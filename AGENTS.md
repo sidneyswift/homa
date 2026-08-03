@@ -319,7 +319,7 @@ status header, or session memory is a substitute for an issue.
 
 ## Design system
 
-UI and copy work should use Homa's existing design system, never invent new colors, type, or components. Source of truth: `docs/homa-design/` (start at its `SKILL.md`, then `readme.md`). A spec-compliant token summary for design tooling lives at [`DESIGN.md`](DESIGN.md). Web currently hand-copies tokens, fonts, and the `Logo` component into `globals.css`, `layout.tsx`, and `apps/web/components/brand/Logo.tsx`. Mobile does the same in `apps/mobile/src/theme/tokens.ts` and `apps/mobile/src/components/brand/logo.tsx`. These copies remain temporary until `packages/design` lands under ticket M1-17. If `docs/homa-design/` tokens change, update those files and `DESIGN.md`'s front matter too, so nothing drifts.
+UI and copy work uses the Quiet authority contract in `packages/design/src/contract/`. The human guide is `docs/homa-design/readme.md`, the workflow is `docs/homa-design/SKILL.md`, and [`DESIGN.md`](DESIGN.md) is a generated summary whose checksum must stay in sync. Web and native currently project a frozen legacy layer from `globals.css`, `layout.tsx`, `apps/web/components/brand/Logo.tsx`, `apps/mobile/src/theme/tokens.ts`, and `apps/mobile/src/components/brand/logo.tsx`; those files are migration targets owned by #720 and #724, not authorities. Generate projections with `pnpm build:design-contract`, then run `pnpm check:design-contract` and `pnpm check:design-parity`. Do not add new colors, type, geometry, or motion outside the contract. Changes to `packages/design/src/contract/` require regenerated outputs, the brand-surface manifest, and the relevant surface evidence.
 
 ## Model gateway credentials
 

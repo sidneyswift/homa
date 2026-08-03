@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Logo } from "../../components/brand/Logo";
+import { QuietFrame } from "../../components/design/QuietFrame";
 import { SignInForm } from "./signin-form";
 
 /**
@@ -30,15 +31,17 @@ export default async function SignInPage({
   const safeNext =
     next?.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/app";
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-16">
-      <Logo size={28} />
-      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
-        Welcome to Homa
-      </h1>
-      <p className="mt-2 text-body">Sign in to your family&apos;s space.</p>
-      <div className="mt-8">
-        <SignInForm next={safeNext} />
-      </div>
+    <main className="quiet-auth-shell">
+      <QuietFrame className="quiet-auth-card" as="article">
+        <Logo size={28} />
+        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+          Welcome to Homa
+        </h1>
+        <p className="mt-2 text-body">Sign in to your family&apos;s space.</p>
+        <div className="mt-8">
+          <SignInForm next={safeNext} />
+        </div>
+      </QuietFrame>
     </main>
   );
 }

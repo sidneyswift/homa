@@ -1,3 +1,4 @@
+import { colorTokens } from "@homa/design/contract";
 import { consumePhoneLinkRequest } from "../../../lib/phone-link";
 import { escapeHtml } from "../../../lib/html-escape";
 
@@ -18,16 +19,16 @@ function page(title: string, body: string, token?: string): Response {
   const form = token
     ? `<form method="post" action="/api/link-phone" style="margin-top:20px;">
         <input type="hidden" name="t" value="${escapeHtml(token)}">
-        <button type="submit" style="border:0;border-radius:999px;background:#E7602F;color:#fff;font-weight:700;font-size:15px;padding:12px 20px;cursor:pointer;">Connect texting</button>
+        <button type="submit" style="border:0;border-radius:12px;background:${colorTokens.midnightAction};color:${colorTokens.paper};font-weight:700;font-size:15px;padding:12px 20px;cursor:pointer;">Connect texting</button>
       </form>`
     : "";
   return new Response(
     `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${safeTitle}</title></head>
-<body style="margin:0;background:#FBF7F0;font-family:'Hanken Grotesk',-apple-system,'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
-  <div style="max-width:420px;background:#fff;border:1px solid #E7DDCE;border-radius:22px;padding:32px 30px;text-align:center;">
-    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:14px;">Homa</div>
-    <h1 style="font-size:22px;color:#221E1A;margin:0 0 10px;">${safeTitle}</h1>
-    <p style="font-size:16px;line-height:1.6;color:#332E29;margin:0;">${safeBody}</p>
+<body style="margin:0;background:${colorTokens.canvas};font-family:'DM Sans',-apple-system,'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
+  <div style="max-width:420px;background:${colorTokens.paper};border:1px solid ${colorTokens.controlBoundary};border-radius:18px;padding:32px 30px;text-align:center;">
+    <div style="font-weight:700;font-size:20px;color:${colorTokens.visualCoral};margin-bottom:14px;">Homa</div>
+    <h1 style="font-family:'EB Garamond',Georgia,serif;font-size:28px;color:${colorTokens.ink};margin:0 0 10px;">${safeTitle}</h1>
+    <p style="font-size:16px;line-height:1.6;color:${colorTokens.ink};margin:0;">${safeBody}</p>
     ${form}
   </div>
 </body></html>`,

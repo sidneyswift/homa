@@ -77,6 +77,14 @@
       "disposition": "replace-active"
     },
     {
+      "path": "AGENTS.md",
+      "sourceHash": "cbd71cb15bf87f69d07edb747d0b80aed89252480fe806c66ba14100117fa4cf",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/mobile/src/app/_layout.tsx",
       "sourceHash": "d25dfa330d98d7d6152c7006a355639c3a3e07512b1efe91232eb5549d86c180",
       "legacySignatures": [
@@ -118,7 +126,23 @@
     },
     {
       "path": "apps/mobile/src/components/brand/logo.tsx",
+      "sourceHash": "2fa171ecaa5bab7f22b698493a55366bbaa3ff0a358abd1f23a2a4a23f1c89be",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/components/brand/logo.tsx",
       "sourceHash": "47c608f3a05c59af2fc2ebbaa1b493a2201e33a9418f446316f52f0f06f3bf0b",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/components/brand/logo.tsx",
+      "sourceHash": "7d768cc467a176371c7bc0d5e2c3d462deac2f90405ded7b9aa080b2939767f1",
       "legacySignatures": [
         "legacy-token-namespace"
       ],
@@ -395,6 +419,22 @@
         "legacy-font-schibsted",
         "legacy-font-hanken",
         "legacy-font-caveat"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/theme/tokens.ts",
+      "sourceHash": "0316ee4cb7403871a49d59de05c03aa1e733d865c384fda1de2055787634a83a",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/mobile/src/theme/tokens.ts",
+      "sourceHash": "899d6863791ee772e6fe72e574a22e818763ffe0605fc9d426b5f507131c1c2a",
+      "legacySignatures": [
+        "legacy-token-namespace"
       ],
       "disposition": "replace-active"
     },
@@ -1451,6 +1491,25 @@
     },
     {
       "path": "apps/web/app/globals.css",
+      "sourceHash": "1893b41ee2bb6e1958486d5bf5ee50f26eaf0b3d29f2579bd5c6ff2f6666d005",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/globals.css",
+      "sourceHash": "7c4dcd5ee2bfa6868f003192006a35ed4887877729137a3876b939360bc71ef7",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/globals.css",
       "sourceHash": "a820530a65b48d39f12800ee03331fca6ebf02ed1f9f5082eec395cf9f4be529",
       "legacySignatures": [
         "legacy-font-schibsted",
@@ -1790,6 +1849,14 @@
       "disposition": "replace-active"
     },
     {
+      "path": "apps/web/app/page.tsx",
+      "sourceHash": "4a99819c111510675501638aa15c1838af40d31475a6ed12f4ef0f5ae2fdd84d",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/web/app/reset-password/confirm/page.tsx",
       "sourceHash": "5be2348808f997d36f84484de845b73c4f520d0d4939e227934cc42f58aea227",
       "legacySignatures": [
@@ -1824,6 +1891,14 @@
     {
       "path": "apps/web/app/world-v3/homa-character.tsx",
       "sourceHash": "12f5b9609cdc46190665f3f43158349eb41d8f8e95eacc93620c74f738491d43",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/app/world-v3/page.tsx",
+      "sourceHash": "1199b6735788032413d9c01dcf1328f6630e150b924f6be33fef3fbd0660236f",
       "legacySignatures": [
         "legacy-token-namespace"
       ],
@@ -1913,6 +1988,30 @@
     {
       "path": "apps/web/components/brand/Logo.tsx",
       "sourceHash": "16c54293bd2265b3e216cf93bda25b25fc5d2d4f6115b5de7c1d3ed15d07e0c3",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/brand/Logo.tsx",
+      "sourceHash": "78885b1d3e28b7ebcd20566182dc979ee8f6d100de20d2cc0f2d96d808e45001",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/brand/Logo.tsx",
+      "sourceHash": "8f5a848cc47febbf25b3e66a2991a05b4d21509b0b1174ff7a5d7872a084b3b6",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/brand/Logo.tsx",
+      "sourceHash": "baaef1a56b3bed9ddf15c8f8405a394d27e8c4ef17a355b680db20613e44ce3c",
       "legacySignatures": [
         "legacy-token-namespace"
       ],
@@ -2067,6 +2166,24 @@
       "disposition": "replace-active"
     },
     {
+      "path": "apps/web/components/marketing/CtaBand.tsx",
+      "sourceHash": "4bf2dea593b60e5a2135deaf57fbd82d68ae52f04fc6c4c8aeb77837060dede8",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/dividers.tsx",
+      "sourceHash": "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/web/components/marketing/dividers.tsx",
       "sourceHash": "d3bea086b6468a442bb427b6d519cb0f59935fc6c4fe6f22d6474a9f143ccec9",
       "legacySignatures": [
@@ -2084,6 +2201,14 @@
       "disposition": "replace-active"
     },
     {
+      "path": "apps/web/components/marketing/Doodle.tsx",
+      "sourceHash": "fbe41be5043bccf1e11e61ab7f8b080a8a4366436d5f283df41e3a2da9f411a2",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/web/components/marketing/ds/Avatar.tsx",
       "sourceHash": "02d6ee95b64f75d34e1543f382b862e2a5b049c1d6177af7846a780d27ede5dd",
       "legacySignatures": [
@@ -2092,8 +2217,32 @@
       "disposition": "replace-active"
     },
     {
+      "path": "apps/web/components/marketing/ds/Avatar.tsx",
+      "sourceHash": "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Badge.tsx",
+      "sourceHash": "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/web/components/marketing/ds/Badge.tsx",
       "sourceHash": "666bfb4a138068ec5a68b1d8e5beff4f7d1202b954503c976e18c863c1a884fe",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Button.tsx",
+      "sourceHash": "55286890ca77e2239bebc3822a728a3752a7846b576155644a6ef3ec6e8d91bf",
       "legacySignatures": [
         "legacy-token-namespace"
       ],
@@ -2112,6 +2261,23 @@
       "sourceHash": "a9adc1f37f1fadaa449b92bf9bffe04285fbe28a1e91ae90cc9a05c97d100157",
       "legacySignatures": [
         "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/ds/Squiggle.tsx",
+      "sourceHash": "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Faq.tsx",
+      "sourceHash": "f0e9a79511d27bd4e85a2ad10ea64f969d1b9da2c6ddf03dbdbf643e6ed9606b",
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
       ],
       "disposition": "replace-active"
     },
@@ -2141,6 +2307,14 @@
       "disposition": "replace-active"
     },
     {
+      "path": "apps/web/components/marketing/Footer.tsx",
+      "sourceHash": "40e047142483ad334f4770f479ff17305daf8ddeddb132977b38147c625c780d",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/web/components/marketing/Hero.tsx",
       "sourceHash": "a0cd04ca28ce69cb8b082357d63f5aac0adcc9899090073a24b7907fe58b3c75",
       "legacySignatures": [
@@ -2153,6 +2327,15 @@
       "path": "apps/web/components/marketing/HeroProductDemo.tsx",
       "sourceHash": "45b49489be153f2c4c5dc9be67df2ff51fb9eb1cc6a1913a15a1b021b7f2b282",
       "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/Nav.tsx",
+      "sourceHash": "a8e6605187d95157113f4808ff2c2793e5b1243aa63df98038ac7686ed57327f",
+      "legacySignatures": [
+        "legacy-shape-language",
         "legacy-token-namespace"
       ],
       "disposition": "replace-active"
@@ -2180,6 +2363,14 @@
       "sourceHash": "aca0653979e279f8c8488bd3ba3b6cafe00b0239d2922f91cdd8f62f0e0c2c9a",
       "legacySignatures": [
         "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/QuietLanding.tsx",
+      "sourceHash": "ffd289149c2aefacbbf39a4ee98870cc839029bd2e43e2d1f91e0b780c6ce12a",
+      "legacySignatures": [
+        "legacy-coral-action"
       ],
       "disposition": "replace-active"
     },
@@ -2213,10 +2404,30 @@
       "disposition": "replace-active"
     },
     {
+      "path": "apps/web/components/marketing/thread/HowThread.tsx",
+      "sourceHash": "a716a2b52735daff7b6b4b8d26b530bbdf22d3c890fa15a3cd42acc4f38f1a4a",
+      "legacySignatures": [
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "apps/web/components/marketing/thread/vignettes.tsx",
       "sourceHash": "02edc521eaaca2bd15e989516b29caf3d876b39e309e9d988b10cb4962545724",
       "legacySignatures": [
         "legacy-font-schibsted",
+        "legacy-font-caveat",
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "apps/web/components/marketing/thread/vignettes.tsx",
+      "sourceHash": "bcc3b775a7e2a17c940b7ce87d903f42b24c9ddf68717e9277fdc54de56a5eb4",
+      "legacySignatures": [
         "legacy-font-caveat",
         "legacy-shape-language",
         "legacy-token-namespace"
@@ -2364,6 +2575,42 @@
       "sourceHash": "ab363a59f94e546befef59eca4f760f5da72e1f0d7180db5cb9c679468a0d74b",
       "legacySignatures": [
         "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "DESIGN.md",
+      "sourceHash": "1f67cf29a047d756c10456889881ab468f9346bf20102ec94f101913f29d5956",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "DESIGN.md",
+      "sourceHash": "293a08f4c12c8be3c04d1284feaec7c02f77ab141eb0a2e8a4e733b01493416b",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "DESIGN.md",
+      "sourceHash": "2d3895d02ee12b64b7aafb3c4cd0e0954b9eb28fc4ae1090a90a479bdf3f606e",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "DESIGN.md",
+      "sourceHash": "82459e6d52b8a1380741e8e4c77e8f7558a2bb8691ed5e45ebbdc5df73b6b216",
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-token-namespace"
       ],
       "disposition": "replace-active"
     },
@@ -2974,6 +3221,23 @@
       "disposition": "replace-active"
     },
     {
+      "path": "docs/homa-design/readme.md",
+      "sourceHash": "c9a0d50284d05ee599f18f3e6ea95eb7274fd1c9115bd11828bcb48cfbbecf9f",
+      "legacySignatures": [
+        "legacy-coral-action"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/readme.md",
+      "sourceHash": "fd0021393c6a65feac861baa40d5d564e5ec67078c4245edc4faae1c92d1fa10",
+      "legacySignatures": [
+        "legacy-warm-playful-doctrine",
+        "legacy-coral-action"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "docs/homa-design/SKILL.md",
       "sourceHash": "607320074262378fac050949b5a8d83dd43b215cd5284b8ab595fa3ccadba0ae",
       "legacySignatures": [
@@ -2982,6 +3246,14 @@
         "legacy-font-caveat",
         "legacy-shape-language",
         "legacy-token-namespace"
+      ],
+      "disposition": "replace-active"
+    },
+    {
+      "path": "docs/homa-design/SKILL.md",
+      "sourceHash": "fffedcdf210a82f25d568a1ab88b9139f5dd4053d1e9adfbe277575f65dcc0ec",
+      "legacySignatures": [
+        "legacy-coral-action"
       ],
       "disposition": "replace-active"
     },
@@ -3169,6 +3441,28 @@
       "disposition": "replace-active"
     },
     {
+      "path": "packages/design/src/contract/contract.test.ts",
+      "sourceHash": "7736c536857df60b2d26746cf408f04ce5ec9665d2a76d1604a47a67cc01f0aa",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-shape-language"
+      ],
+      "disposition": "approved-carry-forward"
+    },
+    {
+      "path": "packages/design/src/contract/contract.test.ts",
+      "sourceHash": "9be096080de88fa7e70a008fc7cb920fbd3726749c9b93d12cc51db6f4532418",
+      "legacySignatures": [
+        "legacy-font-schibsted",
+        "legacy-font-hanken",
+        "legacy-font-caveat",
+        "legacy-shape-language"
+      ],
+      "disposition": "approved-carry-forward"
+    },
+    {
       "path": "README.md",
       "sourceHash": "84507fc9a96c76c3022bc09063afa51557263931dcc50fc385be068e0d69b60c",
       "legacySignatures": [
@@ -3178,8 +3472,32 @@
       "disposition": "replace-active"
     },
     {
+      "path": "README.md",
+      "sourceHash": "ad7100af1c3fe54958aeb2529e4b5ffa1733a4ba4fe093b42c9775fd177b86f9",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "disposition": "replace-active"
+    },
+    {
       "path": "scripts/brand-assets.mts",
       "sourceHash": "a556ce6deecd013ddada2a1e55b68c9a60485d6b2df438dc3327e878599173a9",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "scripts/brand-assets.mts",
+      "sourceHash": "b49cd48607ec6da855ef0b059e23b13497c1086d0cdf2398af879d8ab481a4db",
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "disposition": "regenerate-derived"
+    },
+    {
+      "path": "scripts/brand-assets.mts",
+      "sourceHash": "b50a7648a085ac2f2e962091ee4ed9f1277ccd6eb10a188f0a60e115f99343f4",
       "legacySignatures": [
         "legacy-token-namespace"
       ],

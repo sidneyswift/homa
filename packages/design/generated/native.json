@@ -1,0 +1,300 @@
+{
+  "version": "quiet-authority-v1",
+  "sourceChecksum": "9e6161b688da94500915439a8427dd7e767ef6bd5f9a1a8c45bb6d919d7477ea",
+  "colors": {
+    "canvas": "#F7F4EE",
+    "ink": "#20242B",
+    "paper": "#FFFEFC",
+    "floating": "#FFFFFF",
+    "visualCoral": "#E7602F",
+    "midnightAction": "#27374D",
+    "brandText": "#A33F22",
+    "controlBoundary": "#918B83",
+    "constructiveInk": "#335C46",
+    "constructiveTint": "#E5EFE8",
+    "infoInk": "#2F5968",
+    "infoTint": "#E4EFF2",
+    "highlightInk": "#76560F",
+    "highlightTint": "#F7EBC7",
+    "errorInk": "#923F33",
+    "errorTint": "#F5E5E1",
+    "containedBand": "#27374D"
+  },
+  "typography": {
+    "version": "quiet-authority-v1",
+    "fontRoles": {
+      "display": {
+        "family": "EB Garamond",
+        "minimumPx": 20,
+        "allowedWeights": [
+          400,
+          500,
+          600,
+          700
+        ],
+        "purpose": "meaningful invitations, page titles, reflective framing"
+      },
+      "interface": {
+        "family": "DM Sans",
+        "minimumPx": 12,
+        "allowedWeights": [
+          400,
+          500,
+          600,
+          700
+        ],
+        "purpose": "UI, body, labels, data, and controls"
+      },
+      "wordmark": {
+        "family": "Fredoka",
+        "minimumPx": 12,
+        "allowedWeights": [
+          500,
+          600,
+          700
+        ],
+        "purpose": "real Logo component only"
+      }
+    },
+    "typeRoles": {
+      "hero": {
+        "familyRole": "display",
+        "phone": {
+          "size": 44,
+          "lineHeight": 46
+        },
+        "desktop": {
+          "size": 64,
+          "lineHeight": 66
+        }
+      },
+      "pageTitle": {
+        "familyRole": "display",
+        "minSize": 32,
+        "maxSize": 40,
+        "minLineHeight": 36,
+        "maxLineHeight": 44
+      },
+      "sectionTitle": {
+        "familyRole": "display",
+        "minSize": 26,
+        "maxSize": 32,
+        "minLineHeight": 31,
+        "maxLineHeight": 37
+      },
+      "body": {
+        "familyRole": "interface",
+        "size": 16,
+        "lineHeight": 24
+      },
+      "bodyLarge": {
+        "familyRole": "interface",
+        "size": 18,
+        "lineHeight": 28
+      },
+      "bodySmall": {
+        "familyRole": "interface",
+        "size": 14,
+        "lineHeight": 20
+      },
+      "control": {
+        "familyRole": "interface",
+        "size": 15,
+        "lineHeight": 20
+      },
+      "label": {
+        "familyRole": "interface",
+        "size": 14,
+        "lineHeight": 20
+      },
+      "caption": {
+        "familyRole": "interface",
+        "size": 13,
+        "lineHeight": 18
+      },
+      "eyebrow": {
+        "familyRole": "interface",
+        "size": 12,
+        "lineHeight": 16,
+        "tracking": "0.08em"
+      },
+      "metric": {
+        "familyRole": "interface",
+        "size": 16,
+        "lineHeight": 20,
+        "tabular": true
+      }
+    },
+    "sentenceCase": true
+  },
+  "layout": {
+    "version": "quiet-authority-v1",
+    "spacing": {
+      "base": 4,
+      "scale": [
+        0,
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        32,
+        40,
+        48,
+        64,
+        80,
+        96
+      ]
+    },
+    "radii": {
+      "control": 12,
+      "card": 18,
+      "frame": 28,
+      "compactPill": 999
+    },
+    "elevation": {
+      "rest": "none",
+      "raised": "0 8px 24px rgba(32, 36, 43, 0.08)",
+      "overlay": "0 20px 48px rgba(32, 36, 43, 0.14)"
+    },
+    "containers": {
+      "prose": 720,
+      "workspace": 1280,
+      "phoneGutter": 20,
+      "desktopGutter": 32
+    },
+    "maximumElevationLevels": 2,
+    "nestedBorderedCardDefault": false
+  },
+  "motion": {
+    "version": "quiet-authority-v1",
+    "sequence": [
+      "peek",
+      "orient",
+      "draw",
+      "land",
+      "still"
+    ],
+    "durations": {
+      "fast": 120,
+      "base": 200,
+      "slow": 320
+    },
+    "totalMaximum": 900,
+    "easeOut": "cubic-bezier(0.22, 0.8, 0.28, 1)",
+    "easeInOut": "cubic-bezier(0.5, 0, 0.2, 1)",
+    "pressScale": 0.98,
+    "reducedMotionEndpoint": "final-still-immediately",
+    "loopPolicy": "truthful-live-state-only"
+  },
+  "states": {
+    "version": "quiet-authority-v1",
+    "interactionStates": [
+      "rest",
+      "hover",
+      "keyboard-focus",
+      "pressed",
+      "selected",
+      "disabled",
+      "read-only",
+      "loading",
+      "success",
+      "error",
+      "offline",
+      "interrupted"
+    ],
+    "qualityModes": [
+      "forced-colors",
+      "increased-contrast",
+      "reduced-motion",
+      "large-text",
+      "200%-zoom",
+      "400%-reflow",
+      "dark-or-adaptive"
+    ],
+    "semanticStateRoles": {
+      "constructive": {
+        "label": "constructive",
+        "ink": "constructiveInk",
+        "tint": "constructiveTint"
+      },
+      "info": {
+        "label": "information",
+        "ink": "infoInk",
+        "tint": "infoTint"
+      },
+      "highlight": {
+        "label": "attention",
+        "ink": "highlightInk",
+        "tint": "highlightTint"
+      },
+      "error": {
+        "label": "system failure",
+        "ink": "errorInk",
+        "tint": "errorTint"
+      }
+    }
+  },
+  "profiles": {
+    "version": "quiet-authority-v1",
+    "targetProfiles": {
+      "webProduct": {
+        "channel": "web",
+        "motion": "full-expressive",
+        "typography": "EB-Garamond-plus-DM-Sans",
+        "imagery": "artifact-first",
+        "colorMode": "light-default-adaptive-when-ruled"
+      },
+      "nativeProduct": {
+        "channel": "native",
+        "motion": "full-expressive",
+        "typography": "EB-Garamond-plus-DM-Sans",
+        "imagery": "artifact-first",
+        "colorMode": "platform-appearance"
+      },
+      "marketingRich": {
+        "channel": "marketing",
+        "motion": "static-rich",
+        "typography": "EB-Garamond-plus-DM-Sans",
+        "imagery": "artifact-first",
+        "colorMode": "light-default"
+      },
+      "emailConstrained": {
+        "channel": "email",
+        "motion": "static-rich",
+        "typography": "safe-fallbacks",
+        "imagery": "image-optional",
+        "colorMode": "client-controlled"
+      },
+      "smsPlainText": {
+        "channel": "sms",
+        "motion": "none",
+        "typography": "plain-text",
+        "imagery": "none",
+        "colorMode": "none"
+      },
+      "artifactPrint": {
+        "channel": "print",
+        "motion": "none",
+        "typography": "embedded-or-declared-fallback",
+        "imagery": "artifact-first",
+        "colorMode": "grayscale-proof"
+      },
+      "providerConstrained": {
+        "channel": "provider",
+        "motion": "provider-owned",
+        "typography": "provider-safe-fallbacks",
+        "imagery": "approved-static",
+        "colorMode": "provider-controlled"
+      },
+      "metadataConstrained": {
+        "channel": "metadata",
+        "motion": "none",
+        "typography": "plain-text",
+        "imagery": "tiny-static",
+        "colorMode": "none"
+      }
+    }
+  }
+}

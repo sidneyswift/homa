@@ -1,9 +1,8 @@
 import type { CSSProperties } from "react";
 
 /**
- * Homa Avatar, circular initials, warm auto-color from name. Ported from
- * docs/homa-design/components/data-display/Avatar.jsx (source of truth);
- * keep in sync until packages/design exists (M1-17).
+ * Homa Avatar, circular initials, legacy auto-color from name. This is a
+ * temporary projection migrating to @homa/design.
  */
 
 const PALETTE = ["var(--clay-400)", "var(--sage-500)", "var(--gold-500)", "var(--sky-500)", "var(--clay-500)"];

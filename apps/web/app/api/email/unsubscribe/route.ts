@@ -1,3 +1,4 @@
+import { colorTokens } from "@homa/design/contract";
 import { suppressHash } from "../../../../lib/email/suppression";
 import { verifyUnsubscribeToken } from "../../../../lib/email/unsubscribe-token";
 
@@ -27,9 +28,9 @@ function page(title: string, body: string, status = 200): Response {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex" />
 <title>${title}</title></head>
-<body style="margin:0;background:#FBF7F0;font-family:-apple-system,'Segoe UI',sans-serif;padding:48px 16px;">
-  <div style="max-width:460px;margin:0 auto;background:#ffffff;border:1px solid #E7DDCE;border-radius:22px;padding:32px 30px;text-align:center;">
-    <div style="font-weight:600;font-size:20px;color:#E7602F;margin-bottom:18px;">Homa</div>
+<body style="margin:0;background:${colorTokens.canvas};font-family:'DM Sans',-apple-system,'Segoe UI',sans-serif;padding:48px 16px;">
+  <div style="max-width:460px;margin:0 auto;background:${colorTokens.paper};border:1px solid ${colorTokens.controlBoundary};border-radius:18px;padding:32px 30px;text-align:center;">
+    <div style="font-weight:700;font-size:20px;color:${colorTokens.visualCoral};margin-bottom:18px;">Homa</div>
     ${body}
   </div>
 </body></html>`;
@@ -45,18 +46,18 @@ export async function GET(request: Request): Promise<Response> {
   if (!hash) {
     return page(
       "Link not valid",
-      `<h1 style="font-size:22px;color:#221E1A;margin:0 0 12px;">This link isn't valid</h1>
-       <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0;">It may have expired. You can reply "unsubscribe" to any Homa email and we'll take care of it.</p>`,
+      `<h1 style="font-family:'EB Garamond',Georgia,serif;font-size:28px;color:${colorTokens.ink};margin:0 0 12px;">This link isn't valid</h1>
+       <p style="color:#5B5852;font-size:15px;line-height:1.6;margin:0;">It may have expired. You can reply "unsubscribe" to any Homa email and we'll take care of it.</p>`,
       400,
     );
   }
   const action = `/api/email/unsubscribe?t=${encodeURIComponent(token)}`;
   return page(
     "Unsubscribe",
-    `<h1 style="font-size:22px;color:#221E1A;margin:0 0 12px;">Turn off these reminders?</h1>
-     <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0 0 20px;">You'll stop getting the reminders about finishing setup and opening your report. Emails you ask for, like a report, still come through.</p>
+    `<h1 style="font-family:'EB Garamond',Georgia,serif;font-size:28px;color:${colorTokens.ink};margin:0 0 12px;">Turn off these reminders?</h1>
+     <p style="color:#5B5852;font-size:15px;line-height:1.6;margin:0 0 20px;">You'll stop getting the reminders about finishing setup and opening your report. Emails you ask for, like a report, still come through.</p>
      <form method="post" action="${action}">
-       <button type="submit" style="display:inline-block;background:#E7602F;color:#ffffff;border:none;border-radius:999px;padding:12px 26px;font-weight:700;font-size:15px;cursor:pointer;">Turn off reminders</button>
+       <button type="submit" style="display:inline-block;background:${colorTokens.midnightAction};color:${colorTokens.paper};border:none;border-radius:12px;padding:12px 26px;font-weight:700;font-size:15px;cursor:pointer;">Turn off reminders</button>
      </form>`,
   );
 }
@@ -66,14 +67,14 @@ export async function POST(request: Request): Promise<Response> {
   if (!hash) {
     return page(
       "Link not valid",
-      `<p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0;">This unsubscribe link isn't valid. Reply "unsubscribe" to any Homa email and we'll take care of it.</p>`,
+      `<p style="color:#5B5852;font-size:15px;line-height:1.6;margin:0;">This unsubscribe link isn't valid. Reply "unsubscribe" to any Homa email and we'll take care of it.</p>`,
       400,
     );
   }
   await suppressHash(hash, "drip", "unsubscribe");
   return page(
     "Unsubscribed",
-    `<h1 style="font-size:22px;color:#221E1A;margin:0 0 12px;">Done</h1>
-     <p style="color:#8A7D6C;font-size:15px;line-height:1.6;margin:0;">You won't get these reminders anymore. Anything you ask Homa for still reaches you.</p>`,
+    `<h1 style="font-family:'EB Garamond',Georgia,serif;font-size:28px;color:${colorTokens.ink};margin:0 0 12px;">Done</h1>
+     <p style="color:#5B5852;font-size:15px;line-height:1.6;margin:0;">You won't get these reminders anymore. Anything you ask Homa for still reaches you.</p>`,
   );
 }

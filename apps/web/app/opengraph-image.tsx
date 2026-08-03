@@ -1,32 +1,28 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { colorTokens, logoGeometry } from "@homa/design/contract";
 
 /**
  * Site-wide Open Graph card (1200x630), generated at build time. Design
- * follows the landing hero: cream page, one gold glow (rule of restraint:
- * one playful device), the little-home lockup with the bounced Fredoka
- * wordmark, display headline with the single clay accent word. Colors are
- * hand-copied hexes from globals.css tokens (ImageResponse cannot read CSS
- * variables); if the tokens change, update these too. Fonts are the latin
- * WOFF subsets vendored in apps/web/assets/fonts/.
+ * follows the Quiet authority signature: mineral page, one restrained
+ * highlight, the real Homa lockup, Garamond display, and a single coral
+ * recognition moment. ImageResponse cannot read CSS variables, so colors are
+ * imported from the contract and the embedded font files are hashed assets.
  */
 
 export const alt = "Homa, the homeschool assistant that shows you it's working";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// globals.css tokens, by hand: stone-50, stone-600, stone-900 (text-strong),
-// clay-500 (brand), clay-600, gold-100.
-const BG_PAGE = "#FBF7F0";
-const TEXT_STRONG = "#221E1A";
-const TEXT_MUTED = "#6B6259";
-const BRAND = "#E7602F";
-const CLAY_ACCENT = "#C44C22";
-const GOLD_GLOW = "#FFF3C2";
+const BG_PAGE = colorTokens.canvas;
+const TEXT_STRONG = colorTokens.ink;
+const TEXT_MUTED = "#5B5852";
+const BRAND = colorTokens.visualCoral;
+const CLAY_ACCENT = colorTokens.brandText;
+const GOLD_GLOW = colorTokens.highlightTint;
 
-const HOUSE_PATH =
-  "M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z";
+const HOUSE_PATH = logoGeometry.housePath;
 
 // [letter, baseline offset in em, rotation in deg], the bounced wordmark
 // from components/brand/Logo.tsx.
@@ -38,9 +34,10 @@ const WORDMARK_LETTERS: ReadonlyArray<readonly [string, number, number]> = [
 ];
 
 export default async function Image() {
-  const [fredoka, schibsted] = await Promise.all([
+  const [fredoka, dmSans, ebGaramond] = await Promise.all([
     readFile(join(process.cwd(), "assets/fonts/fredoka-600-latin.woff")),
-    readFile(join(process.cwd(), "assets/fonts/schibsted-grotesk-700-latin.woff")),
+    readFile(join(process.cwd(), "assets/fonts/quiet-authority/dm-sans-700-latin.ttf")),
+    readFile(join(process.cwd(), "assets/fonts/quiet-authority/eb-garamond-600-latin.ttf")),
   ]);
 
   const wordmarkSize = 84;
@@ -63,8 +60,8 @@ export default async function Image() {
         <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
           <svg width={88} height={88} viewBox="0 0 48 48">
             <path d={HOUSE_PATH} fill={BRAND} />
-            <circle cx="17.4" cy="26" r="4.8" fill="#FFFFFF" />
-            <circle cx="30.6" cy="26" r="4.8" fill="#FFFFFF" />
+            <circle cx="17.4" cy="26" r="4.8" fill={colorTokens.paper} />
+            <circle cx="30.6" cy="26" r="4.8" fill={colorTokens.paper} />
             <circle cx="18.3" cy="26.7" r="2.2" fill={TEXT_STRONG} />
             <circle cx="31.5" cy="26.7" r="2.2" fill={TEXT_STRONG} />
           </svg>
@@ -90,7 +87,7 @@ export default async function Image() {
           style={{
             display: "flex",
             flexDirection: "column",
-            fontFamily: "Schibsted Grotesk",
+            fontFamily: "EB Garamond",
             fontSize: 66,
             lineHeight: 1.08,
             letterSpacing: "-0.015em",
@@ -107,7 +104,7 @@ export default async function Image() {
         <div
           style={{
             display: "flex",
-            fontFamily: "Schibsted Grotesk",
+            fontFamily: "DM Sans",
             fontSize: 30,
             color: TEXT_MUTED,
           }}
@@ -120,7 +117,8 @@ export default async function Image() {
       ...size,
       fonts: [
         { name: "Fredoka", data: fredoka, weight: 600, style: "normal" },
-        { name: "Schibsted Grotesk", data: schibsted, weight: 700, style: "normal" },
+        { name: "DM Sans", data: dmSans, weight: 700, style: "normal" },
+        { name: "EB Garamond", data: ebGaramond, weight: 600, style: "normal" },
       ],
     },
   );

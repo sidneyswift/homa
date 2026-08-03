@@ -345,6 +345,15 @@ jobs:
       - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
         run: pnpm check:brand-surfaces
 
+      - name: Active brand residue check (changed files cannot revive legacy identity)
+        run: pnpm check:brand-residue
+
+      - name: Design contract parity check (byte-stable projections)
+        run: pnpm check:design-parity
+
+      - name: Design contract type and semantic tests
+        run: pnpm check:design-contract
+
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 

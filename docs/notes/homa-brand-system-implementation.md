@@ -79,3 +79,47 @@ font deletion, with deletion verified by each surface child and #729. Native
 visual rollout also remains gated by #631 and the Android Phase 0 ruling; this
 baseline records the existing future-Android ruling as intentionally unreleased
 with compile and no-Google-Play-distribution guards, not as shipped Android.
+
+## 2026-08-03, Quiet authority foundation implementation
+
+**Implemented**
+
+- Added the typed `@homa/design` contract for Quiet authority colors, typography,
+  layout, motion, interaction states, target profiles, identity geometry, thread
+  behavior, semantic icons, and verbal identity.
+- Added deterministic contract projections for web CSS, native values, channel
+  reductions, and machine-readable JSON. `DESIGN.md` now carries the generated
+  contract checksum instead of a second hand-maintained token authority.
+- Loaded EB Garamond for meaningful display roles, DM Sans for interface and body,
+  and kept Fredoka restricted to the real Logo adapter. The retired Schibsted web
+  binary and Hanken/Schibsted native packages are no longer active dependencies.
+- Moved superseded design-kit sources and uploads under a hash-preserved,
+  unreachable evidence quarantine. The active `docs/homa-design` home now points
+  to the Quiet authority contract and its generated evidence only.
+- Added canonical Logo geometry consumption to web, native, generated brand assets,
+  OpenGraph, Apple icon, and distribution artwork.
+- Replaced the public landing route with the Quiet authority composition: real work,
+  warm guide, roof-derived thread, and one useful next move. Existing structured
+  data, signup behavior, report link, anchor navigation, and footer destinations are
+  preserved.
+- Added semantic web and native icon adapters, plus the no-indexed
+  `/design/quiet-authority` fixture route used for deterministic visual review.
+- Added an active residue guard that ratchets changed files against the immutable
+  baseline and reports exact legacy font, palette, and deleted design-path findings.
+
+**Verification**
+
+- `corepack pnpm --filter web build` completed successfully with Next.js 16.2.10,
+  including 128 static pages and the `/design/quiet-authority` fixture.
+- Web and native TypeScript, targeted web ESLint, contract tests, generated parity,
+  surface-manifest tests, semantic icon tests, and residue tests pass.
+- A built-server probe with synthetic non-production Supabase configuration returned
+  HTTP 200 for `/` and `/design/quiet-authority`; the landing HTML contains the
+  Quiet composition and JSON-LD, while the fixture emits `robots: noindex, nofollow`
+  and `data-brand-fixture="quiet-authority-v1"`.
+
+**Guardrail correction**
+
+The historical baseline generator now preserves the original source fingerprint
+and hash records after creation. Regenerating the live surface manifest cannot
+silently bless a modified file as historical evidence.

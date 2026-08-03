@@ -8,13 +8,13 @@ import { Doodle } from "../Doodle";
 import { CheckVignette, KidsVignette, ProofVignette, WeekVignette } from "./vignettes";
 
 /**
- * The story thread, ported from docs/homa-design/ui_kits/landing/
- * LandingPage.jsx and reworked in the AAA pass: Homa's margin-rule gone for a
+ * The story thread, ported from the former landing composition and reworked
+ * in the AAA pass: Homa's margin-rule gone for a
  * wander. A squiggly clay path down a ruled notebook page that inks in as you
  * scroll, the Homa mark riding the curve (a white badge so the brand-colored
  * house never blends into the brand-colored ink), and a waypoint per chapter
  * that checks off as the story passes it. Notebook furniture completes the
- * sheet: hole punches down the far-left edge, sticker doodles and Caveat
+ * sheet: hole punches down the far-left edge, restrained margin notes
  * margin notes hanging off the waypoints, and a torn deckle edge into the
  * blush band below (a ruled sheet should not end in a perfect sine).
  *
@@ -131,7 +131,7 @@ const HT_CSS = `
    note gets a tighter right edge than the adds note to clear the circle. */
 .ht-note-plan { right: 90px; transform: rotate(-5deg); }
 .ht-note-adds { top: 0; transform: rotate(-4deg); }
-/* Tablet-band stand-in for the margin notes: same Caveat voice, set inline
+/* Tablet-band stand-in for the margin notes, set inline
    beside the step numeral where the hidden gutter can no longer carry it. */
 .ht-note-inline {
   display: none;

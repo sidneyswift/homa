@@ -6,9 +6,8 @@ import { ViewingRows } from "./context-switcher";
 import { SidebarNav } from "./sidebar-nav";
 
 /**
- * The app's left rail, ported from the design system's web-app template
- * (docs/homa-design/templates/web-app/WebApp.dc.html): floating white
- * card, nav, and the account footer (AccountMenu: the name row opens
+ * The app's left rail, ported from the former web-app template: floating
+ * surface, nav, and the account footer (AccountMenu: the name row opens
  * Settings and Sign out). The kid rows left the desktop rail (founder
  * ruling 2026-07-12: the kid switcher is the top-right avatar,
  * DesktopContextSwitcher, same corner as the phone bar's) and the phone

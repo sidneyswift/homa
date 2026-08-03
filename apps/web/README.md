@@ -115,9 +115,9 @@ pnpm --filter web dev   # http://localhost:3000
   `lib/materials/pinned-privacy.test.ts` protects final-only lesson visibility
   across pinned find, show, and card reads while preserving the exact
   pre-migration legacy query shape.
-- `components/marketing/` landing sections, ported from
-  `docs/homa-design/ui_kits/landing/` (tokens hand-copied into
-  `app/globals.css` until `packages/design` lands, ticket M1-17).
+- `components/marketing/` landing sections, migrating to the Quiet authority
+  contract under gh#683 (legacy values remain frozen until each row passes its
+  own evidence gate).
 - `vercel.json` registers the hourly `/api/map/cron` request. Registration does
   not prove successful production execution.
 

@@ -55,6 +55,7 @@ const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classifica
   { match: (path) => path === "apps/web/app/globals.css", value: { type: "component-family", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product" } },
   { match: (path) => /^apps\/web\/(?:public|app)\/.+\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|vcf)$/i.test(path), value: { type: "asset", audiences: ["family", "public", "provider"], disposition: "regenerate-derived", targetProfile: "asset-derived" } },
   { match: (path) => /^packages\/design\/src\/.+\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "approved-carry-forward", targetProfile: "design-contract" } },
+  { match: (path) => /^packages\/design\/generated\/.+\.(?:json|css)$/.test(path), value: { type: "generator", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "design-projection" } },
   { match: (path) => /^marketing\//.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich" } },
   { match: (path) => path === "DESIGN.md" || /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^docs\/homa-design\/(?!evidence\/)/.test(path), value: { type: "authoring-rule", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^\.agents\/skills\/.+\.(?:md|ts)$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
@@ -78,6 +79,7 @@ const candidateSelectors: Array<(path: string) => boolean> = [
   (path) => /^apps\/web\/(?:lib|app|components)\/.+(?:report|material|print|pdf|compliance|filing).+\.(?:ts|tsx)$/.test(path) && !/\.(?:test|spec)\./.test(path),
   (path) => /^apps\/web\/(?:public|app)\/.+\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|vcf)$/i.test(path),
   (path) => /^packages\/design\/src\/.+\.ts$/.test(path),
+  (path) => /^packages\/design\/generated\/.+\.(?:json|css)$/.test(path),
   (path) => /^marketing\//.test(path),
   (path) => path === "DESIGN.md" || /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^docs\/homa-design\/(?!evidence\/)/.test(path),
   (path) => /^\.agents\/skills\/.+\.(?:md|ts)$/.test(path),
@@ -251,20 +253,27 @@ const manifest: BrandSurfaceManifest = {
   surfaces,
 };
 
+const previousLegacy = existsSync(LEGACY_OUTPUT)
+  ? JSON.parse(readFileSync(LEGACY_OUTPUT, "utf8")) as { ownedInputFingerprint?: string; records?: Array<{ path: string; sourceHash: string; legacySignatures: string[]; disposition: BrandDisposition }> }
+  : null;
+const legacyRecords = previousLegacy?.records ?? surfaces
+  .filter((surface) => surface.legacySignatures.length > 0)
+  .map((surface) => ({
+    path: surface.paths[0]!,
+    sourceHash: surface.currentAssetHashes[0] ?? "",
+    legacySignatures: surface.legacySignatures,
+    disposition: surface.disposition,
+  }));
+const legacyByHash = new Map<string, (typeof legacyRecords)[number]>();
+for (const record of legacyRecords) {
+  legacyByHash.set(`${record.path}:${record.sourceHash}`, record);
+}
 const legacyBaseline = {
   schemaVersion: BRAND_MANIFEST_SCHEMA_VERSION,
   designEra: "warm-playful-baseline",
   sourceCommit: baselineSourceCommit,
-  ownedInputFingerprint,
-  records: surfaces
-    .filter((surface) => surface.legacySignatures.length > 0)
-    .map((surface) => ({
-      path: surface.paths[0],
-      sourceHash: surface.currentAssetHashes[0] ?? null,
-      legacySignatures: surface.legacySignatures,
-      disposition: surface.disposition,
-    }))
-    .sort((a, b) => a.path.localeCompare(b.path)),
+  ownedInputFingerprint: previousLegacy?.ownedInputFingerprint ?? ownedInputFingerprint,
+  records: [...legacyByHash.values()].sort((a, b) => `${a.path}:${a.sourceHash}`.localeCompare(`${b.path}:${b.sourceHash}`)),
 };
 
 const serialized = `${JSON.stringify(manifest, null, 2)}\n`;

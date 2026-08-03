@@ -1,0 +1,76 @@
+{
+  "version": "quiet-authority-v1",
+  "sourceChecksum": "9e6161b688da94500915439a8427dd7e767ef6bd5f9a1a8c45bb6d919d7477ea",
+  "profiles": {
+    "webProduct": {
+      "channel": "web",
+      "motion": "full-expressive",
+      "typography": "EB-Garamond-plus-DM-Sans",
+      "imagery": "artifact-first",
+      "colorMode": "light-default-adaptive-when-ruled"
+    },
+    "nativeProduct": {
+      "channel": "native",
+      "motion": "full-expressive",
+      "typography": "EB-Garamond-plus-DM-Sans",
+      "imagery": "artifact-first",
+      "colorMode": "platform-appearance"
+    },
+    "marketingRich": {
+      "channel": "marketing",
+      "motion": "static-rich",
+      "typography": "EB-Garamond-plus-DM-Sans",
+      "imagery": "artifact-first",
+      "colorMode": "light-default"
+    },
+    "emailConstrained": {
+      "channel": "email",
+      "motion": "static-rich",
+      "typography": "safe-fallbacks",
+      "imagery": "image-optional",
+      "colorMode": "client-controlled"
+    },
+    "smsPlainText": {
+      "channel": "sms",
+      "motion": "none",
+      "typography": "plain-text",
+      "imagery": "none",
+      "colorMode": "none"
+    },
+    "artifactPrint": {
+      "channel": "print",
+      "motion": "none",
+      "typography": "embedded-or-declared-fallback",
+      "imagery": "artifact-first",
+      "colorMode": "grayscale-proof"
+    },
+    "providerConstrained": {
+      "channel": "provider",
+      "motion": "provider-owned",
+      "typography": "provider-safe-fallbacks",
+      "imagery": "approved-static",
+      "colorMode": "provider-controlled"
+    },
+    "metadataConstrained": {
+      "channel": "metadata",
+      "motion": "none",
+      "typography": "plain-text",
+      "imagery": "tiny-static",
+      "colorMode": "none"
+    }
+  },
+  "content": {
+    "version": "quiet-authority-v1",
+    "casing": "sentence-case",
+    "brandName": "Homa",
+    "neverBrandUppercase": true,
+    "voice": "true-clear-memorable-kind",
+    "relationship": "Homa-suggests-parent-decides",
+    "childFraming": "no-verdict-no-behind-no-sibling-comparison",
+    "signature": "real-work-warm-guide-one-useful-next-move",
+    "constrainedFallback": "Logo-accessible-colors-plain-language-next-move",
+    "prohibitedPunctuation": [
+      "em-dash"
+    ]
+  }
+}
