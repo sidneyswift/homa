@@ -1,10 +1,10 @@
-import { CalendarPlus, Check, X } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
@@ -214,14 +214,14 @@ export function DeviceCalendarExportSheet({
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: space.md, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}>
           <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={heading} style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: space.sm }}>
             <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              <CalendarPlus size={20} color={colors.brand} />
+              <Icon name="calendar" size={20} color={colors.action} />
             </View>
             <Text style={{ flex: 1, fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
               {heading}
             </Text>
           </View>
           <IconButton label="Close calendar export" onPress={onClose}>
-            <X size={22} color={colors.textSubtle} />
+            <Icon name="close" size={24} color={colors.textSubtle} />
           </IconButton>
         </View>
 
@@ -254,10 +254,10 @@ export function DeviceCalendarExportSheet({
                     accessibilityLabel={`${item.title}. ${scheduleLabel(item)}. ${item.childScope}${duplicate ? ". Already exported from this device" : ""}`}
                     accessibilityState={{ checked: active }}
                     onPress={() => toggle(item)}
-                    style={{ flexDirection: "row", gap: space.sm, backgroundColor: colors.card, borderRadius: radius.md, borderWidth: 1, borderColor: active ? colors.brand : colors.borderSubtle, padding: space.md }}
+                    style={{ flexDirection: "row", gap: space.sm, backgroundColor: colors.card, borderRadius: radius.md, borderWidth: 1, borderColor: active ? colors.action : colors.borderSubtle, padding: space.md }}
                   >
-                    <View style={{ width: 22, height: 22, borderRadius: radius.xs, borderWidth: 1.5, borderColor: active ? colors.brand : colors.border, backgroundColor: active ? colors.brand : "transparent", alignItems: "center", justifyContent: "center" }}>
-                      {active ? <Check size={14} color={colors.onBrand} /> : null}
+                    <View style={{ width: 22, height: 22, borderRadius: radius.xs, borderWidth: 1.5, borderColor: active ? colors.action : colors.border, backgroundColor: active ? colors.action : "transparent", alignItems: "center", justifyContent: "center" }}>
+                      {active ? <Icon name="check" size={16} color={colors.onBrand} /> : null}
                     </View>
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>{item.title}</Text>
