@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
 import {
@@ -15,6 +16,18 @@ import {
   shouldTryPolicyFallback,
   type ImageFailureKind,
 } from "./generate-image";
+
+test("the image tool does not impose a daily family cap", async () => {
+  const source = await readFile(
+    new URL("../../agent/tools/generate_image.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.doesNotMatch(source, /MAX_IMAGES_PER_FAMILY_PER_DAY/u);
+  assert.doesNotMatch(source, /imagesGeneratedToday/u);
+  assert.doesNotMatch(source, /image budget for today is used up/u);
+  assert.match(source, /emitMapEvent\("materials\.image_generated"/u);
+});
 
 /**
  * Fixtures are built from the real error classes the gateway throws, not

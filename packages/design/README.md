@@ -1,5 +1,11 @@
 # @homa/design
 
-Upcoming shared design package under ticket M1-17. It does not currently supply runtime tokens or components.
+The typed Quiet authority contract and deterministic projections for Homa's
+web, native, marketing, email, SMS, print, provider, and metadata channels.
+It owns exact values, semantic roles, appearance obligations, and channel
+reductions. Runtime tokens and components remain migration targets owned by
+#720 and #724 until their adoption work lands.
 
-Until M1-17 lands, `docs/homa-design/` is canonical and web and mobile keep synchronized local copies as described in the root `AGENTS.md`.
+`docs/homa-design/` carries the human doctrine and workflow. Web and mobile
+keep synchronized runtime copies until the shared primitive adoption work in
+#720 and #724 lands, as described in the root `AGENTS.md`.

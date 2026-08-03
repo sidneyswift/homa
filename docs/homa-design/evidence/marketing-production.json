@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
-  "surfaceManifestFingerprint": "21da8e0622d6792ee5d7de2f8133344c04028257ee8f8595e5ccbffea281fe99",
-  "authoringManifestFingerprint": "21da8e0622d6792ee5d7de2f8133344c04028257ee8f8595e5ccbffea281fe99",
-  "ownedInputFingerprint": "c8d60e2474985466a1a93f44a67f600396d16ebe19180442e968e4ce07455377",
+  "contractSourceChecksum": "000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99",
+  "surfaceManifestFingerprint": "40845b54ff48723c75f9dc8e7020282bd4fa84dc4edef9d127eb7ed3f1b3b275",
+  "authoringManifestFingerprint": "40845b54ff48723c75f9dc8e7020282bd4fa84dc4edef9d127eb7ed3f1b3b275",
+  "ownedInputFingerprint": "fd4ae86fec3dc98ae37243114dc46cae597ce0cd83e9d4547a0559524dfbc683",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -1857,7 +1857,7 @@
         "docs/homa-design/evidence/surfaces.json"
       ],
       "id": "generator:05b36b5e3e9fc248",
-      "sourceHash": "b72bfa77d837c4f9e15a1b1b5549783f4a109ecc04f03a3cb9ead7ce27357691"
+      "sourceHash": "7dbe7b188f107353bb940cb48ef123ec88cfe97fed760dee08660ec8a703ab1d"
     },
     {
       "path": "scripts/socials-starter-pack-assets.mts",

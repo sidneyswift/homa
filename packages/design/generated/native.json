@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
+  "sourceChecksum": "000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99",
   "colors": {
     "canvas": "#F7F4EE",
     "ink": "#20242B",
@@ -126,6 +126,475 @@
       }
     },
     "sentenceCase": true
+  },
+  "fonts": {
+    "version": "quiet-authority-v1",
+    "schemaVersion": 1,
+    "approvedFamilies": {
+      "display": {
+        "family": "EB Garamond",
+        "role": "display",
+        "source": {
+          "provider": "Google Fonts",
+          "license": {
+            "name": "SIL Open Font License 1.1",
+            "identifier": "OFL-1.1",
+            "url": "https://scripts.sil.org/OFL"
+          },
+          "specimenUrl": "https://fonts.google.com/specimen/EB+Garamond",
+          "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/ebgaramond"
+        },
+        "allowedWeights": [
+          400,
+          500,
+          600,
+          700
+        ],
+        "allowedStyles": [
+          "normal",
+          "italic"
+        ],
+        "subsets": [
+          "latin"
+        ],
+        "nativeNames": {
+          "regular": "EBGaramond_400Regular",
+          "medium": "EBGaramond_500Medium",
+          "semibold": "EBGaramond_600SemiBold",
+          "bold": "EBGaramond_700Bold"
+        }
+      },
+      "interface": {
+        "family": "DM Sans",
+        "role": "interface",
+        "source": {
+          "provider": "Google Fonts",
+          "license": {
+            "name": "SIL Open Font License 1.1",
+            "identifier": "OFL-1.1",
+            "url": "https://scripts.sil.org/OFL"
+          },
+          "specimenUrl": "https://fonts.google.com/specimen/DM+Sans",
+          "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/dmsans"
+        },
+        "allowedWeights": [
+          400,
+          500,
+          600,
+          700
+        ],
+        "allowedStyles": [
+          "normal",
+          "italic"
+        ],
+        "subsets": [
+          "latin"
+        ],
+        "nativeNames": {
+          "regular": "DMSans_400Regular",
+          "medium": "DMSans_500Medium",
+          "semibold": "DMSans_600SemiBold",
+          "bold": "DMSans_700Bold"
+        }
+      },
+      "wordmark": {
+        "family": "Fredoka",
+        "role": "wordmark",
+        "source": {
+          "provider": "Google Fonts",
+          "license": {
+            "name": "SIL Open Font License 1.1",
+            "identifier": "OFL-1.1",
+            "url": "https://scripts.sil.org/OFL"
+          },
+          "specimenUrl": "https://fonts.google.com/specimen/Fredoka",
+          "repositoryUrl": "https://github.com/google/fonts/tree/main/ofl/fredoka"
+        },
+        "allowedWeights": [
+          500,
+          600,
+          700
+        ],
+        "allowedStyles": [
+          "normal"
+        ],
+        "subsets": [
+          "latin"
+        ],
+        "nativeNames": {
+          "semibold": "Fredoka_600SemiBold"
+        }
+      }
+    },
+    "checkedInAssets": [
+      {
+        "id": "eb-garamond-600-latin-ttf",
+        "role": "display",
+        "family": "EB Garamond",
+        "path": "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
+        "format": "ttf",
+        "weight": 600,
+        "style": "normal",
+        "subsets": [
+          "latin"
+        ],
+        "sha256": "b536adfa0f5746cfbd148d8a1a669540366edef2c85c4b49450798a037bd928c",
+        "binaryInspection": {
+          "family": "EB Garamond",
+          "style": "SemiBold,Regular",
+          "weightClass": 600,
+          "glyphCoverage": "latin-and-latin-extended",
+          "inspectionTool": "fontconfig fc-scan"
+        }
+      },
+      {
+        "id": "dm-sans-700-latin-ttf",
+        "role": "interface",
+        "family": "DM Sans",
+        "path": "apps/web/assets/fonts/quiet-authority/dm-sans-700-latin.ttf",
+        "format": "ttf",
+        "weight": 700,
+        "style": "normal",
+        "subsets": [
+          "latin"
+        ],
+        "sha256": "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211",
+        "binaryInspection": {
+          "family": "DM Sans",
+          "style": "Bold",
+          "weightClass": 700,
+          "glyphCoverage": "latin-and-latin-extended",
+          "inspectionTool": "fontconfig fc-scan"
+        }
+      },
+      {
+        "id": "fredoka-600-latin-woff",
+        "role": "wordmark",
+        "family": "Fredoka",
+        "path": "apps/web/assets/fonts/fredoka-600-latin.woff",
+        "format": "woff",
+        "weight": 600,
+        "style": "normal",
+        "subsets": [
+          "latin"
+        ],
+        "sha256": "ca6f7ba0a393960b2a3036754726529ddd19b8a20be3faeb8cfabad3882b888a",
+        "binaryInspection": {
+          "family": "Fredoka SemiBold",
+          "style": "Regular",
+          "weightClass": 600,
+          "glyphCoverage": "latin",
+          "inspectionTool": "fontconfig fc-scan"
+        }
+      }
+    ],
+    "runtimeSources": {
+      "webProduct": {
+        "adapter": "next/font/google",
+        "package": "next",
+        "source": "Google Fonts",
+        "roles": {
+          "display": {
+            "family": "EB Garamond",
+            "weights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "styles": [
+              "normal",
+              "italic"
+            ]
+          },
+          "interface": {
+            "family": "DM Sans",
+            "weights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "styles": [
+              "normal",
+              "italic"
+            ]
+          },
+          "wordmark": {
+            "family": "Fredoka",
+            "weights": [
+              500,
+              600
+            ],
+            "styles": [
+              "normal"
+            ]
+          }
+        }
+      },
+      "nativeProduct": {
+        "adapter": "@expo-google-fonts",
+        "packages": {
+          "display": "@expo-google-fonts/eb-garamond",
+          "interface": "@expo-google-fonts/dm-sans",
+          "wordmark": "@expo-google-fonts/fredoka"
+        },
+        "source": "Google Fonts",
+        "roles": {
+          "display": {
+            "family": "EB Garamond",
+            "weights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "styles": [
+              "normal"
+            ]
+          },
+          "interface": {
+            "family": "DM Sans",
+            "weights": [
+              400,
+              500,
+              600,
+              700
+            ],
+            "styles": [
+              "normal"
+            ]
+          },
+          "wordmark": {
+            "family": "Fredoka",
+            "weights": [
+              600
+            ],
+            "styles": [
+              "normal"
+            ]
+          }
+        }
+      }
+    },
+    "channels": {
+      "webProduct": {
+        "display": {
+          "preferred": "EB Garamond",
+          "fallback": [
+            "Georgia",
+            "Times New Roman",
+            "serif"
+          ],
+          "delivery": "runtime"
+        },
+        "interface": {
+          "preferred": "DM Sans",
+          "fallback": [
+            "ui-sans-serif",
+            "system-ui",
+            "-apple-system",
+            "Segoe UI",
+            "sans-serif"
+          ],
+          "delivery": "runtime"
+        },
+        "wordmark": {
+          "preferred": "Fredoka",
+          "fallback": [
+            "Arial Rounded MT Bold",
+            "Arial",
+            "sans-serif"
+          ],
+          "delivery": "runtime"
+        }
+      },
+      "nativeProduct": {
+        "display": {
+          "preferred": "EBGaramond_700Bold",
+          "fallback": [
+            "Georgia",
+            "System"
+          ],
+          "delivery": "runtime"
+        },
+        "interface": {
+          "preferred": "DMSans_400Regular",
+          "fallback": [
+            "System"
+          ],
+          "delivery": "runtime"
+        },
+        "wordmark": {
+          "preferred": "Fredoka_600SemiBold",
+          "fallback": [
+            "Arial Rounded MT Bold",
+            "System"
+          ],
+          "delivery": "runtime"
+        }
+      },
+      "marketingRich": {
+        "display": {
+          "preferred": "EB Garamond",
+          "fallback": [
+            "Georgia",
+            "Times New Roman",
+            "serif"
+          ],
+          "delivery": "runtime"
+        },
+        "interface": {
+          "preferred": "DM Sans",
+          "fallback": [
+            "ui-sans-serif",
+            "system-ui",
+            "sans-serif"
+          ],
+          "delivery": "runtime"
+        },
+        "wordmark": {
+          "preferred": "Fredoka",
+          "fallback": [
+            "Arial Rounded MT Bold",
+            "Arial",
+            "sans-serif"
+          ],
+          "delivery": "runtime"
+        }
+      },
+      "emailConstrained": {
+        "display": {
+          "preferred": "Georgia",
+          "fallback": [
+            "Times New Roman",
+            "serif"
+          ],
+          "delivery": "safe-fallback"
+        },
+        "interface": {
+          "preferred": "Arial",
+          "fallback": [
+            "Helvetica Neue",
+            "Helvetica",
+            "sans-serif"
+          ],
+          "delivery": "safe-fallback"
+        },
+        "wordmark": {
+          "preferred": "image-lockup",
+          "fallback": [
+            "Arial Rounded MT Bold",
+            "Arial",
+            "sans-serif"
+          ],
+          "delivery": "rasterized"
+        }
+      },
+      "smsPlainText": {
+        "display": {
+          "preferred": "plain-text",
+          "fallback": [],
+          "delivery": "plain-text"
+        },
+        "interface": {
+          "preferred": "plain-text",
+          "fallback": [],
+          "delivery": "plain-text"
+        },
+        "wordmark": {
+          "preferred": "plain-text",
+          "fallback": [],
+          "delivery": "plain-text"
+        }
+      },
+      "artifactPrint": {
+        "display": {
+          "preferred": "EB Garamond",
+          "fallback": [
+            "Georgia",
+            "Times New Roman",
+            "serif"
+          ],
+          "delivery": "embedded"
+        },
+        "interface": {
+          "preferred": "DM Sans",
+          "fallback": [
+            "Arial",
+            "Helvetica",
+            "sans-serif"
+          ],
+          "delivery": "embedded"
+        },
+        "wordmark": {
+          "preferred": "rasterized-logo",
+          "fallback": [
+            "Arial Rounded MT Bold",
+            "Arial",
+            "sans-serif"
+          ],
+          "delivery": "rasterized"
+        }
+      },
+      "providerConstrained": {
+        "display": {
+          "preferred": "Georgia",
+          "fallback": [
+            "Times New Roman",
+            "serif"
+          ],
+          "delivery": "safe-fallback"
+        },
+        "interface": {
+          "preferred": "Arial",
+          "fallback": [
+            "Helvetica Neue",
+            "Helvetica",
+            "sans-serif"
+          ],
+          "delivery": "safe-fallback"
+        },
+        "wordmark": {
+          "preferred": "image-lockup",
+          "fallback": [
+            "Arial Rounded MT Bold",
+            "Arial",
+            "sans-serif"
+          ],
+          "delivery": "rasterized"
+        }
+      },
+      "metadataConstrained": {
+        "display": {
+          "preferred": "plain-text",
+          "fallback": [],
+          "delivery": "plain-text"
+        },
+        "interface": {
+          "preferred": "plain-text",
+          "fallback": [],
+          "delivery": "plain-text"
+        },
+        "wordmark": {
+          "preferred": "plain-text",
+          "fallback": [],
+          "delivery": "plain-text"
+        }
+      }
+    },
+    "verification": {
+      "status": "contract-ready-adoption-evidence-pending",
+      "requiredEvidence": [
+        "font-load-and-missing-font-behavior",
+        "cls-and-line-wrap-regression",
+        "dynamic-type-and-localization-expansion",
+        "pdf-embedding-and-grayscale-print",
+        "independent-typography-review",
+        "independent-accessibility-review"
+      ],
+      "note": "This contract records approved sources and fallbacks. It does not claim rendered, delivered, or platform proof."
+    }
   },
   "layout": {
     "version": "quiet-authority-v1",
@@ -295,6 +764,232 @@
         "imagery": "tiny-static",
         "colorMode": "none"
       }
+    }
+  },
+  "channels": {
+    "version": "quiet-authority-v1",
+    "brandChannels": [
+      "web",
+      "native",
+      "marketing",
+      "email",
+      "sms",
+      "print",
+      "provider",
+      "metadata"
+    ],
+    "appearanceModes": [
+      "light",
+      "dark-adaptive",
+      "forced-colors",
+      "increased-contrast",
+      "grayscale",
+      "client-controlled",
+      "provider-controlled"
+    ],
+    "channelExpressions": [
+      "full-expressive",
+      "static-rich",
+      "constrained",
+      "plain-text",
+      "none"
+    ],
+    "channelProfiles": {
+      "web": {
+        "targetProfiles": [
+          "webProduct"
+        ],
+        "expression": "full-expressive",
+        "allowedAppearance": [
+          "light",
+          "dark-adaptive",
+          "forced-colors",
+          "increased-contrast"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "logo",
+          "meaningful-thread",
+          "useful-next-move"
+        ],
+        "motion": "truthful-interruptible"
+      },
+      "native": {
+        "targetProfiles": [
+          "nativeProduct"
+        ],
+        "expression": "full-expressive",
+        "allowedAppearance": [
+          "light",
+          "dark-adaptive",
+          "forced-colors",
+          "increased-contrast"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "logo",
+          "meaningful-thread",
+          "useful-next-move"
+        ],
+        "motion": "truthful-interruptible"
+      },
+      "marketing": {
+        "targetProfiles": [
+          "marketingRich"
+        ],
+        "expression": "static-rich",
+        "allowedAppearance": [
+          "light",
+          "grayscale"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "logo",
+          "meaningful-thread",
+          "useful-next-move"
+        ],
+        "motion": "static-or-reduced-to-still"
+      },
+      "email": {
+        "targetProfiles": [
+          "emailConstrained"
+        ],
+        "expression": "constrained",
+        "allowedAppearance": [
+          "light",
+          "client-controlled"
+        ],
+        "preservedElements": [
+          "logo",
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      },
+      "sms": {
+        "targetProfiles": [
+          "smsPlainText"
+        ],
+        "expression": "plain-text",
+        "allowedAppearance": [
+          "client-controlled"
+        ],
+        "preservedElements": [
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      },
+      "print": {
+        "targetProfiles": [
+          "artifactPrint"
+        ],
+        "expression": "constrained",
+        "allowedAppearance": [
+          "grayscale"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "provenance",
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      },
+      "provider": {
+        "targetProfiles": [
+          "providerConstrained"
+        ],
+        "expression": "constrained",
+        "allowedAppearance": [
+          "provider-controlled"
+        ],
+        "preservedElements": [
+          "approved-static",
+          "plain-language-next-move"
+        ],
+        "motion": "provider-owned"
+      },
+      "metadata": {
+        "targetProfiles": [
+          "metadataConstrained"
+        ],
+        "expression": "plain-text",
+        "allowedAppearance": [
+          "client-controlled"
+        ],
+        "preservedElements": [
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      }
+    },
+    "appearancePolicies": {
+      "light": {
+        "tokenSource": "approved-color-tokens",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "dark-adaptive": {
+        "tokenSource": "projection-owned-adaptive-tokens",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "forced-colors": {
+        "tokenSource": "system-colors",
+        "contrastFloor": 3,
+        "requiresEvidence": true
+      },
+      "increased-contrast": {
+        "tokenSource": "approved-color-tokens",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "grayscale": {
+        "tokenSource": "approved-color-tokens-and-tones",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "client-controlled": {
+        "tokenSource": "client-or-platform",
+        "contrastFloor": null,
+        "requiresEvidence": true
+      },
+      "provider-controlled": {
+        "tokenSource": "provider",
+        "contrastFloor": null,
+        "requiresEvidence": true
+      }
+    }
+  },
+  "doctrine": {
+    "version": "quiet-authority-v1",
+    "name": "quiet-authority",
+    "principles": [
+      "real-work-leads",
+      "homa-keeps-the-thread",
+      "one-useful-next-move",
+      "parent-decides",
+      "semantic-color-is-truthful",
+      "motion-ends-in-state",
+      "channel-reductions-preserve-meaning"
+    ],
+    "domains": [
+      "versioning",
+      "colors",
+      "typography",
+      "layout",
+      "motion",
+      "states",
+      "icons",
+      "brand-geometry",
+      "content",
+      "surface-profiles",
+      "channels",
+      "appearance"
+    ],
+    "sourceOfTruth": {
+      "human": "docs/homa-design/doctrine.md",
+      "typed": "packages/design/src/contract",
+      "generated": "packages/design/generated",
+      "tooling": "DESIGN.md"
     }
   }
 }

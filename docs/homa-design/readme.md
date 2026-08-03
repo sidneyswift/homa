@@ -6,6 +6,10 @@ from `packages/design/src/contract`; this guide explains how to use it across
 web, native, landing, email, SMS, reports, print, stores, social, providers,
 and authoring systems.
 
+The normative cross-surface doctrine is [`doctrine.md`](doctrine.md). This
+guide provides the longer visual reference; the typed contract remains the
+authority for exact values and allowed combinations.
+
 ## The feeling
 
 Homa is calm, capable, and observant. She notices the real work, keeps the
@@ -54,6 +58,15 @@ The display role is 44/46 on phone and 64/66 on desktop for a hero, 32/36 to
 body, 14/20 small body, 15/20 controls, 13/18 captions, and 12/16 eyebrows.
 Metric figures stay in DM Sans with tabular figures. Test long names,
 localization, font failure, Dynamic Type, and PDF embedding.
+
+Font provenance and fallbacks live in the typed registry at
+`packages/design/src/contract/fonts.ts` and its generated projection at
+`packages/design/generated/fonts.json`. The registry records the SIL Open Font
+License source, checked-in specimen hashes, runtime loaders, and a declared
+fallback for every channel. The evidence file at
+`docs/homa-design/evidence/font-system.json` is a contract check, not a claim
+that rendered loading, layout stability, native accessibility, or PDF
+embedding has already passed.
 
 ### Geometry
 

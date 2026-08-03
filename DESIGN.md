@@ -1,6 +1,6 @@
 ---
 version: quiet-authority-v1
-contractChecksum: cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6
+contractChecksum: 000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99
 name: Homa, quiet authority
 description: A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.
 colors:
@@ -40,13 +40,25 @@ motion:
   sequence: peek, orient, draw, land, still
   duration: 120ms to 320ms per movement, under 900ms total
   reducedMotion: final still immediately
+channels:
+  expressive: web, native
+  staticRich: marketing
+  constrained: email, print, provider
+  plainText: sms, metadata
+appearance:
+  light: approved token projection
+  darkAdaptive: projection-owned and evidence-gated
+  forcedColors: system colors with preserved semantics
+  increasedContrast: approved tokens with evidence
+  grayscale: print and static-asset proof mode
 ---
 
 # Homa design system
 
 This file is the compact machine-facing summary of the Quiet authority
 contract. The canonical typed values live in `packages/design/src/contract`
-and the human guide lives in `docs/homa-design/readme.md`. Generated
+and the human doctrine lives in `docs/homa-design/doctrine.md`, with the
+longer visual guide in `docs/homa-design/readme.md`. Generated
 projections must carry the contract version and source checksum.
 
 ## North star
