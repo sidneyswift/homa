@@ -353,6 +353,8 @@ export default function PlannerScreen() {
       subjectId: schedulingActivity.subjectId,
       week: schedulingActivity.week,
       activityIndex: schedulingActivity.activityIndex,
+      planRevision: schedulingActivity.planRevision,
+      expectedText: schedulingActivity.text,
       scheduledDate: date,
     });
     setSchedulingActivity(null);

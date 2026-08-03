@@ -517,6 +517,19 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:planner-checkoff:postgres
 
+      # A rebuild changes positional activity meaning. This proves old
+      # completion is archived, exact matches remap, and clients cannot
+      # forge or alter the family-readable receipt.
+      - name: Planner rebuild history disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:plan-rebuild-history:postgres
+
+      # Scheduling is positional too. This proves a stale plan revision or
+      # changed activity text cannot attach a date after a rebuild.
+      - name: Planner schedule stale-safe disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:plan-schedule-stale-safe:postgres
+
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),
   # so they share a runner instead of tailing another shard.

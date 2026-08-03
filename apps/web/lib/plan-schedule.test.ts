@@ -63,6 +63,8 @@ describe("validateScheduleInput", () => {
     subjectId: "math",
     week: 1,
     activityIndex: 0,
+    planRevision: 1,
+    expectedText: "Count to 20 daily",
     scheduledDate: "2026-08-04",
   };
 
@@ -83,6 +85,11 @@ describe("validateScheduleInput", () => {
   it("rejects a negative or non-integer activity index", () => {
     assert.equal(validateScheduleInput({ ...base, activityIndex: -1 }).ok, false);
     assert.equal(validateScheduleInput({ ...base, activityIndex: 1.5 }).ok, false);
+  });
+
+  it("requires the exact plan snapshot used for the write", () => {
+    assert.equal(validateScheduleInput({ ...base, planRevision: 0 }).ok, false);
+    assert.equal(validateScheduleInput({ ...base, expectedText: "" }).ok, false);
   });
 });
 

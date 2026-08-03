@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FourWeekPlan } from "@homa/core";
+import { z } from "zod";
 
 import { mapDb } from "./map/db";
 
@@ -51,6 +52,10 @@ export interface SchedulePlanActivityInput {
   subjectId: string;
   week: number;
   activityIndex: number;
+  /** The plan revision returned by open_planner when this choice was made. */
+  planRevision: number;
+  /** Exact activity text returned by open_planner, never a positional guess. */
+  expectedText: string;
   /** YYYY-MM-DD. */
   scheduledDate: string;
 }
@@ -123,37 +128,55 @@ export function activityTextAt(
   return weekRow.activities[activityIndex] ?? null;
 }
 
-interface RawPlanRow {
-  plan: FourWeekPlan;
+const STALE_PLAN_NOTE =
+  "That plan changed while the date was being saved. Open the planner again and choose the day from the current activity.";
+const INVALID_RECEIPT_NOTE =
+  "Homa could not prove which activity received that date. Open the planner again before trying once more.";
+
+const scheduleReceiptSchema = z.object({
+  status: z.enum(["applied", "conflict"]),
+  reason: z.string().nullable(),
+  family_id: z.string().uuid().nullable(),
+  plan_id: z.string().uuid().nullable(),
+  plan_revision: z.union([
+    z.number().int(),
+    z.string().regex(/^\d+$/u).transform(Number),
+  ]).nullable(),
+  scheduled_date: z.string().nullable(),
+  activity_text: z.string().nullable(),
+  schedule_id: z.string().uuid().nullable(),
+});
+
+type ScheduleReceipt = z.infer<typeof scheduleReceiptSchema>;
+
+function scheduleConflictNote(reason: string | null): string {
+  return reason === "activity-mismatch" || reason === "revision-mismatch"
+    ? STALE_PLAN_NOTE
+    : "That activity is no longer available in this plan. Open the planner again before choosing a date.";
 }
 
-async function loadPlanPinned(
+function parseScheduleReceipt(
+  data: unknown,
+  input: SchedulePlanActivityInput,
   familyId: string,
-  childId: string,
-  subjectId: string,
-): Promise<RawPlanRow | null> {
-  const sql = mapDb();
-  const rows = await sql<RawPlanRow[]>`
-    select p.plan
-    from public.child_plans p
-    join public.children c on c.id = p.child_id
-    where p.child_id = ${childId} and p.subject_id = ${subjectId} and c.family_id = ${familyId}
-  `;
-  return rows[0] ?? null;
-}
-
-async function loadPlanCaller(
-  db: SupabaseClient,
-  childId: string,
-  subjectId: string,
-): Promise<RawPlanRow | null> {
-  const { data } = await db
-    .from("child_plans")
-    .select("plan")
-    .eq("child_id", childId)
-    .eq("subject_id", subjectId)
-    .maybeSingle();
-  return data ? { plan: data.plan as FourWeekPlan } : null;
+): { ok: true; receipt: ScheduleReceipt } | { ok: false; note: string } {
+  const parsed = z.array(scheduleReceiptSchema).length(1).safeParse(data);
+  if (!parsed.success) return { ok: false, note: INVALID_RECEIPT_NOTE };
+  const receipt = parsed.data[0];
+  if (receipt.status === "conflict") {
+    return { ok: false, note: scheduleConflictNote(receipt.reason) };
+  }
+  if (
+    receipt.family_id !== familyId
+    || receipt.plan_id === null
+    || receipt.plan_revision !== input.planRevision
+    || receipt.scheduled_date !== input.scheduledDate
+    || receipt.activity_text !== input.expectedText
+    || receipt.schedule_id === null
+  ) {
+    return { ok: false, note: INVALID_RECEIPT_NOTE };
+  }
+  return { ok: true, receipt };
 }
 
 export function validateScheduleInput(
@@ -167,6 +190,16 @@ export function validateScheduleInput(
   }
   if (!Number.isInteger(input.activityIndex) || input.activityIndex < 0) {
     return { ok: false, note: "activityIndex must be 0 or a positive whole number." };
+  }
+  if (!Number.isInteger(input.planRevision) || input.planRevision < 1) {
+    return { ok: false, note: "planRevision must be a positive whole number from open_planner." };
+  }
+  if (
+    typeof input.expectedText !== "string"
+    || input.expectedText.trim().length === 0
+    || input.expectedText.length > 4000
+  ) {
+    return { ok: false, note: "expectedText must be the exact activity text from open_planner." };
   }
   return { ok: true };
 }
@@ -183,35 +216,18 @@ export async function schedulePlanActivityCaller(
 ): Promise<SchedulePlanActivityResult> {
   const validated = validateScheduleInput(input);
   if (!validated.ok) return { scheduled: false, note: validated.note };
-
-  const { data: child } = await db
-    .from("children")
-    .select("id")
-    .eq("id", input.childId)
-    .eq("family_id", familyId)
-    .maybeSingle();
-  if (!child) return { scheduled: false, note: WRONG_CHILD_NOTE_FOR_SCHEDULE };
-
-  const planRow = await loadPlanCaller(db, input.childId, input.subjectId);
-  if (!planRow) return { scheduled: false, note: NO_PLAN_NOTE };
-  const activityText = activityTextAt(planRow.plan, input.week, input.activityIndex);
-  if (activityText === null) return { scheduled: false, note: NO_ACTIVITY_NOTE };
-
-  const { error } = await db.from("plan_activity_schedule").upsert(
-    {
-      ...(input.id ? { id: input.id } : {}),
-      family_id: familyId,
-      child_id: input.childId,
-      subject_id: input.subjectId,
-      week: input.week,
-      activity_index: input.activityIndex,
-      scheduled_date: input.scheduledDate,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "family_id,child_id,subject_id,week,activity_index" },
-  );
-  if (error) return { scheduled: false, note: `Could not schedule it: ${error.message}` };
-
+  const rpc = await db.rpc("schedule_plan_activity_v2", {
+    target_child_id: input.childId,
+    target_subject_id: input.subjectId,
+    target_week: input.week,
+    target_activity_index: input.activityIndex,
+    target_scheduled_date: input.scheduledDate,
+    target_expected_text: input.expectedText,
+    target_plan_revision: input.planRevision,
+    target_schedule_id: input.id ?? null,
+  });
+  const parsed = parseScheduleReceipt(rpc.data, input, familyId);
+  if (!parsed.ok) return { scheduled: false, note: parsed.note };
   return {
     scheduled: true,
     childId: input.childId,
@@ -219,7 +235,7 @@ export async function schedulePlanActivityCaller(
     week: input.week,
     activityIndex: input.activityIndex,
     scheduledDate: input.scheduledDate,
-    activityText,
+    activityText: input.expectedText,
   };
 }
 
@@ -231,36 +247,58 @@ export async function schedulePlanActivityPinned(
   if (!validated.ok) return { scheduled: false, note: validated.note };
 
   const sql = mapDb();
-  const childRows = await sql<{ id: string }[]>`
-    select id from public.children where id = ${input.childId} and family_id = ${familyId}
-  `;
-  if (!childRows[0]) return { scheduled: false, note: WRONG_CHILD_NOTE_FOR_SCHEDULE };
+  return sql.begin(async (tx) => {
+    const childRows = await tx<{ id: string }[]>`
+      select id
+      from public.children
+      where id = ${input.childId} and family_id = ${familyId}
+      for update
+    `;
+    if (!childRows[0]) return { scheduled: false, note: WRONG_CHILD_NOTE_FOR_SCHEDULE };
 
-  const planRow = await loadPlanPinned(familyId, input.childId, input.subjectId);
-  if (!planRow) return { scheduled: false, note: NO_PLAN_NOTE };
-  const activityText = activityTextAt(planRow.plan, input.week, input.activityIndex);
-  if (activityText === null) return { scheduled: false, note: NO_ACTIVITY_NOTE };
+    const planRows = await tx<{
+      id: string;
+      plan: FourWeekPlan;
+      plan_revision: number | string;
+    }[]>`
+      select id, plan, plan_revision
+      from public.child_plans
+      where child_id = ${input.childId} and subject_id = ${input.subjectId}
+      for update
+    `;
+    const planRow = planRows[0];
+    if (!planRow) return { scheduled: false, note: NO_PLAN_NOTE };
+    if (Number(planRow.plan_revision) !== input.planRevision) {
+      return { scheduled: false, note: STALE_PLAN_NOTE };
+    }
+    const activityText = activityTextAt(planRow.plan, input.week, input.activityIndex);
+    if (activityText === null) return { scheduled: false, note: NO_ACTIVITY_NOTE };
+    if (activityText !== input.expectedText) {
+      return { scheduled: false, note: STALE_PLAN_NOTE };
+    }
 
-  await sql`
-    insert into public.plan_activity_schedule
-      (id, family_id, child_id, subject_id, week, activity_index, scheduled_date)
-    values
-      (coalesce(${input.id ?? null}::uuid, gen_random_uuid()), ${familyId},
-       ${input.childId}, ${input.subjectId}, ${input.week},
-       ${input.activityIndex}, ${input.scheduledDate})
-    on conflict (family_id, child_id, subject_id, week, activity_index)
-    do update set scheduled_date = excluded.scheduled_date, updated_at = now()
-  `;
-
-  return {
-    scheduled: true,
-    childId: input.childId,
-    subjectId: input.subjectId,
-    week: input.week,
-    activityIndex: input.activityIndex,
-    scheduledDate: input.scheduledDate,
-    activityText,
-  };
+    const rows = await tx<{ id: string }[]>`
+      insert into public.plan_activity_schedule
+        (id, family_id, child_id, subject_id, week, activity_index, scheduled_date)
+      values
+        (coalesce(${input.id ?? null}::uuid, gen_random_uuid()), ${familyId},
+         ${input.childId}, ${input.subjectId}, ${input.week},
+         ${input.activityIndex}, ${input.scheduledDate})
+      on conflict (family_id, child_id, subject_id, week, activity_index)
+      do update set scheduled_date = excluded.scheduled_date, updated_at = now()
+      returning id
+    `;
+    if (!rows[0]) return { scheduled: false, note: INVALID_RECEIPT_NOTE };
+    return {
+      scheduled: true,
+      childId: input.childId,
+      subjectId: input.subjectId,
+      week: input.week,
+      activityIndex: input.activityIndex,
+      scheduledDate: input.scheduledDate,
+      activityText,
+    };
+  });
 }
 
 /**
