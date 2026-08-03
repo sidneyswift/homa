@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
 
 import { ParentStep } from "../../app/onboarding/parent-step";
+import { Icon } from "../design/Icon";
 import { readUtmFromLocation } from "../../lib/waitlist-client";
 
 /**
@@ -110,7 +110,7 @@ export function SignupPopupModal({ open, onClose }: { open: boolean; onClose: ()
         onClick={(event) => event.stopPropagation()}
       >
         <button type="button" onClick={onClose} aria-label="Close" className="signup-popup-close">
-          <X size={18} aria-hidden="true" />
+          <Icon name="close" size={20} />
         </button>
         <ParentStep
           onDone={() => {

@@ -1,4 +1,3 @@
-import { X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -9,6 +8,7 @@ import {
 } from "@homa/core";
 
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { Card } from "../../components/ui/card";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
@@ -132,7 +132,7 @@ export function ChecklistTakeover({
           </Text>
         </View>
         <IconButton label="Back to the chat" onPress={() => onClose(exitFor(child))}>
-          <X size={21} color={colors.textSubtle} />
+          <Icon name="close" size={20} color={colors.textSubtle} />
         </IconButton>
       </View>
       <View

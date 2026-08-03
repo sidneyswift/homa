@@ -1,9 +1,9 @@
-import { ExternalLink } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import {
@@ -227,7 +227,7 @@ export function StateRecordsCard({
                 onPress={() => void Linking.openURL(source.url)}
                 style={{ minHeight: 44, flexDirection: "row", gap: space.xs, alignItems: "center" }}
               >
-                <ExternalLink size={14} color={colors.brand} />
+                <Icon name="external" size={16} color={colors.brand} />
                 <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textStrong }}>{source.label}</Text>
               </Pressable>
             ))}

@@ -1,11 +1,11 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { ExternalLink } from "lucide-react-native";
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
 
 import { Button } from "../components/ui/button";
+import { Icon } from "../components/design/icon";
 import { Card } from "../components/ui/card";
 import { LoadingStatus } from "../components/ui/loading-status";
 import { useBillingGate } from "../features/billing/use-billing-gate";
@@ -258,7 +258,7 @@ function SettingsLinkRow({ label, onPress }: { label: string; onPress: () => voi
         {label}
       </Text>
       <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        <ExternalLink size={17} color={colors.textMuted} />
+        <Icon name="external" size={20} color={colors.textMuted} />
       </View>
     </Pressable>
   );

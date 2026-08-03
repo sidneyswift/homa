@@ -1,5 +1,4 @@
-import { Check } from "lucide-react";
-
+import { Icon } from "../../components/design/Icon";
 import type { ProgressQuestionCardData } from "./progress-message-parts";
 import { ProgressUpdateChip } from "./progress-update-chip";
 
@@ -40,7 +39,7 @@ export function ProgressQuestionCard({
         </p>
         {answeredLabel !== null ? (
           <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sage">
-            <Check size={14} aria-hidden="true" />
+            <Icon name="check" size={16} />
             You said: {answeredLabel}
           </p>
         ) : spent ? (
