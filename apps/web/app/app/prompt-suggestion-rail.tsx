@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { Icon } from "../../components/design/Icon";
 
 export type PromptSuggestionPhase = "idle" | "pending" | "loading" | "ready";
 
@@ -56,10 +56,10 @@ export function PromptSuggestionRail({
                 />
               ) : null}
               <span>{suggestion}</span>
-              <ArrowRight
-                size={14}
+              <Icon
+                name="next"
+                size={16}
                 className="text-[var(--clay-400)]"
-                aria-hidden="true"
               />
             </button>
           ))}

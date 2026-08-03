@@ -1,5 +1,4 @@
 import * as WebBrowser from "expo-web-browser";
-import { Check, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
@@ -12,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { HOMESCHOOL_STYLES, MAP_SUBJECTS, US_STATES } from "@homa/core";
 
 import { Logo } from "../../components/brand/logo";
+import { Icon } from "../../components/design/icon";
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
 import { IconButton } from "../../components/ui/icon-button";
@@ -350,7 +350,7 @@ export function DetailCard({
               >
                 {selected ? (
                   <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                    <Check size={14} color={colors.brandHover} />
+                    <Icon name="check" size={16} color={colors.brandHover} />
                   </View>
                 ) : null}
                 <Text style={{ fontFamily: selected ? fontFamilies.bodySemibold : fontFamilies.body, fontSize: fontSize.sm, color: colors.textStrong }}>
@@ -395,7 +395,7 @@ export function DetailCard({
                   </Text>
                 </View>
                 <IconButton label="Close state picker" onPress={() => setChoosingState(false)}>
-                  <X size={22} color={colors.textSubtle} />
+                  <Icon name="close" size={20} color={colors.textSubtle} />
                 </IconButton>
               </View>
               <ScrollView contentContainerStyle={{ padding: space.md }}>
@@ -427,7 +427,7 @@ export function DetailCard({
                       </Text>
                       {selected ? (
                         <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                          <Check size={18} color={colors.brandHover} />
+                          <Icon name="check" size={20} color={colors.brandHover} />
                         </View>
                       ) : null}
                     </Pressable>

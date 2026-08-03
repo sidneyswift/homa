@@ -1,5 +1,4 @@
 import { useRouter } from "expo-router";
-import { Check } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {
   Pressable,
@@ -13,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import {
@@ -330,7 +330,7 @@ function FilterChip({
     >
       {active ? (
         <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Check size={14} color={colors.textStrong} />
+          <Icon name="check" size={16} color={colors.textStrong} />
         </View>
       ) : null}
       <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, color: active ? colors.textStrong : colors.textMuted }}>

@@ -1,5 +1,4 @@
-import { BookOpen } from "lucide-react";
-
+import { Icon } from "../../components/design/Icon";
 import { familyAssetLibraryHref } from "../../lib/library/family-asset-reference";
 import {
   FAMILY_ASSET_RESOURCE_KIND_LABELS,
@@ -86,7 +85,7 @@ export function FamilyAssetSourceCard({
     <div className="w-full max-w-sm rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
       <div className="flex items-start gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-brand">
-          <BookOpen size={18} aria-hidden="true" />
+          <Icon name="book" size={20} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">

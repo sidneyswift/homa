@@ -1,9 +1,9 @@
-import { X } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AccessibleModal } from "../../components/ui/accessible-modal";
+import { Icon } from "../../components/design/icon";
 import { Button } from "../../components/ui/button";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
@@ -110,7 +110,7 @@ export function EntryEditor({
             disabled={busy}
             onPress={onClose}
           >
-            <X size={22} color={colors.textSubtle} />
+            <Icon name="close" size={20} color={colors.textSubtle} />
           </IconButton>
         </View>
 

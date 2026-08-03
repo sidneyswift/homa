@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-import { CalendarDays } from "lucide-react-native";
 
+import { Icon } from "../../components/design/icon";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 
@@ -45,7 +45,7 @@ export function PlannerCard({ childName }: { childName: string | null }) {
           backgroundColor: colors.brandSoft,
         }}
       >
-        <CalendarDays size={18} color={colors.brand} />
+        <Icon name="calendar" size={20} color={colors.brand} />
       </View>
       <View style={{ flex: 1, gap: 1 }}>
         <Text
