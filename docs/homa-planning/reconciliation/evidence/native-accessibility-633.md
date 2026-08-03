@@ -1,4 +1,4 @@
-# Native accessibility source foundation evidence
+# Native accessibility source and rendered evidence
 
 **Issue:** [gh#633](https://github.com/sidneyswift/homa/issues/633)
 
@@ -12,13 +12,44 @@
 
 **Branch:** `codex/native-accessibility-foundation`
 
-**Status:** Source foundation verified. Rendered, simulator, physical-device, and study evidence remain open.
+**Status:** Source foundation verified. Rendered evidence in progress. Simulator, physical-device, and study evidence remain open.
+
+## Rendered evidence update, 2026-08-02
+
+**Rendered implementation commit:** `6e72e714b8a7c982174de220fce14ea859384e1e`
+
+**Rendered base commit:** `8e438e82dc934f5365525d0bc2af2f6f33f81c48`
+
+**Rendered branch:** `codex/native-accessibility-rendered-tests`
+
+**Rendered status:** Thirty-one rendered interaction tests pass across the five award journeys and shared primitives. This advances rendered evidence to in progress. It does not verify iOS focus order, system handoffs, physical target frames, spoken cadence, or large-text geometry on a real device.
 
 ## Verdict
 
-The implementation commit removes the confirmed source-level P0 and P1 accessibility defects found in the native route gauntlet. It also adds a repeatable accessibility contract to CI and the mobile OTA workflow.
+The source implementation commit removes the confirmed source-level P0 and P1 accessibility defects found in the native route gauntlet. It also adds a repeatable accessibility contract to CI and the mobile OTA workflow. The rendered implementation commit exercises that contract through mounted React Native components and fixes three defects exposed by the new tests.
 
-This is not closure evidence for gh#633. Source inspection and unit tests cannot prove final native VoiceOver order, physical target frames, Dynamic Type geometry, system handoff recovery, spoken Voice cadence, or task parity for an accessibility-setting user. The acceptance manifest deliberately leaves those dimensions open.
+This is not closure evidence for gh#633. Source inspection and rendered component tests cannot prove final native VoiceOver order, physical target frames, Dynamic Type geometry, system handoff recovery, spoken Voice cadence, or task parity for an accessibility-setting user. The acceptance manifest deliberately leaves rendered evidence in progress and the device and study dimensions open.
+
+## What the rendered gauntlet changes
+
+### Product corrections found by rendering real components
+
+- Focus requests now use React Native 0.85's supported `sendAccessibilityEvent(target, "focus")` host event through one shared helper. The drawer, shared modal, and change-focus hook no longer depend on the deprecated numeric-node focus API.
+- Apple sign-in, Google sign-in, email sign-in, account recovery, and native material sharing now expose the active operation as busy while preventing duplicate actions.
+- The persistent Voice dock clears its manual expansion when the route changes. Leaving Planner and later returning no longer resurrects stale expanded controls.
+
+### Rendered regression boundary
+
+The Expo 56 harness uses React Native Testing Library 14, Jest 29, `jest-expo`, and `test-renderer`. It renders route and feature components directly and mocks only Router hooks or native boundaries owned by another layer. Expo Router 56.2.14's testing helper assumes a synchronous render contract that is incompatible with React Native Testing Library 14's asynchronous render API, so it is not used as evidence.
+
+The 31 rendered tests cover:
+
+- Shared Button, IconButton, LoadingStatus, TextField, AccessibleModal, focus, announcement, target-size, and Reduce Motion behavior.
+- Apple and Google entry order, empty-submit recovery, privacy-safe password reset, and busy sign-in states.
+- Progress evidence before an editable next move, one optional question at a time, and child-owned calendar events read as one predictable stop.
+- Material sharing across edited note, opening, handed-off, canceled, failed, announced receipt, normalized telemetry, and missing-family states.
+- Planner's AX5 chronological 31-day list, visible event and activity counts, named selection, and 56-point day actions.
+- Voice idle, connecting, listening, working, speaking, paused, muted, interrupted, expanded controls, full-Voice-route suppression, large text, spoken status, and route-change reset.
 
 ## What the source foundation changes
 
@@ -82,16 +113,34 @@ The accessibility command additionally reported:
 
 An independent read-only review of the final source tree found no confirmed surviving source-level P0 or P1 accessibility defects.
 
+## Rendered verification
+
+All commands below ran in the isolated worktree against rendered implementation commit `6e72e714b8a7c982174de220fce14ea859384e1e` using the repository Node 24 runtime.
+
+| Check | Result |
+|---|---|
+| `corepack pnpm install --frozen-lockfile --ignore-scripts` | PASS, 1,475 workspace packages restored from the committed lockfile |
+| `corepack pnpm typecheck` | PASS, 4 of 4 workspaces |
+| `corepack pnpm lint` | PASS, mobile has zero warnings; web has 9 unrelated pre-existing warnings |
+| Existing mobile Chat, Bootstrap, Planner, Progress, and Voice checks | PASS, 347 of 347 tests |
+| `corepack pnpm check:mobile-accessibility` | PASS, 14 of 14 static tests and 31 of 31 rendered tests |
+| `corepack pnpm --filter mobile typecheck:accessibility-tests` | PASS |
+| `corepack pnpm --filter mobile test:accessibility` | PASS, 4 suites and 31 tests |
+| `git diff --check` | PASS |
+| `corepack pnpm check:em-dash` | PASS, 2,595 tracked text files and 0 violations |
+
+The combined accessibility command additionally reported 14 classified Expo surfaces, 18 registered native or external handoffs, all five priority journeys carrying complete evidence dimensions, and production source using the shared modal, loading, scaling, and announcement policies.
+
 ## Acceptance status
 
-| gh#633 criterion | Source evidence | Current status |
+| gh#633 criterion | Source and rendered evidence | Current status |
 |---|---|---|
-| VoiceOver order and focus match visual meaning | Shared modal and drawer isolation, visible-heading focus, Escape, named controls, source review | OPEN, requires physical VoiceOver traversal and every system handoff |
-| Largest Dynamic Type keeps actions and status available | Removed essential clamps, large-text reflow branches, scroll escapes, static guard | OPEN, requires AX5 on compact and large supported iPhones |
-| Increased Contrast and Differentiate Without Color preserve state | Tested semantic pairs, checked and expanded states, labels, icons, thumb position, and non-color receipts | OPEN, requires rendered and device evaluation with system settings |
-| Reduce Motion removes nonessential movement without hiding state | Shared modal, drawer, Voice, Chat, and Button motion policies plus explicit text and state | OPEN, requires release-build observation during Voice and route transitions |
-| Targets are at least 44 points and primary actions remain reachable | Shared primitives and route corrections establish source-level floors | OPEN, requires final accessibility frames and one-handed physical-device reach |
-| State changes are announced once in plain language | Shared deduplicating adapter, event occurrence IDs, safe Chat completion, semantic Voice states | OPEN, requires real speech cadence and duplicate-speech observation on iOS |
+| VoiceOver order and focus match visual meaning | Shared modal and drawer isolation, visible-heading focus, Escape, named controls, and rendered host-focus requests | OPEN, requires physical VoiceOver traversal and every system handoff |
+| Largest Dynamic Type keeps actions and status available | Removed essential clamps, large-text reflow branches, scroll escapes, and rendered AX5 Planner and Voice paths | OPEN, requires AX5 on compact and large supported iPhones |
+| Increased Contrast and Differentiate Without Color preserve state | Tested semantic pairs, checked and expanded states, labels, icons, thumb position, and non-color receipts | OPEN, requires device evaluation with the real system settings |
+| Reduce Motion removes nonessential movement without hiding state | Shared modal, drawer, Voice, Chat, and Button motion policies plus a rendered reduced-motion Button branch | OPEN, requires release-build observation during Voice and route transitions |
+| Targets are at least 44 points and primary actions remain reachable | Shared floors plus rendered entry, Planner, Progress, calendar, Voice, and primitive target assertions | OPEN, requires final accessibility frames and one-handed physical-device reach |
+| State changes are announced once in plain language | Shared deduplicating adapter plus rendered repeat, reset, sign-in, share, loading, and Voice announcement cases | OPEN, requires real speech cadence and duplicate-speech observation on iOS |
 | Five-participant study includes an accessibility-setting user | No repository artifact can satisfy this | OPEN, study not run |
 
 ## Open device and user evidence
