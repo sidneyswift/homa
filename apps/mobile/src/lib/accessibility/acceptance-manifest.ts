@@ -59,7 +59,7 @@ const ALL_STATES: readonly AccessibilityJourneyState[] = [
 
 const OPEN_EVIDENCE = {
   static: "in-progress",
-  rendered: "required",
+  rendered: "in-progress",
   simulator: "blocked",
   "physical-device": "required",
   study: "required",

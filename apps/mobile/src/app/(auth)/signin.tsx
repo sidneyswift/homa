@@ -184,7 +184,10 @@ export default function SignInScreen() {
                 }
                 cornerRadius={26}
                 accessibilityLabel="Continue with Apple"
-                accessibilityState={{ disabled: signInBusy }}
+                accessibilityState={{
+                  disabled: signInBusy,
+                  busy: oauthPending === "apple",
+                }}
                 pointerEvents={signInBusy ? "none" : "auto"}
                 style={{ width: "100%", height: 52, opacity: signInBusy ? 0.55 : 1 }}
                 onPress={() => {
@@ -204,6 +207,7 @@ export default function SignInScreen() {
               icon={<GoogleGlyph />}
               onPress={() => void continueWith("google", signInWithGoogle)}
               disabled={signInBusy}
+              busy={oauthPending === "google"}
             />
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
@@ -241,6 +245,7 @@ export default function SignInScreen() {
               variant="ghost"
               onPress={() => void sendPasswordReset()}
               disabled={pending || oauthPending !== null || recoveryPending}
+              busy={recoveryPending}
             />
 
             {recoverySent ? (
@@ -261,6 +266,7 @@ export default function SignInScreen() {
               label={pending ? "One moment\u2026" : "Sign in"}
               onPress={() => void submit()}
               disabled={pending || oauthPending !== null || recoveryPending}
+              busy={pending}
               size="lg"
             />
           </Card>

@@ -2,13 +2,11 @@ import { Link } from "expo-router";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { X } from "lucide-react-native";
 import {
-  AccessibilityInfo,
   Animated,
   Dimensions,
   Pressable,
   ScrollView,
   View,
-  findNodeHandle,
 } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,6 +15,7 @@ import { AccountMenu } from "./account-menu";
 import { SidebarNav } from "./sidebar-nav";
 import { Logo } from "../brand/logo";
 import { IconButton } from "../ui/icon-button";
+import { sendAccessibilityFocus } from "../../lib/accessibility";
 import { colors, radius, shadows, space } from "../../theme/tokens";
 
 const DRAWER_WIDTH = Math.min(300, Dimensions.get("window").width * 0.85);
@@ -84,8 +83,7 @@ export function AppDrawer({
         : restoreFocusOnClose.current
           ? returnFocusRef?.current
           : null;
-      const node = target ? findNodeHandle(target) : null;
-      if (node) AccessibilityInfo.setAccessibilityFocus(node);
+      sendAccessibilityFocus(target);
       if (!open) restoreFocusOnClose.current = true;
     });
   }, [backdropOpacity, open, reducedMotion, returnFocusRef, translateX]);
