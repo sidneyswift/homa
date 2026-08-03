@@ -49,6 +49,10 @@ const EXCLUDED_DIR_PREFIXES = [
   // Vendored taxonomy export (CR-52 sanitizes assembled taxonomy text at the
   // read boundary; the tracked snapshot stays unchanged).
   "packages/taxonomy/data/",
+  // Historical warm-playful design evidence quarantined during the Quiet
+  // authority cutover. These generated/reference artifacts are retained for
+  // provenance only and never load into product context or authored guidance.
+  "docs/homa-design/evidence/legacy/warm-playful/",
 ];
 
 const EXCLUDED_FILES = new Set([

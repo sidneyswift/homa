@@ -2,9 +2,8 @@ import type { CSSProperties } from "react";
 
 /**
  * Homa Squiggle, the playful heading divider: a short hand-drawn wave that
- * settles into a thin rule. Ported from
- * docs/homa-design/components/playful/Squiggle.jsx (source of truth); keep
- * in sync until packages/design exists (M1-17).
+ * settles into a thin rule. This is a legacy projection migrating to the
+ * contract-owned roof thread in @homa/design.
  */
 export function Squiggle({
   color = "var(--text-strong)",

@@ -4,9 +4,9 @@ import { Logo } from "../brand/Logo";
 
 /**
  * Navy site footer: brand column with a serif tagline + Product / Company /
- * Support link columns + copyright rule. Evolved from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx with a quiet ruled-paper
- * texture (white at 4%, the notebook Homa keeps). Everything sits on one
+ * Support link columns + copyright rule. Evolved from the former landing
+ * composition with a quiet ruled-paper texture (white at 4%). Everything
+ * sits on one
  * 45px ruling: link rows are exactly 45px (24+21+0) so every baseline rides
  * its rule the way the tagline's 45px leading does, and the copyright border
  * lands on a rule. The yellow-to-navy wave seam is rendered by page.tsx above

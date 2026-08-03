@@ -6,7 +6,7 @@ import { Doodle } from "../Doodle";
 
 /**
  * The four product vignettes riding the story thread, ported from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx and then reworked for the
+ * former landing composition and then reworked for the
  * scrapbook pass: every card is now a taped-in artifact (translucent washi
  * strip over the top edge, hairline print border) so the section literally
  * shows plans and records kept together in one binder. The proof card
@@ -40,7 +40,7 @@ function weekChip(label: string, bg: string, fg: string): ReactNode {
 
 /**
  * The one hand-written margin note style for a calendar day cell: every
- * note shares this exact treatment (Caveat script, sage ink, gentle
+ * note shares this exact treatment (display face, restrained ink, gentle
  * rotate), sized to sit inside a narrow day column rather than a
  * full-width row.
  */
@@ -571,8 +571,8 @@ export function ProofVignette() {
             gap: "0.22em",
           }}
         >
-          {/* Drawn triangle, not the raw unicode glyph: sized and weighted
-              to sit with Schibsted's display cut. */}
+          {/* Drawn triangle, not the raw unicode glyph, sized and weighted for
+              the current legacy projection while this surface migrates. */}
           <svg width="0.62em" height="0.62em" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 4 L21 19 H3 Z" fill="var(--sage-600)" stroke="var(--sage-600)" strokeWidth="3" strokeLinejoin="round" />
           </svg>

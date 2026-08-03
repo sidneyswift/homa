@@ -1,4 +1,5 @@
 import { SHEET_PAGE_CLASS } from "../materials/page-shell";
+import { colorTokens } from "@homa/design/contract";
 import { escapeHtml } from "../html-escape";
 import type { FilingLetter } from "./filing-letter";
 
@@ -23,13 +24,13 @@ import type { FilingLetter } from "./filing-letter";
  * judgment calls (gh#319).
  */
 
-const INK = "#221E1A";
-const BODY = "#332E29";
-const MUTED = "#6B6259";
-const SUBTLE = "#8A7D6C";
-const HAIRLINE = "#E7DDCE";
-const LINE = "#B3A492";
-const CLAY_DEEP = "#9C3B1B";
+const INK = colorTokens.ink;
+const BODY = colorTokens.ink;
+const MUTED = "#5B5852";
+const SUBTLE = "#77736B";
+const HAIRLINE = "#DED8CC";
+const LINE = "#77736B";
+const CLAY_DEEP = colorTokens.brandText;
 
 const MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6 L42 21 L42 42 L6 42 L6 21 Z" fill="none" stroke="${SUBTLE}" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="${SUBTLE}"/><circle cx="30.6" cy="26" r="2.7" fill="${SUBTLE}"/></svg>`;
 
@@ -60,13 +61,13 @@ export function wrapFilingDocument(
 <meta charset="utf-8" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   @page { size: letter; margin: 0; }
   html, body { margin: 0; padding: 0; }
   body {
     width: 8.5in;
-    font-family: "Hanken Grotesk", -apple-system, "Segoe UI", sans-serif;
+    font-family: "DM Sans", -apple-system, "Segoe UI", sans-serif;
     color: ${BODY};
     background: #ffffff;
     -webkit-print-color-adjust: exact;

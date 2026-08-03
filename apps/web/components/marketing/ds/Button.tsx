@@ -6,9 +6,9 @@ import { useState, type CSSProperties, type FocusEvent, type ReactNode } from "r
 import { useCanHover, usePrefersReducedMotion } from "./use-interaction-media";
 
 /**
- * Homa Button, primary interactive element. Ported from
- * docs/homa-design/components/actions/Button.jsx (source of truth); keep in
- * sync until packages/design exists (M1-17). Adds `href` (renders a Next
+ * Homa Button, primary interactive element. This is a legacy projection
+ * migrating to the semantic primitives in @homa/design. Adds `href` (renders
+ * a Next
  * Link with identical styling) so kit CTAs can navigate.
  * Motion per the emil-design-eng skill: exact transition properties, brand
  * ease-out, press scale from --press-scale. Hover only on hover-capable

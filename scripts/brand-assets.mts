@@ -1,7 +1,7 @@
 /**
  * Generate the static Homa brand assets from the design-system logo geometry
- * (docs/homa-design/components/brand/Logo.jsx, mirrored in
- * apps/web/components/brand/Logo.tsx). Run with: pnpm gen:brand
+ * (@homa/design's generated brand contract, projected in web and native
+ * adapters). Run with: pnpm gen:brand
  *
  * Outputs:
  * - apps/web/public/brand/homa-lockup.svg / .png    (mark + bounced wordmark, light surfaces)
@@ -20,8 +20,8 @@
  *
  * The wordmark letters are converted to vector paths via satori + the vendored
  * Fredoka 600 WOFF, so the SVGs render correctly without the font installed.
- * Token hexes are inlined (static files cannot read CSS variables); they are
- * hand-copied from apps/web/app/globals.css, same as opengraph-image.tsx.
+ * Token hexes are inlined from the Quiet authority contract so generated
+ * distribution assets do not create a second palette authority.
  */
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -29,24 +29,21 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import satori from "satori";
 import sharp from "sharp";
+import { colorTokens, logoGeometry } from "../packages/design/src/contract/index.ts";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WEB_ROOT = join(REPO_ROOT, "apps/web");
 const BRAND_DIR = join(WEB_ROOT, "public/brand");
 const MARKETING_BRAND_DIR = join(REPO_ROOT, "marketing/assets/brand");
 
-// globals.css tokens, by hand: clay-500 (brand), clay-400 (mark on dark),
-// stone-900 (text-strong, also the pupils), clay-50 (the soft app-icon
-// surface), and the dark theme's night-sky page (tokens/dark.css --bg-page).
-const CLAY_500 = "#E7602F";
-const CLAY_400 = "#F1793F";
-const STONE_900 = "#221E1A";
-const CLAY_50 = "#FFF0E8";
-const BG_PAGE = "#FBF7F0";
-const NIGHT_NAVY = "#151B27";
+const CLAY_500 = colorTokens.visualCoral;
+const CLAY_400 = colorTokens.visualCoral;
+const STONE_900 = colorTokens.ink;
+const CLAY_50 = "#FBE8DF";
+const BG_PAGE = colorTokens.canvas;
+const NIGHT_NAVY = colorTokens.containedBand;
 
-const HOUSE_PATH =
-  "M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z";
+const HOUSE_PATH = logoGeometry.housePath;
 
 // [letter, baseline offset in em, rotation in deg], the bounced wordmark.
 const WORDMARK_LETTERS: ReadonlyArray<readonly [string, number, number]> = [
@@ -71,8 +68,8 @@ function houseMarkElement(size: number, body: string) {
     "svg",
     { width: size, height: size, viewBox: "0 0 48 48" },
     el("path", { d: HOUSE_PATH, fill: body }),
-    el("circle", { cx: 17.4, cy: 26, r: 4.8, fill: "#FFFFFF" }),
-    el("circle", { cx: 30.6, cy: 26, r: 4.8, fill: "#FFFFFF" }),
+    el("circle", { cx: 17.4, cy: 26, r: 4.8, fill: colorTokens.paper }),
+    el("circle", { cx: 30.6, cy: 26, r: 4.8, fill: colorTokens.paper }),
     el("circle", { cx: 18.3, cy: 26.7, r: 2.2, fill: STONE_900 }),
     el("circle", { cx: 31.5, cy: 26.7, r: 2.2, fill: STONE_900 }),
   );
@@ -80,7 +77,7 @@ function houseMarkElement(size: number, body: string) {
 
 function lockupElement(tone: "light" | "dark") {
   const body = tone === "dark" ? CLAY_400 : CLAY_500;
-  const word = tone === "dark" ? "#FFFFFF" : STONE_900;
+  const word = tone === "dark" ? colorTokens.paper : STONE_900;
   const fontSize = MARK_SIZE * 0.98;
 
   return el(
@@ -182,7 +179,7 @@ function markSvgColored(
  *   profiles, OAuth consent screens) never clip the corners
  */
 function markSvg(viewBox: keyof typeof MARK_BOXES = "standard"): string {
-  return markSvgColored(viewBox, { body: CLAY_500, eyes: "#FFFFFF", pupils: STONE_900 });
+  return markSvgColored(viewBox, { body: CLAY_500, eyes: colorTokens.paper, pupils: STONE_900 });
 }
 
 /** Solid-background raster: the mark centered on a filled canvas (no alpha). */

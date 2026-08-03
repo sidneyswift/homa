@@ -1,4 +1,5 @@
 import { HOUSE_PATH } from "../../components/brand/Logo";
+import { colorTokens } from "@homa/design/contract";
 import { escapeHtml } from "../html-escape";
 import { SHEET_PAGE_CLASS } from "../materials/page-shell";
 import { overrideNoteFor } from "./requirement-overrides";
@@ -107,17 +108,17 @@ export interface StatePack {
 /* White paper, hairline stone rules, clay text accents under 5%       */
 /* coverage, one sage handwritten note. Grayscale-safe by design.      */
 /* ------------------------------------------------------------------ */
-const INK = "#221E1A"; // stone-900
-const BODY = "#332E29"; // stone-800
-const MUTED = "#6B6259"; // stone-600
-const SUBTLE = "#8A7D6C"; // stone-500
-const HAIRLINE = "#E7DDCE"; // stone-200
-const RULE = "#D6C8B4"; // stone-300
-const LINE = "#B3A492"; // stone-400
-const CLAY_SOFT = "#FFBE9C"; // clay-200 (the margin rule)
-const CLAY = "#C44C22"; // clay-600 (clay text on white)
-const CLAY_DEEP = "#9C3B1B"; // clay-700
-const SAGE = "#3D9A50"; // sage-500 (Homa's hand)
+const INK = colorTokens.ink;
+const BODY = colorTokens.ink;
+const MUTED = "#5B5852";
+const SUBTLE = "#77736B";
+const HAIRLINE = "#DED8CC";
+const RULE = colorTokens.controlBoundary;
+const LINE = "#77736B";
+const CLAY_SOFT = "#F1B29A";
+const CLAY = colorTokens.brandText;
+const CLAY_DEEP = colorTokens.brandText;
+const SAGE = colorTokens.constructiveInk;
 
 const FOOTER_MARK_SVG = `<svg width="11" height="11" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="${SUBTLE}" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="${SUBTLE}"/><circle cx="30.6" cy="26" r="2.7" fill="${SUBTLE}"/></svg>`;
 const HEADER_MARK_SVG = `<svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="${INK}"/><circle cx="30.6" cy="26" r="2.7" fill="${INK}"/></svg>`;
@@ -1452,13 +1453,13 @@ export function wrapStatePackDocument(
 <meta charset="utf-8" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   @page { size: letter; margin: 0; }
   html, body { margin: 0; padding: 0; }
   body {
     width: 8.5in;
-    font-family: "Hanken Grotesk", -apple-system, "Segoe UI", sans-serif;
+    font-family: "DM Sans", -apple-system, "Segoe UI", sans-serif;
     color: ${BODY};
     background: #ffffff;
     -webkit-print-color-adjust: exact;
@@ -1508,7 +1509,7 @@ export function wrapStatePackDocument(
   .sp-header-brand { display: flex; align-items: center; gap: 6px; margin-bottom: 0.14in; }
   .sp-header-rule { border-left: 3px solid ${CLAY_SOFT}; padding-left: 0.16in; }
   .sp-overline { margin: 0; font-family: "JetBrains Mono", monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.14em; color: ${CLAY}; }
-  .sp-title { margin: 3px 0 0; font-family: "Schibsted Grotesk", sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.015em; color: ${INK}; }
+  .sp-title { margin: 3px 0 0; font-family: "EB Garamond", Georgia, serif; font-weight: 600; font-size: 28px; letter-spacing: -0.01em; color: ${INK}; }
   .sp-support { margin: 5px 0 0; font-size: 11px; color: ${MUTED}; max-width: 5.6in; }
   .sp-section-label { margin: 0 0 8px; font-family: "JetBrains Mono", monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.14em; color: ${SUBTLE}; }
   .sp-body { font-size: 10.5px; line-height: 1.55; color: ${BODY}; margin: 6px 0; }
@@ -1533,7 +1534,7 @@ export function wrapStatePackDocument(
   .sp-also { display: block; margin-top: 3px; font-size: 9.5px; line-height: 1.45; color: ${BODY}; }
   .sp-mark { color: ${CLAY}; font-weight: 700; }
   .sp-mark-note { margin: 7px 0 0; font-size: 8.6px; line-height: 1.45; color: ${MUTED}; }
-  .sp-dates-scope { font-family: "Hanken Grotesk", sans-serif; text-transform: none; letter-spacing: 0; font-size: 8.5px; color: ${SUBTLE}; }
+  .sp-dates-scope { font-family: "DM Sans", sans-serif; text-transform: none; letter-spacing: 0; font-size: 8.5px; color: ${SUBTLE}; }
   .sp-date-list { list-style: none; margin: 2px 0 8px; padding: 0; }
   .sp-date-list li { display: flex; align-items: baseline; gap: 9px; padding: 3px 0; font-size: 11.5px; color: ${INK}; }
   .sp-date-stamp { flex: 0 0 auto; min-width: 1.05in; font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 500; color: ${CLAY_DEEP}; }
@@ -1554,7 +1555,7 @@ export function wrapStatePackDocument(
   .sp-check-text { flex: 1; }
   .sp-check-text p { margin: 0; font-size: 10.5px; line-height: 1.5; color: ${BODY}; }
   .sp-check-done { flex: 0 0 auto; font-family: "JetBrains Mono", monospace; font-size: 8px; color: ${SUBTLE}; margin-top: 2px; }
-  .sp-hand { font-family: "Caveat", cursive; font-weight: 600; font-size: 19px; color: ${SAGE}; transform: rotate(-2deg); margin: 0.24in 0 0 0.1in; }
+  .sp-hand { font-family: "EB Garamond", Georgia, serif; font-style: italic; font-weight: 500; font-size: 19px; color: ${SAGE}; transform: rotate(-1deg); margin: 0.24in 0 0 0.1in; }
   .sp-legal-affirm { margin-top: 0.1in; }
   .sp-change-note { margin: 0 0 12px; padding: 9px 11px; border-left: 2px solid ${CLAY_SOFT}; background: #FFF8F4; font-size: 11.5px; line-height: 1.5; color: ${BODY}; }
   .sp-affirm-list { list-style: none; margin: 0 0 10px; padding: 0; }

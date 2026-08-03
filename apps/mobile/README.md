@@ -43,8 +43,8 @@ which currently fails under expo-router server rendering.
 
 | Piece | Where | Notes |
 |---|---|---|
-| Design tokens | `src/theme/tokens.ts` | Hand-copied from `docs/homa-design/tokens/`, same sync rule as `apps/web` |
-| Fonts | `src/theme/fonts.ts` | Schibsted Grotesk, Hanken Grotesk, Fredoka via `@expo-google-fonts` |
+| Design tokens | `src/theme/tokens.ts` | Temporary legacy projection, migrating to `@homa/design` under gh#720 |
+| Fonts | `src/theme/fonts.ts` | Temporary legacy projection. Quiet authority roles are generated from `@homa/design`; migration is tracked by gh#715 and gh#720. |
 | Auth | `src/lib/supabase.ts` | supabase-js + AsyncStorage sessions (cookie-free twin of `@supabase/ssr`) |
 | Chat | `src/features/chat/` | `useEveAgent` from `eve/react` against `EXPO_PUBLIC_API_URL/eve/v1/*` |
 | Streaming | `src/lib/streaming-fetch.ts` | `expo/fetch` installed globally; RN's built-in fetch cannot stream NDJSON |

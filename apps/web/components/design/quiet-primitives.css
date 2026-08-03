@@ -1,0 +1,121 @@
+.quiet-frame {
+  border: 1px solid var(--homa-control-boundary);
+  border-radius: var(--homa-radius-card);
+  background: var(--homa-paper);
+  color: var(--homa-ink);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--homa-ink) 7%, transparent);
+}
+
+.quiet-frame--mineral { background: var(--homa-canvas); }
+.quiet-frame--contained { background: var(--homa-contained-band); color: var(--homa-paper); border-color: transparent; }
+
+.quiet-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: var(--homa-radius-control);
+  padding: 0 18px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--homa-motion-fast) var(--homa-motion-ease-out), border-color var(--homa-motion-fast) var(--homa-motion-ease-out), transform var(--homa-motion-fast) var(--homa-motion-ease-out);
+}
+
+.quiet-action--large { min-height: 52px; padding-inline: 24px; font-size: 1rem; }
+.quiet-action--primary { background: var(--homa-midnight-action); color: var(--homa-paper); }
+.quiet-action--secondary { border-color: var(--homa-control-boundary); background: transparent; color: var(--homa-ink); }
+.quiet-action--quiet { background: transparent; color: var(--homa-brand-text); }
+.quiet-action:hover:not(:disabled) { transform: translateY(-1px); }
+.quiet-action--primary:hover:not(:disabled) { background: color-mix(in srgb, var(--homa-midnight-action) 88%, var(--homa-ink)); }
+.quiet-action--secondary:hover:not(:disabled) { background: var(--homa-paper); border-color: var(--homa-ink); }
+.quiet-action:active:not(:disabled) { transform: translateY(1px); }
+.quiet-action:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-action:disabled { cursor: not-allowed; opacity: 0.5; }
+.quiet-action__icon { display: inline-flex; }
+
+.quiet-status {
+  border-radius: var(--homa-radius-control);
+  padding: 9px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.quiet-status--info { background: var(--homa-info-tint); color: var(--homa-info-ink); }
+.quiet-status--constructive { background: var(--homa-constructive-tint); color: var(--homa-constructive-ink); }
+.quiet-status--attention { background: var(--homa-highlight-tint); color: var(--homa-highlight-ink); }
+.quiet-status--error { background: var(--homa-error-tint); color: var(--homa-error-ink); }
+
+.quiet-thread { display: block; width: min(320px, 100%); height: auto; overflow: visible; }
+.quiet-thread path { stroke: var(--homa-visual-coral); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 420; stroke-dashoffset: 420; animation: quiet-thread-draw 900ms var(--homa-motion-ease-out) forwards; }
+@keyframes quiet-thread-draw { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet-action { transition: none; }
+  .quiet-action:hover:not(:disabled), .quiet-action:active:not(:disabled) { transform: none; }
+  .quiet-thread path { animation: none; stroke-dashoffset: 0; }
+}
+
+.quiet-auth-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: var(--homa-canvas);
+}
+.quiet-auth-card { width: min(100%, 480px); padding: clamp(24px, 5vw, 48px); }
+
+.quiet-fixture {
+  min-height: 100dvh;
+  padding: 24px clamp(20px, 5vw, 72px) 80px;
+  background: var(--homa-canvas);
+  color: var(--homa-ink);
+}
+.quiet-fixture__header,
+.quiet-fixture__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.quiet-fixture__header { justify-content: space-between; max-width: 1280px; margin: 0 auto; }
+.quiet-fixture__eyebrow,
+.quiet-fixture__artifact-label {
+  margin: 0;
+  color: var(--homa-brand-text);
+  font: 700 0.75rem/1.35 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.quiet-fixture__hero { max-width: 800px; margin: clamp(72px, 12vw, 144px) auto 88px; text-align: center; }
+.quiet-fixture__hero h1 { max-width: 760px; margin: 16px auto 20px; font: 600 clamp(2.75rem, 7vw, 5.75rem)/0.98 var(--font-display); letter-spacing: -0.035em; }
+.quiet-fixture__lede { max-width: 600px; margin: 0 auto 32px; font: 400 clamp(1.05rem, 2vw, 1.25rem)/1.55 var(--font-sans); color: color-mix(in srgb, var(--homa-ink) 78%, var(--homa-canvas)); }
+.quiet-fixture__actions { justify-content: center; flex-wrap: wrap; }
+.quiet-fixture__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 1280px; margin: 0 auto; align-items: stretch; }
+.quiet-fixture__artifact,
+.quiet-fixture__next { min-height: 280px; padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+.quiet-fixture__artifact h2,
+.quiet-fixture__guide h2,
+.quiet-fixture__next h2 { margin: 0; font: 600 clamp(1.65rem, 2.4vw, 2.25rem)/1.03 var(--font-display); }
+.quiet-fixture__artifact p,
+.quiet-fixture__next p { margin: 0; font: 400 1rem/1.55 var(--font-sans); }
+.quiet-fixture__artifact .quiet-status { margin-top: auto; align-self: flex-start; }
+.quiet-fixture__guide { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 16px; padding: 28px 12px; }
+.quiet-fixture__guide-mark { display: grid; width: 56px; height: 56px; place-items: center; border-radius: 50%; background: var(--homa-visual-coral); }
+.quiet-fixture__guide .quiet-thread { margin: 4px 0 0; }
+.quiet-fixture__next { background: var(--homa-contained-band); color: var(--homa-paper); border-color: transparent; }
+.quiet-fixture__next .quiet-fixture__artifact-label { color: var(--homa-highlight-tint); }
+.quiet-fixture__next-action { margin-top: auto; border-color: color-mix(in srgb, var(--homa-paper) 55%, transparent); color: var(--homa-paper); }
+
+@media (max-width: 760px) {
+  .quiet-fixture { padding-inline: 20px; }
+  .quiet-fixture__header { align-items: flex-start; }
+  .quiet-fixture__header .quiet-fixture__eyebrow { max-width: 150px; text-align: right; }
+  .quiet-fixture__hero { margin-top: 72px; }
+  .quiet-fixture__grid { grid-template-columns: 1fr; }
+  .quiet-fixture__guide { min-height: 240px; padding-inline: 8px; }
+}

@@ -1,57 +1,65 @@
 /**
- * Homa design tokens for React Native, hand-copied from
- * docs/homa-design/tokens/ (the source of truth) via apps/web's
- * globals.css. Same rule as the web app: if docs/homa-design tokens
- * change, update this file too so nothing drifts (see AGENTS.md;
- * packages/design replaces both hand-copies when M1-17 lands).
+ * Native projection of the Quiet authority contract. Components keep the
+ * established semantic names while the values come from @homa/design, so a
+ * surface can migrate without introducing a second token vocabulary.
  *
  * Values are px numbers because React Native styles are unitless.
  */
+import { colorTokens, radii, spacing } from "@homa/design/contract";
 
 export const palette = {
-  stone50: "#FBF7F0",
-  stone100: "#F3ECE1",
-  stone200: "#E7DDCE",
-  stone300: "#D6C8B4",
-  stone400: "#B3A492",
-  stone500: "#8A7D6C",
-  stone600: "#6B6259",
-  stone700: "#4E463E",
-  stone800: "#332E29",
-  stone900: "#221E1A",
+  stone50: colorTokens.canvas,
+  stone100: "#EEEAE2",
+  stone200: "#DED8CC",
+  stone300: colorTokens.controlBoundary,
+  stone400: "#77736B",
+  stone500: "#68645E",
+  stone600: "#5B5852",
+  stone700: "#3F3D39",
+  stone800: colorTokens.ink,
+  stone900: colorTokens.ink,
 
-  clay50: "#FFF0E8",
-  clay100: "#FFDDC9",
-  clay200: "#FFBE9C",
-  clay300: "#FB9868",
-  clay400: "#F1793F",
-  clay500: "#E7602F",
-  clay600: "#C44C22",
-  clay700: "#9C3B1B",
+  clay50: "#FBE8DF",
+  clay100: "#F8D8CC",
+  clay200: "#F1B29A",
+  clay300: "#EA8969",
+  clay400: colorTokens.visualCoral,
+  clay500: colorTokens.visualCoral,
+  clay600: colorTokens.brandText,
+  clay700: colorTokens.brandText,
 
-  sage50: "#EAF6EC",
-  sage100: "#D2ECD6",
-  sage300: "#7CC689",
-  sage500: "#3D9A50",
-  sage600: "#2F7C40",
-  sage700: "#275F34",
+  sage50: colorTokens.constructiveTint,
+  sage100: "#D7E9DC",
+  sage200: "#B5D2BD",
+  sage300: "#85B595",
+  sage400: "#5F9271",
+  sage500: colorTokens.constructiveInk,
+  sage600: colorTokens.constructiveInk,
+  sage700: "#284938",
+  sage800: "#1F382A",
 
-  gold100: "#FFF3C2",
-  gold500: "#F0BE00",
-  goldInk: "#8A6410",
+  gold100: colorTokens.highlightTint,
+  gold300: "#EBCF82",
+  gold400: "#D6AC43",
+  gold500: colorTokens.highlightInk,
+  goldInk: colorTokens.highlightInk,
+  goldInkStrong: "#4D380A",
 
-  sky100: "#DDF3F9",
-  sky500: "#4FB4D6",
-  sky600: "#3A8FA9",
+  sky50: colorTokens.infoTint,
+  sky100: colorTokens.infoTint,
+  sky300: "#AFCED5",
+  sky500: colorTokens.infoInk,
+  sky600: colorTokens.infoInk,
 
-  rose100: "#FDE1D8",
-  rose500: "#E2593B",
+  rose100: colorTokens.errorTint,
+  rose500: colorTokens.errorInk,
+  rose600: "#703027",
 } as const;
 
 /** Semantic aliases, mirroring globals.css. Use these, not the palette. */
 export const colors = {
   page: palette.stone50,
-  card: "#FFFFFF",
+  card: colorTokens.paper,
   surfaceSunken: palette.stone100,
 
   textStrong: palette.stone900,
@@ -60,18 +68,19 @@ export const colors = {
   textSubtle: palette.stone500,
 
   brand: palette.clay500,
+  action: colorTokens.midnightAction,
   brandHover: palette.clay600,
   brandSoft: palette.clay50,
-  onBrand: "#FFFFFF",
+  onBrand: colorTokens.paper,
 
   sage: palette.sage500,
   sageSoft: palette.sage50,
   gold: palette.gold500,
   goldSoft: palette.gold100,
 
-  border: palette.stone300,
+  border: colorTokens.controlBoundary,
   borderSubtle: palette.stone200,
-  focusRing: palette.clay400,
+  focusRing: colorTokens.visualCoral,
 
   success: palette.sage600,
   danger: palette.rose500,
@@ -80,52 +89,54 @@ export const colors = {
 } as const;
 
 /**
- * Native semantic colors for Homa's experimental quiet-evening theme.
- * These mirror docs/homa-design/tokens/dark.css v4. Components choose this
+ * Native semantic colors for the approved dark container profile. Components choose this
  * object as a complete theme so light-theme palette values cannot leak onto
  * a navy surface.
  */
 export const darkColors = {
-  page: "#151B27",
-  card: "#1E2635",
-  surfaceRaised: "#252E40",
-  surfaceSunken: "#101521",
+  page: "#1E2936",
+  card: "#27374D",
+  surfaceRaised: "#33465E",
+  surfaceSunken: "#17212C",
 
-  textStrong: "#EEF2F8",
-  textBody: "#DCE3EE",
-  textMuted: "#9AA7BD",
-  textSubtle: "#7A87A0",
+  textStrong: "#FFFEFC",
+  textBody: "#F2EEE7",
+  textMuted: "#C7C2BA",
+  textSubtle: "#A9A39A",
 
-  brand: "#FFD43B",
-  brandHover: "#FFDE62",
-  brandSoft: "rgba(255, 212, 59, 0.13)",
-  onBrand: "#402E05",
+  /** Accent coral remains available for decorative and ghost affordances. */
+  brand: colorTokens.visualCoral,
+  /** Filled actions use the same midnight ink as the light theme. */
+  action: colorTokens.midnightAction,
+  brandHover: "#F0835A",
+  brandSoft: "#573426",
+  onBrand: "#FFFEFC",
 
-  border: "#364156",
-  borderSubtle: "#2A3345",
-  focusRing: "#FFD43B",
+  border: "#53677D",
+  borderSubtle: "#40546A",
+  focusRing: "#F0835A",
 
-  danger: "#F58469",
-  dangerSoft: "rgba(226, 89, 59, 0.22)",
+  danger: "#F2A296",
+  dangerSoft: "#59332E",
 } as const;
 
 /** 4px base scale (space-1 through space-24 in the token sheet). */
 export const space = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  xs: spacing.scale[1],
+  sm: spacing.scale[2],
+  md: spacing.scale[4],
+  lg: spacing.scale[6],
+  xl: spacing.scale[7],
+  xxl: spacing.scale[9],
 } as const;
 
 export const radius = {
-  xs: 6,
+  xs: 8,
   sm: 10,
-  md: 16,
-  lg: 22,
-  xl: 28,
-  pill: 999,
+  md: radii.control,
+  lg: radii.card,
+  xl: radii.frame,
+  pill: radii.compactPill,
 } as const;
 
 /** Type scale in px (the token sheet's rem values times 16). */
@@ -139,17 +150,17 @@ export const fontSize = {
   xxxl: 36,
 } as const;
 
-/** Soft, warm-tinted shadows (brown, never gray), per shadows.css. */
+/** Quiet, mineral-tinted shadows, limited to two elevations. */
 export const shadows = {
   sm: {
-    shadowColor: "#332A21",
+    shadowColor: colorTokens.ink,
     shadowOpacity: 0.08,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
   md: {
-    shadowColor: "#332A21",
+    shadowColor: colorTokens.ink,
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },

@@ -12,8 +12,8 @@ import { useSignedIn } from "./use-signed-in";
 import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
- * Sticky marketing nav, ported from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx. Links anchor to their
+ * Sticky marketing nav, evolved from the former landing composition. Links
+ * anchor to their
  * page sections; "Sign in" points at /signin; the primary CTA carries the
  * same free-report promise as the hero (HERO_COPY.primaryAction, so the
  * nav never sells a different action than the page) and opens the landing

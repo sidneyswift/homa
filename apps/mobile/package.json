@@ -12,9 +12,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@homa/design": "workspace:*",
     "@expo-google-fonts/fredoka": "^0.4.0",
-    "@expo-google-fonts/hanken-grotesk": "^0.4.0",
-    "@expo-google-fonts/schibsted-grotesk": "^0.4.0",
+    "@expo-google-fonts/dm-sans": "^0.4.0",
+    "@expo-google-fonts/eb-garamond": "^0.4.0",
     "@homa/core": "workspace:*",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@sentry/react-native": "^8.20.0",

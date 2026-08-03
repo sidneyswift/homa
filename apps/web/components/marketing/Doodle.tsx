@@ -1,9 +1,8 @@
 import type { CSSProperties } from "react";
 
 /**
- * Homa doodle, a small hand-drawn decorative shape. Decoration only, never
- * UI. Ported from docs/homa-design/components/playful/Doodle.jsx (source of
- * truth); keep in sync until packages/design exists (M1-17).
+ * Homa doodle, a small decorative shape. Decoration only, never UI. This is a
+ * legacy projection migrating to the contract-owned brand thread.
  */
 
 type DoodleName =

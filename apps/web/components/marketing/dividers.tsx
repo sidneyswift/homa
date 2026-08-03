@@ -5,9 +5,9 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePrefersReducedMotion } from "./ds/use-interaction-media";
 
 /**
- * Section-seam dividers + the Eyebrow section label, ported verbatim from
- * docs/homa-design/ui_kits/landing/LandingPage.jsx (source of truth); keep
- * in sync until packages/design exists (M1-17). Wave and Eyebrow are
+ * Section-seam dividers + the Eyebrow section label, evolved from the former
+ * landing composition. The contract in @homa/design is authoritative. Wave
+ * and Eyebrow are
  * static SVG, no motion. Ribbon's text scrolls like a ticker along its
  * curve (SMIL `<animate>` on `startOffset`, the only cross-browser way to
  * move a textPath, per MDN); JS-armed and skipped entirely under

@@ -3,32 +3,33 @@ import {
   useFonts as useFredoka,
 } from "@expo-google-fonts/fredoka";
 import {
-  HankenGrotesk_400Regular,
-  HankenGrotesk_500Medium,
-  HankenGrotesk_600SemiBold,
-  HankenGrotesk_700Bold,
-  useFonts as useHanken,
-} from "@expo-google-fonts/hanken-grotesk";
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+  DMSans_700Bold,
+  useFonts as useDMSans,
+} from "@expo-google-fonts/dm-sans";
 import {
-  SchibstedGrotesk_600SemiBold,
-  SchibstedGrotesk_700Bold,
-  useFonts as useSchibsted,
-} from "@expo-google-fonts/schibsted-grotesk";
+  EBGaramond_400Regular,
+  EBGaramond_500Medium,
+  EBGaramond_600SemiBold,
+  EBGaramond_700Bold,
+  useFonts as useEBGaramond,
+} from "@expo-google-fonts/eb-garamond";
 
 /**
- * The three load-bearing brand voices (docs/homa-design typography):
- * Schibsted Grotesk for display, Hanken Grotesk for body/UI, Fredoka for
- * the bounced wordmark only. EB Garamond, Caveat, and JetBrains Mono join
- * later with the surfaces that need them (serif accents, margin notes,
- * numeric readouts).
+ * Quiet authority typography: EB Garamond carries human display moments,
+ * DM Sans carries interface and body copy, and Fredoka is reserved for the
+ * real Homa logo. Every surface shares these roles rather than introducing
+ * local families.
  */
 export const fontFamilies = {
-  display: "SchibstedGrotesk_700Bold",
-  displaySemibold: "SchibstedGrotesk_600SemiBold",
-  body: "HankenGrotesk_400Regular",
-  bodyMedium: "HankenGrotesk_500Medium",
-  bodySemibold: "HankenGrotesk_600SemiBold",
-  bodyBold: "HankenGrotesk_700Bold",
+  display: "EBGaramond_700Bold",
+  displaySemibold: "EBGaramond_600SemiBold",
+  body: "DMSans_400Regular",
+  bodyMedium: "DMSans_500Medium",
+  bodySemibold: "DMSans_600SemiBold",
+  bodyBold: "DMSans_700Bold",
   wordmark: "Fredoka_600SemiBold",
 } as const;
 
@@ -39,19 +40,21 @@ export interface HomaFontState {
 
 /** Loads every brand font and surfaces Expo's failure signal to startup. */
 export function useHomaFonts(): HomaFontState {
-  const [schibstedLoaded, schibstedError] = useSchibsted({
-    SchibstedGrotesk_600SemiBold,
-    SchibstedGrotesk_700Bold,
+  const [dmSansLoaded, dmSansError] = useDMSans({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
   });
-  const [hankenLoaded, hankenError] = useHanken({
-    HankenGrotesk_400Regular,
-    HankenGrotesk_500Medium,
-    HankenGrotesk_600SemiBold,
-    HankenGrotesk_700Bold,
+  const [ebGaramondLoaded, ebGaramondError] = useEBGaramond({
+    EBGaramond_400Regular,
+    EBGaramond_500Medium,
+    EBGaramond_600SemiBold,
+    EBGaramond_700Bold,
   });
   const [fredokaLoaded, fredokaError] = useFredoka({ Fredoka_600SemiBold });
   return {
-    loaded: schibstedLoaded && hankenLoaded && fredokaLoaded,
-    error: schibstedError ?? hankenError ?? fredokaError ?? null,
+    loaded: dmSansLoaded && ebGaramondLoaded && fredokaLoaded,
+    error: dmSansError ?? ebGaramondError ?? fredokaError ?? null,
   };
 }

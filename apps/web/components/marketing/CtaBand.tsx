@@ -8,8 +8,7 @@ import { HERO_COPY } from "./landing-content";
 import { useSignupPopup } from "./SignupPopupProvider";
 
 /**
- * Sunshine CTA band, grown from the kit band in
- * docs/homa-design/ui_kits/landing/LandingPage.jsx. `data-final-cta` lets
+ * CTA band, grown from the former landing composition. `data-final-cta` lets
  * ScrollCta.tsx find this section without a prop link, so it can retire
  * its own nudge once the page's real CTA is already on screen. The main
  * CTA opens the signup popup (founder call 2026-07-08); it stays the one

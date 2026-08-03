@@ -1,172 +1,127 @@
-# Homa Design System
+# Homa, quiet authority
 
-**Homa** is an AI assistant for homeschooling families, designed as a calm, capable companion. The current map uses national developmental and academic benchmarks with a parent-led checklist. State data is a separate legal-requirements reference, not state academic mapping. The product can create practice materials and record progress evidence, but it must describe changes as temporal observations rather than proof that Homa caused them. The web app, Expo client, landing-page system, and social templates all use this visual language. Repository presence does not by itself prove that a surface or provider-backed capability is live.
+This is the active human guide for the Homa brand system. It supersedes the
+former visual direction. The implementation contract is generated
+from `packages/design/src/contract`; this guide explains how to use it across
+web, native, landing, email, SMS, reports, print, stores, social, providers,
+and authoring systems.
 
-This repository is the single source of truth for Homa's brand: design tokens, fonts, reusable UI components, full-screen UI kits, foundation specimens, templates, and social layouts.
+## The feeling
 
-> **History:** `AUDIT.md` preserves the dated design exploration and porting
-> record. Current design work uses only the sources in this repository and does
-> not depend on an external working folder.
+Homa is calm, capable, and observant. She notices the real work, keeps the
+thread, and makes the next step easier. The experience should feel like a
+trusted guide at the kitchen table, not a gradebook, toy, or generic premium
+SaaS dashboard.
 
----
+The signature sentence is: real work, one warm guide, one useful next move.
+Use it as a composition rule, not as copy that must appear verbatim everywhere.
 
-## Direction: "Warm and playful"
+## Visual contract
 
-Homa is warm at heart and playful at the edges: the schoolbook charm of a children's museum, held together by editorial restraint. Cream paper (sometimes ruled like a notebook), a coral primary with mint, sunshine, and pool-aqua friends, clean modern headlines (Schibsted Grotesk) with a clay accent word, the little-home character mark beside the bounced "Homa" wordmark, chunky pill buttons, blob-masked photos, squiggle dividers, wavy section edges, and little hand-placed doodles. Rule of restraint: **one or two playful devices per surface, never all of them at once.**
+### Palette
 
----
+| Role | Value | Use |
+| --- | --- | --- |
+| Mineral canvas | `#F7F4EE` | Default page and quiet bands |
+| Ink | `#20242B` | Primary text and structure |
+| Paper | `#FFFEFC` | Reading surfaces and artifacts |
+| Floating | `#FFFFFF` | Temporary elevated surfaces only |
+| Visual coral | `#E7602F` | Homa, roof thread, punctuation, visual signature |
+| Midnight action | `#27374D` | Filled action, selected state, structural emphasis |
+| Brand text | `#A33F22` | Accessible coral-family text substitute |
+| Control boundary | `#918B83` | Borders and quiet controls |
+| Constructive ink/tint | `#335C46` / `#E5EFE8` | Truthful constructive state |
+| Info ink/tint | `#2F5968` / `#E4EFF2` | Truthful information state |
+| Highlight ink/tint | `#76560F` / `#F7EBC7` | Attention or celebration, never a score |
+| Error ink/tint | `#923F33` / `#F5E5E1` | Real system failure only |
 
-## Brand foundation, who we're for
+Color carries meaning. Semantic colors do not decorate and do not describe a
+child's worth. Coral is a small recognizable signal, not a universal action
+color. White on coral is reserved for large display treatment only, never
+normal control text.
 
-**She isn't short on tools. She's short on bandwidth and reassurance.** The homeschooling mom is teacher, planner, principal, and parent at once. Underneath the logistics runs one quiet, constant fear: *"Am I doing enough? Are my kids behind? Am I enough?"* She's often isolated, measuring herself against picture-perfect homeschool Instagram, and carrying guilt about the messy days.
+### Typography
 
-**The emotional job:** move her from *overwhelmed & unsure* → *calm & confident*.
+- EB Garamond, display, minimum 20px. Use for page titles, meaningful
+  invitations, and reflection.
+- DM Sans, interface and body. Use for controls, labels, body copy, data,
+  navigation, and reports that need dense reading.
+- Fredoka, real Logo component only. Never type a substitute wordmark and
+  never use Fredoka as a UI voice.
 
-### The promise (say it everywhere)
+The display role is 44/46 on phone and 64/66 on desktop for a hero, 32/36 to
+40/44 for page titles, 26/31 to 32/37 for sections, 16/24 body, 18/28 large
+body, 14/20 small body, 15/20 controls, 13/18 captions, and 12/16 eyebrows.
+Metric figures stay in DM Sans with tabular figures. Test long names,
+localization, font failure, Dynamic Type, and PDF embedding.
 
-> **You've got this. Homa's got the rest.**
+### Geometry
 
-Every surface should express one feeling, **calm**, and one relationship, **a companion in your corner.** Tagline: *"Homeschooling, made calm."*
+Controls are 12px, cards 18px, and large frames 28px. Use a 4px spacing base,
+clear grouping, and at most two elevations. Do not stack a bordered card
+inside another bordered card unless the inner object is genuinely interactive.
+Pills are for compact selections, not every button. Fine rules, mineral space,
+and an editorial grid should do most of the visual work.
 
-### Five things that make it *feel* like the solution
+### Identity
 
-1. **Homa is a presence, not a product.** A warm daily greeting, gentle nudges, and *permission* ("a lighter day is still a good day"). In the UI: the recurring **"A note from Homa"** pattern (`Callout`, mobile Home).
-2. **An ownable device, "Homa's hand."** The **notebook margin-rule** (a clay vertical line, the workbook margin) and **Homa's handwriting** (Caveat, always **sage**, one margin note per surface, max). Plus the **checkmark / gold-star** language for progress. See `guidelines/brand-device.card.html`.
-3. **Reassurance-first data.** **No red "BEHIND" labels, ever.** Lead with growth, effort, streaks, "on track"; celebrate small wins. The dashboard should *calm* her, not audit her.
-4. **Progress evidence, gently.** The parent completes the main benchmark checklist. Optional deep-dive prompts may be tried together with a child. Homa may show a dated change, such as "Math is up 12 points since April," but never claim that one activity caused it.
-5. **Connected to her world.** Local activities and curriculum comparison remain product direction unless a named ticket and current evidence establish the specific surface. UI-kit examples are visual prototypes, not capability claims.
+The real Logo is the only Homa mark. Its master geometry is owned by
+`packages/design/src/contract/brand.ts` and projected into web, native, print,
+and constrained channels. No route, renderer, email, or asset generator may
+redraw the house, eyes, roof, wordmark, or character from local primitives.
 
----
+The roof-derived coral thread is optional but meaningful. It starts at a real
+learning object, makes no more than two turns, avoids faces, text, and controls,
+and lands at the useful next move. It is 2px in product and 3px in brand
+surfaces, with round caps. It never loops for decoration.
 
-## Content fundamentals
+Imagery is artifact-first: natural light, family-height camera, lived-in work,
+privacy-safe details, and a crop that leaves room for the next move. Do not
+use staged stock imagery as the universal identity proof.
 
-**Voice:** Homa is a warm, competent companion, the friend who's also a veteran homeschooler. She *offers*, she never *commands*.
+## Motion language
 
-- **Person:** Second person ("you," "your kids," "Maya"). Homa says "I" sparingly ("I'll draft that for you").
-- **Tone:** Encouraging, concrete, calm. Celebrates effort; normalizes lighter weeks. Never preachy, never guilt-inducing, never corporate.
-- **Casing:** Sentence case for headings, buttons, and labels. Write **Homa** every time the name is typed, and never type **HOMA**; the logo is the logo, so render the real `Logo` component instead of typing letters meant to stand in for it (founder correction 2026-07-28, `brand-casing-homa`, retiring global D8's old "HOMA on UI surfaces" wording). Overlines and eyebrows may still use an uppercase treatment with wide tracking, which is a type style applied to ordinary words, not a respelling of the brand name.
-- **Length:** Short, but clarity wins every tie. One idea per sentence; lead with the helpful thing. Fewer words is not the goal: cutting words that carry meaning makes copy harder to read, not easier.
-- **Clarity first:** simplicity and low cognitive load beat personality, every time. Plain names for things, no metaphor stacks, no meta-commentary ("here's the honest picture"), no comma splices standing in for the banned em dash. The full rulebook lives at `.agents/skills/homa-copy-writer/SKILL.md`.
-- **Emoji:** Rare and warm, at most one per message (a ☀️ on a morning greeting). Never as bullets or in dense UI.
-- **Punctuation:** **No em dashes, ever** (hard rule, see `CLAUDE.md`). Use a comma, a period, a colon, or a mid-dot (·).
-- **Numbers & jargon:** Plain language. "About 1h 45m," not "105 minutes." No "modules," no "leveraging."
+Homa uses `peek → orient → draw → land → still`. A truthful live state may
+orient the character toward the real object, draw the thread, and settle. Each
+movement is 120ms to 320ms and the whole sequence stays below 900ms. Reduced
+Motion goes directly to the final still. Motion must be interruptible and its
+end must match the underlying state.
 
-**Examples**
+## Surface grammar
 
-- ✅ "Maya's flying through fractions, ready to try some word problems?"
-- ✅ "Good morning, Sarah ☀️ What are we tackling today?"
-- ❌ "The system has generated a curriculum for the student."
+### Product and native
 
-Homa's reusable phrases (encouragement, empty/loading, errors, nudges) live in `guidelines/copy-kit.card.html`. Core rules: reassure before you inform; name the child, name the win; errors reassure first ("your work is safe") then give the fix.
+Lead with the actual object or task. Use Homa at the edge, with a clear next
+move and calm state language. Voice has a safe lane and never competes with the
+primary task. Native adds Dynamic Type, safe areas, keyboard, haptics that tell
+the truth, Reduce Motion, and appearance evidence.
 
----
+### Landing, content, store, and social
 
-## Visual foundations
+Use a large real artifact or family detail, a restrained Homa guide, the coral
+thread when it explains a relationship, and one useful action. Store and social
+reduce to a legible mark, a single idea, accessible text, and a safe crop.
 
-**Color.** Warm and bright, built on warm-tinted neutrals (stone), never gray.
-- **Primary, Clay/Coral** (`--brand` = `#E7602F`): main actions, active nav, brand moments. Hover `--clay-600`, active `--clay-700`.
-- **Secondary, Sage/Mint** (`#3D9A50`): success, "on track," fresh accents.
-- **Accent, Gold/Sunshine** (`#F0BE00`, tints to `#FFD43B`): milestones, highlights, "ahead." Text/icons on gold tints are **always `--gold-ink`** (`#8A6410`); on solid gold, `--gold-ink-strong` (`#402E05`). Never white on gold.
-- **Info, Sky/Aqua** (`#4FB4D6`). **Danger, warm coral-red** (`#E2593B`), never harsh pure red.
-- **Pops** (sparingly: doodles, bands, moments): `--pop-cobalt` `#2E6BE6`, `--pop-blush` `#F49A90`, `--pop-navy` `#23304F`.
-- **Section bands** (full-bleed playful backgrounds): `--band-sky`, `--band-mint`, `--band-blush`, `--band-sunshine`. One or two per page; a band edge is EITHER a wave OR a squiggle ribbon (the ribbon is the seam itself, two section colors meeting under it), never both at one boundary.
-- **Surfaces:** page is warm cream `--bg-page` (`#FBF7F0`); cards are white; `--bg-paper` layers ruled notebook lines over cream.
-- **Text:** warm near-black `--text-strong` through `--text-body / muted / subtle`, all warm stones.
-- **Dark theme (experimental):** "quiet evening" **v4, night sky, sunshine forward**, set `data-theme="dark"` on any subtree (`tokens/dark.css`). The base is a visibly navy dark blue (`#151B27` page, `#1E2635` cards) where **sunshine-gold primaries and baby-blue accents** do the glowing (ink on gold is always deep, never white on gold); clay steps back after dark, reserved for the character mark; upper stones flip light-and-cool as text roles, and every raw scale components lean on remaps (tints, tracks, bars, bands, pops, paper rules). Light is the default.
+### Email, SMS, providers, reports, and print
 
-**Type.**
-- **Display, Schibsted Grotesk** (`--font-display`): all headlines, big numbers, dialog titles. Clean modern grotesque with warm curves; **700 at hero scale, 600 for mid/card titles**, tracked `-0.015em`.
-- **Serif accent, EB Garamond** (`--font-serif`): standalone italic moments only, taglines under a greeting, pull quotes, testimonials, "light on purpose" asides (italic 400; quote blocks roman 400–500). **The accent word inside a headline is NOT serif**: it stays Schibsted and changes color only (usually clay). Never UI chrome, never a headline on its own.
-- **Wordmark, Fredoka 600** (`--font-wordmark`): the bounced "Homa" lockup only, each letter nudged off the baseline (see `Logo`). Never running text, never headlines.
-- **UI & body, Hanken Grotesk** (`--font-sans`): everything in the interface. 400 body, 500–700 emphasis/labels.
-- **Homa's hand, Caveat** (`--font-hand`, always weight 600, always sage): one margin note per surface, max, delight only.
-- **Mono, JetBrains Mono** (`--font-mono`): data, scores, percentages.
-- Scale `--text-2xs → --text-5xl`; display headings track `-0.015em`. Two voices per screen plus body, never four.
+Keep the content and next move. Email uses safe fallbacks, plain text, image-off
+and dark-client states. SMS uses plain language and no visual promise. Reports
+and print put the family artifact first and preserve reading order, provenance,
+and truthful authorship. Provider surfaces inherit meaning and may not invent
+independent colors, fonts, or geometry.
 
-**Spacing & layout.** 4px base (`--space-1..24`). Generous, airy. Prose maxes at `--container-md` (820px), app shells `--container-xl` (1280px). Grid/flex with `gap`, never margin hacks. Collapse to one column below ~720px; the app sidebar becomes a bottom tab bar on mobile; 44px+ hit targets.
+## Copy and care
 
-**Corners & shapes.** Soft, never sharp. Cards `--radius-lg` (22px); buttons/chips are **pill**; inputs `--radius-md` (16px); modals `--radius-xl` (28px). Playful layer: **blob masks** (`--blob-1` through `--blob-5`), the **Squiggle** divider, **wavy band edges**, ruled **notebook paper** (`--bg-paper`), **Doodle** stickers rotated a few degrees. One or two per surface. **Never** the "colored left-border card" trope: subject/plan tiles are soft tinted fills with deep-ink labels.
+Homa suggests, the parent decides. Use sentence case and say the real thing in
+kind language. Never compare siblings. Never describe a child as behind. Never
+turn a semantic error state into a judgment. Never fabricate social proof. Never
+use an em dash.
 
-**Shadows.** Soft, diffuse, **warm-tinted** (brown `rgba(51,42,33,…)`, never black). `--shadow-sm` resting, `--shadow-lg` hover-lift, `--shadow-xl` modals. Focus is a clay glow (`--shadow-focus`), never blue.
+## Evidence law
 
-**Backgrounds & imagery.** Mostly flat warm color and white cards. One editorial exception: the clay gradient (`160deg, clay-400 → clay-600`) on the login side panel and social quote cards. Imagery is **warm lifestyle photography**, real families, cozy natural light, in rounded/blob slots. No cool stock, no heavy filters. (Placeholders today; supply real photos.)
-
-**Motion.** Gentle and quick, **no bounce** in UI (the splash character's squash-and-bounce landing is the one sanctioned exception). `--ease-out` = `cubic-bezier(0.22, 0.8, 0.28, 1)`. Hovers ~120ms (`--dur-fast`), entrances 200–320ms. Hover: darken buttons, lift cards (`translateY(-2px)`, deepen shadow). Press: `scale(0.98)`. **The check-off** (signature micro-interaction): circle fills sage with a 350ms pop, a gold star floats up (800ms), the title quiets to strike-through. Undoable, never a modal, never confetti. See `guidelines/motion-check-off.card.html`.
-
-**Data-viz.** Warm and calm (`guidelines/data-viz.card.html`). Bars in clay-300 (clay-500 emphasis, sage goal-met), rounded tops, hairline baseline; one sage trend line with endpoint dot and display KPI. Growth framing always. Honest downward line segments are allowed, but never use red, a warning treatment, or "behind" language for a child's chart. Numbers use `--font-mono` / tabular figures.
-
-**Borders.** Hairline, warm: `--border-subtle` (stone-200) on cards, `--border-default` (stone-300) on inputs, 1.5px on interactive fields.
-
-**Transparency & blur.** Light and purposeful: sticky nav `rgba(cream,.85)` + `blur(10px)`; modal scrim warm `rgba(51,42,33,.42)` with a small blur.
-
----
-
-## Iconography
-
-- **Canonical set: [Lucide](https://lucide.dev), pinned at `lucide@0.525.0`** (unpkg CDN) in every card, kit, and template. Rounded joins, 1.75 stroke, friendly-but-precise. Wrapped by the `Icon` component.
-- **Why pinned:** Lucide 1.0 (2026) was a breaking release; `@latest` would have rippled everywhere. Bump deliberately, in one sweep.
-- **Substitution flag:** Lucide is a stand-in because no in-house icon set was provided. To self-host, swap the CDN `<script>` and adjust `Icon.jsx`.
-- **No hand-rolled SVGs** for UI glyphs, always `Icon`. (A few tiny inline SVGs live *inside* components for check/chevron/close marks that must render without the icon script; the playful doodle/squiggle/house paths are duplicated by design in static cards, with `components/playful/` and `components/brand/Logo.jsx` as source of truth.)
-- **Emoji:** occasional and warm, per Content fundamentals, never an icon system.
-- **Common glyphs:** `sparkles` (Homa / AI), `book-open`, `graduation-cap`, `calendar`, `chart-line`, `file-pen` (worksheets), `heart`, `award`, `clipboard-list`, `compass`.
-
----
-
-## Components
-
-The files in `components/<group>/` are standalone design-system prototypes and
-M1-17 implementation inputs. They are not production primitives until M1-17
-ports and verifies them in application code. Each prototype has `.jsx` + `.d.ts`
-+ `.prompt.md` files and a directory `@dsCard` HTML. The generated manifest
-records namespace `window.HomaDesignSystem_5e2305`; never hand-edit that
-manifest.
-
-- **actions/**: `Button`, `IconButton`
-- **brand/**: `Logo` ("the little home" character mark, a rounded clay house with bright eyes, + the bounced Fredoka "Homa" wordmark)
-- **forms/**: `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `Chip`
-- **layout/**: `Card`
-- **data-display/**: `Badge`, `Avatar`, `ProgressBar`
-- **feedback/**: `Callout`, `Dialog`, `Toast`
-- **states/**: `Skeleton`, `EmptyState` (loading & empty, in Homa's voice; use it for every placeholder screen)
-- **playful/**: `Squiggle` (heading divider), `Doodle` (10 hand-placed sticker shapes: star, heart, sun, sparkle, squiggle, flower, cloud, moon, zigzag, loop)
-- **navigation/**: `Tabs`
-- **media/**: `Icon` (Lucide wrapper)
-
-**Intentional additions** (from-scratch build, no source inventory): `Icon` (standardizes Lucide), `Callout` (Homa's in-page voice), `Chip` (subject selection is core), `ProgressBar` (progress is core). Each earns its place.
-
----
-
-## UI kits
-
-Full-screen, interactive design prototypes in `ui_kits/<product>/` preserve
-dated visual directions. They are not current route, pricing, identity,
-availability, proof, or capability specifications:
-
-- **web-app/**: login → shell with **Ask Homa** chat, **Progress** dashboard, **Benchmarks** (checklist + impact proof), **Week planner**, **Discover**, **Curriculum**; plus first-run **onboarding** (`onboarding.html`).
-- **mobile-app/**: phone-framed app, Home (check-off celebration), Ask, Plan, Discover, Kids, bottom tabs; `splash.html` is the animated launch moment.
-- **landing/**: marketing site, hero, features, the **story thread** (scroll-driven chapters on the notebook margin-rule, waypoints check off as you pass), the **benchmark demo** (answer three gentle questions, watch the skill map redraw; deeper mechanics behind one toggle), community, stories, pricing, FAQ, CTA band, footer.
-
----
-
-## Repository index
-
-- `styles.css`, **entry point**; `@import`s every token file. Consumers link this one file.
-- `tokens/`: `fonts.css`, `colors.css`, `dark.css`, `shapes.css`, `typography.css`, `spacing.css`, `radius.css`, `shadows.css`, `motion.css`, `base.css` (page-level font/color defaults).
-- `components/`: reusable primitives (list above).
-- `ui_kits/`: `web-app/`, `mobile-app/`, `landing/`.
-- `templates/`: starting points for consuming projects, **Landing Page**, **Web App Shell**, **Printable Worksheet** (US Letter: a student page plus a parent key page with coaching notes and a "how did it go" check-in; `showAnswers` and `parentKey` tweaks), each a `.dc.html` built on the system.
-- `assets/`: brand renders (`brand/homa-character-2048.png` transparent character mark, `brand/homa-app-tile-2048.png` app icon), photography (`photos/hero-family.png`), and a 15-second prototype film (`videos/homa-brand-film.mp4`). The historical landing prototype links the film; production does not. Source of truth for the mark stays `components/brand/Logo.jsx`.
-- `guidelines/`: foundation specimen cards (Brand, Colors, Type, Spacing) for the Design System tab.
-- `social/`: social templates (post, quote, story, carousel, notification, promise).
-- `AUDIT.md`: the senior-pass changelog and the open items.
-- `CLAUDE.md`: hard project rules (em dashes, brand casing).
-- `SKILL.md`: Agent-Skills-compatible entry for Claude Code.
-- `_ds_bundle.js`, `_ds_manifest.json`, `_adherence.oxlintrc.json`: **auto-generated**, never edit.
-
----
-
-## Caveats & how to help make this perfect
-
-- **Fonts are Google-hosted** (Schibsted Grotesk / EB Garamond / Fredoka / Hanken Grotesk / Caveat / JetBrains Mono), so the manifest ships zero font binaries. Send brand font files and we'll self-host.
-- **Imagery:** the landing hero now carries a real photo (`assets/photos/hero-family.png`, warm kitchen-table lesson). Social templates still use placeholder slots; drop in more photography anytime.
-- **Worksheet print test:** paper rules print at 7% cobalt; run one physical print before shipping to families.
+The manifest in `docs/homa-design/evidence/surfaces.json` is generated and
+fail-closed. `legacy-baseline.json` is hash-specific comparison evidence only.
+No screenshot, source grep, or critic claim substitutes for an installed,
+delivered, rendered, or production probe. A row is not accepted until its
+owned-input fingerprint, fixture, harness, client/runtime, evidence, and
+rollback boundary are fresh.

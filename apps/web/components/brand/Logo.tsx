@@ -1,17 +1,15 @@
 import type { CSSProperties } from "react";
+import { logoGeometry } from "@homa/design/contract";
 
 /**
- * Homa logo, "the little home": a chunky rounded clay house with bright eyes,
- * Homa personified, warm, watchful, a little playful, beside the bounced
- * Fredoka wordmark (each letter nudged off the baseline). Ported from
- * docs/homa-design/components/brand/Logo.jsx (source of truth for the brand
- * lockup); keep in sync until packages/design exists (M1-17).
+ * Homa logo, "the little home": a watchful coral house with bright eyes,
+ * beside the Fredoka wordmark (each letter nudged off the baseline). The
+ * master geometry is owned by @homa/design and projected through this adapter.
  */
 
 // Exported for non-React render targets (the printable worksheet footer
 // inlines the mark as a raw SVG string). Same art, one source of truth.
-export const HOUSE_PATH =
-  "M24 5.6 C22.5 5.6 21 6.2 19.8 7.3 L7.1 18.9 C5.5 20.4 4.6 22.5 4.6 24.7 L4.6 35.2 C4.6 40.1 8.5 44 13.4 44 L34.6 44 C39.5 44 43.4 40.1 43.4 35.2 L43.4 24.7 C43.4 22.5 42.5 20.4 40.9 18.9 L28.2 7.3 C27 6.2 25.5 5.6 24 5.6 Z";
+export const HOUSE_PATH = logoGeometry.housePath;
 
 /**
  * The eyes, in the same 48x48 viewBox, exported for the same reason the
@@ -21,20 +19,17 @@ export const HOUSE_PATH =
  * that gives the still logo its character; every animated glance moves
  * relative to that offset rather than replacing it.
  */
-export const EYES = [
-  { cx: 17.4, cy: 26, r: 4.8, pupilCx: 18.3, pupilCy: 26.7, pupilR: 2.2 },
-  { cx: 30.6, cy: 26, r: 4.8, pupilCx: 31.5, pupilCy: 26.7, pupilR: 2.2 },
-] as const;
+export const EYES = logoGeometry.eyes;
 
 /** The pupil ink, and the line-treatment eye radius, shared for the same reason. */
-export const PUPIL_FILL = "#221E1A";
+export const PUPIL_FILL = logoGeometry.pupilFill;
 export const LINE_EYE_R = 2.7;
 
 /** Where the house meets the ground, so a squash scales from its base
  *  like clay pressed down rather than from its middle like a balloon. */
 export const HOUSE_BASE = { x: 24, y: 44 } as const;
 
-// [letter, baseline offset, rotation] per docs/homa-design's bounced wordmark.
+// [letter, baseline offset, rotation] for the approved Homa lockup.
 const WORDMARK_LETTERS: ReadonlyArray<readonly [string, string, number]> = [
   ["H", "-0.06em", -3],
   ["o", "0.05em", 0],
@@ -55,8 +50,8 @@ export function Logo({
   treatment?: "solid" | "line";
   style?: CSSProperties;
 }) {
-  const body = tone === "dark" ? "var(--clay-400)" : "var(--brand)";
-  const word = tone === "dark" ? "#FFFFFF" : "var(--text-strong)";
+  const body = tone === "dark" ? "var(--homa-visual-coral)" : "var(--homa-visual-coral)";
+  const word = tone === "dark" ? "var(--homa-paper)" : "var(--homa-ink)";
   const svgStyle: CSSProperties = { display: "block", flexShrink: 0 };
 
   const mark =
@@ -71,7 +66,7 @@ export function Logo({
       <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" style={svgStyle}>
         <path d={HOUSE_PATH} fill={body} />
         {EYES.map((eye) => (
-          <circle key={eye.cx} cx={eye.cx} cy={eye.cy} r={eye.r} fill="#FFFFFF" />
+          <circle key={eye.cx} cx={eye.cx} cy={eye.cy} r={eye.r} fill="var(--homa-paper)" />
         ))}
         {EYES.map((eye) => (
           <circle key={eye.cx} cx={eye.pupilCx} cy={eye.pupilCy} r={eye.pupilR} fill={PUPIL_FILL} />

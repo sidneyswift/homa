@@ -3,7 +3,7 @@ import { View, type StyleProp, type ViewStyle } from "react-native";
 
 import { colors, radius, shadows, space } from "../../theme/tokens";
 
-/** White surface, 22px corners, soft warm shadow (the design system card). */
+/** Paper surface, one Quiet authority card radius, and one restrained elevation. */
 export function Card({
   children,
   style,

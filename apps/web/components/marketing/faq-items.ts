@@ -2,7 +2,7 @@
  * FAQ_ITEMS: the landing FAQ, single source of truth.
  * Rendered by components/marketing/Faq.tsx and serialized as FAQPage
  * JSON-LD in app/page.tsx; edit here so the two never drift apart.
- * Copy ported from docs/homa-design/ui_kits/landing/LandingPage.jsx.
+ * Copy ported from the former landing composition.
  */
 export const FAQ_ITEMS: ReadonlyArray<readonly [string, string]> = [
   ["Does Homa follow my state's standards?", "Yes. Your state's homeschool rules get their own section of the report, showing each source and its last-checked date. The progress benchmarks themselves are measured against national standards, so you also see how your child compares beyond your state's requirements."],
