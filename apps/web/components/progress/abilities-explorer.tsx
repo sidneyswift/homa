@@ -256,7 +256,7 @@ function AbilityDetail({
       aria-label={`Details for ${selected.name}`}
       className={
         mobileOpen
-          ? "fixed inset-x-3 bottom-3 z-40 max-h-[78vh] overflow-y-auto rounded-xl border border-border-strong bg-card p-5 shadow-[0_24px_70px_rgba(32,36,43,0.22)] md:static md:max-h-none md:overflow-visible md:rounded-lg md:border-border-subtle md:p-6 md:shadow-sm"
+          ? "fixed inset-x-3 bottom-3 z-40 max-h-[78vh] overflow-y-auto rounded-xl border border-border-subtle bg-card p-5 shadow-[0_24px_70px_rgba(32,36,43,0.22)] md:static md:max-h-none md:overflow-visible md:rounded-lg md:border-border-subtle md:p-6 md:shadow-sm"
           : "hidden rounded-lg border border-border-subtle bg-card p-6 shadow-sm md:block"
       }
     >
