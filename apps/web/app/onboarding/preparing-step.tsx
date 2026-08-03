@@ -58,18 +58,18 @@ export function PreparingStep({
 
   return (
     <div aria-busy="true" className="mx-auto max-w-[28rem] text-center">
-      <h1 className="font-display text-2xl font-bold leading-tight text-strong">Getting ready&hellip;</h1>
-      <div className="mt-6 rounded-lg border border-border-subtle bg-card p-6 text-left shadow-sm">
+      <h1 className="font-display text-2xl font-bold leading-tight text-[var(--homa-ink)]">Getting ready&hellip;</h1>
+      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 text-left shadow-sm">
         {lines.slice(0, lineCount).map((line, index) => (
-          <p key={index} className="mt-2 flex items-center gap-2 text-body first:mt-0">
-            <span className={index < lineCount - 1 ? "text-sage" : "text-subtle"} aria-hidden="true">
+          <p key={index} className="mt-2 flex items-center gap-2 text-[var(--homa-ink)] first:mt-0">
+            <span className={index < lineCount - 1 ? "text-[var(--homa-constructive-ink)]" : "text-[var(--homa-muted-ink)]"} aria-hidden="true">
               {index < lineCount - 1 ? "\u2713" : "\u25cb"}
             </span>
             {line}
           </p>
         ))}
       </div>
-      <p className="mt-4 font-hand text-xl text-sage">let&apos;s go {"\u270e"}</p>
+      <p className="mt-4 font-hand text-xl text-[var(--homa-constructive-ink)]">let&apos;s go {"\u270e"}</p>
     </div>
   );
 }

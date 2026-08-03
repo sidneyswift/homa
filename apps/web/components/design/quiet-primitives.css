@@ -1411,6 +1411,81 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   .quiet-admin__nav-item:hover { transform: none; }
 }
 
+/* -------------------------------------------------------------------------
+   Quiet account, onboarding, and paywall surfaces
+   ------------------------------------------------------------------------- */
+.quiet-account-surface,
+.quiet-onboarding-surface,
+.quiet-paywall-surface {
+  color: var(--homa-ink);
+}
+.quiet-account-surface input,
+.quiet-account-surface select,
+.quiet-account-surface textarea,
+.quiet-onboarding-surface input,
+.quiet-onboarding-surface select,
+.quiet-onboarding-surface textarea,
+.quiet-paywall-surface input,
+.quiet-paywall-surface select,
+.quiet-paywall-surface textarea {
+  border-color: var(--homa-control-boundary);
+  background: var(--homa-paper);
+  color: var(--homa-ink);
+}
+.quiet-account-surface input:focus-visible,
+.quiet-account-surface select:focus-visible,
+.quiet-account-surface textarea:focus-visible,
+.quiet-onboarding-surface input:focus-visible,
+.quiet-onboarding-surface select:focus-visible,
+.quiet-onboarding-surface textarea:focus-visible,
+.quiet-paywall-surface input:focus-visible,
+.quiet-paywall-surface select:focus-visible,
+.quiet-paywall-surface textarea:focus-visible {
+  border-color: var(--homa-midnight-action);
+  outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 55%, transparent);
+  outline-offset: 2px;
+}
+.quiet-account-surface > *:not(:first-child),
+.quiet-onboarding-surface > *:not(:first-child) { min-width: 0; }
+.quiet-onboarding-surface .flow-step-in {
+  animation: quiet-entry var(--homa-motion-base) var(--homa-motion-ease-out) both;
+}
+.quiet-onboarding-surface [aria-busy="true"] { border-color: var(--homa-soft-boundary); background: var(--homa-paper); }
+.quiet-onboarding-surface [aria-busy="true"] .animate-pulse { background: var(--homa-control-boundary); }
+.quiet-paywall-surface .quiet-paywall__card,
+.quiet-paywall__card {
+  border: 1px solid var(--homa-control-boundary);
+  border-radius: var(--homa-radius-card);
+  background: var(--homa-paper);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--homa-ink) 8%, transparent);
+}
+.quiet-paywall-surface .quiet-paywall__modal,
+.quiet-paywall__modal {
+  border-color: var(--homa-control-boundary);
+  border-radius: var(--homa-radius-card);
+  background: var(--homa-paper);
+  color: var(--homa-ink);
+}
+.quiet-paywall-surface .quiet-tier-options,
+.quiet-tier-options { color: var(--homa-ink); }
+.quiet-tier-options fieldset { border-color: var(--homa-control-boundary); }
+.quiet-tier-options [aria-checked="true"],
+.quiet-tier-options label:has(input:checked) { border-color: var(--homa-midnight-action); }
+.quiet-tier-options button:focus-visible,
+.quiet-tier-options label:focus-within,
+.quiet-paywall-surface button:focus-visible,
+.quiet-paywall-surface a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent);
+  outline-offset: 3px;
+}
+@keyframes quiet-entry {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quiet-onboarding-surface .flow-step-in { animation: none; }
+}
+
 /* Child routes inherit the shell authority without requiring a route-sized
    rewrite of their data components. These hooks also give screenshot and
    accessibility checks a stable surface boundary for every admin section. */

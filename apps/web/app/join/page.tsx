@@ -53,15 +53,15 @@ function Outcome({
   cta?: { href: string; label: string };
 }) {
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-16">
+    <main className="quiet-auth-shell quiet-account-surface" data-brand-surface="join">
       <Logo size={28} />
-      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-[var(--homa-ink)]">
         {heading}
       </h1>
-      <p className="mt-2 text-body">{body}</p>
+      <p className="mt-2 text-[var(--homa-ink)]">{body}</p>
       <Link
         href={cta.href}
-        className="mt-8 inline-block rounded-pill border border-border bg-card px-6 py-3 text-base font-semibold text-strong transition-colors hover:border-brand"
+        className="mt-8 inline-block rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-6 py-3 text-base font-semibold text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)]"
       >
         {cta.label}
       </Link>
@@ -102,16 +102,16 @@ export default async function JoinPage({
     }
     const inviter = preview.inviterName ?? "A parent in your family";
     return (
-      <main className="mx-auto w-full max-w-md px-6 py-16">
+      <main className="quiet-auth-shell quiet-account-surface" data-brand-surface="join">
         <Logo size={28} />
-        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-[var(--homa-ink)]">
           You&apos;re invited
         </h1>
-        <p className="mt-2 text-body">
+        <p className="mt-2 text-[var(--homa-ink)]">
           {inviter} invited you to share {preview.familyName}&apos;s Homa.
           You&apos;ll both see the same kids, conversations, and materials.
         </p>
-        <p className="mt-2 text-body">
+        <p className="mt-2 text-[var(--homa-ink)]">
           Never used Homa? Tap Continue with Google. Your first sign-in
           creates your account inside your family. Already have a Homa login?
           Sign in with it below.

@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check } from "lucide-react";
+
+import { Icon } from "../../components/design/Icon";
 
 import { MAP_KID_CAP } from "@homa/core";
 
@@ -36,7 +37,7 @@ const MONTHS = [
 const YEAR_SPAN = 17;
 
 const inputClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong transition-colors duration-(--dur-fast) ease-out focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 interface AddedKid {
   name: string;
@@ -185,10 +186,10 @@ export function KidsStep({
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-strong">
+      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         Let&apos;s add your kids.
       </h1>
-      <p className="mt-3 text-body">
+      <p className="mt-3 text-[var(--homa-ink)]">
         {welcomeBack
           ? "Welcome back. Pick up right where you left off."
           : "Tell Homa about each kid. The questionnaire tunes itself to their age."}
@@ -200,18 +201,18 @@ export function KidsStep({
             <div key={`${kid.name}-${index}`} className="flex items-start gap-3">
               <span
                 aria-hidden="true"
-                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent-sage-soft)] text-[var(--sage-700)]"
+                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--homa-constructive-tint)] text-[var(--homa-constructive-ink)]"
               >
-                <Check size={13} strokeWidth={3} />
+                <Icon name="check" size={16} />
               </span>
               {kid.inRange ? (
-                <p className="text-body">
-                  <span className="font-semibold text-strong">{kid.name}</span> is saved and ready
+                <p className="text-[var(--homa-ink)]">
+                  <span className="font-semibold text-[var(--homa-ink)]">{kid.name}</span> is saved and ready
                   for the questionnaire.
                 </p>
               ) : (
-                <p className="text-body">
-                  <span className="font-semibold text-strong">{kid.name}</span> is saved. The
+                <p className="text-[var(--homa-ink)]">
+                  <span className="font-semibold text-[var(--homa-ink)]">{kid.name}</span> is saved. The
                   questionnaire starts at age 2, and I&apos;ll email you the moment {kid.name}&apos;s
                   is ready.
                 </p>
@@ -222,10 +223,10 @@ export function KidsStep({
       ) : null}
 
       {canAddMore ? (
-        <div className="mt-6 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-          <h2 className="font-display text-xl font-semibold text-strong">Add a child</h2>
+        <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+          <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Add a child</h2>
 
-          <label className="mt-4 block font-medium text-strong" htmlFor="kid-name">
+          <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="kid-name">
             First name
           </label>
           <input
@@ -241,7 +242,7 @@ export function KidsStep({
 
           <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-3">
             <div>
-              <label className="block font-medium text-strong" htmlFor="kid-birth-month">
+              <label className="block font-medium text-[var(--homa-ink)]" htmlFor="kid-birth-month">
                 Birth month
               </label>
               <select
@@ -262,7 +263,7 @@ export function KidsStep({
               </select>
             </div>
             <div>
-              <label className="block font-medium text-strong" htmlFor="kid-birth-day">
+              <label className="block font-medium text-[var(--homa-ink)]" htmlFor="kid-birth-day">
                 Day
               </label>
               <select
@@ -285,7 +286,7 @@ export function KidsStep({
               </select>
             </div>
             <div>
-              <label className="block font-medium text-strong" htmlFor="kid-birth-year">
+              <label className="block font-medium text-[var(--homa-ink)]" htmlFor="kid-birth-year">
                 Birth year
               </label>
               <select
@@ -308,7 +309,7 @@ export function KidsStep({
           </div>
 
           {error ? (
-            <p className="mt-3 text-sm text-danger" role="alert">
+            <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
               {error}
             </p>
           ) : null}
@@ -320,19 +321,19 @@ export function KidsStep({
             type="button"
             onClick={() => void addChild()}
             disabled={busy}
-            className="mt-6 min-h-12 w-full rounded-pill border-[1.5px] border-[var(--sage-300)] bg-transparent px-6 py-3 text-base font-semibold text-[var(--sage-700)] transition duration-(--dur-fast) ease-out hover:bg-[var(--sage-50)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+            className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-constructive-ink)] bg-transparent px-6 py-3 text-base font-semibold text-[var(--homa-constructive-ink)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
           >
             {busy ? "Saving\u2026" : "Add child"}
           </button>
         </div>
       ) : (
-        <p className="mt-6 text-sm text-muted">
+        <p className="mt-6 text-sm text-[var(--homa-muted-ink)]">
           Five kids is the most one session holds. Everyone you added is saved.
         </p>
       )}
 
       {error && !canAddMore ? (
-        <p className="mt-3 text-sm text-danger" role="alert">
+        <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
           {error}
         </p>
       ) : null}
@@ -342,7 +343,7 @@ export function KidsStep({
           type="button"
           onClick={() => void startChecklist()}
           disabled={busy}
-          className="mt-5 min-h-12 w-full rounded-pill bg-brand px-6 py-3 text-base font-semibold text-on-brand shadow-sm transition duration-(--dur-fast) ease-out hover:bg-brand-hover motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="mt-5 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
         >
           {busy ? "Saving\u2026" : startLabel}
         </button>

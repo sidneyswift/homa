@@ -95,28 +95,29 @@ export function LockoutCard({
 
   return (
     <section
-      className="w-full max-w-[26rem] rounded-lg border border-border-subtle bg-card p-4 shadow-md sm:p-5"
+      className="quiet-paywall__card w-full max-w-[26rem] rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-4 shadow-md sm:p-5"
+      data-brand-surface="lockout"
       aria-label="About what I can make this week"
     >
-      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-subtle">
+      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[var(--homa-muted-ink)]">
         <Logo size={15} variant="mark" />
         Your week so far
       </p>
-      <p className="mt-2.5 text-body">I am ready to make {requested}.</p>
-      <p className="mt-1.5 text-body">
+      <p className="mt-2.5 text-[var(--homa-ink)]">I am ready to make {requested}.</p>
+      <p className="mt-1.5 text-[var(--homa-ink)]">
         You have used everything I can make for you this week. I can make more{" "}
         {refillLabel}.
       </p>
 
       {madeLines.length > 0 ? (
-        <div className="mt-4 rounded-md border border-border-subtle bg-page p-3.5">
-          <p className="text-xs font-bold uppercase tracking-wide text-subtle">
+        <div className="mt-4 rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-canvas)] p-3.5">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--homa-muted-ink)]">
             What you have so far
           </p>
           <ul className="mt-2 space-y-1">
             {madeLines.map((line) => (
-              <li key={line} className="flex items-baseline gap-2 text-sm text-body">
-                <span aria-hidden="true" className="text-sage">
+              <li key={line} className="flex items-baseline gap-2 text-sm text-[var(--homa-ink)]">
+                <span aria-hidden="true" className="text-[var(--homa-constructive-ink)]">
                   ✓
                 </span>
                 {line}
@@ -128,7 +129,7 @@ export function LockoutCard({
               {endowment.artifacts.slice(0, 4).map((title) => (
                 <span
                   key={title}
-                  className="max-w-full truncate rounded-pill border border-sage/30 bg-sage/10 px-2.5 py-1 text-xs text-body"
+                  className="max-w-full truncate rounded-[var(--homa-radius-control)] border border-[color-mix(in_srgb,var(--homa-constructive-ink)_30%,transparent)] bg-[color-mix(in_srgb,var(--homa-constructive-ink)_10%,transparent)] px-2.5 py-1 text-xs text-[var(--homa-ink)]"
                 >
                   {title}
                 </span>
@@ -138,7 +139,7 @@ export function LockoutCard({
         </div>
       ) : null}
 
-      <p className="mt-4 text-body">
+      <p className="mt-4 text-[var(--homa-ink)]">
         Your first 7 days are free. After that it is $19 a month. There is no weekly
         limit on what I make.
       </p>
@@ -146,19 +147,19 @@ export function LockoutCard({
       <div className="mt-4 flex flex-col gap-2">
         <a
           href={monthlyUrl}
-          className="flex min-h-12 w-full items-center justify-center rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+          className="flex min-h-12 w-full items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-4 py-3 text-base font-bold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)]"
         >
           Start your 7 free days
         </a>
         <button
           type="button"
           onClick={onWait}
-          className="flex min-h-11 w-full items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+          className="flex min-h-11 w-full items-center justify-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2.5 text-sm font-semibold text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)]"
         >
           Make it {refillLabel} instead
         </button>
       </div>
-      <p className="mt-2.5 text-xs text-subtle">
+      <p className="mt-2.5 text-xs text-[var(--homa-muted-ink)]">
         If you wait, I will make it {refillLabel} and tell you it is ready. Everything you
         already have stays available either way.
       </p>

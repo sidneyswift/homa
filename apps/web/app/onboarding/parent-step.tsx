@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
+import { Icon } from "../../components/design/Icon";
 import { Doodle } from "../../components/marketing/Doodle";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { submitWaitlist } from "../../lib/waitlist-client";
@@ -145,14 +145,14 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               its word through every line-wrap. No hand shape exists in the
               doodle set; the heart is the set's "helping hand" mark (same
               use as the landing hero). */}
-          <h1 className="text-balance font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-0.015em] text-strong sm:text-[2.45rem]">
+          <h1 className="text-balance font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-0.015em] text-[var(--homa-ink)] sm:text-[2.45rem]">
             Find out where your child{" "}
             <span className="whitespace-nowrap">
               shines
               <Doodle
                 name="sun"
                 size={27}
-                color="var(--gold-500)"
+                color="var(--homa-highlight-ink)"
                 style={{ marginLeft: 7, verticalAlign: "-0.06em" }}
               />
             </span>
@@ -162,7 +162,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               <Doodle
                 name="heart"
                 size={25}
-                color="var(--pop-blush)"
+                color="var(--homa-error-tint)"
                 rotate={10}
                 style={{ marginLeft: 7, verticalAlign: "-0.06em" }}
               />
@@ -174,7 +174,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               two screens later reads as a trap. Same mechanics phrasing as
               wall-copy.ts's WALL_MECHANICS_LINE so the promise never
               drifts between surfaces. */}
-          <p className="mt-4 max-w-[28rem] text-pretty text-body">
+          <p className="mt-4 max-w-[28rem] text-pretty text-[var(--homa-ink)]">
             Your free trial starts with a five-minute questionnaire and your child&apos;s
             progress report. Strengths come first. Anything still growing comes with a next
             step. A card starts your 7 free days, and nothing is charged during them.
@@ -189,21 +189,21 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               type="button"
               onClick={continueWithGoogle}
               disabled={googleBusy}
-              className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-pill border border-border bg-card px-6 py-3 text-[1.0625rem] font-semibold text-strong shadow-[var(--shadow-xs)] transition-colors duration-(--dur-fast) ease-out hover:border-brand disabled:opacity-60"
+              className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-6 py-3 text-[1.0625rem] font-semibold text-[var(--homa-ink)] shadow-[var(--shadow-xs)] transition-colors duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] disabled:opacity-60"
             >
               <GoogleGlyph />
               {googleBusy ? "Redirecting to Google\u2026" : "Sign up with Google"}
             </button>
             {googleError ? (
-              <p className="mt-2 text-sm text-danger" role="alert">
+              <p className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
                 {googleError}
               </p>
             ) : null}
 
             <div className="my-5 flex items-center gap-3">
-              <span className="h-px flex-1 bg-border-subtle" />
-              <span className="text-sm text-muted">or</span>
-              <span className="h-px flex-1 bg-border-subtle" />
+              <span className="h-px flex-1 bg-[var(--homa-soft-boundary)]" />
+              <span className="text-sm text-[var(--homa-muted-ink)]">or</span>
+              <span className="h-px flex-1 bg-[var(--homa-soft-boundary)]" />
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
@@ -224,7 +224,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
-                className="min-h-[54px] w-full rounded-md border-[1.5px] border-border bg-card px-4 py-3.5 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
+                className="min-h-[54px] w-full rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3.5 text-[1.0625rem] text-[var(--homa-ink)] shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-midnight-action)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
               />
 
               <label className="sr-only" htmlFor="parent-password">
@@ -240,8 +240,8 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Create a password (at least 8 characters)"
-                  className={`min-h-[54px] w-full rounded-md border-[1.5px] bg-card px-4 py-3.5 pr-12 text-[1.0625rem] text-strong shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--dur-fast) ease-out focus:border-[var(--clay-400)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
-                    error ? "border-danger" : "border-border"
+                  className={`min-h-[54px] w-full rounded-[var(--homa-radius-control)] border-[1.5px] bg-[var(--homa-paper)] px-4 py-3.5 pr-12 text-[1.0625rem] text-[var(--homa-ink)] shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-midnight-action)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
+                    error ? "border-[var(--homa-error-ink)]" : "border-[var(--homa-control-boundary)]"
                   }`}
                 />
                 <button
@@ -249,22 +249,22 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                   onClick={() => setShowPassword((current) => !current)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-[var(--stone-100)] hover:text-body"
+                  className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--homa-muted-ink)] transition-colors duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-soft-boundary)] hover:text-[var(--homa-ink)]"
                 >
-                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
               {error ? (
-                <p id="parent-form-error" className="mt-2 text-sm text-danger" role="alert">
+                <p id="parent-form-error" className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
                   {error}
                 </p>
               ) : null}
               {existingAccount ? (
-                <p className="mt-2 rounded-md bg-[var(--accent-sage-soft)] p-3 text-sm text-body" role="status">
+                <p className="mt-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] p-3 text-sm text-[var(--homa-ink)]" role="status">
                   Good news: {email} already has a Homa account.{" "}
                   <a
                     href="/signin?next=/app"
-                    className="font-semibold text-brand underline underline-offset-2"
+                    className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
                   >
                     Sign in
                   </a>{" "}
@@ -272,7 +272,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 </p>
               ) : null}
               {notice ? (
-                <p className="mt-2 rounded-md bg-[var(--accent-sage-soft)] p-3 text-sm text-body" role="status">
+                <p className="mt-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] p-3 text-sm text-[var(--homa-ink)]" role="status">
                   {notice}
                 </p>
               ) : null}
@@ -280,14 +280,14 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="group mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-pill bg-brand px-6 py-3 text-[1.0625rem] font-semibold text-on-brand shadow-sm transition-[background-color,transform,box-shadow] duration-(--dur-fast) ease-out hover:bg-brand-hover focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+                className="group mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-[1.0625rem] font-semibold text-[var(--homa-paper)] shadow-sm transition-[background-color,transform,box-shadow] duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
               >
                 {busy ? "One moment\u2026" : "Get started"}
                 {busy ? null : (
-                  <ArrowRight
-                    size={18}
-                    aria-hidden="true"
-                    className="transition-transform duration-(--dur-fast) ease-out motion-safe:group-hover:translate-x-0.5"
+                  <Icon
+                    name="next"
+                    size={20}
+                    className="transition-transform duration-(--homa-motion-fast) ease-out motion-safe:group-hover:translate-x-0.5"
                   />
                 )}
               </button>
@@ -295,7 +295,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
           </div>
 
           <div className="mt-10">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-subtle">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[var(--homa-muted-ink)]">
               Checked against national standards and research
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-4">
@@ -314,7 +314,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                   title={source.name}
                   width={source.width}
                   height={source.height}
-                  className={`${source.heightClass} w-auto object-contain opacity-80 grayscale transition-[opacity,filter] duration-(--dur-base) ease-out hover:opacity-100 hover:grayscale-0`}
+                  className={`${source.heightClass} w-auto object-contain opacity-80 grayscale transition-[opacity,filter] duration-(--homa-motion-base) ease-out hover:opacity-100 hover:grayscale-0`}
                 />
               ))}
             </div>
@@ -323,10 +323,10 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
 
         <div>
           <ReportPreview />
-          <p className="mt-4 text-center text-xs text-subtle">
+          <p className="mt-4 text-center text-xs text-[var(--homa-muted-ink)]">
             <a
               href="/onboarding/sample"
-              className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+              className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
             >
               See a sample report first
             </a>

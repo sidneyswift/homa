@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-16">
+    <main className="quiet-auth-shell quiet-account-surface" data-brand-surface="reset-password">
       <Logo size={28} />
-      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+      <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-[var(--homa-ink)]">
         Choose a new password
       </h1>
-      <p className="mt-2 text-body">Use at least 8 characters.</p>
+      <p className="mt-2 text-[var(--homa-ink)]">Use at least 8 characters.</p>
       <div className="mt-8">
         <ResetPasswordForm />
       </div>

@@ -31,13 +31,13 @@ export default async function SignInPage({
   const safeNext =
     next?.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/app";
   return (
-    <main className="quiet-auth-shell">
+    <main className="quiet-auth-shell quiet-account-surface" data-brand-surface="signin">
       <QuietFrame className="quiet-auth-card" as="article">
         <Logo size={28} />
-        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-strong">
+        <h1 className="mt-6 font-display text-3xl font-semibold leading-tight text-[var(--homa-ink)]">
           Welcome to Homa
         </h1>
-        <p className="mt-2 text-body">Sign in to your family&apos;s space.</p>
+        <p className="mt-2 text-[var(--homa-ink)]">Sign in to your family&apos;s space.</p>
         <div className="mt-8">
           <SignInForm next={safeNext} />
         </div>

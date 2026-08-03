@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+
+import { Icon } from "../../components/design/Icon";
 
 /**
  * The quiet remove affordance on a hub card. First tap swaps in an inline
@@ -57,21 +58,21 @@ export function RemoveKid({
         type="button"
         onClick={() => setConfirming(true)}
         aria-label={`Remove ${name}`}
-        className="absolute top-3 right-3 rounded-full p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-[var(--sage-50)] hover:text-danger"
+        className="absolute top-3 right-3 rounded-full p-1.5 text-[var(--homa-muted-ink)] transition-colors duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] hover:text-[var(--homa-error-ink)]"
       >
-        <X size={16} aria-hidden="true" />
+        <Icon name="close" size={16} />
       </button>
     );
   }
 
   return (
-    <div className="mt-3 border-t border-border-subtle pt-3 text-sm">
-      <p className="text-body">
+    <div className="mt-3 border-t border-[var(--homa-soft-boundary)] pt-3 text-sm">
+      <p className="text-[var(--homa-ink)]">
         This deletes everything saved for {name}, and there&apos;s no undo. Adding {name} back
         later starts fresh.
       </p>
       {failed ? (
-        <p className="mt-2 text-danger" role="alert">
+        <p className="mt-2 text-[var(--homa-error-ink)]" role="alert">
           That didn&apos;t work. One more try usually does it.
         </p>
       ) : null}
@@ -80,7 +81,7 @@ export function RemoveKid({
           type="button"
           onClick={() => void removeKid()}
           disabled={busy}
-          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 font-semibold text-danger transition duration-(--dur-fast) ease-out hover:border-danger motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 font-semibold text-[var(--homa-error-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-error-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
         >
           {busy ? "Removing\u2026" : `Yes, remove ${name}`}
         </button>
@@ -88,7 +89,7 @@ export function RemoveKid({
           type="button"
           onClick={() => setConfirming(false)}
           disabled={busy}
-          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 font-semibold text-strong transition duration-(--dur-fast) ease-out hover:border-brand motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
         >
           Keep {name}
         </button>

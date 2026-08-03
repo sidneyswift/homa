@@ -30,18 +30,18 @@ export function PlanSection({ plan }: { plan: FamilyPlanState }) {
   const upgradeUrl = plan.plusCheckout?.monthlyUrl ?? null;
 
   return (
-    <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
+    <section className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" data-brand-layer="plan-section">
       <SectionHeading first>Your plan</SectionHeading>
-      <p className="mt-2 text-sm font-semibold text-strong">{TIER_NAMES[plan.tier]}</p>
-      <p className="mt-1 text-sm text-body">{tierDelta(plan.tier)}</p>
+      <p className="mt-2 text-sm font-semibold text-[var(--homa-ink)]">{TIER_NAMES[plan.tier]}</p>
+      <p className="mt-1 text-sm text-[var(--homa-ink)]">{tierDelta(plan.tier)}</p>
 
       {alreadyReached || upgradeUrl === null ? null : (
-        <div className="mt-5 border-t border-border-subtle pt-4">
-          <p className="text-sm font-semibold text-strong">{TIER_NAMES.plus}</p>
-          <p className="mt-1 text-sm text-body">{tierDelta("plus")}</p>
+        <div className="mt-5 border-t border-[var(--homa-soft-boundary)] pt-4">
+          <p className="text-sm font-semibold text-[var(--homa-ink)]">{TIER_NAMES.plus}</p>
+          <p className="mt-1 text-sm text-[var(--homa-ink)]">{tierDelta("plus")}</p>
           <a
             href={upgradeUrl}
-            className="mt-3 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+            className="mt-3 inline-block rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)]"
           >
             Add {TIER_NAMES.plus}
           </a>

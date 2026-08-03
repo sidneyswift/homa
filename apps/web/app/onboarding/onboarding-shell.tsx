@@ -91,10 +91,11 @@ export function OnboardingShell({
   // 911 calls to /api/map/state and a permanent loading skeleton.
   return (
     <div
+      data-brand-surface="onboarding"
       className={
         chromeless
-          ? "min-h-dvh bg-page"
-          : "flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]"
+          ? "quiet-onboarding-surface min-h-dvh bg-[var(--homa-canvas)]"
+          : "quiet-onboarding-surface flex min-h-screen flex-col bg-[var(--homa-canvas)]"
       }
     >
       {chromeless ? null : fullChrome ? (
@@ -127,17 +128,17 @@ export function OnboardingShell({
       {chromeless ? null : fullChrome ? (
         <Footer />
       ) : (
-        <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-subtle">
+        <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-[var(--homa-muted-ink)]">
           <p>
             <Link
-              className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+              className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
               href="/onboarding/method"
             >
               How the report is made
             </Link>
             {" \u00b7 "}
             <Link
-              className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+              className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
               href="/privacy"
             >
               Privacy

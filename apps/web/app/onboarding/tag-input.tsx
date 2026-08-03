@@ -83,11 +83,11 @@ export function TagInput({
 
   return (
     <div className={className}>
-      <p className="font-medium text-strong">
+      <p className="font-medium text-[var(--homa-ink)]">
         {label}
-        {aside ? <span className="font-normal text-muted"> ({aside})</span> : null}
+        {aside ? <span className="font-normal text-[var(--homa-muted-ink)]"> ({aside})</span> : null}
       </p>
-      {hint ? <p className="mt-1 text-sm text-muted">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">{hint}</p> : null}
       <div className="mt-3 flex flex-wrap gap-2">
         {visibleSuggestions.map((chip) => {
           const selected = tags.includes(chip);
@@ -97,10 +97,10 @@ export function TagInput({
               type="button"
               onClick={() => toggleTag(chip)}
               aria-pressed={selected}
-              className={`min-h-10 rounded-pill border px-4 py-2 text-sm transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
+              className={`min-h-10 rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
                 selected
-                  ? "border-brand bg-brand-soft text-[var(--clay-700)]"
-                  : "border-border bg-card text-strong hover:border-brand hover:bg-brand-soft"
+                  ? "border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] text-[var(--homa-brand-text)]"
+                  : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
               }`}
             >
               {chip}
@@ -113,7 +113,7 @@ export function TagInput({
             type="button"
             onClick={() => toggleTag(tag)}
             aria-pressed
-            className="min-h-10 rounded-pill border border-brand bg-brand-soft px-4 py-2 text-sm text-[var(--clay-700)] transition duration-(--dur-fast) ease-out motion-safe:active:scale-[var(--press-scale)]"
+            className="min-h-10 rounded-[var(--homa-radius-control)] border border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] px-4 py-2 text-sm text-[var(--homa-brand-text)] transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)]"
           >
             {tag} {"\u00d7"}
           </button>
@@ -131,7 +131,7 @@ export function TagInput({
         }}
         onBlur={commitDraft}
         placeholder={"add your own, commas ok\u2026"}
-        className="mt-2.5 w-full rounded-pill border border-dashed border-border bg-transparent px-4 py-2 text-sm text-strong transition-colors duration-(--dur-fast) ease-out placeholder:text-subtle focus:border-solid focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+        className="mt-2.5 w-full rounded-[var(--homa-radius-control)] border border-dashed border-[var(--homa-control-boundary)] bg-transparent px-4 py-2 text-sm text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out placeholder:text-[var(--homa-muted-ink)] focus:border-solid focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/20"
       />
     </div>
   );
