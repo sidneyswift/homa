@@ -3053,6 +3053,35 @@
         60,
         108
       ]
+    },
+    {
+      "id": "ref-2026-08-02-curiosity-led-notebooking",
+      "title": "Curiosity-led notebooking from thematic reading",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-08-02T08:56:15-04:00",
+      "subject": "language_arts",
+      "domain": "reading-comprehension",
+      "format": "curiosity-led-notebooking-method",
+      "about": [
+        "curiosity-led notebooking",
+        "thematic read-aloud planning",
+        "child-selected reading response"
+      ],
+      "entities": [
+        "Peter Pan"
+      ],
+      "themes": [
+        "curiosity before compliance",
+        "reading atmosphere",
+        "individual expression"
+      ],
+      "works": [
+        "Peter Pan"
+      ],
+      "ageBand": [
+        48,
+        168
+      ]
     }
   ]
 }

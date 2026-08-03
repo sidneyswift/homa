@@ -1,0 +1,206 @@
+{
+  "id": "cur-2026-08-02-home-learning-year-by-year",
+  "droppedBy": "Carolyng",
+  "droppedAt": "2026-08-02T15:48:27-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785700107.950499",
+  "coversMessageTs": [],
+  "sourceFiles": [
+    {
+      "filename": "home learning year by year .pdf",
+      "slackFileId": "F0BMJK5GR5X",
+      "slackMessageTs": "1785700107.950499",
+      "localPath": ".cosmo/inspo-files/slack/1785700107.950499/home learning year by year -F0BMJK5GR5X.pdf",
+      "size": 167779659,
+      "sha256": "b665fb52c19b8c08a453cca0f2fb52da99a7401c6b76ebc1212195a8d3e447f9",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-home-learning-year-by-year/1785700107.950499-F0BMJK5GR5X-home%20learning%20year%20by%20year%20.pdf",
+      "slackDeclaredSize": 167779659,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-03T16:32:17+00:00",
+      "blobReadBackSize": 167779659,
+      "blobReadBackSha256": "b665fb52c19b8c08a453cca0f2fb52da99a7401c6b76ebc1212195a8d3e447f9",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "b665fb52c19b8c08a453cca0f2fb52da99a7401c6b76ebc1212195a8d3e447f9:application/pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-home-learning-year-by-year/1785700107.950499-F0BMJK5GR5X-home%20learning%20year%20by%20year%20.pdf",
+  "name": "Home Learning Year by Year",
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "home learning year by year -F0BMJK5GR5X.pdf",
+    "sourceParts": [
+      "home learning year by year -F0BMJK5GR5X.pdf"
+    ],
+    "sourceSha256": "b665fb52c19b8c08a453cca0f2fb52da99a7401c6b76ebc1212195a8d3e447f9",
+    "pageCount": 286,
+    "expectedPageCount": 286,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "cur-2026-08-02-home-learning-year-by-year",
+      "kind": "curriculum",
+      "parts": [
+        {
+          "file": "home learning year by year -F0BMJK5GR5X.pdf",
+          "sha256": "b665fb52c19b8c08a453cca0f2fb52da99a7401c6b76ebc1212195a8d3e447f9",
+          "bytes": 167779659
+        }
+      ]
+    },
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "cur-2026-08-02-home-learning-year-by-year",
+      "sourceReceiptSha256": "b33dd229f6cb86a18601feaadf24579dd3dab0864b696545551233593691e865",
+      "pageCount": 286,
+      "expectedPageCount": 286
+    },
+    "mastersDir": ".cosmo/masters/cur-2026-08-02-home-learning-year-by-year",
+    "intakeAt": "2026-08-03T16:33:22+00:00",
+    "gateStatus": "complete",
+    "gateFindings": [],
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "normalizedMasterPages": 283
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-08-02-home-learning-year-by-year.txt",
+    "textBlobUrl": null,
+    "notes": "All 286 captured spread images are represented, covering the complete revised and updated book from front cover through the final page. The sidecar preserves roughly 976,000 searchable characters.",
+    "subjects": [
+      {"name": "homeschool curriculum planning", "role": "teaches", "quote": "How to Design a Creative and Comprehensive Homeschool Curriculum"},
+      {"name": "year-by-year learning expectations", "role": "teaches", "quote": "grade and subject-by-subject summaries"},
+      {"name": "child-led learning", "role": "about", "quote": "natural” or “child-led” learning"},
+      {"name": "curriculum adaptation", "role": "teaches", "quote": "tweak and tailor to each child’s"},
+      {"name": "preschool through grade twelve", "role": "about", "quote": "CHAPTER 18: Grade Twelve"}
+    ],
+    "entities": [
+      {"name": "Rebecca Rupp", "kind": "person", "role": "identity", "quote": "REBECCA RUPP"},
+      {"name": "Next Generation Science Standards", "kind": "organization", "role": "about", "quote": "Next Generation Science Standards"},
+      {"name": "Junior Great Books", "kind": "organization", "role": "about", "quote": "Junior Great Books"}
+    ],
+    "themes": [
+      {"name": "questions are the foundation of education", "evidence": "those questions are the bedrock of education"},
+      {"name": "learning follows individual children", "evidence": "as suits your children"},
+      {"name": "curiosity should survive schooling", "evidence": "We want our children to maintain their curiosity"},
+      {"name": "early learning through real life and play", "evidence": "Some of the most effective learning is what kids do for themselves."}
+    ],
+    "keyTerms": [
+      {"term": "Language Arts", "occurrences": 14, "quote": "Language Arts"},
+      {"term": "Mathematics", "occurrences": 14, "quote": "Mathematics"},
+      {"term": "History and Geography", "occurrences": 14, "quote": "History and Geography"},
+      {"term": "Science", "occurrences": 14, "quote": "Science"},
+      {"term": "Life Skills", "occurrences": 14, "quote": "Life Skills"}
+    ],
+    "referencedWorks": [
+      {"title": "A Child’s Work", "kind": "book", "quote": "A Child’s Work"},
+      {"title": "Einstein Never Used Flash Cards", "kind": "book", "quote": "Einstein Never Used Flash Cards"},
+      {"title": "The Enchanted Hour", "kind": "book", "quote": "The Enchanted Hour"}
+    ],
+    "textExtraction": {
+      "ocr": "tesseract-plus-targeted-vision",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [1,286],
+      "manualVisualReviewPages": [1,4,5,6,35,36],
+      "note": "The source is a CamScanner image PDF. Tesseract recovered the dense two-page spreads; vision recovered the front and back covers."
+    }
+  },
+  "layer1_philosophy": {
+    "methodology": "A flexible home-education design guide, not a prescribed boxed curriculum. It gives public-school comparison points and extensive resources by grade and subject, then asks the parent to select, adapt, accelerate, delay, or replace them according to the actual child.",
+    "principles": [
+      "Treat grade-level lists as a reference, never a verdict or lockstep requirement.",
+      "Tailor content and pace to the individual child and the family's setting.",
+      "Protect curiosity by following questions together and modeling how to find out.",
+      "Connect subjects because an interesting question can lead across the curriculum.",
+      "Use real books, practical life, experiments, art, movement, technology, and community resources alongside direct instruction.",
+      "Preschool belongs to play, conversation, read-alouds, household participation, outdoor exploration, and affection rather than formal curriculum."
+    ],
+    "evidence": [
+      {"claim": "The program is meant to be tailored", "quote": "tweak and tailor to each child’s"},
+      {"claim": "Questions drive learning", "quote": "those questions are the bedrock of education"},
+      {"claim": "Preschool does not require formal curriculum", "quote": "Nobody needs a curriculum for preschoolers."},
+      {"claim": "Child initiative matters", "quote": "Some of the most effective learning is what kids do for themselves."}
+    ],
+    "learningTheory": "Curiosity-led, book-rich, interdisciplinary, experiential, developmentally flexible learning supported by explicit skills, rich resources, real-world practice, and parent-child inquiry.",
+    "assessmentApproach": "Use portfolios, conversations, demonstrations, writing, projects, informal observation, and legally required records. Compare against grade-level expectations as a planning aid, not a judgment of the child.",
+    "parentRole": "Curate resources, answer questions, say 'Let's find out' when the answer is unknown, notice interests and readiness, connect subjects, teach essential skills, and revise the plan when the child does not fit the nominal grade list.",
+    "knowledgeBankMatches": [
+      {"topicKey": "homeschool-curriculum-planning", "topicType": "method_philosophy", "status": "candidate-live-lookup", "note": "The source is a broad method and scope reference for designing a family-specific curriculum."},
+      {"topicKey": "child-led-learning", "topicType": "method_philosophy", "status": "candidate-live-lookup", "note": "The book explicitly discusses natural or child-led learning, while also retaining planned skill and content expectations."}
+    ],
+    "knowledgeBankGaps": [
+      {"suggestedKey": "year-by-year-home-learning-scope-guide", "topicType": "method_format", "title": "Year-by-year home learning scope guide"}
+    ]
+  },
+  "layer2_scope": {
+    "coverage": "Preschool, kindergarten, grades 1 through 8, a high-school overview, and grades 9 through 12 across language arts, mathematics, history and geography, science, foreign language, the arts, philosophy and comparative religion, health and physical education, life skills, and computer and technology skills.",
+    "progression": "The same subject families recur at each grade while expectations, independence, abstraction, reading difficulty, mathematical content, scientific inquiry, cultural reach, and technology use deepen.",
+    "subjects": ["language arts", "mathematics", "history and geography", "science", "foreign language", "the arts", "philosophy and comparative religion", "health and physical education", "life skills", "computer and technology skills"],
+    "stats": {"totalCurriculumTopics": 140, "mapped": 140, "unmapped": 0},
+    "mappingNotes": "This is a broad scope reference rather than a catalog of atomic Homa topics. Its grade-by-subject headings map to existing subject domains; no new taxonomy node is justified by the book's organizational labels."
+  },
+  "layer3_structure": {
+    "yearShape": "Fourteen developmental bands from preschool through grade twelve, plus introductory chapters on educational choices, interdisciplinary connection, general subject principles, assessment, records, and multimedia learning.",
+    "unitPattern": "Each grade chapter opens with developmental context, then moves subject by subject through expected skills, possible content, recommended books, programs, websites, films, kits, and practical activities.",
+    "weeklyTemplate": "No universal weekly schedule is prescribed. Build a family rhythm from short skill practice, sustained reading, discussion, projects, experiments, arts, movement, practical life, and interest-led extensions.",
+    "reviewRhythm": "Revisit reading, writing, mathematics, inquiry, physical competence, life skills, and technology every year while expanding independence and complexity.",
+    "pacingNotes": "The nominal grade is an index into possibilities. The parent should move across adjacent chapters when the learner's readiness or interest differs from the average sequence."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {"type": "year-by-year-scope-plan", "description": "Select goals and resources across the recurring subject headings for one learner's year.", "sourceQuote": "grade and subject-by-subject summaries", "status": "have_recipe", "recipe": "unit-study-packet"},
+      {"type": "read-aloud-and-book-plan", "description": "Build a reading life from picture books, literature, nonfiction, magazines, and recommended lists.", "sourceQuote": "Read picture books", "status": "have_recipe", "recipe": "reading-comprehension-mini-unit"},
+      {"type": "developmental-skills-check", "description": "Review age-typical skills warmly and use the result to choose practice without turning it into a verdict.", "sourceQuote": "Evaluations, Assessments, and Records", "status": "have_recipe", "recipe": "checklist-assessment"},
+      {"type": "hands-on-project", "description": "Learn through experiments, building, cooking, gardening, crafts, field trips, and practical household work.", "sourceQuote": "Let them help bake bread, sort socks, and plant the garden.", "status": "have_recipe", "recipe": "art-project-instructions"},
+      {"type": "nature-journal", "description": "Record direct outdoor observations with simple maps, pictures, labels, and notes.", "sourceQuote": "a nature journal", "status": "have_recipe", "recipe": "nature-observation-journal"},
+      {"type": "art-and-music-study", "description": "Use artist, artwork, composer, music history, listening, and making as recurring cultural study.", "sourceQuote": "TheArts", "status": "have_recipe", "recipe": "artist-composer-study-card"}
+    ],
+    "stats": {"total": 6, "haveRecipe": 6, "noRecipe": 0}
+  },
+  "layer5_lessons": {
+    "decompositionQuality": "full",
+    "unitKind": "grade-band-scope-reference",
+    "unitsFound": 14,
+    "unitsDecomposed": 14,
+    "notes": "The book's learner-facing grain is the grade-band chapter, not a paced lesson. Each row preserves that complete chapter sequence; named resource lists remain searchable in the full sidecar rather than being misrepresented as assigned lessons.",
+    "units": [
+      {"ordinal": 1, "unitLabel": "Preschool", "topic": {"name": "play, read-alouds, practical life, movement, language, and free exploration", "quote": "Preschool"}, "referencedWorks": [{"title": "A Child’s Work", "kind": "book", "quote": "A Child’s Work"}], "questions": [], "themes": [{"name": "natural early learning", "evidence": "freedom to explore"}], "activities": [{"type": "play-and-practical-life", "description": "Read, talk, cook, sort, garden, make, sing, move, and explore together.", "quote": "Cuddle them. Answer their questions. Play games, Read picture books."}], "materials": []},
+      {"ordinal": 2, "unitLabel": "Kindergarten", "topic": {"name": "kindergarten language, number, world knowledge, arts, movement, life skills, and technology", "quote": "Kindergarten"}, "referencedWorks": [], "questions": [], "themes": [{"name": "gentle foundations", "evidence": "Kindergarten"}], "activities": [], "materials": []},
+      {"ordinal": 3, "unitLabel": "Grade 1", "topic": {"name": "grade one reading, writing, arithmetic, history, geography, science, arts, and life skills", "quote": "GradeOne"}, "referencedWorks": [], "questions": [], "themes": [{"name": "foundational independence", "evidence": "first graders"}], "activities": [], "materials": []},
+      {"ordinal": 4, "unitLabel": "Grade 2", "topic": {"name": "grade two fluency, composition, arithmetic, cultural history, science, arts, and practical competence", "quote": "GradeTwo"}, "referencedWorks": [], "questions": [], "themes": [{"name": "expanding foundational skills", "evidence": "Second graders"}], "activities": [], "materials": []},
+      {"ordinal": 5, "unitLabel": "Grade 3", "topic": {"name": "grade three independent reading, cursive, multiplication, history, science, arts, and presentation", "quote": "GradeThree"}, "referencedWorks": [], "questions": [], "themes": [{"name": "growing academic independence", "evidence": "Third graders"}], "activities": [], "materials": []},
+      {"ordinal": 6, "unitLabel": "Grade 4", "topic": {"name": "grade four literature, composition, mathematics, world history, science, arts, and research", "quote": "GradeFour"}, "referencedWorks": [], "questions": [], "themes": [{"name": "research and cultural breadth", "evidence": "Fourth graders"}], "activities": [], "materials": []},
+      {"ordinal": 7, "unitLabel": "Grade 5", "topic": {"name": "grade five analytical reading, writing process, advanced arithmetic, geography, science, arts, and technology", "quote": "GradeFive"}, "referencedWorks": [], "questions": [], "themes": [{"name": "competent independent work", "evidence": "Fifth graders"}], "activities": [], "materials": []},
+      {"ordinal": 8, "unitLabel": "Grade 6", "topic": {"name": "grade six literature, pre-algebra foundations, history, science, languages, arts, and independence", "quote": "GradeSix"}, "referencedWorks": [], "questions": [], "themes": [{"name": "middle-grade transition", "evidence": "CHAPTER 11: GradeSix"}], "activities": [], "materials": []},
+      {"ordinal": 9, "unitLabel": "Grade 7", "topic": {"name": "grade seven language arts, mathematics, history, science, languages, arts, and life skills", "quote": "Grade Seven"}, "referencedWorks": [], "questions": [], "themes": [{"name": "deepening disciplinary study", "evidence": "CHAPTER 12; Grade Seven"}], "activities": [], "materials": []},
+      {"ordinal": 10, "unitLabel": "Grade 8", "topic": {"name": "grade eight literature, algebra readiness, history, science, languages, arts, and technology", "quote": "Grade Eight"}, "referencedWorks": [], "questions": [], "themes": [{"name": "high-school readiness", "evidence": "CHAPTER 13: Grade Eight"}], "activities": [], "materials": []},
+      {"ordinal": 11, "unitLabel": "Grade 9", "topic": {"name": "grade nine high-school language arts, mathematics, history, science, language, arts, and wellness", "quote": "GradeNine"}, "referencedWorks": [], "questions": [], "themes": [{"name": "high-school foundations", "evidence": "CHAPTERI5S:GradeNine"}], "activities": [], "materials": []},
+      {"ordinal": 12, "unitLabel": "Grade 10", "topic": {"name": "grade ten literature, mathematics, history, science, languages, arts, and practical planning", "quote": "Grade Ten"}, "referencedWorks": [], "questions": [], "themes": [{"name": "sustained high-school study", "evidence": "CHAPTER 16: Grade Ten"}], "activities": [], "materials": []},
+      {"ordinal": 13, "unitLabel": "Grade 11", "topic": {"name": "grade eleven advanced reading, writing, mathematics, history, science, arts, and adult preparation", "quote": "GradeEleven"}, "referencedWorks": [], "questions": [], "themes": [{"name": "advanced independent study", "evidence": "CHAPTER 17:GradeEleven"}], "activities": [], "materials": []},
+      {"ordinal": 14, "unitLabel": "Grade 12", "topic": {"name": "grade twelve capstone language arts, mathematics, history, science, arts, wellness, life, and technology", "quote": "Grade Twelve"}, "referencedWorks": [], "questions": [], "themes": [{"name": "capstone and transition", "evidence": "CHAPTER 18: Grade Twelve"}], "activities": [], "materials": []}
+    ]
+  },
+  "decisionsNeeded": [],
+  "sourceCompleteness": {"status": "complete", "sourceFileCount": 1, "durableBlobCount": 1, "pageCount": 286, "note": "The complete Slack PDF is hash-verified, stored in Blob, rendered into 286 capture-spread masters, and fully searchable."},
+  "stages": {
+    "captured": "2026-08-03T16:32:17+00:00",
+    "lastCaptured": "2026-08-03T16:32:17+00:00",
+    "analyzed": "2026-08-03",
+    "tasteLogged": true,
+    "taxonomy": {"proposedTopics": [], "note": "The book's grade and subject framework maps to existing taxonomy domains; it does not justify new atomic topics."},
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/unit-study-packet.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/checklist-assessment.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/nature-observation-journal.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/artist-composer-study-card.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/art-project-instructions.md"
+      ],
+      "verification": {"layer4HaveRecipe": 6, "layer4NoRecipe": 0},
+      "note": "The reusable planning and activity surfaces resolve to shipped recipes."
+    }
+  }
+}

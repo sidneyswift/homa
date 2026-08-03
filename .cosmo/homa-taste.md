@@ -484,3 +484,17 @@ Plus Montessori materials/methods as supplemental activities across subjects.
 - Atmosphere packet (ref-2026-07-31-atmosphere-unit-activities), explicit signal: a strong unit supplement mixes information, cutting, fill-in work, drawing, word search, crossword, and vocabulary recall so a child applies one body of knowledge in several enjoyable ways.
 - Watercolor space cards (ref-2026-08-01-watercolor-space-reference-cards), explicit signal: review and reference materials should be beautiful enough to print, laminate, and keep. Carolyng said plainly that beautiful materials matter.
 - Spanish syllable worksheets (ref-2026-08-01-spanish-syllable-ordering-worksheets), explicit signal: picture reference, bold type, and generous spacing make a simple language practice page work. The cue and geometry are part of the teaching action.
+
+### Carolyng, 2026-08-02 (Curiosity-led notebooking and Home Learning Year by Year)
+- Dropped the eight-frame curiosity-led notebooking method (ref-2026-08-02-curiosity-led-notebooking) and Rebecca Rupp's complete Home Learning Year by Year (cur-2026-08-02-home-learning-year-by-year), with no message commentary.
+- Signal, inferred from the paired choices: the adult should curate a rich learning atmosphere without preselecting the child's response. The notebooking sequence states this directly through child choice, while Rupp's handbook repeatedly asks the parent to tailor a broad scope to the actual learner.
+- Signal: books are both curriculum and evidence of attention. The notebook page begins after a week of thematic books and preserves what stirred the child; the handbook supplies deep book lists across every grade and subject rather than reducing the year to worksheets.
+- Signal: she values breadth without lockstep. The handbook covers preschool through grade twelve and ten recurring subject families, but its method is to move across the lists as suits the child. That combination is a stronger product signal than either breadth or child-led learning alone.
+- Product consequence: the new `curiosity-led-notebook-page` recipe leaves most of the page open and never assigns the book, fact, image, or medium. It is a portfolio surface, not a comprehension test.
+
+### Alessa, 2026-08-02 (Teatro del lector and Literacy Standards Companion)
+- Dropped the complete Teatro del lector Grade 2 teacher guide (cur-2026-08-02-teatro-del-lector-grade-2) and both canonical parts of Your Literacy Standards Companion, Grades 3-5 (cur-2026-08-02-your-literacy-standards-companion-grades-3-5). She re-uploaded each Standards part once; the later files are byte-identical.
+- Signal, inferred from the pair: she is collecting teacher-facing translation layers. Teatro turns oral fluency into a five-day routine; the Standards companion turns abstract standards into student actions, questions, vocabulary, strategies, and planning pages.
+- Signal: repeated reading should culminate in meaning and performance, not speed. Teatro explicitly connects fluency to comprehension, mixes roles across reading levels, and uses rehearsal toward a shared performance.
+- Signal: parent or teacher planning needs multiple views of the same goal. The Standards companion shows official wording, a plain-language gist, cross-grade progression, what the student does, teaching strategies, vocabulary, and grouping plans.
+- Attribution note: no message commentary accompanied these drops, so the signals are inferred from the effort and specificity of the complete scans rather than claimed as explicit preferences.

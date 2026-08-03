@@ -555,6 +555,16 @@ The curriculum writer loads this to recommend buildable activities.
 - **Creation path:** html
 - **Example activity:** `[nature-observation-journal] Five-senses tree log: "I see / I hear / I smell / I feel" prompts beside a drawing box, with a circle to attach a leaf`
 
+### curiosity-led-notebook-page
+- **Slug:** `[curiosity-led-notebook-page]`
+- **Name:** Curiosity-led notebook page
+- **What it is:** A spacious weekly page where the child chooses the book, image, fact, or quotation that held their attention within a shared reading theme, then records it through drawing, painting, labels, or a few copied words.
+- **Best for:** Literature-rich unit studies, thematic read-aloud baskets, mixed-age family learning, and child-led reading portfolios.
+- **Subjects:** ELA (reading response), any content subject used as a thematic reading spine
+- **Ages:** 4-14. Younger children get a larger open canvas and optional dictation; older children may add a source title and up to four lines of writing.
+- **Creation path:** html
+- **Example activity:** `[curiosity-led-notebook-page] Flight notebook page with one large open canvas, two optional memory lines, and a blank for the child-selected book`
+
 ### letter-number-formation-practice
 - **Slug:** `[letter-number-formation-practice]`
 - **Name:** Letter & number formation practice

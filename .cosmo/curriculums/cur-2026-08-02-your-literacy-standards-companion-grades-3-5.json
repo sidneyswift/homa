@@ -1,0 +1,313 @@
+{
+  "id": "cur-2026-08-02-your-literacy-standards-companion-grades-3-5",
+  "droppedBy": "Alessa",
+  "droppedAt": "2026-08-02T18:17:22-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785709042.176199",
+  "coversMessageTs": [
+    "1785709128.170449",
+    "1785709173.066689"
+  ],
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "Your literacy Standards companion part 1-F0BMLGR5BS8.pdf",
+    "sourceParts": [
+      "Your literacy Standards companion part 1-F0BMLGR5BS8.pdf",
+      "Your Literacy Standards Companion part 2 -F0BNB6EPNLQ.pdf"
+    ],
+    "sourceSha256": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577",
+    "pageCount": 197,
+    "expectedPageCount": 197,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "cur-2026-08-02-your-literacy-standards-companion-grades-3-5",
+      "kind": "curriculum",
+      "parts": [
+        {
+          "file": "Your literacy Standards companion part 1-F0BMLGR5BS8.pdf",
+          "sha256": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577",
+          "bytes": 125883780
+        },
+        {
+          "file": "Your Literacy Standards Companion part 2 -F0BNB6EPNLQ.pdf",
+          "sha256": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0",
+          "bytes": 67225344
+        }
+      ]
+    },
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "cur-2026-08-02-your-literacy-standards-companion-grades-3-5",
+      "sourceReceiptSha256": "9daae3d2f1cc80cf058453beac3ce4d7347180940465f65865f4fb8878cbb45d",
+      "pageCount": 197,
+      "expectedPageCount": 197
+    },
+    "mastersDir": ".cosmo/masters/cur-2026-08-02-your-literacy-standards-companion-grades-3-5",
+    "intakeAt": "2026-08-03T16:28:12+00:00",
+    "gateStatus": "complete",
+    "gateFindings": [],
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "normalizedMasterPages": 14
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-08-02-your-literacy-standards-companion-grades-3-5.txt",
+    "textBlobUrl": null,
+    "notes": "All 197 pages across the two canonical parts are represented. Fourteen sideways captures were normalized for reading while the original captures were retained.",
+    "subjects": [
+      {"name": "grades 3 to 5 literacy standards", "role": "teaches", "quote": "YOUR LITERACY STANDARDS COMPANION"},
+      {"name": "standards-based reading instruction", "role": "teaches", "quote": "Part 1. Reading"},
+      {"name": "standards-based writing instruction", "role": "teaches", "quote": "Part 2. Writing"},
+      {"name": "speaking and listening instruction", "role": "teaches", "quote": "Part 3. Speaking and Listening"},
+      {"name": "language conventions and vocabulary", "role": "teaches", "quote": "Part 4. Language"},
+      {"name": "foundational reading skills", "role": "teaches", "quote": "Part 5. Reading Standards: Foundational Skills"}
+    ],
+    "entities": [
+      {"name": "Leslie Blauman", "kind": "person", "role": "identity", "quote": "Leslie Blauman"},
+      {"name": "Jim Burke", "kind": "person", "role": "identity", "quote": "Jim Burke"},
+      {"name": "Common Core State Standards", "kind": "organization", "role": "about", "quote": "Common Core State Standards"}
+    ],
+    "themes": [
+      {"name": "turning standards into daily instruction", "evidence": "Turning Standards Into Daily Teaching"},
+      {"name": "plain-language standards decoding", "evidence": "Gist sections provide plain-English synopses"},
+      {"name": "planning across instructional settings", "evidence": "whole class lessons, think-alouds, read-alouds, small-group practice"}
+    ],
+    "keyTerms": [
+      {"term": "textual evidence", "occurrences": 40, "quote": "specific textual evidence"},
+      {"term": "academic vocabulary", "occurrences": 20, "quote": "Academic Vocabulary"},
+      {"term": "text complexity", "occurrences": 15, "quote": "Text Complexity"}
+    ],
+    "referencedWorks": [],
+    "textExtraction": {
+      "ocr": "tesseract-plus-targeted-vision",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [1,76,190,191,192,193,194,197],
+      "manualVisualReviewPages": [1,2,3,4,5,6,7,8,9],
+      "note": "OCR supplies dense instructional text. Vision recovered the cover and seven low-yield or graphic pages."
+    }
+  },
+  "name": "Your Literacy Standards Companion, grades 3 to 5",
+  "layer5_lessons": {
+    "decompositionQuality": "full",
+    "unitKind": "standards-domain-part",
+    "unitsFound": 5,
+    "unitsDecomposed": 5,
+    "units": [
+      {
+        "ordinal": 1,
+        "unitLabel": "Part 1: Reading",
+        "topic": {"name": "close reading, evidence, structure, point of view, media, and text complexity", "quote": "Part 1. Reading"},
+        "questions": [{"text": "What does the text say explicitly, and what logical inferences does it support?", "quote": "make logical inferences"}],
+        "themes": [{"name": "evidence-based comprehension", "evidence": "cite textual evidence"}],
+        "activities": [{"type": "standards-to-instruction-planning", "description": "Translate each reading standard into student actions, comprehension prompts, vocabulary, and teaching strategies.", "quote": "specific teaching techniques for realizing each standard"}],
+        "materials": [{"name": "planning worksheet", "quote": "Planning to Teach"}],
+        "referencedWorks": []
+      },
+      {
+        "ordinal": 2,
+        "unitLabel": "Part 2: Writing",
+        "topic": {"name": "argument, information, narrative, revision, publishing, research, and writing range", "quote": "Part 2. Writing"},
+        "questions": [{"text": "How will students plan, revise, edit, rewrite, and publish coherent writing?", "quote": "planning, revising, editing, rewriting"}],
+        "themes": [{"name": "writing process", "evidence": "Develop and strengthen writing"}],
+        "activities": [{"type": "writing-workshop-planning", "description": "Plan whole-class modeling, small-group support, individual conferring, and authentic publication.", "quote": "Individual Practice/Conferring"}],
+        "materials": [{"name": "writers notebooks or journals", "quote": "Writers notebooks or journals"}],
+        "referencedWorks": []
+      },
+      {
+        "ordinal": 3,
+        "unitLabel": "Part 3: Speaking and Listening",
+        "topic": {"name": "collaboration, media interpretation, speaker evaluation, presentation, and formal speech", "quote": "Part 3. Speaking and Listening"},
+        "questions": [{"text": "How can students prepare for and participate in productive conversations and collaborations?", "quote": "conversations and collaborations"}],
+        "themes": [{"name": "collaborative meaning making", "evidence": "Comprehension and Collaboration"}],
+        "activities": [{"type": "discussion-and-presentation", "description": "Use structured conversations, evidence evaluation, and presentations with strategic visual media.", "quote": "Present information, findings, and supporting evidence"}],
+        "materials": [{"name": "digital media and visual displays", "quote": "digital media and visual displays of data"}],
+        "referencedWorks": []
+      },
+      {
+        "ordinal": 4,
+        "unitLabel": "Part 4: Language",
+        "topic": {"name": "grammar, usage, mechanics, language function, figurative language, and vocabulary", "quote": "Part 4. Language"},
+        "questions": [{"text": "How does language function differently across contexts and purposes?", "quote": "how language functions"}],
+        "themes": [{"name": "conventions in purposeful use", "evidence": "Conventions of Standard English"}],
+        "activities": [{"type": "language-in-context-practice", "description": "Apply grammar, mechanics, word relationships, nuance, and domain vocabulary within real reading and writing.", "quote": "general academic and domain-specific words and phrases"}],
+        "materials": [{"name": "academic vocabulary reference", "quote": "Academic Vocabulary: Key Words and Phrases"}],
+        "referencedWorks": []
+      },
+      {
+        "ordinal": 5,
+        "unitLabel": "Part 5: Reading Standards, Foundational Skills",
+        "topic": {"name": "phonics, word analysis, accuracy, and fluency", "quote": "Part 5. Reading Standards: Foundational Skills"},
+        "questions": [{"text": "Can the student apply grade-level word analysis and read accurately enough to support comprehension?", "quote": "Read with sufficient accuracy and fluency to support comprehension"}],
+        "themes": [{"name": "foundations serve comprehension", "evidence": "to support comprehension"}],
+        "activities": [{"type": "word-analysis-and-fluency-practice", "description": "Connect grade-level phonics and word analysis to accurate, fluent reading.", "quote": "phonics and word analysis skills in decoding words"}],
+        "materials": [{"name": "text complexity tool", "quote": "Text Complexity Tool"}],
+        "referencedWorks": []
+      }
+    ]
+  },
+  "sourceFiles": [
+    {
+      "filename": "Your Literacy Standards Companion part 2 .pdf",
+      "slackFileId": "F0BNB6EPNLQ",
+      "slackMessageTs": "1785709042.176199",
+      "localPath": ".cosmo/inspo-files/slack/1785709042.176199/Your Literacy Standards Companion part 2 -F0BNB6EPNLQ.pdf",
+      "size": 67225344,
+      "sha256": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-your-literacy-standards-companion-grades-3-5/1785709042.176199-F0BNB6EPNLQ-Your%20Literacy%20Standards%20Companion%20part%202%20.pdf",
+      "slackDeclaredSize": 67225344,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-03T16:34:59+00:00",
+      "blobReadBackSize": 67225344,
+      "blobReadBackSha256": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0:application/pdf"
+    },
+    {
+      "filename": "Your literacy Standards companion part 1.pdf",
+      "slackFileId": "F0BMLGR5BS8",
+      "slackMessageTs": "1785709042.176199",
+      "localPath": ".cosmo/inspo-files/slack/1785709042.176199/Your literacy Standards companion part 1-F0BMLGR5BS8.pdf",
+      "size": 125883780,
+      "sha256": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-your-literacy-standards-companion-grades-3-5/1785709042.176199-F0BMLGR5BS8-Your%20literacy%20Standards%20companion%20part%201.pdf",
+      "slackDeclaredSize": 125883780,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-03T16:34:59+00:00",
+      "blobReadBackSize": 125883780,
+      "blobReadBackSha256": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577:application/pdf"
+    },
+    {
+      "filename": "Your literacy Standards companion part 1.pdf",
+      "slackFileId": "F0BM1LALKNK",
+      "slackMessageTs": "1785709128.170449",
+      "localPath": ".cosmo/inspo-files/slack/1785709128.170449/Your literacy Standards companion part 1-F0BM1LALKNK.pdf",
+      "size": 125883780,
+      "sha256": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-your-literacy-standards-companion-grades-3-5/1785709042.176199-F0BMLGR5BS8-Your%20literacy%20Standards%20companion%20part%201.pdf",
+      "slackDeclaredSize": 125883780,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-03T16:34:59+00:00",
+      "blobReadBackSize": 125883780,
+      "blobReadBackSha256": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "97b78b5057d8bf1e8a26d85ae10d28636b9191ef04f2762f2f8fd7a316925577:application/pdf",
+      "duplicateOf": {
+        "slackMessageTs": "1785709042.176199",
+        "filename": "Your literacy Standards companion part 1.pdf"
+      }
+    },
+    {
+      "filename": "Your Literacy Standards Companion part 2 .pdf",
+      "slackFileId": "F0BNBBV2Z9N",
+      "slackMessageTs": "1785709173.066689",
+      "localPath": ".cosmo/inspo-files/slack/1785709173.066689/Your Literacy Standards Companion part 2 -F0BNBBV2Z9N.pdf",
+      "size": 67225344,
+      "sha256": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-your-literacy-standards-companion-grades-3-5/1785709042.176199-F0BNB6EPNLQ-Your%20Literacy%20Standards%20Companion%20part%202%20.pdf",
+      "slackDeclaredSize": 67225344,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-03T16:34:59+00:00",
+      "blobReadBackSize": 67225344,
+      "blobReadBackSha256": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "53f3d2e1985761be95951e35a71f607e5417700c0eec9137a720ffba61e876a0:application/pdf",
+      "duplicateOf": {
+        "slackMessageTs": "1785709042.176199",
+        "filename": "Your Literacy Standards Companion part 2 .pdf"
+      }
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-your-literacy-standards-companion-grades-3-5/1785709042.176199-F0BNB6EPNLQ-Your%20Literacy%20Standards%20Companion%20part%202%20.pdf",
+  "stages": {
+    "captured": "2026-08-03T16:34:59+00:00",
+    "lastCaptured": "2026-08-03T16:34:59+00:00",
+    "analyzed": "2026-08-03",
+    "tasteLogged": true,
+    "taxonomy": {
+      "proposedTopics": [],
+      "note": "The source organizes existing grades 3 to 5 ELA standards and teaching practices. No new taxonomy concept is required."
+    },
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/guided-notes.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/reading-comprehension-mini-unit.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/lesson-comprehension-check.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/word-fluency-repeated-reading.md"
+      ],
+      "verification": {"layer4HaveRecipe": 5, "layer4NoRecipe": 0},
+      "note": "The reusable planning, comprehension, vocabulary, and fluency surfaces resolve to existing recipes."
+    }
+  },
+  "layer1_philosophy": {
+    "methodology": "A standards-decoding and instructional-planning companion for grades 3 to 5. It restates each literacy anchor, translates the standard into student actions, supplies comprehension questions and academic vocabulary, then asks the teacher to plan whole-class, small-group, and individual practice.",
+    "principles": [
+      "Treat standards as goals to interpret into rich daily learning, not as a script.",
+      "Read the same standard horizontally across grades and vertically within its strand.",
+      "Pair every standards claim with specific student actions and text evidence.",
+      "Integrate several standards in meaningful reading, writing, speaking, and language work.",
+      "Plan differentiation, grouping, texts, materials, and individual conferring before teaching."
+    ],
+    "evidence": [
+      {"claim": "The companion converts standards into daily teaching", "quote": "Turning Standards Into Daily Teaching"},
+      {"claim": "Standards are translated into accessible teacher language", "quote": "plain-English synopses of the standards"},
+      {"claim": "Planning spans multiple instructional arrangements", "quote": "whole class lessons, think-alouds, read-alouds, small-group practice"}
+    ],
+    "learningTheory": "Explicit modeling, close reading, evidence-based discussion, guided practice, differentiation, collaboration, reflection, and transfer across texts.",
+    "assessmentApproach": "Use standards-aligned questions, observation during small-group and independent work, student explanations, conferences, rubrics or checklists, and authentic written or spoken products.",
+    "parentRole": "For home use, translate one standard into a concrete student action, choose an accessible text, model the thinking move aloud, then listen to the child's evidence and preserve notes for the next lesson.",
+    "knowledgeBankMatches": [
+      {"topicKey": "standards-based-literacy-instruction", "topicType": "method_format", "status": "candidate-live-lookup", "note": "The source offers a general repeatable format for turning literacy standards into instruction."}
+    ],
+    "knowledgeBankGaps": []
+  },
+  "layer2_scope": {
+    "coverage": "Grades 3 to 5 English language arts across reading, writing, speaking and listening, language, phonics and word recognition, and fluency.",
+    "progression": "Each standard is shown across grades 3, 4, and 5 so the teacher can see what changes in expected independence, evidence, complexity, and precision.",
+    "subjects": ["reading literature", "reading informational text", "writing", "speaking and listening", "language", "foundational skills"],
+    "stats": {"totalCurriculumTopics": 34, "mapped": 34, "unmapped": 0},
+    "mappingNotes": "All sections correspond to existing ELA standards and taxonomy concepts. This ingestion does not add or rename taxonomy topics."
+  },
+  "layer3_structure": {
+    "yearShape": "Reference companion, not a paced school year. Five domain parts contain standards that may be selected in the order required by the learner's current texts and writing.",
+    "unitPattern": "official anchor and grade-level wording, plain-language gist, what the student does, comprehension questions, teaching strategies, academic vocabulary, then a planning worksheet",
+    "weeklyTemplate": "Choose one priority standard, connect it to a current text or writing task, model the target in a whole-family lesson, practice in a small group or one-to-one conference, then collect an independent response.",
+    "reviewRhythm": "Revisit a standard across multiple texts and integrate it with related standards rather than treating one exposure as mastery.",
+    "pacingNotes": "The source intentionally does not prescribe calendar pacing. Planning calendars are resources, while learner evidence decides repetition and next steps."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {"type": "standards-planning-page", "description": "Plan texts, grouping, materials, mindset, differentiation, whole-class work, small-group practice, and conferring.", "sourceQuote": "Planning to Teach", "status": "have_recipe", "recipe": "guided-notes"},
+      {"type": "close-reading-mini-unit", "description": "Build explicit reading instruction around a standard, comprehension questions, and text evidence.", "sourceQuote": "Read closely", "status": "have_recipe", "recipe": "reading-comprehension-mini-unit"},
+      {"type": "comprehension-question-set", "description": "Adapt student-does prompts into a brief end-of-lesson check.", "sourceQuote": "Comprehension questions are included", "status": "have_recipe", "recipe": "lesson-comprehension-check"},
+      {"type": "academic-vocabulary-notes", "description": "Decode key words and phrases within the meaning of one standard.", "sourceQuote": "Academic Vocabulary: Key Words and Phrases", "status": "have_recipe", "recipe": "guided-notes"},
+      {"type": "foundational-fluency-practice", "description": "Apply known word analysis in repeated accurate reading that supports comprehension.", "sourceQuote": "accuracy and fluency to support comprehension", "status": "have_recipe", "recipe": "word-fluency-repeated-reading"}
+    ],
+    "stats": {"total": 5, "haveRecipe": 5, "noRecipe": 0}
+  },
+  "decisionsNeeded": [],
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceOccurrenceCount": 3,
+    "uniqueSourceFileCount": 2,
+    "durableBlobCount": 2,
+    "pageCount": 197,
+    "duplicateSourceOccurrenceCount": 2,
+    "note": "The canonical two-part scan is complete. Two later Slack uploads are byte-identical occurrences and are retained with duplicateOf receipts without creating duplicate Library records."
+  }
+}
