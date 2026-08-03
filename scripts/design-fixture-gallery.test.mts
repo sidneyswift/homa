@@ -16,7 +16,7 @@ const committed = JSON.parse(readFileSync(manifestPath, "utf8")) as FixtureGalle
 test("fixture gallery covers every contract category and profile obligation", () => {
   const report = validateFixtureGallery(committed);
   assert.equal(report.status, "pass", JSON.stringify(report.issues, null, 2));
-  assert.equal(committed.fixtureCount, 244);
+  assert.equal(committed.fixtureCount, 277);
   assert.ok(report.categoryCounts.atoms >= 100);
   assert.equal(report.categoryCounts.assets, 31);
   assert.equal(report.categoryCounts.channels, 8);
