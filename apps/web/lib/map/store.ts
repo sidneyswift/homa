@@ -30,7 +30,6 @@ import {
 import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
-import { foldFamilyDataIntoTx } from "../family-fold";
 import { resolveOnboardingCompletion } from "../onboarding/store";
 import { dashboardPlanFromRow, withAgeTemplates, type DashboardPlan } from "../plan-week";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
@@ -157,23 +156,7 @@ export async function startAnonymousFamily(
   return { familyId: inserted[0].id, resumeToken };
 }
 
-/** Moves every child of `fromId` into `intoId`, then deletes the empty
- * husk. Children carry their answers, reports, and plans with them (all
- * child-keyed), so a fold never touches those tables. */
 type MapDatabase = ReturnType<typeof mapDb>;
-
-async function foldFamilyInto(
-  sql: MapDatabase,
-  fromId: string,
-  intoId: string,
-): Promise<void> {
-  const folded = await sql.begin((tx) =>
-    foldFamilyDataIntoTx(tx, fromId, intoId)
-  );
-  if (!folded) {
-    throw new Error("Family fold source or destination is missing");
-  }
-}
 
 interface AttachAuthUserInput {
   /** The caller's own (already anonymous, or email-only) family. */
@@ -184,6 +167,20 @@ interface AttachAuthUserInput {
   lastName?: string;
   phoneE164?: string;
   usState?: string;
+}
+
+/**
+ * Select the family an authenticated account may resume. A matched family is
+ * a recovery destination only. It never authorizes a data fold from the
+ * current anonymous sitting.
+ */
+export function accountAttachmentTarget(
+  anonymousFamilyId: string,
+  existingFamilyId: string | undefined,
+): { familyId: string; returning: boolean } {
+  return existingFamilyId
+    ? { familyId: existingFamilyId, returning: true }
+    : { familyId: anonymousFamilyId, returning: false };
 }
 
 /**
@@ -200,11 +197,13 @@ export function isSandboxSignupEmail(email: string): boolean {
 
 /**
  * The account moment: attaches a real Supabase Auth user to a family with
- * ONE membership insert (this is the entire former "bridge"). Mirrors
- * claimFamily's fold-together behavior: if the auth user or email already
- * owns another family, this sitting's kids fold into it. Also stamps
- * status 'claimed' and seeds the agent's first what_works memories from
- * any whats-working notes the parent left before signing up.
+ * ONE membership insert (this is the entire former "bridge"). If the auth
+ * user or email already owns another family, return that family without
+ * folding the current anonymous sitting into it. This is the duplicate-trial
+ * recovery boundary: an existing family stays intact, and a new sitting
+ * never gains access by being silently merged. Also stamps status 'claimed'
+ * and seeds the agent's first what_works memories from any whats-working
+ * notes the parent left before signing up.
  */
 export async function attachAuthUser(
   input: AttachAuthUserInput,
@@ -231,9 +230,19 @@ export async function attachAuthUser(
     limit 1
   `;
 
-  const familyId = existing[0]?.id ?? input.familyId;
-  if (existing.length > 0) {
-    await foldFamilyInto(sql, input.familyId, familyId);
+  const target = accountAttachmentTarget(input.familyId, existing[0]?.id);
+  if (target.returning) {
+    // A verified returning account may resume its own family. Do not merge
+    // the anonymous sitting into that family: matching an email or auth user
+    // proves a recovery destination, not that two family records should
+    // become one.
+    await sql`
+      update public.families set
+        resume_token_hash = ${tokenHash},
+        updated_at = now()
+      where id = ${target.familyId}
+    `;
+    return { ...target, resumeToken };
   }
 
   await sql`
@@ -248,11 +257,11 @@ export async function attachAuthUser(
       sandbox = sandbox or ${isSandboxSignupEmail(email)},
       resume_token_hash = ${tokenHash},
       updated_at = now()
-    where id = ${familyId}
+    where id = ${input.familyId}
   `;
   await sql`
     insert into public.family_members (family_id, user_id, role, display_name)
-    values (${familyId}, ${input.authUserId}, 'parent', ${input.firstName ?? null})
+    values (${input.familyId}, ${input.authUserId}, 'parent', ${input.firstName ?? null})
     on conflict (family_id, user_id) do nothing
   `;
   if (input.phoneE164) {
@@ -260,13 +269,13 @@ export async function attachAuthUser(
     // (phone_e164 unique), and signup never blocks on a phone nicety.
     await sql`
       insert into public.family_phones (family_id, phone_e164, added_by, member_user_id, source)
-      values (${familyId}, ${input.phoneE164}, ${input.authUserId}, ${input.authUserId}, 'signup')
+      values (${input.familyId}, ${input.phoneE164}, ${input.authUserId}, ${input.authUserId}, 'signup')
       on conflict do nothing
     `;
   }
-  await seedWhatWorksMemories(familyId, sql);
+  await seedWhatWorksMemories(input.familyId, sql);
 
-  return { familyId, returning: existing.length > 0, resumeToken };
+  return { ...target, resumeToken };
 }
 
 /**
