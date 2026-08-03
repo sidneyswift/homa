@@ -341,7 +341,13 @@ export function findSurfaceRegistryViolations(
   registered: readonly NativeAccessibilitySurface[],
 ): string[] {
   const discovered = new Set(discoveredFiles);
-  const expected = new Set(registered.map((surface) => surface.file));
+  // Excluded prototypes are intentionally outside Expo Router's app tree and
+  // therefore do not participate in the packaged route registry.
+  const expected = new Set(
+    registered
+      .filter((surface) => surface.kind !== "excluded")
+      .map((surface) => surface.file),
+  );
   return [
     ...[...discovered].filter((file) => !expected.has(file)).map((file) => `unregistered Expo surface: ${file}`),
     ...[...expected].filter((file) => !discovered.has(file)).map((file) => `stale Expo surface entry: ${file}`),

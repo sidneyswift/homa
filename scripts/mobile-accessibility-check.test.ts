@@ -123,6 +123,21 @@ test("route registry reports both new and stale surfaces", () => {
   );
 });
 
+test("route registry ignores excluded prototypes kept outside Expo Router", () => {
+  assert.deepEqual(
+    findSurfaceRegistryViolations(
+      ["apps/mobile/src/app/new.tsx"],
+      [{
+        file: "apps/mobile/src/features/labs/old.tsx",
+        kind: "excluded",
+        owner: "gh#547",
+        reason: "Non-production prototype kept outside the app tree.",
+      }],
+    ),
+    ["unregistered Expo surface: apps/mobile/src/app/new.tsx"],
+  );
+});
+
 test("handoff registry reports both unregistered and stale effects", () => {
   assert.deepEqual(
     findHandoffRegistryViolations(
