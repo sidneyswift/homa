@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "8af1f16544e2bd7af0ae6e2e8b3b0ceb646cad13957319336fc8caef423e248a",
-  "surfaceManifestFingerprint": "88590defe24d87cf89a9ed25a7d3bdfecc34d8338215a330069f452c650607a4",
-  "authoringManifestFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
-  "ownedInputFingerprint": "2b67ab60f998f2f7af0f19b74f19744fb4dca65d5843ba41e4efb0faddd19396",
+  "contractSourceChecksum": "b6edd66761804263fe342ab8dfc7b80c07a8d0c60874d819816aa13dadf4750b",
+  "surfaceManifestFingerprint": "e860990d3f4f09af18f2ab57806e3837b7fadfba30591b938e5b075d98a6dfc4",
+  "authoringManifestFingerprint": "e860990d3f4f09af18f2ab57806e3837b7fadfba30591b938e5b075d98a6dfc4",
+  "ownedInputFingerprint": "d0d218203d56ccd43e488de84d2ed691317990b647d1ba3aa8b37a614166f730",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -605,8 +605,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3",
-      "bytes": 6392,
+      "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0",
+      "bytes": 6294,
       "legacySignatures": []
     },
     {
@@ -616,8 +616,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "7ad2b9d6bc5db0806c31a23524df95457e5a9525cfde29ca1a3b72ba4cfc641c",
-      "bytes": 368,
+      "sourceHash": "3ead999982f4889316654bb842b05e7f35dab8c2482b91ef7ce32de1c632deb4",
+      "bytes": 475,
       "legacySignatures": []
     },
     {
@@ -1631,7 +1631,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3"
+          "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0"
         },
         {
           "file": "video/script.md",

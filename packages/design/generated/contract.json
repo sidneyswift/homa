@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "8af1f16544e2bd7af0ae6e2e8b3b0ceb646cad13957319336fc8caef423e248a",
+  "sourceChecksum": "b6edd66761804263fe342ab8dfc7b80c07a8d0c60874d819816aa13dadf4750b",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -1001,6 +1001,82 @@
         "external": "ExternalLink",
         "refresh": "RefreshCw",
         "stop": "Square"
+      },
+      "semanticIconAdapterContract": {
+        "platforms": [
+          "web",
+          "native"
+        ],
+        "packages": {
+          "web": "lucide-react",
+          "native": "lucide-react-native"
+        },
+        "unknownRole": "throw",
+        "sourcePolicy": "registry-only"
+      },
+      "semanticIconAdapters": {
+        "web": {
+          "back": "ArrowLeft",
+          "next": "ArrowRight",
+          "close": "X",
+          "menu": "Menu",
+          "more": "Ellipsis",
+          "add": "Plus",
+          "edit": "Pencil",
+          "delete": "Trash2",
+          "calendar": "CalendarDays",
+          "book": "BookOpen",
+          "plan": "ClipboardCheck",
+          "progress": "ChartNoAxesCombined",
+          "chat": "Sparkles",
+          "tasks": "ListChecks",
+          "settings": "Settings",
+          "logout": "LogOut",
+          "print": "Printer",
+          "share": "Share2",
+          "voice": "Mic",
+          "muted": "MicOff",
+          "end": "PhoneOff",
+          "collapse": "ChevronDown",
+          "check": "Check",
+          "warning": "TriangleAlert",
+          "error": "CircleAlert",
+          "info": "Info",
+          "external": "ExternalLink",
+          "refresh": "RefreshCw",
+          "stop": "Square"
+        },
+        "native": {
+          "back": "ArrowLeft",
+          "next": "ArrowRight",
+          "close": "X",
+          "menu": "Menu",
+          "more": "Ellipsis",
+          "add": "Plus",
+          "edit": "Pencil",
+          "delete": "Trash2",
+          "calendar": "CalendarDays",
+          "book": "BookOpen",
+          "plan": "ClipboardCheck",
+          "progress": "ChartNoAxesCombined",
+          "chat": "Sparkles",
+          "tasks": "ListChecks",
+          "settings": "Settings",
+          "logout": "LogOut",
+          "print": "Printer",
+          "share": "Share2",
+          "voice": "Mic",
+          "muted": "MicOff",
+          "end": "PhoneOff",
+          "collapse": "ChevronDown",
+          "check": "Check",
+          "warning": "TriangleAlert",
+          "error": "CircleAlert",
+          "info": "Info",
+          "external": "ExternalLink",
+          "refresh": "RefreshCw",
+          "stop": "Square"
+        }
       }
     },
     "layout": {
