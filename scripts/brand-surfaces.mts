@@ -114,6 +114,7 @@ function ownerIssue(path: string): `gh#${number}` {
   if (/signin|password|onboarding|paywall|billing|unsubscribe|join/.test(path)) return "gh#684";
   if (/manifest|opengraph|twitter-image|apple-icon|favicon|homa\.vcf|robots|sitemap|rss\.xml|apps\/web\/public/.test(path)) return "gh#689";
   if (/^(?:\.agents|apps\/web\/agent|packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)/.test(path)) return "gh#739";
+  if (/^apps\/web\/components\/design\//.test(path)) return "gh#724";
   if (/^(?:DESIGN\.md|docs\/homa-design|scripts\/)/.test(path)) return "gh#717";
   if (/^apps\/web\/app\/app\//.test(path)) return "gh#685";
   return "gh#683";
