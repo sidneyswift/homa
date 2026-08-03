@@ -3,9 +3,9 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
-  "surfaceManifestFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
-  "authoringManifestFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
-  "ownedInputFingerprint": "d1bddb89e87a07faccdc3459a52bb0143ef699b7c071ac671a44f4ae3e7f3cfe",
+  "surfaceManifestFingerprint": "21da8e0622d6792ee5d7de2f8133344c04028257ee8f8595e5ccbffea281fe99",
+  "authoringManifestFingerprint": "21da8e0622d6792ee5d7de2f8133344c04028257ee8f8595e5ccbffea281fe99",
+  "ownedInputFingerprint": "dc38c423e917e07def628d9d5c31c714da99a8b825b3abbcd83109a982f9b455",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -605,8 +605,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3",
-      "bytes": 6392,
+      "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0",
+      "bytes": 6294,
       "legacySignatures": []
     },
     {
@@ -616,8 +616,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "7ad2b9d6bc5db0806c31a23524df95457e5a9525cfde29ca1a3b72ba4cfc641c",
-      "bytes": 368,
+      "sourceHash": "3ead999982f4889316654bb842b05e7f35dab8c2482b91ef7ce32de1c632deb4",
+      "bytes": 475,
       "legacySignatures": []
     },
     {
@@ -1631,7 +1631,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3"
+          "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0"
         },
         {
           "file": "video/script.md",
