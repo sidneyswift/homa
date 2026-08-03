@@ -73,3 +73,11 @@ Fresh Homa UX, copy-reader, and copy-editor passes reviewed real simulator captu
 **Preview build correction**
 
 The first Vercel preview correctly rejected a client bundle that imported recurrence and audience helpers through `family-events.ts`, which also owns raw Postgres access. The pure helpers now live in `family-events-model.ts`; client Planner modules import that boundary directly, while the server module re-exports the same functions for tools and tests. The exact full Next 16 production build then passed locally, followed again by web typecheck, lint, all 38 focused Planner tests, the Node 24 Eve build, and the stream-duration guard.
+
+## 2026-08-02 20:08 ET
+
+**Production schema gate**
+
+The additive `20260802232000_family_event_children` migration was applied to production in one transaction and recorded in `supabase_migrations.schema_migrations`. Read-back confirmed the migration row, audience table, and atomic save function are all present.
+
+The first live post-migration isolation run exposed a guard expectation mismatch: PostgREST returns HTTP 204 with zero affected rows when a table has no UPDATE policy. The guard now asserts the actual invariant, zero changed audience rows, through `expectAuthenticatedUpdateFiltered`. The complete production isolation suite then passed with every public migration table covered, including cross-family audience reads, writes, deletes, and RPC calls.

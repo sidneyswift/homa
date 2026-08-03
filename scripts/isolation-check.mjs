@@ -3630,12 +3630,13 @@ async function expectAuthenticatedIsolation() {
         },
         "auth member cannot add another family's event child audience",
       );
-      await expectAuthenticatedUpdateDenied(
+      await expectAuthenticatedUpdateFiltered(
         familyBUser.accessToken,
         "family_event_children",
         "event_id",
         familyEventBId,
         { child_id: childAId },
+        0,
         "auth member cannot update event child audience in place",
       );
       await expectAuthenticatedDeleteFiltered(
