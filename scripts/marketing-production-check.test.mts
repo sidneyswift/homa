@@ -18,7 +18,6 @@ test("marketing production evidence is current and has every production role", (
 });
 
 test("bundle records preserve grounding, format approvals, and refusal evidence", () => {
-  assert.equal(manifest.bundles.length, 3);
   for (const bundle of manifest.bundles) {
     assert.equal(bundle.sourceResolves, true, bundle.path);
     assert.equal(bundle.sourceRefResolves, true, bundle.path);
@@ -34,6 +33,27 @@ test("bundle records preserve grounding, format approvals, and refusal evidence"
   assert.equal(published.distribution.publishedFormats, 1);
   assert.equal(published.distribution.refusedFormats, 1);
   assert.deepEqual(published.distribution.urls, ["https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week"]);
+});
+
+test("the staged SEO wave is complete and remains unpublished", () => {
+  const expectedIds = [
+    "2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
+    "2026-08-03-homeschool-portfolio-checklist",
+    "2026-08-03-homeschool-progress-report-examples",
+    "2026-08-03-homeschool-schedule-for-multiple-children",
+    "2026-08-03-how-to-know-if-homeschooling-is-working",
+    "2026-08-03-how-to-make-a-homeschool-practice-page",
+    "2026-08-03-how-to-organize-homeschool-records",
+    "2026-08-03-weekly-homeschool-planner-template",
+  ];
+  const wave = manifest.bundles.filter((bundle) => expectedIds.includes(bundle.id));
+  assert.deepEqual(wave.map((bundle) => bundle.id).sort(), expectedIds);
+  for (const bundle of wave) {
+    assert.equal(bundle.lifecycle, "draft", bundle.path);
+    assert.deepEqual(bundle.approval, { approved: 0, draft: 1, killed: 0, blockedByProvider: 0 }, bundle.path);
+    assert.equal(bundle.distribution.exists, false, bundle.path);
+    assert.equal(bundle.distribution.publishedFormats, 0, bundle.path);
+  }
 });
 
 test("external publishers are explicit fail-closed records, never simulated receipts", () => {

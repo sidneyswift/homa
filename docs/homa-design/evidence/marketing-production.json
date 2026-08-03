@@ -3,9 +3,9 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "ba95f6d8d6d19fd8f2cf8215432e0c61697dc0c104631540ebb383f863a746da",
-  "surfaceManifestFingerprint": "4476e63f478acb3e471b9db4998de73b1d961f833a8259420a4ce0dca9f97b7c",
-  "authoringManifestFingerprint": "4476e63f478acb3e471b9db4998de73b1d961f833a8259420a4ce0dca9f97b7c",
-  "ownedInputFingerprint": "fd4ae86fec3dc98ae37243114dc46cae597ce0cd83e9d4547a0559524dfbc683",
+  "surfaceManifestFingerprint": "5d32b8a88abc9f65d522ea3dfc9e84cb230c0a8ea70dfe85cc1eb4a8556db95a",
+  "authoringManifestFingerprint": "5d32b8a88abc9f65d522ea3dfc9e84cb230c0a8ea70dfe85cc1eb4a8556db95a",
+  "ownedInputFingerprint": "518da15952ca16354d5ba4fe9ef811cbb6b1e5a248b4982724fdf7f1e31fc43e",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -599,6 +599,182 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:83bfa543606445e1",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "54e22ece15e1495aae431c4c6fdb16ab5c8903324f1dc19f2963873d3ee44273",
+      "bytes": 6389,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:df55100b50f6760e",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "7a359a774bc1b8e53eb300450d8c863a29d9cf87e954f1a5ba738ec5b329fe31",
+      "bytes": 616,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:bdd08b6bb889f7be",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "3041b652025d93bc083adbd7ed5c3b4fc399536a120454250156cdfeb9d1c46e",
+      "bytes": 7044,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:95864172ff0b5a46",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "d401d70ae3a548c7f7cd88860e12b03c88cfdf3e8ad27c810257605bb5304d59",
+      "bytes": 586,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e259d575ff8fcf8c",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "0774737fc5c0cef047a580eb6e09c28859fff40d20a5876712210224d5aae6d5",
+      "bytes": 6269,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:058e52538d58c65a",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "e11de7f2da4679b794a2b0184c67e25572be1df1921b055eb14b04f7feae8c67",
+      "bytes": 592,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:65e93c98f5bfbc17",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "aec67d102fd4878a73d4db39a881874dd9e309b25184d9c040aca39c0a5dc65d",
+      "bytes": 6460,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:29a8fc43bb8d18c9",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "d9be2009c4cd491d2ce1031a52355eeb27eb5e39da42aa69bcff77b1fd2dad0d",
+      "bytes": 603,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:1ebf75f17e0e4a4f",
+      "path": "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "a83fe802bfe62d8b198e11ed0b207ec7f255e0fa59e5194b54c7e558fbfe13a0",
+      "bytes": 5759,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7d7ed1b9c556e8cb",
+      "path": "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "60d10f0d5d56bd441a277fb5a4331230c30c5119e193fe2858d4b54009424cee",
+      "bytes": 601,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:d4b440c2e48c3dad",
+      "path": "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "b2b7a87591f7162b64f10deacdfcd3231b0e35a8c3b251815d6eb24938ee183a",
+      "bytes": 6502,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:12d6041cf3a7c1f1",
+      "path": "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "3433d4484178dd4dafca11bcd1e505043279f07cdd062f0e3c76e80cb8d4ab34",
+      "bytes": 595,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e1e7ca4ed69015ab",
+      "path": "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "5ca82b15f206403a07f4b3d1474eef1961225523412c312be0f2d81d13316e64",
+      "bytes": 5939,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6b7d7f60167d7338",
+      "path": "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "f961178f903fd26f1f540006203426acda54f9e6d6d0f8a4593141de84addd37",
+      "bytes": 589,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5dc8837389c04588",
+      "path": "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "c4413213618811f7450e0c3a293d8431c79eede55c86fb92f30720d995cdbb36",
+      "bytes": 6096,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4885dcd790e654de",
+      "path": "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "429dc77d7b50a47f9a7679e1b1cf896be1e79319d23b309b4553d2a67ca16b70",
+      "bytes": 584,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:d3a2750688ce697f",
       "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/article.mdx",
       "roles": [
@@ -719,8 +895,8 @@
         "golden-fixture"
       ],
       "state": "active",
-      "sourceHash": "8d226f8a7432bf5801778f66b079de8c66166877a39a1b2caa17b8b345d0fcaf",
-      "bytes": 1057,
+      "sourceHash": "a4893e22efd30cf3dffbc03f2aceffe95366e2126eecb23684d7077ded62f904",
+      "bytes": 1131,
       "legacySignatures": []
     },
     {
@@ -731,8 +907,8 @@
         "golden-fixture"
       ],
       "state": "active",
-      "sourceHash": "c091be46adcf88956782eb21bc2076908dfd338b37c7b357f37847f26d585320",
-      "bytes": 421,
+      "sourceHash": "7034be320f39bfbce5556b9f88e57ca82f62cea6d9917d4fda0dd486dbba7649",
+      "bytes": 547,
       "legacySignatures": []
     },
     {
@@ -814,8 +990,8 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "a9c75ca23751fe89f8fc54193c213b02a940ae8dd348db77753cee758b5071a6",
-      "bytes": 12029,
+      "sourceHash": "3aa44710d4b13e20e29199ff35c254b4b12f4c9c45a8c0103d151d522c08bb1f",
+      "bytes": 13548,
       "legacySignatures": []
     },
     {
@@ -874,6 +1050,160 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:bdbdf57426d04ab6",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "d96eacb572552fb344229a5bb33b0bf57f5858477da2928a8eeb49ef5a2c0972",
+      "bytes": 177,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:929189a890b8bf58",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "342d0e57a35525a9205a88cc21a32c49c2e8620907a2c7e9249b623612149027",
+      "bytes": 95,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f377a8234de9fb51",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-portfolio-checklist.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "22a1467dfab91461a34ccea08f12bbd0db0bdf3cdd1e85839e7576215acff6bb",
+      "bytes": 164,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ea9d5fc36bd710fe",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-portfolio-checklist.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "7716734a39a25da5fc596af6fdd82ac66212dcc077c58f6c2cf532ce5fa70783",
+      "bytes": 82,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b69c71e6585c8bb2",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-progress-report-examples.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "8526953d22a38277003e695452544c7127e277ab2938baaf541485999b3615c0",
+      "bytes": 169,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a96555fc1d01ba79",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-progress-report-examples.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "b140f19475cc003f098148c355178cbf7816951e78dcc3e6e5d37b37ba1a403b",
+      "bytes": 87,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3c8810e2f98fa2c3",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-schedule-for-multiple-children.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "0a4d178d1b13c18e80332efd1cffa4fba27fcb696bce11c665a8607507a6931e",
+      "bytes": 175,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c7f18381db65e43f",
+      "path": "marketing/evals/scorecards/2026-08-03-homeschool-schedule-for-multiple-children.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "123e8b71de9804a52da85f30ec3deaa75fac3ac1884a84579c5167aa3a95c862",
+      "bytes": 93,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8380b5a975dd2b28",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-know-if-homeschooling-is-working.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "ed89d7e15d6d625d988067bfb5e3f9b75263b01dd668bb80f40d747d8281243a",
+      "bytes": 173,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c701d533662ccdfb",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-know-if-homeschooling-is-working.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "503196c4b8b82783bcb43e7074cfd35b16e942fc5917ac635095f83227ca8103",
+      "bytes": 91,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:06409d67dabdbebc",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-make-a-homeschool-practice-page.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "314d29993824c21d1d815a665c34736cf98da610e17cf63abed12ef3ac3ce3a5",
+      "bytes": 172,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:020f754353a49798",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-make-a-homeschool-practice-page.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "397df3e863c0b4cf50a74809f666bf9ed49b363a99a18b0b17f4f5f74f8df7dd",
+      "bytes": 90,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b5048d7e7cc19d0c",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-organize-homeschool-records.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "4a108b9659fef22135cf4e94d38c4af805d84bcb52a7f5e72a038af3838152f5",
+      "bytes": 168,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:39829c326cbaf081",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-organize-homeschool-records.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "b5c82ca174afa8a5416bc07e6f02ae218b7c455c87ef24a9f882e0412ce70ed3",
+      "bytes": 86,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:964d1c10cb952e72",
       "path": "marketing/evals/scorecards/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week.json",
       "roles": [
@@ -893,6 +1223,28 @@
       "state": "active",
       "sourceHash": "94508436b5f1829578977949c7297e4926323c3c007485439cf5450df7bd935a",
       "bytes": 105,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:1973da5f1631bd5b",
+      "path": "marketing/evals/scorecards/2026-08-03-weekly-homeschool-planner-template.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "3db6e7067a2a71637e100867498ef3ce979601f79c9ebd37ceb77f7a1cac1844",
+      "bytes": 168,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6e03db548857350d",
+      "path": "marketing/evals/scorecards/2026-08-03-weekly-homeschool-planner-template.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "6948e34c8627696a2813a0bdd2c32c9ff030b50c9ec6fc7fb96e57e07e9116ed",
+      "bytes": 86,
       "legacySignatures": []
     },
     {
@@ -1039,6 +1391,17 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:604bf5eee2c4511a",
+      "path": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "f34d5715ea0ce71a51a2d4be06993513fe785724c45706343ef40a9c5e18baf2",
+      "bytes": 9287,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:fee90e6d62ace4b7",
       "path": "marketing/routines/SPEC.md",
       "roles": [
@@ -1080,6 +1443,17 @@
       "state": "disabled",
       "sourceHash": "fdb6fa7f61b3e57b75025521109df614cc3b1c9ab1a165345f580019ea39b309",
       "bytes": 1335,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:160467164429acf6",
+      "path": "marketing/seo/2026-08-03-blog-wave-1.md",
+      "roles": [
+        "seo-template"
+      ],
+      "state": "active",
+      "sourceHash": "06e1fd00df93fce9b99e734c4f313f986e461170878abee3e777e72631190772",
+      "bytes": 2931,
       "legacySignatures": []
     },
     {
@@ -1424,6 +1798,28 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:5ea1db8791351cf0",
+      "path": "marketing/signals/2026-08-03-a-portfolio-needs-a-purpose-before-a-checklist.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "c2a41b9896dccbcd3071d0ce5e45909db282ab26704e0dd62fd953d4f58874d1",
+      "bytes": 572,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2686e763722f3475",
+      "path": "marketing/signals/2026-08-03-a-small-evidence-loop-answers-is-it-working.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "6c784e08ae8d3e60781cf80a88c110d3c2797e726bdb5f1f307dff5dec4b9640",
+      "bytes": 592,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:868bd788872b17a4",
       "path": "marketing/signals/2026-08-03-how-to-track-homeschool-hours.md",
       "roles": [
@@ -1432,6 +1828,72 @@
       "state": "active",
       "sourceHash": "868042779a3cda56c099d9a352928e9537979f826ae9585c41d04acead664bc3",
       "bytes": 795,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:846726e1f5c12a87",
+      "path": "marketing/signals/2026-08-03-one-lesson-makes-a-better-practice-page.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "aff37c020c2b11462ef081030a4c0adccf4eb2eb093d747023fbc71c85848243",
+      "bytes": 601,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7de4c202b3b4e11e",
+      "path": "marketing/signals/2026-08-03-progress-report-audience-chooses-the-shape.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "bccf959e0c5a4dc72382e79dbb8c497504b9fbee37319d24836f0c9aa56c9836",
+      "bytes": 604,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a7dbd6e7356ecc4c",
+      "path": "marketing/signals/2026-08-03-records-need-one-home-and-one-naming-rule.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "c1c1ac0a36f9021917fa72a136803c559f940a27fcc4dec5a90da2edbd27d935",
+      "bytes": 595,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f4f17817dc35e719",
+      "path": "marketing/signals/2026-08-03-schedule-the-parent-not-just-the-children.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "f1dbf611f280d26d7a3011adfbbf759403d8e286abd516d44d5d16e9c80e9c8d",
+      "bytes": 578,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:95df1d9ee524b2de",
+      "path": "marketing/signals/2026-08-03-the-best-hours-log-is-the-one-that-survives-friday.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "131188a16efba595d17a8574abd97c8bb4431e3526c312c08947e5c68b0b15c7",
+      "bytes": 603,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fbfdd78e0d7b69e1",
+      "path": "marketing/signals/2026-08-03-weekly-plans-need-a-place-for-change.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "3ae7fcac36f31bb88979d4e34c3646befbab82b8df3afe293cae646c8943371a",
+      "bytes": 564,
       "legacySignatures": []
     },
     {
@@ -1453,8 +1915,8 @@
         "voice"
       ],
       "state": "active",
-      "sourceHash": "674e8a6fc1e31c7e1eea2a6c2eb89ba117585dcc72b5a6eb26bc395d06759253",
-      "bytes": 5824,
+      "sourceHash": "46f407f6d52b255d08e2da0fad987ddb0bbe919645faf83bec9245bad1801238",
+      "bytes": 6136,
       "legacySignatures": []
     },
     {
@@ -1614,6 +2076,318 @@
       }
     },
     {
+      "id": "2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-the-best-hours-log-is-the-one-that-survives-friday.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "54e22ece15e1495aae431c4c6fdb16ab5c8903324f1dc19f2963873d3ee44273"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-homeschool-portfolio-checklist",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-a-portfolio-needs-a-purpose-before-a-checklist.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "3041b652025d93bc083adbd7ed5c3b4fc399536a120454250156cdfeb9d1c46e"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-homeschool-portfolio-checklist.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-homeschool-progress-report-examples",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-progress-report-audience-chooses-the-shape.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "0774737fc5c0cef047a580eb6e09c28859fff40d20a5876712210224d5aae6d5"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-homeschool-progress-report-examples.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-homeschool-schedule-for-multiple-children",
+      "path": "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-schedule-the-parent-not-just-the-children.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "aec67d102fd4878a73d4db39a881874dd9e309b25184d9c040aca39c0a5dc65d"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-homeschool-schedule-for-multiple-children.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-how-to-know-if-homeschooling-is-working",
+      "path": "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-a-small-evidence-loop-answers-is-it-working.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "a83fe802bfe62d8b198e11ed0b207ec7f255e0fa59e5194b54c7e558fbfe13a0"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-how-to-know-if-homeschooling-is-working.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-how-to-make-a-homeschool-practice-page",
+      "path": "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-one-lesson-makes-a-better-practice-page.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "b2b7a87591f7162b64f10deacdfcd3231b0e35a8c3b251815d6eb24938ee183a"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-how-to-make-a-homeschool-practice-page.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-how-to-organize-homeschool-records",
+      "path": "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-records-need-one-home-and-one-naming-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "5ca82b15f206403a07f4b3d1474eef1961225523412c312be0f2d81d13316e64"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-how-to-organize-homeschool-records.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-weekly-homeschool-planner-template",
+      "path": "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-03-weekly-plans-need-a-place-for-change.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "c4413213618811f7450e0c3a293d8431c79eede55c86fb92f30720d995cdbb36"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-weekly-homeschool-planner-template.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
       "id": "2026-08-03-how-to-track-homeschool-hours-without-losing-the-week",
       "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week",
       "lifecycle": "published",
@@ -1674,7 +2448,7 @@
         "marketing/content/drafts/*/article.mdx"
       ],
       "id": "generator:69357e3c58450984",
-      "sourceHash": "5b9c832d8c3f0bf7877c60cf1f494763194bde70e0a7faa380e1dd6c435959ec"
+      "sourceHash": "d6e2edc152adae03bca6a21e6e8e9c086a9ddd465533c640bb36d197ad228245"
     },
     {
       "path": ".agents/skills/marketing-copy-editor/SKILL.md",
@@ -1686,7 +2460,7 @@
         "marketing/content/drafts/*/meta.yml"
       ],
       "id": "generator:70a268bc2deac2c9",
-      "sourceHash": "f0f752f357f8eac811b8ba0019f724bb3b14d8e8329c29545706ec4862125612"
+      "sourceHash": "dabd16e4d4f1a53af6006392dc00053775c9a2aed5b4ece72adf07c68c4a434b"
     },
     {
       "path": ".agents/skills/marketing-copy-reviewer/SKILL.md",
@@ -1698,7 +2472,7 @@
         "marketing/content/drafts/*/meta.yml"
       ],
       "id": "generator:9973cf83fa4600ea",
-      "sourceHash": "fe902e6cf02a2e9ce72e33ef0f5147ec9e2f609b72903b8b3f2d5a30f3ce5b24"
+      "sourceHash": "0285cd503754b597915acf1001deef8ad6e2f1e18aeafce396c5cb28d930db0d"
     },
     {
       "path": ".agents/skills/marketing-demand-engine/SKILL.md",
@@ -1710,7 +2484,7 @@
         "marketing/content/drafts/"
       ],
       "id": "generator:dce26b557b5eb04b",
-      "sourceHash": "0f7493f4a8fae1a33b05d585ce87f9ad3c7130083535b23c19fdbdca08299a77"
+      "sourceHash": "c3d8b69a2b46e24dbc50ba7e970ee38042d3c28382c8ef39e45178fcdfc8f75a"
     },
     {
       "path": ".agents/skills/marketing-distributor/SKILL.md",
@@ -1723,7 +2497,7 @@
         "apps/web/content/blog/"
       ],
       "id": "generator:8a209fee1cd8210a",
-      "sourceHash": "7c1f53fa45061d7caa893de6d12b4233bc367bd48bad8c2332969e06ec75550a"
+      "sourceHash": "50011fd3d1f263e946ea68875e2bbf7d67fdc09832f2709786077e88cb7c9f84"
     },
     {
       "path": ".agents/skills/marketing-email-writer/SKILL.md",
@@ -1833,7 +2607,7 @@
         "marketing/evals/scorecards/"
       ],
       "id": "generator:92cc4d015ee58a8e",
-      "sourceHash": "a9c75ca23751fe89f8fc54193c213b02a940ae8dd348db77753cee758b5071a6"
+      "sourceHash": "3aa44710d4b13e20e29199ff35c254b4b12f4c9c45a8c0103d151d522c08bb1f"
     },
     {
       "path": "scripts/brand-assets.mts",
