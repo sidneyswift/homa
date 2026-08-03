@@ -90,6 +90,12 @@ describe("native durable mutation contract", () => {
     assert.match(activityRow, /accessibilityState=\{\{[\s\S]*busy:/u);
   });
 
+  it("bounds plan scheduling so an uncertain request can recover", () => {
+    assert.match(planSchedule, /SCHEDULE_ACTIVITY_TIMEOUT_MS = 10_000/u);
+    assert.match(planSchedule, /\.abortSignal\(controller\.signal\)/u);
+    assert.match(planSchedule, /finally \{\s*clearTimeout\(timeout\);/u);
+  });
+
   it("applies successful plan receipts without a follow-up read", () => {
     for (const route of [plannerRoute, voiceOverlay]) {
       assert.match(

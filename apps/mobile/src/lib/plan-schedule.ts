@@ -69,6 +69,7 @@ interface ScheduleReceipt {
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+export const SCHEDULE_ACTIVITY_TIMEOUT_MS = 10_000;
 
 function parseScheduleReceipt(raw: unknown): ScheduleReceipt | null {
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) return null;
@@ -120,58 +121,68 @@ function parseScheduleReceipt(raw: unknown): ScheduleReceipt | null {
 export async function scheduleActivity(
   input: ScheduleActivityInput,
 ): Promise<{ id: string; scheduledDate: string }> {
-  const result = await supabase.rpc(
-    input.captureLoopId ? "schedule_plan_activity_native_v1" : "schedule_plan_activity_v2",
-    input.captureLoopId
-      ? {
-          target_loop_id: input.captureLoopId,
-          target_child_id: input.childId,
-          target_subject_id: input.subjectId,
-          target_week: input.week,
-          target_activity_index: input.activityIndex,
-          target_scheduled_date: input.scheduledDate,
-          target_expected_text: input.expectedText,
-          target_plan_revision: input.planRevision,
-          target_schedule_id: null,
-        }
-      : {
-          target_child_id: input.childId,
-          target_subject_id: input.subjectId,
-          target_week: input.week,
-          target_activity_index: input.activityIndex,
-          target_scheduled_date: input.scheduledDate,
-          target_expected_text: input.expectedText,
-          target_plan_revision: input.planRevision,
-          target_schedule_id: null,
-        },
-  )
-    .single();
-  const rawReceipt = requireMutationReceipt("schedule_plan_activity", result);
-  const receipt = parseScheduleReceipt(rawReceipt);
-  if (!receipt) {
-    throw new MutationReceiptError(
-      "schedule_plan_activity",
-      "contradictory_receipt",
-      "schedule receipt shape was invalid",
-    );
-  }
-  if (receipt.status === "conflict") {
-    throw new MutationReceiptError(
-      "schedule_plan_activity",
-      "contradictory_receipt",
-      receipt.reason ?? "the plan changed before the date was saved",
-    );
-  }
-  requireReceiptValue(
-    "schedule_plan_activity",
-    receipt.family_id === input.familyId
-      && receipt.plan_id !== null
-      && receipt.plan_revision === input.planRevision
-      && receipt.activity_text === input.expectedText
-      && receipt.scheduled_date === input.scheduledDate
-      && receipt.schedule_id !== null,
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    SCHEDULE_ACTIVITY_TIMEOUT_MS,
   );
-  return { id: receipt.schedule_id!, scheduledDate: receipt.scheduled_date! };
+  try {
+    const result = await supabase.rpc(
+      input.captureLoopId ? "schedule_plan_activity_native_v1" : "schedule_plan_activity_v2",
+      input.captureLoopId
+        ? {
+            target_loop_id: input.captureLoopId,
+            target_child_id: input.childId,
+            target_subject_id: input.subjectId,
+            target_week: input.week,
+            target_activity_index: input.activityIndex,
+            target_scheduled_date: input.scheduledDate,
+            target_expected_text: input.expectedText,
+            target_plan_revision: input.planRevision,
+            target_schedule_id: null,
+          }
+        : {
+            target_child_id: input.childId,
+            target_subject_id: input.subjectId,
+            target_week: input.week,
+            target_activity_index: input.activityIndex,
+            target_scheduled_date: input.scheduledDate,
+            target_expected_text: input.expectedText,
+            target_plan_revision: input.planRevision,
+            target_schedule_id: null,
+          },
+    )
+      .abortSignal(controller.signal)
+      .single();
+    const rawReceipt = requireMutationReceipt("schedule_plan_activity", result);
+    const receipt = parseScheduleReceipt(rawReceipt);
+    if (!receipt) {
+      throw new MutationReceiptError(
+        "schedule_plan_activity",
+        "contradictory_receipt",
+        "schedule receipt shape was invalid",
+      );
+    }
+    if (receipt.status === "conflict") {
+      throw new MutationReceiptError(
+        "schedule_plan_activity",
+        "contradictory_receipt",
+        receipt.reason ?? "the plan changed before the date was saved",
+      );
+    }
+    requireReceiptValue(
+      "schedule_plan_activity",
+      receipt.family_id === input.familyId
+        && receipt.plan_id !== null
+        && receipt.plan_revision === input.planRevision
+        && receipt.activity_text === input.expectedText
+        && receipt.scheduled_date === input.scheduledDate
+        && receipt.schedule_id !== null,
+    );
+    return { id: receipt.schedule_id!, scheduledDate: receipt.scheduled_date! };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function unscheduleActivity(
