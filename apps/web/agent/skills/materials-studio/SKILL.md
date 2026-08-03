@@ -542,6 +542,7 @@ sheet, never a fan-out of replacement icons.
 | Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
 | Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
 | Narration page | pair a blank illustration box with dictation lines for CM-style narration or journaling | narration-page |
+| Curiosity-led notebook page | preserve what caught the child's attention across a shared reading theme without assigning the response | curiosity-led-notebook-page |
 | Artist / composer study card | build a reusable picture-study or composer-study portfolio card | artist-composer-study-card |
 | Composer listening guide | give the child one thing to listen for and ordered moments to catch while a real piece of music plays | composer-listening-guide |
 | Chant and rhyme card | print a traditional chant, nursery rhyme, or fingerplay as a large-type say-aloud card with leader/everyone and clap cues | chant-and-rhyme-card |

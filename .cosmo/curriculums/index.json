@@ -2358,6 +2358,130 @@
         "Z Is for Moose",
         "Zin! Zin! Zin! A Violin"
       ]
+    },
+    {
+      "id": "cur-2026-08-02-home-learning-year-by-year",
+      "name": "Home Learning Year by Year",
+      "droppedBy": "Carolyng",
+      "droppedAt": "2026-08-02T15:48:27-04:00",
+      "methodology": "A flexible home-education design guide, not a prescribed boxed curriculum. It gives public-school comparison points and extensive resources by grade and subject, then asks the parent to select, adapt, accelerate, delay, or replace them according to the actual child.",
+      "mappedPct": 100,
+      "gapCount": 0,
+      "decisionsCount": 0,
+      "about": [
+        "homeschool curriculum planning",
+        "year-by-year learning expectations",
+        "child-led learning",
+        "curriculum adaptation",
+        "preschool through grade twelve"
+      ],
+      "themes": [
+        "questions are the foundation of education",
+        "learning follows individual children",
+        "curiosity should survive schooling",
+        "early learning through real life and play"
+      ],
+      "unitsDecomposed": 14,
+      "unitTopics": [
+        "play, read-alouds, practical life, movement, language, and free exploration",
+        "kindergarten language, number, world knowledge, arts, movement, life skills, and technology",
+        "grade one reading, writing, arithmetic, history, geography, science, arts, and life skills",
+        "grade two fluency, composition, arithmetic, cultural history, science, arts, and practical competence",
+        "grade three independent reading, cursive, multiplication, history, science, arts, and presentation",
+        "grade four literature, composition, mathematics, world history, science, arts, and research",
+        "grade five analytical reading, writing process, advanced arithmetic, geography, science, arts, and technology",
+        "grade six literature, pre-algebra foundations, history, science, languages, arts, and independence",
+        "grade seven language arts, mathematics, history, science, languages, arts, and life skills",
+        "grade eight literature, algebra readiness, history, science, languages, arts, and technology",
+        "grade nine high-school language arts, mathematics, history, science, language, arts, and wellness",
+        "grade ten literature, mathematics, history, science, languages, arts, and practical planning",
+        "grade eleven advanced reading, writing, mathematics, history, science, arts, and adult preparation",
+        "grade twelve capstone language arts, mathematics, history, science, arts, wellness, life, and technology"
+      ],
+      "works": [
+        "A Child\u2019s Work",
+        "Einstein Never Used Flash Cards",
+        "The Enchanted Hour"
+      ]
+    },
+    {
+      "id": "cur-2026-08-02-teatro-del-lector-grade-2",
+      "name": "Teatro del lector: Gu\u00eda del maestro, grado 2",
+      "droppedBy": "Alessa",
+      "droppedAt": "2026-08-02T16:33:47-04:00",
+      "methodology": "A five-day Spanish readers-theater cycle for grade 2 that develops meaning first, models one fluency feature, assigns mixed-level roles, uses repeated guided rehearsal, and ends with performance plus self-reflection.",
+      "mappedPct": 100,
+      "gapCount": 0,
+      "decisionsCount": 0,
+      "about": [
+        "Spanish readers theater",
+        "oral reading fluency",
+        "reading comprehension",
+        "repeated oral reading",
+        "grade 2 literacy"
+      ],
+      "themes": [
+        "performance gives rereading a purpose",
+        "fluency and comprehension reinforce each other",
+        "mixed-level participation"
+      ],
+      "unitsDecomposed": 10,
+      "unitTopics": [
+        "Habitats alrededor del mundo",
+        "Los personajes aprenden y cambian",
+        "El gobierno trabaja para nosotros",
+        "Diferentes personajes, diferentes puntos de vista",
+        "La tecnologia y los inventos",
+        "Los cuentos nos educan",
+        "Pioneros de Ia aviacion",
+        "El viento y el agua modifican la Tierra",
+        "Fabricar, comprar y vender",
+        "La materia en transformacion"
+      ],
+      "works": [
+        "De visita con Benjamin Franklin",
+        "El cuento de la bandera tachonada de estrellas",
+        "El pasto es siempre m\u00e1s verde y No le busques las pulgas al perro",
+        "Glooscap crea las estaciones",
+        "Kanchil le gana en astucia al cocodrilo",
+        "La corona nueva del rey",
+        "La venta de juguetes",
+        "Nuestro nuevo hogar",
+        "Pecos Bill y Sluefoot Sue",
+        "Un cordero con piel de lobo"
+      ]
+    },
+    {
+      "id": "cur-2026-08-02-your-literacy-standards-companion-grades-3-5",
+      "name": "Your Literacy Standards Companion, grades 3 to 5",
+      "droppedBy": "Alessa",
+      "droppedAt": "2026-08-02T18:17:22-04:00",
+      "methodology": "A standards-decoding and instructional-planning companion for grades 3 to 5. It restates each literacy anchor, translates the standard into student actions, supplies comprehension questions and academic vocabulary, then asks the teacher to plan whole-class, small-group, and individual practice.",
+      "mappedPct": 100,
+      "gapCount": 0,
+      "decisionsCount": 0,
+      "about": [
+        "grades 3 to 5 literacy standards",
+        "standards-based reading instruction",
+        "standards-based writing instruction",
+        "speaking and listening instruction",
+        "language conventions and vocabulary",
+        "foundational reading skills"
+      ],
+      "themes": [
+        "turning standards into daily instruction",
+        "plain-language standards decoding",
+        "planning across instructional settings"
+      ],
+      "unitsDecomposed": 5,
+      "unitTopics": [
+        "close reading, evidence, structure, point of view, media, and text complexity",
+        "argument, information, narrative, revision, publishing, research, and writing range",
+        "collaboration, media interpretation, speaker evaluation, presentation, and formal speech",
+        "grammar, usage, mechanics, language function, figurative language, and vocabulary",
+        "phonics, word analysis, accuracy, and fluency"
+      ],
+      "works": []
     }
   ]
 }

@@ -1,0 +1,697 @@
+{
+  "id": "cur-2026-08-02-teatro-del-lector-grade-2",
+  "droppedBy": "Alessa",
+  "droppedAt": "2026-08-02T16:33:47-04:00",
+  "sourceChannel": "homa-inspo",
+  "sourceMessageTs": "1785702827.343619",
+  "coversMessageTs": [],
+  "capture": {
+    "lane": "phone",
+    "sourceFile": "Tractor del lector Guia del maestro -F0BMEQVENDU.pdf",
+    "sourceParts": [
+      "Tractor del lector Guia del maestro -F0BMEQVENDU.pdf"
+    ],
+    "sourceSha256": "c877a4bd4aa32b2806cd1f2ade29e9c6deb004fb3fe2180b2c1a97207476e31d",
+    "pageCount": 39,
+    "expectedPageCount": 39,
+    "sourceReceipt": {
+      "version": 1,
+      "recordId": "cur-2026-08-02-teatro-del-lector-grade-2",
+      "kind": "curriculum",
+      "parts": [
+        {
+          "file": "Tractor del lector Guia del maestro -F0BMEQVENDU.pdf",
+          "sha256": "c877a4bd4aa32b2806cd1f2ade29e9c6deb004fb3fe2180b2c1a97207476e31d",
+          "bytes": 42138288
+        }
+      ]
+    },
+    "reviewBinding": {
+      "version": 1,
+      "recordId": "cur-2026-08-02-teatro-del-lector-grade-2",
+      "sourceReceiptSha256": "d97c2c0a0f53dd3c31ae37ee6e5b9a785778b73fc994958438de4a74107fb685",
+      "pageCount": 39,
+      "expectedPageCount": 39
+    },
+    "mastersDir": ".cosmo/masters/cur-2026-08-02-teatro-del-lector-grade-2",
+    "intakeAt": "2026-08-03T16:21:41+00:00",
+    "gateStatus": "complete",
+    "gateFindings": [],
+    "gateFindingCount": 0,
+    "gateFindingsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "normalizedMasterPages": 0
+  },
+  "aboutness": {
+    "extractionQuality": "full",
+    "textSidecar": ".cosmo/text/cur-2026-08-02-teatro-del-lector-grade-2.txt",
+    "textBlobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo-text/cur-2026-08-02-teatro-del-lector-grade-2/cur-2026-08-02-teatro-del-lector-grade-2.txt",
+    "notes": "All 39 captured pages are represented. OCR recovered the dense Spanish guide, and vision recovered the cover and final matrix page.",
+    "subjects": [
+      {
+        "name": "Spanish readers theater",
+        "role": "teaches",
+        "quote": "Teatro del lector"
+      },
+      {
+        "name": "oral reading fluency",
+        "role": "teaches",
+        "quote": "fluidez de la lectura oral"
+      },
+      {
+        "name": "reading comprehension",
+        "role": "teaches",
+        "quote": "la comprensi\u00e9n"
+      },
+      {
+        "name": "repeated oral reading",
+        "role": "teaches",
+        "quote": "practica repetida de lectura oral"
+      },
+      {
+        "name": "grade 2 literacy",
+        "role": "about",
+        "quote": "GRADO 2"
+      }
+    ],
+    "entities": [
+      {
+        "name": "Benchmark Education",
+        "kind": "organization",
+        "role": "identity",
+        "quote": "Benchmark Education"
+      },
+      {
+        "name": "Timothy Rasinski",
+        "kind": "person",
+        "role": "about",
+        "quote": "Timothy Rasinski"
+      },
+      {
+        "name": "Benjamin Franklin",
+        "kind": "person",
+        "role": "about",
+        "quote": "Benjamin Franklin"
+      }
+    ],
+    "themes": [
+      {
+        "name": "performance gives rereading a purpose",
+        "evidence": "sitdan la practica de la fluidez en un contexto significativo"
+      },
+      {
+        "name": "fluency and comprehension reinforce each other",
+        "evidence": "La fluidez es una habilidad clave de lectura porque est\u00e9 directamente relacionada con la comprensi\u00e9n."
+      },
+      {
+        "name": "mixed-level participation",
+        "evidence": "grupos pequefios heterog\u00e9neos para practicar y representar"
+      }
+    ],
+    "keyTerms": [
+      {
+        "term": "fluidez",
+        "occurrences": 120,
+        "quote": "Fluidez"
+      },
+      {
+        "term": "representaci\u00f3n",
+        "occurrences": 35,
+        "quote": "representacion"
+      },
+      {
+        "term": "gui\u00f3n",
+        "occurrences": 90,
+        "quote": "guion"
+      }
+    ],
+    "referencedWorks": [
+      {
+        "title": "Kanchil le gana en astucia al cocodrilo",
+        "kind": "book",
+        "quote": "Kanchil le gana en astucia al cocodrilo"
+      },
+      {
+        "title": "Pecos Bill y Sluefoot Sue",
+        "kind": "book",
+        "quote": "Pecos Bill y Sluefoot Sue"
+      },
+      {
+        "title": "La corona nueva del rey",
+        "kind": "book",
+        "quote": "La corona nueva del rey"
+      }
+    ],
+    "textExtraction": {
+      "ocr": "tesseract-plus-targeted-vision",
+      "visionModel": "google/gemini-3-flash",
+      "visionPages": [
+        1,
+        39
+      ],
+      "manualVisualReviewPages": [
+        1,
+        3,
+        4,
+        5,
+        39
+      ],
+      "note": "OCR supplies the Spanish lesson text. Vision recovered the identity page and the visually dense final matrix."
+    }
+  },
+  "name": "Teatro del lector: Gu\u00eda del maestro, grado 2",
+  "layer5_lessons": {
+    "decompositionQuality": "full",
+    "unitKind": "five-day-readers-theater-unit",
+    "unitsFound": 10,
+    "unitsDecomposed": 10,
+    "units": [
+      {
+        "ordinal": 1,
+        "unitLabel": "Unit 1",
+        "topic": {
+          "name": "Habitats alrededor del mundo",
+          "quote": "Habitats alrededor del mundo"
+        },
+        "referencedWorks": [
+          {
+            "title": "Kanchil le gana en astucia al cocodrilo",
+            "kind": "book",
+            "quote": "Kanchil le gana en astucia al cocodrilo"
+          }
+        ],
+        "questions": [
+          {
+            "text": "How does Kanchil outwit the crocodiles?",
+            "quote": "c\u00e9mo hard Kanchil para engafiar a los cocodrilos"
+          }
+        ],
+        "themes": [
+          {
+            "name": "interdependence in habitats",
+            "evidence": "c\u00e9mo depende Kade de Kanchil"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Read for meaning, model fluency, assign roles, rehearse, perform, and reflect.",
+            "quote": "Plan de instrucci\u00e9n gradual de 5-Dias"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "guidn"
+          }
+        ]
+      },
+      {
+        "ordinal": 2,
+        "unitLabel": "Unit 2",
+        "topic": {
+          "name": "Los personajes aprenden y cambian",
+          "quote": "Los personajes aprenden y cambian"
+        },
+        "referencedWorks": [
+          {
+            "title": "Pecos Bill y Sluefoot Sue",
+            "kind": "book",
+            "quote": "Pecos Bill y Sluefoot Sue"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "character change",
+            "evidence": "c\u00e9mo reaccionan los personajes"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Use a western tall tale to practice intonation, volume, comprehension, rehearsal, and performance.",
+            "quote": "Practicar fluidez: inflexion/entonacion, volumen"
+          }
+        ],
+        "materials": [
+          {
+            "name": "script roles across reading levels",
+            "quote": "roles de personajes en un rango de niveles"
+          }
+        ]
+      },
+      {
+        "ordinal": 3,
+        "unitLabel": "Unit 3",
+        "topic": {
+          "name": "El gobierno trabaja para nosotros",
+          "quote": "El gobierno trabaja para nosotros"
+        },
+        "referencedWorks": [
+          {
+            "title": "El cuento de la bandera tachonada de estrellas",
+            "kind": "book",
+            "quote": "El cuento de la bandera tachonada de estrellas"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "public symbols and civic history",
+            "evidence": "La bandera tachonada de estrellas"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Build meaning, model prosody, rehearse heterogeneous roles, and perform the civic-history script.",
+            "quote": "Ensayo guiado 2"
+          }
+        ],
+        "materials": [
+          {
+            "name": "performance space",
+            "quote": "Un espacio en el aula puede convertirse facilmente en un escenario"
+          }
+        ]
+      },
+      {
+        "ordinal": 4,
+        "unitLabel": "Unit 4",
+        "topic": {
+          "name": "Diferentes personajes, diferentes puntos de vista",
+          "quote": "Diferentes personajes, diferentes"
+        },
+        "referencedWorks": [
+          {
+            "title": "El pasto es siempre m\u00e1s verde y No le busques las pulgas al perro",
+            "kind": "book",
+            "quote": "EI pasto es siempre mas"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "point of view",
+            "evidence": "distintos personajes"
+          }
+        ],
+        "activities": [
+          {
+            "type": "paired-script-performance",
+            "description": "Compare character perspectives while practicing intonation and emphasis in two linked scripts.",
+            "quote": "inflexi\u00e9n/entonacion, \u00e9nfasis"
+          }
+        ],
+        "materials": [
+          {
+            "name": "two readers theater scripts",
+            "quote": "El pasto es siempre"
+          }
+        ]
+      },
+      {
+        "ordinal": 5,
+        "unitLabel": "Unit 5",
+        "topic": {
+          "name": "La tecnologia y los inventos",
+          "quote": "La tecnologia y los inventos"
+        },
+        "referencedWorks": [
+          {
+            "title": "De visita con Benjamin Franklin",
+            "kind": "book",
+            "quote": "De visita con Benjamin Franklin"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "invention and problem solving",
+            "evidence": "c\u00e9mo los personajes usan la"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Connect historical invention content to fluency practice and a final performance.",
+            "quote": "fraseo, sujeto/predicado"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "Benjamin Franklin"
+          }
+        ]
+      },
+      {
+        "ordinal": 6,
+        "unitLabel": "Unit 6",
+        "topic": {
+          "name": "Los cuentos nos educan",
+          "quote": "Los cuentos nos educan"
+        },
+        "referencedWorks": [
+          {
+            "title": "Un cordero con piel de lobo",
+            "kind": "book",
+            "quote": "Un cordero con piel de lobo"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "messages in traditional stories",
+            "evidence": "reconocer el mensaje"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Use expressive phrasing to surface the message of a traditional tale.",
+            "quote": "leer con el fraseo apropiado"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "Un cordero con piel de lobo"
+          }
+        ]
+      },
+      {
+        "ordinal": 7,
+        "unitLabel": "Unit 7",
+        "topic": {
+          "name": "Pioneros de Ia aviacion",
+          "quote": "Pioneros de Ia aviacion"
+        },
+        "referencedWorks": [
+          {
+            "title": "Nuestro nuevo hogar",
+            "kind": "book",
+            "quote": "Nuestro nuevo hogar"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "learning from aviation pioneers",
+            "evidence": "aprender sobre el"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Practice changes in reading rate while connecting a performance to aviation history.",
+            "quote": "velocidad/ritmo, lento"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "Nuestro nuevo hogar"
+          }
+        ]
+      },
+      {
+        "ordinal": 8,
+        "unitLabel": "Unit 8",
+        "topic": {
+          "name": "El viento y el agua modifican la Tierra",
+          "quote": "El viento y el agua modifican"
+        },
+        "referencedWorks": [
+          {
+            "title": "Glooscap crea las estaciones",
+            "kind": "book",
+            "quote": "Glooscap crea las estaciones"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "earth change and seasons",
+            "evidence": "c\u00e9mo cambia la Tierra"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Combine earth-science meaning with expressive oral reading and ensemble rehearsal.",
+            "quote": "leer con inflexi\u00e9n"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "Glooscap crea"
+          }
+        ]
+      },
+      {
+        "ordinal": 9,
+        "unitLabel": "Unit 9",
+        "topic": {
+          "name": "Fabricar, comprar y vender",
+          "quote": "Fabricar, comprar y vender"
+        },
+        "referencedWorks": [
+          {
+            "title": "La venta de juguetes",
+            "kind": "book",
+            "quote": "La venta de juguetes"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "production and exchange",
+            "evidence": "La venta de juguetes"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Read, discuss, rehearse, and perform a script about making, buying, and selling.",
+            "quote": "Prepararse para"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "La venta de juguetes"
+          }
+        ]
+      },
+      {
+        "ordinal": 10,
+        "unitLabel": "Unit 10",
+        "topic": {
+          "name": "La materia en transformacion",
+          "quote": "La materia en transformacion"
+        },
+        "referencedWorks": [
+          {
+            "title": "La corona nueva del rey",
+            "kind": "book",
+            "quote": "La corona nueva del rey"
+          }
+        ],
+        "questions": [],
+        "themes": [
+          {
+            "name": "changes in matter",
+            "evidence": "La materia en transformacion"
+          }
+        ],
+        "activities": [
+          {
+            "type": "five-day-performance-cycle",
+            "description": "Use a final science-linked script to integrate comprehension, prosody, rehearsal, and reflection.",
+            "quote": "Auto reflexion"
+          }
+        ],
+        "materials": [
+          {
+            "name": "readers theater script",
+            "quote": "La corona nueva del rey"
+          }
+        ]
+      }
+    ]
+  },
+  "sourceFiles": [
+    {
+      "filename": "Tractor del lector Guia del maestro .pdf",
+      "slackFileId": "F0BMEQVENDU",
+      "slackMessageTs": "1785702827.343619",
+      "localPath": ".cosmo/inspo-files/slack/1785702827.343619/Tractor del lector Guia del maestro -F0BMEQVENDU.pdf",
+      "size": 42138288,
+      "sha256": "c877a4bd4aa32b2806cd1f2ade29e9c6deb004fb3fe2180b2c1a97207476e31d",
+      "contentType": "application/pdf",
+      "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-teatro-del-lector-grade-2/1785702827.343619-F0BMEQVENDU-Tractor%20del%20lector%20Guia%20del%20maestro%20.pdf",
+      "slackDeclaredSize": 42138288,
+      "slackSizeVerified": true,
+      "blobReadBackVerified": true,
+      "blobReadBackVerifiedAt": "2026-08-03T16:33:58+00:00",
+      "blobReadBackSize": 42138288,
+      "blobReadBackSha256": "c877a4bd4aa32b2806cd1f2ade29e9c6deb004fb3fe2180b2c1a97207476e31d",
+      "blobReadBackContentType": "application/pdf",
+      "blobReadBackReceiptVersion": "sha256-content-type-v1",
+      "blobReadBackIdentity": "c877a4bd4aa32b2806cd1f2ade29e9c6deb004fb3fe2180b2c1a97207476e31d:application/pdf"
+    }
+  ],
+  "blobUrl": "https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/inspo/cur-2026-08-02-teatro-del-lector-grade-2/1785702827.343619-F0BMEQVENDU-Tractor%20del%20lector%20Guia%20del%20maestro%20.pdf",
+  "stages": {
+    "captured": "2026-08-03T16:33:58+00:00",
+    "lastCaptured": "2026-08-03T16:33:58+00:00",
+    "analyzed": "2026-08-03",
+    "tasteLogged": true,
+    "knowledgeMerged": "2026-08-03",
+    "knowledgeRows": [
+      "a2fc56df-3df4-4b61-b962-817d678fe173"
+    ],
+    "taxonomy": {
+      "proposedTopics": [],
+      "note": "All ten unit themes and fluency targets map to the previously ingested Benchmark grade 2 scope and existing ELA taxonomy."
+    },
+    "graduation": {
+      "kind": "recipe-audit",
+      "targets": [
+        "apps/web/agent/skills/materials-studio/references/recipes/reader-theater-script.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/word-fluency-repeated-reading.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/lesson-comprehension-check.md",
+        "apps/web/agent/skills/materials-studio/references/recipes/checklist-assessment.md"
+      ],
+      "verification": {
+        "layer4HaveRecipe": 4,
+        "layer4NoRecipe": 0
+      },
+      "note": "Every reusable student or parent surface resolves to an existing materials-studio recipe."
+    },
+    "slackReplyTs": "1785775743.157099",
+    "devSummaryTs": "1785775743.660089",
+    "shipReaction": true
+  },
+  "layer1_philosophy": {
+    "methodology": "A five-day Spanish readers-theater cycle for grade 2 that develops meaning first, models one fluency feature, assigns mixed-level roles, uses repeated guided rehearsal, and ends with performance plus self-reflection.",
+    "principles": [
+      "Put repeated oral reading inside a meaningful performance context.",
+      "Connect fluency directly to comprehension rather than treating speed as the goal.",
+      "Assign roles across a range of guided-reading levels so heterogeneous groups can perform together.",
+      "Model one specific prosody or rate feature, then let learners rehearse it repeatedly.",
+      "Keep performance lightweight; costumes and a formal stage are optional."
+    ],
+    "evidence": [
+      {
+        "claim": "Each title uses a five-day instructional sequence",
+        "quote": "Cada guidn contiene 5 lecciones diarias"
+      },
+      {
+        "claim": "Repeated oral reading is the fluency engine",
+        "quote": "practica repetida de lectura oral"
+      },
+      {
+        "claim": "Fluency is connected to comprehension",
+        "quote": "La fluidez es una habilidad clave de lectura porque est\u00e9 directamente relacionada con la comprensi\u00e9n."
+      }
+    ],
+    "learningTheory": "Explicit modeling, gradual release, repeated reading, oral collaboration, performance motivation, and reflection.",
+    "assessmentApproach": "Observe phrase grouping, intonation, rate, accuracy, expression, and meaning during rehearsal; end with self-reflection and supportive comments rather than a speed score.",
+    "parentRole": "Read the script aloud for meaning, model one fluency feature, assign accessible roles, guide two brief rehearsals, host a simple performance, and ask the child to reflect on meaning and voice.",
+    "knowledgeBankMatches": [
+      {
+        "topicKey": "readers-theater",
+        "topicType": "method_philosophy",
+        "status": "candidate-live-lookup",
+        "note": "The source provides a concrete fluency and comprehension implementation of readers theater."
+      }
+    ],
+    "knowledgeBankGaps": [
+      {
+        "suggestedKey": "readers-theater-five-day-fluency-cycle",
+        "topicType": "method_format",
+        "title": "Five-day readers theater fluency cycle",
+        "mergedRowId": "a2fc56df-3df4-4b61-b962-817d678fe173",
+        "mergedAt": "2026-08-03",
+        "readBack": {
+          "status": "active",
+          "contributedBy": "founder",
+          "citationCount": 1
+        }
+      }
+    ]
+  },
+  "layer2_scope": {
+    "coverage": "Ten grade 2 Spanish scripts aligned to the ten Benchmark Taller del lector themes, with recurring comprehension, vocabulary, oral reading, prosody, collaboration, and performance.",
+    "progression": "Across the ten units, the fluency focus rotates through rate, pauses, intonation, volume, emphasis, phrasing, clauses, compound sentences, personification, mood, and dramatic expression.",
+    "subjects": [
+      "Spanish language arts",
+      "reading fluency",
+      "reading comprehension",
+      "oral language",
+      "social studies",
+      "science"
+    ],
+    "stats": {
+      "totalCurriculumTopics": 10,
+      "mapped": 10,
+      "unmapped": 0
+    },
+    "mappingNotes": "The unit themes are already represented by the canonical Benchmark Taller del lector grade 2 curriculum."
+  },
+  "layer3_structure": {
+    "yearShape": "Ten readers-theater experiences, one aligned to each three-week Benchmark reading unit.",
+    "unitPattern": "Day 1 read and discuss for meaning; Day 2 model and practice fluency; Day 3 analyze and assign roles with guided rehearsal; Day 4 rehearse and prepare; Day 5 perform, discuss, and self-reflect.",
+    "weeklyTemplate": "Five sessions of 20 to 25 minutes, with optional independent or group fluency practice between guided sessions.",
+    "reviewRhythm": "Every unit revisits accuracy, phrasing, intonation, rate, and expression while spotlighting one feature more explicitly.",
+    "pacingNotes": "The guide places the cycle in week three of each three-week unit, but a home can run the five short sessions whenever the related theme is active."
+  },
+  "layer4_activities": {
+    "activityTypes": [
+      {
+        "type": "readers-theater-script",
+        "description": "A multi-role Spanish script designed for expressive repeated oral reading.",
+        "sourceQuote": "roles de personajes en un rango de niveles",
+        "status": "have_recipe",
+        "recipe": "reader-theater-script"
+      },
+      {
+        "type": "repeated-fluency-practice",
+        "description": "Reread assigned lines with one prosody, phrasing, or rate focus.",
+        "sourceQuote": "Practicar la fluidez",
+        "status": "have_recipe",
+        "recipe": "word-fluency-repeated-reading"
+      },
+      {
+        "type": "meaning-discussion",
+        "description": "Discuss the script, connect it to the unit theme, and extend comprehension.",
+        "sourceQuote": "Discutir el gui\u00e9n",
+        "status": "have_recipe",
+        "recipe": "lesson-comprehension-check"
+      },
+      {
+        "type": "fluency-self-reflection",
+        "description": "Reflect on accuracy, phrasing, intonation, rate, expression, and collaboration after performance.",
+        "sourceQuote": "Auto reflexion",
+        "status": "have_recipe",
+        "recipe": "checklist-assessment"
+      }
+    ],
+    "stats": {
+      "total": 4,
+      "haveRecipe": 4,
+      "noRecipe": 0
+    }
+  },
+  "decisionsNeeded": [],
+  "sourceCompleteness": {
+    "status": "complete",
+    "sourceFileCount": 1,
+    "durableBlobCount": 1,
+    "pageCount": 39,
+    "note": "The single Slack PDF is hash-verified, stored in Blob, fully rendered, and searchable across all 39 pages."
+  }
+}
