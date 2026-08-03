@@ -16,7 +16,7 @@ import {
 } from "../../lib/family-events";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
-import { addDays, formatMonthDay, formatWeekdayShort, type DateOnly } from "./date-utils";
+import { addDays, compareDateOnly, formatMonthDay, formatWeekdayShort, type DateOnly } from "./date-utils";
 
 const TIME_STEP_MINUTES = 30;
 
@@ -152,6 +152,20 @@ export function draftFromEvent(event: FamilyEventRecord): EventComposerDraft {
     childIds: familyEventChildIds(event),
     startsOn: event.series_starts_on ?? event.starts_on,
     endsOn: event.series_ends_on ?? event.ends_on,
+    hasTime: Boolean(event.series_start_time ?? event.start_time),
+    startTime: event.series_start_time ?? event.start_time ?? "09:00",
+    endTime: event.series_end_time ?? event.end_time ?? "10:00",
+    note: event.note ?? "",
+    recurrence: event.recurrence_rule,
+  };
+}
+
+export function draftFromOccurrence(event: FamilyEventRecord): EventComposerDraft {
+  return {
+    title: event.title,
+    childIds: familyEventChildIds(event),
+    startsOn: event.starts_on,
+    endsOn: event.ends_on,
     hasTime: Boolean(event.start_time),
     startTime: event.start_time ?? "09:00",
     endTime: event.end_time ?? "10:00",
@@ -203,6 +217,9 @@ export function EventComposer({
   onChange,
   onSave,
   onDelete,
+  recurringEditScope,
+  recurringOriginalDate,
+  onRecurringEditScopeChange,
   onClose,
 }: {
   visible: boolean;
@@ -212,6 +229,9 @@ export function EventComposer({
   onChange: (next: EventComposerDraft) => void;
   onSave: () => Promise<void>;
   onDelete?: () => Promise<void>;
+  recurringEditScope?: "occurrence" | "series" | null;
+  recurringOriginalDate?: DateOnly;
+  onRecurringEditScopeChange?: (scope: "occurrence" | "series") => void;
   onClose: () => void;
 }) {
   const { fontScale } = useWindowDimensions();
@@ -235,11 +255,17 @@ export function EventComposer({
     : "Whole family";
   const repeatSummary = draft.recurrence
     ? draft.recurrence.interval > 1
-      ? `Every ${draft.recurrence.interval} weeks`
-      : "Every week"
+      ? `Every ${draft.recurrence.interval} weeks${draft.recurrence.until ? ` until ${formatMonthDay(draft.recurrence.until)}` : ""}`
+      : `Every week${draft.recurrence.until ? ` until ${formatMonthDay(draft.recurrence.until)}` : ""}`
     : "Does not repeat";
   const spansDays = draft.endsOn !== draft.startsOn;
   const largeText = fontScale >= 1.4;
+  const occurrenceOnly = recurringEditScope === "occurrence";
+  const dialogTitle = recurringEditScope
+    ? "Edit repeating event"
+    : isEditing
+      ? "Edit event"
+      : "New event";
 
   async function handleSave() {
     if (!draft.title.trim() || busy) return;
@@ -275,12 +301,26 @@ export function EventComposer({
 
   function requestDelete() {
     if (!onDelete || busy) return;
+    const occurrenceDate = recurringOriginalDate ?? draft.startsOn;
     Alert.alert(
-      "Delete this event?",
-      "This removes the event from Homa. Any copy in your device calendar stays there.",
+      recurringEditScope === "series" ? "Delete entire series?" : "Delete this event?",
+      recurringEditScope === "series"
+        ? "Every event in this series will be removed from Homa. That includes past dates."
+        : recurringEditScope === "occurrence"
+          ? `Only ${formatWeekdayShort(occurrenceDate)}, ${formatMonthDay(occurrenceDate)} will be removed from Homa. Every other date stays.`
+          : "This removes the event from Homa. Any copy in your device calendar stays there.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete event", style: "destructive", onPress: () => void handleDelete() },
+        {
+          text:
+            recurringEditScope === "series"
+              ? "Delete entire series"
+              : recurringEditScope === "occurrence"
+                ? "Delete this event"
+                : "Delete event",
+          style: "destructive",
+          onPress: () => void handleDelete(),
+        },
       ],
     );
   }
@@ -288,7 +328,7 @@ export function EventComposer({
   return (
     <AccessibleModal
       visible={visible}
-      title={isEditing ? "Edit event" : "New event"}
+      title={dialogTitle}
       initialFocusRef={headingRef}
       onRequestClose={busy ? () => undefined : onClose}
       presentationStyle="pageSheet"
@@ -304,9 +344,9 @@ export function EventComposer({
             borderBottomColor: colors.borderSubtle,
           }}
         >
-          <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={isEditing ? "Edit event" : "New event"} style={{ flex: 1 }}>
+          <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={dialogTitle} style={{ flex: 1 }}>
             <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
-              {isEditing ? "Edit event" : "New event"}
+              {dialogTitle}
             </Text>
           </View>
           <IconButton
@@ -320,39 +360,97 @@ export function EventComposer({
         </View>
 
         <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
-          <TextInput
-            accessibilityLabel="Event title"
-            accessibilityState={{ disabled: busy }}
-            editable={!busy}
-            value={draft.title}
-            onChangeText={(title) => onChange({ ...draft, title })}
-            placeholder="What's happening?"
-            placeholderTextColor={colors.textMuted}
-            style={{
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.base,
-              color: colors.textBody,
-              backgroundColor: colors.card,
-              borderWidth: 1,
-              borderColor: colors.border,
-              borderRadius: radius.sm,
-              minHeight: 48,
-              padding: space.sm,
-            }}
-          />
+          {recurringEditScope && onRecurringEditScopeChange ? (
+            <View style={{ gap: space.xs }}>
+              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}>
+                Apply changes to
+              </Text>
+              <View style={{ flexDirection: "row", gap: space.xs }}>
+                {[
+                  { scope: "occurrence" as const, label: "This event" },
+                  { scope: "series" as const, label: "Entire series" },
+                ].map((option) => {
+                  const active = recurringEditScope === option.scope;
+                  return (
+                    <Pressable
+                      key={option.scope}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active, disabled: busy }}
+                      disabled={busy}
+                      onPress={() => onRecurringEditScopeChange(option.scope)}
+                      style={{
+                        flex: 1,
+                        minHeight: 44,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: radius.pill,
+                        backgroundColor: active ? colors.brand : colors.card,
+                        borderWidth: 1,
+                        borderColor: active ? colors.brand : colors.border,
+                        paddingHorizontal: space.sm,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: fontFamilies.bodySemibold,
+                          fontSize: fontSize.sm,
+                          color: active ? colors.onBrand : colors.textBody,
+                        }}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
+                {recurringEditScope === "occurrence"
+                  ? `Moving or deleting affects only ${formatWeekdayShort(recurringOriginalDate ?? draft.startsOn)}, ${formatMonthDay(recurringOriginalDate ?? draft.startsOn)}. Other dates stay.`
+                  : "Saving applies your changes to the entire series. Deleting removes every event in the series, including past dates."}
+              </Text>
+            </View>
+          ) : null}
+
+          {occurrenceOnly ? (
+            <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.base, color: colors.textStrong }}>
+              {draft.title}
+            </Text>
+          ) : (
+            <TextInput
+              accessibilityLabel="Event title"
+              accessibilityState={{ disabled: busy }}
+              editable={!busy}
+              value={draft.title}
+              onChangeText={(title) => onChange({ ...draft, title })}
+              placeholder="What's happening?"
+              placeholderTextColor={colors.textMuted}
+              style={{
+                fontFamily: fontFamilies.body,
+                fontSize: fontSize.base,
+                color: colors.textBody,
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: radius.sm,
+                minHeight: 48,
+                padding: space.sm,
+              }}
+            />
+          )}
 
           <View style={{ gap: space.xs }}>
             <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textBody }}>
-              Starts
+              Date
             </Text>
             <DateStepper
               date={draft.startsOn}
               disabled={busy}
-              onChange={(startsOn) =>
+              onChange={(startsOn) => {
+                const durationDays = Math.max(0, compareDateOnly(draft.endsOn, draft.startsOn));
                 onChange({
                   ...draft,
                   startsOn,
-                  endsOn: draft.endsOn < startsOn ? startsOn : draft.endsOn,
+                  endsOn: addDays(startsOn, durationDays),
                   recurrence: draft.recurrence
                     ? {
                         ...draft.recurrence,
@@ -366,8 +464,8 @@ export function EventComposer({
                             : draft.recurrence.until,
                       }
                     : null,
-                })
-              }
+                });
+              }}
             />
           </View>
 
@@ -394,14 +492,14 @@ export function EventComposer({
                 {draft.hasTime ? <Check size={14} color={colors.onBrand} /> : null}
               </View>
               <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
-                Add a time
+                Include a time
               </Text>
             </Pressable>
             {draft.hasTime ? (
               <View style={{ flexDirection: largeText ? "column" : "row", gap: space.sm }}>
                 <View style={{ flex: largeText ? undefined : 1, gap: space.xs }}>
                   <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
-                    Starts at
+                    Start time
                   </Text>
                   <TimeStepper
                     time={draft.startTime}
@@ -411,7 +509,7 @@ export function EventComposer({
                 </View>
                 <View style={{ flex: largeText ? undefined : 1, gap: space.xs }}>
                   <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
-                    Ends at
+                    End time
                   </Text>
                   <TimeStepper
                     time={draft.endTime}
@@ -423,6 +521,8 @@ export function EventComposer({
             ) : null}
           </View>
 
+          {occurrenceOnly ? null : (
+            <>
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ expanded: moreOpen, disabled: busy }}
@@ -716,18 +816,40 @@ export function EventComposer({
               </View>
             </View>
           ) : null}
+            </>
+          )}
 
           {mutationError ? <InlineError message={mutationError} /> : null}
 
           <Button
-            label={pendingAction === "save" ? "Saving…" : isEditing ? "Save changes" : "Add event"}
+            label={
+              pendingAction === "save"
+                ? occurrenceOnly
+                  ? "Moving…"
+                  : "Saving…"
+                : occurrenceOnly
+                  ? "Move this event"
+                  : isEditing
+                    ? recurringEditScope === "series"
+                      ? "Save series"
+                      : "Save changes"
+                    : "Add event"
+            }
             onPress={() => void handleSave()}
             disabled={busy || !draft.title.trim()}
             busy={pendingAction === "save"}
           />
           {isEditing && onDelete ? (
             <Button
-              label={pendingAction === "delete" ? "Deleting…" : "Delete event"}
+              label={
+                pendingAction === "delete"
+                  ? "Deleting…"
+                  : recurringEditScope === "series"
+                    ? "Delete entire series"
+                    : recurringEditScope === "occurrence"
+                      ? "Delete this event"
+                      : "Delete event"
+              }
               variant="ghost"
               onPress={requestDelete}
               disabled={busy}

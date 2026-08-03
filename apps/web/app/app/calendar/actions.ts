@@ -9,7 +9,9 @@ import {
   MAX_FAMILY_EVENT_CHILDREN,
   normalizedFamilyEventInputChildIds,
   parseFamilyEventInput,
+  parseFamilyEventTiming,
   type FamilyEventInput,
+  type FamilyEventTimingInput,
   type ParsedFamilyEvent,
 } from "../../../lib/family-events";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -165,4 +167,74 @@ export async function deleteFamilyEventAction(eventId: string): Promise<Calendar
   revalidatePath("/app/planner");
   revalidatePath("/app/calendar");
   return { error: null };
+}
+
+async function saveOccurrenceException(input: {
+  eventId: string;
+  familyId: string;
+  occurrenceOn: string;
+  kind: "cancelled" | "moved";
+  timing: FamilyEventTimingInput | null;
+}): Promise<CalendarActionResult> {
+  const occurrence = parseFamilyEventTiming({ startsOn: input.occurrenceOn });
+  if (!occurrence.ok) return { error: occurrence.error };
+  const timing = input.timing ? parseFamilyEventTiming(input.timing) : null;
+  if (timing && !timing.ok) return { error: timing.error };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("save_family_event_occurrence_exception", {
+    p_event_id: input.eventId,
+    p_family_id: input.familyId,
+    p_occurrence_on: input.occurrenceOn,
+    p_kind: input.kind,
+    p_starts_on: timing?.ok ? timing.value.startsOn : null,
+    p_ends_on: timing?.ok ? timing.value.endsOn : null,
+    p_start_time: timing?.ok ? timing.value.startTime : null,
+    p_end_time: timing?.ok ? timing.value.endTime : null,
+  });
+  if (error || data !== input.occurrenceOn) {
+    console.error(
+      `family event occurrence ${input.kind} failed:`,
+      error?.message ?? "missing mutation receipt",
+    );
+    return {
+      error: input.kind === "moved"
+        ? "That event didn't move. Nothing changed; try again in a minute."
+        : "That event wasn't deleted. Nothing changed; try again in a minute.",
+    };
+  }
+  revalidatePath("/app/planner");
+  revalidatePath("/app/calendar");
+  return { error: null };
+}
+
+export async function moveFamilyEventOccurrenceAction(
+  eventId: string,
+  occurrenceOn: string,
+  timing: FamilyEventTimingInput,
+): Promise<CalendarActionResult> {
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+  return saveOccurrenceException({
+    eventId,
+    familyId: family.id,
+    occurrenceOn,
+    kind: "moved",
+    timing,
+  });
+}
+
+export async function deleteFamilyEventOccurrenceAction(
+  eventId: string,
+  occurrenceOn: string,
+): Promise<CalendarActionResult> {
+  const family = await getMyFamily();
+  if (!family) return { error: "Set up your family first." };
+  return saveOccurrenceException({
+    eventId,
+    familyId: family.id,
+    occurrenceOn,
+    kind: "cancelled",
+    timing: null,
+  });
 }

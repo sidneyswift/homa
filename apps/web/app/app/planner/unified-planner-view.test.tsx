@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -34,6 +35,9 @@ const SECOND_KID: UnifiedPlannerKid = {
   name: "Remy",
   avatar_url: null,
 };
+
+const plannerSource = readFileSync(new URL("./unified-planner-view.tsx", import.meta.url), "utf8");
+const calendarActionsSource = readFileSync(new URL("../calendar/actions.ts", import.meta.url), "utf8");
 
 const PLAN: DashboardPlan = {
   childId: KID.id,
@@ -126,6 +130,17 @@ function renderView(
 }
 
 describe("UnifiedPlannerView", () => {
+  it("offers one occurrence or the entire recurring series for move and delete", () => {
+    assert.match(plannerSource, /What do you want to move\?/u);
+    assert.match(plannerSource, /What do you want to delete\?/u);
+    assert.match(plannerSource, /Move this event/u);
+    assert.match(plannerSource, /Edit entire series/u);
+    assert.match(plannerSource, /Delete this event/u);
+    assert.match(plannerSource, /Delete entire series/u);
+    assert.match(calendarActionsSource, /save_family_event_occurrence_exception/u);
+    assert.match(calendarActionsSource, /data !== input\.occurrenceOn/u);
+  });
+
   it("opens on one day with one Add action and four quiet views", () => {
     const html = renderView();
     assert.match(html, />Planner<\/h1>/);

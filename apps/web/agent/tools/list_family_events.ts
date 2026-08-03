@@ -7,6 +7,7 @@ import {
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { getChildrenPinned } from "../../lib/agent-pinned";
 import {
+  expandRecurringFamilyEvents,
   familyEventChildIds,
   listFamilyEventsPinned,
   MAX_EVENT_WINDOW_DAYS,
@@ -89,10 +90,15 @@ export default defineBoundedTool({
       return { events: [], note: window.error };
     }
 
-    const [events, children] = await Promise.all([
+    const [seriesEvents, children] = await Promise.all([
       listFamilyEventsPinned(familyId, window.fromDate, window.toDate),
       getChildrenPinned(familyId),
     ]);
+    const events = expandRecurringFamilyEvents(
+      seriesEvents,
+      window.fromDate,
+      window.toDate,
+    );
     const nameById = new Map(children.map((child) => [child.id, child.name]));
 
     const windowNote = `Window: ${window.fromDate} to ${window.toDate}${
@@ -114,6 +120,8 @@ export default defineBoundedTool({
           endTime: event.endTime,
           note: event.note,
           recurrence: event.recurrence,
+          occurrenceKey: event.occurrenceKey,
+          originalOccurrenceOn: event.originalOccurrenceOn,
         };
       }),
       note:

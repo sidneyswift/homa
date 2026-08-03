@@ -109,3 +109,17 @@ Week summaries now count unfinished activities and appointments before declaring
 **Plan-confirmed**
 
 Final release gates pass: workspace typecheck, workspace lint with zero errors and nine unrelated existing warnings, 51 of 51 Hours UI tests, 149 of 149 calendar compatibility tests, the native Planner test, the em-dash guard, and `git diff --check`.
+
+## 2026-08-02 22:14 ET
+
+**Discovery**
+
+Co-founder feedback on [#734](https://github.com/sidneyswift/homa/issues/734) clarified that a recurring event needs two different kinds of change. A parent may need to move or remove one date, while the underlying weekly series stays intact, or change the entire series.
+
+**Plan-confirmed**
+
+Planner now asks for scope only after the parent chooses Move or Delete. `This event` creates a dated exception keyed by the occurrence's original generated date. `Entire series` edits or deletes the canonical `family_events` row. Web and native use the same rule, while ordinary event details remain unchanged until the scope choice is relevant.
+
+**Plan-confirmed**
+
+The additive `family_event_occurrence_exceptions` table stores either a cancellation or replacement timing. Authenticated clients can read their family's exceptions but cannot write the table directly. The `save_family_event_occurrence_exception` function rechecks family membership, event tenancy, recurrence membership, replacement timing, and returns the exact original date as its mutation receipt. A disposable PostgreSQL replay of all migrations proves valid moves and cancellations, invalid-date rejection, direct-write denial, cross-family isolation, and cascade cleanup when the series is deleted.

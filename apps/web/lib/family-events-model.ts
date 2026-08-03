@@ -31,6 +31,19 @@ export function daysBetweenDateOnly(from: string, to: string): number {
   );
 }
 
+function dateIsOccurrence(
+  event: Pick<FamilyEventRow, "startsOn" | "recurrence">,
+  date: string,
+): boolean {
+  const rule = event.recurrence;
+  if (!rule || date < event.startsOn || (rule.until !== null && date > rule.until)) {
+    return false;
+  }
+  const elapsedDays = daysBetweenDateOnly(event.startsOn, date);
+  return Math.floor(elapsedDays / 7) % rule.interval === 0
+    && rule.weekdays.includes(weekdayForDateOnly(date));
+}
+
 /** Expands stored weekly series only inside the requested Planner window.
  * The original row remains canonical; occurrence dates are view data. */
 export function expandRecurringFamilyEvents(
@@ -48,6 +61,11 @@ export function expandRecurringFamilyEvents(
       continue;
     }
 
+    const exceptions = new Map(
+      (event.occurrenceExceptions ?? [])
+        .filter((exception) => dateIsOccurrence(event, exception.occurrenceOn))
+        .map((exception) => [exception.occurrenceOn, exception]),
+    );
     const durationDays = Math.max(0, daysBetweenDateOnly(event.startsOn, event.endsOn));
     let candidate = addDaysToDateOnly(rangeStart, -durationDays);
     if (candidate < event.startsOn) candidate = event.startsOn;
@@ -60,18 +78,46 @@ export function expandRecurringFamilyEvents(
         && rule.weekdays.includes(weekdayForDateOnly(candidate))
       ) {
         const occurrenceEnd = addDaysToDateOnly(candidate, durationDays);
-        if (occurrenceEnd >= rangeStart) {
+        if (occurrenceEnd >= rangeStart && !exceptions.has(candidate)) {
           expanded.push({
             ...event,
             startsOn: candidate,
             endsOn: occurrenceEnd,
             seriesStartsOn: event.startsOn,
             seriesEndsOn: event.endsOn,
+            seriesStartTime: event.startTime,
+            seriesEndTime: event.endTime,
+            originalOccurrenceOn: candidate,
             occurrenceKey: `${event.id}:${candidate}`,
           });
         }
       }
       candidate = addDaysToDateOnly(candidate, 1);
+    }
+
+    for (const exception of exceptions.values()) {
+      if (
+        exception.kind !== "moved"
+        || exception.startsOn === null
+        || exception.endsOn === null
+        || exception.startsOn > rangeEnd
+        || exception.endsOn < rangeStart
+      ) {
+        continue;
+      }
+      expanded.push({
+        ...event,
+        startsOn: exception.startsOn,
+        endsOn: exception.endsOn,
+        startTime: exception.startTime,
+        endTime: exception.endTime,
+        seriesStartsOn: event.startsOn,
+        seriesEndsOn: event.endsOn,
+        seriesStartTime: event.startTime,
+        seriesEndTime: event.endTime,
+        originalOccurrenceOn: exception.occurrenceOn,
+        occurrenceKey: `${event.id}:${exception.occurrenceOn}`,
+      });
     }
   }
   return expanded.sort(

@@ -23,6 +23,7 @@ import {
 import type {
   FamilyEventInput,
   FamilyEventRow,
+  FamilyEventTimingInput,
 } from "../../../lib/family-events";
 import {
   expandRecurringFamilyEvents,
@@ -52,7 +53,9 @@ import {
 } from "../../../lib/use-plan-checks";
 import {
   createFamilyEventAction,
+  deleteFamilyEventOccurrenceAction,
   deleteFamilyEventAction,
+  moveFamilyEventOccurrenceAction,
   updateFamilyEventAction,
 } from "../calendar/actions";
 import { HoursView } from "../hours/hours-view";
@@ -72,6 +75,7 @@ interface PlannerActivity extends CalendarActivityItem {
 
 interface ComposerState {
   eventId: string | null;
+  editingSeries: boolean;
   title: string;
   childIds: string[];
   startsOn: string;
@@ -84,6 +88,20 @@ interface ComposerState {
   recurrenceInterval: number;
   recurrenceWeekdays: number[];
   repeatUntil: string;
+}
+
+interface MoveComposerState {
+  event: FamilyEventRow;
+  startsOn: string;
+  endsOn: string;
+  allDay: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+interface RecurringScopeState {
+  action: "move" | "delete";
+  event: FamilyEventRow;
 }
 
 const VIEW_LABELS: ReadonlyArray<{ mode: PlannerViewMode; label: string }> = [
@@ -228,6 +246,7 @@ function recurrenceLabel(event: FamilyEventRow): string | null {
 function createComposer(date: string, childId: string | null): ComposerState {
   return {
     eventId: null,
+    editingSeries: false,
     title: "",
     childIds: childId ? [childId] : [],
     startsOn: date,
@@ -247,19 +266,35 @@ function editComposer(event: FamilyEventRow): ComposerState {
   const startsOn = event.seriesStartsOn ?? event.startsOn;
   return {
     eventId: event.id,
+    editingSeries: event.recurrence != null,
     title: event.title,
     childIds: familyEventChildIds(event),
     startsOn,
     endsOn: event.seriesEndsOn ?? event.endsOn,
     allDay: event.startTime === null,
-    startTime: event.startTime ?? "09:00",
-    endTime: event.endTime ?? "10:00",
+    startTime: event.seriesStartTime ?? event.startTime ?? "09:00",
+    endTime: event.seriesEndTime ?? event.endTime ?? "10:00",
     note: event.note ?? "",
     repeatWeekly: event.recurrence != null,
     recurrenceInterval: event.recurrence?.interval ?? 1,
     recurrenceWeekdays: event.recurrence?.weekdays ?? [weekdayForDate(startsOn)],
     repeatUntil: event.recurrence?.until ?? "",
   };
+}
+
+function moveComposer(event: FamilyEventRow): MoveComposerState {
+  return {
+    event,
+    startsOn: event.startsOn,
+    endsOn: event.endsOn,
+    allDay: event.startTime === null,
+    startTime: event.startTime ?? "09:00",
+    endTime: event.endTime ?? "10:00",
+  };
+}
+
+function occurrenceOn(event: FamilyEventRow): string {
+  return event.originalOccurrenceOn ?? event.startsOn;
 }
 
 function ModalShell({
@@ -299,13 +334,20 @@ function ModalShell({
   );
 }
 
-function DialogClose({ onClose }: { onClose: () => void }) {
+function DialogClose({
+  onClose,
+  disabled = false,
+}: {
+  onClose: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClose}
       aria-label="Close"
-      className="grid h-11 w-11 flex-none place-items-center rounded-full bg-page text-muted hover:text-strong"
+      className="grid h-11 w-11 flex-none place-items-center rounded-full bg-page text-muted hover:text-strong disabled:cursor-not-allowed disabled:opacity-50"
     >
       <X size={19} />
     </button>
@@ -541,11 +583,15 @@ function EventDetails({
   event,
   kids,
   onEdit,
+  onMove,
+  onDelete,
   onClose,
 }: {
   event: FamilyEventRow;
   kids: readonly UnifiedPlannerKid[];
   onEdit: () => void;
+  onMove: () => void;
+  onDelete: () => void;
   onClose: () => void;
 }) {
   return (
@@ -570,6 +616,14 @@ function EventDetails({
             <dd className="font-semibold text-strong">{recurrenceLabel(event)}</dd>
           </div>
         ) : null}
+        {event.originalOccurrenceOn && event.originalOccurrenceOn !== event.startsOn ? (
+          <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
+            <dt className="text-muted">Moved from</dt>
+            <dd className="font-semibold text-strong">
+              {formatFullDate(event.originalOccurrenceOn)}
+            </dd>
+          </div>
+        ) : null}
         {event.note ? (
           <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
             <dt className="text-muted">Note</dt>
@@ -577,13 +631,238 @@ function EventDetails({
           </div>
         ) : null}
       </dl>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        {event.recurrence ? (
+          <button
+            type="button"
+            onClick={onMove}
+            className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+          >
+            Move
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={onEdit}
+          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page"
+        >
+          {event.recurrence ? "Edit series" : "Edit event"}
+        </button>
+        {event.recurrence ? (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="ml-auto inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-[var(--clay-700)] hover:underline"
+          >
+            Delete
+          </button>
+        ) : null}
+      </div>
+    </ModalShell>
+  );
+}
+
+function RecurringScopeDialog({
+  state,
+  saving,
+  error,
+  onThisEvent,
+  onEntireSeries,
+  onClose,
+}: {
+  state: RecurringScopeState;
+  saving: boolean;
+  error: string | null;
+  onThisEvent: () => void;
+  onEntireSeries: () => void;
+  onClose: () => void;
+}) {
+  const moving = state.action === "move";
+  const originalDate = occurrenceOn(state.event);
+  const repeat = recurrenceLabel(state.event)?.replace(/^Every/u, "every");
+  return (
+    <ModalShell
+      titleId="planner-recurring-scope-title"
+      onClose={saving ? () => undefined : onClose}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2
+            id="planner-recurring-scope-title"
+            className="font-display text-2xl font-semibold text-strong"
+          >
+            {moving ? "What do you want to move?" : "What do you want to delete?"}
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            {state.event.title} repeats{repeat ? ` ${repeat}` : ""}.
+          </p>
+        </div>
+        <DialogClose onClose={onClose} disabled={saving} />
+      </div>
+
+      <div className="mt-5 grid gap-2">
+        <button
+          type="button"
+          disabled={saving}
+          onClick={onThisEvent}
+          className="min-h-[64px] rounded-md border border-border bg-card px-4 py-3 text-left hover:border-[var(--clay-300)] hover:bg-page disabled:opacity-50"
+        >
+          <span className="block text-sm font-bold text-strong">
+            {moving ? "Move this event" : "Delete this event"}
+          </span>
+          <span className="mt-0.5 block text-xs text-muted">
+            {moving
+              ? `Only ${formatFullDate(originalDate)} moves. The rest stay.`
+              : `${formatFullDate(originalDate)} is removed. The rest stay.`}
+          </span>
+        </button>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={onEntireSeries}
+          className="min-h-[64px] rounded-md border border-border bg-card px-4 py-3 text-left hover:border-[var(--clay-300)] hover:bg-page disabled:opacity-50"
+        >
+          <span
+            className={
+              moving
+                ? "block text-sm font-bold text-strong"
+                : "block text-sm font-bold text-[var(--clay-700)]"
+            }
+          >
+            {moving ? "Edit entire series" : "Delete entire series"}
+          </span>
+          <span className="mt-0.5 block text-xs text-muted">
+            {moving
+              ? "Change the schedule for every event in this series."
+              : "Remove every event in this series, including past dates."}
+          </span>
+        </button>
+      </div>
+
+      {error ? (
+        <p role="alert" className="mt-4 rounded-md bg-[var(--clay-50)] px-3 py-2 text-sm font-semibold text-[var(--clay-700)]">
+          {error}
+        </p>
+      ) : null}
+
       <button
         type="button"
-        onClick={onEdit}
-        className="mt-5 inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page"
+        disabled={saving}
+        onClick={onClose}
+        className="mt-4 inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page disabled:opacity-50"
       >
-        Edit event
+        Cancel
       </button>
+    </ModalShell>
+  );
+}
+
+function MoveEventComposer({
+  state,
+  saving,
+  error,
+  onChange,
+  onSave,
+  onClose,
+}: {
+  state: MoveComposerState;
+  saving: boolean;
+  error: string | null;
+  onChange: (next: MoveComposerState) => void;
+  onSave: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <ModalShell titleId="planner-move-event-title" onClose={saving ? () => undefined : onClose}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="planner-move-event-title" className="font-display text-2xl font-semibold text-strong">
+            Move this event
+          </h2>
+          <p className="mt-1 text-sm text-muted">{state.event.title}</p>
+        </div>
+        <DialogClose onClose={onClose} disabled={saving} />
+      </div>
+
+      <label className="mt-5 block text-sm font-semibold text-body">
+        Date
+        <input
+          type="date"
+          disabled={saving}
+          value={state.startsOn}
+          onChange={(event) => {
+            const durationDays = Math.max(0, daysBetween(state.startsOn, state.endsOn));
+            const startsOn = event.target.value;
+            onChange({
+              ...state,
+              startsOn,
+              endsOn: addDaysDateOnly(startsOn, durationDays),
+            });
+          }}
+          className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </label>
+
+      <label className="mt-4 flex min-h-11 cursor-pointer items-center gap-2.5 text-sm font-semibold text-body">
+        <input
+          type="checkbox"
+          disabled={saving}
+          checked={state.allDay}
+          onChange={(event) => onChange({ ...state, allDay: event.target.checked })}
+          className="h-[18px] w-[18px] accent-[var(--clay-500)] disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        All day
+      </label>
+
+      {state.allDay ? null : (
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <label className="text-sm font-semibold text-body">
+            Start time
+            <input
+              type="time"
+              disabled={saving}
+              value={state.startTime}
+              onChange={(event) => onChange({ ...state, startTime: event.target.value })}
+              className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </label>
+          <label className="text-sm font-semibold text-body">
+            End time
+            <input
+              type="time"
+              disabled={saving}
+              value={state.endTime}
+              onChange={(event) => onChange({ ...state, endTime: event.target.value })}
+              className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </label>
+        </div>
+      )}
+
+      {error ? (
+        <p role="alert" className="mt-4 rounded-md bg-[var(--clay-50)] px-3 py-2 text-sm font-semibold text-[var(--clay-700)]">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={saving}
+          onClick={onSave}
+          className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:opacity-50"
+        >
+          {saving ? "Moving…" : "Move this event"}
+        </button>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={onClose}
+          className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page disabled:opacity-50"
+        >
+          Cancel
+        </button>
+      </div>
     </ModalShell>
   );
 }
@@ -619,20 +898,27 @@ function EventComposer({
     : "Whole family";
   const repeatSummary = composer.repeatWeekly
     ? composer.recurrenceInterval > 1
-      ? `Every ${composer.recurrenceInterval} weeks`
-      : "Every week"
+      ? `Every ${composer.recurrenceInterval} weeks${composer.repeatUntil ? ` until ${formatShortDate(composer.repeatUntil)}` : ""}`
+      : `Every week${composer.repeatUntil ? ` until ${formatShortDate(composer.repeatUntil)}` : ""}`
     : "Does not repeat";
 
   return (
-    <ModalShell titleId="planner-composer-title" onClose={onClose}>
+    <ModalShell
+      titleId="planner-composer-title"
+      onClose={saving ? () => undefined : onClose}
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 id="planner-composer-title" className="font-display text-2xl font-semibold text-strong">
-            {composer.eventId ? "Edit event" : "Add an event"}
+            {composer.editingSeries ? "Edit series" : composer.eventId ? "Edit event" : "Add an event"}
           </h2>
-          <p className="mt-1 text-sm text-muted">Appointments, co-op, trips, and other fixed plans.</p>
+          <p className="mt-1 text-sm text-muted">
+            {composer.editingSeries
+              ? "Changes apply to every event in this series."
+              : "Appointments, co-op, trips, and other fixed plans."}
+          </p>
         </div>
-        <DialogClose onClose={onClose} />
+        <DialogClose onClose={onClose} disabled={saving} />
       </div>
 
       <label className="mt-5 block text-sm font-semibold text-body">
@@ -840,7 +1126,13 @@ function EventComposer({
           disabled={saving || composer.title.trim() === ""}
           className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {saving ? "Saving…" : composer.eventId ? "Save changes" : "Add event"}
+          {saving
+            ? "Saving…"
+            : composer.editingSeries
+              ? "Save series"
+              : composer.eventId
+                ? "Save changes"
+                : "Add event"}
         </button>
         <button
           type="button"
@@ -850,14 +1142,29 @@ function EventComposer({
           Cancel
         </button>
         {composer.eventId ? (
-          <button
-            type="button"
-            onClick={() => (confirmDelete ? onDelete() : setConfirmDelete(true))}
-            disabled={saving}
-            className="ml-auto inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-[var(--clay-700)] hover:underline disabled:opacity-50"
-          >
-            {confirmDelete ? "Confirm delete" : "Delete event"}
-          </button>
+          <div className="ml-auto flex max-w-sm flex-col items-end gap-1">
+            {confirmDelete ? (
+              <p className="text-right text-xs font-semibold text-[var(--clay-700)]">
+                {composer.editingSeries
+                  ? "This removes every event in the series, including past dates."
+                  : "This event will be removed from Homa."}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => (confirmDelete ? onDelete() : setConfirmDelete(true))}
+              disabled={saving}
+              className="inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-[var(--clay-700)] hover:underline disabled:opacity-50"
+            >
+              {confirmDelete
+                ? composer.editingSeries
+                  ? "Delete entire series"
+                  : "Delete event"
+                : composer.editingSeries
+                  ? "Delete series"
+                  : "Delete event"}
+            </button>
+          </div>
         ) : null}
       </div>
     </ModalShell>
@@ -897,7 +1204,10 @@ export function UnifiedPlannerView({
   const [selectedActivity, setSelectedActivity] = useState<PlannerActivity | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<FamilyEventRow | null>(null);
   const [composer, setComposer] = useState<ComposerState | null>(null);
+  const [moveState, setMoveState] = useState<MoveComposerState | null>(null);
+  const [recurringScope, setRecurringScope] = useState<RecurringScopeState | null>(null);
   const [composerError, setComposerError] = useState<string | null>(null);
+  const [recurringActionError, setRecurringActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [dayFilter, setDayFilter] = useState({
@@ -999,6 +1309,78 @@ export function UnifiedPlannerView({
     setSelectedEvent(null);
     setComposerError(null);
     setComposer(editComposer(event));
+  }
+
+  function openRecurringScope(action: RecurringScopeState["action"], event: FamilyEventRow) {
+    setSelectedEvent(null);
+    setRecurringActionError(null);
+    setRecurringScope({ action, event });
+  }
+
+  async function chooseThisRecurringEvent() {
+    if (!recurringScope || saving) return;
+    if (recurringScope.action === "move") {
+      setMoveState(moveComposer(recurringScope.event));
+      setRecurringScope(null);
+      return;
+    }
+    setSaving(true);
+    setRecurringActionError(null);
+    const result = await deleteFamilyEventOccurrenceAction(
+      recurringScope.event.id,
+      occurrenceOn(recurringScope.event),
+    );
+    setSaving(false);
+    if (result.error) {
+      setRecurringActionError(result.error);
+      return;
+    }
+    setRecurringScope(null);
+    router.refresh();
+  }
+
+  async function chooseEntireRecurringSeries() {
+    if (!recurringScope || saving) return;
+    if (recurringScope.action === "move") {
+      setComposerError(null);
+      setComposer(editComposer(recurringScope.event));
+      setRecurringScope(null);
+      return;
+    }
+    setSaving(true);
+    setRecurringActionError(null);
+    const result = await deleteFamilyEventAction(recurringScope.event.id);
+    setSaving(false);
+    if (result.error) {
+      setRecurringActionError(result.error);
+      return;
+    }
+    setRecurringScope(null);
+    router.refresh();
+  }
+
+  async function saveMovedOccurrence() {
+    if (!moveState || saving) return;
+    setSaving(true);
+    setRecurringActionError(null);
+    const timing: FamilyEventTimingInput = {
+      startsOn: moveState.startsOn,
+      endsOn: moveState.endsOn,
+      startTime: moveState.allDay ? null : moveState.startTime,
+      endTime: moveState.allDay ? null : moveState.endTime,
+    };
+    const result = await moveFamilyEventOccurrenceAction(
+      moveState.event.id,
+      occurrenceOn(moveState.event),
+      timing,
+    );
+    setSaving(false);
+    if (result.error) {
+      setRecurringActionError(result.error);
+      return;
+    }
+    setMoveState(null);
+    router.refresh();
   }
 
   async function saveComposer() {
@@ -1383,7 +1765,29 @@ export function UnifiedPlannerView({
           event={selectedEvent}
           kids={kids}
           onEdit={() => openEventEditor(selectedEvent)}
+          onMove={() => openRecurringScope("move", selectedEvent)}
+          onDelete={() => openRecurringScope("delete", selectedEvent)}
           onClose={() => setSelectedEvent(null)}
+        />
+      ) : null}
+      {recurringScope ? (
+        <RecurringScopeDialog
+          state={recurringScope}
+          saving={saving}
+          error={recurringActionError}
+          onThisEvent={() => void chooseThisRecurringEvent()}
+          onEntireSeries={() => void chooseEntireRecurringSeries()}
+          onClose={() => setRecurringScope(null)}
+        />
+      ) : null}
+      {moveState ? (
+        <MoveEventComposer
+          state={moveState}
+          saving={saving}
+          error={recurringActionError}
+          onChange={setMoveState}
+          onSave={() => void saveMovedOccurrence()}
+          onClose={() => setMoveState(null)}
         />
       ) : null}
       {composer ? (
