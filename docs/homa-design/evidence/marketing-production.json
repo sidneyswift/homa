@@ -1,0 +1,1950 @@
+{
+  "schemaVersion": 1,
+  "designEra": "quiet-authority-v1",
+  "contractVersion": "quiet-authority-v1",
+  "contractSourceChecksum": "cb79adb67b2f055645702a43cdfaf8cbd9aecfac482a40790a001dd3d5aaacb6",
+  "surfaceManifestFingerprint": "40b26f78dc2424e8237eebb1980b15fd8a30d4af25135618d5b39f563148fdbb",
+  "authoringManifestFingerprint": "40b26f78dc2424e8237eebb1980b15fd8a30d4af25135618d5b39f563148fdbb",
+  "ownedInputFingerprint": "a47960085bb1db86a8bec8783435b717ae77447a79db3c87cc7d8e50ee9d40aa",
+  "sourceOfTruth": [
+    "marketing/AGENTS.md",
+    "marketing/voice/house-style.md",
+    "docs/homa-planning/14-marketing-demand-engine.md",
+    "packages/design/generated/contract.json",
+    "docs/homa-design/evidence/surfaces.json",
+    "docs/homa-design/evidence/authoring-rails.json"
+  ],
+  "channelReductionLadder": [
+    {
+      "channel": "blog",
+      "state": "repository-publishing",
+      "hardGates": [
+        "source-and-signal",
+        "reader-then-editor",
+        "scorecard-pass",
+        "approved-format",
+        "web-build",
+        "canonical-live-probe"
+      ]
+    },
+    {
+      "channel": "social",
+      "state": "blocked-founder-action",
+      "hardGates": [
+        "approved-format",
+        "postiz-auth",
+        "named-integration-readback",
+        "media-upload-readback",
+        "canonical-url",
+        "rollback-record"
+      ]
+    },
+    {
+      "channel": "email",
+      "state": "blocked-founder-decision",
+      "hardGates": [
+        "dm7-consent-ruling",
+        "approved-format",
+        "resend-delivery-readback",
+        "unsubscribe-readback"
+      ]
+    },
+    {
+      "channel": "video",
+      "state": "staged-only",
+      "hardGates": [
+        "script-gates",
+        "timed-asset-review",
+        "privacy-review",
+        "platform-crop-review"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "marketing:1c8694a37b785739",
+      "path": "marketing/AGENTS.md",
+      "roles": [
+        "authoring-rule",
+        "voice"
+      ],
+      "state": "active",
+      "sourceHash": "e7122feae5621a25930df90bf2fb136bba0af4adf71afd48016d6b053ec62d61",
+      "bytes": 4487,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b3626e9db4fe4ea0",
+      "path": "marketing/assets/brand/homa-lockup-dark.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "9577f462b0f7cb7bbc022d2df62e6f6baee7bd58b3e4a8f5729e9254feb2c88f",
+      "bytes": 32172,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:aed11d53c3a02dc7",
+      "path": "marketing/assets/brand/homa-lockup-dark.svg",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "eaa6582382cd2ddc03a585f83fd236503d48a40d71e34a803cb598e13353d7e5",
+      "bytes": 6522,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:9dcfbe7c6033ddd3",
+      "path": "marketing/assets/brand/homa-lockup.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "a107eab8a2a578f817d0af3e2316376fecf589d1893deb7cc2caf833aa15b775",
+      "bytes": 34454,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:cd0871c8bdb28792",
+      "path": "marketing/assets/brand/homa-lockup.svg",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "81dcd2e0701c1a3a7595a2f1cef41e2722f7151a2ac8a154654df6b9a85242fc",
+      "bytes": 6522,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:60d69a694acb9e2c",
+      "path": "marketing/assets/brand/homa-mark-120.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "cffff27ee2cb790cf1429129d5e823818d529f26109ebad80d3488723bc90e92",
+      "bytes": 2136,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:beb9495363f260f3",
+      "path": "marketing/assets/brand/homa-mark-512.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "b484c2ed7c38bcc2702dac0cd9e8a9a088ded5abf6eeda5da654c348b4a9e95c",
+      "bytes": 11145,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:097b68c7cad550f1",
+      "path": "marketing/assets/brand/homa-mark.svg",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "d9d3aab0d9369eab5989c173948f76af58e2ce1ee101592b44746fda812ef869",
+      "bytes": 689,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:67015de50322342e",
+      "path": "marketing/assets/brand/phone/homa-pfp-clay-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "61093d18904d4aa316a83ad60669a7ba85b738d932c429cc4e93155c18f06d60",
+      "bytes": 35966,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:acd75892712600bb",
+      "path": "marketing/assets/brand/phone/homa-pfp-cream-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "8851360a765c2f7cf0f93a2c2d3cfb424e22ad1531ead6327febc737f656436d",
+      "bytes": 38381,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:cdbbe2dfe26bdaee",
+      "path": "marketing/assets/brand/phone/homa-pfp-night-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "0f8452a4849033b5aca69b43cfb8ca21b036f2dd85708e14f81cd5f2f70005d8",
+      "bytes": 38223,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2035ffe8d8b07b33",
+      "path": "marketing/assets/brand/phone/homa-wallpaper-cream.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "ccdd13a030a95a4d483b71b6ccfe41fc36ae295b0df14e1056bfb3e7f51ebf9e",
+      "bytes": 98398,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4666d3438f80746f",
+      "path": "marketing/assets/brand/phone/homa-wallpaper-night.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "20805d7e663feb6b233c27335f7f973879f7510a2e48d7d8115f2453a8367a78",
+      "bytes": 98259,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4b1c9345bab22eff",
+      "path": "marketing/assets/socials-starter-pack/README.md",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0",
+      "bytes": 1822,
+      "legacySignatures": [
+        "legacy-palette-value"
+      ]
+    },
+    {
+      "id": "marketing:b25bd7457e3d3d6f",
+      "path": "marketing/assets/socials-starter-pack/banners/linkedin/homa-linkedin-banner-cream-4200x700.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "8a7cb2c6777a8011f71fdf895c84a3788f79b46cddc831968737bd181c6185e3",
+      "bytes": 41315,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:0ef54f7dcc35baf1",
+      "path": "marketing/assets/socials-starter-pack/banners/linkedin/homa-linkedin-banner-navy-4200x700.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "f4d0b9ba7d16390584f298e124755f87a9ced09f0040207f099c153014fcb268",
+      "bytes": 40900,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:95dd1e69e2236761",
+      "path": "marketing/assets/socials-starter-pack/banners/x/homa-x-banner-cream-1500x500.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "89a3c73b40a80ec55924ac98000b9395e1ba865e93cdac16a6eaa550fdd22d7e",
+      "bytes": 21214,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e9101e63a9c77f69",
+      "path": "marketing/assets/socials-starter-pack/banners/x/homa-x-banner-navy-1500x500.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "50ba92eb942769285ae642f086871144f74a81074d8c22de421dc808434fbcd9",
+      "bytes": 20742,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:863e662e164e3ce4",
+      "path": "marketing/assets/socials-starter-pack/banners/youtube/homa-youtube-banner-cream-2560x1440.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "47c5081f882caa4f13082812bf8a92c1e36d5f9d1030654614094559b9ef87eb",
+      "bytes": 38698,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c9e53a31d9037607",
+      "path": "marketing/assets/socials-starter-pack/banners/youtube/homa-youtube-banner-navy-2560x1440.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "c64017de5680c81ab81ca37283f9e3d267639e700e1a5e5d5906f2f304d1da13",
+      "bytes": 38178,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6e31e412844ab290",
+      "path": "marketing/assets/socials-starter-pack/logos/homa-lockup-reversed-transparent-2400.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "eeeb867fd08ff5dc9127ea94dba91d86b5bb50ec398327db23946e00b6d438fa",
+      "bytes": 60167,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:0e2e02fc9e57e920",
+      "path": "marketing/assets/socials-starter-pack/logos/homa-lockup-reversed-transparent.svg",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "c28c1037440c7a22ee7782fee4af03c27b9465b51ced1cc826314e37e8ea0a25",
+      "bytes": 6522,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ed01e0f48f2f0fed",
+      "path": "marketing/assets/socials-starter-pack/logos/homa-lockup-transparent-2400.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "558b33d3fc89a7188f6612d88a4e25709cf624ab59b893e73745e3afd2051768",
+      "bytes": 76291,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8d582d2d6388578f",
+      "path": "marketing/assets/socials-starter-pack/logos/homa-lockup-transparent.svg",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "7b2e866f3565774af0079a103be928465971083d267edd8e932501ce05a8b956",
+      "bytes": 6522,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5d7324ad93d7079e",
+      "path": "marketing/assets/socials-starter-pack/pfp/homa-pfp-cream-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "6b05bb1e2b4340b3f3bc82af4afe0aa5c59cc3fb2d76f884f6069d7ffb2efe98",
+      "bytes": 21677,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:9ce72d1e3337a86f",
+      "path": "marketing/assets/socials-starter-pack/pfp/homa-pfp-navy-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "retired-quarantined",
+      "sourceHash": "0c6c7ea27b5c410b30cd45a293a1387b3cf13f2c625aaa7165f7637f4a976392",
+      "bytes": 21585,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:229668eea317c318",
+      "path": "marketing/campaigns/2026-07-tiktok-launch/playbook.md",
+      "roles": [
+        "campaign"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "abfbd6ac1258006cd2b372671eaac1191e5843662e5e3d86a953285cc5bd73b8",
+      "bytes": 8653,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4c53273d0cd96a29",
+      "path": "marketing/campaigns/2026-07-tiktok-launch/post-queue.md",
+      "roles": [
+        "campaign",
+        "queue"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "08d42c0a564debad412f99f805373a8fb6b1db96b9e96cbdaa4514f9283ae264",
+      "bytes": 3031,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5189a03fae67dcc2",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "33a62d235ca6c4285ca216d197a5454d8234a3171a8d4919440f1729c6adfb20",
+      "bytes": 5645,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:00b2fc0924e6c6f1",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/captions/facebook.md",
+      "roles": [
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "ac671c282f413e300b03c4788cec1e613681a7c5aa6ab7f1a07282cbf529530a",
+      "bytes": 594,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e0b69204e05bcfea",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/captions/instagram.md",
+      "roles": [
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "6a718ba3d8a0fb2251c9f3468b28a336bd9e41912af5b90cd3a51751abbb0597",
+      "bytes": 679,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:9ed174fc5712f873",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/captions/tiktok.md",
+      "roles": [
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "69b93d3de042915c5e66c7baaf17a874db800ecc97c10f7d1100337515e23048",
+      "bytes": 456,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:25c186342c5f9ee3",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/captions/youtube.md",
+      "roles": [
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "e1317c6d6938bbbb30f396788e4a7626b032617a8a7bfb315cd77cf41cf6d082",
+      "bytes": 759,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ccc60a4588eb9529",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/email/email.md",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "0425a68ce153538ba19012e55c5700b01a402675623f39f58c81f37526fe0295",
+      "bytes": 954,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b7c4ad1b15027387",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/images/hero.png",
+      "roles": [
+        "asset",
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "9ea412dc4507ae827a7368fd74a7cc625ceb19f931636b09a75cb779aa4ff670",
+      "bytes": 10279985,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a143aaa9576ab445",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "d66f19ca2f05e8733bbf3144177e4669e5dc9f9e22f47621c63660377aa656e2",
+      "bytes": 1471,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2c7e7fee578ec3a4",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/pin/pin.md",
+      "roles": [
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "a84b028a675bc6f3c3e7c82dcbe51f0701c36483b6cc7179506131ca9de43664",
+      "bytes": 1323,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:d1bcf72850370602",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/pin/pin.png",
+      "roles": [
+        "asset",
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "9e967e5dbd1981448640d3a1b2d95ec3cfa7d9d4c2c394d3b40a009e48a8daea",
+      "bytes": 6011908,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:71f4b49e3454ad90",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/video/script.md",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "69223d8ed1a226fd1e5b25d2b6caab09b8c5ed9775d2c4f51a515eca97058f95",
+      "bytes": 3455,
+      "legacySignatures": [
+        "legacy-palette-value"
+      ]
+    },
+    {
+      "id": "marketing:0b0d527d1903b532",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/video/thumbnail.png",
+      "roles": [
+        "asset",
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "ca1417c052b574dea76cefea63fb44ca59d54dcd71336af3e7e170b638c93b6c",
+      "bytes": 7093735,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c203033cc1116f0e",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/video/video.mp4",
+      "roles": [
+        "asset",
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "f74d6a64209e7d5102ad5b856f1614ea5ae18791e726c19d973d766ec418fb20",
+      "bytes": 11571473,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:63b3329cbe2ade18",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/x.md",
+      "roles": [
+        "draft-bundle",
+        "social-template"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "89e7de8cf3321eaabfe4de6965d6abfd89c62114bdc44c3cfdb45e4bff302325",
+      "bytes": 410,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fec032f77d63d3db",
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "df83ed6c41bf6ba158817385295c654ccfdbd7e814ed83f38324fc4722cb3aa3",
+      "bytes": 961,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:19543823f306ea76",
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/video/script.md",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "cb937c1573778d3cbd4054709129049406b2e95aeb888a1f7a5638349d7022b9",
+      "bytes": 4810,
+      "legacySignatures": [
+        "legacy-palette-value"
+      ]
+    },
+    {
+      "id": "marketing:6768e02b25fbc026",
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/video/thumbnail.png",
+      "roles": [
+        "asset",
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "79a4cd390c444a8342f05285a621d04e4e42e51f8668624df3388fa13c52dc80",
+      "bytes": 949114,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f52a04824166e8d8",
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/video/video-captioned.mp4",
+      "roles": [
+        "asset",
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "f9476d3ed93f1f351f9c4ab6dcc55b54f0e41778ba876b04e9ee7e4acda83bcb",
+      "bytes": 6487493,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:201e3b70ea7d5755",
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/video/video.mp4",
+      "roles": [
+        "asset",
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "5028aa4d2e26dc2250edcf47d6247b64a26f3ea50e045d382120753366571994",
+      "bytes": 7510206,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:d3a2750688ce697f",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "dc176296080a3f8c75e7339b4ccad1accde30926d30e670709a537ddc28d0535",
+      "bytes": 6391,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:77807dde9e6dfc17",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "7a33faea4b2cb592ac37b7f0c88f02a7c48018e2c1b700b72329a130fd305b69",
+      "bytes": 273,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8d63b01705915546",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/images/README.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4289cebc09fb2fadcebf06b7ab38f16861ea50f6759839713d9595ef0af5abe0",
+      "bytes": 732,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:66f490fd8268d8e0",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/images/hero.png",
+      "roles": [
+        "asset",
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "a0365e2ac60fde09580eec064353a0835dce36c8111b3335d67027e5840c017c",
+      "bytes": 5689214,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:47b4ba857035d8e9",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d7be4a8f22084109bf780a1518a03e74df62350c9ce1bc9832a60f8e2460d5c8",
+      "bytes": 923,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:46311269327613a3",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/README.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4307b9a11c9ec633e9b2d26f86e934df27468d795718ac3e78a543b093942212",
+      "bytes": 847,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3c28775e479b27d5",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/script.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "c45896256b494999b5e448cfdeb0a6d312313525215a0a897ff64107fa17f38d",
+      "bytes": 5667,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ccc26a17385f1c16",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/thumbnail.png",
+      "roles": [
+        "asset",
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "f2792a228d24f861f1b5d7e680d253b91fa1d469c14879afe239d14bd38ed794",
+      "bytes": 1555237,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:1f6cb7caf24a2a6e",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/video.mp4",
+      "roles": [
+        "asset",
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d0e08402e66031d96d22ae38a17c29b5a0416909f99878687b5846f945c93eba",
+      "bytes": 7793560,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:feb6724254e676a6",
+      "path": "marketing/creators/tiktok-homeschool-sub10k-shortlist.md",
+      "roles": [
+        "authoring-rule"
+      ],
+      "state": "active",
+      "sourceHash": "d90bd6b8ec1cd39bcbf2a27fec9cfac027428d50a8c9433d47b96b6c07da36ed",
+      "bytes": 5331,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:887b70ed63570de0",
+      "path": "marketing/evals/fixtures/README.md",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "8d226f8a7432bf5801778f66b079de8c66166877a39a1b2caa17b8b345d0fcaf",
+      "bytes": 1057,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:49a97b92ed8abf01",
+      "path": "marketing/evals/fixtures/failing-bundle/article.mdx",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "c091be46adcf88956782eb21bc2076908dfd338b37c7b357f37847f26d585320",
+      "bytes": 421,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:0c28beadec5fd451",
+      "path": "marketing/evals/fixtures/failing-bundle/email/email.md",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "e8f118a81a5dc117c4108b59b08731a3c8ee4c16aee75b1477a5aac3e01d3065",
+      "bytes": 197,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8e0ff30a1c7ef50a",
+      "path": "marketing/evals/fixtures/failing-bundle/meta.yml",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "3641aa713c14a0a094176103d0eac2ad218165fb7e7aed3d5a5d3cabc55fdd91",
+      "bytes": 381,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a3bf4c431330a038",
+      "path": "marketing/evals/fixtures/passing-bundle/article.mdx",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "9cb70f6fb34d4c62e1106eb22fcf8f01e494542cc3e2cc3539b0e2bf737f92e3",
+      "bytes": 490,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:511b5bf96b19c831",
+      "path": "marketing/evals/fixtures/passing-bundle/email/email.md",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "adb21fa5cc5382f5d1cbe2cf16cc0f2d6e6d01860284b4c460b5964fc9b5671b",
+      "bytes": 228,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:1b3966b9bdbb3182",
+      "path": "marketing/evals/fixtures/passing-bundle/meta.yml",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "472aca2bc0fb577f910b0fb5544f41812767d6e11baf50199c7fc924f24cfed3",
+      "bytes": 417,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:52b122968a7f2604",
+      "path": "marketing/evals/fixtures/signals/2026-01-01-fixture-signal.md",
+      "roles": [
+        "evaluator",
+        "golden-fixture"
+      ],
+      "state": "active",
+      "sourceHash": "f1d583d7c5709acabff4ce43cf2b0982c9732f59b895ec6fb012319cada9c492",
+      "bytes": 367,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:92cc4d015ee58a8e",
+      "path": "marketing/evals/score_bundle.py",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "804402d7ebab0dfbcc678bc345aef54bb301ad53beef7c14d0769213af5f28ec",
+      "bytes": 11419,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c9f10c35929f34dd",
+      "path": "marketing/evals/scorecards/.gitkeep",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3e417036b0541e50",
+      "path": "marketing/evals/scorecards/2026-07-05-how-to-track-homeschool-hours.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "25ebba5026338ddb4bee2af633d11f7c7374f124ce43dd721b7ddb6e714eb022",
+      "bytes": 163,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:705b69b3b17a33d9",
+      "path": "marketing/evals/scorecards/2026-07-05-how-to-track-homeschool-hours.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "306e2bc9dc6066dcf492934f9a2f04d2309b519431f9b8d6cf853480d17f1d53",
+      "bytes": 82,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:884e74bff876052e",
+      "path": "marketing/evals/scorecards/2026-07-05-ugc-homa-intro.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "798384c1e7d866d58d658fa686f59076fd862949cf5ab50a73d4fbfc2ad469cb",
+      "bytes": 148,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:29c34bc8c20388a2",
+      "path": "marketing/evals/scorecards/2026-07-05-ugc-homa-intro.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "490446b74781d0cbedee3d42e89006ca2d7b923b84672baed180b6762dd12c4d",
+      "bytes": 67,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:964d1c10cb952e72",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "455b0ba8333d7625a28ed06afb1701f37f4bc663681efdeca326ef3cbc1bbc5f",
+      "bytes": 187,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:49887d8d40d9716e",
+      "path": "marketing/evals/scorecards/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "94508436b5f1829578977949c7297e4926323c3c007485439cf5450df7bd935a",
+      "bytes": 105,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4058d32d5c4f7e4f",
+      "path": "marketing/personas/blog-reader.md",
+      "roles": [
+        "persona"
+      ],
+      "state": "active",
+      "sourceHash": "fcb4b706116b1bbc6aabcf0270a5a3f278855273c93916bba4b37342d8de3da5",
+      "bytes": 2947,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3d3238d87d095926",
+      "path": "marketing/personas/pinner.md",
+      "roles": [
+        "persona"
+      ],
+      "state": "active",
+      "sourceHash": "56f1ab378cec0802f7a2ad4ea224b32c5546ade0c9caae2b2f6b35bc739cbaf5",
+      "bytes": 2474,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:bded3440e8eeb7d5",
+      "path": "marketing/personas/shortform-viewer.md",
+      "roles": [
+        "persona"
+      ],
+      "state": "active",
+      "sourceHash": "ee7a215b36563ce3cc8810289edbe3507d88c7794bedc7d758af382eef0af0b3",
+      "bytes": 2736,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6a81146803a7625d",
+      "path": "marketing/personas/waitlist-subscriber.md",
+      "roles": [
+        "persona"
+      ],
+      "state": "active",
+      "sourceHash": "e0af84f4af31b323555163b7b4e6e6785ad6cdc83b1036deec478a747fc71991",
+      "bytes": 3022,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2216027d8451508a",
+      "path": "marketing/raw/2026-07-05-planning-doc-mining.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "72fbec72e34627b75f1ca2f857cc0cade40dfaf5e7982afc519f8e4e6558ab8e",
+      "bytes": 2995,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8cac67967c0c9ca4",
+      "path": "marketing/raw/2026-07-07-gemminer-ai-visibility-audit.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "2181c7bfdeec3e6fbbb046268a146546f41e3041e9d4fdf76ddb991efe1bfe42",
+      "bytes": 4608,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b4db7fd6ae857d42",
+      "path": "marketing/raw/2026-07-07-gemminer-audit-screenshots/01-headline-and-strategic-read.png",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "e93079b4942d813a84c56691dac95aa7659d2a7dbf5d6c0aac37d664446b83ac",
+      "bytes": 68440,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a93da1c866fd8334",
+      "path": "marketing/raw/2026-07-07-gemminer-audit-screenshots/02-buyer-topics-and-citations.png",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "36f8a2cd58984294616f78f3bbd687fab65a5f028fa37b0af3ddd7ed19c68d7c",
+      "bytes": 104157,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:de004a65bdce96e5",
+      "path": "marketing/raw/2026-07-07-gemminer-audit-screenshots/03-cited-page-blueprints.png",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "3f3e764dad4990944ff6e20838b9c0b0bc90665c3e386e5a13850259ff688fe6",
+      "bytes": 32702,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f9bcbc5466f217be",
+      "path": "marketing/raw/2026-07-07-gemminer-audit-screenshots/04-why-pages-arent-cited.png",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "1f3a48bb365ded3ae3dc019db52a62c7fa67a04b546d8477f0b19e44d4e49144",
+      "bytes": 80418,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b5a02d51992c12c9",
+      "path": "marketing/raw/2026-07-08-ai-ugc-landscape-research.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "7c6a77b82f01ac8fea432e294fd6a63de10de130c03c2ed7bc1896c71cae3c91",
+      "bytes": 9078,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:44564fed557a3470",
+      "path": "marketing/raw/2026-07-08-tiktok-strategy-field-research.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "9e77600b857b07192ac86916a3fa59dbf2ca7c65f2f5010c675fa91db68ab4ce",
+      "bytes": 12761,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:37dd1ed1eb0223da",
+      "path": "marketing/raw/2026-07-19-ugcmaxxing-lucaspatiri.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "9d5f6964bb38d97c15e0b048fc57f2813cc881257442e03e5ed4a819fd22ee17",
+      "bytes": 4230,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fee90e6d62ace4b7",
+      "path": "marketing/routines/SPEC.md",
+      "roles": [
+        "queue"
+      ],
+      "state": "disabled",
+      "sourceHash": "3b79306de7795614b98aaf4621c8023620b53ec941245601440f09f06a25839a",
+      "bytes": 1470,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b1472dd54b061b55",
+      "path": "marketing/routines/nightly-content.md",
+      "roles": [
+        "queue"
+      ],
+      "state": "disabled",
+      "sourceHash": "4ee8e79c3f22eb80b26c578c182a3226d1ab2e0f9b184e6e7b624874b9573c74",
+      "bytes": 1238,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:85d6ff9f13228f22",
+      "path": "marketing/routines/runner.md",
+      "roles": [
+        "queue"
+      ],
+      "state": "active",
+      "sourceHash": "c8e35e68765deade1df8ea492da00384746b4a963357fdf3d4e1abeff68c7e23",
+      "bytes": 1317,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:cdcef93991cde306",
+      "path": "marketing/routines/weekly-engagement.md",
+      "roles": [
+        "queue"
+      ],
+      "state": "disabled",
+      "sourceHash": "fdb6fa7f61b3e57b75025521109df614cc3b1c9ab1a165345f580019ea39b309",
+      "bytes": 1335,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fa7a28b22db43c07",
+      "path": "marketing/seo/operating-plan.md",
+      "roles": [
+        "seo-template"
+      ],
+      "state": "active",
+      "sourceHash": "4ce6f17367300f8394d3a7fb826d412a1dbdd18edc10d850d8a90de269debee5",
+      "bytes": 11407,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:311bacef1fc496c4",
+      "path": "marketing/seo/query-to-url-map.md",
+      "roles": [
+        "seo-template"
+      ],
+      "state": "active",
+      "sourceHash": "5b4f15b2b0875242b850e2330068f8191dbf1601ab2e00a8380380d9d25c7c61",
+      "bytes": 9712,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b090e8ff0d6c3f83",
+      "path": "marketing/signals/2026-07-05-a-lighter-day-is-still-a-good-day.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "debf459fa639b479a3a89252b845296f6f5e3b91755d605ceed6d67a80acd312",
+      "bytes": 635,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:91e334a64dfb4215",
+      "path": "marketing/signals/2026-07-05-hours-log-reconstructed-from-memory.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "e42fbe9199eb32a0a0a4f78bd5b17817817a4cb0a9a6c3c4baaf13c318f9fbe4",
+      "bytes": 973,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:0d8dd2708696612f",
+      "path": "marketing/signals/2026-07-05-permission-to-mix-and-match.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "9b249924eccea674e8a83bf61dc971fe41e08508575d7793bad1c4b9f8cbed4c",
+      "bytes": 719,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e25847fb5ce25f4b",
+      "path": "marketing/signals/2026-07-05-the-newcomer-arc-has-a-name.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "af5a4f403a09fe688819e0b51a909774ca6ea95d9a933aee697881f850f35077",
+      "bytes": 801,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:39c729b005f55188",
+      "path": "marketing/signals/2026-07-05-ugc-intro-pillars-spoken-plainly.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "803bf0d3f025e086b23bfe59140369d9eb9d9a31c49230aadf8b4276322b3b06",
+      "bytes": 923,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:83f0e10c8565d53f",
+      "path": "marketing/signals/2026-07-05-voice-notes-are-the-record.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "eaac8fa3a6f8224b6bf46ff091c3ea9b69c4badc2a71e5174999e683022cb55b",
+      "bytes": 693,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2cc85ad4fb857222",
+      "path": "marketing/signals/2026-07-07-ai-cites-pages-it-can-lift-from.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "55975640f770fe1792f54ddd4982d4251efb1df961e10745ac631104721bf963",
+      "bytes": 973,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b6c7acc78f763a8a",
+      "path": "marketing/signals/2026-07-07-ai-recommends-competitors-for-every-buyer-question.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "7893a8d0b379d7eb1d486ea987063fdf3702d9a58f569d539398fb3858107336",
+      "bytes": 908,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:42e550c68ada2cbd",
+      "path": "marketing/signals/2026-07-07-buyer-question-best-ai-homeschool-assistants.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "e34a1760e4e48d2102693e529f9de8f6a06f089145a7d007b10913aea87d845b",
+      "bytes": 916,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8eae3137dab6f263",
+      "path": "marketing/signals/2026-07-07-buyer-question-choosing-adaptive-assistant.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "8bdbe8fa99760b3eb2507199ebe9e90ac60728d1881cbc48e54189bea12330f3",
+      "bytes": 886,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fb29c5318f50362e",
+      "path": "marketing/signals/2026-07-07-buyer-question-compliance-hour-tracking-tools.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "dbfd5e5583d4cdcb3b507ae1ba35902e585f6b9451f072a394f66f3577707a4e",
+      "bytes": 937,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ff590b77efc0a46c",
+      "path": "marketing/signals/2026-07-07-buyer-question-progress-tracking-methods.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "0449256edf56c2a20862f8df78989e7127f170ddc9be3f5b3e6327df09f64de6",
+      "bytes": 920,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:084053dd3d67eafc",
+      "path": "marketing/signals/2026-07-07-chapters-turn-testimonials-into-community.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "87100a4035051e3babd3ea6c66f20374488a5adcac211cb95587211c7394cf3f",
+      "bytes": 903,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4dcbdf5689c69d1d",
+      "path": "marketing/signals/2026-07-07-homa-assists-never-runs.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "0dc3da89a35b457352ad733bd9599fa96349e07fa125cd951aa23bbea7ae06bc",
+      "bytes": 970,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:d7164451ae0c9b10",
+      "path": "marketing/signals/2026-07-07-how-do-you-homa-reader-stories.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "9fa76dbec35b87b2ec3cd75b9f7e6f4e23e2e6d61947affbfc3b6a0c60aec27e",
+      "bytes": 984,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:403eef1885bc1963",
+      "path": "marketing/signals/2026-07-07-testimonial-anatomy-time-and-artifacts.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "d1925da9490297e52fa9778481119cceb614f798dc8c48908747a06fecf4fedd",
+      "bytes": 978,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8f715c5b73d9342a",
+      "path": "marketing/signals/2026-07-07-testimonials-link-socials-loop-back.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "1ce8d811d05d2d5e6840f7cc4cd4aa3003d9f5d8e2e4533be6590bafdd7fc81b",
+      "bytes": 992,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:9d6df51bcac4750b",
+      "path": "marketing/signals/2026-07-07-the-efficacy-loop-in-her-words.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "079f4f2253224b432d1055d4cef57ffe1a3cbb453ea6937809745df95f657c68",
+      "bytes": 1104,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e52ef93123cf76a5",
+      "path": "marketing/signals/2026-07-07-trial-families-sign-releases-real-proof.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "aa47163d184b24f4f58955b5acdaa041226d9abe5c6a100d602d3dab5905415f",
+      "bytes": 1026,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:746c0ed897d65648",
+      "path": "marketing/signals/2026-07-08-ai-as-character-not-tool.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "8b3008ba9e215d3d697e466118b809b31ec416db1aa77b4b003e85a13ac15045",
+      "bytes": 930,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:302250a5d7a829a6",
+      "path": "marketing/signals/2026-07-08-before-august-check-the-level.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "057386d2e3570b701904d6f8886147502248a885452bccbd875b84c57f8e3464",
+      "bytes": 782,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:97c460e05e85d4fa",
+      "path": "marketing/signals/2026-07-08-comment-the-grade-and-subject-funnel.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "6ab7f41916ccaf1ffd4a98f0d3dd36e4653c36befb26e0af7c8b2827b3a60bab",
+      "bytes": 887,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:033a307584a11f69",
+      "path": "marketing/signals/2026-07-08-dont-lead-with-ai.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "111b984076571f5d74ee8035522c8853d938381ea27e185ca8e562952b969c3d",
+      "bytes": 920,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:53718379d1212256",
+      "path": "marketing/signals/2026-07-08-grade-level-is-the-label-not-the-level.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "cadc27b0da2387a652507b59547a504078e0f2467b0f85d1bb24fa6d91fc8bf0",
+      "bytes": 900,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4cdaaf3987ec6ccd",
+      "path": "marketing/signals/2026-07-08-literacy-crisis-enter-gently.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "809504ecd61827259864af4010128b3454e28046fb1d994ad8fa320e9072a550",
+      "bytes": 880,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:65e4fd9faa5a654c",
+      "path": "marketing/signals/2026-07-08-nobody-warned-me-skill-gaps.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "867f7d7ded6b84cedb2df4ceb6da6204c7f6ee2a44b9dc2457488d0a94ae0348",
+      "bytes": 840,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3182750e841368a4",
+      "path": "marketing/signals/2026-07-08-own-the-moment-before-curriculum.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "dfa74d7f5d3017783b26fe57268c6cd03e9e39bf7d208c881ee027f509762375",
+      "bytes": 936,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:be02aa0b9c0befab",
+      "path": "marketing/signals/2026-07-08-proof-is-watching-the-level-change.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "76da9a2e6a275da78737819b310959203a1b6c00454ca06e0654b59e5e68fd86",
+      "bytes": 908,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6e0f5453d03f9a04",
+      "path": "marketing/signals/2026-07-08-the-wrong-level-confession.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "37eef6dd03606ef262ffc02fcd676deaddb46d691786aab0c2f180c297940e1c",
+      "bytes": 900,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:868bd788872b17a4",
+      "path": "marketing/signals/2026-08-03-how-to-track-homeschool-hours.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "868042779a3cda56c099d9a352928e9537979f826ae9585c41d04acead664bc3",
+      "bytes": 795,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2d85a07cd73fd6b1",
+      "path": "marketing/swipe/2026-07-08-ai-ugc-formats.md",
+      "roles": [
+        "social-template"
+      ],
+      "state": "active",
+      "sourceHash": "9e46871e3af761f8f8cd2dcc8c8815cb5cba99e3a9aac1a6313632f34e6e6cb8",
+      "bytes": 7335,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:62e97205e11f68a6",
+      "path": "marketing/voice/house-style.md",
+      "roles": [
+        "authoring-rule",
+        "voice"
+      ],
+      "state": "active",
+      "sourceHash": "990ab638d69ce6db9dde1b214d7101f615f7591da05e876c660ee39e391f99f8",
+      "bytes": 5752,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ad341cd7c112deb6",
+      "path": "marketing/workflows/demand-engine.md",
+      "roles": [
+        "queue"
+      ],
+      "state": "disabled",
+      "sourceHash": "b6673108a414813425bd3f08f32da79643d25d73a241f5d127a37a319b1c2034",
+      "bytes": 4335,
+      "legacySignatures": []
+    }
+  ],
+  "bundles": [
+    {
+      "id": "2026-07-05-how-to-track-homeschool-hours",
+      "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours",
+      "lifecycle": "historical-draft",
+      "source": "marketing/signals/2026-07-05-hours-log-reconstructed-from-memory.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-07-05-planning-doc-mining.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article",
+        "video",
+        "email"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "33a62d235ca6c4285ca216d197a5454d8234a3171a8d4919440f1729c6adfb20"
+        },
+        {
+          "file": "captions/facebook.md",
+          "channel": "facebook",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "ac671c282f413e300b03c4788cec1e613681a7c5aa6ab7f1a07282cbf529530a"
+        },
+        {
+          "file": "captions/instagram.md",
+          "channel": "instagram",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "6a718ba3d8a0fb2251c9f3468b28a336bd9e41912af5b90cd3a51751abbb0597"
+        },
+        {
+          "file": "captions/tiktok.md",
+          "channel": "tiktok",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "69b93d3de042915c5e66c7baaf17a874db800ecc97c10f7d1100337515e23048"
+        },
+        {
+          "file": "captions/youtube.md",
+          "channel": "youtube",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "e1317c6d6938bbbb30f396788e4a7626b032617a8a7bfb315cd77cf41cf6d082"
+        },
+        {
+          "file": "email/email.md",
+          "channel": "email",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "0425a68ce153538ba19012e55c5700b01a402675623f39f58c81f37526fe0295"
+        },
+        {
+          "file": "pin/pin.md",
+          "channel": "pinterest",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "a84b028a675bc6f3c3e7c82dcbe51f0701c36483b6cc7179506131ca9de43664"
+        },
+        {
+          "file": "video/video.mp4",
+          "channel": "tiktok+instagram+youtube+facebook",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "f74d6a64209e7d5102ad5b856f1614ea5ae18791e726c19d973d766ec418fb20"
+        },
+        {
+          "file": "x.md",
+          "channel": "x",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "89e7de8cf3321eaabfe4de6965d6abfd89c62114bdc44c3cfdb45e4bff302325"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-07-05-how-to-track-homeschool-hours.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 9,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-07-05-ugc-homa-intro",
+      "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro",
+      "lifecycle": "historical-draft",
+      "source": "marketing/signals/2026-07-05-ugc-intro-pillars-spoken-plainly.md",
+      "sourceResolves": true,
+      "sourceRef": "docs/homa-planning/journeys/07-positioning-messaging.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "video"
+      ],
+      "formats": [
+        {
+          "file": "video/video-captioned.mp4",
+          "channel": "tiktok+instagram+youtube+facebook",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "f9476d3ed93f1f351f9c4ab6dcc55b54f0e41778ba876b04e9ee7e4acda83bcb"
+        },
+        {
+          "file": "video/video.mp4",
+          "channel": "master-no-captions",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "5028aa4d2e26dc2250edcf47d6247b64a26f3ea50e045d382120753366571994"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-07-05-ugc-homa-intro.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 2,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-how-to-track-homeschool-hours-without-losing-the-week",
+      "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-03-how-to-track-homeschool-hours.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/seo/query-to-url-map.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article",
+        "video"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "dc176296080a3f8c75e7339b4ccad1accde30926d30e670709a537ddc28d0535"
+        },
+        {
+          "file": "video/script.md",
+          "channel": "tiktok+instagram+youtube+facebook",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "c45896256b494999b5e448cfdeb0a6d312313525215a0a897ff64107fa17f38d"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 1
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    }
+  ],
+  "generators": [
+    {
+      "path": ".agents/skills/marketing-article-writer/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Draft the article pillar from one grounded signal",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/article.mdx"
+      ],
+      "id": "generator:69357e3c58450984",
+      "sourceHash": "7472196d10d9a5a3230d84493d0deb170387091692d9a714eec15c01d6234687"
+    },
+    {
+      "path": ".agents/skills/marketing-copy-editor/SKILL.md",
+      "ownerIssue": "gh#739",
+      "purpose": "House-style and claims gate for staged copy",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/meta.yml"
+      ],
+      "id": "generator:70a268bc2deac2c9",
+      "sourceHash": "f0f752f357f8eac811b8ba0019f724bb3b14d8e8329c29545706ec4862125612"
+    },
+    {
+      "path": ".agents/skills/marketing-copy-reviewer/SKILL.md",
+      "ownerIssue": "gh#739",
+      "purpose": "Read-only persona gate before editor review",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/meta.yml"
+      ],
+      "id": "generator:9973cf83fa4600ea",
+      "sourceHash": "fe902e6cf02a2e9ce72e33ef0f5147ec9e2f609b72903b8b3f2d5a30f3ce5b24"
+    },
+    {
+      "path": ".agents/skills/marketing-demand-engine/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Select one grounded signal and stage a gated bundle",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/"
+      ],
+      "id": "generator:dce26b557b5eb04b",
+      "sourceHash": "0f7493f4a8fae1a33b05d585ce87f9ad3c7130083535b23c19fdbdca08299a77"
+    },
+    {
+      "path": ".agents/skills/marketing-distributor/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Publish only human-approved formats through named channel adapters",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/published/",
+        "apps/web/content/blog/"
+      ],
+      "id": "generator:8a209fee1cd8210a",
+      "sourceHash": "7c1f53fa45061d7caa893de6d12b4233bc367bd48bad8c2332969e06ec75550a"
+    },
+    {
+      "path": ".agents/skills/marketing-email-writer/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Derive staged email copy while DM7 remains unresolved",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/email/"
+      ],
+      "id": "generator:2afd258aedb6b7ab",
+      "sourceHash": "7a1f3f4812ca54516a57d24c1022813172cdbd1a91196667523f6197fde61022"
+    },
+    {
+      "path": ".agents/skills/marketing-engagement-loop/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Turn aggregate publisher performance into new signals",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/reports/",
+        "marketing/signals/"
+      ],
+      "id": "generator:8895424476754471",
+      "sourceHash": "581a210ea6c7df545d123517036edf9e7e320943c52b676fe3a4a9c40603c019"
+    },
+    {
+      "path": ".agents/skills/marketing-idea-generator/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Top up the signal reservoir without inventing evidence",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/signals/"
+      ],
+      "id": "generator:d8e92e28d05dde46",
+      "sourceHash": "0fe26705ef95a8069a00bdcd13fea738dbc97136bfedff1ede88878275711fe8"
+    },
+    {
+      "path": ".agents/skills/marketing-illustrator/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Generate artifact-first stills under the marketing-rich profile",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/images/",
+        "marketing/content/drafts/*/pin/"
+      ],
+      "id": "generator:252f0a5553bd8fea",
+      "sourceHash": "74f68ab17c3ce623fef4e2c3fea80219061889fae9543e1583136dfda4be4937"
+    },
+    {
+      "path": ".agents/skills/marketing-janitor/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Archive stale signals and report scorecard trends without deleting content",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/reports/"
+      ],
+      "id": "generator:5cf385726b511bce",
+      "sourceHash": "cfe98ca8904574409acf3558b62570a46dd5c61f5b26746726ea22f9e2b78a3e"
+    },
+    {
+      "path": ".agents/skills/marketing-signal-extraction/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Extract atomic sourced signals from approved research",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/signals/"
+      ],
+      "id": "generator:5a35d8ec168fb55a",
+      "sourceHash": "cc95bac9edba3801d7dc78320cc16f0e9b5087d2a57aafb1e49cb1fafdc20641"
+    },
+    {
+      "path": ".agents/skills/marketing-ugc-engine/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Stage privacy-safe UGC concepts without publishing them",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/video/"
+      ],
+      "id": "generator:ef8fccccbf67549e",
+      "sourceHash": "10f09d70fba0327bbd0f4d899b5f9bd9e7f2d92a94674941340b5c1d509abee7"
+    },
+    {
+      "path": ".agents/skills/marketing-video-producer/SKILL.md",
+      "ownerIssue": "gh#741",
+      "purpose": "Gate video scripts before any generation spend",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/content/drafts/*/video/"
+      ],
+      "id": "generator:61e8e54672fbad05",
+      "sourceHash": "373a59c9cd795806b7fd58c2706218b1158e17b279065c4a0250a6438f4bf514"
+    },
+    {
+      "path": "marketing/evals/score_bundle.py",
+      "ownerIssue": "gh#741",
+      "purpose": "Deterministic grounding, voice, duplication, and completeness floor",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/evals/scorecards/"
+      ],
+      "id": "generator:92cc4d015ee58a8e",
+      "sourceHash": "804402d7ebab0dfbcc678bc345aef54bb301ad53beef7c14d0769213af5f28ec"
+    },
+    {
+      "path": "scripts/brand-assets.mts",
+      "ownerIssue": "gh#719",
+      "purpose": "Project the master identity into web, native, and marketing assets",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/assets/brand/"
+      ],
+      "id": "generator:cf7384e7282fda93",
+      "sourceHash": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2"
+    },
+    {
+      "path": "scripts/brand-surfaces.mts",
+      "ownerIssue": "gh#721",
+      "purpose": "Generate the exhaustive cross-surface brand manifest",
+      "state": "active",
+      "failClosed": true,
+      "outputPaths": [
+        "docs/homa-design/evidence/surfaces.json"
+      ],
+      "id": "generator:05b36b5e3e9fc248",
+      "sourceHash": "b72bfa77d837c4f9e15a1b1b5549783f4a109ecc04f03a3cb9ead7ce27357691"
+    },
+    {
+      "path": "scripts/socials-starter-pack-assets.mts",
+      "ownerIssue": "gh#741",
+      "purpose": "Retired pre-Quiet social starter-pack generator; replacement must land before reactivation",
+      "state": "retired-quarantined",
+      "failClosed": true,
+      "outputPaths": [
+        "marketing/assets/socials-starter-pack/"
+      ],
+      "id": "generator:c2bf7151a939f030",
+      "sourceHash": "8588c78431b68a94fa7e00f53b5decab3e244e13b7513ce203128a190eeacfb7"
+    }
+  ],
+  "integrations": [
+    {
+      "id": "blog-git",
+      "provider": "git-and-vercel",
+      "ownerIssue": "gh#741",
+      "channels": [
+        "blog"
+      ],
+      "state": "repository-publishing",
+      "evidencePath": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/distribution.md",
+      "externalStateClaim": false,
+      "updatePath": "marketing-distributor copies approved article and assets, then the web deployment and canonical probe provide release evidence",
+      "rollback": "Revert the web deployment and restore the prior published bundle path."
+    },
+    {
+      "id": "postiz-social",
+      "provider": "Postiz",
+      "ownerIssue": "gh#183",
+      "channels": [
+        "tiktok",
+        "instagram",
+        "youtube",
+        "facebook",
+        "pinterest",
+        "x"
+      ],
+      "state": "blocked-founder-action",
+      "evidencePath": "docs/homa-design/evidence/channel-evidence.json",
+      "externalStateClaim": false,
+      "updatePath": "Founder registers and connects named @thankshoma profiles, then auth status and integration readback are retained.",
+      "rollback": "Remove only the scheduled post or disconnect the named integration; never replay an entire queue."
+    },
+    {
+      "id": "resend-email",
+      "provider": "Resend",
+      "ownerIssue": "gh#182",
+      "channels": [
+        "email"
+      ],
+      "state": "blocked-founder-decision",
+      "evidencePath": "docs/homa-planning/14-marketing-demand-engine.md",
+      "externalStateClaim": false,
+      "updatePath": "Founder rules DM7 consent scope before any marketing send; the waitlist promise remains binding.",
+      "rollback": "Do not send. If DM7 is ruled, revoke the campaign audience and retain aggregate delivery evidence only."
+    },
+    {
+      "id": "higgsfield-video",
+      "provider": "Higgsfield",
+      "ownerIssue": "gh#741",
+      "channels": [
+        "video"
+      ],
+      "state": "capability-unverified",
+      "evidencePath": null,
+      "externalStateClaim": false,
+      "updatePath": "Run the generation skill only after script gates pass and retain model, prompt, and job URL in the bundle.",
+      "rollback": "Discard the staged asset and regenerate from the gated script; no external publication occurs automatically."
+    },
+    {
+      "id": "canonical-public-domain",
+      "provider": "thankshoma.com",
+      "ownerIssue": "gh#689",
+      "channels": [
+        "blog",
+        "public"
+      ],
+      "state": "repository-publishing",
+      "evidencePath": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/distribution.md",
+      "externalStateClaim": false,
+      "updatePath": "A merged web deployment plus a fresh canonical URL probe is the only production evidence.",
+      "rollback": "Roll back the web deployment and re-probe the canonical route before restoring traffic."
+    }
+  ]
+}
