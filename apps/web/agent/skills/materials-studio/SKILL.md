@@ -484,8 +484,9 @@ fits, design from the creation-path and design rules directly; a missing
 recipe is not a reason to force the wrong format.
 
 **Routine and chore charts are visual schedules, even when the parent calls
-one a worksheet, checklist, morning plan, or evening plan.** Load
-`visual-schedule-cards` before building any card-based routine. A whole-page
+one a worksheet, checklist, morning plan, or evening plan.** Use `read_file`
+on `/workspace/skills/materials-studio/references/recipes/visual-schedule-cards.md`
+before building any card-based routine. A whole-page
 routine chart uses one composed image, or HTML alone when simple symbols are
 enough, never one image per chore, card, or child. For sibling versions, reuse
 the shared composition whenever the visual content is the same; a genuinely

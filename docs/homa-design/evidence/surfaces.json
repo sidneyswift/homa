@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "40845b54ff48723c75f9dc8e7020282bd4fa84dc4edef9d127eb7ed3f1b3b275",
+  "ownedInputFingerprint": "8add10782b751ef9ad666ad5229642b709e1366b2ad10b08953bfc35d47ec97e",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -33695,7 +33695,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "c6e796b219e82d333420cb261e5a01c11a91dfc13c798a005d05334f6675feb3",
+        "fixtureChecksum": "0206e3a4cf71381f12972c646452265d1fcdb55397c5cbfce94d89261fe72eb2",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -33720,7 +33720,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "c6e796b219e82d333420cb261e5a01c11a91dfc13c798a005d05334f6675feb3"
+        "0206e3a4cf71381f12972c646452265d1fcdb55397c5cbfce94d89261fe72eb2"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -102272,6 +102272,93 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "a77ec696a93a96fa72e1cd28a84e34713a782fa39ea99cae8e8f4f7df081ce75"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:d12a9bd42435618a",
+      "paths": [
+        "apps/web/evals/materials-studio/routine-chart-revision-image-reuse.eval.ts"
+      ],
+      "type": "evaluator",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "verification"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "authoring-rails-check",
+        "interface-gauntlet"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "198adc0dd975e42cc1febecf1f22fa4aa093c258fc717ca933746414e82802a3",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "verification"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "198adc0dd975e42cc1febecf1f22fa4aa093c258fc717ca933746414e82802a3"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
