@@ -1,6 +1,8 @@
 import { TIER_NAMES, tierDelta } from "../../../components/billing/wall-copy";
 import type { FamilyPlanState } from "../../../lib/billing/wall";
 import { SectionHeading } from "./section-heading";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 
 /**
  * Which plan she is on, and the way to add Homa Plus (gh#412).
@@ -30,23 +32,20 @@ export function PlanSection({ plan }: { plan: FamilyPlanState }) {
   const upgradeUrl = plan.plusCheckout?.monthlyUrl ?? null;
 
   return (
-    <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
+    <QuietFrame as="section" className="p-6">
       <SectionHeading first>Your plan</SectionHeading>
-      <p className="mt-2 text-sm font-semibold text-strong">{TIER_NAMES[plan.tier]}</p>
-      <p className="mt-1 text-sm text-body">{tierDelta(plan.tier)}</p>
+      <p className="mt-2 text-sm font-semibold text-[color:var(--homa-ink)]">{TIER_NAMES[plan.tier]}</p>
+      <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">{tierDelta(plan.tier)}</p>
 
       {alreadyReached || upgradeUrl === null ? null : (
-        <div className="mt-5 border-t border-border-subtle pt-4">
-          <p className="text-sm font-semibold text-strong">{TIER_NAMES.plus}</p>
-          <p className="mt-1 text-sm text-body">{tierDelta("plus")}</p>
-          <a
-            href={upgradeUrl}
-            className="mt-3 inline-block rounded-pill bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
-          >
+        <div className="mt-5 border-t border-[var(--homa-control-boundary)] pt-4">
+          <p className="text-sm font-semibold text-[color:var(--homa-ink)]">{TIER_NAMES.plus}</p>
+          <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">{tierDelta("plus")}</p>
+          <QuietAction href={upgradeUrl} className="mt-3">
             Add {TIER_NAMES.plus}
-          </a>
+          </QuietAction>
         </div>
       )}
-    </section>
+    </QuietFrame>
   );
 }

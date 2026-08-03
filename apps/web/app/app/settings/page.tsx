@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { CreditCard, LogOut } from "lucide-react";
-
 import { ageInMonths, ageLabel, formatUsPhone } from "@homa/core";
 
 import { getAppData } from "../../../lib/app-data";
@@ -21,6 +19,9 @@ import { HomeschoolSection } from "./homeschool-section";
 import { PlanSection } from "./plan-section";
 import { KidsSection } from "./kids-section";
 import { ParentsSection } from "./parents-section";
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
 
 /**
  * /app/settings: the family's account page. Consolidated 2026-07-12
@@ -109,17 +110,17 @@ export default async function SettingsPage({
     <PageColumn>
       <div className="mx-auto w-full max-w-[720px]">
         <header>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-subtle">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[color:var(--homa-ink-muted)]">
             {family.name}
           </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-strong">
+          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-[color:var(--homa-ink)]">
             Settings
           </h1>
         </header>
 
         <div className="mt-6 flex flex-col gap-4">
-          <section className="rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-            <h2 className="font-display text-xl font-semibold text-strong">Your family</h2>
+          <QuietFrame as="section" className="p-6">
+            <h2 className="font-display text-xl font-semibold text-[color:var(--homa-ink)]">Your family</h2>
 
             <KidsSection
               kids={children.map((child, index) => ({
@@ -193,7 +194,7 @@ export default async function SettingsPage({
                 timeZone: family.time_zone ?? "",
               }}
             />
-          </section>
+          </QuietFrame>
 
           {/* Visible only once something is saved: an empty memory list
               on day one reads as a gap, not a promise. */}
@@ -207,33 +208,21 @@ export default async function SettingsPage({
         </div>
 
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-1">
-          <p className="text-sm text-muted">Signed in as {user?.email ?? "your account"}</p>
+          <p className="text-sm text-[color:var(--homa-ink-muted)]">Signed in as {user?.email ?? "your account"}</p>
           <div className="flex flex-wrap items-center gap-3">
             {plan.billingProvider === "apple" ? (
-              <a
-                href="https://apps.apple.com/account/subscriptions"
-                className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
-              >
-                <CreditCard size={15} aria-hidden="true" />
+              <QuietAction href="https://apps.apple.com/account/subscriptions" kind="secondary" icon={<Icon name="external" />}>
                 Manage App Store subscription
-              </a>
+              </QuietAction>
             ) : hasBilling ? (
-              <a
-                href="/api/billing/portal"
-                className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
-              >
-                <CreditCard size={15} aria-hidden="true" />
+              <QuietAction href="/api/billing/portal" kind="secondary" icon={<Icon name="external" />}>
                 Manage billing
-              </a>
+              </QuietAction>
             ) : null}
             <form action={signOutAction}>
-              <button
-                type="submit"
-                className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-pill border border-border bg-card px-5 py-2 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
-              >
-                <LogOut size={15} aria-hidden="true" />
+              <QuietAction type="submit" kind="secondary" icon={<Icon name="logout" />}>
                 Sign out
-              </button>
+              </QuietAction>
             </form>
           </div>
         </footer>

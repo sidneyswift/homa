@@ -24,10 +24,10 @@ import { SectionHeading } from "./section-heading";
 const INITIAL_STATE: SetupFormState = { error: null };
 
 const inputClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-md border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[color:var(--homa-ink)] focus:border-[var(--homa-midnight-action)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--homa-visual-coral)_24%,transparent)]";
 
 const rowButtonClass =
-  "min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong disabled:opacity-60";
+  "min-h-9 cursor-pointer rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:border-[var(--homa-midnight-action)] hover:text-[color:var(--homa-ink)] disabled:opacity-60";
 
 const US_ZONES: ReadonlyArray<readonly [string, string]> = [
   ["America/New_York", "Eastern"],
@@ -61,20 +61,20 @@ function TimeZoneRow({ currentTimeZone }: { currentTimeZone: string }) {
   const isListed = US_ZONES.some(([zone]) => zone === currentTimeZone);
 
   return (
-    <form action={action} className="mt-4 border-t border-[var(--stone-100)] pt-3">
+    <form action={action} className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-        <span className="text-muted">Time zone:</span>
-        <span className="font-medium text-strong">
+        <span className="text-[color:var(--homa-ink-muted)]">Time zone:</span>
+        <span className="font-medium text-[color:var(--homa-ink)]">
           {currentTimeZone ? zoneLabel(currentTimeZone) : "From your device on your next visit"}
         </span>
-        <span className="text-xs text-muted" role="status">
+        <span className="text-xs text-[color:var(--homa-ink-muted)]" role="status">
           {pending ? "Saving\u2026" : state.saved ? "Saved" : ""}
         </span>
         {changing ? null : (
           <button
             type="button"
             onClick={() => setChanging(true)}
-            className="ml-auto min-h-8 cursor-pointer rounded-pill px-3 py-1 text-sm font-medium text-muted transition-colors hover:text-strong"
+            className="ml-auto min-h-8 cursor-pointer rounded-[var(--homa-radius-control)] px-3 py-1 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
           >
             Change
           </button>
@@ -107,7 +107,7 @@ function TimeZoneRow({ currentTimeZone }: { currentTimeZone: string }) {
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-xs text-muted">
+          <p className="mt-1.5 text-xs text-[color:var(--homa-ink-muted)]">
             Saves when you pick it. Usually it sets itself from your address and
             your device.
           </p>
@@ -147,8 +147,8 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
       <SectionHeading>Family details</SectionHeading>
 
       {editing ? (
-        <form action={action} className="mt-3 rounded-md bg-page p-4">
-          <label className="block text-sm font-medium text-strong" htmlFor="family-name">
+        <form action={action} className="mt-3 rounded-md bg-[var(--homa-canvas)] p-4">
+          <label className="block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor="family-name">
             Family name
           </label>
           <input
@@ -160,12 +160,12 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
             className={inputClass}
           />
 
-          <label className="mt-4 block text-sm font-medium text-strong" htmlFor="family-address">
+          <label className="mt-4 block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor="family-address">
             Address
           </label>
           {/* The mail sentence retired (founder ask 2026-07-12: "real mail
               from Homa is creepy"); the state-rules reason stands alone. */}
-          <p className="mt-1 text-sm text-body">
+          <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
             The state sets which homeschool rules Homa follows.
           </p>
           <input
@@ -180,7 +180,7 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
 
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
             <div>
-              <label className="block text-sm font-medium text-strong" htmlFor="family-city">
+              <label className="block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor="family-city">
                 City
               </label>
               <input
@@ -194,7 +194,7 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-strong" htmlFor="family-state">
+              <label className="block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor="family-state">
                 State
               </label>
               <select
@@ -216,7 +216,7 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-strong" htmlFor="family-zip">
+              <label className="block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor="family-zip">
                 ZIP
               </label>
               <input
@@ -242,14 +242,14 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
             <button
               type="submit"
               disabled={pending}
-              className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+              className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-paper)] transition-colors hover:bg-[color-mix(in_srgb,var(--homa-midnight-action)_88%,var(--homa-ink))] disabled:opacity-60"
             >
               {pending ? "Saving\u2026" : "Save"}
             </button>
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+              className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
             >
               Cancel
             </button>
@@ -259,16 +259,16 @@ export function FamilyDetailsSection({ details }: { details: FamilyDetails }) {
         <div className="flex items-start justify-between gap-3">
           <dl className="mt-2 min-w-0 flex-1 space-y-1.5">
             <div className="text-sm">
-              <dt className="inline text-muted">Family name: </dt>
-              <dd className="inline text-strong">{details.name}</dd>
+              <dt className="inline text-[color:var(--homa-ink-muted)]">Family name: </dt>
+              <dd className="inline text-[color:var(--homa-ink)]">{details.name}</dd>
             </div>
             <div className="text-sm">
-              <dt className="inline text-muted">Address: </dt>
-              <dd className="inline text-strong">
+              <dt className="inline text-[color:var(--homa-ink-muted)]">Address: </dt>
+              <dd className="inline text-[color:var(--homa-ink)]">
                 {address ? (
                   address
                 ) : (
-                  <span className="font-normal text-body">
+                  <span className="font-normal text-[color:var(--homa-ink-muted)]">
                     None yet. The state sets which homeschool rules Homa follows.
                   </span>
                 )}

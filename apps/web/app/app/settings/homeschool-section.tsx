@@ -1,8 +1,6 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Plus } from "lucide-react";
-
 import { HOMESCHOOL_STYLES } from "@homa/core";
 
 import {
@@ -14,6 +12,7 @@ import { TagInput } from "../../onboarding/tag-input";
 import type { SetupFormState } from "./actions";
 import { updateHomeschoolAction } from "./profile-actions";
 import { SectionHeading } from "./section-heading";
+import { Icon } from "../../../components/design/Icon";
 
 /**
  * The how-you-homeschool section of the one family card on
@@ -72,7 +71,7 @@ function HomeschoolEditor({
   }
 
   return (
-    <form action={action} className="mt-3 rounded-md bg-page p-4">
+    <form action={action} className="mt-3 rounded-md bg-[var(--homa-canvas)] p-4">
       {styles.map((style) => (
         <input key={style} type="hidden" name="styles" value={style} />
       ))}
@@ -81,8 +80,8 @@ function HomeschoolEditor({
         <input key={tag} type="hidden" name="curriculums" value={tag} />
       ))}
 
-      <p className="font-medium text-strong">
-        Styles you follow? <span className="font-normal text-muted">(pick any that fit)</span>
+      <p className="font-medium text-[color:var(--homa-ink)]">
+        Styles you follow? <span className="font-normal text-[color:var(--homa-ink-muted)]">(pick any that fit)</span>
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {HOMESCHOOL_STYLES.map((value) => {
@@ -93,10 +92,10 @@ function HomeschoolEditor({
               type="button"
               onClick={() => toggleStyle(value)}
               aria-pressed={selected}
-              className={`min-h-10 cursor-pointer rounded-pill border px-4 py-2 text-sm transition-colors ${
+              className={`min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm transition-colors ${
                 selected
-                  ? "border-brand bg-brand-soft text-[var(--clay-700)]"
-                  : "border-border bg-card text-strong hover:border-brand"
+                  ? "border-[var(--homa-midnight-action)] bg-[color-mix(in_srgb,var(--homa-midnight-action)_10%,var(--homa-paper))] text-[color:var(--homa-brand-text)]"
+                  : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[color:var(--homa-ink)] hover:border-[var(--homa-midnight-action)]"
               }`}
             >
               {HOMESCHOOL_STYLE_LABELS[value]}
@@ -106,17 +105,17 @@ function HomeschoolEditor({
       </div>
       {styles.length > 0 ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted">How closely?</span>
+          <span className="text-sm text-[color:var(--homa-ink-muted)]">How closely?</span>
           {(["closely", "loosely", "exploring"] as const).map((value) => (
             <button
               key={value}
               type="button"
               onClick={() => setStrictness(strictness === value ? null : value)}
               aria-pressed={strictness === value}
-              className={`min-h-10 cursor-pointer rounded-pill border px-4 py-2 text-sm ${
+              className={`min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm ${
                 strictness === value
-                  ? "border-brand bg-brand-soft text-[var(--clay-700)]"
-                  : "border-border bg-card text-strong hover:border-brand"
+                  ? "border-[var(--homa-midnight-action)] bg-[color-mix(in_srgb,var(--homa-midnight-action)_10%,var(--homa-paper))] text-[color:var(--homa-brand-text)]"
+                  : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[color:var(--homa-ink)] hover:border-[var(--homa-midnight-action)]"
               }`}
             >
               {STRICTNESS_LABELS[value]}
@@ -136,10 +135,10 @@ function HomeschoolEditor({
         />
       </div>
 
-      <label className="mt-4 block font-medium text-strong" htmlFor="filing-parent-name">
+      <label className="mt-4 block font-medium text-[color:var(--homa-ink)]" htmlFor="filing-parent-name">
         Your name, as it should appear on an official filing
       </label>
-      <p className="mt-1 text-sm text-muted">
+      <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
         Kept separate from what Homa calls you, because a notice to your
         school district wants the name on your paperwork. Homa leaves this
         blank on the filing rather than guessing it (gh#424).
@@ -151,13 +150,13 @@ function HomeschoolEditor({
         maxLength={120}
         autoComplete="name"
         defaultValue={filingParentName ?? ""}
-        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+        className="mt-2 w-full rounded-md border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2.5 text-sm text-[color:var(--homa-ink)] focus:border-[var(--homa-midnight-action)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--homa-visual-coral)_24%,transparent)]"
       />
 
-      <label className="mt-4 block font-medium text-strong" htmlFor="school-year-start">
+      <label className="mt-4 block font-medium text-[color:var(--homa-ink)]" htmlFor="school-year-start">
         When does your school year start?
       </label>
-      <p className="mt-1 text-sm text-muted">
+      <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
         Most states that ask for a filing count the deadline from this day, so
         it is how Homa knows when your paperwork is due.
       </p>
@@ -166,13 +165,13 @@ function HomeschoolEditor({
         name="school_year_start_on"
         type="date"
         defaultValue={schoolYearStartOn ?? ""}
-        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+        className="mt-2 w-full rounded-md border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2.5 text-sm text-[color:var(--homa-ink)] focus:border-[var(--homa-midnight-action)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--homa-visual-coral)_24%,transparent)]"
       />
 
-      <label className="mt-4 block font-medium text-strong" htmlFor="homeschool-values">
+      <label className="mt-4 block font-medium text-[color:var(--homa-ink)]" htmlFor="homeschool-values">
         Anything that matters to your family?
       </label>
-      <p className="mt-1 text-sm text-muted">
+      <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
         Faith, values, aesthetics, screen rules. Materials will respect it.
       </p>
       <textarea
@@ -181,7 +180,7 @@ function HomeschoolEditor({
         rows={2}
         maxLength={500}
         defaultValue={current.values ?? ""}
-        className="mt-2 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
+        className="mt-2 w-full rounded-md border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2.5 text-sm text-[color:var(--homa-ink)] focus:border-[var(--homa-midnight-action)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--homa-visual-coral)_24%,transparent)]"
       />
 
       {state.error ? (
@@ -193,14 +192,14 @@ function HomeschoolEditor({
         <button
           type="submit"
           disabled={pending}
-          className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+          className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-paper)] transition-colors hover:bg-[color-mix(in_srgb,var(--homa-midnight-action)_88%,var(--homa-ink))] disabled:opacity-60"
         >
           {pending ? "Saving\u2026" : "Save"}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+          className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
         >
           Cancel
         </button>
@@ -244,8 +243,8 @@ export function HomeschoolSection({
           <dl className="mt-2 min-w-0 flex-1 space-y-1.5">
             {current.styles.length > 0 ? (
               <div className="text-sm">
-                <dt className="inline text-muted">Styles: </dt>
-                <dd className="inline text-strong">
+                <dt className="inline text-[color:var(--homa-ink-muted)]">Styles: </dt>
+                <dd className="inline text-[color:var(--homa-ink)]">
                   {current.styles.map(homeschoolStyleLabel).join(", ")}
                   {current.strictness
                     ? ` \u00b7 ${STRICTNESS_LABELS[current.strictness] ?? current.strictness}`
@@ -255,37 +254,37 @@ export function HomeschoolSection({
             ) : null}
             {current.curriculums.length > 0 ? (
               <div className="text-sm">
-                <dt className="inline text-muted">Curriculums: </dt>
-                <dd className="inline text-strong">{current.curriculums.join(", ")}</dd>
+                <dt className="inline text-[color:var(--homa-ink-muted)]">Curriculums: </dt>
+                <dd className="inline text-[color:var(--homa-ink)]">{current.curriculums.join(", ")}</dd>
               </div>
             ) : null}
             {current.values ? (
               <div className="text-sm">
-                <dt className="inline text-muted">What matters: </dt>
-                <dd className="inline text-strong">{current.values}</dd>
+                <dt className="inline text-[color:var(--homa-ink-muted)]">What matters: </dt>
+                <dd className="inline text-[color:var(--homa-ink)]">{current.values}</dd>
               </div>
             ) : null}
           </dl>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="mt-1 min-h-9 shrink-0 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+            className="mt-1 min-h-9 shrink-0 cursor-pointer rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:border-[var(--homa-midnight-action)] hover:text-[color:var(--homa-ink)]"
           >
             Edit
           </button>
         </div>
       ) : (
         <>
-          <p className="mt-2 text-sm text-body">
+          <p className="mt-2 text-sm text-[color:var(--homa-ink-muted)]">
             Styles, curriculums, and what matters to your family. Homa&apos;s plans
             and materials follow whatever you add here.
           </p>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
+            className="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)]"
           >
-            <Plus size={16} aria-hidden="true" />
+            <Icon name="add" size={16} />
             Add how you homeschool
           </button>
         </>

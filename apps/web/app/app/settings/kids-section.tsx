@@ -1,8 +1,6 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Plus } from "lucide-react";
-
 import { addChildAction, type SetupFormState } from "./actions";
 import { updateChildAction } from "./profile-actions";
 import { BirthdayFields } from "./birthday-fields";
@@ -15,6 +13,7 @@ import { SectionHeading } from "./section-heading";
 import { interestSuggestions } from "../../../lib/kid-suggestions";
 import { TagInput } from "../../onboarding/tag-input";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
+import { Icon } from "../../../components/design/Icon";
 
 /**
  * The kids section of the one family card on /app/settings: each child
@@ -28,10 +27,10 @@ import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 const INITIAL_STATE: SetupFormState = { error: null };
 
 const inputClass =
-  "mt-2 w-full rounded-md border border-border bg-card px-4 py-3 text-base text-strong focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
+  "mt-2 w-full rounded-md border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[color:var(--homa-ink)] focus:border-[var(--homa-midnight-action)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--homa-visual-coral)_24%,transparent)]";
 
 const rowButtonClass =
-  "min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong disabled:opacity-60";
+  "min-h-9 cursor-pointer rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:border-[var(--homa-midnight-action)] hover:text-[color:var(--homa-ink)] disabled:opacity-60";
 
 export interface KidRow {
   id: string;
@@ -78,12 +77,12 @@ function KidItem({ kid, photoConsentGranted }: { kid: KidRow; photoConsentGrante
       <div className="flex items-center gap-3">
         <KidAvatar name={kid.name} index={kid.index} avatarUrl={kid.avatarUrl} size={40} />
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-semibold text-strong">{kid.name}</span>
-          <span className="block text-sm text-muted">
+          <span className="block truncate font-semibold text-[color:var(--homa-ink)]">{kid.name}</span>
+          <span className="block text-sm text-[color:var(--homa-ink-muted)]">
             {kid.ageDisplay} {"\u00b7"} {kid.birthdayDisplay}
           </span>
           {!editing && kid.interests.length > 0 ? (
-            <span className="block truncate text-sm text-muted">
+            <span className="block truncate text-sm text-[color:var(--homa-ink-muted)]">
               Into {kid.interests.join(", ")}
             </span>
           ) : null}
@@ -104,12 +103,12 @@ function KidItem({ kid, photoConsentGranted }: { kid: KidRow; photoConsentGrante
       </div>
 
       {editing ? (
-        <form action={action} className="mt-3 rounded-md bg-page p-4">
+        <form action={action} className="mt-3 rounded-md bg-[var(--homa-canvas)] p-4">
           <input type="hidden" name="child_id" value={kid.id} />
           {interests.map((tag) => (
             <input key={tag} type="hidden" name="interests" value={tag} />
           ))}
-          <label className="block text-sm font-medium text-strong" htmlFor={`kid-${kid.id}-name`}>
+          <label className="block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor={`kid-${kid.id}-name`}>
             First name
           </label>
           <input
@@ -142,7 +141,7 @@ function KidItem({ kid, photoConsentGranted }: { kid: KidRow; photoConsentGrante
             />
           </div>
 
-          <label className="mt-4 block text-sm font-medium text-strong" htmlFor={`kid-${kid.id}-focus`}>
+          <label className="mt-4 block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor={`kid-${kid.id}-focus`}>
             Where should Homa focus?
           </label>
           <input
@@ -154,9 +153,9 @@ function KidItem({ kid, photoConsentGranted }: { kid: KidRow; photoConsentGrante
             className={inputClass}
           />
 
-          <label className="mt-4 block text-sm font-medium text-strong" htmlFor={`kid-${kid.id}-notes`}>
+          <label className="mt-4 block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor={`kid-${kid.id}-notes`}>
             Anything else Homa should know{" "}
-            <span className="font-normal text-muted">(health, temperament, whatever helps)</span>
+            <span className="font-normal text-[color:var(--homa-ink-muted)]">(health, temperament, whatever helps)</span>
           </label>
           <textarea
             id={`kid-${kid.id}-notes`}
@@ -176,14 +175,14 @@ function KidItem({ kid, photoConsentGranted }: { kid: KidRow; photoConsentGrante
             <button
               type="submit"
               disabled={pending}
-              className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+              className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-paper)] transition-colors hover:bg-[color-mix(in_srgb,var(--homa-midnight-action)_88%,var(--homa-ink))] disabled:opacity-60"
             >
               {pending ? "Saving\u2026" : "Save"}
             </button>
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+              className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
             >
               Cancel
             </button>
@@ -211,18 +210,18 @@ function AddChildDisclosure() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-pill border border-border bg-card px-5 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
+        className="mt-3 inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)]"
       >
-        <Plus size={16} aria-hidden="true" />
+        <Icon name="add" size={16} />
         Add a child
       </button>
     );
   }
 
   return (
-    <form action={action} className="mt-3 rounded-md bg-page p-4">
-      <p className="font-medium text-strong">Add a child</p>
-      <label className="mt-3 block text-sm font-medium text-strong" htmlFor="new-child-name">
+    <form action={action} className="mt-3 rounded-md bg-[var(--homa-canvas)] p-4">
+      <p className="font-medium text-[color:var(--homa-ink)]">Add a child</p>
+      <label className="mt-3 block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor="new-child-name">
         First name
       </label>
       <input id="new-child-name" name="child_name" type="text" required className={inputClass} />
@@ -236,14 +235,14 @@ function AddChildDisclosure() {
         <button
           type="submit"
           disabled={pending}
-          className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+          className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-paper)] transition-colors hover:bg-[color-mix(in_srgb,var(--homa-midnight-action)_88%,var(--homa-ink))] disabled:opacity-60"
         >
           {pending ? "Adding\u2026" : "Add child"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+          className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
         >
           Cancel
         </button>
@@ -263,7 +262,7 @@ export function KidsSection({
   return (
     <div>
       <SectionHeading first>Kids</SectionHeading>
-      <ul className="divide-y divide-[var(--stone-100)]">
+      <ul className="divide-y divide-[var(--homa-control-boundary)]">
         {kids.map((kid) => (
           <KidItem key={kid.id} kid={kid} photoConsentGranted={photoConsentGranted} />
         ))}

@@ -132,19 +132,19 @@ export function KidPhotoField({
   if (!consented) {
     return (
       <div className="mt-4">
-        <p className="block text-sm font-medium text-strong">{kidName}&apos;s photo</p>
+        <p className="block text-sm font-medium text-[color:var(--homa-ink)]">{kidName}&apos;s photo</p>
         {consentOpen ? (
-          <div className="mt-2 rounded-md border border-border bg-card p-4">
-            <p className="font-medium text-strong">One agreement before the first photo</p>
-            <p className="mt-1 text-sm text-body">
+          <div className="mt-2 rounded-md border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-4">
+            <p className="font-medium text-[color:var(--homa-ink)]">One agreement before the first photo</p>
+            <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
               Homa looks at the photo while drawing {kidName}&apos;s materials. That is
               how {kidName} becomes the main character of a picture book, or the
               astronaut on a coloring page.
             </p>
-            <ul className="mt-3 space-y-1.5 text-sm text-body">
+            <ul className="mt-3 space-y-1.5 text-sm text-[color:var(--homa-ink-muted)]">
               {CONSENT_COMMITMENTS.map((line) => (
                 <li key={line} className="flex gap-2">
-                  <span aria-hidden="true" className="text-brand">
+                  <span aria-hidden="true" className="text-[color:var(--homa-brand-text)]">
                     {"\u2022"}
                   </span>
                   {line}
@@ -156,14 +156,14 @@ export function KidPhotoField({
                 type="button"
                 onClick={agree}
                 disabled={consentPending}
-                className="min-h-10 cursor-pointer rounded-pill bg-brand px-5 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-hover disabled:opacity-60"
+                className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2 text-sm font-semibold text-[color:var(--homa-paper)] transition-colors hover:bg-[color-mix(in_srgb,var(--homa-midnight-action)_88%,var(--homa-ink))] disabled:opacity-60"
               >
                 {consentPending ? "Saving\u2026" : "I agree"}
               </button>
               <button
                 type="button"
                 onClick={() => setConsentOpen(false)}
-                className="min-h-10 cursor-pointer rounded-pill px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-strong"
+                className="min-h-10 cursor-pointer rounded-[var(--homa-radius-control)] px-4 py-2 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
               >
                 Not now
               </button>
@@ -171,14 +171,14 @@ export function KidPhotoField({
           </div>
         ) : (
           <>
-            <p className="mt-1 text-sm text-body">
+            <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
               Add a photo and Homa can draw {kidName} into picture books, coloring
               pages, and other materials.
             </p>
             <button
               type="button"
               onClick={() => setConsentOpen(true)}
-              className="mt-2 min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-medium text-body transition-colors hover:border-brand hover:text-strong"
+              className="mt-2 min-h-9 cursor-pointer rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:border-[var(--homa-midnight-action)] hover:text-[color:var(--homa-ink)]"
             >
               Add {kidName}&apos;s photo
             </button>
@@ -195,7 +195,7 @@ export function KidPhotoField({
 
   return (
     <div className="mt-4">
-      <label className="block text-sm font-medium text-strong" htmlFor={`kid-${kidId}-photo`}>
+      <label className="block text-sm font-medium text-[color:var(--homa-ink)]" htmlFor={`kid-${kidId}-photo`}>
         {kidName}&apos;s photo
       </label>
       <div className="mt-2 flex items-center gap-3">
@@ -205,7 +205,7 @@ export function KidPhotoField({
           <img
             src={shownUrl}
             alt={`${kidName}'s photo`}
-            className="h-10 w-10 shrink-0 rounded-full border border-border object-cover"
+            className="h-10 w-10 shrink-0 rounded-full border border-[var(--homa-control-boundary)] object-cover"
           />
         ) : (
           <KidAvatar name={kidName} index={kidIndex} avatarUrl={null} size={40} />
@@ -226,7 +226,7 @@ export function KidPhotoField({
           type="button"
           disabled={preparing}
           onClick={() => fileInputRef.current?.click()}
-          className="min-h-9 cursor-pointer rounded-pill border border-border bg-card px-4 py-1.5 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:opacity-60"
+          className="min-h-9 cursor-pointer rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-1.5 text-sm font-semibold text-[color:var(--homa-ink)] transition-colors hover:border-[var(--homa-midnight-action)] disabled:opacity-60"
         >
           {shownUrl ? "Change the photo" : "Choose a photo"}
         </button>
@@ -234,13 +234,13 @@ export function KidPhotoField({
           <button
             type="button"
             onClick={removePhoto}
-            className="min-h-9 shrink-0 cursor-pointer rounded-pill px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:text-strong"
+            className="min-h-9 shrink-0 cursor-pointer rounded-[var(--homa-radius-control)] px-3 py-1.5 text-sm font-medium text-[color:var(--homa-ink-muted)] transition-colors hover:text-[color:var(--homa-ink)]"
           >
             Remove
           </button>
         ) : null}
       </div>
-      <p className="mt-1.5 text-xs text-muted">
+      <p className="mt-1.5 text-xs text-[color:var(--homa-ink-muted)]">
         {preparing
           ? "Getting the photo ready\u2026"
           : "Nothing is stored until you tap Save below."}
