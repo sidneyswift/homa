@@ -80,6 +80,10 @@ export const EVAL_FIRST_MAKING_FIXTURE_CHILD_ID =
   "00000000-0000-4000-8000-0000000000c1";
 export const EVAL_FIXTURE_PARENT_USER_ID =
   "00000000-0000-4000-8000-0000000000a0";
+export const EVAL_ONBOARDING_FIXTURE_PARENT_USER_ID =
+  "00000000-0000-4000-8000-0000000000a1";
+export const EVAL_FIRST_MAKING_FIXTURE_PARENT_USER_ID =
+  "00000000-0000-4000-8000-0000000000a2";
 
 const EVAL_FIXTURE_PARENT_NAME = "Rachel";
 const EVAL_ONBOARDING_FIXTURE_PARENT_NAME = "Sidney";
@@ -296,7 +300,10 @@ export function evalFamilyFixtureSeedSql(): string {
     .join(",\n");
   return `
 insert into auth.users (id, email)
-values (${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'walker-fixture@homatest.invalid');
+values
+  (${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'walker-fixture@homatest.invalid'),
+  (${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_USER_ID)}, 'onboarding-fixture@homatest.invalid'),
+  (${sqlString(EVAL_FIRST_MAKING_FIXTURE_PARENT_USER_ID)}, 'first-making-fixture@homatest.invalid');
 
 insert into public.families
   (id, name, us_state, parent_display_name, time_zone, status,
@@ -327,7 +334,7 @@ values
 
 insert into public.family_members (family_id, user_id, role, display_name)
 values (${sqlString(EVAL_ONBOARDING_FIXTURE_FAMILY_ID)},
-        ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
+        ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_USER_ID)}, 'parent',
         ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
 
 insert into public.families
@@ -341,7 +348,7 @@ values
 
 insert into public.family_members (family_id, user_id, role, display_name)
 values (${sqlString(EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID)},
-        ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
+        ${sqlString(EVAL_FIRST_MAKING_FIXTURE_PARENT_USER_ID)}, 'parent',
         ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
 
 insert into public.children
