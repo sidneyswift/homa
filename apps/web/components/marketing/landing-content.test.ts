@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -10,6 +11,8 @@ import {
   PLATFORM_ITEMS,
   SAMPLE_REPORT_COPY,
 } from "./landing-content";
+
+const QUIET_LANDING_SOURCE = readFileSync(new URL("./QuietLanding.tsx", import.meta.url), "utf8");
 
 test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.headline, "The homeschool assistant that does the prep.");
@@ -107,4 +110,28 @@ test("the founder story uses the public co-founder signature", () => {
   assert.match(FOUNDER_STORY_COPY.body, /teaching mattered most/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bcurriculum\b/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bsteady\b/i);
+});
+
+test("the live landing composition keeps the approved artifact-first opening", () => {
+  for (const marker of [
+    "qa-opening__world",
+    "qa-authority",
+    "qa-product",
+    "/images/hero-family.png",
+    "Real curiosity.",
+    "One useful next move",
+    "Quiet authority in full",
+    "<Logo",
+  ]) {
+    assert.match(QUIET_LANDING_SOURCE, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-object|HeroObject|QuietHeroHeadline/u);
+});
+
+test("the product moment exposes a keyboard-safe, reduced-motion state demo", () => {
+  assert.match(QUIET_LANDING_SOURCE, /aria-live="polite"/u);
+  assert.match(QUIET_LANDING_SOURCE, /aria-pressed=\{state === nextState\}/u);
+  assert.match(QUIET_LANDING_SOURCE, /prefers-reduced-motion: reduce/u);
+  assert.match(QUIET_LANDING_SOURCE, /qa-product__control:focus-visible/u);
+  assert.match(QUIET_LANDING_SOURCE, /@keyframes qa-thread-draw/u);
 });
