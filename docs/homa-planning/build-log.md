@@ -38,6 +38,39 @@ and native-parity direction remain binding.
 Implementation and verification are tracked by gh#258 and
 `docs/notes/unified-planner-implementation.md`.
 
+## 2026-08-02 · Founder ruling: Quiet authority becomes Homa's ground-up omnichannel brand system
+
+Founder ruling, not an agent decision. Registered as
+`quiet-authority-ground-up-brand-system` in the canonical reconciliation
+index and tracked by gh#666.
+
+The founder approved the complete Quiet authority direction shown in
+`docs/homa-planning/plans/2026-08-02-homa-brand-system-approval.html` and
+authorized the full omnichannel epic. The approved foundation uses EB
+Garamond for semantic display roles at 20px and above, DM Sans for UI, body,
+controls, labels, and parent-facing data, and Fredoka only through the real
+Homa Logo. Exact Homa coral is the expressive signature, midnight owns
+repeated actions and selection, mineral neutrals carry the environment, and
+semantic colors appear only when their meaning is true.
+
+This is a full brand-system replacement, not a theme layer. Work begins in
+the doctrine, typed contract, fonts, master assets, and atoms, then moves
+outward through patterns, compositions, every product and brand surface,
+legacy removal, and omnichannel certification. Landing, signed-in web,
+native, reports, generated materials, print, email, SMS/MMS, future push
+templates, App Store, browser metadata, social, hosted handoffs, and any
+other customer-visible Homa surface are in scope. Each layer must pass
+rendered, interaction, accessibility, performance, and independent
+builder-versus-critic gauntlet evidence before a dependent layer advances.
+
+No active runtime, default customer-visible surface, current template, or
+discoverable design guidance may retain the superseded system at closeout.
+Historical evidence and immutable family artifacts are preserved for truth,
+but must be classified, made non-authoritative, and removed from default
+current presentation. The program must prove both adoption of Quiet authority
+and absence of the old system with deterministic guards and a closed removal
+ledger.
+
 ## 2026-08-01 · Founder ruling: copyright does not gate family uploads or training eligibility
 
 Founder ruling, not an agent decision. Registered as
