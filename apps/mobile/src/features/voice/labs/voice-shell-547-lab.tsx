@@ -33,9 +33,9 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 
-import { Logo } from "../components/brand/logo";
-import { fontFamilies } from "../theme/fonts";
-import { colors, fontSize, palette, radius, shadows, space } from "../theme/tokens";
+import { Logo } from "../../../components/brand/logo";
+import { fontFamilies } from "../../../theme/fonts";
+import { colors, fontSize, palette, radius, shadows, space } from "../../../theme/tokens";
 
 type Direction = "floating" | "dock";
 type Surface = "voice" | "planner" | "binder" | "preview" | "confirmation";
@@ -125,8 +125,9 @@ function isVoiceState(value: string | undefined): value is VoiceState {
 }
 
 /**
- * Disposable native interaction lab for gh#547. This route is unlinked and
- * carries no session, navigation, active-object, or product-data behavior.
+ * Disposable native interaction lab for gh#547. This file deliberately lives
+ * outside `src/app`, so Expo Router cannot package it as a product route.
+ * It carries no session, navigation, active-object, or product-data behavior.
  * Every record on it is synthetic. The branch is evidence only.
  */
 export default function VoiceShell547Lab() {

@@ -151,6 +151,9 @@ jobs:
       - name: Mobile accessibility contract
         run: pnpm check:mobile-accessibility
 
+      - name: Native interface gauntlet
+        run: pnpm check:native-interface-gauntlet
+
   # The compile chain plus the checks that need real Supabase secrets.
   # Typecheck, lint, and build go through one turbo invocation so turbo
   # can schedule them across the runner's cores and reuse the shared
