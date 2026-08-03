@@ -382,6 +382,9 @@ jobs:
       - name: Brand asset generation and fingerprint check
         run: pnpm check:brand-assets
 
+      - name: Canonical identity asset manifest and residue check
+        run: pnpm check:identity-assets
+
       - name: Design authoring rails check (coverage, contract, residue, fingerprints)
         run: pnpm check:design-authoring
 

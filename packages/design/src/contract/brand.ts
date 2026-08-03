@@ -17,6 +17,8 @@ export const logoGeometry = {
 
 export const roofThread = {
   source: "master-roof-derived-path",
+  viewBox: "0 0 320 48",
+  path: "M3 30 C34 5 55 44 84 19 S137 6 159 28 S212 43 235 20 S278 3 317 23",
   productStrokePx: 2,
   brandStrokePx: 3,
   maximumTurns: 2,
@@ -31,6 +33,9 @@ export const imageryDirection = {
   light: "natural-window-light",
   camera: "family-height",
   privacy: "no-identifying-family-data",
+  consent: "documented-consent-or-unidentifiable-crop",
+  representation: ["varied-family-structures", "varied-ages-and-abilities", "no-performative-homeschooling"] as const,
+  provenance: "record-source-rights-and-usage-before-publishing",
   crop: "preserve-object-and-next-move-safe-zone",
   prohibited: ["staged-stock-as-universal-proof", "character-over-object", "decorative-thread-without-meaning"] as const,
 } as const;
