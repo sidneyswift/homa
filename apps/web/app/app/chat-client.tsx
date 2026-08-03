@@ -31,11 +31,9 @@ import {
 } from "./onboarding-cards";
 import { AnotherKidCard } from "./another-kid-card";
 import {
-  cardWantsComposer,
   DetailCard,
   latestDetailRequest,
   NO_STYLES_SUMMARY,
-  type DetailCardKind,
 } from "./detail-card";
 import { VoiceMode } from "./voice-mode";
 import { VoiceModeButton } from "./voice-mode-button";
@@ -49,7 +47,6 @@ import {
   archiveFromServerHistory,
   type ChatHistoryPayload,
 } from "../../lib/chat-history-model";
-import type { PromptSuggestionSet } from "../../lib/chat-suggestions/contract";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import {
@@ -72,7 +69,6 @@ import {
   pruneMessageTimes,
   saveChat,
   stampMessageTimes,
-  updateSavedPromptSuggestionSet,
   type ArchivedMessage,
 } from "./chat-storage";
 import {
@@ -125,24 +121,10 @@ import {
   latestProgressMessageInteraction,
   type ProgressMessageInteraction,
 } from "./progress-interaction-policy";
-import { requestPromptSuggestionSet } from "./prompt-suggestion-client";
-import {
-  executePromptSuggestionLifecycleAction,
-  promptSuggestionActionForLifecycleEvent,
-  type PromptSuggestionLifecycleHandlers,
-} from "./prompt-suggestion-lifecycle";
 import {
   nextReplyCutoffRecoveryState,
   type ReplyCutoffRecoveryState,
 } from "./reply-cutoff-recovery";
-import {
-  promptSuggestionRequestForMessages,
-  restorePromptSuggestionSetForVisibleMessages,
-} from "./prompt-suggestion-policy";
-import {
-  PromptSuggestionRail,
-  type PromptSuggestionPhase,
-} from "./prompt-suggestion-rail";
 import {
   latestPlannerOpen,
   planEditCount,
@@ -182,8 +164,8 @@ import {
  * the transcript is ONE continuous history under day separators (the
  * Slack-channel reading of the one chat), while the model session
  * rotates at the first visit after 4am local (chat-storage.ts). Old
- * days stay scrollable above; the morning lands on a clean "today" with
- * the suggestion chips back. The durable record is Postgres
+ * days stay scrollable above; the morning lands on a clean "today."
+ * The durable record is Postgres
  * (conversation_messages via the persist hook + recall); localStorage
  * is the render cache (M1-02 replaces it as the render source).
  *
@@ -240,14 +222,6 @@ import {
 
 // agent.ts pins the gateway model: the mid tier in journeys/06 terms.
 const MODEL_TIER = "mid" as const;
-
-const PROMPT_SUGGESTION_LOADING_DELAY_MS = 500;
-
-const SUGGESTIONS = [
-  "What should we work on this week?",
-  "Make a worksheet for today",
-  "We had a rough morning, help me reset",
-] as const;
 
 /** One-time flag for the filing tag's self-introduction. */
 const FILING_HINT_STORAGE_KEY = "homa-chat-filing-hint";
@@ -437,26 +411,6 @@ export function ChatClient({
   const replayedArchivedRef = useRef<ArchivedMessage[]>([]);
   const serverArchiveReconciledRef = useRef(false);
   const rotatedCachePersistedRef = useRef(!prepared.rotated);
-  const [restoredPromptSuggestionSet] =
-    useState<PromptSuggestionSet | null>(() =>
-      restorePromptSuggestionSetForVisibleMessages({
-        archivedMessages: archived.map(({ message }) => message),
-        currentMessages: initialLiveMessages,
-        promptSuggestionSet: prepared.promptSuggestions,
-        staleSessionlessEvents,
-      }),
-    );
-  const [promptSuggestionSet, setPromptSuggestionSet] =
-    useState<PromptSuggestionSet | null>(restoredPromptSuggestionSet);
-  const [promptSuggestionPhase, setPromptSuggestionPhase] =
-    useState<PromptSuggestionPhase>(
-      restoredPromptSuggestionSet ? "ready" : "idle",
-    );
-  const promptSuggestionAbortRef = useRef<AbortController | null>(null);
-  const promptSuggestionLoadingTimerRef =
-    useRef<ReturnType<typeof setTimeout> | null>(null);
-  const promptSuggestionRequestStartedAtRef = useRef<number | null>(null);
-  const suggestionSetIdForTurnRef = useRef<string | null>(null);
   // Message id -> arrival time. State (not a ref) because the transcript
   // grouping reads it during render.
   const [liveTimes, setLiveTimes] = useState<Record<string, number>>(() => ({
@@ -650,163 +604,11 @@ export function ChatClient({
     );
   }, []);
 
-  const clearPromptSuggestionLoadingTimer = useCallback(() => {
-    if (promptSuggestionLoadingTimerRef.current === null) return;
-    clearTimeout(promptSuggestionLoadingTimerRef.current);
-    promptSuggestionLoadingTimerRef.current = null;
-  }, []);
-
-  const cancelPromptSuggestionRequest = useCallback(() => {
-    const controller = promptSuggestionAbortRef.current;
-    promptSuggestionAbortRef.current = null;
-    controller?.abort();
-    clearPromptSuggestionLoadingTimer();
-    promptSuggestionRequestStartedAtRef.current = null;
-  }, [clearPromptSuggestionLoadingTimer]);
-
-  const clearPromptSuggestionState = useCallback(() => {
-    cancelPromptSuggestionRequest();
-    setPromptSuggestionSet(null);
-    setPromptSuggestionPhase("idle");
-    updateSavedPromptSuggestionSet(storageKey, null);
-  }, [cancelPromptSuggestionRequest, storageKey]);
-
-  const emitPromptSuggestionsShown = useCallback(
-    async (suggestionSet: PromptSuggestionSet, latencyMs: number) => {
-      if (!familyId) return;
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) return;
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.access_token;
-      if (!accessToken) return;
-      await emitEvent(
-        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
-        "chat.prompt_suggestions_shown",
-        {
-          suggestion_set_id: suggestionSet.setId,
-          prompt_version: suggestionSet.promptVersion,
-          source: suggestionSet.source,
-          count: suggestionSet.suggestions.length,
-          latency_ms: latencyMs,
-        },
-      );
-    },
-    [familyId, supabase],
-  );
-
-  const emitPromptSuggestionTapped = useCallback(
-    async (suggestionSet: PromptSuggestionSet, position: number) => {
-      if (!familyId) return;
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) return;
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.access_token;
-      if (!accessToken) return;
-      await emitEvent(
-        { supabaseUrl: url, supabaseKey: key, accessToken, familyId },
-        "chat.prompt_suggestion_tapped",
-        {
-          suggestion_set_id: suggestionSet.setId,
-          prompt_version: suggestionSet.promptVersion,
-          source: suggestionSet.source,
-          position,
-        },
-      );
-    },
-    [familyId, supabase],
-  );
-
-  const requestPromptSuggestionsForMessages = useCallback(
-    async (messages: readonly EveMessage[]): Promise<void> => {
-      clearPromptSuggestionState();
-      const request = promptSuggestionRequestForMessages(messages);
-      if (!request) return;
-
-      const controller = new AbortController();
-      const startedAt = currentTimeMs();
-      promptSuggestionAbortRef.current = controller;
-      promptSuggestionRequestStartedAtRef.current = startedAt;
-      setPromptSuggestionPhase("pending");
-      promptSuggestionLoadingTimerRef.current = setTimeout(() => {
-        if (
-          promptSuggestionAbortRef.current === controller
-          && !controller.signal.aborted
-        ) {
-          setPromptSuggestionPhase("loading");
-        }
-      }, PROMPT_SUGGESTION_LOADING_DELAY_MS);
-
-      try {
-        const suggestionSet = await requestPromptSuggestionSet(request, {
-          signal: controller.signal,
-        });
-        if (
-          promptSuggestionAbortRef.current !== controller
-          || controller.signal.aborted
-        ) {
-          return;
-        }
-
-        const requestStartedAt =
-          promptSuggestionRequestStartedAtRef.current ?? startedAt;
-        clearPromptSuggestionLoadingTimer();
-        promptSuggestionAbortRef.current = null;
-        promptSuggestionRequestStartedAtRef.current = null;
-        setPromptSuggestionSet(suggestionSet);
-        setPromptSuggestionPhase("ready");
-        updateSavedPromptSuggestionSet(storageKey, suggestionSet);
-        void emitPromptSuggestionsShown(
-          suggestionSet,
-          Math.max(0, currentTimeMs() - requestStartedAt),
-        );
-      } catch (error) {
-        if (
-          promptSuggestionAbortRef.current !== controller
-          || controller.signal.aborted
-          || (error instanceof DOMException && error.name === "AbortError")
-        ) {
-          return;
-        }
-        clearPromptSuggestionLoadingTimer();
-        promptSuggestionAbortRef.current = null;
-        promptSuggestionRequestStartedAtRef.current = null;
-        setPromptSuggestionPhase("idle");
-      }
-    },
-    [
-      clearPromptSuggestionLoadingTimer,
-      clearPromptSuggestionState,
-      emitPromptSuggestionsShown,
-      storageKey,
-    ],
-  );
-
-  const promptSuggestionLifecycleHandlers =
-    useMemo<PromptSuggestionLifecycleHandlers<EveMessage>>(
-      () => ({
-        clear: clearPromptSuggestionState,
-        requestMessages: (messages) => {
-          void requestPromptSuggestionsForMessages(messages);
-        },
-        startRecovery: () => {
-          startRecoveryRef.current?.();
-        },
-      }),
-      [
-        clearPromptSuggestionState,
-        requestPromptSuggestionsForMessages,
-      ],
-    );
-
   const emitTurnCompleted = useCallback(
     async (
       status: "ok" | "error",
       errorClass?: "turn_failed" | "send_failed" | "unknown",
     ) => {
-      const suggestionSetId = suggestionSetIdForTurnRef.current;
-      suggestionSetIdForTurnRef.current = null;
       if (!familyId) return;
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -824,9 +626,6 @@ export function ChatClient({
           latency_ms: takeTurnLatencyMs(),
           model_tier: MODEL_TIER,
           tool_calls: countLastTurnToolCalls(messagesRef.current),
-          ...(suggestionSetId
-            ? { suggestion_set_id: suggestionSetId }
-            : {}),
         },
       );
     },
@@ -877,23 +676,14 @@ export function ChatClient({
       // onFinish fires for failed turns too; those already emit their
       // own error event (the agent.error effect), so an unconditional
       // "ok" here double-counted every failure (seen live 2026-07-11).
-      // Consume the stall marker before choosing a suggestion action.
-      // A partial auto-stopped reply belongs to recovery, never generation.
+      // Consume the stall marker before deciding whether the queue can
+      // advance. A partial auto-stopped reply belongs to recovery.
       const autoStopped = autoStoppedRef.current;
       autoStoppedRef.current = false;
-      const promptSuggestionAction =
-        promptSuggestionActionForLifecycleEvent({
-          type: "turn_finished",
-          hasError: Boolean(snapshot.error),
-          autoStopped,
-          hasQueuedFollowup: queued.length > 0,
-        });
       if (!snapshot.error) void emitTurnCompleted("ok");
-      executePromptSuggestionLifecycleAction(
-        promptSuggestionAction,
-        snapshot.data.messages,
-        promptSuggestionLifecycleHandlers,
-      );
+      if (autoStopped && !snapshot.error) {
+        startRecoveryRef.current?.();
+      }
       // The post-turn review trigger (M2-13): fire-and-forget; the server
       // decides whether enough new conversation accumulated to review.
       const sessionId = snapshot.session?.sessionId;
@@ -959,24 +749,6 @@ export function ChatClient({
   useEffect(() => {
     sendMessageRef.current = sendMessage;
   });
-
-  useEffect(() => {
-    if (
-      prepared.promptSuggestions !== null
-      && restoredPromptSuggestionSet === null
-    ) {
-      updateSavedPromptSuggestionSet(storageKey, null);
-    }
-  }, [prepared.promptSuggestions, restoredPromptSuggestionSet, storageKey]);
-
-  useEffect(() => {
-    return () => {
-      promptSuggestionAbortRef.current?.abort();
-      if (promptSuggestionLoadingTimerRef.current !== null) {
-        clearTimeout(promptSuggestionLoadingTimerRef.current);
-      }
-    };
-  }, []);
 
   const [draft, setDraft] = useState(initialDraft ?? "");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1479,14 +1251,6 @@ export function ChatClient({
       agentReset();
       durableCursorRef.current = recovered.session.streamIndex;
       lastSendRef.current = null;
-      executePromptSuggestionLifecycleAction(
-        promptSuggestionActionForLifecycleEvent({
-          type: "recovery_finished",
-          outcome: "recovered",
-        }),
-        messages,
-        promptSuggestionLifecycleHandlers,
-      );
       setRecovering(false);
       flushQueuedMessages();
     },
@@ -1496,7 +1260,6 @@ export function ChatClient({
       clearReplyCutoffRecovery,
       flushQueuedMessages,
       liveTimes,
-      promptSuggestionLifecycleHandlers,
       reattachableSession,
       storageKey,
     ],
@@ -1528,13 +1291,6 @@ export function ChatClient({
     const target = replyCutoffTargetRef.current ?? currentRecoveryTarget();
     if (target === null || recoveryRef.current) return;
     const isReplyCutoff = target === replyCutoffTargetRef.current;
-    executePromptSuggestionLifecycleAction(
-      promptSuggestionActionForLifecycleEvent({
-        type: "recovery_started",
-      }),
-      null,
-      promptSuggestionLifecycleHandlers,
-    );
     const controller = new AbortController();
     recoveryRef.current = controller;
     const deadline = setTimeout(() => controller.abort(), RECOVERY_DEADLINE_MS);
@@ -1544,14 +1300,6 @@ export function ChatClient({
       clearTimeout(deadline);
       if (recoveryRef.current === controller) recoveryRef.current = null;
       if (controller.signal.aborted) {
-        executePromptSuggestionLifecycleAction(
-          promptSuggestionActionForLifecycleEvent({
-            type: "recovery_finished",
-            outcome: "aborted",
-          }),
-          null,
-          promptSuggestionLifecycleHandlers,
-        );
         setRecovering(false);
         if (isReplyCutoff) {
           setReplyCutoffRecovery((state) =>
@@ -1597,14 +1345,6 @@ export function ChatClient({
         applyRecoveredTurn(recovered);
         return;
       } else {
-        executePromptSuggestionLifecycleAction(
-          promptSuggestionActionForLifecycleEvent({
-            type: "recovery_finished",
-            outcome: "failed",
-          }),
-          null,
-          promptSuggestionLifecycleHandlers,
-        );
         if (isReplyCutoff) {
           setReplyCutoffRecovery((state) =>
             nextReplyCutoffRecoveryState(state, "failed"),
@@ -1625,7 +1365,6 @@ export function ChatClient({
     currentRecoveryTarget,
     flushQueuedMessages,
     liveTimes,
-    promptSuggestionLifecycleHandlers,
     recoverTurn,
     reattachableSession,
     storageKey,
@@ -1801,10 +1540,6 @@ export function ChatClient({
     !transcript.some(
       (item) => item.kind === "message" && messageSpeaksWords(item.message),
     );
-  // The chips return whenever a session has no words in it yet: the
-  // first run, and a fresh morning over yesterday's scrollback.
-  const showSuggestions =
-    renderMessages.length === 0 && !lineOccupied && onboarding === null;
   // The snap card's dim rule (founder call): while Homa's camera ask is
   // the live question, everything above it steps back. The only full
   // dim in the product; the card's own message stays full strength.
@@ -1814,8 +1549,6 @@ export function ChatClient({
   const activeQuestion = renderBusy
     ? null
     : latestQuestionRequest(renderMessages);
-  // Computed here, above the rail gate that reads them; the docking
-  // logic further down shares these same values.
   // The one checklist card that may still open the questions, and the
   // one report reveal that may still open the report. Same rule as the
   // snap card: newest, nothing from her after it, and only while the
@@ -1831,39 +1564,6 @@ export function ChatClient({
   const latestChecklist = latestChecklistRequest(renderMessages);
   const activeChecklist = renderBusy ? null : latestChecklist;
   const activeReport = latestReportReveal(renderMessages);
-  const promptSuggestionRailAllowed =
-    !renderBusy
-    && !recovering
-    && !renderRestoringBoundSession
-    && promptSuggestionPhase !== "idle"
-    && progressInteraction === null
-    && activeSnap === null
-    && activeQuestion === null
-    // Never during onboarding. The arc has exactly one next thing at
-    // every beat, and the rail is a second voice proposing a different
-    // one: the founder's walk ended on a card saying "Start the
-    // questions", a chip saying "Explain next step", and an open box,
-    // three answers to what-do-I-do-now. The rail also knew the word
-    // "step", which the mode bans Homa herself from saying.
-    && onboarding === null
-    // And never while any card holds the floor, onboarding or not. The
-    // list knew snap and question cards but was never taught the
-    // checklist invite or the report reveal.
-    && activeChecklist === null
-    && activeReport === null
-    && draft.trim().length === 0
-    && attachments.staged.length === 0
-    && dictation.phase === "idle";
-  const showPromptSuggestionRail =
-    hydrated
-    && promptSuggestionRailAllowed
-    && (
-      promptSuggestionPhase === "loading"
-      || (
-        promptSuggestionPhase === "ready"
-        && (promptSuggestionSet?.suggestions.length ?? 0) > 0
-      )
-    );
 
   useEffect(() => {
     // First paint lands at the bottom instantly (yesterday above the
@@ -1958,8 +1658,8 @@ export function ChatClient({
   // and the founder hit the un-docked version live: the invite in the
   // transcript, an open composer under it, and a suggestion chip between
   // them, three different answers to "what do I do now" on one screen.
-  // Docking is also what retires the other two: the composer and its
-  // rail hide while any card is docked, so the card is the whole ask.
+  // Docking also retires the open composer while the card holds the
+  // floor, so the card is the whole ask.
   // activeChecklist is already null while a turn runs, so during
   // streaming the composer stays and nothing flickers.
   // latestChecklist, not activeChecklist: it docks the moment it exists,
@@ -1987,21 +1687,6 @@ export function ChatClient({
       Boolean(dockedChained) ||
       kidChainStage !== null ||
       dockedDetail !== null);
-  /** Which card is in the dock, whoever put it there. */
-  const dockedCardKind: DetailCardKind | null = appBasics
-    ? "family_basics"
-    : dockedChained
-      ? "homeschool_profile"
-      : kidChainStage === "card"
-        ? "child"
-        : (dockedDetail?.card.kind ?? null);
-  /**
-   * The composer keeps the card company only when the card cannot say
-   * everything she might need to (cardWantsComposer).
-   *
-   * Read from the card KIND rather than the field on screen, so it does
-   * not appear and disappear as she steps through a card's questions.
-   */
   /**
    * The composer sits beside a card only on a question the card cannot
    * enumerate, which is a fact about the STEP she is on rather than the
@@ -2259,7 +1944,6 @@ export function ChatClient({
       setWallOpen(true);
       return "rejected";
     }
-    clearPromptSuggestionState();
     if (plan.clearDraft) dictation.clearCutoffNotice();
     if (plan.resetDraftFromVoice) draftFromVoiceRef.current = false;
     if (plan.clearDraft) setDraft("");
@@ -2307,15 +1991,6 @@ export function ChatClient({
       headers: chatSendHeaders(turnModalityRef.current, flush.lane),
     });
     return "sent";
-  }
-
-  function sendPromptSuggestion(index: number, suggestion: string): void {
-    const suggestionSet = promptSuggestionSet;
-    if (suggestionSet?.suggestions[index] !== suggestion) return;
-    const result = sendMessage(suggestion);
-    if (result === "rejected") return;
-    suggestionSetIdForTurnRef.current = suggestionSet.setId;
-    void emitPromptSuggestionTapped(suggestionSet, index);
   }
 
   /**
@@ -2388,7 +2063,6 @@ export function ChatClient({
           [summary]: prepared.receipts,
         }));
       }
-      clearPromptSuggestionState();
       dictation.clearCutoffNotice();
       setDraft("");
       draftFromVoiceRef.current = false;
@@ -2947,11 +2621,11 @@ export function ChatClient({
       ) : null}
 
       {/* The redesigned composer (chat-refined, approved 2026-07-13):
-          docked suggestion chips, then a soft card holding the pending
-          attachment chips, the input, and a toolbar rail (+, camera,
-          the About tag, mic, send). Typing stays enabled while Homa
-          works, and sending mid-turn queues; staged files hold Send
-          until the line is free (the queue stays text-only). */}
+          a soft card holding the pending attachment chips, the input,
+          and a toolbar rail (+, camera, the About tag, mic, send).
+          Typing stays enabled while Homa works, and sending mid-turn
+          queues; staged files hold Send until the line is free (the
+          queue stays text-only). */}
       <footer
         // The rule belongs to the composer, which is a low box that needs
         // an edge to sit against. A docked card brings its own border and
@@ -2969,22 +2643,6 @@ export function ChatClient({
             : `px-4 pb-5 ${showComposer ? "quiet-chat__footer--with-rule" : ""}`
         }`}
       >
-        {showSuggestions ? (
-          // The chips dock quietly by the keyboard (D1 steal, founder
-          // pick) instead of floating mid-transcript.
-          <div className="mx-auto mb-2.5 flex w-full max-w-[780px] flex-wrap gap-2">
-            {SUGGESTIONS.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => sendMessage(suggestion)}
-                className="quiet-chat__suggestion"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        ) : null}
         {checklistTakeover !== null ? (
           // The questions, docked where the composer was, so answering
           // them never leaves the conversation (founder note,
@@ -3192,21 +2850,10 @@ export function ChatClient({
               />
             </div>
           ) : null}
-          {showPromptSuggestionRail ? (
-            <PromptSuggestionRail
-              phase={promptSuggestionPhase}
-              suggestions={promptSuggestionSet?.suggestions ?? []}
-              onSelect={sendPromptSuggestion}
-            />
-          ) : null}
-            <form
+          <form
             data-brand-layer="composer-form"
             ref={composerFormRef}
-            className={`quiet-chat__composer-form w-full px-3 pb-2 pt-2.5 ${
-              showPromptSuggestionRail
-                ? "quiet-chat__composer-form--suggestions -mt-px"
-                : ""
-            }`}
+            className="quiet-chat__composer-form w-full px-3 pb-2 pt-2.5"
             onSubmit={(event) => {
               event.preventDefault();
               if (attachments.readyCount > 0) {

@@ -123,11 +123,14 @@ pnpm --filter web dev   # http://localhost:3000
 
 ## Webchat prompt suggestions
 
-The founder-editable production prompt lives at
-`agent/prompt-suggestions.md`. Live next-message suggestions run only in web
-chat. SMS, email, dispatch, and mobile do not use them. The latest eligible
-rail is stored in local browser chat state so it can return after a route
-change or reload; it is not durable family data.
+Webchat prompt suggestions are paused pending a more valuable redesign.
+`ChatClient` renders neither the fixed starter chips nor the generated rail,
+and it does not request suggestion sets after replies. SMS, email, dispatch,
+and mobile remain unchanged.
+
+The isolated implementation is retained for redesign work. Its editable
+prompt lives at `agent/prompt-suggestions.md`, and suggestion sets remain
+local browser data rather than durable family data.
 
 Run `pnpm check:prompt-suggestions` for the credential-free fixture, contract,
 policy, storage, rail, and client checks that CI uses. Run
