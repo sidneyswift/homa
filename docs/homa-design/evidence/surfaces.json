@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "68578ee3faabf97c88f525160a3e0b1dc44f4fc45c4db384bdb551506e05bce8",
+  "ownedInputFingerprint": "2a81946afc48d7f14300bee3884047fc9f1eb30e28c5814be26e6e5863238642",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -109996,6 +109996,118 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:8f578a9703d7ea9c",
+      "paths": [
+        "apps/web/public/blog/how-to-track-homeschool-hours-without-losing-the-week/hero.png"
+      ],
+      "type": "asset",
+      "reachability": "public",
+      "audiences": [
+        "family",
+        "public",
+        "provider"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#689",
+      "upstreamDomainOwners": [
+        "asset-derived"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "a0365e2ac60fde09580eec064353a0835dce36c8111b3335d67027e5840c017c",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "asset-derived"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "a0365e2ac60fde09580eec064353a0835dce36c8111b3335d67027e5840c017c"
+      ],
+      "disposition": "regenerate-derived",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "revocable-public",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:b2f3bde54fb2aa9c",
       "paths": [
         "apps/web/public/brand/homa-lockup-dark.png"
@@ -118359,9 +118471,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:1a7e9a607b694407",
+      "id": "surface:d3a2750688ce697f",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/article.mdx"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -118472,9 +118584,123 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:61d2de8c9a8559af",
+      "id": "surface:77807dde9e6dfc17",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/images/README.md"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/distribution.md"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "loading"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "7a33faea4b2cb592ac37b7f0c88f02a7c48018e2c1b700b72329a130fd305b69",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "7a33faea4b2cb592ac37b7f0c88f02a7c48018e2c1b700b72329a130fd305b69"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:8d63b01705915546",
+      "paths": [
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/images/README.md"
       ],
       "type": "template",
       "reachability": "public",
@@ -118585,9 +118811,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:9e1acddfb1145773",
+      "id": "surface:66f490fd8268d8e0",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/images/hero.png"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/images/hero.png"
       ],
       "type": "template",
       "reachability": "public",
@@ -118698,9 +118924,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:88c2812e7e4d0a6f",
+      "id": "surface:47b4ba857035d8e9",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/meta.yml"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -118741,7 +118967,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "8ddb10d0a174de131fd690242d1575f3acd811498969bee8145bc0dc10a57b9d",
+        "fixtureChecksum": "d7be4a8f22084109bf780a1518a03e74df62350c9ce1bc9832a60f8e2460d5c8",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -118776,7 +119002,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "8ddb10d0a174de131fd690242d1575f3acd811498969bee8145bc0dc10a57b9d"
+        "d7be4a8f22084109bf780a1518a03e74df62350c9ce1bc9832a60f8e2460d5c8"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -118811,9 +119037,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:efc568c9e01d84ff",
+      "id": "surface:46311269327613a3",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/README.md"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/README.md"
       ],
       "type": "template",
       "reachability": "public",
@@ -118924,9 +119150,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:b2eeddbd6066adcb",
+      "id": "surface:3c28775e479b27d5",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/script.md"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/script.md"
       ],
       "type": "template",
       "reachability": "public",
@@ -119038,9 +119264,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:b98fc68bb5caa6e0",
+      "id": "surface:ccc26a17385f1c16",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/thumbnail.png"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/thumbnail.png"
       ],
       "type": "template",
       "reachability": "public",
@@ -119151,9 +119377,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:8adae00b60cba181",
+      "id": "surface:1f6cb7caf24a2a6e",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/video.mp4"
+        "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/video/video.mp4"
       ],
       "type": "template",
       "reachability": "public",
