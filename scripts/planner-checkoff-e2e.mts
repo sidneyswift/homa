@@ -25,12 +25,14 @@ type ConflictReason =
 interface CheckReceipt {
   status: CheckStatus;
   reason: ConflictReason | null;
+  family_id: string | null;
   plan_id: string | null;
   plan_revision: string | number | null;
   progress_revision: string | number | null;
   progress_snapshot: unknown;
   progress_key: string;
   done: boolean | null;
+  changed: boolean | null;
 }
 
 interface PlanState {
@@ -43,6 +45,33 @@ interface PlanState {
 }
 
 const sql = postgres(databaseUrl, { prepare: false, max: 4 });
+
+function deferredVoid(): {
+  promise: Promise<void>;
+  resolve: () => void;
+} {
+  let resolve!: () => void;
+  const promise = new Promise<void>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
+async function waitForV2LockWait(): Promise<void> {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const [waiting] = await sql<{ count: string | number }[]>`
+      select count(*) as count
+      from pg_stat_activity
+      where pid <> pg_backend_pid()
+        and state = 'active'
+        and wait_event_type = 'Lock'
+        and position('set_plan_activity_check_v2' in query) > 0
+    `;
+    if (Number(waiting.count) > 0) return;
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  }
+  assert.fail("v2 never reached the blocked plan row");
+}
 
 async function setCheck(input: {
   childId?: string;
@@ -64,7 +93,7 @@ async function setCheck(input: {
     await transaction`set local role authenticated`;
     return transaction<CheckReceipt[]>`
       select *
-      from public.set_plan_activity_check(
+      from public.set_plan_activity_check_v2(
         ${input.childId ?? EVAL_FIXTURE_PLAN_CHILD_ID},
         ${input.subjectId ?? EVAL_FIXTURE_PLAN_SUBJECT},
         ${input.checkKey},
@@ -91,6 +120,13 @@ async function readPlan(): Promise<PlanState> {
 
 try {
   const initial = await readPlan();
+  const [fixtureChild] = await sql<{ family_id: string }[]>`
+    select family_id
+    from public.children
+    where id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
+  `;
+  assert.ok(fixtureChild, "the eval fixture includes the plan's child");
+  const fixtureFamilyId = fixtureChild.family_id;
   const revision = Number(initial.plan_revision);
   const activityA = initial.plan.weeks[1]?.activities[0];
   const activityB = initial.plan.weeks[1]?.activities[1];
@@ -122,8 +158,12 @@ try {
   ]);
   assert.equal(receiptA.status, "applied");
   assert.equal(receiptA.reason, null);
+  assert.equal(receiptA.family_id, fixtureFamilyId);
   assert.equal(receiptA.done, true);
+  assert.equal(receiptA.changed, true);
   assert.equal(receiptB.status, "applied");
+  assert.equal(receiptB.family_id, fixtureFamilyId);
+  assert.equal(receiptB.changed, true);
   const orderedReceipts = [receiptA, receiptB].sort(
     (left, right) => Number(left.progress_revision) - Number(right.progress_revision),
   );
@@ -153,6 +193,7 @@ try {
   });
   assert.equal(Number(idempotentReceipt.progress_revision), progressRevision + 2);
   assert.deepEqual(idempotentReceipt.progress_snapshot, concurrent.progress);
+  assert.equal(idempotentReceipt.changed, false);
 
   await sql`
     insert into public.child_plans (
@@ -292,6 +333,28 @@ try {
       and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
   `;
 
+  await sql`
+    update public.child_plans
+    set progress = '{"4.999": true}'::jsonb
+    where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
+      and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
+  `;
+  const invalidStoredKey = await setCheck({
+    checkKey: "2.0",
+    done: false,
+    expectedText: replacement,
+    revision: revision + 2,
+  });
+  assert.equal(invalidStoredKey.status, "conflict");
+  assert.equal(invalidStoredKey.reason, "invalid-progress");
+  assert.equal(invalidStoredKey.changed, null);
+  await sql`
+    update public.child_plans
+    set progress = '{}'::jsonb
+    where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
+      and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
+  `;
+
   const beforeRevisionForgery = await readPlan();
   await sql`
     update public.child_plans
@@ -340,6 +403,7 @@ try {
   });
   assert.equal(missingPlan.status, "conflict");
   assert.equal(missingPlan.reason, "plan-missing");
+  assert.equal(missingPlan.family_id, null);
   assert.equal(missingPlan.plan_id, null);
   assert.equal(missingPlan.plan_revision, null);
   assert.equal(missingPlan.progress_revision, null);
@@ -358,7 +422,7 @@ try {
       await transaction`set local role authenticated`;
       await transaction`
         select *
-        from public.set_plan_activity_check(
+        from public.set_plan_activity_check_v2(
           ${EVAL_FIXTURE_PLAN_CHILD_ID},
           ${EVAL_FIXTURE_PLAN_SUBJECT},
           '2.0',
@@ -368,7 +432,17 @@ try {
         )
       `;
     }),
-    /done, expected text, and a positive plan revision are required/u,
+    /subject, done, expected text, and a positive plan revision are required/u,
+  );
+
+  await assert.rejects(
+    setCheck({
+      checkKey: "1.1000",
+      done: true,
+      expectedText: replacement,
+      revision: Number(duplicateWeekPlan.plan_revision),
+    }),
+    /check key is invalid/u,
   );
 
   const foreignUserId = randomUUID();
@@ -390,23 +464,96 @@ try {
     insert into public.children (id, family_id, name, birth_month)
     values (${foreignChildId}, ${foreignFamilyId}, 'Robin', '2020-01-01')
   `;
+  await sql`
+    insert into public.child_plans (
+      child_id, subject_id, plan, bank_version, progress, retest_at
+    ) values (
+      ${foreignChildId}, 'multi-family', ${sql.json(initial.plan)},
+      'eval-fixture', '{}'::jsonb, now() + interval '18 days'
+    )
+  `;
   await assert.rejects(
     setCheck({
       childId: foreignChildId,
-      checkKey: "1.0",
+      subjectId: "multi-family",
+      checkKey: "2.0",
       done: true,
-      expectedText: "Anything",
+      expectedText: activityA,
       revision: 1,
     }),
     /child does not belong to the caller's family/u,
   );
+
+  await sql`
+    insert into public.family_members (family_id, user_id, role)
+    values (${foreignFamilyId}, ${EVAL_FIXTURE_PARENT_USER_ID}, 'helper')
+  `;
+  const multiFamilyReceipt = await setCheck({
+    childId: foreignChildId,
+    subjectId: "multi-family",
+    checkKey: "2.0",
+    done: true,
+    expectedText: activityA,
+    revision: 1,
+  });
+  assert.equal(multiFamilyReceipt.status, "applied");
+  assert.equal(multiFamilyReceipt.family_id, foreignFamilyId);
+  assert.equal(multiFamilyReceipt.changed, true);
+
+  const planLocked = deferredVoid();
+  const releasePlan = deferredVoid();
+  const planBlocker = sql.begin(async (transaction) => {
+    await transaction`
+      select id
+      from public.child_plans
+      where child_id = ${foreignChildId}
+        and subject_id = 'multi-family'
+      for update
+    `;
+    planLocked.resolve();
+    await releasePlan.promise;
+  });
+  await planLocked.promise;
+
+  const authorizedWhileWaiting = setCheck({
+    childId: foreignChildId,
+    subjectId: "multi-family",
+    checkKey: "2.0",
+    done: false,
+    expectedText: activityA,
+    revision: 1,
+  });
+  await waitForV2LockWait();
+
+  let removalFinished = false;
+  const membershipRemoval = sql`
+    delete from public.family_members
+    where family_id = ${foreignFamilyId}
+      and user_id = ${EVAL_FIXTURE_PARENT_USER_ID}
+  `.then(() => {
+    removalFinished = true;
+  });
+  await new Promise<void>((resolve) => setTimeout(resolve, 25));
+  assert.equal(
+    removalFinished,
+    false,
+    "membership removal waits behind the authorized v2 operation",
+  );
+
+  releasePlan.resolve();
+  const lockedReceipt = await authorizedWhileWaiting;
+  assert.equal(lockedReceipt.status, "applied");
+  assert.equal(lockedReceipt.family_id, foreignFamilyId);
+  await planBlocker;
+  await membershipRemoval;
+  assert.equal(removalFinished, true);
 
   await assert.rejects(
     sql.begin(async (transaction) => {
       await transaction`set local role authenticated`;
       await transaction`
         select *
-        from public.set_plan_activity_check(
+        from public.set_plan_activity_check_v2(
           ${EVAL_FIXTURE_PLAN_CHILD_ID},
           ${EVAL_FIXTURE_PLAN_SUBJECT},
           '2.0',
@@ -419,19 +566,39 @@ try {
     /requires an authenticated caller/u,
   );
 
-  const [legacy] = await sql<{ procedure: string | null }[]>`
-    select to_regprocedure(
-      'public.toggle_plan_activity_check(uuid,text,smallint,smallint,boolean)'
-    )::text as procedure
+  const [contracts] = await sql<{
+    legacy_enabled: boolean;
+    v1_enabled: boolean;
+    v2_enabled: boolean;
+  }[]>`
+    select
+      has_function_privilege(
+        'authenticated',
+        'public.toggle_plan_activity_check(uuid,text,smallint,smallint,boolean)',
+        'execute'
+      ) as legacy_enabled,
+      has_function_privilege(
+        'authenticated',
+        'public.set_plan_activity_check(uuid,text,text,boolean,text,bigint)',
+        'execute'
+      ) as v1_enabled,
+      has_function_privilege(
+        'authenticated',
+        'public.set_plan_activity_check_v2(uuid,text,text,boolean,text,bigint)',
+        'execute'
+      ) as v2_enabled
   `;
-  assert.ok(legacy.procedure, "expand phase keeps the legacy operation available");
+  assert.equal(contracts.legacy_enabled, true);
+  assert.equal(contracts.v1_enabled, false);
+  assert.equal(contracts.v2_enabled, true);
 
   console.log("PASS  Planner check-offs preserve concurrent keys");
   console.log("PASS  Planner check-offs reject stale text and revisions");
   console.log("PASS  Planner conflicts carry typed, non-positional receipts");
   console.log("PASS  plan and progress revisions track independent meaning");
-  console.log("PASS  Planner check-offs enforce family tenancy");
-  console.log("PASS  expand phase preserves the legacy operation");
+  console.log("PASS  Planner receipts preserve exact multi-family tenancy");
+  console.log("PASS  v2 bounds direct input and retires the unused v1 grant");
+  console.log("PASS  expand phase preserves the deployed legacy operation");
 } finally {
   await sql.end({ timeout: 5 });
 }
