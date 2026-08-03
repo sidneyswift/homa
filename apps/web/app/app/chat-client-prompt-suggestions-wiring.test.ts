@@ -187,16 +187,14 @@ describe("ChatClient prompt suggestion wiring", () => {
     assert.ok(clearAfterWall > wallRejection);
   });
 
-  it("uses one rounded composer silhouette without changing static starters", () => {
+  it("uses one Quiet composer silhouette without changing static starters", () => {
     assert.match(
       source,
       /"What should we work on this week\?",\s*"Make a worksheet for today",\s*"We had a rough morning, help me reset"/u,
     );
-    assert.match(
-      source,
-      /max-w-\[780px\] rounded-\[22px\] shadow-md/u,
-    );
-    assert.match(source, /-mt-px rounded-b-\[22px\] rounded-t-none/u);
+    assert.match(source, /quiet-chat__composer mx-auto w-full max-w-\[780px\]/u);
+    assert.match(source, /quiet-chat__composer-form w-full/u);
+    assert.match(source, /quiet-chat__composer-form--suggestions -mt-px/u);
     assert.match(source, /<PromptSuggestionRail/u);
   });
 
