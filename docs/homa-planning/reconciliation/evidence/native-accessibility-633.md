@@ -12,7 +12,7 @@
 
 **Branch:** `codex/native-accessibility-foundation`
 
-**Status:** Source foundation verified. Rendered evidence in progress. Simulator, physical-device, and study evidence remain open.
+**Status:** Source and rendered contracts verified in production. Simulator, physical-device, and study evidence remain open.
 
 ## Rendered evidence update, 2026-08-02
 
@@ -32,7 +32,7 @@
 
 **Recovery branch:** `codex/mobile-accessibility-fingerprint-recovery`
 
-**Recovery status:** Implementation verified locally. Production OTA verification remains open until this recovery is merged and the exact main commit is published and read back from EAS.
+**Recovery status:** Merged and production-verified at exact main commit `d3bbc5febaff2d56c0dc274c1ed84592ac9619ad`. The compatible iOS update was published and read back from EAS. Physical-device and study evidence remain open.
 
 PR #709 passed its full main CI run at commit `710e6f0eec58c2f4e6d8fabb7045ec2e5474dc33`. The separate Mobile OTA workflow correctly refused to publish that commit. The checkout fingerprint was `d51cce170c4bc078993eaf9d63cce47f2a134271`, while the latest finished production iOS build, `e1e97858-f501-4222-bd22-b00ecd4d66aa`, carries `f33dd2307f31e8694a7b2727641a13a4f5f06f86`. The workflow stopped before waiting for Vercel and before creating an EAS update, so the rendered accessibility changes were not represented as shipped.
 
@@ -176,7 +176,11 @@ All commands below ran against recovery implementation commit `428418a33b679590f
 | `git diff --check` | PASS |
 | `corepack pnpm check:em-dash` | PASS, 0 violations |
 
-The main CI run for PR #709 is [run 30775054684](https://github.com/sidneyswift/homa/actions/runs/30775054684) and completed successfully. The blocked OTA attempt is [run 30775054711](https://github.com/sidneyswift/homa/actions/runs/30775054711); its fingerprint step failed, and its Vercel wait and EAS publish steps were skipped. This recovery is not production evidence until its own exact main commit has a successful Mobile OTA run and the resulting EAS update is read back with the matching runtime fingerprint.
+The main CI run for PR #709 is [run 30775054684](https://github.com/sidneyswift/homa/actions/runs/30775054684) and completed successfully. The blocked OTA attempt is [run 30775054711](https://github.com/sidneyswift/homa/actions/runs/30775054711); its fingerprint step failed, and its Vercel wait and EAS publish steps were skipped. No incompatible update was created.
+
+PR #710 merged the recovery as exact main commit `d3bbc5febaff2d56c0dc274c1ed84592ac9619ad`. Its [main CI run 30776496769](https://github.com/sidneyswift/homa/actions/runs/30776496769) completed successfully across build, mobile, database, E2E, and required checks. Its [Mobile OTA run 30776496772](https://github.com/sidneyswift/homa/actions/runs/30776496772) matched installed production build `e1e97858-f501-4222-bd22-b00ecd4d66aa` at runtime `f33dd2307f31e8694a7b2727641a13a4f5f06f86`, waited for the exact web dependency, and published successfully.
+
+The independent EAS read-back returned branch `production`, runtime `f33dd2307f31e8694a7b2727641a13a4f5f06f86`, update group `1cdf76d0-34c8-4fbd-9e97-a95172f13850`, iOS update `019fc537-675d-71ce-843a-a1349d018df9`, and commit `d3bbc5febaff2d56c0dc274c1ed84592ac9619ad`. The [EAS update receipt](https://expo.dev/accounts/sidneyswift/projects/homa/updates/1cdf76d0-34c8-4fbd-9e97-a95172f13850) records the same release. Vercel deployment `dpl_BN5ZuknofNhbJvZ97yf1DzGTNWRT` is Ready, serves `thankshoma.com` and `www.thankshoma.com`, and reports success for that exact merge SHA.
 
 ## Acceptance status
 
