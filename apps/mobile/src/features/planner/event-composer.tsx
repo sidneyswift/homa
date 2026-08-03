@@ -1,10 +1,10 @@
-import { Check, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
@@ -72,7 +72,7 @@ function DateStepper({
         disabled={disabled}
         onPress={() => onChange(addDays(date, -stepDays))}
       >
-        <ChevronLeft size={20} color={colors.textBody} />
+        <Icon name="back" size={20} color={colors.textBody} />
       </IconButton>
       <Text style={{ flex: 1, textAlign: "center", fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
         {formatWeekdayShort(date)}, {formatMonthDay(date)}
@@ -83,7 +83,7 @@ function DateStepper({
         disabled={disabled}
         onPress={() => onChange(addDays(date, stepDays))}
       >
-        <ChevronRight size={20} color={colors.textBody} />
+        <Icon name="next" size={20} color={colors.textBody} />
       </IconButton>
     </View>
   );
@@ -117,7 +117,7 @@ function TimeStepper({
         disabled={disabled}
         onPress={() => onChange(stepTime(time, -1))}
       >
-        <ChevronLeft size={20} color={colors.textBody} />
+        <Icon name="back" size={20} color={colors.textBody} />
       </IconButton>
       <Text style={{ flex: 1, textAlign: "center", fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
         {formatTimeLabel(time)}
@@ -128,7 +128,7 @@ function TimeStepper({
         disabled={disabled}
         onPress={() => onChange(stepTime(time, 1))}
       >
-        <ChevronRight size={20} color={colors.textBody} />
+        <Icon name="next" size={20} color={colors.textBody} />
       </IconButton>
     </View>
   );
@@ -206,7 +206,7 @@ export function draftToInput(draft: EventComposerDraft): FamilyEventInput {
  * (apps/web/app/app/calendar/calendar-view.tsx's slot/event-block
  * composer), simplified to steppers since no native date/time picker is
  * linked into this dev client build yet (that's a real native module,
- * not a pure-JS one like lucide-react-native, so adding it means a
+ * not a JavaScript-only module, so adding it means a
  * fresh `expo run:ios`, not just `pnpm install`).
  */
 export function EventComposer({
@@ -355,7 +355,7 @@ export function EventComposer({
             disabled={busy}
             onPress={onClose}
           >
-            <X size={22} color={colors.textSubtle} />
+            <Icon name="close" size={24} color={colors.textSubtle} />
           </IconButton>
         </View>
 
@@ -384,9 +384,9 @@ export function EventComposer({
                         alignItems: "center",
                         justifyContent: "center",
                         borderRadius: radius.pill,
-                        backgroundColor: active ? colors.brand : colors.card,
+                        backgroundColor: active ? colors.action : colors.card,
                         borderWidth: 1,
-                        borderColor: active ? colors.brand : colors.border,
+                        borderColor: active ? colors.action : colors.border,
                         paddingHorizontal: space.sm,
                       }}
                     >
@@ -483,13 +483,13 @@ export function EventComposer({
                   height: 20,
                   borderRadius: radius.xs,
                   borderWidth: 1.5,
-                  borderColor: draft.hasTime ? colors.brand : colors.border,
-                  backgroundColor: draft.hasTime ? colors.brand : "transparent",
+                  borderColor: draft.hasTime ? colors.action : colors.border,
+                  backgroundColor: draft.hasTime ? colors.action : "transparent",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {draft.hasTime ? <Check size={14} color={colors.onBrand} /> : null}
+                {draft.hasTime ? <Icon name="check" size={16} color={colors.onBrand} /> : null}
               </View>
               <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
                 Include a time
@@ -550,8 +550,9 @@ export function EventComposer({
                 {audienceSummary} · {repeatSummary}
               </Text>
             </View>
-            <ChevronDown
-              size={19}
+            <Icon
+              name="collapse"
+              size={20}
               color={colors.textMuted}
               style={{ transform: [{ rotate: moreOpen ? "180deg" : "0deg" }] }}
             />
@@ -574,9 +575,9 @@ export function EventComposer({
                       justifyContent: "center",
                       paddingHorizontal: space.md,
                       borderRadius: radius.pill,
-                      backgroundColor: draft.childIds.length === 0 ? colors.brand : colors.card,
+                      backgroundColor: draft.childIds.length === 0 ? colors.action : colors.card,
                       borderWidth: 1,
-                      borderColor: draft.childIds.length === 0 ? colors.brand : colors.borderSubtle,
+                      borderColor: draft.childIds.length === 0 ? colors.action : colors.borderSubtle,
                     }}
                   >
                     <Text
@@ -610,9 +611,9 @@ export function EventComposer({
                           justifyContent: "center",
                           paddingHorizontal: space.md,
                           borderRadius: radius.pill,
-                          backgroundColor: active ? colors.brand : colors.card,
+                          backgroundColor: active ? colors.action : colors.card,
                           borderWidth: 1,
-                          borderColor: active ? colors.brand : colors.borderSubtle,
+                          borderColor: active ? colors.action : colors.borderSubtle,
                         }}
                       >
                         <Text
@@ -671,9 +672,9 @@ export function EventComposer({
                           justifyContent: "center",
                           paddingHorizontal: space.md,
                           borderRadius: radius.pill,
-                          backgroundColor: active ? colors.brand : colors.card,
+                          backgroundColor: active ? colors.action : colors.card,
                           borderWidth: 1,
-                          borderColor: active ? colors.brand : colors.borderSubtle,
+                          borderColor: active ? colors.action : colors.borderSubtle,
                         }}
                       >
                         <Text
@@ -761,13 +762,13 @@ export function EventComposer({
                       height: 20,
                       borderRadius: radius.xs,
                       borderWidth: 1.5,
-                      borderColor: spansDays ? colors.brand : colors.border,
-                      backgroundColor: spansDays ? colors.brand : "transparent",
+                      borderColor: spansDays ? colors.action : colors.border,
+                      backgroundColor: spansDays ? colors.action : "transparent",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    {spansDays ? <Check size={14} color={colors.onBrand} /> : null}
+                    {spansDays ? <Icon name="check" size={16} color={colors.onBrand} /> : null}
                   </View>
                   <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
                     Lasts more than one day

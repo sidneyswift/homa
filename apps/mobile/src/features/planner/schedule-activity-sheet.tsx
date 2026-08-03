@@ -1,10 +1,10 @@
-import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
@@ -90,7 +90,7 @@ export function ScheduleActivitySheet({
               disabled={saving}
               onPress={onClose}
             >
-              <X size={22} color={colors.textSubtle} />
+              <Icon name="close" size={24} color={colors.textSubtle} />
             </IconButton>
           </View>
 
@@ -111,7 +111,7 @@ export function ScheduleActivitySheet({
               disabled={saving}
               onPress={() => setDate((current) => addDays(current, -1))}
             >
-              <ChevronLeft size={22} color={colors.textBody} />
+              <Icon name="back" size={24} color={colors.textBody} />
             </IconButton>
             <View style={{ alignItems: "center" }}>
               <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.base, color: colors.textBody }}>
@@ -127,7 +127,7 @@ export function ScheduleActivitySheet({
               disabled={saving}
               onPress={() => setDate((current) => addDays(current, 1))}
             >
-              <ChevronRight size={22} color={colors.textBody} />
+              <Icon name="next" size={24} color={colors.textBody} />
             </IconButton>
           </View>
 
