@@ -7,6 +7,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AiConsentGate } from "../../components/ai-consent-gate";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { KidSwitcher } from "../../features/progress/kid-switcher";
 import {
@@ -28,6 +30,7 @@ import {
   progressAssessmentDraft,
 } from "../../features/progress/view-copy";
 import { supabase } from "../../lib/supabase";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 
@@ -124,16 +127,7 @@ export default function ProgressScreen() {
             >
               Progress
             </Text>
-            <Text
-              accessibilityLiveRegion="polite"
-              style={{
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.base,
-                color: colors.textBody,
-              }}
-            >
-              Loading your family
-            </Text>
+            <LoadingStatus label="Loading your family" />
           </Card>
         </View>
       </SafeAreaView>
@@ -213,7 +207,6 @@ export default function ProgressScreen() {
           <View style={{ gap: 2 }}>
             {updatedLine ? (
               <Text
-                maxFontSizeMultiplier={2}
                 style={{
                   fontFamily: fontFamilies.bodySemibold,
                   fontSize: fontSize.xs,
@@ -225,7 +218,6 @@ export default function ProgressScreen() {
             ) : null}
             <Text
               accessibilityRole="header"
-              maxFontSizeMultiplier={2}
               style={{
                 fontFamily: fontFamilies.display,
                 fontSize: fontSize.xxl,
@@ -252,21 +244,14 @@ export default function ProgressScreen() {
 
         {error && visibleView && selectedChild ? (
           <Card style={{ gap: space.sm }}>
-            <Text
-              accessibilityRole="alert"
-              style={{
-                fontFamily: fontFamilies.bodySemibold,
-                fontSize: fontSize.sm,
-                color: colors.textStrong,
-              }}
-            >
-              {latestObservedAt
+            <InlineError
+              message={latestObservedAt
                 ? `You’re seeing answers through ${formatProgressDate(
                     latestObservedAt,
                     visibleView.timeZone,
                   )}.`
                 : "You’re seeing the last saved progress."}
-            </Text>
+            />
             <Text
               style={{
                 fontFamily: fontFamilies.body,
@@ -406,10 +391,10 @@ function NextMoveStatusCard({
   actionLabel?: string;
   onAction?: () => void;
 }) {
+  useAccessibilityAnnouncement(`${title}. ${body}`);
   return (
     <Card style={{ gap: space.sm }}>
       <Text
-        accessibilityLiveRegion="polite"
         style={{
           fontFamily: fontFamilies.bodySemibold,
           fontSize: fontSize.sm,
@@ -436,22 +421,11 @@ function NextMoveStatusCard({
 
 function ProgressSkeleton({ childName }: { childName: string }) {
   return (
-    <View
-      accessibilityLiveRegion="polite"
-      accessibilityLabel={`Loading ${childName}’s progress`}
-      style={{ gap: space.md }}
-    >
-      <Text
-        style={{
-          fontFamily: fontFamilies.body,
-          fontSize: fontSize.sm,
-          color: colors.textMuted,
-        }}
-      >
-        Loading {childName}’s progress
-      </Text>
-      {[0, 1].map((index) => (
-        <Card key={index} style={{ gap: space.sm }}>
+    <View style={{ gap: space.md }}>
+      <LoadingStatus label={`Loading ${childName}’s progress`} />
+      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ gap: space.md }}>
+        {[0, 1].map((index) => (
+          <Card key={index} style={{ gap: space.sm }}>
           <View
             style={{
               width: "36%",
@@ -476,8 +450,9 @@ function ProgressSkeleton({ childName }: { childName: string }) {
               backgroundColor: colors.surfaceSunken,
             }}
           />
-        </Card>
-      ))}
+          </Card>
+        ))}
+      </View>
     </View>
   );
 }
@@ -492,10 +467,11 @@ function ProgressError({
   onAction: (action: ProgressErrorAction) => void;
 }) {
   const presentation = progressErrorPresentation(failure, childName);
+  useAccessibilityAnnouncement(`${presentation.title}. ${presentation.body}`);
   return (
     <Card style={{ gap: space.sm }}>
       <Text
-        accessibilityRole="alert"
+        accessibilityRole="header"
         style={{
           fontFamily: fontFamilies.displaySemibold,
           fontSize: fontSize.lg,

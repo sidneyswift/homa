@@ -1,17 +1,21 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  ActivityIndicator,
-  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
-import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
+import {
+  useAccessibilityAnnouncement,
+  useScreenReaderEnabled,
+} from "../../lib/accessibility";
 import { toggleActivityCheck } from "../../lib/child-plans";
 import { scheduleActivity } from "../../lib/plan-schedule";
 import { fontFamilies } from "../../theme/fonts";
@@ -238,6 +242,7 @@ function MonthPlanPreviewBody({
   onApprove: () => void;
   onChange: () => void;
 }) {
+  const { fontScale } = useWindowDimensions();
   const hasUnresolvedChoices = preview.unresolvedChoices.length > 0;
   const hasOpenItems =
     preview.conflicts.length > 0
@@ -302,7 +307,7 @@ function MonthPlanPreviewBody({
                   gap: space.sm,
                 }}
               >
-                <View style={{ flexDirection: "row", justifyContent: "space-between", gap: space.sm }}>
+                <View style={{ flexDirection: fontScale >= 1.4 ? "column" : "row", justifyContent: "space-between", gap: space.sm }}>
                   <Text
                     style={{
                       fontFamily: fontFamilies.bodyBold,
@@ -313,7 +318,6 @@ function MonthPlanPreviewBody({
                     {`Week ${week.week}`}
                   </Text>
                   <Text
-                    numberOfLines={1}
                     style={{
                       flexShrink: 1,
                       fontFamily: fontFamilies.bodyMedium,
@@ -350,7 +354,7 @@ function MonthPlanPreviewBody({
                         style={{
                           fontFamily: fontFamilies.bodyMedium,
                           fontSize: fontSize.xs,
-                          color: colors.textSubtle,
+                          color: colors.textMuted,
                         }}
                       >
                         {[
@@ -472,8 +476,8 @@ function OverlaySheet({
   float?: ReactNode;
   children: ReactNode;
 }) {
-  const reducedMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
+  const headingRef = useRef<View>(null);
   // Swipe-down on the grab handle, via the View's own responder props
   // (no PanResponder: its create-with-closures shape trips the
   // react-hooks/refs rule). The start Y lives in a ref touched only
@@ -481,18 +485,19 @@ function OverlaySheet({
   const dragStartY = useRef<number | null>(null);
 
   return (
-    <Modal
+    <AccessibleModal
       visible
+      title={accessibilityLabel}
+      initialFocusRef={headingRef}
       transparent
-      animationType={reducedMotion ? "fade" : "slide"}
       onRequestClose={onDismiss}
     >
       <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: SCRIM_COLOR }}>
         <Pressable
           style={{ flex: 1 }}
           onPress={onDismiss}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         >
           {float ? (
             <View
@@ -512,7 +517,7 @@ function OverlaySheet({
           ) : null}
         </Pressable>
         <View
-          accessibilityLabel={accessibilityLabel}
+          onAccessibilityEscape={onDismiss}
           style={{
             height: "65%",
             backgroundColor: colors.card,
@@ -536,7 +541,9 @@ function OverlaySheet({
             }}
             accessibilityRole="button"
             accessibilityLabel={handleLabel}
-            style={{ alignItems: "center", paddingTop: space.sm, paddingBottom: space.xs }}
+            accessibilityHint="Double tap to close. You can also swipe down."
+            onAccessibilityTap={onDismiss}
+            style={{ minHeight: 44, alignItems: "center", justifyContent: "center", paddingTop: space.sm, paddingBottom: space.xs }}
           >
             <View
               style={{
@@ -547,10 +554,21 @@ function OverlaySheet({
               }}
             />
           </View>
+          <View
+            ref={headingRef}
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel={accessibilityLabel}
+            style={{ paddingHorizontal: space.md, paddingBottom: space.sm }}
+          >
+            <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textMuted }}>
+              {accessibilityLabel}
+            </Text>
+          </View>
           {children}
         </View>
       </View>
-    </Modal>
+    </AccessibleModal>
   );
 }
 
@@ -650,7 +668,7 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
       >
         {familyLoading || (loading && events.length === 0 && scheduleRows.length === 0) ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
-            <ActivityIndicator color={colors.brand} />
+            <LoadingStatus label="Loading this week" />
           </View>
         ) : plannerError ? (
           <InlineError message="This week couldn't refresh. Pull down to try again." />
@@ -661,9 +679,6 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
             activities={scheduledActivities}
             unscheduled={unscheduled}
             kids={children}
-            // Event editing lives on the Planner tab; this overlay is a
-            // quick look while she keeps talking.
-            onPressEvent={() => undefined}
             onToggleActivity={handleToggleActivity}
             onScheduleActivity={setSchedulingActivity}
           />
@@ -740,15 +755,16 @@ function MaterialAction({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={onPress}
       style={{
         minHeight: 44,
         justifyContent: "center",
         borderRadius: radius.pill,
         paddingHorizontal: space.md,
-        backgroundColor: primary ? colors.brand : colors.card,
+        backgroundColor: primary ? colors.brandHover : colors.card,
         borderWidth: 1,
-        borderColor: primary ? colors.brand : colors.border,
+        borderColor: primary ? colors.brandHover : colors.border,
       }}
     >
       <Text
@@ -841,18 +857,10 @@ function HoursOverlayBody() {
       >
         {loading ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
-            <ActivityIndicator color={colors.brand} />
+            <LoadingStatus label="Loading school hours" />
           </View>
         ) : error ? (
-          <Text
-            style={{
-              fontFamily: fontFamilies.body,
-              fontSize: fontSize.sm,
-              color: colors.textMuted,
-            }}
-          >
-            {"That didn't load. The Hours tab has the full record."}
-          </Text>
+          <InlineError message="That didn't load. The Hours tab has the full record." />
         ) : recent.length === 0 ? (
           <Text
             style={{
@@ -884,7 +892,7 @@ function HoursOverlayBody() {
                 fontFamily: fontFamilies.bodyBold,
                 fontSize: 11,
                 letterSpacing: 0.4,
-                color: colors.textSubtle,
+                color: colors.textMuted,
                 textTransform: "uppercase",
               }}
             >
@@ -895,10 +903,6 @@ function HoursOverlayBody() {
                 key={entry.id}
                 entry={entry}
                 showChild={children.length > 1}
-                // Editing lives on the Hours tab; this sheet is a quick
-                // look while she keeps talking (the planner body's own
-                // onPressEvent idiom).
-                onEdit={() => undefined}
               />
             ))}
           </>
@@ -924,6 +928,12 @@ function ReceiptToast({
   onUndo?: (signal: ReceiptSignal) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const screenReaderEnabled = useScreenReaderEnabled();
+  const [focused, setFocused] = useState(false);
+  const receiptAnnouncement = signal.actionReceipt && onUndo
+    ? `${signal.summary}. Undo is available.`
+    : signal.summary;
+  useAccessibilityAnnouncement(receiptAnnouncement);
   // The timer keys on the signal, not the callback: a parent re-render
   // mid-stream must not restart the four seconds.
   const onDismissRef = useRef(onDismiss);
@@ -932,6 +942,11 @@ function ReceiptToast({
     onDismissRef.current = onDismiss;
   }, [onDismiss]);
   useEffect(() => {
+    if (screenReaderEnabled || focused) {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+      timerRef.current = null;
+      return;
+    }
     timerRef.current = setTimeout(
       () => onDismissRef.current(),
       RECEIPT_DISMISS_MS,
@@ -940,7 +955,7 @@ function ReceiptToast({
       if (timerRef.current !== null) clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [signal.key]);
+  }, [focused, screenReaderEnabled, signal.key]);
 
   function handlePress() {
     if (timerRef.current !== null) {
@@ -974,11 +989,12 @@ function ReceiptToast({
       <View
         style={{
           flexDirection: "row",
+          flexWrap: "wrap",
           alignItems: "center",
           gap: space.sm,
           maxWidth: "100%",
           backgroundColor: colors.card,
-          borderRadius: radius.pill,
+          borderRadius: radius.lg,
           borderWidth: 1,
           borderColor: colors.borderSubtle,
           paddingHorizontal: space.md,
@@ -987,6 +1003,8 @@ function ReceiptToast({
         }}
       >
         <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
           style={{
             width: 6,
             height: 6,
@@ -996,12 +1014,14 @@ function ReceiptToast({
         />
         <Pressable
           onPress={handlePress}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           accessibilityRole="button"
           accessibilityLabel={signal.summary}
-          style={{ flexShrink: 1 }}
+          accessibilityHint={onPress ? "Opens details for this completed action." : "Dismisses this receipt."}
+          style={{ minHeight: 44, flexGrow: 1, flexShrink: 1, minWidth: 160, justifyContent: "center" }}
         >
           <Text
-            numberOfLines={2}
             style={{
               fontFamily: fontFamilies.bodyMedium,
               fontSize: fontSize.sm,
@@ -1017,19 +1037,33 @@ function ReceiptToast({
             accessibilityRole="button"
             accessibilityLabel={`Undo ${signal.actionReceipt.namedEffect}`}
             onPress={handleUndo}
-            hitSlop={8}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm }}
           >
             <Text
               style={{
                 fontFamily: fontFamilies.bodySemibold,
                 fontSize: fontSize.sm,
-                color: colors.brand,
+                color: colors.textStrong,
               }}
             >
               Undo
             </Text>
           </Pressable>
         ) : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss receipt"
+          onPress={onDismiss}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm }}
+        >
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textMuted }}>
+            Dismiss
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

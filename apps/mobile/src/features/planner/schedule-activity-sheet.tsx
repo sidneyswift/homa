@@ -1,9 +1,11 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
-import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
 import { fontFamilies } from "../../theme/fonts";
@@ -26,6 +28,7 @@ export function ScheduleActivitySheet({
   onClose: () => void;
 }) {
   const [date, setDate] = useState(initialDate);
+  const headingRef = useRef<View>(null);
   const [saving, setSaving] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const visible = activity !== null;
@@ -50,24 +53,28 @@ export function ScheduleActivitySheet({
   }
 
   return (
-    <Modal
+    <AccessibleModal
       visible={visible}
-      animationType="slide"
+      title="Put this on a day"
+      initialFocusRef={headingRef}
       transparent
       onRequestClose={saving ? () => undefined : onClose}
     >
       <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(51,42,33,0.42)" }}>
         <SafeAreaView
           style={{
+            maxHeight: "90%",
             backgroundColor: colors.card,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
-            padding: space.lg,
-            gap: space.md,
           }}
         >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ padding: space.lg, gap: space.md }}
+          >
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <View style={{ flex: 1, gap: 2 }}>
+            <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel="Put this on a day" style={{ flex: 1, gap: 2 }}>
               <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
                 Put this on a day
               </Text>
@@ -77,16 +84,14 @@ export function ScheduleActivitySheet({
                 </Text>
               ) : null}
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Close activity scheduler"
+            <IconButton
+              label="Close activity scheduler"
               accessibilityState={{ disabled: saving }}
               disabled={saving}
               onPress={onClose}
-              hitSlop={8}
             >
               <X size={22} color={colors.textSubtle} />
-            </Pressable>
+            </IconButton>
           </View>
 
           <View
@@ -100,16 +105,14 @@ export function ScheduleActivitySheet({
               paddingVertical: space.sm,
             }}
           >
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Previous day"
+            <IconButton
+              label="Previous day"
               accessibilityState={{ disabled: saving }}
               disabled={saving}
               onPress={() => setDate((current) => addDays(current, -1))}
-              hitSlop={8}
             >
               <ChevronLeft size={22} color={colors.textBody} />
-            </Pressable>
+            </IconButton>
             <View style={{ alignItems: "center" }}>
               <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.base, color: colors.textBody }}>
                 {formatWeekdayLong(date)}
@@ -118,16 +121,14 @@ export function ScheduleActivitySheet({
                 {formatMonthDay(date)}
               </Text>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Next day"
+            <IconButton
+              label="Next day"
               accessibilityState={{ disabled: saving }}
               disabled={saving}
               onPress={() => setDate((current) => addDays(current, 1))}
-              hitSlop={8}
             >
               <ChevronRight size={22} color={colors.textBody} />
-            </Pressable>
+            </IconButton>
           </View>
 
           {mutationError ? <InlineError message={mutationError} /> : null}
@@ -136,8 +137,9 @@ export function ScheduleActivitySheet({
             onPress={() => void handleSchedule()}
             busy={saving}
           />
+          </ScrollView>
         </SafeAreaView>
       </View>
-    </Modal>
+    </AccessibleModal>
   );
 }

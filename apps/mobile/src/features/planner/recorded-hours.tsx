@@ -65,7 +65,6 @@ export function RecordedHours({
               </Text>
               {entry.note ? (
                 <Text
-                  numberOfLines={1}
                   style={{ flex: 1, fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}
                 >
                   {entry.note}

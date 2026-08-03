@@ -1,14 +1,7 @@
 import { CircleAlert } from "lucide-react-native";
-import { useEffect } from "react";
-import {
-  AccessibilityInfo,
-  Platform,
-  Text,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { Text, View, type StyleProp, type ViewStyle } from "react-native";
 
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
 
@@ -35,18 +28,14 @@ export function InlineError({
         icon: colors.danger,
         text: colors.textBody,
       };
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      AccessibilityInfo.announceForAccessibility(message);
-    }
-  }, [message]);
+  const accessibilityMessage = `Error. ${message}`;
+  useAccessibilityAnnouncement(accessibilityMessage);
 
   return (
     <View
       accessible
-      accessibilityRole="alert"
-      accessibilityLabel={message}
-      accessibilityLiveRegion="polite"
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityMessage}
       style={[
         {
           minHeight: 44,

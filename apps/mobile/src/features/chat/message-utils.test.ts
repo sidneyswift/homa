@@ -7,11 +7,13 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 
 import {
   approvedOutboundChildFramingTexts,
+  chatCompletionAnnouncement,
   memoryChipFor,
   partIsRenderable,
   toolOnlyFallback,
   userMessageSendState,
   visibleMobileChildFramingText,
+  visibleAssistantReplyText,
 } from "./message-utils";
 
 /**
@@ -118,6 +120,41 @@ function assistantWith(...parts: EveMessagePart[]): EveMessage {
     parts,
   } as unknown as EveMessage;
 }
+
+describe("accessible assistant completion", () => {
+  it("announces the exact reply the transcript may display", () => {
+    const message = assistantWith({ type: "text", text: "Try the short lesson first." } as EveMessagePart);
+    assert.equal(visibleAssistantReplyText(message), "Try the short lesson first.");
+    assert.equal(
+      chatCompletionAnnouncement([userMessage("What should we do?"), message]),
+      "Homa replied: Try the short lesson first.",
+    );
+  });
+
+  it("does not let accessibility bypass child-framing review", () => {
+    const unreviewed = assistantWith({
+      type: "text",
+      text: "Mia is far behind in reading.",
+    } as EveMessagePart);
+    assert.equal(
+      visibleAssistantReplyText(unreviewed),
+      OUTBOUND_CHILD_FRAMING_FALLBACK.mobile,
+    );
+    assert.equal(
+      chatCompletionAnnouncement([unreviewed]),
+      `Homa replied: ${OUTBOUND_CHILD_FRAMING_FALLBACK.mobile}`,
+    );
+  });
+
+  it("bounds a long spoken interruption while preserving the full transcript", () => {
+    const longReply = `${"A useful next step. ".repeat(20)}Done.`;
+    const message = assistantWith({ type: "text", text: longReply } as EveMessagePart);
+    const announcement = chatCompletionAnnouncement([message]);
+    assert.match(announcement, /^Homa replied: /u);
+    assert.match(announcement, /Continue reading in Chat\.$/u);
+    assert.ok(announcement.length < longReply.length);
+  });
+});
 
 describe("mobile tool rendering", () => {
   it("does not render hidden protocol directives as parent messages", () => {

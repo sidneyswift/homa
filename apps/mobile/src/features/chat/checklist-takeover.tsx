@@ -1,6 +1,6 @@
 import { X } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 import {
   getMapItem,
@@ -8,7 +8,12 @@ import {
   type MapAnswer,
 } from "@homa/core";
 
+import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { IconButton } from "../../components/ui/icon-button";
+import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
+import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import { fetchMapChild, saveChecklistAnswer } from "./onboarding-card-api";
@@ -53,7 +58,13 @@ export function ChecklistTakeover({
 }) {
   const [child, setChild] = useState<MapStateChild | null>(null);
   const [pending, setPending] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const questionHeadingRef = useRef<View>(null);
+  const focusKey = child
+    ? (checklistPositionFor(child).currentItem?.id ?? "complete")
+    : null;
+  useAccessibilityFocusOnChange(questionHeadingRef, focusKey, () => setTransitioning(false));
 
   useEffect(() => {
     let current = true;
@@ -72,14 +83,8 @@ export function ChecklistTakeover({
   if (error && !child) {
     return (
       <Card style={{ gap: space.md }}>
-        <Text accessibilityRole="alert" style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
-          {error} Nothing you answered is lost.
-        </Text>
-        <Pressable accessibilityRole="button" onPress={() => onClose(null)}>
-          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.brand }}>
-            Back to the chat
-          </Text>
-        </Pressable>
+        <InlineError message={`${error} Nothing you answered is lost.`} />
+        <Button label="Back to the chat" variant="secondary" onPress={() => onClose(null)} />
       </Card>
     );
   }
@@ -87,7 +92,7 @@ export function ChecklistTakeover({
   if (!child) {
     return (
       <Card style={{ alignItems: "center", paddingVertical: space.xl }}>
-        <ActivityIndicator color={colors.brand} />
+        <LoadingStatus label="Loading questions" />
       </Card>
     );
   }
@@ -99,17 +104,15 @@ export function ChecklistTakeover({
   const progress = total > 0 ? `${Math.round((child.answered / total) * 100)}%` as const : "0%";
 
   async function answer(value: MapAnswer) {
-    if (!child || !item || pending) return;
+    if (!child || !item || pending || transitioning) return;
     const activeChild = child;
     setPending(true);
     setError(null);
     try {
       await saveChecklistAnswer({ childId: activeChild.id, itemId: item.id, answer: value });
       const next = withChecklistAnswer(activeChild, item.id, value);
+      setTransitioning(true);
       setChild(next);
-      if (checklistPositionFor(next).complete) {
-        setTimeout(() => onClose(exitFor(next)), 140);
-      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "That answer did not save. Try it again.");
     } finally {
@@ -121,31 +124,46 @@ export function ChecklistTakeover({
     <Card style={{ gap: space.md }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-          <Text style={{ borderRadius: radius.pill, backgroundColor: colors.brandSoft, paddingHorizontal: 10, paddingVertical: 5, fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
+          <Text style={{ borderRadius: radius.pill, backgroundColor: colors.brandSoft, paddingHorizontal: 10, paddingVertical: 5, fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
             {child.name}
           </Text>
-          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
             {subject?.displayName ?? "Questions"}
           </Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to the chat" onPress={() => onClose(exitFor(child))} hitSlop={8}>
+        <IconButton label="Back to the chat" onPress={() => onClose(exitFor(child))}>
           <X size={21} color={colors.textSubtle} />
-        </Pressable>
+        </IconButton>
       </View>
-      <View style={{ height: 4, overflow: "hidden", borderRadius: radius.pill, backgroundColor: colors.borderSubtle }}>
-        <View style={{ width: progress, height: 4, backgroundColor: colors.brand }} />
+      <View
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel="Question progress"
+        accessibilityValue={{ min: 0, max: total, now: child.answered, text: `${child.answered} of ${total} answered` }}
+        style={{ height: 4, overflow: "hidden", borderRadius: radius.pill, backgroundColor: colors.borderSubtle }}
+      >
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: progress, height: 4, backgroundColor: colors.brand }} />
       </View>
       {item ? (
         <>
-          <Text style={{ minHeight: 58, fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, lineHeight: 25, color: colors.textStrong }}>
-            {personalizeStatement(child.name, item)}?
-          </Text>
+          <View
+            ref={questionHeadingRef}
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel={`Question ${child.answered + 1} of ${total}. ${personalizeStatement(child.name, item)}?`}
+          >
+            <Text style={{ minHeight: 58, fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, lineHeight: 25, color: colors.textStrong }}>
+              {personalizeStatement(child.name, item)}?
+            </Text>
+          </View>
           <View style={{ gap: space.sm }}>
             {ANSWERS.map(([value, label]) => (
               <Pressable
                 key={value}
-                accessibilityRole="button"
-                disabled={pending}
+                accessibilityRole="radio"
+                accessibilityLabel={label}
+                accessibilityState={{ disabled: pending || transitioning }}
+                disabled={pending || transitioning}
                 onPress={() => void answer(value)}
                 style={({ pressed }) => ({
                   minHeight: 44,
@@ -155,7 +173,7 @@ export function ChecklistTakeover({
                   borderColor: pressed ? colors.brand : colors.border,
                   backgroundColor: pressed ? colors.brandSoft : colors.card,
                   paddingHorizontal: space.md,
-                  opacity: pending ? 0.6 : 1,
+                  opacity: pending || transitioning ? 0.6 : 1,
                 })}
               >
                 <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}>
@@ -166,17 +184,23 @@ export function ChecklistTakeover({
           </View>
         </>
       ) : (
-        <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, color: colors.textStrong }}>
-          Questions complete
-        </Text>
+        <View style={{ gap: space.md }}>
+          <View
+            ref={questionHeadingRef}
+            accessible
+            accessibilityRole="header"
+            accessibilityLabel="Questions complete"
+          >
+            <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, color: colors.textStrong }}>
+              Questions complete
+            </Text>
+          </View>
+          <Button label="Back to chat" onPress={() => onClose(exitFor(child))} />
+        </View>
       )}
-      {pending ? <ActivityIndicator color={colors.brand} /> : null}
-      {error ? (
-        <Text accessibilityRole="alert" style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>
-          {error}
-        </Text>
-      ) : null}
-      <Text style={{ textAlign: "center", fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+      {pending ? <LoadingStatus label="Saving answer" showLabel={false} /> : null}
+      {error ? <InlineError message={error} /> : null}
+      <Text style={{ textAlign: "center", fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
         {position.remaining <= 1 ? "Almost done" : `About ${position.minutesLeft} min left. You can stop whenever you like.`}
       </Text>
     </Card>

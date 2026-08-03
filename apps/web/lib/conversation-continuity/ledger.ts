@@ -219,6 +219,8 @@ async function episodeForRuntimeSession(
   sessionId: string,
   explicitEpisodeId: string | null,
   explicitThreadHash: string | null,
+  preserveExistingBinding: boolean,
+  useDatabaseClock: boolean,
 ): Promise<string> {
   const sql = mapDb();
   if (explicitEpisodeId) {
@@ -227,16 +229,19 @@ async function episodeForRuntimeSession(
       where id = ${explicitEpisodeId} and family_id = ${familyId}
     `;
     if (rows[0]) {
-      await new PostgresContinuityRepository().upsertBinding({
-        familyId,
-        memberUserId,
-        channel,
-        threadKeyHash:
-          explicitThreadHash ?? hashContinuityKey(`${channel}:${sessionId}`),
-        runtimeSessionId: sessionId,
-        episodeId: rows[0].id,
-        lastSeenAt: new Date(),
-      });
+      await new PostgresContinuityRepository().upsertBinding(
+        {
+          familyId,
+          memberUserId,
+          channel,
+          threadKeyHash:
+            explicitThreadHash ?? hashContinuityKey(`${channel}:${sessionId}`),
+          runtimeSessionId: sessionId,
+          episodeId: rows[0].id,
+          lastSeenAt: new Date(),
+        },
+        { preserveExistingBinding, useDatabaseClock },
+      );
       return rows[0].id;
     }
   }
@@ -261,16 +266,19 @@ async function episodeForRuntimeSession(
       memberUserId,
       now: new Date(),
     }));
-  await repository.upsertBinding({
-    familyId,
-    memberUserId,
-    channel,
-    threadKeyHash:
-      explicitThreadHash ?? hashContinuityKey(`${channel}:${sessionId}`),
-    runtimeSessionId: sessionId,
-    episodeId,
-    lastSeenAt: new Date(),
-  });
+  await repository.upsertBinding(
+    {
+      familyId,
+      memberUserId,
+      channel,
+      threadKeyHash:
+        explicitThreadHash ?? hashContinuityKey(`${channel}:${sessionId}`),
+      runtimeSessionId: sessionId,
+      episodeId,
+      lastSeenAt: new Date(),
+    },
+    { preserveExistingBinding, useDatabaseClock },
+  );
   return episodeId;
 }
 
@@ -350,6 +358,8 @@ export async function persistCanonicalMessage(
     input.sessionId,
     attrs.episodeId ?? null,
     attrs.continuityThreadHash ?? null,
+    input.role === "assistant" || typeof attrs.episodeId === "string",
+    true,
   );
   const providerMessageId = providerMessageIdForRole(
     input.role,

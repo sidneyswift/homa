@@ -154,7 +154,11 @@ describe("native lesson recorder safety contract", () => {
       recorderSource,
       /result\.status === "request_failed"[\s\S]*?setPhase\("review_failed"\)/u,
     );
-    assert.match(recorderSource, /accessibilityRole="alert"/u);
+    assert.equal(recorderSource.match(/<InlineError message=\{/gu)?.length, 3);
+    assert.match(
+      recorderSource,
+      /useAccessibilityAnnouncement\(recorderPhaseCopy\(phase, intent\.childName\)\)/u,
+    );
   });
 
   it("persists the review pointer immediately after finish and before status polling", () => {
@@ -184,7 +188,7 @@ describe("native lesson recorder safety contract", () => {
     assert.match(voiceScreenSource, /familyId=\{family\.id\}/u);
     assert.match(recoveryCardSource, /import \{ Button \}/u);
     assert.match(recoveryCardSource, /accessibilityRole="header"/u);
-    assert.match(recoveryCardSource, /announceForAccessibility/u);
+    assert.match(recoveryCardSource, /useAccessibilityAnnouncement/u);
     assert.doesNotMatch(recoveryCardSource, /numberOfLines/u);
     assert.match(voiceScreenSource, /<ScrollView/u);
   });

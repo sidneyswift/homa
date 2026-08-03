@@ -116,13 +116,11 @@ describe("native durable mutation contract", () => {
     assert.match(voiceOverlay, /<RefreshControl[\s\S]*?onRefresh=\{\(\) => void reload\(\)\}/u);
   });
 
-  it("makes the same recovery message readable on Android and audible on iOS", () => {
-    assert.match(inlineError, /accessibilityRole="alert"/u);
-    assert.match(inlineError, /accessibilityLiveRegion="polite"/u);
-    assert.match(inlineError, /Platform\.OS === "ios"/u);
-    assert.match(
-      inlineError,
-      /AccessibilityInfo\.announceForAccessibility\(message\)/u,
-    );
+  it("renders one named recovery message and announces it through the shared adapter", () => {
+    assert.match(inlineError, /accessibilityRole="text"/u);
+    assert.match(inlineError, /accessibilityLabel=\{accessibilityMessage\}/u);
+    assert.match(inlineError, /useAccessibilityAnnouncement\(accessibilityMessage\)/u);
+    assert.doesNotMatch(inlineError, /accessibilityLiveRegion/u);
+    assert.doesNotMatch(inlineError, /announceForAccessibility/u);
   });
 });

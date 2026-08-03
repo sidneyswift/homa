@@ -38,6 +38,9 @@ function NavRow({
   return (
     <Link href={item.href} onPress={onNavigate} asChild>
       <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={item.label}
+        accessibilityState={{ selected: active }}
         onPressIn={() => setPressed(true)}
         onPressOut={() => setPressed(false)}
         style={{

@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 
 import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, pressScale, radius, space } from "../../theme/tokens";
+import { colors, darkColors, fontSize, palette, pressScale, radius, space } from "../../theme/tokens";
 
 /**
  * The Homa button: always pill-shaped (never square, per the component
@@ -18,8 +19,8 @@ const VARIANT_STYLES: Record<
   { backgroundColor: string; borderColor: string; textColor: string }
 > = {
   primary: {
-    backgroundColor: colors.brand,
-    borderColor: colors.brand,
+    backgroundColor: colors.brandHover,
+    borderColor: colors.brandHover,
     textColor: colors.onBrand,
   },
   secondary: {
@@ -30,7 +31,7 @@ const VARIANT_STYLES: Record<
   ghost: {
     backgroundColor: "transparent",
     borderColor: "transparent",
-    textColor: colors.brand,
+    textColor: palette.clay700,
   },
 };
 
@@ -76,6 +77,7 @@ export function Button({
   icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
+  const reducedMotion = useReducedMotion();
   const look = tone === "dark"
     ? DARK_VARIANT_STYLES[variant]
     : VARIANT_STYLES[variant];
@@ -105,7 +107,7 @@ export function Button({
           alignItems: "center",
           justifyContent: "center",
           opacity: unavailable ? 0.6 : 1,
-          transform: [{ scale: pressed ? pressScale : 1 }],
+          transform: reducedMotion ? undefined : [{ scale: pressed ? pressScale : 1 }],
         },
         style,
       ]}
@@ -114,6 +116,9 @@ export function Button({
         style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 1,
+          maxWidth: "100%",
           gap: icon ? space.sm : 0,
         }}
       >
@@ -123,6 +128,8 @@ export function Button({
             fontFamily: fontFamilies.bodySemibold,
             fontSize: textSize,
             color: look.textColor,
+            flexShrink: 1,
+            textAlign: "center",
           }}
         >
           {label}

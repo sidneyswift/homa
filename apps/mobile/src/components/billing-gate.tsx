@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { MobileBootstrapFailureReason } from "@homa/core";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ErrorCode, useIAP, type Purchase } from "expo-iap";
@@ -21,6 +21,7 @@ import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
+import { LoadingStatus } from "./ui/loading-status";
 
 /**
  * The mobile twin of familyAccountGate() on the web: blocks every tab
@@ -42,7 +43,7 @@ export function BillingGate({
   if (!checked) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator color={colors.brand} />
+        <LoadingStatus label="Checking your Homa plan" />
       </View>
     );
   }
@@ -285,7 +286,7 @@ function Paywall({
 
           {unlockFailed ? (
             <Text
-              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}
+              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}
             >
               {
                 "Your payment went through, but we couldn't unlock your account yet. This usually sorts itself out within a minute. Try closing and reopening the app. If it's still stuck, contact us and we'll fix it."
@@ -295,7 +296,7 @@ function Paywall({
 
           {errorMessage ? (
             <Text
-              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}
+              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}
             >
               {errorMessage}
             </Text>
@@ -317,7 +318,7 @@ function Paywall({
           ) : !product ? (
             <View style={{ gap: space.md }}>
               <PlanPicker tier={tier} onChange={setTier} />
-              <ActivityIndicator color={colors.brand} style={{ marginVertical: space.sm }} />
+              <LoadingStatus label="Loading App Store plans" style={{ marginVertical: space.sm }} />
             </View>
           ) : (
             <View style={{ gap: space.sm }}>
@@ -386,29 +387,32 @@ function Paywall({
 }
 
 function PlanPicker({ tier, onChange }: { tier: PlanTier; onChange: (tier: PlanTier) => void }) {
+  const { fontScale } = useWindowDimensions();
+  const stacked = fontScale >= 1.4;
   return (
-    <View style={{ flexDirection: "row", gap: space.xs }}>
+    <View accessibilityRole="radiogroup" style={{ flexDirection: stacked ? "column" : "row", gap: space.xs }}>
       {HOMA_PLANS.map((plan) => {
         const selected = plan.tier === tier;
         return (
           <Pressable
             key={plan.tier}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
+            accessibilityRole="radio"
+            accessibilityLabel={`${plan.name} plan`}
+            accessibilityState={{ checked: selected }}
             onPress={() => onChange(plan.tier)}
             style={{
-              flex: 1,
+              flex: stacked ? undefined : 1,
+              minHeight: 44,
               borderRadius: 999,
               paddingVertical: space.sm,
               paddingHorizontal: space.xs,
               alignItems: "center",
-              backgroundColor: selected ? colors.brand : colors.page,
+              backgroundColor: selected ? colors.brandHover : colors.page,
               borderWidth: selected ? 0 : 1,
               borderColor: colors.border,
             }}
           >
             <Text
-              numberOfLines={1}
               style={{
                 fontFamily: fontFamilies.bodySemibold,
                 fontSize: fontSize.sm,

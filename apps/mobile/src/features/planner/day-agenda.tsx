@@ -27,7 +27,7 @@ export function DayAgenda({
   events: FamilyEventRecord[];
   activities: ScheduledActivityView[];
   kids: ChildRecord[];
-  onPressEvent: (event: FamilyEventRecord) => void;
+  onPressEvent?: (event: FamilyEventRecord) => void;
   onToggleActivity: (activity: ScheduledActivityView) => Promise<void>;
   showWeekday?: boolean;
 }) {
@@ -42,7 +42,7 @@ export function DayAgenda({
             style={{
               fontFamily: fontFamilies.bodySemibold,
               fontSize: fontSize.sm,
-              color: isToday ? colors.brand : colors.textStrong,
+              color: colors.textStrong,
             }}
           >
             {formatWeekdayLong(date)}
@@ -70,7 +70,7 @@ export function DayAgenda({
                 event={event}
                 childIndex={childIndex === -1 ? null : childIndex}
                 audienceLabel={names.length > 0 ? names.join(" + ") : "Whole family"}
-                onPress={() => onPressEvent(event)}
+                onPress={onPressEvent ? () => onPressEvent(event) : undefined}
               />
             );
           })}
@@ -83,7 +83,7 @@ export function DayAgenda({
           ))}
         </View>
       ) : (
-        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
           Nothing planned. Tap + to add an event.
         </Text>
       )}

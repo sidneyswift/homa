@@ -29,7 +29,7 @@ export function EventCard({
   event: FamilyEventRecord;
   childIndex: number | null;
   audienceLabel: string;
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   const [background, textColor] =
     childIndex === null ? [palette.stone100, colors.textBody] : kidTone(childIndex);
@@ -38,19 +38,8 @@ export function EventCard({
   const timeLabel =
     startTime && endTime ? `${startTime}–${endTime}` : startTime ? startTime : "All day";
 
-  return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: space.sm,
-        backgroundColor: background,
-        borderRadius: radius.sm,
-        paddingHorizontal: space.sm,
-        paddingVertical: space.sm,
-      }}
-    >
+  const content = (
+    <>
       {childIndex === null ? <Users size={14} color={textColor} /> : null}
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: textColor }}>
@@ -60,6 +49,35 @@ export function EventCard({
           {timeLabel} · {audienceLabel}
         </Text>
       </View>
+    </>
+  );
+  const style = {
+    minHeight: 44,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: space.sm,
+    backgroundColor: background,
+    borderRadius: radius.sm,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.sm,
+  };
+
+  if (!onPress) {
+    return (
+      <View accessible accessibilityLabel={`${event.title}. ${audienceLabel}. ${timeLabel}`} style={style}>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Edit ${event.title}. ${audienceLabel}. ${timeLabel}`}
+      onPress={onPress}
+      style={style}
+    >
+      {content}
     </Pressable>
   );
 }

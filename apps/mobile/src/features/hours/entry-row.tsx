@@ -13,7 +13,7 @@ export function EntryRow({
 }: {
   entry: HoursEntry;
   showChild: boolean;
-  onEdit: () => void;
+  onEdit?: () => void;
 }) {
   const [bg, ink] = subjectTone(entry.subject);
   return (
@@ -40,13 +40,12 @@ export function EntryRow({
         {formatMinutesAsHours(entry.minutes)}
       </Text>
       {showChild ? (
-        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
           {entry.childName ?? "Whole family"}
         </Text>
       ) : null}
       {entry.note ? (
         <Text
-          numberOfLines={1}
           style={{ flex: 1, minWidth: 80, fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}
         >
           {entry.note}
@@ -63,15 +62,22 @@ export function EntryRow({
           paddingVertical: 2,
         }}
       >
-        <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 10, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 10, color: colors.textMuted }}>
           {SOURCE_LABELS[entry.source].toUpperCase()}
         </Text>
       </View>
-      <Pressable onPress={onEdit} hitSlop={8}>
-        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
-          Edit
-        </Text>
-      </Pressable>
+      {onEdit ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Edit ${SUBJECT_LABELS[entry.subject]} entry, ${formatMinutesAsHours(entry.minutes)}`}
+          onPress={onEdit}
+          style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.xs }}
+        >
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
+            Edit
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

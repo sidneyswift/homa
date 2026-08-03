@@ -51,7 +51,7 @@ function FeedbackButton({
       disabled={pending}
       onPress={onPress}
       style={{
-        minHeight: 40,
+        minHeight: 44,
         paddingHorizontal: space.sm,
         paddingVertical: space.xs,
         borderRadius: radius.pill,
@@ -65,7 +65,7 @@ function FeedbackButton({
         style={{
           fontFamily: fontFamilies.bodySemibold,
           fontSize: fontSize.xs,
-          color: active ? colors.brandHover : colors.textMuted,
+          color: active ? colors.textStrong : colors.textMuted,
         }}
       >
         {label}
@@ -149,13 +149,12 @@ export function TaskHistoryRow({
         <View style={{ flexDirection: "row", alignItems: "center", gap: space.xs, flex: 1 }}>
           {runIcon(run.kind)}
           <Text
-            numberOfLines={1}
             style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong, flexShrink: 1 }}
           >
             {run.title}
           </Text>
         </View>
-        <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: 11, color: colors.textMuted }}>
           {timeLabel(run.startedAt, timeZone)}
         </Text>
       </View>
@@ -167,13 +166,18 @@ export function TaskHistoryRow({
       {note || askable ? (
         <View style={{ marginTop: space.xs, flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
           {note ? (
-            <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textSubtle }}>
+            <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
               {note}
             </Text>
           ) : null}
           {askable ? (
-            <Pressable onPress={() => router.push("/chat")}>
-              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel="Ask Homa about this task run"
+              onPress={() => router.push("/chat")}
+              style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: space.xs }}
+            >
+              <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
                 Ask Homa about this
               </Text>
             </Pressable>

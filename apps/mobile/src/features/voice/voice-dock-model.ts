@@ -47,3 +47,32 @@ export function voiceDockStatusLabel(input: {
   if (input.status === "working") return "Homa is working";
   return "Listening";
 }
+
+/**
+ * One spoken sentence for every active Voice state. The full Voice route and
+ * compact shell both use this so a status cannot be visible in one place and
+ * silent in the other.
+ */
+export function voiceStatusAnnouncement(input: {
+  status: VoiceDockStatus;
+  muted: boolean;
+  pauseReason: string | null;
+  busyDetail?: string | null;
+}): string | null {
+  if (input.status === "idle") return null;
+  if (input.status === "paused") return input.pauseReason ?? "Homa Voice is paused.";
+  if (input.status === "failed") {
+    return input.busyDetail
+      ? `Voice was interrupted. ${input.busyDetail}`
+      : "Voice was interrupted. Try again when you are ready.";
+  }
+  if (input.muted) return "Homa Voice is muted.";
+  if (input.status === "connecting") return "Getting Homa ready.";
+  if (input.status === "working") {
+    return input.busyDetail
+      ? `Homa is working. ${input.busyDetail}`
+      : "Homa is working.";
+  }
+  if (input.status === "speaking") return "Homa is speaking.";
+  return "Homa is listening.";
+}

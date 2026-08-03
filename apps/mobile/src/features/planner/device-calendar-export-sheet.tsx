@@ -1,12 +1,16 @@
 import { CalendarPlus, Check, X } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { IconButton } from "../../components/ui/icon-button";
+import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { emitFamilyEvent } from "../../lib/events";
 import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
 import {
   calendarExportFingerprint,
   recurrenceLabel,
@@ -57,7 +61,7 @@ function scheduleLabel(item: CalendarExportItem): string {
 
 function resultColor(outcome: CalendarExportResult["outcome"]): string {
   if (outcome === "saved") return colors.success;
-  if (outcome === "failed" || outcome === "denied") return colors.danger;
+  if (outcome === "failed" || outcome === "denied") return colors.textStrong;
   return colors.textMuted;
 }
 
@@ -79,6 +83,7 @@ export function DeviceCalendarExportSheet({
   const [results, setResults] = useState<CalendarExportResult[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const headingRef = useRef<View>(null);
   const supportsWriteOnly = iosMajorVersion() !== null && (iosMajorVersion() ?? 0) >= 17;
 
   const selectedItems = useMemo(
@@ -191,19 +196,33 @@ export function DeviceCalendarExportSheet({
     });
   }
 
+  const heading = step === "select"
+    ? "Choose planner items"
+    : step === "preview"
+      ? "Check before adding"
+      : "Calendar results";
+
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <AccessibleModal
+      visible={visible}
+      title={heading}
+      initialFocusRef={headingRef}
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: space.md, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-            <CalendarPlus size={20} color={colors.brand} />
-            <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
-              {step === "select" ? "Choose planner items" : step === "preview" ? "Check before adding" : "Calendar results"}
+          <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={heading} style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: space.sm }}>
+            <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <CalendarPlus size={20} color={colors.brand} />
+            </View>
+            <Text style={{ flex: 1, fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+              {heading}
             </Text>
           </View>
-          <Pressable accessibilityLabel="Close calendar export" onPress={onClose} hitSlop={8}>
+          <IconButton label="Close calendar export" onPress={onClose}>
             <X size={22} color={colors.textSubtle} />
-          </Pressable>
+          </IconButton>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
@@ -232,6 +251,7 @@ export function DeviceCalendarExportSheet({
                   <Pressable
                     key={item.sourceKey}
                     accessibilityRole="checkbox"
+                    accessibilityLabel={`${item.title}. ${scheduleLabel(item)}. ${item.childScope}${duplicate ? ". Already exported from this device" : ""}`}
                     accessibilityState={{ checked: active }}
                     onPress={() => toggle(item)}
                     style={{ flexDirection: "row", gap: space.sm, backgroundColor: colors.card, borderRadius: radius.md, borderWidth: 1, borderColor: active ? colors.brand : colors.borderSubtle, padding: space.md }}
@@ -242,8 +262,8 @@ export function DeviceCalendarExportSheet({
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong }}>{item.title}</Text>
                       <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>{scheduleLabel(item)}</Text>
-                      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>{item.childScope}</Text>
-                      {duplicate ? <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>Already exported from this device. It will be skipped.</Text> : null}
+                      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>{item.childScope}</Text>
+                      {duplicate ? <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: palette.clay700 }}>Already exported from this device. It will be skipped.</Text> : null}
                     </View>
                   </Pressable>
                 );
@@ -267,11 +287,11 @@ export function DeviceCalendarExportSheet({
                     <PreviewLine label="Repeats" value={recurrenceLabel(item.recurrence)} />
                     <PreviewLine label="For" value={item.childScope} />
                     <PreviewLine label="Notes" value={item.notes?.trim() || "No note"} />
-                    {duplicate ? <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>Duplicate warning: Homa already exported this exact version from this device. It will not be added again.</Text> : null}
+                    {duplicate ? <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: palette.clay700 }}>Duplicate warning: Homa already exported this exact version from this device. It will not be added again.</Text> : null}
                   </View>
                 );
               })}
-              {message ? <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>{message}</Text> : null}
+              {message ? <InlineError message={message} /> : null}
               {destination ? (
                 <>
                   <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: colors.textStrong, textAlign: "center" }}>
@@ -300,18 +320,18 @@ export function DeviceCalendarExportSheet({
               <Button label="Done" onPress={onClose} />
             </>
           )}
-          {busy ? <ActivityIndicator color={colors.brand} /> : null}
+          {busy ? <LoadingStatus label="Working on your calendar request" /> : null}
         </ScrollView>
       </SafeAreaView>
-    </Modal>
+    </AccessibleModal>
   );
 }
 
 function PreviewLine({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flexDirection: "row", gap: space.sm }}>
-      <Text style={{ width: 64, fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textSubtle }}>{label}</Text>
-      <Text style={{ flex: 1, fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textBody }}>{value}</Text>
+    <View style={{ gap: 2 }}>
+      <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>{label}</Text>
+      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}>{value}</Text>
     </View>
   );
 }

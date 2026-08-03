@@ -1,6 +1,6 @@
 import type { MobileBootstrapFailureReason } from "@homa/core";
 import { useEffect, useRef, type ReactNode } from "react";
-import { ActivityIndicator, AppState, Text, View } from "react-native";
+import { AppState, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useSession } from "../features/auth/session-provider";
@@ -12,6 +12,7 @@ import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
+import { LoadingStatus } from "./ui/loading-status";
 
 export function FamilyReadinessGate({
   children,
@@ -57,7 +58,7 @@ export function FamilyReadinessGate({
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator color={colors.brand} />
+        <LoadingStatus label="Loading your family" />
       </View>
     );
   }
@@ -110,12 +111,13 @@ function FamilyReadinessState({
 }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
-      <View
-        style={{
-          flex: 1,
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
           justifyContent: "center",
           padding: space.lg,
         }}
+        showsVerticalScrollIndicator={false}
       >
         <Card style={{ gap: space.md }}>
           <Text
@@ -151,7 +153,7 @@ function FamilyReadinessState({
             onPress={onSwitchAccount}
           />
         </Card>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -1,9 +1,12 @@
 import { Redirect } from "expo-router";
+import { Check } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useFamilyData } from "../../features/family/use-family-data";
+import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { EntryEditor } from "../../features/hours/entry-editor";
 import { EntryRow } from "../../features/hours/entry-row";
 import { TotalsCard } from "../../features/hours/totals-card";
@@ -81,14 +84,14 @@ export function HoursSurface({ embedded = false }: { embedded?: boolean }) {
                 fontFamily: fontFamilies.bodyBold,
                 fontSize: 11,
                 letterSpacing: 0.4,
-                color: colors.textSubtle,
+                color: colors.textMuted,
                 textTransform: "uppercase",
               }}
             >
               The compliance record
             </Text>
           )}
-          <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
+          <Text accessibilityRole="header" style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
             Hours
           </Text>
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
@@ -98,15 +101,11 @@ export function HoursSurface({ embedded = false }: { embedded?: boolean }) {
 
         {loading && rows.length === 0 ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
-            <ActivityIndicator color={colors.brand} />
+            <LoadingStatus label="Loading school hours" />
           </View>
         ) : null}
 
-        {error ? (
-          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>
-            {"That didn't load. Pull down to try again."}
-          </Text>
-        ) : null}
+        {error ? <InlineError message="That didn't load. Pull down to try again." /> : null}
 
         {totals.length > 0 ? (
           <View style={{ gap: space.sm }}>
@@ -196,21 +195,35 @@ export default function HoursScreen() {
 function SubjectChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
     <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`Filter school hours by ${label}`}
+      accessibilityState={{ selected: active }}
       onPress={onPress}
       style={{
+        minHeight: 44,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: space.xs,
         paddingHorizontal: space.md,
         paddingVertical: space.xs,
         borderRadius: radius.pill,
         backgroundColor: active ? colors.brandSoft : colors.card,
         borderWidth: 1,
-        borderColor: active ? colors.brand : colors.borderSubtle,
+        borderColor: active ? colors.brandHover : colors.borderSubtle,
       }}
     >
+      {active ? (
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Check size={14} color={colors.textStrong} />
+        </View>
+      ) : null}
       <Text
         style={{
           fontFamily: fontFamilies.bodyBold,
           fontSize: fontSize.xs,
-          color: active ? colors.brandHover : colors.textMuted,
+          color: active ? colors.textStrong : colors.textMuted,
         }}
       >
         {label}

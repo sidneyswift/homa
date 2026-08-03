@@ -1,5 +1,5 @@
 import { Redirect, Stack } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View } from "react-native";
 
 import { AppDrawer } from "../../components/nav/app-drawer";
@@ -42,25 +42,33 @@ export default function AppShellLayout() {
 
 function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const menuButtonRef = useRef<View>(null);
   const { family, memberDisplayName } = useFamilyData();
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.page }}>
-      <AppTopBar onMenuPress={() => setDrawerOpen(true)} />
-      <View style={{ flex: 1 }}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.page },
-          }}
-        />
+      <View
+        style={{ flex: 1 }}
+        accessibilityElementsHidden={drawerOpen}
+        importantForAccessibility={drawerOpen ? "no-hide-descendants" : "auto"}
+      >
+        <AppTopBar menuButtonRef={menuButtonRef} onMenuPress={() => setDrawerOpen(true)} />
+        <View style={{ flex: 1 }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.page },
+            }}
+          />
+        </View>
+        <VoiceDock />
       </View>
-      <VoiceDock />
       <AppDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         parentName={memberDisplayName ?? family?.parent_display_name ?? "You"}
         familyName={family?.name ?? "Your family"}
+        returnFocusRef={menuButtonRef}
       />
     </View>
   );

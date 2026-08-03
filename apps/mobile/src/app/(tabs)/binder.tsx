@@ -1,17 +1,20 @@
 import { useRouter } from "expo-router";
+import { Check } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import {
   binderCover,
   filterMaterials,
@@ -135,7 +138,7 @@ export default function BinderScreen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void reload()} />}
       >
         <View style={{ gap: 2 }}>
-          <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
+          <Text accessibilityRole="header" style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
             Binder
           </Text>
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
@@ -145,15 +148,11 @@ export default function BinderScreen() {
 
         {familyLoading || (loading && materials.length === 0) ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>
-            <ActivityIndicator color={colors.brand} />
+            <LoadingStatus label="Loading your binder" />
           </View>
         ) : null}
 
-        {error ? (
-          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.danger }}>
-            {"That didn't load. Pull down to try again."}
-          </Text>
-        ) : null}
+        {error ? <InlineError message="That didn't load. Pull down to try again." /> : null}
 
         {!familyLoading && family ? (
           <StateRecordsCard onOpenDocument={openStateRecord} />
@@ -180,9 +179,11 @@ export default function BinderScreen() {
         {materials.length > 0 ? (
           <TextInput
             value={filter.query}
+            accessibilityLabel="Search your binder"
+            accessibilityHint="Filters materials by title, subject, theme, or skill"
             onChangeText={(query) => setFilter((current) => ({ ...current, query }))}
             placeholder="Search your binder"
-            placeholderTextColor={colors.textSubtle}
+            placeholderTextColor={colors.textMuted}
             style={{
               fontFamily: fontFamilies.body,
               fontSize: fontSize.base,
@@ -191,6 +192,7 @@ export default function BinderScreen() {
               borderWidth: 1,
               borderColor: colors.border,
               borderRadius: radius.sm,
+              minHeight: 48,
               padding: space.sm,
             }}
           />
@@ -200,6 +202,7 @@ export default function BinderScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.xs }}>
             <FilterChip
               label="All"
+              accessibilityLabel="Filter material type: All"
               active={filter.kind === null}
               onPress={() => setFilter((current) => ({ ...current, kind: null }))}
             />
@@ -207,6 +210,7 @@ export default function BinderScreen() {
               <FilterChip
                 key={kind}
                 label={KIND_LABELS[kind]}
+                accessibilityLabel={`Filter material type: ${KIND_LABELS[kind]}`}
                 active={filter.kind === kind}
                 onPress={() => setFilter((current) => ({ ...current, kind: current.kind === kind ? null : kind }))}
               />
@@ -218,6 +222,7 @@ export default function BinderScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.xs }}>
             <FilterChip
               label="All subjects"
+              accessibilityLabel="Filter by subject: All subjects"
               active={filter.subject === null}
               onPress={() => setFilter((current) => ({ ...current, subject: null }))}
             />
@@ -225,6 +230,7 @@ export default function BinderScreen() {
               <FilterChip
                 key={subject.key}
                 label={subject.label}
+                accessibilityLabel={`Filter by subject: ${subject.label}`}
                 active={filter.subject === subject.key}
                 onPress={() =>
                   setFilter((current) => ({ ...current, subject: current.subject === subject.key ? null : subject.key }))
@@ -270,9 +276,11 @@ export default function BinderScreen() {
 }
 
 function MaterialGrid({ materials, onSelect }: { materials: BinderMaterial[]; onSelect: (material: BinderMaterial) => void }) {
+  const { fontScale } = useWindowDimensions();
+  const columns = fontScale >= 1.4 ? 1 : 2;
   const rows: BinderMaterial[][] = [];
-  for (let index = 0; index < materials.length; index += 2) {
-    rows.push(materials.slice(index, index + 2));
+  for (let index = 0; index < materials.length; index += columns) {
+    rows.push(materials.slice(index, index + columns));
   }
   return (
     <View style={{ gap: space.sm }}>
@@ -281,27 +289,51 @@ function MaterialGrid({ materials, onSelect }: { materials: BinderMaterial[]; on
           {row.map((material) => (
             <MaterialGridCard key={material.id} material={material} onPress={() => onSelect(material)} />
           ))}
-          {row.length === 1 ? <View style={{ flex: 1 }} /> : null}
+          {columns === 2 && row.length === 1 ? <View style={{ flex: 1 }} /> : null}
         </View>
       ))}
     </View>
   );
 }
 
-function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function FilterChip({
+  label,
+  accessibilityLabel,
+  active,
+  onPress,
+}: {
+  label: string;
+  accessibilityLabel: string;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ selected: active }}
       onPress={onPress}
       style={{
+        minHeight: 44,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: space.xs,
         paddingHorizontal: space.md,
         paddingVertical: space.xs,
         borderRadius: radius.pill,
         backgroundColor: active ? colors.brandSoft : colors.card,
         borderWidth: 1,
-        borderColor: active ? colors.brand : colors.borderSubtle,
+        borderColor: active ? colors.brandHover : colors.borderSubtle,
       }}
     >
-      <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, color: active ? colors.brandHover : colors.textMuted }}>
+      {active ? (
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Check size={14} color={colors.textStrong} />
+        </View>
+      ) : null}
+      <Text style={{ fontFamily: fontFamilies.bodyBold, fontSize: fontSize.xs, color: active ? colors.textStrong : colors.textMuted }}>
         {label}
       </Text>
     </Pressable>

@@ -101,6 +101,40 @@ describe("MessageView send-state rendering", () => {
     assert.doesNotMatch(html, /Not sent/u);
   });
 
+  it("renders a parked authorization challenge as an actionable sign-in card", () => {
+    const html = renderToStaticMarkup(
+      <MessageView
+        timeZone="America/Chicago"
+        message={{
+          id: "turn_2:assistant",
+          role: "assistant",
+          metadata: { status: "streaming", turnId: "turn_2" },
+          parts: [
+            {
+              type: "authorization",
+              state: "required",
+              name: "calendar",
+              displayName: "Calendar",
+              description: "Calendar needs permission.",
+              stepIndex: 0,
+              turnId: "turn_2",
+              authorization: {
+                url: "https://homa.test/connect",
+                userCode: "CODE-123",
+                instructions: "Use the same account as your calendar.",
+              },
+            },
+          ],
+        } as unknown as EveMessage}
+      />,
+    );
+
+    assert.match(html, /Connect Calendar/u);
+    assert.match(html, /Sign in with Calendar/u);
+    assert.match(html, /CODE-123/u);
+    assert.match(html, /https:\/\/homa\.test\/connect/u);
+  });
+
   it("shows Not sent plus a Retry control for a failed message when a handler is given", () => {
     const html = renderToStaticMarkup(
       <MessageView

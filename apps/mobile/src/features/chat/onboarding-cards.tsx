@@ -1,9 +1,7 @@
 import * as WebBrowser from "expo-web-browser";
-import { X } from "lucide-react-native";
+import { Check, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -14,8 +12,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { HOMESCHOOL_STYLES, MAP_SUBJECTS, US_STATES } from "@homa/core";
 
 import { Logo } from "../../components/brand/logo";
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { IconButton } from "../../components/ui/icon-button";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { TextField } from "../../components/ui/text-field";
+import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import {
@@ -62,7 +64,7 @@ function Receipt({ label, detail }: { label: string; detail: string }) {
         paddingVertical: 7,
       }}
     >
-      <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.sage }}>
+      <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.success }}>
         {label}
       </Text>
       <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textBody }}>
@@ -122,12 +124,12 @@ export function ChecklistCard({
             paddingVertical: 5,
             fontFamily: fontFamilies.bodySemibold,
             fontSize: fontSize.xs,
-            color: colors.brand,
+            color: colors.textStrong,
           }}
         >
           {card.childName}
         </Text>
-        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
           {remaining <= 1 ? "almost done" : `about ${minutesLeft} min${answered > 0 ? " left" : ""}`}
         </Text>
       </View>
@@ -231,6 +233,12 @@ export function DetailCard({
   const fields = DETAIL_FIELDS[card.kind];
   const field = fields[Math.min(step, fields.length - 1)];
   const isLast = step === fields.length - 1;
+  const fieldHeadingRef = useRef<View>(null);
+  const statePickerHeadingRef = useRef<View>(null);
+  useAccessibilityFocusOnChange(
+    fieldHeadingRef,
+    active && !saved ? `${card.kind}:${step}` : null,
+  );
   const resolvedValues = {
     ...values,
     birthDate: birthDateFromParts(birth) ?? "",
@@ -286,7 +294,7 @@ export function DetailCard({
     <View accessibilityLabel="Details" style={{ gap: space.md }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
         <Logo size={17} variant="mark" />
-        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
           {card.kind === "child" ? "About your child" : card.kind === "family_basics" ? "About you" : "About your homeschool"}
         </Text>
       </View>
@@ -295,18 +303,25 @@ export function DetailCard({
           {card.intro}
         </Text>
       ) : null}
-      <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}>
-        {field.label(resolvedValues)}
-      </Text>
+      <View
+        ref={fieldHeadingRef}
+        accessible
+        accessibilityRole="header"
+        accessibilityLabel={`${field.label(resolvedValues)}. Step ${step + 1} of ${fields.length}`}
+      >
+        <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.base, color: colors.textStrong }}>
+          {field.label(resolvedValues)}
+        </Text>
+      </View>
       {field.kind === "date" ? (
-        <View style={{ flexDirection: "row", gap: space.sm }}>
-          <View style={{ flex: 1.3 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
+          <View style={{ flex: 1.3, minWidth: 88 }}>
             <TextField label="Year" value={birth.year} onChangeText={(year) => setBirth((current) => ({ ...current, year }))} keyboardType="number-pad" maxLength={4} placeholder="2019" />
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, minWidth: 72 }}>
             <TextField label="Month" value={birth.month} onChangeText={(month) => setBirth((current) => ({ ...current, month }))} keyboardType="number-pad" maxLength={2} placeholder="4" />
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, minWidth: 72 }}>
             <TextField label="Day" value={birth.day} onChangeText={(day) => setBirth((current) => ({ ...current, day }))} keyboardType="number-pad" maxLength={2} placeholder="7" />
           </View>
         </View>
@@ -322,6 +337,10 @@ export function DetailCard({
                 onPress={() => toggleStyle(style)}
                 style={{
                   borderRadius: radius.pill,
+                  minHeight: 44,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: space.xs,
                   borderWidth: 1,
                   borderColor: selected ? colors.brand : colors.border,
                   backgroundColor: selected ? colors.brandSoft : colors.card,
@@ -329,6 +348,11 @@ export function DetailCard({
                   paddingVertical: 8,
                 }}
               >
+                {selected ? (
+                  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                    <Check size={14} color={colors.brandHover} />
+                  </View>
+                ) : null}
                 <Text style={{ fontFamily: selected ? fontFamilies.bodySemibold : fontFamilies.body, fontSize: fontSize.sm, color: colors.textStrong }}>
                   {STYLE_LABELS[style]}
                 </Text>
@@ -352,24 +376,27 @@ export function DetailCard({
               paddingHorizontal: space.md,
             })}
           >
-            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: values.usState ? colors.textStrong : colors.textSubtle }}>
+            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: values.usState ? colors.textStrong : colors.textMuted }}>
               {US_STATES.find((state) => state.code === values.usState)?.name ?? "Pick one"}
             </Text>
           </Pressable>
-          <Modal
+          <AccessibleModal
             visible={choosingState}
-            animationType="slide"
+            title="Choose your state"
+            initialFocusRef={statePickerHeadingRef}
             presentationStyle="pageSheet"
             onRequestClose={() => setChoosingState(false)}
           >
             <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: space.md, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}>
-                <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, color: colors.textStrong }}>
-                  Choose your state
-                </Text>
-                <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={() => setChoosingState(false)} hitSlop={8}>
+                <View ref={statePickerHeadingRef} accessible accessibilityRole="header" accessibilityLabel="Choose your state" style={{ flex: 1 }}>
+                  <Text style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, color: colors.textStrong }}>
+                    Choose your state
+                  </Text>
+                </View>
+                <IconButton label="Close state picker" onPress={() => setChoosingState(false)}>
                   <X size={22} color={colors.textSubtle} />
-                </Pressable>
+                </IconButton>
               </View>
               <ScrollView contentContainerStyle={{ padding: space.md }}>
                 {US_STATES.map((state) => {
@@ -378,6 +405,7 @@ export function DetailCard({
                     <Pressable
                       key={state.code}
                       accessibilityRole="button"
+                      accessibilityLabel={state.name}
                       accessibilityState={{ selected }}
                       onPress={() => {
                         setValue("usState", state.code);
@@ -385,22 +413,29 @@ export function DetailCard({
                       }}
                       style={{
                         minHeight: 48,
-                        justifyContent: "center",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                         borderBottomWidth: 1,
                         borderBottomColor: colors.borderSubtle,
                         paddingHorizontal: space.sm,
                         backgroundColor: selected ? colors.brandSoft : "transparent",
                       }}
                     >
-                      <Text style={{ fontFamily: selected ? fontFamilies.bodySemibold : fontFamilies.body, fontSize: fontSize.base, color: colors.textStrong }}>
+                      <Text style={{ flex: 1, fontFamily: selected ? fontFamilies.bodySemibold : fontFamilies.body, fontSize: fontSize.base, color: colors.textStrong }}>
                         {state.name}
                       </Text>
+                      {selected ? (
+                        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                          <Check size={18} color={colors.brandHover} />
+                        </View>
+                      ) : null}
                     </Pressable>
                   );
                 })}
               </ScrollView>
             </SafeAreaView>
-          </Modal>
+          </AccessibleModal>
         </>
       ) : (
         <TextField
@@ -474,10 +509,10 @@ export function ReportRevealCard({
   return (
     <View accessibilityLabel={`${card.childName}'s progress report`} style={{ gap: space.md }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: space.sm }}>
-        <Text style={{ borderRadius: radius.pill, backgroundColor: colors.brandSoft, paddingHorizontal: 10, paddingVertical: 5, fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.brand }}>
+        <Text style={{ borderRadius: radius.pill, backgroundColor: colors.brandSoft, paddingHorizontal: 10, paddingVertical: 5, fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textStrong }}>
           {card.childName}
         </Text>
-        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
           {card.mappedSubjects} subjects covered
         </Text>
       </View>
@@ -491,7 +526,7 @@ export function ReportRevealCard({
       </Text>
       {card.strengths.length > 0 && card.strengths.length < card.mappedSubjects ? (
         <View style={{ gap: space.sm }}>
-          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textSubtle }}>
+          <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
             Strongest subjects right now
           </Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
@@ -503,14 +538,14 @@ export function ReportRevealCard({
           </View>
         </View>
       ) : null}
-      {!narrativeReady ? <ActivityIndicator color={colors.brand} /> : null}
+      {!narrativeReady ? <LoadingStatus label="Writing your progress story" /> : null}
       {narrativeReady ? (
         <Button
           label="See the whole report"
           onPress={() => void WebBrowser.openBrowserAsync(reportUrl(card.token))}
         />
       ) : null}
-      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textSubtle }}>
+      <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
         {`Sorted across ${MAP_SUBJECTS.length} subjects`}
       </Text>
     </View>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Client } from "eve/client";
 import { ageInMonths, ageLabel } from "@homa/core";
@@ -8,6 +8,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { AiConsentGate } from "../../components/ai-consent-gate";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { useSession } from "../../features/auth/session-provider";
 import {
   buildEveTransport,
@@ -197,8 +198,8 @@ export default function ChatScreen() {
         keyboardVerticalOffset={0}
       >
         {loading || !userId || prepared === null ? (
-          <ActivityIndicator
-            color={colors.brand}
+          <LoadingStatus
+            label="Opening your conversation"
             style={{ marginTop: space.xl }}
           />
         ) : !readyFamily ? (

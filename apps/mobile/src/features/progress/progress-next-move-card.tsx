@@ -29,7 +29,7 @@ export function ProgressNextMoveCard({
       style={{
         gap: space.md,
         backgroundColor: colors.brandSoft,
-        borderColor: colors.brand,
+        borderColor: colors.brandHover,
       }}
     >
       <View style={{ gap: space.xs }}>

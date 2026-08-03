@@ -1,9 +1,12 @@
 import { Play, X } from "lucide-react-native";
-import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useRef, useState, type ReactNode, type RefObject } from "react";
+import { Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
+import { IconButton } from "../../components/ui/icon-button";
+import { InlineError } from "../../components/ui/inline-error";
 import {
   createTask,
   deleteTask,
@@ -36,10 +39,22 @@ const inputStyle = {
   borderWidth: 1,
   borderColor: colors.border,
   borderRadius: radius.sm,
+  minHeight: 48,
   padding: space.sm,
 } as const;
 
-function SheetHeader({ title, onClose }: { title: string; onClose: () => void }) {
+function TaskActionPair({ first, second }: { first: ReactNode; second: ReactNode }) {
+  const { fontScale } = useWindowDimensions();
+  const stacked = fontScale >= 1.4;
+  return (
+    <View style={{ flexDirection: stacked ? "column" : "row", gap: space.sm }}>
+      <View style={stacked ? undefined : { flex: 1 }}>{first}</View>
+      <View style={stacked ? undefined : { flex: 1 }}>{second}</View>
+    </View>
+  );
+}
+
+function SheetHeader({ title, headingRef, onClose }: { title: string; headingRef: RefObject<View | null>; onClose: () => void }) {
   return (
     <View
       style={{
@@ -51,12 +66,14 @@ function SheetHeader({ title, onClose }: { title: string; onClose: () => void })
         borderBottomColor: colors.borderSubtle,
       }}
     >
-      <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
-        {title}
-      </Text>
-      <Pressable onPress={onClose} hitSlop={8}>
+      <View ref={headingRef} accessible accessibilityRole="header" accessibilityLabel={title} style={{ flex: 1 }}>
+        <Text style={{ fontFamily: fontFamilies.display, fontSize: fontSize.lg, color: colors.textStrong }}>
+          {title}
+        </Text>
+      </View>
+      <IconButton label={`Close ${title.toLowerCase()}`} onPress={onClose}>
         <X size={22} color={colors.textSubtle} />
-      </Pressable>
+      </IconButton>
     </View>
   );
 }
@@ -90,9 +107,7 @@ function RunNowSection({ taskId, onDone }: { taskId: string; onDone: () => void 
         onPress={() => void handlePress()}
         disabled={pending}
       />
-      {error ? (
-        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>{error}</Text>
-      ) : null}
+      {error ? <InlineError message={error} /> : null}
     </View>
   );
 }
@@ -112,7 +127,12 @@ function DeleteTaskSection({ task, onDeleted }: { task: TaskRowView; onDeleted: 
   if (!confirming) {
     return (
       <View style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle, paddingTop: space.sm }}>
-        <Pressable onPress={() => setConfirming(true)}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Delete this task"
+          onPress={() => setConfirming(true)}
+          style={{ minHeight: 44, justifyContent: "center" }}
+        >
           <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
             Delete this task
           </Text>
@@ -126,14 +146,10 @@ function DeleteTaskSection({ task, onDeleted }: { task: TaskRowView; onDeleted: 
       <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.xs, color: colors.textMuted }}>
         {`Delete "${name}"? This can't be undone.`}
       </Text>
-      <View style={{ flexDirection: "row", gap: space.sm }}>
-        <View style={{ flex: 1 }}>
-          <Button label="Keep" variant="secondary" onPress={() => setConfirming(false)} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button label={pending ? "Deleting…" : "Delete"} onPress={() => void handleDelete()} disabled={pending} />
-        </View>
-      </View>
+      <TaskActionPair
+        first={<Button label="Keep" variant="secondary" onPress={() => setConfirming(false)} />}
+        second={<Button label={pending ? "Deleting…" : "Delete"} onPress={() => void handleDelete()} disabled={pending} />}
+      />
     </View>
   );
 }
@@ -181,17 +197,11 @@ function BuiltInScheduleSection({
       <WeekdayChips selected={weekdays} onChange={setWeekdays} />
       <HourChips hour={hour} onChange={setHour} />
       <DeliveryChoice value={delivery} onChange={setDelivery} textingLinked={textingLinked} />
-      {error ? (
-        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>{error}</Text>
-      ) : null}
-      <View style={{ flexDirection: "row", gap: space.sm }}>
-        <View style={{ flex: 1 }}>
-          <Button label={pending ? "Saving…" : "Save changes"} onPress={() => void handleSave()} disabled={pending} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button label="Cancel" variant="secondary" onPress={onDone} />
-        </View>
-      </View>
+      {error ? <InlineError message={error} /> : null}
+      <TaskActionPair
+        first={<Button label={pending ? "Saving…" : "Save changes"} onPress={() => void handleSave()} disabled={pending} />}
+        second={<Button label="Cancel" variant="secondary" onPress={onDone} />}
+      />
     </View>
   );
 }
@@ -258,10 +268,11 @@ function CustomTaskFormSection({
           What should it be called?
         </Text>
         <TextInput
+          accessibilityLabel="Task name"
           value={label}
           onChangeText={setLabel}
           placeholder="Phonics game ideas"
-          placeholderTextColor={colors.textSubtle}
+          placeholderTextColor={colors.textMuted}
           maxLength={60}
           style={inputStyle}
         />
@@ -271,10 +282,11 @@ function CustomTaskFormSection({
           What should Homa do?
         </Text>
         <TextInput
+          accessibilityLabel="Task instructions"
           value={prompt}
           onChangeText={setPrompt}
           placeholder="Find one new phonics game and explain how to play it."
-          placeholderTextColor={colors.textSubtle}
+          placeholderTextColor={colors.textMuted}
           maxLength={1000}
           multiline
           numberOfLines={3}
@@ -284,21 +296,17 @@ function CustomTaskFormSection({
       <WeekdayChips selected={weekdays} onChange={setWeekdays} />
       <HourChips hour={hour} onChange={setHour} />
       <DeliveryChoice value={delivery} onChange={setDelivery} textingLinked={textingLinked} />
-      {error ? (
-        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>{error}</Text>
-      ) : null}
-      <View style={{ flexDirection: "row", gap: space.sm }}>
-        <View style={{ flex: 1 }}>
+      {error ? <InlineError message={error} /> : null}
+      <TaskActionPair
+        first={(
           <Button
             label={pending ? "Saving…" : task ? "Save changes" : "Add this task"}
             onPress={() => void handleSave()}
             disabled={pending}
           />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button label="Cancel" variant="secondary" onPress={onDone} />
-        </View>
-      </View>
+        )}
+        second={<Button label="Cancel" variant="secondary" onPress={onDone} />}
+      />
     </View>
   );
 }
@@ -320,6 +328,7 @@ export function TaskEditSheet({
 }) {
   const builtIn = task && task.kind !== "custom" ? BUILT_IN_COPY[task.kind] : null;
   const heading = builtIn ? builtIn.label : task ? "Edit task" : "Add a task";
+  const headingRef = useRef<View>(null);
 
   function handleDeleted() {
     onChanged();
@@ -327,9 +336,9 @@ export function TaskEditSheet({
   }
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} presentationStyle="pageSheet">
+    <AccessibleModal visible={visible} title={heading} initialFocusRef={headingRef} onRequestClose={onClose} presentationStyle="pageSheet">
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
-        <SheetHeader title={heading} onClose={onClose} />
+        <SheetHeader title={heading} headingRef={headingRef} onClose={onClose} />
         <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
           {builtIn && task ? (
             <>
@@ -348,6 +357,6 @@ export function TaskEditSheet({
           )}
         </ScrollView>
       </SafeAreaView>
-    </Modal>
+    </AccessibleModal>
   );
 }

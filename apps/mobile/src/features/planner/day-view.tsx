@@ -27,7 +27,7 @@ export function DayView({
   hoursRows: HoursLogRow[];
   unscheduled: PlanActivityView[];
   kids: ChildRecord[];
-  onPressEvent: (event: FamilyEventRecord) => void;
+  onPressEvent?: (event: FamilyEventRecord) => void;
   onToggleActivity: (activity: ScheduledActivityView) => Promise<void>;
   onScheduleActivity: (activity: PlanActivityView) => void;
 }) {
