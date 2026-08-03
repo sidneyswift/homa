@@ -3155,13 +3155,13 @@ async function expectAuthenticatedIsolation() {
     );
     const [staleSafeCheckFunction] = await sql`
       select to_regprocedure(
-        'public.set_plan_activity_check(uuid,text,text,boolean,text,bigint)'
+        'public.set_plan_activity_check_v2(uuid,text,text,boolean,text,bigint)'
       ) is not null as available
     `;
     if (staleSafeCheckFunction?.available === true) {
       await expectAuthenticatedRpcDenied(
         familyAUser.accessToken,
-        "set_plan_activity_check",
+        "set_plan_activity_check_v2",
         {
           target_child_id: childBId,
           target_subject_id: "isolation-check",
@@ -3171,6 +3171,25 @@ async function expectAuthenticatedIsolation() {
           target_plan_revision: 1,
         },
         "auth member cannot use stale-safe check-off on another family's plan",
+      );
+      const [staleSafePrivileges] = await sql`
+        select
+          has_function_privilege(
+            'authenticated',
+            'public.set_plan_activity_check(uuid,text,text,boolean,text,bigint)',
+            'execute'
+          ) as v1_enabled,
+          has_function_privilege(
+            'authenticated',
+            'public.set_plan_activity_check_v2(uuid,text,text,boolean,text,bigint)',
+            'execute'
+          ) as v2_enabled
+      `;
+      report(
+        "authenticated callers use only the tenant-receipted stale-safe check contract",
+        staleSafePrivileges?.v1_enabled === false &&
+          staleSafePrivileges?.v2_enabled === true,
+        "obsolete v1 remains executable or v2 is unavailable",
       );
     } else {
       report(
