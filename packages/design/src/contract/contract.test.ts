@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { approvedColorPairs, colorTokens } from "./colors.ts";
 import { BRAND_CONTRACT } from "./brand.ts";
+import { CHANNELS_CONTRACT, brandChannels, channelProfiles } from "./channels.ts";
 import { CONTENT_CONTRACT } from "./content.ts";
+import { assertDesignContract, DOCTRINE_CONTRACT } from "./doctrine.ts";
 import { MOTION_CONTRACT } from "./motion.ts";
 import { STATES_CONTRACT } from "./states.ts";
 import { fontRoles, typeRoles } from "./typography.ts";
@@ -116,4 +118,39 @@ test("semantic icon adapters are complete and fail closed", () => {
   assert.equal(getSemanticIcon("web", registry, "back"), "back");
   assert.throws(() => getSemanticIcon("web", registry, "not-a-role"), /Unknown web semantic icon role/);
   assert.throws(() => createSemanticIconRegistry("native", { back: "ArrowLeft" } as never), /missing=/);
+});
+
+test("the Quiet authority doctrine is exhaustive and version-aligned", () => {
+  assert.doesNotThrow(() => assertDesignContract());
+  assert.equal(DOCTRINE_CONTRACT.name, "quiet-authority");
+  assert.deepEqual([...DOCTRINE_CONTRACT.domains].sort(), [
+    "appearance",
+    "brand-geometry",
+    "channels",
+    "colors",
+    "content",
+    "icons",
+    "layout",
+    "motion",
+    "states",
+    "surface-profiles",
+    "typography",
+    "versioning",
+  ]);
+  assert.deepEqual(Object.keys(CHANNELS_CONTRACT.channelProfiles).sort(), [...brandChannels].sort());
+  for (const channel of brandChannels) {
+    assert.ok(channelProfiles[channel].targetProfiles.length > 0);
+    assert.ok(channelProfiles[channel].allowedAppearance.length > 0);
+    assert.ok(channelProfiles[channel].preservedElements.length > 0);
+  }
+});
+
+test("channel reductions preserve meaning without importing product motion", () => {
+  assert.equal(channelProfiles.web.motion, "truthful-interruptible");
+  assert.equal(channelProfiles.native.motion, "truthful-interruptible");
+  assert.equal(channelProfiles.marketing.motion, "static-or-reduced-to-still");
+  for (const channel of ["email", "sms", "print", "provider", "metadata"] as const) {
+    assert.equal(channelProfiles[channel].motion === "none" || channelProfiles[channel].motion === "provider-owned", true);
+    assert.ok(channelProfiles[channel].preservedElements.includes("plain-language-next-move") || channelProfiles[channel].preservedElements.includes("useful-next-move"));
+  }
 });
