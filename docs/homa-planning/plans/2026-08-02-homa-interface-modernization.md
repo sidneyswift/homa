@@ -1,4 +1,4 @@
-# Homa omnichannel brand and interface modernization
+# Homa ground-up omnichannel brand system redesign
 
 **Status:** Founder approved for full ground-up omnichannel execution on 2026-08-02; implementation is tracked by gh#666 and its dependency-ordered children
 **Date:** 2026-08-02
