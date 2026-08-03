@@ -138,7 +138,7 @@ describe("native Progress child-safe presentation contract", () => {
       kidSwitcherSource,
       /accessibilityLabel=\{`Show \$\{kid\.name\}’s progress`\}/u,
     );
-    assert.match(kidSwitcherSource, /backgroundColor: active \? colors\.brandHover/u);
+    assert.match(kidSwitcherSource, /backgroundColor: active \? colors\.action/u);
     assert.match(kidSwitcherSource, /color: active \? colors\.onBrand/u);
   });
 

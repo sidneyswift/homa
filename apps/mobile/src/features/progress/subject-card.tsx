@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { Icon } from "../../components/design/icon";
 import type { ChildProgressView, ProgressSubjectView } from "../../lib/child-progress";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, shadows, space } from "../../theme/tokens";
@@ -237,11 +237,12 @@ export function SubjectCard({
           >
             {expanded ? "Hide details" : "Show details"}
           </Text>
-          {expanded ? (
-            <ChevronUp size={20} color={colors.textBody} />
-          ) : (
-            <ChevronDown size={20} color={colors.textBody} />
-          )}
+          <Icon
+            name="collapse"
+            size={20}
+            color={colors.textBody}
+            style={{ transform: [{ rotate: expanded ? "180deg" : "0deg" }] }}
+          />
         </View>
       </Pressable>
 

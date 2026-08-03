@@ -1,5 +1,4 @@
 import type { ProgressNextMove } from "@homa/core";
-import { Clock3 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
@@ -77,7 +76,6 @@ export function ProgressNextMoveCard({
                 gap: space.xs,
               }}
             >
-              <Clock3 size={16} color={colors.textBody} />
               <Text
                 style={{
                   fontFamily: fontFamilies.bodySemibold,
