@@ -1,4 +1,3 @@
-import { Users } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 import type { FamilyEventRecord } from "../../lib/family-events";
@@ -40,7 +39,6 @@ export function EventCard({
 
   const content = (
     <>
-      {childIndex === null ? <Users size={14} color={textColor} /> : null}
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.sm, color: textColor }}>
           {event.title}

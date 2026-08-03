@@ -68,7 +68,7 @@ export function MonthView({
               minHeight: 56,
               borderRadius: radius.sm,
               borderWidth: entry.isToday ? 2 : 1,
-              borderColor: entry.isToday ? colors.brandHover : colors.borderSubtle,
+              borderColor: entry.isToday ? colors.action : colors.borderSubtle,
               backgroundColor: pressed ? colors.surfaceSunken : colors.card,
               padding: space.sm,
               gap: space.xs,
@@ -127,7 +127,7 @@ export function MonthView({
                   borderRadius: radius.pill,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: entry.isToday ? colors.brandHover : "transparent",
+                  backgroundColor: entry.isToday ? colors.action : "transparent",
                 }}
               >
                 <Text
