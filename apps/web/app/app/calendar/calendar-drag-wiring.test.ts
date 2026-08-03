@@ -94,7 +94,7 @@ describe("drag failure visibility (issue #256)", () => {
   it("renders the drag error as a live notice near the grid", () => {
     const notice = source.slice(
       source.indexOf("{dragError ? ("),
-      source.indexOf("{dragError ? (") + 900,
+      source.indexOf("{dragError ? (") + 1_300,
     );
     assert.ok(notice.length > 0, "the dragError notice should exist");
     assert.match(notice, /role="status"/u, "the notice must announce itself");
@@ -123,7 +123,7 @@ describe("drag failure visibility (issue #256)", () => {
 /**
  * calendar-view.tsx once styled tone-less text with `var(--ink,
  * inherit)`, a token defined nowhere in the design system (issue #256).
- * The real token for text on the pastel family stripe is --text-strong.
+ * The real token for text on the pastel family stripe is --homa-ink.
  */
 describe("design tokens (issue #256)", () => {
   it("never references the phantom --ink token", () => {
