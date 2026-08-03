@@ -67,5 +67,5 @@ owns design-system integration, not general mobile parity.
   Supabase. Native Google Sign-In (the account-picker sheet) is not
   present.
 - No push-notification configuration is present.
-- Printable artifacts render in chat and open their PDF URL in the system viewer, which can offer platform print or share actions. There is no native in-app print control.
-- New and unfinished families open the web `/onboarding` flow. Native onboarding is not present.
+- Printable artifacts render in chat and can use the native print and share adapters after a server-verified preview. Homa reports whether the system sheet was opened, canceled, or handed off, and never claims that a printer or recipient finished the job.
+- Apple and Google sign-in continue into the native family-readiness gate. A new parent can create the family and first learner in the app through receipt-checked, idempotent mutations, then complete the canonical family setup state. Email account creation still opens the web flow, with an explicit sign-in path so the parent does not mistake an unauthenticated browser for a second account.

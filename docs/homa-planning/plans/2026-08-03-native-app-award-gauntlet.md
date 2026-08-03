@@ -30,6 +30,7 @@ The award standard is therefore a measured closed loop, not a feature count.
 ### Observed or verified
 
 - Native route and feature inventory under `apps/mobile/src/`.
+- Xcode 26.6 iOS 18.6 simulator build from this branch installed and rendered the current native sign-in surface. This proves bundle and shell rendering only, not an authenticated setup, first useful outcome, or physical-device behavior.
 - Native package boundary in [`apps/mobile/README.md`](../../../apps/mobile/README.md).
 - Existing launch research in [`docs/homa-planning/plans/2026-07-28-ios-launch-evidence/`](../2026-07-28-ios-launch-evidence/).
 - Voice shell direction screenshots in [`docs/homa-planning/plans/2026-08-01-voice-shell-direction-lab/`](2026-08-01-voice-shell-direction-lab/).
@@ -51,6 +52,7 @@ The award standard is therefore a measured closed loop, not a feature count.
 - A fresh-family install-to-first-use journey completed on a release build without leaving native. The native setup path is implemented, but [gh#304](https://github.com/sidneyswift/homa/issues/304) remains open until production migration, auth handoff, and first useful outcome are proven.
 - Five-mom comprehension and outcome study.
 - Production tenant-isolation and RPC privilege verification. The local isolation guard could not run because this worktree has no `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- The native web fallback is not an authenticated handoff. Native Supabase sessions persist in AsyncStorage, while web SSR reads cookies, and `openWebOnboarding()` sends only `/onboarding`. A direct link can therefore create a separate anonymous web setup or send the parent to sign-in. A true bridge needs a one-use server exchange or an explicit re-authentication step, plus a founder and security ruling. Access or refresh tokens must not be placed in a URL.
 
 The Voice screenshots are useful interaction evidence, but they are a React Native Web prototype with fake family data and an explicit “No product actions” strip. They are not simulator or production proof.
 
