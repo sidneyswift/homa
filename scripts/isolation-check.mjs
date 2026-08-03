@@ -4004,6 +4004,7 @@ async function expectAuthenticatedIsolation() {
         ) is not null as available
       `;
       if (nativeScheduleFunction?.available === true) {
+        coveredTables.add("mobile_capture_loop_receipts");
         await expectAuthenticatedRpcDenied(
           familyAUser.accessToken,
           "schedule_plan_activity_native_v1",
@@ -4059,6 +4060,7 @@ async function expectAuthenticatedIsolation() {
           JSON.stringify(nativeReceiptPrivileges),
         );
       } else {
+        coveredTables.add("mobile_capture_loop_receipts");
         report(
           "native schedule RPC absent from target (additive migration not applied yet); nothing exposed",
           true,
