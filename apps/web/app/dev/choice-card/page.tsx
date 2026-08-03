@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ChoiceCardBench } from "./choice-card-bench";
@@ -8,11 +7,6 @@ import { ChoiceCardBench } from "./choice-card-bench";
  * synthetic data. Keep the environment boundary in this server component so
  * a production build cannot expose the bench or its fixture scenarios.
  */
-export const metadata: Metadata = {
-  title: "Choice card bench",
-  robots: { index: false },
-};
-
 export default function ChoiceCardBenchPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return <ChoiceCardBench />;
