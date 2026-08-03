@@ -37,8 +37,8 @@ const VARIANT_STYLES: Record<
 
 const DARK_VARIANT_STYLES: typeof VARIANT_STYLES = {
   primary: {
-    backgroundColor: darkColors.brand,
-    borderColor: darkColors.brand,
+    backgroundColor: darkColors.action,
+    borderColor: darkColors.action,
     textColor: darkColors.onBrand,
   },
   secondary: {

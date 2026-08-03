@@ -28,55 +28,59 @@
    the active design guide and review-animations skill before adding motion.
    ========================================================================= */
 :root {
+  /* Primitive aliases intentionally stay concrete while migration is in
+     flight. Static contrast tests and non-browser consumers can resolve the
+     new values without evaluating a CSS variable chain. */
   /* --- Contract-backed compatibility names --- */
-  --stone-50:  var(--homa-canvas);
+  --stone-50:  #F7F4EE;
   --stone-100: #EEEAE2;
   --stone-200: #DED8CC;
-  --stone-300: var(--homa-control-boundary);
+  --stone-300: #918B83;
   --stone-400: #77736B;
   --stone-500: #68645E;
   --stone-600: #5B5852;
   --stone-700: #3F3D39;
-  --stone-800: var(--homa-ink);
-  --stone-900: var(--homa-ink);
+  --stone-800: #20242B;
+  --stone-900: #20242B;
 
   /* --- Coral compatibility names --- */
   --clay-50:  #FBE8DF;
   --clay-100: #F8D8CC;
   --clay-200: #F1B29A;
   --clay-300: #EA8969;
-  --clay-400: var(--homa-visual-coral);
-  --clay-500: var(--homa-visual-coral);
-  --clay-600: var(--homa-brand-text);
-  --clay-700: var(--homa-brand-text);
+  --clay-400: #E7602F;
+  --clay-500: #E7602F;
+  --clay-600: #A33F22;
+  /* Deep filled controls project to Quiet authority midnight ink. */
+  --clay-700: #27374D;
 
   /* --- Constructive compatibility names --- */
-  --sage-50:  var(--homa-constructive-tint);
+  --sage-50:  #E5EFE8;
   --sage-100: #D7E9DC;
   --sage-200: #B5D2BD;
   --sage-300: #85B595;
   --sage-400: #5F9271;
-  --sage-500: var(--homa-constructive-ink);
-  --sage-600: var(--homa-constructive-ink);
+  --sage-500: #335C46;
+  --sage-600: #335C46;
   --sage-700: #284938;
 
   /* --- Highlight compatibility names --- */
-  --gold-100: var(--homa-highlight-tint);
+  --gold-100: #F7EBC7;
   --gold-300: #EBCF82;
   --gold-400: #D6AC43;
-  --gold-500: var(--homa-highlight-ink);
-  --gold-ink: var(--homa-highlight-ink);
+  --gold-500: #76560F;
+  --gold-ink: #76560F;
   --gold-ink-strong: #4D380A;
 
   /* --- Information compatibility names --- */
-  --sky-100: var(--homa-info-tint);
+  --sky-100: #E4EFF2;
   --sky-300: #AFCED5;
-  --sky-500: var(--homa-info-ink);
-  --sky-600: var(--homa-info-ink);
+  --sky-500: #2F5968;
+  --sky-600: #2F5968;
 
   /* --- Error compatibility names --- */
-  --rose-100: var(--homa-error-tint);
-  --rose-500: var(--homa-error-ink);
+  --rose-100: #F5E5E1;
+  --rose-500: #923F33;
   --rose-600: #703027;
 
   /* --- Structural compatibility names --- */
@@ -112,10 +116,10 @@
   /* Brand */
   --brand:          var(--homa-visual-coral);
   --brand-hover:    var(--homa-brand-text);
-  --brand-active:   var(--homa-midnight-action);
+  --brand-active:   var(--clay-700);
   --brand-soft:     #FBE8DF;
   --brand-soft-2:   #F8D8CC;
-  --on-brand:       var(--homa-paper);
+  --on-brand:       #FFFEFC;
 
   --accent-sage:    var(--homa-constructive-ink);
   --accent-sage-soft: var(--homa-constructive-tint);

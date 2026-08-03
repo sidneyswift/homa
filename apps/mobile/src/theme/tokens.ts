@@ -104,7 +104,10 @@ export const darkColors = {
   textMuted: "#C7C2BA",
   textSubtle: "#A9A39A",
 
+  /** Accent coral remains available for decorative and ghost affordances. */
   brand: colorTokens.visualCoral,
+  /** Filled actions use the same midnight ink as the light theme. */
+  action: colorTokens.midnightAction,
   brandHover: "#F0835A",
   brandSoft: "#573426",
   onBrand: "#FFFEFC",
