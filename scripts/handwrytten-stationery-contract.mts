@@ -260,7 +260,15 @@ export function validateHandwryttenStationery(input: {
     ["font-embedding", constraints?.webFontEmbedding, "forbidden"],
   ];
   for (const [code, actual, expected] of expectedConstraints) if (actual !== expected) add(issues, `provider-${code}`, `Provider constraint ${code} must be ${String(expected)}.`);
-  for (const env of ["HANDWRYTTEN_API_KEY", "HANDWRYTTEN_CARD_ID", "HANDWRYTTEN_FONT", "HANDWRYTTEN_TEST_MODE", "HANDWRYTTEN_RETURN_ADDRESS_ID"]) if (!constraints?.requiredEnvironment?.includes(env)) add(issues, "provider-environment", `Provider constraint must name ${env}.`);
+  for (const env of [
+    "THANK_YOU_CARDS_ENABLED",
+    "THANK_YOU_CARDS_MONTHLY_CAP",
+    "HANDWRYTTEN_API_KEY",
+    "HANDWRYTTEN_CARD_ID",
+    "HANDWRYTTEN_FONT",
+    "HANDWRYTTEN_TEST_MODE",
+    "HANDWRYTTEN_RETURN_ADDRESS_ID",
+  ]) if (!constraints?.requiredEnvironment?.includes(env)) add(issues, "provider-environment", `Provider constraint must name ${env}.`);
   if (JSON.stringify(constraints?.allowedHandwritingFonts ?? []) !== JSON.stringify(["hwDavid"])) add(issues, "provider-fonts", "Provider constraint must allow only hwDavid as the named handwriting treatment.");
   if (!Array.isArray(constraints?.requiredGenerationOrder) || constraints.requiredGenerationOrder.length < 4) add(issues, "generation-order", "Provider generation order must include hosting, registration, quality check, and assembly.");
   if (!Array.isArray(constraints?.requiredVendorChecks) || constraints.requiredVendorChecks.length < 2) add(issues, "vendor-checks", "Provider generation must require quality and detail read-back checks.");
