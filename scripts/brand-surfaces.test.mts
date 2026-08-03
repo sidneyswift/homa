@@ -7,13 +7,14 @@ import { brandCriticalities, brandDeliveryStates, brandDispositions, brandManife
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/surfaces.json"), "utf8")) as BrandSurfaceManifest;
 const legacyBaseline = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/legacy-baseline.json"), "utf8")) as { designEra: string; sourceCommit: string; records: Array<{ path: string; sourceHash: string | null; legacySignatures: string[] }> };
+const stableCompare = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
 
 test("manifest IDs, paths, and ordering are unique and deterministic", () => {
   const paths = manifest.surfaces.map((surface) => surface.paths[0]!);
   const ids = manifest.surfaces.map((surface) => surface.id);
   assert.equal(new Set(paths).size, paths.length);
   assert.equal(new Set(ids).size, ids.length);
-  assert.deepEqual(paths, [...paths].sort((a, b) => a.localeCompare(b)));
+  assert.deepEqual(paths, [...paths].sort(stableCompare));
 });
 
 test("manifest includes every required surface family", () => {

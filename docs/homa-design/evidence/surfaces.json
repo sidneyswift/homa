@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "d95db4d6dc2a09902af6f196a8d6ae2332acbdde5d5759c97aaf609a5d2303b1",
+  "ownedInputFingerprint": "2a4767a7a65bb5feb54923cf04811c16e0b3843e55b4b84fdf668830cd45f679",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -200,6 +200,92 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:41b692def7687b63",
+      "paths": [
+        ".agents/skills/curriculum-ingestion/SKILL.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#739",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "empty",
+        "error",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "022a21430b086f0c7f90fd6d5743a7ae251cd6170219968d7ee06e83f16aa58c",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "022a21430b086f0c7f90fd6d5743a7ae251cd6170219968d7ee06e83f16aa58c"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:fff1c244607e503d",
       "paths": [
         ".agents/skills/curriculum-ingestion/references/lesson-decomposition.md"
@@ -287,9 +373,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:41b692def7687b63",
+      "id": "surface:d849a90bc0630650",
       "paths": [
-        ".agents/skills/curriculum-ingestion/SKILL.md"
+        ".agents/skills/exploring-ui-directions/SKILL.md"
       ],
       "type": "authoring-rule",
       "reachability": "authenticated",
@@ -306,8 +392,7 @@
       ],
       "requiredStates": [
         "default",
-        "empty",
-        "error",
+        "permission",
         "success"
       ],
       "viewports": [],
@@ -316,7 +401,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "022a21430b086f0c7f90fd6d5743a7ae251cd6170219968d7ee06e83f16aa58c",
+        "fixtureChecksum": "bbb6970ca4f2614fa1ce571eb573b0d1479a904bca6bca76e6849b68cd41dea1",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -341,7 +426,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "022a21430b086f0c7f90fd6d5743a7ae251cd6170219968d7ee06e83f16aa58c"
+        "bbb6970ca4f2614fa1ce571eb573b0d1479a904bca6bca76e6849b68cd41dea1"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -548,9 +633,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:d849a90bc0630650",
+      "id": "surface:519ce66562f58adc",
       "paths": [
-        ".agents/skills/exploring-ui-directions/SKILL.md"
+        ".agents/skills/finding-unknowns/SKILL.md"
       ],
       "type": "authoring-rule",
       "reachability": "authenticated",
@@ -567,7 +652,6 @@
       ],
       "requiredStates": [
         "default",
-        "permission",
         "success"
       ],
       "viewports": [],
@@ -576,7 +660,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "bbb6970ca4f2614fa1ce571eb573b0d1479a904bca6bca76e6849b68cd41dea1",
+        "fixtureChecksum": "23bec63d8288eb76534057baeef20b8092cd1b8099b2ee32b1a205c3b27b3807",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -601,7 +685,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "bbb6970ca4f2614fa1ce571eb573b0d1479a904bca6bca76e6849b68cd41dea1"
+        "23bec63d8288eb76534057baeef20b8092cd1b8099b2ee32b1a205c3b27b3807"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -1277,90 +1361,6 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "e63c6120cc02dfc1be2566f7353dedfe9aeaee65b00bc8a3a38c9423cc411e34"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:519ce66562f58adc",
-      "paths": [
-        ".agents/skills/finding-unknowns/SKILL.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#739",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "23bec63d8288eb76534057baeef20b8092cd1b8099b2ee32b1a205c3b27b3807",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "23bec63d8288eb76534057baeef20b8092cd1b8099b2ee32b1a205c3b27b3807"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -3006,6 +3006,89 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:ef8fccccbf67549e",
+      "paths": [
+        ".agents/skills/marketing-ugc-engine/SKILL.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#739",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "10f09d70fba0327bbd0f4d899b5f9bd9e7f2d92a94674941340b5c1d509abee7",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "10f09d70fba0327bbd0f4d899b5f9bd9e7f2d92a94674941340b5c1d509abee7"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:7a94a5378b49d18f",
       "paths": [
         ".agents/skills/marketing-ugc-engine/references/briefs.md"
@@ -3507,89 +3590,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:ef8fccccbf67549e",
-      "paths": [
-        ".agents/skills/marketing-ugc-engine/SKILL.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#739",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "10f09d70fba0327bbd0f4d899b5f9bd9e7f2d92a94674941340b5c1d509abee7",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "10f09d70fba0327bbd0f4d899b5f9bd9e7f2d92a94674941340b5c1d509abee7"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:61e8e54672fbad05",
       "paths": [
         ".agents/skills/marketing-video-producer/SKILL.md"
@@ -3815,6 +3815,90 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "e065043479a4c12b4f29241499f9c5ec5e99c7f443399ea36ec802fc1576a4a7"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:89c35bcc16c714d5",
+      "paths": [
+        ".agents/skills/pmf-focus/SKILL.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#739",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "4d9d7e53acde8219cda6bf1c054b5b8be310d96e60c266868557ed4d9acda98e",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "4d9d7e53acde8219cda6bf1c054b5b8be310d96e60c266868557ed4d9acda98e"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -4102,90 +4186,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:89c35bcc16c714d5",
-      "paths": [
-        ".agents/skills/pmf-focus/SKILL.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#739",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "4d9d7e53acde8219cda6bf1c054b5b8be310d96e60c266868557ed4d9acda98e",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "4d9d7e53acde8219cda6bf1c054b5b8be310d96e60c266868557ed4d9acda98e"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:c795207924154882",
       "paths": [
         ".agents/skills/postiz/SKILL.md"
@@ -4357,93 +4357,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:b8bf14f57f74bd4d",
-      "paths": [
-        ".agents/skills/reference-ingestion/references/aboutness.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#739",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "error",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "35025b5879bdf8ad7b04a5ed63d0808954e148feaa86a6302deb6d50be9d8e64",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
-      "currentAssetHashes": [
-        "35025b5879bdf8ad7b04a5ed63d0808954e148feaa86a6302deb6d50be9d8e64"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:0fc69230ac8313dc",
       "paths": [
         ".agents/skills/reference-ingestion/SKILL.md"
@@ -4501,6 +4414,93 @@
       ],
       "currentAssetHashes": [
         "ca4adeb81b3be52ccf17d67f735741a09a2691ea3a56b912af7e4ea23a191c96"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:b8bf14f57f74bd4d",
+      "paths": [
+        ".agents/skills/reference-ingestion/references/aboutness.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#739",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "error",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "35025b5879bdf8ad7b04a5ed63d0808954e148feaa86a6302deb6d50be9d8e64",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "currentAssetHashes": [
+        "35025b5879bdf8ad7b04a5ed63d0808954e148feaa86a6302deb6d50be9d8e64"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -4849,6 +4849,276 @@
       ],
       "currentAssetHashes": [
         "cbd71cb15bf87f69d07edb747d0b80aed89252480fe806c66ba14100117fa4cf"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:40f60e1037245d7b",
+      "paths": [
+        "BUILD.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer",
+        "operator"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "error",
+        "permission",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "ab363a59f94e546befef59eca4f760f5da72e1f0d7180db5cb9c679468a0d74b",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "currentAssetHashes": [
+        "ab363a59f94e546befef59eca4f760f5da72e1f0d7180db5cb9c679468a0d74b"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:3dc5dd454e080eb8",
+      "paths": [
+        "DESIGN.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer",
+        "operator"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#717",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "disabled",
+        "error",
+        "interrupted",
+        "loading",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "465289142b03a071b523764ab4989ebaec55dbcfc7298e7afd1b656b166b452d",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-coral-action",
+        "legacy-token-namespace"
+      ],
+      "currentAssetHashes": [
+        "465289142b03a071b523764ab4989ebaec55dbcfc7298e7afd1b656b166b452d"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "not-production-reachable",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:b335630551682c19",
+      "paths": [
+        "README.md"
+      ],
+      "type": "authoring-rule",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer",
+        "operator"
+      ],
+      "criticality": "utility",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "authoring"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "empty",
+        "error",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "ad7100af1c3fe54958aeb2529e4b5ffa1733a4ba4fe093b42c9775fd177b86f9",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "authoring"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "currentAssetHashes": [
+        "ad7100af1c3fe54958aeb2529e4b5ffa1733a4ba4fe093b42c9775fd177b86f9"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -7064,124 +7334,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:c670e5931c4ea6f9",
-      "paths": [
-        "apps/mobile/src/app/_layout.tsx"
-      ],
-      "type": "screen",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#686",
-      "upstreamDomainOwners": [
-        "native-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "error",
-        "keyboard-focus",
-        "loading",
-        "pressed",
-        "success"
-      ],
-      "viewports": [
-        "compact-native",
-        "large-text-native"
-      ],
-      "devices": [
-        "oldest-supported-iPhone",
-        "current-iPhone",
-        "Android-compile-only"
-      ],
-      "clients": [],
-      "assistiveModes": [
-        "VoiceOver",
-        "Dynamic-Type",
-        "Reduced-Motion"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "d25dfa330d98d7d6152c7006a355639c3a3e07512b1efe91232eb5549d86c180",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "native-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
-      "currentAssetHashes": [
-        "d25dfa330d98d7d6152c7006a355639c3a3e07512b1efe91232eb5549d86c180"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "ota-or-store-binary",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "installed-client",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:9f17d3dca6d89519",
       "paths": [
         "apps/mobile/src/app/(auth)/signin.tsx"
@@ -8308,6 +8460,124 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "b11c8b361b54fe549ead16c33c8bcfef7537a66ce4d70540cd0d4b537ec2cd53"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "ota-or-store-binary",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "installed-client",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:c670e5931c4ea6f9",
+      "paths": [
+        "apps/mobile/src/app/_layout.tsx"
+      ],
+      "type": "screen",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#686",
+      "upstreamDomainOwners": [
+        "native-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "error",
+        "keyboard-focus",
+        "loading",
+        "pressed",
+        "success"
+      ],
+      "viewports": [
+        "compact-native",
+        "large-text-native"
+      ],
+      "devices": [
+        "oldest-supported-iPhone",
+        "current-iPhone",
+        "Android-compile-only"
+      ],
+      "clients": [],
+      "assistiveModes": [
+        "VoiceOver",
+        "Dynamic-Type",
+        "Reduced-Motion"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "d25dfa330d98d7d6152c7006a355639c3a3e07512b1efe91232eb5549d86c180",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "native-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "currentAssetHashes": [
+        "d25dfa330d98d7d6152c7006a355639c3a3e07512b1efe91232eb5549d86c180"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -32099,6 +32369,98 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:0181a9657036c0f8",
+      "paths": [
+        "apps/web/agent/skills/materials-studio/SKILL.md"
+      ],
+      "type": "agent-skill",
+      "reachability": "authenticated",
+      "audiences": [
+        "family",
+        "developer"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "generated-content"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "empty",
+        "error",
+        "keyboard-focus",
+        "permission",
+        "pressed",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "5ff16697a8ac3bc6e62102c3aaee2b63ef00c019eb0145d2cb6784432aa71299",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "generated-content"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "currentAssetHashes": [
+        "5ff16697a8ac3bc6e62102c3aaee2b63ef00c019eb0145d2cb6784432aa71299"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:06e9ee8d483b6e56",
       "paths": [
         "apps/web/agent/skills/materials-studio/references/approaches/balanced-literacy.md"
@@ -38872,98 +39234,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:0181a9657036c0f8",
-      "paths": [
-        "apps/web/agent/skills/materials-studio/SKILL.md"
-      ],
-      "type": "agent-skill",
-      "reachability": "authenticated",
-      "audiences": [
-        "family",
-        "developer"
-      ],
-      "criticality": "journey-critical",
-      "ownerIssue": "gh#687",
-      "upstreamDomainOwners": [
-        "generated-content"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "empty",
-        "error",
-        "keyboard-focus",
-        "permission",
-        "pressed",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "5ff16697a8ac3bc6e62102c3aaee2b63ef00c019eb0145d2cb6784432aa71299",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "generated-content"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
-      "currentAssetHashes": [
-        "5ff16697a8ac3bc6e62102c3aaee2b63ef00c019eb0145d2cb6784432aa71299"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:19b5f558d46e82ed",
       "paths": [
         "apps/web/agent/skills/onboarding/SKILL.md"
@@ -39052,93 +39322,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:00dd0d206ef44116",
-      "paths": [
-        "apps/web/agent/skills/planner/references/month-plan.md"
-      ],
-      "type": "agent-skill",
-      "reachability": "authenticated",
-      "audiences": [
-        "family",
-        "developer"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#739",
-      "upstreamDomainOwners": [
-        "generated-content"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "empty",
-        "error",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "d62f960cdecadd8397cb993e0287da420d3ace1acd7e9a8dbadd5fe1c95f5e9c",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "generated-content"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "d62f960cdecadd8397cb993e0287da420d3ace1acd7e9a8dbadd5fe1c95f5e9c"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:55523b0242bf3f69",
       "paths": [
         "apps/web/agent/skills/planner/SKILL.md"
@@ -39195,6 +39378,93 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "4d33aa49411391332521dd6cb8c954f09712373f730960ac0458d023251b73bb"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:00dd0d206ef44116",
+      "paths": [
+        "apps/web/agent/skills/planner/references/month-plan.md"
+      ],
+      "type": "agent-skill",
+      "reachability": "authenticated",
+      "audiences": [
+        "family",
+        "developer"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#739",
+      "upstreamDomainOwners": [
+        "generated-content"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "empty",
+        "error",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "d62f960cdecadd8397cb993e0287da420d3ace1acd7e9a8dbadd5fe1c95f5e9c",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "generated-content"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "d62f960cdecadd8397cb993e0287da420d3ace1acd7e9a8dbadd5fe1c95f5e9c"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -87172,125 +87442,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:04b02799a5cea19d",
-      "paths": [
-        "apps/web/components/brand/thinking-acts.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "forced-colors",
-        "loading"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "f2af27ebf185e1668fac100f07f75c2adbae6e561ad9b8546fa7cbd74ef2bc55",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "f2af27ebf185e1668fac100f07f75c2adbae6e561ad9b8546fa7cbd74ef2bc55"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:c76971f6a566e3d8",
       "paths": [
         "apps/web/components/brand/ThinkingMark.tsx"
@@ -87377,6 +87528,125 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "42ab71d3b1d40c44262459206903d737c5261fe8a5a61fb5cc727e4d12df872e"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:04b02799a5cea19d",
+      "paths": [
+        "apps/web/components/brand/thinking-acts.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "forced-colors",
+        "loading"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "f2af27ebf185e1668fac100f07f75c2adbae6e561ad9b8546fa7cbd74ef2bc55",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "f2af27ebf185e1668fac100f07f75c2adbae6e561ad9b8546fa7cbd74ef2bc55"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -90798,130 +91068,6 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:79c05ce8a73a515f",
-      "paths": [
-        "apps/web/components/marketing/dividers.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "forced-colors",
-        "keyboard-focus",
-        "pressed",
-        "success"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
-      "currentAssetHashes": [
-        "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
       "id": "surface:07ded9aac6a08c12",
       "paths": [
         "apps/web/components/marketing/Doodle.tsx"
@@ -91008,610 +91154,6 @@
       ],
       "currentAssetHashes": [
         "fbe41be5043bccf1e11e61ab7f8b080a8a4366436d5f283df41e3a2da9f411a2"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:1285fffa9450e181",
-      "paths": [
-        "apps/web/components/marketing/ds/Avatar.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "forced-colors"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
-      "currentAssetHashes": [
-        "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:720cf45d78f93c9b",
-      "paths": [
-        "apps/web/components/marketing/ds/Badge.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "forced-colors",
-        "success"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
-      "currentAssetHashes": [
-        "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:a812eed0dd3744c6",
-      "paths": [
-        "apps/web/components/marketing/ds/Button.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "disabled",
-        "forced-colors",
-        "keyboard-focus",
-        "pressed"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "55286890ca77e2239bebc3822a728a3752a7846b576155644a6ef3ec6e8d91bf",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
-      "currentAssetHashes": [
-        "55286890ca77e2239bebc3822a728a3752a7846b576155644a6ef3ec6e8d91bf"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:957ae839cb84da87",
-      "paths": [
-        "apps/web/components/marketing/ds/Card.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "forced-colors",
-        "keyboard-focus",
-        "pressed"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "569dac9985fa34201f6e3ccb5f0b64fe8d0ca6b0268498e898abefd34d565137",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "569dac9985fa34201f6e3ccb5f0b64fe8d0ca6b0268498e898abefd34d565137"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:f900cfb882411649",
-      "paths": [
-        "apps/web/components/marketing/ds/Squiggle.tsx"
-      ],
-      "type": "component-family",
-      "reachability": "authenticated",
-      "audiences": [
-        "family"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "web-product"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "forced-colors"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [
-        "Safari",
-        "Chromium",
-        "Firefox"
-      ],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "web-product"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
-      "currentAssetHashes": [
-        "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -93321,6 +92863,734 @@
       ],
       "currentAssetHashes": [
         "f251d0de7d494d8459165838544830bcb26850acd70bf6df63273ae3e662e5a9"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:79c05ce8a73a515f",
+      "paths": [
+        "apps/web/components/marketing/dividers.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "forced-colors",
+        "keyboard-focus",
+        "pressed",
+        "success"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-shape-language",
+        "legacy-token-namespace"
+      ],
+      "currentAssetHashes": [
+        "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:1285fffa9450e181",
+      "paths": [
+        "apps/web/components/marketing/ds/Avatar.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "forced-colors"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "currentAssetHashes": [
+        "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:720cf45d78f93c9b",
+      "paths": [
+        "apps/web/components/marketing/ds/Badge.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "forced-colors",
+        "success"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "currentAssetHashes": [
+        "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:a812eed0dd3744c6",
+      "paths": [
+        "apps/web/components/marketing/ds/Button.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "disabled",
+        "forced-colors",
+        "keyboard-focus",
+        "pressed"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "55286890ca77e2239bebc3822a728a3752a7846b576155644a6ef3ec6e8d91bf",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-token-namespace"
+      ],
+      "currentAssetHashes": [
+        "55286890ca77e2239bebc3822a728a3752a7846b576155644a6ef3ec6e8d91bf"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:957ae839cb84da87",
+      "paths": [
+        "apps/web/components/marketing/ds/Card.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "forced-colors",
+        "keyboard-focus",
+        "pressed"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "569dac9985fa34201f6e3ccb5f0b64fe8d0ca6b0268498e898abefd34d565137",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "569dac9985fa34201f6e3ccb5f0b64fe8d0ca6b0268498e898abefd34d565137"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:f900cfb882411649",
+      "paths": [
+        "apps/web/components/marketing/ds/Squiggle.tsx"
+      ],
+      "type": "component-family",
+      "reachability": "authenticated",
+      "audiences": [
+        "family"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "web-product"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "forced-colors"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [
+        "Safari",
+        "Chromium",
+        "Firefox"
+      ],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "web-product"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "currentAssetHashes": [
+        "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -108996,6 +109266,118 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:2c8dd3f8f70feab9",
+      "paths": [
+        "apps/web/public/images/benchmark-logos/Seal_of_the_United_States_Department_of_Education.svg"
+      ],
+      "type": "asset",
+      "reachability": "public",
+      "audiences": [
+        "family",
+        "public",
+        "provider"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#689",
+      "upstreamDomainOwners": [
+        "asset-derived"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "239485566d29613985495b663371a4c9cd58ef16ef5404fe1e2c3cdcadda796d",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "asset-derived"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "239485566d29613985495b663371a4c9cd58ef16ef5404fe1e2c3cdcadda796d"
+      ],
+      "disposition": "regenerate-derived",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "revocable-public",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:1eaf9d41cf571383",
       "paths": [
         "apps/web/public/images/benchmark-logos/common-core-state-standards-initiative-logo-png_seeklogo-251109.png"
@@ -109410,118 +109792,6 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "16dc7307f0cc49d0b6ec3f9eedb4dd3dee10dd7c6f7a802b522bd3122a114816"
-      ],
-      "disposition": "regenerate-derived",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "revocable-public",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:2c8dd3f8f70feab9",
-      "paths": [
-        "apps/web/public/images/benchmark-logos/Seal_of_the_United_States_Department_of_Education.svg"
-      ],
-      "type": "asset",
-      "reachability": "public",
-      "audiences": [
-        "family",
-        "public",
-        "provider"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#689",
-      "upstreamDomainOwners": [
-        "asset-derived"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "239485566d29613985495b663371a4c9cd58ef16ef5404fe1e2c3cdcadda796d",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "asset-derived"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "239485566d29613985495b663371a4c9cd58ef16ef5404fe1e2c3cdcadda796d"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -110286,98 +110556,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:40f60e1037245d7b",
+      "id": "surface:b9f71b6f7dd58874",
       "paths": [
-        "BUILD.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer",
-        "operator"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "error",
-        "permission",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "ab363a59f94e546befef59eca4f760f5da72e1f0d7180db5cb9c679468a0d74b",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
-      "currentAssetHashes": [
-        "ab363a59f94e546befef59eca4f760f5da72e1f0d7180db5cb9c679468a0d74b"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:3dc5dd454e080eb8",
-      "paths": [
-        "DESIGN.md"
+        "docs/homa-design/SKILL.md"
       ],
       "type": "authoring-rule",
       "reachability": "authenticated",
@@ -110396,10 +110577,11 @@
       "requiredStates": [
         "default",
         "disabled",
+        "empty",
         "error",
         "interrupted",
         "loading",
-        "success"
+        "offline"
       ],
       "viewports": [],
       "devices": [],
@@ -110407,7 +110589,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "465289142b03a071b523764ab4989ebaec55dbcfc7298e7afd1b656b166b452d",
+        "fixtureChecksum": "fffedcdf210a82f25d568a1ab88b9139f5dd4053d1e9adfbe277575f65dcc0ec",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -110431,11 +110613,10 @@
         ]
       },
       "legacySignatures": [
-        "legacy-coral-action",
-        "legacy-token-namespace"
+        "legacy-coral-action"
       ],
       "currentAssetHashes": [
-        "465289142b03a071b523764ab4989ebaec55dbcfc7298e7afd1b656b166b452d"
+        "fffedcdf210a82f25d568a1ab88b9139f5dd4053d1e9adfbe277575f65dcc0ec"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -110524,98 +110705,6 @@
       ],
       "currentAssetHashes": [
         "c9a0d50284d05ee599f18f3e6ea95eb7274fd1c9115bd11828bcb48cfbbecf9f"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:b9f71b6f7dd58874",
-      "paths": [
-        "docs/homa-design/SKILL.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer",
-        "operator"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#717",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "disabled",
-        "empty",
-        "error",
-        "interrupted",
-        "loading",
-        "offline"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "fffedcdf210a82f25d568a1ab88b9139f5dd4053d1e9adfbe277575f65dcc0ec",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-coral-action"
-      ],
-      "currentAssetHashes": [
-        "fffedcdf210a82f25d568a1ab88b9139f5dd4053d1e9adfbe277575f65dcc0ec"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -113004,6 +113093,120 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:4b1c9345bab22eff",
+      "paths": [
+        "marketing/assets/socials-starter-pack/README.md"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "success"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "revocable-public",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:b25bd7457e3d3d6f",
       "paths": [
         "marketing/assets/socials-starter-pack/banners/linkedin/homa-linkedin-banner-cream-4200x700.png"
@@ -114330,120 +114533,6 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "0c6c7ea27b5c410b30cd45a293a1387b3cf13f2c625aaa7165f7637f4a976392"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "revocable-public",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:4b1c9345bab22eff",
-      "paths": [
-        "marketing/assets/socials-starter-pack/README.md"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "success"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "d2f961367e04c985d050de8c5a31520ef29cbd5e4d5c9932f35ea6724ff13bb0"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -116978,6 +117067,120 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:887b70ed63570de0",
+      "paths": [
+        "marketing/evals/fixtures/README.md"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "success"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "8d226f8a7432bf5801778f66b079de8c66166877a39a1b2caa17b8b345d0fcaf",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "8d226f8a7432bf5801778f66b079de8c66166877a39a1b2caa17b8b345d0fcaf"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:49a97b92ed8abf01",
       "paths": [
         "marketing/evals/fixtures/failing-bundle/article.mdx"
@@ -117622,120 +117825,6 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "472aca2bc0fb577f910b0fb5544f41812767d6e11baf50199c7fc924f24cfed3"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:887b70ed63570de0",
-      "paths": [
-        "marketing/evals/fixtures/README.md"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "success"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "8d226f8a7432bf5801778f66b079de8c66166877a39a1b2caa17b8b345d0fcaf",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "8d226f8a7432bf5801778f66b079de8c66166877a39a1b2caa17b8b345d0fcaf"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -120042,6 +120131,122 @@
       "rolloutState": "inventory"
     },
     {
+      "id": "surface:fee90e6d62ace4b7",
+      "paths": [
+        "marketing/routines/SPEC.md"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "requiredStates": [
+        "default",
+        "disabled",
+        "error",
+        "success"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "3b79306de7795614b98aaf4621c8023620b53ec941245601440f09f06a25839a",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "3b79306de7795614b98aaf4621c8023620b53ec941245601440f09f06a25839a"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:not-yet-cutover",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
       "id": "surface:b1472dd54b061b55",
       "paths": [
         "marketing/routines/nightly-content.md"
@@ -120239,122 +120444,6 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "c8e35e68765deade1df8ea492da00384746b4a963357fdf3d4e1abeff68c7e23"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:fee90e6d62ace4b7",
-      "paths": [
-        "marketing/routines/SPEC.md"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "disabled",
-        "error",
-        "success"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "3b79306de7795614b98aaf4621c8023620b53ec941245601440f09f06a25839a",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "3b79306de7795614b98aaf4621c8023620b53ec941245601440f09f06a25839a"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126685,95 +126774,6 @@
       "productionReadback": null,
       "deletionCommit": null,
       "deliveryState": "revocable-public",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:b335630551682c19",
-      "paths": [
-        "README.md"
-      ],
-      "type": "authoring-rule",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer",
-        "operator"
-      ],
-      "criticality": "utility",
-      "ownerIssue": "gh#683",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "requiredStates": [
-        "default",
-        "empty",
-        "error",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "ad7100af1c3fe54958aeb2529e4b5ffa1733a4ba4fe093b42c9775fd177b86f9",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
-      "currentAssetHashes": [
-        "ad7100af1c3fe54958aeb2529e4b5ffa1733a4ba4fe093b42c9775fd177b86f9"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:not-yet-cutover",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
       "rolloutState": "inventory"
     },
     {

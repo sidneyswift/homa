@@ -19,6 +19,7 @@ const OUTPUT = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
 const LEGACY_OUTPUT = resolve(ROOT, "docs/homa-design/evidence/legacy-baseline.json");
 const CHECK = process.argv.includes("--check");
 const sha256 = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
+const stableCompare = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
 const git = (...args: string[]) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
 const trackedFiles = git("ls-files").split("\n").filter(Boolean).sort();
 const existing = existsSync(OUTPUT)
@@ -227,7 +228,7 @@ const providerRecords: BrandSurfaceRecord[] = externalSurfaces.map(([key, type, 
   deliveryState: delivery as BrandDeliveryState, rolloutState: "inventory",
 }));
 
-const surfaces = [...candidates.map(recordFor), ...providerRecords].sort((a, b) => a.paths[0]!.localeCompare(b.paths[0]!));
+const surfaces = [...candidates.map(recordFor), ...providerRecords].sort((a, b) => stableCompare(a.paths[0]!, b.paths[0]!));
 const ownedInputFingerprint = sha256(surfaces.map((surface) => `${surface.paths.join("|")}:${surface.currentAssetHashes.join("|")}`).join("\n"));
 const baselineSourceCommit = existing?.baselineSourceCommit ?? git("rev-parse", "HEAD");
 const baselineSourceCommitTimestamp = existing?.baselineSourceCommitTimestamp ?? git("show", "-s", "--format=%cI", baselineSourceCommit);
@@ -271,12 +272,15 @@ const legacyByHash = new Map<string, (typeof legacyRecords)[number]>();
 for (const record of legacyRecords) {
   legacyByHash.set(`${record.path}:${record.sourceHash}`, record);
 }
+const legacyBaselineRecords = previousLegacy
+  ? previousLegacy.records
+  : [...legacyByHash.values()].sort((a, b) => stableCompare(`${a.path}:${a.sourceHash}`, `${b.path}:${b.sourceHash}`));
 const legacyBaseline = {
   schemaVersion: BRAND_MANIFEST_SCHEMA_VERSION,
   designEra: "warm-playful-baseline",
   sourceCommit: baselineSourceCommit,
   ownedInputFingerprint: previousLegacy?.ownedInputFingerprint ?? ownedInputFingerprint,
-  records: [...legacyByHash.values()].sort((a, b) => `${a.path}:${a.sourceHash}`.localeCompare(`${b.path}:${b.sourceHash}`)),
+  records: legacyBaselineRecords,
 };
 
 const serialized = `${JSON.stringify(manifest, null, 2)}\n`;
