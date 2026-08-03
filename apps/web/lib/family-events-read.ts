@@ -1,5 +1,6 @@
 import {
   EVENT_COLUMNS,
+  getFamilyEventChildIdsCaller,
   toFamilyEventRow,
   type FamilyEventRow,
   type RawFamilyEventRow,
@@ -31,5 +32,14 @@ export async function getFamilyEventsForFamily(
     .or(`ends_on.gte.${fromDate},recurrence_rule.not.is.null`)
     .order("starts_on", { ascending: true });
   if (error) throw new Error(`family_events read failed: ${error.message}`);
-  return (data ?? []).map((row) => toFamilyEventRow(row as RawFamilyEventRow));
+  const rows = (data ?? []) as RawFamilyEventRow[];
+  const childIdsByEvent = await getFamilyEventChildIdsCaller(
+    supabase,
+    familyId,
+    rows.map((row) => row.id),
+  );
+  return rows.map((row) => toFamilyEventRow({
+    ...row,
+    child_ids: childIdsByEvent.get(row.id) ?? [],
+  }));
 }

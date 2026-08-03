@@ -2,7 +2,17 @@ import { randomUUID } from "node:crypto";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import {
+  addDaysToDateOnly,
+  daysBetweenDateOnly,
+} from "./family-events-model";
 import { mapDb, type DbJson } from "./map/db";
+
+export {
+  addDaysToDateOnly,
+  expandRecurringFamilyEvents,
+  familyEventChildIds,
+} from "./family-events-model";
 
 /**
  * family_events (issue #176, CG-03): Homa's own calendar for appointments,
@@ -29,6 +39,7 @@ import { mapDb, type DbJson } from "./map/db";
 
 export const MAX_FAMILY_EVENT_TITLE = 200;
 export const MAX_FAMILY_EVENT_NOTE = 500;
+export const MAX_FAMILY_EVENT_CHILDREN = 100;
 
 export const WRONG_CHILD_NOTE_FOR_EVENTS =
   "That child id is not in this family. Use a child id from the family context block, or leave it off for a whole-family event.";
@@ -44,7 +55,11 @@ export interface FamilyEventRecurrence {
 export interface FamilyEventRow {
   id: string;
   familyId: string;
+  /** Compatibility marker for older one-child clients. New surfaces use
+   * childIds, which can contain several children. */
   childId: string | null;
+  /** Empty means the whole family. */
+  childIds?: string[];
   title: string;
   /** YYYY-MM-DD. */
   startsOn: string;
@@ -55,6 +70,11 @@ export interface FamilyEventRow {
   endTime: string | null;
   note: string | null;
   recurrence?: FamilyEventRecurrence | null;
+  /** Present on an expanded recurring occurrence so editing can retain the
+   * canonical series start instead of moving the series to this occurrence. */
+  seriesStartsOn?: string;
+  seriesEndsOn?: string;
+  occurrenceKey?: string;
   createdAt: string;
 }
 
@@ -71,6 +91,9 @@ export interface FamilyEventInput {
   endTime?: string | null;
   /** Omit for a whole-family event. */
   childId?: string | null;
+  /** Several children explicitly included in this event. Empty means the
+   * whole family. Wins over childId when supplied. */
+  childIds?: string[];
   note?: string | null;
   recurrence?: FamilyEventRecurrence | null;
 }
@@ -91,6 +114,11 @@ export type ParseFamilyEventResult =
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export function normalizedFamilyEventInputChildIds(input: Pick<FamilyEventInput, "childId" | "childIds">): string[] {
+  const requested = input.childIds ?? (input.childId ? [input.childId] : []);
+  return [...new Set(requested)].sort();
+}
 
 export function parseFamilyEventRecurrence(
   value: FamilyEventRecurrence | null | undefined,
@@ -118,21 +146,6 @@ export function parseFamilyEventRecurrence(
     ok: true,
     value: { ...value, weekdays: [...value.weekdays].sort((left, right) => left - right) },
   };
-}
-
-/** Date-only day arithmetic in UTC, so a YYYY-MM-DD can never shift a
- * day through a local-timezone parse. */
-export function addDaysToDateOnly(dateOnly: string, days: number): string {
-  const [year, month, day] = dateOnly.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
-}
-
-function daysBetweenDateOnly(from: string, to: string): number {
-  const [fy, fm, fd] = from.split("-").map(Number);
-  const [ty, tm, td] = to.split("-").map(Number);
-  return Math.round(
-    (Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / (24 * 60 * 60 * 1000),
-  );
 }
 
 /** The widest window one list_family_events call may cover. */
@@ -243,14 +256,18 @@ export interface RawFamilyEventRow {
   end_time: string | null;
   note: string | null;
   recurrence_rule: unknown;
+  child_ids?: string[] | null;
   created_at: string;
 }
 
 export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
+  const linkedChildIds = row.child_ids
+    ?? [];
   return {
     id: row.id,
     familyId: row.family_id,
     childId: row.child_id,
+    childIds: [...new Set(linkedChildIds)].sort(),
     title: row.title,
     startsOn: row.starts_on,
     endsOn: row.ends_on,
@@ -268,6 +285,33 @@ export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
 export const EVENT_COLUMNS =
   "id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, recurrence_rule, created_at";
 
+/** Reads child links explicitly instead of relying on a PostgREST embedded
+ * relationship. This keeps the RLS boundary obvious and avoids schema-cache
+ * lag immediately after the additive relationship migration lands. */
+export async function getFamilyEventChildIdsCaller(
+  db: SupabaseClient,
+  familyId: string,
+  eventIds: readonly string[],
+): Promise<Map<string, string[]>> {
+  const childIdsByEvent = new Map<string, string[]>(
+    eventIds.map((eventId) => [eventId, []]),
+  );
+  if (eventIds.length === 0) return childIdsByEvent;
+  const { data, error } = await db
+    .from("family_event_children")
+    .select("event_id, child_id")
+    .eq("family_id", familyId)
+    .in("event_id", [...eventIds]);
+  if (error) throw new Error(`family event child audience read failed: ${error.message}`);
+  for (const row of data ?? []) {
+    const eventId = row.event_id as string;
+    const childId = row.child_id as string;
+    childIdsByEvent.get(eventId)?.push(childId);
+  }
+  for (const childIds of childIdsByEvent.values()) childIds.sort();
+  return childIdsByEvent;
+}
+
 export async function getFamilyEventCaller(
   db: SupabaseClient,
   familyId: string,
@@ -280,7 +324,11 @@ export async function getFamilyEventCaller(
     .eq("family_id", familyId)
     .maybeSingle();
   if (error || !data) return null;
-  return toFamilyEventRow(data as unknown as RawFamilyEventRow);
+  const childIdsByEvent = await getFamilyEventChildIdsCaller(db, familyId, [eventId]);
+  return toFamilyEventRow({
+    ...(data as unknown as RawFamilyEventRow),
+    child_ids: childIdsByEvent.get(eventId) ?? [],
+  });
 }
 
 export async function getFamilyEventPinned(
@@ -289,14 +337,20 @@ export async function getFamilyEventPinned(
 ): Promise<FamilyEventRow | null> {
   const sql = mapDb();
   const rows = await sql<RawFamilyEventRow[]>`
-    select id, family_id, child_id, title,
+    select event.id, event.family_id, event.child_id, event.title,
            to_char(starts_on, 'YYYY-MM-DD') as starts_on,
            to_char(ends_on, 'YYYY-MM-DD') as ends_on,
            to_char(start_time, 'HH24:MI') as start_time,
            to_char(end_time, 'HH24:MI') as end_time,
-           note, recurrence_rule, created_at::text as created_at
-    from public.family_events
-    where id = ${eventId} and family_id = ${familyId}
+           note, recurrence_rule, created_at::text as created_at,
+           array(
+             select link.child_id::text
+             from public.family_event_children link
+             where link.event_id = event.id and link.family_id = event.family_id
+             order by link.child_id
+           ) as child_ids
+    from public.family_events event
+    where event.id = ${eventId} and event.family_id = ${familyId}
   `;
   return rows[0] ? toFamilyEventRow(rows[0]) : null;
 }
@@ -315,17 +369,23 @@ export async function listFamilyEventsPinned(
 ): Promise<FamilyEventRow[]> {
   const sql = mapDb();
   const rows = await sql<RawFamilyEventRow[]>`
-    select id, family_id, child_id, title,
+    select event.id, event.family_id, event.child_id, event.title,
            to_char(starts_on, 'YYYY-MM-DD') as starts_on,
            to_char(ends_on, 'YYYY-MM-DD') as ends_on,
            to_char(start_time, 'HH24:MI') as start_time,
            to_char(end_time, 'HH24:MI') as end_time,
-           note, recurrence_rule, created_at::text as created_at
-    from public.family_events
-    where family_id = ${familyId}
-      and starts_on <= ${toDate}
-      and (ends_on >= ${fromDate} or recurrence_rule is not null)
-    order by starts_on asc
+           note, recurrence_rule, created_at::text as created_at,
+           array(
+             select link.child_id::text
+             from public.family_event_children link
+             where link.event_id = event.id and link.family_id = event.family_id
+             order by link.child_id
+           ) as child_ids
+    from public.family_events event
+    where event.family_id = ${familyId}
+      and event.starts_on <= ${toDate}
+      and (event.ends_on >= ${fromDate} or event.recurrence_rule is not null)
+    order by event.starts_on asc
   `;
   return rows.map(toFamilyEventRow);
 }

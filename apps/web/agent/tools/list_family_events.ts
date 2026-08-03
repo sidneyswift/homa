@@ -7,6 +7,7 @@ import {
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { getChildrenPinned } from "../../lib/agent-pinned";
 import {
+  familyEventChildIds,
   listFamilyEventsPinned,
   MAX_EVENT_WINDOW_DAYS,
   resolveEventWindow,
@@ -98,22 +99,27 @@ export default defineBoundedTool({
       window.clamped ? ` (clamped to ${MAX_EVENT_WINDOW_DAYS} days)` : ""
     }.`;
     return {
-      events: events.map((event) => ({
-        id: event.id,
-        title: event.title,
-        childId: event.childId,
-        childName: event.childId ? (nameById.get(event.childId) ?? null) : null,
-        startsOn: event.startsOn,
-        endsOn: event.endsOn,
-        startTime: event.startTime,
-        endTime: event.endTime,
-        note: event.note,
-        recurrence: event.recurrence,
-      })),
+      events: events.map((event) => {
+        const childIds = familyEventChildIds(event);
+        return {
+          id: event.id,
+          title: event.title,
+          childId: event.childId,
+          childName: event.childId ? (nameById.get(event.childId) ?? null) : null,
+          childIds,
+          childNames: childIds.map((childId) => nameById.get(childId) ?? "Child"),
+          startsOn: event.startsOn,
+          endsOn: event.endsOn,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          note: event.note,
+          recurrence: event.recurrence,
+        };
+      }),
       note:
         events.length === 0
           ? `Nothing on the calendar in that window. ${windowNote}`
-          : `${windowNote} A null childId means a whole-family event.`,
+          : `${windowNote} childIds is the full audience; an empty list means a whole-family event. childId remains the one-child compatibility marker.`,
     };
   },
 });

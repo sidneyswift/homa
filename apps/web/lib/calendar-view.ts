@@ -2,6 +2,10 @@ import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import type { HoursLogRow } from "./hours";
 import type { FamilyEventRow } from "./family-events";
+import {
+  expandRecurringFamilyEvents,
+  familyEventChildIds,
+} from "./family-events-model";
 import type { PlanActivityScheduleRow } from "./plan-schedule";
 import type { DashboardPlan } from "./plan-week";
 import { zonedDateParts } from "./time-zone";
@@ -321,8 +325,8 @@ export interface CalendarKidLane {
 export interface CalendarBoard {
   days: CalendarDayCell[];
   kidLanes: CalendarKidLane[];
-  /** Whole-family events only (child_id null); no per-kid activities or
-   * hours belong here, those live on each kid's own lane. */
+  /** Whole-family events only (no explicit child links); no per-kid
+   * activities or hours belong here, those live on each kid's own lane. */
   familyDays: { date: string; events: CalendarEventItem[] }[];
 }
 
@@ -423,7 +427,8 @@ export function buildCalendarBoard(input: BuildCalendarBoardInput): CalendarBoar
   const familyDays = dayDates.map((date) => ({ date, events: [] as CalendarEventItem[] }));
   const familyDaysByDate = new Map(familyDays.map((entry) => [entry.date, entry]));
 
-  for (const event of input.familyEvents) {
+  for (const event of expandRecurringFamilyEvents(input.familyEvents, firstDate, lastDate)) {
+    const eventChildIds = familyEventChildIds(event);
     const item: CalendarEventItem = {
       id: event.id,
       title: event.title,
@@ -434,10 +439,12 @@ export function buildCalendarBoard(input: BuildCalendarBoardInput): CalendarBoar
     };
     for (const date of dayDates) {
       if (date < event.startsOn || date > event.endsOn) continue;
-      if (event.childId === null) {
+      if (eventChildIds.length === 0) {
         familyDaysByDate.get(date)?.events.push(item);
       } else {
-        kidLanes.get(event.childId)?.days.find((day) => day.date === date)?.events.push(item);
+        for (const childId of eventChildIds) {
+          kidLanes.get(childId)?.days.find((day) => day.date === date)?.events.push(item);
+        }
       }
     }
   }

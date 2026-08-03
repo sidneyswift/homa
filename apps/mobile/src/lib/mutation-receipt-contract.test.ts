@@ -18,6 +18,9 @@ const scheduleActivitySheet = source("../features/planner/schedule-activity-shee
 const entryEditor = source("../features/hours/entry-editor.tsx");
 const activityRow = source("../features/planner/activity-row.tsx");
 const inlineError = source("../components/ui/inline-error.tsx");
+const familyEventChildrenMigration = source(
+  "../../../../supabase/migrations/20260802232000_family_event_children.sql",
+);
 
 describe("native durable mutation contract", () => {
   it("requires exact provider receipts before returning success", () => {
@@ -51,9 +54,10 @@ describe("native durable mutation contract", () => {
   });
 
   it("makes event creation idempotent across an ambiguous retry", () => {
-    assert.match(familyEvents, /\.upsert\(/u);
-    assert.match(familyEvents, /onConflict: "id"/u);
-    assert.match(familyEvents, /id: eventId/u);
+    assert.match(familyEvents, /\.rpc\("save_family_event_with_children"/u);
+    assert.match(familyEvents, /p_mode: "create"/u);
+    assert.match(familyEvents, /p_event_id: eventId/u);
+    assert.match(familyEventChildrenMigration, /on conflict \(id\) do update/u);
     assert.match(plannerRoute, /creatingEventId/u);
     assert.match(
       plannerRoute,
@@ -80,7 +84,7 @@ describe("native durable mutation contract", () => {
     );
     assert.match(
       eventComposer,
-      /accessibilityState=\{\{ checked: active, disabled: busy \}\}[\s\S]*?disabled=\{busy\}/u,
+      /accessibilityState=\{\{ selected: active, disabled: busy \}\}[\s\S]*?disabled=\{busy\}/u,
     );
     assert.match(eventComposer, /<DateStepper[\s\S]*?disabled=\{busy\}/u);
     assert.match(eventComposer, /<TimeStepper[\s\S]*?disabled=\{busy\}/u);
@@ -89,6 +93,17 @@ describe("native durable mutation contract", () => {
       scheduleActivitySheet.match(/disabled=\{saving\}/gu)?.length,
       3,
     );
+  });
+
+  it("keeps audience and repeat defaults visible while hiding multi-day duration", () => {
+    assert.match(eventComposer, /Who and repeat/u);
+    assert.match(eventComposer, /\{audienceSummary\} · \{repeatSummary\}/u);
+    assert.match(eventComposer, /Whole family/u);
+    assert.match(eventComposer, /Does not repeat/u);
+    assert.match(eventComposer, /Lasts more than one day/u);
+    assert.match(eventComposer, /\{spansDays \? \([\s\S]*?Last day/u);
+    assert.match(eventComposer, /Add a time/u);
+    assert.doesNotMatch(eventComposer, /first day only/u);
   });
 
   it("propagates rejected receipts through Planner, Hours, and Voice", () => {

@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { getAppData } from "../../../lib/app-data";
 import { getFamilyEventsForFamily } from "../../../lib/family-events-read";
-import { getHoursLogForFamily } from "../../../lib/hours";
+import {
+  getHoursLogForFamily,
+  getHoursLogForFamilyBetween,
+} from "../../../lib/hours";
 import { scopedToViewContext, toHoursEntries } from "../../../lib/hours-view";
 import { emitMapEvent } from "../../../lib/map/events";
 import { getScheduledActivitiesForFamily } from "../../../lib/plan-schedule-read";
@@ -60,9 +63,8 @@ export default async function PlannerPage({
     ? monthGridRangeForDate(activeDate, today)
     : weekRangeForDate(activeDate);
 
-  // Calendar reads stay bounded to the visible view. Hours is the only
-  // view that needs the full compliance record, so Day does not pay for
-  // a 3,000-row hours query merely because Hours lives one tab away.
+  // Calendar and day-hours reads stay bounded to the visible range. Hours
+  // alone loads the full compliance record.
   const [familyEvents, scheduledActivities, hoursRows] = await Promise.all([
     view === "hours"
       ? Promise.resolve([])
@@ -84,12 +86,22 @@ export default async function PlannerPage({
             return [];
           },
         ),
-    view === "hours" ? getHoursLogForFamily(family.id) : Promise.resolve([]),
+    view === "hours"
+      ? getHoursLogForFamily(family.id)
+      : getHoursLogForFamilyBetween(family.id, range.start, range.end).catch(
+          (error: unknown) => {
+            console.error(
+              "planner: bounded hours_log read failed:",
+              error instanceof Error ? error.message : "unknown",
+            );
+            return [];
+          },
+        ),
   ]);
-  const hoursEntries = scopedToViewContext(
-    toHoursEntries(hoursRows, children),
-    viewContext,
-  );
+  const allHoursEntries = toHoursEntries(hoursRows, children);
+  const hoursEntries = view === "hours"
+    ? scopedToViewContext(allHoursEntries, viewContext)
+    : allHoursEntries;
 
   await emitMapEvent("planner.viewed", {
     family_id: family.id,

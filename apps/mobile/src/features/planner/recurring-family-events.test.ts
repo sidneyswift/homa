@@ -31,6 +31,13 @@ describe("recurring family events", () => {
       "2026-08-25",
     ]);
     assert.ok(rows.every((row) => row.id === event().id));
+    assert.ok(rows.every((row) => row.series_starts_on === "2026-08-04"));
+    assert.deepEqual(rows.map((row) => row.occurrence_key), [
+      "11111111-1111-4111-8111-111111111111:2026-08-04",
+      "11111111-1111-4111-8111-111111111111:2026-08-11",
+      "11111111-1111-4111-8111-111111111111:2026-08-18",
+      "11111111-1111-4111-8111-111111111111:2026-08-25",
+    ]);
   });
 
   it("honors interval, weekday, and until without fabricating later dates", () => {
@@ -40,5 +47,14 @@ describe("recurring family events", () => {
       }),
     ], "2026-08-01", "2026-08-31");
     assert.deepEqual(rows.map((row) => row.starts_on), ["2026-08-04", "2026-08-06", "2026-08-18", "2026-08-20"]);
+  });
+
+  it("includes an occurrence that starts before the window and still spans into it", () => {
+    const rows = expandRecurringFamilyEvents([
+      event({ starts_on: "2026-08-04", ends_on: "2026-08-06" }),
+    ], "2026-08-05", "2026-08-05");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?.starts_on, "2026-08-04");
+    assert.equal(rows[0]?.ends_on, "2026-08-06");
   });
 });

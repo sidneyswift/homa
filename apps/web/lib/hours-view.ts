@@ -41,6 +41,20 @@ export const SOURCE_LABELS: Record<HoursSource, string> = {
   call: "Phone call",
 };
 
+const HOURS_SUBJECT_TONES: ReadonlyArray<readonly [string, string]> = [
+  ["var(--clay-50)", "var(--clay-700)"],
+  ["var(--sage-50)", "var(--sage-700)"],
+  ["var(--gold-100)", "var(--gold-ink)"],
+  ["var(--sky-100)", "var(--sky-600)"],
+];
+
+/** One stable, design-system tone per hours subject. Shared by the compact
+ * Day summary and the editable Hours record. */
+export function hoursSubjectTone(subject: HoursSubject): readonly [string, string] {
+  const index = Math.max(0, HOURS_SUBJECTS.indexOf(subject));
+  return HOURS_SUBJECT_TONES[index % HOURS_SUBJECT_TONES.length];
+}
+
 export interface HoursEntry {
   id: string;
   childId: string | null;

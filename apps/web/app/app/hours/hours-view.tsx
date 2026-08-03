@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react";
 
-import { HOURS_SUBJECTS, type HoursSubject } from "../../../lib/hours-model";
 import {
   computeChildTotals,
   formatMinutesAsHours,
   filterEntries,
   groupEntriesByDay,
+  hoursSubjectTone,
   SUBJECT_LABELS,
   subjectOptions,
   type ChildHoursTotals,
@@ -31,18 +31,6 @@ const CHIP_ON =
   "min-h-9 rounded-pill border border-[var(--clay-200)] bg-brand-soft px-3.5 py-1.5 text-xs font-bold text-[var(--clay-700)]";
 const CHIP_OFF =
   "min-h-9 rounded-pill border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted transition-colors hover:border-[var(--clay-200)]";
-
-const SUBJECT_TONES: ReadonlyArray<readonly [string, string]> = [
-  ["var(--clay-50)", "var(--clay-700)"],
-  ["var(--sage-50)", "var(--sage-700)"],
-  ["var(--gold-100)", "var(--gold-ink)"],
-  ["var(--sky-100)", "var(--sky-600)"],
-];
-
-function subjectTone(subject: HoursSubject): readonly [string, string] {
-  const index = Math.max(0, HOURS_SUBJECTS.indexOf(subject));
-  return SUBJECT_TONES[index % SUBJECT_TONES.length];
-}
 
 /** A signed-in family's kid roster, the same slice PlannerKid reads, for
  * avatar tone and photo lookups by position in the FULL family list. */
@@ -100,7 +88,7 @@ function EntryRow({
   showChild: boolean;
   onEdit: () => void;
 }) {
-  const [bg, ink] = subjectTone(entry.subject);
+  const [bg, ink] = hoursSubjectTone(entry.subject);
   return (
     <li className="flex flex-wrap items-center gap-2.5 rounded-md border border-border-subtle bg-card px-3.5 py-2.5 shadow-sm">
       <span

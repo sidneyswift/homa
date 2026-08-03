@@ -23,12 +23,12 @@ function formatTime(time: string | null): string | null {
 export function EventCard({
   event,
   childIndex,
-  ownerLabel,
+  audienceLabel,
   onPress,
 }: {
   event: FamilyEventRecord;
   childIndex: number | null;
-  ownerLabel: string;
+  audienceLabel: string;
   onPress?: () => void;
 }) {
   const [background, textColor] =
@@ -46,7 +46,7 @@ export function EventCard({
           {event.title}
         </Text>
         <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: textColor }}>
-          {ownerLabel} · {timeLabel}
+          {timeLabel} · {audienceLabel}
         </Text>
       </View>
     </>
@@ -64,7 +64,7 @@ export function EventCard({
 
   if (!onPress) {
     return (
-      <View accessible accessibilityLabel={`${event.title}. ${ownerLabel}. ${timeLabel}`} style={style}>
+      <View accessible accessibilityLabel={`${event.title}. ${audienceLabel}. ${timeLabel}`} style={style}>
         {content}
       </View>
     );
@@ -73,7 +73,7 @@ export function EventCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Edit ${event.title}. ${ownerLabel}. ${timeLabel}`}
+      accessibilityLabel={`Edit ${event.title}. ${audienceLabel}. ${timeLabel}`}
       onPress={onPress}
       style={style}
     >

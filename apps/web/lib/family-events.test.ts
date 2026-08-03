@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 
 import {
   applyFamilyEventPatch,
+  expandRecurringFamilyEvents,
+  familyEventChildIds,
   familyEventPatchIsEmpty,
   MAX_EVENT_WINDOW_DAYS,
   parseFamilyEventInput,
@@ -39,6 +41,49 @@ describe("family event recurrence", () => {
       ).ok,
       false,
     );
+  });
+
+  it("expands only the occurrences inside the requested window", () => {
+    const events = expandRecurringFamilyEvents(
+      [
+        {
+          id: "event-1",
+          familyId: "family-1",
+          childId: null,
+          childIds: [],
+          title: "Co-op",
+          startsOn: "2026-08-03",
+          endsOn: "2026-08-03",
+          startTime: "09:00",
+          endTime: "12:00",
+          note: null,
+          recurrence: {
+            frequency: "weekly",
+            interval: 1,
+            weekdays: [1],
+            until: "2026-08-31",
+          },
+          createdAt: "2026-08-01T00:00:00.000Z",
+        },
+      ],
+      "2026-08-10",
+      "2026-08-16",
+    );
+    assert.equal(events.length, 1);
+    assert.equal(events[0].startsOn, "2026-08-10");
+    assert.equal(events[0].seriesStartsOn, "2026-08-03");
+    assert.equal(events[0].occurrenceKey, "event-1:2026-08-10");
+  });
+});
+
+describe("family event child audience", () => {
+  it("uses all consistent links and falls back to the legacy marker", () => {
+    assert.deepEqual(
+      familyEventChildIds({ childId: "child-a", childIds: ["child-a", "child-b"] }),
+      ["child-a", "child-b"],
+    );
+    assert.deepEqual(familyEventChildIds({ childId: "child-b", childIds: ["child-a"] }), ["child-b"]);
+    assert.deepEqual(familyEventChildIds({ childId: null, childIds: ["stale-link"] }), []);
   });
 });
 
