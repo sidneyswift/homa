@@ -75,6 +75,18 @@ check:handwrytten-stationery` rejects missing source paths, stale specification
 fingerprints, unsafe provider limits, simulated read-backs, or an attempt to
 stop the retired template before both real proofs exist.
 
+`fixture-gallery.json` is the deterministic gallery index for #722. It names
+every typed atom and identity asset, Quiet primitive, pattern, interaction and quality state,
+appearance mode, channel reduction, signature composition, and required
+rendering profile with a stable ID and checksum. Its profile rows include web
+widths, native device dispositions, large text, localization expansion,
+Forced Colors, increased contrast, Reduced Motion, adaptive appearance, print,
+email, SMS, provider, and metadata constraints. Rows are intentionally marked
+`contract-only`: this manifest is a fail-closed rendering obligation, never a
+substitute for visual captures, accessibility sessions, device recordings,
+client delivery, or provider read-back. `pnpm check:design-fixtures` verifies
+the typed source, profile coverage, and byte-stable generated artifact.
+
 `pnpm check:brand-assets` runs the canonical generator in check mode. A clean
 checkout must reproduce every web, marketing, native, and distribution asset
 from `packages/design/src/contract`: text and vector assets are byte-for-byte.

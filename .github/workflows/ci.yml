@@ -400,6 +400,9 @@ jobs:
       - name: Design contract parity check (byte-stable projections)
         run: pnpm check:design-parity
 
+      - name: Design fixture gallery check (stable IDs, profiles, and checksums)
+        run: pnpm check:design-fixtures
+
       - name: Design contract type and semantic tests
         run: pnpm check:design-contract
 

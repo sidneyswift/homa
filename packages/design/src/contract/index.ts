@@ -13,3 +13,4 @@ export * from "./content.ts";
 export * from "./channels.ts";
 export * from "./doctrine.ts";
 export * from "./native.ts";
+export * from "./fixtures.ts";
