@@ -22,6 +22,7 @@ export function SidePanel({
   labelledBy,
   onClose,
   initialFocusRef,
+  variant = "legacy",
   children,
 }: {
   /** The id of the caller's own heading element, for aria-labelledby. */
@@ -32,6 +33,8 @@ export function SidePanel({
    * under the user's finger first. Omit for the dialog-level default,
    * which still moves focus into the panel. */
   initialFocusRef?: React.RefObject<HTMLElement | null>;
+  /** Library opts into Quiet authority while older sheet consumers migrate. */
+  variant?: "legacy" | "quiet";
   children: React.ReactNode;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -86,7 +89,11 @@ export function SidePanel({
       <div
         onClick={onClose}
         aria-hidden="true"
-        className="fixed inset-0 z-40 bg-[rgba(51,42,33,0.42)] transition-opacity duration-(--dur-base) ease-out starting:opacity-0 motion-reduce:transition-none print:hidden"
+        className={
+          variant === "quiet"
+            ? "quiet-context-sheet__scrim print:hidden"
+            : "fixed inset-0 z-40 bg-[rgba(51,42,33,0.42)] transition-opacity duration-(--dur-base) ease-out starting:opacity-0 motion-reduce:transition-none print:hidden"
+        }
       />
       <div
         ref={dialogRef}
@@ -94,12 +101,20 @@ export function SidePanel({
         aria-modal="true"
         aria-labelledby={labelledBy}
         tabIndex={-1}
-        className="fixed inset-x-0 bottom-0 z-50 flex max-h-[78dvh] flex-col rounded-t-[var(--radius-xl)] border-t border-border-subtle bg-card shadow-[var(--shadow-xl)] transition-[translate] duration-(--dur-base) ease-out starting:translate-y-full motion-reduce:transition-none focus:outline-none lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:max-h-none lg:w-[min(440px,92vw)] lg:rounded-l-[var(--radius-xl)] lg:rounded-tr-none lg:border-l lg:border-t-0 lg:starting:translate-x-full lg:starting:translate-y-0"
+        className={
+          variant === "quiet"
+            ? "quiet-context-sheet"
+            : "fixed inset-x-0 bottom-0 z-50 flex max-h-[78dvh] flex-col rounded-t-[var(--radius-xl)] border-t border-border-subtle bg-card shadow-[var(--shadow-xl)] transition-[translate] duration-(--dur-base) ease-out starting:translate-y-full motion-reduce:transition-none focus:outline-none lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:max-h-none lg:w-[min(440px,92vw)] lg:rounded-l-[var(--radius-xl)] lg:rounded-tr-none lg:border-l lg:border-t-0 lg:starting:translate-x-full lg:starting:translate-y-0"
+        }
       >
         {/* The sheet's grabber, phones only: says "this slides away". */}
         <span
           aria-hidden="true"
-          className="mx-auto mt-2.5 block h-1.5 w-10 shrink-0 rounded-pill bg-[var(--stone-300)] lg:hidden"
+          className={
+            variant === "quiet"
+              ? "quiet-context-sheet__grabber"
+              : "mx-auto mt-2.5 block h-1.5 w-10 shrink-0 rounded-pill bg-[var(--stone-300)] lg:hidden"
+          }
         />
         {children}
       </div>

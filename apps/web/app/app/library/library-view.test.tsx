@@ -81,20 +81,27 @@ function renderLibrary(
 describe("LibraryView", () => {
   it("starts an empty Library with one clear action", () => {
     const html = renderLibrary([]);
+    assert.match(html, /data-brand-surface="library"/u);
+    assert.match(html, /quiet-frame quiet-frame--paper/u);
+    assert.match(html, /quiet-action quiet-action--primary/u);
     assert.match(html, /Add your first resource/);
-    assert.match(html, />Add a resource<\/button>/);
-    assert.doesNotMatch(html, />Add resources<\/button>/);
+    assert.match(html, /Add a resource<\/span>/u);
+    assert.doesNotMatch(html, /Add resources<\/span>/u);
   });
 
   it("renders a visual shelf without showing storage controls or privacy copy", () => {
     const html = renderLibrary(ASSETS);
-    assert.match(html, />Add resources<\/button>/);
+    assert.match(html, /Add resources<\/span>/u);
+    assert.match(html, /quiet-search/u);
+    assert.match(html, /quiet-filter/u);
+    assert.match(html, /quiet-artifact-card/u);
+    assert.match(html, /quiet-library-cover/u);
     assert.match(html, /Search title, child, or subject/);
     assert.match(html, />All 2<\/button>/);
     assert.match(html, />Worksheet 1<\/button>/);
     assert.match(html, />Book 1<\/button>/);
     assert.match(html, /aria-label="Open Math practice"/);
-    assert.match(html, /aspect-\[3\/4\]/);
+    assert.match(html, /quiet-library-cover/u);
     assert.doesNotMatch(html, />Download<\/a>/);
     assert.doesNotMatch(html, />View details/);
     assert.doesNotMatch(html, /surface=shelf/);
@@ -122,10 +129,12 @@ describe("LibraryView", () => {
 
   it("opens an exact source passed through a Library deep link", () => {
     const html = renderLibrary(ASSETS, [], true, "asset-pdf");
+    assert.match(html, /data-brand-surface="library-detail"/u);
+    assert.match(html, /quiet-context-sheet/u);
     assert.match(html, /Library resource/u);
     assert.match(html, /Close resource details/u);
     assert.match(html, /Math practice/u);
-    assert.match(html, />Download<\/a>/);
+    assert.match(html, /Download<\/span>/u);
   });
 
   it("shows every processing state on the shelf", () => {
@@ -136,9 +145,9 @@ describe("LibraryView", () => {
       { ...ASSETS[0], id: "failed", title: "Failed", status: "failed" },
     ]);
     assert.doesNotMatch(html, /<p[^>]*>Ready<\/p>/);
-    assert.match(html, />Organizing details<\/p>/);
-    assert.match(html, />Needs attention<\/p>/);
-    assert.match(html, />Could not organize<\/p>/);
+    assert.match(html, /Organizing details/u);
+    assert.match(html, /Needs attention/u);
+    assert.match(html, /Could not organize/u);
   });
 
   it("restores an interrupted upload with explicit resume and cleanup actions", () => {
@@ -173,11 +182,11 @@ describe("LibraryView", () => {
     assert.match(html, /1 unfinished upload/);
     assert.match(html, /Everything already on your shelf is still available/);
     assert.match(html, /The connection stopped before the file finished uploading/);
-    assert.match(html, />Choose same file to resume<\/button>/);
-    assert.match(html, />Restart upload<\/button>/);
-    assert.match(html, />Remove upload<\/button>/);
-    assert.match(html, />Add another resource<\/button>/);
-    assert.doesNotMatch(html, />Add resources<\/button>/);
+    assert.match(html, /Choose same file to resume<\/span>/u);
+    assert.match(html, /Restart upload<\/span>/u);
+    assert.match(html, /Remove upload<\/span>/u);
+    assert.match(html, /Add another resource<\/span>/u);
+    assert.doesNotMatch(html, /Add resources<\/span>/u);
     assert.match(html, /Neither changes the file on your device/);
     assert.doesNotMatch(html, /Choose the same file to continue/);
   });
@@ -203,7 +212,7 @@ describe("LibraryView", () => {
       },
     ]);
 
-    assert.match(html, />Try removing again<\/button>/);
+    assert.match(html, /Try removing again<\/span>/u);
     assert.match(html, /The file on your device was not changed/);
     assert.doesNotMatch(html, />Choose same file to resume<\/button>/);
     assert.doesNotMatch(html, />Restart upload<\/button>/);
@@ -235,11 +244,11 @@ describe("LibraryView", () => {
       "asset-pdf",
     );
     assert.match(html, /Your Library stays with you/);
-    assert.match(html, />Download<\/a>/);
-    assert.match(html, />Remove upload<\/button>/);
-    assert.doesNotMatch(html, />Add resources<\/button>/);
-    assert.doesNotMatch(html, />Add another resource<\/button>/);
-    assert.doesNotMatch(html, />Choose file to resume<\/button>/);
-    assert.doesNotMatch(html, />Restart upload<\/button>/);
+    assert.match(html, /Download<\/span>/u);
+    assert.match(html, /Remove upload<\/span>/u);
+    assert.doesNotMatch(html, /Add resources<\/span>/u);
+    assert.doesNotMatch(html, /Add another resource<\/span>/u);
+    assert.doesNotMatch(html, /Choose file to resume<\/span>/u);
+    assert.doesNotMatch(html, /Restart upload<\/span>/u);
   });
 });

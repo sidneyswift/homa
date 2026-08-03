@@ -5,15 +5,12 @@ import {
   createMultipartUpload,
   uploadPart,
 } from "@vercel/blob/client";
-import {
-  AlertCircle,
-  ChevronDown,
-  Search,
-  SlidersHorizontal,
-  Upload,
-} from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
+import { QuietFrame } from "../../../components/design/QuietFrame";
+import { QuietStatus } from "../../../components/design/QuietStatus";
 import { ShelfCover } from "../../../components/library/shelf-cover";
 import {
   familyAssetUploadFingerprint,
@@ -144,6 +141,15 @@ function uploadStatusMessage(upload: UploadRow): string | null {
     return `${upload.progress}% uploaded. ${upload.message ?? "Upload paused."}`;
   }
   return upload.message;
+}
+
+function uploadStatusTone(
+  state: UploadRow["state"],
+): "info" | "constructive" | "attention" | "error" {
+  if (state === "added") return "constructive";
+  if (state === "failed" || state === "remove_failed") return "error";
+  if (state === "paused") return "attention";
+  return "info";
 }
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -739,11 +745,16 @@ export function LibraryView({
   }
 
   return (
-    <div>
+    <div data-brand-surface="library" data-brand-fixture="quiet-authority-v1">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-2xl">
-          <h1 className="font-display text-3xl font-semibold text-strong">Library</h1>
-          <p className="mt-2 text-base leading-7 text-body">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--homa-brand-text)]">
+            Kept close
+          </p>
+          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-[var(--homa-ink)]">
+            Library
+          </h1>
+          <p className="mt-1.5 text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Keep your family&apos;s worksheets, books, and curriculum in one place. Homa
             saves a copy here without moving the original on your device.
           </p>
@@ -764,63 +775,57 @@ export function LibraryView({
           onChange={onResumeFilePicked}
         />
         {canUpload && assets.length > 0 && !hasRecoverableUpload ? (
-          <button
-            type="button"
+          <QuietAction
             onClick={beginAddingResources}
-            className="inline-flex min-h-11 shrink-0 self-start items-center justify-center gap-2 rounded-md bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[var(--clay-700)] sm:self-auto"
+            className="shrink-0 self-start sm:self-auto"
+            icon={<Icon name="add" size={20} />}
           >
-            <Upload size={18} aria-hidden="true" />
             Add resources
-          </button>
+          </QuietAction>
         ) : null}
       </header>
 
       {!canUpload ? (
-        <section className="mt-5 rounded-md border border-border-subtle bg-card px-4 py-4 shadow-sm">
-          <h2 className="font-semibold text-strong">Your Library stays with you</h2>
-          <p className="mt-1 text-sm leading-6 text-body">
+        <QuietFrame as="section" tone="paper" className="mt-5 p-4">
+          <h2 className="font-semibold text-[var(--homa-ink)]">Your Library stays with you</h2>
+          <p className="mt-1 text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
             Open, organize, download, or remove anything already here. Renew your
             membership when you want to add another resource.
           </p>
-          <a
-            href="/onboarding/trial"
-            className="mt-3 inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-bold text-brand hover:bg-brand-soft"
-          >
+          <QuietAction href="/onboarding/trial" kind="quiet" className="mt-3">
             See membership options
-          </a>
-        </section>
+          </QuietAction>
+        </QuietFrame>
       ) : null}
 
       {canUpload && privacyPromptOpen && (assets.length > 0 || hasRecoverableUpload) ? (
-        <section
+        <QuietFrame
+          as="section"
           aria-labelledby="library-privacy-heading"
-          className="mt-5 rounded-md border border-[var(--gold-300)] bg-[var(--warning-soft)] px-4 py-4"
+          className="mt-5 border-[var(--homa-highlight-ink)] bg-[var(--homa-highlight-tint)] px-4 py-4"
         >
-          <h2 id="library-privacy-heading" className="font-semibold text-strong">
+          <h2 id="library-privacy-heading" className="font-semibold text-[var(--homa-ink)]">
             Before you choose files
           </h2>
-          <p className="mt-1 text-sm leading-6 text-body">
+          <p className="mt-1 text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
             Each file has a public link that opens without signing in. Homa does not
             list the link, but anyone who gets it can open the file. This Library is
             for curriculum and other files without private family information.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
+            <QuietAction
               onClick={continueToFilePicker}
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
             >
               Choose files
-            </button>
-            <button
-              type="button"
+            </QuietAction>
+            <QuietAction
+              kind="secondary"
               onClick={() => setPrivacyPromptOpen(false)}
-              className="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-muted hover:bg-card hover:text-strong"
             >
               Go back
-            </button>
+            </QuietAction>
           </div>
-        </section>
+        </QuietFrame>
       ) : null}
 
       {uploads.length > 0 ? (
@@ -828,76 +833,72 @@ export function LibraryView({
           <details
             open={uploadsExpanded}
             onToggle={(event) => setUploadsExpanded(event.currentTarget.open)}
-            className="rounded-lg border border-border-subtle bg-card shadow-sm"
+            className="quiet-frame quiet-frame--paper overflow-hidden"
           >
-            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-strong marker:content-none">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-[var(--homa-ink)] marker:content-none">
               <span>
                 {uploads.length} unfinished {uploads.length === 1 ? "upload" : "uploads"}
-                <span className="ml-2 font-normal text-muted">
+                <span className="ml-2 font-normal text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
                   Everything already on your shelf is still available.
                 </span>
               </span>
-              <ChevronDown
-                size={18}
-                className={uploadsExpanded ? "rotate-180 text-muted" : "text-muted"}
-                aria-hidden="true"
+              <Icon
+                name="collapse"
+                size={20}
+                className={`${uploadsExpanded ? "rotate-180" : ""} text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]`}
               />
             </summary>
-            <div className="space-y-2 border-t border-border-subtle p-2">
+            <div className="space-y-2 border-t border-[var(--homa-control-boundary)] p-2">
               {uploads.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-md bg-page px-4 py-3"
-            >
+            <QuietFrame as="article" tone="mineral" key={item.id} className="px-4 py-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 sm:flex-1">
-                  <p className="break-words text-sm font-semibold text-strong">
+                  <p className="break-words text-sm font-semibold text-[var(--homa-ink)]">
                     {item.name}
                   </p>
-                  <p
-                    className={
-                      item.state === "failed" || item.state === "remove_failed"
-                        ? "mt-1 text-sm text-danger"
-                        : "mt-1 text-sm text-muted"
-                    }
-                  >
-                    {uploadStatusMessage(item)}
-                  </p>
+                  {uploadStatusMessage(item) ? (
+                    <QuietStatus
+                      tone={uploadStatusTone(item.state)}
+                      className="mt-2 inline-flex px-2.5 py-1 text-xs font-semibold"
+                    >
+                      {uploadStatusMessage(item)}
+                    </QuietStatus>
+                  ) : null}
                 </div>
                 <div className="grid w-full grid-cols-1 gap-1 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:justify-end">
                   {canUpload && item.state === "paused" ? (
-                    <button
-                      type="button"
+                    <QuietAction
+                      kind="quiet"
                       onClick={() => beginResumeUpload(item.id)}
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-bold text-brand hover:bg-brand-soft sm:w-auto"
+                      className="w-full px-3 text-sm sm:w-auto"
                     >
                       Choose same file to resume
-                    </button>
+                    </QuietAction>
                   ) : null}
                   {canUpload && item.state === "paused" && item.progress > 0 ? (
-                    <button
-                      type="button"
+                    <QuietAction
+                      kind="secondary"
                       onClick={() => void restartUpload(item)}
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-semibold text-muted hover:bg-page hover:text-strong sm:w-auto"
+                      className="w-full px-3 text-sm sm:w-auto"
                     >
                       Restart upload
-                    </button>
+                    </QuietAction>
                   ) : null}
                   {item.state === "paused" ||
                   item.state === "remove_failed" ||
                   item.state === "added" ||
                   item.state === "failed" ? (
-                    <button
-                      type="button"
+                    <QuietAction
+                      kind="secondary"
                       onClick={() => void dismissUpload(item)}
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-semibold text-muted hover:bg-page hover:text-strong sm:w-auto"
+                      className="w-full px-3 text-sm sm:w-auto"
                     >
                       {item.state === "paused"
                         ? "Remove upload"
                         : item.state === "remove_failed"
                           ? "Try removing again"
-                          : "Dismiss"}
-                    </button>
+                        : "Dismiss"}
+                    </QuietAction>
                   ) : null}
                 </div>
               </div>
@@ -909,27 +910,27 @@ export function LibraryView({
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={item.progress}
-                  className="mt-3 h-1.5 overflow-hidden rounded-full bg-page"
+                  className="mt-3 h-1.5 overflow-hidden rounded-[var(--homa-radius-control)] bg-[var(--homa-control-boundary)]"
                 >
                   <div
-                    className="h-full rounded-full bg-brand transition-[width] duration-(--dur-fast)"
+                    className="h-full rounded-[var(--homa-radius-control)] bg-[var(--homa-visual-coral)] transition-[width] duration-(--homa-motion-fast)"
                     style={{ width: `${item.progress}%` }}
                   />
                 </div>
               ) : null}
               {item.state === "paused" ? (
-                <p className="mt-3 text-xs leading-5 text-subtle">
+                <p className="mt-3 text-xs leading-5 text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
                   {canUpload
                     ? "Restarting clears upload progress. Removing clears this unfinished upload from Homa. Neither changes the file on your device."
                     : "Removing clears this unfinished upload from Homa. The file on your device stays."}
                 </p>
               ) : null}
               {item.state === "remove_failed" ? (
-                <p className="mt-3 text-xs leading-5 text-subtle">
+                <p className="mt-3 text-xs leading-5 text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
                   The file on your device was not changed.
                 </p>
               ) : null}
-            </div>
+            </QuietFrame>
               ))}
             </div>
           </details>
@@ -937,100 +938,91 @@ export function LibraryView({
       ) : null}
 
       {canUpload && hasRecoverableUpload ? (
-        <button
-          type="button"
+        <QuietAction
+          kind="secondary"
           onClick={beginAddingResources}
-          className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-border-subtle bg-card px-4 py-2.5 text-sm font-semibold text-strong shadow-sm hover:bg-page"
+          className="mt-4"
+          icon={<Icon name="add" size={20} />}
         >
-          <Upload size={18} aria-hidden="true" />
           Add another resource
-        </button>
+        </QuietAction>
       ) : null}
 
       {pageError ? (
-        <div className="mt-6 flex items-start gap-2 rounded-md border border-[var(--danger)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger">
-          <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+        <QuietStatus tone="error" className="mt-6 flex items-start gap-2 px-4 py-3 text-sm">
+          <Icon name="error" size={20} className="mt-0.5 shrink-0" />
           {pageError}
-        </div>
+        </QuietStatus>
       ) : null}
 
       {assets.length === 0 && !hasRecoverableUpload ? (
-        <section className="mt-8 rounded-lg border border-border-subtle bg-card px-6 py-12 text-center shadow-sm">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-soft text-brand">
-            <Upload size={22} aria-hidden="true" />
+        <QuietFrame as="section" tone="paper" className="mt-8 px-6 py-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-highlight-tint)] text-[var(--homa-highlight-ink)]">
+            <Icon name="add" size={24} />
           </div>
           {canUpload && privacyPromptOpen ? (
             <>
-              <h2 className="mt-4 font-display text-2xl font-semibold text-strong">
+              <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--homa-ink)]">
                 Before you choose files
               </h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-body">
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
                 Each file has a public link that opens without signing in. Homa does not
                 list the link, but anyone who gets it can open the file. This Library is
                 for curriculum and other files without private family information.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
-                <button
-                  type="button"
+                <QuietAction
                   onClick={continueToFilePicker}
-                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
                 >
                   Choose files
-                </button>
-                <button
-                  type="button"
+                </QuietAction>
+                <QuietAction
+                  kind="secondary"
                   onClick={() => setPrivacyPromptOpen(false)}
-                  className="inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-muted hover:bg-page hover:text-strong"
                 >
-                Go back
-                </button>
+                  Go back
+                </QuietAction>
               </div>
             </>
           ) : canUpload ? (
             <>
-              <h2 className="mt-4 font-display text-2xl font-semibold text-strong">
+              <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--homa-ink)]">
                 Add your first resource
               </h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-body">
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
                 Start with a worksheet, book, or curriculum. You can still sign in and
                 download your files after you cancel your membership.
               </p>
-              <button
-                type="button"
+              <QuietAction
                 onClick={beginAddingResources}
-                className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-brand px-4 py-2.5 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+                className="mt-6"
               >
                 Add a resource
-              </button>
+              </QuietAction>
             </>
           ) : (
             <>
-              <h2 className="mt-4 font-display text-2xl font-semibold text-strong">
+              <h2 className="mt-4 font-display text-2xl font-semibold text-[var(--homa-ink)]">
                 Nothing saved here yet
               </h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-body">
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
                 Renew your membership when you are ready to add a resource.
               </p>
             </>
           )}
-        </section>
+        </QuietFrame>
       ) : (
         <section className="mt-8">
           <div>
-            <h2 className="font-display text-xl font-semibold text-strong">Your shelf</h2>
-            <p className="mt-1 text-sm text-muted">
+            <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Your shelf</h2>
+            <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_62%,var(--homa-canvas))]">
               {visibleAssets.length === assets.length
                 ? `${assets.length} ${assets.length === 1 ? "resource" : "resources"}`
                 : `${visibleAssets.length} of ${assets.length} resources`}
             </p>
           </div>
 
-          <label className="relative mt-4 block w-full max-w-xl">
-            <Search
-              size={17}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle"
-              aria-hidden="true"
-            />
+          <label className="quiet-search mt-4 block w-full max-w-xl" aria-label="Search your Library">
             <span className="sr-only">Search your Library</span>
             <input
               type="search"
@@ -1038,7 +1030,7 @@ export function LibraryView({
               maxLength={180}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search title, child, or subject"
-              className="min-h-11 w-full rounded-md border border-border-subtle bg-card py-2 pl-9 pr-3 text-sm text-strong outline-none transition-colors placeholder:text-subtle focus:border-brand"
+              className="quiet-search__input"
             />
           </label>
 
@@ -1051,11 +1043,7 @@ export function LibraryView({
               type="button"
               aria-pressed={resourceKind === null}
               onClick={() => setResourceKind(null)}
-              className={
-                resourceKind === null
-                  ? "inline-flex min-h-11 items-center rounded-pill bg-brand-soft px-3 py-2 text-sm font-bold text-[var(--clay-700)]"
-                  : "inline-flex min-h-11 items-center rounded-pill border border-border-subtle px-3 py-2 text-sm font-semibold text-muted hover:bg-card"
-              }
+              className={resourceKind === null ? "quiet-filter quiet-filter--active" : "quiet-filter"}
             >
               All {assets.length}
             </button>
@@ -1065,11 +1053,7 @@ export function LibraryView({
                 type="button"
                 aria-pressed={resourceKind === kind}
                 onClick={() => setResourceKind(kind)}
-                className={
-                  resourceKind === kind
-                    ? "inline-flex min-h-11 items-center rounded-pill bg-brand-soft px-3 py-2 text-sm font-bold text-[var(--clay-700)]"
-                    : "inline-flex min-h-11 items-center rounded-pill border border-border-subtle px-3 py-2 text-sm font-semibold text-muted hover:bg-card"
-                }
+                className={resourceKind === kind ? "quiet-filter quiet-filter--active" : "quiet-filter"}
               >
                 {FAMILY_ASSET_RESOURCE_KIND_LABELS[kind]} {resourceKindCounts.get(kind) ?? 0}
               </button>
@@ -1078,10 +1062,9 @@ export function LibraryView({
               <button
                 type="button"
                 onClick={() => setFiltersOpen((open) => !open)}
-                className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border-subtle px-3 py-2 text-sm font-semibold text-muted hover:bg-card hover:text-strong"
+                className="quiet-filter"
                 aria-expanded={filtersOpen || advancedFilterCount > 0}
               >
-                <SlidersHorizontal size={16} aria-hidden="true" />
                 Filters{advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}
               </button>
             ) : null}
@@ -1089,15 +1072,15 @@ export function LibraryView({
 
           {hasAdvancedFilterOptions ? (
             <div
-              className={`${filtersOpen || advancedFilterCount > 0 ? "grid" : "hidden"} mt-3 gap-2 rounded-md border border-border-subtle bg-card p-3 sm:grid-cols-2 lg:grid-cols-3`}
+              className={`${filtersOpen || advancedFilterCount > 0 ? "grid" : "hidden"} quiet-frame quiet-frame--paper mt-3 gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3`}
             >
               {filterOptions.children.length > 0 ? (
-                <label className="text-xs font-semibold text-muted">
+                <label className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                   For
                   <select
                     value={childId ?? ""}
                     onChange={(event) => setChildId(event.target.value || null)}
-                    className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-page px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                    className="mt-1 min-h-11 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] px-3 py-2 text-sm font-normal text-[var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                   >
                     <option value="">All resources</option>
                     <option value={FAMILY_ASSET_WHOLE_FAMILY_CHILD}>Whole family</option>
@@ -1110,12 +1093,12 @@ export function LibraryView({
                 </label>
               ) : null}
               {filterOptions.subjects.length > 0 ? (
-                <label className="text-xs font-semibold text-muted">
+                <label className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                   Subject
                   <select
                     value={subjectId ?? ""}
                     onChange={(event) => setSubjectId(event.target.value || null)}
-                    className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-page px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                    className="mt-1 min-h-11 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] px-3 py-2 text-sm font-normal text-[var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                   >
                     <option value="">All subjects</option>
                     {filterOptions.subjects.map((subject) => (
@@ -1127,7 +1110,7 @@ export function LibraryView({
                 </label>
               ) : null}
               {showStatusFilter ? (
-                <label className="text-xs font-semibold text-muted">
+                <label className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                   Status
                   <select
                     value={status ?? ""}
@@ -1136,7 +1119,7 @@ export function LibraryView({
                         (event.target.value || null) as FamilyAssetView["status"] | null,
                       )
                     }
-                    className="mt-1 min-h-11 w-full rounded-md border border-border-subtle bg-page px-3 py-2 text-sm font-normal text-strong outline-none focus:border-brand"
+                    className="mt-1 min-h-11 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-canvas)] px-3 py-2 text-sm font-normal text-[var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
                   >
                     <option value="">All statuses</option>
                     {filterOptions.statuses.map((itemStatus) => (
@@ -1151,20 +1134,20 @@ export function LibraryView({
           ) : null}
 
           {hasSearch ? (
-            <button
-              type="button"
+            <QuietAction
+              kind="quiet"
               onClick={clearFilters}
-              className="mt-3 inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-semibold text-brand hover:bg-brand-soft"
+              className="mt-3 px-3 text-sm"
             >
               Clear search and filters
-            </button>
+            </QuietAction>
           ) : null}
 
           {visibleAssets.length === 0 ? (
-            <div className="mt-5 rounded-lg border border-dashed border-border-subtle px-6 py-10 text-center">
-              <p className="font-semibold text-strong">Nothing on this shelf matches.</p>
-              <p className="mt-1 text-sm text-muted">Clear a filter or try another word.</p>
-            </div>
+            <QuietFrame as="section" tone="paper" className="mt-5 border-dashed px-6 py-10 text-center">
+              <p className="font-semibold text-[var(--homa-ink)]">Nothing on this shelf matches.</p>
+              <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">Clear a filter or try another word.</p>
+            </QuietFrame>
           ) : (
             <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
               {visibleAssets.map((asset) => {
@@ -1185,9 +1168,9 @@ export function LibraryView({
                       type="button"
                       onClick={() => openAsset(asset)}
                       aria-label={`Open ${asset.title}`}
-                      className="group block w-full rounded-md text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      className="quiet-artifact-card group"
                     >
-                      <div className="transition-transform duration-150 group-hover:-translate-y-1">
+                      <div className="quiet-artifact-card__preview">
                         <ShelfCover
                           title={asset.title}
                           publisher={asset.publisher}
@@ -1201,27 +1184,24 @@ export function LibraryView({
                           imageAlt={asset.title}
                         />
                       </div>
-                      <h3 className="mt-2 line-clamp-2 text-[0.82rem] font-semibold leading-snug text-strong group-hover:text-brand">
+                      <h3 className="mt-2 line-clamp-2 text-[0.82rem] font-semibold leading-snug text-[var(--homa-ink)] group-hover:text-[var(--homa-brand-text)]">
                         {asset.title}
                       </h3>
-                      <p className="mt-0.5 line-clamp-1 text-[0.72rem] text-subtle">
+                      <p className="mt-0.5 line-clamp-1 text-[0.72rem] text-[color:color-mix(in_srgb,var(--homa-ink)_56%,var(--homa-canvas))]">
                         {audience}{subject ? ` · ${subject}` : ""}
                       </p>
                       {curriculumUnitCount > 0 ? (
-                        <p className="mt-1 line-clamp-1 text-[0.7rem] font-semibold text-brand">
+                        <p className="mt-1 line-clamp-1 text-[0.7rem] font-semibold text-[var(--homa-brand-text)]">
                           {curriculumUnitCount} curriculum {curriculumUnitCount === 1 ? "unit" : "units"}
                         </p>
                       ) : null}
                       {asset.status !== "ready" ? (
-                        <p
-                          className={
-                            assetStatus.tone === "processing"
-                              ? "mt-1 line-clamp-1 text-[0.7rem] font-semibold text-muted"
-                              : "mt-1 line-clamp-1 text-[0.7rem] font-semibold text-danger"
-                          }
+                        <QuietStatus
+                          tone={assetStatus.tone === "processing" ? "attention" : "error"}
+                          className="mt-1 inline-flex px-2 py-1 text-[0.7rem] font-semibold"
                         >
                           {assetStatus.label}
-                        </p>
+                        </QuietStatus>
                       ) : null}
                     </button>
                   </article>
