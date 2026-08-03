@@ -91,6 +91,7 @@
     "test:family-library-training:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/family-library-training-e2e.mts",
     "test:planner-checkoff:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/planner-checkoff-e2e.mts",
     "test:plan-rebuild-history:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/plan-rebuild-history-e2e.mts",
+    "test:plan-schedule-stale-safe:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/plan-schedule-stale-safe-e2e.mts",
     "check:taxonomy": "node packages/taxonomy/scripts/validate.mjs && tsx scripts/taxonomy-check.mts && tsx --test packages/taxonomy/src/progress.test.ts",
     "taxonomy:progress": "tsx packages/taxonomy/scripts/generate-progress-index.mts",
     "taxonomy:slugs": "tsx packages/taxonomy/scripts/generate-slug-map.mts",

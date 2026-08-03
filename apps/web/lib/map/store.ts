@@ -894,6 +894,7 @@ export type EditPlanOutcome =
     }
   | { status: "unknown_child" }
   | { status: "no_plan" }
+  | { status: "stale"; note: string }
   | { status: "invalid_edit"; note: string };
 
 /**
@@ -911,19 +912,33 @@ export async function editPlanActivities(
   subjectId: string,
   edits: readonly PlanEdit[],
   sql: MapDatabase = mapDb(),
+  expectedPlanRevision: number | null = null,
 ): Promise<EditPlanOutcome> {
   if (!(await childBelongsToFamily(childId, familyId, sql))) {
     return { status: "unknown_child" };
   }
   const rows = await sql<
-    { id: string; plan: FourWeekPlan; progress: Record<string, boolean> | null }[]
+    {
+      id: string;
+      plan: FourWeekPlan;
+      progress: Record<string, boolean> | null;
+      plan_revision: number | string;
+    }[]
   >`
-    select id, plan, progress
+    select id, plan, progress, plan_revision
     from public.child_plans
     where child_id = ${childId} and subject_id = ${subjectId}
   `;
   const row = rows[0];
   if (!row) return { status: "no_plan" };
+  const observedPlanRevision = Number(row.plan_revision);
+  const planRevision = expectedPlanRevision ?? observedPlanRevision;
+  if (!Number.isInteger(planRevision) || planRevision < 1) {
+    return {
+      status: "stale",
+      note: "This plan has no usable revision. Open the planner again before editing it.",
+    };
+  }
 
   const applied = applyPlanEdits(row.plan, row.progress ?? {}, edits);
   if (!applied.ok) {
@@ -991,14 +1006,24 @@ export async function editPlanActivities(
   // exactly the pooler's own pinning unit (removeChild's
   // pg_advisory_xact_lock relies on the same guarantee in production).
   const remaps = scheduleRemapForEdits(row.plan, edits);
-  await sql.begin(async (tx) => {
-    await tx`
+  const updated = await sql.begin(async (tx) => {
+    const lockedChild = await tx<{ id: string }[]>`
+      select id
+      from public.children
+      where id = ${childId} and family_id = ${familyId}
+      for update
+    `;
+    if (!lockedChild[0]) return false;
+    const planUpdate = await tx<{ id: string }[]>`
       update public.child_plans
       set plan = ${sql.json(applied.result.plan as unknown as DbJson)},
           progress = ${sql.json(applied.result.progress as unknown as DbJson)},
           updated_at = now()
       where id = ${row.id}
+        and plan_revision = ${planRevision}
+      returning id
     `;
+    if (!planUpdate[0]) return false;
     // Cascade the index shift into the calendar (issue #176): a removal
     // slides every later activity in that week down one, so a schedule row
     // still holding the old index would put a DIFFERENT activity on that
@@ -1066,7 +1091,14 @@ export async function editPlanActivities(
         `;
       }
     }
+    return true;
   });
+  if (!updated) {
+    return {
+      status: "stale",
+      note: "That plan changed while the edit was being saved. Open the planner again before editing it.",
+    };
+  }
   await touchFamily(familyId, sql);
   return {
     status: "applied",

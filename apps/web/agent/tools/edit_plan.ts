@@ -107,7 +107,7 @@ function toPlanEdit(edit: z.infer<typeof editSchema>): PlanEdit | null {
 
 export default defineBoundedTool({
   description:
-    "Edit the activities on an existing plan (a subject's four weeks, or the month plan with subjectId \"month\"): add an activity to a week, replace one, or remove one. Changes land immediately on the family's planner and plan pages. Activities are addressed by the indices open_planner returned this conversation; the planner skill owns that workflow. Removing or replacing an activity also clears or shifts its check-offs honestly. This tool cannot create a new month from nothing: when no plan exists, the parent builds one with one tap in the child's progress report.",
+    "Edit the activities on an existing plan (a subject's four weeks, or the month plan with subjectId \"month\"): add an activity to a week, replace one, or remove one. Changes land immediately on the family's planner and plan pages. Call open_planner first and copy its planRevision; activities are addressed by the indices it returned, and a changed revision is a conflict that must reopen the planner. Removing or replacing an activity also clears or shifts its check-offs honestly. This tool cannot create a new month from nothing: when no plan exists, the parent builds one with one tap in the child's progress report.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z
@@ -116,6 +116,11 @@ export default defineBoundedTool({
       subjectId: subjectIdSchema.describe(
         'The plan to edit, from open_planner: a subject id, or "month" for the month plan.',
       ),
+      planRevision: z
+        .number()
+        .int()
+        .min(1)
+        .describe("The positive plan revision returned by open_planner for this edit."),
       edits: z.array(editSchema).min(1).max(10),
     })
     .strict(),
@@ -162,6 +167,8 @@ export default defineBoundedTool({
       input.childId,
       input.subjectId,
       edits,
+      undefined,
+      input.planRevision,
     );
     if (outcome.status === "unknown_child") {
       return { error: "unknown_child", note: WRONG_CHILD_NOTE };
@@ -176,6 +183,9 @@ export default defineBoundedTool({
             ? `This child has no "${input.subjectId}" plan. Their plans: ${subjects.join(", ")}.`
             : "This child has no plans yet. A month is built with one tap in their progress report; offer that door.",
       };
+    }
+    if (outcome.status === "stale") {
+      return { error: "stale_plan", note: outcome.note };
     }
     if (outcome.status === "invalid_edit") {
       return { error: "invalid_edit", note: outcome.note };

@@ -87,6 +87,7 @@ function fakeDb(respond: (text: string, args: unknown[]) => unknown[] | Error): 
 function respondForEdit(options: {
   scheduled: { activity_index: number; scheduled_date: string }[];
   failInsert?: boolean;
+  failUpdate?: boolean;
   canonicalSources?: {
     id: string;
     title: string;
@@ -103,8 +104,8 @@ function respondForEdit(options: {
 }) {
   return (text: string): unknown[] | Error => {
     if (/select id from public\.children/u.test(text)) return [{ id: CHILD }];
-    if (/select id, plan, progress from public\.child_plans/u.test(text)) {
-      return [{ id: "plan-1", plan: plan(), progress: { "1.0": true } }];
+    if (/select id, plan, progress, plan_revision from public\.child_plans/u.test(text)) {
+      return [{ id: "plan-1", plan: plan(), progress: { "1.0": true }, plan_revision: 1 }];
     }
     if (
       /select id, title, unit_source_locator as "sourceLocator"/u.test(text)
@@ -117,6 +118,9 @@ function respondForEdit(options: {
       return options.existingSources ?? [];
     }
     if (/select activity_index, scheduled_date/u.test(text)) return options.scheduled;
+    if (/update public\.child_plans/u.test(text)) {
+      return options.failUpdate ? [] : [{ id: "plan-1" }];
+    }
     if (options.failInsert && /insert into public\.plan_activity_schedule/u.test(text)) {
       return new Error("connection reset mid-cascade");
     }
@@ -315,6 +319,27 @@ describe("editPlanActivities schedule cascade (issue #256)", () => {
       /update public\.families/u.test(statement.text),
     );
     assert.equal(familyTouch, undefined);
+  });
+
+  it("rejects a revision race before touching the schedule cascade", async () => {
+    const db = fakeDb(
+      respondForEdit({
+        scheduled: [{ activity_index: 0, scheduled_date: "2026-08-03" }],
+        failUpdate: true,
+      }),
+    );
+    const outcome = await editPlanActivities(
+      FAMILY,
+      CHILD,
+      "math",
+      [{ action: "remove", week: 1, index: 0 }],
+      db.sql as Parameters<typeof editPlanActivities>[4],
+    );
+    assert.equal(outcome.status, "stale");
+    assert.equal(
+      db.statements.some((statement) => /plan_activity_schedule/u.test(statement.text)),
+      false,
+    );
   });
 
   it("writes nothing for a child outside the family", async () => {

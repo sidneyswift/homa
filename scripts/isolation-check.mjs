@@ -3952,6 +3952,52 @@ async function expectAuthenticatedIsolation() {
     }
 
     if (planActivityScheduleSchemaAvailable) {
+      const [scheduleFunction] = await sql`
+        select to_regprocedure(
+          'public.schedule_plan_activity_v2(uuid,text,smallint,smallint,date,text,bigint,uuid)'
+        ) is not null as available
+      `;
+      if (scheduleFunction?.available === true) {
+        await expectAuthenticatedRpcDenied(
+          familyAUser.accessToken,
+          "schedule_plan_activity_v2",
+          {
+            target_child_id: childBId,
+            target_subject_id: "isolation-check",
+            target_week: 1,
+            target_activity_index: 0,
+            target_scheduled_date: "2026-01-04",
+            target_expected_text: "Cross-family source.",
+            target_plan_revision: 1,
+            target_schedule_id: null,
+          },
+          "auth member cannot schedule another family's plan activity",
+        );
+        const [schedulePrivileges] = await sql`
+          select
+            has_function_privilege(
+              'authenticated',
+              'public.schedule_plan_activity_v2(uuid,text,smallint,smallint,date,text,bigint,uuid)',
+              'execute'
+            ) as authenticated_can_execute,
+            has_function_privilege(
+              'anon',
+              'public.schedule_plan_activity_v2(uuid,text,smallint,smallint,date,text,bigint,uuid)',
+              'execute'
+            ) as anon_can_execute
+        `;
+        report(
+          "schedule RPC is authenticated-only",
+          schedulePrivileges?.authenticated_can_execute === true &&
+            schedulePrivileges?.anon_can_execute === false,
+          JSON.stringify(schedulePrivileges),
+        );
+      } else {
+        report(
+          "schedule RPC absent from target (additive migration not applied yet); nothing exposed",
+          true,
+        );
+      }
       await expectAuthenticatedRead(
         familyBUser.accessToken,
         "plan_activity_schedule",

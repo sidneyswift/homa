@@ -644,6 +644,8 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
       subjectId: schedulingActivity.subjectId,
       week: schedulingActivity.week,
       activityIndex: schedulingActivity.activityIndex,
+      planRevision: schedulingActivity.planRevision,
+      expectedText: schedulingActivity.text,
       scheduledDate: date,
     });
     setSchedulingActivity(null);
