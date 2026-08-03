@@ -20,6 +20,7 @@ import {
   EVAL_FIXTURE_SESSION_ATTRIBUTE,
   evalFamilyFixtureAuth,
 } from "../../lib/family-context-eval-fixture";
+import { readAbilityContextCookie } from "../../lib/child-progress/ability-context";
 import {
   familyOnboardingActive,
   onboardingRowFromMembership,
@@ -182,6 +183,14 @@ function supabaseAuth(): AuthFn<Request> {
     const viewContext = readViewContextCookie(request.headers.get("cookie"));
     if (viewContext && viewContext !== VIEW_CONTEXT_FAMILY) {
       attributes.viewChildId = viewContext;
+    }
+    // The abilities explorer's Ask Homa door leaves a short-lived, server
+    // validated focus hint. family-context rechecks the child and catalog
+    // ability against this family before the model sees it.
+    const abilityContext = readAbilityContextCookie(request.headers.get("cookie"));
+    if (abilityContext) {
+      attributes.viewAbilityChildId = abilityContext.childId;
+      attributes.viewAbilityId = abilityContext.abilityId;
     }
 
     return {

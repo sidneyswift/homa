@@ -6,6 +6,7 @@ import {
   progressUpdatedLine,
 } from "../../lib/child-progress/map-model";
 import type { ChildProgressView } from "../../lib/child-progress/types";
+import type { AbilitiesExplorerPayload } from "../../lib/child-progress/abilities-explorer-types";
 import {
   progressAssessmentCta,
   progressEmptyState,
@@ -19,6 +20,7 @@ import { KidAvatar } from "../dashboard/kid-avatar";
 import { PageColumn } from "../dashboard/page-column";
 import { AskHomaAboutChild } from "./ask-homa-about-child";
 import { AbilitiesCard } from "./abilities-card";
+import { AbilitiesExplorer } from "./abilities-explorer";
 import { LessonsCard, type ProgressLessonsCardData } from "./lessons-card";
 import { ProgressMap } from "./progress-map";
 import { ProgressSubjects } from "./progress-subjects";
@@ -161,6 +163,7 @@ export function ProgressView({
   lessons = null,
   hasFirsts = false,
   deeperChecks = true,
+  abilitiesExplorer = null,
 }: {
   view: ChildProgressView;
   /**
@@ -191,6 +194,8 @@ export function ProgressView({
    * panel's deep-dive door walks the family's own flow, so only her
    * session offers it. */
   deeperChecks?: boolean;
+  /** The dense taxonomy map, dark until its independent presentation flag. */
+  abilitiesExplorer?: AbilitiesExplorerPayload | null;
 }) {
   const now = new Date();
   const updatedLine = progressUpdatedLine(view, now);
@@ -324,10 +329,14 @@ export function ProgressView({
             leave a mother with. Suppressed for a never-assessed child
             so the first check-in stays the page's one ask. */}
         {neverAssessed ? null : (
-          <AbilitiesCard
-            childName={view.childName}
-            sky={abilitiesSkyFromView(view, now)}
-          />
+          abilitiesExplorer ? (
+            <AbilitiesExplorer payload={abilitiesExplorer} />
+          ) : (
+            <AbilitiesCard
+              childName={view.childName}
+              sky={abilitiesSkyFromView(view, now)}
+            />
+          )
         )}
 
         {/* The door to the firsts page. Two gates, each load-bearing.
