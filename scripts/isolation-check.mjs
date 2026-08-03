@@ -3255,6 +3255,36 @@ async function expectAuthenticatedIsolation() {
       childPlanRebuildHistoryWriteFixture,
       "cross-family token cannot mutate Family B child plan rebuild history",
     );
+    const [serverVersion] = await sql`
+      select current_setting('server_version_num') as version_num
+    `;
+    if (Number(serverVersion.version_num) >= 170000) {
+      const [maintainAcl] = await sql`
+        select
+          has_table_privilege(
+            'authenticated',
+            'public.child_plan_rebuild_history',
+            'MAINTAIN'
+          ) as authenticated_can_maintain,
+          has_table_privilege(
+            'anon',
+            'public.child_plan_rebuild_history',
+            'MAINTAIN'
+          ) as anon_can_maintain,
+          has_table_privilege(
+            'service_role',
+            'public.child_plan_rebuild_history',
+            'MAINTAIN'
+          ) as service_can_maintain
+      `;
+      report(
+        "rebuild history maintenance remains server-only",
+        maintainAcl?.authenticated_can_maintain === false &&
+          maintainAcl?.anon_can_maintain === false &&
+          maintainAcl?.service_can_maintain === true,
+        JSON.stringify(maintainAcl),
+      );
+    }
     // toggle_plan_activity_check (migration 20260729160000) is the atomic
     // single-key alternative to the whole-map-replace check-off sync;
     // its authorization check must deny a cross-family child the same

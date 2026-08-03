@@ -296,6 +296,39 @@ try {
   await expectAuthenticatedWriteDenied(result.rebuildHistoryId, "update");
   await expectAuthenticatedWriteDenied(result.rebuildHistoryId, "delete");
 
+  const [serverVersion] = await sql<Array<{ version_num: string }>>`
+    select current_setting('server_version_num') as version_num
+  `;
+  if (Number(serverVersion.version_num) >= 170000) {
+    const [maintainAcl] = await sql<
+      Array<{
+        authenticated_can_maintain: boolean;
+        anon_can_maintain: boolean;
+        service_can_maintain: boolean;
+      }>
+    >`
+      select
+        has_table_privilege(
+          'authenticated',
+          'public.child_plan_rebuild_history',
+          'MAINTAIN'
+        ) as authenticated_can_maintain,
+        has_table_privilege(
+          'anon',
+          'public.child_plan_rebuild_history',
+          'MAINTAIN'
+        ) as anon_can_maintain,
+        has_table_privilege(
+          'service_role',
+          'public.child_plan_rebuild_history',
+          'MAINTAIN'
+        ) as service_can_maintain
+    `;
+    assert.equal(maintainAcl.authenticated_can_maintain, false);
+    assert.equal(maintainAcl.anon_can_maintain, false);
+    assert.equal(maintainAcl.service_can_maintain, true);
+  }
+
   await assert.rejects(
     sql.begin(async (transaction) => {
       await transaction`set local role anon`;
