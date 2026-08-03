@@ -231,13 +231,15 @@ function findResidue(path: string, text: string, hash: string, allowedHashes: Ma
   return findings;
 }
 
-export function collectBrandResidueFindings(): BrandResidueFinding[] {
+export type BrandResidueScope = "delta" | "full";
+
+export function collectBrandResidueFindings(scope: BrandResidueScope = "delta"): BrandResidueFinding[] {
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8")) as LegacyBaseline;
   if (baseline.schemaVersion !== 1 || !baseline.sourceCommit || !Array.isArray(baseline.records)) {
     throw new Error(`Unsupported legacy baseline schema in ${relative(ROOT, BASELINE_PATH)}`);
   }
   const allowedHashes = baselineHashes(baseline);
-  const changedPaths = changedPathsForRun(baseline.sourceCommit);
+  const changedPaths = scope === "full" ? null : changedPathsForRun(baseline.sourceCommit);
   const findings: BrandResidueFinding[] = [];
   for (const path of gitTrackedFiles()) {
     if (isExcludedPath(path) || !isTextPath(path)) continue;
@@ -252,17 +254,23 @@ export function collectBrandResidueFindings(): BrandResidueFinding[] {
   return findings;
 }
 
-export function collectLegacyFontPathResidue(): string[] {
+export function collectLegacyFontPathResidue(scope: BrandResidueScope = "delta"): string[] {
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8")) as LegacyBaseline;
-  const changedPaths = changedPathsForRun(baseline.sourceCommit);
+  const changedPaths = scope === "full" ? null : changedPathsForRun(baseline.sourceCommit);
   return gitTrackedFiles().filter((path) => /(?:schibsted|hanken|caveat)/i.test(path) && !isExcludedPath(path) && (!changedPaths || changedPaths.has(path)));
 }
 
 export function assertNoBrandResidue(): void {
-  const pathResidue = collectLegacyFontPathResidue();
-  const findings = collectBrandResidueFindings();
+  const fullTree = process.argv.includes("--full");
+  const scope: BrandResidueScope = fullTree ? "full" : "delta";
+  const pathResidue = collectLegacyFontPathResidue(scope);
+  const findings = collectBrandResidueFindings(scope);
   if (pathResidue.length === 0 && findings.length === 0) {
-    console.log("Brand residue guard passed: no active legacy font paths or changed-file signatures found.");
+    console.log(
+      fullTree
+        ? "Full-tree brand residue guard passed: no active legacy font paths or unquarantined signatures found."
+        : "Brand residue guard passed: no active legacy font paths or changed-file signatures found.",
+    );
     return;
   }
 

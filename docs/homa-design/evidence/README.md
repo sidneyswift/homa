@@ -15,6 +15,13 @@ the implementation plan.
 quarantined comparison namespace, not an active allowlist. It is excluded from
 product bundles, indexing, generators, and active design discovery.
 
+`pnpm check:brand-residue` is the pull-request ratchet. It scans the delivery
+delta and rejects newly introduced legacy identity. `pnpm audit:brand-residue`
+scans the complete tracked text tree against the hash baseline. The audit is
+intentionally allowed to fail while migration work remains: its findings are
+the eradication queue, not a reason to add another baseline exemption. A final
+release may not close until the audit passes from a clean checkout.
+
 The manifest records Android as intentionally unreleased because the existing
 cross-platform ruling reserves Android for a future build. That is a release
 disposition, not permission for visual drift: Android shares the native
