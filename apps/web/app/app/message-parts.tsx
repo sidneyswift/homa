@@ -4,6 +4,7 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { Logo } from "../../components/brand/Logo";
 import type { ThinkMood } from "../../components/brand/ThinkingMark";
+import { Icon } from "../../components/design/Icon";
 import { parseAttachmentMarkers } from "../../lib/attachments/markers";
 import {
   isNarratedPause,
@@ -72,8 +73,8 @@ import { WorkedForLine, workedForSteps } from "./worked-for";
 /**
  * Message rendering for the chat transcript (approved chat redesign
  * 2026-07-13, the scrapbook direction calmed): the parent's messages
- * sit in a soft coral bubble on the right (calmer than the old brand
- * fill: strong coral now belongs to actions), photos she sent display
+ * sit in a soft coral wash on the right (functional controls use midnight),
+ * photos she sent display
  * big on white with their caption handwritten underneath, and files
  * ride as quiet chips. Homa's replies render FLAT on the page, no card;
  * the work behind a reply folds into one "Worked for N seconds" line
@@ -228,24 +229,21 @@ export function memoryChipFor(part: EveMessagePart): MemoryChipContent | null {
  * A receipt, not a badge (founder note, 2026-07-22: "confusing and too
  * colorful").
  *
- * It was a filled sage pill with a border, which is the visual weight of
+ * It was a filled status badge with a border, which is the visual weight of
  * a call to action, sitting next to a sentence that already said the
  * same thing in Homa's own words. Two problems at once: it looked like
  * something to press, and it was louder than the fact it was reporting.
  *
- * Now a quiet line with one small sage dot. The dot keeps the "this
+ * Now a quiet line with one small constructive dot. The dot keeps the "this
  * landed" signal that MJ-02 asks a named effect to carry; everything
  * else steps back so the sentence above it does the talking.
  */
 function MemoryChip({ chip }: { chip: MemoryChipContent }) {
   return (
-    <p className="inline-flex max-w-full items-baseline gap-2 self-start text-xs text-subtle">
-      <span
-        aria-hidden="true"
-        className="mb-px h-1.5 w-1.5 shrink-0 self-center rounded-pill bg-sage"
-      />
+    <p className="quiet-message__memory-chip">
+      <span aria-hidden="true" className="quiet-message__receipt-dot" />
       <span className="font-medium">{chip.label}</span>
-      {chip.detail ? <span className="truncate text-muted">{chip.detail}</span> : null}
+      {chip.detail ? <span className="quiet-message__memory-detail">{chip.detail}</span> : null}
     </p>
   );
 }
@@ -473,9 +471,9 @@ function AuthorizationCard({ part }: { part: AuthorizationPart }) {
     : part.description;
 
   return (
-    <div className="flex max-w-md flex-col items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
+    <div className="quiet-message__authorization">
       <div className="space-y-1">
-        <p className="font-bold text-strong">
+        <p className="quiet-message__authorization-title">
           {required
             ? `Connect ${part.displayName}`
             : authorized
@@ -490,7 +488,7 @@ function AuthorizationCard({ part }: { part: AuthorizationPart }) {
       {required && part.authorization?.userCode ? (
         <p className="flex items-center gap-2 text-sm text-muted">
           <span>Code</span>
-          <code className="rounded-md bg-page px-2 py-1 font-mono text-strong">
+          <code className="quiet-message__authorization-code">
             {part.authorization.userCode}
           </code>
         </p>
@@ -500,7 +498,7 @@ function AuthorizationCard({ part }: { part: AuthorizationPart }) {
           href={part.authorization.url}
           rel="noreferrer"
           target="_blank"
-          className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-on-brand transition-opacity hover:opacity-90"
+          className="quiet-message__authorization-link"
         >
           Sign in with {part.displayName}
         </a>
@@ -807,7 +805,7 @@ function AssistantItemView({
               onSendSuggestion={progressSendSuggestion}
             />
           ) : null}
-          <p className="inline-flex min-h-8 items-center rounded-pill border border-border-subtle bg-page px-3 py-1.5 text-sm font-semibold text-muted">
+          <p className="quiet-message__workflow-chip">
             {item.label}
           </p>
         </div>
@@ -854,7 +852,7 @@ export function MessageView({
   actionableProgressPartKey?: string;
   timeZone: string;
   /** The render wall for attachment markers; media only draws from this
-   * family's own chat blob space. */
+   * family's own chat storage space. */
   familyId?: string | null;
   /** Save receipts for the attachments this user message carried
    * (live-session state; scrollback shows the media without them). */
@@ -921,27 +919,28 @@ export function MessageView({
                 existed before GH #170; a dropped connection used to
                 erase her words with no sign anything was wrong). */}
             <div
-              className={`max-w-[76%] rounded-lg rounded-br-sm px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong ${
+              className={`quiet-message__user-bubble ${
                 sendState === null
-                  ? "bg-[var(--brand-soft-2)]"
-                  : "bg-[var(--brand-soft-2)] opacity-70"
+                  ? ""
+                  : "quiet-message__user-bubble--pending"
               }`}
             >
               <p className="whitespace-pre-wrap">{visibleText}</p>
             </div>
             {sendState === "sending" ? (
-              <p className="text-xs text-subtle" role="status">
+              <p className="quiet-message__send-state" role="status">
                 Sending&hellip;
               </p>
             ) : sendState === "failed" ? (
-              <p className="flex items-center gap-2 text-xs text-danger" role="alert">
+              <p className="quiet-message__send-state quiet-message__send-state--error" role="alert">
                 Not sent.
                 {onRetryFailedMessage ? (
                   <button
                     type="button"
                     onClick={() => onRetryFailedMessage(visibleText)}
-                    className="font-semibold underline underline-offset-2 transition-opacity hover:opacity-80"
+                    className="quiet-message__retry"
                   >
+                    <Icon name="refresh" size={16} />
                     Retry
                   </button>
                 ) : null}

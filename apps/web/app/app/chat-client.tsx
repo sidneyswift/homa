@@ -4,9 +4,6 @@ import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
 import { Client, type HandleMessageStreamEvent } from "eve/client";
 import { useEveAgent, type EveMessage } from "eve/react";
-import {
-  RefreshCw,
-} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
@@ -488,7 +485,7 @@ export function ChatClient({
   /** Lost-turn recovery, held by ref for onFinish (same reason). */
   const startRecoveryRef = useRef<(() => void) | null>(null);
   // The attach flow (approved chat redesign): staged files upload to
-  // the family's own blob space as she picks them; send trades URLs
+  // the family's own storage space as she picks them; send trades URLs
   // for model parts and binder receipts.
   const attachments = useChatAttachments(familyId);
   const [preparingAttachments, setPreparingAttachments] = useState(false);
@@ -1825,7 +1822,7 @@ export function ChatClient({
   // line is free.
   // Two questions, and conflating them was a bug the founder hit: "ok
   // this didnt make a card". The card HAD been made. Because `active`
-  // was gated on `busy`, it rendered as its own spent pill for the rest
+  // was gated on `busy`, it rendered as its own spent status for the rest
   // of the turn, so what she saw where a card should be was the grey
   // receipt that means "already done".
   //
@@ -2337,7 +2334,7 @@ export function ChatClient({
   }
 
   /**
-   * The attach send path: trades the staged blob URLs for model parts,
+   * The attach send path: trades the staged storage URLs for model parts,
    * marker text, and binder receipts (/api/chat/attachments), then
    * sends ONE turn carrying text + media parts. Runs only while idle
    * (the send button holds staged files back during a running turn, so
@@ -2703,7 +2700,7 @@ export function ChatClient({
                           : "flex"
                       }
                     >
-                      <span className="inline-flex items-center rounded-pill border border-border-subtle bg-card px-2.5 py-0.5 text-[11px] font-semibold text-subtle">
+                      <span className="quiet-chat__source-chip">
                         {item.sourceLabel}
                       </span>
                     </p>
@@ -2748,7 +2745,7 @@ export function ChatClient({
         {(bindingSyncFailure || authorizationParked) &&
         bindingSyncFailureSummary ? (
           <div className="flex flex-col items-end gap-1" role="alert">
-            <div className="max-w-[76%] rounded-lg rounded-br-sm bg-[var(--brand-soft-2)] px-[15px] py-2.5 text-[0.9rem] leading-normal text-strong opacity-70">
+            <div className="quiet-chat__status-bubble">
               <p className="whitespace-pre-wrap">
                 {bindingSyncFailureSummary}
               </p>
@@ -2791,14 +2788,14 @@ export function ChatClient({
                 >
                   <Icon name="close" size={16} />
                 </button>
-                <div className="rounded-lg rounded-br-sm bg-brand px-[18px] py-3.5 text-[0.95rem] leading-normal text-on-brand opacity-70">
+                <div className="quiet-chat__queued-bubble">
                   <p className="whitespace-pre-wrap">
                     {entry.text}
                   </p>
                 </div>
               </div>
             ))}
-            <p className="flex items-center gap-3 text-xs text-subtle">
+            <p className="quiet-chat__queued-meta">
               {bindingSyncFailure || authorizationParked
                 ? "Waiting to reconnect"
                 : "Sends when Homa finishes"}
@@ -2806,7 +2803,7 @@ export function ChatClient({
                 <button
                   type="button"
                   onClick={() => agent.stop()}
-                  className="font-semibold text-brand transition-colors hover:underline"
+                  className="quiet-chat__queued-send"
                 >
                   Send now
                 </button>
@@ -2838,7 +2835,7 @@ export function ChatClient({
               onClick={retryBindingSync}
               className="quiet-chat__status-action"
             >
-              <RefreshCw size={15} aria-hidden="true" />
+              <Icon name="refresh" size={16} />
               Try again
             </QuietAction>
           </div>
@@ -2855,7 +2852,7 @@ export function ChatClient({
               onClick={retryBindingSync}
               className="quiet-chat__status-action"
             >
-              <RefreshCw size={15} aria-hidden="true" />
+              <Icon name="refresh" size={16} />
               Reconnect Homa
             </QuietAction>
           </div>
@@ -2872,7 +2869,7 @@ export function ChatClient({
               onClick={continueCutoffRecovery}
               className="quiet-chat__status-action"
             >
-              <RefreshCw size={15} aria-hidden="true" />
+              <Icon name="refresh" size={16} />
               Reconnect and continue
             </QuietAction>
           </div>
@@ -2884,7 +2881,7 @@ export function ChatClient({
           // parent-facing string. Sits above the two below so a stale
           // credential never masquerades as either.
           <p
-            className="mx-auto max-w-md rounded-md border border-border bg-card px-3 py-2 text-center font-mono text-xs text-body"
+            className="quiet-chat__debug mx-auto max-w-md"
             role="alert"
           >
             DEV: the Vercel OIDC token expired at{" "}
@@ -2942,7 +2939,7 @@ export function ChatClient({
             onClick={() =>
               bottomRef.current?.scrollIntoView({ behavior: "smooth" })
             }
-            className="quiet-chat__back-to-now absolute -top-14 left-1/2 z-10 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-strong shadow-md transition-colors hover:border-brand hover:text-brand"
+            className="quiet-chat__back-to-now absolute -top-14 left-1/2 z-10"
           >
             <Icon name="next" size={20} className="rotate-90" />
           </button>
@@ -2966,10 +2963,10 @@ export function ChatClient({
         // the card reaches the edges itself. Everything from sm up, and
         // everything outside onboarding, keeps the padded dock.
         data-brand-layer="composer"
-        className={`quiet-chat__footer pt-3 sm:bg-page sm:px-6 sm:pb-5 sm:pt-3 ${
+        className={`quiet-chat__footer pt-3 sm:px-6 sm:pb-5 sm:pt-3 ${
           sheetDock
             ? "ob-dock-sheet px-0 pb-0 sm:rounded-none sm:border-t-0 sm:shadow-none"
-            : `bg-page px-4 pb-5 ${showComposer ? "border-t border-border-subtle" : ""}`
+            : `px-4 pb-5 ${showComposer ? "quiet-chat__footer--with-rule" : ""}`
         }`}
       >
         {showSuggestions ? (
@@ -2981,7 +2978,7 @@ export function ChatClient({
                 key={suggestion}
                 type="button"
                 onClick={() => sendMessage(suggestion)}
-                className="quiet-chat__suggestion rounded-pill bg-[var(--stone-100)] px-3.5 py-1.5 text-[0.8rem] text-muted transition-colors hover:bg-[var(--stone-200)] hover:text-strong"
+                className="quiet-chat__suggestion"
               >
                 {suggestion}
               </button>
@@ -3176,7 +3173,7 @@ export function ChatClient({
           </div>
         ) : null}
         <div
-          className={`quiet-chat__composer mx-auto w-full max-w-[780px] rounded-[22px] shadow-md ${
+          className={`quiet-chat__composer mx-auto w-full max-w-[780px] ${
             // Inside the phone sheet this is a zone, not a box: the CSS
             // strips its chrome and gives it a hairline instead. From sm
             // up it is the second of two floating boxes, so it takes a
@@ -3205,10 +3202,10 @@ export function ChatClient({
             <form
             data-brand-layer="composer-form"
             ref={composerFormRef}
-            className={`quiet-chat__composer-form w-full border border-border-subtle bg-card px-3 pb-2 pt-2.5 transition-shadow focus-within:ring-2 focus-within:ring-brand/30 ${
+            className={`quiet-chat__composer-form w-full px-3 pb-2 pt-2.5 ${
               showPromptSuggestionRail
-                ? "-mt-px rounded-b-[22px] rounded-t-none"
-                : "rounded-[22px]"
+                ? "quiet-chat__composer-form--suggestions -mt-px"
+                : ""
             }`}
             onSubmit={(event) => {
               event.preventDefault();
@@ -3261,7 +3258,7 @@ export function ChatClient({
             </div>
           )}
           {filingHintOpen && focusChildName ? (
-            <p className="mb-1.5 ml-[52px] w-fit rounded-md bg-[var(--stone-900)] px-2.5 py-1.5 text-xs font-medium text-[var(--stone-50)]">
+            <p className="quiet-chat__hint mb-1.5 ml-[52px] w-fit">
               Photos and files you send are saved in {focusChildName}&apos;s
               binder. Change kids at the top right.
             </p>
@@ -3279,7 +3276,7 @@ export function ChatClient({
                 type="button"
                 aria-label={`Attachments save to ${focusChildName}'s binder; tap for details`}
                 onClick={() => setFilingHintOpen((current) => !current)}
-                className="ml-1 inline-flex min-h-8 items-center gap-1 rounded-pill bg-brand-soft px-2.5 py-1 text-xs font-semibold text-[var(--clay-700)]"
+                className="quiet-chat__focus-tag ml-1"
               >
                 About {focusChildName}
                 <Icon name="next" size={16} className="rotate-90" />
@@ -3305,7 +3302,7 @@ export function ChatClient({
                       : "quiet-chat__composer-action--stop-primary"
                   }`}
                 >
-                  <span aria-hidden="true" className="quiet-chat__stop-glyph" />
+                  <Icon name="stop" size={16} />
                 </button>
                 {draft.trim().length > 0 && attachments.staged.length === 0 ? (
                   <button
