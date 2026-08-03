@@ -40,6 +40,16 @@ that all generated asset rows are fingerprinted, and that authored residue is
 zero. The one negative contract sentinel is recorded as an approved profile
 rule, not a legacy allowlist.
 
+`marketing-production.json` is the production-specific companion to
+`surfaces.json`. `pnpm check:marketing-production` records every marketing
+voice rule, asset, campaign, queue, bundle file, evaluator, and publishing
+generator with a source hash and lifecycle state. It also records bundle
+grounding, per-format approval and refusal, scorecard status, distribution
+URLs, the channel reduction ladder, and named publisher blockers. Postiz,
+Resend, and generation providers remain explicit fail-closed records until a
+founder-owned readback exists. A quarantined historical asset or negative
+fixture stays visible for forensics but cannot be treated as active output.
+
 `channel-evidence.json` is the deterministic delivery contract for the five
 non-web channel bundles owned by gh#728: email, parent-facing PDF, physical
 print, hosted providers, and distribution assets. It records the exact

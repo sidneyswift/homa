@@ -367,6 +367,9 @@ jobs:
       - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
         run: pnpm check:brand-surfaces
 
+      - name: Marketing production contract check (bundles, queues, generators, publishers)
+        run: pnpm check:marketing-production
+
       - name: Channel evidence contract check (fresh fingerprints and hard gates)
         run: pnpm check:channel-evidence
 
