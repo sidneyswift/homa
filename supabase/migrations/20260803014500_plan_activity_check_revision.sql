@@ -8,12 +8,17 @@
 
 alter table public.child_plans
   add column plan_revision bigint not null default 1
-  check (plan_revision >= 1);
+  check (plan_revision >= 1),
+  add column progress_revision bigint not null default 0
+  check (progress_revision >= 0);
 
 comment on column public.child_plans.plan_revision is
   'Increments only when plan JSON changes. Progress-only writes do not change it.';
 
-create or replace function public.bump_child_plan_revision()
+comment on column public.child_plans.progress_revision is
+  'Increments only when progress JSON changes. Orders authoritative check snapshots.';
+
+create or replace function public.bump_child_plan_revisions()
 returns trigger
 language plpgsql
 set search_path = ''
@@ -21,19 +26,33 @@ as $$
 begin
   if tg_op = 'INSERT' then
     new.plan_revision := 1;
-  elsif new.plan is distinct from old.plan then
-    new.plan_revision := old.plan_revision + 1;
+    new.progress_revision := 0;
   else
-    -- A caller cannot manufacture a revision by updating the column alone.
-    new.plan_revision := old.plan_revision;
+    if new.plan is distinct from old.plan then
+      new.plan_revision := old.plan_revision + 1;
+    else
+      -- A caller cannot manufacture a revision by updating the column alone.
+      new.plan_revision := old.plan_revision;
+    end if;
+
+    if new.progress is distinct from old.progress then
+      new.progress_revision := old.progress_revision + 1;
+    else
+      -- The same protection keeps response ordering server-controlled.
+      new.progress_revision := old.progress_revision;
+    end if;
   end if;
   return new;
 end;
 $$;
 
-create trigger child_plans_bump_plan_revision
-before insert or update of plan, plan_revision on public.child_plans
-for each row execute function public.bump_child_plan_revision();
+create trigger child_plans_bump_revisions
+before insert or update of plan, plan_revision, progress, progress_revision
+on public.child_plans
+for each row execute function public.bump_child_plan_revisions();
+
+revoke all on function public.bump_child_plan_revisions()
+  from public, anon, authenticated;
 
 create or replace function public.set_plan_activity_check(
   target_child_id uuid,
@@ -48,6 +67,8 @@ returns table (
   reason text,
   plan_id uuid,
   plan_revision bigint,
+  progress_revision bigint,
+  progress_snapshot jsonb,
   progress_key text,
   done boolean
 )
@@ -103,6 +124,8 @@ begin
       'plan-missing'::text,
       null::uuid,
       null::bigint,
+      null::bigint,
+      null::jsonb,
       target_check_key,
       null::boolean;
     return;
@@ -114,6 +137,8 @@ begin
       'revision-mismatch'::text,
       locked_plan.id,
       locked_plan.plan_revision,
+      locked_plan.progress_revision,
+      locked_plan.progress,
       target_check_key,
       null::boolean;
     return;
@@ -143,6 +168,8 @@ begin
       'invalid-plan'::text,
       locked_plan.id,
       locked_plan.plan_revision,
+      locked_plan.progress_revision,
+      locked_plan.progress,
       target_check_key,
       null::boolean;
     return;
@@ -156,6 +183,8 @@ begin
       'activity-mismatch'::text,
       locked_plan.id,
       locked_plan.plan_revision,
+      locked_plan.progress_revision,
+      locked_plan.progress,
       target_check_key,
       null::boolean;
     return;
@@ -167,6 +196,8 @@ begin
       'invalid-progress'::text,
       locked_plan.id,
       locked_plan.plan_revision,
+      locked_plan.progress_revision,
+      locked_plan.progress,
       target_check_key,
       null::boolean;
     return;
@@ -182,17 +213,18 @@ begin
     'false'::jsonb
   ) is distinct from to_jsonb(target_done)
   then
-    update public.child_plans
+    update public.child_plans as target_plan
     set
       progress = jsonb_set(
-        coalesce(progress, '{}'::jsonb),
+        coalesce(target_plan.progress, '{}'::jsonb),
         array[target_check_key],
         to_jsonb(target_done),
         true
       ),
-      updated_at = now()
-    where id = locked_plan.id
-    returning progress into locked_plan.progress;
+      updated_at = clock_timestamp()
+    where target_plan.id = locked_plan.id
+    returning target_plan.progress, target_plan.progress_revision
+    into locked_plan.progress, locked_plan.progress_revision;
     current_done := target_done;
   end if;
 
@@ -201,6 +233,8 @@ begin
     null::text,
     locked_plan.id,
     locked_plan.plan_revision,
+    locked_plan.progress_revision,
+    locked_plan.progress,
     target_check_key,
     current_done;
 end;

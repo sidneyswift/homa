@@ -27,6 +27,8 @@ interface CheckReceipt {
   reason: ConflictReason | null;
   plan_id: string | null;
   plan_revision: string | number | null;
+  progress_revision: string | number | null;
+  progress_snapshot: unknown;
   progress_key: string;
   done: boolean | null;
 }
@@ -37,6 +39,7 @@ interface PlanState {
   };
   progress: Record<string, boolean>;
   plan_revision: string | number;
+  progress_revision: string | number;
 }
 
 const sql = postgres(databaseUrl, { prepare: false, max: 4 });
@@ -77,7 +80,7 @@ async function setCheck(input: {
 
 async function readPlan(): Promise<PlanState> {
   const [row] = await sql<PlanState[]>`
-    select plan, progress, plan_revision
+    select plan, progress, plan_revision, progress_revision
     from public.child_plans
     where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
       and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
@@ -100,6 +103,8 @@ try {
     where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
       and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
   `;
+  const reset = await readPlan();
+  const progressRevision = Number(reset.progress_revision);
 
   const [receiptA, receiptB] = await Promise.all([
     setCheck({
@@ -119,28 +124,56 @@ try {
   assert.equal(receiptA.reason, null);
   assert.equal(receiptA.done, true);
   assert.equal(receiptB.status, "applied");
+  const orderedReceipts = [receiptA, receiptB].sort(
+    (left, right) => Number(left.progress_revision) - Number(right.progress_revision),
+  );
+  assert.deepEqual(
+    orderedReceipts.map((receipt) => Number(receipt.progress_revision)),
+    [progressRevision + 1, progressRevision + 2],
+  );
+  assert.equal(
+    (orderedReceipts[1].progress_snapshot as Record<string, boolean>)["2.0"],
+    true,
+  );
+  assert.equal(
+    (orderedReceipts[1].progress_snapshot as Record<string, boolean>)["2.1"],
+    true,
+  );
   const concurrent = await readPlan();
   assert.equal(concurrent.progress["2.0"], true);
   assert.equal(concurrent.progress["2.1"], true);
   assert.equal(Number(concurrent.plan_revision), revision);
+  assert.equal(Number(concurrent.progress_revision), progressRevision + 2);
+
+  const idempotentReceipt = await setCheck({
+    checkKey: "2.0",
+    done: true,
+    expectedText: activityA,
+    revision,
+  });
+  assert.equal(Number(idempotentReceipt.progress_revision), progressRevision + 2);
+  assert.deepEqual(idempotentReceipt.progress_snapshot, concurrent.progress);
 
   await sql`
     insert into public.child_plans (
       child_id, subject_id, plan, bank_version, progress, retest_at,
-      plan_revision
+      plan_revision, progress_revision
     ) values (
       ${EVAL_FIXTURE_PLAN_CHILD_ID}, 'revision-insert-test',
       ${sql.json(initial.plan)}, 'eval-fixture', '{}'::jsonb,
-      now() + interval '18 days', 999
+      now() + interval '18 days', 999, 999
     )
   `;
-  const [insertedRevision] = await sql<{ plan_revision: string | number }[]>`
-    select plan_revision
+  const [insertedRevision] = await sql<
+    { plan_revision: string | number; progress_revision: string | number }[]
+  >`
+    select plan_revision, progress_revision
     from public.child_plans
     where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
       and subject_id = 'revision-insert-test'
   `;
   assert.equal(Number(insertedRevision.plan_revision), 1);
+  assert.equal(Number(insertedRevision.progress_revision), 0);
 
   await sql`
     update public.child_plans
@@ -157,6 +190,7 @@ try {
   assert.equal(textConflict.status, "conflict");
   assert.equal(textConflict.reason, "activity-mismatch");
   assert.equal(textConflict.done, null);
+  assert.deepEqual(textConflict.progress_snapshot, {});
   assert.equal((await readPlan()).progress["2.0"], undefined);
 
   await sql`
@@ -184,6 +218,7 @@ try {
   assert.equal(revisionConflict.status, "conflict");
   assert.equal(revisionConflict.reason, "revision-mismatch");
   assert.equal(revisionConflict.done, null);
+  assert.deepEqual(revisionConflict.progress_snapshot, {});
   assert.equal((await readPlan()).progress["2.0"], undefined);
 
   const replacement = "Read one chapter, then tell the funniest part.";
@@ -222,9 +257,17 @@ try {
   });
   assert.equal(currentReceipt.status, "applied");
   assert.equal(currentReceipt.done, true);
+  assert.equal(
+    (currentReceipt.progress_snapshot as Record<string, boolean>)["2.0"],
+    true,
+  );
   const afterProgress = await readPlan();
   assert.equal(afterProgress.progress["2.0"], true);
   assert.equal(Number(afterProgress.plan_revision), revision + 2);
+  assert.equal(
+    Number(currentReceipt.progress_revision),
+    Number(afterProgress.progress_revision),
+  );
 
   await sql`
     update public.child_plans
@@ -241,6 +284,7 @@ try {
   assert.equal(invalidProgress.status, "conflict");
   assert.equal(invalidProgress.reason, "invalid-progress");
   assert.equal(invalidProgress.done, null);
+  assert.deepEqual(invalidProgress.progress_snapshot, []);
   await sql`
     update public.child_plans
     set progress = '{}'::jsonb
@@ -248,13 +292,19 @@ try {
       and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
   `;
 
+  const beforeRevisionForgery = await readPlan();
   await sql`
     update public.child_plans
-    set plan_revision = 999
+    set plan_revision = 999, progress_revision = 999
     where child_id = ${EVAL_FIXTURE_PLAN_CHILD_ID}
       and subject_id = ${EVAL_FIXTURE_PLAN_SUBJECT}
   `;
-  assert.equal(Number((await readPlan()).plan_revision), revision + 2);
+  const afterRevisionForgery = await readPlan();
+  assert.equal(Number(afterRevisionForgery.plan_revision), revision + 2);
+  assert.equal(
+    Number(afterRevisionForgery.progress_revision),
+    Number(beforeRevisionForgery.progress_revision),
+  );
 
   await sql`
     update public.child_plans
@@ -292,6 +342,8 @@ try {
   assert.equal(missingPlan.reason, "plan-missing");
   assert.equal(missingPlan.plan_id, null);
   assert.equal(missingPlan.plan_revision, null);
+  assert.equal(missingPlan.progress_revision, null);
+  assert.equal(missingPlan.progress_snapshot, null);
   assert.equal(missingPlan.done, null);
 
   await assert.rejects(
@@ -377,7 +429,7 @@ try {
   console.log("PASS  Planner check-offs preserve concurrent keys");
   console.log("PASS  Planner check-offs reject stale text and revisions");
   console.log("PASS  Planner conflicts carry typed, non-positional receipts");
-  console.log("PASS  plan_revision changes only with plan meaning");
+  console.log("PASS  plan and progress revisions track independent meaning");
   console.log("PASS  Planner check-offs enforce family tenancy");
   console.log("PASS  expand phase preserves the legacy operation");
 } finally {
