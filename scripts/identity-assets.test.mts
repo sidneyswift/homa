@@ -13,6 +13,7 @@ async function manifest() {
     designEra: string;
     sourceFingerprint: string;
     sourceOfTruth: Record<string, string>;
+    geometry: { imagery: { consent: string; provenance: string; representation: string[] } };
     safeAreas: Record<string, { viewBox: string; clearSpace: number; use: string }>;
     consumers: Array<{ path: string; authority: string; role: string }>;
     assets: Array<{
@@ -65,6 +66,9 @@ test("identity consumers are listed and active geometry has no duplicate finding
   assert.ok(value.geometryAudit.retiredDuplicates.length >= 1, "retired geometry must remain visible as quarantined evidence");
   assert.equal(value.sourceOfTruth.identityContract, "packages/design/src/contract/identity.ts");
   assert.equal(value.sourceOfTruth.logoGeometry, "packages/design/src/contract/brand.ts#logoGeometry");
+  assert.equal(value.geometry.imagery.consent, "documented-consent-or-unidentifiable-crop");
+  assert.equal(value.geometry.imagery.provenance, "record-source-rights-and-usage-before-publishing");
+  assert.deepEqual(value.geometry.imagery.representation, ["varied-family-structures", "varied-ages-and-abilities", "no-performative-homeschooling"]);
 });
 
 test("the checked generator is byte-stable in a clean checkout", () => {

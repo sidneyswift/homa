@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "8b56bf820fe6eae4ca4e0cdabebc4864744c8c2cbe27e71d49434841d2aee4dc",
+  "sourceChecksum": "8af1f16544e2bd7af0ae6e2e8b3b0ceb646cad13957319336fc8caef423e248a",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -73,6 +73,13 @@
         "light": "natural-window-light",
         "camera": "family-height",
         "privacy": "no-identifying-family-data",
+        "consent": "documented-consent-or-unidentifiable-crop",
+        "representation": [
+          "varied-family-structures",
+          "varied-ages-and-abilities",
+          "no-performative-homeschooling"
+        ],
+        "provenance": "record-source-rights-and-usage-before-publishing",
         "crop": "preserve-object-and-next-move-safe-zone",
         "prohibited": [
           "staged-stock-as-universal-proof",
@@ -167,6 +174,13 @@
           "light": "natural-window-light",
           "camera": "family-height",
           "privacy": "no-identifying-family-data",
+          "consent": "documented-consent-or-unidentifiable-crop",
+          "representation": [
+            "varied-family-structures",
+            "varied-ages-and-abilities",
+            "no-performative-homeschooling"
+          ],
+          "provenance": "record-source-rights-and-usage-before-publishing",
           "crop": "preserve-object-and-next-move-safe-zone",
           "prohibited": [
             "staged-stock-as-universal-proof",
@@ -735,6 +749,11 @@
           "path": "apps/web/components/brand/thinking-acts.tsx",
           "authority": "components/brand/Logo.tsx",
           "role": "web-character-animation"
+        },
+        {
+          "path": "apps/web/components/design/QuietThread.tsx",
+          "authority": "@homa/design/contract#roofThread",
+          "role": "web-thread-adapter"
         },
         {
           "path": "apps/web/app/world-v3/homa-character.tsx",

@@ -93,6 +93,13 @@
       "light": "natural-window-light",
       "camera": "family-height",
       "privacy": "no-identifying-family-data",
+      "consent": "documented-consent-or-unidentifiable-crop",
+      "representation": [
+        "varied-family-structures",
+        "varied-ages-and-abilities",
+        "no-performative-homeschooling"
+      ],
+      "provenance": "record-source-rights-and-usage-before-publishing",
       "crop": "preserve-object-and-next-move-safe-zone",
       "prohibited": [
         "staged-stock-as-universal-proof",
@@ -210,7 +217,7 @@
       "role": "vcard-derived-embed"
     }
   ],
-  "sourceFingerprint": "15a99b084299d58d5e40043330f8b678ce9bf68e4a2d4b352b8580131881c1e8",
+  "sourceFingerprint": "eca8536f0742ae2320b944d0b60a548b3d562ab17f24bb291870557b3bd4f2b0",
   "assets": [
     {
       "id": "web-lockup-light-svg",

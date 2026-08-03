@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "ca48745c8f5cfe7f65c6cab581edb1b412cfe3caa8bd078409f10e35d4401ee3",
-  "surfaceManifestFingerprint": "f90642e3b85387a1f35b1c9d037f7b757fd43ec64a0c9a2df39569563ae00347",
-  "authoringManifestFingerprint": "f90642e3b85387a1f35b1c9d037f7b757fd43ec64a0c9a2df39569563ae00347",
-  "ownedInputFingerprint": "dc38c423e917e07def628d9d5c31c714da99a8b825b3abbcd83109a982f9b455",
+  "contractSourceChecksum": "8af1f16544e2bd7af0ae6e2e8b3b0ceb646cad13957319336fc8caef423e248a",
+  "surfaceManifestFingerprint": "88590defe24d87cf89a9ed25a7d3bdfecc34d8338215a330069f452c650607a4",
+  "authoringManifestFingerprint": "069d14f75fa887c694e8773fbdac985ace06550786512ad331185e750a7df075",
+  "ownedInputFingerprint": "2b67ab60f998f2f7af0f19b74f19744fb4dca65d5843ba41e4efb0faddd19396",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -605,8 +605,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0",
-      "bytes": 6294,
+      "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3",
+      "bytes": 6392,
       "legacySignatures": []
     },
     {
@@ -616,8 +616,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "3ead999982f4889316654bb842b05e7f35dab8c2482b91ef7ce32de1c632deb4",
-      "bytes": 475,
+      "sourceHash": "7ad2b9d6bc5db0806c31a23524df95457e5a9525cfde29ca1a3b72ba4cfc641c",
+      "bytes": 368,
       "legacySignatures": []
     },
     {
@@ -1631,7 +1631,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "f8f20a0a5b45a654d8dbc384050bbe0c00b9681507e3d74e03436f41bf3966a0"
+          "sourceHash": "bee9338daafb56ad346414b7eec4358ebae554ca95781b3fff11789e79049ed3"
         },
         {
           "file": "video/script.md",
@@ -1857,7 +1857,7 @@
         "docs/homa-design/evidence/surfaces.json"
       ],
       "id": "generator:05b36b5e3e9fc248",
-      "sourceHash": "b72bfa77d837c4f9e15a1b1b5549783f4a109ecc04f03a3cb9ead7ce27357691"
+      "sourceHash": "7dbe7b188f107353bb940cb48ef123ec88cfe97fed760dee08660ec8a703ab1d"
     },
     {
       "path": "scripts/socials-starter-pack-assets.mts",

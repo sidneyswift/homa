@@ -33,6 +33,9 @@ export const imageryDirection = {
   light: "natural-window-light",
   camera: "family-height",
   privacy: "no-identifying-family-data",
+  consent: "documented-consent-or-unidentifiable-crop",
+  representation: ["varied-family-structures", "varied-ages-and-abilities", "no-performative-homeschooling"] as const,
+  provenance: "record-source-rights-and-usage-before-publishing",
   crop: "preserve-object-and-next-move-safe-zone",
   prohibited: ["staged-stock-as-universal-proof", "character-over-object", "decorative-thread-without-meaning"] as const,
 } as const;
