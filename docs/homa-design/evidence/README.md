@@ -11,6 +11,14 @@ or unclassified work. Rows use the approved manifest types, the three
 criticality levels, the ten dispositions, and the five delivery states from
 the implementation plan.
 
+The `brand-inventory-v1` completeness guard is part of
+`pnpm check:brand-surfaces`. It fails closed when authoring, artifacts,
+providers, admin, marketing, native, or external-channel coverage disappears,
+when a row loses its owner or required type, when a trust-critical path is
+under-classified, or when an external provider or durable row has an invalid
+delivery state. It validates the committed inventory only and never promotes
+a row beyond its recorded rollout state or supplies production evidence.
+
 `legacy-baseline.json` is the hash-specific warm-playful baseline. It is a
 quarantined comparison namespace, not an active allowlist. It is excluded from
 product bundles, indexing, generators, and active design discovery.
