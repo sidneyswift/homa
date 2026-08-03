@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getFamilyMaterialsDeep } from "../../../../../lib/admin/family-deep-data";
 import { requireFounder } from "../../../../../lib/admin/gate";
 import { timeAgo } from "../../../../../lib/admin/format";
+import { AdminArtifactPreview } from "../../../artifact-preview";
 import { EmptyNote, Pill, statusTone } from "../../../ui";
 import { FamilyShell, isUuid } from "../family-shell";
 
@@ -44,20 +45,13 @@ export default async function AdminFamilyMaterialsPage({
                   key={material.id}
                   className="overflow-hidden rounded-lg border border-border-subtle bg-card shadow-sm"
                 >
-                  <a
+                  <AdminArtifactPreview
+                    src={material.previewUrl}
+                    alt={`Preview of ${material.title}`}
                     href={material.pdfUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block border-b border-border-subtle bg-[var(--homa-canvas)]"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={material.previewUrl}
-                      alt={`Preview of ${material.title}`}
-                      className="aspect-[8.5/6] w-full object-cover object-top"
-                      loading="lazy"
-                    />
-                  </a>
+                    className="border-0 rounded-none shadow-none"
+                    imageClassName="aspect-[8.5/6]"
+                  />
                   <div className="p-3.5">
                     <p className="truncate font-display text-sm font-bold text-strong">
                       {material.title}
