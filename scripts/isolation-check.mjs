@@ -2869,6 +2869,38 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B child plan fixture",
     );
+    const [childPlanRebuildHistoryB] = await sql`
+      insert into public.child_plan_rebuild_history (
+        child_id,
+        subject_id,
+        plan_id,
+        plan_revision,
+        progress_revision,
+        plan,
+        progress,
+        remapped_progress,
+        source_links,
+        scheduled_days,
+        archived_done_count,
+        preserved_done_count,
+        reason
+      ) values (
+        ${childBId},
+        'isolation-check',
+        ${childPlanBId},
+        1,
+        0,
+        '{}'::jsonb,
+        '{}'::jsonb,
+        '{}'::jsonb,
+        '[]'::jsonb,
+        '[]'::jsonb,
+        0,
+        0,
+        'deep-dive-rebuild'
+      )
+      returning id
+    `;
     // Chat attachments are server-write-only, so the fixture goes in
     // through the privileged connection, like the ChildProgress rows.
     const [chatAttachmentB] = await sql`
@@ -3177,6 +3209,82 @@ async function expectAuthenticatedIsolation() {
       0,
       "auth member cannot read another family's child plan",
     );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryB.id,
+      1,
+      "auth member can read own child plan rebuild history",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryB.id,
+      0,
+      "auth member cannot read another family's child plan rebuild history",
+    );
+    const childPlanRebuildHistoryWriteFixture = {
+      keyColumn: "id",
+      keyValue: childPlanRebuildHistoryB.id,
+      insertRow: {
+        child_id: childBId,
+        subject_id: "isolation-client-forge",
+        plan_id: childPlanBId,
+        plan_revision: 1,
+        progress_revision: 0,
+        plan: {},
+        progress: {},
+        remapped_progress: {},
+        source_links: [],
+        scheduled_days: [],
+        archived_done_count: 0,
+        preserved_done_count: 0,
+        reason: "deep-dive-rebuild",
+      },
+      updateRow: { archived_done_count: 1 },
+    };
+    await expectAuthenticatedWritesDenied(
+      familyBUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryWriteFixture,
+      "auth member cannot mutate own child plan rebuild history",
+    );
+    await expectAuthenticatedWritesDenied(
+      familyAUser.accessToken,
+      "child_plan_rebuild_history",
+      childPlanRebuildHistoryWriteFixture,
+      "cross-family token cannot mutate Family B child plan rebuild history",
+    );
+    const [serverVersion] = await sql`
+      select current_setting('server_version_num') as version_num
+    `;
+    if (Number(serverVersion.version_num) >= 170000) {
+      const [maintainAcl] = await sql`
+        select
+          has_table_privilege(
+            'authenticated',
+            'public.child_plan_rebuild_history',
+            'MAINTAIN'
+          ) as authenticated_can_maintain,
+          has_table_privilege(
+            'anon',
+            'public.child_plan_rebuild_history',
+            'MAINTAIN'
+          ) as anon_can_maintain,
+          has_table_privilege(
+            'service_role',
+            'public.child_plan_rebuild_history',
+            'MAINTAIN'
+          ) as service_can_maintain
+      `;
+      report(
+        "rebuild history maintenance remains server-only",
+        maintainAcl?.authenticated_can_maintain === false &&
+          maintainAcl?.anon_can_maintain === false &&
+          maintainAcl?.service_can_maintain === true,
+        JSON.stringify(maintainAcl),
+      );
+    }
     // toggle_plan_activity_check (migration 20260729160000) is the atomic
     // single-key alternative to the whole-map-replace check-off sync;
     // its authorization check must deny a cross-family child the same
@@ -3844,6 +3952,52 @@ async function expectAuthenticatedIsolation() {
     }
 
     if (planActivityScheduleSchemaAvailable) {
+      const [scheduleFunction] = await sql`
+        select to_regprocedure(
+          'public.schedule_plan_activity_v2(uuid,text,smallint,smallint,date,text,bigint,uuid)'
+        ) is not null as available
+      `;
+      if (scheduleFunction?.available === true) {
+        await expectAuthenticatedRpcDenied(
+          familyAUser.accessToken,
+          "schedule_plan_activity_v2",
+          {
+            target_child_id: childBId,
+            target_subject_id: "isolation-check",
+            target_week: 1,
+            target_activity_index: 0,
+            target_scheduled_date: "2026-01-04",
+            target_expected_text: "Cross-family source.",
+            target_plan_revision: 1,
+            target_schedule_id: null,
+          },
+          "auth member cannot schedule another family's plan activity",
+        );
+        const [schedulePrivileges] = await sql`
+          select
+            has_function_privilege(
+              'authenticated',
+              'public.schedule_plan_activity_v2(uuid,text,smallint,smallint,date,text,bigint,uuid)',
+              'execute'
+            ) as authenticated_can_execute,
+            has_function_privilege(
+              'anon',
+              'public.schedule_plan_activity_v2(uuid,text,smallint,smallint,date,text,bigint,uuid)',
+              'execute'
+            ) as anon_can_execute
+        `;
+        report(
+          "schedule RPC is authenticated-only",
+          schedulePrivileges?.authenticated_can_execute === true &&
+            schedulePrivileges?.anon_can_execute === false,
+          JSON.stringify(schedulePrivileges),
+        );
+      } else {
+        report(
+          "schedule RPC absent from target (additive migration not applied yet); nothing exposed",
+          true,
+        );
+      }
       await expectAuthenticatedRead(
         familyBUser.accessToken,
         "plan_activity_schedule",
@@ -4367,6 +4521,7 @@ await expectReadDenied("family_phone_access_epochs");
 await expectEmptyRead("child_answers");
 await expectEmptyRead("child_reports");
 await expectEmptyRead("child_plans");
+await expectReadDenied("child_plan_rebuild_history");
 // Product report tables (migration #23): family-scoped by RLS through
 // is_child_family_member. Anon has no policy, so reads return nothing;
 // cross-family access is proven by the same identity model as children.
@@ -4999,6 +5154,25 @@ await expectInsertDenied(
     retest_at: "2026-01-01T00:00:00Z",
   },
   "anon cannot forge child_plans",
+);
+await expectInsertDenied(
+  "child_plan_rebuild_history",
+  {
+    child_id: "00000000-0000-0000-0000-000000000000",
+    subject_id: "math",
+    plan_id: "00000000-0000-0000-0000-000000000000",
+    plan_revision: 1,
+    progress_revision: 0,
+    plan: {},
+    progress: {},
+    remapped_progress: {},
+    source_links: [],
+    scheduled_days: [],
+    archived_done_count: 0,
+    preserved_done_count: 0,
+    reason: "deep-dive-rebuild",
+  },
+  "anon cannot forge child plan rebuild history",
 );
 await expectInsertDenied(
   "child_progress_evidence",

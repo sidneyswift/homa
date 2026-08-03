@@ -19,6 +19,7 @@ import { runPlanNarrative } from "../../../../../../lib/map/narrative-runner";
 import { requireFamily } from "../../../../../../lib/map/session";
 import {
   getOrBuildPlan,
+  getPlanRebuildReceipt,
   getReportEventIdsByToken,
   planExists,
 } from "../../../../../../lib/map/store";
@@ -59,10 +60,10 @@ export default async function PlanPage({
   searchParams,
 }: {
   params: Promise<{ token: string; subjectId: string }>;
-  searchParams: Promise<{ rebuilt?: string; built?: string; cleared?: string }>;
+  searchParams: Promise<{ rebuilt?: string; built?: string; receipt?: string }>;
 }) {
   const { token, subjectId } = await params;
-  const { rebuilt, built, cleared } = await searchParams;
+  const { rebuilt, built, receipt } = await searchParams;
   const domain = getMapSubject(subjectId);
   const isMonth = subjectId === MONTH_PLAN_SUBJECT;
 
@@ -130,15 +131,19 @@ export default async function PlanPage({
   if ((domain || isMonth) && rebuilt === "1") {
     const rebuiltPlan = await getOrBuildPlan(token, subjectId, { rebuild: true });
     if (rebuiltPlan) {
-      // ?cleared=1 carries the rebuild's calendar receipt across the
-      // redirect: the rebuild took the old month's placed days off the
-      // calendar (issue #256), and the banner below says so.
-      const clearedParam = rebuiltPlan.clearedScheduledDays > 0 ? "&cleared=1" : "";
-      redirect(`/onboarding/r/${token}/plan/${subjectId}?built=1${clearedParam}`);
+      const next = new URLSearchParams({ built: "1" });
+      if (rebuiltPlan.rebuildHistoryId) {
+        next.set("receipt", rebuiltPlan.rebuildHistoryId);
+      }
+      redirect(`/onboarding/r/${token}/plan/${subjectId}?${next.toString()}`);
     }
   }
 
   const result = domain || isMonth ? await getOrBuildPlan(token, subjectId) : null;
+  const rebuildReceipt =
+    built === "1" && receipt
+      ? await getPlanRebuildReceipt(token, subjectId, receipt)
+      : null;
 
   if (!result) {
     return (
@@ -264,12 +269,61 @@ export default async function PlanPage({
 
           <div className="px-7 py-7 sm:px-10">
             {built === "1" ? (
-              <p className="mb-4 rounded-md px-4 py-3 text-sm font-semibold" style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}>
-                Built from your deep dive: this month aims at exactly what you just pinned down.
-                {cleared === "1"
-                  ? " The new month starts fresh, so the calendar days placed for the old one came off with it. You can put the new weeks on real days whenever you like."
-                  : null}
-              </p>
+              <div
+                className="mb-4 space-y-1.5 rounded-md px-4 py-3 text-sm"
+                style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
+                aria-label="Plan update"
+              >
+                <p className="font-semibold">
+                  {rebuildReceipt
+                    ? "Your updated four-week plan is ready."
+                    : "Your four-week plan is ready."}
+                </p>
+                <p>
+                  Homa {rebuildReceipt ? "rebuilt" : "built"} it from what you just shared.
+                </p>
+                {rebuildReceipt && rebuildReceipt.preservedDoneCount > 0 ? (
+                  <p>
+                    {rebuildReceipt.preservedDoneCount}{" "}
+                    {rebuildReceipt.preservedDoneCount === 1
+                      ? "completed activity appears"
+                      : "completed activities appear"}{" "}
+                    in both plans, so{" "}
+                    {rebuildReceipt.preservedDoneCount === 1
+                      ? "its checkmark stayed."
+                      : "their checkmarks stayed."}
+                  </p>
+                ) : null}
+                {rebuildReceipt && rebuildReceipt.archivedUnmatchedDoneCount > 0 ? (
+                  <p>
+                    {rebuildReceipt.archivedUnmatchedDoneCount}{" "}
+                    {rebuildReceipt.archivedUnmatchedDoneCount === 1
+                      ? "old checkmark does not match an activity"
+                      : "old checkmarks do not match any activities"}{" "}
+                    in this plan. Homa kept{" "}
+                    {rebuildReceipt.archivedUnmatchedDoneCount === 1 ? "it" : "them"}{" "}
+                    with the old plan, but{" "}
+                    {rebuildReceipt.archivedUnmatchedDoneCount === 1
+                      ? "it is not shown"
+                      : "they are not shown"}{" "}
+                    on this page.
+                  </p>
+                ) : null}
+                {rebuildReceipt && rebuildReceipt.clearedScheduledDays > 0 ? (
+                  <p>
+                    Activities scheduled from the old plan were removed from Homa&apos;s Planner.
+                  </p>
+                ) : null}
+                {rebuildReceipt ? <p>This plan is unscheduled.</p> : null}
+                {rebuildReceipt ? (
+                  <Link
+                    href="/app/planner"
+                    className="inline-flex min-h-11 items-center font-semibold text-brand underline-offset-2 hover:underline"
+                  >
+                    Open Planner
+                  </Link>
+                ) : null}
+              </div>
             ) : null}
             {introText ? (
               <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
@@ -332,9 +386,8 @@ export default async function PlanPage({
 
             <PlanWeeks
               weeks={plan.weeks}
-              storageKey={`homa-plan-${token}-${subjectId}`}
               weekLines={weekLines}
-              childId={result.childId}
+              reportToken={token}
               subjectId={subjectId}
               initialChecks={result.progress}
             />

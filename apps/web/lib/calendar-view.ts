@@ -284,12 +284,6 @@ export interface CalendarActivityItem {
    * can never show text that no longer matches the real plan. */
   text: string;
   done: boolean;
-  /** The child's report token, the same identity usePlanChecks syncs
-   * check-offs under on every other plan surface. Null on the rare
-   * child-plans-without-a-report edge case; the component renders the
-   * activity read-only rather than wiring a checkbox with no sync
-   * identity to write to. */
-  token: string | null;
 }
 
 export interface CalendarEventItem {
@@ -343,9 +337,6 @@ export interface BuildCalendarBoardInput {
   scheduledActivities: readonly PlanActivityScheduleRow[];
   familyEvents: readonly FamilyEventRow[];
   hoursEntries: readonly Pick<HoursLogRow, "childId" | "happenedOn" | "minutes">[];
-  /** Each visible child's report token (the check-off sync identity
-   * every other plan surface already uses), keyed by childId. */
-  reportTokens: ReadonlyMap<string, string | null>;
   now: Date;
   timeZone: string;
   /** One kid selected in the context switcher, or null for everyone. */
@@ -420,7 +411,6 @@ export function buildCalendarBoard(input: BuildCalendarBoardInput): CalendarBoar
       checkId,
       text,
       done: Boolean(plan.progress[checkId]),
-      token: input.reportTokens.get(row.childId) ?? null,
     });
   }
 

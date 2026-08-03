@@ -71,6 +71,9 @@ export interface PlannerWeekSummary {
 export interface PlannerPlanPayload {
   subjectId: string;
   subjectName: string;
+  /** The revision that must accompany any edit or schedule write. Null is
+   * reserved for an unsaved provisional age-based plan. */
+  planRevision: number | null;
   currentWeekNumber: number;
   doneCount: number;
   totalCount: number;
@@ -158,6 +161,7 @@ export function shapePlannerPlan(
   const base = {
     subjectId: plan.subjectId,
     subjectName: subjectDisplayName(plan.subjectId),
+    planRevision: plan.planRevision,
     currentWeekNumber: plan.weeks[currentIdx]?.week ?? 1,
     doneCount: plan.done,
     totalCount: plan.total,

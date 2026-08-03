@@ -39,7 +39,7 @@ import {
 
 export default defineBoundedTool({
   description:
-    "Give one plan activity a real calendar date, so it shows up in Planner on that day. Use when the parent names a day for an existing activity ('let's do the math worksheet Tuesday', 'move story time to Thursday'), or right after finalizing a material built for a specific plan activity when the parent named a day for it. Always call open_planner first in this conversation to get real week and activity indices; never guess them. Re-scheduling the same activity (same child, subject, week, index) just moves its date, it never creates a duplicate.",
+    "Give one plan activity a real calendar date, so it shows up in Planner on that day. Use when the parent names a day for an existing activity ('let's do the math worksheet Tuesday', 'move story time to Thursday'), or right after finalizing a material built for a specific plan activity when the parent named a day for it. Always call open_planner first in this conversation to get the real week, activity index, exact activity text, and plan revision; never guess any of them. Re-scheduling the same activity (same child, subject, week, index) just moves its date, it never creates a duplicate. If the plan changed after open_planner, report the conflict and open the planner again.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z
@@ -57,6 +57,17 @@ export default defineBoundedTool({
         .int()
         .min(0)
         .describe("The activity's index within that week, from open_planner."),
+      planRevision: z
+        .number()
+        .int()
+        .min(1)
+        .describe("The positive plan revision returned by open_planner for this activity."),
+      expectedText: z
+        .string()
+        .trim()
+        .min(1)
+        .max(4000)
+        .describe("The exact activity text returned by open_planner, copied without rewriting."),
       scheduledDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)

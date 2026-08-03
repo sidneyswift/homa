@@ -17,6 +17,7 @@ import {
   useScreenReaderEnabled,
 } from "../../lib/accessibility";
 import { toggleActivityCheck } from "../../lib/child-plans";
+import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
 import { scheduleActivity } from "../../lib/plan-schedule";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
@@ -586,6 +587,8 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
     loading,
     error: plannerError,
     reload,
+    reconcileAfterAmbiguousWrite,
+    applyActivityCheck,
   } = usePlannerData(family?.id ?? null, children, weekStart, weekEnd);
   const [schedulingActivity, setSchedulingActivity] =
     useState<PlanActivityView | null>(null);
@@ -609,14 +612,26 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
   );
 
   async function handleToggleActivity(activity: ScheduledActivityView) {
-    await toggleActivityCheck(
-      activity.childId,
-      activity.subjectId,
-      activity.week,
-      activity.activityIndex,
-      !activity.done,
-    );
+    let outcome;
+    try {
+      outcome = await toggleActivityCheck({
+        childId: activity.childId,
+        subjectId: activity.subjectId,
+        checkKey: activity.checkKey,
+        done: !activity.done,
+        expectedText: activity.text,
+        planRevision: activity.planRevision,
+      });
+    } catch (cause) {
+      await reconcileAfterAmbiguousWrite();
+      throw cause;
+    }
+    if (outcome.status === "applied") {
+      applyActivityCheck(activity, outcome);
+      return;
+    }
     await reload();
+    throw new PlanActivityCheckConflictError(outcome);
   }
 
   async function handleScheduleActivity(date: DateOnly) {
@@ -629,6 +644,8 @@ function PlannerOverlayBody({ refreshCount }: { refreshCount: number }) {
       subjectId: schedulingActivity.subjectId,
       week: schedulingActivity.week,
       activityIndex: schedulingActivity.activityIndex,
+      planRevision: schedulingActivity.planRevision,
+      expectedText: schedulingActivity.text,
       scheduledDate: date,
     });
     setSchedulingActivity(null);

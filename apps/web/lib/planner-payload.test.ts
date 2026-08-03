@@ -28,6 +28,8 @@ function plan(nowMs: number, overrides: Partial<DashboardPlan> = {}): DashboardP
   return {
     childId: "child-1",
     subjectId: "math",
+    planRevision: 1,
+    progressRevision: 1,
     done: 1,
     total: 8,
     retestAt: retestForWeekTwo(nowMs),

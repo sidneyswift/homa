@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import type { FamilyEventRow } from "../../../lib/family-events";
@@ -32,7 +32,7 @@ import {
 } from "./actions";
 import { setViewContextAction } from "../view-context-actions";
 import { VIEW_CONTEXT_FAMILY } from "../../../lib/view-context";
-import { planChecksStorageKey, usePlanChecks } from "../../../lib/use-plan-checks";
+import { useAuthenticatedPlanChecks } from "../../../lib/use-authenticated-plan-checks";
 import { avatarTone, KidAvatar } from "../../../components/dashboard/kid-avatar";
 
 /**
@@ -183,21 +183,19 @@ function ActivityCard({
   item,
   tone,
   kid,
+  checked,
+  pending,
+  writable,
+  onToggle,
 }: {
   item: CalendarActivityItem;
   tone: readonly [string, string];
   kid: { name: string; index: number; avatarUrl: string | null } | null;
+  checked: boolean;
+  pending: boolean;
+  writable: boolean;
+  onToggle: () => void;
 }) {
-  // Wired to the token only when one exists; the rare token-less edge
-  // case (see lib/calendar-view.ts's CalendarActivityItem.token comment)
-  // still shows the activity, just without a working checkbox.
-  const checks = usePlanChecks({
-    storageKey: planChecksStorageKey(item.token ?? "no-token", item.subjectId),
-    childId: item.childId,
-    subjectId: item.subjectId,
-    initialChecks: { [item.checkId]: item.done },
-  });
-  const checked = item.token ? Boolean(checks.done[item.checkId]) : item.done;
   const [bg, ink] = tone;
 
   return (
@@ -217,8 +215,9 @@ function ActivityCard({
         <input
           type="checkbox"
           checked={checked}
-          disabled={!item.token}
-          onChange={() => item.token && checks.toggle(item.checkId)}
+          disabled={!writable}
+          aria-busy={pending}
+          onChange={onToggle}
           className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-[var(--sage-500)]"
         />
         <span
@@ -238,7 +237,6 @@ function ActivityCard({
 export function CalendarView({
   kids,
   plans,
-  reports,
   familyEvents,
   scheduledActivities,
   hoursEntries,
@@ -251,7 +249,6 @@ export function CalendarView({
   /** The FULL family roster, always (tone/avatar keys off list position). */
   kids: CalendarKid[];
   plans: DashboardPlan[];
-  reports: Map<string, { token: string | null }>;
   familyEvents: FamilyEventRow[];
   scheduledActivities: PlanActivityScheduleRow[];
   hoursEntries: { childId: string | null; happenedOn: string; minutes: number }[];
@@ -302,6 +299,11 @@ export function CalendarView({
   // Edit from the detail card). Saving goes through the server actions,
   // then router.refresh() re-reads the week from the source of truth.
   const router = useRouter();
+  const refreshPlanChecks = useCallback(() => router.refresh(), [router]);
+  const planChecks = useAuthenticatedPlanChecks({
+    plans,
+    refresh: refreshPlanChecks,
+  });
   const [composer, setComposer] = useState<ComposerState | null>(null);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -511,7 +513,6 @@ export function CalendarView({
     scheduledActivities,
     familyEvents,
     hoursEntries,
-    reportTokens: new Map(kids.map((kid) => [kid.id, reports.get(kid.id)?.token ?? null])),
     now,
     timeZone,
     focusChildId: selectedKidId,
@@ -632,6 +633,21 @@ export function CalendarView({
 
   return (
     <>
+      {planChecks.getMessage() ? (
+        <div
+          role="status"
+          className="mb-3 flex items-start justify-between gap-3 rounded-md border border-border bg-card p-3 text-sm text-body"
+        >
+          <span>{planChecks.getMessage()}</span>
+          <button
+            type="button"
+            onClick={() => planChecks.clearMessage()}
+            className="font-semibold text-brand hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
       {/* One compact header row (a veteran mom's request: the afternoon
           belongs above the fold, not a tall title stack) */}
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -907,6 +923,10 @@ export function CalendarView({
                   >
                     {day.cards.map(({ item, kidIndex }) => {
                       const kid = kids[kidIndex];
+                      const writable = planChecks.isWritable(
+                        item.childId,
+                        item.subjectId,
+                      );
                       return (
                         <ActivityCard
                           key={item.key}
@@ -916,6 +936,29 @@ export function CalendarView({
                             kid && selectedKidId === null
                               ? { name: kid.name, index: kidIndex, avatarUrl: kid.avatar_url }
                               : null
+                          }
+                          writable={writable}
+                          checked={
+                            writable
+                              ? planChecks.isChecked(
+                                  item.childId,
+                                  item.subjectId,
+                                  item.checkId,
+                                )
+                              : item.done
+                          }
+                          pending={planChecks.isPending(
+                            item.childId,
+                            item.subjectId,
+                            item.checkId,
+                          )}
+                          onToggle={() =>
+                            planChecks.toggle({
+                              childId: item.childId,
+                              subjectId: item.subjectId,
+                              checkKey: item.checkId,
+                              expectedText: item.text,
+                            })
                           }
                         />
                       );

@@ -3,7 +3,11 @@ import { describe, it } from "node:test";
 
 import type { FourWeekPlan } from "@homa/core";
 
-import { editPlanActivities, writeRebuiltPlan } from "./store";
+import {
+  editPlanActivities,
+  getPlanRebuildReceipt,
+  writeRebuiltPlan,
+} from "./store";
 
 /**
  * The transactional shape of the two schedule-cascade writes (issue
@@ -83,6 +87,7 @@ function fakeDb(respond: (text: string, args: unknown[]) => unknown[] | Error): 
 function respondForEdit(options: {
   scheduled: { activity_index: number; scheduled_date: string }[];
   failInsert?: boolean;
+  failUpdate?: boolean;
   canonicalSources?: {
     id: string;
     title: string;
@@ -99,8 +104,8 @@ function respondForEdit(options: {
 }) {
   return (text: string): unknown[] | Error => {
     if (/select id from public\.children/u.test(text)) return [{ id: CHILD }];
-    if (/select id, plan, progress from public\.child_plans/u.test(text)) {
-      return [{ id: "plan-1", plan: plan(), progress: { "1.0": true } }];
+    if (/select id, plan, progress, plan_revision from public\.child_plans/u.test(text)) {
+      return [{ id: "plan-1", plan: plan(), progress: { "1.0": true }, plan_revision: 1 }];
     }
     if (
       /select id, title, unit_source_locator as "sourceLocator"/u.test(text)
@@ -113,6 +118,9 @@ function respondForEdit(options: {
       return options.existingSources ?? [];
     }
     if (/select activity_index, scheduled_date/u.test(text)) return options.scheduled;
+    if (/update public\.child_plans/u.test(text)) {
+      return options.failUpdate ? [] : [{ id: "plan-1" }];
+    }
     if (options.failInsert && /insert into public\.plan_activity_schedule/u.test(text)) {
       return new Error("connection reset mid-cascade");
     }
@@ -313,6 +321,27 @@ describe("editPlanActivities schedule cascade (issue #256)", () => {
     assert.equal(familyTouch, undefined);
   });
 
+  it("rejects a revision race before touching the schedule cascade", async () => {
+    const db = fakeDb(
+      respondForEdit({
+        scheduled: [{ activity_index: 0, scheduled_date: "2026-08-03" }],
+        failUpdate: true,
+      }),
+    );
+    const outcome = await editPlanActivities(
+      FAMILY,
+      CHILD,
+      "math",
+      [{ action: "remove", week: 1, index: 0 }],
+      db.sql as Parameters<typeof editPlanActivities>[4],
+    );
+    assert.equal(outcome.status, "stale");
+    assert.equal(
+      db.statements.some((statement) => /plan_activity_schedule/u.test(statement.text)),
+      false,
+    );
+  });
+
   it("writes nothing for a child outside the family", async () => {
     const db = fakeDb((text) =>
       /select id from public\.children/u.test(text) ? [] : [],
@@ -334,32 +363,110 @@ describe("editPlanActivities schedule cascade (issue #256)", () => {
 });
 
 describe("writeRebuiltPlan (issue #256)", () => {
-  function respondForRebuild(cleared: number) {
+  function respondForRebuild(options: {
+    existing?: boolean;
+    cleared?: number;
+    clearedLinks?: number;
+    failUpsert?: boolean;
+  } = {}) {
+    const existing = options.existing ?? true;
+    const nextProgress = existing ? { "2.1": true } : {};
     return (text: string): unknown[] | Error => {
+      if (/select id from public\.children/u.test(text)) return [{ id: CHILD }];
+      if (/select id, plan, progress, plan_revision/u.test(text)) {
+        return existing
+          ? [
+              {
+                id: "plan-1",
+                plan: plan(),
+                progress: { "1.0": true, "1.1": true },
+                plan_revision: 4,
+                progress_revision: 8,
+              },
+            ]
+          : [];
+      }
+      if (/select asset_id, week, activity_index, activity_text/u.test(text)) {
+        return [
+          {
+            asset_id: ASSET,
+            week: 1,
+            activity_index: 0,
+            activity_text: "Count to 20 daily",
+            source_title: "Counting workbook",
+            source_locator: "Page 2",
+          },
+        ];
+      }
+      if (/select week, activity_index,/u.test(text)) {
+        return [{ week: 1, activity_index: 0, scheduled_date: "2026-08-03" }];
+      }
+      if (/insert into public\.child_plan_rebuild_history/u.test(text)) {
+        return [{ id: "history-1" }];
+      }
       if (/insert into public\.child_plans/u.test(text)) {
-        return [{ retest_at: "2026-08-31 00:00:00" }];
+        if (options.failUpsert) return new Error("replacement failed");
+        return [{ retest_at: "2026-08-31 00:00:00", progress: nextProgress }];
       }
       if (/delete from public\.plan_activity_schedule/u.test(text)) {
-        return Array.from({ length: cleared }, (_, index) => ({ id: `row-${index}` }));
+        return Array.from({ length: options.cleared ?? 0 }, (_, index) => ({
+          id: `row-${index}`,
+        }));
+      }
+      if (/delete from public\.family_asset_plan_links/u.test(text)) {
+        return Array.from({ length: options.clearedLinks ?? 0 }, (_, index) => ({
+          id: `link-${index}`,
+        }));
       }
       return [];
     };
   }
 
-  it("upserts the plan and clears that plan's schedule rows in one transaction", async () => {
-    const db = fakeDb(respondForRebuild(2));
+  function rebuiltPlan(): FourWeekPlan {
+    return plan({
+      weeks: [
+        { week: 1, focus: "new work", activities: ["Try a new puzzle"] },
+        {
+          week: 2,
+          focus: "counting",
+          activities: ["Sort the blocks", "Count to 20 daily"],
+        },
+      ],
+    });
+  }
+
+  it("archives the old meaning, remaps exact completion, and clears positional rows atomically", async () => {
+    const db = fakeDb(respondForRebuild({ cleared: 2, clearedLinks: 1 }));
     const written = await writeRebuiltPlan(db.sql as Parameters<typeof writeRebuiltPlan>[0], {
       familyId: FAMILY,
       childId: CHILD,
       subjectId: "math",
-      plan: plan(),
+      plan: rebuiltPlan(),
     });
     assert.equal(written.retestAt, "2026-08-31 00:00:00");
+    assert.deepEqual(written.progress, { "2.1": true });
     assert.equal(written.clearedScheduledDays, 2);
+    assert.equal(written.clearedSourceLinks, 1);
+    assert.equal(written.archivedDoneCount, 2);
+    assert.equal(written.preservedDoneCount, 1);
+    assert.equal(written.archivedUnmatchedDoneCount, 1);
+    assert.equal(written.rebuildHistoryId, "history-1");
 
     for (const statement of db.statements) {
       assert.ok(statement.inTx, `must run inside the transaction: ${statement.text}`);
     }
+    const archiveAt = db.statements.findIndex((statement) =>
+      /insert into public\.child_plan_rebuild_history/u.test(statement.text),
+    );
+    const replaceAt = db.statements.findIndex((statement) =>
+      /insert into public\.child_plans/u.test(statement.text),
+    );
+    assert.ok(archiveAt >= 0 && archiveAt < replaceAt, "history lands before replacement");
+    const archive = db.statements[archiveAt];
+    assert.deepEqual(archive.args.slice(0, 5), [CHILD, "math", "plan-1", 4, 8]);
+    assert.deepEqual(archive.args[6], { "1.0": true, "1.1": true });
+    assert.deepEqual(archive.args[7], { "2.1": true });
+
     const clear = db.statements.find((statement) =>
       /delete from public\.plan_activity_schedule/u.test(statement.text),
     );
@@ -368,14 +475,110 @@ describe("writeRebuiltPlan (issue #256)", () => {
     assert.deepEqual(clear.args, [FAMILY, CHILD, "math"]);
   });
 
-  it("reports zero cleared days for a first build with nothing scheduled", async () => {
-    const db = fakeDb(respondForRebuild(0));
+  it("writes a first plan without inventing history", async () => {
+    const db = fakeDb(respondForRebuild({ existing: false }));
     const written = await writeRebuiltPlan(db.sql as Parameters<typeof writeRebuiltPlan>[0], {
       familyId: FAMILY,
       childId: CHILD,
       subjectId: "math",
       plan: plan(),
     });
+    assert.equal(written.wasNew, true);
+    assert.deepEqual(written.progress, {});
     assert.equal(written.clearedScheduledDays, 0);
+    assert.equal(written.rebuildHistoryId, null);
+    assert.equal(
+      db.statements.some((statement) =>
+        /insert into public\.child_plan_rebuild_history/u.test(statement.text),
+      ),
+      false,
+    );
+  });
+
+  it("rejects a child outside the family before any plan write", async () => {
+    const db = fakeDb((text) =>
+      /select id from public\.children/u.test(text) ? [] : [],
+    );
+    await assert.rejects(
+      writeRebuiltPlan(db.sql as Parameters<typeof writeRebuiltPlan>[0], {
+        familyId: FAMILY,
+        childId: CHILD,
+        subjectId: "math",
+        plan: plan(),
+      }),
+      /does not belong/u,
+    );
+    assert.equal(
+      db.statements.some((statement) =>
+        /insert into public\.child_plans|child_plan_rebuild_history/u.test(
+          statement.text,
+        ),
+      ),
+      false,
+    );
+  });
+
+  it("never reports success when replacement fails after the archive statement", async () => {
+    const db = fakeDb(respondForRebuild({ failUpsert: true }));
+    await assert.rejects(
+      writeRebuiltPlan(db.sql as Parameters<typeof writeRebuiltPlan>[0], {
+        familyId: FAMILY,
+        childId: CHILD,
+        subjectId: "math",
+        plan: rebuiltPlan(),
+      }),
+      /replacement failed/u,
+    );
+    assert.ok(
+      db.statements
+        .filter((statement) =>
+          /child_plan_rebuild_history|insert into public\.child_plans/u.test(
+            statement.text,
+          ),
+        )
+        .every((statement) => statement.inTx),
+    );
+  });
+});
+
+describe("getPlanRebuildReceipt", () => {
+  it("derives claims only from history scoped to the token, subject, and current plan", async () => {
+    const db = fakeDb((text) =>
+      /from public\.child_plan_rebuild_history/u.test(text)
+        ? [
+            {
+              preserved_done_count: "2",
+              archived_unmatched_done_count: "1",
+              cleared_scheduled_days: "3",
+            },
+          ]
+        : [],
+    );
+    const receipt = await getPlanRebuildReceipt(
+      "report-token",
+      "math",
+      "history-1",
+      db.sql as Parameters<typeof getPlanRebuildReceipt>[3],
+    );
+    assert.deepEqual(receipt, {
+      preservedDoneCount: 2,
+      archivedUnmatchedDoneCount: 1,
+      clearedScheduledDays: 3,
+    });
+    assert.equal(db.statements.length, 1);
+    assert.deepEqual(db.statements[0].args, ["report-token", "math", "history-1"]);
+    assert.match(db.statements[0].text, /join public\.child_reports/u);
+    assert.match(db.statements[0].text, /join public\.child_plans/u);
+  });
+
+  it("returns no claims for a receipt outside the joined boundary", async () => {
+    const db = fakeDb(() => []);
+    const receipt = await getPlanRebuildReceipt(
+      "report-token",
+      "math",
+      "foreign-history",
+      db.sql as Parameters<typeof getPlanRebuildReceipt>[3],
+    );
+    assert.equal(receipt, null);
   });
 });

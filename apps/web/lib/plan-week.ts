@@ -20,6 +20,10 @@ import { profileInterestList } from "./map/profile-context";
 export interface DashboardPlan {
   childId: string;
   subjectId: string;
+  /** Changes only when plan JSON changes. Null for an unstored template. */
+  planRevision: number | null;
+  /** Orders progress snapshots. Null for an unstored template. */
+  progressRevision: number | null;
   /** Check-offs done vs total activities, counted from the synced map. */
   done: number;
   total: number;
@@ -91,6 +95,8 @@ export function withAgeTemplates(
       {
         childId: child.id,
         subjectId: MONTH_PLAN_SUBJECT,
+        planRevision: null,
+        progressRevision: null,
         done: 0,
         total: template.weeks.reduce((sum, week) => sum + week.activities.length, 0),
         // Week one starts today: retestAt minus 28 days is read as the
@@ -171,6 +177,8 @@ export function dashboardPlanFromRow(row: {
   plan: FourWeekPlan;
   progress: Record<string, boolean> | null;
   retest_at: string;
+  plan_revision: number | string;
+  progress_revision: number | string;
 }): DashboardPlan | null {
   const weeks = Array.isArray(row.plan?.weeks) ? row.plan.weeks.filter(validPlanWeek) : [];
   if (weeks.length === 0) return null;
@@ -178,6 +186,8 @@ export function dashboardPlanFromRow(row: {
   return {
     childId: row.child_id,
     subjectId: row.subject_id,
+    planRevision: Number(row.plan_revision),
+    progressRevision: Number(row.progress_revision),
     done: Object.values(progress).filter(Boolean).length,
     total: weeks.reduce((sum, week) => sum + week.activities.length, 0),
     retestAt: row.retest_at,

@@ -55,7 +55,7 @@ const NO_PANEL_CHANNELS = new Set(["sms", "email", "dispatch", "agent-job"]);
 
 export default defineBoundedTool({
   description:
-    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit or schedule a plan and need the current activities with their indices and real scheduled dates. Pass childId to get that child's plans with all four weeks in full; without it every plan returns its current week plus per-week summaries. Each activity in a full week carries scheduledDate, the real persisted calendar date from schedule_plan_activity, or null when it has never been put on a day. In web chat this opens the planner panel next to the conversation, and in the phone app the week slides up in place; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan or schedule_plan_activity.",
+    "Open the family's week planner beside the chat and see what is on it. Use when the parent asks what is planned, wants to see or adjust the week or the month, asks to schedule an existing lesson or curriculum onto the planner, asks how to input things into the planner, or when you are about to edit or schedule a plan and need the current activities, exact text, plan revision, indices, and real scheduled dates. Pass childId to get that child's plans with all four weeks in full; without it every plan returns its current week plus per-week summaries. Each stored plan includes planRevision, and each activity in a full week carries scheduledDate, the real persisted calendar date from schedule_plan_activity, or null when it has never been put on a day. In web chat this opens the planner panel next to the conversation, and in the phone app the week slides up in place; over SMS or email no panel opens, so tell the week in plain words instead. Read-only; make changes with edit_plan or schedule_plan_activity.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
@@ -142,7 +142,7 @@ export default defineBoundedTool({
           : "No planner panel opens on this channel: share the week in your own words.",
         hasStored
           ? [
-              "Activity indices above are what edit_plan and schedule_plan_activity address.",
+              "Activity indices above are what edit_plan and schedule_plan_activity address. Copy the planRevision and exact activity text into a write; they prove the slot is still the one the parent saw.",
               "scheduledDate is the activity's real calendar date; null means the parent has not put it on a day.",
               fullWeeks
                 ? ""
