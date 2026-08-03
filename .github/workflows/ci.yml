@@ -397,6 +397,9 @@ jobs:
       - name: Design contract type and semantic tests
         run: pnpm check:design-contract
 
+      - name: Semantic icon direct-import residue check
+        run: pnpm check:icon-residue
+
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 

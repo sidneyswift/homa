@@ -49,4 +49,74 @@ export const semanticIconAliases = {
   stop: "Square",
 } as const satisfies Record<SemanticIconName, string>;
 
-export const ICON_CONTRACT = { version: DESIGN_CONTRACT_VERSION, iconContract, semanticIcons, semanticIconAliases } as const;
+export type SemanticIconPlatform = "web" | "native";
+export type SemanticIconRegistry<TGlyph> = Readonly<Record<SemanticIconName, TGlyph>>;
+
+/**
+ * The adapter contract keeps platform ownership explicit. A platform may
+ * choose a different component implementation later, but it cannot invent a
+ * role or silently fall back to a guessed glyph.
+ */
+export const semanticIconAdapterContract = {
+  platforms: ["web", "native"] as const,
+  packages: {
+    web: "lucide-react",
+    native: "lucide-react-native",
+  },
+  unknownRole: "throw",
+  sourcePolicy: "registry-only",
+} as const satisfies {
+  platforms: readonly SemanticIconPlatform[];
+  packages: Record<SemanticIconPlatform, string>;
+  unknownRole: "throw";
+  sourcePolicy: "registry-only";
+};
+
+/** The aliases are intentionally shared until a platform needs an optical adjustment. */
+export const semanticIconAdapters = {
+  web: semanticIconAliases,
+  native: semanticIconAliases,
+} as const satisfies Record<SemanticIconPlatform, SemanticIconRegistry<string>>;
+
+export function isSemanticIconName(value: string): value is SemanticIconName {
+  return (semanticIcons as readonly string[]).includes(value);
+}
+
+/**
+ * Validate a platform registry at its adapter boundary. This catches missing
+ * and extra roles even when a caller is JavaScript or has widened a value.
+ */
+export function createSemanticIconRegistry<TGlyph>(
+  platform: SemanticIconPlatform,
+  registry: SemanticIconRegistry<TGlyph>,
+): SemanticIconRegistry<TGlyph> {
+  const expected = new Set<string>(semanticIcons);
+  const actual = Object.keys(registry);
+  const missing = semanticIcons.filter((name) => !(name in registry));
+  const extra = actual.filter((name) => !expected.has(name));
+  if (missing.length > 0 || extra.length > 0) {
+    throw new Error(`Invalid ${platform} semantic icon registry: missing=${missing.join(",") || "none"}; extra=${extra.join(",") || "none"}`);
+  }
+  return registry;
+}
+
+/** Resolve an icon role without allowing unknown values to disappear. */
+export function getSemanticIcon<TGlyph>(
+  platform: SemanticIconPlatform,
+  registry: SemanticIconRegistry<TGlyph>,
+  name: string,
+): TGlyph {
+  if (!isSemanticIconName(name)) throw new Error(`Unknown ${platform} semantic icon role: ${name}`);
+  const glyph = registry[name];
+  if (glyph === undefined || glyph === null) throw new Error(`Missing ${platform} glyph for semantic icon role: ${name}`);
+  return glyph;
+}
+
+export const ICON_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  iconContract,
+  semanticIcons,
+  semanticIconAliases,
+  semanticIconAdapterContract,
+  semanticIconAdapters,
+} as const;
