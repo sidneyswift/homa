@@ -4,7 +4,7 @@
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "716710f433b10004713ec8970d0395babf4012b848bab4235ec9ae76d844861c",
   "surfaceManifestFingerprint": "bde83a5d4b2c9560a14170a55437bb08a19d8b2dc435f42be84e6199f1f64023",
-  "authoringManifestFingerprint": "cb57916a88bec8d5064af5a0efac6456ade16b5718acb0cefa5e29b4f32421cb",
+  "authoringManifestFingerprint": "bde83a5d4b2c9560a14170a55437bb08a19d8b2dc435f42be84e6199f1f64023",
   "ownedInputFingerprint": "dc38c423e917e07def628d9d5c31c714da99a8b825b3abbcd83109a982f9b455",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
