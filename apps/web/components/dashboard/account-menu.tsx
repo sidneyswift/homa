@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LogOut, Settings } from "lucide-react";
 
 import { signOutAction } from "../../app/signin/actions";
+import { QuietAction } from "../design/QuietAction";
 
 /**
  * The sidebar's account footer. The avatar + name row is a single button;
@@ -39,32 +39,34 @@ export function AccountMenu({
   }, [open]);
 
   return (
-    <div className="relative mt-auto border-t border-border-subtle pt-1.5">
+    <div className="quiet-shell__account">
       {open ? (
         <>
           {/* Tap-catch layer: any tap outside the menu closes it. */}
-          <div className="fixed inset-0 z-40" onClick={close} aria-hidden="true" />
+          <div className="quiet-shell__scrim" onClick={close} aria-hidden="true" />
           <div
             id="sidebar-account-menu"
-            className="absolute inset-x-0 bottom-full z-50 mb-1.5 origin-bottom rounded-md border border-border-subtle bg-card p-1.5 shadow-lg transition-[opacity,translate,scale] duration-(--dur-base) ease-out starting:translate-y-1 starting:scale-[0.98] starting:opacity-0 motion-reduce:transition-none"
+            className="quiet-shell__menu quiet-shell__menu--account"
           >
-            <Link
+            <QuietAction
               href="/app/settings"
               onClick={close}
-              className="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm font-medium text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+              kind="quiet"
+              className="quiet-shell__menu-action"
+              icon={<Settings size={18} aria-hidden="true" />}
             >
-              <Settings size={16} className="text-subtle" aria-hidden="true" />
               Settings
-            </Link>
-            <div className="mx-2 my-1 h-px bg-border-subtle" aria-hidden="true" />
+            </QuietAction>
+            <div className="quiet-shell__menu-separator" aria-hidden="true" />
             <form action={signOutAction}>
-              <button
+              <QuietAction
                 type="submit"
-                className="flex w-full cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-sm font-medium text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+                kind="quiet"
+                className="quiet-shell__menu-action"
+                icon={<LogOut size={18} aria-hidden="true" />}
               >
-                <LogOut size={16} className="text-subtle" aria-hidden="true" />
                 Sign out
-              </button>
+              </QuietAction>
             </form>
           </div>
         </>
@@ -75,7 +77,7 @@ export function AccountMenu({
         aria-expanded={open ? "true" : "false"}
         aria-controls="sidebar-account-menu"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+        className="quiet-shell__account-trigger"
       >
         {avatarUrl ? (
           // Plain <img>: a remote Supabase storage URL; next/image would
@@ -84,16 +86,16 @@ export function AccountMenu({
           <img
             src={avatarUrl}
             alt=""
-            className="h-[34px] w-[34px] rounded-full border border-border-subtle object-cover"
+            className="quiet-shell__account-avatar object-cover"
           />
         ) : (
-          <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[var(--sage-500)] font-bold text-white">
+          <span className="quiet-shell__account-avatar">
             {parentName.charAt(0)}
           </span>
         )}
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[0.85rem] font-semibold text-body">{parentName}</span>
-          <span className="block truncate text-[0.72rem] text-subtle">{familyName}</span>
+        <span className="quiet-shell__account-copy">
+          <span className="quiet-shell__account-name">{parentName}</span>
+          <span className="quiet-shell__account-family">{familyName}</span>
         </span>
       </button>
     </div>

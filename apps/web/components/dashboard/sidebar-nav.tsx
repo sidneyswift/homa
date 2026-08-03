@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Calendar,
-  ChartLine,
-  LibraryBig,
-  ListChecks,
-  Sparkles,
-} from "lucide-react";
+
+import { Icon, type SemanticIconName } from "../design/Icon";
 
 /**
  * The sidebar's nav list. Client-side on purpose: the app frame renders
@@ -24,13 +18,17 @@ import {
  * signed-in visitors (same tabs, same icons, no drift).
  */
 export const APP_NAV_ITEMS = [
-  { href: "/app", label: "Chat", icon: Sparkles },
-  { href: "/app/progress", label: "Progress", icon: ChartLine },
-  { href: "/app/planner", label: "Planner", icon: Calendar },
-  { href: "/app/library", label: "Library", icon: LibraryBig },
-  { href: "/app/binder", label: "Binder", icon: BookOpen },
-  { href: "/app/tasks", label: "Tasks", icon: ListChecks },
-] as const;
+  { href: "/app", label: "Chat", icon: "voice" },
+  { href: "/app/progress", label: "Progress", icon: "progress" },
+  { href: "/app/planner", label: "Planner", icon: "calendar" },
+  { href: "/app/library", label: "Library", icon: "book" },
+  { href: "/app/binder", label: "Binder", icon: "book" },
+  { href: "/app/tasks", label: "Tasks", icon: "plan" },
+] as const satisfies ReadonlyArray<{
+  href: string;
+  label: string;
+  icon: SemanticIconName;
+}>;
 
 const KID_PROGRESS_PATH = /^\/app\/[^/]+\/progress$/;
 const LEGACY_REPORT_PATH = /^\/app\/(?:[^/]+\/)?report$/;
@@ -54,22 +52,18 @@ export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-0.5">
-      {APP_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+    <nav className="quiet-shell__nav">
+      {APP_NAV_ITEMS.map(({ href, label, icon }) => {
         const active = isAppNavItemActive(href, pathname);
         return (
           <Link
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={
-              active
-                ? "flex min-h-11 items-center gap-3 rounded-md bg-brand-soft px-3 py-2.5 text-[0.95rem] font-bold text-[var(--clay-700)]"
-                : "flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-[0.95rem] font-medium text-muted transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
-            }
+            className={`quiet-shell__nav-item${active ? " quiet-shell__nav-item--active" : ""}`}
           >
-            <span className={active ? "text-brand" : "text-subtle"}>
-              <Icon size={20} />
+            <span className="quiet-shell__nav-icon">
+              <Icon name={icon} size={20} />
             </span>
             {label}
           </Link>

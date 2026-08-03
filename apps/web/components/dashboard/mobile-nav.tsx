@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
 
 import { Logo } from "../brand/Logo";
+import { Icon } from "../design/Icon";
 import { ContextSwitcher } from "./context-switcher";
 import { SidebarContent, type SidebarProps } from "./sidebar";
 
@@ -68,19 +68,19 @@ export function MobileNav(props: SidebarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-subtle bg-page/95 px-3 backdrop-blur lg:hidden print:hidden">
+      <header className="quiet-shell__mobile-bar lg:hidden print:hidden">
         <button
           type="button"
           aria-expanded={open}
           aria-controls="app-drawer"
           aria-label="Open menu"
           onClick={() => setOpen(true)}
-          className="rounded-md p-2 text-body transition-colors duration-(--dur-fast) ease-out hover:bg-page active:bg-[var(--stone-100)]"
+          className="quiet-shell__icon-action"
         >
-          <Menu size={22} />
+          <Icon name="menu" size={24} />
         </button>
 
-        <Link href="/app" aria-label="Home" className="inline-flex rounded-md">
+        <Link href="/app" aria-label="Home" className="quiet-shell__logo">
           <Logo size={24} />
         </Link>
 
@@ -91,7 +91,7 @@ export function MobileNav(props: SidebarProps) {
         {props.kids.length > 1 ? (
           <ContextSwitcher kids={props.kids} selected={props.viewContext} />
         ) : (
-          <span className="w-[38px]" aria-hidden="true" />
+          <span className="h-11 w-11" aria-hidden="true" />
         )}
       </header>
 
@@ -104,7 +104,7 @@ export function MobileNav(props: SidebarProps) {
           <div
             onClick={close}
             aria-hidden="true"
-            className="fixed inset-0 z-40 bg-[rgba(51,42,33,0.42)] transition-opacity duration-(--dur-base) ease-out starting:opacity-0 motion-reduce:transition-none"
+            className="quiet-shell__scrim"
           />
           <div
             id="app-drawer"
@@ -116,19 +116,19 @@ export function MobileNav(props: SidebarProps) {
               const target = event.target as HTMLElement;
               if (target.closest("a") || target.closest("[data-drawer-close]")) close();
             }}
-            className="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] translate-x-0 flex-col overflow-y-auto rounded-r-[var(--radius-xl)] border-r border-border-subtle bg-card p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] shadow-[var(--shadow-xl)] transition-[translate] duration-(--dur-base) ease-out starting:-translate-x-full motion-reduce:transition-none"
+            className="quiet-shell__drawer"
           >
-            <div className="flex items-center justify-between px-2.5 pb-5 pt-1">
-              <Link href="/app" aria-label="Home" className="inline-flex rounded-md">
+            <div className="quiet-shell__drawer-header">
+              <Link href="/app" aria-label="Home" className="quiet-shell__logo">
                 <Logo size={26} />
               </Link>
               <button
                 type="button"
                 aria-label="Close menu"
                 onClick={close}
-                className="rounded-md p-1.5 text-subtle transition-colors duration-(--dur-fast) ease-out hover:bg-page hover:text-body"
+                className="quiet-shell__icon-action"
               >
-                <X size={20} />
+                <Icon name="close" size={24} />
               </button>
             </div>
 
