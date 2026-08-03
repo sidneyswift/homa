@@ -47,10 +47,10 @@ import { mintLinkToken, mintNamedLinkToken } from "../map/store";
 const GLOBAL_CAP_MS = 7 * 24 * 60 * 60 * 1000;
 const SETUP_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 const REPORT_MIN_AGE_MS = 48 * 60 * 60 * 1000;
-/** A full week after the parent said yes: long enough that "did they start
- * it" is a fair question, and it makes the email's "four weeks" framing
- * true rather than premature. */
-const LOOP_BACK_MIN_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+/** Two days after the parent explicitly asked for a plan. This creates a
+ * useful rescue inside Homa's seven-day trial, while still leaving room for
+ * a parent to try the first activity before Homa asks how it went. */
+const LOOP_BACK_MIN_AGE_MS = 2 * 24 * 60 * 60 * 1000;
 /** Matches the funnel plan's "2-6 days" beat-keyed drip window
  * (plans/2026-07-21-chat-first-onboarding.md §6.2): long enough that a
  * few taps left is still true, short enough the questions are still
@@ -82,9 +82,9 @@ export interface DripSignals {
   anyReportViewed: boolean;
   unviewedChildName: string | null;
   unviewedReportToken: string | null;
-  /** The most recent plan the parent said yes to, and when. Null when the
-   * family has no plan, which is the only state the loop-back nudge can
-   * honestly address: it names the plan, so it must exist. */
+  /** The most recent plan the parent explicitly asked Homa to build, and
+   * when. This comes from map.plan_consented, not child_plans: a stored plan
+   * can be Homa's preparation, but consent is the parent's actual choice. */
   planChildName: string | null;
   planSubjectId: string | null;
   planCreatedAt: Date | null;
@@ -161,8 +161,8 @@ export function chooseDripNudge(signals: DripSignals, now: Date): DripDecision {
   }
 
   // The loop-back nudge, aimed at the activation ladder's measured cliff:
-  // a plan the parent said yes to, and no word back about how it went. It
-  // names the plan, so it only fires when a plan actually exists.
+  // a plan the parent explicitly asked for, and no word back about how it
+  // went. It names that plan, so the consent event must prove it exists.
   const loopBackEligible =
     signals.planChildName !== null &&
     signals.planSubjectId !== null &&
@@ -260,8 +260,8 @@ export interface DripPlan {
  * Ordered by how close the family already is to value, and by how fast the
  * nudge goes stale. A family who finished the whole assessment and never
  * opened the report is one tap away and her report ages every day, so she
- * leads. The loop-back nudge asks about a plan that is already a week old, so
- * a few hours changes nothing. The setup nudge is for families who never
+ * leads. The loop-back nudge asks about a plan that is already two days old,
+ * so a few hours changes little. The setup nudge is for families who never
  * reached value at all, and an hour later is no worse for them.
  *
  * Without this the cap took whatever five rows Postgres happened to return,
@@ -470,24 +470,9 @@ async function loadDripSignals(): Promise<DripSignals[]> {
         where c.family_id = f.id and r.emailed_at is not null and r.viewed_at is null
         order by r.emailed_at limit 1
       ) as unviewed_token,
-      (
-        select c.name from public.child_plans p
-        join public.children c on c.id = p.child_id
-        where c.family_id = f.id
-        order by p.created_at desc limit 1
-      ) as plan_child_name,
-      (
-        select p.subject_id from public.child_plans p
-        join public.children c on c.id = p.child_id
-        where c.family_id = f.id
-        order by p.created_at desc limit 1
-      ) as plan_subject_id,
-      (
-        select p.created_at from public.child_plans p
-        join public.children c on c.id = p.child_id
-        where c.family_id = f.id
-        order by p.created_at desc limit 1
-      ) as plan_created_at,
+      consented_plan.child_name as plan_child_name,
+      consented_plan.subject_id as plan_subject_id,
+      consented_plan.created_at as plan_created_at,
       exists (
         select 1 from public.events e
         where e.family_id = f.id and e.name = any(${LOOP_BACK_EVENTS as unknown as string[]})
@@ -549,6 +534,20 @@ async function loadDripSignals(): Promise<DripSignals[]> {
       order by count(a.*) desc
       limit 1
     ) mid_checklist on true
+    left join lateral (
+      -- A plan row alone can be Homa's preparation. The consent event is
+      -- the parent action that makes the loop-back email's wording true.
+      select c.name as child_name,
+        e.props->>'subject' as subject_id,
+        e.created_at
+      from public.events e
+      join public.children c on c.id::text = e.props->>'child_id'
+      where e.family_id = f.id
+        and c.family_id = f.id
+        and e.name = 'map.plan_consented'
+      order by e.created_at desc
+      limit 1
+    ) consented_plan on true
     where coalesce(f.status, 'open') <> 'deleted'
       and not coalesce(f.sandbox, false)
       and f.email is not null

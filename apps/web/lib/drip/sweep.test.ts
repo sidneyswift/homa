@@ -143,7 +143,7 @@ function withPlan(overrides: Partial<DripSignals> = {}): DripSignals {
   });
 }
 
-test("loop-back nudge fires for a plan with no word back, a week on", () => {
+test("loop-back nudge fires for an explicitly requested plan with no word back, two days on", () => {
   assert.deepEqual(chooseDripNudge(withPlan(), NOW), {
     kind: "drip_loop_back",
     childName: "Mia",
@@ -155,8 +155,8 @@ test("loop-back nudge does not fire once the parent closed the loop", () => {
   assert.equal(chooseDripNudge(withPlan({ closedLoop: true }), NOW), null);
 });
 
-test("loop-back nudge waits a full week after the plan", () => {
-  assert.equal(chooseDripNudge(withPlan({ planCreatedAt: DAYS(2) }), NOW), null);
+test("loop-back nudge waits a full 48 hours after the plan", () => {
+  assert.equal(chooseDripNudge(withPlan({ planCreatedAt: HOURS(47) }), NOW), null);
 });
 
 test("loop-back nudge never repeats once sent", () => {
