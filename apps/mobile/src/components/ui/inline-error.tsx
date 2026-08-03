@@ -1,6 +1,6 @@
-import { CircleAlert } from "lucide-react-native";
 import { Text, View, type StyleProp, type ViewStyle } from "react-native";
 
+import { Icon } from "../design/icon";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
@@ -55,7 +55,7 @@ export function InlineError({
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
       >
-        <CircleAlert size={19} color={look.icon} />
+        <Icon name="error" size={20} color={look.icon} />
       </View>
       <Text
         style={{
