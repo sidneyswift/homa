@@ -151,6 +151,7 @@
     "seed:family-history": "tsx --tsconfig apps/web/tsconfig.json scripts/seed-family-history.mts"
   },
   "devDependencies": {
+    "axe-core": "^4.12.1",
     "postgres": "^3.4.9",
     "satori": "^0.26.0",
     "sharp": "^0.35.3",
