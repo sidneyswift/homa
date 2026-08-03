@@ -104,7 +104,7 @@ Report these by canonical URL and by intent cluster:
 
 - non-brand impressions, clicks, and click-through rate
 - indexation status and crawl errors
-- organic sessions and qualified waitlist or trial starts
+- organic sessions and qualified onboarding or trial starts
 - activation and paid conversion where the route is measurable
 - AI citation count and average cited pages from Bing AI Performance
 - fixed-prompt citation rate, recommendation rate, and accuracy rate by engine
