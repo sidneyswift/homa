@@ -1,6 +1,32 @@
+"use client";
+
+import { APP_NAV_ITEMS } from "../dashboard/sidebar-nav";
+import { QuietNav, type QuietNavMenuItem } from "../design/QuietNav";
+import { HERO_COPY } from "./landing-content";
+import { useSignedIn } from "./use-signed-in";
+import { useSignupPopup } from "./SignupPopupProvider";
+
 /**
- * Compatibility export for public routes that still import the marketing
- * shell. The canonical implementation lives in the design package boundary.
+ * Marketing adapter for the reusable Quiet shell. Auth and signup behavior
+ * stays here, while the design primitive owns layout, motion, and focus.
  */
-export { QuietNav as Nav } from "../design/QuietNav";
+export function Nav() {
+  const signedIn = useSignedIn();
+  const openPopup = useSignupPopup();
+  const signedInItems: readonly QuietNavMenuItem[] = [
+    ...APP_NAV_ITEMS,
+    { href: "/app/settings", label: "Settings" },
+  ];
+
+  return (
+    <QuietNav
+      signedIn={signedIn}
+      primaryActionLabel={HERO_COPY.primaryAction}
+      primaryActionHref="/onboarding"
+      onPrimaryAction={openPopup ?? undefined}
+      signedInItems={signedInItems}
+    />
+  );
+}
+
 export { QUIET_NAV_LINKS } from "../design/QuietNav";

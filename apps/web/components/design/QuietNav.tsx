@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import type { SemanticIconName } from "@homa/design/contract";
 
 import { Logo } from "../brand/Logo";
-import { APP_NAV_ITEMS } from "../dashboard/sidebar-nav";
-import { useSignupPopup } from "../marketing/SignupPopupProvider";
-import { HERO_COPY } from "../marketing/landing-content";
-import { useSignedIn } from "../marketing/use-signed-in";
 import { Icon } from "./Icon";
 import { QuietAction } from "./QuietAction";
 
@@ -21,6 +17,20 @@ export const QUIET_NAV_LINKS = [
   ["Features", "/#features"],
   ["Our story", "/#stories"],
 ] as const;
+
+export type QuietNavMenuItem = {
+  href: string;
+  label: string;
+  icon?: SemanticIconName;
+};
+
+export type QuietNavProps = {
+  signedIn?: boolean;
+  primaryActionLabel: string;
+  primaryActionHref?: string;
+  onPrimaryAction?: () => void;
+  signedInItems?: readonly QuietNavMenuItem[];
+};
 
 const DESKTOP_QUERY = "(min-width: 881px)";
 const SCROLLED_AT_PX = 8;
@@ -37,9 +47,13 @@ type MenuState = "closed" | "open" | "closing";
  * destinations used by the dashboard shell. Outside SignupPopupProvider the
  * primary action remains a normal /onboarding link.
  */
-export function QuietNav() {
-  const openPopup = useSignupPopup();
-  const signedIn = useSignedIn();
+export function QuietNav({
+  signedIn = false,
+  primaryActionLabel,
+  primaryActionHref = "/onboarding",
+  onPrimaryAction,
+  signedInItems = [],
+}: QuietNavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [activeHref, setActiveHref] = useState<string | null>(null);
   const [menuTickHref, setMenuTickHref] = useState<string | null>(null);
@@ -177,15 +191,14 @@ export function QuietNav() {
     return () => desktop.removeEventListener("change", onChange);
   }, []);
 
-  const ctaLabel = HERO_COPY.primaryAction;
   const closing = menuState === "closing" ? "true" : undefined;
-  const navAction = openPopup ? (
-    <QuietAction kind="primary" onClick={openPopup}>
-      {ctaLabel}
+  const navAction = onPrimaryAction ? (
+    <QuietAction kind="primary" onClick={onPrimaryAction}>
+      {primaryActionLabel}
     </QuietAction>
   ) : (
-    <QuietAction kind="primary" href="/onboarding">
-      {ctaLabel}
+    <QuietAction kind="primary" href={primaryActionHref}>
+      {primaryActionLabel}
     </QuietAction>
   );
 
@@ -258,17 +271,12 @@ export function QuietNav() {
           >
             {signedIn ? (
               <>
-                {APP_NAV_ITEMS.map(({ href, label, icon }) => (
+                {signedInItems.map(({ href, label, icon }) => (
                   <Link key={href} href={href} className="quiet-nav__menu-link" onClick={closeMenu}>
-                    <Icon name={icon} size={20} />
+                    {icon ? <Icon name={icon} size={20} /> : null}
                     {label}
                   </Link>
                 ))}
-                <div className="quiet-nav__divider" aria-hidden="true" />
-                <Link href="/app/settings" className="quiet-nav__menu-link" onClick={closeMenu}>
-                  <Settings size={18} aria-hidden="true" />
-                  Settings
-                </Link>
               </>
             ) : (
               <>
@@ -288,20 +296,20 @@ export function QuietNav() {
                   Sign in
                 </Link>
                 <span className="quiet-nav__mobile-action">
-                  {openPopup ? (
+                  {onPrimaryAction ? (
                     <QuietAction
                       kind="primary"
                       className="quiet-nav__mobile-cta"
                       onClick={() => {
                         closeMenu();
-                        openPopup();
+                        onPrimaryAction();
                       }}
                     >
-                      {ctaLabel}
+                      {primaryActionLabel}
                     </QuietAction>
                   ) : (
-                    <QuietAction kind="primary" href="/onboarding" className="quiet-nav__mobile-cta" onClick={closeMenu}>
-                      {ctaLabel}
+                    <QuietAction kind="primary" href={primaryActionHref} className="quiet-nav__mobile-cta" onClick={closeMenu}>
+                      {primaryActionLabel}
                     </QuietAction>
                   )}
                 </span>
