@@ -1,6 +1,7 @@
-import { Check, Clock3, FileText, FolderOpen, Leaf, type LucideIcon } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
+import { Icon } from "../design/Icon";
+import type { SemanticIconName } from "../design/Icon";
 import type { CapabilityId } from "./landing-content";
 
 /**
@@ -31,14 +32,14 @@ function ProofShell({ children, style }: { children: ReactNode; style?: CSSPrope
 }
 
 function ProofHeader({
-  icon: Icon,
+  icon,
   title,
   note,
   noteStyle,
   chipBg,
   chipInk,
 }: {
-  icon: LucideIcon;
+  icon: SemanticIconName;
   title: string;
   note: string;
   noteStyle?: CSSProperties;
@@ -59,7 +60,7 @@ function ProofHeader({
           flexShrink: 0,
         }}
       >
-        <Icon size={18} color={chipInk} aria-hidden="true" />
+        <Icon name={icon} size={20} color={chipInk} />
       </span>
       <div>
         <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.86rem", fontWeight: 700 }}>{title}</p>
@@ -107,7 +108,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                 header tall and pushed the check chip off optical center
                 against the THIS WEEK stamp. */}
             <ProofHeader
-              icon={Check}
+              icon="check"
               title="Maya · age 4"
               note={"Tuesday · about 1h 25m"}
               noteStyle={{ whiteSpace: "nowrap", fontSize: "clamp(0.62rem, 2.6vw, var(--text-xs))" }}
@@ -150,7 +151,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                     flexShrink: 0,
                   }}
                 >
-                  {index === 0 ? <Check size={9} color="#fff" strokeWidth={3.4} aria-hidden="true" /> : null}
+                  {index === 0 ? <Icon name="check" size={16} color="#fff" /> : null}
                 </span>
                 <span style={{ flex: 1, color: "var(--text-body)", fontSize: "0.78rem" }}>{title}</span>
                 <span
@@ -234,7 +235,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                   so the file card carries the child and the day instead of
                   repeating the title beside itself. */}
               <ProofHeader
-                icon={FileText}
+                icon="document"
                 title="Made for Maya"
                 note="Tuesday's practice page"
                 chipBg="var(--gold-100)"
@@ -281,7 +282,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
           />
           <ProofShell style={{ position: "relative" }}>
             <ProofHeader
-              icon={FolderOpen}
+                icon="folder"
               title="What you kept this week"
               note="3 items"
               chipBg="var(--clay-100)"
@@ -342,7 +343,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                     color: "var(--sage-700)",
                   }}
                 >
-                  <Leaf size={20} aria-hidden="true" />
+                  <Icon name="nature" size={20} />
                 </div>
                 <div>
                   <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Our science walk</p>
@@ -372,7 +373,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
                     color: "var(--sky-600)",
                   }}
                 >
-                  <FileText size={20} aria-hidden="true" />
+                  <Icon name="document" size={20} />
                 </div>
                 <div>
                   <p style={{ margin: 0, color: "var(--text-strong)", fontSize: "0.78rem", fontWeight: 700 }}>Progress report</p>
@@ -398,7 +399,7 @@ export function CapabilityProof({ capabilityId }: { capabilityId: CapabilityId }
               March 2 to 6 is a real Monday-to-Friday, so the ledger stays
               calendar-plausible. */}
           <ProofHeader
-            icon={Clock3}
+            icon="time"
             title="March 2 to 6"
             note="Hours recorded by subject"
             chipBg="var(--sky-100)"

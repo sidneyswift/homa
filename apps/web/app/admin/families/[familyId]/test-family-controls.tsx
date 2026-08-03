@@ -1,8 +1,8 @@
 "use client";
 
-import { FlaskConical, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { Icon } from "../../../../components/design/Icon";
 import { deleteSandboxFamilyAction, setFamilySandboxAction } from "../../actions";
 
 /**
@@ -51,12 +51,12 @@ export function TestFamilyControls({
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       <button type="button" onClick={toggle} disabled={pending} className={chipClass}>
-        <FlaskConical size={12} aria-hidden="true" />
+        <Icon name="experiment" size={16} />
         {sandbox ? "Not a test family" : "Mark as test family"}
       </button>
       {sandbox ? (
         <button type="button" onClick={remove} disabled={pending} className={chipClass}>
-          <Trash2 size={12} aria-hidden="true" />
+          <Icon name="delete" size={16} />
           {pending
             ? "Deleting\u2026"
             : armed

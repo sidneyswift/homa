@@ -1,30 +1,10 @@
 "use client";
 
 import type { EveMessage } from "eve/react";
-import {
-  BookOpen,
-  BookmarkMinus,
-  BookmarkPlus,
-  CalendarClock,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Eraser,
-  FileText,
-  History,
-  Image as ImageIcon,
-  ListChecks,
-  Mail,
-  PenLine,
-  Search,
-  Sparkles,
-  UserRound,
-  Users,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
 import { useState } from "react";
+
+import { Icon } from "../../components/design/Icon";
+import type { SemanticIconName } from "../../components/design/Icon";
 
 /**
  * The worked-for line (approved chat redesign, D2 steal kept by founder
@@ -37,47 +17,47 @@ import { useState } from "react";
  */
 
 export interface WorkedForStep {
-  icon: LucideIcon;
+  icon: SemanticIconName;
   label: string;
   /** One short finding line, when the tool's output carries one. */
   detail: string | null;
 }
 
-const STEP_REGISTRY: Record<string, { icon: LucideIcon; label: string }> = {
-  get_children: { icon: Users, label: "Checked your family's info" },
-  create_printable: { icon: FileText, label: "Made the page" },
-  create_worksheet: { icon: FileText, label: "Made the page" },
-  show_material: { icon: FileText, label: "Brought the page back" },
-  generate_image: { icon: ImageIcon, label: "Made an image" },
-  find_materials: { icon: Search, label: "Looked through your materials" },
-  mark_material_final: { icon: Check, label: "Kept the final version" },
-  remember: { icon: PenLine, label: "Noted that" },
-  forget: { icon: Eraser, label: "Removed a note" },
-  update_child_profile: { icon: UserRound, label: "Updated the profile" },
-  save_skill: { icon: BookmarkPlus, label: "Saved that as a skill" },
-  forget_skill: { icon: BookmarkMinus, label: "Removed a skill" },
-  load_skill: { icon: BookOpen, label: "Checked your saved instructions" },
-  save_knowledge: { icon: BookOpen, label: "Saved research notes" },
-  manage_child_progress: { icon: ListChecks, label: "Updated progress" },
-  recall: { icon: History, label: "Searched my notes" },
-  read_family_curriculum: { icon: BookOpen, label: "Read the curriculum" },
-  preview_curriculum_mapping: { icon: ListChecks, label: "Built your review" },
-  approve_curriculum_mapping: { icon: Check, label: "Saved what you approved" },
-  log_hours: { icon: Clock, label: "Logged the hours" },
-  create_task: { icon: CalendarClock, label: "Set that up as a task" },
-  delete_task: { icon: CalendarClock, label: "Removed a task" },
-  list_tasks: { icon: CalendarClock, label: "Checked your tasks" },
-  add_child: { icon: UserRound, label: "Added them to your family" },
-  save_family_basics: { icon: PenLine, label: "Saved your family's basics" },
-  save_homeschool_profile: { icon: PenLine, label: "Saved how you homeschool" },
-  start_checklist: { icon: ListChecks, label: "Opened the questions" },
-  ask_for_details: { icon: PenLine, label: "Asked for a few details" },
-  score_child_report: { icon: Sparkles, label: "Built the progress report" },
-  start_first_making: { icon: Sparkles, label: "Started making a page" },
-  send_skeptic_brief: { icon: Mail, label: "Sent the report to your inbox" },
+const STEP_REGISTRY: Record<string, { icon: SemanticIconName; label: string }> = {
+  get_children: { icon: "people", label: "Checked your family's info" },
+  create_printable: { icon: "document", label: "Made the page" },
+  create_worksheet: { icon: "document", label: "Made the page" },
+  show_material: { icon: "document", label: "Brought the page back" },
+  generate_image: { icon: "image", label: "Made an image" },
+  find_materials: { icon: "search", label: "Looked through your materials" },
+  mark_material_final: { icon: "check", label: "Kept the final version" },
+  remember: { icon: "edit", label: "Noted that" },
+  forget: { icon: "erase", label: "Removed a note" },
+  update_child_profile: { icon: "person", label: "Updated the profile" },
+  save_skill: { icon: "bookmark_add", label: "Saved that as a skill" },
+  forget_skill: { icon: "bookmark_remove", label: "Removed a skill" },
+  load_skill: { icon: "book", label: "Checked your saved instructions" },
+  save_knowledge: { icon: "book", label: "Saved research notes" },
+  manage_child_progress: { icon: "tasks", label: "Updated progress" },
+  recall: { icon: "history", label: "Searched my notes" },
+  read_family_curriculum: { icon: "book", label: "Read the curriculum" },
+  preview_curriculum_mapping: { icon: "tasks", label: "Built your review" },
+  approve_curriculum_mapping: { icon: "check", label: "Saved what you approved" },
+  log_hours: { icon: "time", label: "Logged the hours" },
+  create_task: { icon: "calendar", label: "Set that up as a task" },
+  delete_task: { icon: "calendar", label: "Removed a task" },
+  list_tasks: { icon: "calendar", label: "Checked your tasks" },
+  add_child: { icon: "person", label: "Added them to your family" },
+  save_family_basics: { icon: "edit", label: "Saved your family's basics" },
+  save_homeschool_profile: { icon: "edit", label: "Saved how you homeschool" },
+  start_checklist: { icon: "tasks", label: "Opened the questions" },
+  ask_for_details: { icon: "edit", label: "Asked for a few details" },
+  score_child_report: { icon: "spark", label: "Built the progress report" },
+  start_first_making: { icon: "spark", label: "Started making a page" },
+  send_skeptic_brief: { icon: "mail", label: "Sent the report to your inbox" },
 };
 
-const FALLBACK_STEP = { icon: Wrench, label: "Worked on it" };
+const FALLBACK_STEP = { icon: "tools" as const, label: "Worked on it" };
 
 /** Findings worth a line under the step, per tool output shape. */
 function stepDetail(toolName: string, output: unknown): string | null {
@@ -136,7 +116,6 @@ export function WorkedForLine({
     seconds !== null && seconds > 0
       ? `Worked for ${seconds} ${seconds === 1 ? "second" : "seconds"}`
       : "Worked on it";
-  const Chevron = open ? ChevronUp : ChevronDown;
   return (
     <div>
       <button
@@ -146,16 +125,15 @@ export function WorkedForLine({
         className="inline-flex min-h-8 items-center gap-1.5 text-sm text-subtle transition-colors hover:text-muted"
       >
         {label}
-        <Chevron size={13} aria-hidden="true" />
+        <Icon name={open ? "expand" : "collapse"} size={16} />
       </button>
       {open ? (
         <div className="mt-1 flex flex-col gap-0.5">
           {steps.map((step, index) => {
-            const Icon = step.icon;
             return (
               <div key={index} className="flex items-start gap-2.5 py-1">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--stone-100)] text-muted">
-                  <Icon size={13} aria-hidden="true" />
+                  <Icon name={step.icon} size={16} />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-body">

@@ -1,8 +1,7 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
-
 import { useOnboardingReset } from "./use-onboarding-reset";
+import { Icon } from "../design/Icon";
 
 /**
  * The dev badge: one tap to be a brand new parent again.
@@ -47,7 +46,7 @@ export function DevToolbar({ familyId }: { familyId: string | null }) {
         }
         className="flex min-h-8 items-center gap-1.5 rounded-pill border border-border-subtle bg-card/90 px-2.5 py-1 text-xs font-semibold text-muted shadow-sm backdrop-blur transition-colors hover:border-brand hover:text-strong disabled:cursor-not-allowed disabled:opacity-70"
       >
-        <RotateCcw size={13} aria-hidden="true" />
+        <Icon name="refresh" size={16} />
         {phase === "working" ? "Resetting…" : "Restart onboarding"}
       </button>
       {familyId ? (

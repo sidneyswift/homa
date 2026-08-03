@@ -6,6 +6,7 @@ import {
   collectDirectIconImports,
   collectDirectIconImportsFromText,
   readIconImportExceptions,
+  readIconImportReview,
   validateIconImportExceptions,
 } from "./icon-import-residue-check.mts";
 
@@ -31,6 +32,32 @@ const MIGRATED_SURFACES = [
   "apps/web/components/marketing/Hero.tsx",
   "apps/web/components/marketing/SampleReportProof.tsx",
   "apps/web/components/marketing/SignupPopupModal.tsx",
+  "apps/mobile/src/features/lessons/native-lesson-recorder.tsx",
+  "apps/mobile/src/features/tasks/task-card.tsx",
+  "apps/mobile/src/features/tasks/task-edit-sheet.tsx",
+  "apps/mobile/src/features/tasks/task-history-row.tsx",
+  "apps/mobile/src/features/voice/labs/voice-shell-547-lab.tsx",
+  "apps/mobile/src/features/voice/voice-prompt-starters.tsx",
+  "apps/web/app/admin/agent-prompt-button.tsx",
+  "apps/web/app/admin/alert-ack-button.tsx",
+  "apps/web/app/admin/families/[familyId]/build-report-button.tsx",
+  "apps/web/app/admin/families/[familyId]/phone-lend-controls.tsx",
+  "apps/web/app/admin/families/[familyId]/test-family-controls.tsx",
+  "apps/web/app/app/attachment-message-parts.tsx",
+  "apps/web/app/app/chat-attachments.tsx",
+  "apps/web/app/app/curriculum-mapping-card.tsx",
+  "apps/web/app/app/planner-canvas.tsx",
+  "apps/web/app/app/planner/unified-planner-view.tsx",
+  "apps/web/app/app/slash-composer.tsx",
+  "apps/web/app/app/snap-card.tsx",
+  "apps/web/app/app/worked-for.tsx",
+  "apps/web/components/dashboard/context-switcher.tsx",
+  "apps/web/components/dev/dev-toolbar.tsx",
+  "apps/web/components/marketing/CapabilityProof.tsx",
+  "apps/web/components/marketing/HeroProductDemo.tsx",
+  "apps/web/components/marketing/PainBridge.tsx",
+  "apps/web/components/marketing/PlatformStrip.tsx",
+  "apps/web/components/marketing/QuietLanding.tsx",
 ] as const;
 
 test("collects only direct Lucide package imports with source locations", () => {
@@ -56,7 +83,16 @@ test("the checked-in exception manifest exactly covers current direct imports", 
   );
   assert.equal(report.directImports, exceptions.length);
   assert.equal(report.adapterImports, 3);
-  assert.ok(report.migrationPendingImports > 0);
+  assert.equal(report.migrationPendingImports, 0);
+});
+
+test("the pending wave has a complete ownership and support review", () => {
+  const review = readIconImportReview();
+  assert.equal(review.length, 26);
+  assert.equal(new Set(review.map((entry) => entry.path)).size, review.length);
+  assert.deepEqual(new Set(review.map((entry) => entry.surfaceClass)), new Set(["user-facing", "admin-founder", "dev-only"]));
+  assert.ok(review.every((entry) => entry.glyphSupport === "supported" && entry.decision === "migrate"));
+  assert.ok(review.every((entry) => entry.rationale.length >= 20));
 });
 
 test("completed icon migration surfaces stay on the semantic adapter", () => {

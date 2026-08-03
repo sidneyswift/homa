@@ -1,8 +1,8 @@
 "use client";
 
-import { Bot, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { Icon } from "../../components/design/Icon";
 import { buildAgentPromptAction } from "./actions";
 import type { AgentPromptSource } from "../../lib/admin/agent-prompt";
 
@@ -96,7 +96,6 @@ export function AgentPromptButton({
     void copy().finally(() => setPending(false));
   };
 
-  const Icon = copied ? Check : Bot;
   return (
     <span className="inline-flex items-center gap-2">
       {error ? (
@@ -109,7 +108,7 @@ export function AgentPromptButton({
         title="Copies everything an AI agent needs to diagnose this failure"
         className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50"
       >
-        <Icon size={12} aria-hidden="true" />
+        <Icon name={copied ? "check" : "assistant"} size={16} />
         {copied ? "Copied" : pending ? "Building…" : "Prompt for agent"}
       </button>
     </span>

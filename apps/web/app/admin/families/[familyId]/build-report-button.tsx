@@ -1,8 +1,8 @@
 "use client";
 
-import { FileCheck2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
+import { Icon } from "../../../../components/design/Icon";
 import { buildChildReportAction } from "../../actions";
 
 /**
@@ -45,7 +45,7 @@ export function BuildReportButton({
         disabled={pending}
         className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill border border-border bg-card px-2.5 py-1 text-[0.7rem] font-bold text-muted shadow-sm transition-colors hover:text-strong disabled:opacity-50"
       >
-        <FileCheck2 size={12} aria-hidden="true" />
+        <Icon name="document" size={16} />
         {pending
           ? "Building\u2026"
           : armed

@@ -1,11 +1,11 @@
-import { Globe2, MessageCircle, Smartphone, type LucideIcon } from "lucide-react";
-
+import { Icon } from "../design/Icon";
+import type { SemanticIconName } from "../design/Icon";
 import { PLATFORM_ITEMS, type PlatformKind } from "./landing-content";
 
-const PLATFORM_ICONS: Record<PlatformKind, LucideIcon> = {
-  message: MessageCircle,
-  web: Globe2,
-  phone: Smartphone,
+const PLATFORM_ICONS: Record<PlatformKind, SemanticIconName> = {
+  message: "chat",
+  web: "globe",
+  phone: "mobile",
 };
 
 /**
@@ -90,7 +90,7 @@ export function PlatformStrip() {
       <style>{PLATFORM_CSS}</style>
       <ul className="lp-platform-strip" aria-label="Ways to use Homa">
         {PLATFORM_ITEMS.map(({ kind, label }) => {
-          const Icon = PLATFORM_ICONS[kind];
+          const icon = PLATFORM_ICONS[kind];
           const tint = PLATFORM_TINTS[kind];
           return (
             <li
@@ -104,7 +104,7 @@ export function PlatformStrip() {
                 marginTop: tint.drop,
               }}
             >
-              <Icon size={15} aria-hidden="true" />
+              <Icon name={icon} size={16} />
               {label}
             </li>
           );

@@ -1,9 +1,9 @@
 import { useRouter } from "expo-router";
-import { Bell, FlaskConical, Moon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import type { ResearchBriefFeedbackSignal, TaskRunView } from "../../lib/tasks";
+import { Icon } from "../../components/design/icon";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
 import { isResearchBriefFeedbackEligible, showsAskHoma, statusNote, timeLabel } from "./task-view";
@@ -19,16 +19,16 @@ function runIcon(kind: TaskRunView["kind"]) {
   switch (kind) {
     case "morning_brief":
     case "fleet_research":
-      return <FlaskConical size={16} color={colors.brand} />;
+      return <Icon name="experiment" size={16} color={colors.brand} />;
     case "journal_prompt":
-      return <Moon size={16} color={colors.brand} />;
+      return <Icon name="journal" size={16} color={colors.brand} />;
     case "custom":
     case "agent_job":
-      return <Bell size={16} color={colors.brand} />;
+      return <Icon name="reminder" size={16} color={colors.brand} />;
     default: {
       const exhaustive: never = kind;
       void exhaustive;
-      return <Bell size={16} color={colors.brand} />;
+      return <Icon name="reminder" size={16} color={colors.brand} />;
     }
   }
 }

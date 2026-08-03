@@ -1,6 +1,5 @@
-import { BookOpenCheck } from "lucide-react";
-
 import { FAMILY_CURRICULUM_UNIT_REVIEW_LABELS } from "../../lib/library/family-assets";
+import { Icon } from "../../components/design/Icon";
 
 export interface CurriculumMappingCardUnit {
   ordinal: number;
@@ -202,7 +201,7 @@ export function CurriculumMappingCard({ card }: { card: CurriculumMappingCardDat
       <header className="border-b border-border-subtle bg-brand-soft px-4 py-4 sm:px-5">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-card text-brand">
-            <BookOpenCheck size={20} aria-hidden="true" />
+            <Icon name="book" size={20} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">

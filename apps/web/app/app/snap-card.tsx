@@ -1,9 +1,9 @@
 "use client";
 
 import type { EveMessage, EveMessagePart } from "eve/react";
-import { Camera } from "lucide-react";
 import { useRef } from "react";
 
+import { Icon } from "../../components/design/Icon";
 import { Logo } from "../../components/brand/Logo";
 
 /**
@@ -128,7 +128,7 @@ export function SnapCard({
               onClick={() => cameraRef.current?.click()}
               className="flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-brand px-4 py-3 text-base font-bold text-on-brand shadow-sm transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Camera size={19} aria-hidden="true" />
+              <Icon name="camera" size={20} />
               Snap the page
             </button>
             <button

@@ -1,8 +1,8 @@
 "use client";
 
-import { FileText } from "lucide-react";
 import { useState } from "react";
 
+import { Icon } from "../../components/design/Icon";
 import type {
   AttachmentMarker,
   FileMarker,
@@ -74,7 +74,7 @@ export function UserAttachmentDisplay({
           rel="noopener noreferrer"
           className="flex max-w-[76%] items-center gap-2.5 rounded-md border border-border-subtle bg-card px-3 py-2.5 transition-colors hover:border-brand"
         >
-          <FileText size={18} className="shrink-0 text-muted" aria-hidden="true" />
+          <Icon name="document" size={20} className="shrink-0 text-muted" />
           <span className="truncate text-sm font-medium text-strong">{file.name}</span>
         </a>
       ))}
