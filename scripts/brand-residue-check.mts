@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -19,6 +19,15 @@ type LegacyBaseline = {
 type ResidueRule = {
   name: string;
   pattern: RegExp;
+};
+
+type GitHubEventPayload = {
+  before?: unknown;
+  after?: unknown;
+  pull_request?: {
+    base?: { sha?: unknown };
+    head?: { sha?: unknown };
+  };
 };
 
 export type BrandResidueFinding = {
@@ -103,18 +112,70 @@ function availableBaselineCommit(sourceCommit: string): string | null {
   return null;
 }
 
-function changedPathsSince(sourceCommit: string): Set<string> | null {
-  // The guard is a migration ratchet. Existing untouched files may still be
-  // represented by the quarantined baseline, but a file touched in this
-  // change set must not bring a retired token back into the active graph.
-  const baselineCommit = availableBaselineCommit(sourceCommit);
-  if (!baselineCommit) return null;
-  return new Set(
-    execFileSync("git", ["diff", "--name-only", "--diff-filter=ACMRTUXB", baselineCommit, "--"], { cwd: ROOT })
+function gitDiffPaths(range: readonly string[]): Set<string> | null {
+  try {
+    return new Set(
+      execFileSync("git", ["diff", "--name-only", "--diff-filter=ACMRTUXB", ...range, "--"], { cwd: ROOT })
+        .toString("utf8")
+        .split("\n")
+        .filter(Boolean),
+    );
+  } catch {
+    return null;
+  }
+}
+
+function eventPayload(): GitHubEventPayload | null {
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  if (!eventPath || !existsSync(eventPath)) return null;
+  try {
+    return JSON.parse(readFileSync(eventPath, "utf8")) as GitHubEventPayload;
+  } catch {
+    return null;
+  }
+}
+
+function changedPathsForRun(sourceCommit: string): Set<string> | null {
+  // The guard is a migration ratchet, but its scope must be the delivery
+  // delta. A pull_request checkout is a synthetic merge commit, so diff its
+  // first parent (the base branch) to the merge tree. A push event supplies
+  // the exact before/after range. This prevents unrelated historical files
+  // from main from being treated as part of a brand change.
+  const event = eventPayload();
+  if (process.env.GITHUB_EVENT_NAME === "pull_request") {
+    const parents = execFileSync("git", ["rev-list", "--parents", "-n", "1", "HEAD"], { cwd: ROOT })
       .toString("utf8")
-      .split("\n")
-      .filter(Boolean),
-  );
+      .trim()
+      .split(/\s+/);
+    if (parents.length >= 3) {
+      const mergeDelta = gitDiffPaths(["HEAD^1", "HEAD"]);
+      if (mergeDelta) return mergeDelta;
+    }
+    const baseSha = event?.pull_request?.base?.sha;
+    const headSha = event?.pull_request?.head?.sha;
+    if (typeof baseSha === "string" && typeof headSha === "string") {
+      const pullRequestDelta = gitDiffPaths([`${baseSha}...${headSha}`]);
+      if (pullRequestDelta) return pullRequestDelta;
+    }
+  }
+  if (process.env.GITHUB_EVENT_NAME === "push") {
+    const before = event?.before;
+    const after = event?.after ?? "HEAD";
+    if (typeof before === "string" && before !== "0".repeat(40) && typeof after === "string") {
+      const pushDelta = gitDiffPaths([before, after]);
+      if (pushDelta) return pushDelta;
+    }
+  }
+
+  // Local runs usually have origin/main available. This keeps a worktree
+  // that contains a merge commit aligned with the PR's intended delta.
+  const localDelta = gitDiffPaths(["origin/main...HEAD"]);
+  if (localDelta) return localDelta;
+
+  // Shallow or detached environments may not have the remote ref. Retain a
+  // conservative baseline fallback rather than silently scanning everything.
+  const baselineCommit = availableBaselineCommit(sourceCommit);
+  return baselineCommit ? gitDiffPaths([baselineCommit, "HEAD"]) : null;
 }
 
 function isTextPath(path: string): boolean {
@@ -176,7 +237,7 @@ export function collectBrandResidueFindings(): BrandResidueFinding[] {
     throw new Error(`Unsupported legacy baseline schema in ${relative(ROOT, BASELINE_PATH)}`);
   }
   const allowedHashes = baselineHashes(baseline);
-  const changedPaths = changedPathsSince(baseline.sourceCommit);
+  const changedPaths = changedPathsForRun(baseline.sourceCommit);
   const findings: BrandResidueFinding[] = [];
   for (const path of gitTrackedFiles()) {
     if (isExcludedPath(path) || !isTextPath(path)) continue;
@@ -193,7 +254,7 @@ export function collectBrandResidueFindings(): BrandResidueFinding[] {
 
 export function collectLegacyFontPathResidue(): string[] {
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8")) as LegacyBaseline;
-  const changedPaths = changedPathsSince(baseline.sourceCommit);
+  const changedPaths = changedPathsForRun(baseline.sourceCommit);
   return gitTrackedFiles().filter((path) => /(?:schibsted|hanken|caveat)/i.test(path) && !isExcludedPath(path) && (!changedPaths || changedPaths.has(path)));
 }
 
