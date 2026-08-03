@@ -145,6 +145,9 @@ describe("UnifiedPlannerView", () => {
   it("opens on one day with one Add action and four quiet views", () => {
     const html = renderView();
     assert.match(html, />Planner<\/h1>/);
+    assert.match(html, /data-brand-surface="planner"/);
+    assert.match(html, /quiet-action quiet-action--primary/);
+    assert.match(plannerSource, /aria-label="Close"/);
     assert.match(html, />Day<\/a>/);
     assert.match(html, />Week<\/a>/);
     assert.match(html, />Month<\/a>/);

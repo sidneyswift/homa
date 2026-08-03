@@ -42,3 +42,5 @@ export function Icon({
     />
   );
 }
+
+export type { SemanticIconName };

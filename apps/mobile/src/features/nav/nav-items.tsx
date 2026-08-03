@@ -1,11 +1,4 @@
-import {
-  BookOpen,
-  Calendar,
-  ChartLine,
-  ListChecks,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react-native";
+import type { SemanticIconName } from "@homa/design/contract";
 
 /**
  * The app's nav destinations. Ported from web's APP_NAV_ITEMS
@@ -17,13 +10,13 @@ import {
 export interface AppNavItem {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: SemanticIconName;
 }
 
 export const APP_NAV_ITEMS: AppNavItem[] = [
-  { href: "/chat", label: "Chat", icon: Sparkles },
-  { href: "/progress", label: "Progress", icon: ChartLine },
-  { href: "/planner", label: "Planner", icon: Calendar },
-  { href: "/binder", label: "Binder", icon: BookOpen },
-  { href: "/tasks", label: "Tasks", icon: ListChecks },
+  { href: "/chat", label: "Chat", icon: "chat" },
+  { href: "/progress", label: "Progress", icon: "progress" },
+  { href: "/planner", label: "Planner", icon: "calendar" },
+  { href: "/binder", label: "Binder", icon: "book" },
+  { href: "/tasks", label: "Tasks", icon: "tasks" },
 ];

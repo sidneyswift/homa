@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { APP_NAV_ITEMS, type AppNavItem } from "../../features/nav/nav-items";
+import { Icon } from "../design/icon";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
 
@@ -33,8 +34,6 @@ function NavRow({
   onNavigate?: () => void;
 }) {
   const [pressed, setPressed] = useState(false);
-  const Icon = item.icon;
-
   return (
     <Link href={item.href} onPress={onNavigate} asChild>
       <Pressable
@@ -58,7 +57,7 @@ function NavRow({
               : "transparent",
         }}
       >
-        <Icon size={20} color={active ? colors.brand : colors.textSubtle} />
+        <Icon name={item.icon} size={20} color={active ? colors.brand : colors.textSubtle} />
         <Text
           style={{
             fontFamily: active ? fontFamilies.bodyBold : fontFamilies.bodyMedium,

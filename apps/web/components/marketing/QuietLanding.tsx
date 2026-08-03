@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { Check, Clock3, FileCheck2, Files, HelpCircle } from "lucide-react";
 import { useState } from "react";
 
@@ -10,7 +9,7 @@ import { QuietFrame } from "../design/QuietFrame";
 import { QuietStatus } from "../design/QuietStatus";
 import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
-import { Logo } from "../brand/Logo";
+import { QuietFooter } from "../design/QuietFooter";
 import { ReportPreview } from "../../app/onboarding/report-preview";
 import { FAQ_ITEMS } from "./faq-items";
 import { HERO_COPY, PAIN_CLOSING, PAIN_ITEMS, CAPABILITY_ITEMS, FOUNDER_STORY_COPY, SAMPLE_REPORT_COPY, type CapabilityId, type PainId } from "./landing-content";
@@ -26,15 +25,13 @@ const PAIN_ICONS: Record<PainId, typeof Clock3> = {
 
 const QUIET_LANDING_CSS = `
 .quiet-landing { --homa-muted-ink: color-mix(in srgb, var(--homa-ink) 64%, var(--homa-canvas)); --homa-soft-boundary: color-mix(in srgb, var(--homa-control-boundary) 34%, transparent); min-width: 320px; overflow-x: clip; background: var(--homa-canvas); color: var(--homa-ink); }
-.quiet-landing .lp-nav { position: sticky; top: 0; z-index: 50; background: transparent; }
-.quiet-landing .lp-nav::before { background: color-mix(in srgb, var(--homa-canvas) 94%, transparent); border-bottom-color: color-mix(in srgb, var(--homa-control-boundary) 40%, transparent); }
-.quiet-landing .lp-nav-row { max-width: 1180px; }
-.quiet-landing #how, .quiet-landing #features, .quiet-landing #sample-report, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--lp-nav-height) + 12px); }
-.quiet-landing .lp-nav-link { color: var(--homa-muted-ink); border-radius: var(--homa-radius-control); }
-.quiet-landing .lp-nav-link:hover, .quiet-landing .lp-nav-link[aria-current] { color: var(--homa-ink); }
-.quiet-landing .lp-nav-link::after { background: var(--homa-visual-coral); }
-.quiet-landing .lp-nav-auth .lp-nav-link-ink { color: var(--homa-ink); }
-.quiet-landing .lp-nav-home:focus-visible, .quiet-landing .lp-nav-link:focus-visible, .quiet-landing .lp-nav-toggle:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--homa-visual-coral) 52%, transparent); }
+.quiet-landing .quiet-nav { position: sticky; top: 0; z-index: 50; background: transparent; }
+.quiet-landing .quiet-nav__row { max-width: 1180px; }
+.quiet-landing #how, .quiet-landing #features, .quiet-landing #sample-report, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--quiet-nav-height) + 12px); }
+.quiet-landing .quiet-nav__link { color: var(--homa-muted-ink); border-radius: var(--homa-radius-control); }
+.quiet-landing .quiet-nav__link:hover, .quiet-landing .quiet-nav__link[aria-current="true"] { color: var(--homa-ink); }
+.quiet-landing .quiet-nav__link::after { background: var(--homa-visual-coral); }
+.quiet-landing .quiet-nav__signin { color: var(--homa-ink); }
 
 .qa-hero { padding: clamp(26px, 5vw, 58px) 20px clamp(52px, 8vw, 94px); }
 .qa-hero__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(420px, 1.1fr); gap: clamp(30px, 5vw, 74px); align-items: center; max-width: 1180px; margin: 0 auto; }
@@ -137,22 +134,11 @@ const QUIET_LANDING_CSS = `
 .qa-cta h2 { color: var(--homa-paper); }
 .qa-cta p { max-width: 650px; color: color-mix(in srgb, var(--homa-paper) 72%, transparent); }
 .qa-cta .quiet-action { background: var(--homa-paper); color: var(--homa-midnight-action); }
-.qa-footer { border-top: 1px solid color-mix(in srgb, var(--homa-paper) 18%, transparent); background: var(--homa-contained-band); color: var(--homa-paper); padding: 34px 20px 46px; }
-.qa-footer__inner { display: grid; grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 1180px; margin: 0 auto; }
-.qa-footer__brand p { max-width: 230px; margin: 14px 0 0; color: color-mix(in srgb, var(--homa-paper) 72%, transparent); line-height: 1.45; }
-.qa-footer__head { color: color-mix(in srgb, var(--homa-paper) 62%, transparent); font: 800 .7rem/1.2 var(--font-sans); letter-spacing: .1em; text-transform: uppercase; }
-.qa-footer__links { display: grid; gap: 12px; margin-top: 14px; }
-.qa-footer__links a { color: var(--homa-paper); font-size: .88rem; text-decoration: none; }
-.qa-footer__links a:hover { color: var(--homa-paper); text-decoration: underline; text-underline-offset: 3px; }
-.qa-footer__links a:focus-visible { outline: 3px solid var(--homa-visual-coral); outline-offset: 3px; }
-.qa-footer__legal { display: flex; justify-content: space-between; gap: 12px; max-width: 1180px; margin: 34px auto 0; border-top: 1px solid color-mix(in srgb, var(--homa-paper) 18%, transparent); padding-top: 18px; color: color-mix(in srgb, var(--homa-paper) 62%, transparent); font-size: .8rem; }
-
 @media (max-width: 960px) {
   .qa-hero__grid { grid-template-columns: 1fr; max-width: 760px; }
   .qa-hero__copy { max-width: 700px; }
   .qa-pain-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .qa-story { grid-template-columns: minmax(0, 1fr) 230px; }
-  .qa-footer__inner { grid-template-columns: 1.2fr repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   .qa-hero h1 { font-size: clamp(3.2rem, 16vw, 5.2rem); }
@@ -160,8 +146,6 @@ const QUIET_LANDING_CSS = `
   .qa-capability-grid, .qa-report, .qa-story, .qa-faq, .qa-cta__inner { grid-template-columns: 1fr; }
   .qa-report__preview { order: -1; }
   .qa-story__photo { width: min(240px, 72vw); }
-  .qa-footer__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .qa-footer__brand { grid-column: 1 / -1; }
 }
 @media (max-width: 480px) {
   .qa-hero { padding-inline: 16px; }
@@ -171,9 +155,6 @@ const QUIET_LANDING_CSS = `
   .qa-frame { padding: 17px; }
   .qa-object__next { align-items: flex-start; flex-direction: column; }
   .qa-object__next .quiet-action { align-self: stretch; }
-  .qa-footer { padding-inline: 16px; }
-  .qa-footer__inner { grid-template-columns: 1fr 1fr; }
-  .qa-footer__legal { align-items: flex-start; flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {
   .qa-faq__question svg { transition: none; }
@@ -263,23 +244,6 @@ function QuietFaq() {
         );
       })}
     </div>
-  );
-}
-
-function QuietFooter() {
-  const columns = [
-    ["Product", [["Your child's progress report", "/onboarding"], ["How the report works", "/onboarding/method"], ["Features", "/#features"]]],
-    ["Company", [["Our story", "/#stories"], ["Blog", "/blog"], ["Joining Homa", "/onboarding"]]],
-    ["Support", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Contact", "mailto:hello@thankshoma.com"]]],
-  ] as const;
-  return (
-    <footer className="qa-footer">
-      <div className="qa-footer__inner">
-        <div className="qa-footer__brand"><Logo size={30} tone="dark" /><p>Your homeschool helper, keeping the work and the record together.</p></div>
-        {columns.map(([heading, links]) => <nav aria-label={heading} key={heading}><div className="qa-footer__head">{heading}</div><div className="qa-footer__links">{links.map(([label, href]) => href.startsWith("/") ? <Link href={href} key={label}>{label}</Link> : <a href={href} key={label}>{label}</a>)}</div></nav>)}
-      </div>
-      <div className="qa-footer__legal"><span>© 2026 Homa.</span><span>Made for families who teach.</span></div>
-    </footer>
   );
 }
 

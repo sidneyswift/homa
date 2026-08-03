@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "9e6161b688da94500915439a8427dd7e767ef6bd5f9a1a8c45bb6d919d7477ea",
+  "sourceChecksum": "355549fa37a334ba997c74d576c5a5a9f8ab26c2b2718d05ac212294aadac61f",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -230,6 +230,10 @@
         "book",
         "plan",
         "progress",
+        "chat",
+        "tasks",
+        "settings",
+        "logout",
         "print",
         "share",
         "voice",
@@ -252,6 +256,10 @@
         "book": "BookOpen",
         "plan": "ClipboardCheck",
         "progress": "ChartNoAxesCombined",
+        "chat": "Sparkles",
+        "tasks": "ListChecks",
+        "settings": "Settings",
+        "logout": "LogOut",
         "print": "Printer",
         "share": "Share2",
         "voice": "Mic",

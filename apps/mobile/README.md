@@ -50,7 +50,7 @@ which currently fails under expo-router server rendering.
 | Streaming | `src/lib/streaming-fetch.ts` | `expo/fetch` installed globally; RN's built-in fetch cannot stream NDJSON |
 | Family data | `src/lib/family.ts` | Port of `apps/web/lib/family.ts` + home actions, RLS-scoped |
 | Events | `src/lib/events.ts` | `@homa/core` typed registry, caller's own token |
-| Brand assets | `assets/brand/*.svg` | PNGs in `assets/images/` are generated: `rsvg-convert -w 1024 -h 1024 brand/<name>.svg -o images/<name>.png` |
+| Brand assets | `assets/brand/*.svg` | SVG and PNG projections are generated together from the Quiet authority contract: `pnpm gen:brand` |
 
 The home greeting uses the current member display name when available. M1-17
 owns design-system integration, not general mobile parity.

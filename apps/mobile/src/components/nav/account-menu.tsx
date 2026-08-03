@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { LogOut, Settings } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { Icon } from "../design/icon";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
 import { fontFamilies } from "../../theme/fonts";
@@ -87,7 +87,7 @@ export function AccountMenu({
               backgroundColor: pressed ? colors.page : "transparent",
             })}
           >
-            <Settings size={16} color={colors.textSubtle} />
+            <Icon name="settings" size={16} color={colors.textSubtle} />
             <Text
               style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}
             >
@@ -111,7 +111,7 @@ export function AccountMenu({
               backgroundColor: pressed ? colors.page : "transparent",
             })}
           >
-            <LogOut size={16} color={colors.textSubtle} />
+            <Icon name="logout" size={16} color={colors.textSubtle} />
             <Text
               style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}
             >
