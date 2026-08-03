@@ -7,5 +7,6 @@ export * from "./motion.ts";
 export * from "./states.ts";
 export * from "./profiles.ts";
 export * from "./brand.ts";
+export * from "./identity.ts";
 export * from "./icons.ts";
 export * from "./content.ts";

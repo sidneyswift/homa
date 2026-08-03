@@ -10,6 +10,7 @@ import {
   DESIGN_CONTRACT_VERSION,
   ICON_CONTRACT,
   FONT_SYSTEM_CONTRACT,
+  IDENTITY_CONTRACT,
   LAYOUT_CONTRACT,
   MOTION_CONTRACT,
   PROFILES_CONTRACT,
@@ -32,6 +33,7 @@ function canonical(value: unknown): string {
 
 const source = {
   brand: BRAND_CONTRACT,
+  identity: IDENTITY_CONTRACT,
   colors: COLOR_CONTRACT,
   content: CONTENT_CONTRACT,
   icons: ICON_CONTRACT,
