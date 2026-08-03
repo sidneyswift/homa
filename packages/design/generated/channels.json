@@ -1,6 +1,199 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "381387b8dd8b6103ae0755cd6e478557ebff3f85940c5fed2c1fc90f1e0f1cf4",
+  "sourceChecksum": "000dc7a4059396c796a5c731a6672c39ffac1679ce7ba33998abee96b4ce0f99",
+  "channels": {
+    "version": "quiet-authority-v1",
+    "brandChannels": [
+      "web",
+      "native",
+      "marketing",
+      "email",
+      "sms",
+      "print",
+      "provider",
+      "metadata"
+    ],
+    "appearanceModes": [
+      "light",
+      "dark-adaptive",
+      "forced-colors",
+      "increased-contrast",
+      "grayscale",
+      "client-controlled",
+      "provider-controlled"
+    ],
+    "channelExpressions": [
+      "full-expressive",
+      "static-rich",
+      "constrained",
+      "plain-text",
+      "none"
+    ],
+    "channelProfiles": {
+      "web": {
+        "targetProfiles": [
+          "webProduct"
+        ],
+        "expression": "full-expressive",
+        "allowedAppearance": [
+          "light",
+          "dark-adaptive",
+          "forced-colors",
+          "increased-contrast"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "logo",
+          "meaningful-thread",
+          "useful-next-move"
+        ],
+        "motion": "truthful-interruptible"
+      },
+      "native": {
+        "targetProfiles": [
+          "nativeProduct"
+        ],
+        "expression": "full-expressive",
+        "allowedAppearance": [
+          "light",
+          "dark-adaptive",
+          "forced-colors",
+          "increased-contrast"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "logo",
+          "meaningful-thread",
+          "useful-next-move"
+        ],
+        "motion": "truthful-interruptible"
+      },
+      "marketing": {
+        "targetProfiles": [
+          "marketingRich"
+        ],
+        "expression": "static-rich",
+        "allowedAppearance": [
+          "light",
+          "grayscale"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "logo",
+          "meaningful-thread",
+          "useful-next-move"
+        ],
+        "motion": "static-or-reduced-to-still"
+      },
+      "email": {
+        "targetProfiles": [
+          "emailConstrained"
+        ],
+        "expression": "constrained",
+        "allowedAppearance": [
+          "light",
+          "client-controlled"
+        ],
+        "preservedElements": [
+          "logo",
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      },
+      "sms": {
+        "targetProfiles": [
+          "smsPlainText"
+        ],
+        "expression": "plain-text",
+        "allowedAppearance": [
+          "client-controlled"
+        ],
+        "preservedElements": [
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      },
+      "print": {
+        "targetProfiles": [
+          "artifactPrint"
+        ],
+        "expression": "constrained",
+        "allowedAppearance": [
+          "grayscale"
+        ],
+        "preservedElements": [
+          "real-artifact",
+          "provenance",
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      },
+      "provider": {
+        "targetProfiles": [
+          "providerConstrained"
+        ],
+        "expression": "constrained",
+        "allowedAppearance": [
+          "provider-controlled"
+        ],
+        "preservedElements": [
+          "approved-static",
+          "plain-language-next-move"
+        ],
+        "motion": "provider-owned"
+      },
+      "metadata": {
+        "targetProfiles": [
+          "metadataConstrained"
+        ],
+        "expression": "plain-text",
+        "allowedAppearance": [
+          "client-controlled"
+        ],
+        "preservedElements": [
+          "plain-language-next-move"
+        ],
+        "motion": "none"
+      }
+    },
+    "appearancePolicies": {
+      "light": {
+        "tokenSource": "approved-color-tokens",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "dark-adaptive": {
+        "tokenSource": "projection-owned-adaptive-tokens",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "forced-colors": {
+        "tokenSource": "system-colors",
+        "contrastFloor": 3,
+        "requiresEvidence": true
+      },
+      "increased-contrast": {
+        "tokenSource": "approved-color-tokens",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "grayscale": {
+        "tokenSource": "approved-color-tokens-and-tones",
+        "contrastFloor": 4.5,
+        "requiresEvidence": true
+      },
+      "client-controlled": {
+        "tokenSource": "client-or-platform",
+        "contrastFloor": null,
+        "requiresEvidence": true
+      },
+      "provider-controlled": {
+        "tokenSource": "provider",
+        "contrastFloor": null,
+        "requiresEvidence": true
+      }
+    }
+  },
   "profiles": {
     "webProduct": {
       "channel": "web",
@@ -648,5 +841,38 @@
     "prohibitedPunctuation": [
       "em-dash"
     ]
+  },
+  "doctrine": {
+    "version": "quiet-authority-v1",
+    "name": "quiet-authority",
+    "principles": [
+      "real-work-leads",
+      "homa-keeps-the-thread",
+      "one-useful-next-move",
+      "parent-decides",
+      "semantic-color-is-truthful",
+      "motion-ends-in-state",
+      "channel-reductions-preserve-meaning"
+    ],
+    "domains": [
+      "versioning",
+      "colors",
+      "typography",
+      "layout",
+      "motion",
+      "states",
+      "icons",
+      "brand-geometry",
+      "content",
+      "surface-profiles",
+      "channels",
+      "appearance"
+    ],
+    "sourceOfTruth": {
+      "human": "docs/homa-design/doctrine.md",
+      "typed": "packages/design/src/contract",
+      "generated": "packages/design/generated",
+      "tooling": "DESIGN.md"
+    }
   }
 }

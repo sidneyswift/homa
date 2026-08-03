@@ -29,7 +29,7 @@ The latest recorded production baseline is a snapshot, not a standing guarantee.
 3. `docs/homa-planning/journeys/10-reconciliation.md` §5 for founder rulings and later supersessions.
 4. The named backlog ticket and its current implementation plan, if one exists.
 5. The code, tests, configuration, and migrations that currently own the behavior.
-6. `docs/homa-design/SKILL.md`, then `docs/homa-design/readme.md`, for UI or copy work.
+6. `docs/homa-design/SKILL.md`, then `docs/homa-design/doctrine.md` and `docs/homa-design/readme.md`, for UI or copy work.
 
 Historical phase narratives and shipped-work notes live in `docs/homa-planning/build-log.md` and dated plans. They are evidence of what was decided or observed at that time, not a substitute for current repository or production verification.
 
@@ -39,7 +39,7 @@ Historical phase narratives and shipped-work notes live in `docs/homa-planning/b
 - `apps/mobile`: an Expo client using the same Supabase and web-agent backend. It is not part of the root `pnpm dev` task.
 - `packages/core`: shared events, map content and scoring, schemas, and other domain code.
 - `packages/taxonomy`: the skill graph and its validation tooling.
-- `packages/design`: an upcoming shared package under ticket M1-17. Web and mobile currently keep synchronized local copies.
+- `packages/design`: the typed Quiet authority contract and deterministic projections. Web and mobile still keep synchronized runtime copies while #720 and #724 migrate them to shared primitives.
 - `supabase/migrations`: local migration history. Local file presence never proves remote application.
 - `docs/homa-planning`: product contract, ticket backlog, dated plans, decisions, runbooks, and historical research.
 - `docs/homa-design`: canonical design source.
@@ -53,7 +53,7 @@ The route and package-specific maps belong in `apps/web/README.md` and `apps/mob
 - SMS, email, dispatch, and other server-originated channels derive a family from authenticated transport mappings, then call family-pinned server libraries. They do not accept a model-chosen family.
 - Ticket M1-02 owns the remaining non-service-role plus transaction-local `SET LOCAL` hardening for server-originated database work.
 - Generated artifacts are uploaded to durable storage before the turn ends. Sandbox and local files are scratch space only.
-- `packages/design` does not yet supply runtime tokens or components. Ticket M1-17 owns that integration.
+- `packages/design` owns exact design values and cross-surface channel rules. It does not yet replace every runtime token or component copy; #720 and #724 own that integration.
 - State-requirement snapshots are reviewed legal-reference data. Product display does not re-verify statutes on every render.
 - The public map uses national developmental and academic benchmarks. State-requirement data describes homeschool law, not state academic standards.
 

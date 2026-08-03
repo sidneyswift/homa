@@ -59,7 +59,7 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `apps/mobile/` | Expo (React Native) companion app: pure client on the same Supabase + eve backend |
 | `packages/core/` | The domain system (profiles, benchmarks, questionnaire, generators) |
 | `packages/core/src/events.ts` and `events.test.ts` | Typed event registry and exact schema tests, including the nine PII-free ChildProgress events |
-| `packages/design/` | Quiet authority contract and deterministic projections; runtime copies remain temporary migration targets under gh#720 and gh#724 |
+| `packages/design/` | Quiet authority contract, channel rules, and deterministic projections; runtime copies remain temporary migration targets under gh#720 and gh#724 |
 | `packages/taxonomy/` | Subject, domain, topic skill graph, validation tooling, and the generated narrow progress-metadata export |
 | `supabase/` | Local database migrations; local presence does not prove remote application |
 | `data/` | Reviewed snapshots of external reference data (`state-requirements/`: HomeschoolLeap API pulls that seed the `state_requirements` table; runbook: `docs/homa-planning/runbooks/state-requirements-refresh.md`) |

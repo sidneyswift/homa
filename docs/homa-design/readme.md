@@ -6,6 +6,10 @@ from `packages/design/src/contract`; this guide explains how to use it across
 web, native, landing, email, SMS, reports, print, stores, social, providers,
 and authoring systems.
 
+The normative cross-surface doctrine is [`doctrine.md`](doctrine.md). This
+guide provides the longer visual reference; the typed contract remains the
+authority for exact values and allowed combinations.
+
 ## The feeling
 
 Homa is calm, capable, and observant. She notices the real work, keeps the
