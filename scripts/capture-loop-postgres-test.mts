@@ -43,6 +43,7 @@ const childBId = uuid("2", 3);
 const scheduleAId = uuid("4", 1);
 const scheduleBId = uuid("4", 2);
 const nativeScheduleLoopId = uuid("a", 1);
+const nativeScheduleSecondLoopId = uuid("a", 3);
 const progressRecordedId = uuid("6", 1);
 const progressPendingId = uuid("6", 2);
 const progressConflictId = uuid("6", 3);
@@ -537,6 +538,34 @@ async function main(): Promise<void> {
       status: "applied",
       schedule_id: scheduleAId,
     });
+    const nativeSharedReceiptRows = await sql<{
+      status: string;
+      schedule_id: string;
+    }[]>`
+      select status, schedule_id
+      from public.schedule_plan_activity_native_v1(
+        ${nativeScheduleSecondLoopId}::uuid,
+        ${childAId}::uuid,
+        'math'::text,
+        1::smallint,
+        0::smallint,
+        '2026-08-10'::date,
+        'Native schedule fixture.'::text,
+        1::bigint,
+        null::uuid
+      )
+    `;
+    assert.deepEqual(nativeSharedReceiptRows[0], {
+      status: "applied",
+      schedule_id: scheduleAId,
+    });
+    const [sharedReceiptBindings] = await sql<{ count: number }[]>`
+      select count(*)::int as count
+      from public.mobile_capture_loop_receipts
+      where family_id = ${familyAId}
+        and receipt_id = ${scheduleAId}
+    `;
+    assert.equal(sharedReceiptBindings?.count, 2);
     await assert.rejects(
       sql`
         select *
