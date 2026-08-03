@@ -159,6 +159,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch PR base and head for delivery-delta guards
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags origin "${{ github.event.pull_request.base.sha }}"
+          git fetch --no-tags origin "${{ github.event.pull_request.head.sha }}"
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.1
