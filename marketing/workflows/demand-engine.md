@@ -49,7 +49,7 @@ step. `disabled` means the schedule is deliberately off and not installed.
 | 7 | Script + generate the shortform video | `marketing-video-producer` | staged-only; Higgsfield account access verified, generation unverified |
 | 8 | Derive the legacy-waitlist nurture email | `marketing-email-writer` | blocked-on-human: DM7 consent ruling open |
 | 9 | Blog hero, figures, pin image | `marketing-illustrator` | staged-only; Higgsfield account access verified, generation unverified |
-| 10 | Publish approved formats: blog | `marketing-distributor` | local-only; current skill stops after local copy, build, and commit, so push, READY, and live probe are unverified |
+| 10 | Publish approved formats: blog | `marketing-distributor` | verified 2026-08-03; article published at https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week; PR #785, merge a5fd44ff; build, push, and live probe verified |
 | 11 | Publish approved formats: TikTok, Instagram, Pinterest, Facebook, YouTube, X | `marketing-distributor` | blocked-on-human: register @thankshoma handles, create the YouTube channel, connect each account in Postiz, run `postiz auth:login` (HUMAN-TODO) |
 | 12 | Send the email | `marketing-distributor` | blocked-on-human: DM7; Resend delivery was not verified |
 | 13 | Weekly analytics into reports + engagement signals | `marketing-engagement-loop` | blocked-on-human: no published social data, Postiz unauthenticated, waitlist data not inspected |
