@@ -152,7 +152,12 @@ jobs:
     if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
     steps:
+      # The residue ratchet compares the PR head with its base SHA. A shallow
+      # checkout hides that object and forces the checker into its historical
+      # fallback, which would scan unrelated main-branch files.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
