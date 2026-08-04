@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Logo } from "../../components/brand/Logo";
 import { QuietFrame } from "../../components/design/QuietFrame";
+import { signInErrorMessage } from "./auth-copy";
 import { SignInForm } from "./signin-form";
 
 /**
@@ -25,9 +26,9 @@ export const metadata: Metadata = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   const safeNext =
     next?.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/app";
   return (
@@ -39,7 +40,7 @@ export default async function SignInPage({
         </h1>
         <p className="mt-2 text-[var(--homa-ink)]">Sign in to your family&apos;s space.</p>
         <div className="mt-8">
-          <SignInForm next={safeNext} />
+          <SignInForm next={safeNext} callbackError={signInErrorMessage(error)} />
         </div>
       </QuietFrame>
     </main>

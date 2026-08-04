@@ -110,7 +110,7 @@ export function TierOptions({
                 // min-h-11 is the 44px touch minimum; the old pill was 32px.
                 className={`inline-flex min-h-11 cursor-pointer items-center rounded-[var(--homa-radius-control)] px-4 text-sm font-semibold transition duration-(--homa-motion-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)] ${
                   period === option
-                    ? "bg-[var(--homa-brand-text)] text-[var(--homa-paper)]"
+                    ? "bg-[var(--homa-midnight-action)] text-[var(--homa-paper)]"
                     : "text-[var(--homa-muted-ink)] hover:text-[var(--homa-ink)]"
                 }`}
               >

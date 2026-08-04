@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
+import { QuietAction, QuietFeedback, QuietField, QuietFrame } from "../../components/design";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { signInAction, type AuthFormState } from "./actions";
 
@@ -19,16 +20,19 @@ const INITIAL_STATE: AuthFormState = { error: null };
 export function SignInForm({
   next = "/app",
   showOnboardingLink = true,
+  callbackError = null,
 }: {
   next?: string;
   /** The /join page turns this off: pointing a fresh invitee into the
    * standalone onboarding funnel would route them out of their invite
    * (reader pass 2026-07-11). */
   showOnboardingLink?: boolean;
+  /** A safe, server-mapped provider failure from /auth/callback. */
+  callbackError?: string | null;
 }) {
   const [state, action, pending] = useActionState(signInAction, INITIAL_STATE);
   const [googlePending, setGooglePending] = useState(false);
-  const [oauthError, setOauthError] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState<string | null>(callbackError);
 
   async function continueWithGoogle() {
     setOauthError(null);
@@ -49,20 +53,22 @@ export function SignInForm({
 
   return (
     <div>
-      <div className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" data-brand-layer="signin-form">
-        <button
+      <QuietFrame as="article" className="p-6" data-brand-layer="signin-form">
+        <QuietAction
+          kind="secondary"
+          size="large"
           type="button"
-          onClick={continueWithGoogle}
+          onClick={() => void continueWithGoogle()}
           disabled={googlePending}
-          className="flex min-h-12 w-full items-center justify-center gap-3 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-6 py-3 text-base font-semibold text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)] disabled:opacity-60"
+          className="w-full"
+          icon={<GoogleGlyph />}
         >
-          <GoogleGlyph />
           {googlePending ? "Redirecting to Google…" : "Continue with Google"}
-        </button>
+        </QuietAction>
         {oauthError ? (
-          <p className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
+          <QuietFeedback tone="error" className="mt-3">
             {oauthError}
-          </p>
+          </QuietFeedback>
         ) : null}
 
         <div className="my-5 flex items-center gap-3">
@@ -73,29 +79,13 @@ export function SignInForm({
 
         <form action={action}>
           <input type="hidden" name="next" value={next} />
-          <label className="block font-medium text-[var(--homa-ink)]" htmlFor="auth-email">
-            Email
-          </label>
-          <input
-            id="auth-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
-          />
+          <QuietField id="auth-email" label="Email" required>
+            <input name="email" type="email" autoComplete="email" />
+          </QuietField>
 
-          <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="auth-password">
-            Password
-          </label>
-          <input
-            id="auth-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
-          />
+          <QuietField id="auth-password" label="Password" required className="mt-4">
+            <input name="password" type="password" autoComplete="current-password" />
+          </QuietField>
           <div className="mt-2 text-right">
             <Link
               href="/forgot-password"
@@ -106,20 +96,21 @@ export function SignInForm({
           </div>
 
           {state.error ? (
-            <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
+            <QuietFeedback tone="error" className="mt-3">
               {state.error}
-            </p>
+            </QuietFeedback>
           ) : null}
 
-          <button
+          <QuietAction
             type="submit"
             disabled={pending}
-            className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)] disabled:opacity-60"
+            size="large"
+            className="mt-6 w-full"
           >
             {pending ? "One moment…" : "Sign in"}
-          </button>
+          </QuietAction>
         </form>
-      </div>
+      </QuietFrame>
 
       {showOnboardingLink ? (
         <p className="mt-4 text-center text-sm text-[var(--homa-ink)]">

@@ -71,7 +71,7 @@ export function ReportLockOffer({
           // No uppercase transform: WALL_EYEBROW is "Homa membership",
           // and rendering it uppercase puts "HOMA" on screen, retired by
           // the 2026-07-28 brand correction (`brand-casing-homa`).
-          className="font-mono text-[0.7rem] tracking-wide"
+          className="font-sans text-xs font-semibold tracking-[0.08em]"
           style={{ color: "var(--homa-info-ink)" }}
         >
           {WALL_EYEBROW}
@@ -98,7 +98,7 @@ export function ReportLockOffer({
     <div data-brand-layer="report-lock" className="quiet-report__lock rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-info-tint)] p-5">
       <p
         // No uppercase transform: see the sign-in branch above.
-        className="font-mono text-[0.7rem] tracking-wide"
+        className="font-sans text-xs font-semibold tracking-[0.08em]"
         style={{ color: "var(--homa-info-ink)" }}
       >
         {WALL_EYEBROW}
