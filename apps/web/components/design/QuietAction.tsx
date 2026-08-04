@@ -16,6 +16,7 @@ type ActionProps = {
   | "form"
   | "aria-haspopup"
   | "aria-expanded"
+  | "aria-pressed"
   | "aria-label"
 >;
 
@@ -32,6 +33,7 @@ export function QuietAction({
   onClick,
   "aria-haspopup": ariaHasPopup,
   "aria-expanded": ariaExpanded,
+  "aria-pressed": ariaPressed,
   "aria-label": ariaLabel,
 }: ActionProps) {
   const classes = `quiet-action quiet-action--${kind} quiet-action--${size} ${className}`.trim();
@@ -44,10 +46,10 @@ export function QuietAction({
 
   if (href && !disabled) {
     return (
-      <Link className={classes} href={href} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-label={ariaLabel}>
+      <Link className={classes} href={href} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-pressed={ariaPressed} aria-label={ariaLabel}>
         {content}
       </Link>
     );
   }
-  return <button className={classes} disabled={disabled} type={type} form={form} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-label={ariaLabel}>{content}</button>;
+  return <button className={classes} disabled={disabled} type={type} form={form} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-pressed={ariaPressed} aria-label={ariaLabel}>{content}</button>;
 }
