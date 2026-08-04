@@ -77,7 +77,7 @@ export default function BlogIndexPage() {
                 <li key={cluster.slug}>
                   <Link
                     href={`/blog/topics/${cluster.slug}`}
-                    className="inline-flex rounded-pill bg-brand-soft px-4 py-2 font-semibold text-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-soft-2"
+                    className="inline-flex rounded-pill bg-brand-soft px-4 py-2 font-semibold text-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand hover:text-on-brand"
                   >
                     {cluster.shortName}
                   </Link>
