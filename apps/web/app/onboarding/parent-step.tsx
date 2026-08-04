@@ -5,7 +5,6 @@ import { useState } from "react";
 import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
 import { QuietAction, QuietFeedback, QuietField } from "../../components/design";
 import { Icon } from "../../components/design/Icon";
-import { Doodle } from "../../components/marketing/Doodle";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { submitWaitlist } from "../../lib/waitlist-client";
 import { ReportPreview } from "./report-preview";
@@ -142,31 +141,14 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
     <div>
       <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <div>
-          {/* The doodles ride inside nowrap spans so each one stays glued to
-              its word through every line-wrap. No hand shape exists in the
-              doodle set; the heart is the set's "helping hand" mark (same
-              use as the landing hero). */}
-          <h1 className="text-balance font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-0.015em] text-[var(--homa-ink)] sm:text-[2.45rem]">
+          <h1 className="quiet-onboarding__parent-heading">
             Find out where your child{" "}
-            <span className="whitespace-nowrap">
+            <span className="quiet-onboarding__parent-word">
               shines
-              <Doodle
-                name="sun"
-                size={27}
-                color="var(--homa-highlight-ink)"
-                style={{ marginLeft: 7, verticalAlign: "-0.06em" }}
-              />
             </span>
             , and where they need a{" "}
-            <span className="whitespace-nowrap">
+            <span className="quiet-onboarding__parent-word">
               hand
-              <Doodle
-                name="heart"
-                size={25}
-                color="var(--homa-error-tint)"
-                rotate={10}
-                style={{ marginLeft: 7, verticalAlign: "-0.06em" }}
-              />
             </span>
           </h1>
           {/* The trial terms live HERE, before the signup doors, because
@@ -175,7 +157,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               two screens later reads as a trap. Same mechanics phrasing as
               wall-copy.ts's WALL_MECHANICS_LINE so the promise never
               drifts between surfaces. */}
-          <p className="mt-4 max-w-[28rem] text-pretty text-[var(--homa-ink)]">
+          <p className="quiet-onboarding__parent-copy">
             Your free trial starts with a five-minute questionnaire and your child&apos;s
             progress report. Strengths come first. Anything still growing comes with a next
             step. A card starts your 7 free days, and nothing is charged during them.
@@ -185,13 +167,13 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               so the ask sits directly on the paper (founder call
               2026-07-06: "we don't need a white card, the progress report
               is a card"). */}
-          <div className="mt-9 max-w-[28rem] text-left">
+          <div className="quiet-onboarding__parent-form">
             <QuietAction
               kind="secondary"
               size="large"
               type="button"
               onClick={() => void continueWithGoogle()}
-              disabled={googleBusy}
+              disabled={googleBusy || busy}
               className="w-full"
               icon={<GoogleGlyph />}
             >
@@ -203,14 +185,14 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               </QuietFeedback>
             ) : null}
 
-            <div className="my-5 flex items-center gap-3">
-              <span className="h-px flex-1 bg-[var(--homa-soft-boundary)]" />
-              <span className="text-sm text-[var(--homa-muted-ink)]">or</span>
-              <span className="h-px flex-1 bg-[var(--homa-soft-boundary)]" />
+            <div className="quiet-onboarding__parent-divider">
+              <span className="quiet-onboarding__parent-divider-line" />
+              <span className="quiet-onboarding__parent-divider-label">or</span>
+              <span className="quiet-onboarding__parent-divider-line" />
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
-              <QuietField id="parent-email" label="Email" required>
+              <QuietField id="parent-email" label="Email" required disabled={busy}>
                 <input
                   name="email"
                   type="email"
@@ -223,7 +205,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                   aria-describedby={error ? "parent-form-error" : undefined}
                 />
               </QuietField>
-              <QuietField id="parent-password" label="Password" hint="At least 8 characters." required className="mt-4">
+              <QuietField id="parent-password" label="Password" hint="At least 8 characters." required disabled={busy} className="mt-4">
                 <input
                   name="password"
                   type={showPassword ? "text" : "password"}
@@ -241,6 +223,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 className="mt-1 self-end"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 aria-pressed={showPassword}
+                disabled={busy}
                 onClick={() => setShowPassword((current) => !current)}
               >
                 {showPassword ? "Hide password" : "Show password"}
@@ -264,11 +247,11 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 </QuietFeedback>
               ) : null}
 
-              <p className="mt-4 text-center text-sm text-[var(--homa-muted-ink)]">
+              <p className="quiet-onboarding__parent-copy text-center">
                 Have you used Homa before?{" "}
                 <a
                   href="/signin?next=/app"
-                  className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
+                  className="quiet-onboarding__parent-link"
                 >
                   Sign in to pick up where you left off
                 </a>
@@ -295,8 +278,8 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             </form>
           </div>
 
-          <div className="mt-10">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[var(--homa-muted-ink)]">
+          <div className="quiet-onboarding__parent-trust">
+            <p>
               Checked against national standards and research
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-4">
@@ -327,7 +310,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
           <p className="mt-4 text-center text-xs text-[var(--homa-muted-ink)]">
             <a
               href="/onboarding/sample"
-              className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
+              className="quiet-onboarding__parent-link"
             >
               See a sample report first
             </a>

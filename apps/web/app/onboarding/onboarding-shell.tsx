@@ -92,16 +92,12 @@ export function OnboardingShell({
   return (
     <div
       data-brand-surface="onboarding"
-      className={
-        chromeless
-          ? "quiet-onboarding-surface min-h-dvh bg-[var(--homa-canvas)]"
-          : "quiet-onboarding-surface flex min-h-screen flex-col bg-[var(--homa-canvas)]"
-      }
+      className={`quiet-onboarding-surface quiet-onboarding__page${chromeless ? "" : " quiet-onboarding__page--flow"}`}
     >
       {chromeless ? null : fullChrome ? (
         <Nav />
       ) : (
-        <header className="flex w-full items-center px-6 py-4 sm:px-10">
+        <header className="quiet-onboarding__header">
           <Link href="/" aria-label="Homa home" className="inline-flex">
             <Logo size={26} />
           </Link>
@@ -115,12 +111,10 @@ export function OnboardingShell({
         className={
           chromeless
             ? "contents"
-            : `mx-auto flex w-full max-w-[68rem] flex-1 flex-col px-6 ${
-                fullChrome ? "pt-16 pb-24 sm:pt-24 sm:pb-32" : "pt-10 pb-16 sm:pt-12 sm:pb-20"
-              }`
+            : `quiet-onboarding__main ${fullChrome ? "quiet-onboarding__main--full" : "quiet-onboarding__main--focused"}`
         }
       >
-        <div className={chromeless ? "contents" : `w-full ${topAnchored ? "" : "my-auto"}`}>
+        <div className={chromeless ? "contents" : `quiet-onboarding__main-inner ${topAnchored ? "quiet-onboarding__main-inner--anchored" : ""}`}>
           <MapFlow onPhaseChange={setPhase} chat={chat} paywallPending={paywallPending} />
         </div>
       </main>
@@ -128,17 +122,17 @@ export function OnboardingShell({
       {chromeless ? null : fullChrome ? (
         <Footer />
       ) : (
-        <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-[var(--homa-muted-ink)]">
+        <footer className="quiet-onboarding__footer">
           <p>
             <Link
-              className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
+              className="quiet-onboarding__footer-link"
               href="/onboarding/method"
             >
               How the report is made
             </Link>
             {" \u00b7 "}
             <Link
-              className="underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
+              className="quiet-onboarding__footer-link"
               href="/privacy"
             >
               Privacy
