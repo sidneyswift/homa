@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 
+import { QuietFrame } from "../../../../components/design";
 import { Doodle } from "../../../../components/marketing/Doodle";
 
 /**
@@ -108,9 +109,10 @@ export function NarrativeBeat({
   }, [token, subjectId, router]);
 
   return (
-    <div
+    <QuietFrame
+      as="div"
       aria-busy="true"
-      className="relative overflow-hidden rounded-lg border border-border-subtle bg-card p-6 shadow-sm"
+      className="quiet-narrative-beat relative overflow-hidden p-6"
     >
       {/* Ambient doodle layer: decoration only, never announced, never
           intercepts taps. */}
@@ -134,7 +136,7 @@ export function NarrativeBeat({
             rise-in and self-drawing underline replay on every new line. */}
         <div aria-live="polite" aria-atomic="true">
           <div key={lineIndex}>
-            <p className="nb-line font-display text-lg font-semibold text-strong">
+            <p className="quiet-narrative-beat__line nb-line">
               {lines[lineIndex]}
             </p>
             {/* Self-writing pen stroke: pathLength=1 lets the dash draw
@@ -158,25 +160,25 @@ export function NarrativeBeat({
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-muted">
+        <p className="quiet-narrative-beat__copy quiet-narrative-beat__copy--spaced">
           This takes as long as good writing takes, usually under a minute. The page updates
           itself; leaving and coming back is safe too.
         </p>
         {longWait ? (
-          <p className="mt-2 text-sm text-muted">
+          <p className="quiet-narrative-beat__copy">
             This one is taking longer than usual. Nothing is lost:{" "}
             <button
               type="button"
               onClick={() => router.refresh()}
-              className="font-semibold text-brand underline underline-offset-2"
+              className="quiet-narrative-beat__refresh"
             >
               refresh now
             </button>{" "}
             or come back in a minute.
           </p>
         ) : null}
-        <p className="mt-4 font-hand text-xl text-sage">worth the wait {"\u270e"}</p>
+        <p className="quiet-narrative-beat__signature">worth the wait {"\u270e"}</p>
       </div>
-    </div>
+    </QuietFrame>
   );
 }
