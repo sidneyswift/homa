@@ -29,7 +29,7 @@ import { SidebarContent, type SidebarProps } from "./sidebar";
  * trigger sits on.
  */
 
-/** Tailwind's lg, where the shell swaps the phone bar for the sidebar. */
+/** The Quiet shell breakpoint where the phone bar swaps for the sidebar. */
 const DESKTOP_QUERY = "(min-width: 1024px)";
 const DRAWER_EXIT_MS = 200;
 const FOCUSABLE_SELECTOR =
@@ -154,7 +154,7 @@ export function MobileNav(props: SidebarProps) {
 
   return (
     <>
-      <header className="quiet-shell__mobile-bar lg:hidden print:hidden">
+      <header className="quiet-shell__mobile-bar">
         <button
           type="button"
           aria-expanded={open}
@@ -210,7 +210,13 @@ export function MobileNav(props: SidebarProps) {
               if (target.closest("a") || target.closest("[data-drawer-close]")) close();
             }}
             onTransitionEnd={(event) => {
-              if (event.target === event.currentTarget && event.propertyName === "transform") finishClose();
+              if (
+                drawerState === "closing" &&
+                event.target === event.currentTarget &&
+                event.propertyName === "transform"
+              ) {
+                finishClose();
+              }
             }}
             data-closing={drawerState === "closing" ? "true" : undefined}
             className="quiet-shell__drawer"
