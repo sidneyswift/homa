@@ -67,7 +67,7 @@ export function SubjectLessonRetryButton({
   const retryCopy = getSubjectLessonRetryCopy(retryTarget);
 
   return (
-    <div className="mt-4">
+    <div className="quiet-lesson__keep">
       <QuietAction
         disabled={busy}
         aria-busy={busy}
@@ -91,7 +91,7 @@ export function SubjectLessonRetryButton({
         {busy ? retryCopy.pending : retryCopy.action}
       </QuietAction>
       {error ? (
-        <p className="mt-3 text-sm text-[var(--rose-600)]" role="alert">
+        <p className="quiet-lesson__error" role="alert">
           {error}
         </p>
       ) : null}

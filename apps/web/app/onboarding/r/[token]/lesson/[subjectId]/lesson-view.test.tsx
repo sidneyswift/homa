@@ -85,6 +85,10 @@ const GLOBALS_CSS = readFileSync(
   new URL("../../../../../globals.css", import.meta.url),
   "utf8",
 );
+const QUIET_PRIMITIVES_CSS = readFileSync(
+  new URL("../../../../../../components/design/quiet-primitives.css", import.meta.url),
+  "utf8",
+);
 
 const ROUTER = {
   back() {},
@@ -512,7 +516,7 @@ describe("owner worksheet Keep and daily-loop handoff", () => {
     );
     assert.match(
       html,
-      /<section[^>]*aria-labelledby="phone-setup-heading"[^>]*class="[^"]*border-border-subtle[^"]*bg-card[^"]*"[^>]*>/u,
+      /<section[^>]*aria-labelledby="phone-setup-heading"[^>]*class="[^"]*quiet-lesson__phone[^"]*"[^>]*>/u,
     );
     assert.match(
       interactiveClassForText(html, "Message Homa about this lesson"),
@@ -693,13 +697,10 @@ describe("retained lesson contrast and retry", () => {
       assert.doesNotMatch(className, /clay-700|clay-600|rounded-pill/u);
     }
     assert.doesNotMatch(readyHtml, />Worksheet ready</u);
-    assert.match(
-      readyHtml,
-      /marker:text-\[var\(--homa-midnight-action\)\]/u,
-    );
-    assert.doesNotMatch(MATERIAL_CARD_SOURCE, /\btext-brand\b/u);
-    assert.match(RETRY_SOURCE, /text-\[var\(--rose-600\)\]/u);
-    assert.doesNotMatch(RETRY_SOURCE, /text-\[var\(--danger\)\]/u);
+    assert.match(readyHtml, /quiet-lesson__steps/u);
+    assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-lesson__steps/u);
+    assert.match(MATERIAL_CARD_SOURCE, /quiet-artifact-card__title/u);
+    assert.match(RETRY_SOURCE, /quiet-lesson__error/u);
 
     const white = cssHexToken("on-brand");
     const rose600 = cssHexToken("rose-600");
