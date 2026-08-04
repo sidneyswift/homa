@@ -650,11 +650,23 @@ try {
   );
 
   const [contracts] = await sql<{
+    public_enabled: boolean;
+    anon_enabled: boolean;
     legacy_enabled: boolean;
     v1_enabled: boolean;
     v2_enabled: boolean;
   }[]>`
     select
+      has_function_privilege(
+        'public',
+        'public.toggle_plan_activity_check(uuid,text,smallint,smallint,boolean)',
+        'execute'
+      ) as public_enabled,
+      has_function_privilege(
+        'anon',
+        'public.toggle_plan_activity_check(uuid,text,smallint,smallint,boolean)',
+        'execute'
+      ) as anon_enabled,
       has_function_privilege(
         'authenticated',
         'public.toggle_plan_activity_check(uuid,text,smallint,smallint,boolean)',
@@ -671,7 +683,9 @@ try {
         'execute'
       ) as v2_enabled
   `;
-  assert.equal(contracts.legacy_enabled, true);
+  assert.equal(contracts.public_enabled, false);
+  assert.equal(contracts.anon_enabled, false);
+  assert.equal(contracts.legacy_enabled, false);
   assert.equal(contracts.v1_enabled, false);
   assert.equal(contracts.v2_enabled, true);
 
@@ -682,7 +696,7 @@ try {
   console.log("PASS  Planner receipts preserve exact multi-family tenancy");
   console.log("PASS  v2 bounds direct input and retires the unused v1 grant");
   console.log("PASS  legacy report tokens preserve exact family and plan tenancy");
-  console.log("PASS  expand phase preserves the deployed legacy operation");
+  console.log("PASS  legacy positional check RPC is no longer executable");
 } finally {
   if (mapStoreLoaded) {
     const { mapDb } = await import("../apps/web/lib/map/db");
