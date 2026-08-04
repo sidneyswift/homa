@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { AppFrame } from "../design/AppFrame";
 import { DesktopContextSwitcher } from "./context-switcher";
 import { MobileNav } from "./mobile-nav";
 import { Sidebar, type SidebarKid } from "./sidebar";
@@ -33,7 +34,7 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   return (
-    <div className="quiet-shell">
+    <AppFrame>
       <Sidebar
         parentName={parentName}
         familyName={familyName}
@@ -55,7 +56,7 @@ export function DashboardShell({
           the selection affects). */}
       <DesktopContextSwitcher kids={kids} selected={viewContext} />
 
-      <main className="quiet-shell__main">{children}</main>
-    </div>
+      <main className="quiet-shell__main" data-app-content="">{children}</main>
+    </AppFrame>
   );
 }

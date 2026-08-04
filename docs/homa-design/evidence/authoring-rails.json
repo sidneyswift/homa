@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "manifestFingerprint": "fb5f0b8fa6e4ed411d1214854ea5e9e86a6989a3a8a5983679f2bf89bce09a0b",
+  "manifestFingerprint": "5457f3eab1c79e7affdde3c327c275b49e966822653ecff8c9c60673aa868b8f",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "authoringRoots": [
     ".agents/skills/",

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Logo } from "../brand/Logo";
 import { Icon } from "../design/Icon";
@@ -23,37 +23,121 @@ import { SidebarContent, type SidebarProps } from "./sidebar";
  *
  * Drawer behavior matches the house menus (marketing Nav, AccountMenu):
  * closes on Escape, a backdrop tap, any link tap inside, or the viewport
- * growing past the desktop breakpoint; React unmounts it instantly on
- * close. Entrance per the emil-design-eng rules: transform only,
- * ease-out, from the edge the trigger sits on.
+ * growing past the desktop breakpoint. The drawer keeps an explicit closing
+ * state long enough to play its exit transition, then returns focus to the
+ * trigger. Entrance and exit use transform only, ease-out, from the edge the
+ * trigger sits on.
  */
 
 /** Tailwind's lg, where the shell swaps the phone bar for the sidebar. */
 const DESKTOP_QUERY = "(min-width: 1024px)";
+const DRAWER_EXIT_MS = 200;
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export function MobileNav(props: SidebarProps) {
-  const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  const [drawerState, setDrawerState] = useState<"closed" | "open" | "closing">("closed");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const hadOpenDrawerRef = useRef(false);
+  const open = drawerState !== "closed";
+
+  const finishClose = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setDrawerState("closed");
+  }, []);
+
+  const openDrawer = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setDrawerState("open");
+  }, []);
+
+  const close = useCallback(() => {
+    setDrawerState((current) => {
+      if (current !== "open") return current;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        window.setTimeout(finishClose, 0);
+      } else {
+        closeTimerRef.current = window.setTimeout(finishClose, DRAWER_EXIT_MS);
+      }
+      return "closing";
+    });
+  }, [finishClose]);
 
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") close();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [close, open]);
+
+  useEffect(() => {
+    if (!open) {
+      if (hadOpenDrawerRef.current) {
+        hadOpenDrawerRef.current = false;
+        triggerRef.current?.focus({ preventScroll: true });
+      }
+      return;
+    }
+
+    hadOpenDrawerRef.current = true;
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+    const activeDrawer = drawer;
+
+    const focusables = () =>
+      Array.from(activeDrawer.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+    window.requestAnimationFrame(() => {
+      (closeButtonRef.current ?? focusables()[0] ?? activeDrawer).focus({ preventScroll: true });
+    });
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) {
+        event.preventDefault();
+        activeDrawer.focus();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement) || !activeDrawer.contains(active)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [drawerState, open]);
 
   useEffect(() => {
     // Rotating to landscape past the breakpoint would strand an open
     // drawer over the desktop sidebar.
     const desktop = window.matchMedia(DESKTOP_QUERY);
     function onChange(event: MediaQueryListEvent) {
-      if (event.matches) setOpen(false);
+      if (event.matches) close();
     }
     desktop.addEventListener("change", onChange);
     return () => desktop.removeEventListener("change", onChange);
-  }, []);
+  }, [close]);
 
   useEffect(() => {
     // A full-height drawer over a scrolled page: the page underneath
@@ -66,6 +150,8 @@ export function MobileNav(props: SidebarProps) {
     };
   }, [open]);
 
+  useEffect(() => () => finishClose(), [finishClose]);
+
   return (
     <>
       <header className="quiet-shell__mobile-bar lg:hidden print:hidden">
@@ -74,7 +160,8 @@ export function MobileNav(props: SidebarProps) {
           aria-expanded={open}
           aria-controls="app-drawer"
           aria-label="Open menu"
-          onClick={() => setOpen(true)}
+          onClick={openDrawer}
+          ref={triggerRef}
           className="quiet-shell__icon-action"
         >
           <Icon name="menu" size={24} />
@@ -104,10 +191,16 @@ export function MobileNav(props: SidebarProps) {
           <div
             onClick={close}
             aria-hidden="true"
+            data-closing={drawerState === "closing" ? "true" : undefined}
             className="quiet-shell__scrim"
           />
           <div
             id="app-drawer"
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Homa menu"
+            tabIndex={-1}
             // Delegated close: the drawer is the sidebar, so every link
             // inside (tabs, account menu's Settings) should land on its
             // page with the drawer gone; the viewing rows are buttons,
@@ -116,6 +209,10 @@ export function MobileNav(props: SidebarProps) {
               const target = event.target as HTMLElement;
               if (target.closest("a") || target.closest("[data-drawer-close]")) close();
             }}
+            onTransitionEnd={(event) => {
+              if (event.target === event.currentTarget && event.propertyName === "transform") finishClose();
+            }}
+            data-closing={drawerState === "closing" ? "true" : undefined}
             className="quiet-shell__drawer"
           >
             <div className="quiet-shell__drawer-header">
@@ -123,6 +220,7 @@ export function MobileNav(props: SidebarProps) {
                 <Logo size={26} />
               </Link>
               <button
+                ref={closeButtonRef}
                 type="button"
                 aria-label="Close menu"
                 onClick={close}
