@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
@@ -11,6 +9,7 @@ import {
   summarizePageGeometry,
   underfillNotesApplyTo,
 } from "./page-geometry";
+import { wrapPrintableDocument } from "./page-shell";
 
 /**
  * Deterministic page-geometry feedback (gh#349): the composer authors
@@ -20,8 +19,6 @@ import {
  * (overflow always wins over an underfill note), and that a naive fill
  * metric never gets treated as something to maximize.
  */
-
-const here = import.meta.dirname;
 
 const PX_PER_IN = 96;
 
@@ -294,13 +291,13 @@ describe("PRINTABLE_HEIGHT_IN stays true to the shell CSS", () => {
   // about where the printable area actually ends, so read the CSS back
   // out of page-shell.ts rather than trusting the number in isolation.
   it("equals the page box height minus the body's own top and bottom padding", async () => {
-    const source = await readFile(path.join(here, "page-shell.ts"), "utf8");
-    const pageHeight = source.match(/\.homa-sheet-page \{[^}]*height:\s*(\d+(?:\.\d+)?)in/);
-    const bodyPadding = source.match(
+    const rendered = wrapPrintableDocument(["<p>geometry probe</p>"], "", "letter");
+    const pageHeight = rendered.match(/\.homa-sheet-page \{[^}]*height:\s*(\d+(?:\.\d+)?)in/);
+    const bodyPadding = rendered.match(
       /\.homa-sheet-body \{[^}]*padding:\s*(\d+(?:\.\d+)?)in\s+(\d+(?:\.\d+)?)in\s+(\d+(?:\.\d+)?)in/,
     );
-    assert.ok(pageHeight, "page box height not found; update this guard");
-    assert.ok(bodyPadding, "body padding shorthand not found; update this guard");
+    assert.ok(pageHeight, "rendered page box height not found; update this guard");
+    assert.ok(bodyPadding, "rendered body padding shorthand not found; update this guard");
     const expected =
       Number(pageHeight[1]) - Number(bodyPadding[1]) - Number(bodyPadding[3]);
     assert.equal(PRINTABLE_HEIGHT_IN, expected);

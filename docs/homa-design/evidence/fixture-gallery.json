@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "galleryVersion": "fixture-gallery-v1",
   "designEra": "quiet-authority-v1",
-  "sourceContractChecksum": "ba95f6d8d6d19fd8f2cf8215432e0c61697dc0c104631540ebb383f863a746da",
+  "sourceContractChecksum": "c866bf300199716658f620281b2c57cbbcab220903834467b9770e07b6bfe08d",
   "generator": "scripts/design-fixture-gallery.mts",
   "profileMatrix": [
     {
@@ -11736,5 +11736,5 @@
     ]
   },
   "fixtureCount": 277,
-  "manifestChecksum": "ebea4b767b92f159933fa0b3a7abd1e8e1a6f2403a24e62e61924055bc5a8d8e"
+  "manifestChecksum": "2be6cd2b05eeac8572c3d0d06dfe43178fa47d8db7a76e95f73dee926df3d58d"
 }

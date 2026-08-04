@@ -105,9 +105,10 @@ describe("Quiet authority email shell", () => {
     const renderedPayload = payload as { html: string; text: string };
     assert.match(renderedPayload.html, /color-scheme: light dark/u);
     assert.match(renderedPayload.html, /role="presentation"/u);
-    assert.match(renderedPayload.html, /font-family:'DM Sans', 'Segoe UI', Arial, sans-serif/u);
-    assert.match(renderedPayload.html, /font-family:'EB Garamond', Georgia, serif/u);
-    assert.match(renderedPayload.html, /Homa <span aria-hidden="true"/u);
+    assert.match(renderedPayload.html, /font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif/u);
+    assert.match(renderedPayload.html, /font-family:Georgia, 'Times New Roman', serif/u);
+    assert.match(renderedPayload.html, /src="https:\/\/thankshoma\.com\/brand\/homa-mark\.svg"/u);
+    assert.match(renderedPayload.html, /<span style="vertical-align:middle;">Homa<\/span>/u);
     assert.match(renderedPayload.html, /&lt;quiet&gt;/u);
     assert.match(renderedPayload.html, /A line with &amp; safe content\./u);
     assert.doesNotMatch(renderedPayload.html, /<quiet>/u);
@@ -133,6 +134,19 @@ describe("Quiet authority email shell", () => {
     assert.match(html, /href="https:\/\/thankshoma\.com\/report\?child=&lt;story&gt;"/u);
     assert.match(html, /Open &lt;report&gt;/u);
     assert.doesNotMatch(html, /href="[^"]*<story>/u);
+  });
+
+  it("escapes a preview logo URL without allowing a markup injection", () => {
+    const html = renderHomaEmailHtml({
+      preview: "A preview",
+      heading: "A useful next move",
+      bodyLines: ["The next step is ready."],
+      footerNote: "A footer note.",
+      logoUrl: 'https://example.com/mark.svg?x="quoted"',
+    });
+
+    assert.match(html, /src="https:\/\/example\.com\/mark\.svg\?x=&quot;quoted&quot;"/u);
+    assert.doesNotMatch(html, /src="[^"]*"quoted"/u);
   });
 });
 
