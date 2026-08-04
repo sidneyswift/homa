@@ -92,6 +92,7 @@ export function TrialGate({
   checkout,
   lapsed,
   portalAvailable,
+  duplicateTrialPrevented = false,
 }: {
   checkout: WallCheckout;
   /** True when this family had a trial or subscription that ended:
@@ -100,6 +101,9 @@ export function TrialGate({
   /** True when a Stripe billing relationship exists, so the gate can
    *  offer the self-serve portal (fix a card, restart the old plan). */
   portalAvailable: boolean;
+  /** Stripe matched this card to another active trial and stopped the
+   * duplicate before it could make a future charge. */
+  duplicateTrialPrevented?: boolean;
 }) {
   // The charge dates come from HER clock, not the server's. FamilyRow
   // carries no time zone, so a server-rendered date can be a day wrong,
@@ -121,6 +125,20 @@ export function TrialGate({
       keepalive: true,
     }).catch(() => {});
   }, []);
+
+  if (duplicateTrialPrevented) {
+    return (
+      <div className="quiet-paywall__content quiet-paywall__gate" data-brand-layer="trial-gate">
+        <h1 className="quiet-paywall__gate-headline">We stopped a second Homa trial.</h1>
+        <div className="quiet-paywall__gate-reassurance" role="status">
+          <p>This card is already part of a Homa trial, so it will not be charged again.</p>
+          <a className="quiet-paywall__proof-link" href="/signin?next=/app">
+            Sign in to your account
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="quiet-paywall__content quiet-paywall__gate" data-brand-layer="trial-gate">

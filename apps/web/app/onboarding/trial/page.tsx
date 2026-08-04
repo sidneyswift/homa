@@ -39,7 +39,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function TrialGatePage() {
+export default async function TrialGatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ duplicate_trial?: string }>;
+}) {
   const family = await requireFamily();
   if (!family || !family.has_account) redirect("/onboarding");
 
@@ -49,6 +53,7 @@ export default async function TrialGatePage() {
   const portalAvailable = gate.lapsed
     ? await familyHasBillingRelationship(family.id)
     : false;
+  const duplicateTrialPrevented = (await searchParams).duplicate_trial === "1";
 
   // The onboarding flow's quiet chrome (OnboardingShell's focused-step
   // ruling): a logo home link and the two-link footer, nothing that
@@ -62,11 +67,12 @@ export default async function TrialGatePage() {
       </header>
       <main className="quiet-paywall__main">
         <div className="quiet-paywall__main-inner">
-          <TrialGate
-            checkout={gate.checkout}
-            lapsed={gate.lapsed}
-            portalAvailable={portalAvailable}
-          />
+            <TrialGate
+              checkout={gate.checkout}
+              lapsed={gate.lapsed}
+              portalAvailable={portalAvailable}
+              duplicateTrialPrevented={duplicateTrialPrevented}
+            />
         </div>
       </main>
       {/* The footer stays readable against the canvas and carries the

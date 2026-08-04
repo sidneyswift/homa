@@ -47,6 +47,7 @@ const fixtureUserIds = [];
 let morningResearchBriefV2SchemaAvailable = false;
 let morningOfferFunnelSchemaAvailable = false;
 let familyBillingSubscriptionsSchemaAvailable = false;
+let stripeTrialCardClaimsSchemaAvailable = false;
 let accountDeletionJobsSchemaAvailable = false;
 let familyLibrarySchemaAvailable = false;
 let familyAssetPlanLinksSchemaAvailable = false;
@@ -5079,6 +5080,22 @@ await expectReadDenied("admin_alert_acknowledgments");
     await expectReadDenied("family_billing_subscriptions");
   }
 }
+// Stripe card fingerprints are provider-only equality signals. They are
+// never family-readable because a match would disclose another family's
+// billing relationship.
+{
+  const response = await rest(`stripe_trial_card_claims?select=card_fingerprint&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("stripe_trial_card_claims");
+    report("stripe_trial_card_claims absent from target (additive migration not applied yet); nothing exposed", true);
+  } else {
+    stripeTrialCardClaimsSchemaAvailable = true;
+    await expectReadDenied("stripe_trial_card_claims");
+  }
+}
 // Account-deletion audit rows are server-only. The migration is additive and
 // is intentionally safe to deploy before the app route, so this check arms
 // when the table reaches the target.
@@ -5768,6 +5785,16 @@ if (familyBillingSubscriptionsSchemaAvailable) {
       status: "active",
     },
     "anon cannot forge family billing subscriptions",
+  );
+}
+if (stripeTrialCardClaimsSchemaAvailable) {
+  await expectInsertDenied(
+    "stripe_trial_card_claims",
+    {
+      card_fingerprint: "fp_intruder",
+      family_id: "00000000-0000-0000-0000-000000000000",
+    },
+    "anon cannot forge Stripe trial card claims",
   );
 }
 if (accountDeletionJobsSchemaAvailable) {

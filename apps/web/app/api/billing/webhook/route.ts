@@ -14,6 +14,7 @@ import {
   startFamilyTrial,
   tierForStripeProductRecognized,
 } from "../../../../lib/billing/wall";
+import { enforceStripeTrialCardUniqueness } from "../../../../lib/billing/duplicate-trial";
 import {
   siteUrl,
   submitTrialReminderEmail,
@@ -103,6 +104,13 @@ export async function POST(request: Request): Promise<Response> {
         let subscription: Stripe.Subscription | null = null;
         if (subscriptionId) {
           subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        }
+        if (subscription) {
+          const trialGuard = await enforceStripeTrialCardUniqueness(stripe, familyId, subscription);
+          if (trialGuard === "duplicate") {
+            await emitMapEvent("billing.duplicate_trial_prevented", { family_id: familyId });
+            break;
+          }
         }
         const purchasedProduct = subscription?.items.data[0]?.price.product ?? null;
         // Recognized-only: an unmapped product must leave plan_tier

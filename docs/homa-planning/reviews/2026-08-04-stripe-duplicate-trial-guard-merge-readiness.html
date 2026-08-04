@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Merge readiness: Stripe duplicate-trial guard</title>
+    <style>
+      body { background: #f7f4ef; color: #14251f; font: 16px/1.55 system-ui, sans-serif; margin: 0; }
+      main { margin: 0 auto; max-width: 900px; padding: 48px 24px 72px; }
+      h1, h2 { line-height: 1.1; } h1 { font-size: 2.4rem; } h2 { margin-top: 3rem; }
+      .stats, .flow, .card, .question { background: #fff; border: 1px solid #d7ded8; border-radius: 14px; margin: 16px 0; padding: 20px; }
+      .flow { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+      .new { border-left: 5px solid #12715b; } .dependency { border-left: 5px solid #8d6139; }
+      code { background: #edf1ed; border-radius: 4px; padding: 1px 4px; } label { display: block; margin: 8px 0; }
+      button { background: #12715b; border: 0; border-radius: 7px; color: white; cursor: pointer; font: inherit; padding: 10px 16px; }
+      #result { font-weight: 700; margin: 16px 0; } .answer { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>Merge readiness report · 2026-08-04</p>
+      <h1>Stripe duplicate-trial guard</h1>
+      <div class="stats">
+        <strong>Branch:</strong> <code>codex/stripe-duplicate-trial-guard</code><br>
+        <strong>Scope:</strong> 14 implementation, migration, test, and evidence files before this review artifact.<br>
+        <strong>Release shape:</strong> application deploy first, then additive migration verification. No destructive schema change.
+      </div>
+
+      <h2>Mental model</h2>
+      <div class="flow">
+        <section>
+          <h3>Before</h3>
+          <p>Stripe Checkout completion or its webhook stamped <code>trial_started_at</code>. A new email and device could create a second subscription with the same card. Homa had no provider-level equality signal.</p>
+        </section>
+        <section class="new">
+          <h3>After</h3>
+          <p>Verified Stripe subscription → retrieve its card payment method → atomically claim its provider fingerprint → either stamp the trial or cancel the later subscription → show a private account-recovery path. The webhook runs the same guard for closed-tab checkouts.</p>
+        </section>
+      </div>
+
+      <h2>Non-obvious behaviors</h2>
+      <section class="card">
+        <h3>Exact card signal, not identity matching</h3>
+        <p><strong>What:</strong> only Stripe card fingerprints can block a trial. Name, email, child data, IP address, and device identity play no part.</p>
+        <p><strong>Why:</strong> a false positive would expose or conflate unrelated families. Missing and non-card signals safely proceed.</p>
+        <p><strong>Where:</strong> <code>apps/web/lib/billing/duplicate-trial.ts:47-58,117-134</code>.</p>
+      </section>
+      <section class="card">
+        <h3>Race-safe ownership</h3>
+        <p><strong>What:</strong> one database primary key serializes concurrent claims. The same family can retry; another family can claim only after the prior owner is explicitly lapsed.</p>
+        <p><strong>Why:</strong> a read-then-write check would let two concurrent checkouts both pass.</p>
+        <p><strong>Where:</strong> <code>apps/web/lib/billing/duplicate-trial.ts:60-100</code>, <code>supabase/migrations/20260804090000_stripe_trial_card_claims.sql:6-17</code>.</p>
+      </section>
+      <section class="card">
+        <h3>No new entitlement for the later checkout</h3>
+        <p><strong>What:</strong> the duplicate branch cancels the Stripe subscription and exits before <code>startFamilyTrial</code> or subscription mirroring.</p>
+        <p><strong>Why:</strong> cancellation alone is insufficient if the product already unlocked the second family.</p>
+        <p><strong>Where:</strong> <code>apps/web/app/api/billing/confirm/route.ts:106-117</code>, <code>apps/web/app/api/billing/webhook/route.ts:104-128</code>.</p>
+      </section>
+      <section class="card">
+        <h3>Privacy-preserving recovery</h3>
+        <p><strong>What:</strong> the later family sees a reassurance and a sign-in link, not any account, family, or card details. Analytics carry only the local family ID.</p>
+        <p><strong>Why:</strong> a card match must never disclose that another family exists.</p>
+        <p><strong>Where:</strong> <code>apps/web/components/billing/trial-gate.tsx:129-141</code>, <code>packages/core/src/events.ts:1479-1485</code>.</p>
+      </section>
+
+      <h2>Existing behavior this relies on</h2>
+      <section class="card dependency">
+        <p>Stripe must provide a card payment method and a stable fingerprint. Wallet-token and non-card checkouts intentionally remain outside this exact guard. Stripe’s cancellation API must remain idempotent for an already-canceled subscription.</p>
+        <p>The production database must receive migration <code>20260804090000_stripe_trial_card_claims.sql</code> after the deployed application is ready. The isolation check is already armed to prove the final RLS posture.</p>
+      </section>
+
+      <h2>Merge quiz</h2>
+      <form id="quiz">
+        <section class="question"><strong>1. Two checkout webhooks arrive concurrently for different families and the same card. What protects against both trials being unlocked?</strong>
+          <label><input type="radio" name="q1" value="a"> The browser redirect keeps them sequential.</label>
+          <label><input type="radio" name="q1" value="b"> The fingerprint table primary key and atomic upsert permit one active owner.</label>
+          <label><input type="radio" name="q1" value="c"> The telemetry event deduplicates the subscriptions.</label>
+        </section>
+        <section class="question"><strong>2. Stripe returns no card fingerprint for a wallet or non-card method. What happens?</strong>
+          <label><input type="radio" name="q2" value="a"> Homa guesses from email and device.</label>
+          <label><input type="radio" name="q2" value="b"> Homa blocks every trial to be safe.</label>
+          <label><input type="radio" name="q2" value="c"> Homa does not declare a duplicate and preserves the ordinary checkout path.</label>
+        </section>
+        <section class="question"><strong>3. Why is the guard in both the confirm redirect and webhook?</strong>
+          <label><input type="radio" name="q3" value="a"> The webhook is only for analytics.</label>
+          <label><input type="radio" name="q3" value="b"> Either delivery order, including a closed checkout tab, must prevent local entitlement.</label>
+          <label><input type="radio" name="q3" value="c"> Each route protects a different billing tier.</label>
+        </section>
+        <section class="question"><strong>4. A duplicate is confirmed. Which behavior is correct?</strong>
+          <label><input type="radio" name="q4" value="a"> Cancel the later Stripe subscription and do not call <code>startFamilyTrial</code>.</label>
+          <label><input type="radio" name="q4" value="b"> Start the trial, then cancel it when the seven days end.</label>
+          <label><input type="radio" name="q4" value="c"> Merge the later family into the earlier family.</label>
+        </section>
+        <section class="question"><strong>5. What information may the reassurance screen reveal?</strong>
+          <label><input type="radio" name="q5" value="a"> The previous family name, so the parent can recognize it.</label>
+          <label><input type="radio" name="q5" value="b"> Only that a second trial was stopped, with a sign-in path to the parent’s own account.</label>
+          <label><input type="radio" name="q5" value="c"> The last four digits of the prior card.</label>
+        </section>
+        <section class="question"><strong>6. After the code deploy reaches READY, what release action is still required?</strong>
+          <label><input type="radio" name="q6" value="a"> Apply and verify the additive migration, including its server-only RLS boundary.</label>
+          <label><input type="radio" name="q6" value="b"> Delete old Stripe subscriptions in production.</label>
+          <label><input type="radio" name="q6" value="c"> Turn off the trial paywall experiment.</label>
+        </section>
+        <button type="button" id="grade">Grade quiz</button>
+        <p id="result" aria-live="polite"></p>
+      </form>
+    </main>
+    <script>
+      const answers = { q1: "b", q2: "c", q3: "b", q4: "a", q5: "b", q6: "a" };
+      document.querySelector("#grade").addEventListener("click", () => {
+        const score = Object.entries(answers).filter(([name, answer]) => document.querySelector(`input[name="${name}"]:checked`)?.value === answer).length;
+        document.querySelector("#result").textContent = score === 6
+          ? "6/6. Cleared to merge after CI, deployment, migration, and live verification are all complete."
+          : `${score}/6. Re-read the matching report card before merging. The pass bar is 6/6.`;
+      });
+    </script>
+  </body>
+</html>
