@@ -4,7 +4,7 @@
   "harnessVersion": "provider-handoff-v1",
   "ownerIssue": "gh#732",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "bbee7cd5fb37fbd432eb2737d79413b0572146b7fb2a9d3702b9743adbe3b5e2",
+  "ownedInputFingerprint": "dde4c61a04385fb62deb18e10deacf56326579f275716ae695718459c36befc5",
   "surfaceCoverage": {
     "selector": "ownerIssue:gh#732",
     "surfaceCount": 2,

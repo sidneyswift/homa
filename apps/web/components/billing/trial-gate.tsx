@@ -123,10 +123,10 @@ export function TrialGate({
   }, []);
 
   return (
-    <div className="quiet-paywall__content mx-auto w-full max-w-[34rem]" data-brand-layer="trial-gate">
+    <div className="quiet-paywall__content quiet-paywall__gate" data-brand-layer="trial-gate">
       {/* text-balance so the headline never leaves "days" alone on a
           second line at phone width. */}
-      <h1 className="text-balance font-display text-3xl font-bold leading-tight text-[var(--homa-ink)] sm:text-4xl">
+      <h1 className="quiet-paywall__gate-headline">
         {TRIAL_GATE_HEADLINE}
       </h1>
       {/* One line, and the last words before the prices. A returning
@@ -139,12 +139,12 @@ export function TrialGate({
           and two named exactly that as the reason they would not
           proceed. This sentence breaks the word budget that produced
           that result, which is the correct trade. */}
-      <p className="mt-3 text-lg text-[var(--homa-ink)]">{TRIAL_GATE_WHAT_IT_IS}</p>
+      <p className="quiet-paywall__gate-identity">{TRIAL_GATE_WHAT_IT_IS}</p>
       {/* Five of ten personas named this the most persuasive sentence
           on the page, and it was in small grey type below the fold,
           styled like a legal footnote. It is the only trust signal
           available to a product with no customers to quote. */}
-      <p className="mt-2 text-sm text-[var(--homa-muted-ink)]">
+      <p className="quiet-paywall__gate-makers">
         {lapsed ? `${TRIAL_GATE_LAPSED_REASSURANCE} ` : ""}
         {TRIAL_GATE_MAKERS_LINE}
       </p>
@@ -157,7 +157,7 @@ export function TrialGate({
           one round. It is four words. Nothing else on the page answers
           that question this early, and the whole card-upfront gate
           turns on it. */}
-      <p className="mt-4 text-base font-semibold text-[var(--homa-ink)]">{TRIAL_GATE_REASSURANCE}</p>
+      <p className="quiet-paywall__gate-reassurance">{TRIAL_GATE_REASSURANCE}</p>
 
       <TierOptions door="signup" checkout={checkout} />
 
@@ -172,24 +172,24 @@ export function TrialGate({
           consent. Do not shrink it, grey it, or move it into an
           accordion. Do not reword it either: the exact sentence tested
           best. */}
-      <p className="mt-4 text-base text-[var(--homa-ink)]">
+      <p className="quiet-paywall__gate-charge-note">
         {dates
           ? trialChargeNoteDated(dates.remindOn, dates.chargeOn)
           : TRIAL_GATE_CHARGE_NOTE}
       </p>
 
-      <hr className="mt-8 border-[var(--homa-soft-boundary)]" />
+      <hr className="quiet-paywall__rule" />
 
-      <h2 className="mt-6 font-display text-lg font-bold text-[var(--homa-ink)]">
+      <h2 className="quiet-paywall__section-heading">
         {lapsed ? TRIAL_GATE_ACCOUNT_READY : TRIAL_GATE_EVERY_PLAN_HEADING}
       </h2>
       {/* A list, not the 60-word paragraph it was: five of ten personas
           said they skipped every word of that block, and it is the only
           place the page says what is included. */}
-      <ul className="mt-3 flex flex-col gap-2">
+      <ul className="quiet-paywall__included">
         {TRIAL_GATE_EVERY_PLAN.map((line) => (
-          <li key={line} className="flex items-start gap-2 text-[var(--homa-ink)]">
-            <Icon name="check" size={16} className="mt-1 shrink-0 text-[var(--homa-constructive-ink)]" />
+          <li key={line} className="quiet-paywall__included-item">
+            <Icon name="check" size={16} className="quiet-paywall__included-icon" />
             {line}
           </li>
         ))}
@@ -199,7 +199,7 @@ export function TrialGate({
           The sample below is a counting page for a five-year-old, and
           three personas with older children read it as evidence that
           Homa is for little ones. */}
-      <p className="mt-3 text-sm text-[var(--homa-muted-ink)]">{TRIAL_GATE_AGE_RANGE}</p>
+      <p className="quiet-paywall__gate-age">{TRIAL_GATE_AGE_RANGE}</p>
 
       {/* The honest proof, below the CTA where it costs the fold
           nothing: a real practice page Homa made, not a description of
@@ -208,8 +208,8 @@ export function TrialGate({
           9:40pm is not an answer. Testimonials would be the usual
           filler here and there are none to quote, so the artifact does
           that job instead. */}
-      <figure className="mt-6">
-        <div className="overflow-hidden rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)]">
+      <figure className="quiet-paywall__artifact">
+        <div className="quiet-paywall__artifact-frame">
           <Image
             src="/images/hero-butterfly-math.png"
             alt="A Homa practice page titled Butterfly math, asking a child to count each butterfly and caterpillar and color one box for each."
@@ -219,7 +219,7 @@ export function TrialGate({
             className="h-56 w-full object-cover object-top"
           />
         </div>
-        <figcaption className="mt-2 text-sm text-[var(--homa-muted-ink)]">
+        <figcaption className="quiet-paywall__artifact-caption">
           {TRIAL_GATE_ARTIFACT_CAPTION}
         </figcaption>
       </figure>
@@ -228,19 +228,19 @@ export function TrialGate({
           named these two links as the only things they actually wanted
           and the hardest things to see. They stay text links rather
           than buttons so they never compete with the CTA. */}
-      <p className="mt-4 text-base">
+      <p className="quiet-paywall__proof-links">
         <a
           // clay-700, not the brand clay: brand clay on the warm page
           // background measures 3.01:1, under the 4.5:1 WCAG AA floor
           // for text this size.
-          className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-ink)]"
+          className="quiet-paywall__proof-link"
           href="/onboarding/sample"
         >
           {TRIAL_GATE_SAMPLE_LINK}
         </a>
         {" · "}
         <a
-          className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-ink)]"
+          className="quiet-paywall__proof-link"
           href="/onboarding/method"
         >
           {TRIAL_GATE_METHOD_LINK}
@@ -253,14 +253,14 @@ export function TrialGate({
           this one gave permission to leave at the exact moment they
           were wobbling. The fact stays true and stated (offers never
           commands); it just is not the final word. */}
-      <p className="mt-8 text-xs text-[var(--homa-muted-ink)]">
+      <p className="quiet-paywall__way-out">
         {TRIAL_GATE_SAVED_LINE}
         {lapsed && portalAvailable ? (
           <>
             {" "}
             <a
               href="/api/billing/portal"
-              className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
+              className="quiet-paywall__portal-link"
             >
               {TRIAL_GATE_MANAGE_BILLING}
             </a>

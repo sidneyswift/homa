@@ -69,15 +69,15 @@ export default async function PaywallBenchPage({
 
   if (doors) {
     return (
-      <div className="flex min-h-screen flex-col gap-8 bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)] p-6">
-        <section className="mx-auto w-full max-w-[36rem] rounded-lg border border-border bg-card p-5">
-          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-muted">
+      <div className="quiet-paywall-surface quiet-paywall__page gap-8 p-6">
+        <section className="quiet-paywall__report-lock mx-auto w-full max-w-[36rem]">
+          <h2 className="quiet-paywall__rule-label mb-4">
             Door wall offer (WallOffer)
           </h2>
           <WallOffer door="month" childName="Maya" checkout={checkout} />
         </section>
         <section className="mx-auto w-full max-w-[36rem]">
-          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-muted">
+          <h2 className="quiet-paywall__rule-label mb-4">
             Report lock offer (ReportLockOffer)
           </h2>
           <ReportLockOffer
@@ -95,14 +95,14 @@ export default async function PaywallBenchPage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--bg-page-warm)] [background-image:var(--bg-paper)]">
-      <header className="flex w-full items-center px-6 py-4 sm:px-10">
+    <div className="quiet-paywall-surface quiet-paywall__page" data-brand-surface="paywall-bench">
+      <header className="quiet-paywall__header">
         <Link href="/" aria-label="Homa home" className="inline-flex">
           <Logo size={26} />
         </Link>
       </header>
-      <main className="mx-auto flex w-full max-w-[68rem] flex-1 flex-col px-6 pt-10 pb-16 sm:pt-12 sm:pb-20">
-        <div className="my-auto w-full">
+      <main className="quiet-paywall__main">
+        <div className="quiet-paywall__main-inner">
           <TrialGate
             checkout={fixtureCheckout(soloTier)}
             lapsed={lapsed}
@@ -110,17 +110,17 @@ export default async function PaywallBenchPage({
           />
         </div>
       </main>
-      <footer className="mx-auto w-full max-w-[36rem] px-6 pb-8 text-center text-sm text-muted">
+      <footer className="quiet-paywall__footer">
         <p>
           <Link
-            className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+            className="quiet-paywall__footer-link"
             href="/privacy"
           >
             Privacy
           </Link>
           {" · "}
           <Link
-            className="underline underline-offset-2 transition-colors duration-(--dur-fast) ease-out hover:text-brand"
+            className="quiet-paywall__footer-link"
             href="/terms"
           >
             Terms
