@@ -1,9 +1,9 @@
 "use client";
 
 import { PASSWORD_MAX_LENGTH, validatePasswordReset } from "@homa/core";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { QuietAction, QuietFeedback, QuietField, QuietFrame } from "../../components/design";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 
 type RecoverySessionState = "checking" | "ready" | "missing";
@@ -71,89 +71,81 @@ export function ResetPasswordForm() {
 
   if (sessionState === "checking") {
     return (
-      <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 text-[var(--homa-ink)] shadow-sm" aria-live="polite">
-        Checking your reset link…
-      </div>
+      <QuietFrame as="article" className="p-6" data-brand-layer="reset-password-checking">
+        <QuietFeedback tone="info" busy title="Checking your reset link">
+          We&apos;re making sure this link is still active.
+        </QuietFeedback>
+      </QuietFrame>
     );
   }
 
   if (sessionState === "missing") {
     return (
-      <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-        <p className="text-[var(--homa-ink)]">That reset link has expired or already been used.</p>
-        <Link
-          href="/forgot-password"
-          className="mt-4 inline-block font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
-        >
+      <QuietFrame as="article" className="p-6" data-brand-layer="reset-password-missing">
+        <QuietFeedback tone="error" title="This reset link is no longer active">
+          That reset link has expired or already been used.
+        </QuietFeedback>
+        <QuietAction kind="quiet" href="/forgot-password" className="mt-4">
           Send reset link
-        </Link>
-      </div>
+        </QuietAction>
+      </QuietFrame>
     );
   }
 
   if (updated) {
     return (
-      <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" aria-live="polite">
-        <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Password changed</h2>
-        <p className="mt-2 text-[var(--homa-ink)]">You&apos;re signed in.</p>
-        <Link
-          href="/app"
-          className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)]"
-        >
+      <QuietFrame as="article" className="p-6" data-brand-layer="reset-password-success">
+        <QuietFeedback tone="constructive" title="Password changed">
+          You&apos;re signed in.
+        </QuietFeedback>
+        <QuietAction href="/app" size="large" className="mt-5 w-full">
           Continue to Homa
-        </Link>
-      </div>
+        </QuietAction>
+      </QuietFrame>
     );
   }
 
   return (
     <form
       onSubmit={(event) => void submit(event)}
-      className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
+      className="quiet-frame quiet-frame--paper p-6"
       data-brand-layer="reset-password-form"
     >
-      <label className="block font-medium text-[var(--homa-ink)]" htmlFor="new-password">
-        New password
-      </label>
-      <input
-        id="new-password"
-        name="password"
-        type="password"
-        autoComplete="new-password"
-        minLength={8}
-        maxLength={PASSWORD_MAX_LENGTH}
-        required
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-        className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
-      />
-      <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="confirm-password">
-        Confirm new password
-      </label>
-      <input
-        id="confirm-password"
-        name="confirmation"
-        type="password"
-        autoComplete="new-password"
-        minLength={8}
-        maxLength={PASSWORD_MAX_LENGTH}
-        required
-        value={confirmation}
-        onChange={(event) => setConfirmation(event.target.value)}
-        className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
-      />
+      <QuietField id="new-password" label="New password" hint="Use at least 8 characters." required>
+        <input
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          minLength={8}
+          maxLength={PASSWORD_MAX_LENGTH}
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </QuietField>
+      <QuietField id="confirm-password" label="Confirm new password" required className="mt-4">
+        <input
+          name="confirmation"
+          type="password"
+          autoComplete="new-password"
+          minLength={8}
+          maxLength={PASSWORD_MAX_LENGTH}
+          value={confirmation}
+          onChange={(event) => setConfirmation(event.target.value)}
+        />
+      </QuietField>
       {error ? (
-        <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
+        <QuietFeedback tone="error" className="mt-3">
           {error}
-        </p>
+        </QuietFeedback>
       ) : null}
-      <button
+      <QuietAction
         type="submit"
         disabled={pending}
-        className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)] disabled:opacity-60"
+        size="large"
+        className="mt-6 w-full"
       >
         {pending ? "Updating password…" : "Update password"}
-      </button>
+      </QuietAction>
     </form>
   );
 }

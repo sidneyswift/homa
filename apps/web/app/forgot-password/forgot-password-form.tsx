@@ -6,6 +6,7 @@ import {
 } from "@homa/core";
 import { useState } from "react";
 
+import { QuietAction, QuietFeedback, QuietField, QuietFrame } from "../../components/design";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 
 export function ForgotPasswordForm({ expired = false }: { expired?: boolean }) {
@@ -48,51 +49,47 @@ export function ForgotPasswordForm({ expired = false }: { expired?: boolean }) {
 
   if (sent) {
     return (
-      <div className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" data-brand-layer="forgot-password-success" aria-live="polite">
-        <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Check your inbox</h2>
-        <p className="mt-2 text-[var(--homa-ink)]">
+      <QuietFrame as="article" className="p-6" data-brand-layer="forgot-password-success">
+        <QuietFeedback tone="constructive" title="Check your inbox">
           If that email is connected to Homa, a reset link is on its way. It may take a minute.
-        </p>
-      </div>
+        </QuietFeedback>
+      </QuietFrame>
     );
   }
 
   return (
     <form
       onSubmit={(event) => void submit(event)}
-      className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
+      className="quiet-frame quiet-frame--paper p-6"
       data-brand-layer="forgot-password-form"
     >
       {expired ? (
-        <p className="mb-4 text-sm text-[var(--homa-ink)]" role="alert">
+        <QuietFeedback tone="highlight" title="That link has expired" className="mb-4">
           That reset link has expired or already been used. Send yourself a fresh one below.
-        </p>
+        </QuietFeedback>
       ) : null}
-      <label className="block font-medium text-[var(--homa-ink)]" htmlFor="recovery-email">
-        Email
-      </label>
-      <input
-        id="recovery-email"
-        name="email"
-        type="email"
-        autoComplete="email"
-        required
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-3 text-base text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
-      />
+      <QuietField id="recovery-email" label="Email" required>
+        <input
+          name="email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+      </QuietField>
       {error ? (
-        <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
+        <QuietFeedback tone="error" className="mt-3">
           {error}
-        </p>
+        </QuietFeedback>
       ) : null}
-      <button
+      <QuietAction
         type="submit"
         disabled={pending}
-        className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition-colors hover:bg-[var(--homa-ink)] disabled:opacity-60"
+        size="large"
+        className="mt-6 w-full"
       >
         {pending ? "Sending link…" : "Send reset link"}
-      </button>
+      </QuietAction>
     </form>
   );
 }

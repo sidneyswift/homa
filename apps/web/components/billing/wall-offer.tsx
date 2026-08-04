@@ -32,7 +32,7 @@ export function WallOffer({
           a mark it is the real Logo component, never a text imitation
           of it. */}
       <p
-        className="font-mono text-[0.7rem] tracking-wide"
+        className="font-sans text-xs font-semibold tracking-[0.08em]"
         style={{ color: "var(--homa-constructive-ink)" }}
       >
         {WALL_EYEBROW}

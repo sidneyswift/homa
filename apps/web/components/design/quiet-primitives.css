@@ -1502,6 +1502,22 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   background: var(--homa-paper);
   color: var(--homa-ink);
 }
+/* WallModal still carries the historical class names because the narrow
+   welcome chooser shares that DOM contract. The scoped Quiet projection
+   owns the visible paywall scrim and card, so the purchase path does not
+   inherit the old warm-brown surface or shadow. */
+.quiet-paywall-surface.wall-overlay {
+  background: color-mix(in srgb, var(--homa-ink) 42%, transparent);
+  transition: opacity var(--homa-motion-base) var(--homa-motion-ease-out);
+}
+.quiet-paywall__modal.wall-card {
+  border: 1px solid var(--homa-control-boundary);
+  border-radius: var(--homa-radius-card);
+  background: var(--homa-paper);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--homa-ink) 16%, transparent);
+  transition: opacity var(--homa-motion-base) var(--homa-motion-ease-out),
+    transform var(--homa-motion-base) var(--homa-motion-ease-out);
+}
 .quiet-paywall-surface .quiet-tier-options,
 .quiet-tier-options { color: var(--homa-ink); }
 .quiet-tier-options fieldset { border-color: var(--homa-control-boundary); }
@@ -1519,6 +1535,8 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .quiet-paywall-surface.wall-overlay,
+  .quiet-paywall__modal.wall-card { transition: none; transform: none; }
   .quiet-onboarding-surface .flow-step-in { animation: none; }
 }
 
