@@ -32,20 +32,19 @@ export function WallOffer({
           a mark it is the real Logo component, never a text imitation
           of it. */}
       <p
-        className="font-sans text-xs font-semibold tracking-[0.08em]"
-        style={{ color: "var(--homa-constructive-ink)" }}
+        className="quiet-paywall__eyebrow"
       >
         {WALL_EYEBROW}
       </p>
-      <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-[var(--homa-ink)]">
+      <h2 className="quiet-paywall__heading">
         {WALL_HEADLINE}
       </h2>
       {/* Reassure before inform (and the reader gate's bridge): the
           report she already has is hers for good, then the thing she
           just tapped, named, inside what the 7 free days include. */}
-      <p className="mt-3 text-[var(--homa-ink)]">{wallReportLine(childName)}</p>
-      <p className="mt-2 text-[var(--homa-ink)]">{wallIncludedLine(door, childName)}</p>
-      <p className="mt-2 text-[var(--homa-ink)]">{WALL_MECHANICS_LINE}</p>
+      <p className="quiet-paywall__copy quiet-paywall__copy--lead">{wallReportLine(childName)}</p>
+      <p className="quiet-paywall__copy">{wallIncludedLine(door, childName)}</p>
+      <p className="quiet-paywall__copy">{WALL_MECHANICS_LINE}</p>
       <TierOptions door={door} checkout={checkout} />
     </div>
   );

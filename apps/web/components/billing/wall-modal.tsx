@@ -81,7 +81,7 @@ export function WallModal({
           ref={dismissRef}
           type="button"
           onClick={dismiss}
-          className="mt-4 text-sm text-[var(--homa-muted-ink)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-ink)]"
+          className="quiet-paywall__dismiss"
         >
           {WALL_DISMISS}
         </button>

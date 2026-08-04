@@ -66,21 +66,20 @@ export function ReportLockOffer({
 
   if (!checkout) {
     return (
-      <div data-brand-layer="report-lock" className="quiet-report__lock rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-info-tint)] p-5">
+      <div data-brand-layer="report-lock" className="quiet-paywall__report-lock">
         <p
           // No uppercase transform: WALL_EYEBROW is "Homa membership",
           // and rendering it uppercase puts "HOMA" on screen, retired by
           // the 2026-07-28 brand correction (`brand-casing-homa`).
-          className="font-sans text-xs font-semibold tracking-[0.08em]"
-          style={{ color: "var(--homa-info-ink)" }}
+          className="quiet-paywall__eyebrow"
         >
           {WALL_EYEBROW}
         </p>
-        <h3 className="mt-2 font-display text-xl font-bold leading-tight text-strong">
+        <h3 className="quiet-paywall__report-lock-heading">
           {REPORT_LOCK_SIGNIN_HEADLINE}
         </h3>
-        <p className="mt-2 text-body">{reportLockReadyLine(childName, mappedCount)}</p>
-        <p className="mt-2 text-body">{REPORT_LOCK_SIGNIN_BODY}</p>
+        <p className="quiet-paywall__copy quiet-paywall__copy--lead">{reportLockReadyLine(childName, mappedCount)}</p>
+        <p className="quiet-paywall__copy">{REPORT_LOCK_SIGNIN_BODY}</p>
         <Link
           href={`/signin?next=${encodeURIComponent(signinNext)}`}
           className={reportButtonClass(
@@ -95,22 +94,22 @@ export function ReportLockOffer({
   }
 
   return (
-    <div data-brand-layer="report-lock" className="quiet-report__lock rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-info-tint)] p-5">
+    <div data-brand-layer="report-lock" className="quiet-paywall__report-lock">
       <p
         // No uppercase transform: see the sign-in branch above.
-        className="font-sans text-xs font-semibold tracking-[0.08em]"
+        className="quiet-paywall__eyebrow"
         style={{ color: "var(--homa-info-ink)" }}
       >
         {WALL_EYEBROW}
       </p>
-      <h3 className="mt-2 font-display text-xl font-bold leading-tight text-strong">
+      <h3 className="quiet-paywall__report-lock-heading">
         {WALL_HEADLINE}
       </h3>
       {/* Reassure before inform: the whole report exists and is hers,
           then what the free days open, the held subjects named first. */}
-      <p className="mt-3 text-body">{reportLockReadyLine(childName, mappedCount)}</p>
-      <p className="mt-2 text-body">{reportLockHeldLine(childName, openCount, lockedCount)}</p>
-      <p className="mt-2 text-body">{WALL_MECHANICS_LINE}</p>
+      <p className="quiet-paywall__copy quiet-paywall__copy--lead">{reportLockReadyLine(childName, mappedCount)}</p>
+      <p className="quiet-paywall__copy">{reportLockHeldLine(childName, openCount, lockedCount)}</p>
+      <p className="quiet-paywall__copy">{WALL_MECHANICS_LINE}</p>
       <TierOptions door="report" checkout={checkout} onBeforeCheckout={rememberChild} />
     </div>
   );

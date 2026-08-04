@@ -90,7 +90,7 @@ export function TierOptions({
   const href = usingAnnual ? (activeCheckout.annualUrl as string) : activeCheckout.monthlyUrl;
 
   return (
-    <div className="quiet-tier-options mt-6 flex flex-col gap-4" data-brand-layer="tier-options">
+    <div className="quiet-tier-options quiet-paywall__tier-options" data-brand-layer="tier-options">
       {anyAnnualAvailable ? (
         // A tablist promises tab panels that do not exist here; this is
         // one choice between two options, so it is a real radio group
@@ -100,18 +100,18 @@ export function TierOptions({
         // reading axis (headline, rows, and every line under the
         // button), and a centered control in the middle of it makes the
         // eye jump sideways on the way to the prices.
-        <fieldset className="w-fit self-start rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-1">
+        <fieldset className="quiet-paywall__period">
           <legend className="sr-only">Billing period</legend>
-          <div className="flex items-center gap-1">
+          <div className="quiet-paywall__period-options">
             {(["monthly", "annual"] as const).map((option) => (
               <label
                 key={option}
                 htmlFor={`${groupId}-period-${option}`}
                 // min-h-11 is the 44px touch minimum; the old pill was 32px.
-                className={`inline-flex min-h-11 cursor-pointer items-center rounded-[var(--homa-radius-control)] px-4 text-sm font-semibold transition duration-(--homa-motion-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)] ${
+                className={`quiet-paywall__period-option ${
                   period === option
-                    ? "bg-[var(--homa-midnight-action)] text-[var(--homa-paper)]"
-                    : "text-[var(--homa-muted-ink)] hover:text-[var(--homa-ink)]"
+                    ? "quiet-paywall__period-option--selected"
+                    : ""
                 }`}
               >
                 <input
@@ -134,7 +134,7 @@ export function TierOptions({
                       tierPriceAmount(activeTier, "annual"),
                     )}
                 {option === "annual" ? (
-                  <span className="ml-1 text-xs font-normal opacity-90">
+                  <span className="quiet-paywall__period-badge">
                     {BILLING_TOGGLE_ANNUAL_BADGE}
                   </span>
                 ) : null}
@@ -151,7 +151,7 @@ export function TierOptions({
           it. The input is visually hidden but focusable, so keyboard
           and screen-reader behaviour is the platform's, and
           focus-within paints the ring on the whole row. */}
-      <fieldset className="flex flex-col gap-2 border-0 p-0">
+      <fieldset className="quiet-paywall__tiers">
         <legend className="sr-only">Plan</legend>
         {available.map((tier) => {
           const isSelected = tier === activeTier;
@@ -165,10 +165,10 @@ export function TierOptions({
               // belonging to the tier NAME, and centering it against a
               // row whose height varies with how the delta line wraps
               // leaves it floating beside nothing.
-              className={`flex w-full cursor-pointer items-start gap-3 rounded-[var(--homa-radius-control)] border p-4 text-left transition duration-(--homa-motion-fast) ease-out focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--homa-midnight-action)] motion-safe:active:scale-[var(--press-scale)] ${
+              className={`quiet-paywall__tier ${
                 isSelected
-                  ? "border-2 border-[var(--homa-midnight-action)] bg-[var(--homa-info-tint)]"
-                  : "border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] hover:border-[var(--homa-control-boundary)]"
+                  ? "quiet-paywall__tier--selected"
+                  : ""
               }`}
             >
               <input
@@ -182,12 +182,10 @@ export function TierOptions({
               />
               <span
                 aria-hidden="true"
-                className={`mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                  isSelected ? "border-[var(--homa-midnight-action)]" : "border-[var(--homa-control-boundary)]"
-                }`}
+                className="quiet-paywall__tier-radio"
               >
                 {isSelected ? (
-                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--homa-midnight-action)]" />
+                  <span className="quiet-paywall__tier-radio-mark" />
                 ) : null}
               </span>
 
@@ -195,28 +193,28 @@ export function TierOptions({
                   form one scannable right-hand column, and the delta
                   line gets the full row width underneath instead of
                   wrapping around the price. */}
-              <span className="min-w-0 flex-1">
-                <span className="flex items-baseline justify-between gap-3">
-                  <span className="min-w-0 font-display text-lg font-bold text-[var(--homa-ink)]">
+              <span className="quiet-paywall__tier-copy">
+                <span className="quiet-paywall__tier-topline">
+                  <span className="quiet-paywall__tier-name">
                     {TIER_NAMES[tier]}
                   </span>
-                  <span className="shrink-0 whitespace-nowrap">
-                    <span className="font-display text-xl font-bold text-[var(--homa-ink)]">
+                  <span>
+                    <span className="quiet-paywall__tier-price">
                       ${tierPriceAmount(tier, rowPeriod).toLocaleString("en-US")}
                     </span>
-                    <span className="text-sm font-normal text-[var(--homa-muted-ink)]">
+                    <span className="quiet-paywall__tier-unit">
                       /{tierPriceUnit(rowPeriod)}
                     </span>
                   </span>
                 </span>
-                <span className="mt-1 block text-sm text-[var(--homa-muted-ink)]">{tierDelta(tier)}</span>
+                <span className="quiet-paywall__tier-delta">{tierDelta(tier)}</span>
               </span>
             </label>
           );
         })}
       </fieldset>
 
-      <div>
+      <div className="quiet-paywall__checkout">
         <a
           href={href}
           onClick={() => {
@@ -238,10 +236,10 @@ export function TierOptions({
             asked question and a would-leave for both multi-child
             readers, so it sits at the button rather than below the
             fold. */}
-        <p className="mt-2 text-sm font-semibold text-[var(--homa-ink)]">
+        <p className="quiet-paywall__charge">
           {tierChargeLine(activeTier, effectivePeriod)}
         </p>
-        <p className="mt-1 text-sm text-[var(--homa-ink)]">{TRIAL_GATE_FAMILY_PRICE}</p>
+        <p className="quiet-paywall__family-price">{TRIAL_GATE_FAMILY_PRICE}</p>
       </div>
     </div>
   );
