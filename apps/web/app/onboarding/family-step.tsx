@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { US_STATES } from "@homa/core";
 
+import { QuietAction, QuietFeedback, QuietField, QuietFrame } from "../../components/design";
 import { uploadAvatarPhoto } from "../../lib/avatar-upload";
 
 /**
@@ -31,9 +32,6 @@ import { uploadAvatarPhoto } from "../../lib/avatar-upload";
  * travels to /api/map/family, which re-checks the URL points at our
  * bucket before storing it.
  */
-
-const inputClass =
-  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 export function FamilyStep({
   firstName,
@@ -117,7 +115,7 @@ export function FamilyStep({
   }
 
   return (
-    <div>
+    <div data-brand-surface="onboarding-family" className="quiet-onboarding__step">
       <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         {firstName ? `Nice to meet you, ${firstName}.` : "Let's set up your family."}
       </h1>
@@ -125,113 +123,111 @@ export function FamilyStep({
         One quick card about your family, then we&apos;ll add your kids.
       </p>
 
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
-      >
-        <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Create your family</h2>
+      <QuietFrame as="article" className="quiet-onboarding__form mt-6 p-6">
+        <form onSubmit={handleSubmit} noValidate>
+          <h2 className="quiet-onboarding__form-title">Create your family</h2>
 
-        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-name">
-          Family name
-        </label>
-        <input
-          id="family-name"
-          type="text"
-          autoFocus
-          required
-          value={familyName}
-          onChange={(event) => setFamilyName(event.target.value)}
-          placeholder="The Swift family"
-          className={inputClass}
-        />
-
-        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-parent-name">
-          Your name
-        </label>
-        <input
-          id="family-parent-name"
-          type="text"
-          autoComplete="name"
-          required
-          value={parentName}
-          onChange={(event) => setParentName(event.target.value)}
-          placeholder="Sarah Chen"
-          className={inputClass}
-        />
-
-        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-state">
-          State{" "}
-          <span className="font-normal text-[var(--homa-muted-ink)]">(so Homa can follow your state&apos;s rules)</span>
-        </label>
-        <select
-          id="family-state"
-          autoComplete="address-level1"
-          required
-          value={usState}
-          onChange={(event) => setUsState(event.target.value)}
-          className={inputClass}
-        >
-          <option value="" disabled>
-            Pick your state
-          </option>
-          {US_STATES.map((state) => (
-            <option key={state.code} value={state.code}>
-              {state.name}
-            </option>
-          ))}
-        </select>
-
-        <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="family-photo">
-          Your photo <span className="font-normal text-[var(--homa-muted-ink)]">(optional)</span>
-        </label>
-        <div className="mt-2 flex items-center gap-3">
-          {photoPreview ? (
-            // Plain <img>: a local object URL preview, nothing for
-            // next/image to optimize.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={photoPreview}
-              alt="Your profile photo preview"
-              className="h-12 w-12 rounded-full border border-[var(--homa-control-boundary)] object-cover"
+          <QuietField id="family-name" label="Family name" required className="mt-5">
+            <input
+              type="text"
+              autoFocus
+              value={familyName}
+              onChange={(event) => setFamilyName(event.target.value)}
+              placeholder="The Swift family"
+              aria-describedby={error ? "family-form-error" : undefined}
             />
-          ) : null}
-          <input
-            ref={fileInputRef}
-            id="family-photo"
-            type="file"
-            accept="image/*"
-            onChange={(event) => choosePhoto(event.target.files?.[0] ?? null)}
-            className="text-sm text-[var(--homa-ink)] file:mr-3 file:cursor-pointer file:rounded-[var(--homa-radius-control)] file:border file:border-[var(--homa-control-boundary)] file:bg-[var(--homa-paper)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[var(--homa-ink)] hover:file:border-[var(--homa-visual-coral)]"
-          />
-          {photo ? (
-            <button
-              type="button"
-              onClick={() => {
-                choosePhoto(null);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-              }}
-              className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+          </QuietField>
+
+          <QuietField id="family-parent-name" label="Your name" required className="mt-4">
+            <input
+              type="text"
+              autoComplete="name"
+              value={parentName}
+              onChange={(event) => setParentName(event.target.value)}
+              placeholder="Sarah Chen"
+              aria-describedby={error ? "family-form-error" : undefined}
+            />
+          </QuietField>
+
+          <QuietField
+            id="family-state"
+            label="State"
+            hint="So Homa can follow your state&apos;s homeschool rules."
+            required
+            className="mt-4"
+          >
+            <select
+              autoComplete="address-level1"
+              value={usState}
+              onChange={(event) => setUsState(event.target.value)}
+              aria-describedby={error ? "family-form-error" : undefined}
             >
-              remove
-            </button>
+              <option value="" disabled>
+                Pick your state
+              </option>
+              {US_STATES.map((state) => (
+                <option key={state.code} value={state.code}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </QuietField>
+
+          <QuietField
+            id="family-photo"
+            label={<>Your photo <span className="quiet-field__optional">(optional)</span></>}
+            hint={
+              photoPreview || photo ? (
+                <div className="quiet-onboarding__photo-row">
+                  {photoPreview ? (
+                    // Plain <img>: a local object URL preview, nothing for
+                    // next/image to optimize.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={photoPreview}
+                      alt="Your profile photo preview"
+                      className="quiet-onboarding__photo-preview"
+                    />
+                  ) : null}
+                  {photo ? (
+                    <QuietAction
+                      kind="quiet"
+                      type="button"
+                      className="quiet-onboarding__remove-action"
+                      onClick={() => {
+                        choosePhoto(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                    >
+                      Remove
+                    </QuietAction>
+                  ) : null}
+                </div>
+              ) : undefined
+            }
+            className="mt-4"
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(event) => choosePhoto(event.target.files?.[0] ?? null)}
+              className="quiet-onboarding__file-input"
+              aria-describedby={error ? "family-form-error" : undefined}
+            />
+          </QuietField>
+
+          {error ? (
+            <QuietFeedback id="family-form-error" tone="error" className="mt-4">
+              {error}
+            </QuietFeedback>
           ) : null}
-        </div>
 
-        {error ? (
-          <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={busy}
-          className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
-        >
-          {busy ? "Saving…" : "Continue"}
-        </button>
-      </form>
+          <QuietAction type="submit" disabled={busy} size="large" className="mt-6 w-full">
+            {busy ? "Saving…" : "Continue"}
+          </QuietAction>
+        </form>
+      </QuietFrame>
     </div>
   );
 }

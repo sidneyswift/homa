@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { Icon } from "../../components/design/Icon";
+import { QuietAction, QuietFeedback, QuietField, QuietFrame, QuietStatus } from "../../components/design";
 
 import { MAP_KID_CAP } from "@homa/core";
 
@@ -35,9 +36,6 @@ const MONTHS = [
 ] as const;
 
 const YEAR_SPAN = 17;
-
-const inputClass =
-  "mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-base text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30";
 
 interface AddedKid {
   name: string;
@@ -185,7 +183,7 @@ export function KidsStep({
       : `Start ${questionnaireNoun}`;
 
   return (
-    <div>
+    <div data-brand-surface="onboarding-kids" className="quiet-onboarding__step">
       <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
         Let&apos;s add your kids.
       </h1>
@@ -196,13 +194,14 @@ export function KidsStep({
       </p>
 
       {added.length > 0 ? (
-        <div className="mt-6 flex flex-col gap-4">
+        <div className="quiet-onboarding__saved-kids mt-6" aria-live="polite">
           {added.map((kid, index) => (
-            <div key={`${kid.name}-${index}`} className="flex items-start gap-3">
-              <span
-                aria-hidden="true"
-                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--homa-constructive-tint)] text-[var(--homa-constructive-ink)]"
-              >
+            <QuietStatus
+              key={`${kid.name}-${index}`}
+              tone={kid.inRange ? "constructive" : "info"}
+              className="quiet-onboarding__saved-kid"
+            >
+              <span className="quiet-onboarding__saved-kid-mark" aria-hidden="true">
                 <Icon name="check" size={16} />
               </span>
               {kid.inRange ? (
@@ -217,40 +216,32 @@ export function KidsStep({
                   is ready.
                 </p>
               )}
-            </div>
+            </QuietStatus>
           ))}
         </div>
       ) : null}
 
       {canAddMore ? (
-        <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-          <h2 className="font-display text-xl font-semibold text-[var(--homa-ink)]">Add a child</h2>
+        <QuietFrame as="article" className="quiet-onboarding__form mt-6 p-6">
+          <h2 className="quiet-onboarding__form-title">Add a child</h2>
 
-          <label className="mt-4 block font-medium text-[var(--homa-ink)]" htmlFor="kid-name">
-            First name
-          </label>
-          <input
-            id="kid-name"
-            ref={nameInputRef}
-            type="text"
-            autoFocus
-            required
-            value={form.name}
-            onChange={(event) => updateForm({ name: event.target.value })}
-            className={inputClass}
-          />
+          <QuietField id="kid-name" label="First name" required className="mt-5">
+            <input
+              ref={nameInputRef}
+              type="text"
+              autoFocus
+              value={form.name}
+              onChange={(event) => updateForm({ name: event.target.value })}
+              aria-describedby={error ? "kids-form-error" : undefined}
+            />
+          </QuietField>
 
-          <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-3">
-            <div>
-              <label className="block font-medium text-[var(--homa-ink)]" htmlFor="kid-birth-month">
-                Birth month
-              </label>
+          <div className="quiet-onboarding__birthday-grid mt-4">
+            <QuietField id="kid-birth-month" label="Birth month" required>
               <select
-                id="kid-birth-month"
-                required
                 value={form.month}
                 onChange={(event) => updateForm({ month: event.target.value })}
-                className={inputClass}
+                aria-describedby={error ? "kids-form-error" : undefined}
               >
                 <option value="" disabled>
                   Month
@@ -261,17 +252,12 @@ export function KidsStep({
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="block font-medium text-[var(--homa-ink)]" htmlFor="kid-birth-day">
-                Day
-              </label>
+            </QuietField>
+            <QuietField id="kid-birth-day" label="Day" required>
               <select
-                id="kid-birth-day"
-                required
                 value={form.day}
                 onChange={(event) => updateForm({ day: event.target.value })}
-                className={inputClass}
+                aria-describedby={error ? "kids-form-error" : undefined}
               >
                 <option value="" disabled>
                   Day
@@ -284,17 +270,12 @@ export function KidsStep({
                   ),
                 )}
               </select>
-            </div>
-            <div>
-              <label className="block font-medium text-[var(--homa-ink)]" htmlFor="kid-birth-year">
-                Birth year
-              </label>
+            </QuietField>
+            <QuietField id="kid-birth-year" label="Birth year" required>
               <select
-                id="kid-birth-year"
-                required
                 value={form.year}
                 onChange={(event) => updateForm({ year: event.target.value })}
-                className={inputClass}
+                aria-describedby={error ? "kids-form-error" : undefined}
               >
                 <option value="" disabled>
                   Year
@@ -305,48 +286,50 @@ export function KidsStep({
                   </option>
                 ))}
               </select>
-            </div>
+            </QuietField>
           </div>
 
           {error ? (
-            <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
+            <QuietFeedback id="kids-form-error" tone="error" className="mt-4">
               {error}
-            </p>
+            </QuietFeedback>
           ) : null}
 
           {/* "Add child" stays the card's own action (secondary weight so
               the flow's one primary is the start button below); it saves
               this kid and clears the card for a sibling. */}
-          <button
+          <QuietAction
+            kind="secondary"
             type="button"
             onClick={() => void addChild()}
             disabled={busy}
-            className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-constructive-ink)] bg-transparent px-6 py-3 text-base font-semibold text-[var(--homa-constructive-ink)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+            className="mt-6 w-full"
           >
-            {busy ? "Saving\u2026" : "Add child"}
-          </button>
-        </div>
+            {busy ? "Saving…" : "Add child"}
+          </QuietAction>
+        </QuietFrame>
       ) : (
-        <p className="mt-6 text-sm text-[var(--homa-muted-ink)]">
+        <p className="quiet-onboarding__capacity-note mt-6">
           Five kids is the most one session holds. Everyone you added is saved.
         </p>
       )}
 
       {error && !canAddMore ? (
-        <p className="mt-3 text-sm text-[var(--homa-error-ink)]" role="alert">
+        <QuietFeedback tone="error" className="mt-4">
           {error}
-        </p>
+        </QuietFeedback>
       ) : null}
 
       {totalKids > 0 || !formIsBlank(form) ? (
-        <button
+        <QuietAction
           type="button"
           onClick={() => void startChecklist()}
           disabled={busy}
-          className="mt-5 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          size="large"
+          className="mt-5 w-full"
         >
           {busy ? "Saving\u2026" : startLabel}
-        </button>
+        </QuietAction>
       ) : null}
     </div>
   );
