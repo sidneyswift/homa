@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "868a968a2a45777b9927335ac24eefe592151b3bb7ae53d276bbaf172a695bc4",
+  "ownedInputFingerprint": "e2192f104d1d4fb584f189e857b7a1d617d61fc2a4154d444813f4769a4e6fd6",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -87666,6 +87666,7 @@
       ],
       "requiredStates": [
         "default",
+        "empty",
         "forced-colors",
         "keyboard-focus",
         "pressed"
@@ -87697,7 +87698,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "c328d788434c83fd211be406cada16a57084ca69ad7a3a66437603e6afbf2732",
+        "fixtureChecksum": "6b3788e6ca9c5387056fddd1eace0fba4474b8f4377d43b0f92ad0bc52e1db55",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -87730,11 +87731,9 @@
           "non-judgmental-child-framing"
         ]
       },
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
+      "legacySignatures": [],
       "currentAssetHashes": [
-        "c328d788434c83fd211be406cada16a57084ca69ad7a3a66437603e6afbf2732"
+        "6b3788e6ca9c5387056fddd1eace0fba4474b8f4377d43b0f92ad0bc52e1db55"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -94765,7 +94764,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "0094ba9d19367050c8837f36693157c6739b05928188fe4dfb7c005ce82644bf",
+        "fixtureChecksum": "dd3e04bc0f4f978e3e4ff775ad4da75f94adb9fbd4a58ffadf64408367dc0dff",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -94800,7 +94799,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "0094ba9d19367050c8837f36693157c6739b05928188fe4dfb7c005ce82644bf"
+        "dd3e04bc0f4f978e3e4ff775ad4da75f94adb9fbd4a58ffadf64408367dc0dff"
       ],
       "disposition": "replace-active",
       "featureFlags": [],

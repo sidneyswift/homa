@@ -1,5 +1,10 @@
 import Link from "next/link";
-import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
+import type {
+  ButtonHTMLAttributes,
+  MouseEventHandler,
+  PointerEventHandler,
+  ReactNode,
+} from "react";
 
 type ActionProps = {
   children: ReactNode;
@@ -9,6 +14,8 @@ type ActionProps = {
   className?: string;
   icon?: ReactNode;
   onClick?: MouseEventHandler<HTMLElement>;
+  onPointerEnter?: PointerEventHandler<HTMLElement>;
+  onPointerLeave?: PointerEventHandler<HTMLElement>;
 } & Pick<
   ButtonHTMLAttributes<HTMLButtonElement>,
   | "disabled"
@@ -31,6 +38,8 @@ export function QuietAction({
   type = "button",
   form,
   onClick,
+  onPointerEnter,
+  onPointerLeave,
   "aria-haspopup": ariaHasPopup,
   "aria-expanded": ariaExpanded,
   "aria-pressed": ariaPressed,
@@ -46,10 +55,10 @@ export function QuietAction({
 
   if (href && !disabled) {
     return (
-      <Link className={classes} href={href} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-pressed={ariaPressed} aria-label={ariaLabel}>
+      <Link className={classes} href={href} onClick={onClick} onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-pressed={ariaPressed} aria-label={ariaLabel}>
         {content}
       </Link>
     );
   }
-  return <button className={classes} disabled={disabled} type={type} form={form} onClick={onClick} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-pressed={ariaPressed} aria-label={ariaLabel}>{content}</button>;
+  return <button className={classes} disabled={disabled} type={type} form={form} onClick={onClick} onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave} aria-haspopup={ariaHasPopup} aria-expanded={ariaExpanded} aria-pressed={ariaPressed} aria-label={ariaLabel}>{content}</button>;
 }
