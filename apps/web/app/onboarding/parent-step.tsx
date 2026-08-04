@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
+import { QuietAction, QuietFeedback, QuietField } from "../../components/design";
 import { Icon } from "../../components/design/Icon";
 import { Doodle } from "../../components/marketing/Doodle";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
@@ -78,7 +79,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
     });
     if (oauthError) {
       setGoogleBusy(false);
-      setGoogleError(oauthError.message);
+      setGoogleError("We couldn't start Google sign-up. Try again, or use email and password.");
     }
     // On success the browser is already navigating to Google; no cleanup.
   }
@@ -185,19 +186,21 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               2026-07-06: "we don't need a white card, the progress report
               is a card"). */}
           <div className="mt-9 max-w-[28rem] text-left">
-            <button
+            <QuietAction
+              kind="secondary"
+              size="large"
               type="button"
-              onClick={continueWithGoogle}
+              onClick={() => void continueWithGoogle()}
               disabled={googleBusy}
-              className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-6 py-3 text-[1.0625rem] font-semibold text-[var(--homa-ink)] shadow-[var(--shadow-xs)] transition-colors duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] disabled:opacity-60"
+              className="w-full"
+              icon={<GoogleGlyph />}
             >
-              <GoogleGlyph />
               {googleBusy ? "Redirecting to Google\u2026" : "Sign up with Google"}
-            </button>
+            </QuietAction>
             {googleError ? (
-              <p className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
+              <QuietFeedback tone="error" className="mt-3">
                 {googleError}
-              </p>
+              </QuietFeedback>
             ) : null}
 
             <div className="my-5 flex items-center gap-3">
@@ -207,74 +210,58 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
-              {/* Visible labels removed per design (2026-07-08); each input
-                  keeps an accessible name via a sr-only label for screen
-                  readers, and the placeholder carries the visible hint.
-                  No name field here: FamilyStep asks it, once. */}
-              <label className="sr-only" htmlFor="parent-email">
-                Where should I send the report?
-              </label>
-              <input
-                id="parent-email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                autoFocus
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-                className="min-h-[54px] w-full rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3.5 text-[1.0625rem] text-[var(--homa-ink)] shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-midnight-action)] focus:shadow-[var(--shadow-focus)] focus:outline-none"
-              />
-
-              <label className="sr-only" htmlFor="parent-password">
-                Create a password
-              </label>
-              <div className="relative mt-3">
+              <QuietField id="parent-email" label="Email" required>
                 <input
-                  id="parent-password"
+                  name="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  autoFocus
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  aria-describedby={error ? "parent-form-error" : undefined}
+                />
+              </QuietField>
+              <QuietField id="parent-password" label="Password" hint="At least 8 characters." required className="mt-4">
+                <input
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  required
                   minLength={8}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Create a password (at least 8 characters)"
-                  className={`min-h-[54px] w-full rounded-[var(--homa-radius-control)] border-[1.5px] bg-[var(--homa-paper)] px-4 py-3.5 pr-12 text-[1.0625rem] text-[var(--homa-ink)] shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] duration-(--homa-motion-fast) ease-out focus:border-[var(--homa-midnight-action)] focus:shadow-[var(--shadow-focus)] focus:outline-none ${
-                    error ? "border-[var(--homa-error-ink)]" : "border-[var(--homa-control-boundary)]"
-                  }`}
+                  placeholder="Create a password"
+                  aria-describedby={error ? "parent-form-error" : undefined}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((current) => !current)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[var(--homa-muted-ink)] transition-colors duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-soft-boundary)] hover:text-[var(--homa-ink)]"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
+              </QuietField>
+              <QuietAction
+                kind="quiet"
+                type="button"
+                className="mt-1 self-end"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? "Hide password" : "Show password"}
+              </QuietAction>
               {error ? (
-                <p id="parent-form-error" className="mt-2 text-sm text-[var(--homa-error-ink)]" role="alert">
+                <QuietFeedback id="parent-form-error" tone="error" className="mt-3">
                   {error}
-                </p>
+                </QuietFeedback>
               ) : null}
               {existingAccount ? (
-                <p className="mt-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] p-3 text-sm text-[var(--homa-ink)]" role="status">
-                  Good news: {email} already has a Homa account.{" "}
-                  <a
-                    href="/signin?next=/app"
-                    className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2"
-                  >
+                <QuietFeedback tone="constructive" title="This email already has a Homa account" className="mt-3">
+                  {email} is ready whenever you are.
+                  <QuietAction kind="quiet" href="/signin?next=/app" className="mt-2">
                     Sign in
-                  </a>{" "}
-                  to continue where you left off.
-                </p>
+                  </QuietAction>
+                </QuietFeedback>
               ) : null}
               {notice ? (
-                <p className="mt-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] p-3 text-sm text-[var(--homa-ink)]" role="status">
+                <QuietFeedback tone="constructive" title="Your spot is saved" className="mt-3">
                   {notice}
-                </p>
+                </QuietFeedback>
               ) : null}
 
               <p className="mt-4 text-center text-sm text-[var(--homa-muted-ink)]">
@@ -288,20 +275,23 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                 .
               </p>
 
-              <button
+              <QuietAction
                 type="submit"
                 disabled={busy}
-                className="group mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-[1.0625rem] font-semibold text-[var(--homa-paper)] shadow-sm transition-[background-color,transform,box-shadow] duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+                size="large"
+                className="group mt-4 w-full"
+                icon={
+                  busy ? null : (
+                    <Icon
+                      name="next"
+                      size={20}
+                      className="transition-transform duration-(--homa-motion-fast) ease-out motion-safe:group-hover:translate-x-0.5"
+                    />
+                  )
+                }
               >
                 {busy ? "One moment\u2026" : "Create account"}
-                {busy ? null : (
-                  <Icon
-                    name="next"
-                    size={20}
-                    className="transition-transform duration-(--homa-motion-fast) ease-out motion-safe:group-hover:translate-x-0.5"
-                  />
-                )}
-              </button>
+              </QuietAction>
             </form>
           </div>
 
