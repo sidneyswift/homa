@@ -6,6 +6,7 @@ import {
   useSubjectDoor,
   type SubjectDoorRow,
 } from "../../../../components/progress/subject-door-context";
+import { QuietAction } from "../../../../components/design/QuietAction";
 import { progressSubjectHeadline } from "../../../../lib/child-progress/view-copy";
 import { ageAboutLabel } from "../../../../lib/map/trajectory-format";
 import type {
@@ -66,23 +67,23 @@ const LABEL_CHAR_W = 6.9;
 
 /** One distinguishable design-system color per subject (tokens only). */
 const SUBJECT_COLORS: Record<string, string> = {
-  math: "var(--pop-cobalt)",
-  literacy: "var(--sky-600)",
-  phonics: "var(--pop-navy)",
-  writing: "var(--clay-700)",
-  language: "var(--sky-500)",
-  science: "var(--sage-500)",
-  social_studies: "var(--sage-700)",
-  art: "var(--clay-500)",
-  music: "var(--pop-blush)",
-  gross_motor: "var(--gold-400)",
-  fine_motor: "var(--gold-ink)",
-  social_emotional: "var(--clay-300)",
-  self_care: "var(--sage-300)",
-  executive_function: "var(--stone-700)",
-  computer_science: "var(--stone-500)",
+  math: "var(--homa-midnight-action)",
+  literacy: "var(--homa-info-ink)",
+  phonics: "var(--homa-contained-band)",
+  writing: "var(--homa-brand-text)",
+  language: "var(--homa-constructive-ink)",
+  science: "var(--homa-highlight-ink)",
+  social_studies: "color-mix(in srgb, var(--homa-info-ink) 72%, var(--homa-ink))",
+  art: "var(--homa-visual-coral)",
+  music: "color-mix(in srgb, var(--homa-brand-text) 62%, var(--homa-ink))",
+  gross_motor: "color-mix(in srgb, var(--homa-highlight-ink) 72%, var(--homa-ink))",
+  fine_motor: "color-mix(in srgb, var(--homa-constructive-ink) 72%, var(--homa-ink))",
+  social_emotional: "color-mix(in srgb, var(--homa-visual-coral) 72%, var(--homa-ink))",
+  self_care: "color-mix(in srgb, var(--homa-info-ink) 52%, var(--homa-ink))",
+  executive_function: "var(--homa-ink)",
+  computer_science: "var(--homa-muted-ink)",
 };
-const FALLBACK_COLOR = "var(--stone-500)";
+const FALLBACK_COLOR = "var(--homa-muted-ink)";
 
 function colorFor(subjectId: string): string {
   return SUBJECT_COLORS[subjectId] ?? FALLBACK_COLOR;
@@ -142,20 +143,20 @@ function MeaningBox({
     ? subject.strongestStatement ?? subject.frontierStatement
     : subject.strongestStatement;
   return (
-    <div className="mt-2 rounded-md border border-border-subtle bg-page px-3 py-2.5 text-sm">
-      <p className="font-semibold text-strong">
+    <div className="quiet-trajectory__meaning mt-2">
+      <p className="quiet-trajectory__meaning-title">
         {subject.name} {subject.display} mo
-        <span className="ml-2 font-mono text-[0.65rem] font-medium text-subtle">
+        <span className="quiet-trajectory__meaning-meta">
           from {subject.observations}{" "}
           {subject.observations === 1 ? "answer" : "answers"}
         </span>
       </p>
       {statement ? (
-        <p className="mt-0.5 text-body">
+        <p className="quiet-trajectory__meaning-copy mt-0.5">
           {belowAge ? "Working on: " : ""}
           {statement}
           {subject.strongestMonths !== null ? (
-            <span className="text-muted">
+            <span className="quiet-trajectory__meaning-muted">
               {" \u00b7 "}typical around age {ageAboutLabel(subject.strongestMonths)}
               {" \u00b7 "}{childName} is {childAgeYears}
             </span>
@@ -163,10 +164,7 @@ function MeaningBox({
         </p>
       ) : null}
       {subject.beyondScale ? (
-        <p
-          className="mt-1.5 inline-block rounded-pill px-2.5 py-0.5 font-mono text-[0.65rem] font-bold"
-          style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
-        >
+        <p className="quiet-trajectory__cap mt-1.5 inline-block">
           The checklist stops here, not {childName}
         </p>
       ) : null}
@@ -321,8 +319,9 @@ export function TrajectoryChart({
 
   return (
     <div>
-      <div className="rounded-md border border-border-subtle bg-card p-3 sm:p-4">
+      <div className="quiet-trajectory__chart-frame">
         <svg
+          className="quiet-trajectory__chart"
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           role="img"
           aria-label={`${childName}'s months ahead by subject over time. Tap a subject below the chart to focus its line.`}
@@ -338,14 +337,14 @@ export function TrajectoryChart({
                 x2={x(t)}
                 y1={MARGIN.top}
                 y2={MARGIN.top + PLOT_HEIGHT}
-                stroke="var(--stone-100)"
+                stroke="var(--homa-soft-boundary)"
                 strokeWidth={1}
               />
               <text
+                className="quiet-trajectory__axis-label"
                 x={x(t)}
                 y={MARGIN.top + PLOT_HEIGHT + 18}
                 textAnchor="middle"
-                style={{ font: "500 12px var(--font-mono)", fill: "var(--text-subtle)" }}
               >
                 {index === 0 ? "start" : dayLabel(t)}
               </text>
@@ -359,14 +358,14 @@ export function TrajectoryChart({
                 x2={WIDTH - MARGIN.right}
                 y1={y(months)}
                 y2={y(months)}
-                stroke={months === 0 ? "var(--stone-300)" : "var(--stone-100)"}
+                stroke={months === 0 ? "var(--homa-control-boundary)" : "var(--homa-soft-boundary)"}
                 strokeWidth={months === 0 ? 2 : 1}
               />
               <text
+                className="quiet-trajectory__axis-label"
                 x={MARGIN.left - 8}
                 y={y(months) + 3}
                 textAnchor="end"
-                style={{ font: "500 12px var(--font-mono)", fill: "var(--text-subtle)" }}
               >
                 {months === 0
                   ? "at age"
@@ -381,15 +380,15 @@ export function TrajectoryChart({
             x2={todayX}
             y1={MARGIN.top}
             y2={MARGIN.top + PLOT_HEIGHT}
-            stroke="var(--stone-300)"
+            stroke="var(--homa-control-boundary)"
             strokeWidth={1}
             strokeDasharray="2 3"
           />
           <text
+            className="quiet-trajectory__today-label"
             x={todayX}
             y={MARGIN.top - 8}
             textAnchor="middle"
-            style={{ font: "700 10px var(--font-mono)", fill: "var(--text-subtle)" }}
           >
             today
           </text>
@@ -440,7 +439,7 @@ export function TrajectoryChart({
                     )
                     .join(" ")}
                   fill="none"
-                  stroke="rgba(0,0,0,0)"
+                  stroke="transparent"
                   strokeWidth={14}
                 />
                 {points.map((point, index) =>
@@ -476,15 +475,15 @@ export function TrajectoryChart({
                   y1={label.lineY}
                   x2={labelX - 3}
                   y2={label.y}
-                  stroke="var(--stone-200)"
+                  stroke="var(--homa-soft-boundary)"
                   strokeWidth={1}
                 />
               ) : null}
               <circle cx={labelX} cy={label.y} r={2.5} fill={label.color} />
               <text
+                className="quiet-trajectory__end-label"
                 x={labelX + 6}
                 y={label.y + 3}
-                style={{ font: "500 11px var(--font-mono)", fill: "var(--text-muted)" }}
               >
                 {label.text}
               </text>
@@ -506,18 +505,19 @@ export function TrajectoryChart({
           door mode they are the subject-by-subject list and each row
           opens that subject's detail panel. */}
       {door ? (
-        <p className="mt-2.5 text-sm text-muted">
+        <p className="quiet-trajectory__hint mt-2.5">
           Every number here comes from your answers. Tap a subject to see them.
         </p>
       ) : null}
-      <div className="mt-2 grid grid-cols-1 gap-x-2 rounded-md border border-border-subtle bg-card p-1.5 sm:grid-cols-2">
+      <div className="quiet-trajectory__legend mt-2">
         {story.subjects.map((subject) => {
           const doorRow = doorRowById.get(subject.subjectId);
           const isPinned = pinned === subject.subjectId;
           const opensPanel = Boolean(door && doorRow);
           return (
-            <button
+            <QuietAction
               key={subject.subjectId}
+              kind="quiet"
               type="button"
               aria-pressed={opensPanel ? undefined : isPinned}
               aria-haspopup={opensPanel ? "dialog" : undefined}
@@ -529,81 +529,52 @@ export function TrajectoryChart({
               onClick={() => activate(subject.subjectId)}
               onPointerEnter={hoverIn(subject.subjectId)}
               onPointerLeave={hoverOut}
-              className={`flex min-h-10 items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors duration-(--dur-fast) ease-out ${
-                isPinned ? "bg-[var(--surface-inverse)]" : "hover:bg-page"
-              }`.trim()}
+              className={`quiet-trajectory__legend-row ${isPinned ? "quiet-trajectory__legend-row--selected" : ""}`.trim()}
             >
-              <span
-                aria-hidden="true"
-                className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-                style={{ background: colorFor(subject.subjectId) }}
-              />
-              <span
-                className={`min-w-0 flex-1 truncate font-semibold ${
-                  isPinned ? "text-[var(--text-inverse)]" : "text-strong"
-                }`.trim()}
-              >
-                {subject.name}
-              </span>
-              {doorRow?.needsConfirm ? (
+              <>
                 <span
-                  className="flex-shrink-0 rounded-pill px-2 py-0.5 text-[0.62rem] font-bold"
-                  style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
-                >
-                  {progressSubjectHeadline("conflict")}
-                </span>
-              ) : null}
-              {subject.mover ? (
-                <span
-                  className="flex-shrink-0 rounded-pill px-2 py-0.5 font-mono text-[0.62rem] font-bold"
-                  style={{ background: "var(--accent-sage-soft)", color: "var(--sage-700)" }}
-                >
-                  +{subject.mover.to - subject.mover.from} this week
-                </span>
-              ) : null}
-              <span
-                className={`flex-shrink-0 font-mono text-xs ${
-                  isPinned ? "text-[var(--stone-300)]" : "text-muted"
-                }`.trim()}
-              >
-                {subject.display}
-              </span>
-              {opensPanel ? (
-                <span aria-hidden="true" className="flex-shrink-0 text-subtle">
-                  {"\u203A"}
-                </span>
-              ) : null}
-            </button>
+                  aria-hidden="true"
+                  className="quiet-trajectory__swatch"
+                  style={{ background: colorFor(subject.subjectId) }}
+                />
+                <span className="quiet-trajectory__subject-name">{subject.name}</span>
+                {doorRow?.needsConfirm ? (
+                  <span className="quiet-trajectory__badge quiet-trajectory__badge--attention">
+                    {progressSubjectHeadline("conflict")}
+                  </span>
+                ) : null}
+                {subject.mover ? (
+                  <span className="quiet-trajectory__badge quiet-trajectory__badge--constructive">
+                    +{subject.mover.to - subject.mover.from} this week
+                  </span>
+                ) : null}
+                <span className="quiet-trajectory__value">{subject.display}</span>
+                {opensPanel ? <span aria-hidden="true" className="quiet-trajectory__chevron">{"\u203A"}</span> : null}
+              </>
+            </QuietAction>
           );
         })}
         {unchartedRows.map((row) => (
-          <button
+          <QuietAction
             key={row.subjectId}
+            kind="quiet"
             type="button"
             aria-haspopup="dialog"
             aria-expanded={door?.openSubjectId === row.subjectId}
             onClick={() => door?.openSubject(row.subjectId)}
-            className="flex min-h-10 items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors duration-(--dur-fast) ease-out hover:bg-page"
+            className="quiet-trajectory__legend-row"
           >
-            <span
-              aria-hidden="true"
-              className="h-2.5 w-2.5 flex-shrink-0 rounded-full border-2 border-[var(--stone-300)]"
-            />
-            <span className="min-w-0 flex-1 truncate font-semibold text-strong">
-              {row.displayName}
-            </span>
-            {row.needsConfirm ? (
-              <span
-                className="flex-shrink-0 rounded-pill px-2 py-0.5 text-[0.62rem] font-bold"
-                style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
-              >
-                {progressSubjectHeadline("conflict")}
-              </span>
-            ) : null}
-            <span aria-hidden="true" className="flex-shrink-0 text-subtle">
-              {"\u203A"}
-            </span>
-          </button>
+            <>
+              <span aria-hidden="true" className="quiet-trajectory__swatch quiet-trajectory__swatch--empty" />
+              <span className="quiet-trajectory__subject-name">{row.displayName}</span>
+              {row.needsConfirm ? (
+                <span className="quiet-trajectory__badge quiet-trajectory__badge--attention">
+                  {progressSubjectHeadline("conflict")}
+                </span>
+              ) : null}
+              <span aria-hidden="true" className="quiet-trajectory__chevron">{"\u203A"}</span>
+            </>
+          </QuietAction>
         ))}
       </div>
     </div>
