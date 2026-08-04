@@ -67,20 +67,20 @@ function KeptLessonHandoff({
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      className="mt-5 rounded-lg bg-[var(--accent-sage-soft)] p-5"
+      className="quiet-lesson__section quiet-lesson__kept"
     >
       <h3
         id="kept-worksheet-heading"
         ref={headingRef}
         tabIndex={-1}
-        className="font-display text-lg font-semibold text-strong"
+        className="quiet-lesson__section-title"
       >
         Kept in Binder
       </h3>
-      <p className="mt-2 text-body">
+      <p className="quiet-lesson__body-copy">
         Homa can help you adjust the lesson or talk through how it went.
       </p>
-      <div className="mt-4">
+      <div className="quiet-lesson__keep">
         <QuietAction
           href="/app"
         >
@@ -89,22 +89,22 @@ function KeptLessonHandoff({
         {showPhoneSetupLink ? (
           <section
             aria-labelledby="phone-setup-heading"
-            className="mt-5 rounded-md border border-border-subtle bg-card p-4"
+            className="quiet-lesson__phone"
           >
             <h4
               id="phone-setup-heading"
-              className="font-display text-base font-semibold text-strong"
+              className="quiet-lesson__phone-title"
             >
               Prefer text?
             </h4>
-            <p className="mt-2 text-sm text-body">
+            <p className="quiet-lesson__phone-copy">
               Phone setup is optional. Homa sends one research note by text each
               weekday morning.
             </p>
             <QuietAction
               kind="secondary"
               href="/app/settings?edit=phone#parents"
-              className="mt-2"
+              className="quiet-lesson__phone-action"
             >
               Open phone settings
             </QuietAction>
@@ -150,7 +150,7 @@ export function SubjectLessonKeepButton({
   }
 
   return (
-    <div className="mt-5">
+    <div className="quiet-lesson__keep">
       <QuietAction
         disabled={pending}
         onClick={() => {
@@ -167,11 +167,11 @@ export function SubjectLessonKeepButton({
       >
         {pending ? "Keeping..." : "Keep in Binder"}
       </QuietAction>
-      <p className="mt-2 text-sm text-muted">
+      <p className="quiet-lesson__action-note">
         Binder saves the worksheet for later. The lesson stays at this link.
       </p>
       {failed ? (
-        <p className="mt-3 text-sm text-[var(--rose-600)]" role="alert">
+        <p className="quiet-lesson__error" role="alert">
           The worksheet is still on this page, but it was not saved to Binder.
         </p>
       ) : null}

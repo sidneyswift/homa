@@ -39,44 +39,41 @@ export function PlanWeeks({
   const doneCount = Object.values(done).filter(Boolean).length;
 
   return (
-    <div className="mt-7 flex flex-col gap-4">
+    <div className="quiet-plan__weeks">
       {doneCount > 0 ? (
-        <p className="font-hand text-xl text-sage">
+        <p className="quiet-plan__progress">
           {doneCount} of {total} done {"\u270e"}
         </p>
       ) : null}
       {weeks.map((week, weekIndex) => (
-        <div key={week.week} className="rounded-lg border border-border-subtle p-5">
-          <h3 className="font-display text-lg font-semibold text-strong">Week {week.week}</h3>
-          <p className="mt-0.5 text-sm text-muted">
+        <section key={week.week} className="quiet-plan__week">
+          <h3 className="quiet-plan__week-title">Week {week.week}</h3>
+          <p className="quiet-plan__week-focus">
             Focus: {week.focus.charAt(0).toLowerCase()}
             {week.focus.slice(1)}
           </p>
           {weekLines?.[weekIndex] ? (
-            <p className="mt-1.5 text-sm text-body">{weekLines[weekIndex]}</p>
+            <p className="quiet-plan__week-note">{weekLines[weekIndex]}</p>
           ) : null}
-          <ul className="mt-3 flex flex-col gap-2">
+          <ul className="quiet-plan__activities">
             {week.activities.map((activity, index) => {
               const id = `${week.week}.${index}`;
               const checked = Boolean(done[id]);
               return (
                 <li key={id}>
-                  <label className="flex cursor-pointer items-start gap-3 text-body">
+                  <label className={`quiet-plan__activity ${checked ? "quiet-plan__activity--done" : ""}`.trim()}>
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggle(id)}
-                      className="mt-1 h-4 w-4 flex-shrink-0 accent-[var(--sage-500)]"
                     />
-                    <span className={checked ? "text-subtle line-through decoration-[var(--sage-400)]" : ""}>
-                      {activity}
-                    </span>
+                    <span>{activity}</span>
                   </label>
                 </li>
               );
             })}
           </ul>
-        </div>
+        </section>
       ))}
     </div>
   );

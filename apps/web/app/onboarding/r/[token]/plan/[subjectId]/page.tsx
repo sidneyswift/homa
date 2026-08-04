@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 
@@ -7,6 +6,9 @@ import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
 import { Logo } from "../../../../../../components/brand/Logo";
 import { WallOffer } from "../../../../../../components/billing/wall-offer";
+import { QuietAction } from "../../../../../../components/design/QuietAction";
+import { QuietFeedback } from "../../../../../../components/design/QuietFeedback";
+import { QuietFrame } from "../../../../../../components/design/QuietFrame";
 import {
   WALL_SIGNIN_BODY,
   WALL_SIGNIN_BUTTON,
@@ -24,7 +26,6 @@ import {
   planExists,
 } from "../../../../../../lib/map/store";
 import { NarrativeBeat } from "../../narrative-beat";
-import { reportButtonClass } from "../../report-button";
 import { PlanWeeks } from "./plan-weeks";
 
 /**
@@ -86,38 +87,39 @@ export default async function PlanPage({
           await emitMapEvent("wall.viewed", { family_id: ids.familyId, door: "plan" });
         }
         return (
-          <main className="mx-auto w-full max-w-xl px-6 py-20">
-            <Logo size={26} />
-            {isOwner ? (
-              <div className="mt-8 rounded-lg border border-border-subtle bg-card p-6 shadow-sm">
-                <WallOffer door="plan" checkout={checkout} />
-              </div>
-            ) : (
-              <div className="mt-8">
-                <h1 className="font-display text-2xl font-bold text-strong">
-                  {WALL_SIGNIN_HEADLINE}
-                </h1>
-                <p className="mt-3 text-body">{WALL_SIGNIN_BODY}</p>
-                <Link
-                  href={`/signin?next=${encodeURIComponent(`/onboarding/r/${token}/plan/${subjectId}`)}`}
-                  className={reportButtonClass(
-                    "primary",
-                    "mt-6 inline-flex min-h-12 items-center px-6 py-3 text-base font-semibold",
-                  )}
+          <div className="quiet-plan">
+            <main className="quiet-plan__standalone">
+              <Logo size={26} />
+              {isOwner ? (
+                <QuietFrame className="quiet-plan__wall" tone="paper">
+                  <WallOffer door="plan" checkout={checkout} />
+                </QuietFrame>
+              ) : (
+                <div className="quiet-plan__standalone-copy">
+                  <h1 className="quiet-plan__state-title">
+                    {WALL_SIGNIN_HEADLINE}
+                  </h1>
+                  <p className="quiet-plan__state-copy">{WALL_SIGNIN_BODY}</p>
+                  <QuietAction
+                    href={`/signin?next=${encodeURIComponent(`/onboarding/r/${token}/plan/${subjectId}`)}`}
+                    size="large"
+                    className="quiet-plan__state-action"
+                  >
+                    {WALL_SIGNIN_BUTTON}
+                  </QuietAction>
+                </div>
+              )}
+              <p className="quiet-plan__standalone-back">
+                <QuietAction
+                  kind="quiet"
+                  href={`/onboarding/r/${token}`}
+                  className="quiet-plan__footer-link"
                 >
-                  {WALL_SIGNIN_BUTTON}
-                </Link>
-              </div>
-            )}
-            <p className="mt-4 text-sm">
-              <Link
-                href={`/onboarding/r/${token}`}
-                className="text-brand underline-offset-2 hover:underline"
-              >
-                back to the report
-              </Link>
-            </p>
-          </main>
+                  back to the report
+                </QuietAction>
+              </p>
+            </main>
+          </div>
         );
       }
     }
@@ -147,24 +149,24 @@ export default async function PlanPage({
 
   if (!result) {
     return (
-      <main className="mx-auto w-full max-w-xl px-6 py-20">
-        <Logo size={26} />
-        <h1 className="mt-8 font-display text-2xl font-bold text-strong">
-          This plan link isn&apos;t active.
-        </h1>
-        <p className="mt-3 text-body">
-          Start with your child&apos;s progress report and every subject gets a plan button.
-        </p>
-        <Link
-          href="/onboarding"
-          className={reportButtonClass(
-            "primary",
-            "mt-6 inline-flex min-h-12 items-center px-6 py-3 text-base font-semibold",
-          )}
-        >
-          Start your free trial
-        </Link>
-      </main>
+      <div className="quiet-plan">
+        <main className="quiet-plan__standalone">
+          <Logo size={26} />
+          <h1 className="quiet-plan__state-title">
+            This plan link isn&apos;t active.
+          </h1>
+          <p className="quiet-plan__state-copy">
+            Start with your child&apos;s progress report and every subject gets a plan button.
+          </p>
+          <QuietAction
+            href="/onboarding"
+            size="large"
+            className="quiet-plan__state-action"
+          >
+            Start your free trial
+          </QuietAction>
+        </main>
+      </div>
     );
   }
 
@@ -197,17 +199,17 @@ export default async function PlanPage({
       }
     });
     return (
-      <div className="min-h-screen bg-page">
-        <main className="mx-auto w-full max-w-xl px-6 py-16">
+      <div className="quiet-plan">
+        <main className="quiet-plan__standalone">
           <Logo size={26} />
-          <h1 className="mt-8 font-display text-3xl font-bold leading-tight text-strong">
+          <h1 className="quiet-plan__state-title quiet-plan__state-title--loading">
             Homa is building the four-week plan
           </h1>
-          <p className="mt-2 text-body">
+          <p className="quiet-plan__state-copy">
             The month&apos;s targets are set. Now the plan gets written for {childName}{" "}
             specifically.
           </p>
-          <div className="mt-6">
+          <div className="quiet-plan__state-beat">
             <NarrativeBeat
               token={token}
               subjectId={subjectId}
@@ -239,46 +241,44 @@ export default async function PlanPage({
   });
 
   return (
-    <div className="min-h-screen bg-page pb-16">
-      <main className="mx-auto w-full max-w-2xl px-4 pt-6">
-        <div className="overflow-hidden rounded-[28px] border border-border bg-card shadow-lg print:border-0 print:shadow-none">
-          <div style={{ background: "var(--band-mint)" }} className="px-7 pb-7 pt-8 sm:px-10">
-            <div className="flex items-center gap-3">
+    <div className="quiet-plan">
+      <main className="quiet-plan__main">
+        <article className="quiet-plan__frame">
+          <header className="quiet-plan__header">
+            <div className="quiet-plan__identity">
               <Logo size={24} />
-              <span className="font-mono text-xs uppercase tracking-widest text-strong/70">
+              <span className="quiet-plan__eyebrow">
                 a four-week plan {"\u00b7"} made for {childName}
               </span>
             </div>
-            <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong">
+            <h1 className="quiet-plan__title">
               {isMonth ? (
                 <>
-                  {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>month</span>
+                  {childName}&apos;s <span className="quiet-plan__title-accent">month</span>
                 </>
               ) : (
                 <>
-                  {childName}&apos;s <span style={{ color: "var(--sage-700)" }}>{plan.subjectName.toLowerCase()}</span> month
+                  {childName}&apos;s <span className="quiet-plan__title-accent">{plan.subjectName.toLowerCase()}</span> month
                 </>
               )}
             </h1>
-            <p className="mt-2 font-serif text-lg italic text-strong/75">
+            <p className="quiet-plan__subtitle">
               {isMonth
                 ? "an add-on to what you already do: the smallest moves that show up in the numbers"
                 : "four weeks, a few minutes a day, then a retest to see what moved"}
             </p>
-          </div>
+          </header>
 
-          <div className="px-7 py-7 sm:px-10">
+          <div className="quiet-plan__body">
             {built === "1" ? (
-              <div
-                className="mb-4 space-y-1.5 rounded-md px-4 py-3 text-sm"
-                style={{ background: "var(--gold-100)", color: "var(--gold-ink)" }}
+              <QuietFeedback
+                tone="highlight"
+                className="quiet-plan__update"
+                title={rebuildReceipt
+                  ? "Your updated four-week plan is ready."
+                  : "Your four-week plan is ready."}
                 aria-label="Plan update"
               >
-                <p className="font-semibold">
-                  {rebuildReceipt
-                    ? "Your updated four-week plan is ready."
-                    : "Your four-week plan is ready."}
-                </p>
                 <p>
                   Homa {rebuildReceipt ? "rebuilt" : "built"} it from what you just shared.
                 </p>
@@ -316,55 +316,46 @@ export default async function PlanPage({
                 ) : null}
                 {rebuildReceipt ? <p>This plan is unscheduled.</p> : null}
                 {rebuildReceipt ? (
-                  <Link
+                  <QuietAction
+                    kind="quiet"
                     href="/app/planner"
-                    className="inline-flex min-h-11 items-center font-semibold text-brand underline-offset-2 hover:underline"
+                    className="quiet-plan__update-action"
                   >
                     Open Planner
-                  </Link>
+                  </QuietAction>
                 ) : null}
-              </div>
+              </QuietFeedback>
             ) : null}
             {introText ? (
-              <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
-                <p
-                  className="font-mono text-[0.65rem] uppercase tracking-widest"
-                  style={{ color: "var(--sage-700)" }}
-                >
-                  This month, in short
-                </p>
-                <p className="mt-1 whitespace-pre-line text-body">{introText}</p>
-              </div>
+              <section className="quiet-plan__intro">
+                <p className="quiet-plan__intro-label">This month, in short</p>
+                <p className="quiet-plan__intro-copy">{introText}</p>
+              </section>
             ) : plan.startingLine ? (
-              <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
-                <p
-                  className="font-mono text-[0.65rem] uppercase tracking-widest"
-                  style={{ color: "var(--sage-700)" }}
-                >
-                  The starting line (already solid)
-                </p>
-                <p className="mt-1 text-body">
+              <section className="quiet-plan__starting-line">
+                <p className="quiet-plan__intro-label">The starting line (already solid)</p>
+                <p className="quiet-plan__intro-copy">
                   {plan.startingLine}. That&apos;s real footing. The month builds on top of it.
                 </p>
-              </div>
+              </section>
             ) : (
-              <div className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-4">
-                <p className="text-body">
+              <section className="quiet-plan__starting-line">
+                <p className="quiet-plan__intro-copy">
                   We&apos;re starting fresh here, and that&apos;s a fine place to start. Week one
                   finds the footing.
                 </p>
-              </div>
+              </section>
             )}
 
             {/* When the written intro exists it already carries the aim
                 (read-through: intro + targets read twice); the formal
                 targets fold away as the fine print. */}
             {introText ? (
-              <details className="mt-4">
-                <summary className="cursor-pointer font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+              <details className="quiet-plan__details">
+                <summary className="quiet-plan__details-summary">
                   The formal targets behind this month
                 </summary>
-                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-body">
+                <ol className="quiet-plan__target-list">
                   {plan.targets.map((target) => (
                     <li key={target}>{target}</li>
                   ))}
@@ -372,17 +363,17 @@ export default async function PlanPage({
               </details>
             ) : (
               <>
-                <h2 className="mt-7 font-display text-xl font-semibold text-strong">
+                <h2 className="quiet-plan__target-heading">
                   What this month aims at
                 </h2>
-                <ol className="mt-2 list-decimal space-y-1 pl-5 text-body">
+                <ol className="quiet-plan__target-list">
                   {plan.targets.map((target) => (
                     <li key={target}>{target}</li>
                   ))}
                 </ol>
               </>
             )}
-            {plan.styleNote ? <p className="mt-2 text-sm text-muted">{plan.styleNote}</p> : null}
+            {plan.styleNote ? <p className="quiet-plan__style-note">{plan.styleNote}</p> : null}
 
             <PlanWeeks
               weeks={plan.weeks}
@@ -392,47 +383,51 @@ export default async function PlanPage({
               initialChecks={result.progress}
             />
 
-            <div className="mt-7 rounded-lg p-5" style={{ background: "var(--gold-100)" }}>
-              <p className="font-semibold" style={{ color: "var(--gold-ink-strong)" }}>
+            <section className="quiet-plan__retest">
+              <p className="quiet-plan__retest-title">
                 Retest week: around {retestDate}
               </p>
               {closingText ? (
-                <p className="mt-1 whitespace-pre-line text-sm" style={{ color: "var(--gold-ink)" }}>
+                <p className="quiet-plan__retest-copy">
                   {closingText}
                 </p>
               ) : (
-                <p className="mt-1 text-sm" style={{ color: "var(--gold-ink)" }}>
+                <p className="quiet-plan__retest-copy">
                   I&apos;ll email you a two-minute re-check so you can see what moved on{" "}
                   {childName}&apos;s report. A slower month is normal too. The numbers are a map,
                   never a grade.
                 </p>
               )}
-            </div>
+            </section>
 
-            <div className="mt-7 rounded-lg p-6 print:hidden" style={{ background: "var(--surface-inverse)" }}>
-              <p className="font-display text-xl font-bold" style={{ color: "#fff" }}>
+            <section className="quiet-plan__invite quiet-plan__print-hidden">
+              <p className="quiet-plan__invite-title">
                 Homa runs a month like this for every subject at once.
               </p>
-              <p className="mt-2 max-w-lg text-sm" style={{ color: "var(--stone-300)" }}>
+              <p className="quiet-plan__invite-copy">
                 Materials made for {childName}, woven around your family, numbers tracked for you.
                 Open Homa to keep planning from the dashboard.
               </p>
-              <Link
+              <QuietAction
                 href="/app"
-                className="mt-4 inline-flex min-h-11 items-center rounded-pill bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:bg-page"
+                className="quiet-plan__invite-action"
               >
                 Open Homa
-              </Link>
-            </div>
+              </QuietAction>
+            </section>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-7 py-4 text-sm text-subtle sm:px-10">
+          <footer className="quiet-plan__footer">
             <span>made with Homa for {childName}</span>
-            <Link href={`/onboarding/r/${token}`} className="text-brand underline-offset-2 hover:underline print:hidden">
+            <QuietAction
+              kind="quiet"
+              href={`/onboarding/r/${token}`}
+              className="quiet-plan__footer-link quiet-plan__print-hidden"
+            >
               back to the report
-            </Link>
-          </div>
-        </div>
+            </QuietAction>
+          </footer>
+        </article>
       </main>
     </div>
   );

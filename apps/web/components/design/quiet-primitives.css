@@ -350,6 +350,69 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 .quiet-artifact-card:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 4px; }
 .quiet-artifact-card__preview { overflow: hidden; border: 1px solid var(--homa-control-boundary); border-radius: var(--homa-radius-card); background: var(--homa-paper); box-shadow: 0 8px 20px color-mix(in srgb, var(--homa-ink) 7%, transparent); transition: box-shadow var(--homa-motion-fast) var(--homa-motion-ease-out); }
 .quiet-artifact-card:hover .quiet-artifact-card__preview { box-shadow: 0 14px 30px color-mix(in srgb, var(--homa-ink) 12%, transparent); }
+.quiet-artifact-card--material {
+  max-width: 24rem;
+  cursor: default;
+  border: 1px solid var(--homa-control-boundary);
+  background: var(--homa-paper);
+  padding: 16px;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--homa-ink) 7%, transparent);
+}
+.quiet-artifact-card--material:hover { transform: none; }
+.quiet-artifact-card__title {
+  display: block;
+  color: var(--homa-ink);
+  font: 600 1.125rem/1.25 var(--font-display);
+}
+.quiet-artifact-card__headline {
+  margin: 0;
+  color: var(--homa-brand-text);
+  font: 600 0.875rem/1.35 var(--font-sans);
+}
+.quiet-artifact-card__meta {
+  margin: 2px 0 0;
+  color: var(--homa-muted-ink);
+  font: 400 0.875rem/1.4 var(--font-sans);
+}
+.quiet-artifact-card__sources {
+  margin: 6px 0 0;
+  color: var(--homa-muted-ink);
+  font: 400 0.75rem/1.45 var(--font-sans);
+}
+.quiet-artifact-card__sources-label { font-weight: 600; }
+.quiet-artifact-card__source-link {
+  color: var(--homa-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--homa-control-boundary);
+  text-underline-offset: 2px;
+}
+.quiet-artifact-card__source-link:hover { color: var(--homa-brand-text); }
+.quiet-artifact-card__image { display: block; width: 100%; aspect-ratio: 8.5 / 11; }
+.quiet-artifact-card__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.quiet-artifact-card__pager-button {
+  min-width: 36px;
+  min-height: 36px;
+  padding-inline: 8px;
+}
+.quiet-artifact-card__pager-label {
+  color: var(--homa-muted-ink);
+  font: 600 0.75rem/1.35 var(--font-sans);
+  text-align: center;
+}
+.quiet-artifact-card__print-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 16px;
+  padding-inline: 20px;
+  font-size: 0.875rem;
+}
 
 .quiet-library-cover {
   position: relative;
@@ -1752,6 +1815,291 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   .quiet-onboarding__status-dot { animation: none; }
 }
 
+/* Tokenized plans and lessons are the report's next step. They share the
+   same paper, mineral, ink, action, and disclosure vocabulary while keeping
+   their product-specific hierarchy explicit. */
+.quiet-plan,
+.quiet-lesson {
+  min-height: 100dvh;
+  background: var(--homa-canvas);
+  color: var(--homa-ink);
+  font-family: var(--font-sans);
+}
+.quiet-plan { padding: 24px 16px 64px; }
+.quiet-lesson { padding: 24px 16px 64px; }
+.quiet-plan__main,
+.quiet-lesson__main {
+  width: min(100%, 48rem);
+  margin: 0 auto;
+}
+.quiet-plan__standalone,
+.quiet-lesson__standalone {
+  width: min(100%, 36rem);
+  margin: 0 auto;
+  padding: 40px 0;
+}
+.quiet-plan__wall { margin-top: 32px; padding: 24px; }
+.quiet-plan__standalone-copy { margin-top: 32px; }
+.quiet-plan__state-title {
+  margin: 32px 0 0;
+  color: var(--homa-ink);
+  font: 600 clamp(1.75rem, 5vw, 2.5rem)/1.05 var(--font-display);
+  letter-spacing: -0.025em;
+}
+.quiet-plan__state-title--loading { margin-top: 32px; }
+.quiet-plan__state-copy {
+  margin: 12px 0 0;
+  color: color-mix(in srgb, var(--homa-ink) 76%, var(--homa-canvas));
+  font: 400 0.9375rem/1.55 var(--font-sans);
+}
+.quiet-plan__state-action { margin-top: 24px; }
+.quiet-plan__state-beat { margin-top: 24px; }
+.quiet-plan__standalone-back { margin: 16px 0 0; }
+.quiet-lesson__state-title { margin-top: 32px; color: var(--homa-ink); font: 600 clamp(1.75rem, 5vw, 2.5rem)/1.05 var(--font-display); letter-spacing: -0.025em; }
+.quiet-lesson__state-copy { margin: 12px 0 0; color: color-mix(in srgb, var(--homa-ink) 76%, var(--homa-canvas)); font: 400 0.9375rem/1.55 var(--font-sans); }
+.quiet-lesson__state-action { margin-top: 24px; }
+.quiet-plan__frame,
+.quiet-lesson__frame {
+  overflow: hidden;
+  border: 1px solid var(--homa-control-boundary);
+  border-radius: var(--homa-radius-frame);
+  background: var(--homa-paper);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--homa-ink) 8%, transparent);
+}
+.quiet-plan__header,
+.quiet-lesson__header {
+  padding: 32px 28px;
+  background: var(--homa-info-tint);
+}
+.quiet-plan__identity,
+.quiet-lesson__identity {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 12px;
+}
+.quiet-plan__eyebrow,
+.quiet-lesson__eyebrow {
+  margin: 0;
+  color: color-mix(in srgb, var(--homa-ink) 72%, var(--homa-canvas));
+  font: 700 0.6875rem/1.3 var(--font-sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.quiet-plan__title,
+.quiet-lesson__title {
+  margin: 20px 0 0;
+  color: var(--homa-ink);
+  font: 600 clamp(2.15rem, 6vw, 3.25rem)/0.98 var(--font-display);
+  letter-spacing: -0.035em;
+}
+.quiet-plan__title-accent,
+.quiet-lesson__title-accent { color: var(--homa-constructive-ink); }
+.quiet-plan__subtitle {
+  margin: 10px 0 0;
+  color: color-mix(in srgb, var(--homa-ink) 76%, var(--homa-canvas));
+  font: 400 1.125rem/1.4 var(--font-display);
+}
+.quiet-plan__body,
+.quiet-lesson__body { padding: 28px; }
+.quiet-plan__update { margin: 0 0 16px; }
+.quiet-plan__update p { margin: 0; }
+.quiet-plan__update p + p { margin-top: 4px; }
+.quiet-plan__update-action { margin-top: 8px; }
+.quiet-plan__intro,
+.quiet-plan__starting-line {
+  border: 1px solid color-mix(in srgb, var(--homa-constructive-ink) 34%, transparent);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-constructive-tint);
+  padding: 16px;
+}
+.quiet-plan__intro-label,
+.quiet-plan__details-summary {
+  color: var(--homa-constructive-ink);
+  font: 700 0.6875rem/1.3 var(--font-sans);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.quiet-plan__intro-copy,
+.quiet-plan__target-list,
+.quiet-plan__week-list {
+  color: color-mix(in srgb, var(--homa-ink) 82%, var(--homa-canvas));
+  font: 400 0.9375rem/1.55 var(--font-sans);
+}
+.quiet-plan__intro-copy { margin: 4px 0 0; white-space: pre-line; }
+.quiet-plan__details { margin-top: 16px; }
+.quiet-plan__details-summary {
+  cursor: pointer;
+  color: var(--homa-muted-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--homa-soft-boundary);
+  text-underline-offset: 3px;
+}
+.quiet-plan__details-summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent);
+  outline-offset: 3px;
+}
+.quiet-plan__target-heading,
+.quiet-plan__week-title {
+  color: var(--homa-ink);
+  font: 600 1.25rem/1.15 var(--font-display);
+}
+.quiet-plan__target-heading { margin: 28px 0 0; }
+.quiet-plan__target-list { margin: 8px 0 0; padding-left: 24px; }
+.quiet-plan__style-note {
+  margin: 8px 0 0;
+  color: var(--homa-muted-ink);
+  font: 400 0.8125rem/1.45 var(--font-sans);
+}
+.quiet-plan__weeks { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.quiet-plan__progress {
+  margin: 0;
+  color: var(--homa-constructive-ink);
+  font: 400 1.25rem/1.2 var(--font-display);
+}
+.quiet-plan__week {
+  border: 1px solid var(--homa-soft-boundary);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-paper);
+  padding: 18px;
+}
+.quiet-plan__week-title { font-size: 1.125rem; }
+.quiet-plan__week-focus {
+  margin: 3px 0 0;
+  color: var(--homa-muted-ink);
+  font: 400 0.8125rem/1.4 var(--font-sans);
+}
+.quiet-plan__week-note {
+  margin: 8px 0 0;
+  color: color-mix(in srgb, var(--homa-ink) 78%, var(--homa-canvas));
+  font: 400 0.8125rem/1.45 var(--font-sans);
+}
+.quiet-plan__activities {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.quiet-plan__activity {
+  display: flex;
+  min-height: 44px;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--homa-ink);
+  font: 400 0.9375rem/1.45 var(--font-sans);
+  cursor: pointer;
+}
+.quiet-plan__activity input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin: 1px 0 0;
+  accent-color: var(--homa-midnight-action);
+}
+.quiet-plan__activity input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent);
+  outline-offset: 3px;
+}
+.quiet-plan__activity--done {
+  color: var(--homa-muted-ink);
+  text-decoration: line-through;
+  text-decoration-color: var(--homa-constructive-ink);
+}
+.quiet-plan__retest {
+  margin-top: 28px;
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-highlight-tint);
+  padding: 18px;
+  color: var(--homa-highlight-ink);
+}
+.quiet-plan__retest-title { font-weight: 700; }
+.quiet-plan__retest-copy { margin: 4px 0 0; font: 400 0.8125rem/1.45 var(--font-sans); }
+.quiet-plan__invite {
+  margin-top: 28px;
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-contained-band);
+  padding: 24px;
+  color: var(--homa-paper);
+}
+.quiet-plan__invite-title { font: 600 1.25rem/1.15 var(--font-display); }
+.quiet-plan__invite-copy { max-width: 34rem; margin: 8px 0 0; color: color-mix(in srgb, var(--homa-paper) 78%, var(--homa-contained-band)); font: 400 0.875rem/1.5 var(--font-sans); }
+.quiet-plan__invite-action { margin-top: 16px; background: var(--homa-paper); color: var(--homa-ink); }
+.quiet-plan__invite-action:hover:not(:disabled) { background: var(--homa-canvas); }
+.quiet-plan__footer,
+.quiet-lesson__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--homa-soft-boundary);
+  padding: 16px 28px;
+  color: var(--homa-muted-ink);
+  font: 400 0.8125rem/1.4 var(--font-sans);
+}
+.quiet-plan__footer-link { color: var(--homa-brand-text); text-decoration: underline; text-underline-offset: 3px; }
+.quiet-plan__footer-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 70%, transparent); outline-offset: 3px; }
+.quiet-plan__print-hidden { display: block; }
+
+.quiet-lesson__title { margin-top: 10px; font-size: clamp(2rem, 5vw, 2.75rem); }
+.quiet-lesson__body { padding-top: 32px; }
+.quiet-lesson__section { margin-top: 32px; }
+.quiet-lesson__section:first-child { margin-top: 0; }
+.quiet-lesson__section-title {
+  color: var(--homa-ink);
+  font: 600 1.25rem/1.15 var(--font-display);
+}
+.quiet-lesson__section-title--large { margin-top: 12px; font-size: 1.75rem; }
+.quiet-lesson__hint {
+  margin: 8px 0 0;
+  color: var(--homa-muted-ink);
+  font: 400 0.8125rem/1.4 var(--font-sans);
+}
+.quiet-lesson__statement {
+  margin: 12px 0 0;
+  border: 1px solid color-mix(in srgb, var(--homa-constructive-ink) 34%, transparent);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-constructive-tint);
+  padding: 16px;
+  color: var(--homa-ink);
+  font: 400 0.9375rem/1.55 var(--font-sans);
+}
+.quiet-lesson__build,
+.quiet-lesson__failure,
+.quiet-lesson__kept,
+.quiet-lesson__phone {
+  border-radius: var(--homa-radius-control);
+  padding: 20px;
+}
+.quiet-lesson__build { border: 1px solid var(--homa-soft-boundary); background: var(--homa-canvas); }
+.quiet-lesson__failure { background: var(--homa-highlight-tint); color: var(--homa-highlight-ink); }
+.quiet-lesson__kept { background: var(--homa-constructive-tint); }
+.quiet-lesson__phone { margin-top: 20px; border: 1px solid var(--homa-soft-boundary); background: var(--homa-paper); }
+.quiet-lesson__body-copy { margin: 12px 0 0; color: var(--homa-ink); font: 400 0.9375rem/1.55 var(--font-sans); }
+.quiet-lesson__status-copy { margin: 12px 0 0; color: inherit; font: 400 0.9375rem/1.55 var(--font-sans); }
+.quiet-lesson__status-note { margin: 8px 0 0; color: var(--homa-muted-ink); font: 400 0.8125rem/1.45 var(--font-sans); }
+.quiet-lesson__materials { margin-top: 20px; }
+.quiet-lesson__materials-title { color: var(--homa-ink); font: 600 0.9375rem/1.35 var(--font-sans); }
+.quiet-lesson__materials-list,
+.quiet-lesson__steps { color: var(--homa-ink); font: 400 0.9375rem/1.55 var(--font-sans); }
+.quiet-lesson__materials-list { margin: 8px 0 0; padding-left: 24px; }
+.quiet-lesson__steps { margin: 24px 0 0; padding-left: 24px; }
+.quiet-lesson__steps li { padding-left: 4px; }
+.quiet-lesson__steps li + li { margin-top: 12px; }
+.quiet-lesson__practice { color: var(--homa-ink); font: 400 0.9375rem/1.55 var(--font-sans); }
+.quiet-lesson__keep { margin-top: 20px; }
+.quiet-lesson__action-note,
+.quiet-lesson__error { margin: 8px 0 0; font: 400 0.8125rem/1.45 var(--font-sans); }
+.quiet-lesson__action-note { color: var(--homa-muted-ink); }
+.quiet-lesson__error { color: var(--homa-error-ink); }
+.quiet-lesson__phone-title { color: var(--homa-ink); font: 600 1rem/1.3 var(--font-display); }
+.quiet-lesson__phone-copy { margin: 8px 0 0; color: var(--homa-ink); font: 400 0.8125rem/1.45 var(--font-sans); }
+.quiet-lesson__artifact { margin-top: 16px; }
+.quiet-lesson__phone-action { margin-top: 8px; }
+.quiet-lesson__footer .quiet-action { min-height: 44px; }
+
 /* Reports are evidence first. These hooks keep the shared renderer, the
    sample preview, and print-first renditions on one surface grammar while
    leaving the data and disclosure behavior in their route components. */
@@ -2245,10 +2593,23 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 
 @media (min-width: 40rem) {
   .quiet-trajectory__legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quiet-plan__header,
+  .quiet-lesson__header { padding: 40px; }
+  .quiet-plan__body,
+  .quiet-lesson__body { padding: 36px 40px; }
+  .quiet-plan__footer,
+  .quiet-lesson__footer { padding-inline: 40px; }
 }
 
 @media print {
   @page { size: letter; margin: 0.55in; }
+  .quiet-plan,
+  .quiet-lesson { min-height: 0; padding: 0; background: var(--homa-paper); }
+  .quiet-plan__frame,
+  .quiet-lesson__frame { border: 0; box-shadow: none; }
+  .quiet-plan__invite,
+  .quiet-plan__print-hidden,
+  .quiet-lesson__print-hidden { display: none !important; }
   .quiet-print-surface { background: var(--homa-paper) !important; }
   .quiet-print-surface .quiet-frame { border: 0; box-shadow: none; }
   .quiet-print-surface .quiet-print-hidden { display: none !important; }

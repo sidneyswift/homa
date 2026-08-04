@@ -78,27 +78,25 @@ export function MaterialCard({
   return (
     <div
       data-brand-layer="material-card"
-      className="quiet-artifact-card w-full max-w-sm border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] p-4 shadow-sm"
+      className="quiet-artifact-card quiet-artifact-card--material"
     >
       {showStatusHeadline ? (
-        <p className="text-sm font-medium text-[var(--homa-brand-text)]">{headline}</p>
+        <p className="quiet-artifact-card__headline">{headline}</p>
       ) : null}
-      <p
-        className={`${showStatusHeadline ? "mt-1 " : ""}font-display text-lg font-semibold text-strong`}
-      >
+      <p className="quiet-artifact-card__title">
         {material.title}
       </p>
-      {subtitle ? <p className="mt-0.5 text-sm text-muted">{subtitle}</p> : null}
+      {subtitle ? <p className="quiet-artifact-card__meta">{subtitle}</p> : null}
       {material.sources && material.sources.length > 0 ? (
-        <p className="mt-1.5 text-xs text-subtle">
-          <span className="font-medium">Made from </span>
+        <p className="quiet-artifact-card__sources">
+          <span className="quiet-artifact-card__sources-label">Made from </span>
           {material.sources.map((source, index) => (
             <span key={source.id}>
               {index > 0 ? ", " : null}
               {source.libraryUrl ? (
                 <a
                   href={source.libraryUrl}
-                  className="underline decoration-[var(--homa-control-boundary)] underline-offset-2 hover:text-[var(--homa-ink)]"
+                  className="quiet-artifact-card__source-link"
                 >
                   {source.title}
                 </a>
@@ -114,7 +112,7 @@ export function MaterialCard({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open the ${material.title} PDF`}
-        className="quiet-artifact-card__preview mt-3 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--homa-visual-coral)]"
+        className="quiet-artifact-card__preview"
       >
         {/* Plain img on purpose: blob previews are remote, sized by the
             letter aspect ratio, and never above the fold. */}
@@ -126,22 +124,22 @@ export function MaterialCard({
               ? `Preview of ${material.title}, page ${pageIndex + 1} of ${pageCount}`
               : `Preview of ${material.title}`
           }
-          className="block aspect-[8.5/11] w-full"
+          className="quiet-artifact-card__image"
           loading="lazy"
         />
       </a>
       {pagePreviews.length > 1 ? (
-        <div className="mt-2 flex items-center justify-between">
+        <div className="quiet-artifact-card__pager">
           <button
             type="button"
             onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
             disabled={pageIndex === 0}
             aria-label="Previous page"
-            className="quiet-action quiet-action--secondary min-h-9 min-w-9 px-2 text-body disabled:opacity-40"
+            className="quiet-action quiet-action--secondary quiet-artifact-card__pager-button"
           >
             <Icon name="back" size={16} />
           </button>
-          <span aria-live="polite" className="text-xs font-semibold text-muted">
+          <span aria-live="polite" className="quiet-artifact-card__pager-label">
             Page {pageIndex + 1} of {pageCount}
             {pageCount > pagePreviews.length ? ` · previews show the first ${pagePreviews.length}` : ""}
           </span>
@@ -152,7 +150,7 @@ export function MaterialCard({
             }
             disabled={pageIndex >= pagePreviews.length - 1}
             aria-label="Next page"
-            className="quiet-action quiet-action--secondary min-h-9 min-w-9 px-2 text-body disabled:opacity-40"
+            className="quiet-action quiet-action--secondary quiet-artifact-card__pager-button"
           >
             <Icon name="next" size={16} />
           </button>
@@ -162,7 +160,7 @@ export function MaterialCard({
         href={pdfHref}
         target="_blank"
         rel="noopener noreferrer"
-        className="quiet-action quiet-action--primary mt-4 min-h-11 px-5 py-2.5 text-sm shadow-sm"
+        className="quiet-action quiet-action--primary quiet-artifact-card__print-action"
       >
         {pageCount > 1 ? `Print all ${pageCount} pages` : "Print it"}
       </a>
