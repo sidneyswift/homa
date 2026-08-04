@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ageLabel, MAP_SUBJECTS } from "@homa/core";
 
+import { QuietAction, QuietFrame } from "../../components/design";
 import type { FlowChild } from "./flow-types";
 
 /**
@@ -149,21 +150,21 @@ export function ScoringStep({
 
   if (failed) {
     return (
-      <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-        <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
+      <QuietFrame as="div" tone="paper" data-brand-layer="onboarding-scoring-error" className="quiet-onboarding__error p-6">
+        <p className="quiet-onboarding__loading-title">
           The report didn&apos;t build.
         </p>
-        <p className="mt-2 text-[var(--homa-ink)]">
+        <p className="quiet-onboarding__loading-copy">
           Your answers are saved. Try again now, or come back later with the link in your inbox.
         </p>
-        <button
+        <QuietAction
           type="button"
           onClick={() => window.location.reload()}
-          className="mt-4 min-h-11 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] hover:bg-[var(--homa-ink)]"
+          className="mt-4"
         >
           Try again
-        </button>
-      </div>
+        </QuietAction>
+      </QuietFrame>
     );
   }
 
@@ -173,23 +174,23 @@ export function ScoringStep({
       : "Building the progress reports\u2026";
 
   return (
-    <div aria-busy="true">
-      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
+    <div aria-busy="true" data-brand-surface="onboarding-scoring" className="quiet-onboarding__loading">
+      <h1 className="quiet-onboarding__loading-heading">
         {headline}
       </h1>
-      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
+      <QuietFrame as="div" tone="paper" data-brand-layer="onboarding-scoring-progress" className="quiet-onboarding__progress mt-6 p-6">
         {/* Keyed by position: two kids can share a name, so the line text
             alone is not unique. The list itself never reorders. */}
         {lines.slice(0, lineCount).map((line, index) => (
-          <p key={index} className="mt-2 flex items-center gap-2 text-[var(--homa-ink)] first:mt-0">
-            <span className={index < lineCount - 1 ? "text-[var(--homa-constructive-ink)]" : "text-[var(--homa-muted-ink)]"} aria-hidden="true">
+          <p key={index} className="quiet-onboarding__progress-line">
+            <span className={`quiet-onboarding__progress-mark ${index < lineCount - 1 ? "quiet-onboarding__progress-mark--done" : ""}`.trim()} aria-hidden="true">
               {index < lineCount - 1 ? "\u2713" : "\u25cb"}
             </span>
             {line}
           </p>
         ))}
-      </div>
-      <p className="mt-4 font-hand text-xl text-[var(--homa-constructive-ink)]">worth the wait {"\u270e"}</p>
+      </QuietFrame>
+      <p className="quiet-onboarding__signature">worth the wait {"\u270e"}</p>
     </div>
   );
 }
