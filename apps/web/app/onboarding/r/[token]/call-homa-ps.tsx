@@ -89,7 +89,7 @@ export function CallHomaPs({
 
   if (state === "called") {
     return (
-      <p className="mt-2 text-body print:hidden" role="status">
+      <p className="quiet-report__call-status mt-2 print:hidden" role="status">
         Calling you now. Pick up and we&apos;ll talk through {childName}&apos;s report.
       </p>
     );
@@ -101,16 +101,16 @@ export function CallHomaPs({
         // The whole line becomes the status while dialing (swapping
         // only the button's label used to leave a broken sentence:
         // "BTW, calling... if you'd rather I give you a call").
-        <p className="text-body" role="status">
+        <p className="quiet-report__call-status" role="status">
           Calling you now{"\u2026"}
         </p>
       ) : (
-        <p className="text-body">
+        <p className="quiet-report__call-copy">
           If you&apos;d rather talk through the report,{" "}
           <button
             type="button"
             onClick={() => void call()}
-            className="font-semibold text-[var(--homa-brand-text)] underline underline-offset-2 transition-opacity duration-(--homa-motion-fast) ease-out hover:opacity-80"
+            className="quiet-report__call-action"
           >
             have me call you now
           </button>
@@ -121,16 +121,16 @@ export function CallHomaPs({
         // Copy-kit shape (name it, settle it, next step), and the SAME
         // wording as MonthButton's no-session state: one failure, one
         // vocabulary (editor gate, 2026-07-11).
-        <p className="mt-1 text-xs text-muted">
+        <p className="quiet-report__call-note mt-1">
           The call didn&apos;t start. I don&apos;t recognize this device yet. Open your email
           link on this device once, then try again.
         </p>
       ) : null}
       {state === "walled" ? (
-        <p className="mt-1 text-xs text-muted">{WALL_STALE_CALL_LINE}</p>
+        <p className="quiet-report__call-note mt-1">{WALL_STALE_CALL_LINE}</p>
       ) : null}
       {error ? (
-        <p className="mt-1 text-xs text-danger" role="alert">
+        <p className="quiet-report__call-error mt-1" role="alert">
           {error}
         </p>
       ) : null}

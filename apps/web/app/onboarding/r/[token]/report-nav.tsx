@@ -13,7 +13,7 @@ export function ReportNav() {
   return (
     <header data-brand-layer="report-nav" className="sticky top-0 z-30 border-b border-[var(--homa-control-boundary)] bg-[color-mix(in_srgb,var(--homa-canvas)_95%,transparent)] backdrop-blur print:hidden">
       <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-2.5">
-        <Link href="/app" aria-label="Open Homa" className="inline-flex rounded-md">
+        <Link href="/app" aria-label="Open Homa" className="quiet-report__nav-logo">
           <Logo size={22} />
         </Link>
         <nav className="flex items-center gap-2">
