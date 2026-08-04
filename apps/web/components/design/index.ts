@@ -1,6 +1,8 @@
 export { Icon } from "./Icon";
 export type { IconProps, SemanticIconName } from "./Icon";
 export { AppFrame } from "./AppFrame";
+export { ContextPanel } from "./ContextPanel";
+export { PageHeader } from "./PageHeader";
 export { QuietAction } from "./QuietAction";
 export { QuietChoice } from "./QuietChoice";
 export type { QuietChoiceOption, QuietChoiceProps, QuietChoiceType, QuietChoiceValue } from "./QuietChoice";
@@ -16,4 +18,7 @@ export type { QuietMediaKind, QuietMediaProps } from "./QuietMedia";
 export { QuietStatus } from "./QuietStatus";
 export { QuietThread } from "./QuietThread";
 export { QuietTag } from "./QuietTag";
+export { ToolShelf } from "./ToolShelf";
+export { VoiceSafeSlot } from "./VoiceSafeSlot";
+export { WorkStage } from "./WorkStage";
 export { Workspace } from "./Workspace";

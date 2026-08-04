@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { WorkStage } from "../design/WorkStage";
 import { Workspace } from "../design/Workspace";
 
 /**
@@ -10,7 +11,9 @@ import { Workspace } from "../design/Workspace";
 export function PageColumn({ children }: { children: ReactNode }) {
   return (
     <Workspace className="quiet-workspace--page">
-      <div className="quiet-workspace__content">{children}</div>
+      <WorkStage as="div" className="quiet-work-stage--page">
+        <div className="quiet-workspace__content">{children}</div>
+      </WorkStage>
     </Workspace>
   );
 }

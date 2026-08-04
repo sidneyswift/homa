@@ -58,4 +58,15 @@ describe("SidePanel", () => {
     assert.match(html, /quiet-context-sheet__grabber/u);
     assert.doesNotMatch(html, /rgba\(51,42,33,0\.42\)/u);
   });
+
+  it("publishes the approved Quiet phone detent", () => {
+    const html = renderToStaticMarkup(
+      <SidePanel labelledBy="h" onClose={() => {}} variant="quiet" detent="expanded">
+        <span id="h" />
+      </SidePanel>,
+    );
+    assert.match(html, /data-context-panel=""/u);
+    assert.match(html, /data-context-mode="sheet"/u);
+    assert.match(html, /data-detent="expanded"/u);
+  });
 });
