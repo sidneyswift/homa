@@ -3,9 +3,9 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "surfaceManifestFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
-  "authoringManifestFingerprint": "47f93d96f47de41dc1f3ff5ae8e1e2244d8bf3085e5ffd07f71bb888de9f9079",
-  "ownedInputFingerprint": "518da15952ca16354d5ba4fe9ef811cbb6b1e5a248b4982724fdf7f1e31fc43e",
+  "surfaceManifestFingerprint": "226a3d8f2b81da713511585cbf032fe54b613fb9f91b22f253c1eb1cbae1b85a",
+  "authoringManifestFingerprint": "226a3d8f2b81da713511585cbf032fe54b613fb9f91b22f253c1eb1cbae1b85a",
+  "ownedInputFingerprint": "307d0e6ba011089b7cd084057d74d96cd0d9709edce7365ed281d6b13d0e2875",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -378,8 +378,8 @@
         "draft-bundle"
       ],
       "state": "historical-quarantined",
-      "sourceHash": "33a62d235ca6c4285ca216d197a5454d8234a3171a8d4919440f1729c6adfb20",
-      "bytes": 5645,
+      "sourceHash": "8f31b929ef65bf470f53dff0248aa37f2c6dfbafa761e21584262c51bf63d12c",
+      "bytes": 5144,
       "legacySignatures": []
     },
     {
@@ -460,8 +460,8 @@
         "draft-bundle"
       ],
       "state": "historical-quarantined",
-      "sourceHash": "d66f19ca2f05e8733bbf3144177e4669e5dc9f9e22f47621c63660377aa656e2",
-      "bytes": 1471,
+      "sourceHash": "fa9ad59c61ddc80c69971979c4fd283ffdfda8b683db63e5fd1317fb480bf128",
+      "bytes": 1607,
       "legacySignatures": []
     },
     {
@@ -605,8 +605,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "54e22ece15e1495aae431c4c6fdb16ab5c8903324f1dc19f2963873d3ee44273",
-      "bytes": 6389,
+      "sourceHash": "b664b297aa17b6a0d3cebdb02ea5628ae4ecf013d3af121dce87868ac61c373f",
+      "bytes": 6450,
       "legacySignatures": []
     },
     {
@@ -627,8 +627,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "3041b652025d93bc083adbd7ed5c3b4fc399536a120454250156cdfeb9d1c46e",
-      "bytes": 7044,
+      "sourceHash": "966821c00b7ca5124b1c13bcbe5941232dde22830183478b4c038c719e48ee27",
+      "bytes": 7093,
       "legacySignatures": []
     },
     {
@@ -649,8 +649,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "0774737fc5c0cef047a580eb6e09c28859fff40d20a5876712210224d5aae6d5",
-      "bytes": 6269,
+      "sourceHash": "d5448939a3fb1cd0566fdde1989a01192f19cd589a4ad85639cc2fae7ae2b832",
+      "bytes": 6300,
       "legacySignatures": []
     },
     {
@@ -671,8 +671,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "aec67d102fd4878a73d4db39a881874dd9e309b25184d9c040aca39c0a5dc65d",
-      "bytes": 6460,
+      "sourceHash": "4d10b3a5344324cebbc915a24c287fc35624208792dfd0d3be21f48ee425d680",
+      "bytes": 6507,
       "legacySignatures": []
     },
     {
@@ -693,8 +693,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "a83fe802bfe62d8b198e11ed0b207ec7f255e0fa59e5194b54c7e558fbfe13a0",
-      "bytes": 5759,
+      "sourceHash": "3ffb6d566d24c44af211bd0982175171323cb11386e72403bdb6baf440685ed3",
+      "bytes": 5793,
       "legacySignatures": []
     },
     {
@@ -715,8 +715,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "b2b7a87591f7162b64f10deacdfcd3231b0e35a8c3b251815d6eb24938ee183a",
-      "bytes": 6502,
+      "sourceHash": "05c4557ae04f9dcb6e87a9c58a3ccfd97acdf9649aea956ebf18665b8b78c008",
+      "bytes": 6539,
       "legacySignatures": []
     },
     {
@@ -737,8 +737,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "5ca82b15f206403a07f4b3d1474eef1961225523412c312be0f2d81d13316e64",
-      "bytes": 5939,
+      "sourceHash": "f2a2bb27fc38308f149eebe2e6b52e9a1b9f539d62b0b3193b7757072e9bf183",
+      "bytes": 5985,
       "legacySignatures": []
     },
     {
@@ -759,8 +759,8 @@
         "draft-bundle"
       ],
       "state": "active",
-      "sourceHash": "c4413213618811f7450e0c3a293d8431c79eede55c86fb92f30720d995cdbb36",
-      "bytes": 6096,
+      "sourceHash": "681650d781f250b2b0c549f608527cf89b23a3b13fccaa4b85409ff3dba0dff4",
+      "bytes": 6194,
       "legacySignatures": []
     },
     {
@@ -775,14 +775,278 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:33b74677704cc1c1",
+      "path": "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d",
+      "bytes": 7068,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c59694b09eef205e",
+      "path": "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "38441460739cc766a08b34b78735a575a5da707922c55a33d3d31c2ceb3a4b60",
+      "bytes": 678,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:9175f3c055d26443",
+      "path": "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251",
+      "bytes": 6983,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:31ec1ac8e7033da0",
+      "path": "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "4b38ff484ba7dfe7320f298948678aae8d1d907a377f9bfcc095727c35678e6c",
+      "bytes": 692,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b084414ce53ad876",
+      "path": "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203",
+      "bytes": 7640,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:66b51a475d017acc",
+      "path": "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "60ea60a889d18bd1e0d06092df67bc3ea147689330580e0a89976c5bad0d295e",
+      "bytes": 711,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6bd4a5d916e4d539",
+      "path": "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f",
+      "bytes": 7017,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5f0fd263286df438",
+      "path": "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "8e0d75f6f1c68d31228e31bd2eca4d349dfa9c9ac72cd114a3225f6c3a82e35f",
+      "bytes": 712,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3cb97b4ae65351a4",
+      "path": "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6",
+      "bytes": 7006,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7494dfe127ee867d",
+      "path": "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "7097660d3fd41b1104e3dbb0beb520db851830d1665094e4de6d4ea9626c5468",
+      "bytes": 673,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:864618aed0e09cb6",
+      "path": "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f",
+      "bytes": 6828,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:2d0784e51188f02f",
+      "path": "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "5f8adb2385941cefe5eff7c0953a7becdd0c6c2d25db00bc58767c4abef25949",
+      "bytes": 689,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4f2b09a3d3c04ac6",
+      "path": "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630",
+      "bytes": 5850,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:dcb67f544df61ed0",
+      "path": "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "f48d733a6a0027ba1e8374fe06aad030e825230674d8010e75fbcd8eed4df51d",
+      "bytes": 687,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:98a837965acc43ae",
+      "path": "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796",
+      "bytes": 7061,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a6f2aca6234bc849",
+      "path": "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "2e94bc91656d69c08cda1df4408b2c7b776ec1e6705969c173d5dea4693585e9",
+      "bytes": 692,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ca25c452488f07ba",
+      "path": "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9",
+      "bytes": 6956,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:69423c7d7999ba7f",
+      "path": "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "cbd562b82b3fa3bfdd09bd98f4e188466d7e0333563481a48043a72b3e23c4b0",
+      "bytes": 711,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:8304e0435cd3489d",
+      "path": "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9",
+      "bytes": 5238,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a0240a4e7f2d5da2",
+      "path": "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "0a534f4cc3ac535b03d9272459dc41934113c9819dc402744df5c901478168bc",
+      "bytes": 671,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:0011f52df3597e40",
+      "path": "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54",
+      "bytes": 6477,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:94129f3d835a5370",
+      "path": "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "edac1fc6e8d193c2b434b6af822bb9f1423524865820ea27539e83b140448d3a",
+      "bytes": 680,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a641c4b65cc2f25f",
+      "path": "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long/article.mdx",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27",
+      "bytes": 5783,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ad82acfd8c894d35",
+      "path": "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long/meta.yml",
+      "roles": [
+        "draft-bundle"
+      ],
+      "state": "historical-quarantined",
+      "sourceHash": "6ce88f2bad9abf595fbb991b4a4f9e0ffa3907d0e2df3b2c844c546cf259e99b",
+      "bytes": 669,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:d3a2750688ce697f",
       "path": "marketing/content/published/2026-08-03-how-to-track-homeschool-hours-without-losing-the-week/article.mdx",
       "roles": [
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "6338b3e54cde1b23bf30a78f5ce1eb09e350439711a9bbf7e4e7ab0aaf4b70a7",
-      "bytes": 5307,
+      "sourceHash": "fb84ffc8882f3e728669781084ab88427a0973095236c966d97cbe7277f8f61a",
+      "bytes": 5240,
       "legacySignatures": []
     },
     {
@@ -990,8 +1254,8 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "3aa44710d4b13e20e29199ff35c254b4b12f4c9c45a8c0103d151d522c08bb1f",
-      "bytes": 13548,
+      "sourceHash": "8446f4c8205faed0384467aa0534680927e93e21454e75f264f809a53de1ce10",
+      "bytes": 15723,
       "legacySignatures": []
     },
     {
@@ -1056,7 +1320,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "d96eacb572552fb344229a5bb33b0bf57f5858477da2928a8eeb49ef5a2c0972",
+      "sourceHash": "9377dcd253c27488167ef85186251b422c1baf5c229082e46860a9ca40db0187",
       "bytes": 177,
       "legacySignatures": []
     },
@@ -1078,7 +1342,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "22a1467dfab91461a34ccea08f12bbd0db0bdf3cdd1e85839e7576215acff6bb",
+      "sourceHash": "3038009f27befb81d8c1759184ca9da7c409b24b2e9953fe4c995bba07c61021",
       "bytes": 164,
       "legacySignatures": []
     },
@@ -1100,7 +1364,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "8526953d22a38277003e695452544c7127e277ab2938baaf541485999b3615c0",
+      "sourceHash": "7978850aba1f0760d7f13674c9e7bd580d12a525ced2365674610523d1c3243b",
       "bytes": 169,
       "legacySignatures": []
     },
@@ -1122,7 +1386,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "0a4d178d1b13c18e80332efd1cffa4fba27fcb696bce11c665a8607507a6931e",
+      "sourceHash": "cf2c2fc33873f122763424f33f5a1aba11cb740c9f4c719f6c0e438aa0c004d5",
       "bytes": 175,
       "legacySignatures": []
     },
@@ -1144,7 +1408,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "ed89d7e15d6d625d988067bfb5e3f9b75263b01dd668bb80f40d747d8281243a",
+      "sourceHash": "e0455c2a8b8b15b7fbf60ff4d20265b0c3fb18e91d4e23dfa89dd48f673cfc1e",
       "bytes": 173,
       "legacySignatures": []
     },
@@ -1166,7 +1430,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "314d29993824c21d1d815a665c34736cf98da610e17cf63abed12ef3ac3ce3a5",
+      "sourceHash": "51dfc03a16c3955f6510563160cf45db3a4c23b7c1555bfbef447fe6097ff5c0",
       "bytes": 172,
       "legacySignatures": []
     },
@@ -1188,7 +1452,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "4a108b9659fef22135cf4e94d38c4af805d84bcb52a7f5e72a038af3838152f5",
+      "sourceHash": "66348f4b1de6655c8f139ddf1a1fabcee0f33017dcf682f42d599227b69a127d",
       "bytes": 168,
       "legacySignatures": []
     },
@@ -1210,7 +1474,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "54581d539b9e36cb7d1cf56930af578eacb17f92e2c4c47e838a61b86b5882cd",
+      "sourceHash": "10055f958dd1fb25a580ab64a53f2a082a5e40e7925f3e1d458fad11ab456cce",
       "bytes": 187,
       "legacySignatures": []
     },
@@ -1232,7 +1496,7 @@
         "evaluator"
       ],
       "state": "active",
-      "sourceHash": "3db6e7067a2a71637e100867498ef3ce979601f79c9ebd37ceb77f7a1cac1844",
+      "sourceHash": "118620baa4a1cb79d39fe62d5514367b6c07fadfb673b537ee163bf112e5e892",
       "bytes": 168,
       "legacySignatures": []
     },
@@ -1245,6 +1509,270 @@
       "state": "active",
       "sourceHash": "6948e34c8627696a2813a0bdd2c32c9ff030b50c9ec6fc7fb96e57e07e9116ed",
       "bytes": 86,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:79bdf974ac882f84",
+      "path": "marketing/evals/scorecards/2026-08-04-homeschool-reading-log-that-stays-useful.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "14932a8999a3d7f7aaa8b8d60b20b7488f24eaa4fb1d31ae0f341bd8f12d8fdc",
+      "bytes": 174,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:854db46755764917",
+      "path": "marketing/evals/scorecards/2026-08-04-homeschool-reading-log-that-stays-useful.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "d2e508137f9c535c51986ae980bff95bc2ac9217d29537b447b40c115154d96b",
+      "bytes": 92,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e5e694715ea7a321",
+      "path": "marketing/evals/scorecards/2026-08-04-how-many-problems-should-a-practice-page-have.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "09d0c0cac47e690390b27aee114c20370735f0128cc90855cea2a0bb70be2dc9",
+      "bytes": 179,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c01e9a5182f9b4fc",
+      "path": "marketing/evals/scorecards/2026-08-04-how-many-problems-should-a-practice-page-have.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "944abd1c12d7cf910c837a1a3db802974493b337e9a73a8f80aecc9b64608e71",
+      "bytes": 97,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:af7adb5d0f9f971d",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "cc282d0bb2b985b87205604e319b83070f2c2cbc066310785de5fe03b2149d7b",
+      "bytes": 186,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ccece8110b3b130f",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "42e37ea0e2a687df408f4aa201ec2bf2766dc2590ae6389aa24025a77a166042",
+      "bytes": 104,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:636f5daccc3fa301",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-check-a-generated-worksheet-before-printing.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "b85f8bf396e2e7a9e5ba57659910b7d47eb95d50502a4b49ddae1dd5b57bc696",
+      "bytes": 184,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f81d5c260c2fb1fb",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-check-a-generated-worksheet-before-printing.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "a69dd3de27bdbcc023db4a3f70094a2505ea97db8b513c55641b9eab463822ed",
+      "bytes": 102,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5e3b93833c9e9cbd",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-choose-homeschool-work-samples.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "72261655aeae00cbd8f44547bd23b8e5c49f1ff2e35b67de58d491ea730fa593",
+      "bytes": 171,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:0d917e52044bd023",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-choose-homeschool-work-samples.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "2f7dff6b33672ffe374aabbfad861efa7c64ea73932760939cdf484763e459bc",
+      "bytes": 89,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4833ca7d88c05fed",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-document-homeschool-math-progress.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "139a33d629cba97a05393bc261ee134028c50e47281f5d0bd163cfee8b2532e4",
+      "bytes": 174,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7e6dc151f7cafb75",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-document-homeschool-math-progress.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "67687fb2b6dca3745a6c273075123b22baef34f4fbdcbda782ee29c403c3885b",
+      "bytes": 92,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:102b0ea8b12bc566",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-make-a-flexible-homeschool-schedule.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "3a570cd64099f5bfc4c0756044ec67030ea6eb494509e226115866bdae3ba98f",
+      "bytes": 176,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:13aa03d2f6e9ff80",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-make-a-flexible-homeschool-schedule.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "b151f92c266119fe5a88e321c8d4458e5d132ca6690e0d52cf6e3e279f858374",
+      "bytes": 94,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:490bafd1125b62a2",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-track-homeschool-reading-progress.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "ff937689239207f4af1090759a6d16bb3cd954022616319253fce523acb35b15",
+      "bytes": 174,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7420f61a919fdfe8",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-track-homeschool-reading-progress.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "c58b84f0511c7373afa423cd051d1512253d159adb302a6882774d63ac5e4824",
+      "bytes": 92,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c65c3c15e0186b2c",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-write-a-homeschool-narrative-progress-report.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "16cf3b531c6c7cd69826ab7ffa4684d0fa3e96ec5788bf96267c18cdcb8b60ae",
+      "bytes": 185,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ff1cf6710abed8b1",
+      "path": "marketing/evals/scorecards/2026-08-04-how-to-write-a-homeschool-narrative-progress-report.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "8889073c247bc1998aca7dcaca57a6772a63079988a1afb97f045a3950e5f7e7",
+      "bytes": 103,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:dd4d684b8ff49d5b",
+      "path": "marketing/evals/scorecards/2026-08-04-simple-homeschool-daily-checklist.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "732c793e75ce50fac027acd038fd617f9f2adeafbdb081e596247ca5d7b1fb20",
+      "bytes": 167,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:28d40c3717ab4833",
+      "path": "marketing/evals/scorecards/2026-08-04-simple-homeschool-daily-checklist.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "83f5c93bc8bab5e37d284cfe6bdfc490e763e5e913d07983786adea17b49b636",
+      "bytes": 85,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fff2634100f5f6d6",
+      "path": "marketing/evals/scorecards/2026-08-04-what-to-write-in-a-homeschool-daily-log.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "08bb372772fee5a478f63603f5b95da474021416cbaa9c3ca8a238023022d949",
+      "bytes": 173,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f0cb83fbf801a750",
+      "path": "marketing/evals/scorecards/2026-08-04-what-to-write-in-a-homeschool-daily-log.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "7cc88819062ed6471f933ba3ea54660781827b000c6bf6444018c09dbb25538c",
+      "bytes": 91,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:32f02a9171127a1b",
+      "path": "marketing/evals/scorecards/2026-08-04-when-homeschool-lessons-run-long.json",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "f27d730279e4fc6aae35a1113e182e2a7029965f8b71f16f8d4bb74a652128c6",
+      "bytes": 166,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ec6ee24b9a54a212",
+      "path": "marketing/evals/scorecards/2026-08-04-when-homeschool-lessons-run-long.md",
+      "roles": [
+        "evaluator"
+      ],
+      "state": "active",
+      "sourceHash": "649688a8b496c53999072e1d9aab079d118bce96075f98ca7e9bca1c03dc7ba3",
+      "bytes": 84,
       "legacySignatures": []
     },
     {
@@ -1402,6 +1930,17 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:7857a29791c4d8c0",
+      "path": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "8ef2350d1cf806e6f27afea27c2b1522322738003dfaaed5ea3e68eec1ecd43b",
+      "bytes": 14552,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:fee90e6d62ace4b7",
       "path": "marketing/routines/SPEC.md",
       "roles": [
@@ -1457,14 +1996,25 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:ed59b06a8f82abfc",
+      "path": "marketing/seo/2026-08-04-seo-ocean-launch-plan.md",
+      "roles": [
+        "seo-template"
+      ],
+      "state": "active",
+      "sourceHash": "5305d9ed5ea1e7613d1c0811b20f5316e4c6ae107bc5fb4e9c514a9cdb44879c",
+      "bytes": 9083,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:fa7a28b22db43c07",
       "path": "marketing/seo/operating-plan.md",
       "roles": [
         "seo-template"
       ],
       "state": "active",
-      "sourceHash": "7562752b8f4a867dd7a0360bbb26884a18988ccaff1f884475c0ecd18520156f",
-      "bytes": 11409,
+      "sourceHash": "a8671e38b8ae70b0d3c74ba2d623be49d6c11f606e148f4736e7fb7562385951",
+      "bytes": 13359,
       "legacySignatures": []
     },
     {
@@ -1474,8 +2024,19 @@
         "seo-template"
       ],
       "state": "active",
-      "sourceHash": "5b4f15b2b0875242b850e2330068f8191dbf1601ab2e00a8380380d9d25c7c61",
-      "bytes": 9712,
+      "sourceHash": "4e02bcad2dd4d6ef963ea87086b3699c6bd8813f0e1382b1fa0c24dd5cae1868",
+      "bytes": 10383,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:1a6221778f8c5a89",
+      "path": "marketing/seo/topic-graph.json",
+      "roles": [
+        "seo-template"
+      ],
+      "state": "active",
+      "sourceHash": "952033bb6ff33e74168ec092198ff6d38ae51829440c1b2b90ce41f14031ddcb",
+      "bytes": 27366,
       "legacySignatures": []
     },
     {
@@ -1897,6 +2458,138 @@
       "legacySignatures": []
     },
     {
+      "id": "marketing:f951f5c129376c3f",
+      "path": "marketing/signals/2026-08-04-a-checklist-needs-the-next-decision.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "441f3c2ff41b67401bb3dcf694798f7d9e2dab57687db8046685c734ded94609",
+      "bytes": 573,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:56899dfa53a2f8ee",
+      "path": "marketing/signals/2026-08-04-a-daily-log-needs-one-memory-cue.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "cbe12ef4ed0d69de31122ce42fd96046f62072d8a81df5d2eba005f84e97561d",
+      "bytes": 556,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c4a9377415544d76",
+      "path": "marketing/signals/2026-08-04-a-generated-worksheet-needs-a-parent-check.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "b5d1fea111de725c76bd9a0d40106f5eaa7790bb4945d549bacbe922a25d6396",
+      "bytes": 551,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7b1e2ed9ee0566bb",
+      "path": "marketing/signals/2026-08-04-a-long-lesson-needs-a-stopping-rule.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "bdbad50c1ebb1092d6de3a03d2b90dee4291fed3c25fb6cdfe38cf8c618dd9b2",
+      "bytes": 629,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f309091c4cd41e26",
+      "path": "marketing/signals/2026-08-04-a-narrative-report-needs-four-sentences.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "da46f3e11577716de90f93428b079ec85ba2b4a69c2cd8a10aeb0484b7dde44b",
+      "bytes": 601,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a10f3bad120239c5",
+      "path": "marketing/signals/2026-08-04-a-reading-log-needs-a-reader.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "715a9921ca6201bebdd8e11ee785c0b853a7315aa48a7ebaec7bad78797798be",
+      "bytes": 566,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7098cf411c7e9d19",
+      "path": "marketing/signals/2026-08-04-change-access-not-the-learning-target.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "9248de04e1b6b154c7ecffaa4dbb06e7e8ec91d6c15daf37079986ff7dd7bf75",
+      "bytes": 591,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:34eede0befc79f98",
+      "path": "marketing/signals/2026-08-04-every-work-sample-needs-a-job.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "63239a2da22d0e1409649853f0def1d018ead6b7d8c9cb476c867615d1b2b258",
+      "bytes": 545,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:1061d168db79a9fe",
+      "path": "marketing/signals/2026-08-04-flexibility-needs-a-decision-rule.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "66e7282f0f5b608da90cfa5bc79e97a1ab47940fec2cd4586ba1253d4d0f48d1",
+      "bytes": 596,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7fd98b13b3bec125",
+      "path": "marketing/signals/2026-08-04-math-progress-needs-the-same-idea-twice.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "bc37493376ee134a9a6d46c443e8acb699635ba6b1bcbfbade3875c4716e68b0",
+      "bytes": 546,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ff373b7278be7bb9",
+      "path": "marketing/signals/2026-08-04-question-count-needs-a-stop-rule.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "ac70302f40e98805c2159129a387d0226bb181f2d24ccd9cbcacdf665884aa77",
+      "bytes": 618,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:649a23871cff91e2",
+      "path": "marketing/signals/2026-08-04-reading-progress-needs-a-comparable-moment.md",
+      "roles": [
+        "source"
+      ],
+      "state": "active",
+      "sourceHash": "2a54ea8969116099a796642d6ebeac74636898d7ad777391c066a94399a678f1",
+      "bytes": 595,
+      "legacySignatures": []
+    },
+    {
       "id": "marketing:2d85a07cd73fd6b1",
       "path": "marketing/swipe/2026-07-08-ai-ugc-formats.md",
       "roles": [
@@ -1915,8 +2608,8 @@
         "voice"
       ],
       "state": "active",
-      "sourceHash": "46f407f6d52b255d08e2da0fad987ddb0bbe919645faf83bec9245bad1801238",
-      "bytes": 6136,
+      "sourceHash": "1b9c6e8cd64ead028c6aa9fb487fc2a57d65d9a3da5952f8c01e22a9649b8a29",
+      "bytes": 6223,
       "legacySignatures": []
     },
     {
@@ -1951,7 +2644,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "33a62d235ca6c4285ca216d197a5454d8234a3171a8d4919440f1729c6adfb20"
+          "sourceHash": "8f31b929ef65bf470f53dff0248aa37f2c6dfbafa761e21584262c51bf63d12c"
         },
         {
           "file": "captions/facebook.md",
@@ -2092,7 +2785,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "54e22ece15e1495aae431c4c6fdb16ab5c8903324f1dc19f2963873d3ee44273"
+          "sourceHash": "b664b297aa17b6a0d3cebdb02ea5628ae4ecf013d3af121dce87868ac61c373f"
         }
       ],
       "scorecard": {
@@ -2131,7 +2824,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "3041b652025d93bc083adbd7ed5c3b4fc399536a120454250156cdfeb9d1c46e"
+          "sourceHash": "966821c00b7ca5124b1c13bcbe5941232dde22830183478b4c038c719e48ee27"
         }
       ],
       "scorecard": {
@@ -2170,7 +2863,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "0774737fc5c0cef047a580eb6e09c28859fff40d20a5876712210224d5aae6d5"
+          "sourceHash": "d5448939a3fb1cd0566fdde1989a01192f19cd589a4ad85639cc2fae7ae2b832"
         }
       ],
       "scorecard": {
@@ -2209,7 +2902,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "aec67d102fd4878a73d4db39a881874dd9e309b25184d9c040aca39c0a5dc65d"
+          "sourceHash": "4d10b3a5344324cebbc915a24c287fc35624208792dfd0d3be21f48ee425d680"
         }
       ],
       "scorecard": {
@@ -2248,7 +2941,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "a83fe802bfe62d8b198e11ed0b207ec7f255e0fa59e5194b54c7e558fbfe13a0"
+          "sourceHash": "3ffb6d566d24c44af211bd0982175171323cb11386e72403bdb6baf440685ed3"
         }
       ],
       "scorecard": {
@@ -2287,7 +2980,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "b2b7a87591f7162b64f10deacdfcd3231b0e35a8c3b251815d6eb24938ee183a"
+          "sourceHash": "05c4557ae04f9dcb6e87a9c58a3ccfd97acdf9649aea956ebf18665b8b78c008"
         }
       ],
       "scorecard": {
@@ -2326,7 +3019,7 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "5ca82b15f206403a07f4b3d1474eef1961225523412c312be0f2d81d13316e64"
+          "sourceHash": "f2a2bb27fc38308f149eebe2e6b52e9a1b9f539d62b0b3193b7757072e9bf183"
         }
       ],
       "scorecard": {
@@ -2365,11 +3058,479 @@
           "channel": "blog",
           "status": "draft",
           "exists": true,
-          "sourceHash": "c4413213618811f7450e0c3a293d8431c79eede55c86fb92f30720d995cdbb36"
+          "sourceHash": "681650d781f250b2b0c549f608527cf89b23a3b13fccaa4b85409ff3dba0dff4"
         }
       ],
       "scorecard": {
         "path": "marketing/evals/scorecards/2026-08-03-weekly-homeschool-planner-template.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-homeschool-reading-log-that-stays-useful",
+      "path": "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-a-reading-log-needs-a-reader.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-homeschool-reading-log-that-stays-useful.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-many-problems-should-a-practice-page-have",
+      "path": "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-question-count-needs-a-stop-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-many-problems-should-a-practice-page-have.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
+      "path": "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-change-access-not-the-learning-target.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-check-a-generated-worksheet-before-printing",
+      "path": "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-a-generated-worksheet-needs-a-parent-check.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-check-a-generated-worksheet-before-printing.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-choose-homeschool-work-samples",
+      "path": "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-every-work-sample-needs-a-job.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-choose-homeschool-work-samples.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-document-homeschool-math-progress",
+      "path": "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-math-progress-needs-the-same-idea-twice.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-document-homeschool-math-progress.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-make-a-flexible-homeschool-schedule",
+      "path": "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-flexibility-needs-a-decision-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-make-a-flexible-homeschool-schedule.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-track-homeschool-reading-progress",
+      "path": "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-reading-progress-needs-a-comparable-moment.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-track-homeschool-reading-progress.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
+      "path": "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-a-narrative-report-needs-four-sentences.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-write-a-homeschool-narrative-progress-report.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-simple-homeschool-daily-checklist",
+      "path": "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-a-checklist-needs-the-next-decision.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-simple-homeschool-daily-checklist.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-what-to-write-in-a-homeschool-daily-log",
+      "path": "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-a-daily-log-needs-one-memory-cue.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-what-to-write-in-a-homeschool-daily-log.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": null,
+        "exists": false,
+        "urls": [],
+        "publishedFormats": 0,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 0,
+        "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-when-homeschool-lessons-run-long",
+      "path": "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long",
+      "lifecycle": "draft",
+      "source": "marketing/signals/2026-08-04-a-long-lesson-needs-a-stopping-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "draft",
+          "exists": true,
+          "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-when-homeschool-lessons-run-long.json",
         "exists": true,
         "passed": true
       },
@@ -2405,7 +3566,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "6338b3e54cde1b23bf30a78f5ce1eb09e350439711a9bbf7e4e7ab0aaf4b70a7"
+          "sourceHash": "fb84ffc8882f3e728669781084ab88427a0973095236c966d97cbe7277f8f61a"
         },
         {
           "file": "video/script.md",
@@ -2448,7 +3609,7 @@
         "marketing/content/drafts/*/article.mdx"
       ],
       "id": "generator:69357e3c58450984",
-      "sourceHash": "d6e2edc152adae03bca6a21e6e8e9c086a9ddd465533c640bb36d197ad228245"
+      "sourceHash": "744afde8124d244e3c39fda4446401619002b1d24fa261558e0d9a9d076bd6f0"
     },
     {
       "path": ".agents/skills/marketing-copy-editor/SKILL.md",
@@ -2607,7 +3768,7 @@
         "marketing/evals/scorecards/"
       ],
       "id": "generator:92cc4d015ee58a8e",
-      "sourceHash": "3aa44710d4b13e20e29199ff35c254b4b12f4c9c45a8c0103d151d522c08bb1f"
+      "sourceHash": "8446f4c8205faed0384467aa0534680927e93e21454e75f264f809a53de1ce10"
     },
     {
       "path": "scripts/brand-assets.mts",
