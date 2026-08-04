@@ -119,27 +119,27 @@ export function ReceiptsList({
 
   return (
     <>
-      <ul className="mt-2 flex flex-col gap-2">
+      <ul className="quiet-report__receipt-list mt-2">
         {[...rows]
           .sort((a, b) => a.typicalMonths - b.typicalMonths)
           .map((row) => {
             const shown =
               pending[row.itemId]?.answer ?? row.answer;
             return (
-              <li key={row.itemId} className="rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] px-4 py-3">
+              <li key={row.itemId} className="quiet-report__receipt-row">
                 {/* One flowing line: the question, a quiet leader, the
                     answer. Literally what was asked and what she said. */}
-                <p className="text-sm leading-relaxed text-strong">
-                  <span className="font-medium">{row.statement}?</span>{" "}
-                  <span aria-hidden="true" className="text-subtle">
+                <p className="quiet-report__receipt-copy">
+                  <span className="quiet-report__receipt-question">{row.statement}?</span>{" "}
+                  <span aria-hidden="true" className="quiet-report__receipt-leader">
                     {"\u2026"}
                   </span>{" "}
-                  <span className="font-semibold">
+                  <span className="quiet-report__receipt-answer">
                     {shown === "skip" ? "Skipped" : ANSWER_LABELS[shown]}
                   </span>
                   {pending[row.itemId] ? (
                     <span
-                      className="ml-1.5 font-mono text-[0.65rem] font-bold"
+                      className="quiet-report__receipt-updated ml-1.5"
                       style={{ color: "var(--homa-info-ink)" }}
                     >
                       {"\u00b7"} updated
@@ -150,7 +150,7 @@ export function ReceiptsList({
                       type="button"
                       onClick={() => setEditing(row.itemId)}
                       disabled={state === "busy"}
-                      className="ml-2 text-xs font-semibold text-[var(--homa-brand-text)] underline-offset-2 hover:underline print:hidden"
+                      className="quiet-report__receipt-change ml-2 print:hidden"
                     >
                       change
                     </button>
@@ -158,7 +158,7 @@ export function ReceiptsList({
                 </p>
 
                 {editable && editing === row.itemId ? (
-                  <div className="mt-2 flex flex-wrap gap-1.5 print:hidden">
+                  <div className="quiet-report__receipt-choices mt-2 print:hidden">
                     {CHOICES.map((choice) => (
                       <button
                         key={choice}
@@ -186,8 +186,8 @@ export function ReceiptsList({
                         }}
                         className={
                           shown === choice
-                            ? "quiet-action quiet-action--primary min-h-8 rounded-[var(--homa-radius-control)] px-3 py-1 text-xs"
-                            : "quiet-action quiet-action--secondary min-h-8 rounded-[var(--homa-radius-control)] px-3 py-1 text-xs motion-safe:active:scale-[var(--press-scale)]"
+                            ? "quiet-report__receipt-choice quiet-action quiet-action--primary"
+                            : "quiet-report__receipt-choice quiet-action quiet-action--secondary motion-safe:active:scale-[var(--press-scale)]"
                         }
                       >
                         {ANSWER_LABELS[choice]}
@@ -201,20 +201,20 @@ export function ReceiptsList({
       </ul>
 
       {state === "no-session" ? (
-        <p className="mt-2 text-xs text-muted print:hidden">
+        <p className="quiet-report__receipt-status mt-2 print:hidden">
           Changes work on the device you used for the questionnaire, or open your email link here
           first.
         </p>
       ) : state === "conflict" ? (
-        <p className="mt-2 text-xs text-muted print:hidden">
+        <p className="quiet-report__receipt-status mt-2 print:hidden">
           This answer needs confirmation in Progress before it can be changed here.
         </p>
       ) : state === "error" ? (
-        <p className="mt-2 text-xs text-muted print:hidden">
+        <p className="quiet-report__receipt-status mt-2 print:hidden">
           Those changes were not saved. They are still here for you to review.
         </p>
       ) : pendingCount > 0 ? (
-        <div className="mt-3 flex items-center gap-3 print:hidden">
+        <div className="quiet-report__receipt-save mt-3 print:hidden">
           <button
             type="button"
             onClick={() => void saveChanges()}
@@ -225,7 +225,7 @@ export function ReceiptsList({
               ? "Updating\u2026"
               : `Save ${pendingCount} ${pendingCount === 1 ? "change" : "changes"}`}
           </button>
-          <span className="text-xs text-muted">
+          <span className="quiet-report__receipt-save-note">
             Saving updates the whole report around your new answer.
           </span>
         </div>
