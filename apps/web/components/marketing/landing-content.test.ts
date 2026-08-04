@@ -128,6 +128,13 @@ test("the live landing composition keeps the approved artifact-first opening", (
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-object|HeroObject|QuietHeroHeadline/u);
 });
 
+test("the landing keeps functional actions on the approved midnight role", () => {
+  assert.doesNotMatch(
+    QUIET_LANDING_SOURCE,
+    /quiet-action--primary\s*\{[^}]*var\(--homa-visual-coral\)/u,
+  );
+});
+
 test("the product moment exposes a keyboard-safe, reduced-motion state demo", () => {
   assert.match(QUIET_LANDING_SOURCE, /aria-live="polite"/u);
   assert.match(QUIET_LANDING_SOURCE, /aria-pressed=\{state === nextState\}/u);
