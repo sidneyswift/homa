@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { HOMESCHOOL_STYLES } from "@homa/core";
 
+import { QuietAction, QuietChoice, QuietField, QuietFrame } from "../../components/design";
 import { HOMESCHOOL_STYLE_LABELS } from "../../lib/homeschool-styles";
 import { TagInput } from "./tag-input";
 
@@ -31,14 +32,6 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
 
   const hasAnything = styles.length > 0 || curriculums.length > 0 || values.trim().length > 0;
-
-  /** Toggles in place, preserving pick order (the first pick stays the
-   * primary style downstream, e.g. the plan's style note). */
-  function toggleStyle(value: string) {
-    setStyles(
-      styles.includes(value) ? styles.filter((item) => item !== value) : [...styles, value],
-    );
-  }
 
   /** Saves whatever was picked, then moves on either way: this context
    * is a bonus, never a blocker between her and her kids' setup. */
@@ -68,73 +61,42 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
+    <div className="quiet-onboarding__step">
+      <h1 className="quiet-onboarding__step-heading">
         About your homeschool.
       </h1>
-      <p className="mt-3 text-[var(--homa-ink)]">
+      <p className="quiet-onboarding__step-intro">
         Optional, and it makes your kids&apos; materials fit what you&apos;re already doing.
       </p>
 
-      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm sm:p-6">
-        <div>
-          {/* Multi-select (founder request 2026-07-06: more than one must
-              be pickable). Selected chips take the soft brand tint, same
-              as the TagInput chips below: several solid clay pills would
-              fight the one real CTA on this card. */}
-          <p className="font-medium text-[var(--homa-ink)]">
-            Styles you follow? <span className="font-normal text-[var(--homa-muted-ink)]">(pick any that fit)</span>
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {HOMESCHOOL_STYLES.map((value) => {
-              const selected = styles.includes(value);
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => toggleStyle(value)}
-                  aria-pressed={selected}
-                  className={`min-h-10 rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm transition duration-(--homa-motion-fast) ease-out ${
-                    selected
-                      ? "border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] text-[var(--homa-brand-text)]"
-                      : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)]"
-                  }`}
-                >
-                  {HOMESCHOOL_STYLE_LABELS[value]}
-                </button>
-              );
-            })}
-          </div>
-          {styles.length > 0 ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-[var(--homa-muted-ink)]">How closely?</span>
-              {(
-                [
-                  ["closely", "pretty closely"],
-                  ["loosely", "loosely"],
-                  ["exploring", "just exploring it"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setStrictness(strictness === value ? null : value)}
-                  aria-pressed={strictness === value}
-                  className={`min-h-10 rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm ${
-                    strictness === value
-                      ? "border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] text-[var(--homa-brand-text)]"
-                      : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)]"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
+      <QuietFrame className="quiet-onboarding__step-card">
+        <QuietChoice
+          name="homeschool-styles"
+          label="Styles you follow?"
+          type="checkbox"
+          value={styles}
+          hint="Pick any that fit."
+          options={HOMESCHOOL_STYLES.map((value) => ({ value, label: HOMESCHOOL_STYLE_LABELS[value] }))}
+          onChange={(value) => setStyles(Array.isArray(value) ? [...value] : [])}
+          className="quiet-onboarding__style-choice"
+        />
+        {styles.length > 0 ? (
+          <QuietChoice
+            name="homeschool-strictness"
+            label="How closely?"
+            value={strictness ?? ""}
+            options={[
+              { value: "closely", label: "pretty closely" },
+              { value: "loosely", label: "loosely" },
+              { value: "exploring", label: "just exploring it" },
+            ]}
+            onChange={(value) => setStrictness(typeof value === "string" && value ? value : null)}
+            className="quiet-onboarding__choice-group"
+          />
+        ) : null}
 
         <TagInput
-          className="mt-5"
+          className="quiet-onboarding__tag-input"
           label="Curriculums you're using now?"
           hint="Type any: The Good and the Beautiful, Math-U-See, Heggerty, your own..."
           suggestions={["The Good and the Beautiful", "Math-U-See", "Heggerty", "All About Reading", "Singapore Math", "Masterbooks"]}
@@ -143,37 +105,35 @@ export function HomeschoolStep({ onDone }: { onDone: () => void }) {
           max={12}
         />
 
-        <div className="mt-5">
-          <p className="font-medium text-[var(--homa-ink)]">Anything that matters to your family?</p>
-          <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">
-            Faith, values, aesthetics, screen rules. Materials will respect it.
-          </p>
+        <QuietField
+          id="homeschool-values"
+          label="Anything that matters to your family?"
+          hint="Faith, values, aesthetics, screen rules. Materials will respect it."
+          className="quiet-onboarding__choice-group"
+        >
           <textarea
             value={values}
             onChange={(event) => setValues(event.target.value)}
             rows={2}
             maxLength={500}
-            className="mt-2 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] px-4 py-2.5 text-sm text-[var(--homa-ink)] focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/30"
           />
-        </div>
+        </QuietField>
 
-        <button
-          type="button"
-          onClick={() => void saveAndContinue()}
-          disabled={busy}
-          className="mt-6 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
-        >
-          {busy ? "Saving\u2026" : "Continue"}
-        </button>
-        <button
-          type="button"
-          onClick={onDone}
-          disabled={busy}
-          className="mt-2 w-full text-center text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
-        >
-          skip for now
-        </button>
-      </div>
+        <div className="quiet-onboarding__step-actions">
+          <QuietAction
+            type="button"
+            onClick={() => void saveAndContinue()}
+            disabled={busy}
+            className="w-full"
+            size="large"
+          >
+            {busy ? "Saving\u2026" : "Continue"}
+          </QuietAction>
+          <QuietAction kind="quiet" type="button" onClick={onDone} disabled={busy} className="w-full">
+            skip for now
+          </QuietAction>
+        </div>
+      </QuietFrame>
     </div>
   );
 }

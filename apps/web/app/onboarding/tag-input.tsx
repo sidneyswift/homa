@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { QuietField, QuietTag } from "../../components/design";
+
 /**
  * Tap-or-type tag capture: suggestion chips toggle in place, free text
  * enters on Enter/comma/blur, and commas split into several tags (a typed
@@ -80,59 +82,52 @@ export function TagInput({
   // Fixed set, fixed order: the row must not reshuffle as she picks.
   const visibleSuggestions = suggestions.slice(0, 8);
   const customTags = tags.filter((tag) => !visibleSuggestions.includes(tag));
+  const inputId = `tag-input-${label.toLowerCase().replace(/[^a-z0-9]+/gu, "-")}`;
 
   return (
-    <div className={className}>
-      <p className="font-medium text-[var(--homa-ink)]">
+    <fieldset className={`quiet-onboarding__tag-input ${className}`.trim()}>
+      <legend className="quiet-choice__legend">
         {label}
-        {aside ? <span className="font-normal text-[var(--homa-muted-ink)]"> ({aside})</span> : null}
-      </p>
-      {hint ? <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">{hint}</p> : null}
-      <div className="mt-3 flex flex-wrap gap-2">
+        {aside ? <span className="quiet-onboarding__field-aside"> ({aside})</span> : null}
+      </legend>
+      {hint ? <p className="quiet-field__hint">{hint}</p> : null}
+      <div className="quiet-onboarding__choice-list">
         {visibleSuggestions.map((chip) => {
           const selected = tags.includes(chip);
           return (
-            <button
+            <QuietTag
               key={chip}
-              type="button"
+              label={chip}
+              selected={selected}
               onClick={() => toggleTag(chip)}
-              aria-pressed={selected}
-              className={`min-h-10 rounded-[var(--homa-radius-control)] border px-4 py-2 text-sm transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
-                selected
-                  ? "border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] text-[var(--homa-brand-text)]"
-                  : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
-              }`}
-            >
-              {chip}
-            </button>
+            />
           );
         })}
         {customTags.map((tag) => (
-          <button
+          <QuietTag
             key={tag}
-            type="button"
+            label={tag}
+            selected
+            removable
             onClick={() => toggleTag(tag)}
-            aria-pressed
-            className="min-h-10 rounded-[var(--homa-radius-control)] border border-[var(--homa-visual-coral)] bg-[var(--homa-info-tint)] px-4 py-2 text-sm text-[var(--homa-brand-text)] transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)]"
-          >
-            {tag} {"\u00d7"}
-          </button>
+          />
         ))}
       </div>
-      <input
-        type="text"
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === ",") {
-            event.preventDefault();
-            commitDraft();
-          }
-        }}
-        onBlur={commitDraft}
-        placeholder={"add your own, commas ok\u2026"}
-        className="mt-2.5 w-full rounded-[var(--homa-radius-control)] border border-dashed border-[var(--homa-control-boundary)] bg-transparent px-4 py-2 text-sm text-[var(--homa-ink)] transition-colors duration-(--homa-motion-fast) ease-out placeholder:text-[var(--homa-muted-ink)] focus:border-solid focus:border-[var(--homa-visual-coral)] focus:outline-none focus:ring-2 focus:ring-[var(--homa-visual-coral)]/20"
-      />
-    </div>
+      <QuietField id={inputId} label="Add your own" className="quiet-onboarding__tag-input-control">
+        <input
+          type="text"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === ",") {
+              event.preventDefault();
+              commitDraft();
+            }
+          }}
+          onBlur={commitDraft}
+          placeholder={"commas separate entries\u2026"}
+        />
+      </QuietField>
+    </fieldset>
   );
 }

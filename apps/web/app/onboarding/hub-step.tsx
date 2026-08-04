@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Icon } from "../../components/design/Icon";
+import { QuietAction, QuietFeedback, QuietFrame } from "../../components/design";
 
 import { MAP_KID_CAP } from "@homa/core";
 
@@ -64,46 +65,51 @@ export function HubStep({
   const anyPending = childrenList.some((child) => !child.inRange);
 
   return (
-    <div>
-      <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
+    <div className="quiet-onboarding__hub">
+      <h1 className="quiet-onboarding__hub-heading">
         {welcomeBack ? "Welcome back" : "Your family"}
       </h1>
-      <p className="mt-3 text-[var(--homa-ink)]">
+      <p className="quiet-onboarding__hub-intro">
         {childrenList.length === 0
           ? "Add your kids and we'll get mapping."
           : "Everything saves as you go. Pick up anywhere."}
       </p>
 
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="quiet-onboarding__hub-cards">
         {childrenList.map((child) => {
           if (!child.inRange) {
             return (
-              <div
+              <QuietFrame
+                as="article"
                 key={child.id}
-                className="relative rounded-[var(--homa-radius-card)] border border-[color-mix(in_srgb,var(--homa-constructive-ink)_40%,transparent)] bg-[var(--homa-constructive-tint)] p-5"
+                className="quiet-onboarding__hub-card"
               >
-                <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">{child.name}</p>
-                <p className="mt-1 text-[var(--homa-ink)]">
+                <QuietFeedback
+                  tone="constructive"
+                  title={child.name}
+                  className="quiet-onboarding__hub-card-feedback"
+                >
                   The questionnaire starts at age 2. I&apos;ll email you the moment {child.name}&apos;s is
                   ready. Everything you&apos;ve shared is saved.
-                </p>
+                </QuietFeedback>
                 <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
-              </div>
+              </QuietFrame>
             );
           }
           if (child.reportToken) {
             return (
-              <div key={child.id} className="relative rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm">
-                <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">{child.name}</p>
-                <p className="mt-1 text-[var(--homa-ink)]">The report is ready, and it&apos;s in your inbox too.</p>
-                <a
+              <QuietFrame as="article" key={child.id} className="quiet-onboarding__hub-card">
+                <p className="quiet-onboarding__hub-card-name">{child.name}</p>
+                <p className="quiet-onboarding__hub-card-copy">The report is ready, and it&apos;s in your inbox too.</p>
+                <QuietAction
                   href={`/onboarding/r/${child.reportToken}`}
-                  className="mt-3 inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)]"
+                  size="large"
+                  className="quiet-onboarding__hub-card-action"
                 >
                   Open {child.name}&apos;s report
-                </a>
+                </QuietAction>
                 <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
-              </div>
+              </QuietFrame>
             );
           }
           // All questions answered, report not built yet (she stepped
@@ -111,23 +117,24 @@ export function HubStep({
           // ask, so the honest action is the report itself.
           if (isChecklistComplete(child)) {
             return (
-              <div key={child.id} className="relative rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm">
-                <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">{child.name}</p>
-                <p className="mt-1 text-[var(--homa-ink)]">Every question is answered. The report is one tap away.</p>
-                <button
+              <QuietFrame as="article" key={child.id} className="quiet-onboarding__hub-card">
+                <p className="quiet-onboarding__hub-card-name">{child.name}</p>
+                <p className="quiet-onboarding__hub-card-copy">Every question is answered. The report is one tap away.</p>
+                <QuietAction
                   type="button"
                   onClick={() => onSeeReport(child.id)}
-                  className="mt-3 inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
+                  size="large"
+                  className="quiet-onboarding__hub-card-action"
                 >
                   See {child.name}&apos;s report
-                </button>
+                </QuietAction>
                 <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
-              </div>
+              </QuietFrame>
             );
           }
           const started = child.answered > 0;
           return (
-            <div key={child.id} className="relative rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 shadow-sm">
+            <QuietFrame as="article" key={child.id} className="quiet-onboarding__hub-card">
               {/* Further simplified (2026-07-07, "subtitles are
                   unneeded"): the separate subtitle line is gone; the one
                   fact worth keeping, how many answers already exist,
@@ -136,10 +143,10 @@ export function HubStep({
                   shown at all once there's nothing to report ("About 5
                   minutes" was cut too, matching the reasoning it was
                   removed in on the checklist's first-question kicker). */}
-              <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
+              <p className="quiet-onboarding__hub-card-name">
                 {child.name}
                 {started ? (
-                  <span className="font-normal text-[var(--homa-muted-ink)]">
+                  <span className="quiet-onboarding__hub-card-saved">
                     {" "}
                     ({child.answered} answer{child.answered === 1 ? "" : "s"} saved)
                   </span>
@@ -151,54 +158,62 @@ export function HubStep({
                   up. The accessible name still carries the full
                   sentence for a screen reader user pulling up a bare
                   list of buttons. */}
-              <button
+              <QuietAction
                 type="button"
                 onClick={() => onStartChecklist(child.id)}
                 aria-label={started ? "Continue the questionnaire" : `Start ${child.name}'s questionnaire`}
-                className="mt-3 inline-flex min-h-11 w-28 items-center justify-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
+                size="large"
+                className="quiet-onboarding__hub-card-action"
               >
                 {started ? "Continue" : "Start"}
-              </button>
+              </QuietAction>
               <RemoveKid childId={child.id} name={child.name} onRemoved={onChildRemoved} />
-            </div>
+            </QuietFrame>
           );
         })}
       </div>
 
       {anyPending && childrenList.every((child) => !child.inRange) ? (
-        <p className="mt-4 text-[var(--homa-ink)]">
+        <QuietFeedback tone="constructive" className="quiet-onboarding__hub-card-status">
           You&apos;re all set. We&apos;ll email you when the questionnaire is ready for their age.
-        </p>
+        </QuietFeedback>
       ) : null}
 
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="quiet-onboarding__hub-actions">
         {childrenList.length < MAP_KID_CAP ? (
-          <button
+          <QuietAction
+            kind="secondary"
+            size="large"
             type="button"
             onClick={onAddKids}
-            className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-[var(--homa-radius-control)] border-[1.5px] border-[var(--homa-constructive-ink)] px-4 py-2 text-sm font-semibold text-[var(--homa-constructive-ink)] transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] motion-safe:active:scale-[var(--press-scale)]"
+            className="quiet-onboarding__hub-add"
+            icon={<Icon name="add" size={16} />}
           >
-            <Icon name="add" size={16} />
             add another kid
-          </button>
+          </QuietAction>
         ) : null}
         {email ? (
           linkStatus === "sent" ? (
-            <p className="text-sm text-[var(--homa-muted-ink)]">Link sent. It works on any device.</p>
+            <QuietFeedback tone="constructive" className="quiet-onboarding__hub-card-status">
+              Link sent. It works on any device.
+            </QuietFeedback>
           ) : (
             <>
               {linkStatus === "failed" ? (
-                <p className="text-sm text-[var(--homa-ink)]">That link did not send. You can try again.</p>
+                <QuietFeedback tone="error" className="quiet-onboarding__hub-card-status">
+                  That link did not send. You can try again.
+                </QuietFeedback>
               ) : null}
-              <button
+              <QuietAction
+                kind="quiet"
                 type="button"
                 onClick={() => void emailMeThisLink()}
                 disabled={linkStatus === "sending"}
-                className="inline-flex items-center gap-1.5 self-start text-sm text-[var(--homa-muted-ink)] underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-ink)] hover:underline disabled:cursor-wait disabled:opacity-70"
+                className="quiet-onboarding__hub-utility-action disabled:cursor-wait disabled:opacity-70"
+                icon={<Icon name="chat" size={16} />}
               >
-                <Icon name="chat" size={16} />
-                {linkStatus === "sending" ? "sending..." : "email me this link (for later, or another device)"}
-              </button>
+                {linkStatus === "sending" ? "sending…" : "email me this link (for later, or another device)"}
+              </QuietAction>
             </>
           )
         ) : null}

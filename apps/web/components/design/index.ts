@@ -14,3 +14,4 @@ export { QuietMedia } from "./QuietMedia";
 export type { QuietMediaKind, QuietMediaProps } from "./QuietMedia";
 export { QuietStatus } from "./QuietStatus";
 export { QuietThread } from "./QuietThread";
+export { QuietTag } from "./QuietTag";
