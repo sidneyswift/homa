@@ -44,6 +44,8 @@ describe("Quiet print report artifacts", () => {
       assert.doesNotMatch(source, /(?:bg-card|border-border|text-(?:body|strong|muted|subtle))/u);
       assert.doesNotMatch(source, /report\.(?:helpWith|whatsWorking|letter)/u);
     }
+    assert.ok((ONE_PAGER.match(/data-brand-surface="report-one-pager"/gu) ?? []).length >= 2);
+    assert.ok((EVIDENCE.match(/data-brand-surface="report-evidence"/gu) ?? []).length >= 2);
     assert.match(PRIMITIVES, /@page\s*\{\s*size:\s*letter/u);
     assert.match(PRIMITIVES, /\.quiet-print-surface \.quiet-print-hidden/u);
     assert.match(PRIMITIVES, /\.quiet-artifact__chart-frame/u);
