@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { QuietAction, QuietFeedback } from "../../components/design";
 import { Icon } from "../../components/design/Icon";
 
 /**
@@ -54,45 +55,49 @@ export function RemoveKid({
 
   if (!confirming) {
     return (
-      <button
+      <QuietAction
+        kind="quiet"
         type="button"
         onClick={() => setConfirming(true)}
         aria-label={`Remove ${name}`}
-        className="absolute top-3 right-3 rounded-full p-1.5 text-[var(--homa-muted-ink)] transition-colors duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-constructive-tint)] hover:text-[var(--homa-error-ink)]"
+        className="quiet-remove__trigger absolute top-2 right-2"
+        icon={<Icon name="close" size={16} />}
       >
-        <Icon name="close" size={16} />
-      </button>
+        Remove
+      </QuietAction>
     );
   }
 
   return (
-    <div className="mt-3 border-t border-[var(--homa-soft-boundary)] pt-3 text-sm">
-      <p className="text-[var(--homa-ink)]">
+    <div className="quiet-remove__confirm mt-3 pt-3">
+      <p className="quiet-remove__copy">
         This deletes everything saved for {name}, and there&apos;s no undo. Adding {name} back
         later starts fresh.
       </p>
       {failed ? (
-        <p className="mt-2 text-[var(--homa-error-ink)]" role="alert">
+        <QuietFeedback tone="error" className="mt-2">
           That didn&apos;t work. One more try usually does it.
-        </p>
+        </QuietFeedback>
       ) : null}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <button
+      <div className="quiet-remove__actions mt-3">
+        <QuietAction
+          kind="secondary"
           type="button"
           onClick={() => void removeKid()}
           disabled={busy}
-          className="inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 font-semibold text-[var(--homa-error-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-error-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="quiet-remove__destructive"
         >
           {busy ? "Removing\u2026" : `Yes, remove ${name}`}
-        </button>
-        <button
+        </QuietAction>
+        <QuietAction
+          kind="secondary"
           type="button"
           onClick={() => setConfirming(false)}
           disabled={busy}
-          className="inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+          className="quiet-remove__keep"
         >
           Keep {name}
-        </button>
+        </QuietAction>
       </div>
     </div>
   );
