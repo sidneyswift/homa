@@ -1680,6 +1680,19 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 .quiet-onboarding__saved-kid-mark { display: inline-flex; flex: 0 0 20px; align-items: center; justify-content: center; padding-top: 1px; }
 .quiet-onboarding__saved-kid p { min-width: 0; margin: 0; }
 .quiet-onboarding__capacity-note { color: var(--homa-muted-ink); font: 400 0.875rem/1.4 var(--font-sans); }
+.quiet-remove__trigger {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0;
+  color: var(--homa-muted-ink);
+}
+.quiet-remove__trigger:hover:not(:disabled) { color: var(--homa-error-ink); background: var(--homa-error-tint); }
+.quiet-remove__confirm { border-top: 1px solid var(--homa-soft-boundary); }
+.quiet-remove__copy { color: var(--homa-ink); font: 400 0.875rem/1.45 var(--font-sans); }
+.quiet-remove__actions { display: flex; min-width: 0; flex-wrap: wrap; gap: 8px; }
+.quiet-remove__destructive { color: var(--homa-error-ink); }
+.quiet-remove__destructive:hover:not(:disabled) { border-color: var(--homa-error-ink); color: var(--homa-error-ink); }
+.quiet-remove__keep { color: var(--homa-ink); }
 @media (min-width: 560px) {
   .quiet-onboarding__birthday-grid {
     grid-template-columns: minmax(0, 1.35fr) minmax(5.5rem, 0.7fr) minmax(0, 0.95fr);
