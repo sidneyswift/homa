@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import {
+  APP_NAV_GROUPS,
   APP_NAV_ITEMS,
   isAppNavItemActive,
 } from "./sidebar-nav";
@@ -35,7 +36,19 @@ describe("isAppNavItemActive", () => {
     assert.equal(plannerItem?.href, "/app/planner");
     const labels = APP_NAV_ITEMS.map((item) => String(item.label));
     assert.equal(labels.includes("Calendar"), false);
-    assert.equal(labels.includes("Hours"), false);
+    assert.equal(labels.includes("Hours"), true);
+    assert.equal(APP_NAV_ITEMS.find((item) => item.label === "Hours")?.group, "work");
+  });
+
+  it("keeps the binding primary and secondary navigation hierarchy", () => {
+    assert.deepEqual(APP_NAV_GROUPS.map((group) => group.label), [null, "Your work"]);
+    assert.deepEqual(
+      APP_NAV_GROUPS.map((group) => group.items.map((item) => item.label)),
+      [
+        ["Chat", "Progress", "Planner", "Tasks"],
+        ["Library", "Binder", "Hours"],
+      ],
+    );
   });
 
   it("exposes the family-owned Library beside Binder (issue #352)", () => {
@@ -84,21 +97,19 @@ describe("isAppNavItemActive", () => {
 describe("desktop sidebar visibility", () => {
   it("uses the Quiet frame as a dedicated screen-only host", () => {
     assert.match(SIDEBAR_SOURCE, /<QuietFrame/u);
-    assert.match(SIDEBAR_SOURCE, /data-app-sidebar=""/u);
+    assert.match(SIDEBAR_SOURCE, /data-app-rail=""/u);
     assert.doesNotMatch(SIDEBAR_SOURCE, /<aside/u);
     assert.match(
       SIDEBAR_SOURCE,
-      /data-app-sidebar=""\s+role="complementary"\s+aria-label="App sidebar"/u,
+      /data-app-rail=""\s+role="complementary"\s+aria-label="App sidebar"/u,
     );
-    assert.match(SIDEBAR_SOURCE, /className="app-sidebar quiet-shell__rail"/u);
-    assert.doesNotMatch(SIDEBAR_SOURCE, /hidden.*lg:flex|lg:flex.*hidden/u);
+    assert.match(SIDEBAR_SOURCE, /className="quiet-shell__rail"/u);
+    assert.doesNotMatch(SIDEBAR_SOURCE, /app-sidebar/u);
+    assert.doesNotMatch(GLOBALS_CSS, /\.app-sidebar/u);
+    assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__rail\s*\{\s*display:\s*none/u);
     assert.match(
-      GLOBALS_CSS,
-      /\.app-sidebar\s*\{\s*display:\s*none;\s*\}/u,
-    );
-    assert.match(
-      GLOBALS_CSS,
-      /@media screen and \(min-width:\s*64rem\)\s*\{\s*\.app-sidebar\s*\{\s*display:\s*flex !important;\s*\}/u,
+      QUIET_PRIMITIVES_CSS,
+      /@media screen and \(min-width:\s*64rem\)\s*\{[\s\S]*?\.quiet-shell__rail\s*\{\s*display:\s*flex !important/u,
     );
   });
 });
@@ -132,5 +143,23 @@ describe("Quiet signed-in shell contract", () => {
     assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__icon-action\s*\{[\s\S]*width:\s*44px/u);
     assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__nav-item\s*\{[\s\S]*min-height:\s*44px/u);
     assert.match(QUIET_PRIMITIVES_CSS, /@media \(prefers-reduced-motion:\s*reduce\)/u);
+  });
+
+  it("gives the mobile drawer a dialog, exit, and focus lifecycle", () => {
+    const mobileSource = readFileSync(new URL("./mobile-nav.tsx", import.meta.url), "utf8");
+    assert.match(mobileSource, /role="dialog"/u);
+    assert.match(mobileSource, /aria-modal="true"/u);
+    assert.match(mobileSource, /data-closing=/u);
+    assert.match(mobileSource, /onTransitionEnd=/u);
+    assert.match(mobileSource, /triggerRef\.current\?\.focus/u);
+    assert.match(mobileSource, /FOCUSABLE_SELECTOR/u);
+    assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__drawer\[data-closing="true"\]/u);
+  });
+
+  it("routes page gutters through the Workspace geometry contract", () => {
+    const pageColumnSource = readFileSync(new URL("./page-column.tsx", import.meta.url), "utf8");
+    assert.match(pageColumnSource, /<Workspace/u);
+    assert.match(pageColumnSource, /quiet-workspace__content/u);
+    assert.doesNotMatch(pageColumnSource, /px-5|lg:px-10|max-w-\[1040px\]/u);
   });
 });

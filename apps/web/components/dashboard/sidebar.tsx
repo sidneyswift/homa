@@ -53,10 +53,10 @@ export function Sidebar(props: SidebarProps) {
     <QuietFrame
       as="div"
       tone="paper"
-      data-app-sidebar=""
+      data-app-rail=""
       role="complementary"
       aria-label="App sidebar"
-      className="app-sidebar quiet-shell__rail"
+      className="quiet-shell__rail"
     >
       <div className="quiet-shell__rail-logo">
         {/* The wordmark is a home link everywhere (tester ask, memo 2). */}

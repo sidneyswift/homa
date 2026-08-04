@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { Workspace } from "../design/Workspace";
+
 /**
  * The scrolling content column inside the app frame: the padding and
  * centered max-width that used to live on the shell's <main>. Pages own
@@ -7,8 +9,8 @@ import type { ReactNode } from "react";
  */
 export function PageColumn({ children }: { children: ReactNode }) {
   return (
-    <div className="px-5 py-7 lg:px-10 lg:py-8">
-      <div className="mx-auto w-full max-w-[1040px]">{children}</div>
-    </div>
+    <Workspace className="quiet-workspace--page">
+      <div className="quiet-workspace__content">{children}</div>
+    </Workspace>
   );
 }

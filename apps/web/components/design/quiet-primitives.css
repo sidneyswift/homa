@@ -833,6 +833,12 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   .quiet-nav__menu-link[aria-current="true"] { background: var(--homa-highlight-tint); color: var(--homa-ink); }
   .quiet-nav__menu-link--strong { font-weight: 700; }
   .quiet-nav__divider { height: 1px; margin: 7px 8px; background: var(--homa-control-boundary); opacity: 0.55; }
+  .quiet-nav__menu-label {
+    margin: 4px 14px 2px;
+    color: var(--homa-muted-ink);
+    font: 700 0.75rem/16px var(--font-sans);
+    letter-spacing: 0.04em;
+  }
   .quiet-nav__mobile-action { display: block; padding: 8px 4px 4px; }
   .quiet-nav__mobile-cta { width: 100%; }
 
@@ -891,6 +897,25 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 
 .quiet-shell__main { min-width: 0; flex: 1; }
 
+/* The rail has one canonical responsive display contract. Keeping it beside
+   the shell prevents a route or compatibility stylesheet from leaving both
+   desktop and phone navigation hidden. */
+.quiet-shell__rail { display: none; }
+
+.quiet-workspace {
+  min-width: 0;
+  width: 100%;
+}
+
+.quiet-workspace--page {
+  padding: 28px 20px;
+}
+
+.quiet-workspace__content {
+  width: min(100%, 1040px);
+  margin-inline: auto;
+}
+
 .quiet-shell__rail {
   position: sticky;
   top: 16px;
@@ -905,10 +930,28 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   box-shadow: 0 8px 24px color-mix(in srgb, var(--homa-ink) 8%, transparent);
 }
 
+@media screen and (min-width: 64rem) {
+  .quiet-shell__rail { display: flex !important; }
+}
+
 .quiet-shell__logo { display: inline-flex; border-radius: var(--homa-radius-control); }
 .quiet-shell__rail-logo { padding: 0 8px 24px; }
 
 .quiet-shell__nav { display: flex; flex-direction: column; gap: 4px; }
+.quiet-shell__nav-group { display: grid; gap: 4px; }
+.quiet-shell__nav-group + .quiet-shell__nav-group { margin-top: 20px; }
+.quiet-shell__nav-group-label {
+  margin: 0 12px 4px;
+  color: color-mix(in srgb, var(--homa-ink) 58%, var(--homa-canvas));
+  font: 700 0.75rem/16px var(--font-sans);
+  letter-spacing: 0.04em;
+}
+.quiet-shell__nav-group--work .quiet-shell__nav-item {
+  color: color-mix(in srgb, var(--homa-ink) 62%, var(--homa-canvas));
+}
+.quiet-shell__nav-group--work .quiet-shell__nav-item--active {
+  color: var(--homa-paper);
+}
 .quiet-shell__nav-item {
   display: flex;
   min-height: 44px;
@@ -1005,6 +1048,8 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   transition: transform var(--homa-motion-base) var(--homa-motion-ease-out);
 }
 @starting-style { .quiet-shell__drawer { transform: translateX(-100%); } }
+.quiet-shell__drawer[data-closing="true"] { transform: translateX(-100%); }
+.quiet-shell__scrim[data-closing="true"] { opacity: 0; }
 .quiet-shell__drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 24px; }
 
 .quiet-shell__menu {
@@ -1097,6 +1142,7 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 
 @media (max-width: 63.999rem) {
   .quiet-shell { display: block; }
+  .quiet-shell__rail { display: none !important; }
   .quiet-shell__context-desktop { display: none; }
 }
 

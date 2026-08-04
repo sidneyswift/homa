@@ -22,6 +22,7 @@ export type QuietNavMenuItem = {
   href: string;
   label: string;
   icon?: SemanticIconName;
+  group?: "primary" | "work";
   dividerBefore?: boolean;
 };
 
@@ -272,9 +273,14 @@ export function QuietNav({
           >
             {signedIn ? (
               <>
-                {signedInItems.map(({ href, label, icon, dividerBefore }) => (
+                {signedInItems.map(({ href, label, icon, group, dividerBefore }, index) => (
                   <Fragment key={href}>
-                    {dividerBefore ? <div className="quiet-nav__divider" aria-hidden="true" /> : null}
+                    {dividerBefore || (group === "work" && signedInItems[index - 1]?.group !== "work") ? (
+                      <div className="quiet-nav__divider" aria-hidden="true" />
+                    ) : null}
+                    {group === "work" && signedInItems[index - 1]?.group !== "work" ? (
+                      <p className="quiet-nav__menu-label">Your work</p>
+                    ) : null}
                     <Link href={href} className="quiet-nav__menu-link" onClick={closeMenu}>
                       {icon ? <Icon name={icon} size={20} /> : null}
                       {label}
