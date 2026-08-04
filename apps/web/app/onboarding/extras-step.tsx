@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { MAP_INTERESTS_CAP } from "@homa/core";
 
+import { QuietAction, QuietFrame } from "../../components/design";
 import { helpSuggestions, interestSuggestions } from "../../lib/kid-suggestions";
 import type { FlowChild } from "./flow-types";
 import { TagInput } from "./tag-input";
@@ -83,7 +84,7 @@ export function ExtrasStep({
       : "skip this, show the report";
 
   return (
-    <div>
+    <div data-brand-surface="onboarding-extras" className="quiet-onboarding__extras">
       {/* Completion gets the hand-note celebration (the house playful
           device, same family as "on a roll" and "worth the wait"), so the
           headline can be ONE beat instead of the old "Done. The report is
@@ -92,7 +93,7 @@ export function ExtrasStep({
           first question's hint. One question per card (founder call
           2026-07-06: "these should be separated, one question at a
           time"), same rhythm as the questionnaire itself. */}
-      <p className="font-hand text-2xl text-[var(--homa-constructive-ink)]">questionnaire done {"\u2713"}</p>
+      <p className="quiet-onboarding__completion-note">questionnaire done {"\u2713"}</p>
       {/* "while I build" is honest only when the report is actually next;
           with another kid's questions still open, the build may wait on
           the next-kid choice one screen later. And once several reports
@@ -105,11 +106,14 @@ export function ExtrasStep({
             : `Two quick extras while I build ${child.name}'s report`}
       </h1>
 
-      <div
+      <QuietFrame
+        as="div"
+        tone="paper"
+        data-brand-layer="onboarding-extras-step"
         key={step}
-        className="flow-step-in mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-[var(--shadow-md)] sm:p-7"
+        className="quiet-onboarding__step flow-step-in mt-6 p-6 sm:p-7"
       >
-        <p className="font-mono text-xs text-[var(--homa-muted-ink)]">extra {step + 1} of 2</p>
+        <p className="quiet-onboarding__step-meta">extra {step + 1} of 2</p>
 
         {step === 0 ? (
           <>
@@ -122,20 +126,22 @@ export function ExtrasStep({
               setTags={setInterests}
               max={MAP_INTERESTS_CAP}
             />
-            <button
+            <QuietAction
               type="button"
               onClick={() => setStep(1)}
-              className="mt-7 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)]"
+              size="large"
+              className="mt-7 w-full"
             >
               Next
-            </button>
-            <button
+            </QuietAction>
+            <QuietAction
               type="button"
               onClick={() => setStep(1)}
-              className="mt-2 w-full text-center text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+              kind="quiet"
+              className="mt-2 w-full"
             >
               skip this one
-            </button>
+            </QuietAction>
           </>
         ) : (
           <>
@@ -153,35 +159,36 @@ export function ExtrasStep({
               setTags={setHelpWith}
               max={6}
             />
-            <button
+            <QuietAction
               type="button"
               onClick={() => void finish()}
               disabled={busy}
-              className="mt-7 min-h-12 w-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-6 py-3 text-base font-semibold text-[var(--homa-paper)] shadow-sm transition duration-(--homa-motion-fast) ease-out hover:bg-[var(--homa-ink)] motion-safe:active:scale-[var(--press-scale)] disabled:opacity-60"
+              size="large"
+              className="mt-7 w-full"
             >
               {busy ? "Saving\u2026" : finishLabel}
-            </button>
+            </QuietAction>
             <div className="mt-2 flex items-center justify-center gap-5">
-              <button
+              <QuietAction
                 type="button"
                 onClick={() => setStep(0)}
                 disabled={busy}
-                className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+                kind="quiet"
               >
                 back
-              </button>
-              <button
+              </QuietAction>
+              <QuietAction
                 type="button"
                 onClick={() => void finish()}
                 disabled={busy}
-                className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+                kind="quiet"
               >
                 {finishSkipLabel}
-              </button>
+              </QuietAction>
             </div>
           </>
         )}
-      </div>
+      </QuietFrame>
     </div>
   );
 }

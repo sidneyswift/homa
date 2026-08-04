@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ageLabel } from "@homa/core";
 
+import { QuietFrame } from "../../components/design";
+
 /**
  * The beat between kids and the first question of a brand-new
  * questionnaire (founder feedback 2026-07-07: clicking "Start the
@@ -57,19 +59,19 @@ export function PreparingStep({
   }, [lineKey, lines]);
 
   return (
-    <div aria-busy="true" className="mx-auto max-w-[28rem] text-center">
-      <h1 className="font-display text-2xl font-bold leading-tight text-[var(--homa-ink)]">Getting ready&hellip;</h1>
-      <div className="mt-6 rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 text-left shadow-sm">
+    <div aria-busy="true" data-brand-surface="onboarding-preparing" className="quiet-onboarding__loading mx-auto max-w-[28rem] text-center">
+      <h1 className="quiet-onboarding__loading-heading quiet-onboarding__loading-heading--small">Getting ready&hellip;</h1>
+      <QuietFrame as="div" tone="paper" data-brand-layer="onboarding-preparing-progress" className="quiet-onboarding__progress mt-6 p-6 text-left">
         {lines.slice(0, lineCount).map((line, index) => (
-          <p key={index} className="mt-2 flex items-center gap-2 text-[var(--homa-ink)] first:mt-0">
-            <span className={index < lineCount - 1 ? "text-[var(--homa-constructive-ink)]" : "text-[var(--homa-muted-ink)]"} aria-hidden="true">
+          <p key={index} className="quiet-onboarding__progress-line">
+            <span className={`quiet-onboarding__progress-mark ${index < lineCount - 1 ? "quiet-onboarding__progress-mark--done" : ""}`.trim()} aria-hidden="true">
               {index < lineCount - 1 ? "\u2713" : "\u25cb"}
             </span>
             {line}
           </p>
         ))}
-      </div>
-      <p className="mt-4 font-hand text-xl text-[var(--homa-constructive-ink)]">let&apos;s go {"\u270e"}</p>
+      </QuietFrame>
+      <p className="quiet-onboarding__signature">let&apos;s go {"\u270e"}</p>
     </div>
   );
 }
