@@ -1,4 +1,5 @@
 import { Doodle } from "../../components/marketing/Doodle";
+import { QuietFrame } from "../../components/design";
 
 /**
  * Decorative, at-a-glance mock of the progress report for the entry
@@ -39,9 +40,9 @@ export function ReportPreview() {
         style={{ position: "absolute", top: -13, left: -11, zIndex: 2 }}
       />
 
-      <div data-brand-surface="report-preview" className="quiet-report-preview rotate-[1.5deg] overflow-hidden rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] shadow-[var(--shadow-xl)] transition-transform duration-(--homa-motion-base) ease-out motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-0 group-focus-visible:shadow-[var(--shadow-focus)]">
-        <div className="relative px-6 pb-5 pt-6" style={{ background: "var(--homa-info-tint)" }}>
-          <p className="font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em]" style={{ color: "var(--homa-info-ink)" }}>
+      <QuietFrame as="article" data-brand-surface="report-preview" className="quiet-report-preview rotate-[1.5deg] overflow-hidden transition-transform duration-(--homa-motion-base) ease-out motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-0 group-focus-visible:shadow-[var(--shadow-focus)]">
+        <div className="quiet-report-preview__header relative">
+          <p className="quiet-report-preview__eyebrow" style={{ color: "var(--homa-info-ink)" }}>
             Sample {"\u00b7"} made for Maya
           </p>
           {/* Second person, not the sample kid's name (founder screenshot
@@ -50,46 +51,43 @@ export function ReportPreview() {
               per house style. */}
           {/* nowrap keeps "progress report" wrapping as a unit; a mid-width
               break set the coral word alone at the start of line 2. */}
-          <p className="mt-1.5 font-display text-2xl font-bold leading-tight text-strong">
+          <p className="quiet-report-preview__title">
             Your child&apos;s <span style={{ color: "var(--homa-brand-text)", whiteSpace: "nowrap" }}>progress report</span>
           </p>
-          <p className="mt-1.5 font-mono text-[0.6875rem]" style={{ color: "var(--homa-info-ink)" }}>
+          <p className="quiet-report-preview__meta" style={{ color: "var(--homa-info-ink)" }}>
             age 4y 2m {"\u00b7"} 16 subjects {"\u00b7"} national benchmarks
           </p>
           {/* Anchored to the header seam, not the card: a fixed top offset
               landed on the wrapped meta line at narrow widths and sliced
               "national benchmarks" mid-word. */}
-          <div
-            className="absolute -bottom-3.5 right-3 rotate-[3deg] whitespace-nowrap rounded-[var(--homa-radius-control)] bg-[var(--homa-paper)] px-3 py-1.5 text-xs font-bold shadow-[var(--shadow-md)]"
-            style={{ color: "var(--homa-constructive-ink)" }}
-          >
+          <div className="quiet-report-preview__delta" style={{ color: "var(--homa-constructive-ink)" }}>
             {"\u25b2"} +4 mo since June
           </div>
         </div>
 
-        <div className="space-y-2.5 p-5">
+        <div className="quiet-report-preview__body">
           {PREVIEW_ROWS.map((row) => (
-            <div key={row.subject} className="rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)] px-3.5 py-2.5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="whitespace-nowrap text-sm font-semibold text-strong">{row.subject}</span>
+            <div key={row.subject} className="quiet-report-preview__row">
+              <div className="quiet-report-preview__row-head">
+                <span className="quiet-report-preview__subject">{row.subject}</span>
                 <span
-                  className="whitespace-nowrap rounded-[var(--homa-radius-control)] px-2.5 py-1 text-[0.6875rem] font-bold"
+                  className="quiet-report-preview__chip"
                   style={{ background: row.chipBg, color: row.chipInk }}
                 >
                   {row.badge}
                 </span>
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-pill bg-[var(--homa-soft-boundary)]">
-                <div className="h-full rounded-pill" style={{ width: row.barWidth, background: row.barColor }} />
+              <div className="quiet-report-preview__bar" aria-hidden="true">
+                <div className="quiet-report-preview__bar-fill" style={{ width: row.barWidth, background: row.barColor }} />
               </div>
             </div>
           ))}
 
-          <div className="rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] px-3.5 py-3">
-            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em]" style={{ color: "var(--homa-constructive-ink)" }}>
+          <div className="quiet-report-preview__note">
+            <p className="quiet-report-preview__note-eyebrow" style={{ color: "var(--homa-constructive-ink)" }}>
               A note from Homa
             </p>
-            <p className="mt-1 text-sm leading-snug text-body">
+            <p className="quiet-report-preview__note-copy">
               Language is Maya&apos;s strongest start. Fine motor is growing right now, right on
               rhythm for four.
             </p>
@@ -98,14 +96,11 @@ export function ReportPreview() {
           {/* Closes the card in the same micro-label ritual as the header
               eyebrow and the Homa note, so the last line reads designed
               rather than defaulted. */}
-          <p
-            className="pt-1 text-center font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em]"
-            style={{ color: "var(--homa-muted-ink)" }}
-          >
+          <p className="quiet-report-preview__footer" style={{ color: "var(--homa-muted-ink)" }}>
             + 12 more subjects inside
           </p>
         </div>
-      </div>
+      </QuietFrame>
     </a>
   );
 }
