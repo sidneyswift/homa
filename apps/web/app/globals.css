@@ -466,9 +466,6 @@ h1, h2, h3, h4, h5, h6 {
     bottom: -20px !important;
     transform: rotate(-2.5deg) scale(0.5) !important;
   }
-  .lp-pain-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
   /* Founder story card stacks with the photo first: meet the humans, then
      read their words. The photo narrows so it reads as a portrait, not a
      banner. */
@@ -482,19 +479,6 @@ h1, h2, h3, h4, h5, h6 {
   .lp-capability-grid {
     grid-template-columns: 1fr !important;
   }
-}
-
-/* PainBridge index cards, desktop only: uniform four-up card rows are the
-   one template tell on a page that otherwise earns its hand-made feel with
-   tape, tilt, and stagger. Loose top offsets plus sub-degree tilts read as
-   cards laid on a desk. Tilt uses the standalone rotate property so the
-   reveal system's transform never resets it; offsets stay off phones where
-   the grid stacks. */
-@media (min-width: 881px) {
-  .lp-pain-grid > article:nth-child(1) { rotate: -0.6deg; }
-  .lp-pain-grid > article:nth-child(2) { margin-top: 20px; rotate: 0.45deg; }
-  .lp-pain-grid > article:nth-child(3) { margin-top: 6px; rotate: -0.4deg; }
-  .lp-pain-grid > article:nth-child(4) { margin-top: 24px; rotate: 0.55deg; }
 }
 
 @media (max-width: 540px) {
@@ -514,10 +498,6 @@ h1, h2, h3, h4, h5, h6 {
      clearance the absolute note needs at tablet widths. */
   .lp-hero-shell {
     padding-bottom: 36px !important;
-  }
-  .lp-pain-grid {
-    grid-template-columns: 1fr !important;
-    gap: 30px !important;
   }
   /* Stack the practice proof: side-by-side leaves the file info a sliver
      wide on phones and every line wraps. */
@@ -605,9 +585,11 @@ html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-a
 
 .signup-popup-card {
   position: relative;
+  min-width: 0;
   width: 100%;
   max-width: 1040px;
   max-height: calc(100vh - 48px);
+  overflow-x: hidden;
   overflow-y: auto;
   background: var(--surface-card);
   border-radius: var(--radius-xl);
@@ -621,6 +603,13 @@ html.rv-armed [data-reveal].rv-no-anim, html.rv-armed [data-reveal-kids].rv-no-a
     transform: scale(0.96);
   }
 }
+
+/* Grid children default to min-width: auto, so the report preview's
+   content-sized labels could widen the whole dialog on a 320px phone.
+   The preview itself now wraps at the atom layer; this lets the popup's
+   shared onboarding grid actually honor the available inline size. */
+.signup-popup-card .grid > * { min-width: 0; }
+.signup-popup-card .quiet-onboarding__parent-link { overflow-wrap: anywhere; }
 
 .signup-popup-close {
   position: absolute;

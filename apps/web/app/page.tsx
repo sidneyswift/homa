@@ -4,15 +4,16 @@ import { QuietLanding } from "../components/marketing/QuietLanding";
 
 /* ── Answer capsules & freshness signals ────────────────────────── */
 export const metadata: Metadata = {
+  title: "Homeschool, handled.",
   description:
-    "Homa is an AI homeschool assistant that tracks developmental progress for children ages 2 to 16 and generates personalized printable materials.",
+    "Homa is an AI assistant for homeschool parents. Plan the week, make practice pages, keep teaching hours and records, and know what to try next.",
   // Self-referencing canonical: crawlers treat fragment URLs (/#how,
   // /#features) as separate documents with identical content unless the
   // page names its one preferred URL.
   alternates: { canonical: "/" },
   other: {
     "answer-capsule":
-      "Try Homa free for 7 days: weekly plans, practice pages made for your child, and a progress report showing exactly where your child stands. Then $19 a month, cancel anytime.",
+      "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages for each child, keeps teaching hours and records, and shows what to try next. Add a credit card to start 7 free days. Memberships start at $19 a month after that.",
   },
 };
 
@@ -22,14 +23,14 @@ const webAppJsonLd = {
   name: "Homa",
   url: "https://thankshoma.com",
   description:
-    "The calm homeschool assistant. Homa learns each child, makes printable materials just for them, tracks hours for your state, and shows you it\u2019s working.",
+    "Homa is an AI assistant for homeschool parents that prepares weekly plans and practice pages, keeps teaching hours and records, and shows what to try next.",
   applicationCategory: "EducationApplication",
   operatingSystem: "Any",
   offers: {
     "@type": "Offer",
     price: "19",
     priceCurrency: "USD",
-    description: "7-day free trial, then $19 per month. Cancel anytime.",
+    description: "Add a credit card to start 7 free days. Nothing is charged during those 7 days. Then $19 per month.",
   },
   // @id ties into the Organization node in the root layout's site-wide
   // graph; name stays inline for validators that don't resolve across
@@ -50,8 +51,8 @@ const faqJsonLd = {
 
 /**
  * Public landing page and lead magnet entry point. The route uses the Quiet
- * authority composition: one dominant weekly-plan object, one useful next
- * move, and a restrained paper, mineral, midnight, and coral role system.
+ * authority composition: one clear product promise, one live weekly-plan
+ * preview, and a restrained paper, mineral, midnight, and coral role system.
  * Signup actions open the shared onboarding popup, while the sample-report
  * action remains a direct public demonstration link. JSON-LD stays server
  * rendered so search and answer-capsule consumers receive the same claims as

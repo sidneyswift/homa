@@ -8,7 +8,7 @@
     { "path": "apps/web/components/design/icon-registry.ts", "package": "lucide-react", "kind": "adapter" }
   ],
   "review": {
-    "baselinePendingCount": 26,
+    "baselinePendingCount": 25,
     "status": "migrated",
     "entries": [
       { "path": "apps/mobile/src/features/lessons/native-lesson-recorder.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Lesson recording controls are family-facing and now use play, pause, refresh, stop, and delete roles." },
@@ -34,7 +34,6 @@
       { "path": "apps/web/components/dev/dev-toolbar.tsx", "surfaceClass": "dev-only", "glyphSupport": "supported", "decision": "migrate", "rationale": "Development reset controls use the refresh role to keep local tooling aligned." },
       { "path": "apps/web/components/marketing/CapabilityProof.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Landing proof cards use check, document, folder, nature, and time roles." },
       { "path": "apps/web/components/marketing/HeroProductDemo.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "The landing hero product specimen uses back, next, document, check, add, and send roles." },
-      { "path": "apps/web/components/marketing/PainBridge.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Landing pain cards use time, help, files, and document roles." },
       { "path": "apps/web/components/marketing/PlatformStrip.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Landing channel labels use chat, globe, and mobile roles." },
       { "path": "apps/web/components/marketing/QuietLanding.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "The Quiet landing page uses the same semantic roles as the shared marketing proof and pain grammar." }
     ]

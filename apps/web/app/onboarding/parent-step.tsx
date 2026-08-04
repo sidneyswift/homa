@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { WALL_MECHANICS_LINE, tierPriceAmount } from "../../components/billing/wall-copy";
 import { GoogleGlyph } from "../../components/brand/GoogleGlyph";
 import { QuietAction, QuietFeedback, QuietField } from "../../components/design";
 import { Icon } from "../../components/design/Icon";
@@ -142,14 +143,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
       <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <div>
           <h1 className="quiet-onboarding__parent-heading">
-            Find out where your child{" "}
-            <span className="quiet-onboarding__parent-word">
-              shines
-            </span>
-            , and where they need a{" "}
-            <span className="quiet-onboarding__parent-word">
-              hand
-            </span>
+            Start with what you already know about your child.
           </h1>
           {/* The trial terms live HERE, before the signup doors, because
               this screen is where the commitment starts (signup paywall,
@@ -158,9 +152,13 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
               wall-copy.ts's WALL_MECHANICS_LINE so the promise never
               drifts between surfaces. */}
           <p className="quiet-onboarding__parent-copy">
-            Your free trial starts with a five-minute questionnaire and your child&apos;s
-            progress report. Strengths come first. Anything still growing comes with a next
-            step. A card starts your 7 free days, and nothing is charged during them.
+            Create your account, then answer a few plain-language questions about each
+            child&apos;s learning. Homa turns your answers into a progress report that starts
+            with strengths and gives you a useful next step for every subject.
+          </p>
+          <p className="quiet-onboarding__parent-copy">
+            {WALL_MECHANICS_LINE} Homa memberships start at ${tierPriceAmount("regular", "monthly")} a
+            month after that. Cancel before the first charge to pay nothing.
           </p>
 
           {/* Open form, no card: the report preview is the page's one card,

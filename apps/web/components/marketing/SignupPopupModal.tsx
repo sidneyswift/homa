@@ -53,15 +53,12 @@ export function SignupPopupModal({ open, onClose }: { open: boolean; onClose: ()
     };
   }, [open]);
 
-  // Focus management (a dialog without it strands keyboard and screen
-  // reader users on the dimmed page): focus moves to the card on open,
-  // Tab cycles inside it, and closing hands focus back to the CTA that
-  // opened it.
+  // Focus moves into the dialog here. SignupPopupProvider owns the exact
+  // opener and restores it after this node has left the document; doing
+  // both halves in this effect lost focus to body during modal removal.
   useEffect(() => {
     if (!open) return;
-    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     cardRef.current?.focus();
-    return () => previouslyFocused?.focus();
   }, [open]);
 
   useEffect(() => {

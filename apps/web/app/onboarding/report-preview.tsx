@@ -30,7 +30,7 @@ export function ReportPreview() {
     <a
       href="/onboarding/sample"
       aria-label="See the full sample report"
-      className="group relative mx-auto block w-full max-w-[24rem] focus-visible:outline-none lg:mx-0 lg:max-w-none"
+      className="group relative mx-auto block min-w-0 w-full max-w-[24rem] focus-visible:outline-none lg:mx-0 lg:max-w-none"
     >
       <Doodle
         name="star"
