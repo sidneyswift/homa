@@ -1,5 +1,7 @@
 "use client";
 
+import { QuietFrame } from "../../components/design";
+
 /**
  * The live-assembling report (UX review 2026-07-06, approved in full): the
  * entry screen sells the flow with a report preview, then the preview
@@ -46,42 +48,35 @@ export function ReportRail({ childName, subjects }: { childName: string; subject
 
   return (
     <aside data-brand-layer="report-rail" aria-label={`${childName}'s report, assembling`} className="hidden lg:block">
-      <div className="sticky top-8 overflow-hidden rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] shadow-sm">
-        <div className="px-4 pb-3 pt-3.5" style={{ background: "var(--homa-info-tint)" }}>
-          <p
-            className="font-mono text-[0.5625rem] font-medium uppercase tracking-[0.14em]"
-            style={{ color: "var(--homa-info-ink)" }}
-          >
+      <QuietFrame as="div" tone="paper" className="quiet-report-rail sticky top-8 overflow-hidden">
+        <div className="quiet-report-rail__header">
+          <p className="quiet-report-rail__eyebrow">
             Building as you answer
           </p>
-          <p className="mt-0.5 font-display text-sm font-bold leading-tight text-strong">
-            {childName}&apos;s <span style={{ color: "var(--homa-brand-text)" }}>progress report</span>
+          <p className="quiet-report-rail__title">
+            {childName}&apos;s <span className="quiet-report-rail__title-accent">progress report</span>
           </p>
         </div>
-        <ul className="px-4 py-3">
+        <ul className="quiet-report-rail__list">
           {visibleSubjects.map((subject) => (
-            <li key={subject.id} className="flex items-center gap-2 py-[3px] text-xs">
+            <li key={subject.id} className="quiet-report-rail__item">
               {subject.status === "done" ? (
-                <span aria-hidden="true" className="rail-check w-3.5 text-center font-bold text-[var(--homa-constructive-ink)]">
+                <span aria-hidden="true" className="quiet-report-rail__mark quiet-report-rail__mark--done rail-check">
                   {"\u2713"}
                 </span>
               ) : (
-                <span aria-hidden="true" className="w-3.5 text-center font-bold text-[var(--homa-visual-coral)]">
+                <span aria-hidden="true" className="quiet-report-rail__mark quiet-report-rail__mark--current">
                   {"\u25cf"}
                 </span>
               )}
-              <span
-                className={`transition-colors duration-(--dur-base) ease-out ${
-                  subject.status === "done" ? "font-medium text-strong" : "font-semibold text-strong"
-                }`}
-              >
+              <span className={`quiet-report-rail__subject ${subject.status === "done" ? "quiet-report-rail__subject--done" : ""}`.trim()}>
                 {subject.name}
               </span>
             </li>
           ))}
           {upcomingCount > 0 ? (
-            <li className="flex items-center gap-2 py-[3px] text-xs text-subtle">
-              <span aria-hidden="true" className="w-3.5 text-center">
+            <li className="quiet-report-rail__item quiet-report-rail__item--upcoming">
+              <span aria-hidden="true" className="quiet-report-rail__mark">
                 {"\u25cb"}
               </span>
               <span>
@@ -91,11 +86,11 @@ export function ReportRail({ childName, subjects }: { childName: string; subject
           ) : null}
         </ul>
         {remaining === 0 ? (
-          <p className="border-t border-[var(--homa-soft-boundary)] px-4 py-2.5 text-center text-[0.6875rem] text-[var(--homa-muted-ink)]">
+          <p className="quiet-report-rail__footer">
             All subjects placed
           </p>
         ) : null}
-      </div>
+      </QuietFrame>
     </aside>
   );
 }

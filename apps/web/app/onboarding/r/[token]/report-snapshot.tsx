@@ -1,5 +1,6 @@
 import { ageInMonths } from "@homa/core";
 
+import { QuietFrame } from "../../../../components/design";
 import type { SubjectDoorRow } from "../../../../components/progress/subject-door-context";
 import {
   trajectoryHasScaleChange,
@@ -50,14 +51,16 @@ export function ReportSnapshot({
   if (story.subjects.length === 0) return null;
 
   return (
-    <div
+    <QuietFrame
+      as="div"
+      tone="mineral"
       data-brand-layer="report-snapshot"
-      className={`quiet-report__snapshot rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-canvas)] p-5 ${className}`.trim()}
+      className={`quiet-report__snapshot p-5 ${className}`.trim()}
     >
-      <p className="font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+      <p className="quiet-report__eyebrow">
         {childName}&apos;s snapshot {"\u00b7"} {generatedDate}
       </p>
-      <p className="mt-1 text-sm text-muted">{story.caption}</p>
+      <p className="quiet-report__caption">{story.caption}</p>
       <div className="mt-3">
         <TrajectoryChart
           story={story}
@@ -71,12 +74,12 @@ export function ReportSnapshot({
           body: the copy-editor gate holds body copy to its two-sentence
           budget, and the dots this explains are right above it. */}
       {showsScaleChange ? (
-        <p className="mt-2 text-xs text-muted">
+        <p className="quiet-report__fine-print">
           A dotted stretch means we improved how we measure, not that
           {" "}{childName} changed. Every number you see now is measured the
           new way.
         </p>
       ) : null}
-    </div>
+    </QuietFrame>
   );
 }
