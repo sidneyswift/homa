@@ -323,9 +323,10 @@ export function QuietLanding() {
               <div className="qa-opening__world">
                 <Image className="qa-opening__photo" src="/images/hero-family.png" alt="A parent and child turning a learning page into a hands-on moment" fill priority sizes="(max-width: 700px) 100vw, 1240px" />
                 <div className="qa-opening__copy">
-                  <span className="qa-opening__kicker">The Homa feeling</span>
-                  <h1 id="quiet-hero-title">Real curiosity.<br />One useful<br />next move<span>.</span></h1>
-                  <p>A family&apos;s actual work leads. Homa quietly keeps the thread, brings forward what matters, and makes tomorrow feel lighter.</p>
+                  <span className="qa-opening__kicker">Homeschool, handled</span>
+                  <h1 id="quiet-hero-title">Less admin.<br />More teaching<span>.</span></h1>
+                  <p>Homa plans your week, builds tailored materials for each kid, and adapts to growth.</p>
+                  <p><strong>Meet your kid where they are. Every day.</strong></p>
                   <div className="qa-opening__next"><span className="qa-opening__next-mark" aria-hidden="true">→</span><div><small>One useful next move</small><strong>Print the butterfly counting page</strong></div></div>
                 </div>
                 <QuietThread className="qa-opening__thread" label="A coral line connecting today's work to what comes next" />
