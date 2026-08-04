@@ -1,4 +1,8 @@
 import { DESIGN_CONTRACT_VERSION } from "./version.ts";
+import { type ColorToken } from "./colors.ts";
+import { channelTypography } from "./fonts.ts";
+import { identitySafeAreas } from "./identity.ts";
+import { radii, spacing } from "./layout.ts";
 import type { TargetProfile } from "./profiles.ts";
 
 /**
@@ -111,6 +115,97 @@ export const appearancePolicies = {
   requiresEvidence: boolean;
 }>;
 
+/**
+ * Constrained-channel geometry and delivery rules. These are projections of
+ * the master contract, not a second set of visual tokens. Renderers consume
+ * token names and typography roles so a contract change invalidates every
+ * dependent channel together.
+ */
+export const channelProjections = {
+  email: {
+    profile: "emailConstrained",
+    expression: channelProfiles.email.expression,
+    maxWidthPx: 560,
+    gutterPx: { wide: spacing.scale[3], narrow: spacing.scale[4] },
+    outerPaddingPx: { top: 36, right: spacing.scale[3], bottom: 40, left: spacing.scale[3] },
+    card: { radiusPx: radii.card, paddingPx: { wide: "32px 30px", narrow: "26px 22px" } },
+    ctaRadiusPx: radii.control,
+    colors: {
+      canvas: "canvas",
+      paper: "paper",
+      ink: "ink",
+      action: "midnightAction",
+      brandText: "brandText",
+      visualCoral: "visualCoral",
+      boundary: "controlBoundary",
+    } as const satisfies Record<string, ColorToken>,
+    typography: channelTypography.emailConstrained,
+    logo: {
+      assetPath: "apps/web/public/brand/homa-mark.svg",
+      publicPath: "/brand/homa-mark.svg",
+      fallbackText: "Homa",
+      alt: "Homa",
+      minimumWidthPx: 24,
+    },
+    imagePolicy: "optional-with-meaningful-alt",
+    motion: "none",
+    appearance: "client-controlled",
+  },
+  print: {
+    profile: "artifactPrint",
+    expression: channelProfiles.print.expression,
+    pageSizes: {
+      letter: { widthIn: 8.5, heightIn: 11, cssSize: "letter" },
+      a4: { widthIn: 8.27, heightIn: 11.69, cssSize: "A4" },
+    },
+    interior: { topIn: 0.55, leftIn: 0.6, bottomIn: 0.95, rightIn: 0.6 },
+    footer: { bottomIn: 0.32, fontSizePx: 9.5, gapPx: 5 },
+    radiiPx: { control: radii.control, card: radii.card, frame: radii.frame },
+    colors: {
+      canvas: "canvas",
+      paper: "paper",
+      ink: "ink",
+      floating: "floating",
+      visualCoral: "visualCoral",
+      brandText: "brandText",
+      midnightAction: "midnightAction",
+      controlBoundary: "controlBoundary",
+    } as const satisfies Record<string, ColorToken>,
+    typography: channelTypography.artifactPrint,
+    logo: { assetPath: "apps/web/public/brand/homa-mark.svg", safeArea: identitySafeAreas.printInline },
+    fontEmbedding: "embedded-or-declared-fallback",
+    grayscaleProof: "required",
+    motion: "none",
+    appearance: "grayscale",
+  },
+  provider: {
+    profile: "providerConstrained",
+    expression: channelProfiles.provider.expression,
+    typography: channelTypography.providerConstrained,
+    logo: { assetPath: "apps/web/public/brand/homa-mark.svg", publicPath: "/brand/homa-mark.svg", fallbackText: "Homa" },
+    allowedColorRoles: ["brandText", "midnightAction", "paper", "canvas"] as const satisfies readonly ColorToken[],
+    unsupported: ["web-font-embedding", "product-motion", "unsupported-css"] as const,
+    motion: "provider-owned",
+    appearance: "provider-controlled",
+  },
+  distribution: {
+    profile: "metadataConstrained",
+    expression: channelProfiles.metadata.expression,
+    typography: channelTypography.metadataConstrained,
+    logo: { assetPath: "apps/web/public/brand/homa-mark.svg", publicPath: "/brand/homa-mark.svg", safeArea: identitySafeAreas.tight },
+    preserved: ["plain-language-next-move", "tiny-static-mark"] as const,
+    motion: "none",
+    appearance: "client-controlled",
+  },
+} as const satisfies Record<string, {
+  [key: string]: unknown;
+  profile: TargetProfile;
+  expression: ChannelExpression;
+  typography: unknown;
+  motion: string;
+  appearance: AppearanceMode;
+}>;
+
 export const CHANNELS_CONTRACT = {
   version: DESIGN_CONTRACT_VERSION,
   brandChannels,
@@ -118,4 +213,5 @@ export const CHANNELS_CONTRACT = {
   channelExpressions,
   channelProfiles,
   appearancePolicies,
+  projections: channelProjections,
 } as const;

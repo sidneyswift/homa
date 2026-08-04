@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   hasPageBreakMarkup,
+  imagePageBody,
   joinPageBodies,
   SHEET_PAGE_CLASS,
   selectMaterialPages,
@@ -125,6 +126,14 @@ test("printable shells carry the Quiet contract and semantic artifact tokens", (
   assert.match(document, /--homa-midnight-action: #27374D/u);
   assert.match(document, /font-family: var\(--homa-font-interface\)/u);
   assert.doesNotMatch(document, /#FBF7F0|#221E1A|#8A7D6C|Hanken|Schibsted/u);
+});
+
+test("the print projection renders the declared A4 geometry instead of a Letter clone", () => {
+  const document = wrapPrintablePage("<h1>A4 practice</h1>", "Story", "a4");
+  assert.match(document, /@page \{ size: A4; margin: 0; \}/u);
+  assert.match(document, /width: 8\.27in/u);
+  assert.match(document, /height: 11\.69in/u);
+  assert.match(imagePageBody("https://example.com/page.png", "a4"), /height: 10\.19in/u);
 });
 
 test("a single page keeps the exact one-box contract", () => {

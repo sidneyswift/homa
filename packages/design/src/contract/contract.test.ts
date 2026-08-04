@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { approvedColorPairs, colorTokens } from "./colors.ts";
 import { BRAND_CONTRACT } from "./brand.ts";
-import { CHANNELS_CONTRACT, brandChannels, channelProfiles } from "./channels.ts";
+import { CHANNELS_CONTRACT, brandChannels, channelProfiles, channelProjections } from "./channels.ts";
 import { CONTENT_CONTRACT } from "./content.ts";
 import { assertDesignContract, DOCTRINE_CONTRACT } from "./doctrine.ts";
 import { MOTION_CONTRACT } from "./motion.ts";
@@ -160,6 +160,23 @@ test("channel reductions preserve meaning without importing product motion", () 
     assert.equal(channelProfiles[channel].motion === "none" || channelProfiles[channel].motion === "provider-owned", true);
     assert.ok(channelProfiles[channel].preservedElements.includes("plain-language-next-move") || channelProfiles[channel].preservedElements.includes("useful-next-move"));
   }
+});
+
+test("constrained projections derive safe delivery rules from the active contract", () => {
+  assert.equal(channelProjections.email.profile, "emailConstrained");
+  assert.equal(channelProjections.email.typography.display.preferred, "Georgia");
+  assert.equal(channelProjections.email.typography.interface.preferred, "Arial");
+  assert.equal(channelProjections.email.motion, "none");
+  assert.equal(channelProjections.email.colors.action, "midnightAction");
+  assert.equal(channelProjections.print.profile, "artifactPrint");
+  assert.deepEqual(Object.keys(channelProjections.print.pageSizes).sort(), ["a4", "letter"]);
+  assert.equal(channelProjections.print.fontEmbedding, "embedded-or-declared-fallback");
+  assert.equal(channelProjections.provider.motion, "provider-owned");
+  assert.deepEqual(channelProjections.distribution.preserved, ["plain-language-next-move", "tiny-static-mark"]);
+  assert.ok(channelProfiles.email.targetProfiles.includes(channelProjections.email.profile));
+  assert.ok(channelProfiles.print.targetProfiles.includes(channelProjections.print.profile));
+  assert.ok(channelProfiles.provider.targetProfiles.includes(channelProjections.provider.profile));
+  assert.ok(channelProfiles.metadata.targetProfiles.includes(channelProjections.distribution.profile));
 });
 
 test("native projection covers every approved primitive role and disposition", () => {

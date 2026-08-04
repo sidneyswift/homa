@@ -1,7 +1,6 @@
 import { BANNED_WORDS, EM_DASH } from "@homa/core";
-import { colorTokens, fontRoles } from "@homa/design/contract";
+import { channelProjections, colorTokens, logoGeometry } from "@homa/design/contract";
 
-import { HOUSE_PATH } from "../../components/brand/Logo";
 import { escapeHtml } from "../html-escape";
 import {
   MATERIAL_BRAND_ERA,
@@ -166,10 +165,19 @@ export function isAllowedPrintableSubresourceUrl(rawUrl: string): boolean {
 }
 
 /** The footer's house mark, inlined as raw SVG (same art as the Logo). */
-const FOOTER_MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="${HOUSE_PATH}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="currentColor"/><circle cx="30.6" cy="26" r="2.7" fill="currentColor"/></svg>`;
+const PRINT_PROJECTION = channelProjections.print;
+const FOOTER_MARK_SVG = `<svg width="12" height="12" viewBox="0 0 48 48" aria-hidden="true"><path d="${logoGeometry.housePath}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><circle cx="17.4" cy="26" r="2.7" fill="currentColor"/><circle cx="30.6" cy="26" r="2.7" fill="currentColor"/></svg>`;
 
-const PRINT_INTERFACE_FONT_STACK = `"${fontRoles.interface.family}", "Segoe UI", sans-serif`;
-const PRINT_DISPLAY_FONT_STACK = `"${fontRoles.display.family}", Georgia, "Times New Roman", serif`;
+function printFontStack(role: keyof typeof PRINT_PROJECTION.typography): string {
+  const stack = PRINT_PROJECTION.typography[role];
+  return [stack.preferred, ...stack.fallback]
+    .map((family) => (family.includes(" ") ? `"${family}"` : family))
+    .join(", ");
+}
+
+const PRINT_INTERFACE_FONT_STACK = printFontStack("interface");
+const PRINT_DISPLAY_FONT_STACK = printFontStack("display");
+export type PrintPageSize = keyof typeof PRINT_PROJECTION.pageSizes;
 
 /**
  * How a multi-page material's pages live in the one `materials.html`
@@ -234,20 +242,22 @@ export const SHEET_PAGE_CLASS = "homa-sheet-page";
 export const SHEET_BODY_CLASS = "homa-sheet-body";
 
 /**
- * wrapPrintableDocument(pageBodies, footerFor): string
- * Full HTML document for one letter-size printable of one or more pages.
- * Each page body goes into its own exact 11in page box (border-box, the
- * same 0.55/0.6/0.95in interior padding the single-page shell always
- * had), with the D7 footer positioned inside every box. The exact-height
- * box is what makes screen and print agree: on screen the boxes stack at
- * 11in intervals so per-page screenshots are true pages, and in print
- * each box fills exactly one sheet with a forced break after it.
+ * wrapPrintableDocument(pageBodies, footerFor, pageSize): string
+ * Full HTML document for one declared print size and one or more pages.
+ * Each page body goes into its own exact page box (border-box, with the
+ * projection's interior padding), with the D7 footer positioned inside
+ * every box. The exact-height box is what makes screen and print agree: on
+ * screen the boxes stack at page-height intervals so per-page screenshots
+ * are true pages, and in print each box fills exactly one sheet with a
+ * forced break after it.
  */
 export function wrapPrintableDocument(
   pageBodies: readonly string[],
   footerFor: string,
+  pageSize: PrintPageSize = "letter",
 ): string {
   const madeFor = footerFor.trim();
+  const page = PRINT_PROJECTION.pageSizes[pageSize];
   const footer = `<div class="homa-sheet-footer">${FOOTER_MARK_SVG}<span>made with Homa${madeFor ? ` for ${escapeHtml(madeFor)}` : ""}</span></div>`;
   const pages = pageBodies
     .map(
@@ -262,23 +272,24 @@ export function wrapPrintableDocument(
 <meta name="color-scheme" content="light" />
 <style>
   :root {
-    --homa-canvas: ${colorTokens.canvas};
-    --homa-ink: ${colorTokens.ink};
-    --homa-paper: ${colorTokens.paper};
-    --homa-floating: ${colorTokens.floating};
-    --homa-visual-coral: ${colorTokens.visualCoral};
-    --homa-midnight-action: ${colorTokens.midnightAction};
-    --homa-brand-text: ${colorTokens.brandText};
-    --homa-control-boundary: ${colorTokens.controlBoundary};
-    --homa-radius-control: 12px;
-    --homa-radius-card: 18px;
+    --homa-canvas: ${colorTokens[PRINT_PROJECTION.colors.canvas]};
+    --homa-ink: ${colorTokens[PRINT_PROJECTION.colors.ink]};
+    --homa-paper: ${colorTokens[PRINT_PROJECTION.colors.paper]};
+    --homa-floating: ${colorTokens[PRINT_PROJECTION.colors.floating]};
+    --homa-visual-coral: ${colorTokens[PRINT_PROJECTION.colors.visualCoral]};
+    --homa-midnight-action: ${colorTokens[PRINT_PROJECTION.colors.midnightAction]};
+    --homa-brand-text: ${colorTokens[PRINT_PROJECTION.colors.brandText]};
+    --homa-control-boundary: ${colorTokens[PRINT_PROJECTION.colors.controlBoundary]};
+    --homa-radius-control: ${PRINT_PROJECTION.radiiPx.control}px;
+    --homa-radius-card: ${PRINT_PROJECTION.radiiPx.card}px;
+    --homa-radius-frame: ${PRINT_PROJECTION.radiiPx.frame}px;
     --homa-font-interface: ${PRINT_INTERFACE_FONT_STACK};
     --homa-font-display: ${PRINT_DISPLAY_FONT_STACK};
   }
-  @page { size: letter; margin: 0; }
+  @page { size: ${page.cssSize}; margin: 0; }
   html, body { margin: 0; padding: 0; }
   body {
-    width: 8.5in;
+    width: ${page.widthIn}in;
     font-family: var(--homa-font-interface);
     color: var(--homa-ink);
     background: var(--homa-canvas);
@@ -288,8 +299,8 @@ export function wrapPrintableDocument(
   .homa-sheet-page {
     position: relative;
     box-sizing: border-box;
-    width: 8.5in;
-    height: 11in;
+    width: ${page.widthIn}in;
+    height: ${page.heightIn}in;
     overflow: hidden;
     background: var(--homa-paper);
     page-break-after: always;
@@ -304,19 +315,19 @@ export function wrapPrintableDocument(
   .homa-sheet-body {
     box-sizing: border-box;
     height: 100%;
-    padding: 0.55in 0.6in 0.95in;
+    padding: ${PRINT_PROJECTION.interior.topIn}in ${PRINT_PROJECTION.interior.rightIn}in ${PRINT_PROJECTION.interior.bottomIn}in ${PRINT_PROJECTION.interior.leftIn}in;
     color: var(--homa-ink);
   }
   .homa-sheet-footer {
     position: absolute;
-    bottom: 0.32in;
-    left: 0.6in;
-    right: 0.6in;
+    bottom: ${PRINT_PROJECTION.footer.bottomIn}in;
+    left: ${PRINT_PROJECTION.interior.leftIn}in;
+    right: ${PRINT_PROJECTION.interior.rightIn}in;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 5px;
-    font-size: 9.5px;
+    gap: ${PRINT_PROJECTION.footer.gapPx}px;
+    font-size: ${PRINT_PROJECTION.footer.fontSizePx}px;
     color: color-mix(in srgb, var(--homa-ink) 58%, var(--homa-canvas));
   }
 </style>
@@ -333,8 +344,8 @@ ${pages}
  * brings its own <style> block and web-font <link>s) inside a single
  * page box.
  */
-export function wrapPrintablePage(bodyHtml: string, footerFor: string): string {
-  return wrapPrintableDocument([bodyHtml], footerFor);
+export function wrapPrintablePage(bodyHtml: string, footerFor: string, pageSize: PrintPageSize = "letter"): string {
+  return wrapPrintableDocument([bodyHtml], footerFor, pageSize);
 }
 
 /**
@@ -343,9 +354,11 @@ export function wrapPrintablePage(bodyHtml: string, footerFor: string): string {
  * so every pixel stays visible whatever shape the model produced;
  * portrait output at 1024x1536 fills the page.
  */
-export function imagePageBody(imageUrl: string): string {
+export function imagePageBody(imageUrl: string, pageSize: PrintPageSize = "letter"): string {
+  const page = PRINT_PROJECTION.pageSizes[pageSize];
+  const contentHeightIn = page.heightIn - PRINT_PROJECTION.interior.topIn - PRINT_PROJECTION.interior.bottomIn;
   return `<style>
-  .homa-image-page { display: flex; align-items: flex-start; justify-content: center; height: 9.5in; }
+  .homa-image-page { display: flex; align-items: flex-start; justify-content: center; height: ${contentHeightIn}in; }
   .homa-image-page img { max-width: 100%; max-height: 100%; object-fit: contain; }
 </style>
 <div class="homa-image-page"><img src="${escapeHtml(imageUrl)}" alt="" /></div>`;
@@ -355,8 +368,8 @@ export function imagePageBody(imageUrl: string): string {
  * wrapImagePage(imageUrl, footerFor): the image-direct creation path,
  * one image page on the letter sheet, D7 footer intact.
  */
-export function wrapImagePage(imageUrl: string, footerFor: string): string {
-  return wrapPrintablePage(imagePageBody(imageUrl), footerFor);
+export function wrapImagePage(imageUrl: string, footerFor: string, pageSize: PrintPageSize = "letter"): string {
+  return wrapPrintablePage(imagePageBody(imageUrl, pageSize), footerFor, pageSize);
 }
 
 /** Blob-path-safe slug from a sheet title ("Skye's Big O!" -> "skyes-big-o"). */
