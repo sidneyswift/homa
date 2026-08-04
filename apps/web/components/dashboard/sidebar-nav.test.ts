@@ -20,6 +20,10 @@ const QUIET_PRIMITIVES_CSS = readFileSync(
   new URL("../design/quiet-primitives.css", import.meta.url),
   "utf8",
 );
+const MOBILE_NAV_SOURCE = readFileSync(
+  new URL("./mobile-nav.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("isAppNavItemActive", () => {
   it("exposes the approved Progress navigation item", () => {
@@ -112,6 +116,13 @@ describe("desktop sidebar visibility", () => {
       /@media screen and \(min-width:\s*64rem\)\s*\{[\s\S]*?\.quiet-shell__rail\s*\{\s*display:\s*flex !important/u,
     );
   });
+
+  it("shows exactly one navigation host at the desktop breakpoint", () => {
+    assert.match(
+      QUIET_PRIMITIVES_CSS,
+      /@media screen and \(min-width:\s*64rem\)\s*\{[\s\S]*?\.quiet-shell__mobile-bar\s*\{\s*display:\s*none !important/u,
+    );
+  });
 });
 
 describe("Quiet signed-in shell contract", () => {
@@ -146,13 +157,16 @@ describe("Quiet signed-in shell contract", () => {
   });
 
   it("gives the mobile drawer a dialog, exit, and focus lifecycle", () => {
-    const mobileSource = readFileSync(new URL("./mobile-nav.tsx", import.meta.url), "utf8");
-    assert.match(mobileSource, /role="dialog"/u);
-    assert.match(mobileSource, /aria-modal="true"/u);
-    assert.match(mobileSource, /data-closing=/u);
-    assert.match(mobileSource, /onTransitionEnd=/u);
-    assert.match(mobileSource, /triggerRef\.current\?\.focus/u);
-    assert.match(mobileSource, /FOCUSABLE_SELECTOR/u);
+    assert.match(MOBILE_NAV_SOURCE, /role="dialog"/u);
+    assert.match(MOBILE_NAV_SOURCE, /aria-modal="true"/u);
+    assert.match(MOBILE_NAV_SOURCE, /data-closing=/u);
+    assert.match(MOBILE_NAV_SOURCE, /onTransitionEnd=/u);
+    assert.match(
+      MOBILE_NAV_SOURCE,
+      /onTransitionEnd=\{\(event\) => \{[\s\S]*?drawerState === "closing"[\s\S]*?event\.propertyName === "transform"[\s\S]*?finishClose\(\)/u,
+    );
+    assert.match(MOBILE_NAV_SOURCE, /triggerRef\.current\?\.focus/u);
+    assert.match(MOBILE_NAV_SOURCE, /FOCUSABLE_SELECTOR/u);
     assert.match(QUIET_PRIMITIVES_CSS, /\.quiet-shell__drawer\[data-closing="true"\]/u);
   });
 

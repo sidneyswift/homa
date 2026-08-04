@@ -1042,6 +1042,7 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 
 @media screen and (min-width: 64rem) {
   .quiet-shell__rail { display: flex !important; }
+  .quiet-shell__mobile-bar { display: none !important; }
 }
 
 @media screen and (min-width: 80rem) {
