@@ -19,6 +19,7 @@ import {
   WALL_STALE_LESSON_LINE,
   tierChargeLine,
   tierDelta,
+  tierDescription,
   trialChargeNoteDated,
   trialDatesFromNow,
   wallIncludedLine,
@@ -110,11 +111,11 @@ test("no tier makes a claim about any state's filing rules", () => {
   // state require filing?"), which sent two review personas to a search
   // engine instead of a checkout. Nothing here may name a state or
   // promise filing until one state actually works end to end (gh#297).
-  const deltas = PLAN_TIERS.map((tier) => tierDelta(tier)).join(" ");
-  assert.doesNotMatch(deltas, /\bfiling\b/i);
-  assert.doesNotMatch(deltas, /\bquarterly\b/i);
+  const publicTierCopy = PLAN_TIERS.flatMap((tier) => [tierDelta(tier), tierDescription(tier)]).join(" ");
+  assert.doesNotMatch(publicTierCopy, /\bfiling\b/i);
+  assert.doesNotMatch(publicTierCopy, /\bquarterly\b/i);
   assert.doesNotMatch(
-    deltas,
+    publicTierCopy,
     /\b(New York|Texas|California|Missouri|Florida|Virginia|Pennsylvania)\b/i,
   );
 });
@@ -134,6 +135,7 @@ test("the top tier promises a person, never a named founder", () => {
   // A plan description is a standing promise. Naming who delivers it
   // makes it one that has to be kept at customer forty.
   assert.doesNotMatch(tierDelta("elite"), /Alessa|Carolyng|founder/i);
+  assert.doesNotMatch(tierDescription("elite"), /Alessa|Carolyng|founder/i);
 });
 
 test("the trial gate states the card ask, the reminder day, and the way out", () => {
@@ -209,7 +211,7 @@ test("no tier claims a metering mechanic that nothing enforces", () => {
   // directions, and eight of ten personas read the second as proof the
   // cheap tier is deliberately throttled. Until enforcement ships,
   // a tier may not claim one.
-  const deltas = PLAN_TIERS.map((tier) => tierDelta(tier)).join(" ");
+  const publicTierCopy = PLAN_TIERS.flatMap((tier) => [tierDelta(tier), tierDescription(tier)]).join(" ");
   for (const unsupportable of [
     /\bmakings?\b/i,
     /\bno waiting\b/i,
@@ -219,7 +221,7 @@ test("no tier claims a metering mechanic that nothing enforces", () => {
     /\bunlimited\b/i,
     /\b(five|5)\s*(times|x)\b/i,
   ]) {
-    assert.doesNotMatch(deltas, unsupportable, `unenforced claim: ${unsupportable}`);
+    assert.doesNotMatch(publicTierCopy, unsupportable, `unenforced claim: ${unsupportable}`);
   }
 });
 

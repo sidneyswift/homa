@@ -7,17 +7,23 @@ import {
   CAPABILITY_FEATURE_HREFS,
   FOUNDER_STORY_COPY,
   HERO_COPY,
-  PAIN_ITEMS,
+  LANDING_SECTION_COPY,
   PLATFORM_ITEMS,
+  PRODUCT_PREVIEW_COPY,
   SAMPLE_REPORT_COPY,
+  WORKFLOW_ITEMS,
 } from "./landing-content";
 
 const QUIET_LANDING_SOURCE = readFileSync(new URL("./QuietLanding.tsx", import.meta.url), "utf8");
 
 test("the landing hero names Homa's category and primary action", () => {
-  assert.equal(HERO_COPY.headline, "The homeschool assistant that does the prep.");
-  assert.equal(HERO_COPY.primaryAction, "Start your free trial");
-  assert.equal(HERO_COPY.eyebrow, "Made for homeschool parents");
+  assert.equal(HERO_COPY.headline, "Homeschool, handled.");
+  assert.equal(HERO_COPY.primaryAction, "Start your 7 free days");
+  assert.equal(HERO_COPY.eyebrow, "Your homeschool assistant");
+  assert.match(HERO_COPY.body, /AI assistant for homeschool parents/i);
+  assert.match(HERO_COPY.body, /plans the week/i);
+  assert.match(HERO_COPY.body, /practice pages/i);
+  assert.match(HERO_COPY.body, /teaching time and finished work/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -25,8 +31,10 @@ test("the trial CTA states the card terms before the click", () => {
   // length, the price, and the way out to be visible at the CTA, not
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
+  assert.match(HERO_COPY.primaryActionNote, /credit card/i);
   assert.match(HERO_COPY.primaryActionNote, /\$19 a month/);
-  assert.match(HERO_COPY.primaryActionNote, /cancel anytime/i);
+  assert.match(HERO_COPY.primaryActionNote, /before the first charge/i);
+  assert.match(HERO_COPY.primaryActionNote, /cancel before then/i);
 });
 
 test("the platform strip states only verified access modes", () => {
@@ -36,12 +44,13 @@ test("the platform strip states only verified access modes", () => {
   );
 });
 
-test("the pain bridge stays concise and does not diagnose the parent", () => {
+test("the how-it-works bridge explains the parent's path without diagnosing her", () => {
   assert.deepEqual(
-    PAIN_ITEMS.map(({ id }) => id),
-    ["planning", "proof", "scattered", "paperwork"],
+    WORKFLOW_ITEMS.map(({ id }) => id),
+    ["family", "review", "change", "record"],
   );
-  assert.doesNotMatch(JSON.stringify(PAIN_ITEMS), /you need help/i);
+  assert.doesNotMatch(JSON.stringify(WORKFLOW_ITEMS), /you need help/i);
+  assert.match(LANDING_SECTION_COPY.how.headline, /week you actually have/i);
 });
 
 test("the capability section exposes four shipped product nouns in parent-day order", () => {
@@ -66,8 +75,10 @@ test("each capability card points to its canonical feature page", () => {
 test("the new landing copy does not publish deferred or unsupported claims", () => {
   const copy = JSON.stringify({
     HERO_COPY,
+    LANDING_SECTION_COPY,
     PLATFORM_ITEMS,
-    PAIN_ITEMS,
+    PRODUCT_PREVIEW_COPY,
+    WORKFLOW_ITEMS,
     CAPABILITY_ITEMS,
     SAMPLE_REPORT_COPY,
     FOUNDER_STORY_COPY,
@@ -100,14 +111,20 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
-  assert.match(SAMPLE_REPORT_COPY.body, /five-minute questionnaire per child/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /national standards and education research/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /about five minutes answering questions/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /published national benchmarks/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /sources Homa used/i);
   assert.match(SAMPLE_REPORT_COPY.reassurance, /starts with strengths/i);
+  assert.doesNotMatch(
+    `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
+    /test|score|questionnaire|observation/i,
+  );
 });
 
 test("the founder story uses the public co-founder signature", () => {
   assert.equal(FOUNDER_STORY_COPY.signature, "Alessa & Carolyng");
-  assert.match(FOUNDER_STORY_COPY.body, /teaching mattered most/i);
+  assert.equal(FOUNDER_STORY_COPY.headline, "Homa started at our kitchen table.");
+  assert.match(FOUNDER_STORY_COPY.body, /Homa grew from that need/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bcurriculum\b/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bsteady\b/i);
 });
@@ -118,14 +135,29 @@ test("the live landing composition keeps the approved artifact-first opening", (
     "qa-authority",
     "qa-product",
     "/images/hero-family.png",
-    "Real curiosity.",
-    "One useful next move",
-    "Quiet authority in full",
+    "HERO_COPY.headline",
+    "HERO_COPY.body",
+    "LANDING_SECTION_COPY.authority",
     "<Logo",
   ]) {
     assert.match(QUIET_LANDING_SOURCE, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /The Homa feeling/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /Quiet authority in full/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /Homa should feel like/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /Real curiosity\./u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-object|HeroObject|QuietHeroHeadline/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /4\.5h|1h 45m|30m|45m/u);
+});
+
+test("the primary action appears in the first visual viewport", () => {
+  const openingStart = QUIET_LANDING_SOURCE.indexOf('<section className="qa-opening"');
+  const authorityStart = QUIET_LANDING_SOURCE.indexOf('<div className="qa-authority">');
+  const firstTrialAction = QUIET_LANDING_SOURCE.indexOf("<TrialAction />", openingStart);
+
+  assert.ok(openingStart >= 0);
+  assert.ok(firstTrialAction > openingStart);
+  assert.ok(firstTrialAction < authorityStart);
 });
 
 test("the landing keeps functional actions on the approved midnight role", () => {
@@ -141,4 +173,12 @@ test("the product moment exposes a keyboard-safe, reduced-motion state demo", ()
   assert.match(QUIET_LANDING_SOURCE, /prefers-reduced-motion: reduce/u);
   assert.match(QUIET_LANDING_SOURCE, /qa-product__control:focus-visible/u);
   assert.match(QUIET_LANDING_SOURCE, /@keyframes qa-thread-draw/u);
+  assert.deepEqual(Object.keys(PRODUCT_PREVIEW_COPY.states), ["tell", "updating", "ready"]);
+  assert.doesNotMatch(JSON.stringify(PRODUCT_PREVIEW_COPY.states), /\bIdle\b|\bListening\b|\bWorking\b/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /\.qa-product__state\[data-state="tell"\]/u);
+});
+
+test("the product moment records only teaching time the parent supplied", () => {
+  assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /\b\d+\s+minutes\b/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.states.updating.description, /records the science time/iu);
 });

@@ -12,15 +12,27 @@ import { QuietFooter } from "../design/QuietFooter";
 import { Logo } from "../brand/Logo";
 import { ReportPreview } from "../../app/onboarding/report-preview";
 import { FAQ_ITEMS } from "./faq-items";
-import { HERO_COPY, PAIN_CLOSING, PAIN_ITEMS, CAPABILITY_FEATURE_HREFS, CAPABILITY_ITEMS, FOUNDER_STORY_COPY, SAMPLE_REPORT_COPY, type CapabilityId, type PainId } from "./landing-content";
+import {
+  CAPABILITY_FEATURE_HREFS,
+  CAPABILITY_ITEMS,
+  FOUNDER_STORY_COPY,
+  HERO_COPY,
+  LANDING_SECTION_COPY,
+  PRODUCT_PREVIEW_COPY,
+  SAMPLE_REPORT_COPY,
+  WORKFLOW_CLOSING,
+  WORKFLOW_ITEMS,
+  type CapabilityId,
+  type WorkflowId,
+} from "./landing-content";
 import { Nav } from "./Nav";
 import { SignupPopupProvider, useSignupPopup } from "./SignupPopupProvider";
 
-const PAIN_ICONS: Record<PainId, SemanticIconName> = {
-  planning: "time",
-  proof: "help",
-  scattered: "files",
-  paperwork: "document",
+const WORKFLOW_ICONS: Record<WorkflowId, SemanticIconName> = {
+  family: "people",
+  review: "document",
+  change: "undo",
+  record: "files",
 };
 
 const QUIET_LANDING_CSS = `
@@ -45,6 +57,9 @@ const QUIET_LANDING_CSS = `
 .qa-opening__copy h1 { max-width: 660px; margin: 15px 0 0; color: var(--homa-paper); font: 400 clamp(3.6rem, 7.7vw, 6.8rem)/.88 var(--font-display); letter-spacing: -.045em; text-wrap: balance; }
 .qa-opening__copy h1 span { color: var(--homa-visual-coral); }
 .qa-opening__copy p { max-width: 540px; margin: 20px 0 0; color: color-mix(in srgb, var(--homa-paper) 88%, transparent); font-size: clamp(1.02rem, 1.4vw, 1.24rem); line-height: 1.55; }
+.qa-opening__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+.qa-opening__actions .quiet-action--primary { background: var(--homa-paper); color: var(--homa-midnight-action); }
+.qa-opening__copy > .qa-opening__note { max-width: 560px; margin-top: 10px; color: color-mix(in srgb, var(--homa-paper) 84%, transparent); font-size: .82rem; line-height: 1.48; }
 .qa-opening__next { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 11px; align-items: center; width: fit-content; max-width: 100%; margin-top: 25px; border: 1px solid color-mix(in srgb, var(--homa-paper) 35%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--homa-midnight-action) 72%, transparent); box-shadow: 0 16px 34px color-mix(in srgb, var(--homa-ink) 26%, transparent); padding: 10px 14px 10px 10px; backdrop-filter: blur(12px); }
 .qa-opening__next-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--homa-visual-coral); color: var(--homa-ink); font: 800 18px/1 var(--font-sans); }
 .qa-opening__next small { display: block; color: color-mix(in srgb, var(--homa-visual-coral) 66%, var(--homa-paper)); font: 800 .68rem/1.2 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; }
@@ -74,8 +89,7 @@ const QUIET_LANDING_CSS = `
 .qa-product__state { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 24px; border: 1px solid var(--homa-soft-boundary); border-radius: 18px; background: var(--homa-paper); padding: 14px; }
 .qa-product__mark { display: grid; place-items: center; width: 60px; height: 56px; border-radius: 16px; background: color-mix(in srgb, var(--homa-visual-coral) 14%, var(--homa-paper)); transition: transform var(--homa-motion-base) var(--homa-motion-ease-out), box-shadow var(--homa-motion-base) var(--homa-motion-ease-out); }
 .qa-product__mark svg { width: 47px; height: 47px; }
-.qa-product__state[data-state="listening"] .qa-product__mark { transform: scale(1.04); box-shadow: 0 0 0 6px color-mix(in srgb, var(--homa-visual-coral) 18%, transparent); }
-.qa-product__state[data-state="working"] .qa-product__mark svg { animation: qa-mark-orient 900ms ease-in-out infinite alternate; }
+.qa-product__state[data-state="updating"] .qa-product__mark svg { animation: qa-mark-orient 900ms ease-in-out infinite alternate; }
 .qa-product__state[data-state="ready"] .qa-product__mark { transform: translateY(-2px); }
 .qa-product__state-copy strong { display: block; color: var(--homa-ink); font-size: .88rem; }
 .qa-product__state-copy span { display: block; margin-top: 3px; color: var(--homa-muted-ink); font-size: .75rem; line-height: 1.4; }
@@ -83,11 +97,11 @@ const QUIET_LANDING_CSS = `
 .qa-product__activity i { display: block; width: 4px; height: 12px; border-radius: 999px; background: currentColor; }
 .qa-product__activity i:nth-child(2) { height: 20px; }
 .qa-product__activity i:nth-child(3) { height: 8px; }
-.qa-product__state[data-state="listening"] .qa-product__activity i { animation: qa-wave 700ms ease-in-out infinite alternate; }
-.qa-product__state[data-state="listening"] .qa-product__activity i:nth-child(2) { animation-delay: 120ms; }
-.qa-product__state[data-state="listening"] .qa-product__activity i:nth-child(3) { animation-delay: 240ms; }
+.qa-product__state[data-state="updating"] .qa-product__activity i { animation: qa-wave 700ms ease-in-out infinite alternate; }
+.qa-product__state[data-state="updating"] .qa-product__activity i:nth-child(2) { animation-delay: 120ms; }
+.qa-product__state[data-state="updating"] .qa-product__activity i:nth-child(3) { animation-delay: 240ms; }
 .qa-product__activity span { margin-left: 2px; }
-.qa-product__controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.qa-product__controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
 .qa-product__control { min-height: 40px; border: 1px solid var(--homa-control-boundary); border-radius: 10px; background: var(--homa-paper); color: var(--homa-muted-ink); padding: 6px 8px; font: 700 .68rem/1 var(--font-sans); cursor: pointer; transition: background var(--homa-motion-fast) var(--homa-motion-ease-out), border-color var(--homa-motion-fast) var(--homa-motion-ease-out), color var(--homa-motion-fast) var(--homa-motion-ease-out); }
 .qa-product__control[aria-pressed="true"] { border-color: var(--homa-midnight-action); background: color-mix(in srgb, var(--homa-midnight-action) 8%, var(--homa-paper)); color: var(--homa-midnight-action); }
 .qa-product__control:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 64%, transparent); outline-offset: 3px; }
@@ -146,8 +160,6 @@ const QUIET_LANDING_CSS = `
 .qa-proof__metric { display: flex; align-items: center; gap: 12px; min-height: 66px; border-radius: var(--homa-radius-control); background: var(--homa-info-tint); padding: 12px; }
 .qa-proof__metric strong { display: block; color: var(--homa-info-ink); font: 600 1.7rem/1 var(--font-display); }
 .qa-proof__metric span { display: block; margin-top: 4px; color: var(--homa-info-ink); font-size: .76rem; line-height: 1.35; }
-.qa-proof__bar { height: 8px; overflow: hidden; border-radius: 99px; background: color-mix(in srgb, var(--homa-info-ink) 16%, transparent); }
-.qa-proof__bar::before { content: ""; display: block; width: 72%; height: 100%; border-radius: inherit; background: var(--homa-info-ink); }
 
 .qa-report { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(26px, 5vw, 70px); align-items: center; }
 .qa-report h2 { max-width: 510px; }
@@ -170,7 +182,7 @@ const QUIET_LANDING_CSS = `
 .qa-faq__question:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 62%, transparent); outline-offset: 5px; }
 .qa-faq__question svg { flex: none; color: var(--homa-brand-text); transition: transform var(--homa-motion-fast) var(--homa-motion-ease-out); }
 .qa-faq__item[data-open="true"] .qa-faq__question svg { transform: rotate(45deg); }
-.qa-faq__answer { max-width: 660px; padding: 0 36px 20px 0; color: var(--homa-muted-ink); line-height: 1.55; }
+.qa-faq__answer { max-width: 660px; padding: 0 36px 20px 0; color: var(--homa-muted-ink); line-height: 1.55; white-space: pre-line; }
 .qa-cta { background: var(--homa-contained-band); color: var(--homa-paper); }
 .qa-cta__inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 26px; align-items: center; }
 .qa-cta h2 { color: var(--homa-paper); }
@@ -208,15 +220,15 @@ const QUIET_LANDING_CSS = `
   .qa-opening__character { right: 18px; bottom: 16px; }
   .qa-authority h2 { font-size: clamp(2.9rem, 14vw, 4.2rem); }
   .qa-product { padding: 14px; }
-  .qa-product__controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qa-product__controls { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .qa-faq__question svg { transition: none; }
   .qa-story__photo { transform: none; }
   .qa-opening__copy, .qa-product, .qa-opening__character { animation: none; }
   .qa-opening__thread path { animation: none; stroke-dashoffset: 0; }
-  .qa-product__state[data-state="working"] .qa-product__mark svg,
-  .qa-product__state[data-state="listening"] .qa-product__activity i { animation: none; }
+  .qa-product__state[data-state="updating"] .qa-product__mark svg,
+  .qa-product__state[data-state="updating"] .qa-product__activity i { animation: none; }
 }
 `;
 
@@ -232,45 +244,40 @@ function TrialAction({ secondary = false }: { secondary?: boolean }) {
   );
 }
 
-const QUIET_DEMO_STATES = {
-  idle: { title: "Homa is here", description: "Talk, type, or open the plan already waiting for you.", activity: "Waiting for you" },
-  listening: { title: "Homa is listening", description: "She is making room for the thought you are working through.", activity: "Listening" },
-  working: { title: "Homa is working", description: "She is shaping the next useful piece of the week.", activity: "Working" },
-  ready: { title: "Your week is ready", description: "The plan is saved, with one useful next move in view.", activity: "Ready" },
-} as const;
+const QUIET_DEMO_STATES = PRODUCT_PREVIEW_COPY.states;
 
 type QuietDemoState = keyof typeof QUIET_DEMO_STATES;
 
 function QuietProductMoment() {
-  const [state, setState] = useState<QuietDemoState>("idle");
+  const [state, setState] = useState<QuietDemoState>("tell");
   const copy = QUIET_DEMO_STATES[state];
 
   return (
-    <article className="qa-product" aria-label="Quiet authority product moment">
+    <article className="qa-product" aria-label="See how Homa updates a homeschool week">
       <div className="qa-product__top">
         <Logo size={19} />
-        <span className="quiet-status">Saturday is ready</span>
+        <span className="quiet-status">{PRODUCT_PREVIEW_COPY.status}</span>
       </div>
       <div className="qa-product__question">
-        <small>Your family</small>
-        <h3>What can I take off your plate?</h3>
+        <small>{PRODUCT_PREVIEW_COPY.eyebrow}</small>
+        <h3>{PRODUCT_PREVIEW_COPY.headline}</h3>
       </div>
       <div className="qa-product__state" data-state={state}>
         <div className="qa-product__mark"><Logo size={47} variant="mark" /></div>
         <div className="qa-product__state-copy"><strong>{copy.title}</strong><span aria-live="polite">{copy.description}</span></div>
         <div className="qa-product__activity" aria-hidden="true"><i /><i /><i /><span>{copy.activity}</span></div>
       </div>
-      <div className="qa-product__controls" role="group" aria-label="Preview Homa state motion">
+      <div className="qa-product__controls" role="group" aria-label="See how Homa updates a week">
         {(Object.keys(QUIET_DEMO_STATES) as QuietDemoState[]).map((nextState) => (
           <button className="qa-product__control" type="button" key={nextState} aria-pressed={state === nextState} onClick={() => setState(nextState)}>
-            {nextState[0].toUpperCase() + nextState.slice(1)}
+            {QUIET_DEMO_STATES[nextState].control}
           </button>
         ))}
       </div>
-      <div className="qa-product__next"><div><b>Three useful things for Maya today</b><span>Reading first, lighter math, and a leaf walk if everyone needs air.</span></div><i aria-hidden="true">→</i></div>
+      <div className="qa-product__next"><div><b>{PRODUCT_PREVIEW_COPY.dayTitle}</b><span>{PRODUCT_PREVIEW_COPY.dayBody}</span></div><i aria-hidden="true">→</i></div>
       <div className="qa-product__artifact">
         <Image src="/images/hero-butterfly-math.png" alt="A practice page made for a child's butterfly math lesson" width={1024} height={1536} sizes="70px" />
-        <div><small>Real work, kept in context</small><strong>Dinosaurs became today&apos;s counting page.</strong><p>Saved with the plan, ready to print, and easy to change.</p></div>
+        <div><small>{PRODUCT_PREVIEW_COPY.artifactEyebrow}</small><strong>{PRODUCT_PREVIEW_COPY.artifactTitle}</strong><p>{PRODUCT_PREVIEW_COPY.artifactBody}</p></div>
       </div>
     </article>
   );
@@ -278,15 +285,15 @@ function QuietProductMoment() {
 
 function QuietCapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) {
   if (capabilityId === "plan") {
-    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Maya · age 4</strong><span>Tuesday · 1h 25m</span></div><div className="qa-proof__rows">{[["Butterfly math", "Done"], ["Butterfly book", "20m"], ["Science walk", "30m"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
+    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Leo · Tuesday</strong><span>Ready to review</span></div><div className="qa-proof__rows">{[["Fractions review", "Done"], ["History reading", "Read next"], ["Science lab", "This afternoon"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
   }
   if (capabilityId === "practice") {
     return <div className="qa-proof qa-proof__document"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="62px" /><div><div className="qa-proof__meta"><strong>Made for Maya</strong><span>Tuesday</span></div><p>A practice page shaped around this week&apos;s lesson.</p><span className="qa-proof__document-status">Ready to print</span></div></div>;
   }
   if (capabilityId === "binder") {
-    return <div className="qa-proof"><div className="qa-proof__folder"><span className="qa-proof__folder-thumb"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="42px" /></span><span><strong>Butterfly math</strong><small>Practice page</small></span><small>Tue</small></div><div className="qa-proof__folder"><span className="qa-proof__folder-thumb" /><span><strong>Progress report</strong><small>Started with strengths</small></span><small>Mon</small></div></div>;
+    return <div className="qa-proof"><div className="qa-proof__folder"><span className="qa-proof__folder-thumb"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="42px" /></span><span><strong>Butterfly math</strong><small>Maya · practice page</small></span><small>Tue</small></div><div className="qa-proof__folder"><span className="qa-proof__folder-thumb" /><span><strong>Leo&apos;s lab notes</strong><small>Finished work</small></span><small>Mon</small></div></div>;
   }
-  return <div className="qa-proof"><div className="qa-proof__metric"><strong>4.5h</strong><span>shared this week<br />across 3 subjects</span></div><div className="qa-proof__bar" aria-hidden="true" /></div>;
+  return <div className="qa-proof"><div className="qa-proof__metric"><strong>Teaching time</strong><span>saved by child<br />and subject</span></div></div>;
 }
 
 function QuietFaq() {
@@ -323,21 +330,22 @@ export function QuietLanding() {
               <div className="qa-opening__world">
                 <Image className="qa-opening__photo" src="/images/hero-family.png" alt="A parent and child turning a learning page into a hands-on moment" fill priority sizes="(max-width: 700px) 100vw, 1240px" />
                 <div className="qa-opening__copy">
-                  <span className="qa-opening__kicker">The Homa feeling</span>
-                  <h1 id="quiet-hero-title">Real curiosity.<br />One useful<br />next move<span>.</span></h1>
-                  <p>A family&apos;s actual work leads. Homa quietly keeps the thread, brings forward what matters, and makes tomorrow feel lighter.</p>
-                  <div className="qa-opening__next"><span className="qa-opening__next-mark" aria-hidden="true">→</span><div><small>One useful next move</small><strong>Print the butterfly counting page</strong></div></div>
+                  <span className="qa-opening__kicker">{HERO_COPY.eyebrow}</span>
+                  <h1 id="quiet-hero-title">{HERO_COPY.headline.slice(0, -1)}<span>{HERO_COPY.headline.slice(-1)}</span></h1>
+                  <p>{HERO_COPY.body}</p>
+                  <div className="qa-opening__actions"><TrialAction /></div>
+                  <p className="qa-opening__note">{HERO_COPY.primaryActionNote}</p>
+                  <div className="qa-opening__next"><span className="qa-opening__next-mark" aria-hidden="true">→</span><div><small>{HERO_COPY.proofLabel}</small><strong>{HERO_COPY.proof}</strong></div></div>
                 </div>
                 <QuietThread className="qa-opening__thread" label="A coral line connecting today's work to what comes next" />
                 <div className="qa-opening__character" aria-hidden="true"><Logo size={74} variant="mark" tone="dark" /></div>
               </div>
               <div className="qa-authority">
                 <div className="qa-authority__copy">
-                  <span className="qa-authority__kicker">Quiet authority in full</span>
-                  <h2>Calm enough to trust. Curious enough to feel alive<span>.</span></h2>
-                  <p>Homa should feel like a thoughtful guide with a beautiful worktable: editorial where emotion matters, crisp where decisions happen, and playful only where it makes the family&apos;s work feel lighter.</p>
-                  <div className="qa-authority__actions"><TrialAction /><QuietAction kind="secondary" href="#features" icon={<Icon name="next" size={20} />}>See your week</QuietAction></div>
-                  <p className="qa-opening__note">{HERO_COPY.primaryActionNote}</p>
+                  <span className="qa-authority__kicker">{LANDING_SECTION_COPY.authority.eyebrow}</span>
+                  <h2>{LANDING_SECTION_COPY.authority.headline}</h2>
+                  <p>{LANDING_SECTION_COPY.authority.body}</p>
+                  <div className="qa-authority__actions"><QuietAction kind="secondary" href="#how" icon={<Icon name="next" size={20} />}>{LANDING_SECTION_COPY.authority.secondaryAction}</QuietAction></div>
                 </div>
                 <QuietProductMoment />
               </div>
@@ -345,14 +353,14 @@ export function QuietLanding() {
           </section>
 
           <section id="how" className="qa-band qa-section" aria-labelledby="quiet-how-title">
-            <div className="qa-section__intro"><div className="qa-eyebrow">The work around teaching</div><h2 id="quiet-how-title">Planning and records take time.</h2><p className="qa-section__lead">Homa prepares the week, keeps the record, and leaves you with more attention for the part only you can do.</p></div>
-            <div className="qa-pain-grid">{PAIN_ITEMS.map(({ id, title, body }) => { const icon = PAIN_ICONS[id]; return <QuietFrame as="article" tone="paper" className="qa-frame qa-pain-card" key={id}><span className="qa-pain-card__icon"><Icon name={icon} size={20} /></span><h3>{title}</h3><p>{body}</p></QuietFrame>; })}</div>
-            <p className="qa-closing">{PAIN_CLOSING}</p>
+            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.how.eyebrow}</div><h2 id="quiet-how-title">{LANDING_SECTION_COPY.how.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.how.body}</p></div>
+            <div className="qa-pain-grid">{WORKFLOW_ITEMS.map(({ id, title, body }) => { const icon = WORKFLOW_ICONS[id]; return <QuietFrame as="article" tone="paper" className="qa-frame qa-pain-card" key={id}><span className="qa-pain-card__icon"><Icon name={icon} size={20} /></span><h3>{title}</h3><p>{body}</p></QuietFrame>; })}</div>
+            <p className="qa-closing">{WORKFLOW_CLOSING}</p>
           </section>
 
           <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
-            <div className="qa-section__intro"><div className="qa-eyebrow">One connected record</div><h2 id="quiet-features-title">Plans, pages, and proof in one place.</h2><p className="qa-section__lead">Every piece of the week stays connected, from the first idea to the page you print and the time you share.</p></div>
-            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>See this feature</QuietAction></div></QuietFrame>)}</div>
+            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.features.eyebrow}</div><h2 id="quiet-features-title">{LANDING_SECTION_COPY.features.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.features.body}</p></div>
+            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body, action }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>{action}</QuietAction></div></QuietFrame>)}</div>
           </section>
 
           <section id="sample-report" className="qa-band qa-section" aria-labelledby="quiet-report-title">
@@ -363,9 +371,9 @@ export function QuietLanding() {
             <div className="qa-story"><div><div className="qa-eyebrow">{FOUNDER_STORY_COPY.eyebrow}</div><h2 id="quiet-story-title">{FOUNDER_STORY_COPY.headline}</h2><p className="qa-story__body">{FOUNDER_STORY_COPY.body}</p><p className="qa-story__signature">{FOUNDER_STORY_COPY.signature}</p></div><div className="qa-story__photo"><Image src="/images/founders.jpg" alt="Alessa and Carolyng, Homa's co-founders, smiling together outside in the sun" width={920} height={868} sizes="280px" /></div></div>
           </section>
 
-          <section id="faq" className="qa-band qa-section" aria-labelledby="quiet-faq-title"><div className="qa-faq"><div className="qa-section__intro"><div className="qa-eyebrow">Good to know</div><h2 id="quiet-faq-title">Questions, answered.</h2><p className="qa-section__lead">Short answers, before you begin.</p></div><QuietFaq /></div></section>
+          <section id="faq" className="qa-band qa-section" aria-labelledby="quiet-faq-title"><div className="qa-faq"><div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.faq.eyebrow}</div><h2 id="quiet-faq-title">{LANDING_SECTION_COPY.faq.headline}</h2></div><QuietFaq /></div></section>
 
-          <section className="qa-cta qa-section" aria-labelledby="quiet-cta-title"><div className="qa-cta__inner"><div><div className="qa-eyebrow" style={{ color: "var(--homa-paper)" }}>Start with a calmer week</div><h2 id="quiet-cta-title">Every plan starts with 7 free days.</h2><p className="qa-section__lead">Nothing is charged during them. We email you a reminder before the first charge.</p></div><TrialAction /></div></section>
+          <section className="qa-cta qa-section" aria-labelledby="quiet-cta-title"><div className="qa-cta__inner"><div><div className="qa-eyebrow" style={{ color: "var(--homa-paper)" }}>{LANDING_SECTION_COPY.final.eyebrow}</div><h2 id="quiet-cta-title">{LANDING_SECTION_COPY.final.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.final.body}</p></div><TrialAction /></div></section>
         </main>
         <QuietFooter />
       </SignupPopupProvider>

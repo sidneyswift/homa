@@ -60,7 +60,7 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
     case "report":
       return `Your 7 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     case "signup":
-      return `Your 7 free days include the questionnaire and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the questions and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
     default: {
       const exhaustive: never = door;
       throw new Error(`Unhandled wall door: ${exhaustive}`);
@@ -71,14 +71,14 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
 /** The ask, unmistakable on the first pass (reader gate: "card" alone
  *  read as the card on screen), then one fact per sentence. */
 export const WALL_MECHANICS_LINE =
-  "A credit card starts your 7 free days. Nothing is charged during them. You get an email before the first charge.";
+  "Add a credit card to start 7 free days. We do not charge it during those 7 days. We email you before the first charge.";
 
 /** The children fact as a full sentence (editor gate: "Unlimited kids,
  *  one price" collided with the two prices right above it). tierBullets
  *  prepends the per-tier annual math when the toggle sits on annual. */
 export const WALL_BULLETS = [
   "Adding children never changes the price.",
-  "Cancel anytime.",
+  "You can stop renewal anytime in your settings.",
 ] as const;
 
 export const WALL_DISMISS = "Not now";
@@ -263,7 +263,7 @@ export function tierDelta(tier: PlanTier): string {
       // because it is the one thing on the list a free chatbot cannot
       // be (log_hours writes a durable record), and because it is the
       // legal obligation the highest-load persona came to solve.
-      return "Weekly plans, practice pages, hours logged.";
+      return "Weekly plans, practice pages, teaching hours logged.";
     case "plus":
       // Founder ruling 2026-07-28, second pass. The three tiers now run
       // on one axis, how far Homa comes toward you: the base is Homa on
@@ -284,7 +284,7 @@ export function tierDelta(tier: PlanTier): string {
       // than three rows carrying one more noun. "Your own curriculum"
       // kept its "own", which is the word that means the material she
       // already paid for rather than one Homa invents.
-      return "Adds text, phone, and your own curriculum.";
+      return "Adds text messages, phone calls, and curriculum uploads.";
     case "elite":
       // Founder ruling 2026-07-28: this tier's job is to make $49 read
       // as reasonable, and it earns that by being worth its own price,
@@ -335,7 +335,7 @@ export function tierDelta(tier: PlanTier): string {
       //
       // Shipping is already possible today: setFamilyAddress collects a
       // full mailing address in /app/settings.
-      return "Materials posted, and a person to plan with.";
+      return "Adds mailed materials and planning with a person.";
     default: {
       const exhaustive: never = tier;
       throw new Error(`Unhandled plan tier: ${exhaustive}`);
@@ -349,11 +349,11 @@ export function tierDelta(tier: PlanTier): string {
 export function tierDescription(tier: PlanTier): string {
   switch (tier) {
     case "regular":
-      return "Weekly plans, printable practice pages made for your child, phone calls with Homa, and chat.";
+      return "Homa includes weekly plans, printable practice pages, and teaching-hour records.";
     case "plus":
-      return "Everything in Homa, plus state filing support: quarterly reports and homeschool paperwork, prepared from what you've already logged.";
+      return "Homa Plus adds text messages, phone calls, and uploaded curriculum.";
     case "elite":
-      return "Everything in Homa Plus, plus the most capable version of Homa for every worksheet and practice page, five times the makings each week, and no delay when things get busy.";
+      return "Homa Max adds printed materials by mail and planning with a person.";
     default: {
       const exhaustive: never = tier;
       throw new Error(`Unhandled plan tier: ${exhaustive}`);

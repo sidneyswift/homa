@@ -35,4 +35,17 @@ describe("Quiet onboarding loading surfaces", () => {
     assert.match(PRIMITIVES, /data-flow-phase="bootstrap-error"/u);
     assert.match(MAP_FLOW, /data-flow-phase=\{phase\}/u);
   });
+
+  it("keeps the bootstrap fallback on the quiet atom path", () => {
+    assert.match(MAP_FLOW, /QuietFrame/u);
+    assert.match(MAP_FLOW, /QuietFeedback/u);
+    assert.match(MAP_FLOW, /QuietAction/u);
+    assert.match(MAP_FLOW, /quiet-onboarding__loading-skeleton/u);
+    assert.match(MAP_FLOW, /quiet-onboarding__error-action/u);
+    assert.doesNotMatch(MAP_FLOW, /rounded-\[var\(--homa-radius-card\)\]/u);
+    assert.doesNotMatch(MAP_FLOW, /animate-pulse/u);
+    assert.match(PRIMITIVES, /@keyframes quiet-loading-sheen/u);
+    assert.match(PRIMITIVES, /\.quiet-onboarding__bootstrap/u);
+    assert.match(PRIMITIVES, /\.quiet-onboarding__loading-skeleton-line \{ animation: none; \}/u);
+  });
 });

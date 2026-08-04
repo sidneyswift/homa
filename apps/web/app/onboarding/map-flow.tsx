@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 
 import type { MapAnswer } from "@homa/core";
 
+import { QuietAction, QuietFeedback, QuietFrame } from "../../components/design";
 import { readUtmFromLocation } from "../../lib/waitlist-client";
 import { ChecklistStep } from "./checklist-step";
 import { DeepDiveStep } from "./deep-dive-step";
@@ -447,26 +448,46 @@ export function MapFlow({
   function renderPhase(): ReactNode {
     if (phase === "loading") {
       return (
-        <div aria-busy="true" className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-          <div className="h-4 w-2/3 animate-pulse rounded bg-[var(--homa-soft-boundary)]" />
-          <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-[var(--homa-soft-boundary)]" />
-        </div>
+        <QuietFrame
+          as="div"
+          tone="paper"
+          aria-busy="true"
+          data-brand-layer="onboarding-loading"
+          className="quiet-onboarding__loading quiet-onboarding__bootstrap"
+        >
+          <p className="quiet-onboarding__step-meta">Getting things ready</p>
+          <h1 className="quiet-onboarding__loading-heading">Finding your place.</h1>
+          <p className="quiet-onboarding__loading-copy">
+            Homa is bringing your next useful step into view.
+          </p>
+          <div className="quiet-onboarding__loading-skeleton" aria-hidden="true">
+            <span className="quiet-onboarding__loading-skeleton-line quiet-onboarding__loading-skeleton-line--long" />
+            <span className="quiet-onboarding__loading-skeleton-line quiet-onboarding__loading-skeleton-line--medium" />
+            <span className="quiet-onboarding__loading-skeleton-line quiet-onboarding__loading-skeleton-line--short" />
+          </div>
+        </QuietFrame>
       );
     }
 
     if (phase === "bootstrap-error") {
       return (
-        <div className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 text-center shadow-sm">
-          <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">Couldn&apos;t start just now.</p>
-          <p className="mt-2 text-[var(--homa-ink)]">Nothing was lost, one more try usually does it.</p>
-          <button
+        <QuietFrame
+          as="div"
+          tone="paper"
+          data-brand-layer="onboarding-bootstrap-error"
+          className="quiet-onboarding__error quiet-onboarding__bootstrap"
+        >
+          <QuietFeedback tone="error" title="Couldn&apos;t start just now.">
+            Nothing was lost, one more try usually does it.
+          </QuietFeedback>
+          <QuietAction
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-4 min-h-11 rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] hover:bg-[var(--homa-ink)]"
+            className="quiet-onboarding__error-action"
           >
             Try again
-          </button>
-        </div>
+          </QuietAction>
+        </QuietFrame>
       );
     }
 

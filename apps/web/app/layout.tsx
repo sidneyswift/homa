@@ -35,11 +35,11 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://thankshoma.com"),
   title: {
-    default: "Homa \u00b7 the homeschool assistant that shows you it's working",
+    default: "Homa \u00b7 Homeschool, handled.",
     template: "%s \u00b7 Homa",
   },
   description:
-    "The calm homeschool assistant. Homa learns each child, makes printable materials just for them, tracks hours for your state, and shows you it's working.",
+    "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages, keeps teaching hours and records, and shows what to try next.",
   // Attribution meta: no personal bylines to fabricate (copy laws), so the
   // organization is the named author everywhere.
   applicationName: "Homa",
@@ -88,7 +88,7 @@ const siteJsonLd = {
       url: "https://thankshoma.com",
       email: "hello@mail.thankshoma.com",
       description:
-        "The calm homeschool assistant. Homa learns each child, makes printable materials just for them, tracks hours for your state, and shows you it's working.",
+        "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages, keeps teaching hours and records, and shows what to try next.",
     },
     {
       "@type": "WebSite",

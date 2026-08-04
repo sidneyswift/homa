@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+} from "react";
 
 import { SignupPopupModal } from "./SignupPopupModal";
 
@@ -17,18 +25,35 @@ import { SignupPopupModal } from "./SignupPopupModal";
  * redundant and lets the reader inspect proof before entering family data.
  */
 
-const SignupPopupContext = createContext<(() => void) | null>(null);
+type SignupPopupOpener = (event?: ReactMouseEvent<HTMLElement>) => void;
+
+const SignupPopupContext = createContext<SignupPopupOpener | null>(null);
 
 /** Returns the function that opens the popup, or null outside the
  * provider (see module doc: callers should fall back to a plain link). */
-export function useSignupPopup(): (() => void) | null {
+export function useSignupPopup(): SignupPopupOpener | null {
   return useContext(SignupPopupContext);
 }
 
 export function SignupPopupProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const openPopup = useCallback(() => setOpen(true), []);
-  const closePopup = useCallback(() => setOpen(false), []);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const openPopup = useCallback<SignupPopupOpener>((event) => {
+    returnFocusRef.current = event?.currentTarget
+      ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    setOpen(true);
+  }, []);
+  const closePopup = useCallback(() => {
+    const returnFocus = returnFocusRef.current;
+    setOpen(false);
+    // React removes the dialog during this event. Restore on the next
+    // frame so the browser cannot move focus back to body as the focused
+    // dialog node disappears. preventScroll keeps the reader's place.
+    window.requestAnimationFrame(() => {
+      if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
+      returnFocusRef.current = null;
+    });
+  }, []);
 
   return (
     <SignupPopupContext.Provider value={openPopup}>
