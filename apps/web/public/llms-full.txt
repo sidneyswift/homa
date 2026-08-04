@@ -72,6 +72,8 @@ A: Homa has no child account or child-facing AI chat. A parent may choose to try
 - Sample report: https://thankshoma.com/onboarding/sample
 - Report method and sources: https://thankshoma.com/onboarding/method
 - Blog: https://thankshoma.com/blog
+- Homeschool records guides: https://thankshoma.com/blog/topics/records
+- How to track homeschool hours without losing the week: https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week
 - Feature pages: https://thankshoma.com/features/homeschool-planner
 - Privacy policy: https://thankshoma.com/privacy
 - Terms of service: https://thankshoma.com/terms

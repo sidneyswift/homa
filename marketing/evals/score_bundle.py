@@ -40,10 +40,22 @@ BANNED_PATHS = ("homa-macmini/", "homa-research/", "homa-template/")
 
 DASH_RE = re.compile(r"[\u2014\u2013]")
 HOMA_CAPS_RE = re.compile(r"\bHOMA\b")
-BEHIND_RE = re.compile(r"falling behind|\bis behind\b", re.IGNORECASE)
+BEHIND_RE = re.compile(r"\bbehind\b", re.IGNORECASE)
 SIBLING_RE = re.compile(
     r"than (his|her|their) (brother|sister|sibling)", re.IGNORECASE
 )
+HARD_COPY_BANS = {
+    "catch up": re.compile(r"\bcatch(?:ing)?[ -]up\b", re.IGNORECASE),
+    "ahead of grade level": re.compile(r"\bahead of grade level\b", re.IGNORECASE),
+    "diagnosis vocabulary": re.compile(
+        r"\bdiagnos(?:e|es|ed|ing)|\bscreening\b|\bassessment\b|\bdelay\b|\bdisorder\b",
+        re.IGNORECASE,
+    ),
+    "teacher or tutor framing": re.compile(
+        r"\btutor\b|\bteacher\b|\bteaches your child\b|\breplaces\b",
+        re.IGNORECASE,
+    ),
+}
 
 # Platform limits mirror the format-rules table in voice/house-style.md.
 # If that table changes, change these together (the janitor flags drift).
@@ -57,8 +69,13 @@ EMAIL_SUBJECT_MAX = 50
 PIN_TITLE_MAX = 100
 PIN_DESCRIPTION_MAX = 500
 DUP_RATIO = 0.7
-ARTICLE_FRONTMATTER_FIELDS = ("title", "description", "date", "tags", "hero")
+ARTICLE_FRONTMATTER_FIELDS = (
+    "title", "description", "date", "updated", "cluster", "tags", "related",
+    "hero", "heroAlt",
+)
+ARTICLE_CLUSTERS = {"planning", "records", "progress", "practice", "getting-started"}
 WAITLIST_RE = re.compile(r"\bwaitlist\b|/waitlist\b", re.IGNORECASE)
+SHORT_ANSWER_LABEL_RE = re.compile(r"\bshort answer\s*:", re.IGNORECASE)
 
 
 def load_banlist() -> list[str]:
@@ -186,6 +203,9 @@ def check_voice(bundle: Path, banlist: list[str], f: Findings) -> None:
                 f.fail("voice", rel, f'L{i}: "behind" framing')
             if SIBLING_RE.search(line):
                 f.fail("voice", rel, f"L{i}: sibling comparison")
+            for label, pattern in HARD_COPY_BANS.items():
+                if pattern.search(line):
+                    f.fail("voice", rel, f"L{i}: hard-ban language ({label})")
         for phrase in banlist:
             if phrase.lower() in lower:
                 f.fail("voice", rel, f"banlist phrase: {phrase}")
@@ -235,7 +255,33 @@ def check_article_contract(bundle: Path, f: Findings) -> None:
     if description and len(description.group(1).strip()) >= 160:
         f.fail("article", "article.mdx",
                f"description is {len(description.group(1).strip())} chars, max 159")
-    for number, line in enumerate(body_of(article).splitlines(), 1):
+    cluster = re.search(r"^cluster:\s*(\S+)\s*$", frontmatter, re.MULTILINE)
+    if cluster and cluster.group(1) not in ARTICLE_CLUSTERS:
+        f.fail("article", "article.mdx",
+               f"unknown cluster: {cluster.group(1)}")
+
+    body = body_of(article)
+    words = re.findall(r"\b[\w']+\b", body)
+    if len(words) < 800 or len(words) > 1400:
+        f.fail("article", "article.mdx",
+               f"body is {len(words)} words, expected 800 to 1400")
+    opening = body.split("\n## ", 1)[0]
+    quoted_answers = re.findall(r"^>\s+(.+)$", opening, re.MULTILINE)
+    if not any(len(re.findall(r"\b[\w']+\b", answer)) >= 25
+               for answer in quoted_answers):
+        f.fail("article", "article.mdx",
+               "opening needs a self-contained quoted answer of at least 25 words")
+    if SHORT_ANSWER_LABEL_RE.search(opening):
+        f.fail("article", "article.mdx",
+               'opening labels itself "Short answer:" instead of answering directly')
+    if not re.search(r"\]\(/features/[a-z0-9-]+\)", body):
+        f.fail("article", "article.mdx", "missing internal feature-page link")
+    onboarding_links = body.count("](/onboarding)")
+    if onboarding_links != 0:
+        f.fail("article", "article.mdx",
+               f"MDX duplicates the shared renderer CTA ({onboarding_links} onboarding links)")
+
+    for number, line in enumerate(body.splitlines(), 1):
         if WAITLIST_RE.search(line):
             f.fail("article", "article.mdx",
                    f"body L{number}: retired waitlist product state")

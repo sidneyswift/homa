@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
+import { BlogIndexContent } from "../../components/marketing/BlogIndexContent";
 import { Footer } from "../../components/marketing/Footer";
 import { Nav } from "../../components/marketing/Nav";
-import { formatBlogDate, listBlogPosts } from "../../lib/blog";
+import { HERO_COPY } from "../../components/marketing/landing-content";
+import { getBlogPage, getBlogPageCount, listBlogPosts } from "../../lib/blog";
+import { getBlogCluster } from "../../lib/blog-clusters";
 
 /**
  * /blog: notes from Homa. Index of published articles (git is the CMS; files
@@ -13,9 +15,9 @@ import { formatBlogDate, listBlogPosts } from "../../lib/blog";
  */
 
 export const metadata: Metadata = {
-  title: "Notes",
+  title: "Homeschool planning, records, and progress guides",
   description:
-    "Notes from Homa: calm, practical writing for homeschool families, one idea at a time.",
+    "Practical homeschool guides for planning flexible weeks, keeping useful records, noticing progress, and making practice pages.",
   alternates: {
     canonical: "/blog",
     types: { "application/rss+xml": "/blog/rss.xml" },
@@ -24,6 +26,11 @@ export const metadata: Metadata = {
 
 export default function BlogIndexPage() {
   const posts = listBlogPosts();
+  const pageCount = getBlogPageCount(posts);
+  const firstPage = getBlogPage(1, posts);
+  const clusters = [...new Set(posts.map((post) => post.cluster))]
+    .map((slug) => getBlogCluster(slug))
+    .filter((cluster) => cluster !== undefined);
 
   const blogJsonLd = {
     "@context": "https://schema.org",
@@ -38,6 +45,8 @@ export default function BlogIndexPage() {
       "@type": "BlogPosting",
       headline: post.title,
       datePublished: post.date,
+      dateModified: post.updated,
+      articleSection: getBlogCluster(post.cluster)?.name,
       url: `https://thankshoma.com/blog/${post.slug}`,
     })),
   };
@@ -55,9 +64,28 @@ export default function BlogIndexPage() {
             Notes from Homa
           </h1>
           <p className="mt-3 text-body">
-            Calm, practical writing for homeschool families. One idea at a time.
+            Practical help for planning the week, keeping the record, noticing progress,
+            and choosing what to try next.
           </p>
         </header>
+
+        {clusters.length > 0 ? (
+          <nav className="mt-8" aria-label="Blog topics">
+            <p className="text-sm font-semibold uppercase tracking-wide text-muted">Browse by topic</p>
+            <ul className="mt-3 flex flex-wrap gap-3">
+              {clusters.map((cluster) => (
+                <li key={cluster.slug}>
+                  <Link
+                    href={`/blog/topics/${cluster.slug}`}
+                    className="inline-flex rounded-pill bg-brand-soft px-4 py-2 font-semibold text-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-soft-2"
+                  >
+                    {cluster.shortName}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
 
         {posts.length === 0 ? (
           <div
@@ -68,44 +96,17 @@ export default function BlogIndexPage() {
               Notes are on their way
             </p>
             <p className="mt-2 text-body">
-              We&rsquo;re writing. While you wait, your child&rsquo;s progress report takes five minutes.
+              We&rsquo;re writing. {HERO_COPY.primaryActionNote}
             </p>
             <Link
               href="/onboarding"
               className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
             >
-              Start your free trial
+              {HERO_COPY.primaryAction}
             </Link>
           </div>
         ) : (
-          <ul className="mt-10 grid gap-6">
-            {posts.map((post) => (
-              <li key={post.slug}>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="block overflow-hidden rounded-lg bg-card shadow-sm transition-shadow duration-(--dur-base) ease-out hover:shadow-lg"
-                  style={{ border: "1px solid var(--border-subtle)" }}
-                >
-                  {post.hero ? (
-                    <Image
-                      src={post.hero}
-                      alt=""
-                      width={1200}
-                      height={675}
-                      className="h-auto w-full"
-                    />
-                  ) : null}
-                  <div className="p-6">
-                    <p className="text-sm text-muted">{formatBlogDate(post.date)}</p>
-                    <h2 className="mt-1 font-display text-xl font-semibold leading-snug text-strong">
-                      {post.title}
-                    </h2>
-                    <p className="mt-2 text-body">{post.description}</p>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <BlogIndexContent posts={firstPage} page={1} pageCount={pageCount} />
         )}
       </main>
       <Footer />

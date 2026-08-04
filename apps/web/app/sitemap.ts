@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { listBlogPosts } from "../lib/blog";
+import { getBlogPageCount, listBlogPosts, listPublishedBlogClusters } from "../lib/blog";
 import { FEATURE_PAGE_SLUGS } from "../lib/feature-pages";
 
 /**
@@ -22,8 +22,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const posts: MetadataRoute.Sitemap = listBlogPosts().map((post) => ({
     url: `${BASE}/blog/${post.slug}`,
-    lastModified: new Date(`${post.date}T00:00:00Z`),
+    lastModified: new Date(`${post.updated}T00:00:00Z`),
   }));
 
-  return [...staticRoutes, ...featureRoutes, ...posts];
+  const topicRoutes: MetadataRoute.Sitemap = listPublishedBlogClusters().map((cluster) => ({
+    url: `${BASE}/blog/topics/${cluster}`,
+  }));
+
+  const pageCount = getBlogPageCount();
+  const paginationRoutes: MetadataRoute.Sitemap = Array.from(
+    { length: Math.max(0, pageCount - 1) },
+    (_, index) => ({ url: `${BASE}/blog/page/${index + 2}` }),
+  );
+
+  return [...staticRoutes, ...featureRoutes, ...topicRoutes, ...paginationRoutes, ...posts];
 }

@@ -19,7 +19,8 @@ A finished article does five things at once:
 3. Makes every factual and product claim easy to verify and safe to quote.
 4. Gives the reader a practical next step without turning the article into a
    disguised product pitch.
-5. Renders correctly on the live blog, with current links and one honest CTA.
+5. Renders correctly on the live blog, with current links and the renderer's
+   one honest CTA.
 
 ## Procedure
 
@@ -37,9 +38,10 @@ Read `.agents/skills/homa-copy-writer/SKILL.md` and
 - Verify every Homa capability against current repository and production
   evidence before mentioning it. Link the relevant live feature page when one
   exists.
-- Verify the CTA route from the current product. `/onboarding` is the current
-  default. Never inherit a destination or product state from an older article,
-  draft, persona, or skill example.
+- Verify the shared article renderer's CTA route, label, and trial terms against
+  the current product. Never copy that CTA into MDX. The renderer owns the one
+  current conversion action so price and product state cannot drift across
+  articles.
 
 Stop if the query cannot be answered from real evidence or the product claim
 cannot be confirmed. A plausible sentence is not a substitute for truth.
@@ -55,7 +57,7 @@ Before drafting prose, write these items in scratch space:
 - the article's one thesis
 - the evidence that supports it
 - the next three questions she is likely to ask
-- Homa's relevant capability, honest limitation, and current CTA
+- Homa's relevant capability and honest limitation
 
 Do not paste this brief into the article. It is a thinking tool that prevents
 keyword-shaped prose and disconnected sections.
@@ -83,8 +85,10 @@ Draft `article.mdx` into the bundle directory.
 - Write 800 to 1400 words, one idea deep.
 - Earn reassurance through a specific observation. Generic comfort before the
   reader sees herself feels manufactured.
-- Put a self-contained direct answer near the top. It should still make sense
-  if a search or answer engine quotes it without the surrounding paragraph.
+- Put a self-contained direct answer in a blockquote near the top. It should
+  still make sense if a search or answer engine quotes it without the
+  surrounding paragraph. State the answer directly. Never label it "Short
+  answer," "Quick answer," or any other meta-commentary.
 - Use natural-language H2s for the reader's real follow-up questions. Use a
   table, list, or definition only when it makes the answer easier to understand.
 - Keep short paragraphs and one main idea per sentence. Name the noun again
@@ -95,8 +99,13 @@ Draft `article.mdx` into the bundle directory.
   invent a real family; mark composite examples as hypothetical.
 - Introduce Homa only after the article has delivered independent value. State
   the current capability and limitation plainly, with a relevant internal link.
-- End with one warm CTA to a current Homa path. Do not mention or link to a
-  waitlist.
+  The feature link is supporting navigation, not a click invitation.
+- End the MDX on the reader's useful takeaway. Do not add an onboarding CTA;
+  `apps/web/app/blog/[slug]/page.tsx` renders the page's one current trial CTA
+  and disclosure after the article. Do not mention or link to a waitlist.
+- Follow Homa's offers-never-commands law in descriptions, headings, and body
+  copy. Prefer a clear possibility, decision rule, or recommendation over
+  imperatives such as "Use," "Start," "Choose," or "Write."
 
 Claims rules from house style apply throughout: no unsupported statistics,
 outcome guarantees, clinical framing, or causal efficacy claims.
@@ -112,6 +121,9 @@ outcome guarantees, clinical framing, or causal efficacy claims.
 - Attribute changing or high-stakes facts to the primary source in the prose.
   Explicit attribution is easier for a person and an answer engine to trust.
 - Link to the relevant Homa feature and to closely related internal guidance.
+- Assign one canonical topic cluster and list only live or same-wave related
+  article slugs. The cluster hub and related links are part of the article's
+  crawl path, not decorative metadata.
 - Add information gain: a useful distinction, example, checklist, or decision
   rule that a generic summary would not give the reader.
 - Do not add FAQs, headings, tables, or keywords only to manufacture SEO shape.
@@ -140,13 +152,20 @@ The blog build fails on violations, which is the point:
 title: "How many hours a day should homeschool actually take?"
 description: "Under 160 characters, written like an answer, it becomes the meta description."
 date: 2026-07-08
+updated: 2026-07-08
+cluster: getting-started
 tags: [hours, getting-started]
+related: [how-to-track-homeschool-hours]
 hero: /blog/how-many-hours-homeschool/hero.png
+heroAlt: "A short homeschool morning plan beside two open books"
 ---
 ```
 
 The filename and slug are the kebab-case core question. The hero path follows
-`/blog/<slug>/hero.png`; `marketing-illustrator` renders it later.
+`/blog/<slug>/hero.png`; `marketing-illustrator` renders it later. `cluster`
+must be `planning`, `records`, `progress`, `practice`, or `getting-started`.
+Describe the visible hero in `heroAlt`; do not repeat the title or describe an
+image that has not been specified. On first draft, `updated` equals `date`.
 
 ## Gate contract
 

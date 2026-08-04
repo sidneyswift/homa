@@ -1,7 +1,8 @@
 # Homa SEO and AI-search operating plan
 
 Status: operating draft
-Date: 2026-08-03
+Date: 2026-08-04
+Evidence window: guidance and market evidence available through 2026-07-31, verified 2026-08-04
 Scope: Homa feature discovery, parent-side homeschool questions, Google Search, ChatGPT search, Gemini, and Microsoft Copilot
 
 This plan turns `marketing/seo/query-to-url-map.md` into a repeatable measurement and publishing system. It is designed to increase qualified discovery without turning the site into a volume content farm.
@@ -12,11 +13,23 @@ Google's current guidance says the normal foundations still apply to AI Overview
 
 Google's people-first guidance emphasizes original value, first-hand experience, clear authorship where readers would expect it, and a real audience need. It explicitly warns against producing many pages mainly to attract search visits or using automation to manipulate rankings. See [Creating helpful, reliable, people-first content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content).
 
+Google's current AI-search guidance adds a useful scale boundary: create
+non-commodity value and do not make a separate page for every possible fan-out
+or query variation. Google's spam policy says large batches of low-value or
+unoriginal pages can be scaled content abuse regardless of whether a model or a
+person made them. See [AI search optimization guidance](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), [generative AI content guidance](https://developers.google.com/search/docs/fundamentals/using-gen-ai-content), and [spam policies](https://developers.google.com/search/docs/essentials/spam-policies).
+
 OpenAI's publisher guidance says public sites should not block `OAI-SearchBot` if they want their content included in ChatGPT summaries and snippets. Homa's `robots.ts` names that crawler and allows it to crawl the public site. See the [Publishers and Developers FAQ](https://help.openai.com/en/articles/12627856-publishers-and-developers-faq).
 
 Microsoft's Bing Webmaster Tools AI Performance preview reports total citations, average cited pages, grounding queries, page-level citation activity, and trends across supported AI experiences. That makes Bing the first source in this plan for recurring first-party citation measurement. See [Introducing AI Performance in Bing Webmaster Tools](https://blogs.bing.com/webmaster/February-2026/Introducing-AI-Performance-in-Bing-Webmaster-Tools-Public-Preview).
 
-Implication: the strategy is not a secret markup trick. It is a small set of canonical, useful pages with clear product evidence, strong internal linking, accessible text, and a measurement loop that treats AI citations as a separate outcome from blue-link ranking.
+Implication: the strategy is not a secret markup trick. It is a growing set of
+canonical, useful pages with clear product evidence, strong internal linking,
+accessible text, and a measurement loop that treats AI citations as a separate
+outcome from blue-link ranking. `marketing/seo/topic-graph.json` is the
+canonical ownership layer. It currently maps 100 distinct parent intents and
+holds legal, state, and named-product comparisons behind explicit research
+gates.
 
 ## The operating loop
 
@@ -34,12 +47,17 @@ Implication: the strategy is not a secret markup trick. It is a small set of can
 | --- | --- | --- | --- |
 | Every deploy | Check the build, sitemap, robots, canonical URLs, JSON-LD validity, broken internal links, and noindex boundaries. | None unless a check fails. | Deployment gate and URL health report. |
 | Daily | Pull Search Console and analytics deltas for published feature and blog URLs. Alert on a sharp indexation or organic-click change against the previous baseline. | Triage only when an alert fires. | Exception queue, not a daily content quota. |
-| Weekly | Export query and page performance from Search Console. Pull Bing AI Performance citations and grounding queries. Run the fixed AI prompt set three times per engine and store the raw answers, cited URLs, mention accuracy, and date. | Choose one page to improve, merge, or leave alone. | Weekly visibility report and one prioritized action. |
+| Weekly | Export query and page performance from Search Console. Pull Bing AI Performance citations and grounding queries. Run the fixed AI prompt set three times per engine and store the raw answers, cited URLs, mention accuracy, and date. Recompute internal-link and topic ownership checks. | Choose one page to improve, merge, or leave alone. Approve up to one coordinated cluster pair from the staged queue. | Weekly visibility report, one prioritized improvement, and zero to two approved publications. |
 | Every two weeks | Recompute the internal-link graph, identify orphaned or weakly linked URLs, check canonical ownership, and compare the query map with newly observed queries. | Approve a link change or a new brief. | Link and intent backlog. |
 | Monthly | Refresh authenticated volume, trend, CPC, and difficulty data from Google Keyword Planner, Search Console, and one paid SEO source. Sample current SERPs for each P0 and P1 cluster. Review branded and non-brand conversion paths. | Re-score priorities and retire stale ideas. | Updated query map with research dates. |
 | Quarterly | Recheck every product-claim ledger row. Revisit state and legal source pages with a qualified reviewer. Audit authorship, About links, privacy language, and proof assets. | Approve current claims and any jurisdiction-specific publication. | Claim ledger and content refresh decisions. |
 
-The weekly action is deliberately small. Consistent improvements to a few canonical pages are safer and more measurable than a large batch of thin posts.
+During the initial library build, a four-week launch sprint may approve two
+cluster pairs per week because the articles were researched and gated before
+the sprint. After that inventory is live, the steady-state ceiling is two new
+articles per week plus one evidence-led refresh. Publication is never a quota:
+if the source, reader gate, editor gate, or product verification is incomplete,
+the correct count is zero.
 
 ## What can be automated safely
 
@@ -54,6 +72,9 @@ The weekly action is deliberately small. Consistent improvements to a few canoni
 - Cluster new query strings into existing intent owners and create a brief with the evidence links. The model may propose a cluster, but a deterministic validator must require a real source, canonical owner, and approved product-claim IDs.
 - Suggest internal links from the query map and render a reviewable diff.
 - Notify search engines about an approved URL change through the supported indexing workflow. Never use a notification as proof that a page was indexed.
+- Submit approved changed URLs to Bing through IndexNow when the site key and
+  deployment workflow are configured. Google discovery still relies on normal
+  crawlable links and sitemaps.
 
 ### Keep human-controlled
 
@@ -126,3 +147,7 @@ The goal is not the largest number of pages. The goal is a small, trusted librar
 - Google people-first guidance: https://developers.google.com/search/docs/fundamentals/creating-helpful-content
 - OpenAI publisher guidance: https://help.openai.com/en/articles/12627856-publishers-and-developers-faq
 - Bing AI Performance preview: https://blogs.bing.com/webmaster/February-2026/Introducing-AI-Performance-in-Bing-Webmaster-Tools-Public-Preview
+- Google AI search optimization guidance: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
+- Google generative AI content guidance: https://developers.google.com/search/docs/fundamentals/using-gen-ai-content
+- Google spam policies: https://developers.google.com/search/docs/essentials/spam-policies
+- Bing IndexNow: https://www.bing.com/webmasters/help/indexnow-0z209wby

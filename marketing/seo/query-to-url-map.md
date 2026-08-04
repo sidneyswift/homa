@@ -1,10 +1,14 @@
 # Homa search map
 
 Status: research map, not publication approval
-Date: 2026-08-03
+Date: 2026-08-04
 Scope: parent-side homeschool planning, records, progress, and practice
 
 This file turns the July 2026 SEO and AI-search research into a first query-to-URL map. It is deliberately a map rather than a keyword-volume report. No authenticated Google Keyword Planner, Search Console, Ahrefs, or Semrush export was available during this pass, so monthly volume, CPC, and difficulty are not invented here. Re-score these rows after the first-party and paid-search data are connected.
+
+The machine-checkable expansion is `marketing/seo/topic-graph.json`. It maps
+100 distinct intents to one canonical owner each. This document explains the
+priority and evidence rules; the graph owns row-level status and paths.
 
 ## Operating rules
 
@@ -46,13 +50,18 @@ Create these outside the blog. They are product and search landing pages, not sh
 
 Each page should link to one hub, one useful free resource, one proof asset, and the appropriate onboarding path. The homepage remains the category page for “AI homeschool assistant.”
 
-### First three hubs
+### First topic hubs
 
-1. /guides/homeschool-record-keeping
-2. /guides/homeschool-progress
-3. /guides/homeschool-planning
+1. /blog/topics/records
+2. /blog/topics/progress
+3. /blog/topics/planning
+4. /blog/topics/practice
+5. /blog/topics/getting-started
 
-Do not create the fourth AI-specific hub until the product page and at least one tested comparison can support it with more than generic AI language.
+The route exists only for a cluster with at least one published article. Empty
+hubs do not enter the sitemap. Do not create an AI-specific hub until the
+product page and at least one tested comparison can support it with more than
+generic AI language.
 
 ### First supporting assets
 
@@ -64,6 +73,11 @@ Do not create the fourth AI-specific hub until the product page and at least one
 - Weekly homeschool planner template
 - Homeschool portfolio checklist
 - One real product walkthrough video per P0 feature cluster
+
+The 2026-08-04 staged wave adds flexible scheduling, long lessons, a daily
+checklist, daily logs, work-sample selection, a useful reading log, reading and
+math progress, narrative reports, practice amount, worksheet verification, and
+worksheet adaptation. See `marketing/raw/2026-08-04-seo-content-ocean.md`.
 
 ## Product-claim ledger for content review
 
