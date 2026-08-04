@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
 };
 
-const UPDATED = "July 6, 2026";
+const UPDATED = "August 4, 2026";
 
 export default function TermsPage() {
   return (
@@ -36,19 +36,28 @@ export default function TermsPage() {
           them. Using thankshoma.com, or signing in to Homa, means you agree to them.
         </p>
 
-        <h2 className="mt-8 font-display text-xl font-semibold text-strong">What Homa is right now</h2>
+        <h2 className="mt-8 font-display text-xl font-semibold text-strong">What Homa provides</h2>
         <p className="mt-3 text-body">
           Homa is early, and we would rather tell you that plainly than pretend otherwise. Today
-          the service includes your child&apos;s progress report and practice plans, the blog, and
-          the Homa assistant where it is available in your account. All of it is free today. If
-          paid plans arrive, we will show the price clearly and ask before charging you, never the
-          other way around.
+          the service can include progress reports, weekly plans, practice pages, teaching-hour
+          records, family files, and the Homa assistant. The exact features available to you are
+          the ones shown in your account and membership offer.
+        </p>
+
+        <h2 className="mt-8 font-display text-xl font-semibold text-strong">Memberships and your 7 free days</h2>
+        <p className="mt-3 text-body">
+          Starting a trial requires a payment method. We do not charge it during your 7 free days.
+          The price, billing period, included services, and our promise to email you before the
+          first charge are shown before you choose a membership. Unless you cancel before the trial
+          ends, the membership renews at the price and interval you selected. You can stop the next
+          renewal from your settings. Stripe processes web purchases and Apple processes App Store
+          purchases, so their payment terms also apply to the purchase they handle.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Homa is for parents</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li>You must be 18 or older and the parent or legal guardian of the children you tell Homa about.</li>
-          <li>Children never use Homa. Accounts, reports, and conversations belong to the grown-ups.</li>
+          <li>Children do not hold accounts or use the Homa assistant. Accounts, reports, and conversations belong to the grown-ups; the materials Homa makes are for your family.</li>
           <li>Your sign-in is yours: please keep it to yourself, and reach out right away if you think someone else has used it.</li>
         </ul>
 
@@ -69,7 +78,7 @@ export default function TermsPage() {
             What you share stays yours. You give us permission to use it for one purpose only:
             running Homa for your family. What we collect and who processes it lives in the{" "}
             <Link href="/privacy" className="text-brand underline-offset-2 hover:underline">privacy policy</Link>,
-            and you can have everything deleted with one email.
+            and you can request deletion of your account and family records stored in Homa with one email.
           </li>
           <li>
             The site, reports, and plans we make are for your family&apos;s personal use. Please
@@ -81,8 +90,8 @@ export default function TermsPage() {
         <p className="mt-3 text-body">
           Don&apos;t try to break the service, probe other families&apos; data, or use Homa for
           anything unlawful or harmful. You can stop using Homa anytime and ask us to delete
-          everything. If an account breaks these terms we may suspend it, and if we ever do, we
-          will tell you why.
+          your account and family records stored in Homa. If an account breaks these terms we may
+          suspend it, and if we ever do, we will tell you why.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">The service will change</h2>
@@ -103,7 +112,6 @@ export default function TermsPage() {
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Questions</h2>
         <p className="mt-3 text-body">
           Write to <a className="text-brand underline-offset-2 hover:underline" href="mailto:hello@mail.thankshoma.com?subject=Question%20about%20the%20terms">hello@mail.thankshoma.com</a>.
-          A person answers, not a bot.
         </p>
       </main>
     </div>

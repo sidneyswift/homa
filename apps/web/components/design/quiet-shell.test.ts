@@ -14,6 +14,7 @@ test("Quiet nav preserves the public destinations and their order", () => {
   assert.deepEqual(QUIET_NAV_LINKS, [
     ["How it works", "/#how"],
     ["Features", "/#features"],
+    ["Memberships", "/#memberships"],
     ["Our story", "/#stories"],
   ]);
 });

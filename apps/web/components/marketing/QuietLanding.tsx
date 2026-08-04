@@ -18,6 +18,8 @@ import {
   FOUNDER_STORY_COPY,
   HERO_COPY,
   LANDING_SECTION_COPY,
+  MEMBERSHIP_ITEMS,
+  MEMBERSHIP_NOTE,
   PRODUCT_PREVIEW_COPY,
   SAMPLE_REPORT_COPY,
   WORKFLOW_CLOSING,
@@ -39,7 +41,7 @@ const QUIET_LANDING_CSS = `
 .quiet-landing { min-width: 320px; overflow-x: clip; background: var(--homa-canvas); color: var(--homa-ink); }
 .quiet-landing .quiet-nav { position: sticky; top: 0; z-index: 50; background: transparent; }
 .quiet-landing .quiet-nav__row { max-width: 1180px; }
-.quiet-landing #how, .quiet-landing #features, .quiet-landing #sample-report, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--quiet-nav-height) + 12px); }
+.quiet-landing #how, .quiet-landing #features, .quiet-landing #sample-report, .quiet-landing #memberships, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--quiet-nav-height) + 12px); }
 .quiet-landing .quiet-nav__link { color: var(--homa-muted-ink); border-radius: var(--homa-radius-control); }
 .quiet-landing .quiet-nav__link:hover, .quiet-landing .quiet-nav__link[aria-current="true"] { color: var(--homa-ink); }
 .quiet-landing .quiet-nav__link::after { background: var(--homa-visual-coral); }
@@ -168,6 +170,16 @@ const QUIET_LANDING_CSS = `
 .qa-report__preview { min-width: 0; overflow: hidden; border: 1px solid var(--homa-soft-boundary); border-radius: var(--homa-radius-card); background: var(--homa-paper); box-shadow: 0 14px 34px color-mix(in srgb, var(--homa-ink) 8%, transparent); }
 .qa-report__preview > * { max-width: 100%; }
 
+.qa-membership-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 38px; }
+.qa-membership-card { display: flex; min-width: 0; flex-direction: column; }
+.qa-membership-card h3 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.1rem); line-height: .98; }
+.qa-membership-card__price { margin-top: 18px; color: var(--homa-ink); font: 700 2.15rem/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.qa-membership-card__price span { margin-left: 4px; color: var(--homa-muted-ink); font-size: .82rem; font-weight: 600; }
+.qa-membership-card__annual { margin-top: 9px; color: var(--homa-brand-text); font-size: .78rem; font-weight: 700; }
+.qa-membership-card__body { margin: 20px 0 0; border-top: 1px solid var(--homa-soft-boundary); padding-top: 18px; color: var(--homa-muted-ink); line-height: 1.5; }
+.qa-memberships__footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 28px; }
+.qa-memberships__footer p { max-width: 690px; margin: 0; color: var(--homa-muted-ink); line-height: 1.55; }
+
 .qa-story { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: clamp(25px, 6vw, 88px); align-items: center; }
 .qa-story h2 { max-width: 570px; }
 .qa-story__body { margin: 22px 0 0; color: var(--homa-muted-ink); font-size: 1.05rem; line-height: 1.65; }
@@ -202,8 +214,9 @@ const QUIET_LANDING_CSS = `
   .qa-opening__copy h1 { font-size: clamp(3.4rem, 15vw, 5.5rem); }
   .qa-opening__thread { width: min(520px, 82vw); }
   .qa-authority { padding: 42px 24px 48px; }
-  .qa-capability-grid, .qa-report, .qa-story, .qa-faq, .qa-cta__inner { grid-template-columns: 1fr; }
+  .qa-capability-grid, .qa-report, .qa-membership-grid, .qa-story, .qa-faq, .qa-cta__inner { grid-template-columns: 1fr; }
   .qa-report__preview { order: -1; }
+  .qa-memberships__footer { align-items: flex-start; flex-direction: column; }
   .qa-story__photo { width: min(240px, 72vw); }
 }
 @media (max-width: 480px) {
@@ -365,6 +378,12 @@ export function QuietLanding() {
 
           <section id="sample-report" className="qa-band qa-section" aria-labelledby="quiet-report-title">
             <div className="qa-report"><div><div className="qa-eyebrow">{SAMPLE_REPORT_COPY.eyebrow}</div><h2 id="quiet-report-title">{SAMPLE_REPORT_COPY.headline}</h2><p className="qa-report__reassurance">{SAMPLE_REPORT_COPY.reassurance}</p><p className="qa-report__body">{SAMPLE_REPORT_COPY.body}</p><div className="qa-authority__actions"><QuietAction kind="secondary" size="large" href={SAMPLE_REPORT_COPY.href} icon={<Icon name="next" size={20} />}>{SAMPLE_REPORT_COPY.action}</QuietAction></div></div><div className="qa-report__preview"><ReportPreview /></div></div>
+          </section>
+
+          <section id="memberships" className="qa-band qa-section" aria-labelledby="quiet-memberships-title">
+            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.memberships.eyebrow}</div><h2 id="quiet-memberships-title">{LANDING_SECTION_COPY.memberships.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.memberships.body}</p></div>
+            <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}</div>
+            <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE}</p><TrialAction /></div>
           </section>
 
           <section id="stories" className="qa-band qa-section" aria-labelledby="quiet-story-title">

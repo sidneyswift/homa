@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Logo } from "../../components/brand/Logo";
+import { SUBPROCESSORS } from "./subprocessors";
 
 /**
  * /privacy: the one-page policy, written in plain language. Pulled forward
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
 };
 
-const UPDATED = "July 7, 2026";
+const UPDATED = "August 4, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -32,64 +33,76 @@ export default function PrivacyPage() {
 
         <p className="mt-6 text-body">
           Built by a homeschool family, for homeschool families. The short version: we collect
-          only what we need, children never use Homa, and one email deletes everything.
+          information to provide Homa to your family, children do not need accounts, and you can
+          ask us to delete your account and the family records stored in Homa.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What we collect, and why</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li>
-            <b>Waitlist:</b> your email, plus optional name, state, and kids&apos; ages. Used to
-            send your invite and plan who we can serve well.
+            <b>Account and contact details:</b> your name, email address, phone number when you
+            choose text or calling, sign-in details, and billing status. We use them to secure
+            your account, reach you in the ways you choose, and manage your membership.
           </li>
           <li>
-            <b>Your child&apos;s progress report:</b> each child&apos;s first name (a nickname is fine), their birthday, your questionnaire answers, and any optional extras you share (interests,
-            homeschool style, curriculums). Used to build the report you asked for, and, when your invite opens, to start Homa off already knowing your
-            family. Your child never uses Homa and is never asked anything.
+            <b>Family details:</b> the names or nicknames, birthdays, interests, homeschool style,
+            curriculum, schedule, and other details you choose to share. A mailing address is
+            collected only when a feature needs one. We use this information to prepare the
+            plans, reports, records, and materials you ask for.
           </li>
           <li>
-            <b>Product analytics:</b> anonymous usage events (which step was reached). Never
-            names, never emails.
+            <b>Your work in Homa:</b> messages, questionnaire answers, lesson notes, teaching
+            hours, plans, finished work, and files such as documents, photos, audio, or video
+            that you choose to upload. We use them to provide the feature you selected and keep
+            your family&apos;s work connected.
+          </li>
+          <li>
+            <b>Service information:</b> product usage, device and browser details, delivery
+            receipts, and error or security records. We use them to operate, protect, and improve
+            Homa.
           </li>
         </ul>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Who processes data for us</h2>
         <p className="mt-3 text-body">
-          Four companies process data for us. This is the complete list:
+          The provider depends on the feature you choose. These are the services that can
+          process family data for Homa today:
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
-          <li><b>Supabase</b> (database hosting, US East): stores everything above.</li>
-          <li><b>Vercel</b> (web hosting): serves the site and runs our code.</li>
-          <li><b>Resend</b> (email): delivers the emails you asked for.</li>
-          <li>
-            <b>Anthropic</b>, via Vercel AI Gateway (writes the words of your report, and powers
-            chatting with Homa once your invite opens).
-          </li>
+          {SUBPROCESSORS.map(({ name, purpose }) => (
+            <li key={name}>
+              <b>{name}</b> {purpose}.
+            </li>
+          ))}
         </ul>
         <p className="mt-3 text-body">
-          Here is exactly how AI touches your report: every number in it is computed by plain
-          arithmetic that a person reviewed, never by AI. Homa, an AI, writes the sentences of
-          the report around those numbers, from your answers. We contractually disallow your
-          data being used to train models, and every sentence passes our safety rules before
-          you see it.
+          We send each provider only the information needed for its part of the service. Homa
+          does not use your family&apos;s content to train AI models. For our main AI providers, we
+          use paid APIs that do not train on prompts or responses by default. When another
+          provider offers a no-training control, we enable it. Providers and features can change
+          as Homa changes. When a change materially affects this policy, we update this page and
+          its date.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What we never do</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li>We never sell your data or share it with advertisers.</li>
           <li>We never use your family&apos;s data to train AI models.</li>
-          <li>We never email you beyond your children&apos;s progress reports and your invite, unless you ask.</li>
+          <li>We do not give children accounts or ask them to talk to Homa.</li>
         </ul>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Delete anytime</h2>
         <p className="mt-3 text-body">
           Email <a className="text-brand underline-offset-2 hover:underline" href="mailto:hello@mail.thankshoma.com?subject=Please%20delete%20my%20family%27s%20data">hello@mail.thankshoma.com</a>{" "}
-          with the address you signed up with and we delete your family&apos;s records, including
-          questionnaire answers and reports. A real person confirms within a few days.
+          with the address you signed up with. We delete your account and family records stored in Homa,
+          uploaded files, questionnaire answers, and reports, then confirm within a few days. We
+          may retain limited payment, security, delivery, or backup records when the law requires
+          it or until a provider&apos;s normal retention period ends.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Questions</h2>
         <p className="mt-3 text-body">
-          Reply to any email from us, or write to the address above. A person answers, not a bot.
+          Reply to any email from us, or write to the address above.
         </p>
       </main>
     </div>
