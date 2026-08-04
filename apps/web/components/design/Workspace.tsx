@@ -7,12 +7,18 @@ import type { ReactNode } from "react";
 export function Workspace({
   children,
   className = "",
+  layout = "flow",
 }: {
   children: ReactNode;
   className?: string;
+  layout?: "flow" | "stage-context";
 }) {
   return (
-    <div className={`quiet-workspace ${className}`.trim()} data-workspace="">
+    <div
+      className={`quiet-workspace quiet-workspace--${layout} ${className}`.trim()}
+      data-workspace=""
+      data-workspace-layout={layout}
+    >
       {children}
     </div>
   );

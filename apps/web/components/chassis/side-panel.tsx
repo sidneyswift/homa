@@ -23,6 +23,7 @@ export function SidePanel({
   onClose,
   initialFocusRef,
   variant = "legacy",
+  detent = "resting",
   children,
 }: {
   /** The id of the caller's own heading element, for aria-labelledby. */
@@ -35,6 +36,8 @@ export function SidePanel({
   initialFocusRef?: React.RefObject<HTMLElement | null>;
   /** Library opts into Quiet authority while older sheet consumers migrate. */
   variant?: "legacy" | "quiet";
+  /** Quiet phone sheets start at the resting detent and may expand later. */
+  detent?: "resting" | "expanded";
   children: React.ReactNode;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -106,6 +109,9 @@ export function SidePanel({
             ? "quiet-context-sheet"
             : "fixed inset-x-0 bottom-0 z-50 flex max-h-[78dvh] flex-col rounded-t-[var(--radius-xl)] border-t border-border-subtle bg-card shadow-[var(--shadow-xl)] transition-[translate] duration-(--dur-base) ease-out starting:translate-y-full motion-reduce:transition-none focus:outline-none lg:inset-x-auto lg:inset-y-0 lg:right-0 lg:max-h-none lg:w-[min(440px,92vw)] lg:rounded-l-[var(--radius-xl)] lg:rounded-tr-none lg:border-l lg:border-t-0 lg:starting:translate-x-full lg:starting:translate-y-0"
         }
+        data-context-panel={variant === "quiet" ? "" : undefined}
+        data-context-mode={variant === "quiet" ? "sheet" : undefined}
+        data-detent={variant === "quiet" ? detent : undefined}
       >
         {/* The sheet's grabber, phones only: says "this slides away". */}
         <span

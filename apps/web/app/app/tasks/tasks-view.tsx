@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Icon } from "../../../components/design/Icon";
+import { PageHeader } from "../../../components/design/PageHeader";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
 import { QuietStatus } from "../../../components/design/QuietStatus";
@@ -310,30 +311,27 @@ export function TasksView({
 
   return (
     <div data-brand-surface="tasks" data-brand-fixture="quiet-authority-v1" className="quiet-task-surface">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--homa-brand-text)]">
-            On her own schedule
-          </p>
-          <h1 className="mt-1.5 font-display text-[2rem] font-semibold leading-tight tracking-[-0.015em] text-[var(--homa-ink)]">
-            Homa&apos;s tasks
-          </h1>
-          <p className="mt-1.5 max-w-xl text-sm text-[var(--homa-muted-ink)]">
+      <PageHeader
+        eyebrow="On her own schedule"
+        heading="Homa&apos;s tasks"
+        description={
+          <>
             Homa works on these by herself: morning briefs about your kids,
             evening check-ins, and any tasks you give her. Everything she
-            does shows up below. Your kids&apos; week stays in the
-            Planner tab.
-          </p>
-        </div>
-        <QuietAction
-          aria-haspopup="dialog"
-          aria-expanded={creating}
-          onClick={() => setCreating(true)}
-          icon={<Icon name="add" size={16} />}
-        >
-          Add a task
-        </QuietAction>
-      </header>
+            does shows up below. Your kids&apos; week stays in the Planner tab.
+          </>
+        }
+        actions={
+          <QuietAction
+            aria-haspopup="dialog"
+            aria-expanded={creating}
+            onClick={() => setCreating(true)}
+            icon={<Icon name="add" size={16} />}
+          >
+            Add a task
+          </QuietAction>
+        }
+      />
 
       {creating ? (
         <TaskEditOverlay

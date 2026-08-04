@@ -7,6 +7,7 @@ import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
 import { QuietStatus } from "../../../components/design/QuietStatus";
+import { ToolShelf } from "../../../components/design/ToolShelf";
 import { KidAvatar } from "../../../components/dashboard/kid-avatar";
 import {
   buildCalendarBoard,
@@ -1753,7 +1754,7 @@ export function UnifiedPlannerView({
         </div>
       </header>
 
-      <nav className="mt-5 flex border-b border-border-subtle" aria-label="Planner views">
+      <ToolShelf label="Planner views" className="mt-5 border-b border-border-subtle">
         {VIEW_LABELS.map(({ mode, label }) => (
           <Link
             key={mode}
@@ -1768,7 +1769,7 @@ export function UnifiedPlannerView({
             {label}
           </Link>
         ))}
-      </nav>
+      </ToolShelf>
 
       {view === "hours" ? (
         <div className="pt-7">
