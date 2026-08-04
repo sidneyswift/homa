@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "c866bf300199716658f620281b2c57cbbcab220903834467b9770e07b6bfe08d",
+  "sourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -561,6 +561,10 @@
         "errorInk": "real system failure only",
         "errorTint": "real system failure background",
         "containedBand": "contained mineral band with paper foreground"
+      },
+      "webCompatibilityTokens": {
+        "mutedInk": "color-mix(in srgb, var(--homa-ink) 64%, var(--homa-canvas))",
+        "softBoundary": "color-mix(in srgb, var(--homa-control-boundary) 34%, transparent)"
       },
       "nativeColorScale": {
         "stone50": "#F7F4EE",

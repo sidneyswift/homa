@@ -35,7 +35,7 @@ export function SubjectList({
     <QuietFrame as="section" aria-label="Subjects" className="mt-4 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">Subject by subject</h2>
-        <p className="text-xs text-[color:var(--homa-ink-muted)]">
+        <p className="text-xs text-[color:var(--homa-muted-ink)]">
           strongest first {"\u00b7"} typical for {ageLabel(ageMonths)} marked on each bar
         </p>
       </div>
@@ -83,13 +83,13 @@ export function SubjectList({
                   <SubjectGauge score={score} />
                 </div>
               ) : null}
-              <p className="mt-1.5 text-sm text-[color:var(--homa-ink-muted)]">{line.sentence}</p>
+        <p className="mt-1.5 text-sm text-[color:var(--homa-muted-ink)]">{line.sentence}</p>
             </div>
           );
         })}
       </div>
       {notMapped.length > 0 ? (
-        <p className="mt-3 border-t border-[var(--homa-control-boundary)] pt-3 text-xs text-[color:var(--homa-ink-muted)]">
+        <p className="mt-3 border-t border-[var(--homa-control-boundary)] pt-3 text-xs text-[color:var(--homa-muted-ink)]">
           {notMapped.length} {notMapped.length === 1 ? "subject isn't" : "subjects aren't"} mapped
           yet. A few more answers on the report fill {notMapped.length === 1 ? "it" : "them"} in.
         </p>

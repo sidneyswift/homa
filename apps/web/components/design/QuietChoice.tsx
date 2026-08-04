@@ -87,7 +87,6 @@ export function QuietChoice({
       aria-busy={state === "loading" ? true : undefined}
       aria-describedby={describedBy}
       aria-invalid={error ? true : undefined}
-      aria-required={required ? true : undefined}
       disabled={disabled}
     >
       <legend className="quiet-choice__legend">

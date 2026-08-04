@@ -332,7 +332,7 @@ function ModalShell({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[color-mix(in_srgb,var(--homa-midnight)_42%,transparent)] p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[color-mix(in_srgb,var(--homa-midnight-action)_42%,transparent)] p-4 backdrop-blur-[2px]">
       <button
         type="button"
         className="absolute inset-0 cursor-default"
@@ -365,7 +365,7 @@ function DialogClose({
       disabled={disabled}
       onClick={onClose}
       aria-label="Close"
-      className="grid h-11 w-11 flex-none place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-transparent text-[var(--homa-ink-muted)] transition-colors hover:border-[var(--homa-ink)] hover:text-[var(--homa-ink)] disabled:cursor-not-allowed disabled:opacity-50"
+      className="grid h-11 w-11 flex-none place-items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-transparent text-[var(--homa-muted-ink)] transition-colors hover:border-[var(--homa-ink)] hover:text-[var(--homa-ink)] disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Icon name="close" size={20} />
     </button>
