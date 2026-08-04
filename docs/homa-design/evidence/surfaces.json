@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "41252c0ecd0cf53fd2b3932dd43477b325ad2195c15470d4d0a3c5ff72448b71",
+  "ownedInputFingerprint": "1e8a143f7d376f8b4bc220e5c70744acfdf84428535e4296af05a4a6f7ed6173",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -56806,7 +56806,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "45a540fad368a5e41ea9d7a698ae7e6e77f467e516ac7014a46cd24fbd541965",
+        "fixtureChecksum": "7cf53f09b9203c261f97717342753daac546bfc691a86362bd043ba0b589d671",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -56838,7 +56838,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "45a540fad368a5e41ea9d7a698ae7e6e77f467e516ac7014a46cd24fbd541965"
+        "7cf53f09b9203c261f97717342753daac546bfc691a86362bd043ba0b589d671"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -57169,7 +57169,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "6d942b30215cd9bbd60e86b04d8ca8342013938c52898bdf411fc31ac1d80167",
+        "fixtureChecksum": "69e938476a592a7788dd2ac8292e1b9b03f99d481bee225936a137e792ba7251",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -57201,7 +57201,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "6d942b30215cd9bbd60e86b04d8ca8342013938c52898bdf411fc31ac1d80167"
+        "69e938476a592a7788dd2ac8292e1b9b03f99d481bee225936a137e792ba7251"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -88664,7 +88664,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "7c4a6c2b789ecdaa45b063d51e2dce45fac81875b8d2fe2346769f484bcf8c83",
+        "fixtureChecksum": "633ffd5ad426d27229e3e6ac3da20d6a6dbc34c9c0ebc8b18ab00dd7f5771a1f",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -88699,7 +88699,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "7c4a6c2b789ecdaa45b063d51e2dce45fac81875b8d2fe2346769f484bcf8c83"
+        "633ffd5ad426d27229e3e6ac3da20d6a6dbc34c9c0ebc8b18ab00dd7f5771a1f"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -91798,7 +91798,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "d721247d569963389070f6671e0453475733b52d14a033e7f1432368ca90d374",
+        "fixtureChecksum": "87558906bf42a3269b472c3b8e5389bb0173e0505ec5d6d18a44742809e8391a",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -91835,7 +91835,7 @@
         "legacy-token-namespace"
       ],
       "currentAssetHashes": [
-        "d721247d569963389070f6671e0453475733b52d14a033e7f1432368ca90d374"
+        "87558906bf42a3269b472c3b8e5389bb0173e0505ec5d6d18a44742809e8391a"
       ],
       "disposition": "replace-active",
       "featureFlags": [],

@@ -1476,6 +1476,12 @@ export const EVENT_SCHEMAS = {
   "billing.trial_started": z.object({
     family_id: z.uuid(),
   }),
+  // Stripe matched the checkout card to another active Homa trial. The
+  // second subscription was canceled before it could make a future charge.
+  // This deliberately carries no card or matched-family identifier.
+  "billing.duplicate_trial_prevented": z.object({
+    family_id: z.uuid(),
+  }),
   // The Day 4 trial reminder actually reached Resend, for the family
   // named. Emitted only on a submitted send, so counting these against
   // billing.trial_started answers "did every trial get its reminder?"

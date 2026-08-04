@@ -7,6 +7,7 @@ import {
   startFamilyTrial,
   tierForStripeProduct,
 } from "../../../../lib/billing/wall";
+import { enforceStripeTrialCardUniqueness } from "../../../../lib/billing/duplicate-trial";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { requireFamily } from "../../../../lib/map/session";
 import { childBelongsToFamily } from "../../../../lib/map/store";
@@ -102,6 +103,14 @@ export async function GET(request: Request): Promise<Response> {
     const productId =
       typeof purchasedProduct === "string" ? purchasedProduct : purchasedProduct?.id ?? null;
     const tier = tierForStripeProduct(productId);
+    const subscription = session.subscription;
+    if (subscription && typeof subscription !== "string") {
+      const trialGuard = await enforceStripeTrialCardUniqueness(stripe, family.id, subscription);
+      if (trialGuard === "duplicate") {
+        await emitMapEvent("billing.duplicate_trial_prevented", { family_id: family.id });
+        return redirectClearingCookie(new URL("/onboarding/trial?duplicate_trial=1", requestUrl));
+      }
+    }
     const fresh = await startFamilyTrial(family.id, customerId, tier);
     if (fresh) {
       await emitMapEvent("billing.trial_started", { family_id: family.id });
@@ -112,7 +121,6 @@ export async function GET(request: Request): Promise<Response> {
     // family whose fresh checkout minted a new Stripe customer, and a
     // stale "canceled" status would wall a family that just paid (see
     // recordFamilySubscription).
-    const subscription = session.subscription;
     if (subscription && typeof subscription !== "string") {
       await recordFamilySubscription(family.id, {
         id: subscription.id,
