@@ -10,8 +10,9 @@ voice laws, `docs/homa-design/` guidelines, and the binding claims rules in
 
 1. Warm, plain, unhurried. Write like the co-op friend who happens to know the
    answer, never like a brand.
-2. Reassure before inform. She hears "you're doing fine" before any fact,
-   number, or suggestion.
+2. Lead with the useful thing. Reassure first when the moment contains a real
+   failure, scary number, or fear that she broke something. A cushion around a
+   neutral fact can sound like bad news is being withheld.
 3. Offers, never commands. "Want to try this tomorrow?" not "Do this tomorrow."
 4. Sentence case everywhere, including headings and buttons.
 5. One idea per piece. The article proves one thing; the video shows one thing;
@@ -19,17 +20,18 @@ voice laws, `docs/homa-design/` guidelines, and the binding claims rules in
 6. Show the reasoning. She distrusts conclusions that arrive without their work.
 7. Calm is the brand. If a line manufactures urgency, fear, or guilt, it is off
    brand even if it converts.
-8. Clarity beats personality (founder ruling 2026-07-08). One idea per
-   sentence, plain names for things, no metaphor stacks, no meta-commentary
-   about the copy itself. Fewer words is not the goal, fewer ideas per
-   sentence is: a 3-word line can confuse as hard as a 20-word one, and
-   cutting words that carry meaning raises the load instead of lowering it.
+8. Clear and memorable. Boring is a failure state (founder ruling 2026-07-29,
+   `copy-voice-memorable`, which overturns the 2026-07-08 priority). Order when
+   choices genuinely conflict: true, then clear, then memorable, then short.
+   One idea per load-bearing sentence, plain names for things, no metaphor
+   stacks, and no meta-commentary. Fewer words is not the goal. Cutting words
+   that carry meaning raises the load instead of lowering it.
 
 ## Hard bans (each is also a scorer assertion or an editor check)
 
 - The em dash character, anywhere. Use a comma, period, colon, or mid-dot.
-- "HOMA" in prose. It is "Homa" in sentences and conversation; the all-caps
-  form belongs to the wordmark and UI surfaces under global founder ruling D8.
+- "HOMA" anywhere. The name is always "Homa". Where the brand appears as a
+  mark, render the real `Logo` component instead of typing or transforming it.
 - "Behind", "falling behind", "catch up", "ahead of grade level" as a promise.
   Say "growing", "on track", "that's just what's next".
 - Comparing siblings, ever, in any direction.
@@ -107,7 +109,7 @@ article bodies and email bodies.
 
 | Format | Rules |
 |---|---|
-| Article | 800 to 1400 words, one idea deep. Title answers what she actually searched. Headers she can skim. Every claim traces to the bundle's signal. Ends with one clear CTA to a current Homa path, usually /onboarding or the article's canonical URL. |
+| Article | 800 to 1400 words, one idea deep. Title answers what she actually searched, and the first 100 words answer it plainly. Sections form a coherent reader journey, not a keyword outline. Every claim traces to the bundle's signal or a current primary source. Ends with one clear CTA to a current Homa path, usually /onboarding or the article's canonical URL. |
 | Video script | Hook lands inside 2 seconds, spoken or on-screen. 3 to 5 beats. 20 to 40 seconds total. One CTA. Assume sound-off viewing works via captions. |
 | TikTok caption | Max 2200 chars. Hook line first, 3 to 5 hashtags, no hashtag walls. |
 | Instagram caption | Max 2200 chars. Line breaks for breath. 3 to 5 hashtags. |

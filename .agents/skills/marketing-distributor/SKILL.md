@@ -23,10 +23,14 @@ either fully ships or fully reports why it cannot.
 **Blog (works today, git is the channel):**
 1. Copy `article.mdx` to `apps/web/content/blog/<slug>.mdx` (slug = bundle
    slug). Copy `images/` contents to `apps/web/public/blog/<slug>/`.
-2. Verify: `pnpm --filter web typecheck && pnpm --filter web build`. A
-   frontmatter violation fails the build; that is the publish gate working.
-   Fix inside the bundle, re-copy, never hand-edit only the apps/web copy.
-3. Commit: `Blog: publish <slug>`. Canonical URL:
+2. Prove the bundle article and web copy are byte-identical. Fix inside the
+   bundle and re-copy; never hand-edit only the `apps/web` mirror.
+3. Verify: `pnpm --filter web typecheck && pnpm --filter web build`. Inspect the
+   built article output or local route, not only the command exit code. Confirm
+   intended tables, headings, and links rendered as HTML; no Markdown pipes or
+   link syntax are visible; the current product link and CTA are present; and
+   no stale product-state language appears in visible copy.
+4. Commit: `Blog: publish <slug>`. Canonical URL:
    `https://thankshoma.com/blog/<slug>`.
 
 **Social via Postiz (blocked-on-human until accounts exist):**
@@ -66,6 +70,14 @@ recipients per the ruling's scope, aggregate reporting only.
 4. Update the status column in `marketing/workflows/demand-engine.md` if
    reality changed (a channel came alive).
 5. Commit: `Marketing: publish <bundle> (<formats>)`.
+
+For a blog, publishing is not complete at the commit. Ship through the normal
+branch, pull request, required-check, merge, and Vercel production flow. Wait
+for the merge deployment to report Ready, then fetch the canonical article,
+blog index, and sitemap. Verify status 200, canonical metadata, Article and
+Breadcrumb JSON-LD, index and sitemap inclusion, intended rendered structures,
+current internal links, and no stale product-state language in visible copy.
+Record the verified canonical URL in `distribution.md`.
 
 ## Laws (marketing/AGENTS.md, restated)
 

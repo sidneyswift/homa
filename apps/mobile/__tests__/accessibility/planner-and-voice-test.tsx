@@ -101,12 +101,18 @@ function voiceSession(
 
 describe("large-text Planner accessibility", () => {
   beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2030-01-15T12:00:00Z"));
     mockWindowDimensions.mockReturnValue({
       fontScale: 2,
       width: 320,
       height: 640,
       scale: 3,
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("replaces the dense grid with named 56-point day actions", async () => {
