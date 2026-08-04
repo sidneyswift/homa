@@ -23,7 +23,15 @@ import {
 } from "./map-answer-attempt";
 import { buildQueue } from "./question-queue";
 import { ReportRail, type RailSubject } from "./report-rail";
-import { QuietAction, QuietFeedback, QuietFrame, QuietStatus } from "../../components/design";
+import {
+  ContextPanel,
+  QuietAction,
+  QuietFeedback,
+  QuietFrame,
+  QuietStatus,
+  WorkStage,
+  Workspace,
+} from "../../components/design";
 
 /**
  * S3: the checklist, straight in with no intro screen (read-through ruling:
@@ -532,8 +540,16 @@ export function ChecklistStep({
   return (
     <div
       data-brand-surface="onboarding-checklist"
-      className={`quiet-onboarding__checklist ${compact ? "" : "lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10"}`.trim()}
+      className="quiet-onboarding__checklist"
     >
+      <Workspace
+        layout={compact ? "flow" : "stage-context"}
+        className="quiet-onboarding__checklist-workspace"
+      >
+      <WorkStage
+        labelledBy="onboarding-checklist-question"
+        className="quiet-onboarding__checklist-stage"
+      >
       <div>
         {/* Two tiers so "who" and "what section" each read on their own
             (founder feedback 2026-07-07, mobile review: kid + subject
@@ -603,7 +619,7 @@ export function ChecklistStep({
                 2026-07-08), so "Story counts out loud to 10?" always
                 names who's being asked about, load-bearing with two or
                 more kids in one sitting. */}
-            <h2 className="quiet-onboarding__question-title">
+            <h2 id="onboarding-checklist-question" className="quiet-onboarding__question-title">
               {personalizeStatement(child.name, current.item)}?
             </h2>
           </div>
@@ -690,9 +706,23 @@ export function ChecklistStep({
         </QuietAction>
       </div>
 
+      </WorkStage>
+
       {compact ? null : (
-        <ReportRail childName={child.name} subjects={railSubjects} />
+        <ContextPanel
+          mode="docked"
+          labelledBy="onboarding-checklist-report"
+          className="quiet-onboarding__report-context hidden lg:block"
+        >
+          <ReportRail
+            childName={child.name}
+            subjects={railSubjects}
+            contentOnly
+            headingId="onboarding-checklist-report"
+          />
+        </ContextPanel>
       )}
+      </Workspace>
     </div>
   );
 }

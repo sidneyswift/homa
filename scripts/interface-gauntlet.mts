@@ -39,7 +39,7 @@ export const GAUNTLET_ROUTES = [
   { path: "/", requiredMarkers: ["quiet-landing", "quiet-nav", "quiet-footer"] },
   { path: "/signin", requiredMarkers: ["quiet-auth-shell", "quiet-frame"] },
   { path: "/onboarding", requiredMarkers: ["quiet-nav", "quiet-footer", "quiet-action"] },
-  { path: "/design/quiet-authority", requiredMarkers: ["quiet-fixture", "quiet-frame", "quiet-action", "quiet-status"] },
+  { path: "/design/quiet-authority", requiredMarkers: ["quiet-fixture", "quiet-frame", "quiet-action", "quiet-status", "quiet-authenticated-context-v1"] },
 ] as const;
 
 export const GAUNTLET_ROUTE_MANIFEST_PATHS = [
