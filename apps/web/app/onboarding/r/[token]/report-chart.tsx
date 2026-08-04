@@ -76,6 +76,7 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
 
   return (
     <svg
+      className="quiet-report__chart"
       viewBox={`0 0 ${WIDTH} ${height}`}
       role="img"
       aria-label="Months ahead of age, one dot per subject"
@@ -92,10 +93,10 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
             strokeWidth={months === 0 ? 2 : 1}
           />
           <text
+            className="quiet-report__chart-axis-label"
             x={x(months)}
             y={12}
             textAnchor="middle"
-            style={{ font: "500 11px var(--font-mono)", fill: "var(--homa-muted-ink)" }}
           >
             {months === 0 ? "at age" : `+${months}${months === 24 ? " mo" : ""}`}
           </text>
@@ -118,11 +119,10 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
         return (
           <g key={score.subjectId}>
             <text
+              className="quiet-report__chart-subject"
               x={PAD_L}
               y={labelY}
               style={{
-                font: "600 13px var(--font-sans)",
-                fill: "var(--homa-ink)",
                 paintOrder: "stroke",
                 stroke: "var(--homa-paper)",
                 strokeWidth: 4,
@@ -152,15 +152,14 @@ function StackedChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectSco
               fill={color}
               stroke="var(--homa-paper)"
               strokeWidth={2.5}
-              style={{ filter: "drop-shadow(0 0 1px rgba(78,70,62,.35))" }}
+              className="quiet-report__chart-dot"
             />
             <text
+              className="quiet-report__chart-value"
               x={flip ? dotX - 15 : dotX + 15}
               y={cy + 4}
               textAnchor={flip ? "end" : "start"}
               style={{
-                font: "500 11px var(--font-mono)",
-                fill: "var(--homa-muted-ink)",
                 paintOrder: "stroke",
                 stroke: "var(--homa-paper)",
                 strokeWidth: 4,
@@ -189,6 +188,7 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
 
   return (
     <svg
+      className="quiet-report__chart"
       viewBox={`0 0 ${WIDTH} ${height}`}
       role="img"
       aria-label="Months ahead of age, one dot per subject"
@@ -205,10 +205,10 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
             strokeWidth={months === 0 ? 2 : 1}
           />
           <text
+            className="quiet-report__chart-axis-label"
             x={x(months)}
             y={14}
             textAnchor="middle"
-            style={{ font: "500 10px var(--font-mono)", fill: "var(--homa-muted-ink)" }}
           >
             {months === 0 ? "at age" : `+${months}${months === 24 ? " mo" : ""}`}
           </text>
@@ -224,10 +224,10 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
         return (
           <g key={score.subjectId}>
             <text
+              className="quiet-report__chart-subject"
               x={LABEL_W - 10}
               y={cy + 4}
               textAnchor="end"
-              style={{ font: "600 12px var(--font-sans)", fill: "var(--homa-ink)" }}
             >
               {domain?.displayName ?? score.subjectId}
             </text>
@@ -252,12 +252,12 @@ function WideChart({ rows, prior }: { rows: SubjectScore[]; prior: SubjectScore[
               fill={rowColor(score)}
               stroke="var(--homa-paper)"
               strokeWidth={2.5}
-              style={{ filter: "drop-shadow(0 0 1px rgba(78,70,62,.35))" }}
+              className="quiet-report__chart-dot"
             />
             <text
+              className="quiet-report__chart-value"
               x={dotX + 14}
               y={cy + 4}
-              style={{ font: "500 10px var(--font-mono)", fill: "var(--homa-muted-ink)" }}
             >
               {rowLabel(score)}
             </text>

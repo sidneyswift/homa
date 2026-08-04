@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import {
   ageInMonths,
@@ -11,6 +10,8 @@ import {
 } from "@homa/core";
 
 import { Logo } from "../../../../../components/brand/Logo";
+import { QuietAction } from "../../../../../components/design/QuietAction";
+import { QuietFrame } from "../../../../../components/design/QuietFrame";
 import { getReportByToken } from "../../../../../lib/map/store";
 import { movementBetween } from "../growth-story";
 
@@ -50,11 +51,9 @@ export default async function EvidencePackPage({
 
   if (!report) {
     return (
-      <main className="mx-auto w-full max-w-xl px-6 py-20">
+      <main className="quiet-print-surface mx-auto w-full max-w-xl px-6 py-20">
         <Logo size={26} />
-        <h1 className="mt-8 font-display text-2xl font-bold text-strong">
-          This link isn&apos;t active.
-        </h1>
+        <h1 className="quiet-artifact__title mt-8">This link isn&apos;t active.</h1>
       </main>
     );
   }
@@ -109,20 +108,27 @@ export default async function EvidencePackPage({
   }
 
   return (
-    <div data-brand-surface="report-evidence" className="quiet-report quiet-print-surface min-h-screen bg-[var(--homa-canvas)] pb-16 print:bg-[var(--homa-paper)]">
+    <div
+      data-brand-surface="report-evidence"
+      className="quiet-report quiet-print-surface min-h-screen bg-[var(--homa-canvas)] pb-16 print:bg-[var(--homa-paper)]"
+    >
       <main className="mx-auto w-full max-w-2xl px-4 pt-6">
-        <div className="quiet-frame overflow-hidden rounded-[var(--homa-radius-card)] border-[var(--homa-control-boundary)] shadow-lg print:border-0 print:shadow-none">
+        <QuietFrame
+          as="div"
+          tone="paper"
+          className="overflow-hidden rounded-[var(--homa-radius-card)] border-[var(--homa-control-boundary)] shadow-lg print:border-0 print:shadow-none"
+        >
           <div className="quiet-report__hero px-7 pb-6 pt-8 sm:px-10" style={{ background: "var(--homa-canvas)" }}>
             <div className="flex items-center gap-3">
               <Logo size={24} />
-              <span className="font-mono text-xs uppercase tracking-widest text-strong/70">
+              <span className="quiet-artifact__meta">
                 growth evidence pack {"\u00b7"} {generatedDate}
               </span>
             </div>
-            <h1 className="mt-4 font-display text-3xl font-bold leading-tight text-strong">
+            <h1 className="quiet-artifact__title mt-4">
               {report.childName}, {ageLabel(months)}
             </h1>
-            <p className="mt-1 text-sm text-muted">
+            <p className="quiet-artifact__lede mt-1">
               Prepared from a parent&apos;s structured observations, each checked against published
               national benchmarks (bank {report.bankVersion}). Not a test; every claim below cites
               its source.
@@ -130,35 +136,29 @@ export default async function EvidencePackPage({
           </div>
 
           <div className="px-7 py-7 sm:px-10">
-            <h2 className="font-display text-lg font-semibold text-strong">Composite picture</h2>
-            <ul className="mt-2 flex flex-col gap-1 text-sm text-body">
+            <h2 className="quiet-artifact__section-title">Composite picture</h2>
+            <ul className="quiet-artifact__body-copy mt-2 flex flex-col gap-1">
               <li>
-                <b>{scores.mappedCount} of {scores.totalSubjects}</b> subjects mapped, from{" "}
-                <b>{scores.observationCount}</b> parent observations.
+                <strong>{scores.mappedCount} of {scores.totalSubjects}</strong> subjects mapped, from{" "}
+                <strong>{scores.observationCount}</strong> parent observations.
               </li>
               <li>
-                Against age-typical anchors: <b>{positions.ahead}</b> past typical,{" "}
-                <b>{positions.onTrack}</b> at typical, <b>{positions.growing}</b> approaching
+                Against age-typical anchors: <strong>{positions.ahead}</strong> past typical,{" "}
+                <strong>{positions.onTrack}</strong> at typical, <strong>{positions.growing}</strong> approaching
                 typical (in progress).
               </li>
             </ul>
 
             {growthLines.length > 0 ? (
               <>
-                <h2 className="mt-7 font-display text-lg font-semibold text-strong">
-                  Documented growth between check-ins
-                </h2>
-                <ul className="mt-2 flex flex-col gap-1 text-sm text-body">
-                  {growthLines.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
+                <h2 className="quiet-artifact__section-title mt-7">Documented growth between check-ins</h2>
+                <ul className="quiet-artifact__body-copy mt-2 flex flex-col gap-1">
+                  {growthLines.map((line) => <li key={line}>{line}</li>)}
                 </ul>
               </>
             ) : null}
 
-            <h2 className="mt-7 font-display text-lg font-semibold text-strong">
-              Subject-by-subject record
-            </h2>
+            <h2 className="quiet-artifact__section-title mt-7">Subject-by-subject record</h2>
             <div className="mt-3 flex flex-col gap-4">
               {scores.strengthOrder.map((subjectId) => {
                 const score = scores.subjects.find((entry) => entry.subjectId === subjectId);
@@ -167,24 +167,21 @@ export default async function EvidencePackPage({
                 const line = subjectLine(score, report.childName);
                 const rows = answersByDomain.get(subjectId) ?? [];
                 return (
-                  <div key={subjectId} className="rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)] p-4">
+                  <div key={subjectId} className="quiet-artifact__record">
                     <div className="flex flex-wrap items-baseline gap-2">
-                      <h3 className="font-semibold text-strong">{domain.displayName}</h3>
-                      <span className="font-mono text-xs text-muted">{line.badge}</span>
-                      {line.numberLabel ? (
-                        <span className="font-mono text-xs text-muted">{line.numberLabel}</span>
-                      ) : null}
+                      <h3 className="quiet-artifact__record-title">{domain.displayName}</h3>
+                      <span className="quiet-artifact__record-badge">{line.badge}</span>
+                      {line.numberLabel ? <span className="quiet-artifact__record-badge">{line.numberLabel}</span> : null}
                     </div>
                     <ul className="mt-2 flex flex-col gap-1.5">
                       {rows
                         .sort((a, b) => a.typicalMonths - b.typicalMonths)
                         .map((row) => (
-                          <li key={row.statement} className="text-xs text-body">
-                            <span className="text-strong">{row.statement}?</span>{" "}
-                            <b>{ANSWER_LABELS[row.answer]}</b>
-                            <span className="text-subtle">
-                              {" "}
-                              {"\u00b7"} typical by {ageLabel(row.typicalMonths)}
+                          <li key={row.statement} className="quiet-artifact__record-line">
+                            <span className="font-semibold">{row.statement}?</span>{" "}
+                            <strong className="quiet-artifact__answer">{ANSWER_LABELS[row.answer]}</strong>
+                            <span className="quiet-artifact__fine">
+                              {" "}{"\u00b7"} typical by {ageLabel(row.typicalMonths)}
                               {row.standards.length > 0 ? ` \u00b7 ${row.standards.join(", ")}` : ""}
                             </span>
                           </li>
@@ -195,47 +192,44 @@ export default async function EvidencePackPage({
               })}
             </div>
 
-            <h2 className="mt-7 font-display text-lg font-semibold text-strong">Benchmark sources</h2>
-            <ul className="mt-2 flex flex-col gap-1">
+            <h2 className="quiet-artifact__section-title mt-7">Benchmark sources</h2>
+            <ul className="quiet-artifact__body-copy mt-2 flex flex-col gap-1">
               {Array.from(allSourceKeys).map((key) => {
                 const source = MAP_SOURCES[key];
                 if (!source) return null;
-                return (
-                  <li key={key} className="text-xs text-muted">
-                    {source.label}
-                  </li>
-                );
+                return <li key={key}>{source.label}</li>;
               })}
             </ul>
 
-            <div className="mt-7 rounded-[var(--homa-radius-control)] bg-[var(--homa-canvas)] p-4 text-xs text-[var(--homa-muted-ink)]">
+            <div className="quiet-artifact__notice mt-7">
               <p>
-                <b className="text-strong">What this document is, and is not.</b> This record was
-                built from a parent&apos;s own observations, organized and checked against the
-                published national benchmarks listed above. It is not a standardized test, not a
-                medical or developmental evaluation, and it does not satisfy any state
-                requirement of any kind. Numbers describe distance from age-typical anchors;
-                every child grows in their own order.
+                <strong>What this document is, and is not.</strong> This record was built from a
+                parent&apos;s own observations, organized and checked against the published national
+                benchmarks listed above. It is not a standardized test, not a medical or
+                developmental evaluation, and it does not satisfy any state requirement of any
+                kind. Numbers describe distance from age-typical anchors; every child grows in
+                their own order.
               </p>
               <p className="mt-2">
                 Method, in full:{" "}
-                <Link href="/onboarding/method" className="text-[var(--homa-brand-text)] underline">
+                <a className="quiet-artifact__link" href="/onboarding/method">
                   thankshoma.com/onboarding/method
-                </Link>
+                </a>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--homa-soft-boundary)] px-7 py-4 text-sm text-[var(--homa-muted-ink)] sm:px-10">
+          <footer className="quiet-artifact__footer">
             <span>made with Homa for {report.childName}</span>
-            <Link
+            <QuietAction
+              kind="quiet"
               href={`/onboarding/r/${token}`}
-              className="text-[var(--homa-brand-text)] underline-offset-2 hover:underline print:hidden"
+              className="quiet-artifact__link quiet-print-hidden"
             >
               back to the report
-            </Link>
-          </div>
-        </div>
+            </QuietAction>
+          </footer>
+        </QuietFrame>
       </main>
     </div>
   );

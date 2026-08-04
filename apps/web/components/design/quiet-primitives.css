@@ -1952,10 +1952,100 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 .quiet-report-preview__note-copy { margin: 4px 0 0; color: var(--homa-ink); font: 400 0.875rem/1.35 var(--font-sans); }
 .quiet-report-preview__footer { padding-top: 4px; color: var(--homa-muted-ink); font-size: 0.625rem; font-weight: 600; letter-spacing: 0.12em; text-align: center; }
 .quiet-print-surface { color: var(--homa-ink); }
+.quiet-artifact__meta {
+  color: var(--homa-muted-ink);
+  font: 700 0.6875rem/1.3 var(--font-sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.quiet-artifact__title {
+  margin: 0;
+  color: var(--homa-ink);
+  font: 600 clamp(2rem, 5vw, 2.5rem)/1.08 var(--font-display);
+  letter-spacing: -0.02em;
+}
+.quiet-artifact__lede,
+.quiet-artifact__body-copy {
+  color: color-mix(in srgb, var(--homa-ink) 76%, var(--homa-canvas));
+  font: 400 0.875rem/1.55 var(--font-sans);
+}
+.quiet-artifact__section-title {
+  margin: 0;
+  color: var(--homa-ink);
+  font: 600 1.125rem/1.25 var(--font-display);
+}
+.quiet-artifact__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  color: var(--homa-muted-ink);
+  font: 600 0.75rem/1.4 var(--font-sans);
+}
+.quiet-artifact__metric-value { color: var(--homa-ink); font-weight: 700; }
+.quiet-artifact__strength-card {
+  border: 1px solid color-mix(in srgb, var(--homa-highlight-ink) 25%, var(--homa-control-boundary));
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-highlight-tint);
+  padding: 16px;
+}
+.quiet-artifact__strength-name { color: var(--homa-highlight-ink); font: 700 0.875rem/1.25 var(--font-sans); }
+.quiet-artifact__strength-value { margin-top: 4px; color: var(--homa-highlight-ink); font: 600 1.5rem/1.1 var(--font-sans); }
+.quiet-artifact__strength-unit { font-size: 0.75rem; font-weight: 500; }
+.quiet-artifact__chart-frame {
+  border: 1px solid var(--homa-soft-boundary);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-paper);
+  padding: 16px;
+}
+.quiet-report__chart { color: var(--homa-ink); }
+.quiet-report__chart-axis-label,
+.quiet-report__chart-value {
+  fill: var(--homa-muted-ink);
+  font: 600 0.6875rem/1 var(--font-sans);
+}
+.quiet-report__chart-subject { fill: var(--homa-ink); font: 600 0.75rem/1 var(--font-sans); }
+.quiet-report__chart-dot { filter: drop-shadow(0 0 1px color-mix(in srgb, var(--homa-ink) 35%, transparent)); }
+.quiet-artifact__notice {
+  border: 1px solid var(--homa-soft-boundary);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-canvas);
+  padding: 16px;
+  color: var(--homa-muted-ink);
+  font: 400 0.75rem/1.5 var(--font-sans);
+}
+.quiet-artifact__fine { color: var(--homa-muted-ink); font: 400 0.6875rem/1.45 var(--font-sans); }
+.quiet-artifact__record {
+  border: 1px solid var(--homa-soft-boundary);
+  border-radius: var(--homa-radius-control);
+  padding: 16px;
+}
+.quiet-artifact__record-title { color: var(--homa-ink); font: 600 1rem/1.25 var(--font-sans); }
+.quiet-artifact__record-badge { color: var(--homa-muted-ink); font: 600 0.6875rem/1.35 var(--font-sans); }
+.quiet-artifact__record-line { color: var(--homa-ink); font: 400 0.75rem/1.5 var(--font-sans); }
+.quiet-artifact__answer { font-weight: 700; }
+.quiet-artifact__link { color: var(--homa-brand-text); text-decoration: underline; text-underline-offset: 2px; }
+.quiet-artifact__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--homa-soft-boundary);
+  padding: 16px 28px;
+  color: var(--homa-muted-ink);
+  font: 400 0.8125rem/1.4 var(--font-sans);
+}
+.quiet-print-hidden { display: inline-flex; }
 
 @media print {
+  @page { size: letter; margin: 0.55in; }
   .quiet-print-surface { background: var(--homa-paper) !important; }
   .quiet-print-surface .quiet-frame { border: 0; box-shadow: none; }
+  .quiet-print-surface .quiet-print-hidden { display: none !important; }
+  .quiet-print-surface .quiet-artifact__chart-frame,
+  .quiet-print-surface .quiet-artifact__record { break-inside: avoid; }
+  .quiet-print-surface,
+  .quiet-print-surface * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 @media (prefers-reduced-motion: reduce) {
