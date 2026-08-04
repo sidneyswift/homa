@@ -21,13 +21,13 @@ const QUIET_LANDING_SOURCE = readFileSync(new URL("./QuietLanding.tsx", import.m
 const LANDING_PAGE_SOURCE = readFileSync(new URL("../../app/page.tsx", import.meta.url), "utf8");
 
 test("the landing hero names Homa's category and primary action", () => {
-  assert.equal(HERO_COPY.headline, "Homeschool, handled.");
+  assert.equal(HERO_COPY.headline, "Less admin. More teaching.");
   assert.equal(HERO_COPY.primaryAction, "Start your 7 free days");
-  assert.equal(HERO_COPY.eyebrow, "Your homeschool assistant");
-  assert.match(HERO_COPY.body, /AI assistant for homeschool parents/i);
-  assert.match(HERO_COPY.body, /plans the week/i);
-  assert.match(HERO_COPY.body, /practice pages from the lesson for children ages 2 to 7/i);
-  assert.match(HERO_COPY.body, /teaching hours you report/i);
+  assert.equal(HERO_COPY.eyebrow, "Homeschool, handled");
+  assert.match(HERO_COPY.body, /plans your week/i);
+  assert.match(HERO_COPY.body, /tailored materials/i);
+  assert.match(HERO_COPY.body, /adapts to growth/i);
+  assert.match(HERO_COPY.body, /Meet your kid where they are/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -76,7 +76,7 @@ test("the landing states the current practice-page age boundary before signup", 
   const practice = CAPABILITY_ITEMS.find(({ id }) => id === "practice");
 
   assert.ok(practice);
-  assert.match(HERO_COPY.body, /ages 2 to 7/i);
+  assert.match(HERO_COPY.body, /tailored materials/i);
   assert.match(practice.body, /ages 2 to 7/i);
 });
 
