@@ -11,6 +11,7 @@ import {
 } from "@homa/core";
 
 import type { FlowChild } from "./flow-types";
+import { QuietAction, QuietChoice, QuietFeedback, QuietFrame, QuietStatus } from "../../components/design";
 import {
   classifyMapAnswerResponse,
   createMapAnswerAttempt,
@@ -317,132 +318,133 @@ export function DeepDiveStep({
 
   if (mode === null) {
     return (
-      <div>
-        <h1 className="font-display text-3xl font-bold leading-tight text-[var(--homa-ink)]">
+      <div data-brand-surface="onboarding-deep-dive" className="quiet-onboarding__deep-dive">
+        <h1 className="quiet-onboarding__step-heading">
           Going deeper on {domain.displayName.toLowerCase()}
         </h1>
-        <p className="mt-3 text-[var(--homa-ink)]">
+        <p className="quiet-onboarding__step-copy mt-3">
           A few more questions to pin down where {child.name} stands and where a plan should
           start. Two ways to do it:
         </p>
-        <div className="mt-6 flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => chooseMode("parent")}
-            className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 text-left shadow-sm transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)]"
-          >
-            <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">Answer from what you&apos;ve seen</p>
-            <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">
-              Your own noticing, from memory, right now.
-            </p>
-          </button>
-          <button
-            type="button"
-            onClick={() => chooseMode("together")}
-            className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-5 text-left shadow-sm transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)]"
-          >
-            <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">Sit with {child.name} and try them</p>
-            <p className="mt-1 text-sm text-[var(--homa-muted-ink)]">
-              Try each one together, casually. No test energy, just the two of you finding out.
-            </p>
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={onExit}
-          className="mt-6 text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
-        >
+        <QuietChoice
+          name="deep-dive-mode"
+          label="How would you like to begin?"
+          value={mode ?? ""}
+          className="mt-6"
+          options={[
+            {
+              value: "parent",
+              label: "Answer from what you've seen",
+              description: "Your own noticing, from memory, right now.",
+            },
+            {
+              value: "together",
+              label: `Sit with ${child.name} and try them`,
+              description: "Try each one together, casually. No test energy, just the two of you finding out.",
+            },
+          ]}
+          onChange={(value) => {
+            if (typeof value === "string" && (value === "parent" || value === "together")) {
+              chooseMode(value);
+            }
+          }}
+        />
+        <QuietAction kind="quiet" type="button" onClick={onExit} className="quiet-onboarding__exit-action mt-6">
           back to the report
-        </button>
+        </QuietAction>
       </div>
     );
   }
 
   if (flushing || !current) {
     return (
-      <div aria-busy="true" className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-        <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
+      <QuietFrame
+        as="article"
+        aria-busy="true"
+        data-brand-layer="onboarding-deep-dive-saving"
+        className="quiet-onboarding__answer-state p-6"
+      >
+        <p className="quiet-onboarding__loading-title">
           Deep dive done.
         </p>
         {saveError && !flushing ? (
-          <>
-            <p className="mt-2 text-[var(--homa-ink)]">{saveError}</p>
-            <button
-              type="button"
-              onClick={() => finish()}
-              className="mt-4 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 text-sm font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
-            >
-              try saving again
-            </button>
-          </>
+          <QuietFeedback tone="error" className="mt-3">{saveError}</QuietFeedback>
         ) : (
-          <p className="mt-2 text-[var(--homa-ink)]">Updating {child.name}&apos;s report{"\u2026"}</p>
+          <QuietStatus tone="info" className="mt-3">Updating {child.name}&apos;s report{"\u2026"}</QuietStatus>
         )}
-      </div>
+        {saveError && !flushing ? (
+          <QuietAction kind="secondary" type="button" onClick={() => finish()} className="mt-4">
+            Try saving again
+          </QuietAction>
+        ) : null}
+      </QuietFrame>
     );
   }
 
   return (
-    <div>
+    <div data-brand-surface="onboarding-deep-dive" className="quiet-onboarding__deep-dive">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-[var(--homa-muted-ink)]">
+        <p className="quiet-onboarding__deep-dive-meta">
           {child.name} {"\u00b7"} {domain.displayName} deep dive
         </p>
-        <p className="font-mono text-xs text-[var(--homa-muted-ink)]">
+        <p className="quiet-onboarding__deep-dive-count">
           {sittingCount + 1} of up to {DEEP_DIVE_CAP}
         </p>
       </div>
 
       {mode === "together" && sittingCount === 0 ? (
-        <p className="mt-4 rounded-[var(--homa-radius-control)] bg-[var(--homa-constructive-tint)] px-4 py-3 text-sm text-[var(--homa-ink)]">
+        <QuietStatus tone="constructive" className="mt-4">
           Keep it playful: &ldquo;hey {child.name}, want to try something?&rdquo; Stop anytime,
           everything saves as you go.
-        </p>
+        </QuietStatus>
       ) : null}
 
-      <div className="mt-3 flex min-h-[19rem] flex-col rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-        <p className="text-sm font-medium text-[var(--homa-muted-ink)]">
+      <QuietFrame as="article" data-brand-layer="onboarding-deep-dive-question" className="quiet-onboarding__question-card mt-3 p-6">
+        <p className="quiet-onboarding__question-kicker">
           {mode === "together" ? `Try it with ${child.name}:` : `From what you've seen:`}
         </p>
-        <h2 className="mt-1 font-display text-xl font-semibold leading-snug text-[var(--homa-ink)]">
+        <h2 className="quiet-onboarding__question-title mt-1">
           {personalizeStatement(child.name, current)}?
         </h2>
 
-        <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
+        <div className="quiet-onboarding__answer-grid mt-auto pt-5">
           {CHIP_LABELS.map(([value, label]) => (
-            <button
+            <QuietAction
               key={value}
               type="button"
               onClick={() => answerCurrent(value)}
-              className="min-h-12 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-3 text-sm font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)] motion-safe:active:scale-[var(--press-scale)]"
+              kind="secondary"
+              className="quiet-onboarding__answer-chip"
             >
               {label}
-            </button>
+            </QuietAction>
           ))}
         </div>
-        <div className="mt-3 flex items-center gap-4">
+        <div className="quiet-onboarding__deep-dive-actions mt-3">
           {sittingHistory.length > 0 ? (
-            <button
+            <QuietAction
+              kind="quiet"
               type="button"
               onClick={() => void goBack()}
               disabled={undoing}
-              className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+              className="quiet-onboarding__text-action"
             >
-              {undoing ? "undoing..." : `${"\u2190"} back`}
-            </button>
+              {undoing ? "Undoing..." : "← Back"}
+            </QuietAction>
           ) : null}
-          <button
+          <QuietAction
+            kind="quiet"
             type="button"
             onClick={() => finish()}
-            className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+            className="quiet-onboarding__text-action"
           >
             stop here and update the report
-          </button>
+          </QuietAction>
         </div>
         {saveError ? (
-          <p className="mt-3 text-sm text-[var(--homa-ink)]">{saveError}</p>
+          <QuietFeedback tone="error" className="mt-3">{saveError}</QuietFeedback>
         ) : null}
-      </div>
+      </QuietFrame>
     </div>
   );
 }

@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "4e66d43156375fe32081abec65b84b7e8125ca6926ae680e7cbac7808d772dd7",
+  "ownedInputFingerprint": "075ff5d8c4704601599cd7e4b6cbed6ceac137aa9514fc5a7f9745832745c318",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -82857,7 +82857,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "ea1eb1f21adcb7c07ed8fc07a0877beff899780ee9723fb5161fc76ddd6a2ebb",
+        "fixtureChecksum": "eae83724ec8a9e01b7c90fb14498938f3c1a2af3f67500eb275bcc438bd45efc",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -82891,10 +82891,10 @@
         ]
       },
       "legacySignatures": [
-        "legacy-coral-action"
+        "legacy-token-namespace"
       ],
       "currentAssetHashes": [
-        "ea1eb1f21adcb7c07ed8fc07a0877beff899780ee9723fb5161fc76ddd6a2ebb"
+        "eae83724ec8a9e01b7c90fb14498938f3c1a2af3f67500eb275bcc438bd45efc"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -82986,7 +82986,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "e6132ba615e4bb3fd525e89689c5fdea1baf5835376f8e4c675b198c5cf1ccb8",
+        "fixtureChecksum": "226a3ea0429bc28b6a003bb89c20f1ce7b32650d2b2b5a197b82b82b4963fa44",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -83021,7 +83021,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "e6132ba615e4bb3fd525e89689c5fdea1baf5835376f8e4c675b198c5cf1ccb8"
+        "226a3ea0429bc28b6a003bb89c20f1ce7b32650d2b2b5a197b82b82b4963fa44"
       ],
       "disposition": "replace-active",
       "featureFlags": [],

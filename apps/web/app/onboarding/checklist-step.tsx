@@ -23,6 +23,7 @@ import {
 } from "./map-answer-attempt";
 import { buildQueue } from "./question-queue";
 import { ReportRail, type RailSubject } from "./report-rail";
+import { QuietAction, QuietFeedback, QuietFrame, QuietStatus } from "../../components/design";
 
 /**
  * S3: the checklist, straight in with no intro screen (read-through ruling:
@@ -456,31 +457,37 @@ export function ChecklistStep({
 
   if (flushing || !current || !domain) {
     return (
-      <div aria-busy="true" className="mx-auto max-w-[36rem] rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm">
-        <p className="font-display text-lg font-semibold text-[var(--homa-ink)]">
+      <QuietFrame
+        as="article"
+        aria-busy="true"
+        data-brand-layer="onboarding-checklist-saving"
+        className="quiet-onboarding__answer-state mx-auto max-w-[36rem] p-6"
+      >
+        <p className="quiet-onboarding__loading-title">
           Questionnaire done.
         </p>
         {saveError && !flushing ? (
           <>
-            <p className="mt-2 text-[var(--homa-ink)]">{saveError}</p>
-            <button
+            <QuietFeedback tone="error" className="mt-3">{saveError}</QuietFeedback>
+            <QuietAction
+              kind="secondary"
               type="button"
               onClick={() => void completeWhenSaved()}
-              className="mt-4 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-4 py-2 text-sm font-semibold text-[var(--homa-ink)] transition duration-(--homa-motion-fast) ease-out hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
+              className="mt-4"
             >
-              try saving again
-            </button>
+              Try saving again
+            </QuietAction>
           </>
         ) : (
-          <p className="mt-2 flex items-center gap-2 text-[var(--homa-ink)]" role="status">
+          <QuietStatus tone="info" className="mt-3">
             <span
-              className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--homa-midnight-action)] motion-reduce:animate-none"
+              className="quiet-onboarding__status-dot animate-pulse motion-reduce:animate-none"
               aria-hidden="true"
             />
             Saving the last answers{"\u2026"}
-          </p>
+          </QuietStatus>
         )}
-      </div>
+      </QuietFrame>
     );
   }
 
@@ -524,9 +531,8 @@ export function ChecklistStep({
 
   return (
     <div
-      className={
-        compact ? "" : "lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10"
-      }
+      data-brand-surface="onboarding-checklist"
+      className={`quiet-onboarding__checklist ${compact ? "" : "lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10"}`.trim()}
     >
       <div>
         {/* Two tiers so "who" and "what section" each read on their own
@@ -537,28 +543,28 @@ export function ChecklistStep({
             they're actually answering about right now. */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="shrink-0 rounded-[var(--homa-radius-control)] bg-[var(--homa-info-tint)] px-2.5 py-1 text-xs font-bold text-[var(--homa-brand-text)]">
+            <span className="quiet-onboarding__kid-chip">
               {child.name}
             </span>
             {headerInterests ? (
-              <span className="truncate text-xs text-[var(--homa-muted-ink)]">
+              <span className="quiet-onboarding__interest-line truncate">
                 {headerInterests}
               </span>
             ) : null}
           </div>
-          <p className="shrink-0 font-mono text-xs text-[var(--homa-muted-ink)]">{timeLabel}</p>
+          <p className="quiet-onboarding__time-label">{timeLabel}</p>
         </div>
-        <p className="mt-2 truncate font-display text-lg font-bold text-[var(--homa-ink)]">
+        <p className="quiet-onboarding__subject-label mt-2 truncate">
           {domain.displayName}
         </p>
         {/* One continuous hairline, small screens only: the rail carries
             per-subject progress wherever it fits. */}
         <div
-          className={`mt-2 h-1 overflow-hidden rounded-[var(--homa-radius-control)] bg-[var(--homa-soft-boundary)] ${compact ? "" : "lg:hidden"}`}
+          className={`quiet-onboarding__progress-track mt-2 ${compact ? "" : "lg:hidden"}`.trim()}
           aria-hidden="true"
         >
           <div
-            className="h-full rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] transition-[width] duration-(--homa-motion-base) ease-out"
+            className="quiet-onboarding__progress-fill"
             style={{ width: `${Math.round((subjectsDone / plans.length) * 100)}%` }}
           />
         </div>
@@ -569,8 +575,8 @@ export function ChecklistStep({
             compete with the thing she is actually being asked.
             One quiet line, no animation, no count that ticks. */}
         {monthSoFar ? (
-          <p className="mt-2 truncate text-xs text-[var(--homa-muted-ink)]">
-            <span className="font-semibold text-[var(--homa-muted-ink)]">
+          <p className="quiet-onboarding__month-note mt-2 truncate">
+            <span className="quiet-onboarding__month-note-label">
               {subjectsDone > 0 ? `${child.name}'s month so far: ` : `A month for ${child.name}: `}
             </span>
             {monthSoFar.weeks[0]?.focus ?? ""}
@@ -580,39 +586,40 @@ export function ChecklistStep({
         {/* Fixed minimum height so the card never jumps as question length
             changes; the question centers in the leftover space so the
             reserve reads as breathing room, not a void. */}
-        <div className="mt-3 flex min-h-[19rem] flex-col rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-[var(--shadow-md)]">
+        <QuietFrame
+          as="article"
+          data-brand-layer="onboarding-checklist-question"
+          className="quiet-onboarding__question-card mt-3 p-6"
+        >
           <p
-            className={`text-sm font-medium ${
-              kicker?.tone === "gold" ? "text-[var(--homa-highlight-ink)]" : "text-[var(--homa-muted-ink)]"
-            } ${kicker ? "" : "invisible"}`}
+            className={`quiet-onboarding__question-kicker ${
+              kicker?.tone === "gold" ? "quiet-onboarding__question-kicker--gold" : ""
+            } ${kicker ? "" : "quiet-onboarding__question-kicker--empty"}`.trim()}
           >
             {kicker?.text ?? "\u00a0"}
           </p>
-          <div className="flex flex-1 items-center py-4">
+          <div className="quiet-onboarding__question-body">
             {/* The kid's name rides inside every question (founder call
                 2026-07-08), so "Story counts out loud to 10?" always
                 names who's being asked about, load-bearing with two or
                 more kids in one sitting. */}
-            <h2 className="font-display text-xl font-semibold leading-snug text-[var(--homa-ink)]">
+            <h2 className="quiet-onboarding__question-title">
               {personalizeStatement(child.name, current.item)}?
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+          <div className="quiet-onboarding__answer-grid">
             {CHIP_LABELS.map(([value, label]) => (
-              <button
+              <QuietAction
                 key={value}
                 type="button"
                 onClick={() => answerCurrent(value)}
                 aria-pressed={flashAnswer === value}
-                className={`min-h-12 rounded-[var(--homa-radius-control)] border px-3 py-3 text-sm font-semibold transition duration-(--homa-motion-fast) ease-out motion-safe:active:scale-[var(--press-scale)] ${
-                  flashAnswer === value
-                    ? "border-[var(--homa-visual-coral)] bg-[var(--homa-midnight-action)] text-[var(--homa-paper)]"
-                    : "border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] text-[var(--homa-ink)] hover:border-[var(--homa-visual-coral)] hover:bg-[var(--homa-info-tint)]"
-                }`}
+                kind={flashAnswer === value ? "primary" : "secondary"}
+                className="quiet-onboarding__answer-chip"
               >
                 {label}
-              </button>
+              </QuietAction>
             ))}
           </div>
           {/* Centered when it's the only thing here (2026-07-07, "looks
@@ -623,44 +630,46 @@ export function ChecklistStep({
               if it belonged to those buttons. Splits back to the sides
               only once "on a roll" actually has something to balance
               against. */}
-          <div className={`mt-4 flex items-center ${easilyStreak >= 3 ? "justify-between" : "justify-center"}`}>
-            <span className="flex items-center gap-4">
+          <div className={`quiet-onboarding__question-actions mt-4 ${easilyStreak >= 3 ? "quiet-onboarding__question-actions--rolling" : ""}`.trim()}>
+            <span className="quiet-onboarding__question-action-group">
               {/* "undo last answer", not "back": "back" next to the
                   "back to your family" navigation link below was two
                   identical affordances with opposite consequences. */}
               {sittingHistory.length > 0 ? (
-                <button
+                <QuietAction
+                  kind="quiet"
                   type="button"
                   onClick={() => void goBack()}
                   disabled={undoing}
-                  className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+                  className="quiet-onboarding__text-action"
                 >
-                  {undoing ? "undoing..." : "undo last answer"}
-                </button>
+                  {undoing ? "Undoing..." : "Undo last answer"}
+                </QuietAction>
               ) : null}
               {/* D12 (plans/2026-07-21-chat-first-onboarding.md §2.5): the
                   skip flash reuses the same ANSWER_FLASH_MS window the four
                   answer chips already hold before advancing, so this needs
                   no new timing, only a label swap during it. "Trust at the
                   exact moment moms expect to be graded." */}
-              <button
+              <QuietAction
+                kind="quiet"
                 type="button"
                 onClick={() => answerCurrent("skip")}
-                className="text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+                className="quiet-onboarding__text-action"
               >
                 {flashAnswer === "skip"
                   ? "Skipped. Never counts against her."
                   : "skip this one"}
-              </button>
+              </QuietAction>
             </span>
             {easilyStreak >= 3 ? (
-              <span className="font-hand text-lg text-[var(--homa-constructive-ink)]">on a roll {"\u270e"}</span>
+              <QuietStatus tone="constructive" className="quiet-onboarding__roll">On a roll {"\u270e"}</QuietStatus>
             ) : null}
           </div>
           {saveError ? (
-            <p className="mt-3 text-center text-sm text-[var(--homa-ink)]">{saveError}</p>
+            <QuietFeedback tone="error" className="mt-3">{saveError}</QuietFeedback>
           ) : null}
-        </div>
+        </QuietFrame>
 
         {/* "Back to your family", not "finish later (your answers are
             saved)": this answers the real question the old label didn't,
@@ -671,13 +680,14 @@ export function ChecklistStep({
             this comment used to point to is gone, cut on request; the
             save-in-progress reassurance now lives only on the hub
             itself, see hub-step.tsx.) */}
-        <button
+        <QuietAction
+          kind="quiet"
           type="button"
           onClick={exitChecklist}
-          className="mt-6 text-sm text-[var(--homa-muted-ink)] underline-offset-2 hover:underline"
+          className="quiet-onboarding__exit-action mt-6"
         >
           {"\u2190"} {exitLabel}
-        </button>
+        </QuietAction>
       </div>
 
       {compact ? null : (
