@@ -311,28 +311,28 @@ export function ReportView({
     <>
       <div className="flex items-center gap-3">
         <Logo size={24} />
-        <span className="font-mono text-xs uppercase tracking-widest text-strong/70">
+        <span className="quiet-report__meta">
           made for {report.childName} {"\u00b7"} {generatedDate}
         </span>
       </div>
-      <h1 className="mt-5 font-display text-4xl font-bold leading-none tracking-tight text-strong sm:text-5xl">
+      <h1 className="quiet-report__title mt-5">
         {report.childName}&apos;s <span style={{ color: "var(--homa-brand-text)" }}>progress report</span>
       </h1>
       {/* No subtitle (round 2, founder ask 2026-07-09): the heading
           flowing straight into age, subjects, and benchmarks below
           is enough. */}
-      <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-strong/70">
+      <div className="quiet-report__metrics mt-5">
         <span>
-          age <b className="text-strong">{ageLabel(months)}</b>
+          age <b className="quiet-report__metric-value">{ageLabel(months)}</b>
         </span>
         <span>
-          subjects mapped <b className="text-strong">{report.scores.mappedCount} of {report.scores.totalSubjects}</b>
+          subjects mapped <b className="quiet-report__metric-value">{report.scores.mappedCount} of {report.scores.totalSubjects}</b>
         </span>
         <span>
-          your answers <b className="text-strong">{report.scores.observationCount}</b>
+          your answers <b className="quiet-report__metric-value">{report.scores.observationCount}</b>
         </span>
         <span>
-          <b className="text-strong">national</b> benchmarks
+          <b className="quiet-report__metric-value">national</b> benchmarks
         </span>
       </div>
     </>
@@ -358,28 +358,27 @@ export function ReportView({
         {/* The constructive ink keeps this small eyebrow above the AA
             contrast bar on the tinted note surface. */}
         <p
-          className="font-mono text-[0.65rem] uppercase tracking-widest"
+          className="quiet-report__note-eyebrow"
           style={{ color: "var(--homa-constructive-ink)" }}
         >
           A note from Homa
         </p>
-        <p className="mt-2 font-serif text-lg italic text-strong">
+        <p className="quiet-report__letter-line mt-2">
           {noteGreeting(report.parentFirstName)}
         </p>
-        <p className="mt-2 text-body">
+        <p className="quiet-report__body-copy mt-2">
           {noteText ?? homaNote(report.scores, report.childName)}
         </p>
         {monthOffered ? (
-          <p className="mt-2 text-body">{notePlanSentence(report.childName, monthName)}</p>
+          <p className="quiet-report__body-copy mt-2">{notePlanSentence(report.childName, monthName)}</p>
         ) : null}
         {editable && viewerActions.call ? (
           <div className="mt-2">
             <CallHomaPs childId={report.childId} childName={report.childName} wall={wall} />
           </div>
         ) : null}
-        {/* text-lg matches the greeting: the letter's two serif
-            bookends read as one voice at one size. */}
-        <p className="mt-3 font-serif text-lg italic text-strong">
+        {/* The display bookends read as one voice at one size. */}
+        <p className="quiet-report__letter-line mt-3">
           Thanks,
           <br />
           Homa
@@ -415,10 +414,10 @@ export function ReportView({
 
   const subjectsHeading = (
     <>
-      <h2 className={`font-display text-xl font-semibold text-strong ${inApp ? "" : "mt-9"}`.trim()}>
+      <h2 className={`quiet-report__section-title ${inApp ? "" : "mt-9"}`.trim()}>
         Subject by subject
       </h2>
-      <p className="mt-1 text-sm text-muted">
+      <p className="quiet-report__section-copy mt-1">
         Open any subject to see what I asked, what you answered, and the benchmarks used.
       </p>
     </>
@@ -451,10 +450,10 @@ export function ReportView({
     return (
       <div
         key={score.subjectId}
-        className="rounded-[var(--homa-radius-control)] border border-dashed border-[var(--homa-soft-boundary)] px-4 py-3.5"
+        className="quiet-report__held-row"
       >
-        <p className="font-semibold text-muted">{domain?.displayName}</p>
-        <p className="mt-0.5 text-sm text-subtle">
+        <p className="quiet-report__held-title">{domain?.displayName}</p>
+        <p className="quiet-report__held-copy mt-0.5">
           {reportLockRowLine(domain?.displayName ?? score.subjectId, score.observations)}
         </p>
       </div>
@@ -504,15 +503,15 @@ export function ReportView({
           new Set(domain?.items.flatMap((item) => [...item.sources]) ?? []),
         );
         return (
-          <details key={score.subjectId} id={`subject-${score.subjectId}`} className="group rounded-[var(--homa-radius-control)] border border-[var(--homa-soft-boundary)]">
-            <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+          <details key={score.subjectId} id={`subject-${score.subjectId}`} className="quiet-report__subject group">
+            <summary className="quiet-report__subject-summary flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span
-                className="flex-shrink-0 whitespace-nowrap rounded-pill px-3 py-1 text-xs font-bold"
+                className="quiet-report__status flex-shrink-0 whitespace-nowrap px-3 py-1"
                 style={badgeStyle}
               >
                 {line.badge}
               </span>
-              <span className="min-w-0 flex-1 font-semibold text-strong">
+              <span className="quiet-report__subject-name min-w-0 flex-1">
                 {domain?.displayName}
               </span>
               <span className="flex-shrink-0 text-right">
@@ -520,11 +519,11 @@ export function ReportView({
                     badge ("+9 mo"); "at age" next to "On track" was
                     the same fact in two vocabularies. */}
                 {line.numberLabel ? (
-                  <span className="block font-mono text-sm text-strong">{line.numberLabel}</span>
+                  <span className="quiet-report__subject-number block">{line.numberLabel}</span>
                 ) : null}
                 {movement ? (
                   <span
-                    className="mt-0.5 inline-block rounded-pill px-2 py-0.5 font-mono text-[0.65rem] font-bold"
+                    className="quiet-report__movement mt-0.5 inline-block px-2 py-0.5"
                     style={
                       movement.tone === "highlight"
                         ? { background: "var(--homa-highlight-tint)", color: "var(--homa-highlight-ink)" }
@@ -537,19 +536,19 @@ export function ReportView({
               </span>
               <span
                 aria-hidden="true"
-                className="flex-shrink-0 text-[var(--homa-muted-ink)] transition-transform duration-(--homa-motion-fast) ease-out group-open:rotate-180"
+                className="quiet-report__subject-chevron flex-shrink-0 group-open:rotate-180"
               >
                 {"\u25BE"}
               </span>
             </summary>
-            <div className="border-t border-[var(--homa-soft-boundary)] px-5 pb-5 pt-4">
+            <div className="quiet-report__subject-body">
               {/* 1. What this subject is, in plain words. */}
-              <p className="text-sm text-body">{domain?.whatItIs}</p>
+              <p className="quiet-report__subject-copy">{domain?.whatItIs}</p>
 
               {/* 2. The questions, and what she answered. */}
               {subjectAnswers.length > 0 ? (
                 <>
-                  <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+                  <p className="quiet-report__detail-label mt-5">
                     Questions I asked {"\u00b7"} your answers
                   </p>
                   <ReceiptsList
@@ -559,7 +558,7 @@ export function ReportView({
                   />
                 </>
               ) : (
-                <p className="mt-4 text-sm text-[var(--homa-muted-ink)]">
+                <p className="quiet-report__subject-copy mt-4 quiet-report__subject-copy--muted">
                   No answers here yet. A few would fill this subject in.
                 </p>
               )}
@@ -568,15 +567,15 @@ export function ReportView({
                   paragraph, connecting the subject and her answers. */}
               {score.position !== "not_mapped" ? (
                 <>
-                  <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-widest text-[var(--homa-muted-ink)]">
+                  <p className="quiet-report__detail-label mt-5">
                     Why this is interesting
                   </p>
-                  <p className="mt-1 whitespace-pre-line text-sm text-body">{whyInteresting}</p>
+                  <p className="quiet-report__subject-copy mt-1 whitespace-pre-line">{whyInteresting}</p>
                 </>
               ) : null}
 
               {/* 4. The benchmarks, as plain links. */}
-              <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-widest text-subtle">
+              <p className="quiet-report__detail-label mt-5">
                 Benchmarks
               </p>
               <ul className="mt-1.5 flex flex-col gap-1">
@@ -588,12 +587,12 @@ export function ReportView({
                   // exact page"), not the index.
                   const href = key === "cdc" ? cdcChecklistUrl(months) : source.url;
                   return (
-                    <li key={key} className="text-xs">
+                    <li key={key} className="quiet-report__source-item">
                       <a
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[var(--homa-muted-ink)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
+                        className="quiet-report__source-link transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
                       >
                         {source.label}
                       </a>
@@ -630,7 +629,7 @@ export function ReportView({
                       >
                         Answer a few deeper questions
                       </span>
-                      <span className="text-xs text-subtle">hers to tap</span>
+                      <span className="quiet-report__permission-note">hers to tap</span>
                     </>
                   ) : sample ? (
                     <Link
@@ -735,7 +734,7 @@ export function ReportView({
   const methodologyCard = (
     <details data-brand-layer="report-methodology" className={`quiet-report__methodology group rounded-[var(--homa-radius-card)] bg-[var(--homa-canvas)] ${inApp ? "" : "mt-9"}`.trim()}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 [&::-webkit-details-marker]:hidden">
-        <h3 className="font-display text-base font-semibold text-strong">
+        <h3 className="quiet-report__section-title">
           How this report is made
         </h3>
         <span
@@ -746,7 +745,7 @@ export function ReportView({
         </span>
       </summary>
       <div className="px-5 pb-5 text-sm">
-        <p className="text-muted">
+        <p className="quiet-report__body-copy">
           {/* Explicit join: Turbopack's SWC JSX transform strips the
               leading space of a multi-line text node right after an
               expression, which rendered "Mayadoes". */}
@@ -757,13 +756,13 @@ export function ReportView({
           test and not medical advice, and the picture sharpens as you answer more.
         </p>
         {stateName && !stateRequirements ? (
-          <p className="mt-2 text-muted">
+          <p className="quiet-report__body-copy mt-2">
             Homeschooling is legal in all 50 states, including {stateName}. When your
             invite to Homa opens, Homa tracks {stateName}&apos;s requirements for you.
           </p>
         ) : null}
         <details className="group/sources mt-3">
-          <summary className="cursor-pointer list-none text-xs font-semibold text-strong [&::-webkit-details-marker]:hidden">
+          <summary className="quiet-report__source-toggle cursor-pointer list-none [&::-webkit-details-marker]:hidden">
             Sources{" "}
             <span
               aria-hidden="true"
@@ -782,7 +781,7 @@ export function ReportView({
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[var(--homa-muted-ink)] underline underline-offset-2 transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
+                    className="quiet-report__source-link transition-colors duration-(--homa-motion-fast) ease-out hover:text-[var(--homa-brand-text)]"
                   >
                     {source.label}
                   </a>
@@ -790,7 +789,7 @@ export function ReportView({
               );
             })}
           </ul>
-          <p className="mt-2 font-mono text-[0.6rem] text-subtle">
+          <p className="quiet-report__version mt-2">
             checklist version {report.bankVersion}
           </p>
         </details>
@@ -806,7 +805,7 @@ export function ReportView({
   const siblingsCard =
     !sample && !mirror && readyKids.length > 0 ? (
       <div data-brand-layer="report-siblings" className={`quiet-report__support rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
-        <p className="font-display text-lg font-semibold text-strong">
+        <p className="quiet-report__support-title">
           {readyKids.length === 1
             ? `${readyKids[0].name}'s report is ready too.`
             : "The other reports are ready too."}
@@ -828,7 +827,7 @@ export function ReportView({
           </div>
         ) : (
           <>
-            <p className="mt-1 text-sm text-body">
+            <p className="quiet-report__support-copy mt-1">
               {readyKids.length === 1 ? "It's" : "They're"} in your inbox, and one tap from
               your family page.
             </p>
@@ -850,10 +849,10 @@ export function ReportView({
   const nextKidCard =
     !sample && !mirror && nextKid ? (
       <div data-brand-layer="report-next-child" className={`quiet-report__support rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-constructive-tint)] p-5 print:hidden ${inApp ? "" : "mt-9"}`.trim()}>
-        <p className="font-display text-lg font-semibold text-strong">
+        <p className="quiet-report__support-title">
           {nextKid.name} is next.
         </p>
-        <p className="mt-1 text-sm text-body">
+        <p className="quiet-report__support-copy mt-1">
           Same questionnaire, tuned to {nextKid.name}&apos;s age. About five minutes.
         </p>
         <Link
