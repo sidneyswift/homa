@@ -273,6 +273,10 @@ const baseSchema = `
     id uuid primary key,
     family_id uuid not null references public.families (id) on delete cascade
   );
+  create table public.planner_learning_activities (
+    id uuid primary key,
+    family_id uuid not null references public.families (id) on delete cascade
+  );
   create table public.family_events (
     id uuid primary key,
     family_id uuid not null references public.families (id) on delete cascade

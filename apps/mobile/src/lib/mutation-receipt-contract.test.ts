@@ -18,12 +18,16 @@ const scheduleActivitySheet = source("../features/planner/schedule-activity-shee
 const entryEditor = source("../features/hours/entry-editor.tsx");
 const activityRow = source("../features/planner/activity-row.tsx");
 const plannerData = source("../features/planner/use-planner-data.ts");
+const learningActivityRow = source("../features/planner/learning-activity-row.tsx");
 const inlineError = source("../components/ui/inline-error.tsx");
 const familyEventChildrenMigration = source(
   "../../../../supabase/migrations/20260802232000_family_event_children.sql",
 );
 const familyEventOccurrenceMigration = source(
   "../../../../supabase/migrations/20260803003000_family_event_occurrence_exceptions.sql",
+);
+const plannerLearningMigration = source(
+  "../../../../supabase/migrations/20260803043000_planner_learning_activities.sql",
 );
 
 describe("native durable mutation contract", () => {
@@ -86,6 +90,18 @@ describe("native durable mutation contract", () => {
     assert.match(activityRow, /onToggle: \(\) => Promise<void>/u);
     assert.match(activityRow, /await onToggle/u);
     assert.match(activityRow, /accessibilityState=\{\{[\s\S]*busy:/u);
+    assert.match(learningActivityRow, /await onToggle/u);
+    assert.match(learningActivityRow, /accessibilityState=\{\{[\s\S]*busy:/u);
+  });
+
+  it("confirms before one transaction unchecks learning and removes linked Hours", () => {
+    assert.match(learningActivityRow, /Alert\.alert\(/u);
+    assert.match(learningActivityRow, /The time linked to this activity will also be removed from Hours\./u);
+    assert.doesNotMatch(learningActivityRow, /lockedByHours/u);
+    assert.match(
+      plannerLearningMigration,
+      /delete from public\.hours_log as hours[\s\S]*using public\.planner_learning_activity_hours as link/u,
+    );
   });
 
   it("applies successful plan receipts without a follow-up read", () => {

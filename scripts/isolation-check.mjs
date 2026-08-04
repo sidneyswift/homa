@@ -551,6 +551,17 @@ async function planActivityScheduleSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function plannerLearningActivitiesSchemaExists() {
+  const rows = await sql`
+    select
+      to_regclass('public.planner_learning_activities') is not null
+      and to_regclass('public.planner_learning_activity_children') is not null
+      and to_regclass('public.planner_learning_activity_hours') is not null
+      as present
+  `;
+  return rows[0]?.present === true;
+}
+
 async function monthPlanApprovalsSchemaExists() {
   const rows = await sql`
     select to_regclass('public.month_plan_approvals') is not null as present
@@ -2681,6 +2692,28 @@ async function expectAuthenticatedIsolation() {
           "create Family B plan_activity_schedule fixture",
         )
       : null;
+    const plannerLearningSchemaAvailable = await plannerLearningActivitiesSchemaExists();
+    const plannerLearningActivityBId = plannerLearningSchemaAvailable
+      ? (
+          await sql`
+            insert into public.planner_learning_activities
+              (family_id, title, subject, activity_date, status,
+               source_channel, source_quote, idempotency_key)
+            values
+              (${familyBId}, 'Isolation check lesson', 'math', '2026-01-01',
+               'planned', 'web', 'We planned an isolation check lesson.',
+               ${`isolation-planner:${suffix}`})
+            returning id
+          `
+        )[0]?.id
+      : null;
+    if (plannerLearningSchemaAvailable && plannerLearningActivityBId) {
+      await sql`
+        insert into public.planner_learning_activity_children
+          (family_id, activity_id, child_id)
+        values (${familyBId}, ${plannerLearningActivityBId}, ${childBId})
+      `;
+    }
     const monthPlanApprovalsSchemaAvailable = await monthPlanApprovalsSchemaExists();
     const monthPlanApprovalBId = monthPlanApprovalsSchemaAvailable
       ? (
@@ -4070,6 +4103,219 @@ async function expectAuthenticatedIsolation() {
       }
     }
 
+    if (plannerLearningSchemaAvailable && plannerLearningActivityBId) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "planner_learning_activities",
+        plannerLearningActivityBId,
+        1,
+        "auth member can read own planner learning activity",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "planner_learning_activities",
+        plannerLearningActivityBId,
+        0,
+        "auth member cannot read another family's planner learning activity",
+      );
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "planner_learning_activity_children",
+        plannerLearningActivityBId,
+        1,
+        "auth member can read own planner learning child audience",
+        "activity_id",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "planner_learning_activity_children",
+        plannerLearningActivityBId,
+        0,
+        "auth member cannot read another family's planner learning child audience",
+        "activity_id",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        "planner_learning_activities",
+        {
+          insertRow: {
+            family_id: familyBId,
+            title: "Client-forged Planner lesson",
+            subject: "math",
+            activity_date: "2026-01-01",
+            status: "planned",
+            source_channel: "web",
+            source_quote: "Client-forged Planner lesson",
+            idempotency_key: `isolation-planner-forged:${suffix}`,
+          },
+          keyColumn: "id",
+          keyValue: plannerLearningActivityBId,
+          updateRow: { title: "Direct edit should be denied" },
+        },
+        "auth member cannot directly write planner learning activities",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        "planner_learning_activity_children",
+        {
+          insertRow: {
+            family_id: familyBId,
+            activity_id: plannerLearningActivityBId,
+            child_id: childBId,
+          },
+          keyColumn: "activity_id",
+          keyValue: plannerLearningActivityBId,
+          updateRow: { child_id: childAId },
+        },
+        "auth member cannot directly write planner learning child audiences",
+      );
+      await expectAuthenticatedRpcDenied(
+        familyAUser.accessToken,
+        "set_planner_learning_activity_status",
+        {
+          target_activity_id: plannerLearningActivityBId,
+          target_expected_status: "planned",
+          target_status: "completed",
+          target_source_channel: "web",
+        },
+        "auth member cannot change another family's planner learning status",
+      );
+
+      const completeBody = await jsonResponse(
+        await restAs(
+          familyBUser.accessToken,
+          "rpc/set_planner_learning_activity_status",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              target_activity_id: plannerLearningActivityBId,
+              target_expected_status: "planned",
+              target_status: "completed",
+              target_source_channel: "web",
+            }),
+            headers: { Prefer: "return=representation" },
+          },
+        ),
+        "complete own planner learning activity",
+      );
+      const completeRow = Array.isArray(completeBody) ? completeBody[0] : completeBody;
+      report(
+        "auth member can complete own planner learning activity through exact RPC",
+        completeRow?.result === "applied"
+          && completeRow?.activity_status === "completed"
+          && completeRow?.changed === true,
+        JSON.stringify(completeRow).slice(0, 180),
+      );
+
+      await sql`
+        insert into public.planner_learning_activity_hours
+          (family_id, activity_id, hours_entry_id)
+        values (${familyBId}, ${plannerLearningActivityBId}, ${hoursLogBId})
+      `;
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "planner_learning_activity_hours",
+        plannerLearningActivityBId,
+        1,
+        "auth member can read own planner learning Hours link",
+        "activity_id",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "planner_learning_activity_hours",
+        plannerLearningActivityBId,
+        0,
+        "auth member cannot read another family's planner learning Hours link",
+        "activity_id",
+      );
+      await expectAuthenticatedWritesDenied(
+        familyBUser.accessToken,
+        "planner_learning_activity_hours",
+        {
+          insertRow: {
+            family_id: familyBId,
+            activity_id: plannerLearningActivityBId,
+            hours_entry_id: hoursLogBId,
+          },
+          keyColumn: "activity_id",
+          keyValue: plannerLearningActivityBId,
+          updateRow: { hours_entry_id: hoursLogBId },
+        },
+        "auth member cannot directly write planner learning Hours links",
+      );
+
+      const undoBody = await jsonResponse(
+        await restAs(
+          familyBUser.accessToken,
+          "rpc/set_planner_learning_activity_status",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              target_activity_id: plannerLearningActivityBId,
+              target_expected_status: "completed",
+              target_status: "planned",
+              target_source_channel: "web",
+            }),
+            headers: { Prefer: "return=representation" },
+          },
+        ),
+        "atomically undo Hours-linked planner learning activity",
+      );
+      const undoRow = Array.isArray(undoBody) ? undoBody[0] : undoBody;
+      const [undoCounts] = await sql`
+        select
+          (select count(*)::integer
+             from public.hours_log
+            where id = ${hoursLogBId}) as hours_count,
+          (select count(*)::integer
+             from public.planner_learning_activity_hours
+            where activity_id = ${plannerLearningActivityBId}) as link_count
+      `;
+      report(
+        "Hours-linked planner learning activity atomically unchecks",
+        undoRow?.result === "applied"
+          && undoRow?.activity_status === "planned"
+          && undoRow?.changed === true
+          && undoCounts?.hours_count === 0
+          && undoCounts?.link_count === 0,
+        JSON.stringify({ undoRow, undoCounts }).slice(0, 220),
+      );
+    } else {
+      for (const table of [
+        "planner_learning_activities",
+        "planner_learning_activity_children",
+        "planner_learning_activity_hours",
+      ]) {
+        coveredTables.add(table);
+      }
+      for (const label of [
+        "auth member can read own planner learning activity",
+        "auth member cannot read another family's planner learning activity",
+        "auth member can read own planner learning child audience",
+        "auth member cannot read another family's planner learning child audience",
+        "auth member cannot directly write planner learning activities insert",
+        "auth member cannot directly write planner learning activities update",
+        "auth member cannot directly write planner learning activities delete",
+        "auth member cannot directly write planner learning child audiences insert",
+        "auth member cannot directly write planner learning child audiences update",
+        "auth member cannot directly write planner learning child audiences delete",
+        "auth member cannot change another family's planner learning status",
+        "auth member can complete own planner learning activity through exact RPC",
+        "auth member can read own planner learning Hours link",
+        "auth member cannot read another family's planner learning Hours link",
+        "auth member cannot directly write planner learning Hours links insert",
+        "auth member cannot directly write planner learning Hours links update",
+        "auth member cannot directly write planner learning Hours links delete",
+        "Hours-linked planner learning activity cannot be silently unchecked",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the additive planner learning activity migration is pending on this target",
+        );
+      }
+    }
+
     if (monthPlanApprovalsSchemaAvailable) {
       await expectAuthenticatedRead(
         familyBUser.accessToken,
@@ -4615,6 +4861,29 @@ await expectReadDenied("conversation_offer_recovery");
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
 await expectEmptyRead("hours_log");
+// Planner learning activities are member-readable and server-write-only.
+// The additive tables may be absent before deploy; once present, all three
+// anonymous probes arm together.
+{
+  const tables = [
+    "planner_learning_activities",
+    "planner_learning_activity_children",
+    "planner_learning_activity_hours",
+  ];
+  const response = await rest("planner_learning_activities?select=id&limit=1", {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    for (const table of tables) coveredTables.add(table);
+    report(
+      "planner learning activity tables absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    for (const table of tables) await expectAnonymousNoRowsOrDenied(table);
+  }
+}
 // Task rows (migrations #39 + #49): members read their OWN family's
 // rows only; anon sees nothing and nobody writes over the Data API.
 await expectEmptyRead("agent_schedules");

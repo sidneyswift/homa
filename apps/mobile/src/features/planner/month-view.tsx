@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 
 import type { FamilyEventRecord } from "../../lib/family-events";
+import type { PlannerLearningActivityRecord } from "../../lib/planner-learning-activities";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import {
@@ -21,11 +22,13 @@ export function MonthView({
   anchorDate,
   events,
   activities,
+  learningActivities,
   onSelectDate,
 }: {
   anchorDate: DateOnly;
   events: FamilyEventRecord[];
   activities: ScheduledActivityView[];
+  learningActivities: PlannerLearningActivityRecord[];
   onSelectDate: (date: DateOnly) => void;
 }) {
   const { fontScale, width } = useWindowDimensions();
@@ -40,7 +43,8 @@ export function MonthView({
     const eventCount = events.filter(
       (event) => compareDateOnly(event.starts_on, day) <= 0 && compareDateOnly(event.ends_on, day) >= 0,
     ).length;
-    const activityCount = activities.filter((activity) => activity.scheduledDate === day).length;
+    const activityCount = activities.filter((activity) => activity.scheduledDate === day).length
+      + learningActivities.filter((activity) => activity.activityDate === day).length;
     const countSummary = [
       eventCount > 0 ? `${eventCount} ${eventCount === 1 ? "event" : "events"}` : "No events",
       activityCount > 0 ? `${activityCount} ${activityCount === 1 ? "activity" : "activities"}` : "No activities",

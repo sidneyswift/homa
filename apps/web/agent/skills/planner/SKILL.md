@@ -1,14 +1,14 @@
 ---
-description: Use when the parent asks what is on the planner, the week, or the family calendar, wants the week or the month adjusted, wants Homa to draft a brand-new month around her children and real commitments, asks to schedule an existing lesson, curriculum, or unit study onto the planner or onto a real day, asks to add, change, move, or remove an appointment, trip, or other family event, asks to move school work around an appointment or trip ("doctor's appt Tuesday, push things back"), or wants to see the plan while you talk. Writing or designing a new lesson plan is materials work, not planner work. Contains the open-then-edit workflow, preview-first month planning, real calendar dates, family calendar tools, and reshuffling around real life.
+description: Use first, before clarifying or acting, when the parent tells Homa what school, enrichment, PE, music, co-op, or life-skills work the family did and wants it logged, asks Homa to mark planned work finished, asks what is planned or completed, wants the week or month adjusted, asks to schedule existing lessons or curriculum, asks to add or move a family event, or wants work reshuffled around real life. Not for writing, creating, or drafting a new lesson plan, even when the parent names a week; materials-studio owns authoring and nothing is added to Planner unless she separately asks to schedule it. Contains log-first capture, exact completion, open-then-edit, real calendar dates, and preview-first month planning.
 metadata:
-  homa-tools: open_planner, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
+  homa-tools: open_planner, record_planner_activity, complete_planner_activity, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
   homa-related-skills: curriculum-studio, curriculum-mapping, materials-studio, family-librarian
 ---
 
 # The Planner
 
-You can see the family's planner and change what is on it, give a plan
-activity a real date, and add or remove family calendar events
+You can see the family's Planner, log what happened, change what is on it,
+give a plan activity a real date, and add or remove family calendar events
 (appointments, trips, co-op days). In web chat, open_planner also opens
 the week board right beside the conversation, so the parent watches the
 week fill in as you work. You never have to describe buttons or guess
@@ -20,8 +20,9 @@ calendar, the answer is to do it with her, in front of her.
 - Each child can have plans: one per subject, plus "month" (the month
   plan built from their progress report). A plan is four weeks; each
   week has one focus line and a short list of activities.
-- The parent checks activities off as they happen. Check-offs are hers:
-  you never mark work done.
+- Planned and completed are two states of the same family learning ledger.
+  When the parent tells you work happened, log it or mark the exact existing
+  item finished. Do not make her rewrite it in Planner.
 - /app/planner is the one parent-facing home. It opens on Day. Week and
   Month show the same real scheduled activities and family events at a
   wider horizon. Hours holds the editable school-time record.
@@ -32,16 +33,58 @@ calendar, the answer is to do it with her, in front of her.
   preview-first workflow. Read `references/month-plan.md` when that is
   what she asks for. The report's one-tap plan remains the quick option
   for one child's benchmark-shaped month.
-- Day, Week, and Month are views of the same persisted calendar facts
-  written by schedule_plan_activity and add_family_event. They differ
-  only in how much time they reveal at once.
+- Independent learning can be planned or completed without belonging to a
+  generated four-week plan. These stable rows are what
+  record_planner_activity creates.
+- Day, Week, and Month are views of the same persisted calendar facts. They
+  differ only in how much time they reveal at once.
+
+## Log what the family did
+
+Logging is first class. A family may plan every page on Sunday, follow a
+curriculum rhythm without pre-planning, or mix both. Planner holds the result
+either way.
+
+1. **Use the current parent message as evidence.** Record only what she said
+   happened or asked to place on a date. Give every call an exact sourceQuote
+   from that message. Never convert a suggestion from Homa into family history.
+2. **Choose the existing item when there is one.** If she says "we finished
+   the worksheet" or names work likely already planned, call open_planner and
+   identify one exact row. A stable learningActivity uses its id. A generated
+   plan activity uses childId, subjectId, week, activityIndex, exact text, and
+   planRevision. Then call complete_planner_activity. If more than one item
+   could match, ask one short question before changing anything.
+3. **Otherwise create the history directly.** Call record_planner_activity
+   once per distinct lesson or activity. A message naming three lessons becomes
+   three rows. Use completed when it already happened, planned when she is
+   putting future work on a day.
+4. **Name every participating child.** Use child ids from family context. An
+   empty child list means the whole family, not "I am not sure which child."
+   Ask one short question when the audience is genuinely unclear.
+5. **Classify the school subject faithfully.** Gymnastics can be PE, piano can
+   be music, cooking can be life skills, when the parent presents it as school
+   learning. The model makes that judgment; the tool verifies the closed
+   subject value.
+6. **Time is optional.** If the parent supplied real minutes, include them and
+   the same transaction updates Hours. Never estimate. Do not delay the Planner
+   log just because duration is missing; after logging, one short "About how
+   long?" is useful when compliance time matters and the moment allows it.
+7. **Confirm briefly.** Name what landed, for whom, the date, and whether it is
+   planned or finished. Do not make her repeat the list back to you.
+
+A completion means the work happened. It does not mean the child mastered a
+skill. Never update ChildProgress merely because a Planner activity was
+completed. If the same parent message separately contains an observable
+capability claim, the ChildProgress evidence workflow may judge that claim on
+its own.
 
 ## The workflow, in order
 
-1. **open_planner first, always.** It returns every plan's current
+1. **open_planner first for edits, scheduling, and existing-item completion.** It returns every plan's current
    week: focus, activities, their indices, and each activity's real
    scheduled date (scheduledDate; null means it has never been put on
-   a day). Pass childId when the conversation is about one child: that
+   a day), planRevision, and stable independent learningActivities. Pass
+   childId when the conversation is about one child: that
    returns the child's plans with ALL FOUR weeks in full, which is
    what you need for any non-current-week edit or any scheduling work.
    Without childId the other weeks arrive as one-line summaries only.
@@ -175,8 +218,10 @@ activity; a decomposed unit source still re-checks Homa Plus at write time.
   fresh indices returned by edit_plan before scheduling or editing again.
 - The canvas is web chat only. Over SMS, say what is on the week and
   what you changed; she can open /app/planner when she is at a screen.
-- You edit activities, not history: check-offs, progress reports, and
-  retest dates are never yours to touch from here.
+- complete_planner_activity conflicts are the truth. The item changed or was
+  already completed elsewhere. Open Planner again; never guess a replacement.
+- Planner completion never edits progress reports, skill scores, or retest
+  dates.
 
 ## Reshuffling the week around real life
 

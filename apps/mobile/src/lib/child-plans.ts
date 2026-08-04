@@ -19,10 +19,10 @@ export interface ChildPlanRecord {
   id: string;
   child_id: string;
   subject_id: string;
+  plan_revision: number;
   plan: FourWeekPlan;
   progress: Record<string, boolean>;
   retest_at: string | null;
-  plan_revision: number;
   progress_revision: number;
 }
 
