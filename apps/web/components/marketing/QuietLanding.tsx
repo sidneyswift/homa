@@ -24,7 +24,7 @@ const PAIN_ICONS: Record<PainId, SemanticIconName> = {
 };
 
 const QUIET_LANDING_CSS = `
-.quiet-landing { --homa-muted-ink: color-mix(in srgb, var(--homa-ink) 64%, var(--homa-canvas)); --homa-soft-boundary: color-mix(in srgb, var(--homa-control-boundary) 34%, transparent); min-width: 320px; overflow-x: clip; background: var(--homa-canvas); color: var(--homa-ink); }
+.quiet-landing { min-width: 320px; overflow-x: clip; background: var(--homa-canvas); color: var(--homa-ink); }
 .quiet-landing .quiet-nav { position: sticky; top: 0; z-index: 50; background: transparent; }
 .quiet-landing .quiet-nav__row { max-width: 1180px; }
 .quiet-landing #how, .quiet-landing #features, .quiet-landing #sample-report, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--quiet-nav-height) + 12px); }

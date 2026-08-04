@@ -56,6 +56,7 @@ test("QuietChoice renders a native group with selected and disabled options", ()
   assert.match(html, /<legend[^>]*><span>What feels right this week\?<\/span><span[^>]+>\*<\/span>/u);
   assert.match(html, /aria-describedby="pace-hint pace-error"/u);
   assert.match(html, /aria-invalid="true"/u);
+  assert.doesNotMatch(html, /<fieldset[^>]+aria-required=/u);
 
   const optionsHtml = renderToStaticMarkup(
     <QuietChoice

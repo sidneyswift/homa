@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { approvedColorPairs, colorTokens } from "./colors.ts";
+import { approvedColorPairs, colorTokens, webCompatibilityTokens } from "./colors.ts";
 import { BRAND_CONTRACT } from "./brand.ts";
 import { CHANNELS_CONTRACT, brandChannels, channelProfiles, channelProjections } from "./channels.ts";
 import { CONTENT_CONTRACT } from "./content.ts";
@@ -48,6 +48,13 @@ test("every approved semantic pair meets its stated contrast floor", () => {
     const ratio = contrast(colorTokens[pair.foreground], colorTokens[pair.background]);
     assert.ok(ratio >= pair.minimumRatio, `${pair.foreground} on ${pair.background}: ${ratio.toFixed(2)}`);
   }
+});
+
+test("web compatibility tokens stay derived from canonical Quiet tokens", () => {
+  assert.match(webCompatibilityTokens.mutedInk, /var\(--homa-ink\)/u);
+  assert.match(webCompatibilityTokens.mutedInk, /var\(--homa-canvas\)/u);
+  assert.match(webCompatibilityTokens.softBoundary, /var\(--homa-control-boundary\)/u);
+  assert.match(webCompatibilityTokens.softBoundary, /transparent/u);
 });
 
 test("font roles have one meaning and the display floor is enforced", () => {

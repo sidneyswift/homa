@@ -4,11 +4,15 @@ import { readFileSync } from "node:fs";
 import {
   GAUNTLET_LONG_COPY,
   GAUNTLET_FOCUSABLE_SELECTOR,
+  GAUNTLET_FIXTURE_PRIMITIVE_STATES,
   GAUNTLET_IGNORED_FOCUS_TAGS,
   GAUNTLET_PERFORMANCE_BUDGET,
+  GAUNTLET_REAL_PRIMITIVE_CONSUMERS,
   GAUNTLET_REFLOW_VIEWPORTS,
+  GAUNTLET_ROUTE_MANIFEST_PATHS,
   GAUNTLET_ROUTES,
   GAUNTLET_VIEWPORTS,
+  GAUNTLET_WEB_PRIMITIVES,
   collectStaticGauntletReport,
 } from "./interface-gauntlet.mts";
 
@@ -17,6 +21,12 @@ test("interface gauntlet declares representative route and viewport coverage", (
   assert.deepEqual(GAUNTLET_REFLOW_VIEWPORTS.map(({ zoom }) => zoom), [2, 4]);
   assert.deepEqual(GAUNTLET_ROUTES.map(({ path }) => path), ["/", "/signin", "/onboarding", "/design/quiet-authority"]);
   for (const route of GAUNTLET_ROUTES) assert.ok(route.requiredMarkers.length > 0, `${route.path} needs a rendered marker contract`);
+  assert.deepEqual(GAUNTLET_ROUTE_MANIFEST_PATHS, [
+    ["/", "apps/web/app/page.tsx"],
+    ["/signin", "apps/web/app/signin/page.tsx"],
+    ["/onboarding", "apps/web/app/onboarding/page.tsx"],
+    ["/design/quiet-authority", "apps/web/app/design/quiet-authority/page.tsx"],
+  ]);
 });
 
 test("rendered gauntlet keeps explicit stress budgets and localization input", () => {
@@ -41,6 +51,31 @@ test("static interface contract is healthy even before rendered evidence is supp
   assert.equal(report.contract, "quiet-authority-v1");
   assert.match(report.manifestFingerprint, /^[0-9a-f]{64}$/u);
   assert.equal(report.status, "pass", report.issues.map((issue) => `${issue.check}: ${issue.detail}`).join("\n"));
+});
+
+test("web primitive coverage cannot shrink below the contract inventory", () => {
+  assert.deepEqual(
+    GAUNTLET_WEB_PRIMITIVES.map(([id]) => id),
+    [
+      "web-quiet-action",
+      "web-quiet-choice",
+      "web-quiet-feedback",
+      "web-quiet-field",
+      "web-quiet-frame",
+      "web-quiet-identity",
+      "web-quiet-media",
+      "web-quiet-nav",
+      "web-quiet-footer",
+      "web-quiet-status",
+      "web-quiet-thread",
+      "web-semantic-icon",
+    ],
+  );
+  assert.ok(GAUNTLET_REAL_PRIMITIVE_CONSUMERS.length >= 2);
+  assert.ok(GAUNTLET_REAL_PRIMITIVE_CONSUMERS.some(([source]) => source.includes("marketing/")));
+  assert.ok(GAUNTLET_REAL_PRIMITIVE_CONSUMERS.some(([source]) => source.includes("dashboard/")));
+  assert.deepEqual(GAUNTLET_FIXTURE_PRIMITIVE_STATES.map(([id]) => id), GAUNTLET_WEB_PRIMITIVES.map(([id]) => id));
+  for (const [, states] of GAUNTLET_FIXTURE_PRIMITIVE_STATES) assert.ok(states.length >= 2);
 });
 
 test("shared Quiet navigation can shrink and wrap long localized labels", () => {

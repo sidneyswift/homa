@@ -68,7 +68,7 @@ export function KidView({
           <h1 className="font-display text-[1.8rem] font-semibold leading-tight tracking-[-0.015em] text-[color:var(--homa-ink)]">
             {child.name}&apos;s progress
           </h1>
-          <p className="mt-0.5 text-sm text-[color:var(--homa-ink-muted)]">
+          <p className="mt-0.5 text-sm text-[color:var(--homa-muted-ink)]">
             {ageLabel(months)}
             {child.profile.interests?.length
               ? ` \u00b7 into ${child.profile.interests.join(", ")}`
@@ -125,7 +125,7 @@ export function KidView({
               A note from Homa
             </p>
             <p className="mt-1 font-serif italic text-[color:var(--homa-ink)]">{noteGreeting(parentFirstName)}</p>
-            <p className="mt-1 text-[color:var(--homa-ink-muted)]">
+            <p className="mt-1 text-[color:var(--homa-muted-ink)]">
               {homaNote(report.scores, child.name)}
               {moved > 0
                 ? ` Since last check-in, ${moved} ${moved === 1 ? "subject" : "subjects"} moved up.`
@@ -142,7 +142,7 @@ export function KidView({
                 ? `${child.name}'s picture starts with the checklist.`
                 : `${child.name} is past the checklist's range.`}
           </p>
-          <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">
+            <p className="mt-1 text-sm text-[color:var(--homa-muted-ink)]">
             {months < 24
               ? "Until then, this page keeps their spot warm."
               : isInScoredRange(months)
@@ -176,15 +176,15 @@ export function KidView({
           <p className="mt-1.5 font-display text-lg font-semibold text-[color:var(--homa-ink)]">
             {curriculum.curriculum.title}
           </p>
-          <p className="mt-1 text-sm text-[color:var(--homa-ink-muted)]">{curriculum.curriculum.overview}</p>
+            <p className="mt-1 text-sm text-[color:var(--homa-muted-ink)]">{curriculum.curriculum.overview}</p>
           {curriculum.curriculum.subjects.length > 0 ? (
-            <p className="mt-2 text-xs text-[color:var(--homa-ink-muted)]">
+              <p className="mt-2 text-xs text-[color:var(--homa-muted-ink)]">
               Covers {curriculum.curriculum.subjects.map((subject) => subject.subjectName).join(", ")}.
             </p>
           ) : null}
         </QuietFrame>
       ) : curriculumPending ? (
-        <p className="mt-4 text-sm text-[color:var(--homa-ink-muted)]">
+        <p className="mt-4 text-sm text-[color:var(--homa-muted-ink)]">
           Homa is building {child.name}&apos;s curriculum from your call.
         </p>
       ) : null}

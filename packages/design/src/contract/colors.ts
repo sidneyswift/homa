@@ -43,6 +43,16 @@ export const colorUsage = {
 } as const satisfies Record<ColorToken, string>;
 
 /**
+ * Web-only derived aliases that keep secondary ink and quiet boundaries
+ * available on every route. They are generated beside the canonical tokens,
+ * rather than being scoped by a single landing component.
+ */
+export const webCompatibilityTokens = {
+  mutedInk: "color-mix(in srgb, var(--homa-ink) 64%, var(--homa-canvas))",
+  softBoundary: "color-mix(in srgb, var(--homa-control-boundary) 34%, transparent)",
+} as const;
+
+/**
  * The native adapter still needs a few tonal steps for child-facing accents,
  * calendars, and truthful status surfaces. They live here, beside the
  * semantic contract, so React Native cannot grow a private color vocabulary.
@@ -111,6 +121,7 @@ export const COLOR_CONTRACT = {
   version: DESIGN_CONTRACT_VERSION,
   tokens: colorTokens,
   usage: colorUsage,
+  webCompatibilityTokens,
   nativeColorScale,
   approvedPairs: approvedColorPairs,
 } as const;

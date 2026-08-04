@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "6909e21c73d30eef1f70e74c5cf898eb38fd0f35b55189e17f6c1c18aeaa726c",
+  "ownedInputFingerprint": "d060a033a9c7931a30bc52838855637e6098ee3ccb7d71eb5f3a8b74dd7262c7",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -5221,7 +5221,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "93b63c8196c8387cad231b5e1c0b78681df5acbe315d64d96618e4ef122f3939",
+        "fixtureChecksum": "da2004e6a412d6c88ea86ac748e3c29e1f049c9f9d0d150680542d11a6ba6b86",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -5248,7 +5248,7 @@
         "legacy-coral-action"
       ],
       "currentAssetHashes": [
-        "93b63c8196c8387cad231b5e1c0b78681df5acbe315d64d96618e4ef122f3939"
+        "da2004e6a412d6c88ea86ac748e3c29e1f049c9f9d0d150680542d11a6ba6b86"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -72961,7 +72961,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "288c95805fa29cd067041e4a501156f128f206b95fb1bab6e95064d11bdff98a",
+        "fixtureChecksum": "4d89125b5fa0d3b47c11a93d7a51377b5d7bab2782d613809303474b22f85385",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -72996,7 +72996,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "288c95805fa29cd067041e4a501156f128f206b95fb1bab6e95064d11bdff98a"
+        "4d89125b5fa0d3b47c11a93d7a51377b5d7bab2782d613809303474b22f85385"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -73204,7 +73204,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "dccfa325f5535aed38163875efa3057a50f90117ce92c09713042ddac3ad5ee2",
+        "fixtureChecksum": "fec3c20f943835ec1a9ee02862d31f4e31bfe3db4716422acdca3fb82218eb1b",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -73241,7 +73241,7 @@
         "legacy-token-namespace"
       ],
       "currentAssetHashes": [
-        "dccfa325f5535aed38163875efa3057a50f90117ce92c09713042ddac3ad5ee2"
+        "fec3c20f943835ec1a9ee02862d31f4e31bfe3db4716422acdca3fb82218eb1b"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -75445,7 +75445,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "f3e2a496c921740dafbde1358f36ef9286032587f325a62bd14cf45226f28d64",
+        "fixtureChecksum": "02221ccdf1230d37883ca8514053ed8a6ff01b61ff0485aa3c39eff7ad463dd1",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -75482,7 +75482,7 @@
         "legacy-token-namespace"
       ],
       "currentAssetHashes": [
-        "f3e2a496c921740dafbde1358f36ef9286032587f325a62bd14cf45226f28d64"
+        "02221ccdf1230d37883ca8514053ed8a6ff01b61ff0485aa3c39eff7ad463dd1"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -80400,8 +80400,12 @@
       ],
       "requiredStates": [
         "default",
+        "disabled",
+        "empty",
+        "error",
         "forced-colors",
         "keyboard-focus",
+        "loading",
         "pressed",
         "success"
       ],
@@ -80432,7 +80436,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "71ac94ab50ba80ca7e16b89a669fe909afd07178b639aabadbbd6d94c9047634",
+        "fixtureChecksum": "aefbba076509a0a21332132ecd14914a7eba1ff5b0ba0f4d51ef1115d4a6b281",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -80467,7 +80471,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "71ac94ab50ba80ca7e16b89a669fe909afd07178b639aabadbbd6d94c9047634"
+        "aefbba076509a0a21332132ecd14914a7eba1ff5b0ba0f4d51ef1115d4a6b281"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -94143,7 +94147,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "35c92dff610b35c5af63fee22c6f73af1308e211b2c7df5a3cb3fa3c232f8fc2",
+        "fixtureChecksum": "0831f55c8e401ed40024f1b01f7df48bb00d3284272cbd08e3641983d8529a47",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -94180,7 +94184,7 @@
         "legacy-token-namespace"
       ],
       "currentAssetHashes": [
-        "35c92dff610b35c5af63fee22c6f73af1308e211b2c7df5a3cb3fa3c232f8fc2"
+        "0831f55c8e401ed40024f1b01f7df48bb00d3284272cbd08e3641983d8529a47"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -94886,7 +94890,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "0a9f88eea69c95744f8bb547b1144b0d889413b4d9b755e9fe757280b1df8c77",
+        "fixtureChecksum": "4348e86a91c49b28daa1cb18bfa51f86c7974d50a10ce78390c5587357b23baa",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -94921,7 +94925,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "0a9f88eea69c95744f8bb547b1144b0d889413b4d9b755e9fe757280b1df8c77"
+        "4348e86a91c49b28daa1cb18bfa51f86c7974d50a10ce78390c5587357b23baa"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -97973,7 +97977,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "c8998e458daef64e55b7c926acbd6154218337d589c90faf43e0c3368c813df6",
+        "fixtureChecksum": "56ee86ecb5564979f4e4e7dd89619d4e6c05875e6ea3f726f22d3c1eed0ae542",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -98010,7 +98014,7 @@
         "legacy-coral-action"
       ],
       "currentAssetHashes": [
-        "c8998e458daef64e55b7c926acbd6154218337d589c90faf43e0c3368c813df6"
+        "56ee86ecb5564979f4e4e7dd89619d4e6c05875e6ea3f726f22d3c1eed0ae542"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -118360,7 +118364,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "891e9d533b97f431de2f2a4940549e8a7e4fad14467043909c9e0a3adaa14375",
+        "fixtureChecksum": "8f64bdfd29cc090e2d29a61c1877d68f2c67906e1b127915df3d18ace340a88e",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -118385,7 +118389,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "891e9d533b97f431de2f2a4940549e8a7e4fad14467043909c9e0a3adaa14375"
+        "8f64bdfd29cc090e2d29a61c1877d68f2c67906e1b127915df3d18ace340a88e"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -138065,7 +138069,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "05d7034f7820d879028332c0623ac7ece64d065321464b89896fd671799d3299",
+        "fixtureChecksum": "13a015552b5bc69d8f3c522f7461ba5a0bac399d31e17f1783837d194f33e02b",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -138090,7 +138094,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "05d7034f7820d879028332c0623ac7ece64d065321464b89896fd671799d3299"
+        "13a015552b5bc69d8f3c522f7461ba5a0bac399d31e17f1783837d194f33e02b"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -138161,7 +138165,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "0e9e930f34cd59557a8bb9ed0970249fcc8840ea30c33478cd646ddbafbcc155",
+        "fixtureChecksum": "fadd41de8e4a62f47a63605bf26b95158e5010115b1b4e0d09eea8c62c3ef1bc",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -138186,7 +138190,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "0e9e930f34cd59557a8bb9ed0970249fcc8840ea30c33478cd646ddbafbcc155"
+        "fadd41de8e4a62f47a63605bf26b95158e5010115b1b4e0d09eea8c62c3ef1bc"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -138345,7 +138349,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "3eef0bc23dc5587768113141b26d377947aba22725d84a73b2809358f9cb8988",
+        "fixtureChecksum": "09b7fa9fc3d3bb85cf509214f2e252ee109bb014a7c00ce30880fd2100b15128",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -138370,7 +138374,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "3eef0bc23dc5587768113141b26d377947aba22725d84a73b2809358f9cb8988"
+        "09b7fa9fc3d3bb85cf509214f2e252ee109bb014a7c00ce30880fd2100b15128"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -138433,7 +138437,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "ebd2cf958bc3f89cf1fcfe554bd0715ecf43635cdfcc1db9871f4635bcf3c145",
+        "fixtureChecksum": "9b59f783019570206465ca8f4559a9d1a88f4d1456dc11b9ffdb9c8283e4f2d8",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -138458,7 +138462,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "ebd2cf958bc3f89cf1fcfe554bd0715ecf43635cdfcc1db9871f4635bcf3c145"
+        "9b59f783019570206465ca8f4559a9d1a88f4d1456dc11b9ffdb9c8283e4f2d8"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -138701,7 +138705,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "37ef81828315c54f377cb51e822b778d85efa51d8ae7d1cc9e70fcdec05276bb",
+        "fixtureChecksum": "b31038da6918dbea8f5f10598474bd58df0cd6c8f65c85c3c1d093109808bdf1",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -138726,7 +138730,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "37ef81828315c54f377cb51e822b778d85efa51d8ae7d1cc9e70fcdec05276bb"
+        "b31038da6918dbea8f5f10598474bd58df0cd6c8f65c85c3c1d093109808bdf1"
       ],
       "disposition": "approved-carry-forward",
       "featureFlags": [],
@@ -138879,7 +138883,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "6981ceb20846094c4586cfa47383bd228afb97ce50709071d91bad08a6244073",
+        "fixtureChecksum": "1a86ab1b88be4503338dc53e2c9e3947a6b5f8b6b6eb32690d1be7299d548ec9",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -138909,7 +138913,7 @@
         "legacy-shape-language"
       ],
       "currentAssetHashes": [
-        "6981ceb20846094c4586cfa47383bd228afb97ce50709071d91bad08a6244073"
+        "1a86ab1b88be4503338dc53e2c9e3947a6b5f8b6b6eb32690d1be7299d548ec9"
       ],
       "disposition": "approved-profile-rule",
       "featureFlags": [],

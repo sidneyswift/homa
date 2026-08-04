@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -6,7 +7,9 @@ import type { BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST_PATH = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
+const FIXTURE_GALLERY_PATH = resolve(ROOT, "docs/homa-design/evidence/fixture-gallery.json");
 const DESIGN_CSS_PATH = resolve(ROOT, "apps/web/components/design/quiet-primitives.css");
+const GENERATED_WEB_CSS_PATH = resolve(ROOT, "packages/design/generated/web.css");
 
 export const GAUNTLET_VIEWPORTS = [
   { name: "phone-small", width: 320, height: 800 },
@@ -37,6 +40,65 @@ export const GAUNTLET_ROUTES = [
   { path: "/signin", requiredMarkers: ["quiet-auth-shell", "quiet-frame"] },
   { path: "/onboarding", requiredMarkers: ["quiet-nav", "quiet-footer", "quiet-action"] },
   { path: "/design/quiet-authority", requiredMarkers: ["quiet-fixture", "quiet-frame", "quiet-action", "quiet-status"] },
+] as const;
+
+export const GAUNTLET_ROUTE_MANIFEST_PATHS = [
+  ["/", "apps/web/app/page.tsx"],
+  ["/signin", "apps/web/app/signin/page.tsx"],
+  ["/onboarding", "apps/web/app/onboarding/page.tsx"],
+  ["/design/quiet-authority", "apps/web/app/design/quiet-authority/page.tsx"],
+] as const;
+
+/**
+ * The web adapter is larger than the five shell primitives used by the first
+ * gauntlet pass. Keep this list aligned with the design contract's fixture
+ * gallery so a new primitive cannot ship without a deterministic specimen
+ * and a surface-manifest row.
+ */
+export const GAUNTLET_WEB_PRIMITIVES = [
+  ["web-quiet-action", "apps/web/components/design/QuietAction.tsx"],
+  ["web-quiet-choice", "apps/web/components/design/QuietChoice.tsx"],
+  ["web-quiet-feedback", "apps/web/components/design/QuietFeedback.tsx"],
+  ["web-quiet-field", "apps/web/components/design/QuietField.tsx"],
+  ["web-quiet-frame", "apps/web/components/design/QuietFrame.tsx"],
+  ["web-quiet-identity", "apps/web/components/design/QuietIdentity.tsx"],
+  ["web-quiet-media", "apps/web/components/design/QuietMedia.tsx"],
+  ["web-quiet-nav", "apps/web/components/design/QuietNav.tsx"],
+  ["web-quiet-footer", "apps/web/components/design/QuietFooter.tsx"],
+  ["web-quiet-status", "apps/web/components/design/QuietStatus.tsx"],
+  ["web-quiet-thread", "apps/web/components/design/QuietThread.tsx"],
+  ["web-semantic-icon", "apps/web/components/design/Icon.tsx"],
+] as const;
+
+export const GAUNTLET_FIXTURE_PRIMITIVE_STATES = [
+  ["web-quiet-action", ["default", "primary", "secondary", "disabled", "focus", "pressed", "retry"]],
+  ["web-quiet-choice", ["selected", "success", "disabled", "focus"]],
+  ["web-quiet-feedback", ["error", "loading", "alert", "retry"]],
+  ["web-quiet-field", ["error", "disabled", "readonly", "focus"]],
+  ["web-quiet-frame", ["paper", "contained"]],
+  ["web-quiet-identity", ["full", "mark"]],
+  ["web-quiet-media", ["loading", "empty", "artifact"]],
+  ["web-quiet-nav", ["rest", "focus", "menu"]],
+  ["web-quiet-footer", ["rest", "focus", "links"]],
+  ["web-quiet-status", ["constructive", "error", "rest"]],
+  ["web-quiet-thread", ["draw", "land", "still", "reduced-motion"]],
+  ["web-semantic-icon", ["decorative", "labeled"]],
+] as const;
+
+/**
+ * Two real consumers are the minimum extraction proof: public acquisition
+ * and signed-in family work. These are production components, not the
+ * approval fixture or unit tests, so route-local clones cannot satisfy the
+ * requirement by existing only in the gallery.
+ */
+export const GAUNTLET_REAL_PRIMITIVE_CONSUMERS = [
+  [
+    "apps/web/components/marketing/QuietLanding.tsx",
+    ["QuietAction", "QuietFrame", "QuietThread", "QuietFooter"],
+  ],
+  ["apps/web/components/dashboard/sidebar.tsx", ["QuietFrame"]],
+  ["apps/web/components/dashboard/account-menu.tsx", ["QuietAction"]],
+  ["apps/web/components/dashboard/context-switcher.tsx", ["QuietStatus"]],
 ] as const;
 
 type GauntletIssue = {
@@ -114,11 +176,119 @@ function hasTrackedSurface(manifest: BrandSurfaceManifest, path: string): boolea
   return manifest.surfaces.some((surface) => surface.paths.includes(path));
 }
 
+type FixtureGallery = {
+  categories?: {
+    primitives?: Array<{
+      id?: string;
+      source?: string;
+      evidenceStatus?: string;
+      checksum?: string;
+    }>;
+  };
+};
+
+function primitiveContractIssues(manifest: BrandSurfaceManifest): GauntletIssue[] {
+  const issues: GauntletIssue[] = [];
+  let gallery: FixtureGallery;
+  try {
+    gallery = JSON.parse(readFileSync(FIXTURE_GALLERY_PATH, "utf8")) as FixtureGallery;
+  } catch {
+    return [{ check: "primitive-fixture-gallery", detail: "fixture-gallery.json is missing or invalid" }];
+  }
+
+  const fixtures = new Map((gallery.categories?.primitives ?? []).map((fixture) => [fixture.id, fixture]));
+  for (const [id, source] of GAUNTLET_WEB_PRIMITIVES) {
+    if (!existsSync(resolve(ROOT, source))) {
+      issues.push({ check: "primitive-source", detail: `${source} is missing` });
+    }
+    if (!hasTrackedSurface(manifest, source)) {
+      issues.push({ check: "primitive-manifest", detail: `${source} is not classified in the manifest` });
+    }
+    const fixture = fixtures.get(id);
+    if (!fixture || fixture.source !== source) {
+      issues.push({ check: "primitive-fixture", detail: `${id} does not point at ${source}` });
+    } else {
+      if (fixture.evidenceStatus !== "contract-only") {
+        issues.push({ check: "primitive-fixture-state", detail: `${id} must remain contract-only until rendered or device evidence is accepted` });
+      }
+      if (!/^[0-9a-f]{64}$/u.test(fixture.checksum ?? "")) {
+        issues.push({ check: "primitive-fixture-checksum", detail: `${id} has no valid checksum` });
+      }
+    }
+  }
+  return issues;
+}
+
+function fixtureRouteContractIssues(): GauntletIssue[] {
+  const source = readFileSync(resolve(ROOT, "apps/web/app/design/quiet-authority/page.tsx"), "utf8");
+  const markers = [...source.matchAll(/data-gauntlet-primitive="([^"]+)"/gu)].flatMap((match) => match[1]!.split(/\s+/u));
+  const states = [...source.matchAll(/data-gauntlet-states="([^"]+)"/gu)].flatMap((match) => match[1]!.split(","));
+  const issues: GauntletIssue[] = [];
+  for (const [id, requiredStates] of GAUNTLET_FIXTURE_PRIMITIVE_STATES) {
+    if (!markers.includes(id)) issues.push({ check: "fixture-primitive-marker", detail: `${id} has no explicit data-gauntlet-primitive marker` });
+    for (const state of requiredStates) {
+      if (!states.includes(state)) issues.push({ check: "fixture-primitive-state", detail: `${id} has no ${state} state marker` });
+    }
+  }
+  return issues;
+}
+
+function realPrimitiveConsumerIssues(): GauntletIssue[] {
+  const issues: GauntletIssue[] = [];
+  for (const [source, primitiveNames] of GAUNTLET_REAL_PRIMITIVE_CONSUMERS) {
+    const absolutePath = resolve(ROOT, source);
+    if (!existsSync(absolutePath)) {
+      issues.push({ check: "primitive-consumer", detail: `${source} is missing` });
+      continue;
+    }
+    const contents = readFileSync(absolutePath, "utf8");
+    for (const primitiveName of primitiveNames) {
+      if (!new RegExp(`\\b${primitiveName}\\b`, "u").test(contents)) {
+        issues.push({ check: "primitive-consumer", detail: `${source} no longer consumes ${primitiveName}` });
+      }
+    }
+  }
+  return issues;
+}
+
+function webTokenProjectionIssues(): GauntletIssue[] {
+  const issues: GauntletIssue[] = [];
+  let generatedCss: string;
+  try {
+    generatedCss = readFileSync(GENERATED_WEB_CSS_PATH, "utf8");
+  } catch {
+    return [{ check: "web-token-projection", detail: "generated web.css is missing or unreadable" }];
+  }
+  const definitions = new Set([...generatedCss.matchAll(/--(homa-[a-z0-9-]+)\s*:/gu)].map((match) => match[1]));
+  for (const alias of ["homa-muted-ink", "homa-soft-boundary"]) {
+    if (!definitions.has(alias)) issues.push({ check: "web-token-projection", detail: `generated web.css does not define --${alias}` });
+  }
+  const landingSource = readFileSync(resolve(ROOT, "apps/web/components/marketing/QuietLanding.tsx"), "utf8");
+  if (/\.quiet-landing\s*\{[^}]*--homa-(?:muted-ink|soft-boundary)\s*:/su.test(landingSource)) {
+    issues.push({ check: "web-token-scope", detail: "derived Quiet tokens must not be scoped only to QuietLanding" });
+  }
+  let trackedPaths: string[] = [];
+  try {
+    trackedPaths = execFileSync("git", ["ls-files", "apps/web"], { cwd: ROOT }).toString("utf8").split("\n").filter(Boolean);
+  } catch {
+    issues.push({ check: "web-token-scan", detail: "could not enumerate tracked web source files" });
+    return issues;
+  }
+  for (const path of trackedPaths.filter((candidate) => /\.(?:css|ts|tsx)$/u.test(candidate))) {
+    const source = readFileSync(resolve(ROOT, path), "utf8");
+    for (const match of source.matchAll(/var\(\s*--(homa-[a-z0-9-]+)/gu)) {
+      const token = match[1];
+      if (!definitions.has(token)) issues.push({ check: "web-token-undefined", detail: `${path} references undefined --${token}` });
+    }
+  }
+  return issues;
+}
+
 function routeIssues(manifest: BrandSurfaceManifest): GauntletIssue[] {
   const issues: GauntletIssue[] = [];
-  for (const route of GAUNTLET_ROUTES) {
-    if (!manifest.surfaces.some((surface) => surface.type === "route" && surface.paths.some((path) => path.includes(route.path === "/" ? "app/page" : route.path.slice(1))))) {
-      issues.push({ check: "manifest-route-coverage", detail: `${route.path} is not represented by a route surface row` });
+  for (const [route, source] of GAUNTLET_ROUTE_MANIFEST_PATHS) {
+    if (!manifest.surfaces.some((surface) => surface.type === "route" && surface.paths.includes(source))) {
+      issues.push({ check: "manifest-route-coverage", detail: `${route} is not represented by the exact route source ${source}` });
     }
   }
   return issues;
@@ -152,17 +322,26 @@ export function collectStaticGauntletReport(): StaticGauntletReport {
     if (!css.includes("forced-colors: active")) issues.push({ check: "forced-colors", detail: "web primitives have no Forced Colors endpoint" });
     if (!css.includes(":focus-visible")) issues.push({ check: "focus-visible", detail: "web primitives have no visible keyboard focus endpoint" });
     if (!css.includes("--homa-")) issues.push({ check: "semantic-tokens", detail: "web primitives do not reference generated Homa tokens" });
+    for (const selector of [
+      ".quiet-action",
+      ".quiet-field",
+      ".quiet-choice",
+      ".quiet-feedback",
+      ".quiet-frame",
+      ".quiet-identity",
+      ".quiet-media",
+      ".quiet-nav",
+      ".quiet-footer",
+      ".quiet-status",
+      ".quiet-thread",
+    ]) {
+      if (!css.includes(selector)) issues.push({ check: "primitive-css-selector", detail: `${selector} has no CSS adapter` });
+    }
+    for (const stateHook of [":hover", ":active", ":focus-visible", ":disabled", "data-selected", "data-state=\"error\""]) {
+      if (!css.includes(stateHook)) issues.push({ check: "primitive-css-state", detail: `${stateHook} has no CSS endpoint` });
+    }
   }
-  for (const requiredPath of [
-    "apps/web/components/design/QuietFrame.tsx",
-    "apps/web/components/design/QuietAction.tsx",
-    "apps/web/components/design/QuietStatus.tsx",
-    "apps/web/components/design/QuietNav.tsx",
-    "apps/web/components/design/QuietFooter.tsx",
-  ]) {
-    if (!hasTrackedSurface(manifest, requiredPath)) issues.push({ check: "primitive-manifest", detail: `${requiredPath} is not classified in the manifest` });
-  }
-  issues.push(...routeIssues(manifest), ...criticalSurfaceIssues(manifest));
+  issues.push(...primitiveContractIssues(manifest), ...fixtureRouteContractIssues(), ...realPrimitiveConsumerIssues(), ...webTokenProjectionIssues(), ...routeIssues(manifest), ...criticalSurfaceIssues(manifest));
   return {
     harnessVersion: "interface-gauntlet-v2",
     contract: "quiet-authority-v1",
@@ -207,6 +386,32 @@ export async function runRenderedGauntlet(baseUrl: string, outputDir: string): P
         const missingMarkers = route.requiredMarkers.filter((marker) => !markers.includes(marker));
         if (response === null || response.status() >= 400) issues.push({ check: "http-status", detail: `${route.path} returned ${response?.status() ?? "no response"}` });
         for (const marker of missingMarkers) issues.push({ check: "route-marker", detail: `${route.path} is missing ${marker}` });
+        if (route.path === "/design/quiet-authority") {
+          const fixtureEvidence = await page.locator("[data-gauntlet-primitive]").evaluateAll((elements) => {
+            const stateMap = new Map<string, Set<string>>();
+            for (const element of elements) {
+              const ids = (element.getAttribute("data-gauntlet-primitive") ?? "").split(/\s+/u).filter(Boolean);
+              const states = (element.getAttribute("data-gauntlet-states") ?? "").split(",").map((state) => state.trim()).filter(Boolean);
+              for (const id of ids) {
+                const existing = stateMap.get(id) ?? new Set<string>();
+                for (const state of states) existing.add(state);
+                stateMap.set(id, existing);
+              }
+            }
+            return [...stateMap.entries()].map(([id, states]) => [id, [...states]] as const);
+          });
+          const observed = new Map(fixtureEvidence.map(([id, states]) => [id, new Set(states)]));
+          for (const [id, requiredStates] of GAUNTLET_FIXTURE_PRIMITIVE_STATES) {
+            const actualStates = observed.get(id);
+            if (!actualStates) {
+              issues.push({ check: "fixture-primitive-rendered", detail: `${route.path} did not render ${id}` });
+              continue;
+            }
+            for (const state of requiredStates) {
+              if (!actualStates.has(state)) issues.push({ check: "fixture-state-rendered", detail: `${route.path} did not render ${id}:${state}` });
+            }
+          }
+        }
         const timing = await page.evaluate(() => {
           const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
           const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
@@ -350,10 +555,11 @@ async function collectLongCopyEvidence(page: any, issues: GauntletIssue[], path:
 
 async function collectRecoveryEvidence(context: any, page: any, issues: GauntletIssue[], path: string): Promise<RecoveryEvidence> {
   await context.setOffline(true);
+  await page.waitForFunction(() => !navigator.onLine, undefined, { timeout: 2_000 }).catch(() => undefined);
   const offlineSignal = await page.evaluate(() => !navigator.onLine);
   const offlineRequestFailed = await page.evaluate(async () => {
     try {
-      await fetch(`${location.origin}/__gauntlet_offline_probe__`, { cache: "no-store" });
+      await fetch(`${location.origin}/__gauntlet_offline_probe__?nonce=${Date.now()}`, { cache: "no-store" });
       return false;
     } catch {
       return true;
@@ -372,6 +578,9 @@ async function collectRecoveryEvidence(context: any, page: any, issues: Gauntlet
   const errorStateCount = await page.locator('[data-state="error"], [role="alert"]').count();
   const retryControlCount = await page.getByRole("button", { name: /retry|try again|reload/i }).count();
   if (!offlineSignal || !offlineRequestFailed || !restoredOnline || !onlineRequestSucceeded) issues.push({ check: "recovery-offline-signal", detail: `${path} did not expose a deterministic offline failure and online recovery transition` });
+  if (path === "/design/quiet-authority" && (errorStateCount < 1 || retryControlCount < 1)) {
+    issues.push({ check: "recovery-visible-control", detail: `${path} must expose a visible error state and a retry control in its recovery specimen` });
+  }
   return { offlineSignal, offlineRequestFailed, restoredOnline, onlineRequestSucceeded, errorStateCount, retryControlCount };
 }
 

@@ -17,7 +17,7 @@ interface Tile {
 }
 
 const SUB_TONE: Record<Tile["subTone"], React.CSSProperties> = {
-  muted: { color: "var(--text-[color:var(--homa-ink-muted)])" },
+  muted: { color: "var(--homa-muted-ink)" },
   sage: { color: "var(--sage-700)", fontWeight: 700 },
   gold: { color: "var(--gold-ink)", fontWeight: 700 },
 };
@@ -91,7 +91,7 @@ export function StatTiles({
     <div className="mt-6 grid gap-4 sm:grid-cols-3">
       {tiles.map((tile) => (
         <QuietFrame as="div" key={tile.label} className="p-5">
-          <p className="text-[0.8rem] font-semibold text-[color:var(--homa-ink-muted)]">{tile.label}</p>
+          <p className="text-[0.8rem] font-semibold text-[color:var(--homa-muted-ink)]">{tile.label}</p>
           <p className="mt-1.5 font-display text-[2rem] font-semibold leading-none text-[color:var(--homa-ink)]">
             {tile.value}
           </p>
