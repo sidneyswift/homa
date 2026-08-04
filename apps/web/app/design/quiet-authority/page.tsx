@@ -11,6 +11,7 @@ import { QuietNav } from "../../../components/design/QuietNav";
 import { QuietStatus } from "../../../components/design/QuietStatus";
 import { QuietThread } from "../../../components/design/QuietThread";
 import { Icon } from "../../../components/design/Icon";
+import { AuthenticatedContextFixture } from "./authenticated-context-fixture";
 
 export const metadata: Metadata = {
   title: "Quiet authority fixture | Homa",
@@ -94,6 +95,8 @@ export default function QuietAuthorityFixture() {
           </QuietAction>
         </QuietFrame>
       </section>
+
+      <AuthenticatedContextFixture />
 
       <section className="quiet-fixture__atoms" aria-labelledby="quiet-fixture-atoms-title">
         <div className="quiet-fixture__atoms-heading">

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
+const MAP_FLOW = readFileSync(new URL("./map-flow.tsx", import.meta.url), "utf8");
 const SOURCES = [
   readFileSync(new URL("./extras-step.tsx", import.meta.url), "utf8"),
   readFileSync(new URL("./preparing-step.tsx", import.meta.url), "utf8"),
@@ -31,5 +32,7 @@ describe("Quiet onboarding loading surfaces", () => {
     assert.match(PRIMITIVES, /\.quiet-action:focus-visible/u);
     assert.match(PRIMITIVES, /\.quiet-onboarding-surface \.flow-step-in \{\s*animation:/u);
     assert.match(PRIMITIVES, /\.quiet-onboarding-surface \.flow-step-in \{\s*animation: none;/u);
+    assert.match(PRIMITIVES, /data-flow-phase="bootstrap-error"/u);
+    assert.match(MAP_FLOW, /data-flow-phase=\{phase\}/u);
   });
 });

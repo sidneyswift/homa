@@ -743,6 +743,7 @@ export function MapFlow({
     <div
       key={phase}
       data-brand-layer="onboarding-flow"
+      data-flow-phase={phase}
       ref={wrapperRef}
       tabIndex={-1}
       className={`flow-step-in outline-none ${widthClass}`}

@@ -37,7 +37,18 @@ export interface RailSubject {
   status: "done" | "current" | "upcoming";
 }
 
-export function ReportRail({ childName, subjects }: { childName: string; subjects: RailSubject[] }) {
+export function ReportRail({
+  childName,
+  subjects,
+  contentOnly = false,
+  headingId,
+}: {
+  childName: string;
+  subjects: RailSubject[];
+  /** The stage-context composition owns the semantic aside. */
+  contentOnly?: boolean;
+  headingId?: string;
+}) {
   const done = subjects.filter((subject) => subject.status === "done").length;
   const remaining = subjects.length - done;
   // Named individually: done (the payoff) and current (where she is).
@@ -46,14 +57,13 @@ export function ReportRail({ childName, subjects }: { childName: string; subject
   const visibleSubjects = subjects.filter((subject) => subject.status !== "upcoming");
   const upcomingCount = subjects.length - visibleSubjects.length;
 
-  return (
-    <aside data-brand-layer="report-rail" aria-label={`${childName}'s report, assembling`} className="hidden lg:block">
+  const content = (
       <QuietFrame as="div" tone="paper" className="quiet-report-rail sticky top-8 overflow-hidden">
         <div className="quiet-report-rail__header">
           <p className="quiet-report-rail__eyebrow">
             Building as you answer
           </p>
-          <p className="quiet-report-rail__title">
+          <p id={headingId} className="quiet-report-rail__title">
             {childName}&apos;s <span className="quiet-report-rail__title-accent">progress report</span>
           </p>
         </div>
@@ -91,6 +101,13 @@ export function ReportRail({ childName, subjects }: { childName: string; subject
           </p>
         ) : null}
       </QuietFrame>
+  );
+
+  if (contentOnly) return content;
+
+  return (
+    <aside data-brand-layer="report-rail" aria-label={`${childName}'s report, assembling`} className="hidden lg:block">
+      {content}
     </aside>
   );
 }

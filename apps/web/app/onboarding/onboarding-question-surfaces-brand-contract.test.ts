@@ -27,6 +27,16 @@ describe("Quiet onboarding question surfaces", () => {
     }
   });
 
+  it("composes the full checklist as a stage with a semantic report context", () => {
+    assert.match(CHECKLIST, /<Workspace[\s\S]*layout=\{compact \? "flow" : "stage-context"\}/u);
+    assert.match(CHECKLIST, /<WorkStage[\s\S]*labelledBy="onboarding-checklist-question"/u);
+    assert.match(CHECKLIST, /<ContextPanel[\s\S]*labelledBy="onboarding-checklist-report"/u);
+    assert.match(CHECKLIST, /<ReportRail[\s\S]*contentOnly/u);
+    assert.match(CHECKLIST, /id="onboarding-checklist-question"/u);
+    assert.match(CHECKLIST, /headingId="onboarding-checklist-report"/u);
+    assert.match(PRIMITIVES, /\.quiet-onboarding__report-context[\s\S]*border: 0/u);
+  });
+
   it("keeps adaptive question geometry and accessibility behavior in the shared adapter", () => {
     assert.match(PRIMITIVES, /\.quiet-onboarding__question-card\s*\{[\s\S]*display:\s*flex/u);
     assert.match(PRIMITIVES, /\.quiet-onboarding__answer-grid\s*\{/u);

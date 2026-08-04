@@ -210,14 +210,14 @@ export function PlannerCanvasPanel({
 
   const headingId = "planner-canvas-heading";
   const header = (
-    <header className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3">
-      <p id={headingId} className="text-sm font-semibold text-strong">
+    <header className={variant === "onboarding" ? "quiet-side-panel__header" : "flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3"}>
+      <p id={headingId} className={variant === "onboarding" ? "quiet-side-panel__title" : "text-sm font-semibold text-strong"}>
         Week planner
       </p>
       <div className="flex items-center gap-3">
         <Link
           href="/app/planner"
-          className="text-xs font-semibold text-brand hover:underline"
+          className={variant === "onboarding" ? "quiet-side-panel__link" : "text-xs font-semibold text-brand hover:underline"}
         >
           Full page
         </Link>
@@ -225,7 +225,7 @@ export function PlannerCanvasPanel({
           type="button"
           aria-label="Close the planner"
           onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-card hover:text-strong"
+          className={variant === "onboarding" ? "quiet-side-panel__close" : "flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-card hover:text-strong"}
         >
           <Icon name="close" size={20} />
         </button>
@@ -233,7 +233,7 @@ export function PlannerCanvasPanel({
     </header>
   );
   const body = (
-    <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-5">
+    <div className={variant === "onboarding" ? "quiet-side-panel__body" : "flex-1 overflow-y-auto px-4 py-5 sm:px-5"}>
       {state.phase === "loading" ? (
         <PlannerBoardSkeleton />
       ) : state.phase === "error" ? (
@@ -270,7 +270,7 @@ export function PlannerCanvasPanel({
 
   if (variant === "onboarding") {
     return (
-      <SidePanel labelledBy={headingId} onClose={onClose}>
+      <SidePanel labelledBy={headingId} onClose={onClose} variant="quiet" detent="resting">
         {header}
         {body}
       </SidePanel>

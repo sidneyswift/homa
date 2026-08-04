@@ -49,7 +49,9 @@ describe("PlannerCanvasPanel variant", () => {
     );
     assert.match(html, /role="dialog"/);
     assert.match(html, /aria-modal="true"/);
-    assert.match(html, /max-h-\[78dvh\]/);
+    assert.match(html, /quiet-context-sheet/u);
+    assert.match(html, /data-detent="resting"/u);
+    assert.match(html, /quiet-side-panel__header/u);
     assert.doesNotMatch(html, /fixed inset-0 z-40 flex flex-col bg-page/);
   });
 
