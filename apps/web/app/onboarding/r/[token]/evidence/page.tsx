@@ -51,7 +51,10 @@ export default async function EvidencePackPage({
 
   if (!report) {
     return (
-      <main className="quiet-print-surface mx-auto w-full max-w-xl px-6 py-20">
+      <main
+        data-brand-surface="report-evidence"
+        className="quiet-print-surface mx-auto w-full max-w-xl px-6 py-20"
+      >
         <Logo size={26} />
         <h1 className="quiet-artifact__title mt-8">This link isn&apos;t active.</h1>
       </main>
