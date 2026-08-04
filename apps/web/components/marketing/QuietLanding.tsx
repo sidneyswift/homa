@@ -63,8 +63,8 @@ const QUIET_LANDING_CSS = `
 .qa-authority__copy > p { max-width: 640px; margin: 22px 0 0; color: color-mix(in srgb, var(--homa-paper) 86%, transparent); font-size: clamp(1.02rem, 1.4vw, 1.24rem); line-height: 1.6; }
 .qa-authority__copy > .qa-opening__note { margin-top: 12px; color: color-mix(in srgb, var(--homa-paper) 68%, transparent); font-size: .78rem; line-height: 1.45; }
 .qa-authority__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
-.qa-authority__actions .quiet-action--primary { background: var(--homa-visual-coral); color: var(--homa-ink); }
-.qa-authority__actions .quiet-action--secondary { border-color: color-mix(in srgb, var(--homa-paper) 42%, transparent); color: var(--homa-paper); }
+.qa-authority > .qa-authority__copy .qa-authority__actions .quiet-action--primary { background: var(--homa-visual-coral); color: var(--homa-ink); }
+.qa-authority > .qa-authority__copy .qa-authority__actions .quiet-action--secondary { border-color: color-mix(in srgb, var(--homa-paper) 42%, transparent); color: var(--homa-paper); }
 .qa-product { position: relative; z-index: 2; border: 1px solid color-mix(in srgb, var(--homa-paper) 42%, transparent); border-radius: 28px; background: var(--homa-paper); box-shadow: 0 30px 70px color-mix(in srgb, var(--homa-ink) 32%, transparent); color: var(--homa-ink); padding: 18px; transform: rotate(1deg); animation: qa-product-enter 480ms var(--homa-motion-ease-out) both; }
 .qa-product__top { display: flex; justify-content: space-between; gap: 12px; align-items: center; color: var(--homa-muted-ink); font: 650 .75rem/1.3 var(--font-sans); }
 .qa-product__top .quiet-status { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; background: var(--homa-constructive-tint); color: var(--homa-constructive-ink); padding: 7px 10px; font-size: .72rem; }
