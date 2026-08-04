@@ -8,6 +8,9 @@ import {
   FOUNDER_STORY_COPY,
   HERO_COPY,
   LANDING_SECTION_COPY,
+  MEMBERSHIP_ITEMS,
+  MEMBERSHIP_NOTE,
+  MONTHLY_MEMBERSHIP_PRICES,
   PLATFORM_ITEMS,
   PRODUCT_PREVIEW_COPY,
   SAMPLE_REPORT_COPY,
@@ -15,6 +18,7 @@ import {
 } from "./landing-content";
 
 const QUIET_LANDING_SOURCE = readFileSync(new URL("./QuietLanding.tsx", import.meta.url), "utf8");
+const LANDING_PAGE_SOURCE = readFileSync(new URL("../../app/page.tsx", import.meta.url), "utf8");
 
 test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.headline, "Homeschool, handled.");
@@ -22,8 +26,8 @@ test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.eyebrow, "Your homeschool assistant");
   assert.match(HERO_COPY.body, /AI assistant for homeschool parents/i);
   assert.match(HERO_COPY.body, /plans the week/i);
-  assert.match(HERO_COPY.body, /practice pages/i);
-  assert.match(HERO_COPY.body, /teaching time and finished work/i);
+  assert.match(HERO_COPY.body, /practice pages from the lesson for children ages 2 to 7/i);
+  assert.match(HERO_COPY.body, /teaching hours you report/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -32,9 +36,17 @@ test("the trial CTA states the card terms before the click", () => {
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /credit card/i);
-  assert.match(HERO_COPY.primaryActionNote, /\$19 a month/);
+  assert.match(HERO_COPY.primaryActionNote, /\$19, \$49, or \$199/);
   assert.match(HERO_COPY.primaryActionNote, /before the first charge/i);
   assert.match(HERO_COPY.primaryActionNote, /cancel before then/i);
+  assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49, 199]);
+});
+
+test("metadata and structured offers reuse the catalog-derived landing contract", () => {
+  assert.match(LANDING_PAGE_SOURCE, /HERO_COPY\.primaryActionNote/u);
+  assert.match(LANDING_PAGE_SOURCE, /MEMBERSHIP_ITEMS\.map/u);
+  assert.doesNotMatch(LANDING_PAGE_SOURCE, /Monthly memberships cost \$19/u);
+  assert.doesNotMatch(LANDING_PAGE_SOURCE, /price:\s*["']19["']/u);
 });
 
 test("the platform strip states only verified access modes", () => {
@@ -56,8 +68,43 @@ test("the how-it-works bridge explains the parent's path without diagnosing her"
 test("the capability section exposes four shipped product nouns in parent-day order", () => {
   assert.deepEqual(
     CAPABILITY_ITEMS.map(({ title }) => title),
-    ["The weekly plan", "Practice pages", "The binder", "Hours and state rules"],
+    ["The weekly plan", "Practice pages", "The binder", "Teaching hours and state rules"],
   );
+});
+
+test("the landing states the current practice-page age boundary before signup", () => {
+  const practice = CAPABILITY_ITEMS.find(({ id }) => id === "practice");
+
+  assert.ok(practice);
+  assert.match(HERO_COPY.body, /ages 2 to 7/i);
+  assert.match(practice.body, /ages 2 to 7/i);
+});
+
+test("the landing shows the complete membership catalog before the final signup ask", () => {
+  assert.deepEqual(
+    MEMBERSHIP_ITEMS.map(({ name, monthlyPrice, annualPrice }) => ({ name, monthlyPrice, annualPrice })),
+    [
+      { name: "Homa", monthlyPrice: 19, annualPrice: 182 },
+      { name: "Homa Plus", monthlyPrice: 49, annualPrice: 470 },
+      { name: "Homa Max", monthlyPrice: 199, annualPrice: 1910 },
+    ],
+  );
+  assert.match(LANDING_SECTION_COPY.memberships.body, /practice pages for ages 2 to 7/i);
+  assert.match(LANDING_SECTION_COPY.memberships.headline, /price/i);
+  assert.doesNotMatch(LANDING_SECTION_COPY.memberships.headline, /what each membership includes/i);
+  assert.match(MEMBERSHIP_NOTE, /paid once for the year/i);
+  assert.match(MEMBERSHIP_NOTE, /stop the next renewal/i);
+});
+
+test("the landing does not expand service promises whose delivery gates remain open", () => {
+  const plus = MEMBERSHIP_ITEMS.find(({ tier }) => tier === "plus");
+  const max = MEMBERSHIP_ITEMS.find(({ tier }) => tier === "elite");
+
+  assert.ok(plus);
+  assert.ok(max);
+  assert.match(plus.body, /curriculum-file uploads for weekly planning/i);
+  assert.match(max.body, /membership picker/i);
+  assert.doesNotMatch(`${plus.body} ${max.body}`, /text messages|phone calls|mailed materials|planning with a person/i);
 });
 
 test("each capability card points to its canonical feature page", () => {
@@ -111,10 +158,10 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
-  assert.match(SAMPLE_REPORT_COPY.body, /about five minutes answering questions/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /published national benchmarks/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /sources Homa used/i);
-  assert.match(SAMPLE_REPORT_COPY.reassurance, /starts with strengths/i);
+  assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes answering questions/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /published sources for your child's age/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /starts with strengths/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /you can open each one/i);
   assert.doesNotMatch(
     `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
     /test|score|questionnaire|observation/i,
@@ -124,7 +171,8 @@ test("the sample proof explains the mechanism before the result", () => {
 test("the founder story uses the public co-founder signature", () => {
   assert.equal(FOUNDER_STORY_COPY.signature, "Alessa & Carolyng");
   assert.equal(FOUNDER_STORY_COPY.headline, "Homa started at our kitchen table.");
-  assert.match(FOUNDER_STORY_COPY.body, /Homa grew from that need/i);
+  assert.match(FOUNDER_STORY_COPY.body, /She prepares the week/i);
+  assert.match(FOUNDER_STORY_COPY.body, /we stay in charge/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bcurriculum\b/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bsteady\b/i);
 });
@@ -138,6 +186,7 @@ test("the live landing composition keeps the approved artifact-first opening", (
     "HERO_COPY.headline",
     "HERO_COPY.body",
     "LANDING_SECTION_COPY.authority",
+    "MEMBERSHIP_ITEMS",
     "<Logo",
   ]) {
     assert.match(QUIET_LANDING_SOURCE, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -180,5 +229,7 @@ test("the product moment exposes a keyboard-safe, reduced-motion state demo", ()
 
 test("the product moment records only teaching time the parent supplied", () => {
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /\b\d+\s+minutes\b/iu);
-  assert.match(PRODUCT_PREVIEW_COPY.states.updating.description, /records the science time/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.states.updating.description, /records 35 minutes of science/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /unfinished fractions review/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.states.updating.description, /moves Leo's fractions review/iu);
 });

@@ -7,11 +7,31 @@ test("the state-rules FAQ keeps source context separate from compliance", () => 
   const answer = FAQ_ITEMS.find(([question]) => question === "Can Homa help with my state's homeschool rules?")?.[1];
 
   assert.ok(answer);
-  assert.match(answer, /^Yes, with sources and clear limits\./);
+  assert.match(answer, /^Homa records the teaching hours you report\./);
   assert.match(answer, /does not decide whether your family meets a legal requirement/i);
-  assert.match(answer, /each source was last checked/i);
-  assert.match(answer, /official website to confirm what applies/i);
+  assert.match(answer, /date it was last reviewed/i);
+  assert.match(answer, /confirm what applies/i);
+  assert.match(answer, /state's official website/i);
   assert.doesNotMatch(answer, /Homa follows your state's standards/i);
+});
+
+test("the age FAQ states both the report range and the current practice-page limit", () => {
+  const answer = FAQ_ITEMS.find(([question]) => question === "What ages does Homa cover?")?.[1];
+
+  assert.ok(answer);
+  assert.match(answer, /progress reports cover ages 2 to 16/i);
+  assert.match(answer, /practice pages currently cover ages 2 to 7/i);
+});
+
+test("the privacy FAQ gives a plain use, training, and deletion boundary", () => {
+  const answer = FAQ_ITEMS.find(([question]) => question === "How does Homa use my family's information?")?.[1];
+
+  assert.ok(answer);
+  assert.match(answer, /use what you share only to run Homa for your family/i);
+  assert.match(answer, /do not sell it or use it to train AI models/i);
+  assert.match(answer, /delete your family's records/i);
+  assert.match(answer, /Privacy page/i);
+  assert.doesNotMatch(answer, /lists the companies/i);
 });
 
 test("the pricing FAQ explains the three prices and what changes", () => {
@@ -23,8 +43,9 @@ test("the pricing FAQ explains the three prices and what changes", () => {
   assert.match(answer, /Homa Plus is \$49 a month/i);
   assert.match(answer, /Homa Max is \$199 a month/i);
   assert.match(answer, /practice pages/i);
-  assert.match(answer, /text messages, phone calls, and uploaded curriculum/i);
-  assert.match(answer, /printed materials by mail and planning with a person/i);
+  assert.match(answer, /Homa Plus adds curriculum-file uploads for weekly planning/i);
+  assert.match(answer, /membership picker shows the current Homa Max details/i);
+  assert.doesNotMatch(answer, /text messages|phone calls|printed materials|planning with a person/i);
   assert.match(answer, /annual memberships are paid once for the year/i);
   assert.match(answer, /stop any membership from renewing in your settings/i);
 });

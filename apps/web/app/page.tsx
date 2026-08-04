@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import { FAQ_ITEMS } from "../components/marketing/faq-items";
+import { HERO_COPY, MEMBERSHIP_ITEMS } from "../components/marketing/landing-content";
 import { QuietLanding } from "../components/marketing/QuietLanding";
 
 /* ── Answer capsules & freshness signals ────────────────────────── */
 export const metadata: Metadata = {
   title: "Homeschool, handled.",
   description:
-    "Homa is an AI assistant for homeschool parents. Plan the week, make practice pages, keep teaching hours and records, and know what to try next.",
+    "Homa is an AI assistant for homeschool parents. Plan the week, make practice pages for ages 2 to 7, record teaching hours, and keep finished work together.",
   // Self-referencing canonical: crawlers treat fragment URLs (/#how,
   // /#features) as separate documents with identical content unless the
   // page names its one preferred URL.
   alternates: { canonical: "/" },
   other: {
-    "answer-capsule":
-      "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages for each child, keeps teaching hours and records, and shows what to try next. Add a credit card to start 7 free days. Memberships start at $19 a month after that.",
+    "answer-capsule": `${HERO_COPY.body} ${HERO_COPY.primaryActionNote}`,
   },
 };
 
@@ -23,15 +23,16 @@ const webAppJsonLd = {
   name: "Homa",
   url: "https://thankshoma.com",
   description:
-    "Homa is an AI assistant for homeschool parents that prepares weekly plans and practice pages, keeps teaching hours and records, and shows what to try next.",
+    "Homa is an AI assistant for homeschool parents that prepares weekly plans, makes practice pages for children ages 2 to 7, and keeps teaching hours and finished work together.",
   applicationCategory: "EducationApplication",
   operatingSystem: "Any",
-  offers: {
+  offers: MEMBERSHIP_ITEMS.map((membership) => ({
     "@type": "Offer",
-    price: "19",
+    name: membership.name,
+    price: String(membership.monthlyPrice),
     priceCurrency: "USD",
-    description: "Add a credit card to start 7 free days. Nothing is charged during those 7 days. Then $19 per month.",
-  },
+    description: `${membership.body} ${HERO_COPY.primaryActionNote}`,
+  })),
   // @id ties into the Organization node in the root layout's site-wide
   // graph; name stays inline for validators that don't resolve across
   // script blocks.
