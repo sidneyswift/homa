@@ -42,5 +42,7 @@ export default defineEval({
     t.succeeded();
     t.loadedSkill("materials-studio");
     t.notCalledTool("open_planner");
+    t.notCalledTool("record_planner_activity");
+    t.notCalledTool("complete_planner_activity");
   },
 });

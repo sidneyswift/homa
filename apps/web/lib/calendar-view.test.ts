@@ -36,7 +36,7 @@ function mayaPlan(overrides: Partial<DashboardPlan> = {}): DashboardPlan {
   return {
     childId: "child-maya",
     subjectId: "math",
-    planRevision: 1,
+    planRevision: 7,
     progressRevision: 0,
     done: 0,
     total: 2,
@@ -201,6 +201,7 @@ describe("buildCalendarBoard: kid lanes", () => {
       childId: "child-maya",
       subjectId: "math",
       subjectLabel: "Math",
+      planRevision: 7,
       checkId: "1.0",
       text: "Count to 20 daily",
       done: true,

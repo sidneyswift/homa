@@ -3,6 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getChildPlans, type ChildPlanRecord } from "../../lib/child-plans";
 import { getFamilyEvents, type FamilyEventRecord } from "../../lib/family-events";
 import { getHoursLogForFamilyBetween, type HoursLogRow } from "../../lib/hours";
+import {
+  getPlannerLearningActivities,
+  type PlannerLearningActivityRecord,
+} from "../../lib/planner-learning-activities";
 import { getScheduledActivities, type PlanActivityScheduleRecord } from "../../lib/plan-schedule";
 import type { ChildRecord } from "../../lib/family";
 import type { PlanActivityCheckApplied } from "../../lib/plan-check-mutation";
@@ -22,6 +26,7 @@ interface PlannerData {
   childPlans: ChildPlanRecord[];
   sourceLinks: FamilyAssetPlanLinkRecord[];
   hoursRows: HoursLogRow[];
+  learningActivities: PlannerLearningActivityRecord[];
   loading: boolean;
   error: string | null;
   reload: () => Promise<void>;
@@ -46,6 +51,9 @@ export function usePlannerData(
   const [childPlans, setChildPlans] = useState<ChildPlanRecord[]>([]);
   const [sourceLinks, setSourceLinks] = useState<FamilyAssetPlanLinkRecord[]>([]);
   const [hoursRows, setHoursRows] = useState<HoursLogRow[]>([]);
+  const [learningActivities, setLearningActivities] = useState<
+    PlannerLearningActivityRecord[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const reloadGeneration = useRef(0);
@@ -60,18 +68,27 @@ export function usePlannerData(
       setChildPlans([]);
       setSourceLinks([]);
       setHoursRows([]);
+      setLearningActivities([]);
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
       const childIds = children.map((child) => child.id);
-      const [nextEvents, nextSchedule, nextPlans, nextSourceLinks, nextHoursRows] = await Promise.all([
+      const [
+        nextEvents,
+        nextSchedule,
+        nextPlans,
+        nextSourceLinks,
+        nextHoursRows,
+        nextLearningActivities,
+      ] = await Promise.all([
         getFamilyEvents(familyId, rangeStart, rangeEnd),
         getScheduledActivities(familyId, rangeStart, rangeEnd),
         Promise.all(childIds.map((childId) => getChildPlans(childId))).then((lists) => lists.flat()),
         getFamilyAssetPlanLinks(familyId, childIds),
         getHoursLogForFamilyBetween(familyId, rangeStart, rangeEnd),
+        getPlannerLearningActivities(familyId, rangeStart, rangeEnd),
       ]);
       if (requestGeneration !== reloadGeneration.current) return;
       setEvents(expandRecurringFamilyEvents(nextEvents, rangeStart, rangeEnd));
@@ -79,6 +96,7 @@ export function usePlannerData(
       setChildPlans((current) => mergeChildPlanSnapshots(current, nextPlans));
       setSourceLinks(nextSourceLinks);
       setHoursRows(nextHoursRows);
+      setLearningActivities(nextLearningActivities);
       setError(null);
     } catch (cause) {
       if (requestGeneration !== reloadGeneration.current) return;
@@ -127,13 +145,13 @@ export function usePlannerData(
       mergeAppliedPlanActivityCheck(current, target, outcome),
     );
   }, []);
-
   return {
     events,
     scheduleRows,
     childPlans,
     sourceLinks,
     hoursRows,
+    learningActivities,
     loading,
     error,
     reload,

@@ -11,6 +11,7 @@ import {
 } from "../../../lib/hours";
 import { scopedToViewContext, toHoursEntries } from "../../../lib/hours-view";
 import { emitMapEvent } from "../../../lib/map/events";
+import { getPlannerLearningActivitiesForFamily } from "../../../lib/planner-learning-activities-read";
 import { getScheduledActivitiesForFamily } from "../../../lib/plan-schedule-read";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import {
@@ -65,7 +66,7 @@ export default async function PlannerPage({
 
   // Calendar and day-hours reads stay bounded to the visible range. Hours
   // alone loads the full compliance record.
-  const [familyEvents, scheduledActivities, hoursRows] = await Promise.all([
+  const [familyEvents, scheduledActivities, learningActivities, hoursRows] = await Promise.all([
     view === "hours"
       ? Promise.resolve([])
       : getFamilyEventsForFamily(family.id, range.start, range.end).catch((error: unknown) => {
@@ -81,6 +82,17 @@ export default async function PlannerPage({
           (error: unknown) => {
             console.error(
               "planner: plan_activity_schedule read failed (migration may be unapplied):",
+              error instanceof Error ? error.message : "unknown",
+            );
+            return [];
+          },
+        ),
+    view === "hours"
+      ? Promise.resolve([])
+      : getPlannerLearningActivitiesForFamily(family.id, range.start, range.end).catch(
+          (error: unknown) => {
+            console.error(
+              "planner: learning activity read failed (migration may be unapplied):",
               error instanceof Error ? error.message : "unknown",
             );
             return [];
@@ -120,6 +132,7 @@ export default async function PlannerPage({
         plans={plans}
         familyEvents={familyEvents}
         scheduledActivities={scheduledActivities}
+        learningActivities={learningActivities}
         hoursEntries={hoursEntries}
         timeZone={timeZone}
         now={now}

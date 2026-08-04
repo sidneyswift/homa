@@ -116,6 +116,7 @@ describe("large-text Planner accessibility", () => {
         anchorDate="2026-08-15"
         events={[plannerEvent]}
         activities={[plannerActivity]}
+        learningActivities={[]}
         onSelectDate={onSelectDate}
       />,
     );
@@ -123,9 +124,9 @@ describe("large-text Planner accessibility", () => {
     expect(view.queryByLabelText("Month calendar")).toBeNull();
     expect(view.getAllByRole("button")).toHaveLength(31);
     const day = view.getByRole("button", {
-      name: "Tuesday, Aug 4, 2026. 1 event · 1 activity",
+      name: /Tuesday, Aug 4, 2026(?:\. Today)?\. 1 event · 1 activity/u,
     });
-    expect(view.getByText("Tuesday, Aug 4, 2026")).toBeVisible();
+    expect(view.getByText(/Tuesday, Aug 4, 2026(?: · Today)?/u)).toBeVisible();
     expect(view.getByText("1 event · 1 activity")).toBeVisible();
     expect(day).toHaveStyle({ minHeight: 56 });
     expect(day).toHaveProp("accessibilityHint", "Shows this day in Planner");

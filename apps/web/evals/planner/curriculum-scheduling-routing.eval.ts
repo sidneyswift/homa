@@ -13,7 +13,7 @@ export default defineEval({
     "Putting a named curriculum onto the planner loads the planner skill.",
   async test(t) {
     await t.send(
-      "We're adding a phonics workbook for Maya. Can you put it on her planner for three mornings next week?",
+      "We're adding a phonics workbook for Maya. Can you put it on her planner Monday, Wednesday, and Friday next week?",
     );
     t.succeeded();
     t.loadedSkill("planner");

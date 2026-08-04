@@ -32,7 +32,7 @@ import { effectiveTimeZone, zonedDateString } from "../../lib/time-zone";
 
 export default defineBoundedTool({
   description:
-    "List events on the family calendar: appointments, trips, co-op days, anything added with add_family_event. Use before adding a new event (to avoid a duplicate), before any reshuffle or placement of school work, or when the parent asks what is coming up. Defaults to the next 30 days; pass from/to for a specific window, including past days (a mid-week reshuffle should read the whole week, Monday included). Read-only; change the calendar with add_family_event, update_family_event, or remove_family_event.",
+    "Load the planner skill before calling. List events on the family calendar: appointments, trips, co-op days, anything added with add_family_event. Use before adding a new event (to avoid a duplicate), before any reshuffle or placement of school work, or when the parent asks what is coming up. Defaults to the next 30 days; pass from/to for a specific window, including past days (a mid-week reshuffle should read the whole week, Monday included). Read-only; change the calendar with add_family_event, update_family_event, or remove_family_event.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z

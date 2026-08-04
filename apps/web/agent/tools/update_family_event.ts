@@ -36,7 +36,7 @@ import {
 
 export default defineBoundedTool({
   description:
-    "Change one existing family calendar event in one call: rename it, move it to another day, or change its time. Use eventId from list_family_events or add_family_event's own result. Only the fields you pass change; moving startsOn alone moves the whole event and keeps a multi-day event's length. Not for school plan activities; a plan activity's date moves with schedule_plan_activity and its wording with edit_plan. Prefer this over remove_family_event plus add_family_event, which can lose the event if the second call fails.",
+    "Load the planner skill before calling. Change one existing family calendar event in one call: rename it, move it to another day, or change its time. Use eventId from list_family_events or add_family_event's own result. Only the fields you pass change; moving startsOn alone moves the whole event and keeps a multi-day event's length. Not for school plan activities; a plan activity's date moves with schedule_plan_activity and its wording with edit_plan. Prefer this over remove_family_event plus add_family_event, which can lose the event if the second call fails.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z
