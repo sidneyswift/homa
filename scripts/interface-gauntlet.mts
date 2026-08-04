@@ -27,6 +27,11 @@ export const GAUNTLET_PERFORMANCE_BUDGET = {
 export const GAUNTLET_LONG_COPY =
   "Alexandria-Wilhelmina van der Meer and the curious learning community";
 
+/** Next.js development chrome is not a product control and must not enter the focus walk. */
+export const GAUNTLET_FOCUSABLE_SELECTOR =
+  'a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"]):not(nextjs-portal):not(next-route-announcer)';
+export const GAUNTLET_IGNORED_FOCUS_TAGS = ["nextjs-portal", "next-route-announcer"] as const;
+
 export const GAUNTLET_ROUTES = [
   { path: "/", requiredMarkers: ["quiet-landing", "quiet-nav", "quiet-footer"] },
   { path: "/signin", requiredMarkers: ["quiet-auth-shell", "quiet-frame"] },
@@ -270,20 +275,26 @@ async function collectAxeEvidence(page: any, axePath: string | null, issues: Gau
 }
 
 async function collectFocusEvidence(page: any, issues: GauntletIssue[], path: string): Promise<FocusEvidence> {
-  const focusableCount = await page.locator("a[href],button,input,select,textarea,[tabindex]:not([tabindex=\"-1\"])").count();
+  const focusableCount = await page.locator(GAUNTLET_FOCUSABLE_SELECTOR).count();
   const visited = new Set<string>();
   let visibleFocusCount = 0;
   let escapedCount = 0;
-  for (let index = 0; index < Math.min(focusableCount, 80); index += 1) {
+  let visitedControls = 0;
+  let attempts = 0;
+  while (visitedControls < Math.min(focusableCount, 80) && attempts < 100) {
     await page.keyboard.press("Tab");
-    const state = await page.evaluate((tabIndex: number) => {
+    attempts += 1;
+    const state = await page.evaluate(({ tabIndex, ignoredTags }: { tabIndex: number; ignoredTags: readonly string[] }) => {
       const element = document.activeElement;
-      if (!(element instanceof HTMLElement)) return { key: "none", visible: false, escaped: true };
+      if (!(element instanceof HTMLElement)) return { key: "none", visible: false, escaped: true, ignored: false };
+      if (ignoredTags.includes(element.tagName.toLowerCase())) return { key: "ignored", visible: false, escaped: false, ignored: true };
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
       const visible = element.matches(":focus-visible") || style.outlineStyle !== "none" || style.outlineWidth !== "0px" || style.boxShadow !== "none";
-      return { key: `${element.tagName.toLowerCase()}:${element.id || element.getAttribute("name") || element.textContent?.trim().slice(0, 30) || tabIndex}`, visible, escaped: element !== document.body && (rect.width === 0 || rect.height === 0) };
-    }, index);
+      return { key: `${element.tagName.toLowerCase()}:${element.id || element.getAttribute("name") || element.textContent?.trim().slice(0, 30) || tabIndex}`, visible, escaped: element !== document.body && (rect.width === 0 || rect.height === 0), ignored: false };
+    }, { tabIndex: attempts, ignoredTags: GAUNTLET_IGNORED_FOCUS_TAGS });
+    if (state.ignored) continue;
+    visitedControls += 1;
     visited.add(state.key);
     if (state.visible) visibleFocusCount += 1;
     if (state.escaped) escapedCount += 1;

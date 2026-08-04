@@ -3,6 +3,8 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import {
   GAUNTLET_LONG_COPY,
+  GAUNTLET_FOCUSABLE_SELECTOR,
+  GAUNTLET_IGNORED_FOCUS_TAGS,
   GAUNTLET_PERFORMANCE_BUDGET,
   GAUNTLET_REFLOW_VIEWPORTS,
   GAUNTLET_ROUTES,
@@ -22,6 +24,15 @@ test("rendered gauntlet keeps explicit stress budgets and localization input", (
   assert.equal(GAUNTLET_PERFORMANCE_BUDGET.transferBytes, 5_000_000);
   assert.match(GAUNTLET_LONG_COPY, /Alexandria/u);
   assert.ok(GAUNTLET_LONG_COPY.length > 40);
+});
+
+test("focus traversal excludes only Next.js development chrome", () => {
+  assert.match(GAUNTLET_FOCUSABLE_SELECTOR, /:not\(nextjs-portal\)/u);
+  assert.match(GAUNTLET_FOCUSABLE_SELECTOR, /:not\(next-route-announcer\)/u);
+  assert.match(GAUNTLET_FOCUSABLE_SELECTOR, /a\[href\]/u);
+  assert.match(GAUNTLET_FOCUSABLE_SELECTOR, /button/u);
+  assert.match(GAUNTLET_FOCUSABLE_SELECTOR, /input/u);
+  assert.deepEqual(GAUNTLET_IGNORED_FOCUS_TAGS, ["nextjs-portal", "next-route-announcer"]);
 });
 
 test("static interface contract is healthy even before rendered evidence is supplied", () => {
