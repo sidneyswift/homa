@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "84efca6ab54e38f147006a96d6b9fbd6f33c500b847501873e4128caa3138a98",
+  "ownedInputFingerprint": "cad660a5df9c3c4aeb6cbb8ac0bbcd139a804ece4e246492049cd61742f1e917",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -3114,9 +3114,9 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "journey-critical",
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "preservedBinding": {
         "surfaceId": "surface:4edaefc78d47cb9e",
         "path": "apps/web/app/error.tsx",
@@ -3126,9 +3126,9 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "journey-critical",
-        "deliveryState": "controlled-current",
+        "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
       },
       "sourceState": "present-signaled",
@@ -3171,9 +3171,9 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "preservedBinding": {
         "surfaceId": "surface:76c7631fb955cb20",
         "path": "apps/web/app/features/[slug]/page.tsx",
@@ -3185,9 +3185,9 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
-        "deliveryState": "controlled-current",
+        "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
       },
       "sourceState": "present-signaled",
@@ -3338,9 +3338,9 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "journey-critical",
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "preservedBinding": {
         "surfaceId": "surface:e3f413cfe6bce754",
         "path": "apps/web/app/not-found.tsx",
@@ -3350,9 +3350,9 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "journey-critical",
-        "deliveryState": "controlled-current",
+        "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
       },
       "sourceState": "present-signaled",
@@ -3609,7 +3609,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "revocable-public",
       "preservedBinding": {
@@ -3622,7 +3622,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
@@ -3669,7 +3669,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "revocable-public",
       "preservedBinding": {
@@ -3684,7 +3684,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"

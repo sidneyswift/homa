@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "84efca6ab54e38f147006a96d6b9fbd6f33c500b847501873e4128caa3138a98",
+  "ownedInputFingerprint": "cad660a5df9c3c4aeb6cbb8ac0bbcd139a804ece4e246492049cd61742f1e917",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -82913,9 +82913,9 @@
         "apps/web/app/apple-icon.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#689",
@@ -83027,7 +83027,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -84030,9 +84030,9 @@
         "apps/web/app/design/quiet-authority/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -84151,7 +84151,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -84909,9 +84909,9 @@
         "apps/web/app/error.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#683",
@@ -85028,7 +85028,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -85154,9 +85154,9 @@
         "apps/web/app/features/[slug]/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -85274,7 +85274,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -85412,9 +85412,9 @@
         "apps/web/app/forgot-password/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -85529,7 +85529,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -85910,9 +85910,9 @@
         "apps/web/app/join/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#684",
@@ -86028,7 +86028,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -86037,9 +86037,9 @@
         "apps/web/app/layout.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -86152,7 +86152,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -86253,9 +86253,9 @@
         "apps/web/app/not-found.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#683",
@@ -86371,7 +86371,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -87534,9 +87534,9 @@
         "apps/web/app/onboarding/method/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -87650,7 +87650,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -87913,9 +87913,9 @@
         "apps/web/app/onboarding/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -88030,7 +88030,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -88422,9 +88422,9 @@
         "apps/web/app/onboarding/r/[token]/evidence/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -88538,7 +88538,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -89306,9 +89306,9 @@
         "apps/web/app/onboarding/r/[token]/lesson/[subjectId]/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -89421,7 +89421,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -89692,9 +89692,9 @@
         "apps/web/app/onboarding/r/[token]/one-pager/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -89808,7 +89808,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -89817,9 +89817,9 @@
         "apps/web/app/onboarding/r/[token]/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -89935,7 +89935,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -89944,9 +89944,9 @@
         "apps/web/app/onboarding/r/[token]/plan/[subjectId]/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -90063,7 +90063,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -92008,9 +92008,9 @@
         "apps/web/app/onboarding/sample/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -92122,7 +92122,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -92483,9 +92483,9 @@
         "apps/web/app/onboarding/trial/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -92599,7 +92599,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -92608,9 +92608,9 @@
         "apps/web/app/opengraph-image.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#689",
@@ -92722,7 +92722,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -92731,9 +92731,9 @@
         "apps/web/app/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -92845,7 +92845,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -92854,9 +92854,9 @@
         "apps/web/app/privacy/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#683",
@@ -92971,7 +92971,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -93105,9 +93105,9 @@
         "apps/web/app/reset-password/confirm/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -93223,7 +93223,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -93232,9 +93232,9 @@
         "apps/web/app/reset-password/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -93346,7 +93346,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -93700,9 +93700,9 @@
         "apps/web/app/signin/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#684",
@@ -93816,7 +93816,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -94044,9 +94044,9 @@
         "apps/web/app/terms/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "journey-critical",
       "ownerIssue": "gh#683",
@@ -94162,7 +94162,7 @@
       },
       "productionReadback": null,
       "deletionCommit": null,
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "rolloutState": "inventory"
     },
     {
@@ -94423,9 +94423,9 @@
         "apps/web/app/world-real/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -94920,9 +94920,9 @@
         "apps/web/app/world-v3/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -95173,9 +95173,9 @@
         "apps/web/app/world-v4/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -95430,9 +95430,9 @@
         "apps/web/app/world/page.tsx"
       ],
       "type": "route",
-      "reachability": "authenticated",
+      "reachability": "public",
       "audiences": [
-        "family"
+        "public"
       ],
       "criticality": "supporting",
       "ownerIssue": "gh#683",
@@ -180722,6 +180722,7 @@
         "default",
         "empty",
         "error",
+        "loading",
         "success"
       ],
       "viewports": [],
@@ -180730,7 +180731,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "50f482d7a8af4f1c317d1a2447385aa8148a8253cfaa3842d0507e43c0d8026a",
+        "fixtureChecksum": "9d599322bb9e665cfcf850b128093311c42a0009c415456ee21c589857cc062d",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -180755,7 +180756,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "50f482d7a8af4f1c317d1a2447385aa8148a8253cfaa3842d0507e43c0d8026a"
+        "9d599322bb9e665cfcf850b128093311c42a0009c415456ee21c589857cc062d"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -180771,8 +180772,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "1a0c57edfeb991308c7a3961fdec188c27a13e01",
-        "sourceCommitTimestamp": "2026-08-04T18:55:18-06:00",
+        "sourceCommitSha": "d4a0ddb536c3da20a4844b8fe6c7ca0984e0260f",
+        "sourceCommitTimestamp": "2026-08-04T19:07:14-06:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -180820,7 +180821,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "1934e2c80e24a27918230856e666382bb83758b3adb2f1356e0420db338b3ea1",
+        "fixtureChecksum": "84debe9a9f74380605f6c05dceed0f5be882d07a8432dbfaa0e2a6d162d7a052",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -180845,7 +180846,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "1934e2c80e24a27918230856e666382bb83758b3adb2f1356e0420db338b3ea1"
+        "84debe9a9f74380605f6c05dceed0f5be882d07a8432dbfaa0e2a6d162d7a052"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -180861,8 +180862,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "1a0c57edfeb991308c7a3961fdec188c27a13e01",
-        "sourceCommitTimestamp": "2026-08-04T18:55:18-06:00",
+        "sourceCommitSha": "d4a0ddb536c3da20a4844b8fe6c7ca0984e0260f",
+        "sourceCommitTimestamp": "2026-08-04T19:07:14-06:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -181278,7 +181279,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "7b03f79775bcdd31e2c47083d70bc9946c9d1fbb43c68db65f3065a7f8df185c",
+        "fixtureChecksum": "52a45650f45be0ad6f15e65e1ea3fe5c228836fad087770d048214a10d9b3eb0",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -181303,7 +181304,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "7b03f79775bcdd31e2c47083d70bc9946c9d1fbb43c68db65f3065a7f8df185c"
+        "52a45650f45be0ad6f15e65e1ea3fe5c228836fad087770d048214a10d9b3eb0"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -181319,8 +181320,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "1a0c57edfeb991308c7a3961fdec188c27a13e01",
-        "sourceCommitTimestamp": "2026-08-04T18:55:18-06:00",
+        "sourceCommitSha": "d4a0ddb536c3da20a4844b8fe6c7ca0984e0260f",
+        "sourceCommitTimestamp": "2026-08-04T19:07:14-06:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -181359,7 +181360,9 @@
         "@homa/design"
       ],
       "requiredStates": [
-        "default"
+        "default",
+        "error",
+        "loading"
       ],
       "viewports": [],
       "devices": [],
@@ -181367,7 +181370,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "390427685510b96ace703437d796ede1b061c5b4c76c2a9ccff21df9ac3b09e1",
+        "fixtureChecksum": "49d564bed2aa22bf5fcbd2b5fdb2714ab79514ad0d25c758f3fa91ed11d39904",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -181392,7 +181395,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "390427685510b96ace703437d796ede1b061c5b4c76c2a9ccff21df9ac3b09e1"
+        "49d564bed2aa22bf5fcbd2b5fdb2714ab79514ad0d25c758f3fa91ed11d39904"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -181408,8 +181411,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "54f4828cc55665b1a44c144199093e7b37714006",
-        "sourceCommitTimestamp": "2026-08-04T18:56:41-06:00",
+        "sourceCommitSha": "d4a0ddb536c3da20a4844b8fe6c7ca0984e0260f",
+        "sourceCommitTimestamp": "2026-08-04T19:07:14-06:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
