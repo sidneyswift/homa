@@ -23,6 +23,7 @@ export const darkQuietColors = nativeThemeColors.dark;
 export const quietSpace = spacing;
 export const quietRadii = radii;
 export const quietTypeScale = nativeTypeScale;
+export const quietTypeRoles = NATIVE_PROJECTION_CONTRACT.theme.typography.typeRoles;
 export const quietElevation = nativeElevation;
 export const quietPressScale = NATIVE_PROJECTION_CONTRACT.theme.motion.pressScale;
 

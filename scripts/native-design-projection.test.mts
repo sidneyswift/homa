@@ -12,10 +12,13 @@ import {
 import { nativePrimitiveRegistry } from "../apps/mobile/src/components/ui/semantic-registry.ts";
 import {
   colors,
+  darkQuietColors,
   darkColors,
   fontSize,
   palette,
   pressScale,
+  quietColors,
+  quietTypeRoles,
   radius,
   shadows,
   space,
@@ -25,6 +28,10 @@ const root = resolve(import.meta.dirname, "..");
 const projectionSource = readFileSync(resolve(root, "apps/mobile/src/theme/native-projection.ts"), "utf8");
 const compatibilitySource = readFileSync(resolve(root, "apps/mobile/src/theme/tokens.ts"), "utf8");
 const primitivesSource = readFileSync(resolve(root, "apps/mobile/src/components/ui/semantic.tsx"), "utf8");
+const buttonSource = readFileSync(resolve(root, "apps/mobile/src/components/ui/button.tsx"), "utf8");
+const textFieldSource = readFileSync(resolve(root, "apps/mobile/src/components/ui/text-field.tsx"), "utf8");
+const signInSource = readFileSync(resolve(root, "apps/mobile/src/app/(auth)/signin.tsx"), "utf8");
+const logoSource = readFileSync(resolve(root, "apps/mobile/src/components/brand/logo.tsx"), "utf8");
 const generatedNative = JSON.parse(readFileSync(resolve(root, "packages/design/generated/native.json"), "utf8")) as {
   sourceChecksum?: string;
   projection?: typeof NATIVE_PROJECTION_CONTRACT;
@@ -36,6 +43,18 @@ test("native projection is sourced from the design contract", () => {
   assert.doesNotMatch(compatibilitySource, /#[0-9A-F]{6}/iu);
   assert.deepEqual(generatedNative.projection?.primitiveRoles, [...nativePrimitiveRoles]);
   assert.equal(generatedNative.projection?.schemaVersion, NATIVE_PROJECTION_CONTRACT.schemaVersion);
+  assert.equal(quietColors.brandText, "#A33F22");
+  assert.equal(darkQuietColors.brandText, "#F0835A");
+  assert.equal(darkQuietColors.action, "#FFFEFC");
+  assert.equal(darkQuietColors.actionText, "#27374D");
+  assert.deepEqual(quietTypeRoles.control, {
+    familyRole: "interface",
+    weights: [600],
+    size: 15,
+    lineHeight: 20,
+    minimumSize: 14,
+  });
+  assert.notEqual(quietColors.brandText, quietColors.brand);
 });
 
 test("legacy native compatibility is frozen and cannot alias the live contract", () => {
@@ -62,6 +81,43 @@ test("every native primitive has a typed adapter implementation", () => {
     assert.ok(requirement.accessibility.length > 0, `${role} must name accessibility obligations`);
     assert.match(primitivesSource, new RegExp(`export function ${implementation.component}\\b`, "u"));
   }
+});
+
+test("the legacy Button API delegates to NativeAction without its own visual system", () => {
+  assert.match(buttonSource, /import\s*\{[\s\S]*NativeAction[\s\S]*\}\s*from "\.\/semantic"/u);
+  assert.match(buttonSource, /<NativeAction\b/u);
+  assert.doesNotMatch(buttonSource, /Pressable|theme\/tokens|fontFamilies|useReducedMotion/u);
+});
+
+test("icon actions reflow at accessibility text sizes without capping Dynamic Type", () => {
+  assert.match(primitivesSource, /useWindowDimensions\(\)/u);
+  assert.match(primitivesSource, /Boolean\(icon\)\s*&&\s*fontScale\s*>=\s*2/u);
+  assert.match(primitivesSource, /stacksIconAboveLabel\s*\?\s*"column"\s*:\s*"row"/u);
+  assert.doesNotMatch(primitivesSource, /maxFontSizeMultiplier|allowFontScaling|adjustsFontSizeToFit/u);
+});
+
+test("semantic text uses natural custom-font metrics at accessibility sizes", () => {
+  assert.match(primitivesSource, /fontScale\s*>=\s*2\s*\?\s*\{\s*lineHeight:\s*undefined\s*\}\s*:\s*null/u);
+  assert.doesNotMatch(primitivesSource, /fontSize:\s*[^,\n]*\*\s*fontScale/u);
+});
+
+test("the legacy TextField API delegates to NativeField without its own visual system", () => {
+  assert.match(textFieldSource, /import\s*\{\s*NativeField\s*\}\s*from "\.\/semantic"/u);
+  assert.match(textFieldSource, /<NativeField\b/u);
+  assert.doesNotMatch(textFieldSource, /<TextInput\b|theme\/tokens|fontFamilies|useState/u);
+});
+
+test("the sign-in journey keeps oversized Dynamic Type content inside its scroll origin", () => {
+  assert.match(signInSource, /useWindowDimensions\(\)/u);
+  assert.match(signInSource, /justifyContent:\s*fontScale\s*>=\s*2\s*\?\s*"flex-start"\s*:\s*"center"/u);
+  assert.doesNotMatch(signInSource, /maxFontSizeMultiplier|allowFontScaling|adjustsFontSizeToFit/u);
+});
+
+test("the image-based wordmark stays geometric under Dynamic Type", () => {
+  assert.match(logoSource, /accessibilityRole="image"/u);
+  assert.match(logoSource, /homa-lockup\.png/u);
+  assert.match(logoSource, /homa-lockup-dark\.png/u);
+  assert.doesNotMatch(logoSource, /allowFontScaling|maxFontSizeMultiplier|adjustsFontSizeToFit/u);
 });
 
 test("native contract names platform proof without claiming it", () => {

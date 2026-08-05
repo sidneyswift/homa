@@ -17,6 +17,7 @@ export {
   quietRadii,
   quietSpace,
   quietTonalScale,
+  quietTypeRoles,
   quietTypeScale,
   radius,
   shadows,

@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@homa/design": "workspace:*",
-    "@expo-google-fonts/fredoka": "^0.4.0",
     "@expo-google-fonts/dm-sans": "^0.4.0",
     "@expo-google-fonts/eb-garamond": "^0.4.0",
     "@homa/core": "workspace:*",

@@ -18,7 +18,8 @@
  *   iOS scales down cleanly. Solid backgrounds on purpose: iOS composites
  *   transparent avatars onto an auto-picked color that can swallow the mark.)
  * - apps/mobile/assets/brand/                       (Expo icon, adaptive icon,
- *   monochrome icon, and splash SVGs; the same contract geometry and colors)
+ *   monochrome icon, splash SVGs, and native image lockups; the same contract
+ *   geometry and colors)
  * - apps/mobile/assets/images/                     (the PNG projections Expo
  *   consumes, rasterized from the native SVGs above)
  *
@@ -372,7 +373,8 @@ async function main() {
       await writeOutput(join(dir, `homa-lockup${suffix}.svg`), svg);
       await writeOutput(join(dir, `homa-lockup${suffix}.png`), png);
     }
-    console.log(`wrote homa-lockup${suffix}.svg + .png (web public + marketing)`);
+    await writeOutput(join(MOBILE_BRAND_DIR, `homa-lockup${suffix}.png`), png);
+    console.log(`wrote homa-lockup${suffix}.svg + .png (web public + marketing + native)`);
   }
 
   const mark = markSvg();

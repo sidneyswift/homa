@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,6 +20,7 @@ import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { InlineError } from "../../components/ui/inline-error";
+import { NativeText } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
 import { signInWithApple } from "../../features/auth/apple-sign-in";
 import { signInWithGoogle } from "../../features/auth/google-sign-in";
@@ -29,8 +30,7 @@ import { env } from "../../lib/env";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
 import { openWebOnboarding } from "../../lib/web-links";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { colors, space } from "../../theme/tokens";
 
 /**
  * Google and email + password sign-in, matching the web /signin flow and
@@ -57,6 +57,7 @@ function describeSignInFailure(result: SignInFlowResult): string | null {
 
 export default function SignInScreen() {
   const { session } = useSession();
+  const { fontScale } = useWindowDimensions();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -149,7 +150,7 @@ export default function SignInScreen() {
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
+            justifyContent: fontScale >= 2 ? "flex-start" : "center",
             padding: space.lg,
             gap: space.lg,
           }}
@@ -157,16 +158,9 @@ export default function SignInScreen() {
         >
           <View style={{ alignItems: "center", gap: space.md }}>
             <Logo size={44} />
-            <Text
-              style={{
-                textAlign: "center",
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.base,
-                color: colors.textBody,
-              }}
-            >
+            <NativeText role="body" tone="body" style={{ textAlign: "center" }}>
               {"You've got this. Homa's got the rest."}
-            </Text>
+            </NativeText>
           </View>
 
           <Card style={{ gap: space.md }}>
@@ -212,15 +206,9 @@ export default function SignInScreen() {
 
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
               <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
-              <Text
-                style={{
-                  fontFamily: fontFamilies.body,
-                  fontSize: fontSize.sm,
-                  color: colors.textMuted,
-                }}
-              >
+              <NativeText role="caption" tone="muted">
                 or
-              </Text>
+              </NativeText>
               <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
             </View>
 
@@ -249,15 +237,9 @@ export default function SignInScreen() {
             />
 
             {recoverySent ? (
-              <Text
-                style={{
-                  fontFamily: fontFamilies.body,
-                  fontSize: fontSize.sm,
-                  color: colors.textBody,
-                }}
-              >
+              <NativeText role="bodySmall" tone="body">
                 {recoveryMessage}
-              </Text>
+              </NativeText>
             ) : null}
 
             {error ? <InlineError message={error} /> : null}
@@ -272,16 +254,9 @@ export default function SignInScreen() {
           </Card>
 
           <View style={{ gap: space.sm }}>
-            <Text
-              style={{
-                textAlign: "center",
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.sm,
-                color: colors.textMuted,
-              }}
-            >
+            <NativeText role="bodySmall" tone="muted" style={{ textAlign: "center" }}>
               New to Homa? Start with the web onboarding, then sign in here.
-            </Text>
+            </NativeText>
             <Button
               label="Open onboarding"
               variant="ghost"

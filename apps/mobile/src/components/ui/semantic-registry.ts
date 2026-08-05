@@ -13,7 +13,7 @@ export interface NativePrimitiveImplementation {
 export const nativePrimitiveRegistry = {
   text: { component: "NativeText", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "new-primitive", legacyComponents: ["react-native/Text", "route-local text styles"] },
   surface: { component: "NativeSurface", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "new-primitive", legacyComponents: ["Card", "route-local View surfaces"] },
-  action: { component: "NativeAction", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "wrap-existing", legacyComponents: ["Button", "IconButton", "route-local Pressable"] },
+  action: { component: "NativeAction", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "wrap-existing", legacyComponents: ["Button compatibility adapter", "IconButton", "route-local Pressable"] },
   field: { component: "NativeField", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "wrap-existing", legacyComponents: ["TextField", "route-local TextInput"] },
   choice: { component: "NativeChoice", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "new-primitive", legacyComponents: ["route-local radio", "route-local checkbox", "route-local Switch"] },
   status: { component: "NativeStatus", source: "apps/mobile/src/components/ui/semantic.tsx", disposition: "wrap-existing", legacyComponents: ["InlineError", "LoadingStatus", "route-local status rows"] },

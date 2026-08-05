@@ -217,7 +217,7 @@
       "role": "vcard-derived-embed"
     }
   ],
-  "sourceFingerprint": "7717e40dcc688a66e85b52e89b3646d0f124cada7a5e457340aa64d3326f9d6c",
+  "sourceFingerprint": "7bb7722293e8c4a1ee613b60ed182bd218994a396e6b6b9ea2b4ead963ff20a1",
   "assets": [
     {
       "id": "web-lockup-light-svg",
@@ -797,6 +797,52 @@
       },
       "outputHash": "d7e56f4002503ddce4e7b20be5ea6c6784a3ea32f177dbe3ddb028a4fedf1c91",
       "perceptualHash": "4d32553617378a07",
+      "perceptualHashAlgorithm": "dhash-9x8-gray-v1"
+    },
+    {
+      "id": "native-lockup-light-png",
+      "path": "apps/mobile/assets/brand/homa-lockup.png",
+      "source": "master-homa-lockup",
+      "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+      "format": "png",
+      "expectedDimensions": {
+        "width": 1200,
+        "height": 270
+      },
+      "safeArea": "lockup",
+      "appearance": "light",
+      "destination": "native-raster",
+      "lifecycle": "active-derived",
+      "generator": "scripts/brand-assets.mts",
+      "dimensions": {
+        "width": 1200,
+        "height": 270
+      },
+      "outputHash": "a107eab8a2a578f817d0af3e2316376fecf589d1893deb7cc2caf833aa15b775",
+      "perceptualHash": "585a454964676c45",
+      "perceptualHashAlgorithm": "dhash-9x8-gray-v1"
+    },
+    {
+      "id": "native-lockup-dark-png",
+      "path": "apps/mobile/assets/brand/homa-lockup-dark.png",
+      "source": "master-homa-lockup",
+      "geometryAuthority": "packages/design/src/contract/brand.ts#logoGeometry+colorTokens",
+      "format": "png",
+      "expectedDimensions": {
+        "width": 1200,
+        "height": 270
+      },
+      "safeArea": "lockup",
+      "appearance": "dark",
+      "destination": "native-raster",
+      "lifecycle": "active-derived",
+      "generator": "scripts/brand-assets.mts",
+      "dimensions": {
+        "width": 1200,
+        "height": 270
+      },
+      "outputHash": "9577f462b0f7cb7bbc022d2df62e6f6baee7bd58b3e4a8f5729e9254feb2c88f",
+      "perceptualHash": "a9a8859294919445",
       "perceptualHashAlgorithm": "dhash-9x8-gray-v1"
     },
     {

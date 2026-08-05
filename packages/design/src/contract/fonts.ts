@@ -172,13 +172,11 @@ export const runtimeFontSources = {
     packages: {
       display: "@expo-google-fonts/eb-garamond",
       interface: "@expo-google-fonts/dm-sans",
-      wordmark: "@expo-google-fonts/fredoka",
     },
     source: "Google Fonts",
     roles: {
       display: { family: "EB Garamond", weights: [400, 500, 600, 700], styles: ["normal"] },
       interface: { family: "DM Sans", weights: [400, 500, 600, 700], styles: ["normal"] },
-      wordmark: { family: "Fredoka", weights: [600], styles: ["normal"] },
     },
   },
 } as const;
@@ -200,7 +198,7 @@ export const channelTypography = {
   nativeProduct: {
     display: { preferred: "EBGaramond_700Bold", fallback: ["Georgia", "System"], delivery: "runtime" },
     interface: { preferred: "DMSans_400Regular", fallback: ["System"], delivery: "runtime" },
-    wordmark: { preferred: "Fredoka_600SemiBold", fallback: ["Arial Rounded MT Bold", "System"], delivery: "runtime" },
+    wordmark: { preferred: "image-lockup", fallback: ["Arial Rounded MT Bold", "System"], delivery: "rasterized" },
   },
   marketingRich: {
     display: { preferred: "EB Garamond", fallback: ["Georgia", "Times New Roman", "serif"], delivery: "runtime" },
