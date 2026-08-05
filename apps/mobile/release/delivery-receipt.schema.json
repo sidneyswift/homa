@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://thankshoma.com/schemas/mobile-delivery-receipt-v1.json",
+  "title": "Homa mobile delivery receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "identifier": { "type": "string", "minLength": 1 },
+    "sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "runtimeFingerprint": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "artifactFingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "httpUrl": { "type": "string", "format": "uri", "pattern": "^https?://" },
+    "nullableText": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "null" }
+      ]
+    },
+    "nullableHttpUrl": {
+      "oneOf": [
+        { "$ref": "#/$defs/httpUrl" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "receiptVersion",
+    "status",
+    "source",
+    "classification",
+    "matchingBuild",
+    "productionGates",
+    "bundle",
+    "update",
+    "workflow",
+    "receiptFingerprint"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "receiptVersion": { "const": "mobile-delivery-receipt-v1" },
+    "status": { "const": "published" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "sha"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 3 },
+        "sha": { "$ref": "#/$defs/sha" }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compatibilityClass", "requiredRail", "fingerprint", "changeCategories"],
+      "properties": {
+        "compatibilityClass": { "const": "ota-safe" },
+        "requiredRail": { "const": "eas-update" },
+        "fingerprint": { "$ref": "#/$defs/runtimeFingerprint" },
+        "changeCategories": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "matchingBuild": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "platform",
+        "status",
+        "distribution",
+        "buildProfile",
+        "channel",
+        "gitCommitHash",
+        "fingerprint",
+        "appVersion",
+        "appBuildVersion",
+        "createdAt"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "platform": { "const": "ios" },
+        "status": { "const": "finished" },
+        "distribution": { "const": "store" },
+        "buildProfile": { "const": "production" },
+        "channel": { "const": "production" },
+        "gitCommitHash": { "$ref": "#/$defs/sha" },
+        "fingerprint": { "$ref": "#/$defs/runtimeFingerprint" },
+        "appVersion": { "$ref": "#/$defs/nullableText" },
+        "appBuildVersion": { "$ref": "#/$defs/nullableText" },
+        "createdAt": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "productionGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["buildAndCheck", "vercel"],
+      "properties": {
+        "buildAndCheck": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "detailsUrl", "completedAt"],
+          "properties": {
+            "id": { "$ref": "#/$defs/identifier" },
+            "detailsUrl": { "$ref": "#/$defs/httpUrl" },
+            "completedAt": { "$ref": "#/$defs/timestamp" }
+          }
+        },
+        "vercel": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "targetUrl", "updatedAt"],
+          "properties": {
+            "id": { "$ref": "#/$defs/identifier" },
+            "targetUrl": { "$ref": "#/$defs/httpUrl" },
+            "updatedAt": { "$ref": "#/$defs/timestamp" }
+          }
+        }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint", "fileCount", "bundleCount", "sourceMapCount", "sourceFileCount", "totalBytes"],
+      "properties": {
+        "fingerprint": { "$ref": "#/$defs/artifactFingerprint" },
+        "fileCount": { "type": "integer", "minimum": 1 },
+        "bundleCount": { "type": "integer", "minimum": 1 },
+        "sourceMapCount": { "type": "integer", "minimum": 1 },
+        "sourceFileCount": { "type": "integer", "minimum": 1 },
+        "totalBytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "update": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "groupId",
+        "runtimeVersion",
+        "platform",
+        "channel",
+        "gitCommitHash",
+        "createdAt",
+        "branch",
+        "message",
+        "manifestPermalink"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "groupId": { "$ref": "#/$defs/identifier" },
+        "runtimeVersion": { "$ref": "#/$defs/runtimeFingerprint" },
+        "platform": { "const": "ios" },
+        "channel": { "const": "production" },
+        "gitCommitHash": { "$ref": "#/$defs/sha" },
+        "createdAt": { "$ref": "#/$defs/timestamp" },
+        "branch": { "$ref": "#/$defs/nullableText" },
+        "message": { "$ref": "#/$defs/nullableText" },
+        "manifestPermalink": { "$ref": "#/$defs/nullableHttpUrl" }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runId", "runUrl"],
+      "properties": {
+        "runId": { "type": "string", "pattern": "^[0-9]+$" },
+        "runUrl": { "$ref": "#/$defs/httpUrl" }
+      }
+    },
+    "receiptFingerprint": { "$ref": "#/$defs/artifactFingerprint" }
+  }
+}

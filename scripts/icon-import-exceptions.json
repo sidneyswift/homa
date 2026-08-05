@@ -8,14 +8,13 @@
     { "path": "apps/web/components/design/icon-registry.ts", "package": "lucide-react", "kind": "adapter" }
   ],
   "review": {
-    "baselinePendingCount": 25,
+    "baselinePendingCount": 24,
     "status": "migrated",
     "entries": [
       { "path": "apps/mobile/src/features/lessons/native-lesson-recorder.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Lesson recording controls are family-facing and now use play, pause, refresh, stop, and delete roles." },
       { "path": "apps/mobile/src/features/tasks/task-card.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Scheduled task kinds and navigation are family-facing and use reminder, experiment, journal, and next roles." },
       { "path": "apps/mobile/src/features/tasks/task-edit-sheet.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Task editing and run-now controls use close and play roles." },
       { "path": "apps/mobile/src/features/tasks/task-history-row.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Task history is family-facing and uses reminder, experiment, and journal roles." },
-      { "path": "apps/mobile/src/features/voice/labs/voice-shell-547-lab.tsx", "surfaceClass": "dev-only", "glyphSupport": "supported", "decision": "migrate", "rationale": "The lab is excluded from production routing, but keeping its icons on the contract prevents prototype drift." },
       { "path": "apps/mobile/src/features/voice/voice-prompt-starters.tsx", "surfaceClass": "user-facing", "glyphSupport": "supported", "decision": "migrate", "rationale": "Voice prompt starters are family-facing and use edit, book, calendar, and plan roles." },
       { "path": "apps/web/app/admin/agent-prompt-button.tsx", "surfaceClass": "admin-founder", "glyphSupport": "supported", "decision": "migrate", "rationale": "Founder diagnostic controls use assistant and check roles." },
       { "path": "apps/web/app/admin/alert-ack-button.tsx", "surfaceClass": "admin-founder", "glyphSupport": "supported", "decision": "migrate", "rationale": "Operator alert controls use check and undo roles." },
