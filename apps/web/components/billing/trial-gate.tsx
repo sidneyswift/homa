@@ -40,8 +40,8 @@ import {
  * a three-card "Today / Day 4 / Day 7" timeline, and a 24-word list of
  * everything the trial included, and only then reached the prices. On a
  * 390px phone that put the first price 1.1 screenfuls down behind 149
- * words, with none of the three prices visible in the first screenful
- * and three competing buttons once you got there. A teardown of 17
+ * words, with none of its then-three prices visible in the first
+ * screenful and three competing buttons once you got there. A teardown of 17
  * shipping pricing pages put the median distance from the top of a
  * phone screen to the first price at 12 words, with a practical ceiling
  * around 15: every page under it landed a price in the first screenful,

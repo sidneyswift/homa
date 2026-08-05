@@ -45,3 +45,14 @@ test("feature copy keeps the parent-facing language boundaries", () => {
     assert.doesNotMatch(copy, forbidden);
   }
 });
+
+test("the record-keeping page describes the binder that ships today", () => {
+  const page = getFeaturePage("homeschool-record-keeping");
+
+  assert.ok(page);
+  const copy = JSON.stringify(page);
+  assert.match(copy, /finalized materials/i);
+  assert.match(copy, /binder/i);
+  assert.match(copy, /open or print/i);
+  assert.doesNotMatch(copy, /photos?|reports?|finished work|lab notes/i);
+});

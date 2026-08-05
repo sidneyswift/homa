@@ -7,10 +7,8 @@ import { QuietAction } from "../design/QuietAction";
 import { QuietFrame } from "../design/QuietFrame";
 import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
-import type { SemanticIconName } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { Logo } from "../brand/Logo";
-import { ReportPreview } from "../../app/onboarding/report-preview";
 import { FAQ_ITEMS } from "./faq-items";
 import {
   CAPABILITY_FEATURE_HREFS,
@@ -22,26 +20,16 @@ import {
   MEMBERSHIP_NOTE,
   PRODUCT_PREVIEW_COPY,
   SAMPLE_REPORT_COPY,
-  WORKFLOW_CLOSING,
-  WORKFLOW_ITEMS,
   type CapabilityId,
-  type WorkflowId,
 } from "./landing-content";
 import { Nav } from "./Nav";
 import { SignupPopupProvider, useSignupPopup } from "./SignupPopupProvider";
-
-const WORKFLOW_ICONS: Record<WorkflowId, SemanticIconName> = {
-  family: "people",
-  review: "document",
-  change: "undo",
-  record: "files",
-};
 
 const QUIET_LANDING_CSS = `
 .quiet-landing { min-width: 320px; overflow-x: clip; background: var(--homa-canvas); color: var(--homa-ink); }
 .quiet-landing .quiet-nav { position: sticky; top: 0; z-index: 50; background: transparent; }
 .quiet-landing .quiet-nav__row { max-width: 1180px; }
-.quiet-landing #how, .quiet-landing #features, .quiet-landing #sample-report, .quiet-landing #memberships, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--quiet-nav-height) + 12px); }
+.quiet-landing #how, .quiet-landing #features, .quiet-landing #memberships, .quiet-landing #stories, .quiet-landing #faq { scroll-margin-top: calc(var(--quiet-nav-height) + 12px); }
 .quiet-landing .quiet-nav__link { color: var(--homa-muted-ink); border-radius: var(--homa-radius-control); }
 .quiet-landing .quiet-nav__link:hover, .quiet-landing .quiet-nav__link[aria-current="true"] { color: var(--homa-ink); }
 .quiet-landing .quiet-nav__link::after { background: var(--homa-visual-coral); }
@@ -91,19 +79,11 @@ const QUIET_LANDING_CSS = `
 .qa-product__state { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 24px; border: 1px solid var(--homa-soft-boundary); border-radius: 18px; background: var(--homa-paper); padding: 14px; }
 .qa-product__mark { display: grid; place-items: center; width: 60px; height: 56px; border-radius: 16px; background: color-mix(in srgb, var(--homa-visual-coral) 14%, var(--homa-paper)); transition: transform var(--homa-motion-base) var(--homa-motion-ease-out), box-shadow var(--homa-motion-base) var(--homa-motion-ease-out); }
 .qa-product__mark svg { width: 47px; height: 47px; }
-.qa-product__state[data-state="updating"] .qa-product__mark svg { animation: qa-mark-orient 900ms ease-in-out infinite alternate; }
 .qa-product__state[data-state="ready"] .qa-product__mark { transform: translateY(-2px); }
 .qa-product__state-copy strong { display: block; color: var(--homa-ink); font-size: .88rem; }
 .qa-product__state-copy span { display: block; margin-top: 3px; color: var(--homa-muted-ink); font-size: .75rem; line-height: 1.4; }
-.qa-product__activity { grid-column: 2; display: flex; align-items: center; gap: 9px; min-height: 18px; color: var(--homa-brand-text); font-size: .72rem; }
-.qa-product__activity i { display: block; width: 4px; height: 12px; border-radius: 999px; background: currentColor; }
-.qa-product__activity i:nth-child(2) { height: 20px; }
-.qa-product__activity i:nth-child(3) { height: 8px; }
-.qa-product__state[data-state="updating"] .qa-product__activity i { animation: qa-wave 700ms ease-in-out infinite alternate; }
-.qa-product__state[data-state="updating"] .qa-product__activity i:nth-child(2) { animation-delay: 120ms; }
-.qa-product__state[data-state="updating"] .qa-product__activity i:nth-child(3) { animation-delay: 240ms; }
-.qa-product__activity span { margin-left: 2px; }
-.qa-product__controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.qa-product__activity { grid-column: 2; min-height: 18px; color: var(--homa-brand-text); font-size: .72rem; font-weight: 700; }
+.qa-product__controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
 .qa-product__control { min-height: 40px; border: 1px solid var(--homa-control-boundary); border-radius: 10px; background: var(--homa-paper); color: var(--homa-muted-ink); padding: 6px 8px; font: 700 .68rem/1 var(--font-sans); cursor: pointer; transition: background var(--homa-motion-fast) var(--homa-motion-ease-out), border-color var(--homa-motion-fast) var(--homa-motion-ease-out), color var(--homa-motion-fast) var(--homa-motion-ease-out); }
 .qa-product__control[aria-pressed="true"] { border-color: var(--homa-midnight-action); background: color-mix(in srgb, var(--homa-midnight-action) 8%, var(--homa-paper)); color: var(--homa-midnight-action); }
 .qa-product__control:focus-visible { outline: 3px solid color-mix(in srgb, var(--homa-visual-coral) 64%, transparent); outline-offset: 3px; }
@@ -120,27 +100,19 @@ const QUIET_LANDING_CSS = `
 @keyframes qa-product-enter { from { opacity: 0; transform: translateY(18px) rotate(1deg); } to { opacity: 1; transform: translateY(0) rotate(1deg); } }
 @keyframes qa-thread-draw { to { stroke-dashoffset: 0; } }
 @keyframes qa-character-peek { from { opacity: 0; transform: translateY(12px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes qa-mark-orient { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
-@keyframes qa-wave { from { transform: scaleY(.65); } to { transform: scaleY(1.15); } }
 
 .qa-band { border-top: 1px solid var(--homa-soft-boundary); }
 .qa-section { max-width: 1180px; margin: 0 auto; padding: clamp(58px, 8vw, 100px) 20px; }
 .qa-section__intro { max-width: 700px; }
 .qa-section h2 { margin: 12px 0 0; color: var(--homa-ink); font-size: clamp(2.45rem, 5vw, 4.4rem); line-height: .94; text-wrap: balance; }
 .qa-section__lead { max-width: 640px; margin: 18px 0 0; color: var(--homa-muted-ink); font-size: 1.05rem; line-height: 1.58; }
-.qa-pain-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 38px; }
 .qa-frame { padding: 20px; }
-.qa-pain-card { min-height: 198px; }
-.qa-pain-card__icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: var(--homa-radius-control); background: var(--homa-highlight-tint); color: var(--homa-highlight-ink); }
-.qa-pain-card h3 { margin: 23px 0 8px; font-size: 1.45rem; line-height: 1; }
-.qa-pain-card p { margin: 0; color: var(--homa-muted-ink); line-height: 1.48; }
-.qa-closing { display: flex; align-items: center; gap: 14px; margin-top: 34px; color: var(--homa-ink); font: 500 clamp(1.35rem, 2.5vw, 1.8rem)/1.15 var(--font-display); }
-.qa-closing::before { content: ""; width: 38px; height: 3px; flex: none; border-radius: 99px; background: var(--homa-visual-coral); }
 .qa-capability-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 38px; }
 .qa-capability-card { display: flex; min-width: 0; flex-direction: column; }
 .qa-capability-card h3 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.1rem); line-height: .98; }
 .qa-capability-card p { margin: 12px 0 22px; color: var(--homa-muted-ink); line-height: 1.5; }
 .qa-capability-card__proof { margin-top: auto; overflow: hidden; border-radius: var(--homa-radius-control); }
+.qa-capability-actions { margin-top: 24px; }
 .qa-proof { min-height: 142px; border-top: 1px solid var(--homa-soft-boundary); padding-top: 16px; }
 .qa-proof__meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--homa-muted-ink); font-size: .74rem; }
 .qa-proof__meta strong { color: var(--homa-ink); font-size: .82rem; }
@@ -163,18 +135,12 @@ const QUIET_LANDING_CSS = `
 .qa-proof__metric strong { display: block; color: var(--homa-info-ink); font: 600 1.7rem/1 var(--font-display); }
 .qa-proof__metric span { display: block; margin-top: 4px; color: var(--homa-info-ink); font-size: .76rem; line-height: 1.35; }
 
-.qa-report { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(26px, 5vw, 70px); align-items: center; }
-.qa-report h2 { max-width: 510px; }
-.qa-report__reassurance { margin: 22px 0 0; border-left: 3px solid var(--homa-constructive-ink); background: var(--homa-constructive-tint); padding: 13px 15px; color: var(--homa-constructive-ink); line-height: 1.5; }
-.qa-report__body { margin: 16px 0 0; color: var(--homa-muted-ink); line-height: 1.55; }
-.qa-report__preview { min-width: 0; overflow: hidden; border: 1px solid var(--homa-soft-boundary); border-radius: var(--homa-radius-card); background: var(--homa-paper); box-shadow: 0 14px 34px color-mix(in srgb, var(--homa-ink) 8%, transparent); }
-.qa-report__preview > * { max-width: 100%; }
-
-.qa-membership-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 38px; }
+.qa-membership-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 38px; }
 .qa-membership-card { display: flex; min-width: 0; flex-direction: column; }
 .qa-membership-card h3 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.1rem); line-height: .98; }
 .qa-membership-card__price { margin-top: 18px; color: var(--homa-ink); font: 700 2.15rem/1 var(--font-sans); font-variant-numeric: tabular-nums; }
 .qa-membership-card__price span { margin-left: 4px; color: var(--homa-muted-ink); font-size: .82rem; font-weight: 600; }
+.qa-membership-card__availability { margin-top: 18px; color: var(--homa-brand-text); font: 700 1rem/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; }
 .qa-membership-card__annual { margin-top: 9px; color: var(--homa-brand-text); font-size: .78rem; font-weight: 700; }
 .qa-membership-card__body { margin: 20px 0 0; border-top: 1px solid var(--homa-soft-boundary); padding-top: 18px; color: var(--homa-muted-ink); line-height: 1.5; }
 .qa-memberships__footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 28px; }
@@ -195,16 +161,10 @@ const QUIET_LANDING_CSS = `
 .qa-faq__question svg { flex: none; color: var(--homa-brand-text); transition: transform var(--homa-motion-fast) var(--homa-motion-ease-out); }
 .qa-faq__item[data-open="true"] .qa-faq__question svg { transform: rotate(45deg); }
 .qa-faq__answer { max-width: 660px; padding: 0 36px 20px 0; color: var(--homa-muted-ink); line-height: 1.55; white-space: pre-line; }
-.qa-cta { background: var(--homa-contained-band); color: var(--homa-paper); }
-.qa-cta__inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 26px; align-items: center; }
-.qa-cta h2 { color: var(--homa-paper); }
-.qa-cta p { max-width: 650px; color: color-mix(in srgb, var(--homa-paper) 72%, transparent); }
-.qa-cta .quiet-action { background: var(--homa-paper); color: var(--homa-midnight-action); }
 @media (max-width: 960px) {
   .qa-opening__world { min-height: 600px; }
   .qa-authority { grid-template-columns: 1fr; }
   .qa-product { max-width: 620px; margin-inline: auto; }
-  .qa-pain-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .qa-story { grid-template-columns: minmax(0, 1fr) 230px; }
 }
 @media (max-width: 700px) {
@@ -214,14 +174,12 @@ const QUIET_LANDING_CSS = `
   .qa-opening__copy h1 { font-size: clamp(3.4rem, 15vw, 5.5rem); }
   .qa-opening__thread { width: min(520px, 82vw); }
   .qa-authority { padding: 42px 24px 48px; }
-  .qa-capability-grid, .qa-report, .qa-membership-grid, .qa-story, .qa-faq, .qa-cta__inner { grid-template-columns: 1fr; }
-  .qa-report__preview { order: -1; }
+  .qa-capability-grid, .qa-membership-grid, .qa-story, .qa-faq { grid-template-columns: 1fr; }
   .qa-memberships__footer { align-items: flex-start; flex-direction: column; }
   .qa-story__photo { width: min(240px, 72vw); }
 }
 @media (max-width: 480px) {
   .qa-section { padding-inline: 16px; }
-  .qa-pain-grid { grid-template-columns: 1fr; }
   .qa-capability-grid { gap: 10px; }
   .qa-frame { padding: 17px; }
   .qa-opening__world { min-height: 680px; }
@@ -230,7 +188,7 @@ const QUIET_LANDING_CSS = `
   .qa-opening__copy p { font-size: 1rem; }
   .qa-opening__next { width: 100%; }
   .qa-opening__thread { bottom: 38px; left: 20px; width: 88vw; }
-  .qa-opening__character { right: 18px; bottom: 16px; }
+  .qa-opening__character { display: none; }
   .qa-authority h2 { font-size: clamp(2.9rem, 14vw, 4.2rem); }
   .qa-product { padding: 14px; }
   .qa-product__controls { grid-template-columns: 1fr; }
@@ -240,20 +198,16 @@ const QUIET_LANDING_CSS = `
   .qa-story__photo { transform: none; }
   .qa-opening__copy, .qa-product, .qa-opening__character { animation: none; }
   .qa-opening__thread path { animation: none; stroke-dashoffset: 0; }
-  .qa-product__state[data-state="updating"] .qa-product__mark svg,
-  .qa-product__state[data-state="updating"] .qa-product__activity i { animation: none; }
 }
 `;
 
-function TrialAction({ secondary = false }: { secondary?: boolean }) {
+function TrialAction() {
   const openPopup = useSignupPopup();
-  const action = secondary ? "See the sample report" : HERO_COPY.primaryAction;
-  const href = secondary ? SAMPLE_REPORT_COPY.href : "/onboarding";
   const icon = <Icon name="next" size={20} />;
-  return openPopup && !secondary ? (
-    <QuietAction kind="primary" size="large" onClick={openPopup} icon={icon}>{action}</QuietAction>
+  return openPopup ? (
+    <QuietAction kind="primary" size="large" onClick={openPopup} icon={icon}>{HERO_COPY.primaryAction}</QuietAction>
   ) : (
-    <QuietAction kind={secondary ? "secondary" : "primary"} size="large" href={href} icon={icon}>{action}</QuietAction>
+    <QuietAction kind="primary" size="large" href="/onboarding" icon={icon}>{HERO_COPY.primaryAction}</QuietAction>
   );
 }
 
@@ -278,7 +232,7 @@ function QuietProductMoment() {
       <div className="qa-product__state" data-state={state}>
         <div className="qa-product__mark"><Logo size={47} variant="mark" /></div>
         <div className="qa-product__state-copy"><strong>{copy.title}</strong><span aria-live="polite">{copy.description}</span></div>
-        <div className="qa-product__activity" aria-hidden="true"><i /><i /><i /><span>{copy.activity}</span></div>
+        <div className="qa-product__activity" aria-hidden="true">{copy.activity}</div>
       </div>
       <div className="qa-product__controls" role="group" aria-label="See how Homa updates a week">
         {(Object.keys(QUIET_DEMO_STATES) as QuietDemoState[]).map((nextState) => (
@@ -298,15 +252,15 @@ function QuietProductMoment() {
 
 function QuietCapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) {
   if (capabilityId === "plan") {
-    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Leo · Tuesday</strong><span>Ready to review</span></div><div className="qa-proof__rows">{[["Fractions review", "Done"], ["History reading", "Read next"], ["Science lab", "This afternoon"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
+    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Leo · This week</strong><span>Updated</span></div><div className="qa-proof__rows">{[["Fractions review", "Moved to Thursday"], ["History reading", "Read next"], ["Science lab", "This afternoon"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
   }
   if (capabilityId === "practice") {
     return <div className="qa-proof qa-proof__document"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="62px" /><div><div className="qa-proof__meta"><strong>Made for Maya</strong><span>Tuesday</span></div><p>A practice page shaped around this week&apos;s lesson.</p><span className="qa-proof__document-status">Ready to print</span></div></div>;
   }
   if (capabilityId === "binder") {
-    return <div className="qa-proof"><div className="qa-proof__folder"><span className="qa-proof__folder-thumb"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="42px" /></span><span><strong>Butterfly math</strong><small>Maya · practice page</small></span><small>Tue</small></div><div className="qa-proof__folder"><span className="qa-proof__folder-thumb" /><span><strong>Leo&apos;s lab notes</strong><small>Finished work</small></span><small>Mon</small></div></div>;
+    return <div className="qa-proof"><div className="qa-proof__folder"><span className="qa-proof__folder-thumb"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="42px" /></span><span><strong>Butterfly math</strong><small>Maya · practice page</small></span><small>Tue</small></div><div className="qa-proof__folder"><span className="qa-proof__folder-thumb" /><span><strong>Counting garden</strong><small>Maya · practice page</small></span><small>Mon</small></div></div>;
   }
-  return <div className="qa-proof"><div className="qa-proof__metric"><strong>Teaching time</strong><span>saved by child<br />and subject</span></div></div>;
+  return <div className="qa-proof"><div className="qa-proof__metric"><strong>Teaching hours</strong><span>recorded by child<br />and subject</span></div></div>;
 }
 
 function QuietFaq() {
@@ -353,46 +307,35 @@ export function QuietLanding() {
                 <QuietThread className="qa-opening__thread" label="A coral line connecting today's work to what comes next" />
                 <div className="qa-opening__character" aria-hidden="true"><Logo size={74} variant="mark" tone="dark" /></div>
               </div>
-              <div className="qa-authority">
+              <div id="how" className="qa-authority">
                 <div className="qa-authority__copy">
                   <span className="qa-authority__kicker">{LANDING_SECTION_COPY.authority.eyebrow}</span>
                   <h2>{LANDING_SECTION_COPY.authority.headline}</h2>
                   <p>{LANDING_SECTION_COPY.authority.body}</p>
-                  <div className="qa-authority__actions"><QuietAction kind="secondary" href="#how" icon={<Icon name="next" size={20} />}>{LANDING_SECTION_COPY.authority.secondaryAction}</QuietAction></div>
                 </div>
                 <QuietProductMoment />
               </div>
             </div>
           </section>
 
-          <section id="how" className="qa-band qa-section" aria-labelledby="quiet-how-title">
-            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.how.eyebrow}</div><h2 id="quiet-how-title">{LANDING_SECTION_COPY.how.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.how.body}</p></div>
-            <div className="qa-pain-grid">{WORKFLOW_ITEMS.map(({ id, title, body }) => { const icon = WORKFLOW_ICONS[id]; return <QuietFrame as="article" tone="paper" className="qa-frame qa-pain-card" key={id}><span className="qa-pain-card__icon"><Icon name={icon} size={20} /></span><h3>{title}</h3><p>{body}</p></QuietFrame>; })}</div>
-            <p className="qa-closing">{WORKFLOW_CLOSING}</p>
-          </section>
-
           <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
             <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.features.eyebrow}</div><h2 id="quiet-features-title">{LANDING_SECTION_COPY.features.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.features.body}</p></div>
             <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body, action }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>{action}</QuietAction></div></QuietFrame>)}</div>
-          </section>
-
-          <section id="sample-report" className="qa-band qa-section" aria-labelledby="quiet-report-title">
-            <div className="qa-report"><div><div className="qa-eyebrow">{SAMPLE_REPORT_COPY.eyebrow}</div><h2 id="quiet-report-title">{SAMPLE_REPORT_COPY.headline}</h2><p className="qa-report__reassurance">{SAMPLE_REPORT_COPY.reassurance}</p><p className="qa-report__body">{SAMPLE_REPORT_COPY.body}</p><div className="qa-authority__actions"><QuietAction kind="secondary" size="large" href={SAMPLE_REPORT_COPY.href} icon={<Icon name="next" size={20} />}>{SAMPLE_REPORT_COPY.action}</QuietAction></div></div><div className="qa-report__preview"><ReportPreview /></div></div>
+            <div className="qa-capability-actions"><QuietAction kind="quiet" href={SAMPLE_REPORT_COPY.href} icon={<Icon name="next" size={16} />}>{SAMPLE_REPORT_COPY.action}</QuietAction></div>
           </section>
 
           <section id="memberships" className="qa-band qa-section" aria-labelledby="quiet-memberships-title">
             <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.memberships.eyebrow}</div><h2 id="quiet-memberships-title">{LANDING_SECTION_COPY.memberships.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.memberships.body}</p></div>
             <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}</div>
-            <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE}</p><TrialAction /></div>
+            <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE} {HERO_COPY.primaryActionNote}</p><TrialAction /></div>
           </section>
+
+          <section id="faq" className="qa-band qa-section" aria-labelledby="quiet-faq-title"><div className="qa-faq"><div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.faq.eyebrow}</div><h2 id="quiet-faq-title">{LANDING_SECTION_COPY.faq.headline}</h2></div><QuietFaq /></div></section>
 
           <section id="stories" className="qa-band qa-section" aria-labelledby="quiet-story-title">
             <div className="qa-story"><div><div className="qa-eyebrow">{FOUNDER_STORY_COPY.eyebrow}</div><h2 id="quiet-story-title">{FOUNDER_STORY_COPY.headline}</h2><p className="qa-story__body">{FOUNDER_STORY_COPY.body}</p><p className="qa-story__signature">{FOUNDER_STORY_COPY.signature}</p></div><div className="qa-story__photo"><Image src="/images/founders.jpg" alt="Alessa and Carolyng, Homa's co-founders, smiling together outside in the sun" width={920} height={868} sizes="280px" /></div></div>
           </section>
 
-          <section id="faq" className="qa-band qa-section" aria-labelledby="quiet-faq-title"><div className="qa-faq"><div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.faq.eyebrow}</div><h2 id="quiet-faq-title">{LANDING_SECTION_COPY.faq.headline}</h2></div><QuietFaq /></div></section>
-
-          <section className="qa-cta qa-section" aria-labelledby="quiet-cta-title"><div className="qa-cta__inner"><div><div className="qa-eyebrow" style={{ color: "var(--homa-paper)" }}>{LANDING_SECTION_COPY.final.eyebrow}</div><h2 id="quiet-cta-title">{LANDING_SECTION_COPY.final.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.final.body}</p></div><TrialAction /></div></section>
         </main>
         <QuietFooter />
       </SignupPopupProvider>

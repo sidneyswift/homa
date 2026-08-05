@@ -14,9 +14,8 @@ import { QuietAction } from "./QuietAction";
  */
 export const QUIET_NAV_LINKS = [
   ["How it works", "/#how"],
-  ["Features", "/#features"],
   ["Memberships", "/#memberships"],
-  ["Our story", "/#stories"],
+  ["Questions", "/#faq"],
 ] as const;
 
 export type QuietNavMenuItem = {

@@ -13,9 +13,9 @@ import { REPORT_WRITER_PROMPT } from "./report-writer-prompt.generated";
  * The model call that writes the report's words (D8 overturn). One
  * generateObject per report (and per plan), through the Vercel AI Gateway:
  * deployed, the gateway authenticates via the Vercel project (the same way
- * eve chat already does); locally it reads AI_GATEWAY_API_KEY or the
- * Vercel OIDC token from .env.local. disallowPromptTraining keeps the
- * privacy page's "never used to train" line contractual.
+ * eve chat already does); locally it reads the Vercel OIDC token from
+ * .env.local. disallowPromptTraining applies the provider's per-call
+ * training control without expanding Homa's public privacy promise.
  *
  * No timeout and no retry cap beyond one internal transport retry
  * (founder ruling: "let the agent do its thing"; quality over speed).

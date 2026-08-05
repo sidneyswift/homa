@@ -9,7 +9,7 @@ import {
   APPLE_NATIVE_PRODUCT_IDS,
   APPLE_NATIVE_PROVIDER_PRODUCTS,
   APPLE_PRODUCT_IDS,
-  HOMA_PLANS,
+  PURCHASABLE_HOMA_PLANS,
   planDefinition,
   weeklyEquivalentUsd,
   type PlanTier,
@@ -391,7 +391,7 @@ function PlanPicker({ tier, onChange }: { tier: PlanTier; onChange: (tier: PlanT
   const stacked = fontScale >= 1.4;
   return (
     <View accessibilityRole="radiogroup" style={{ flexDirection: stacked ? "column" : "row", gap: space.xs }}>
-      {HOMA_PLANS.map((plan) => {
+      {PURCHASABLE_HOMA_PLANS.map((plan) => {
         const selected = plan.tier === tier;
         return (
           <Pressable

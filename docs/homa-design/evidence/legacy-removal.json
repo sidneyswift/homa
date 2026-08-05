@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "158899e05c4903b07a99f4d78e54c1ebef75ef9522073fe43c9efd3c8c4fdb9c",
+  "ownedInputFingerprint": "60f65a870ad1de1f4595b69b7c7ff2f81429d27c7d6baa1f73ae3362a1c9a2e2",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -3488,11 +3488,8 @@
     {
       "surfaceId": "surface:5d99a6c94c0bbd71",
       "path": "apps/web/app/onboarding/report-preview.tsx",
-      "sourceHash": "63627415fb83612960f00143cdd1807011d5d11e73000bdd78baa39337864ca4",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language"
-      ],
+      "sourceHash": "9cc1f976ae58de39515976b4cd59b5a30445f38dc6bb677eef332b6124d67f10",
+      "legacySignatures": [],
       "detectedSourceHash": "63627415fb83612960f00143cdd1807011d5d11e73000bdd78baa39337864ca4",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -3518,7 +3515,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -3715,7 +3712,7 @@
     {
       "surfaceId": "surface:62602b2bdd78ff00",
       "path": "apps/web/components/billing/trial-gate.tsx",
-      "sourceHash": "87558906bf42a3269b472c3b8e5389bb0173e0505ec5d6d18a44742809e8391a",
+      "sourceHash": "7af9517a1e7bc0eae305f8fd6bc1328d0c2dc1acebe08aa7354ec73cead063ba",
       "legacySignatures": [],
       "detectedSourceHash": "87558906bf42a3269b472c3b8e5389bb0173e0505ec5d6d18a44742809e8391a",
       "detectedLegacySignatures": [
@@ -4204,7 +4201,7 @@
     {
       "surfaceId": "surface:ae88754b4ff63a0b",
       "path": "apps/web/components/design/quiet-primitives.css",
-      "sourceHash": "4e9182f1662608194f946d04dbaa9c510c1ca7b860f9b61d58e0325acf28460d",
+      "sourceHash": "e8d94e1d556d03e5ea5b0b2dc5a437b2342bfda74f0ed58feb2a20f83dd3f378",
       "legacySignatures": [],
       "detectedSourceHash": "4e9182f1662608194f946d04dbaa9c510c1ca7b860f9b61d58e0325acf28460d",
       "detectedLegacySignatures": [

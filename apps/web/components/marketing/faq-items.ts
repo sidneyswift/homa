@@ -1,9 +1,3 @@
-import {
-  TIER_NAMES,
-  WALL_MECHANICS_LINE,
-  tierPriceAmount,
-} from "../billing/wall-copy";
-
 /**
  * FAQ_ITEMS: the landing FAQ, single source of truth.
  * Rendered by components/marketing/Faq.tsx and serialized as FAQPage
@@ -11,11 +5,9 @@ import {
  * Copy ported from the former landing composition.
  */
 export const FAQ_ITEMS: ReadonlyArray<readonly [string, string]> = [
-  ["Can Homa help with my state's homeschool rules?", "Homa records the teaching hours you report. The state-rules section links to each source and shows the date it was last reviewed. She does not decide whether your family meets a legal requirement. Confirm what applies on your state's official website."],
-  ["Can I use my own curriculum?", "Yes. Every membership lets you tell Homa which curriculum you use. Homa Plus can read curriculum files you upload and add those lessons to your weekly plan."],
-  ["What ages does Homa cover?", "Weekly planning, teaching-hour records, and finished work can include every child you add. Progress reports cover ages 2 to 16. Practice pages currently cover ages 2 to 7."],
-  ["Does my child ever use it?", "No. Homa is built for you. You answer the questions and talk to Homa. Your child does not need an account and never has to talk to an AI."],
-  ["How does Homa use my family's information?", "We use what you share only to run Homa for your family. We do not sell it or use it to train AI models. You can ask us to delete your family's records. The Privacy page explains what Homa collects, why it is needed, which kinds of services process it, and the current deletion steps."],
-  ["What if the week changes?", "Tell Homa what changed. She can move unfinished work, lighten a day, or prepare a different page while keeping completed work and hours in the record."],
-  ["How much does Homa cost?", `${WALL_MECHANICS_LINE}\n\n${TIER_NAMES.regular} is $${tierPriceAmount("regular", "monthly")} a month. ${TIER_NAMES.plus} is $${tierPriceAmount("plus", "monthly")} a month. ${TIER_NAMES.elite} is $${tierPriceAmount("elite", "monthly")} a month.\n\nEvery membership includes weekly plans, printable practice pages, teaching-hour records, and web chat. ${TIER_NAMES.plus} adds curriculum-file uploads for weekly planning. The membership picker shows the current ${TIER_NAMES.elite} details before checkout.\n\nAnnual memberships are paid once for the year and cost 20% less than twelve monthly payments. You can stop any membership from renewing in your settings.`],
+  ["Can Homa help with my state's homeschool rules?", "Homa records the hours you report and links to dated state-rule sources. She does not decide whether your family meets a legal requirement. Confirm it on your state's official website."],
+  ["Can I use my own curriculum?", "Yes. Share the curriculum details you want in the plan. Homa Plus can read uploaded curriculum files and add those lessons for you."],
+  ["What ages does Homa cover?", "Weekly planning and teaching-hour records can include every child you add. Progress reports cover ages 2 to 16. Practice pages currently cover ages 2 to 7."],
+  ["Does my child ever use it?", "No. Homa is for parents. Your child does not need an account or have to talk to an AI."],
+  ["How does Homa use my family's information?", "We use what you share to run Homa for your family. We do not sell it. You can ask us to delete your family's records. Read the Privacy page for details."],
 ];

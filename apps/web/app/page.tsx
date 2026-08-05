@@ -7,7 +7,7 @@ import { QuietLanding } from "../components/marketing/QuietLanding";
 export const metadata: Metadata = {
   title: "Homeschool, handled.",
   description:
-    "Homa is an AI assistant for homeschool parents. Plan the week, make practice pages for ages 2 to 7, record teaching hours, and keep finished work together.",
+    "Homa is an AI assistant for homeschool parents. Plan the week, make practice pages, and keep your homeschool records together.",
   // Self-referencing canonical: crawlers treat fragment URLs (/#how,
   // /#features) as separate documents with identical content unless the
   // page names its one preferred URL.
@@ -23,7 +23,7 @@ const webAppJsonLd = {
   name: "Homa",
   url: "https://thankshoma.com",
   description:
-    "Homa is an AI assistant for homeschool parents that prepares weekly plans, makes practice pages for children ages 2 to 7, and keeps teaching hours and finished work together.",
+    "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages, and keeps homeschool records together.",
   applicationCategory: "EducationApplication",
   operatingSystem: "Any",
   offers: MEMBERSHIP_ITEMS.map((membership) => ({

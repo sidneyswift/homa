@@ -7,6 +7,7 @@ import {
   GAUNTLET_FIXTURE_PRIMITIVE_STATES,
   GAUNTLET_IGNORED_FOCUS_TAGS,
   GAUNTLET_PERFORMANCE_BUDGET,
+  GAUNTLET_READ_ONLY_METHODS,
   GAUNTLET_REAL_PRIMITIVE_CONSUMERS,
   GAUNTLET_REFLOW_VIEWPORTS,
   GAUNTLET_ROUTE_MANIFEST_PATHS,
@@ -14,6 +15,8 @@ import {
   GAUNTLET_VIEWPORTS,
   GAUNTLET_WEB_PRIMITIVES,
   collectStaticGauntletReport,
+  installReadOnlyGauntletNetworkGuard,
+  shouldBlockGauntletRequest,
 } from "./interface-gauntlet.mts";
 
 test("interface gauntlet declares representative route and viewport coverage", () => {
@@ -34,6 +37,64 @@ test("rendered gauntlet keeps explicit stress budgets and localization input", (
   assert.equal(GAUNTLET_PERFORMANCE_BUDGET.transferBytes, 5_000_000);
   assert.match(GAUNTLET_LONG_COPY, /Alexandria/u);
   assert.ok(GAUNTLET_LONG_COPY.length > 40);
+});
+
+test("rendered gauntlet permits reads and rejects every mutation method", () => {
+  assert.deepEqual(GAUNTLET_READ_ONLY_METHODS, ["GET", "HEAD", "OPTIONS"]);
+  for (const method of GAUNTLET_READ_ONLY_METHODS) assert.equal(shouldBlockGauntletRequest(method), false);
+  for (const method of ["POST", "PUT", "PATCH", "DELETE", "CONNECT", "TRACE"]) {
+    assert.equal(shouldBlockGauntletRequest(method), true, `${method} must be blocked`);
+  }
+});
+
+test("rendered gauntlet aborts mutations without recording query strings", async () => {
+  let handler: ((route: any) => Promise<void>) | undefined;
+  const context = {
+    route: async (pattern: string, next: (route: any) => Promise<void>) => {
+      assert.equal(pattern, "**/*");
+      handler = next;
+    },
+  };
+  const blockedMutations: Array<{ method: string; origin: string; path: string }> = [];
+  await installReadOnlyGauntletNetworkGuard(context, blockedMutations);
+  assert.ok(handler);
+
+  let aborted = false;
+  let continued = false;
+  await handler({
+    request: () => ({ method: () => "POST", url: () => "https://example.test/api/map/start?secret=hidden" }),
+    abort: async (reason: string) => {
+      assert.equal(reason, "blockedbyclient");
+      aborted = true;
+    },
+    continue: async () => {
+      continued = true;
+    },
+  });
+
+  assert.equal(aborted, true);
+  assert.equal(continued, false);
+  assert.deepEqual(blockedMutations, [{ method: "POST", origin: "https://example.test", path: "/api/map/start" }]);
+});
+
+test("rendered gauntlet lets read requests continue", async () => {
+  let handler: ((route: any) => Promise<void>) | undefined;
+  const context = { route: async (_pattern: string, next: (route: any) => Promise<void>) => { handler = next; } };
+  const blockedMutations: Array<{ method: string; origin: string; path: string }> = [];
+  await installReadOnlyGauntletNetworkGuard(context, blockedMutations);
+  assert.ok(handler);
+
+  let continued = false;
+  await handler({
+    request: () => ({ method: () => "GET", url: () => "https://example.test/" }),
+    abort: async () => assert.fail("GET must not be aborted"),
+    continue: async () => {
+      continued = true;
+    },
+  });
+
+  assert.equal(continued, true);
+  assert.deepEqual(blockedMutations, []);
 });
 
 test("focus traversal excludes only Next.js development chrome", () => {

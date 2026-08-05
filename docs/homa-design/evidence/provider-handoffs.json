@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "ffa2c957f6c3d7beee286953632f7ad6cc7a2cd62ff3de7dc43b0d0d175f4509"
+    "scopedInputFingerprint": "0752bb577144f41240af2449e90749e33760b9427081e114ca75468128b565ff"
   },
   "records": [
     {
@@ -131,7 +131,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "b05406adcd5a214c36356307109267186dfd8e1c51f71ae57bfff06efc504bc0"
+      "scopedInputFingerprint": "273cc4de06a0cd6035700fd7c6cf060fc35f71f86a2f2fb611d28354433eb092"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -509,7 +509,7 @@
         "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
         "Provider outages never become a guessed paid state and never cross family boundaries."
       ],
-      "scopedInputFingerprint": "073894f1d8f94b8945b539c49380e6594fa799e744764992fcfd9b9edf59e5b3"
+      "scopedInputFingerprint": "82b16253565cd024be49c7fd7cf80d187cdfd7f08b51e776fc3ce10afd87c5a8"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -530,7 +530,7 @@
       },
       {
         "path": "apps/mobile/src/components/billing-gate.tsx",
-        "sha256": "628543ed2660c105195888843972120db90539952c0e261b5aebc9eec6c0ae4e"
+        "sha256": "e2155bc7841725f253906b80d6c0d91509ca51dc8bb8f1cd09871a0c97402322"
       },
       {
         "path": "apps/mobile/src/features/auth/apple-sign-in.ts",
@@ -602,7 +602,7 @@
       },
       {
         "path": "apps/web/components/billing/wall-copy.ts",
-        "sha256": "30381c070bb8449ffd1f0e61f3f7f56f3b3612eddf84fdd6262de97a757f82f3"
+        "sha256": "2f9f0c06c52414752f2d8d512fd316aa2a606bbc5a4075ea32c9940a1401f662"
       },
       {
         "path": "apps/web/lib/billing/apple-verify.ts",
@@ -614,7 +614,7 @@
       },
       {
         "path": "apps/web/lib/billing/wall.ts",
-        "sha256": "88d77101ec6009483cf5fac89b8ac38207675cbf160c36dc08e1d15fcc8cb927"
+        "sha256": "62f65ac5cd8596663a78b1a99ae42f8eb01d7bd76904013f2a890a8f9b42d45d"
       },
       {
         "path": "apps/web/lib/supabase/client.ts",
@@ -629,6 +629,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "693022ee9aef48284770386cba0d244ea3fdd7f3c0d57ed09632c081e2b363d1"
+    "sourceFingerprint": "731b7d96365a2e1d477fb97a26c3a3f2b6a2a49418640f037be52a51c6c7d0e4"
   }
 }

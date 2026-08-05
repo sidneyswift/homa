@@ -77,17 +77,14 @@ export default function PrivacyPage() {
         </ul>
         <p className="mt-3 text-body">
           We send each provider only the information needed for its part of the service. Homa
-          does not use your family&apos;s content to train AI models. For our main AI providers, we
-          use paid APIs that do not train on prompts or responses by default. When another
-          provider offers a no-training control, we enable it. Providers and features can change
-          as Homa changes. When a change materially affects this policy, we update this page and
-          its date.
+          uses provider controls that limit how family information is processed when those
+          controls are available. Providers and features can change as Homa changes. When a
+          change materially affects this policy, we update this page and its date.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">What we never do</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-body">
           <li>We never sell your data or share it with advertisers.</li>
-          <li>We never use your family&apos;s data to train AI models.</li>
           <li>We do not give children accounts or ask them to talk to Homa.</li>
         </ul>
 

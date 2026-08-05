@@ -4,6 +4,8 @@ import { describe, it } from "node:test";
 import {
   APPLE_PRODUCT_IDS,
   HOMA_PLANS,
+  PURCHASABLE_HOMA_PLANS,
+  planAvailableForPurchase,
   providerProduct,
   weeklyEquivalentUsd,
 } from "./billing-catalog";
@@ -15,6 +17,14 @@ describe("Homa billing catalog", () => {
       assert.ok(providerProduct("apple", `com.thankshoma.homa.${plan.tier}.monthly`));
       assert.ok(providerProduct("apple", `com.thankshoma.homa.${plan.tier}.annual`));
     }
+  });
+
+  it("separates new offers from permanent receipt recognition", () => {
+    assert.deepEqual(PURCHASABLE_HOMA_PLANS.map(({ tier }) => tier), ["regular", "plus"]);
+    assert.equal(planAvailableForPurchase("regular"), true);
+    assert.equal(planAvailableForPurchase("plus"), true);
+    assert.equal(planAvailableForPurchase("elite"), false);
+    assert.ok(providerProduct("apple", "com.thankshoma.homa.elite.monthly"));
   });
 
   it("never mistakes an unknown provider product for a plan", () => {
