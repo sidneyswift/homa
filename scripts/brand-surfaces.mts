@@ -33,7 +33,7 @@ import {
   classifyGeneratedWebRouteHandlerBoundary,
   generatedWebRouteHandlerRuntimePolicy,
 } from "./brand-route-boundary.mts";
-import { collectLatestCommittedSources, resolveBrandSourceRef } from "./brand-source-provenance.mts";
+import { collectLatestCommittedSources } from "./brand-source-provenance.mts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -59,14 +59,11 @@ const workingTreePaths = new Set([
   ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
   ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
 ]);
-// First-parent history identifies the commit that delivered each path into the
-// current release lineage. Diffing every merge parent would falsely attribute
-// a file to a later unrelated merge whose side branch simply lacked the file.
-// A synthetic PR merge whose tree exactly equals its second parent uses that
-// parent as the content source. A merge with any tree change stays on HEAD and
-// fails stale evidence until the branch is rebased and regenerated.
-const provenanceRef = resolveBrandSourceRef(git);
-const latestCommittedSource = collectLatestCommittedSources(git, provenanceRef);
+// The content lineage follows first parents except when any encountered merge
+// has a tree exactly equal to parent two. That merge contributes no new bytes,
+// so provenance follows the authored content parent across later main commits.
+// Any merge-tree difference remains on the release lineage and fails stale.
+const latestCommittedSource = collectLatestCommittedSources(git);
 const existing = existsSync(OUTPUT)
   ? JSON.parse(readFileSync(OUTPUT, "utf8")) as Partial<BrandSurfaceManifest>
   : null;

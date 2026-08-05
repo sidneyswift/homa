@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import test from "node:test";
-import { resolve } from "node:path";
 import type { LegacyRemovalLedger } from "../packages/design/src/legacy-removal.ts";
 import { brandCriticalities, brandDeliveryStates, brandDispositions, brandManifestTypes, type BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
 import { LEGACY_FONT_PATH_SIGNATURE } from "../packages/design/src/legacy-signatures.ts";
@@ -75,6 +76,47 @@ test("source provenance keeps a merge that introduces any tree change", () => {
 test("source provenance keeps an ordinary one-parent checkout", () => {
   const gitStub = stubGit({ "rev-list --parents -n 1 HEAD": "head parent" });
   assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
+});
+
+test("source provenance keeps an octopus checkout on the merge", () => {
+  const gitStub = stubGit({ "rev-list --parents -n 1 HEAD": "merge base content third" });
+  assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
+});
+
+test("source provenance follows an exact content merge through a later child", () => {
+  const repo = mkdtempSync(join(tmpdir(), "homa-brand-provenance-"));
+  const repoGit: GitTextCommand = (...args) => execFileSync("git", args, {
+    cwd: repo,
+    encoding: "utf8",
+    maxBuffer: 8 * 1024 * 1024,
+  }).trim();
+
+  try {
+    repoGit("init", "--quiet");
+    repoGit("config", "user.name", "Homa provenance test");
+    repoGit("config", "user.email", "provenance-test@localhost");
+    repoGit("config", "commit.gpgsign", "false");
+    writeFileSync(join(repo, "surface.txt"), "base\n");
+    repoGit("add", "surface.txt");
+    repoGit("commit", "--quiet", "-m", "base");
+    const base = repoGit("rev-parse", "HEAD");
+
+    writeFileSync(join(repo, "surface.txt"), "feature\n");
+    repoGit("add", "surface.txt");
+    repoGit("commit", "--quiet", "-m", "feature");
+    const feature = repoGit("rev-parse", "HEAD");
+    const featureTree = repoGit("rev-parse", `${feature}^{tree}`);
+    const merge = repoGit("commit-tree", featureTree, "-p", base, "-p", feature, "-m", "exact merge");
+    const child = repoGit("commit-tree", featureTree, "-p", merge, "-m", "later child");
+
+    assert.equal(collectLatestCommittedSources(repoGit, merge).get("surface.txt")?.sha, feature);
+    assert.equal(collectLatestCommittedSources(repoGit, child).get("surface.txt")?.sha, feature);
+
+    const squash = repoGit("commit-tree", featureTree, "-p", base, "-m", "squash");
+    assert.equal(collectLatestCommittedSources(repoGit, squash).get("surface.txt")?.sha, squash);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 });
 
 test("manifest IDs, paths, and ordering are unique and deterministic", () => {
