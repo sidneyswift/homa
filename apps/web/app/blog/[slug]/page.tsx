@@ -5,15 +5,25 @@ import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 
+import { BlogCard } from "../../../components/marketing/BlogCard";
 import { Footer } from "../../../components/marketing/Footer";
 import { Nav } from "../../../components/marketing/Nav";
-import { blogPostExists, formatBlogDate, listBlogPosts, readBlogPost } from "../../../lib/blog";
+import { HERO_COPY } from "../../../components/marketing/landing-content";
+import {
+  blogPostExists,
+  formatBlogDate,
+  getRelatedBlogPosts,
+  listBlogPosts,
+  readBlogPost,
+} from "../../../lib/blog";
+import { getBlogCluster } from "../../../lib/blog-clusters";
 
 /**
  * /blog/[slug]: one published article, statically generated. Slugs come only
  * from files in content/blog/ (dynamicParams=false: anything else 404s).
  * SEO: metadata + OG from frontmatter, JSON-LD Article, sitemap entry via
- * app/sitemap.ts. Every article ends in the /onboarding CTA.
+ * app/sitemap.ts. The renderer owns the one /onboarding CTA so trial language
+ * cannot drift across article MDX files.
  */
 
 export const dynamicParams = false;
@@ -45,7 +55,9 @@ export async function generateMetadata({
       description: post.description,
       url: `/blog/${post.slug}`,
       publishedTime: `${post.date}T00:00:00.000Z`,
-      images: image ? [{ url: image }] : undefined,
+      modifiedTime: `${post.updated}T00:00:00.000Z`,
+      section: getBlogCluster(post.cluster)?.name,
+      images: image ? [{ url: image, alt: post.heroAlt }] : undefined,
     },
   };
 }
@@ -58,16 +70,22 @@ export default async function BlogPostPage({
   const { slug } = await params;
   if (!blogPostExists(slug)) notFound();
   const post = readBlogPost(slug);
+  const cluster = getBlogCluster(post.cluster);
+  const relatedPosts = getRelatedBlogPosts(post);
+  const pageUrl = `https://thankshoma.com/blog/${post.slug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
+    "@id": `${pageUrl}#article`,
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    dateModified: post.date,
+    dateModified: post.updated,
     image: post.ogImage ?? post.hero,
-    mainEntityOfPage: `https://thankshoma.com/blog/${post.slug}`,
+    articleSection: cluster?.name,
+    mainEntityOfPage: pageUrl,
+    isPartOf: { "@id": "https://thankshoma.com/blog#blog" },
     // @id ties into the Organization node in the root layout's site-wide
     // graph; name stays inline for validators that don't resolve across
     // script blocks.
@@ -81,7 +99,20 @@ export default async function BlogPostPage({
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://thankshoma.com" },
       { "@type": "ListItem", position: 2, name: "Notes", item: "https://thankshoma.com/blog" },
-      { "@type": "ListItem", position: 3, name: post.title, item: `https://thankshoma.com/blog/${post.slug}` },
+      ...(cluster
+        ? [{
+            "@type": "ListItem",
+            position: 3,
+            name: cluster.name,
+            item: `https://thankshoma.com/blog/topics/${cluster.slug}`,
+          }]
+        : []),
+      {
+        "@type": "ListItem",
+        position: cluster ? 4 : 3,
+        name: post.title,
+        item: pageUrl,
+      },
     ],
   };
 
@@ -99,14 +130,29 @@ export default async function BlogPostPage({
         />
         <article>
           <header>
-            <p className="text-sm text-muted">{formatBlogDate(post.date)}</p>
+            <nav className="text-sm text-muted" aria-label="Breadcrumb">
+              <Link className="underline underline-offset-4" href="/blog">Notes</Link>
+              {cluster ? (
+                <>
+                  <span aria-hidden="true"> / </span>
+                  <Link className="underline underline-offset-4" href={`/blog/topics/${cluster.slug}`}>
+                    {cluster.shortName}
+                  </Link>
+                </>
+              ) : null}
+            </nav>
             <h1 className="mt-2 font-display text-3xl font-semibold leading-tight text-strong">
               {post.title}
             </h1>
+            <p className="mt-4 text-lg leading-relaxed text-body">{post.description}</p>
+            <p className="mt-4 text-sm text-muted">
+              By Homa · Published {formatBlogDate(post.date)}
+              {post.updated !== post.date ? ` · Updated ${formatBlogDate(post.updated)}` : ""}
+            </p>
             {post.hero ? (
               <Image
                 src={post.hero}
-                alt=""
+                alt={post.heroAlt ?? ""}
                 width={1200}
                 height={675}
                 priority
@@ -119,22 +165,34 @@ export default async function BlogPostPage({
           </div>
         </article>
 
+        {relatedPosts.length > 0 ? (
+          <aside className="mt-14" aria-labelledby="related-notes-heading">
+            <h2 id="related-notes-heading" className="font-display text-2xl font-semibold text-strong">
+              Keep going
+            </h2>
+            <ul className="mt-6 grid gap-6">
+              {relatedPosts.map((relatedPost) => (
+                <BlogCard key={relatedPost.slug} post={relatedPost} />
+              ))}
+            </ul>
+          </aside>
+        ) : null}
+
         <aside
           className="mt-14 rounded-lg bg-brand-soft p-8 text-center"
           style={{ border: "1px solid var(--border-brand)" }}
         >
           <p className="font-display text-xl font-semibold text-strong">
-            You&rsquo;ve got this. Homa&rsquo;s got the rest.
+            Homa can take the prep from here.
           </p>
           <p className="mt-2 text-body">
-            Your 7 free days start with a five-minute questionnaire and a progress
-            report showing exactly where your child stands.
+            {HERO_COPY.primaryActionNote}
           </p>
           <Link
             href="/onboarding"
             className="mt-5 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand transition-colors duration-(--dur-base) ease-out hover:bg-brand-hover"
           >
-            Start your free trial
+            {HERO_COPY.primaryAction}
           </Link>
         </aside>
       </main>

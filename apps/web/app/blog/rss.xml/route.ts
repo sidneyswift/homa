@@ -31,6 +31,7 @@ export function GET() {
         `      <link>${url}</link>`,
         `      <guid isPermaLink="true">${url}</guid>`,
         `      <description>${escapeXml(post.description)}</description>`,
+        `      <category>${escapeXml(post.cluster)}</category>`,
         `      <pubDate>${new Date(`${post.date}T00:00:00Z`).toUTCString()}</pubDate>`,
         "    </item>",
       ].join("\n");

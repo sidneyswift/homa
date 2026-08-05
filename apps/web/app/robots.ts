@@ -30,7 +30,7 @@ const AI_CRAWLERS = [
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      { userAgent: AI_CRAWLERS, allow: "/" },
+      { userAgent: AI_CRAWLERS, allow: "/", disallow: "/api/" },
       { userAgent: "*", allow: "/", disallow: "/api/" },
     ],
     sitemap: "https://thankshoma.com/sitemap.xml",
