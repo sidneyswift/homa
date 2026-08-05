@@ -194,6 +194,15 @@ for (const required of [
 ]) {
   requireText(blogRouteSource, required, "blog article route");
 }
+if (blogRouteSource.includes("formatBlogDate") || blogRouteSource.includes("Published {")) {
+  fail("blog article route: publication dates must stay out of visible copy");
+}
+requireText(blogRouteSource, ">By Homa<", "blog article byline");
+
+const blogCardSource = read("apps/web/components/marketing/BlogCard.tsx");
+if (blogCardSource.includes("formatBlogDate") || blogCardSource.includes("post.date")) {
+  fail("blog card: publication dates must stay out of visible copy");
+}
 
 const topicRouteSource = read("apps/web/app/blog/topics/[cluster]/page.tsx");
 for (const required of ['"@type": "CollectionPage"', '"@type": "ItemList"', '"@type": "BreadcrumbList"']) {
