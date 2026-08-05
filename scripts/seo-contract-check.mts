@@ -165,7 +165,21 @@ for (const file of blogFiles) {
   if (updated! < date!) fail(`${relativePath}: updated cannot be earlier than date`);
   if (!cluster || !clusterSlugs.includes(cluster)) fail(`${relativePath}: unknown cluster ${cluster}`);
   publishedClusters.add(cluster!);
-  if (hero && !heroAlt) fail(`${relativePath}: heroAlt is required when hero is present`);
+  if (hero) {
+    if (!heroAlt) fail(`${relativePath}: heroAlt is required when hero is present`);
+    if (!hero.startsWith("/blog/")) {
+      fail(`${relativePath}: local hero must use a /blog/ public path`);
+    }
+
+    const publicRoot = path.resolve(ROOT, "apps/web/public");
+    const heroPath = path.resolve(publicRoot, hero.slice(1));
+    if (!heroPath.startsWith(`${publicRoot}${path.sep}`)) {
+      fail(`${relativePath}: hero path escapes apps/web/public`);
+    }
+    if (!fs.existsSync(heroPath) || !fs.statSync(heroPath).isFile()) {
+      fail(`${relativePath}: hero asset is missing at ${hero}`);
+    }
+  }
   if (!source.includes("](/features/")) fail(`${relativePath}: missing feature-page link`);
   if (source.includes("](/onboarding)")) fail(`${relativePath}: MDX duplicates the shared renderer CTA`);
 
