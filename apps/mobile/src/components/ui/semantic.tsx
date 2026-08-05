@@ -3,6 +3,7 @@ import {
   Pressable,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
   type AccessibilityState,
   type PressableProps,
@@ -22,13 +23,26 @@ import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { nativeHapticRoles, type NativePrimitiveRole } from "@homa/design/contract";
 import { fontFamilies } from "../../theme/fonts";
 import {
-  colors,
-  darkColors,
-  fontSize,
-  pressScale,
-  radius,
-  space,
+  darkQuietColors as darkColors,
+  quietColors as colors,
+  quietPressScale as pressScale,
+  quietRadii,
+  quietSpace,
+  quietTypeRoles,
+  quietTypeScale as fontSize,
 } from "../../theme/tokens";
+
+const space = {
+  xs: quietSpace.scale[1],
+  sm: quietSpace.scale[2],
+  md: quietSpace.scale[4],
+  lg: quietSpace.scale[6],
+} as const;
+
+const radius = {
+  control: quietRadii.control,
+  card: quietRadii.card,
+} as const;
 
 /** The role names are deliberately exported for static primitive coverage checks. */
 export const nativePrimitiveRoleNames: readonly NativePrimitiveRole[] = [
@@ -45,17 +59,34 @@ export const nativePrimitiveRoleNames: readonly NativePrimitiveRole[] = [
   "artifact",
 ];
 
-type TextRole = "body" | "bodyLarge" | "bodySmall" | "caption" | "label" | "metric" | "display";
+type TextRole = "body" | "bodyLarge" | "bodySmall" | "caption" | "label" | "eyebrow" | "control" | "metric" | "display";
 type TextTone = "strong" | "body" | "muted" | "subtle" | "inverse";
 
 const TEXT_STYLES: Record<TextRole, TextStyle> = {
-  body: { fontFamily: fontFamilies.body, fontSize: fontSize.base, lineHeight: 24 },
-  bodyLarge: { fontFamily: fontFamilies.body, fontSize: fontSize.lg, lineHeight: 28 },
-  bodySmall: { fontFamily: fontFamilies.body, fontSize: fontSize.sm, lineHeight: 20 },
-  caption: { fontFamily: fontFamilies.body, fontSize: fontSize.xs, lineHeight: 18 },
-  label: { fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, lineHeight: 20 },
-  metric: { fontFamily: fontFamilies.bodySemibold, fontSize: fontSize.base, lineHeight: 20 },
-  display: { fontFamily: fontFamilies.display, fontSize: fontSize.xxl, lineHeight: 32 },
+  body: { fontFamily: fontFamilies.body, fontSize: quietTypeRoles.body.size, lineHeight: quietTypeRoles.body.lineHeight },
+  bodyLarge: { fontFamily: fontFamilies.body, fontSize: quietTypeRoles.bodyLarge.size, lineHeight: quietTypeRoles.bodyLarge.lineHeight },
+  bodySmall: { fontFamily: fontFamilies.body, fontSize: quietTypeRoles.bodySmall.size, lineHeight: quietTypeRoles.bodySmall.lineHeight },
+  caption: { fontFamily: fontFamilies.bodyMedium, fontSize: quietTypeRoles.caption.size, lineHeight: quietTypeRoles.caption.lineHeight },
+  label: { fontFamily: fontFamilies.bodySemibold, fontSize: quietTypeRoles.label.size, lineHeight: quietTypeRoles.label.lineHeight },
+  eyebrow: {
+    fontFamily: fontFamilies.bodyBold,
+    fontSize: quietTypeRoles.eyebrow.size,
+    lineHeight: quietTypeRoles.eyebrow.lineHeight,
+    letterSpacing: quietTypeRoles.eyebrow.size * 0.08,
+    textTransform: "uppercase",
+  },
+  control: {
+    fontFamily: fontFamilies.bodySemibold,
+    fontSize: quietTypeRoles.control.size,
+    lineHeight: quietTypeRoles.control.lineHeight,
+  },
+  metric: {
+    fontFamily: fontFamilies.bodySemibold,
+    fontSize: quietTypeRoles.metric.minSize,
+    lineHeight: quietTypeRoles.metric.lineHeight,
+    fontVariant: ["tabular-nums"],
+  },
+  display: { fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.xxl, lineHeight: 32 },
 };
 
 function textColor(tone: TextTone, appearance: "light" | "dark"): string {
@@ -81,10 +112,16 @@ export function NativeText({
   tone?: TextTone;
   style?: StyleProp<TextStyle>;
 }) {
+  const { fontScale } = useWindowDimensions();
   return (
     <Text
       {...props}
-      style={[TEXT_STYLES[role], { color: textColor(tone, appearance) }, style]}
+      style={[
+        TEXT_STYLES[role],
+        { color: textColor(tone, appearance) },
+        style,
+        fontScale >= 2 ? { lineHeight: undefined } : null,
+      ]}
     >
       {children}
     </Text>
@@ -133,9 +170,9 @@ export function NativeEyebrow({
     <NativeText
       {...props}
       appearance={appearance}
-      role="label"
+      role="eyebrow"
       tone="muted"
-      style={[{ letterSpacing: 1.1, textTransform: "uppercase" }, style]}
+      style={style}
     >
       {children}
     </NativeText>
@@ -162,7 +199,7 @@ export function NativeSurface({
     : variant === "sunken"
       ? theme.surfaceSunken
       : variant === "raised"
-        ? ("surfaceRaised" in theme ? theme.surfaceRaised : theme.card)
+        ? theme.surfaceRaised
         : variant === "transparent"
           ? "transparent"
           : theme.card;
@@ -172,7 +209,7 @@ export function NativeSurface({
       style={[
         {
           backgroundColor,
-          borderRadius: radius.lg,
+          borderRadius: radius.card,
           borderWidth: variant === "transparent" ? 0 : 1,
           borderColor: appearance === "dark" ? darkColors.borderSubtle : colors.borderSubtle,
         },
@@ -184,7 +221,17 @@ export function NativeSurface({
   );
 }
 
-type ActionVariant = "primary" | "secondary" | "quiet" | "destructive";
+export type NativeActionVariant = "primary" | "secondary" | "quiet" | "destructive";
+export type NativeActionSize = "sm" | "md" | "lg";
+
+const NATIVE_ACTION_SIZE_STYLES: Record<
+  NativeActionSize,
+  { minHeight: number; paddingHorizontal: number; paddingVertical: number; textSize: number }
+> = {
+  sm: { minHeight: 44, paddingHorizontal: space.md, paddingVertical: space.sm, textSize: quietTypeRoles.control.minimumSize },
+  md: { minHeight: 48, paddingHorizontal: 20, paddingVertical: 12, textSize: quietTypeRoles.control.size },
+  lg: { minHeight: 52, paddingHorizontal: space.lg, paddingVertical: 14, textSize: quietTypeRoles.control.size },
+};
 
 export function NativeAction({
   accessibilityHint,
@@ -195,6 +242,7 @@ export function NativeAction({
   icon,
   label,
   onPress,
+  size = "md",
   style,
   variant = "primary",
 }: Omit<PressableProps, "children" | "style" | "onPress" | "disabled"> & {
@@ -206,19 +254,23 @@ export function NativeAction({
   icon?: ReactNode;
   label: string;
   onPress: () => void;
+  size?: NativeActionSize;
   style?: StyleProp<ViewStyle>;
-  variant?: ActionVariant;
+  variant?: NativeActionVariant;
 }) {
   const reducedMotion = useReducedMotion();
+  const { fontScale } = useWindowDimensions();
   const theme = appearance === "dark" ? darkColors : colors;
   const look = variant === "primary"
-    ? { backgroundColor: theme.action, borderColor: theme.action, text: theme.onBrand }
+    ? { backgroundColor: theme.action, borderColor: theme.action, text: theme.actionText }
     : variant === "destructive"
-      ? { backgroundColor: theme.danger, borderColor: theme.danger, text: theme.onBrand }
+      ? { backgroundColor: theme.danger, borderColor: theme.danger, text: theme.dangerText }
       : variant === "quiet"
-        ? { backgroundColor: "transparent", borderColor: "transparent", text: theme.brand }
+        ? { backgroundColor: "transparent", borderColor: "transparent", text: theme.brandText }
         : { backgroundColor: theme.card, borderColor: theme.border, text: theme.textStrong };
   const unavailable = disabled || busy;
+  const sizeStyle = NATIVE_ACTION_SIZE_STYLES[size];
+  const stacksIconAboveLabel = Boolean(icon) && fontScale >= 2;
   return (
     <Pressable
       accessibilityRole="button"
@@ -229,13 +281,13 @@ export function NativeAction({
       onPress={onPress}
       style={({ pressed }) => [
         {
-          minHeight: 44,
-          borderRadius: radius.md,
+          minHeight: sizeStyle.minHeight,
+          borderRadius: radius.control,
           borderWidth: 1,
           borderColor: look.borderColor,
           backgroundColor: look.backgroundColor,
-          paddingHorizontal: space.md,
-          paddingVertical: space.sm,
+          paddingHorizontal: sizeStyle.paddingHorizontal,
+          paddingVertical: sizeStyle.paddingVertical,
           alignItems: "center",
           justifyContent: "center",
           opacity: unavailable ? 0.55 : 1,
@@ -244,9 +296,29 @@ export function NativeAction({
         style,
       ]}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm, flexShrink: 1 }}>
+      <View
+        style={{
+          flexDirection: stacksIconAboveLabel ? "column" : "row",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 1,
+          maxWidth: "100%",
+          width: stacksIconAboveLabel ? "100%" : undefined,
+          gap: stacksIconAboveLabel ? space.xs : space.sm,
+        }}
+      >
         {icon}
-        <NativeText tone="inverse" style={{ color: look.text, textAlign: "center", flexShrink: 1, fontFamily: fontFamilies.bodySemibold }}>
+        <NativeText
+          role="control"
+          tone="inverse"
+          style={{
+            color: look.text,
+            textAlign: "center",
+            flexShrink: 1,
+            width: stacksIconAboveLabel ? "100%" : undefined,
+            fontSize: sizeStyle.textSize,
+          }}
+        >
           {label}
         </NativeText>
       </View>
@@ -282,7 +354,10 @@ export function NativeField({
       <TextInput
         {...props}
         accessibilityLabel={accessibilityLabel ?? label}
-        accessibilityState={{ disabled: props.editable === false }}
+        accessibilityState={{
+          ...props.accessibilityState,
+          disabled: props.accessibilityState?.disabled === true || props.editable === false,
+        }}
         onFocus={(event) => {
           setFocused(true);
           onFocus?.(event);
@@ -295,7 +370,7 @@ export function NativeField({
         style={[
           {
             minHeight: 48,
-            borderRadius: radius.md,
+            borderRadius: radius.control,
             borderWidth: focused ? 2 : 1,
             borderColor: focused ? theme.focusRing : theme.border,
             backgroundColor: theme.card,
@@ -347,7 +422,7 @@ export function NativeChoice({
           flexDirection: "row",
           alignItems: "center",
           gap: space.sm,
-          borderRadius: radius.md,
+          borderRadius: radius.control,
           paddingHorizontal: space.sm,
           opacity: disabled ? 0.55 : pressed ? 0.7 : 1,
         },
@@ -383,9 +458,9 @@ export function NativeStatus({
 }) {
   const theme = appearance === "dark" ? darkColors : colors;
   const paletteForTone = tone === "constructive"
-    ? { ink: theme.success, tint: theme.sageSoft }
+    ? { ink: theme.constructive, tint: theme.constructiveSoft }
     : tone === "attention"
-      ? { ink: theme.gold, tint: theme.goldSoft }
+      ? { ink: theme.highlight, tint: theme.highlightSoft }
       : tone === "error"
         ? { ink: theme.danger, tint: theme.dangerSoft }
         : tone === "offline"
@@ -393,7 +468,7 @@ export function NativeStatus({
           : { ink: theme.info, tint: appearance === "dark" ? darkColors.surfaceSunken : theme.surfaceSunken };
   useAccessibilityAnnouncement(announce ? label : null, occurrenceId);
   return (
-    <View accessible accessibilityRole="text" accessibilityLabel={label} style={[{ minHeight: 44, borderRadius: radius.md, borderWidth: 1, borderColor: paletteForTone.ink, backgroundColor: paletteForTone.tint, padding: space.sm, gap: 2 }, style]}>
+    <View accessible accessibilityRole="text" accessibilityLabel={label} style={[{ minHeight: 44, borderRadius: radius.control, borderWidth: 1, borderColor: paletteForTone.ink, backgroundColor: paletteForTone.tint, padding: space.sm, gap: 2 }, style]}>
       <NativeText role="label" tone="strong" appearance={appearance}>{label}</NativeText>
       {detail ? <NativeText role="bodySmall" tone="body" appearance={appearance}>{detail}</NativeText> : null}
     </View>
@@ -443,7 +518,7 @@ export function NativeNavigation({
       accessibilityState={{ selected }}
       onPress={onPress}
       style={({ pressed }) => [
-        { minHeight: 44, minWidth: 44, flexDirection: "row", alignItems: "center", gap: space.sm, borderRadius: radius.md, paddingHorizontal: space.sm, backgroundColor: selected ? theme.brandSoft : "transparent", opacity: pressed ? 0.7 : 1 },
+        { minHeight: 44, minWidth: 44, flexDirection: "row", alignItems: "center", gap: space.sm, borderRadius: radius.control, paddingHorizontal: space.sm, backgroundColor: selected ? theme.brandSoft : "transparent", opacity: pressed ? 0.7 : 1 },
         style,
       ]}
     >

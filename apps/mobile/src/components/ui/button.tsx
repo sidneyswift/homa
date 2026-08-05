@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
-import { Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import { useReducedMotion } from "react-native-reanimated";
+import type { StyleProp, ViewStyle } from "react-native";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, palette, pressScale, radius, space } from "../../theme/tokens";
+import {
+  NativeAction,
+  type NativeActionSize,
+  type NativeActionVariant,
+} from "./semantic";
 
 /**
  * The Homa button: functional controls use the contract's 12px control
@@ -14,43 +16,10 @@ import { colors, darkColors, fontSize, palette, pressScale, radius, space } from
 type ButtonVariant = "primary" | "secondary" | "ghost";
 type ButtonTone = "light" | "dark";
 
-const VARIANT_STYLES: Record<
-  ButtonVariant,
-  { backgroundColor: string; borderColor: string; textColor: string }
-> = {
-  primary: {
-    backgroundColor: colors.action,
-    borderColor: colors.action,
-    textColor: colors.onBrand,
-  },
-  secondary: {
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-    textColor: colors.textStrong,
-  },
-  ghost: {
-    backgroundColor: "transparent",
-    borderColor: "transparent",
-    textColor: palette.clay700,
-  },
-};
-
-const DARK_VARIANT_STYLES: typeof VARIANT_STYLES = {
-  primary: {
-    backgroundColor: darkColors.action,
-    borderColor: darkColors.action,
-    textColor: darkColors.onBrand,
-  },
-  secondary: {
-    backgroundColor: darkColors.surfaceRaised,
-    borderColor: darkColors.border,
-    textColor: darkColors.textStrong,
-  },
-  ghost: {
-    backgroundColor: "transparent",
-    borderColor: "transparent",
-    textColor: darkColors.brand,
-  },
+const BUTTON_VARIANT_TO_NATIVE_ACTION: Record<ButtonVariant, NativeActionVariant> = {
+  primary: "primary",
+  secondary: "secondary",
+  ghost: "quiet",
 };
 
 export function Button({
@@ -70,71 +39,25 @@ export function Button({
   accessibilityHint?: string;
   variant?: ButtonVariant;
   tone?: ButtonTone;
-  size?: "sm" | "md" | "lg";
+  size?: NativeActionSize;
   disabled?: boolean;
   busy?: boolean;
   /** Optional mark shown before the label, e.g. the Google glyph. */
   icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
-  const reducedMotion = useReducedMotion();
-  const look = tone === "dark"
-    ? DARK_VARIANT_STYLES[variant]
-    : VARIANT_STYLES[variant];
-  const vertical = size === "lg" ? 14 : size === "md" ? 12 : 8;
-  const horizontal = size === "lg" ? space.lg : size === "md" ? 20 : space.md;
-  const textSize = size === "sm" ? fontSize.sm : fontSize.base;
-  const minimumHeight = size === "lg" ? 52 : size === "md" ? 48 : 44;
-  const unavailable = disabled || busy;
-
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
+    <NativeAction
+      appearance={tone}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: unavailable, busy }}
+      busy={busy}
+      disabled={disabled}
+      icon={icon}
+      label={label}
       onPress={onPress}
-      disabled={unavailable}
-      style={({ pressed }) => [
-        {
-          backgroundColor: look.backgroundColor,
-          borderColor: look.borderColor,
-          borderWidth: 1,
-          borderRadius: radius.md,
-          minHeight: minimumHeight,
-          paddingVertical: vertical,
-          paddingHorizontal: horizontal,
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: unavailable ? 0.6 : 1,
-          transform: reducedMotion ? undefined : [{ scale: pressed ? pressScale : 1 }],
-        },
-        style,
-      ]}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 1,
-          maxWidth: "100%",
-          gap: icon ? space.sm : 0,
-        }}
-      >
-        {icon}
-        <Text
-          style={{
-            fontFamily: fontFamilies.bodySemibold,
-            fontSize: textSize,
-            color: look.textColor,
-            flexShrink: 1,
-            textAlign: "center",
-          }}
-        >
-          {label}
-        </Text>
-      </View>
-    </Pressable>
+      size={size}
+      style={style}
+      variant={BUTTON_VARIANT_TO_NATIVE_ACTION[variant]}
+    />
   );
 }

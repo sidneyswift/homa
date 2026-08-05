@@ -13,13 +13,25 @@ import { AccessibleModal } from "../../src/components/ui/accessible-modal";
 import { Button } from "../../src/components/ui/button";
 import { IconButton } from "../../src/components/ui/icon-button";
 import { LoadingStatus } from "../../src/components/ui/loading-status";
+import { NativeEyebrow, NativeHeading, NativeText } from "../../src/components/ui/semantic";
 import { TextField } from "../../src/components/ui/text-field";
 import {
   useAccessibilityAnnouncement,
   useAccessibilityFocusOnChange,
 } from "../../src/lib/accessibility";
+import { darkQuietColors, quietTypeRoles } from "../../src/theme/tokens";
+import { fontFamilies } from "../../src/theme/fonts";
 
 const mockedUseReducedMotion = jest.mocked(useReducedMotion);
+const mockWindowDimensions = jest.fn();
+
+jest.mock(
+  "react-native/Libraries/Utilities/useWindowDimensions",
+  () => ({
+    __esModule: true,
+    default: () => mockWindowDimensions(),
+  }),
+);
 
 function AnnouncementProbe({
   message,
@@ -57,6 +69,12 @@ function FocusProbe({ changeKey }: { changeKey: string }) {
 describe("Homa mobile accessibility primitives", () => {
   beforeEach(() => {
     mockedUseReducedMotion.mockReturnValue(false);
+    mockWindowDimensions.mockReturnValue({
+      fontScale: 1,
+      width: 390,
+      height: 844,
+      scale: 3,
+    });
     jest
       .spyOn(AccessibilityInfo, "isScreenReaderEnabled")
       .mockResolvedValue(true);
@@ -104,6 +122,152 @@ describe("Homa mobile accessibility primitives", () => {
 
     const action = view.getByRole("button", { name: "Open lesson" });
     expect(StyleSheet.flatten(action.props.style).transform).toBeUndefined();
+  });
+
+  it("preserves compact and large Button geometry through NativeAction", async () => {
+    const longLabel = "Prepare a different fractions review for tomorrow morning";
+    const view = await render(
+      <View>
+        <Button label="Keep this one" size="sm" onPress={jest.fn()} />
+        <Button label="Delete account" size="lg" variant="ghost" tone="dark" onPress={jest.fn()} />
+        <Button label={longLabel} icon={<View testID="button-icon" />} onPress={jest.fn()} />
+      </View>,
+    );
+
+    expect(view.getByRole("button", { name: "Keep this one" })).toHaveStyle({
+      minHeight: 44,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    });
+    expect(view.getByText("Keep this one")).toHaveStyle({
+      fontSize: quietTypeRoles.control.minimumSize,
+      lineHeight: quietTypeRoles.control.lineHeight,
+    });
+    expect(view.getByRole("button", { name: "Delete account" })).toHaveStyle({
+      minHeight: 52,
+      paddingHorizontal: 24,
+      paddingVertical: 14,
+    });
+    expect(view.getByText("Delete account")).toHaveStyle({ color: darkQuietColors.brandText });
+    expect(view.getByTestId("button-icon")).toBeTruthy();
+    expect(view.getByText(longLabel).parent).toHaveStyle({
+      justifyContent: "center",
+      maxWidth: "100%",
+    });
+    expect(view.getByText(longLabel)).toHaveStyle({
+      flexShrink: 1,
+      fontSize: quietTypeRoles.control.size,
+      lineHeight: quietTypeRoles.control.lineHeight,
+      textAlign: "center",
+    });
+  });
+
+  it("renders semantic text with the approved Quiet authority role metrics", async () => {
+    const view = await render(
+      <View>
+        <NativeHeading level={1}>Your week</NativeHeading>
+        <NativeHeading level={2}>This week</NativeHeading>
+        <NativeHeading level={3}>Daily plan</NativeHeading>
+        <NativeEyebrow>Today</NativeEyebrow>
+        <NativeText role="body">Body copy</NativeText>
+        <NativeText role="bodyLarge">Large body copy</NativeText>
+        <NativeText role="bodySmall">Small body copy</NativeText>
+        <NativeText role="caption">Updated at 8:42 AM</NativeText>
+        <NativeText role="label">Ready to print</NativeText>
+        <NativeText role="metric">12.5 hours</NativeText>
+      </View>,
+    );
+
+    expect(view.getByText("Your week")).toHaveStyle({
+      fontFamily: fontFamilies.displaySemibold,
+      fontSize: 36,
+      lineHeight: 40,
+    });
+    expect(view.getByText("This week")).toHaveStyle({
+      fontFamily: fontFamilies.displaySemibold,
+      fontSize: 28,
+      lineHeight: 32,
+    });
+    expect(view.getByText("Daily plan")).toHaveStyle({
+      fontFamily: fontFamilies.displaySemibold,
+      fontSize: 22,
+      lineHeight: 28,
+    });
+    expect(view.getByText("Today")).toHaveStyle({
+      fontFamily: fontFamilies.bodyBold,
+      fontSize: quietTypeRoles.eyebrow.size,
+      lineHeight: quietTypeRoles.eyebrow.lineHeight,
+      letterSpacing: quietTypeRoles.eyebrow.size * 0.08,
+      textTransform: "uppercase",
+    });
+    expect(view.getByText("Body copy")).toHaveStyle({
+      fontFamily: fontFamilies.body,
+      fontSize: quietTypeRoles.body.size,
+      lineHeight: quietTypeRoles.body.lineHeight,
+    });
+    expect(view.getByText("Large body copy")).toHaveStyle({
+      fontFamily: fontFamilies.body,
+      fontSize: quietTypeRoles.bodyLarge.size,
+      lineHeight: quietTypeRoles.bodyLarge.lineHeight,
+    });
+    expect(view.getByText("Small body copy")).toHaveStyle({
+      fontFamily: fontFamilies.body,
+      fontSize: quietTypeRoles.bodySmall.size,
+      lineHeight: quietTypeRoles.bodySmall.lineHeight,
+    });
+    expect(view.getByText("Updated at 8:42 AM")).toHaveStyle({
+      fontFamily: fontFamilies.bodyMedium,
+      fontSize: quietTypeRoles.caption.size,
+      lineHeight: quietTypeRoles.caption.lineHeight,
+    });
+    expect(view.getByText("Ready to print")).toHaveStyle({
+      fontFamily: fontFamilies.bodySemibold,
+      fontSize: quietTypeRoles.label.size,
+      lineHeight: quietTypeRoles.label.lineHeight,
+    });
+    expect(view.getByText("12.5 hours")).toHaveStyle({
+      fontFamily: fontFamilies.bodySemibold,
+      fontSize: quietTypeRoles.metric.minSize,
+      lineHeight: quietTypeRoles.metric.lineHeight,
+      fontVariant: ["tabular-nums"],
+    });
+  });
+
+  it("uses natural custom-font line metrics at accessibility text sizes", async () => {
+    mockWindowDimensions.mockReturnValue({
+      fontScale: 2,
+      width: 390,
+      height: 844,
+      scale: 3,
+    });
+    const view = await render(
+      <View>
+        <NativeHeading level={1}>Readable heading</NativeHeading>
+        <NativeText role="body">Readable body</NativeText>
+        <NativeText role="label">Readable label</NativeText>
+      </View>,
+    );
+
+    expect(view.getByText("Readable heading")).toHaveStyle({ lineHeight: undefined });
+    expect(view.getByText("Readable body")).toHaveStyle({ lineHeight: undefined });
+    expect(view.getByText("Readable label")).toHaveStyle({ lineHeight: undefined });
+    expect(view.getByText("Readable body")).not.toHaveProp("maxFontSizeMultiplier");
+  });
+
+  it("preserves caller TextInput accessibility state through the field adapter", async () => {
+    const view = await render(
+      <TextField
+        label="Family email"
+        value="parent@example.com"
+        accessibilityState={{ busy: true, disabled: true, expanded: true }}
+      />,
+    );
+
+    expect(view.getByLabelText("Family email")).toHaveProp("accessibilityState", {
+      busy: true,
+      disabled: true,
+      expanded: true,
+    });
   });
 
   it("keeps an icon action named while hiding decorative descendants", async () => {

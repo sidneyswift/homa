@@ -16,6 +16,7 @@ import {
   nativePlatformContract,
   nativePrimitiveRequirements,
   nativePrimitiveRoles,
+  nativeThemeColors,
 } from "./native.ts";
 import {
   FONT_SYSTEM_CONTRACT,
@@ -50,6 +51,28 @@ test("every approved semantic pair meets its stated contrast floor", () => {
   for (const pair of approvedColorPairs) {
     const ratio = contrast(colorTokens[pair.foreground], colorTokens[pair.background]);
     assert.ok(ratio >= pair.minimumRatio, `${pair.foreground} on ${pair.background}: ${ratio.toFixed(2)}`);
+  }
+});
+
+test("native action pairs remain legible and visibly bounded in both appearances", () => {
+  for (const [appearance, theme] of Object.entries(nativeThemeColors)) {
+    const textPairs = [
+      ["primary", theme.actionText, theme.action],
+      ["destructive", theme.dangerText, theme.danger],
+    ] as const;
+    for (const [role, foreground, background] of textPairs) {
+      const ratio = contrast(foreground, background);
+      assert.ok(ratio >= 4.5, `${appearance} ${role} text: ${ratio.toFixed(2)}`);
+    }
+
+    for (const background of [theme.card, theme.surfaceRaised]) {
+      const ratio = contrast(theme.border, background);
+      assert.ok(ratio >= 3, `${appearance} control border: ${ratio.toFixed(2)}`);
+    }
+    assert.ok(
+      contrast(theme.action, theme.card) >= 3,
+      `${appearance} primary action boundary must remain visible on a card`,
+    );
   }
 });
 

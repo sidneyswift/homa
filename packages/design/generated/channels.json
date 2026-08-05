@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
+  "sourceChecksum": "a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4",
   "channels": {
     "version": "quiet-authority-v1",
     "brandChannels": [
@@ -887,8 +887,7 @@
         "adapter": "@expo-google-fonts",
         "packages": {
           "display": "@expo-google-fonts/eb-garamond",
-          "interface": "@expo-google-fonts/dm-sans",
-          "wordmark": "@expo-google-fonts/fredoka"
+          "interface": "@expo-google-fonts/dm-sans"
         },
         "source": "Google Fonts",
         "roles": {
@@ -911,15 +910,6 @@
               500,
               600,
               700
-            ],
-            "styles": [
-              "normal"
-            ]
-          },
-          "wordmark": {
-            "family": "Fredoka",
-            "weights": [
-              600
             ],
             "styles": [
               "normal"
@@ -977,12 +967,12 @@
           "delivery": "runtime"
         },
         "wordmark": {
-          "preferred": "Fredoka_600SemiBold",
+          "preferred": "image-lockup",
           "fallback": [
             "Arial Rounded MT Bold",
             "System"
           ],
-          "delivery": "runtime"
+          "delivery": "rasterized"
         }
       },
       "marketingRich": {

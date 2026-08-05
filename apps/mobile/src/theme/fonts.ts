@@ -1,8 +1,4 @@
 import {
-  Fredoka_600SemiBold,
-  useFonts as useFredoka,
-} from "@expo-google-fonts/fredoka";
-import {
   DMSans_400Regular,
   DMSans_500Medium,
   DMSans_600SemiBold,
@@ -19,9 +15,9 @@ import {
 
 /**
  * Quiet authority typography: EB Garamond carries human display moments,
- * DM Sans carries interface and body copy, and Fredoka is reserved for the
- * real Homa logo. Every surface shares these roles rather than introducing
- * local families.
+ * DM Sans carries interface and body copy. The Homa wordmark is projected
+ * from the shared generated image lockup, so native startup only loads fonts
+ * that render readable interface text.
  */
 export const fontFamilies = {
   display: "EBGaramond_700Bold",
@@ -30,7 +26,6 @@ export const fontFamilies = {
   bodyMedium: "DMSans_500Medium",
   bodySemibold: "DMSans_600SemiBold",
   bodyBold: "DMSans_700Bold",
-  wordmark: "Fredoka_600SemiBold",
 } as const;
 
 export interface HomaFontState {
@@ -52,9 +47,8 @@ export function useHomaFonts(): HomaFontState {
     EBGaramond_600SemiBold,
     EBGaramond_700Bold,
   });
-  const [fredokaLoaded, fredokaError] = useFredoka({ Fredoka_600SemiBold });
   return {
-    loaded: dmSansLoaded && ebGaramondLoaded && fredokaLoaded,
-    error: dmSansError ?? ebGaramondError ?? fredokaError ?? null,
+    loaded: dmSansLoaded && ebGaramondLoaded,
+    error: dmSansError ?? ebGaramondError ?? null,
   };
 }
