@@ -366,9 +366,21 @@ interface WorkflowStepSnapshot {
 
 const ANDROID_JS_STEP_NAME = "Android JavaScript bundle export";
 const ANDROID_NATIVE_STEP_NAME = "Android native compile-only assembly";
+const ANDROID_CAPACITY_STEP_NAME = "Reclaim runner disk for Android compilation";
 const ANDROID_JS_COMMAND = "pnpm --filter mobile exec expo export --platform android --output-dir ${{ runner.temp }}/homa-android-compile";
 const ANDROID_PREBUILD_COMMAND = "pnpm --filter mobile exec expo prebuild --platform android --no-install --clean";
 const ANDROID_GRADLE_COMMAND = "bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon";
+const ANDROID_CAPACITY_COMMANDS = [
+  "sudo rm -rf /opt/hostedtoolcache/CodeQL",
+  "sudo rm -rf /usr/share/dotnet",
+  "sudo rm -rf /opt/ghc",
+  "sudo rm -rf /usr/local/share/boost",
+  "sudo rm -rf /usr/share/swift",
+  "sudo rm -rf /usr/local/lib/android/sdk/system-images",
+  "sudo rm -rf /usr/local/lib/android/sdk/emulator",
+  "sudo apt-get clean",
+  "df -h /",
+] as const;
 
 function workflowJobBlock(workflow: string, jobId: string): string | null {
   const lines = workflow.split(/\r?\n/u);
@@ -524,6 +536,11 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
         "fail",
         "Android CI proof cannot be parsed safely when a double-quoted mapping key contains an escape.",
       ),
+      check(
+        "android-runner-capacity-guard",
+        "fail",
+        "Android CI proof cannot be parsed safely when a double-quoted mapping key contains an escape.",
+      ),
     ];
   }
   const rootHeader = workflowHeader(ciWorkflow);
@@ -531,6 +548,7 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
   const steps = mobileJob ? workflowSteps(mobileJob) : [];
   const jsSteps = steps.filter((step) => step.name === ANDROID_JS_STEP_NAME);
   const nativeSteps = steps.filter((step) => step.name === ANDROID_NATIVE_STEP_NAME);
+  const capacitySteps = steps.filter((step) => step.name === ANDROID_CAPACITY_STEP_NAME);
   const executionOverridesAreAbsent = rootHeader !== null
     && mobileJob !== null
     && executionScopeHasNoDefaultsOrMerge(ciWorkflow, 0)
@@ -556,6 +574,15 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
     && nativeSteps[0]!.runLines[0] === ANDROID_PREBUILD_COMMAND
     && nativeSteps[0]!.runLines[1] === ANDROID_GRADLE_COMMAND
     && workflowStepEnabledAndBlocking(nativeSteps[0]!);
+  const hasRunnerCapacity = enabledJob
+    && ordered
+    && capacitySteps.length === 1
+    && jsSteps.length === 1
+    && capacitySteps[0]!.order < jsSteps[0]!.order
+    && capacitySteps[0]!.runForm === "|"
+    && capacitySteps[0]!.runLines.length === ANDROID_CAPACITY_COMMANDS.length
+    && capacitySteps[0]!.runLines.every((line, index) => line === ANDROID_CAPACITY_COMMANDS[index])
+    && workflowStepEnabledAndBlocking(capacitySteps[0]!);
   return [
     check(
       "android-js-bundle-export-guard",
@@ -566,6 +593,11 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
       "android-native-gradle-compile-guard",
       hasNativeAssembly ? "pass" : "fail",
       "Android native code must be prebuilt and assembled through :app:assembleDebug in CI.",
+    ),
+    check(
+      "android-runner-capacity-guard",
+      hasRunnerCapacity ? "pass" : "fail",
+      "Android CI must reclaim only unused hosted toolchains and emulator assets before the blocking export and native compilation proofs.",
     ),
   ];
 }

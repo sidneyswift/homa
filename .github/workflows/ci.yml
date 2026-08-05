@@ -207,6 +207,21 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # GitHub's Ubuntu image carries several large toolchains this job never
+      # invokes. The first blocking Gradle proof exhausted the runner disk
+      # before completion, so reclaim only unrelated SDKs and emulator assets.
+      - name: Reclaim runner disk for Android compilation
+        run: |
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/lib/android/sdk/system-images
+          sudo rm -rf /usr/local/lib/android/sdk/emulator
+          sudo apt-get clean
+          df -h /
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

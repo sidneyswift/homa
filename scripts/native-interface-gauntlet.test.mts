@@ -61,6 +61,9 @@ function emptyAssertions(): Record<NativeInstalledEvidenceAssertionId, string | 
 }
 
 function androidWorkflow(options: {
+  capacityAfterJs?: boolean;
+  capacityCommands?: string[];
+  capacityStepExtra?: string;
   jobIf?: string;
   jsStepExtra?: string;
   jsCommand?: string;
@@ -76,6 +79,23 @@ function androidWorkflow(options: {
     "pnpm --filter mobile exec expo prebuild --platform android --no-install --clean",
     "bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon",
   ];
+  const capacityCommands = options.capacityCommands ?? [
+    "sudo rm -rf /opt/hostedtoolcache/CodeQL",
+    "sudo rm -rf /usr/share/dotnet",
+    "sudo rm -rf /opt/ghc",
+    "sudo rm -rf /usr/local/share/boost",
+    "sudo rm -rf /usr/share/swift",
+    "sudo rm -rf /usr/local/lib/android/sdk/system-images",
+    "sudo rm -rf /usr/local/lib/android/sdk/emulator",
+    "sudo apt-get clean",
+    "df -h /",
+  ];
+  const capacityStep = [
+    "      - name: Reclaim runner disk for Android compilation",
+    ...(options.capacityStepExtra ? [`        ${options.capacityStepExtra}`] : []),
+    "        run: |",
+    ...capacityCommands.map((command) => `          ${command}`),
+  ];
   const jsStep = [
     "      - name: Android JavaScript bundle export",
     ...(options.jsStepExtra ? [`        ${options.jsStepExtra}`] : []),
@@ -87,7 +107,11 @@ function androidWorkflow(options: {
     "        run: |",
     ...nativeCommands.map((command) => `          ${command}`),
   ];
-  const proofSteps = options.nativeFirst ? [...nativeStep, ...jsStep] : [...jsStep, ...nativeStep];
+  const proofSteps = options.nativeFirst
+    ? [...capacityStep, ...nativeStep, ...jsStep]
+    : options.capacityAfterJs
+      ? [...jsStep, ...capacityStep, ...nativeStep]
+      : [...capacityStep, ...jsStep, ...nativeStep];
   return [
     "name: CI",
     "jobs:",
@@ -119,6 +143,7 @@ test("native interface gauntlet static contract is healthy", () => {
   assert.equal("status" in report, false, "a static report must not expose an ambiguous pass status");
   assert.equal(report.checks.find((item) => item.id === "android-js-bundle-export-guard")?.status, "pass");
   assert.equal(report.checks.find((item) => item.id === "android-native-gradle-compile-guard")?.status, "pass");
+  assert.equal(report.checks.find((item) => item.id === "android-runner-capacity-guard")?.status, "pass");
   assert.equal(report.checks.find((item) => item.id === "android-distribution-guard")?.status, "pass");
 });
 
@@ -264,6 +289,22 @@ test("Android native Gradle compilation and JavaScript export are exact blocking
       "bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon || true",
     ],
   })).some((item) => item.id === "android-native-gradle-compile-guard" && item.status === "fail"));
+});
+
+test("Android runner capacity is exact, blocking, and ordered before proof", () => {
+  const status = (workflow: string) => checkAndroidCiCommands(workflow)
+    .find((item) => item.id === "android-runner-capacity-guard")?.status;
+  assert.equal(status(androidWorkflow()), "pass");
+  assert.equal(status(androidWorkflow({ capacityCommands: [] })), "fail");
+  assert.equal(status(androidWorkflow({ capacityAfterJs: true })), "fail");
+  assert.equal(status(androidWorkflow({ capacityStepExtra: "continue-on-error: true" })), "fail");
+  assert.equal(status(androidWorkflow({
+    capacityCommands: [
+      "sudo rm -rf /opt/hostedtoolcache",
+      "sudo apt-get clean",
+      "df -h /",
+    ],
+  })), "fail");
 });
 
 test("Android CI proof cannot move outside mobile-checks or become skippable", () => {
