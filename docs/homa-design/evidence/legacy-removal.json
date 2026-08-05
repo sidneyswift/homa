@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "782c35083704b71b77d90fc9b9dcc4cc70df6f68a76f7419328afc693a811e5f",
+  "ownedInputFingerprint": "4ba8d904750fb7c4fbfa3bdbe3b1db1817ede2aad7c2992478a8a049c455067e",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2945,7 +2945,7 @@
     {
       "surfaceId": "surface:1ab791143807ed20",
       "path": "apps/web/app/blog/[slug]/page.tsx",
-      "sourceHash": "eabee6e2af13949e422da6ccad21db4ef4caf952fd2a2b68958e2af73439d904",
+      "sourceHash": "71099faa4a286d302a19e2e55d4522e5681586e791db11af573e0d2c4df99d6d",
       "legacySignatures": [
         "legacy-rounded-pill"
       ],
@@ -2998,7 +2998,7 @@
     {
       "surfaceId": "surface:5933906594e57863",
       "path": "apps/web/app/blog/page.tsx",
-      "sourceHash": "56c0fdfc15bfd939843ce412755f3ae6d297ee0b5a8c92547519584f4edd30d1",
+      "sourceHash": "494a9fa16ee40e79cdeec99fabef2a55b8beec210989f5368be98a54619d9acc",
       "legacySignatures": [
         "legacy-rounded-pill"
       ],
@@ -4373,7 +4373,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4386,7 +4386,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4429,7 +4429,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4442,7 +4442,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4483,7 +4483,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4495,7 +4495,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4540,7 +4540,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4554,7 +4554,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4595,7 +4595,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4607,7 +4607,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4652,7 +4652,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4666,7 +4666,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4709,7 +4709,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4722,7 +4722,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4765,7 +4765,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4778,7 +4778,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4823,7 +4823,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4837,7 +4837,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4883,7 +4883,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4898,7 +4898,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4941,7 +4941,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -4954,7 +4954,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -4997,7 +4997,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5010,7 +5010,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -5053,7 +5053,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5066,7 +5066,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -5109,7 +5109,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5122,7 +5122,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -5163,7 +5163,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5175,7 +5175,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -5216,7 +5216,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5228,7 +5228,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -5273,7 +5273,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5287,7 +5287,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -5332,7 +5332,7 @@
       ],
       "ownerIssue": "gh#683",
       "disposition": "replace-active",
-      "reachability": "authenticated",
+      "reachability": "public",
       "criticality": "supporting",
       "deliveryState": "controlled-current",
       "preservedBinding": {
@@ -5346,7 +5346,7 @@
         ],
         "ownerIssue": "gh#683",
         "disposition": "replace-active",
-        "reachability": "authenticated",
+        "reachability": "public",
         "criticality": "supporting",
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
@@ -10630,6 +10630,62 @@
       }
     },
     {
+      "surfaceId": "surface:21af51d1e76586f8",
+      "path": "docs/homa-planning/plans/2026-08-04-seo-ocean-merge-readiness.html",
+      "sourceHash": "38e7ad1f98ba2a096ac87c200aea051ab3a3291cc4c0ceec5eb95e1c25381a65",
+      "legacySignatures": [
+        "legacy-shadow-radius-namespace",
+        "legacy-token-namespace"
+      ],
+      "detectedSourceHash": "38e7ad1f98ba2a096ac87c200aea051ab3a3291cc4c0ceec5eb95e1c25381a65",
+      "detectedLegacySignatures": [
+        "legacy-shadow-radius-namespace",
+        "legacy-token-namespace"
+      ],
+      "ownerIssue": "gh#729",
+      "disposition": "replace-active",
+      "reachability": "authenticated",
+      "criticality": "utility",
+      "deliveryState": "controlled-current",
+      "preservedBinding": {
+        "surfaceId": "surface:21af51d1e76586f8",
+        "path": "docs/homa-planning/plans/2026-08-04-seo-ocean-merge-readiness.html",
+        "detectedSourceHash": "38e7ad1f98ba2a096ac87c200aea051ab3a3291cc4c0ceec5eb95e1c25381a65",
+        "detectedLegacySignatures": [
+          "legacy-shadow-radius-namespace",
+          "legacy-token-namespace"
+        ],
+        "ownerIssue": "gh#729",
+        "disposition": "replace-active",
+        "reachability": "authenticated",
+        "criticality": "utility",
+        "deliveryState": "controlled-current",
+        "rollbackBoundary": "web-deployment"
+      },
+      "sourceState": "present-signaled",
+      "status": "open",
+      "evidence": {
+        "replacement": null,
+        "deletion": null,
+        "immutableResidual": null,
+        "productionReadback": null,
+        "cacheReadback": null,
+        "installedClientReadback": null,
+        "historicalDeliveryReadback": null,
+        "privateProvenanceReadback": null,
+        "observedAt": null
+      },
+      "rollback": {
+        "boundary": "web-deployment",
+        "rehearsalEvidence": null
+      },
+      "deletionCommit": null,
+      "stopGeneration": {
+        "observedAt": null,
+        "evidencePath": null
+      }
+    },
+    {
       "surfaceId": "surface:ab25b6dfaaabe6b5",
       "path": "docs/homa-planning/plans/celebration-v1/2-guards-and-truth.md",
       "sourceHash": "821f40ac2d047a2d59b1db167d09688049ebb615000e6c5b2c115e8b345209de",
@@ -11452,7 +11508,7 @@
     {
       "surfaceId": "surface:8873d2d4adf93a1b",
       "path": "scripts/font-system-check.mts",
-      "sourceHash": "8aff4b2cc8ac5cdf30a4b15e7f01b7007e65a8330e62e01335c41c2a36fc9150",
+      "sourceHash": "82ae5252e339afb9aee4c9887cdd77a1bf7d6ba53b218f624f399857f06cd1b9",
       "legacySignatures": [],
       "detectedSourceHash": "8aff4b2cc8ac5cdf30a4b15e7f01b7007e65a8330e62e01335c41c2a36fc9150",
       "detectedLegacySignatures": [
@@ -11507,7 +11563,7 @@
     {
       "surfaceId": "surface:ac203b8ba273f994",
       "path": "scripts/font-system-check.test.mts",
-      "sourceHash": "8875c4030174b7529ca85fdbfb60eff1ceb6a76593f116958dcf9cca5ee3a834",
+      "sourceHash": "87035321a30305f396e56525d8ceae31d3a67d50a3db438ff1be268aa527072a",
       "legacySignatures": [],
       "detectedSourceHash": "8875c4030174b7529ca85fdbfb60eff1ceb6a76593f116958dcf9cca5ee3a834",
       "detectedLegacySignatures": [
