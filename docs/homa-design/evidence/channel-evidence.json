@@ -372,7 +372,7 @@
         "selector": "distribution-asset",
         "surfaceCount": 50,
         "surfaceIdsFingerprint": "f8a125204aad0c7cabbce5793fe4aefbb218fd572bc78f80b16c77fa2ef0f9db",
-        "scopedInputFingerprint": "1fe9e87790f4fe55b4ed8b5b4cb524027e4f248d434299be7ffd4b65400ac518"
+        "scopedInputFingerprint": "1ab149f936437ab219cd6380820f2e5d8fae2469f3a8bfdfd1173100c85e5328"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/distribution-asset.json",
       "fixtureChecksum": "1b7669dcaca9728eca86d8c7be1e1f68a599f7cabb813286611a981e9cdccf18",
@@ -451,5 +451,5 @@
       "status": "pending"
     }
   ],
-  "manifestSchemaVersion": 2
+  "manifestSchemaVersion": 3
 }

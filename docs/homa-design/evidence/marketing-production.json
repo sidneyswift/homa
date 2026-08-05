@@ -3,9 +3,9 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "surfaceManifestFingerprint": "4e3aa2c59f5e62dd40381d3d6a960b5c2ffd7237ff51975e28b8e032717e002c",
-  "authoringManifestFingerprint": "4e3aa2c59f5e62dd40381d3d6a960b5c2ffd7237ff51975e28b8e032717e002c",
-  "ownedInputFingerprint": "a94e760f04abbe5b344d351e39ff669e29047f9f9773d4bb9f9afd7f34473897",
+  "surfaceManifestFingerprint": "d4e2859ec43803af575c4ff3a2d6df6f8d39c24040a534561c1f021c34e5a6ef",
+  "authoringManifestFingerprint": "d4e2859ec43803af575c4ff3a2d6df6f8d39c24040a534561c1f021c34e5a6ef",
+  "ownedInputFingerprint": "0525c6ea940dfe6c754f4e8be72e9f3d9de304c4d27cffd8ff68af35ecdae44e",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -599,443 +599,234 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:83bfa543606445e1",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/article.mdx",
+      "id": "marketing:f8db19a6ea617f32",
+      "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/article.mdx",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "b664b297aa17b6a0d3cebdb02ea5628ae4ecf013d3af121dce87868ac61c373f",
+      "sourceHash": "fb6743508271fe93bafef6c8e4715ed424555796b91de9dd3bff6578d2350290",
       "bytes": 6450,
       "legacySignatures": []
     },
     {
-      "id": "marketing:df55100b50f6760e",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/meta.yml",
+      "id": "marketing:7e14850549e995cf",
+      "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/distribution.md",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
-      "state": "historical-quarantined",
-      "sourceHash": "7a359a774bc1b8e53eb300450d8c863a29d9cf87e954f1a5ba738ec5b329fe31",
-      "bytes": 616,
+      "state": "active",
+      "sourceHash": "e388dbf4873c5f342b66285ff705ab8a7dea18b9ccb68398a902aedf6fc3fbfc",
+      "bytes": 140,
       "legacySignatures": []
     },
     {
-      "id": "marketing:bdd08b6bb889f7be",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist/article.mdx",
+      "id": "marketing:32cfe34dc3e96b21",
+      "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/meta.yml",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "966821c00b7ca5124b1c13bcbe5941232dde22830183478b4c038c719e48ee27",
+      "sourceHash": "73acd0af9f4b8d86492471989bd4e62dfa065ebf9c9276081fde8745582e2655",
+      "bytes": 691,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b2170d7ef438f91d",
+      "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "c97fc1fbe49605e88b2b9ec7635d3cca2f6b2699102034f5d7107b45cf5ae6a5",
       "bytes": 7093,
       "legacySignatures": []
     },
     {
-      "id": "marketing:95864172ff0b5a46",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist/meta.yml",
+      "id": "marketing:6d5fb9e813229b98",
+      "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/distribution.md",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
-      "state": "historical-quarantined",
-      "sourceHash": "d401d70ae3a548c7f7cd88860e12b03c88cfdf3e8ad27c810257605bb5304d59",
-      "bytes": 586,
+      "state": "active",
+      "sourceHash": "0e7c0723dae46fd382d2773be2e18c8da797712659c3b1802cd69f9e9f59c0c8",
+      "bytes": 127,
       "legacySignatures": []
     },
     {
-      "id": "marketing:e259d575ff8fcf8c",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples/article.mdx",
+      "id": "marketing:54c19358e9888567",
+      "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/meta.yml",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d5448939a3fb1cd0566fdde1989a01192f19cd589a4ad85639cc2fae7ae2b832",
+      "sourceHash": "0c746b07dc31147568c3e4876403c58bb469cafbd35e382e5be5bf216dde583e",
+      "bytes": 661,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:aeb558879ce0c3fb",
+      "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "5cfe37b6ef7c8b768325434f5f4cbfb464bc03f689ac1e4dc218c97423fe1c8f",
       "bytes": 6300,
       "legacySignatures": []
     },
     {
-      "id": "marketing:058e52538d58c65a",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples/meta.yml",
+      "id": "marketing:22ebf706420cef75",
+      "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples/distribution.md",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
-      "state": "historical-quarantined",
-      "sourceHash": "e11de7f2da4679b794a2b0184c67e25572be1df1921b055eb14b04f7feae8c67",
-      "bytes": 592,
+      "state": "active",
+      "sourceHash": "eb2e7134a8daa886d0e90b7a9d05c08f05a10f5b95ae8abb9b7a6ad7b32438ae",
+      "bytes": 132,
       "legacySignatures": []
     },
     {
-      "id": "marketing:65e93c98f5bfbc17",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children/article.mdx",
+      "id": "marketing:ce1dc05fd5959105",
+      "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples/meta.yml",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "4d10b3a5344324cebbc915a24c287fc35624208792dfd0d3be21f48ee425d680",
+      "sourceHash": "a4fb4594768c461d61a86ceb8808978524ba3ef7ce5fc859c51ef73d4466dd97",
+      "bytes": 667,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e3e8b01cdca5da2a",
+      "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "e4648d5076460fb48559a67e13badfef86f8503fd21d5f67c6144b9384af7033",
       "bytes": 6507,
       "legacySignatures": []
     },
     {
-      "id": "marketing:29a8fc43bb8d18c9",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children/meta.yml",
+      "id": "marketing:74265229fc5dbf65",
+      "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/distribution.md",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "d9be2009c4cd491d2ce1031a52355eeb27eb5e39da42aa69bcff77b1fd2dad0d",
-      "bytes": 603,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:1ebf75f17e0e4a4f",
-      "path": "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "3ffb6d566d24c44af211bd0982175171323cb11386e72403bdb6baf440685ed3",
-      "bytes": 5793,
+      "sourceHash": "a4e5500cc0f478d2ce677e00abaff1b089e1564df05e15a1cf47ddd362f47833",
+      "bytes": 138,
       "legacySignatures": []
     },
     {
-      "id": "marketing:7d7ed1b9c556e8cb",
-      "path": "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working/meta.yml",
+      "id": "marketing:f2b31ce50bf89758",
+      "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/meta.yml",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "60d10f0d5d56bd441a277fb5a4331230c30c5119e193fe2858d4b54009424cee",
-      "bytes": 601,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:d4b440c2e48c3dad",
-      "path": "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "05c4557ae04f9dcb6e87a9c58a3ccfd97acdf9649aea956ebf18665b8b78c008",
-      "bytes": 6539,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:12d6041cf3a7c1f1",
-      "path": "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "3433d4484178dd4dafca11bcd1e505043279f07cdd062f0e3c76e80cb8d4ab34",
-      "bytes": 595,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:e1e7ca4ed69015ab",
-      "path": "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records/article.mdx",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "f2a2bb27fc38308f149eebe2e6b52e9a1b9f539d62b0b3193b7757072e9bf183",
-      "bytes": 5985,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:6b7d7f60167d7338",
-      "path": "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "f961178f903fd26f1f540006203426acda54f9e6d6d0f8a4593141de84addd37",
-      "bytes": 589,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:5dc8837389c04588",
-      "path": "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template/article.mdx",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "681650d781f250b2b0c549f608527cf89b23a3b13fccaa4b85409ff3dba0dff4",
-      "bytes": 6194,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:4885dcd790e654de",
-      "path": "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "429dc77d7b50a47f9a7679e1b1cf896be1e79319d23b309b4553d2a67ca16b70",
-      "bytes": 584,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:33b74677704cc1c1",
-      "path": "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful/article.mdx",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d",
-      "bytes": 7068,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:c59694b09eef205e",
-      "path": "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "38441460739cc766a08b34b78735a575a5da707922c55a33d3d31c2ceb3a4b60",
+      "sourceHash": "7a1845353fe9971b66b0e833d73331ee173dde34a0d209ee5a974edf6809d844",
       "bytes": 678,
       "legacySignatures": []
     },
     {
-      "id": "marketing:9175f3c055d26443",
-      "path": "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have/article.mdx",
+      "id": "marketing:61a4a10a100784ce",
+      "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/article.mdx",
       "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251",
-      "bytes": 6983,
+      "sourceHash": "0c4305eb95a782dbb45e1341e0f9a5e0781abc89f351b665ec69d2614d348fdd",
+      "bytes": 5793,
       "legacySignatures": []
     },
     {
-      "id": "marketing:31ec1ac8e7033da0",
-      "path": "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have/meta.yml",
+      "id": "marketing:c1ed025714cf9904",
+      "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/distribution.md",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "4b38ff484ba7dfe7320f298948678aae8d1d907a377f9bfcc095727c35678e6c",
-      "bytes": 692,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:b084414ce53ad876",
-      "path": "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203",
-      "bytes": 7640,
+      "sourceHash": "05583de9935977245119849acf58f6d974dce8ed2701fa27e869cf9fe0dee2af",
+      "bytes": 136,
       "legacySignatures": []
     },
     {
-      "id": "marketing:66b51a475d017acc",
-      "path": "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/meta.yml",
+      "id": "marketing:47cd97653747fc53",
+      "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/meta.yml",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "60ea60a889d18bd1e0d06092df67bc3ea147689330580e0a89976c5bad0d295e",
-      "bytes": 711,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:6bd4a5d916e4d539",
-      "path": "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f",
-      "bytes": 7017,
+      "sourceHash": "cbb4b5ac263838431bbedecd4256288ec7153cd01e6d829e055acac8941ca26d",
+      "bytes": 676,
       "legacySignatures": []
     },
     {
-      "id": "marketing:5f0fd263286df438",
-      "path": "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing/meta.yml",
+      "id": "marketing:f6ada650df24122b",
+      "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/article.mdx",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "8e0d75f6f1c68d31228e31bd2eca4d349dfa9c9ac72cd114a3225f6c3a82e35f",
-      "bytes": 712,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:3cb97b4ae65351a4",
-      "path": "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6",
-      "bytes": 7006,
+      "sourceHash": "0a200b56c2108b89ec8a3d2e6b52b416a7102fbc9eb59c9f2590c1ef59b34536",
+      "bytes": 6539,
       "legacySignatures": []
     },
     {
-      "id": "marketing:7494dfe127ee867d",
-      "path": "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples/meta.yml",
+      "id": "marketing:c72c28cc56d449bd",
+      "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/distribution.md",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "7097660d3fd41b1104e3dbb0beb520db851830d1665094e4de6d4ea9626c5468",
-      "bytes": 673,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:864618aed0e09cb6",
-      "path": "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f",
-      "bytes": 6828,
+      "sourceHash": "e5d27977bd0d2562c01ae34027098b7069204d7dd282c122ba71047820080c36",
+      "bytes": 135,
       "legacySignatures": []
     },
     {
-      "id": "marketing:2d0784e51188f02f",
-      "path": "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress/meta.yml",
+      "id": "marketing:6192b197f9f22afb",
+      "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/meta.yml",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "5f8adb2385941cefe5eff7c0953a7becdd0c6c2d25db00bc58767c4abef25949",
-      "bytes": 689,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:4f2b09a3d3c04ac6",
-      "path": "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630",
-      "bytes": 5850,
+      "sourceHash": "27c026cf2756faa9558d68d6cfab95074afb77a48ded0724822f1bb54b955f5d",
+      "bytes": 670,
       "legacySignatures": []
     },
     {
-      "id": "marketing:dcb67f544df61ed0",
-      "path": "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule/meta.yml",
+      "id": "marketing:ef422fb2e1bab3b3",
+      "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/article.mdx",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "f48d733a6a0027ba1e8374fe06aad030e825230674d8010e75fbcd8eed4df51d",
-      "bytes": 687,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:98a837965acc43ae",
-      "path": "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796",
-      "bytes": 7061,
+      "sourceHash": "df5a6eeb0cd7e730710c3375ebedaa1a052634f3d778eb42c07b491c8bff7f56",
+      "bytes": 5985,
       "legacySignatures": []
     },
     {
-      "id": "marketing:a6f2aca6234bc849",
-      "path": "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress/meta.yml",
+      "id": "marketing:96ae6a5d0502cb77",
+      "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/distribution.md",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "2e94bc91656d69c08cda1df4408b2c7b776ec1e6705969c173d5dea4693585e9",
-      "bytes": 692,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:ca25c452488f07ba",
-      "path": "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9",
-      "bytes": 6956,
+      "sourceHash": "0863bb4ed3fadc6c233662879e9d65fe9bca0b89de4cdca06489c060a31416de",
+      "bytes": 131,
       "legacySignatures": []
     },
     {
-      "id": "marketing:69423c7d7999ba7f",
-      "path": "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/meta.yml",
+      "id": "marketing:e1ba8eb5a0a486f6",
+      "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/meta.yml",
       "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "cbd562b82b3fa3bfdd09bd98f4e188466d7e0333563481a48043a72b3e23c4b0",
-      "bytes": 711,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:8304e0435cd3489d",
-      "path": "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist/article.mdx",
-      "roles": [
-        "draft-bundle"
+        "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9",
-      "bytes": 5238,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:a0240a4e7f2d5da2",
-      "path": "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "0a534f4cc3ac535b03d9272459dc41934113c9819dc402744df5c901478168bc",
-      "bytes": 671,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:0011f52df3597e40",
-      "path": "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log/article.mdx",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54",
-      "bytes": 6477,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:94129f3d835a5370",
-      "path": "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "edac1fc6e8d193c2b434b6af822bb9f1423524865820ea27539e83b140448d3a",
-      "bytes": 680,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:a641c4b65cc2f25f",
-      "path": "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long/article.mdx",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27",
-      "bytes": 5783,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:ad82acfd8c894d35",
-      "path": "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long/meta.yml",
-      "roles": [
-        "draft-bundle"
-      ],
-      "state": "historical-quarantined",
-      "sourceHash": "6ce88f2bad9abf595fbb991b4a4f9e0ffa3907d0e2df3b2c844c546cf259e99b",
-      "bytes": 669,
+      "sourceHash": "3480b3fbcbc1604588b7f3701422106ca119f4002767359ea81910afa5fd0e07",
+      "bytes": 664,
       "legacySignatures": []
     },
     {
@@ -1138,6 +929,435 @@
       "state": "active",
       "sourceHash": "d0e08402e66031d96d22ae38a17c29b5a0416909f99878687b5846f945c93eba",
       "bytes": 7793560,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:cc6125b85a94b248",
+      "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "615384cc02a61cfde7ede522d60362224230a289ff25810f870771ba27b38e50",
+      "bytes": 6194,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:97cf525989dbe06b",
+      "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "2f7ae343860bf4018ebd2834e50b572dfd6f9215e89f270f0f90807c996f558f",
+      "bytes": 131,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b7de032dcbb0bb1a",
+      "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "2a8e54c1f1738edf082679ab3789ac6f935fd5f0db685d901f2c468cc0559a5f",
+      "bytes": 659,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5cefc54617aeee97",
+      "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d",
+      "bytes": 7068,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:56bc8bddaa28b3ef",
+      "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "ec960588e5daa4992814b8794ed6ba6a4a6bb677cffec59a97302a82ee898708",
+      "bytes": 137,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:27d0c23699b00dae",
+      "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "1bce72fb8de0e90ecf9113c9fcb1fb7f0e42c01ce47c23d58761b43e077e688f",
+      "bytes": 663,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:db5e0aa50073956a",
+      "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251",
+      "bytes": 6983,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f5c208469883b507",
+      "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "0a939b7cdc35d9939320bffe75d44b5bd8a60b9407142f345ca10a51d4b6f4e3",
+      "bytes": 142,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e279d3b4761759fb",
+      "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "689cd48d68c5e039ea27fe05bebed0b98c73639278c20b0ba6e998b93690bdfe",
+      "bytes": 677,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:268578a24c7c1357",
+      "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203",
+      "bytes": 7640,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6f93f71dbe1c7be2",
+      "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "a8292398e9ccd5515ffb8f0de32d571aaaae0e16e3e392ea1e0fb81d7579efdc",
+      "bytes": 149,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:98b55382380b47ed",
+      "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "e9a6449bd9abcaccd4411ea6a50a1787f2f9ce239f5a6167124af5973f1199a3",
+      "bytes": 696,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3af9f990f7e26df2",
+      "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f",
+      "bytes": 7017,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:93371e2209c84ece",
+      "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "b02884bfb9e13721f595b34e62f66711ae8a24c7de0f7987691576ec15d0d5d2",
+      "bytes": 147,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:580e5b4fd211f7a3",
+      "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "17b48558d8b35f103768d6b9cdafbd89f9239a6c8e48d1a83c0811697b5c3545",
+      "bytes": 697,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:b46cd315d77ff102",
+      "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6",
+      "bytes": 7006,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:dfcd95d97a0694bd",
+      "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d1919988eed6ada97520157c97eda64bbd67e132928d7bae17060b0c3892a0ca",
+      "bytes": 134,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e87f02dc88255b61",
+      "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "72b9a92984637994b2e3ed5babdc9a3bd32cea6728abba118a23943c0f8d4904",
+      "bytes": 658,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ffbc4447c22370b2",
+      "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f",
+      "bytes": 6828,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:d6098ead8d21cf91",
+      "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "61ec5fc9e5eab8eabe68eb8501054ee47dd6ce1e742ce412a7a407d86377a863",
+      "bytes": 137,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:905a5681a498b9b6",
+      "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "1347c5b06de7f89e2b4835db876078e004c52042ef5a9edd5b9a37b89da958d9",
+      "bytes": 674,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:fdbbe97d8b1992b7",
+      "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630",
+      "bytes": 5850,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:da7e7536074d8fd7",
+      "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "128def67d910d50af80e24214a3a9c27860bd91b5ccfe3f22fd4d44156d10975",
+      "bytes": 139,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:6670f6aaea014684",
+      "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "4736ce994aef578ab69a4899a8ae2ce48c6d8802d1227caa650c0d717ec8536f",
+      "bytes": 672,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:847766ef90164cf5",
+      "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796",
+      "bytes": 7061,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:305738b1744902c7",
+      "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "5ed3021eca0eab9b480ee4c4db3f2faa4340fd55fca63ef56e8971d91e953a57",
+      "bytes": 137,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:4b3833662083f0f7",
+      "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "0239a7c21cc63e0d439d33bc1d19c96dc822f93a4e8b8636f8da05013ec0a333",
+      "bytes": 677,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:f4582b3c9d325d74",
+      "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9",
+      "bytes": 6956,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:e6253afabb8ceec1",
+      "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "8f0bfa6acdb3ef6834600ac0dcf87b55e1100ea85e3408f47e7675b19f9bb7c9",
+      "bytes": 148,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:a4d4d023c64a1d8e",
+      "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "88a2777677da6f89318b46fd25a9d4630a5bece809b2baefeea450c66fd1e483",
+      "bytes": 696,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:42cfca84d86a16fa",
+      "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9",
+      "bytes": 5238,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3a33dd14ce7d518e",
+      "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "763d9775028e80e3daee5dd319b48bb5701b510814d8ae0cff075d449acdf8b8",
+      "bytes": 130,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:453123d2de861b01",
+      "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "6ef89ee4ad36841aada043340b014dfbc51c140ae20a3d693b6927bdf17d10b2",
+      "bytes": 656,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:ad2045feaa179100",
+      "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54",
+      "bytes": 6477,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:7f90d7fe6f6f73dd",
+      "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "c232b115fe02bdd5553563f602cfb453240588393e9ae34f65cb445a41885322",
+      "bytes": 136,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:3b3acc8ca13100d4",
+      "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "b0fbcf5ced2d322c45df934b2820e8dbf496c4d7f99447c60e4c1a2cd1dacb50",
+      "bytes": 665,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:9134d7a57c473b5e",
+      "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/article.mdx",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27",
+      "bytes": 5783,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:5692b5d4906ce1a2",
+      "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/distribution.md",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "025038dde77bf4592e9e0961dcdfc85150df5ca2ccad02307846130bf4a01a97",
+      "bytes": 129,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:c321d06042ed0ace",
+      "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/meta.yml",
+      "roles": [
+        "published-bundle"
+      ],
+      "state": "active",
+      "sourceHash": "12ce7e5424e419f9b037a3e98f73dd7b0fa1a2681261a39c8cc374e7e2c50036",
+      "bytes": 654,
       "legacySignatures": []
     },
     {
@@ -2035,8 +2255,8 @@
         "seo-template"
       ],
       "state": "active",
-      "sourceHash": "952033bb6ff33e74168ec092198ff6d38ae51829440c1b2b90ce41f14031ddcb",
-      "bytes": 27366,
+      "sourceHash": "450c7c178f53ebf5e8834fe008131041a316f90860859e813ddd0c79d236edf3",
+      "bytes": 27326,
       "legacySignatures": []
     },
     {
@@ -2770,8 +2990,8 @@
     },
     {
       "id": "2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-the-best-hours-log-is-the-one-that-survives-friday.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -2783,9 +3003,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "b664b297aa17b6a0d3cebdb02ea5628ae4ecf013d3af121dce87868ac61c373f"
+          "sourceHash": "fb6743508271fe93bafef6c8e4715ed424555796b91de9dd3bff6578d2350290"
         }
       ],
       "scorecard": {
@@ -2794,23 +3014,25 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/homeschool-hours-tracker-app-or-spreadsheet"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
     },
     {
       "id": "2026-08-03-homeschool-portfolio-checklist",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-a-portfolio-needs-a-purpose-before-a-checklist.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -2822,9 +3044,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "966821c00b7ca5124b1c13bcbe5941232dde22830183478b4c038c719e48ee27"
+          "sourceHash": "c97fc1fbe49605e88b2b9ec7635d3cca2f6b2699102034f5d7107b45cf5ae6a5"
         }
       ],
       "scorecard": {
@@ -2833,23 +3055,25 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/homeschool-portfolio-checklist"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
     },
     {
       "id": "2026-08-03-homeschool-progress-report-examples",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-progress-report-audience-chooses-the-shape.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -2861,9 +3085,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "d5448939a3fb1cd0566fdde1989a01192f19cd589a4ad85639cc2fae7ae2b832"
+          "sourceHash": "5cfe37b6ef7c8b768325434f5f4cbfb464bc03f689ac1e4dc218c97423fe1c8f"
         }
       ],
       "scorecard": {
@@ -2872,23 +3096,25 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/homeschool-progress-report-examples"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
     },
     {
       "id": "2026-08-03-homeschool-schedule-for-multiple-children",
-      "path": "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-schedule-the-parent-not-just-the-children.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -2900,9 +3126,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "4d10b3a5344324cebbc915a24c287fc35624208792dfd0d3be21f48ee425d680"
+          "sourceHash": "e4648d5076460fb48559a67e13badfef86f8503fd21d5f67c6144b9384af7033"
         }
       ],
       "scorecard": {
@@ -2911,23 +3137,25 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/homeschool-schedule-for-multiple-children"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
     },
     {
       "id": "2026-08-03-how-to-know-if-homeschooling-is-working",
-      "path": "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-a-small-evidence-loop-answers-is-it-working.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -2939,9 +3167,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "3ffb6d566d24c44af211bd0982175171323cb11386e72403bdb6baf440685ed3"
+          "sourceHash": "0c4305eb95a782dbb45e1341e0f9a5e0781abc89f351b665ec69d2614d348fdd"
         }
       ],
       "scorecard": {
@@ -2950,23 +3178,25 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-know-if-homeschooling-is-working"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
     },
     {
       "id": "2026-08-03-how-to-make-a-homeschool-practice-page",
-      "path": "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-one-lesson-makes-a-better-practice-page.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -2978,9 +3208,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "05c4557ae04f9dcb6e87a9c58a3ccfd97acdf9649aea956ebf18665b8b78c008"
+          "sourceHash": "0a200b56c2108b89ec8a3d2e6b52b416a7102fbc9eb59c9f2590c1ef59b34536"
         }
       ],
       "scorecard": {
@@ -2989,23 +3219,25 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-make-a-homeschool-practice-page"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
     },
     {
       "id": "2026-08-03-how-to-organize-homeschool-records",
-      "path": "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records",
-      "lifecycle": "draft",
+      "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records",
+      "lifecycle": "published",
       "source": "marketing/signals/2026-08-03-records-need-one-home-and-one-naming-rule.md",
       "sourceResolves": true,
       "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
@@ -3017,9 +3249,9 @@
         {
           "file": "article.mdx",
           "channel": "blog",
-          "status": "draft",
+          "status": "approved",
           "exists": true,
-          "sourceHash": "f2a2bb27fc38308f149eebe2e6b52e9a1b9f539d62b0b3193b7757072e9bf183"
+          "sourceHash": "df5a6eeb0cd7e730710c3375ebedaa1a052634f3d778eb42c07b491c8bff7f56"
         }
       ],
       "scorecard": {
@@ -3028,522 +3260,17 @@
         "passed": true
       },
       "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-03-weekly-homeschool-planner-template",
-      "path": "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-03-weekly-plans-need-a-place-for-change.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "681650d781f250b2b0c549f608527cf89b23a3b13fccaa4b85409ff3dba0dff4"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-03-weekly-homeschool-planner-template.json",
+        "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/distribution.md",
         "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-organize-homeschool-records"
+        ],
+        "publishedFormats": 1,
         "refusedFormats": 0
       },
       "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-homeschool-reading-log-that-stays-useful",
-      "path": "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-a-reading-log-needs-a-reader.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-homeschool-reading-log-that-stays-useful.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-many-problems-should-a-practice-page-have",
-      "path": "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-question-count-needs-a-stop-rule.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-many-problems-should-a-practice-page-have.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
-      "path": "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-change-access-not-the-learning-target.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-check-a-generated-worksheet-before-printing",
-      "path": "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-a-generated-worksheet-needs-a-parent-check.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-check-a-generated-worksheet-before-printing.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-choose-homeschool-work-samples",
-      "path": "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-every-work-sample-needs-a-job.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-choose-homeschool-work-samples.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-document-homeschool-math-progress",
-      "path": "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-math-progress-needs-the-same-idea-twice.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-document-homeschool-math-progress.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-make-a-flexible-homeschool-schedule",
-      "path": "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-flexibility-needs-a-decision-rule.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-make-a-flexible-homeschool-schedule.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-track-homeschool-reading-progress",
-      "path": "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-reading-progress-needs-a-comparable-moment.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-track-homeschool-reading-progress.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
-      "path": "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-a-narrative-report-needs-four-sentences.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-how-to-write-a-homeschool-narrative-progress-report.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-simple-homeschool-daily-checklist",
-      "path": "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-a-checklist-needs-the-next-decision.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-simple-homeschool-daily-checklist.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-what-to-write-in-a-homeschool-daily-log",
-      "path": "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-a-daily-log-needs-one-memory-cue.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-what-to-write-in-a-homeschool-daily-log.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
-        "killed": 0,
-        "blockedByProvider": 0
-      }
-    },
-    {
-      "id": "2026-08-04-when-homeschool-lessons-run-long",
-      "path": "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long",
-      "lifecycle": "draft",
-      "source": "marketing/signals/2026-08-04-a-long-lesson-needs-a-stopping-rule.md",
-      "sourceResolves": true,
-      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
-      "sourceRefResolves": true,
-      "lanes": [
-        "article"
-      ],
-      "formats": [
-        {
-          "file": "article.mdx",
-          "channel": "blog",
-          "status": "draft",
-          "exists": true,
-          "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27"
-        }
-      ],
-      "scorecard": {
-        "path": "marketing/evals/scorecards/2026-08-04-when-homeschool-lessons-run-long.json",
-        "exists": true,
-        "passed": true
-      },
-      "distribution": {
-        "path": null,
-        "exists": false,
-        "urls": [],
-        "publishedFormats": 0,
-        "refusedFormats": 0
-      },
-      "approval": {
-        "approved": 0,
-        "draft": 1,
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
@@ -3593,6 +3320,539 @@
       "approval": {
         "approved": 1,
         "draft": 1,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-03-weekly-homeschool-planner-template",
+      "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-03-weekly-plans-need-a-place-for-change.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-03-seo-blog-wave-1.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "615384cc02a61cfde7ede522d60362224230a289ff25810f870771ba27b38e50"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-03-weekly-homeschool-planner-template.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/weekly-homeschool-planner-template"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-homeschool-reading-log-that-stays-useful",
+      "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-a-reading-log-needs-a-reader.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-homeschool-reading-log-that-stays-useful.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/homeschool-reading-log-that-stays-useful"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-many-problems-should-a-practice-page-have",
+      "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-question-count-needs-a-stop-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-many-problems-should-a-practice-page-have.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-many-problems-should-a-practice-page-have"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
+      "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-change-access-not-the-learning-target.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-adapt-a-worksheet-without-changing-the-lesson"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-check-a-generated-worksheet-before-printing",
+      "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-a-generated-worksheet-needs-a-parent-check.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-check-a-generated-worksheet-before-printing.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-check-a-generated-worksheet-before-printing"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-choose-homeschool-work-samples",
+      "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-every-work-sample-needs-a-job.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-choose-homeschool-work-samples.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-choose-homeschool-work-samples"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-document-homeschool-math-progress",
+      "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-math-progress-needs-the-same-idea-twice.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-document-homeschool-math-progress.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-document-homeschool-math-progress"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-make-a-flexible-homeschool-schedule",
+      "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-flexibility-needs-a-decision-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-make-a-flexible-homeschool-schedule.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-make-a-flexible-homeschool-schedule"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-track-homeschool-reading-progress",
+      "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-reading-progress-needs-a-comparable-moment.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-track-homeschool-reading-progress.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-track-homeschool-reading-progress"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
+      "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-a-narrative-report-needs-four-sentences.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-how-to-write-a-homeschool-narrative-progress-report.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/how-to-write-a-homeschool-narrative-progress-report"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-simple-homeschool-daily-checklist",
+      "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-a-checklist-needs-the-next-decision.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-simple-homeschool-daily-checklist.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/simple-homeschool-daily-checklist"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-what-to-write-in-a-homeschool-daily-log",
+      "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-a-daily-log-needs-one-memory-cue.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-what-to-write-in-a-homeschool-daily-log.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/what-to-write-in-a-homeschool-daily-log"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
+        "killed": 0,
+        "blockedByProvider": 0
+      }
+    },
+    {
+      "id": "2026-08-04-when-homeschool-lessons-run-long",
+      "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long",
+      "lifecycle": "published",
+      "source": "marketing/signals/2026-08-04-a-long-lesson-needs-a-stopping-rule.md",
+      "sourceResolves": true,
+      "sourceRef": "marketing/raw/2026-08-04-seo-content-ocean.md",
+      "sourceRefResolves": true,
+      "lanes": [
+        "article"
+      ],
+      "formats": [
+        {
+          "file": "article.mdx",
+          "channel": "blog",
+          "status": "approved",
+          "exists": true,
+          "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27"
+        }
+      ],
+      "scorecard": {
+        "path": "marketing/evals/scorecards/2026-08-04-when-homeschool-lessons-run-long.json",
+        "exists": true,
+        "passed": true
+      },
+      "distribution": {
+        "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/distribution.md",
+        "exists": true,
+        "urls": [
+          "https://thankshoma.com/blog/when-homeschool-lessons-run-long"
+        ],
+        "publishedFormats": 1,
+        "refusedFormats": 0
+      },
+      "approval": {
+        "approved": 1,
+        "draft": 0,
         "killed": 0,
         "blockedByProvider": 0
       }
@@ -3792,7 +4052,7 @@
         "docs/homa-design/evidence/surfaces.json"
       ],
       "id": "generator:05b36b5e3e9fc248",
-      "sourceHash": "9a45991b674bae36b6eedd8a24da424f97738c7c37e84a441265225afb53fb41"
+      "sourceHash": "436bafdb044b4950eb0a926d66867d10a2c9847831205b69b91b9cce4c4e4cd9"
     },
     {
       "path": "scripts/socials-starter-pack-assets.mts",

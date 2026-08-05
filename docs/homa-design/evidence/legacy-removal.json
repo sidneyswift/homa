@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "4e3aa2c59f5e62dd40381d3d6a960b5c2ffd7237ff51975e28b8e032717e002c",
+  "ownedInputFingerprint": "d4e2859ec43803af575c4ff3a2d6df6f8d39c24040a534561c1f021c34e5a6ef",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2945,7 +2945,7 @@
     {
       "surfaceId": "surface:1ab791143807ed20",
       "path": "apps/web/app/blog/[slug]/page.tsx",
-      "sourceHash": "71099faa4a286d302a19e2e55d4522e5681586e791db11af573e0d2c4df99d6d",
+      "sourceHash": "756ea010dc1424b179768ae747b292a209c0d58e8dc68a53bf245c16b89d2058",
       "legacySignatures": [
         "legacy-rounded-pill"
       ],
@@ -3287,7 +3287,7 @@
       "disposition": "regenerate-derived",
       "reachability": "public",
       "criticality": "supporting",
-      "deliveryState": "controlled-current",
+      "deliveryState": "revocable-public",
       "preservedBinding": {
         "surfaceId": "surface:3b49ac3c138947c1",
         "path": "apps/web/app/manifest.ts",
@@ -3299,7 +3299,7 @@
         "disposition": "regenerate-derived",
         "reachability": "public",
         "criticality": "supporting",
-        "deliveryState": "controlled-current",
+        "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
       },
       "sourceState": "present-signaled",
