@@ -11,18 +11,6 @@ interface BrandHistoryEntry extends BrandCommittedSource {
   paths: string[];
 }
 
-export function resolveBrandSourceRef(git: GitTextCommand, ref = "HEAD"): string {
-  const [commit, ...parents] = git("rev-list", "--parents", "-n", "1", ref)
-    .split(/\s+/)
-    .filter(Boolean);
-  if (!commit || parents.length !== 2) return ref;
-
-  const contentParent = parents[1]!;
-  const checkoutTree = git("rev-parse", `${commit}^{tree}`);
-  const contentParentTree = git("rev-parse", `${contentParent}^{tree}`);
-  return checkoutTree === contentParentTree ? contentParent : ref;
-}
-
 function firstParentHistory(git: GitTextCommand, ref: string): BrandHistoryEntry[] {
   const entries: BrandHistoryEntry[] = [];
   let current: BrandHistoryEntry | null = null;

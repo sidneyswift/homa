@@ -28,7 +28,7 @@ import {
   validatedWebRouteHandlerRuntimePolicy,
 } from "./brand-inventory-completeness-check.mts";
 import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
-import { collectLatestCommittedSources, resolveBrandSourceRef, type GitTextCommand } from "./brand-source-provenance.mts";
+import { collectLatestCommittedSources, type GitTextCommand } from "./brand-source-provenance.mts";
 
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/surfaces.json"), "utf8")) as BrandSurfaceManifest;
@@ -46,44 +46,15 @@ const workingTreePaths = new Set([
 ]);
 const latestCommittedSource = collectLatestCommittedSources(git);
 
-function stubGit(responses: Readonly<Record<string, string>>): GitTextCommand {
-  return (...args) => {
-    const key = args.join(" ");
-    const response = responses[key];
-    assert.notEqual(response, undefined, `unexpected Git command: ${key}`);
-    return response!;
-  };
+interface ProvenanceFixture {
+  repoGit: GitTextCommand;
+  repo: string;
+  base: string;
+  feature: string;
+  featureTree: string;
 }
 
-test("source provenance unwraps a byte-identical two-parent checkout", () => {
-  const gitStub = stubGit({
-    "rev-list --parents -n 1 HEAD": "merge base content",
-    "rev-parse merge^{tree}": "tree-content",
-    "rev-parse content^{tree}": "tree-content",
-  });
-  assert.equal(resolveBrandSourceRef(gitStub), "content");
-});
-
-test("source provenance keeps a merge that introduces any tree change", () => {
-  const gitStub = stubGit({
-    "rev-list --parents -n 1 HEAD": "merge base content",
-    "rev-parse merge^{tree}": "tree-merged",
-    "rev-parse content^{tree}": "tree-content",
-  });
-  assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
-});
-
-test("source provenance keeps an ordinary one-parent checkout", () => {
-  const gitStub = stubGit({ "rev-list --parents -n 1 HEAD": "head parent" });
-  assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
-});
-
-test("source provenance keeps an octopus checkout on the merge", () => {
-  const gitStub = stubGit({ "rev-list --parents -n 1 HEAD": "merge base content third" });
-  assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
-});
-
-test("source provenance follows an exact content merge through a later child", () => {
+function withProvenanceRepo(run: (fixture: ProvenanceFixture) => void): void {
   const repo = mkdtempSync(join(tmpdir(), "homa-brand-provenance-"));
   const repoGit: GitTextCommand = (...args) => execFileSync("git", args, {
     cwd: repo,
@@ -106,17 +77,66 @@ test("source provenance follows an exact content merge through a later child", (
     repoGit("commit", "--quiet", "-m", "feature");
     const feature = repoGit("rev-parse", "HEAD");
     const featureTree = repoGit("rev-parse", `${feature}^{tree}`);
-    const merge = repoGit("commit-tree", featureTree, "-p", base, "-p", feature, "-m", "exact merge");
-    const child = repoGit("commit-tree", featureTree, "-p", merge, "-m", "later child");
-
-    assert.equal(collectLatestCommittedSources(repoGit, merge).get("surface.txt")?.sha, feature);
-    assert.equal(collectLatestCommittedSources(repoGit, child).get("surface.txt")?.sha, feature);
-
-    const squash = repoGit("commit-tree", featureTree, "-p", base, "-m", "squash");
-    assert.equal(collectLatestCommittedSources(repoGit, squash).get("surface.txt")?.sha, squash);
+    run({ repoGit, repo, base, feature, featureTree });
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
+}
+
+test("source provenance unwraps a byte-identical two-parent checkout", () => {
+  withProvenanceRepo(({ repoGit, base, feature, featureTree }) => {
+    const merge = repoGit("commit-tree", featureTree, "-p", base, "-p", feature, "-m", "exact merge");
+    assert.equal(collectLatestCommittedSources(repoGit, merge).get("surface.txt")?.sha, feature);
+  });
+});
+
+test("source provenance follows an exact content merge through a later child", () => {
+  withProvenanceRepo(({ repoGit, base, feature, featureTree }) => {
+    const merge = repoGit("commit-tree", featureTree, "-p", base, "-p", feature, "-m", "exact merge");
+    const child = repoGit("commit-tree", featureTree, "-p", merge, "-m", "later child");
+    assert.equal(collectLatestCommittedSources(repoGit, child).get("surface.txt")?.sha, feature);
+  });
+});
+
+test("source provenance keeps an altered two-parent merge and its child on the merge", () => {
+  withProvenanceRepo(({ repoGit, repo, base, feature }) => {
+    writeFileSync(join(repo, "surface.txt"), "merge result\n");
+    repoGit("add", "surface.txt");
+    const mergedTree = repoGit("write-tree");
+    const merge = repoGit("commit-tree", mergedTree, "-p", base, "-p", feature, "-m", "altered merge");
+    const child = repoGit("commit-tree", mergedTree, "-p", merge, "-m", "later child");
+
+    assert.equal(collectLatestCommittedSources(repoGit, merge).get("surface.txt")?.sha, merge);
+    assert.equal(collectLatestCommittedSources(repoGit, child).get("surface.txt")?.sha, merge);
+  });
+});
+
+test("source provenance keeps an ordinary one-parent squash on the squash", () => {
+  withProvenanceRepo(({ repoGit, base, featureTree }) => {
+    const squash = repoGit("commit-tree", featureTree, "-p", base, "-m", "squash");
+    assert.equal(collectLatestCommittedSources(repoGit, squash).get("surface.txt")?.sha, squash);
+  });
+});
+
+test("source provenance keeps a three-parent checkout on the octopus merge", () => {
+  withProvenanceRepo(({ repoGit, base, feature, featureTree }) => {
+    const third = repoGit("commit-tree", featureTree, "-p", feature, "-m", "third parent");
+    const octopus = repoGit(
+      "commit-tree",
+      featureTree,
+      "-p",
+      base,
+      "-p",
+      feature,
+      "-p",
+      third,
+      "-m",
+      "octopus merge",
+    );
+
+    assert.equal(repoGit("rev-parse", `${octopus}^{tree}`), repoGit("rev-parse", `${feature}^{tree}`));
+    assert.equal(collectLatestCommittedSources(repoGit, octopus).get("surface.txt")?.sha, octopus);
+  });
 });
 
 test("manifest IDs, paths, and ordering are unique and deterministic", () => {
