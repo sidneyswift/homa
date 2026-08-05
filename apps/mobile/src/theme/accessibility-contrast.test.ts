@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { colors, darkColors } from "./tokens";
+import { colors, darkColors, darkQuietColors, quietColors } from "./tokens";
 
 function relativeLuminance(hex: string): number {
   assert.match(hex, /^#[0-9A-F]{6}$/iu);
@@ -48,11 +48,35 @@ test("approved semantic text pairs meet 4.5 to 1 contrast", () => {
   }
 });
 
+const QUIET_AUTHORITY_TEXT_PAIRS = [
+  ["quiet primary action", quietColors.actionText, quietColors.action],
+  ["quiet destructive action", quietColors.dangerText, quietColors.danger],
+  ["quiet brand text on page", quietColors.brandText, quietColors.page],
+  ["quiet brand text on card", quietColors.brandText, quietColors.card],
+  ["dark quiet primary action", darkQuietColors.actionText, darkQuietColors.action],
+  ["dark quiet destructive action", darkQuietColors.dangerText, darkQuietColors.danger],
+  ["dark quiet brand text on page", darkQuietColors.brandText, darkQuietColors.page],
+  ["dark quiet brand text on card", darkQuietColors.brandText, darkQuietColors.card],
+] as const;
+
+test("generated Quiet authority action text meets 4.5 to 1 contrast", () => {
+  for (const [label, foreground, background] of QUIET_AUTHORITY_TEXT_PAIRS) {
+    assert.ok(
+      contrastRatio(foreground, background) >= 4.5,
+      `${label} is ${contrastRatio(foreground, background).toFixed(2)}:1`,
+    );
+  }
+});
+
 const NON_TEXT_PAIRS = [
   ["active control boundary", colors.brandHover, colors.card],
   ["idle control boundary", colors.textMuted, colors.card],
   ["active boundary on brand soft", colors.brandHover, colors.brandSoft],
   ["idle switch thumb", colors.textMuted, colors.surfaceSunken],
+  ["quiet secondary action boundary", quietColors.border, quietColors.card],
+  ["dark quiet secondary action boundary", darkQuietColors.border, darkQuietColors.card],
+  ["dark quiet raised action boundary", darkQuietColors.border, darkQuietColors.surfaceRaised],
+  ["dark quiet primary action boundary", darkQuietColors.action, darkQuietColors.card],
 ] as const;
 
 test("approved control boundaries meet 3 to 1 contrast", () => {

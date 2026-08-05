@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -26,6 +27,8 @@ import {
   type NativeInstalledEvidenceCheckId,
 } from "../apps/mobile/src/lib/accessibility/gauntlet-contract";
 import type { GauntletCheckStatus } from "./native-interface-gauntlet.mts";
+
+const gauntletSource = readFileSync(new URL("./native-interface-gauntlet.mts", import.meta.url), "utf8");
 
 function completeSimulatorChecks(): Record<NativeInstalledEvidenceCheckId, GauntletCheckStatus> {
   return {
@@ -160,6 +163,20 @@ test("static strict status never masquerades as installed or physical acceptance
     staticContractStatusForChecks([{ id: "repository-contract", status: "pass", detail: "valid" }]),
     "pass",
   );
+});
+
+test("installed evidence applies accessibility settings before cold launch and capture", () => {
+  const installOffset = gauntletSource.indexOf('xcrun("simctl", "install", device.udid, appPath)');
+  const terminateOffset = gauntletSource.indexOf('xcrun("simctl", "terminate", device.udid, bundleId)');
+  const contentSizeOffset = gauntletSource.indexOf('xcrun("simctl", "ui", device.udid, "content_size"');
+  const launchOffset = gauntletSource.indexOf('xcrun("simctl", "launch", device.udid, bundleId)');
+  const captureOffset = gauntletSource.indexOf('xcrun("simctl", "io", device.udid, "screenshot"');
+  assert.ok(installOffset >= 0);
+  assert.ok(terminateOffset > installOffset);
+  assert.ok(contentSizeOffset > terminateOffset);
+  assert.ok(launchOffset > contentSizeOffset);
+  assert.ok(captureOffset > launchOffset);
+  assert.match(gauntletSource.slice(launchOffset, captureOffset), /execFileSync\("sleep", \["30"\]\)/u);
 });
 
 test("native matrix names all required profiles, settings, and state scenarios once", () => {

@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
+  "sourceChecksum": "a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4",
   "colors": {
     "canvas": "#F7F4EE",
     "ink": "#20242B",
@@ -457,8 +457,7 @@
         "adapter": "@expo-google-fonts",
         "packages": {
           "display": "@expo-google-fonts/eb-garamond",
-          "interface": "@expo-google-fonts/dm-sans",
-          "wordmark": "@expo-google-fonts/fredoka"
+          "interface": "@expo-google-fonts/dm-sans"
         },
         "source": "Google Fonts",
         "roles": {
@@ -481,15 +480,6 @@
               500,
               600,
               700
-            ],
-            "styles": [
-              "normal"
-            ]
-          },
-          "wordmark": {
-            "family": "Fredoka",
-            "weights": [
-              600
             ],
             "styles": [
               "normal"
@@ -547,12 +537,12 @@
           "delivery": "runtime"
         },
         "wordmark": {
-          "preferred": "Fredoka_600SemiBold",
+          "preferred": "image-lockup",
           "fallback": [
             "Arial Rounded MT Bold",
             "System"
           ],
-          "delivery": "runtime"
+          "delivery": "rasterized"
         }
       },
       "marketingRich": {
@@ -1536,13 +1526,16 @@
         "light": {
           "page": "#F7F4EE",
           "card": "#FFFEFC",
+          "surfaceRaised": "#FFFFFF",
           "surfaceSunken": "#EEEAE2",
           "textStrong": "#20242B",
           "textBody": "#20242B",
           "textMuted": "#5B5852",
           "textSubtle": "#68645E",
           "brand": "#E7602F",
+          "brandText": "#A33F22",
           "action": "#27374D",
+          "actionText": "#FFFEFC",
           "brandHover": "#A33F22",
           "brandSoft": "#FBE8DF",
           "onBrand": "#FFFEFC",
@@ -1555,6 +1548,7 @@
           "focusRing": "#E7602F",
           "success": "#335C46",
           "danger": "#923F33",
+          "dangerText": "#FFFEFC",
           "dangerSoft": "#F5E5E1",
           "info": "#2F5968"
         },
@@ -1568,7 +1562,9 @@
           "textMuted": "#C7C2BA",
           "textSubtle": "#A9A39A",
           "brand": "#E7602F",
-          "action": "#27374D",
+          "brandText": "#F0835A",
+          "action": "#FFFEFC",
+          "actionText": "#27374D",
           "brandHover": "#F0835A",
           "brandSoft": "#573426",
           "onBrand": "#FFFEFC",
@@ -1576,11 +1572,12 @@
           "constructiveSoft": "#294737",
           "highlight": "#EBCF82",
           "highlightSoft": "#51431F",
-          "border": "#53677D",
+          "border": "#8295A9",
           "borderSubtle": "#40546A",
           "focusRing": "#F0835A",
           "success": "#9BC5A8",
           "danger": "#F2A296",
+          "dangerText": "#20242B",
           "dangerSoft": "#59332E",
           "info": "#AFCED5"
         }

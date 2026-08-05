@@ -905,14 +905,10 @@ function runInstalledEvidence(profileId: string, deviceId: string, appPath: stri
     xcrun("simctl", "install", device.udid, appPath);
     checks.installedCommand = "pass";
     try {
-      xcrun("simctl", "launch", device.udid, bundleId);
-      checks.launchedCommand = "pass";
-      // Expo's release bundle still needs a short cold-start window before
-      // the first product surface is rendered. Without this wait the capture
-      // can prove only the launch splash, not the signed-out route.
-      execFileSync("sleep", ["8"]);
+      xcrun("simctl", "terminate", device.udid, bundleId);
     } catch {
-      limitation = `${limitation} The installed app did not launch cleanly.`;
+      // A clean simulator has no running process yet. The cold-launch
+      // precondition is satisfied in both the success and not-running cases.
     }
     try {
       xcrun("simctl", "ui", device.udid, "content_size", "accessibility-extra-extra-extra-large");
@@ -927,6 +923,19 @@ function runInstalledEvidence(profileId: string, deviceId: string, appPath: stri
       checks.increaseContrastSettingCommand = settings.increaseContrast === "enabled" ? "pass" : "fail";
     } catch {
       settings.increaseContrast = "unavailable";
+    }
+    try {
+      // Accessibility-setting changes can terminate a foreground app. Apply
+      // the complete profile first, then cold launch so the captured Yoga
+      // measurements and native glyph metrics describe the same stable frame.
+      xcrun("simctl", "launch", device.udid, bundleId);
+      checks.launchedCommand = "pass";
+      // Expo's release bundle still needs a short cold-start window before
+      // the first product surface is rendered. Without this wait the capture
+      // can prove only the launch splash, not the signed-out route.
+      execFileSync("sleep", ["30"]);
+    } catch {
+      limitation = `${limitation} The installed app did not launch cleanly.`;
     }
     // Capture the rendered app before opening the custom-scheme link. On a
     // clean simulator, iOS may show an "Open in Homa?" confirmation sheet

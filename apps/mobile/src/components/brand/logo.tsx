@@ -1,8 +1,7 @@
-import { Text, View } from "react-native";
+import { Image, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { logoGeometry } from "@homa/design/contract";
 
-import { fontFamilies } from "../../theme/fonts";
 import { colors, palette } from "../../theme/tokens";
 
 /**
@@ -30,14 +29,6 @@ export const PUPIL_FILL = logoGeometry.pupilFill;
  *  like clay pressed down rather than from its middle like a balloon. */
 export const HOUSE_BASE = { x: 24, y: 44 } as const;
 
-// [letter, baseline offset multiplier, rotation] for the bounced wordmark.
-const WORDMARK_LETTERS: readonly (readonly [string, number, number])[] = [
-  ["H", -0.06, -3],
-  ["o", 0.05, 0],
-  ["m", -0.04, 2],
-  ["a", 0.06, -2],
-];
-
 export function Logo({
   size = 32,
   variant = "full",
@@ -48,8 +39,6 @@ export function Logo({
   tone?: "light" | "dark";
 }) {
   const body = tone === "dark" ? palette.clay400 : colors.brand;
-  const word = tone === "dark" ? colors.card : colors.textStrong;
-
   const mark = (
     <Svg width={size} height={size} viewBox="0 0 48 48">
       <Path d={HOUSE_PATH} fill={body} />
@@ -76,33 +65,17 @@ export function Logo({
     );
   }
 
-  const letterSize = size * 0.98;
+  const lockup = tone === "dark"
+    ? require("../../../assets/brand/homa-lockup-dark.png")
+    : require("../../../assets/brand/homa-lockup.png");
   return (
-    <View
+    <Image
+      source={lockup}
       accessibilityRole="image"
       accessibilityLabel="Homa"
-      style={{ flexDirection: "row", alignItems: "center", gap: size * 0.3 }}
-    >
-      {mark}
-      <View style={{ flexDirection: "row", marginTop: size * -0.04 }}>
-        {WORDMARK_LETTERS.map(([letter, offsetY, rotateDeg]) => (
-          <Text
-            key={letter}
-            style={{
-              fontFamily: fontFamilies.wordmark,
-              fontSize: letterSize,
-              lineHeight: letterSize * 1.1,
-              color: word,
-              transform: [
-                { translateY: letterSize * offsetY },
-                { rotate: `${rotateDeg}deg` },
-              ],
-            }}
-          >
-            {letter}
-          </Text>
-        ))}
-      </View>
-    </View>
+      fadeDuration={0}
+      resizeMode="contain"
+      style={{ width: size * (1200 / 270), height: size }}
+    />
   );
 }
