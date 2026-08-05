@@ -32,7 +32,8 @@ test("the privacy policy renders the exact current subprocessor inventory", () =
   assert.doesNotMatch(privacySource, /other model or media providers/i);
   assert.doesNotMatch(privacySource, /anonymous usage events/i);
   assert.match(privacySource, /provider depends on the feature/i);
-  assert.match(privacySource, /paid APIs that do not train on prompts or responses by default/i);
+  assert.match(privacySource, /provider controls that limit how family information is processed/i);
+  assert.doesNotMatch(privacySource, /train AI models|no-training|zero-retention/i);
   assert.doesNotMatch(privacySource, /active family records/i);
   assert.match(privacySource, /normal retention period/i);
 });

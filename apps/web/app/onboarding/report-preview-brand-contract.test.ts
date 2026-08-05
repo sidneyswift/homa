@@ -11,6 +11,10 @@ test("onboarding report preview uses the Quiet report adapter", () => {
   assert.match(preview, /quiet-report-preview__row/u);
   assert.match(preview, /quiet-report-preview__note/u);
   assert.match(preview, /quiet-report-preview-link/u);
+  assert.match(preview, /From you/u);
+  assert.match(preview, /See the full sample report/u);
+  assert.doesNotMatch(preview, /\bObserved\b|12 more areas inside/u);
+  assert.doesNotMatch(preview, /after lunch|story words/u);
   assert.doesNotMatch(preview, /Doodle|rotate-\[/u);
   assert.doesNotMatch(preview, /font-mono/u);
   assert.doesNotMatch(preview, /rounded-\[var\(--homa-radius-(?:card|control)\)\]/u);

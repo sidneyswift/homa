@@ -23,30 +23,30 @@ test("the age FAQ states both the report range and the current practice-page lim
   assert.match(answer, /practice pages currently cover ages 2 to 7/i);
 });
 
-test("the privacy FAQ gives a plain use, training, and deletion boundary", () => {
+test("the privacy FAQ gives a plain use, sale, and deletion boundary", () => {
   const answer = FAQ_ITEMS.find(([question]) => question === "How does Homa use my family's information?")?.[1];
 
   assert.ok(answer);
-  assert.match(answer, /use what you share only to run Homa for your family/i);
-  assert.match(answer, /do not sell it or use it to train AI models/i);
+  assert.match(answer, /use what you share to run Homa for your family/i);
+  assert.match(answer, /do not sell it/i);
   assert.match(answer, /delete your family's records/i);
   assert.match(answer, /Privacy page/i);
+  assert.doesNotMatch(answer, /train AI models|no-training|zero-retention/i);
   assert.doesNotMatch(answer, /lists the companies/i);
 });
 
-test("the pricing FAQ explains current prices and labels Max unavailable", () => {
+test("the pricing FAQ explains only current purchasable memberships", () => {
   const answer = FAQ_ITEMS.find(([question]) => question === "How much does Homa cost?")?.[1];
 
   assert.ok(answer);
   assert.match(answer, /add a credit card to start 7 free days/i);
   assert.match(answer, /Homa is \$19 a month/i);
   assert.match(answer, /Homa Plus is \$49 a month/i);
-  assert.doesNotMatch(answer, /Homa Max is \$199|\$1,910/i);
   assert.match(answer, /practice pages/i);
-  assert.match(answer, /Homa Plus includes text messages, phone calls, and uploaded curriculum/i);
-  assert.match(answer, /Homa Max is coming soon/i);
-  assert.match(answer, /not available to purchase yet/i);
-  assert.doesNotMatch(answer, /Homa Max adds/i);
+  assert.match(answer, /phone number for texting or calling Homa/i);
+  assert.match(answer, /curriculum file uploads/i);
+  assert.match(answer, /weekly plan/i);
+  assert.doesNotMatch(answer, /Homa Max|coming soon|\$199|\$1,910/i);
   assert.match(answer, /annual memberships are paid once for the year/i);
   assert.match(answer, /stop any membership from renewing in your settings/i);
 });

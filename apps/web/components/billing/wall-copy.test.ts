@@ -127,7 +127,9 @@ test("available tiers stay truthful while unbuilt Max remains unavailable", () =
   // built paid services state an addition, while open fulfillment is
   // explicitly planned rather than presented as already delivered.
   assert.doesNotMatch(tierDelta("regular"), /^Adds /);
-  assert.match(tierDelta("plus"), /^Includes /);
+  assert.match(tierDelta("plus"), /^Text or call Homa/);
+  assert.match(tierDescription("plus"), /phone number for texting or calling Homa/i);
+  assert.match(tierDescription("plus"), /curriculum file uploads for your weekly plan/i);
   assert.match(tierDelta("elite"), /^Coming soon:/);
   assert.match(tierDelta("elite"), /post|person/i);
   assert.match(tierDescription("elite"), /not available to purchase yet/i);

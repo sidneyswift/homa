@@ -183,7 +183,7 @@ function checkoutUrl(base: string, familyId: string, email: string | null): stri
 /** The available checkout bundle for one family, or null when the
  *  regular tier's links are missing (the wall/gate fails open upstream).
  *  Known but unavailable tiers remain null for new purchases. */
-function buildWallCheckout(familyId: string, email: string | null): WallCheckout | null {
+export function buildWallCheckout(familyId: string, email: string | null): WallCheckout | null {
   const regularLinks = tierPaymentLinkBases("regular");
   if (!regularLinks) return null;
   function tierCheckout(links: { monthly: string; annual: string | null } | null): TierCheckout | null {

@@ -17,10 +17,10 @@ const PREVIEW_ROWS: ReadonlyArray<{
   chipBg: string;
   chipInk: string;
 }> = [
-  { subject: "Language", evidence: "Retells familiar events in order", nextStep: "Ask what happened next", chipBg: "var(--homa-highlight-tint)", chipInk: "var(--homa-highlight-ink)" },
-  { subject: "Math", evidence: "Makes two equal groups to six", nextStep: "Share eight objects", chipBg: "var(--homa-highlight-tint)", chipInk: "var(--homa-highlight-ink)" },
-  { subject: "Reading", evidence: "Recognizes familiar names and signs", nextStep: "Find one new label", chipBg: "var(--homa-constructive-tint)", chipInk: "var(--homa-constructive-ink)" },
-  { subject: "Fine motor", evidence: "Draws lines and closed circles", nextStep: "Trace one curved path", chipBg: "var(--homa-info-tint)", chipInk: "var(--homa-info-ink)" },
+  { subject: "Language", evidence: "Retells a familiar event in order", nextStep: "Ask what happened next", chipBg: "var(--homa-highlight-tint)", chipInk: "var(--homa-highlight-ink)" },
+  { subject: "Math", evidence: "Shares six blocks evenly between two toys", nextStep: "Try eight blocks with two toys", chipBg: "var(--homa-highlight-tint)", chipInk: "var(--homa-highlight-ink)" },
+  { subject: "Reading", evidence: "Recognizes her name and familiar signs", nextStep: "Look for one new word on a label", chipBg: "var(--homa-constructive-tint)", chipInk: "var(--homa-constructive-ink)" },
+  { subject: "Drawing", evidence: "Draws lines and closed circles", nextStep: "Trace one curved line together", chipBg: "var(--homa-info-tint)", chipInk: "var(--homa-info-ink)" },
 ];
 
 export function ReportPreview() {
@@ -50,7 +50,7 @@ export function ReportPreview() {
           {/* Anchored to the header seam, not the card so a wrapped meta
               line cannot collide with the next-step label. */}
           <div className="quiet-report-preview__delta" style={{ color: "var(--homa-constructive-ink)" }}>
-            One useful next step
+            What to try next
           </div>
         </div>
 
@@ -63,7 +63,7 @@ export function ReportPreview() {
                   className="quiet-report-preview__chip"
                   style={{ background: row.chipBg, color: row.chipInk }}
                 >
-                  Observed
+                  From you
                 </span>
               </div>
               <p className="quiet-report-preview__evidence">{row.evidence}</p>
@@ -76,15 +76,14 @@ export function ReportPreview() {
               A note from Homa
             </p>
             <p className="quiet-report-preview__note-copy">
-              Maya connects ideas with story words. Try retelling one short part after lunch.
+              You said Maya retells familiar events in order. Next time you share a story, ask what happened next.
             </p>
           </div>
 
-          {/* Closes the card in the same micro-label ritual as the header
-              eyebrow and the Homa note, so the last line reads designed
-              rather than defaulted. */}
+          {/* The whole card is one link. Close with its destination, not a
+              hidden subject count that makes the report feel like a test. */}
           <p className="quiet-report-preview__footer" style={{ color: "var(--homa-muted-ink)" }}>
-            12 more areas inside
+            See the full sample report
           </p>
         </div>
       </QuietFrame>

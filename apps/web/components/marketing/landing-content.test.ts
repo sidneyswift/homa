@@ -8,7 +8,6 @@ import {
   FOUNDER_STORY_COPY,
   HERO_COPY,
   LANDING_SECTION_COPY,
-  COMING_SOON_MEMBERSHIP,
   MEMBERSHIP_ITEMS,
   MEMBERSHIP_NOTE,
   MONTHLY_MEMBERSHIP_PRICES,
@@ -38,11 +37,13 @@ test("the trial CTA states the card terms before the click", () => {
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /credit card/i);
-  assert.match(HERO_COPY.primaryActionNote, /\$19 or \$49/);
+  assert.match(HERO_COPY.primaryActionNote, /Homa is \$19 and Homa Plus is \$49/);
   assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
   assert.match(HERO_COPY.primaryActionNote, /before the first charge/i);
   assert.match(HERO_COPY.primaryActionNote, /cancel before then/i);
   assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49]);
+  assert.match(LANDING_SECTION_COPY.final.body, /require a credit card/i);
+  assert.doesNotMatch(LANDING_SECTION_COPY.final.body, /and a credit card/i);
 });
 
 test("metadata and structured offers reuse the catalog-derived landing contract", () => {
@@ -103,10 +104,10 @@ test("the landing names built Plus services and keeps unbuilt Max out of checkou
 
   assert.ok(plus);
   assert.equal(MEMBERSHIP_ITEMS.some(({ tier }) => tier === "elite"), false);
-  assert.match(plus.body, /text messages, phone calls, and uploaded curriculum/i);
-  assert.equal(COMING_SOON_MEMBERSHIP.availability, "Coming soon");
-  assert.match(COMING_SOON_MEMBERSHIP.body, /not available to purchase yet/i);
-  assert.doesNotMatch(COMING_SOON_MEMBERSHIP.body, /\$199|Homa Max adds/i);
+  assert.match(plus.body, /phone number for texting or calling Homa/i);
+  assert.match(plus.body, /curriculum file uploads/i);
+  assert.match(plus.body, /weekly plan/i);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /COMING_SOON_MEMBERSHIP|Homa Max|Coming soon/u);
 });
 
 test("the fictional product example proves Homa can plan for an older child", () => {
@@ -167,8 +168,8 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
   assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes per child/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /published sources used for your child's age/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /one practical next step for each subject/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /where each age-based question came from/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /one practical activity for each subject/i);
   assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits your child/i);
   assert.doesNotMatch(
     `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
@@ -205,6 +206,9 @@ test("the live landing composition keeps the approved artifact-first opening", (
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /Real curiosity\./u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-object|HeroObject|QuietHeroHeadline/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /4\.5h|1h 45m|30m|45m/u);
+  assert.match(QUIET_LANDING_SOURCE, /Leo · This week/u);
+  assert.match(QUIET_LANDING_SOURCE, /Teaching hours[\s\S]*recorded by child/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /Leo · Tuesday|Teaching time[\s\S]*saved by child/u);
 });
 
 test("the primary action appears in the first visual viewport", () => {
@@ -244,7 +248,11 @@ test("the product moment exposes a keyboard-safe, reduced-motion state demo", ()
 
 test("the product moment records only teaching time the parent supplied", () => {
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /\b\d+\s+minutes\b/iu);
-  assert.match(PRODUCT_PREVIEW_COPY.states.updating.description, /records 35 minutes of science/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.dayBody, /35 minutes of science is added/iu);
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /unfinished fractions review/iu);
-  assert.match(PRODUCT_PREVIEW_COPY.states.updating.description, /moves Leo's fractions review/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.dayBody, /fractions review moves to Thursday/iu);
+  assert.doesNotMatch(
+    PRODUCT_PREVIEW_COPY.states.updating.description,
+    /35 minutes|fractions review|counting page/iu,
+  );
 });

@@ -260,10 +260,9 @@ export function tierDelta(tier: PlanTier): string {
       // legal obligation the highest-load persona came to solve.
       return "Weekly plans, practice pages, teaching hours logged.";
     case "plus":
-      // "Includes" remains true while channel gating is dark and after
-      // it turns on. "Adds" would falsely imply the base tier cannot use
-      // text or phone in today's production configuration.
-      return "Includes text messages, phone calls, and curriculum uploads.";
+      // Name the available channels without claiming the lower tier is
+      // blocked while channel gating remains dark in production.
+      return "Text or call Homa. Upload curriculum files.";
     case "elite":
       // Max is preserved for receipt compatibility, not merchandised as
       // delivered. A mailing address field is not a fulfillment system.
@@ -283,7 +282,7 @@ export function tierDescription(tier: PlanTier): string {
     case "regular":
       return "Homa includes weekly plans, printable practice pages, and teaching-hour records.";
     case "plus":
-      return "Homa Plus includes text messages, phone calls, and uploaded curriculum.";
+      return "Homa Plus includes a phone number for texting or calling Homa, plus curriculum file uploads for your weekly plan.";
     case "elite":
       return "Homa Max is coming soon. Printed materials by mail and planning with a person are planned. It is not available to purchase yet.";
     default: {

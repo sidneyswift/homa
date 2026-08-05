@@ -15,7 +15,6 @@ import { FAQ_ITEMS } from "./faq-items";
 import {
   CAPABILITY_FEATURE_HREFS,
   CAPABILITY_ITEMS,
-  COMING_SOON_MEMBERSHIP,
   FOUNDER_STORY_COPY,
   HERO_COPY,
   LANDING_SECTION_COPY,
@@ -300,7 +299,7 @@ function QuietProductMoment() {
 
 function QuietCapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) {
   if (capabilityId === "plan") {
-    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Leo · Tuesday</strong><span>Ready to review</span></div><div className="qa-proof__rows">{[["Fractions review", "Done"], ["History reading", "Read next"], ["Science lab", "This afternoon"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
+    return <div className="qa-proof"><div className="qa-proof__meta"><strong>Leo · This week</strong><span>Ready to review</span></div><div className="qa-proof__rows">{[["Fractions review", "Moved to Thursday"], ["History reading", "Read next"], ["Science lab", "This afternoon"]].map(([title, meta], index) => <div className="qa-proof__row" key={title}><span className="qa-proof__mark">{index === 0 ? <Icon name="check" size={16} /> : null}</span><span>{title}</span><small>{meta}</small></div>)}</div></div>;
   }
   if (capabilityId === "practice") {
     return <div className="qa-proof qa-proof__document"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="62px" /><div><div className="qa-proof__meta"><strong>Made for Maya</strong><span>Tuesday</span></div><p>A practice page shaped around this week&apos;s lesson.</p><span className="qa-proof__document-status">Ready to print</span></div></div>;
@@ -308,7 +307,7 @@ function QuietCapabilityProof({ capabilityId }: { capabilityId: CapabilityId }) 
   if (capabilityId === "binder") {
     return <div className="qa-proof"><div className="qa-proof__folder"><span className="qa-proof__folder-thumb"><Image src="/images/hero-butterfly-math.png" alt="" width={1024} height={1536} sizes="42px" /></span><span><strong>Butterfly math</strong><small>Maya · practice page</small></span><small>Tue</small></div><div className="qa-proof__folder"><span className="qa-proof__folder-thumb" /><span><strong>Leo&apos;s lab notes</strong><small>Finished work</small></span><small>Mon</small></div></div>;
   }
-  return <div className="qa-proof"><div className="qa-proof__metric"><strong>Teaching time</strong><span>saved by child<br />and subject</span></div></div>;
+  return <div className="qa-proof"><div className="qa-proof__metric"><strong>Teaching hours</strong><span>recorded by child<br />and subject</span></div></div>;
 }
 
 function QuietFaq() {
@@ -384,7 +383,7 @@ export function QuietLanding() {
 
           <section id="memberships" className="qa-band qa-section" aria-labelledby="quiet-memberships-title">
             <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.memberships.eyebrow}</div><h2 id="quiet-memberships-title">{LANDING_SECTION_COPY.memberships.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.memberships.body}</p></div>
-            <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}<QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={COMING_SOON_MEMBERSHIP.tier}><h3>{COMING_SOON_MEMBERSHIP.name}</h3><div className="qa-membership-card__availability">{COMING_SOON_MEMBERSHIP.availability}</div><p className="qa-membership-card__body">{COMING_SOON_MEMBERSHIP.body}</p></QuietFrame></div>
+            <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}</div>
             <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE}</p><TrialAction /></div>
           </section>
 

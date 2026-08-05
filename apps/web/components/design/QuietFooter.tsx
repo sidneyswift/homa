@@ -11,7 +11,6 @@ export const QUIET_FOOTER_COLUMNS = [
       ["How the report works", "/onboarding/method"],
       ["Homeschool planner", "/features/homeschool-planner"],
       ["Hours and state rules", "/features/homeschool-hours-tracker"],
-      ["Progress reports", "/features/homeschool-progress-tracker"],
       ["Features", "/#features"],
     ],
   ],
@@ -20,7 +19,7 @@ export const QUIET_FOOTER_COLUMNS = [
     [
       ["Our story", "/#stories"],
       ["Blog", "/blog"],
-      ["Joining Homa", "/onboarding"],
+      ["Start with Homa", "/onboarding"],
     ],
   ],
   [
