@@ -183,28 +183,25 @@ describe("canonical native Progress read boundary", () => {
     assert.doesNotMatch(clientSource, /from\("child_progress_live"\)/u);
   });
 
-  it("waits for the same commit's web deployment before publishing an OTA", () => {
+  it("waits for the same commit's CI and web deployment before publishing verified OTA bytes", () => {
     const waitIndex = otaWorkflowSource.indexOf(
-      "Wait for the production web deployment",
+      "Wait for exact production gates",
     );
     const publishIndex = otaWorkflowSource.indexOf(
-      "Publish EAS Update to the production channel",
+      "Publish the verified bytes to the production channel",
     );
     assert.notEqual(waitIndex, -1);
     assert.ok(publishIndex > waitIndex);
-    assert.match(
-      otaWorkflowSource,
-      /repos\/\$\{GITHUB_REPOSITORY\}\/commits\/\$\{GITHUB_SHA\}\/status/u,
-    );
-    assert.match(otaWorkflowSource, /select\(\.context == "Vercel"\)/u);
+    assert.match(otaWorkflowSource, /wait-for-production-gates\.mjs/u);
+    assert.match(otaWorkflowSource, /checks: read/u);
     assert.match(otaWorkflowSource, /statuses: read/u);
-    assert.doesNotMatch(otaWorkflowSource, /\/check-runs/u);
+    assert.match(otaWorkflowSource, /--input-dir "\$HOMA_MOBILE_EXPORT_DIR"/u);
+    assert.match(otaWorkflowSource, /--skip-bundler/u);
     assert.match(
       otaWorkflowSource,
       /- "\.github\/workflows\/mobile-ota-update\.yml"/u,
     );
-    assert.match(otaWorkflowSource, /success\)\s+exit 0/u);
-    assert.match(otaWorkflowSource, /failure\|error\)/u);
-    assert.match(otaWorkflowSource, /for attempt in \$\(seq 1 90\)/u);
+    assert.match(otaWorkflowSource, /- "pnpm-lock\.yaml"/u);
+    assert.doesNotMatch(otaWorkflowSource, /for attempt in \$\(seq|check-ota-fingerprint/u);
   });
 });
