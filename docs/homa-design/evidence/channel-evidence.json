@@ -370,9 +370,9 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "distribution-asset",
-        "surfaceCount": 52,
-        "surfaceIdsFingerprint": "da93a522b2c9b0505dc11717202d7ebb26f131d39687b9e1136da249ce745318",
-        "scopedInputFingerprint": "d1ea1250e844a6e33cc0cdacc18a0a913ea7b84efaab109d723186181c071b5b"
+        "surfaceCount": 72,
+        "surfaceIdsFingerprint": "27ef92cc05818d1d9caebc2898d5e9161ea47a6082f149064d8531f9c6f3ed9e",
+        "scopedInputFingerprint": "c3fb5b3e246d0389305ddc9ed15648191d8bf4786b856a7441abf4fffe5e2338"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/distribution-asset.json",
       "fixtureChecksum": "1b7669dcaca9728eca86d8c7be1e1f68a599f7cabb813286611a981e9cdccf18",
