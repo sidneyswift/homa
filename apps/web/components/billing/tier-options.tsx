@@ -22,7 +22,8 @@ import {
 const TIER_ORDER: PlanTier[] = ["regular", "plus", "elite"];
 
 /**
- * The tier picker: three rows and one button (2026-07-28 redesign).
+ * The tier picker: one row per available plan and one button
+ * (2026-07-28 redesign).
  *
  * It replaced three stacked cards that each carried a name, a 1 to 3
  * sentence description, a price, a 40-character button, and two
@@ -33,12 +34,12 @@ const TIER_ORDER: PlanTier[] = ["regular", "plus", "elite"];
  * median distance from the top of a phone screen to the first price at
  * 12 words.
  *
- * So the shape inverted. Each tier is one row: name, one line of what
- * that tier ADDS, and the price, with the shared contents stated once
- * above the picker instead of three times inside it. Selecting a row
- * arms a single button. All three prices are legible in one glance and
- * comparable without scrolling, and the page has exactly one primary
- * action instead of three.
+ * So the shape inverted. Each available tier is one row: name, one line
+ * of what that tier includes, and the price, with the shared contents
+ * stated once above the picker instead of repeating them in every row.
+ * Selecting a row arms a single button. All available prices are
+ * legible in one glance and comparable without scrolling, and the page
+ * has exactly one primary action instead of one per tier.
  *
  * Two deliberate ethics choices, both against the grain of the paywalls
  * this pattern was taken from:
@@ -189,7 +190,7 @@ export function TierOptions({
                 ) : null}
               </span>
 
-              {/* Name and price share the top line so the three prices
+              {/* Name and price share the top line so the available prices
                   form one scannable right-hand column, and the delta
                   line gets the full row width underneath instead of
                   wrapping around the price. */}

@@ -1,4 +1,8 @@
-import { type BillingPeriod, type BillingProvider } from "@homa/core";
+import {
+  planAvailableForPurchase,
+  type BillingPeriod,
+  type BillingProvider,
+} from "@homa/core";
 
 import {
   familyBillingEntitlement,
@@ -69,9 +73,11 @@ export function signupPaywallEnabled(): boolean {
 }
 
 /** Live links first (set only in Vercel production), TEST for local dev
- *  and previews. A tier's monthly link must exist or the tier doesn't
- *  render at all (regular's absence downs the whole wall; plus/elite's
- *  absence just narrows the offer to fewer tiers). Annual is optional
+ *  and previews. A tier must first be available in the shared catalog,
+ *  then its monthly link must exist or the tier doesn't
+ *  render at all (regular's absence downs the whole wall; Plus's
+ *  absence narrows the offer). Max remains receipt-recognized but is
+ *  intentionally unavailable for new purchases. Annual is optional
  *  per tier. Every tier's annual price is 20% off its monthly price
  *  times twelve, rounded to the nearest dollar (founder ruling
  *  2026-07-26); prices live in wall-copy.ts's TIER_PRICES.
@@ -81,6 +87,7 @@ export function signupPaywallEnabled(): boolean {
  *  it can statically see at build time, so `process.env[computedKey]`
  *  would read as undefined in production. */
 function tierPaymentLinkBases(tier: PlanTier): { monthly: string; annual: string | null } | null {
+  if (!planAvailableForPurchase(tier)) return null;
   let monthly: string | undefined;
   let annual: string | undefined;
   if (tier === "regular") {
@@ -98,12 +105,7 @@ function tierPaymentLinkBases(tier: PlanTier): { monthly: string; annual: string
       process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_PLUS_ANNUAL_URL ||
       process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_PLUS_ANNUAL_URL;
   } else {
-    monthly =
-      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ELITE_MONTHLY_URL ||
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ELITE_MONTHLY_URL;
-    annual =
-      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ELITE_ANNUAL_URL ||
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ELITE_ANNUAL_URL;
+    return null;
   }
   if (!monthly) return null;
   return { monthly, annual: annual || null };
@@ -178,8 +180,9 @@ function checkoutUrl(base: string, familyId: string, email: string | null): stri
   return url.toString();
 }
 
-/** The three-tier checkout bundle for one family, or null when the
- *  regular tier's links are missing (the wall/gate fails open upstream). */
+/** The available checkout bundle for one family, or null when the
+ *  regular tier's links are missing (the wall/gate fails open upstream).
+ *  Known but unavailable tiers remain null for new purchases. */
 function buildWallCheckout(familyId: string, email: string | null): WallCheckout | null {
   const regularLinks = tierPaymentLinkBases("regular");
   if (!regularLinks) return null;
@@ -193,7 +196,7 @@ function buildWallCheckout(familyId: string, email: string | null): WallCheckout
   return {
     regular: tierCheckout(regularLinks) as TierCheckout,
     plus: tierCheckout(tierPaymentLinkBases("plus")),
-    elite: tierCheckout(tierPaymentLinkBases("elite")),
+    elite: null,
   };
 }
 

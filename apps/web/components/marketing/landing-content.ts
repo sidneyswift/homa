@@ -1,18 +1,24 @@
 import {
+  planDefinition,
+  PURCHASABLE_HOMA_PLANS,
+  type PlanTier,
+} from "@homa/core";
+
+import {
   TIER_NAMES,
+  tierDescription,
   tierPriceAmount,
 } from "../billing/wall-copy";
 
-const MEMBERSHIP_TIERS = ["regular", "plus", "elite"] as const;
+export type MembershipTier = PlanTier;
 
-export type MembershipTier = (typeof MEMBERSHIP_TIERS)[number];
-
-export const MONTHLY_MEMBERSHIP_PRICES = MEMBERSHIP_TIERS.map((tier) =>
+export const MONTHLY_MEMBERSHIP_PRICES = PURCHASABLE_HOMA_PLANS.map(({ tier }) =>
   tierPriceAmount(tier, "monthly"),
 );
 
 const monthlyMembershipPriceList = (() => {
   const labels = MONTHLY_MEMBERSHIP_PRICES.map((price) => `$${price}`);
+  if (labels.length <= 2) return labels.join(" or ");
   return `${labels.slice(0, -1).join(", ")}, or ${labels.at(-1)}`;
 })();
 
@@ -194,13 +200,11 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
   },
 ];
 
-const LANDING_MEMBERSHIP_BODIES: Readonly<Record<MembershipTier, string>> = {
+const LANDING_MEMBERSHIP_BODIES: Readonly<Record<PlanTier, string>> = {
   regular:
     "Weekly plans, printable practice pages, teaching-hour records, and web chat are included.",
-  plus:
-    "Curriculum-file uploads for weekly planning are included. The membership picker names every other service currently offered before checkout.",
-  elite:
-    "A limited service membership. The membership picker names exactly what Homa is offering before checkout.",
+  plus: tierDescription("plus"),
+  elite: tierDescription("elite"),
 };
 
 export const MEMBERSHIP_ITEMS: ReadonlyArray<{
@@ -209,13 +213,22 @@ export const MEMBERSHIP_ITEMS: ReadonlyArray<{
   monthlyPrice: number;
   annualPrice: number;
   body: string;
-}> = MEMBERSHIP_TIERS.map((tier) => ({
+}> = PURCHASABLE_HOMA_PLANS.map(({ tier }) => ({
   tier,
   name: TIER_NAMES[tier],
   monthlyPrice: tierPriceAmount(tier, "monthly"),
   annualPrice: tierPriceAmount(tier, "annual"),
   body: LANDING_MEMBERSHIP_BODIES[tier],
 }));
+
+const maxPlan = planDefinition("elite");
+
+export const COMING_SOON_MEMBERSHIP = {
+  tier: maxPlan.tier,
+  name: maxPlan.name,
+  availability: "Coming soon",
+  body: tierDescription("elite"),
+} as const;
 
 export const MEMBERSHIP_NOTE =
   "Annual memberships are paid once for the year and cost 20% less than twelve monthly payments. You can stop the next renewal in your settings.";

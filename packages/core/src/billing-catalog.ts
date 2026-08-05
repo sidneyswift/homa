@@ -16,11 +16,15 @@ export type BillingPeriod = (typeof BILLING_PERIODS)[number];
 export const BILLING_PROVIDERS = ["stripe", "apple", "google"] as const;
 export type BillingProvider = (typeof BILLING_PROVIDERS)[number];
 
+export const PLAN_SALES_STATES = ["available", "coming_soon"] as const;
+export type PlanSalesState = (typeof PLAN_SALES_STATES)[number];
+
 export interface PlanDefinition {
   tier: PlanTier;
   name: string;
   monthlyUsd: number;
   annualUsd: number;
+  salesState: PlanSalesState;
 }
 
 /**
@@ -28,10 +32,19 @@ export interface PlanDefinition {
  * monthly payments, rounded to the current web sticker prices.
  */
 export const HOMA_PLANS: readonly PlanDefinition[] = [
-  { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182 },
-  { tier: "plus", name: "Homa Plus", monthlyUsd: 49, annualUsd: 470 },
-  { tier: "elite", name: "Homa Max", monthlyUsd: 199, annualUsd: 1910 },
+  { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182, salesState: "available" },
+  { tier: "plus", name: "Homa Plus", monthlyUsd: 49, annualUsd: 470, salesState: "available" },
+  { tier: "elite", name: "Homa Max", monthlyUsd: 199, annualUsd: 1910, salesState: "coming_soon" },
 ];
+
+/**
+ * The offer catalog is smaller than the receipt catalog on purpose.
+ * Existing provider product ids remain recognized after a plan stops taking
+ * new purchases, while every sales surface derives from this filtered list.
+ */
+export const PURCHASABLE_HOMA_PLANS: readonly PlanDefinition[] = HOMA_PLANS.filter(
+  (plan) => plan.salesState === "available",
+);
 
 export interface ProviderProduct {
   provider: BillingProvider;
@@ -80,6 +93,10 @@ export function isBillingProvider(value: unknown): value is BillingProvider {
 
 export function planDefinition(tier: PlanTier): PlanDefinition {
   return HOMA_PLANS.find((plan) => plan.tier === tier) ?? HOMA_PLANS[0];
+}
+
+export function planAvailableForPurchase(tier: PlanTier): boolean {
+  return planDefinition(tier).salesState === "available";
 }
 
 export function providerProduct(

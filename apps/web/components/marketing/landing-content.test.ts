@@ -8,6 +8,7 @@ import {
   FOUNDER_STORY_COPY,
   HERO_COPY,
   LANDING_SECTION_COPY,
+  COMING_SOON_MEMBERSHIP,
   MEMBERSHIP_ITEMS,
   MEMBERSHIP_NOTE,
   MONTHLY_MEMBERSHIP_PRICES,
@@ -37,10 +38,11 @@ test("the trial CTA states the card terms before the click", () => {
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /credit card/i);
-  assert.match(HERO_COPY.primaryActionNote, /\$19, \$49, or \$199/);
+  assert.match(HERO_COPY.primaryActionNote, /\$19 or \$49/);
+  assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
   assert.match(HERO_COPY.primaryActionNote, /before the first charge/i);
   assert.match(HERO_COPY.primaryActionNote, /cancel before then/i);
-  assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49, 199]);
+  assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49]);
 });
 
 test("metadata and structured offers reuse the catalog-derived landing contract", () => {
@@ -81,13 +83,12 @@ test("the landing states the current practice-page age boundary before signup", 
   assert.match(practice.body, /ages 2 to 7/i);
 });
 
-test("the landing shows the complete membership catalog before the final signup ask", () => {
+test("the landing shows every purchasable membership before the final signup ask", () => {
   assert.deepEqual(
     MEMBERSHIP_ITEMS.map(({ name, monthlyPrice, annualPrice }) => ({ name, monthlyPrice, annualPrice })),
     [
       { name: "Homa", monthlyPrice: 19, annualPrice: 182 },
       { name: "Homa Plus", monthlyPrice: 49, annualPrice: 470 },
-      { name: "Homa Max", monthlyPrice: 199, annualPrice: 1910 },
     ],
   );
   assert.match(LANDING_SECTION_COPY.memberships.body, /practice pages for ages 2 to 7/i);
@@ -97,18 +98,15 @@ test("the landing shows the complete membership catalog before the final signup 
   assert.match(MEMBERSHIP_NOTE, /stop the next renewal/i);
 });
 
-test("the landing does not expand service promises whose delivery gates remain open", () => {
+test("the landing names built Plus services and keeps unbuilt Max out of checkout", () => {
   const plus = MEMBERSHIP_ITEMS.find(({ tier }) => tier === "plus");
-  const max = MEMBERSHIP_ITEMS.find(({ tier }) => tier === "elite");
 
   assert.ok(plus);
-  assert.ok(max);
-  assert.match(plus.body, /curriculum-file uploads for weekly planning/i);
-  assert.match(plus.body, /membership picker names every other service currently offered/i);
-  assert.match(max.body, /limited service membership/i);
-  assert.match(max.body, /membership picker names exactly what Homa is offering/i);
-  assert.doesNotMatch(`${plus.body} ${max.body}`, /only when available|when it is available|whether it is available/i);
-  assert.doesNotMatch(`${plus.body} ${max.body}`, /text messages|phone calls|mailed materials|planning with a person/i);
+  assert.equal(MEMBERSHIP_ITEMS.some(({ tier }) => tier === "elite"), false);
+  assert.match(plus.body, /text messages, phone calls, and uploaded curriculum/i);
+  assert.equal(COMING_SOON_MEMBERSHIP.availability, "Coming soon");
+  assert.match(COMING_SOON_MEMBERSHIP.body, /not available to purchase yet/i);
+  assert.doesNotMatch(COMING_SOON_MEMBERSHIP.body, /\$199|Homa Max adds/i);
 });
 
 test("the fictional product example proves Homa can plan for an older child", () => {

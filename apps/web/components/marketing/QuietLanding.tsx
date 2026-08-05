@@ -15,6 +15,7 @@ import { FAQ_ITEMS } from "./faq-items";
 import {
   CAPABILITY_FEATURE_HREFS,
   CAPABILITY_ITEMS,
+  COMING_SOON_MEMBERSHIP,
   FOUNDER_STORY_COPY,
   HERO_COPY,
   LANDING_SECTION_COPY,
@@ -175,6 +176,7 @@ const QUIET_LANDING_CSS = `
 .qa-membership-card h3 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.1rem); line-height: .98; }
 .qa-membership-card__price { margin-top: 18px; color: var(--homa-ink); font: 700 2.15rem/1 var(--font-sans); font-variant-numeric: tabular-nums; }
 .qa-membership-card__price span { margin-left: 4px; color: var(--homa-muted-ink); font-size: .82rem; font-weight: 600; }
+.qa-membership-card__availability { margin-top: 18px; color: var(--homa-brand-text); font: 700 1rem/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; }
 .qa-membership-card__annual { margin-top: 9px; color: var(--homa-brand-text); font-size: .78rem; font-weight: 700; }
 .qa-membership-card__body { margin: 20px 0 0; border-top: 1px solid var(--homa-soft-boundary); padding-top: 18px; color: var(--homa-muted-ink); line-height: 1.5; }
 .qa-memberships__footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 28px; }
@@ -382,7 +384,7 @@ export function QuietLanding() {
 
           <section id="memberships" className="qa-band qa-section" aria-labelledby="quiet-memberships-title">
             <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.memberships.eyebrow}</div><h2 id="quiet-memberships-title">{LANDING_SECTION_COPY.memberships.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.memberships.body}</p></div>
-            <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}</div>
+            <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}<QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={COMING_SOON_MEMBERSHIP.tier}><h3>{COMING_SOON_MEMBERSHIP.name}</h3><div className="qa-membership-card__availability">{COMING_SOON_MEMBERSHIP.availability}</div><p className="qa-membership-card__body">{COMING_SOON_MEMBERSHIP.body}</p></QuietFrame></div>
             <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE}</p><TrialAction /></div>
           </section>
 

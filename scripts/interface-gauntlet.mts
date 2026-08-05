@@ -27,6 +27,8 @@ export const GAUNTLET_PERFORMANCE_BUDGET = {
   transferBytes: 5_000_000,
 } as const;
 
+export const GAUNTLET_READ_ONLY_METHODS = ["GET", "HEAD", "OPTIONS"] as const;
+
 export const GAUNTLET_LONG_COPY =
   "Alexandria-Wilhelmina van der Meer and the curious learning community";
 
@@ -128,8 +130,21 @@ export type RenderedRouteResult = {
   longCopy: LayoutEvidence;
   recovery: RecoveryEvidence;
   performance: PerformanceEvidence;
+  networkGuard: NetworkGuardEvidence;
   screenshotPath: string;
   issues: GauntletIssue[];
+};
+
+export type BlockedMutationEvidence = {
+  method: string;
+  origin: string;
+  path: string;
+};
+
+export type NetworkGuardEvidence = {
+  mode: "read-only";
+  blockedMutationCount: number;
+  blockedMutations: BlockedMutationEvidence[];
 };
 
 export type FocusEvidence = {
@@ -167,6 +182,36 @@ export type PerformanceEvidence = {
   domContentLoadedMs: number | null;
   transferBytes: number;
 };
+
+export function shouldBlockGauntletRequest(method: string): boolean {
+  const normalizedMethod = method.trim().toUpperCase();
+  return !(GAUNTLET_READ_ONLY_METHODS as readonly string[]).includes(normalizedMethod);
+}
+
+function blockedMutationEvidence(method: string, requestUrl: string): BlockedMutationEvidence {
+  try {
+    const url = new URL(requestUrl);
+    return { method: method.toUpperCase(), origin: url.origin, path: url.pathname };
+  } catch {
+    return { method: method.toUpperCase(), origin: "invalid-url", path: requestUrl.slice(0, 200) };
+  }
+}
+
+export async function installReadOnlyGauntletNetworkGuard(
+  context: any,
+  blockedMutations: BlockedMutationEvidence[],
+): Promise<void> {
+  await context.route("**/*", async (route: any) => {
+    const request = route.request();
+    const method = request.method();
+    if (shouldBlockGauntletRequest(method)) {
+      blockedMutations.push(blockedMutationEvidence(method, request.url()));
+      await route.abort("blockedbyclient");
+      return;
+    }
+    await route.continue();
+  });
+}
 
 function loadManifest(): BrandSurfaceManifest {
   return JSON.parse(readFileSync(MANIFEST_PATH, "utf8")) as BrandSurfaceManifest;
@@ -378,6 +423,8 @@ export async function runRenderedGauntlet(baseUrl: string, outputDir: string): P
     for (const route of GAUNTLET_ROUTES) {
       for (const viewport of GAUNTLET_VIEWPORTS) {
         const context = await browser.newContext({ viewport });
+        const blockedMutations: BlockedMutationEvidence[] = [];
+        await installReadOnlyGauntletNetworkGuard(context, blockedMutations);
         const page = await context.newPage();
         const issues: GauntletIssue[] = [];
         const response = await page.goto(new URL(route.path, baseUrl).toString(), { waitUntil: "domcontentloaded", timeout: 20_000 });
@@ -444,13 +491,18 @@ export async function runRenderedGauntlet(baseUrl: string, outputDir: string): P
         if (!forcedColors) issues.push({ check: "forced-colors-context", detail: `${route.path} did not expose the forced-colors media query` });
         await page.emulateMedia({ forcedColors: "none", reducedMotion: "no-preference" });
 
-        const reflow = await collectReflowEvidence(browser, baseUrl, route.path, issues);
+        const reflow = await collectReflowEvidence(browser, baseUrl, route.path, issues, blockedMutations);
         const longCopy = await collectLongCopyEvidence(page, issues, route.path);
         const recovery = await collectRecoveryEvidence(context, page, issues, route.path);
         const screenshotPath = resolve(outputDir, `${route.path === "/" ? "home" : route.path.slice(1).replaceAll("/", "-")}-${viewport.name}.png`);
         await page.screenshot({ path: screenshotPath, fullPage: true });
         await context.close();
-        results.push({ path: route.path, viewport: viewport.name, status: response?.status() ?? null, markers, reducedMotion, forcedColors, focus, axe, reflow, longCopy, recovery, performance: performanceEvidence, screenshotPath, issues });
+        const networkGuard: NetworkGuardEvidence = {
+          mode: "read-only",
+          blockedMutationCount: blockedMutations.length,
+          blockedMutations,
+        };
+        results.push({ path: route.path, viewport: viewport.name, status: response?.status() ?? null, markers, reducedMotion, forcedColors, focus, axe, reflow, longCopy, recovery, performance: performanceEvidence, networkGuard, screenshotPath, issues });
       }
     }
   } finally {
@@ -509,10 +561,17 @@ async function collectFocusEvidence(page: any, issues: GauntletIssue[], path: st
   return { focusableCount, visitedCount: visited.size, visibleFocusCount, escapedCount };
 }
 
-async function collectReflowEvidence(browser: any, baseUrl: string, path: string, issues: GauntletIssue[]): Promise<ReflowEvidence[]> {
+async function collectReflowEvidence(
+  browser: any,
+  baseUrl: string,
+  path: string,
+  issues: GauntletIssue[],
+  blockedMutations: BlockedMutationEvidence[],
+): Promise<ReflowEvidence[]> {
   const evidence: ReflowEvidence[] = [];
   for (const viewport of GAUNTLET_REFLOW_VIEWPORTS) {
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
+    await installReadOnlyGauntletNetworkGuard(context, blockedMutations);
     const page = await context.newPage();
     try {
       await page.goto(new URL(path, baseUrl).toString(), { waitUntil: "domcontentloaded", timeout: 20_000 });

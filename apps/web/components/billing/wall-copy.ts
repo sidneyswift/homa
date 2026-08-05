@@ -84,19 +84,14 @@ export const WALL_BULLETS = [
 export const WALL_DISMISS = "Not now";
 
 /**
- * The three sellable tiers (2026-07-25: Plus and Elite priced and
- * launched ahead of their differentiating product work, per founder
- * direction to test willingness to pay before building). Plus is
- * described as an active commitment ("adds state filing support"),
+ * The commercial tier names. Plus is described as an active commitment,
  * never a claim that a specific state's filing is already built and
  * verified today: a wrong legal claim is the one failure mode this
  * exact persona (Monica, docs/homa-planning/journeys/01-personas-jtbd.md
- * P4) cancels same-day over. The top tier's features are real,
- * buildable mechanics (a plan_tier column and the makings multiplier
- * already exist, supabase/migrations/20260725040000_family_plan_tier.sql);
- * the enforcement is dark until the base allowance itself ships,
- * matching how the wall's own doors already ship dark before a flag
- * flip. Internal key stays "elite" (the DB check constraint, Stripe
+ * P4) cancels same-day over. Max remains in the durable tier and receipt
+ * catalog for existing purchases, but it is not available for a new
+ * purchase until its human and physical fulfillment exists. Internal key
+ * stays "elite" (the DB check constraint, Stripe
  * product mapping in wall.ts) to avoid a second migration; only the
  * display name changed, same pattern as "regular" displaying as "Homa".
  *
@@ -211,7 +206,7 @@ export function tierPriceUnit(period: BillingPeriod): string {
   return period === "monthly" ? "month" : "year";
 }
 
-/** The toggle itself: one control above all three cards, so "annual"
+/** The toggle itself: one control above every available tier, so "annual"
  *  means the same 20%-off-monthly discount everywhere (founder ruling
  *  2026-07-26) and one badge states it once instead of a per-tier
  *  dollar figure. */
@@ -236,9 +231,9 @@ export function tierBullets(tier: PlanTier, period: BillingPeriod): readonly str
  * The old picker gave each card a 1 to 3 sentence description that
  * re-listed the shared features, which put 35, 41, and 51 words on the
  * three cards: reading burden rose with price, so the tier needing the
- * most consideration was the hardest to scan. These are 4, 7, and 8
- * words, in the same grammatical shape, so the three rows can be
- * compared without being read in full.
+ * most consideration was the hardest to scan. Every live row now keeps
+ * one compact line so the available plans can be compared without being
+ * read in full.
  *
  * The full vetted sentences are not deleted, they moved: tierDescription
  * still carries them for the compare section under the picker, which is
@@ -265,77 +260,14 @@ export function tierDelta(tier: PlanTier): string {
       // legal obligation the highest-load persona came to solve.
       return "Weekly plans, practice pages, teaching hours logged.";
     case "plus":
-      // Founder ruling 2026-07-28, second pass. The three tiers now run
-      // on one axis, how far Homa comes toward you: the base is Homa on
-      // the web, this one is Homa reaching you wherever you are and
-      // working from materials you already own, and the top one is a
-      // person and a parcel arriving.
-      //
-      // State filing was this row's story until now and is deliberately
-      // gone. It was the page's single largest unsupportable claim, the
-      // one the compliance-heavy persona cancels same-day over, and it
-      // also asked a question the page could not answer ("does MY state
-      // require filing?") which sent two personas to a search engine
-      // instead of a checkout. Removing it costs nothing that existed.
-      //
-      // Email is delivered on this tier too and is not named here: at
-      // 45 characters the row wrapped to a second line while the other
-      // two held one, and three rows of identical shape scan faster
-      // than three rows carrying one more noun. "Your own curriculum"
-      // kept its "own", which is the word that means the material she
-      // already paid for rather than one Homa invents.
-      return "Adds text messages, phone calls, and curriculum uploads.";
+      // "Includes" remains true while channel gating is dark and after
+      // it turns on. "Adds" would falsely imply the base tier cannot use
+      // text or phone in today's production configuration.
+      return "Includes text messages, phone calls, and curriculum uploads.";
     case "elite":
-      // Founder ruling 2026-07-28: this tier's job is to make $49 read
-      // as reasonable, and it earns that by being worth its own price,
-      // not by being a big number with nothing behind it.
-      //
-      // What it said until then: "Adds five times the makings each
-      // week, and no waiting." Both halves were unsupportable in both
-      // directions, because nothing reads families.plan_tier to meter
-      // anything: no allowance for five times to be five times OF, no
-      // queue to skip. Worse, it anchored backwards. Seven of ten
-      // review personas said the $199 row made them trust the $19 row
-      // LESS, and eight read "no waiting" as proof the cheap plan is
-      // deliberately throttled. An anchor only works when the top tier
-      // reads as more; a mystery reads as a catch.
-      //
-      // The year build is the differentiator because it is real work a
-      // parent cannot do herself in an evening, and because the
-      // machinery ships: curriculum-studio runs 12 and 36 week program
-      // builds as finite background jobs
-      // (apps/web/agent/skills/curriculum-studio/SKILL.md). A 36 week
-      // program is a school year.
-      //
-      // The word doing the work is "without asking". On request, this
-      // capability is available to every tier today, so claiming it as
-      // an addition would repeat the exact falsehood above. What Max
-      // adds is that Homa does it up front, per child, and keeps it
-      // current, rather than waiting to be asked. That is a service
-      // difference, so it takes nothing away from anyone below it.
-      //
-      // Founder ruling 2026-07-28, second pass: physical and human.
-      // The year build lasted one revision and was cut for the reason
-      // that kills every software differentiator on this page, in the
-      // founder's own words: "Homa can build that whole year on the $19
-      // plan. That's not that much of a difference." Correct. Anything
-      // the cheap tier can already do cannot carry the expensive one.
-      //
-      // Materials in the post and a person on a call are the only kind
-      // of thing the base tier cannot quietly match, which is exactly
-      // why they work here. They also answer the objection the
-      // 2026-07-25 tier panel raised against "Concierge", that it
-      // promised a human the mechanism did not back: this time there is
-      // a human.
-      //
-      // Say "a person", never the founders by name. A plan description
-      // is a standing promise, and naming who delivers it makes it one
-      // you have to keep at customer forty. Deliver founders while that
-      // is possible.
-      //
-      // Shipping is already possible today: setFamilyAddress collects a
-      // full mailing address in /app/settings.
-      return "Adds mailed materials and planning with a person.";
+      // Max is preserved for receipt compatibility, not merchandised as
+      // delivered. A mailing address field is not a fulfillment system.
+      return "Coming soon: mailed materials and planning with a person.";
     default: {
       const exhaustive: never = tier;
       throw new Error(`Unhandled plan tier: ${exhaustive}`);
@@ -351,9 +283,9 @@ export function tierDescription(tier: PlanTier): string {
     case "regular":
       return "Homa includes weekly plans, printable practice pages, and teaching-hour records.";
     case "plus":
-      return "Homa Plus adds text messages, phone calls, and uploaded curriculum.";
+      return "Homa Plus includes text messages, phone calls, and uploaded curriculum.";
     case "elite":
-      return "Homa Max adds printed materials by mail and planning with a person.";
+      return "Homa Max is coming soon. Printed materials by mail and planning with a person are planned. It is not available to purchase yet.";
     default: {
       const exhaustive: never = tier;
       throw new Error(`Unhandled plan tier: ${exhaustive}`);
