@@ -43,8 +43,10 @@ test("the pricing FAQ explains the three prices and what changes", () => {
   assert.match(answer, /Homa Plus is \$49 a month/i);
   assert.match(answer, /Homa Max is \$199 a month/i);
   assert.match(answer, /practice pages/i);
-  assert.match(answer, /Homa Plus adds curriculum-file uploads for weekly planning/i);
-  assert.match(answer, /membership picker shows the current Homa Max details/i);
+  assert.match(answer, /Homa Plus includes curriculum-file uploads for weekly planning/i);
+  assert.match(answer, /Homa Max is a limited service membership/i);
+  assert.match(answer, /membership picker names exactly what Homa is offering/i);
+  assert.doesNotMatch(answer, /only when available|when it is available|whether it is available/i);
   assert.doesNotMatch(answer, /text messages|phone calls|printed materials|planning with a person/i);
   assert.match(answer, /annual memberships are paid once for the year/i);
   assert.match(answer, /stop any membership from renewing in your settings/i);

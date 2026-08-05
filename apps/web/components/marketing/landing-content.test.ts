@@ -21,13 +21,14 @@ const QUIET_LANDING_SOURCE = readFileSync(new URL("./QuietLanding.tsx", import.m
 const LANDING_PAGE_SOURCE = readFileSync(new URL("../../app/page.tsx", import.meta.url), "utf8");
 
 test("the landing hero names Homa's category and primary action", () => {
-  assert.equal(HERO_COPY.headline, "Less admin. More teaching.");
+  assert.equal(HERO_COPY.headline, "Homeschool, handled.");
   assert.equal(HERO_COPY.primaryAction, "Start your 7 free days");
-  assert.equal(HERO_COPY.eyebrow, "Homeschool, handled");
-  assert.match(HERO_COPY.body, /plans your week/i);
-  assert.match(HERO_COPY.body, /tailored materials/i);
-  assert.match(HERO_COPY.body, /adapts to growth/i);
-  assert.match(HERO_COPY.body, /Meet your kid where they are/i);
+  assert.equal(HERO_COPY.eyebrow, "Your homeschool assistant");
+  assert.match(HERO_COPY.body, /AI assistant for homeschool parents/i);
+  assert.match(HERO_COPY.body, /plans the week for every child you add/i);
+  assert.match(HERO_COPY.body, /For children ages 2 to 7, she also makes practice pages/i);
+  assert.match(HERO_COPY.body, /teaching hours you report/i);
+  assert.match(HERO_COPY.body, /You review every change/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -76,7 +77,7 @@ test("the landing states the current practice-page age boundary before signup", 
   const practice = CAPABILITY_ITEMS.find(({ id }) => id === "practice");
 
   assert.ok(practice);
-  assert.match(HERO_COPY.body, /tailored materials/i);
+  assert.match(HERO_COPY.body, /children ages 2 to 7/i);
   assert.match(practice.body, /ages 2 to 7/i);
 });
 
@@ -103,8 +104,17 @@ test("the landing does not expand service promises whose delivery gates remain o
   assert.ok(plus);
   assert.ok(max);
   assert.match(plus.body, /curriculum-file uploads for weekly planning/i);
-  assert.match(max.body, /membership picker/i);
+  assert.match(plus.body, /membership picker names every other service currently offered/i);
+  assert.match(max.body, /limited service membership/i);
+  assert.match(max.body, /membership picker names exactly what Homa is offering/i);
+  assert.doesNotMatch(`${plus.body} ${max.body}`, /only when available|when it is available|whether it is available/i);
   assert.doesNotMatch(`${plus.body} ${max.body}`, /text messages|phone calls|mailed materials|planning with a person/i);
+});
+
+test("the fictional product example proves Homa can plan for an older child", () => {
+  assert.match(PRODUCT_PREVIEW_COPY.eyebrow, /Leo, age 9/i);
+  assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /Leo's unfinished fractions review/i);
+  assert.equal(LANDING_SECTION_COPY.authority.secondaryAction, "See how it works");
 });
 
 test("each capability card points to its canonical feature page", () => {
@@ -158,10 +168,10 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
-  assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes answering questions/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /published sources for your child's age/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /starts with strengths/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /you can open each one/i);
+  assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes per child/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /published sources used for your child's age/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /one practical next step for each subject/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits your child/i);
   assert.doesNotMatch(
     `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
     /test|score|questionnaire|observation/i,
@@ -207,6 +217,13 @@ test("the primary action appears in the first visual viewport", () => {
   assert.ok(openingStart >= 0);
   assert.ok(firstTrialAction > openingStart);
   assert.ok(firstTrialAction < authorityStart);
+});
+
+test("the decorative Homa mark yields to hero proof on narrow phones", () => {
+  assert.match(
+    QUIET_LANDING_SOURCE,
+    /@media \(max-width: 480px\)[\s\S]*?\.qa-opening__character \{ display: none; \}/u,
+  );
 });
 
 test("the landing keeps functional actions on the approved midnight role", () => {

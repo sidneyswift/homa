@@ -230,7 +230,7 @@ const QUIET_LANDING_CSS = `
   .qa-opening__copy p { font-size: 1rem; }
   .qa-opening__next { width: 100%; }
   .qa-opening__thread { bottom: 38px; left: 20px; width: 88vw; }
-  .qa-opening__character { right: 18px; bottom: 16px; }
+  .qa-opening__character { display: none; }
   .qa-authority h2 { font-size: clamp(2.9rem, 14vw, 4.2rem); }
   .qa-product { padding: 14px; }
   .qa-product__controls { grid-template-columns: 1fr; }
