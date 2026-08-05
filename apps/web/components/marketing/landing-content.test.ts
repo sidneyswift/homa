@@ -24,10 +24,11 @@ test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.primaryAction, "Start your 7 free days");
   assert.equal(HERO_COPY.eyebrow, "Your homeschool assistant");
   assert.match(HERO_COPY.body, /AI assistant for homeschool parents/i);
-  assert.match(HERO_COPY.body, /plans the week for every child you add/i);
-  assert.match(HERO_COPY.body, /For children ages 2 to 7, she also makes practice pages/i);
-  assert.match(HERO_COPY.body, /teaching hours you report/i);
-  assert.match(HERO_COPY.body, /You review every change/i);
+  assert.match(HERO_COPY.body, /plans the week/i);
+  assert.match(HERO_COPY.body, /makes practice pages/i);
+  assert.match(HERO_COPY.body, /keeps your records together/i);
+  assert.match(HERO_COPY.body, /Your child never has to use Homa/i);
+  assert.match(HERO_COPY.body, /You review every update/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -36,18 +37,13 @@ test("the trial CTA states the card terms before the click", () => {
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /credit card/i);
-  assert.match(HERO_COPY.primaryActionNote, /Choose monthly or annual when you sign up/);
-  assert.match(HERO_COPY.primaryActionNote, /Homa costs \$19 a month or \$182 a year/);
-  assert.match(HERO_COPY.primaryActionNote, /Homa Plus costs \$49 a month or \$470 a year/);
+  assert.match(HERO_COPY.primaryActionNote, /from \$19 a month/i);
   assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
-  assert.match(HERO_COPY.primaryActionNote, /before the first charge/i);
-  assert.match(HERO_COPY.primaryActionNote, /cancel before then/i);
+  assert.match(HERO_COPY.primaryActionNote, /cancel before the first charge/i);
   assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49]);
-  assert.match(LANDING_SECTION_COPY.final.body, /Homa for \$19 a month/i);
-  assert.match(LANDING_SECTION_COPY.final.body, /Homa Plus for \$49 a month/i);
-  assert.match(LANDING_SECTION_COPY.final.body, /require a credit card/i);
-  assert.doesNotMatch(LANDING_SECTION_COPY.final.body, /and a credit card/i);
-  assert.doesNotMatch(LANDING_SECTION_COPY.final.body, /the \$19 Homa membership/i);
+  assert.match(LANDING_SECTION_COPY.final.body, /from \$19 a month/i);
+  assert.match(LANDING_SECTION_COPY.final.body, /credit card required/i);
+  assert.match(LANDING_SECTION_COPY.final.body, /cancel before the first charge/i);
 });
 
 test("metadata and structured offers reuse the catalog-derived landing contract", () => {
@@ -75,8 +71,8 @@ test("the landing states the current practice-page age boundary before signup", 
   const practice = CAPABILITY_ITEMS.find(({ id }) => id === "practice");
 
   assert.ok(practice);
-  assert.match(HERO_COPY.body, /children ages 2 to 7/i);
   assert.match(practice.body, /ages 2 to 7/i);
+  assert.doesNotMatch(HERO_COPY.body, /ages? \d/i);
 });
 
 test("the landing shows every purchasable membership before the final signup ask", () => {
@@ -87,11 +83,10 @@ test("the landing shows every purchasable membership before the final signup ask
       { name: "Homa Plus", monthlyPrice: 49, annualPrice: 470 },
     ],
   );
-  assert.match(LANDING_SECTION_COPY.memberships.body, /practice pages for ages 2 to 7/i);
-  assert.match(LANDING_SECTION_COPY.memberships.headline, /price/i);
-  assert.doesNotMatch(LANDING_SECTION_COPY.memberships.headline, /what each membership includes/i);
-  assert.match(MEMBERSHIP_NOTE, /paid once for the year/i);
-  assert.match(MEMBERSHIP_NOTE, /stop the next renewal/i);
+  assert.match(LANDING_SECTION_COPY.memberships.headline, /whole family/i);
+  assert.match(LANDING_SECTION_COPY.memberships.body, /no extra cost/i);
+  assert.match(MEMBERSHIP_NOTE, /paid once a year/i);
+  assert.match(MEMBERSHIP_NOTE, /stop renewal anytime/i);
 });
 
 test("the landing names built Plus services and keeps unbuilt Max out of checkout", () => {
@@ -110,7 +105,7 @@ test("the fictional product example proves Homa can plan for an older child", ()
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /Leo's unfinished fractions review/i);
   assert.equal(PRODUCT_PREVIEW_COPY.states.tell.title, "Parent's note");
   assert.equal(PRODUCT_PREVIEW_COPY.states.tell.control, "Read note");
-  assert.equal(LANDING_SECTION_COPY.authority.secondaryAction, "See prices");
+  assert.equal(LANDING_SECTION_COPY.authority.secondaryAction, "See what Homa handles");
 });
 
 test("each capability card points to its canonical feature page", () => {
@@ -164,12 +159,9 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
   assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes per child/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /published developmental milestones/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /national grade standards/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /source links/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /not a test or evaluation/i);
   assert.match(SAMPLE_REPORT_COPY.body, /one practical activity for each subject/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits your child/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /never turns your child into a number or a verdict/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits/i);
   assert.doesNotMatch(
     `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
     /score|questionnaire|diagnosis/i,
@@ -179,8 +171,8 @@ test("the sample proof explains the mechanism before the result", () => {
 test("the founder story uses the public co-founder signature", () => {
   assert.equal(FOUNDER_STORY_COPY.signature, "Alessa & Carolyng");
   assert.equal(FOUNDER_STORY_COPY.headline, "Homa started at our kitchen table.");
-  assert.match(FOUNDER_STORY_COPY.body, /She prepares the week/i);
-  assert.match(FOUNDER_STORY_COPY.body, /we stay in charge/i);
+  assert.match(FOUNDER_STORY_COPY.body, /Homa prepares the week/i);
+  assert.match(FOUNDER_STORY_COPY.body, /You stay in charge/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bcurriculum\b/i);
   assert.doesNotMatch(FOUNDER_STORY_COPY.body, /\bsteady\b/i);
 });
@@ -210,19 +202,42 @@ test("the live landing composition keeps the approved artifact-first opening", (
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /Leo · Tuesday|Teaching time[\s\S]*saved by child/u);
 });
 
-test("the phone reading order moves proof and prices ahead of capability detail", () => {
+test("the phone reading order explains the product before asking for a price decision", () => {
   const howAnchor = QUIET_LANDING_SOURCE.indexOf('<div id="how" className="qa-authority">');
   const reportSection = QUIET_LANDING_SOURCE.indexOf('<section id="sample-report"');
   const membershipsSection = QUIET_LANDING_SOURCE.indexOf('<section id="memberships"');
   const featuresSection = QUIET_LANDING_SOURCE.indexOf('<section id="features"');
+  const faqSection = QUIET_LANDING_SOURCE.indexOf('<section id="faq"');
+  const storySection = QUIET_LANDING_SOURCE.indexOf('<section id="stories"');
 
   assert.ok(howAnchor >= 0);
-  assert.ok(reportSection > howAnchor);
+  assert.ok(featuresSection > howAnchor);
+  assert.ok(reportSection > featuresSection);
   assert.ok(membershipsSection > reportSection);
-  assert.ok(featuresSection > membershipsSection);
+  assert.ok(faqSection > membershipsSection);
+  assert.ok(storySection > faqSection);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /<section id="how"/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-pain-grid|WORKFLOW_ITEMS/u);
-  assert.match(QUIET_LANDING_SOURCE, /href="#memberships"/u);
+  assert.match(QUIET_LANDING_SOURCE, /href="#features"/u);
+});
+
+test("the public landing copy keeps each decision-sized block concise", () => {
+  const wordCount = (value: string) => value.trim().split(/\s+/u).filter(Boolean).length;
+
+  assert.ok(wordCount(HERO_COPY.body) <= 34);
+  assert.ok(wordCount(HERO_COPY.primaryActionNote) <= 22);
+  assert.ok(wordCount(LANDING_SECTION_COPY.authority.body) <= 18);
+  assert.ok(wordCount(LANDING_SECTION_COPY.features.body) <= 12);
+  assert.ok(wordCount(LANDING_SECTION_COPY.memberships.body) <= 16);
+  assert.ok(wordCount(LANDING_SECTION_COPY.final.body) <= 22);
+
+  for (const capability of CAPABILITY_ITEMS) {
+    assert.ok(wordCount(capability.body) <= 28, `${capability.id} copy is too dense`);
+  }
+
+  assert.ok(wordCount(SAMPLE_REPORT_COPY.reassurance) <= 14);
+  assert.ok(wordCount(SAMPLE_REPORT_COPY.body) <= 38);
+  assert.ok(wordCount(FOUNDER_STORY_COPY.body) <= 34);
 });
 
 test("the primary action appears in the first visual viewport", () => {
@@ -262,9 +277,9 @@ test("the product moment exposes a keyboard-safe, reduced-motion state demo", ()
 
 test("the product moment records only teaching time the parent supplied", () => {
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /\b\d+\s+minutes\b/iu);
-  assert.match(PRODUCT_PREVIEW_COPY.dayBody, /35 minutes of science is added/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.dayBody, /35 minutes of science are recorded/iu);
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /unfinished fractions review/iu);
-  assert.match(PRODUCT_PREVIEW_COPY.dayBody, /fractions review moves to Thursday/iu);
+  assert.match(PRODUCT_PREVIEW_COPY.dayBody, /fractions review moved to Thursday/iu);
   assert.doesNotMatch(
     PRODUCT_PREVIEW_COPY.states.updating.description,
     /35 minutes|fractions review|counting page/iu,

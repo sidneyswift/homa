@@ -7,10 +7,10 @@ test("the state-rules FAQ keeps source context separate from compliance", () => 
   const answer = FAQ_ITEMS.find(([question]) => question === "Can Homa help with my state's homeschool rules?")?.[1];
 
   assert.ok(answer);
-  assert.match(answer, /^Homa records the teaching hours you report\./);
+  assert.match(answer, /^Homa records the hours you report/);
   assert.match(answer, /does not decide whether your family meets a legal requirement/i);
-  assert.match(answer, /date it was last reviewed/i);
-  assert.match(answer, /confirm what applies/i);
+  assert.match(answer, /dated state-rule sources/i);
+  assert.match(answer, /confirm it/i);
   assert.match(answer, /state's official website/i);
   assert.doesNotMatch(answer, /Homa follows your state's standards/i);
 });
@@ -35,18 +35,17 @@ test("the privacy FAQ gives a plain use, sale, and deletion boundary", () => {
   assert.doesNotMatch(answer, /lists the companies/i);
 });
 
-test("the pricing FAQ explains only current purchasable memberships", () => {
-  const answer = FAQ_ITEMS.find(([question]) => question === "How much does Homa cost?")?.[1];
+test("the FAQ does not repeat the complete pricing section", () => {
+  assert.equal(
+    FAQ_ITEMS.some(([question]) => question === "How much does Homa cost?"),
+    false,
+  );
+});
 
-  assert.ok(answer);
-  assert.match(answer, /add a credit card to start 7 free days/i);
-  assert.match(answer, /Homa is \$19 a month/i);
-  assert.match(answer, /Homa Plus is \$49 a month/i);
-  assert.match(answer, /practice pages/i);
-  assert.match(answer, /phone number for texting or calling Homa/i);
-  assert.match(answer, /curriculum file uploads/i);
-  assert.match(answer, /weekly plan/i);
-  assert.doesNotMatch(answer, /Homa Max|coming soon|\$199|\$1,910/i);
-  assert.match(answer, /annual memberships are paid once for the year/i);
-  assert.match(answer, /stop any membership from renewing in your settings/i);
+test("every collapsed answer stays short enough to scan", () => {
+  const wordCount = (value: string) => value.trim().split(/\s+/u).filter(Boolean).length;
+
+  for (const [question, answer] of FAQ_ITEMS) {
+    assert.ok(wordCount(answer) <= 45, `${question} is too dense`);
+  }
 });

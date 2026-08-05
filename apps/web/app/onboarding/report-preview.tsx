@@ -28,7 +28,7 @@ export function ReportPreview() {
     <a
       href="/onboarding/sample"
       aria-label="See the full sample report"
-      className="quiet-report-preview-link"
+      className="quiet-report-preview-link min-w-0"
     >
       <QuietFrame as="article" data-brand-surface="report-preview" className="quiet-report-preview">
         <div className="quiet-report-preview__header relative">
@@ -37,8 +37,8 @@ export function ReportPreview() {
           </p>
           {/* Second person, not the sample kid's name (founder screenshot
               2026-07-08): the mock sells what YOUR child gets; Maya stays
-              in the eyebrow and note as the worked example. Sentence case
-              per house style. */}
+              in the eyebrow as the worked example. Sentence case per house
+              style. */}
           {/* nowrap keeps "progress report" wrapping as a unit; a mid-width
               break set the coral word alone at the start of line 2. */}
           <p className="quiet-report-preview__title">
@@ -70,15 +70,6 @@ export function ReportPreview() {
               <p className="quiet-report-preview__next">Try next: {row.nextStep}</p>
             </div>
           ))}
-
-          <div className="quiet-report-preview__note">
-            <p className="quiet-report-preview__note-eyebrow" style={{ color: "var(--homa-constructive-ink)" }}>
-              A note from Homa
-            </p>
-            <p className="quiet-report-preview__note-copy">
-              You said Maya retells familiar events in order. Next time you share a story, ask what happened next.
-            </p>
-          </div>
 
           {/* The whole card is one link. Close with its destination, not a
               hidden subject count that makes the report feel like a test. */}

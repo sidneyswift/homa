@@ -16,15 +16,12 @@ export const MONTHLY_MEMBERSHIP_PRICES = PURCHASABLE_HOMA_PLANS.map(({ tier }) =
 );
 
 const regularMonthlyPrice = tierPriceAmount("regular", "monthly");
-const plusMonthlyPrice = tierPriceAmount("plus", "monthly");
-const regularAnnualPrice = tierPriceAmount("regular", "annual");
-const plusAnnualPrice = tierPriceAmount("plus", "annual");
 
 export const HERO_COPY = {
   eyebrow: "Your homeschool assistant",
   headline: "Homeschool, handled.",
   body:
-    "Homa is an AI assistant for homeschool parents. She plans the week for every child you add, records the teaching hours you report, and keeps finished work together. For children ages 2 to 7, she also makes practice pages. You review every change.",
+    "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages, and keeps your records together. Your child never has to use Homa. You review every update.",
   primaryAction: "Start your 7 free days",
   /** Under the primary CTA, everywhere it appears: the card ask must be
    *  visible BEFORE the click (trial-transparency research 2026-07-26:
@@ -32,9 +29,9 @@ export const HERO_COPY = {
    *  cancellations; naming it raised trial starts in the Blinkist
    *  case). One price, the trial length, and the way out. */
   primaryActionNote:
-    `Choose monthly or annual when you sign up. Homa costs $${regularMonthlyPrice} a month or $${regularAnnualPrice.toLocaleString("en-US")} a year. Homa Plus costs $${plusMonthlyPrice} a month or $${plusAnnualPrice.toLocaleString("en-US")} a year. Both memberships start with 7 free days and require a credit card. We email you before the first charge. Cancel before then to pay nothing.`,
-  proofLabel: "One membership for your family",
-  proof: "Add every child. The price stays the same.",
+    `7 free days, then from $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
+  proofLabel: "Your whole family",
+  proof: "Add every child at no extra cost.",
 } as const;
 
 export type PlatformKind = "message" | "web" | "phone";
@@ -50,68 +47,66 @@ export const PLATFORM_ITEMS: ReadonlyArray<{
 
 export const LANDING_SECTION_COPY = {
   authority: {
-    eyebrow: "One note, three updates",
-    headline: "Tell Homa what changed. Review the updated week.",
+    eyebrow: "How it works",
+    headline: "Tell Homa what changed.",
     body:
-      "Change the plan, add teaching time, and make a practice page in one note. Homa shows you the result before you keep it.",
-    secondaryAction: "See prices",
+      "She updates the plan, records the hours, and prepares the page. You review the result.",
+    secondaryAction: "See what Homa handles",
   },
   features: {
-    eyebrow: "What you get",
-    headline: "One place for plans, pages, records, and teaching hours.",
-    body:
-      "Open the plan, a printable page, the family binder, and the teaching-hour record below. Each example shows what you tell Homa, what she prepares, and what you can review or change.",
+    eyebrow: "What Homa handles",
+    headline: "The plan. The pages. The records.",
+    body: "Everything stays together, even when the week changes.",
   },
   memberships: {
-    eyebrow: "Membership prices",
-    headline: "Every price, before you choose.",
-    body:
-      "Every membership includes the progress report, weekly plans, practice pages for ages 2 to 7, teaching-hour records, and web chat. Adding children never changes the price.",
+    eyebrow: "Simple pricing",
+    headline: "One price for your whole family.",
+    body: "Choose Homa or Homa Plus. Add every child at no extra cost.",
   },
   faq: {
-    eyebrow: "Before you start",
-    headline: "Ages, curriculum, state rules, and memberships.",
+    eyebrow: "Questions",
+    headline: "The details, without the fine print.",
   },
   final: {
     eyebrow: "Start with next week",
-    headline: "Let Homa prepare the week.",
+    headline: "Let Homa handle the plan.",
     body:
-      "Choose Homa for $19 a month or Homa Plus for $49 a month when you sign up. Both start with 7 free days and require a credit card. We email you before the first charge. Cancel before then to pay nothing.",
+      `7 free days, then from $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
   },
 } as const;
 
 export const PRODUCT_PREVIEW_COPY = {
   status: "Fictional example",
   eyebrow: "Maya, age 4, and Leo, age 9",
-  headline: "Make Tuesday lighter.",
+  headline: "One note updates the week.",
   states: {
     tell: {
       control: "Read note",
       title: "Parent's note",
       description:
         "Move Leo's unfinished fractions review to Thursday. He finished science after 35 minutes. Make Maya a butterfly counting page for Tuesday.",
-      activity: "Shared with Homa",
+      activity: "Sent to Homa",
     },
     updating: {
       control: "Homa updates",
-      title: "Homa is making three changes",
+      title: "Homa is updating the week",
       description:
-        "The weekly plan, teaching hours, and practice page update together.",
+        "She moves the lesson, records the time, and makes the practice page.",
       activity: "Making changes",
     },
     ready: {
       control: "Review changes",
-      title: "Ready for the parent",
-      description: "Review each change before it becomes part of the week.",
+      title: "Ready to review",
+      description: "Check each change before you keep it.",
       activity: "Ready to review",
     },
   },
-  dayTitle: "The week reflects all three changes",
+  dayTitle: "The week is up to date",
   dayBody:
-    "Maya's counting page is on Tuesday. Leo's fractions review moves to Thursday, and 35 minutes of science is added to his teaching hours.",
-  artifactEyebrow: "A page made from the lesson",
-  artifactTitle: "Maya's butterfly counting page is ready to print.",
-  artifactBody: "Homa saves the page with Tuesday's weekly plan. You can print the page or ask for a change.",
+    "Maya's page is ready. Leo's fractions review moved to Thursday. His 35 minutes of science are recorded.",
+  artifactEyebrow: "Made from the lesson",
+  artifactTitle: "Maya's counting page is ready to print.",
+  artifactBody: "Print it, or ask Homa for a change.",
 } as const;
 
 export type CapabilityId = "practice" | "plan" | "binder" | "records";
@@ -135,28 +130,28 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
     id: "plan",
     title: "The weekly plan",
     body:
-      "Tell Homa which children you are planning for, how much time you have, and which curriculum you use. She builds the weekly plan from those details. Homa Plus can also read curriculum files you upload. Move a lesson or lighten a day without starting over.",
+      "Homa builds each child's week from the schedule and curriculum details you share. Homa Plus can read curriculum files for you. Move a lesson without rebuilding the plan.",
     action: "See the weekly plan",
   },
   {
     id: "practice",
     title: "Practice pages",
     body:
-      "Practice pages currently cover ages 2 to 7. Tell Homa the lesson and what your child is practicing. She makes the page, saves it in your family binder, and keeps it ready to print.",
+      "For ages 2 to 7, Homa makes printable practice pages from the lesson you are teaching.",
     action: "See practice pages",
   },
   {
     id: "binder",
     title: "The binder",
     body:
-      "Finished work, photos, notes, and reports stay together in your family binder. Find them later or print a page again.",
+      "Add finished work, photos, and notes. Homa keeps them with reports and practice pages, ready to find later.",
     action: "See the binder",
   },
   {
     id: "records",
     title: "Teaching hours and state rules",
     body:
-      "Tell Homa how long you taught. She records teaching hours by child and subject. The state-rules section links to each source and shows the date it was last reviewed.",
+      "Report the time you taught. Homa records it by child and subject, with dated state-rule sources nearby.",
     action: "See teaching hours",
   },
 ];
@@ -183,15 +178,15 @@ export const MEMBERSHIP_ITEMS: ReadonlyArray<{
 }));
 
 export const MEMBERSHIP_NOTE =
-  "Annual memberships are paid once for the year and cost 20% less than twelve monthly payments. You can stop the next renewal in your settings.";
+  "Annual plans cost 20% less and are paid once a year. Stop renewal anytime in settings.";
 
 export const SAMPLE_REPORT_COPY = {
-  eyebrow: "The progress report",
+  eyebrow: "Progress report",
   headline: "See what is going well and what to try next.",
   body:
-    "Homa organizes your answers by subject. Early ages use published developmental milestones; school ages use national grade standards, with source links. This is not a test or evaluation. You get one practical activity for each subject, and you decide what fits your child.",
+    "Answer from what you have already seen. Homa turns your answers into one practical activity for each subject. It never turns your child into a number or a verdict. You decide what fits.",
   reassurance:
-    "About five minutes per child. You answer from what you have already seen, and your child never has to use Homa.",
+    "About five minutes per child. Your child never has to use Homa.",
   action: "See the sample report",
   href: "/onboarding/sample",
 } as const;
@@ -200,6 +195,6 @@ export const FOUNDER_STORY_COPY = {
   eyebrow: "Our story",
   headline: "Homa started at our kitchen table.",
   body:
-    "We built Homa while teaching our own children and trying to keep every plan, page, and record together. The paperwork kept taking time from the teaching. She prepares the week and keeps the record, while we stay in charge of our children's learning.",
+    "We built Homa while teaching our own children. We wanted planning and paperwork to stop stealing time from teaching. Homa prepares the week and keeps the record. You stay in charge.",
   signature: "Alessa & Carolyng",
 } as const;

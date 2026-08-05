@@ -339,11 +339,16 @@ export function QuietLanding() {
                   <span className="qa-authority__kicker">{LANDING_SECTION_COPY.authority.eyebrow}</span>
                   <h2>{LANDING_SECTION_COPY.authority.headline}</h2>
                   <p>{LANDING_SECTION_COPY.authority.body}</p>
-                  <div className="qa-authority__actions"><QuietAction kind="secondary" href="#memberships" icon={<Icon name="next" size={20} />}>{LANDING_SECTION_COPY.authority.secondaryAction}</QuietAction></div>
+                  <div className="qa-authority__actions"><QuietAction kind="secondary" href="#features" icon={<Icon name="next" size={20} />}>{LANDING_SECTION_COPY.authority.secondaryAction}</QuietAction></div>
                 </div>
                 <QuietProductMoment />
               </div>
             </div>
+          </section>
+
+          <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
+            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.features.eyebrow}</div><h2 id="quiet-features-title">{LANDING_SECTION_COPY.features.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.features.body}</p></div>
+            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body, action }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>{action}</QuietAction></div></QuietFrame>)}</div>
           </section>
 
           <section id="sample-report" className="qa-band qa-section" aria-labelledby="quiet-report-title">
@@ -356,16 +361,11 @@ export function QuietLanding() {
             <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE}</p><TrialAction /></div>
           </section>
 
-          <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
-            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.features.eyebrow}</div><h2 id="quiet-features-title">{LANDING_SECTION_COPY.features.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.features.body}</p></div>
-            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body, action }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>{action}</QuietAction></div></QuietFrame>)}</div>
-          </section>
+          <section id="faq" className="qa-band qa-section" aria-labelledby="quiet-faq-title"><div className="qa-faq"><div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.faq.eyebrow}</div><h2 id="quiet-faq-title">{LANDING_SECTION_COPY.faq.headline}</h2></div><QuietFaq /></div></section>
 
           <section id="stories" className="qa-band qa-section" aria-labelledby="quiet-story-title">
             <div className="qa-story"><div><div className="qa-eyebrow">{FOUNDER_STORY_COPY.eyebrow}</div><h2 id="quiet-story-title">{FOUNDER_STORY_COPY.headline}</h2><p className="qa-story__body">{FOUNDER_STORY_COPY.body}</p><p className="qa-story__signature">{FOUNDER_STORY_COPY.signature}</p></div><div className="qa-story__photo"><Image src="/images/founders.jpg" alt="Alessa and Carolyng, Homa's co-founders, smiling together outside in the sun" width={920} height={868} sizes="280px" /></div></div>
           </section>
-
-          <section id="faq" className="qa-band qa-section" aria-labelledby="quiet-faq-title"><div className="qa-faq"><div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.faq.eyebrow}</div><h2 id="quiet-faq-title">{LANDING_SECTION_COPY.faq.headline}</h2></div><QuietFaq /></div></section>
 
           <section className="qa-cta qa-section" aria-labelledby="quiet-cta-title"><div className="qa-cta__inner"><div><div className="qa-eyebrow" style={{ color: "var(--homa-paper)" }}>{LANDING_SECTION_COPY.final.eyebrow}</div><h2 id="quiet-cta-title">{LANDING_SECTION_COPY.final.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.final.body}</p></div><TrialAction /></div></section>
         </main>

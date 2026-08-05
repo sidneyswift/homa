@@ -14,8 +14,7 @@ test("Quiet nav preserves the public destinations and their order", () => {
   assert.deepEqual(QUIET_NAV_LINKS, [
     ["How it works", "/#how"],
     ["Memberships", "/#memberships"],
-    ["Features", "/#features"],
-    ["Our story", "/#stories"],
+    ["Questions", "/#faq"],
   ]);
 });
 test("Quiet footer keeps one canonical link set for every public shell", () => {
