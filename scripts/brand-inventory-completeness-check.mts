@@ -66,12 +66,17 @@ const webRouteFileNames = new Set([
   "twitter-image.tsx",
 ]);
 
-function webRouteBoundary(path: string): "public" | "family" | "operator" | "developer" | null {
+export function classifyValidatedWebRouteBoundary(path: string): "public" | "family" | "operator" | "developer" | "intercept-unresolved" | null {
   const prefix = "apps/web/app/";
   if (!path.startsWith(prefix)) return null;
   const parts = path.slice(prefix.length).split("/");
   const file = parts.pop();
   if (!file || !webRouteFileNames.has(file)) return null;
+  if (parts.some((segment) =>
+    segment.startsWith("(.)")
+    || segment.startsWith("(..)")
+    || segment.startsWith("(...)")
+  )) return "intercept-unresolved";
   const runtimeSegments = parts.filter((segment) =>
     !(segment.startsWith("(") && segment.endsWith(")"))
     && !segment.startsWith("@"));
@@ -159,7 +164,7 @@ export const brandInventoryCoverageRules: readonly BrandInventoryCoverageRule[] 
     id: "public-web",
     description: "Public landing, acquisition, trust, recovery, onboarding, and metadata routes",
     minimumRows: 15,
-    select: (surface) => webRouteBoundary(pathOf(surface)) === "public",
+    select: (surface) => classifyValidatedWebRouteBoundary(pathOf(surface)) === "public",
     requiredTypes: ["route"],
     requiredOwners: ["gh#683", "gh#684", "gh#689"],
   },
@@ -244,8 +249,10 @@ function validateRowShape(manifest: BrandSurfaceManifest, issues: BrandInventory
     if (journeyCriticalPath.some((pattern) => pattern.test(path)) && surface.criticality !== "journey-critical") {
       addIssue(issues, "criticality-underassigned", "A trust-critical identity, access, billing, delivery, legal, evidence, or recovery surface cannot be supporting or utility.", path);
     }
-    const routeBoundary = webRouteBoundary(path);
-    if (routeBoundary) {
+    const routeBoundary = classifyValidatedWebRouteBoundary(path);
+    if (routeBoundary === "intercept-unresolved") {
+      addIssue(issues, "route-intercept-unresolved", "Intercepting routes require an explicit reviewed runtime boundary and may never default to public.", path);
+    } else if (routeBoundary) {
       const expected = routeBoundary === "public"
         ? { reachability: "public", deliveryState: "revocable-public" }
         : routeBoundary === "developer"

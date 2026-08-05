@@ -26,6 +26,10 @@ import {
   historicalBrandQuarantineRecords,
   isActiveAuthoringIndexOrRegistryPath,
 } from "../packages/design/src/historical-quarantine.ts";
+import {
+  assertNoUnresolvedInterceptingRoutes,
+  classifyGeneratedWebRouteBoundary,
+} from "./brand-route-boundary.mts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -45,6 +49,7 @@ const trackedFiles = git("ls-files", "--cached", "--others", "--exclude-standard
   .split("\n")
   .filter(Boolean)
   .sort();
+assertNoUnresolvedInterceptingRoutes(trackedFiles);
 const workingTreePaths = new Set([
   ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
   ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
@@ -96,36 +101,13 @@ interface Classification {
   rollbackBoundary?: string;
 }
 
-const WEB_ROUTE_FILE_NAMES = new Set([
-  "apple-icon.tsx",
-  "error.tsx",
-  "global-error.tsx",
-  "layout.tsx",
-  "loading.tsx",
-  "not-found.tsx",
-  "opengraph-image.tsx",
-  "page.tsx",
-  "twitter-image.tsx",
-]);
-
-function firstRuntimeRouteSegment(path: string): string | undefined {
-  const prefix = "apps/web/app/";
-  if (!path.startsWith(prefix)) return undefined;
-  const parts = path.slice(prefix.length).split("/");
-  const file = parts.pop();
-  if (!file || !WEB_ROUTE_FILE_NAMES.has(file)) return undefined;
-  const runtimeSegments = parts.filter((segment) =>
-    !(segment.startsWith("(") && segment.endsWith(")"))
-    && !segment.startsWith("@"));
-  return runtimeSegments[0] ?? "";
-}
-
 const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
   { match: (path) => path === ".github/workflows/ci.yml" || path === "package.json" || [
     "scripts/channel-evidence-check.mts",
     "scripts/channel-evidence-contract.mts",
     "scripts/ci-change-scope.mjs",
     "scripts/evidence-receipt-loader.mts",
+    "scripts/brand-route-boundary.mts",
     "scripts/marketing-production-check.mts",
     "scripts/marketing-production-check.test.mts",
     "scripts/native-interface-gauntlet.mts",
@@ -147,10 +129,10 @@ const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classi
   { match: (path) => path === "apps/web/app/blog/rss.xml/route.ts", value: { type: "renderer", audiences: ["public", "provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/web\/content\/blog\/.+\.mdx$/.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => path === "apps/web/lib/blog.ts" || path === "apps/web/lib/blog-clusters.ts", value: { type: "generator", audiences: ["public", "developer"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
-  { match: (path) => firstRuntimeRouteSegment(path) === "app", value: { type: "route", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
-  { match: (path) => firstRuntimeRouteSegment(path) === "admin", value: { type: "route", audiences: ["operator"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
-  { match: (path) => firstRuntimeRouteSegment(path) === "dev", value: { type: "route", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", deliveryState: "controlled-current" } },
-  { match: (path) => firstRuntimeRouteSegment(path) !== undefined, value: { type: "route", audiences: ["public"], disposition: "replace-active", targetProfile: "web-product", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => classifyGeneratedWebRouteBoundary(path) === "family", value: { type: "route", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteBoundary(path) === "operator", value: { type: "route", audiences: ["operator"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteBoundary(path) === "developer", value: { type: "route", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteBoundary(path) === "public", value: { type: "route", audiences: ["public"], disposition: "replace-active", targetProfile: "web-product", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/web\/app\/api\/(?:link-phone|email\/unsubscribe)\/route\.ts$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path) || /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path), value: { type: "generator", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained" } },

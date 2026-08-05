@@ -12,6 +12,11 @@ import {
   historicalQuarantineDocumentationManifestPath,
   isActiveAuthoringIndexOrRegistryPath,
 } from "../packages/design/src/historical-quarantine.ts";
+import {
+  assertNoUnresolvedInterceptingRoutes,
+  classifyGeneratedWebRouteBoundary,
+} from "./brand-route-boundary.mts";
+import { classifyValidatedWebRouteBoundary } from "./brand-inventory-completeness-check.mts";
 import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
 
 const root = resolve(import.meta.dirname, "..");
@@ -69,6 +74,7 @@ test("inventory discovery covers exact design sources that broad keyword selecto
   const paths = new Set(manifest.surfaces.flatMap((surface) => surface.paths));
   for (const path of [
     "scripts/brand-surfaces.mts",
+    "scripts/brand-route-boundary.mts",
     "scripts/design-contract.mts",
     "scripts/brand-residue-check.mts",
     "apps/web/lib/materials/render-page.ts",
@@ -225,6 +231,33 @@ test("web route reachability follows the structural proxy boundary", () => {
   assert.equal(byPath.get("apps/web/app/app/page.tsx")?.reachability, "authenticated");
   assert.deepEqual(byPath.get("apps/web/app/admin/page.tsx")?.audiences, ["operator"]);
   assert.equal(byPath.get("apps/web/app/dev/reset/page.tsx")?.reachability, "internal");
+});
+
+test("route groups and slots stay neutral while interceptors fail closed", () => {
+  const fixtures = new Map<string, ReturnType<typeof classifyGeneratedWebRouteBoundary>>([
+    ["apps/web/app/(marketing)/page.tsx", "public"],
+    ["apps/web/app/(shell)/app/page.tsx", "family"],
+    ["apps/web/app/@modal/app/page.tsx", "family"],
+    ["apps/web/app/@modal/(.)app/page.tsx", "intercept-unresolved"],
+    ["apps/web/app/foo/@modal/(..)app/page.tsx", "intercept-unresolved"],
+    ["apps/web/app/foo/bar/@modal/(..)(..)app/page.tsx", "intercept-unresolved"],
+    ["apps/web/app/@modal/(...)admin/page.tsx", "intercept-unresolved"],
+    ["apps/web/app/@modal/(.)dev/page.tsx", "intercept-unresolved"],
+  ]);
+
+  for (const [path, expected] of fixtures) {
+    assert.equal(classifyGeneratedWebRouteBoundary(path), expected, `generator: ${path}`);
+    assert.equal(classifyValidatedWebRouteBoundary(path), expected, `validator: ${path}`);
+  }
+  assert.doesNotThrow(() => assertNoUnresolvedInterceptingRoutes([
+    "apps/web/app/(marketing)/page.tsx",
+    "apps/web/app/(shell)/app/page.tsx",
+    "apps/web/app/@modal/app/page.tsx",
+  ]));
+  assert.throws(
+    () => assertNoUnresolvedInterceptingRoutes([...fixtures.keys()]),
+    /Intercepting web route source requires an explicit reviewed runtime boundary/,
+  );
 });
 
 test("provider handoffs bind every governing source into the hashed inventory", () => {

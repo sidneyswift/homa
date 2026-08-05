@@ -72,6 +72,20 @@ test("public and authenticated web route boundaries fail closed", () => {
   assert.ok(boundaryIssues.some((issue) => issue.surfacePath === "apps/web/app/app/page.tsx"));
 });
 
+test("an intercepting route cannot enter the manifest as public", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  const landing = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/page.tsx");
+  assert.ok(landing);
+  landing.paths = ["apps/web/app/@modal/(.)app/page.tsx"];
+  landing.reachability = "public";
+  landing.audiences = ["public"];
+  landing.deliveryState = "revocable-public";
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.ok(report.issues.some((issue) =>
+    issue.code === "route-intercept-unresolved"
+    && issue.surfacePath === "apps/web/app/@modal/(.)app/page.tsx"));
+});
+
 test("catch-all inventory rows are rejected", () => {
   const mutated = structuredClone(manifest) as BrandSurfaceManifest;
   mutated.surfaces[0]!.paths = ["apps/web/**/miscellaneous.tsx"];
