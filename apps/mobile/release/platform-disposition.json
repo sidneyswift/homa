@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "owner": "founder",
+  "ios": {
+    "publicDistribution": "approved"
+  },
+  "android": {
+    "publicDistribution": "blocked",
+    "allowedScope": "compile-only",
+    "ruling": "Android remains compile-only until a founder-approved pull request adds a complete Google Play release and rollback rail."
+  }
+}

@@ -1,19 +1,9 @@
 name: Mobile OTA update
 
-# Keeps installed phone apps in sync with main, IF a production build with
-# a matching native fingerprint exists. When mobile code (or the shared
-# core package it imports) changes, this publishes an EAS Update: matching
-# installed builds download the new JavaScript on next launch, no App
-# Store release needed. Native changes (a new package with native code,
-# an Expo SDK upgrade) do NOT ship this way; they need a new store build:
-#   cd apps/mobile
-#   eas build --platform ios --profile production
-#   eas submit --platform ios --latest
-# The update only applies to builds with a matching native fingerprint, so
-# an out-of-date binary can never receive incompatible JavaScript, and (the
-# failure mode this workflow silently had for weeks) an up-to-date checkout
-# with no matching binary at all publishes into a void. The fingerprint
-# guard step below makes that failure loud instead of silent.
+# Every push touching the iOS JavaScript closure is classified before release.
+# A matching production-store fingerprint permits EAS Update. Anything else
+# fails closed and requires the store-binary rail documented in
+# apps/mobile/release/ROLLBACK.md.
 
 on:
   push:
@@ -23,6 +13,7 @@ on:
       - "apps/mobile/**"
       - "packages/core/**"
       - "packages/design/**"
+      - "pnpm-lock.yaml"
   workflow_dispatch: {}
 
 concurrency:
@@ -31,13 +22,17 @@ concurrency:
 
 permissions:
   contents: read
+  checks: read
   statuses: read
 
 jobs:
   publish-update:
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
@@ -48,96 +43,122 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      - name: Require an exact main source
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            printf 'Production mobile delivery is allowed only from main. Got %s.\n' "$GITHUB_REF"
+            exit 1
+          fi
+
+      - name: Prepare isolated delivery directories
+        run: |
+          mkdir -p "${RUNNER_TEMP}/homa-mobile-delivery" "${RUNNER_TEMP}/homa-mobile-export"
+          printf 'HOMA_MOBILE_RELEASE_DIR=%s\n' "${RUNNER_TEMP}/homa-mobile-delivery" >> "$GITHUB_ENV"
+          printf 'HOMA_MOBILE_EXPORT_DIR=%s\n' "${RUNNER_TEMP}/homa-mobile-export" >> "$GITHUB_ENV"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck mobile
-        run: pnpm --filter mobile typecheck
+      - name: Mobile release-rail contracts
+        run: pnpm check:mobile-release-rails
 
-      - name: Event registry and capture-loop staging guard
-        run: pnpm check:event-registry
-
-      - name: Mobile chat unit tests
-        run: pnpm check:mobile-chat
-
-      - name: Mobile bootstrap unit tests
-        run: pnpm check:mobile-bootstrap
-
-      - name: Mobile planner unit tests
-        run: pnpm check:mobile-planner
-
-      - name: Mobile Progress unit tests
-        run: pnpm check:mobile-progress
-
-      - name: Mobile voice unit tests
-        run: pnpm check:mobile-voice
-
-      - name: Mobile accessibility contract
-        run: pnpm check:mobile-accessibility
-
-      - name: Native interface gauntlet
-        run: pnpm check:native-interface-gauntlet
-
-      # A red mobile test suite must never reach an installed phone: this
-      # runs before publish, not just in CI, since CI and this workflow
-      # fire on the same push independently.
-
-      # EXPO_PUBLIC_ values are inlined into the JavaScript bundle at
-      # publish time. Read them from eas.json so OTA updates and store
-      # builds always ship the exact same public config.
+      # EXPO_PUBLIC_ values are bundled into JavaScript. Read them from the
+      # production build profile so store builds and OTA exports agree.
       - name: Load public app config from eas.json
         working-directory: apps/mobile
         run: jq -r '.build.production.env | to_entries[] | "\(.key)=\(.value)"' eas.json >> "$GITHUB_ENV"
 
-      # expo-updates matches an OTA update to an installed binary by exact
-      # native fingerprint. A mismatch is not a warning, it is silence: the
-      # 2026-07-27 to 2026-07-28 window published updates for weeks that no
-      # installed phone could receive. This must run on a clean checkout
-      # (no apps/mobile/ios directory) or it computes a wrong result; see
-      # the script's own comment and .agents/skills/ios-release.
-      - name: OTA fingerprint guard (refuse to publish into a void)
+      - name: Classify exact iOS delivery rail
+        id: classify
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: node scripts/check-ota-fingerprint.mjs
+        run: node scripts/classify-ios-delivery.mjs
 
-      # GitHub starts this workflow and Vercel in parallel. A same-commit
-      # mobile client can depend on a new server contract, so publishing the
-      # client first would put installed phones in front of an old API.
-      - name: Wait for the production web deployment
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Refuse OTA when a store binary is required
+        if: steps.classify.outputs.required_rail == 'store-binary-required'
         run: |
-          for attempt in $(seq 1 90); do
-            # Vercel reports through GitHub's commit-status API, not the
-            # check-runs API. The wrong endpoint stranded the 2026-08-02
-            # Progress OTA even after its production deployment succeeded.
-            state="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status" --jq '(.statuses | map(select(.context == "Vercel")) | sort_by(.created_at) | last) // {state:"missing"} | .state')"
-            case "$state" in
-              success)
-                exit 0
-                ;;
-              failure|error)
-                printf 'Vercel deployment did not succeed: %s\n' "$state"
-                exit 1
-                ;;
-              pending|missing)
-                ;;
-              *)
-                printf 'Unexpected Vercel deployment state: %s\n' "$state"
-                exit 1
-                ;;
-            esac
-            sleep 10
-          done
-          printf 'Timed out waiting for the Vercel deployment check.\n'
+          printf 'iOS delivery classification is %s. A production store build is required; no OTA was published.\n' "${{ steps.classify.outputs.compatibility_class }}"
           exit 1
 
-      - name: Publish EAS Update to the production channel
+      # A red mobile suite must never reach an installed phone. These checks
+      # run here even though CI also runs them because both workflows begin at
+      # the same push and neither may assume the other has finished.
+      - name: Typecheck mobile
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm --filter mobile typecheck
+
+      - name: Event registry and capture-loop staging guard
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:event-registry
+
+      - name: Mobile chat unit tests
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:mobile-chat
+
+      - name: Mobile bootstrap unit tests
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:mobile-bootstrap
+
+      - name: Mobile planner unit tests
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:mobile-planner
+
+      - name: Mobile Progress unit tests
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:mobile-progress
+
+      - name: Mobile voice unit tests
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:mobile-voice
+
+      - name: Mobile accessibility contract
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:mobile-accessibility
+
+      - name: Native interface gauntlet
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: pnpm check:native-interface-gauntlet
+
+      # GitHub Actions and Vercel start independently. A client may depend on
+      # a same-commit server contract, so both exact-SHA gates must finish
+      # before the export can be published.
+      - name: Wait for exact production gates
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node apps/mobile/scripts/wait-for-production-gates.mjs
+
+      - name: Export the production iOS bundle once
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        working-directory: apps/mobile
+        run: npx expo export --platform ios --output-dir "$HOMA_MOBILE_EXPORT_DIR" --source-maps
+
+      - name: Verify the exact production bundle
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        env:
+          HOMA_MOBILE_BUNDLE_REPORT: ${{ runner.temp }}/homa-mobile-delivery/bundle-report.json
+        run: node apps/mobile/scripts/mobile-production-bundle-check.mjs
+
+      - name: Publish the verified bytes to the production channel
+        if: steps.classify.outputs.required_rail == 'eas-update'
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           MSG="$(printf '%s\n' "${COMMIT_MESSAGE:-Manual OTA update}" | head -n 1 | cut -c 1-200)"
-          npx eas-cli@21.4.0 update --channel production --environment production --platform ios --non-interactive --message "$MSG"
+          npx eas-cli@21.4.0 update --channel production --environment production --platform ios --non-interactive --message "$MSG" --input-dir "$HOMA_MOBILE_EXPORT_DIR" --skip-bundler --json > "$HOMA_MOBILE_RELEASE_DIR/eas-update.raw.json"
+
+      - name: Bind the production delivery receipt
+        if: steps.classify.outputs.required_rail == 'eas-update'
+        run: node apps/mobile/scripts/mobile-delivery-receipt.mjs
+
+      - name: Retain classification and delivery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-delivery-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/homa-mobile-delivery
+          if-no-files-found: warn
+          retention-days: 90

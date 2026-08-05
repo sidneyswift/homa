@@ -36,7 +36,6 @@ const MIGRATED_SURFACES = [
   "apps/mobile/src/features/tasks/task-card.tsx",
   "apps/mobile/src/features/tasks/task-edit-sheet.tsx",
   "apps/mobile/src/features/tasks/task-history-row.tsx",
-  "apps/mobile/src/features/voice/labs/voice-shell-547-lab.tsx",
   "apps/mobile/src/features/voice/voice-prompt-starters.tsx",
   "apps/web/app/admin/agent-prompt-button.tsx",
   "apps/web/app/admin/alert-ack-button.tsx",
@@ -87,7 +86,7 @@ test("the checked-in exception manifest exactly covers current direct imports", 
 
 test("the pending wave has a complete ownership and support review", () => {
   const review = readIconImportReview();
-  assert.equal(review.length, 25);
+  assert.equal(review.length, 24);
   assert.equal(new Set(review.map((entry) => entry.path)).size, review.length);
   assert.deepEqual(new Set(review.map((entry) => entry.surfaceClass)), new Set(["user-facing", "admin-founder", "dev-only"]));
   assert.ok(review.every((entry) => entry.glyphSupport === "supported" && entry.decision === "migrate"));

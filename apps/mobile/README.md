@@ -22,22 +22,28 @@ simulator; your Mac's LAN IP from a real phone).
 Two release paths, both from `apps/mobile` (EAS project:
 `@sidneyswift/homa`, bundle `com.thankshoma.homa`):
 
-- JavaScript-only changes ship over the air. A push to `main` touching
-  `apps/mobile/` or `packages/core/` runs
-  `.github/workflows/mobile-ota-update.yml`, which publishes an EAS
-  Update to the `production` channel. Installed apps download it on
-  their next launch and run it the launch after. Manual equivalent:
-  `eas update --channel production --environment production --platform ios --message "..."`.
+- OTA-safe changes ship over the air. A push to `main` touching the mobile
+  JavaScript closure runs `.github/workflows/mobile-ota-update.yml`. The
+  workflow requires an ancestor production-store build with the same native
+  fingerprint, waits for exact-commit CI and Vercel success, verifies one
+  exported iOS bundle, and publishes those exact bytes to the `production`
+  channel. Installed apps can download it on a later launch and run it after a
+  relaunch; only a physical-device observation proves installation.
 - Native changes (a package with native code, an Expo SDK upgrade,
   native `app.json` config) need a new store build:
-  `eas build --platform ios --profile production`, then
-  `eas submit --platform ios --latest`. Updates only apply to builds
+  `npx eas-cli@21.4.0 build --platform ios --profile production`, then
+  `npx eas-cli@21.4.0 submit --platform ios --id EAS_BUILD_ID --profile production`.
+  Submitting an explicit ID preserves the source-to-store audit chain. Updates only apply to builds
   with a matching native fingerprint, so a stale binary never receives
   incompatible JavaScript.
 
-CI authenticates with the `EXPO_TOKEN` repo secret. Updates publish iOS
-only for now: `--platform all` would also run the web static export,
-which currently fails under expo-router server rendering.
+The workflow retains its classification and delivery evidence for 90 days.
+Rollback and the evidence boundary are documented in
+`apps/mobile/release/ROLLBACK.md`.
+
+CI authenticates with the `EXPO_TOKEN` repo secret. Public distribution is
+iOS-only. Android remains compile-only in CI, and the founder-owned platform
+disposition plus EAS pre-install hook rejects Android public builds.
 
 ## How it hangs together
 

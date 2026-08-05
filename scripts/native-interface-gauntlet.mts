@@ -27,6 +27,10 @@ import {
   nativeAccessibilityJourneys,
   nativeAccessibilitySurfaces,
 } from "../apps/mobile/src/lib/accessibility/acceptance-manifest";
+import {
+  containsAndroidPublicReleaseCommand,
+  readPlatformDisposition,
+} from "../apps/mobile/scripts/android-release-guard.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MOBILE_ROOT = resolve(ROOT, "apps/mobile");
@@ -607,11 +611,10 @@ function checkAppConfig(): GauntletCheck[] {
   const eas = readJson<EASConfig>(EAS_CONFIG_PATH);
   const mobilePackage = readJson<MobilePackageConfig>(MOBILE_PACKAGE_PATH);
   const ciWorkflow = readFileSync(resolve(ROOT, ".github/workflows/ci.yml"), "utf8");
-  const workflowText = git("ls-files", ".github/workflows")
+  const workflowTexts = git("ls-files", ".github/workflows")
     .split("\n")
     .filter(Boolean)
-    .map((path) => readFileSync(resolve(ROOT, path), "utf8"))
-    .join("\n");
+    .map((path) => readFileSync(resolve(ROOT, path), "utf8"));
   const checks: GauntletCheck[] = [];
   const podspecFloor = `'${nativeIosSupportPolicy.minimumOperatingSystem.major}.${nativeIosSupportPolicy.minimumOperatingSystem.minor}'`;
   const nativeModulesMatchFloor = NATIVE_MODULE_PODSPEC_PATHS.every(
@@ -656,13 +659,19 @@ function checkAppConfig(): GauntletCheck[] {
     ),
   );
   checks.push(...checkAndroidCiCommands(ciWorkflow));
-  const hasAndroidDistributionCommand = /\beas\s+(?:build|submit)\b[^\n]*--platform\s+(?:android|all)\b/u.test(workflowText);
+  const hasAndroidDistributionCommand = workflowTexts.some((workflow) => containsAndroidPublicReleaseCommand(workflow));
+  const platformDisposition = readPlatformDisposition();
+  const mobileScripts = (mobilePackage.scripts ?? {}) as Record<string, unknown>;
   checks.push(
     check(
       "android-distribution-guard",
       !existsSync(resolve(ROOT, ".github/workflows/mobile-android-release.yml"))
         && !existsSync(resolve(ROOT, "apps/mobile/google-services.json"))
         && eas.submit?.production?.android === undefined
+        && mobileScripts["eas-build-pre-install"] === "node scripts/android-release-guard.mjs"
+        && platformDisposition.owner === "founder"
+        && platformDisposition.android.publicDistribution === "blocked"
+        && platformDisposition.android.allowedScope === "compile-only"
         && !hasAndroidDistributionCommand
         ? "pass"
         : "fail",

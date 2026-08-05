@@ -158,7 +158,6 @@ export const nativeAccessibilitySurfaces: readonly NativeAccessibilitySurface[] 
   { file: "apps/mobile/src/app/(tabs)/tasks.tsx", kind: "supporting", owner: "gh#307", reason: "Proactive Homa work." },
   { file: "apps/mobile/src/app/settings.tsx", kind: "supporting", owner: "gh#299", reason: "Account, family, plan, and policy access." },
   { file: "apps/mobile/src/app/settings/delete-account.tsx", kind: "supporting", owner: "gh#299", reason: "Irreversible account deletion." },
-  { file: "apps/mobile/src/features/voice/labs/voice-shell-547-lab.tsx", kind: "excluded", owner: "gh#547", reason: "Named non-production visual prototype, kept outside Expo Router so it cannot ship as a route." },
 ];
 
 /** Native and external handoffs need separate release-build evidence. */

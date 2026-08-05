@@ -261,6 +261,9 @@ jobs:
       - name: Native interface gauntlet
         run: pnpm check:native-interface-gauntlet
 
+      - name: Mobile release-rail contracts
+        run: pnpm check:mobile-release-rails
+
       - name: Android JavaScript bundle export
         run: pnpm --filter mobile exec expo export --platform android --output-dir ${{ runner.temp }}/homa-android-compile
 
