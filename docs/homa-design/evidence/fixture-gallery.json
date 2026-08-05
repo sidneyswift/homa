@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "galleryVersion": "fixture-gallery-v1",
   "designEra": "quiet-authority-v1",
-  "sourceContractChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
+  "sourceContractChecksum": "b2962bf3b2e582153bb572e2ddab3618eb93da10cbed2184f484880f963f8607",
   "generator": "scripts/design-fixture-gallery.mts",
   "profileMatrix": [
     {
@@ -1505,6 +1505,49 @@
         ],
         "source": "packages/design/src/contract/typography.ts#typeRoles",
         "checksum": "60c4e51b2b65eec23fe08bf74251985df06b0bf6f9b365395b61a20574d9d35b"
+      },
+      {
+        "category": "atoms",
+        "description": "Type role cardTitle.",
+        "details": {
+          "role": "cardTitle",
+          "familyRole": "display"
+        },
+        "evidenceStatus": "contract-only",
+        "galleryVersion": "fixture-gallery-v1",
+        "id": "atom-type-role-cardTitle",
+        "profileIds": [
+          "web-phone-small",
+          "web-phone",
+          "web-desktop",
+          "web-reflow-200",
+          "web-reflow-400",
+          "web-large-text",
+          "web-localization-expanded",
+          "web-forced-colors",
+          "web-increased-contrast",
+          "web-reduced-motion",
+          "web-dark-adaptive",
+          "native-iphone-oldest",
+          "native-iphone-current",
+          "native-large-text",
+          "native-localization-expanded",
+          "native-increased-contrast",
+          "native-reduced-motion",
+          "native-dark-adaptive",
+          "marketing-desktop",
+          "marketing-grayscale",
+          "email-600-light",
+          "email-320-narrow",
+          "email-client-controlled",
+          "sms-plain-text",
+          "print-letter",
+          "print-a4",
+          "provider-static",
+          "metadata-plain-text"
+        ],
+        "source": "packages/design/src/contract/typography.ts#typeRoles",
+        "checksum": "e2c8eda097982a8b750c6a37f5cbc398d82c96e6bb12b2b3254945f90a280715"
       },
       {
         "category": "atoms",
@@ -6842,11 +6885,11 @@
       },
       {
         "category": "assets",
-        "description": "marketing-library asset projection for solid-clay appearance.",
+        "description": "marketing-library asset projection for solid-coral appearance.",
         "details": {},
         "evidenceStatus": "contract-only",
         "galleryVersion": "fixture-gallery-v1",
-        "id": "asset-marketing-pfp-clay",
+        "id": "asset-marketing-pfp-coral",
         "profileIds": [
           "web-phone-small",
           "web-phone",
@@ -6877,16 +6920,16 @@
           "provider-static",
           "metadata-plain-text"
         ],
-        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-pfp-clay",
-        "checksum": "415296f4f1c8d33f9d95903bcecd570f8517969ac8e34cd1f5d58069fe60f1f6"
+        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-pfp-coral",
+        "checksum": "62bd93097d815e96b86d82f00f9bdc42b69ff8e570e5b634f187d51a3bf0cd68"
       },
       {
         "category": "assets",
-        "description": "marketing-library asset projection for solid-cream appearance.",
+        "description": "marketing-library asset projection for solid-canvas appearance.",
         "details": {},
         "evidenceStatus": "contract-only",
         "galleryVersion": "fixture-gallery-v1",
-        "id": "asset-marketing-pfp-cream",
+        "id": "asset-marketing-pfp-canvas",
         "profileIds": [
           "web-phone-small",
           "web-phone",
@@ -6917,16 +6960,16 @@
           "provider-static",
           "metadata-plain-text"
         ],
-        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-pfp-cream",
-        "checksum": "45ce1d7ac3bcb42ff851533bd832a46cd10d28bf26c648c4e92b68101fb0437d"
+        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-pfp-canvas",
+        "checksum": "04548355635afe1151059c81c303d5655dd7795c04b29b132c2c182829a0a906"
       },
       {
         "category": "assets",
-        "description": "marketing-library asset projection for solid-night appearance.",
+        "description": "marketing-library asset projection for solid-midnight appearance.",
         "details": {},
         "evidenceStatus": "contract-only",
         "galleryVersion": "fixture-gallery-v1",
-        "id": "asset-marketing-pfp-night",
+        "id": "asset-marketing-pfp-midnight",
         "profileIds": [
           "web-phone-small",
           "web-phone",
@@ -6957,16 +7000,16 @@
           "provider-static",
           "metadata-plain-text"
         ],
-        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-pfp-night",
-        "checksum": "77a29d320f4b61e2728d9d06e4abd672b8032906b78bdb5a56da838985b0f755"
+        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-pfp-midnight",
+        "checksum": "32b484ddab31b6a83e0980b9fee6cba282be7d3a4e423fa93536825b52c9d199"
       },
       {
         "category": "assets",
-        "description": "marketing-library asset projection for solid-cream appearance.",
+        "description": "marketing-library asset projection for solid-canvas appearance.",
         "details": {},
         "evidenceStatus": "contract-only",
         "galleryVersion": "fixture-gallery-v1",
-        "id": "asset-marketing-wallpaper-cream",
+        "id": "asset-marketing-wallpaper-canvas",
         "profileIds": [
           "web-phone-small",
           "web-phone",
@@ -6997,16 +7040,16 @@
           "provider-static",
           "metadata-plain-text"
         ],
-        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-wallpaper-cream",
-        "checksum": "2e4debed32f663781bd8b89e9ea9b5819991268e64733dd23adb788f7123ede6"
+        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-wallpaper-canvas",
+        "checksum": "6e64157a500cf90882e9e7d65f565f892d5cf6c8ebcf4a4000e4e0074543747f"
       },
       {
         "category": "assets",
-        "description": "marketing-library asset projection for solid-night appearance.",
+        "description": "marketing-library asset projection for solid-midnight appearance.",
         "details": {},
         "evidenceStatus": "contract-only",
         "galleryVersion": "fixture-gallery-v1",
-        "id": "asset-marketing-wallpaper-night",
+        "id": "asset-marketing-wallpaper-midnight",
         "profileIds": [
           "web-phone-small",
           "web-phone",
@@ -7037,8 +7080,8 @@
           "provider-static",
           "metadata-plain-text"
         ],
-        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-wallpaper-night",
-        "checksum": "3a41593cbe9a37789f4d81f8458057963428940150809a068122845441e14935"
+        "source": "packages/design/src/contract/identity.ts#identityAssetCatalog.marketing-wallpaper-midnight",
+        "checksum": "8f3692e132f118903701a633d6d8fe74cfc0d11fe54bea2085bdfc44099c4aff"
       },
       {
         "category": "assets",
@@ -10907,8 +10950,8 @@
         "profileIds": [
           "web-phone-small"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "c885d1ecc974dcc4ca7ee35c4906967985e65fbf78cd26d5a5a98568e036d592"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "5c62ae3d2ca87574ea8dde752dc15cda5aa943b95e2033c88b1f8e48466979be"
       },
       {
         "category": "profiles",
@@ -10934,8 +10977,8 @@
         "profileIds": [
           "web-phone"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "aa14410a0ddda51f8a754f41b4b4ddf9fbebcab1afe584438482ab9dd572e582"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "1a1fe901d73089f1cdb0f3195eeaf99d2be30c0dd16d2486b9c88728b2b49421"
       },
       {
         "category": "profiles",
@@ -10962,8 +11005,8 @@
         "profileIds": [
           "web-desktop"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "0106d8b094b588b976f7c643c85814bc277c482287109cb916bc106da9f74a80"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "eb6338175504989c37350f84ff0d6ca17a06e76ffba5d0f0cd2254c2a7dad284"
       },
       {
         "category": "profiles",
@@ -10992,8 +11035,8 @@
         "profileIds": [
           "web-reflow-200"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "96811ff793c2e1a9ba071e178978bd344d1987030045455c9633918fc25116da"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "a41832938d5204b6375b799bfc8d7bbb1aff6ce1e4afce8a3e06cec9faf06bc1"
       },
       {
         "category": "profiles",
@@ -11022,8 +11065,8 @@
         "profileIds": [
           "web-reflow-400"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "13b9f66f1065f104a858a969be9c8dc9ce98c6e0d7dc05b429a26198b723162c"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "49af302cb05383fba3458fa161a03855f55a02b9f66cab649d6901d924cc0ee2"
       },
       {
         "category": "profiles",
@@ -11051,8 +11094,8 @@
         "profileIds": [
           "web-large-text"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "ba7c68e72c20aa4e58765a0404ff20db6558f65112bda09564877d442d0cab41"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "b30576da49e3cb95417e6ae2f1fb6bf0aaf9a55c357efc8bd1663f0eb3a1e3d9"
       },
       {
         "category": "profiles",
@@ -11081,8 +11124,8 @@
         "profileIds": [
           "web-localization-expanded"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "a56486f7096523c6a020e95c91c08ef6e9624e88faf7eb3310d938590777beac"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "58adf9bdbb449751ea70d88ef091b97cff0813fc53d45102fb17e020963dc704"
       },
       {
         "category": "profiles",
@@ -11110,8 +11153,8 @@
         "profileIds": [
           "web-forced-colors"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "c992bc52817722291e490af346b357be040d382b62b3fd0e318e4b5dcaa17f99"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "0ea84ebbb9339d0d4c891c80a6453c64d3d83fa7b538189b461ff26388adbe30"
       },
       {
         "category": "profiles",
@@ -11139,8 +11182,8 @@
         "profileIds": [
           "web-increased-contrast"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "76b03ed8692cc903810fa626064b7913df0b911bd2a52683644854b11baa15b4"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "f06df6d3c5247166cf1c7e9f6e2db91c8abe73d842e2ed5d8cc908753c539518"
       },
       {
         "category": "profiles",
@@ -11168,8 +11211,8 @@
         "profileIds": [
           "web-reduced-motion"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "057c2c4229c88e77bf2aad86f0f955a364d388fa97dc4a3d1d99215fe1609f28"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "417244f9a5751053df699820d0f22aab7bf9c6d1721491967e63c6c6148c86b8"
       },
       {
         "category": "profiles",
@@ -11198,8 +11241,8 @@
         "profileIds": [
           "web-dark-adaptive"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "eb33da1bad0367256860fedf78047c3eae7a10b8b5745458c37841ab9617b681"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "cc38dac7b0793c485f227417c5fc268f610ba9b05c547302eaca6b5e4e0af2e5"
       },
       {
         "category": "profiles",
@@ -11223,8 +11266,8 @@
         "profileIds": [
           "native-iphone-oldest"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "1e1c61d4f1242dea2f20b2bbb3e731c2cf0a4c71cc9be9844e1e57eb5f41409a"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "b9951ada4ac08a995dffad514384d7a29875e4091f79e8e5480f9a3d3c573b38"
       },
       {
         "category": "profiles",
@@ -11248,8 +11291,8 @@
         "profileIds": [
           "native-iphone-current"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "d69ccb35423f4cd0463277eba0e11bc25cd7b29bf7cd8ae167766fb9d26ce9d1"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "547516fe3acb969227678da42ba75e62c6fbacddc0caebfc356485dd82ad7d44"
       },
       {
         "category": "profiles",
@@ -11275,8 +11318,8 @@
         "profileIds": [
           "native-large-text"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "cb4cbfa41c436a952b433589f90d1dd9dee1d8ebffa4670bd0287c44a3815e82"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "f5585a38454a28cc8e23773d9a52fed89c912ab201d064cdd0e1a88fa954f4af"
       },
       {
         "category": "profiles",
@@ -11302,8 +11345,8 @@
         "profileIds": [
           "native-localization-expanded"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "691710322e8f30bca6d422ddcfca03946228d5342b68d07310c814515b6c9320"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "7afb89a34f0f9969f18b05a809bee56350b3ad62dfbb04772419d0ff31a91994"
       },
       {
         "category": "profiles",
@@ -11329,8 +11372,8 @@
         "profileIds": [
           "native-increased-contrast"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "b2ae841538608510159682aa0efbd339920bc7147d8ab6de1a6229aa4a5cdcde"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "4a1f214671f9960288c653ca3af87ce71becf8e6a6abb094c77b79c38ee07abf"
       },
       {
         "category": "profiles",
@@ -11355,8 +11398,8 @@
         "profileIds": [
           "native-reduced-motion"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "98200530eb21af69bba24875cb7344a01c26ac3e3874f481c31076e09964ced5"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "83f2e84d35aeeadd2cbf25e041a0642ebcfc092849d389e0223046ef9ee5b908"
       },
       {
         "category": "profiles",
@@ -11382,8 +11425,8 @@
         "profileIds": [
           "native-dark-adaptive"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "e86f4c4c5cb8f9906b0eaff6f26c20c1b2f3983e4e542af5f1b4d7d8f57d434b"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "caa664951898aa767e9266a477414137411e398396e2baf736214a84867117d3"
       },
       {
         "category": "profiles",
@@ -11406,8 +11449,8 @@
         "profileIds": [
           "native-ipad-portrait-ruled"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "8b120ac984c751b0ca17ae1e61d6cca8ec404f44a1ecb1b73c22189d3aa4ea3c"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "70e9f3192f2fba0dcf6910a5a7c15c28623d06e754450168577bd454d359f219"
       },
       {
         "category": "profiles",
@@ -11430,8 +11473,8 @@
         "profileIds": [
           "native-ipad-landscape-ruled"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "c5cf8d4aed371c6bc2dff25ad5b7eb416a0344b0a2cd5607d6f3e1169b414620"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "f8004ed4efca8d18ee8fd93faedf7a96b58be7a0e223f0674718a1592b5b87fc"
       },
       {
         "category": "profiles",
@@ -11454,8 +11497,8 @@
         "profileIds": [
           "native-android-compile-only"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "c74711a2a40664fb71fdc61b0a15fcdebdf3d03c910f27d8a057b9dbe71135f6"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "7cbab21bf75a9e0ad8b5c9c03149aef4757d78b92e8b3f79f98f53ac13b87f37"
       },
       {
         "category": "profiles",
@@ -11482,8 +11525,8 @@
         "profileIds": [
           "marketing-desktop"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "f4fec268b8dc0a0a4ee38fb111d9d7ca3c3aa1a198f503e1f71fb00c91e90864"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "dde86c1bca6d2953c9f3469370d70487a889e39455ba14a2de57706629ddf803"
       },
       {
         "category": "profiles",
@@ -11509,8 +11552,8 @@
         "profileIds": [
           "marketing-grayscale"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "e1c8bcdaa9c9bbd2105dcdd7a8b6bd982ca2bc43c3951497858a8b79818a9c78"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "e6e959e55257ab657564bc42cd70e78c0d4589eadcfdbf0117aff5b16a7a01a8"
       },
       {
         "category": "profiles",
@@ -11538,8 +11581,8 @@
         "profileIds": [
           "email-600-light"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "807ae4310b5c0d6f5c7c61125e7598b2ac5b2cf75a2fb2253cc76035f127369a"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "961bd9c7680ffd82b61c4486c988a676eb719947a296ad21529d8eccf4e0872c"
       },
       {
         "category": "profiles",
@@ -11567,8 +11610,8 @@
         "profileIds": [
           "email-320-narrow"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "77831f72ad41c89ec8c79b6139d1eabbcf1012b22d51138176f3ec1d0252c37d"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "2379349745ceca341a92a3b540f5a9ef878c2732a3b6ac969f7b17d33f58cb24"
       },
       {
         "category": "profiles",
@@ -11595,8 +11638,8 @@
         "profileIds": [
           "email-client-controlled"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "eb4ca9c05ec6bd4e99a79463c8fe3b3f75e45742d57be5d9ebdd1a3cc7fba4cf"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "63d516e0cba549463bca0e553d34db8d78ac6bcc545c70a582ca447c07e7b602"
       },
       {
         "category": "profiles",
@@ -11621,8 +11664,8 @@
         "profileIds": [
           "sms-plain-text"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "2b443e6cb98c244c46a111e33479b571543b68e5d3cdc658fbae2f9952b39746"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "c59aa8d42aba35b6e81707a5c2b01b4655e6514c9bfa47b459851333dcf92ee5"
       },
       {
         "category": "profiles",
@@ -11650,8 +11693,8 @@
         "profileIds": [
           "print-letter"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "1c2920566f8e08229940c6421998097a470786c5018f06c6a9c671f56c460f6d"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "ed6494d152244dc42eff9da6ce2de1cf25d5b79b9d72db55006bd47b355edcf9"
       },
       {
         "category": "profiles",
@@ -11679,8 +11722,8 @@
         "profileIds": [
           "print-a4"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "933be168d7e8c1f6361fb804c644caa2bdb04409cc655f33301618e2525b3530"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "c7d1c6cb4953cda57a1588724ad78e54223e96894bd4b2e4da59fb2c644f4b93"
       },
       {
         "category": "profiles",
@@ -11705,8 +11748,8 @@
         "profileIds": [
           "provider-static"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "abd7f3377b5dad651047fd6fddaed1ec64d4c9f62cc584f3aa9faa5ada7e2c3b"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "b7abab92b8449ac2a6b5f2a4c6c5e8f973005696fae1601e81089b5de5d2c4a9"
       },
       {
         "category": "profiles",
@@ -11730,11 +11773,11 @@
         "profileIds": [
           "metadata-plain-text"
         ],
-        "source": "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
-        "checksum": "94cd6b9675060d42bd9b1cd2b08558adf27534a4e40e5e4dd922d9a0a211382c"
+        "source": "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
+        "checksum": "d17f67a5a45224b226920645d0280153600d02860aed0835566f69738af3512c"
       }
     ]
   },
-  "fixtureCount": 277,
-  "manifestChecksum": "43bc132d1695fc6f944e2fcce27af78b34ee13fb0864c58b5e01354bdf258778"
+  "fixtureCount": 278,
+  "manifestChecksum": "85f5a51cabb55bc79996470d801f857830c6b9c47493a3005680102d39ff7cb2"
 }

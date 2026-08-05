@@ -2,10 +2,18 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "manifestFingerprint": "2b3715702b86cd8c8a1c10f49c6ad010b04268a31a9ca11dd9059ee03a020646",
+  "contractSourceChecksum": "b2962bf3b2e582153bb572e2ddab3618eb93da10cbed2184f484880f963f8607",
+  "manifestFingerprint": "1a72e74f4b00c32e0242cfe9ac83a8803bd238272bf006173c1d0844bcd44f81",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "authoringRoots": [
+    "AGENTS.md",
+    "BUILD.md",
+    "README.md",
+    "apps/mobile/AGENTS.md",
+    "apps/mobile/CLAUDE.md",
+    "docs/homa-curriculum-atlas/materials-patterns.md",
+    "docs/homa-planning/14-marketing-demand-engine.md",
+    "marketing/AGENTS.md",
     ".agents/skills/",
     "apps/web/agent/",
     "marketing/voice/",
@@ -14,21 +22,21 @@
     "packages/design/src/contract/"
   ],
   "counts": {
-    "authoring-rule": 128,
+    "authoring-rule": 137,
     "agent-skill": 46,
     "prompt": 123,
     "evaluator": 47,
     "golden-fixture": 8
   },
-  "expectedPaths": 352,
-  "coveredPaths": 352,
-  "sourceFingerprint": "d4d800a09e9591506ba311909c60da0391e5624a98b2bed6cb540c3fefb6901c",
+  "expectedPaths": 361,
+  "coveredPaths": 361,
+  "sourceFingerprint": "23eac9c774f27bf690210fc5ea908384413ca496d83b9370802fbd1d7ec715e3",
   "assetGenerator": {
     "paths": [
       "scripts/brand-assets.mts"
     ],
     "sourceHashes": {
-      "scripts/brand-assets.mts": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2"
+      "scripts/brand-assets.mts": "cd1c353175e6ba48aedbfff050b80562b5617903ab52d755c417a8398884a7ed"
     },
     "findings": [],
     "generatedAssets": 17
@@ -40,7 +48,7 @@
         "path": "packages/design/src/contract/contract.test.ts",
         "rule": "negative-identity-sentinel",
         "reason": "The contract test proves retired fonts and shape words cannot enter the active typed contract. It is a negative assertion, not an authoring instruction.",
-        "sourceHash": "1a86ab1b88be4503338dc53e2c9e3947a6b5f8b6b6eb32690d1be7299d548ec9"
+        "sourceHash": "6128a72fc6b4e8fdd34c7e14ef839b0cc95f9d2e1b15fec6cbe8fd101202bd61"
       }
     ]
   },
