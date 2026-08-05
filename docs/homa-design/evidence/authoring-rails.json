@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "b2962bf3b2e582153bb572e2ddab3618eb93da10cbed2184f484880f963f8607",
-  "manifestFingerprint": "1a72e74f4b00c32e0242cfe9ac83a8803bd238272bf006173c1d0844bcd44f81",
+  "contractSourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
+  "manifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "authoringRoots": [
     "AGENTS.md",
@@ -30,7 +30,7 @@
   },
   "expectedPaths": 361,
   "coveredPaths": 361,
-  "sourceFingerprint": "23eac9c774f27bf690210fc5ea908384413ca496d83b9370802fbd1d7ec715e3",
+  "sourceFingerprint": "d1ff151d92995d3f4f145963b7ad216f785ba2acfd60e37297908ce277816600",
   "assetGenerator": {
     "paths": [
       "scripts/brand-assets.mts"
@@ -48,7 +48,7 @@
         "path": "packages/design/src/contract/contract.test.ts",
         "rule": "negative-identity-sentinel",
         "reason": "The contract test proves retired fonts and shape words cannot enter the active typed contract. It is a negative assertion, not an authoring instruction.",
-        "sourceHash": "6128a72fc6b4e8fdd34c7e14ef839b0cc95f9d2e1b15fec6cbe8fd101202bd61"
+        "sourceHash": "baee3da902773755456738d0551b997388ee8387e4c98e9ce293efcfa4348db0"
       }
     ]
   },

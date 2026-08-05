@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "1a72e74f4b00c32e0242cfe9ac83a8803bd238272bf006173c1d0844bcd44f81",
+  "ownedInputFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -10565,7 +10565,7 @@
     {
       "surfaceId": "surface:da853996ad708767",
       "path": "docs/homa-planning/plans/2026-08-02-homa-interface-modernization.md",
-      "sourceHash": "6ba488e08260d9d7d0d3a6180e690490f8f15ab6a831300b7851471a9ca3d26d",
+      "sourceHash": "a5db2c52b148d58dfcbe69003794775123560ddfbc7b9dbcbbe3cb311ee8656a",
       "legacySignatures": [],
       "detectedSourceHash": "1dcb5cf81e4813119b5e16f5653ecb16cf7d4f0f83c41005ec55a5fac8ddfbb4",
       "detectedLegacySignatures": [
