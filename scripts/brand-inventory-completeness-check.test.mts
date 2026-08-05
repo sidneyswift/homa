@@ -13,7 +13,7 @@ test("inventory completeness covers every cross-surface domain", () => {
   const report = buildBrandInventoryCoverageReport(manifest);
   assert.equal(report.status, "pass", JSON.stringify(report.issues, null, 2));
   assert.ok(report.surfaceCount > 1_000);
-  for (const rule of ["authoring", "artifacts", "providers", "admin", "marketing", "published-content", "native", "external-channels"]) {
+  for (const rule of ["authoring", "artifacts", "providers", "admin", "marketing", "published-content", "public-web", "native", "external-channels"]) {
     assert.ok((report.rowsByRule[rule] ?? 0) > 0, `missing inventory domain: ${rule}`);
   }
 });
@@ -53,6 +53,23 @@ test("published blog content cannot disappear behind the classifier", () => {
   assert.equal(report.status, "fail");
   assert.ok(report.issues.some((issue) => issue.code === "coverage-minimum" && issue.message.startsWith("published-content requires")));
   assert.ok(report.issues.some((issue) => issue.code === "coverage-type" && issue.message.includes("published-content is missing a route")));
+});
+
+test("public and authenticated web route boundaries fail closed", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  const landing = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/page.tsx");
+  const app = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/app/page.tsx");
+  assert.ok(landing && app);
+  landing.reachability = "authenticated";
+  landing.audiences = ["family"];
+  landing.deliveryState = "controlled-current";
+  app.reachability = "public";
+  app.audiences = ["public"];
+  app.deliveryState = "revocable-public";
+  const report = buildBrandInventoryCoverageReport(mutated);
+  const boundaryIssues = report.issues.filter((issue) => issue.code === "route-boundary");
+  assert.ok(boundaryIssues.some((issue) => issue.surfacePath === "apps/web/app/page.tsx"));
+  assert.ok(boundaryIssues.some((issue) => issue.surfacePath === "apps/web/app/app/page.tsx"));
 });
 
 test("catch-all inventory rows are rejected", () => {

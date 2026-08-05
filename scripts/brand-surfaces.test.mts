@@ -154,6 +154,79 @@ test("published blog sources are independently discovered and classified as publ
   assert.deepEqual(byPath.get("apps/web/app/blog/rss.xml/route.ts")?.audiences, ["public", "provider"]);
 });
 
+test("web route reachability follows the structural proxy boundary", () => {
+  const proxySource = readFileSync(resolve(root, "apps/web/proxy.ts"), "utf8");
+  assert.match(proxySource, /path === "\/app" \|\| path\.startsWith\("\/app\/"\)/);
+
+  const routeFileNames = new Set([
+    "apple-icon.tsx",
+    "error.tsx",
+    "global-error.tsx",
+    "layout.tsx",
+    "loading.tsx",
+    "not-found.tsx",
+    "opengraph-image.tsx",
+    "page.tsx",
+    "twitter-image.tsx",
+  ]);
+  const routeSources = git("ls-files", "--", "apps/web/app")
+    .split("\n")
+    .filter((path) => routeFileNames.has(path.split("/").at(-1) ?? ""));
+  const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+
+  for (const path of routeSources) {
+    const parts = path.slice("apps/web/app/".length).split("/");
+    parts.pop();
+    const first = parts.filter((segment) =>
+      !(segment.startsWith("(") && segment.endsWith(")"))
+      && !segment.startsWith("@"))[0] ?? "";
+    const surface = byPath.get(path);
+    assert.ok(surface, `web route source missing from manifest: ${path}`);
+    assert.equal(surface.type, "route", path);
+    if (first === "app") {
+      assert.equal(surface.reachability, "authenticated", path);
+      assert.ok(surface.audiences.includes("family"), path);
+      assert.equal(surface.deliveryState, "controlled-current", path);
+    } else if (first === "admin") {
+      assert.equal(surface.reachability, "authenticated", path);
+      assert.deepEqual(surface.audiences, ["operator"], path);
+      assert.equal(surface.deliveryState, "controlled-current", path);
+    } else if (first === "dev") {
+      assert.equal(surface.reachability, "internal", path);
+      assert.deepEqual(surface.audiences, ["developer"], path);
+      assert.equal(surface.deliveryState, "controlled-current", path);
+    } else {
+      assert.equal(surface.reachability, "public", path);
+      assert.ok(surface.audiences.includes("public"), path);
+      assert.equal(surface.deliveryState, "revocable-public", path);
+    }
+  }
+
+  for (const path of [
+    "apps/web/app/page.tsx",
+    "apps/web/app/layout.tsx",
+    "apps/web/app/error.tsx",
+    "apps/web/app/not-found.tsx",
+    "apps/web/app/opengraph-image.tsx",
+    "apps/web/app/apple-icon.tsx",
+    "apps/web/app/features/[slug]/page.tsx",
+    "apps/web/app/privacy/page.tsx",
+    "apps/web/app/terms/page.tsx",
+    "apps/web/app/world/page.tsx",
+    "apps/web/app/world-real/page.tsx",
+    "apps/web/app/world-v3/page.tsx",
+    "apps/web/app/world-v4/page.tsx",
+    "apps/web/app/signin/page.tsx",
+    "apps/web/app/forgot-password/page.tsx",
+    "apps/web/app/reset-password/page.tsx",
+    "apps/web/app/reset-password/confirm/page.tsx",
+    "apps/web/app/join/page.tsx",
+  ]) assert.equal(byPath.get(path)?.reachability, "public", path);
+  assert.equal(byPath.get("apps/web/app/app/page.tsx")?.reachability, "authenticated");
+  assert.deepEqual(byPath.get("apps/web/app/admin/page.tsx")?.audiences, ["operator"]);
+  assert.equal(byPath.get("apps/web/app/dev/reset/page.tsx")?.reachability, "internal");
+});
+
 test("provider handoffs bind every governing source into the hashed inventory", () => {
   const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
   for (const path of [

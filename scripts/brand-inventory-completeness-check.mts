@@ -54,6 +54,34 @@ const artifactPath = (path: string): boolean =>
 
 const nativePath = (path: string): boolean => path.startsWith("apps/mobile/");
 
+const webRouteFileNames = new Set([
+  "apple-icon.tsx",
+  "error.tsx",
+  "global-error.tsx",
+  "layout.tsx",
+  "loading.tsx",
+  "not-found.tsx",
+  "opengraph-image.tsx",
+  "page.tsx",
+  "twitter-image.tsx",
+]);
+
+function webRouteBoundary(path: string): "public" | "family" | "operator" | "developer" | null {
+  const prefix = "apps/web/app/";
+  if (!path.startsWith(prefix)) return null;
+  const parts = path.slice(prefix.length).split("/");
+  const file = parts.pop();
+  if (!file || !webRouteFileNames.has(file)) return null;
+  const runtimeSegments = parts.filter((segment) =>
+    !(segment.startsWith("(") && segment.endsWith(")"))
+    && !segment.startsWith("@"));
+  const first = runtimeSegments[0] ?? "";
+  if (first === "app") return "family";
+  if (first === "admin") return "operator";
+  if (first === "dev") return "developer";
+  return "public";
+}
+
 const communicationPath = (path: string): boolean =>
   /(?:email|sms|mms|telnyx|resend|push)/i.test(path)
   || path === "provider:handwrytten";
@@ -126,6 +154,14 @@ export const brandInventoryCoverageRules: readonly BrandInventoryCoverageRule[] 
     select: (surface) => publicContentPath(pathOf(surface)),
     requiredTypes: ["route", "renderer", "template", "generator"],
     requiredOwners: ["gh#683"],
+  },
+  {
+    id: "public-web",
+    description: "Public landing, acquisition, trust, recovery, onboarding, and metadata routes",
+    minimumRows: 15,
+    select: (surface) => webRouteBoundary(pathOf(surface)) === "public",
+    requiredTypes: ["route"],
+    requiredOwners: ["gh#683", "gh#684", "gh#689"],
   },
   {
     id: "native",
@@ -207,6 +243,27 @@ function validateRowShape(manifest: BrandSurfaceManifest, issues: BrandInventory
     }
     if (journeyCriticalPath.some((pattern) => pattern.test(path)) && surface.criticality !== "journey-critical") {
       addIssue(issues, "criticality-underassigned", "A trust-critical identity, access, billing, delivery, legal, evidence, or recovery surface cannot be supporting or utility.", path);
+    }
+    const routeBoundary = webRouteBoundary(path);
+    if (routeBoundary) {
+      const expected = routeBoundary === "public"
+        ? { reachability: "public", deliveryState: "revocable-public" }
+        : routeBoundary === "developer"
+          ? { reachability: "internal", deliveryState: "controlled-current" }
+          : routeBoundary === "operator"
+            ? { reachability: "authenticated", deliveryState: "controlled-current" }
+            : { reachability: "authenticated", deliveryState: "controlled-current" };
+      if (surface.type !== "route"
+        || surface.reachability !== expected.reachability
+        || !surface.audiences.includes(routeBoundary)
+        || surface.deliveryState !== expected.deliveryState) {
+        addIssue(
+          issues,
+          "route-boundary",
+          `Route must remain ${routeBoundary}: route/${expected.reachability}/${routeBoundary}/${expected.deliveryState}.`,
+          path,
+        );
+      }
     }
   }
   if (manifest.surfaces.length === 0) addIssue(issues, "empty-manifest", "The inventory must contain at least one surface row.");

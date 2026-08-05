@@ -96,6 +96,30 @@ interface Classification {
   rollbackBoundary?: string;
 }
 
+const WEB_ROUTE_FILE_NAMES = new Set([
+  "apple-icon.tsx",
+  "error.tsx",
+  "global-error.tsx",
+  "layout.tsx",
+  "loading.tsx",
+  "not-found.tsx",
+  "opengraph-image.tsx",
+  "page.tsx",
+  "twitter-image.tsx",
+]);
+
+function firstRuntimeRouteSegment(path: string): string | undefined {
+  const prefix = "apps/web/app/";
+  if (!path.startsWith(prefix)) return undefined;
+  const parts = path.slice(prefix.length).split("/");
+  const file = parts.pop();
+  if (!file || !WEB_ROUTE_FILE_NAMES.has(file)) return undefined;
+  const runtimeSegments = parts.filter((segment) =>
+    !(segment.startsWith("(") && segment.endsWith(")"))
+    && !segment.startsWith("@"));
+  return runtimeSegments[0] ?? "";
+}
+
 const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
   { match: (path) => path === ".github/workflows/ci.yml" || path === "package.json" || [
     "scripts/channel-evidence-check.mts",
@@ -123,10 +147,13 @@ const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classi
   { match: (path) => path === "apps/web/app/blog/rss.xml/route.ts", value: { type: "renderer", audiences: ["public", "provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/web\/content\/blog\/.+\.mdx$/.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => path === "apps/web/lib/blog.ts" || path === "apps/web/lib/blog-clusters.ts", value: { type: "generator", audiences: ["public", "developer"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => firstRuntimeRouteSegment(path) === "app", value: { type: "route", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => firstRuntimeRouteSegment(path) === "admin", value: { type: "route", audiences: ["operator"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => firstRuntimeRouteSegment(path) === "dev", value: { type: "route", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", deliveryState: "controlled-current" } },
+  { match: (path) => firstRuntimeRouteSegment(path) !== undefined, value: { type: "route", audiences: ["public"], disposition: "replace-active", targetProfile: "web-product", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/web\/app\/api\/(?:link-phone|email\/unsubscribe)\/route\.ts$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path) || /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path), value: { type: "generator", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained" } },
-  { match: (path) => /^apps\/web\/app\/.+\/(?:page|layout|loading|error|not-found|opengraph-image|twitter-image|apple-icon)\.tsx$/.test(path) || /^apps\/web\/app\/(?:page|layout|error|not-found|opengraph-image|apple-icon)\.tsx$/.test(path), value: { type: "route", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product" } },
   { match: (path) => /^apps\/mobile\/src\/app\/.+\.tsx$/.test(path), value: { type: "screen", audiences: ["family"], disposition: "replace-active", targetProfile: "native-product" } },
   { match: (path) => /(?:^|\/)(?:email|emails)(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|html)$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "email-constrained" } },
   { match: (path) => /(?:^|\/)sms(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|md)$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "sms-plain-text" } },
@@ -271,9 +298,9 @@ const classify = (path: string) => {
   if (!rule) throw new Error(`Unclassified brand surface: ${path}`);
   return rule.value;
 };
-// Discovery and classification intentionally share one rule table. The former
-// selector list could omit a file that the classifier knew how to describe,
-// making a green inventory check self-referential rather than exhaustive.
+// One table prevents discovery and classification from drifting apart. The
+// independent structural domain checks and Git-derived tests still prevent
+// this table from silently omitting a whole route or publishing family.
 const candidates = trackedFiles.filter((path) => rules.some((rule) => rule.match(path)));
 
 function ownerIssue(path: string): `gh#${number}` {
