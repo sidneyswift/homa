@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DESIGN_CONTRACT_VERSION } from "../packages/design/src/contract/version.ts";
-import type { BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
+import { BRAND_MANIFEST_SCHEMA_VERSION, type BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST_PATH = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -17,7 +17,6 @@ const AUTHORING_TYPES = ["authoring-rule", "agent-skill", "prompt", "evaluator",
 type AuthoringType = (typeof AUTHORING_TYPES)[number];
 
 const TEXT_EXTENSIONS = new Set([".md", ".mdx", ".mts", ".mjs", ".ts", ".tsx", ".py", ".json", ".yml", ".yaml"]);
-const SKILL_TEXT_EXTENSIONS = new Set([".md", ".mdx", ".mts", ".mjs", ".ts", ".tsx"]);
 const sha256 = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
 const stableCompare = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
 const git = (...args: string[]) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
@@ -93,9 +92,9 @@ function expectedAuthoringType(path: string): AuthoringType | null {
   if (path.startsWith("marketing/voice/") && isTextPath(path)) return "authoring-rule";
   if (path.startsWith("marketing/evals/fixtures/") && isTextPath(path)) return "golden-fixture";
   if (path.startsWith("marketing/evals/") && isTextPath(path)) return "evaluator";
-  if (path.startsWith(".agents/skills/") && SKILL_TEXT_EXTENSIONS.has(path.slice(path.lastIndexOf(".")))) return path.endsWith("/SKILL.md") ? "agent-skill" : "authoring-rule";
-  if (path.startsWith("apps/web/agent/skills/") && SKILL_TEXT_EXTENSIONS.has(path.slice(path.lastIndexOf(".")))) return path.endsWith("/SKILL.md") ? "agent-skill" : "authoring-rule";
-  if (path.startsWith("apps/web/agent/") && !path.startsWith("apps/web/agent/channels/") && !path.startsWith("apps/web/agent/instructions/") && SKILL_TEXT_EXTENSIONS.has(path.slice(path.lastIndexOf(".")))) return "prompt";
+  if (path.startsWith(".agents/skills/") && isTextPath(path)) return path.endsWith("/SKILL.md") ? "agent-skill" : "authoring-rule";
+  if (path.startsWith("apps/web/agent/skills/") && isTextPath(path)) return path.endsWith("/SKILL.md") ? "agent-skill" : "authoring-rule";
+  if (path.startsWith("apps/web/agent/") && !path.startsWith("apps/web/agent/channels/") && !path.startsWith("apps/web/agent/instructions/") && isTextPath(path)) return "prompt";
   return null;
 }
 
@@ -204,7 +203,7 @@ function sourceHash(path: string): string {
 }
 
 function assertManifestShape(manifest: BrandSurfaceManifest): void {
-  if (manifest.schemaVersion !== 1 || manifest.designEra !== "quiet-authority-v1") throw new Error("Brand manifest is not the Quiet authority schema");
+  if (manifest.schemaVersion !== BRAND_MANIFEST_SCHEMA_VERSION || manifest.designEra !== "quiet-authority-v1") throw new Error("Brand manifest is not the Quiet authority schema");
   if (!/^[0-9a-f]{64}$/.test(manifest.ownedInputFingerprint)) throw new Error("Brand manifest has no valid owned-input fingerprint");
   const paths = new Set<string>();
   for (const surface of manifest.surfaces) {

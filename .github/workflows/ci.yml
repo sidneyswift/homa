@@ -11,7 +11,8 @@ name: CI
 # same steps now run as parallel jobs: "build" (compile chain), three
 # balanced guard shards ("checks", "db-checks", "e2e-checks", split by
 # measured step time; all export HOMA_POSTGRES_BIN so a suite can move
-# between them freely), and "mobile-checks". Turborepo and Next build caches make
+# between them freely), plus scope-independent "brand-checks" and
+# "mobile-checks". Turborepo and Next build caches make
 # unchanged packages replay instantly. Mobile typecheck/lint run ONLY in
 # mobile-checks; the build job filters mobile out of its turbo run
 # because running them twice per commit bought nothing.
@@ -54,7 +55,7 @@ jobs:
           fi
 
   # Fast paths still enforce the repository-wide style law and test the
-  # classifier that decides which expensive jobs may skip.
+  # classifier that decides which expensive web and database jobs may skip.
   light-checks:
     needs: classify-changes
     runs-on: ubuntu-24.04
@@ -72,12 +73,97 @@ jobs:
         # contract dependency-free so the fast gate can execute it directly.
         run: node --experimental-strip-types scripts/seo-contract-check.mts
 
+  # Brand truth crosses product code, mobile code, authoring docs, generated
+  # evidence, marketing, and provider handoffs. It runs for every scope so a
+  # docs-only or mobile-only change cannot bypass manifest freshness, residue,
+  # removal-ledger, or projection checks while the expensive web and database
+  # shards retain their fast paths.
+  brand-checks:
+    needs: classify-changes
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR base and head for delivery-delta guards
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags origin "${{ github.event.pull_request.base.sha }}"
+          git fetch --no-tags origin "${{ github.event.pull_request.head.sha }}"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Design-token check (colour utilities name a declared token)
+        run: pnpm check:design-tokens
+
+      - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
+        run: pnpm check:brand-surfaces
+
+      - name: Legacy removal ledger check (exact bindings and invalidation)
+        run: pnpm check:legacy-removal
+
+      - name: Marketing production contract check (bundles, queues, generators, publishers)
+        run: pnpm check:marketing-production
+
+      - name: Channel evidence contract check (fresh fingerprints and hard gates)
+        run: pnpm check:channel-evidence
+
+      - name: Provider handoff contract check (owned fields and external read-back gates)
+        run: pnpm check:provider-handoffs
+
+      - name: Handwrytten stationery contract check (source inventory and irreversible-delivery gates)
+        run: pnpm check:handwrytten-stationery
+
+      - name: Brand asset generation and fingerprint check
+        run: pnpm check:brand-assets
+
+      - name: Canonical identity asset manifest and residue check
+        run: pnpm check:identity-assets
+
+      - name: Design authoring rails check (coverage, contract, residue, fingerprints)
+        run: pnpm check:design-authoring
+
+      - name: Licensed font system contract and residue check
+        run: pnpm check:font-system
+
+      - name: Durable artifact design-era check (classification and Quiet print markers)
+        run: pnpm check:artifact-brand-era
+
+      - name: Active brand residue check (changed files cannot revive legacy identity)
+        run: pnpm check:brand-residue
+
+      - name: Design contract parity check (byte-stable projections)
+        run: pnpm check:design-parity
+
+      - name: Design fixture gallery check (stable IDs, profiles, and checksums)
+        run: pnpm check:design-fixtures
+
+      - name: Web interface gauntlet contract check
+        run: pnpm check:interface-gauntlet
+
+      - name: Design contract type and semantic tests
+        run: pnpm check:design-contract
+
+      - name: Semantic icon direct-import residue check
+        run: pnpm check:icon-residue
+
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
   # name and verifies the exact job set required by the classified scope.
   # If a job is added below, add it to `needs` here or it stops gating merges.
   build-and-check:
-    needs: [classify-changes, light-checks, mobile-checks, build, checks, db-checks, e2e-checks]
+    needs: [classify-changes, light-checks, brand-checks, mobile-checks, build, checks, db-checks, e2e-checks]
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -89,6 +175,7 @@ jobs:
           CI_SCOPE: ${{ needs.classify-changes.outputs.scope }}
           CI_CLASSIFY: ${{ needs.classify-changes.result }}
           CI_LIGHT: ${{ needs.light-checks.result }}
+          CI_BRAND: ${{ needs.brand-checks.result }}
           CI_MOBILE: ${{ needs.mobile-checks.result }}
           CI_BUILD: ${{ needs.build.result }}
           CI_CHECKS: ${{ needs.checks.result }}
@@ -114,6 +201,11 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -153,6 +245,14 @@ jobs:
 
       - name: Native interface gauntlet
         run: pnpm check:native-interface-gauntlet
+
+      - name: Android JavaScript bundle export
+        run: pnpm --filter mobile exec expo export --platform android --output-dir ${{ runner.temp }}/homa-android-compile
+
+      - name: Android native compile-only assembly
+        run: |
+          pnpm --filter mobile exec expo prebuild --platform android --no-install --clean
+          bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon
 
   # The compile chain plus the checks that need real Supabase secrets.
   # Typecheck, lint, and build go through one turbo invocation so turbo
@@ -360,54 +460,6 @@ jobs:
 
       - name: Events-registry parity check (MJ-08)
         run: pnpm check:events
-
-      - name: Design-token check (colour utilities name a declared token)
-        run: pnpm check:design-tokens
-
-      - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
-        run: pnpm check:brand-surfaces
-
-      - name: Marketing production contract check (bundles, queues, generators, publishers)
-        run: pnpm check:marketing-production
-
-      - name: Channel evidence contract check (fresh fingerprints and hard gates)
-        run: pnpm check:channel-evidence
-
-      - name: Provider handoff contract check (owned fields and external read-back gates)
-        run: pnpm check:provider-handoffs
-
-      - name: Handwrytten stationery contract check (source inventory and irreversible-delivery gates)
-        run: pnpm check:handwrytten-stationery
-
-      - name: Brand asset generation and fingerprint check
-        run: pnpm check:brand-assets
-
-      - name: Canonical identity asset manifest and residue check
-        run: pnpm check:identity-assets
-
-      - name: Design authoring rails check (coverage, contract, residue, fingerprints)
-        run: pnpm check:design-authoring
-
-      - name: Licensed font system contract and residue check
-        run: pnpm check:font-system
-
-      - name: Durable artifact design-era check (classification and Quiet print markers)
-        run: pnpm check:artifact-brand-era
-
-      - name: Active brand residue check (changed files cannot revive legacy identity)
-        run: pnpm check:brand-residue
-
-      - name: Design contract parity check (byte-stable projections)
-        run: pnpm check:design-parity
-
-      - name: Design fixture gallery check (stable IDs, profiles, and checksums)
-        run: pnpm check:design-fixtures
-
-      - name: Design contract type and semantic tests
-        run: pnpm check:design-contract
-
-      - name: Semantic icon direct-import residue check
-        run: pnpm check:icon-residue
 
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines

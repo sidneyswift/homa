@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
+import { BRAND_MANIFEST_SCHEMA_VERSION, type BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST_PATH = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -313,7 +313,7 @@ function criticalSurfaceIssues(manifest: BrandSurfaceManifest): GauntletIssue[] 
 export function collectStaticGauntletReport(): StaticGauntletReport {
   const manifest = loadManifest();
   const issues: GauntletIssue[] = [];
-  if (manifest.schemaVersion !== 1) issues.push({ check: "manifest-schema", detail: `unsupported schema ${manifest.schemaVersion}` });
+  if (manifest.schemaVersion !== BRAND_MANIFEST_SCHEMA_VERSION) issues.push({ check: "manifest-schema", detail: `unsupported schema ${manifest.schemaVersion}` });
   if (manifest.designEra !== "quiet-authority-v1") issues.push({ check: "design-era", detail: `manifest is ${manifest.designEra}` });
   if (!existsSync(DESIGN_CSS_PATH)) issues.push({ check: "primitive-css", detail: "quiet-primitives.css is missing" });
   else {

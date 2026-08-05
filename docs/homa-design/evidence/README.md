@@ -23,6 +23,24 @@ a row beyond its recorded rollout state or supplies production evidence.
 quarantined comparison namespace, not an active allowlist. It is excluded from
 product bundles, indexing, generators, and active design discovery.
 
+`legacy-removal.json` is the generated, fail-closed removal ledger owned by
+gh#729. Each row retains its original detection hash and signatures while also
+binding the current stable surface ID, path, source hash, signatures, owner,
+disposition, and rollback boundary. New detections and any binding drift reset
+to `open`; changed or deleted bytes never promote themselves. An explicit
+resolution must use `replacement-verified`, `stop-generation-verified`,
+`deleted`, or `immutable-residual` and supply the status-specific evidence,
+rollback rehearsal, commit, production readback, or stop-generation receipt
+required by the typed contract.
+
+Run `pnpm build:legacy-removal` after the surface manifest changes. `pnpm
+audit:legacy-removal` validates the ledger and reports the remaining queue
+without failing solely because work remains. Final gh#729 certification uses
+`pnpm audit:legacy-removal:strict`, which fails until the queue is empty.
+`pnpm audit:brand-eradication` combines that ledger with a full active-tree
+residue scan and reports the honest migration queue without claiming release
+readiness. Final certification uses `pnpm audit:brand-eradication:strict`.
+
 `pnpm check:brand-residue` is the pull-request ratchet. It scans the delivery
 delta and rejects newly introduced legacy identity. `pnpm audit:brand-residue`
 scans the complete tracked text tree against the hash baseline. The audit is
@@ -61,10 +79,20 @@ distribution receipt exists. `pnpm check:channel-evidence` fails when a
 manifest or fixture changes, when a profile disappears, when a passing gate
 lacks a retained proof path, or when a provider capability is simulated.
 
-Real receipts must be redacted and retained in the approved private evidence
-location. Commit only the content-free receipt path beside the row. A pending
-row may not be promoted to `pass` until every profile gate and the full
-evidence record are populated.
+Every passing receipt uses schema v2 and binds the exact profile-scoped input
+fingerprint it certifies. The committed receipt envelope is not evidence by
+itself. It must point to a distinct content-addressed artifact whose bytes are
+identical in `HEAD`, or to a typed private attestation that binds the external
+artifact SHA-256, issuer, signing identity, subject, observation, and scoped
+input fingerprint. Sensitive raw production evidence stays in the approved
+private location. Private attestations remain unable to pass until the loader
+has an approved trust anchor and authenticates their detached signature.
+
+When channel or provider inputs drift, reconciliation resets the status,
+gates or read-backs, observations, reviewer identities, receipt references,
+and rollback proof before writing the new fingerprint. A pending row may not
+be promoted to `pass` until every profile gate and the full evidence record
+are populated against that current fingerprint.
 
 `handwrytten-stationery.json` is the #740 physical-mail contract. It binds the
 Handwrytten wrapper, outbox, copy, Logo source, Quiet authority stationery

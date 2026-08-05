@@ -46,3 +46,38 @@ test("catch-all inventory rows are rejected", () => {
   const report = buildBrandInventoryCoverageReport(mutated);
   assert.ok(report.issues.some((issue) => issue.code === "catch-all-row"));
 });
+
+test("semantic catch-alls fail even when they contain no wildcard syntax", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  mutated.surfaces[0]!.paths = ["provider:social-accounts"];
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.ok(report.issues.some((issue) => issue.code === "semantic-catch-all-row"));
+});
+
+test("source provenance cannot borrow commit data across row states", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  const committed = mutated.surfaces.find((surface) => surface.evidenceMetadata.environment === "git-source-commit");
+  const synthetic = mutated.surfaces.find((surface) => surface.evidenceMetadata.environment === "inventory-only-no-external-observation");
+  assert.ok(committed && synthetic);
+  committed.evidenceMetadata.sourceCommitTimestamp = null;
+  synthetic.evidenceMetadata.sourceCommitSha = "0".repeat(40);
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.ok(report.issues.some((issue) => issue.code === "invalid-source-provenance"));
+  assert.ok(report.issues.some((issue) => issue.code === "unexpected-source-provenance"));
+});
+
+test("Git timestamps cannot impersonate a real surface observation", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  const surface = mutated.surfaces[0];
+  assert.ok(surface);
+  surface.evidenceMetadata.observedAt = "2026-08-04T12:00:00Z";
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.ok(report.issues.some((issue) => issue.code === "unreceipted-observation"));
+});
+
+test("manifest shape changes require the current schema version", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  mutated.schemaVersion = 1 as never;
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.ok(report.issues.some((issue) => issue.code === "schema-version"));
+});

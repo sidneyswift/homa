@@ -14,6 +14,18 @@ import {
   type BrandSurfaceRecord,
 } from "../packages/design/src/surfaces.ts";
 import { DESIGN_CONTRACT_VERSION } from "../packages/design/src/contract/version.ts";
+import {
+  LEGACY_FONT_PATH_SIGNATURE,
+  collectLegacySignatures,
+  isLegacyFontPath,
+  isLegacyTextPath,
+} from "../packages/design/src/legacy-signatures.ts";
+import {
+  collectHistoricalQuarantineIndexViolations,
+  historicalBrandQuarantinePaths,
+  historicalBrandQuarantineRecords,
+  isActiveAuthoringIndexOrRegistryPath,
+} from "../packages/design/src/historical-quarantine.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -21,32 +33,88 @@ const LEGACY_OUTPUT = resolve(ROOT, "docs/homa-design/evidence/legacy-baseline.j
 const CHECK = process.argv.includes("--check");
 const sha256 = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
 const stableCompare = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
-const git = (...args: string[]) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" }).trim();
-const trackedFiles = git("ls-files").split("\n").filter(Boolean).sort();
+const git = (...args: string[]) => execFileSync("git", args, {
+  cwd: ROOT,
+  encoding: "utf8",
+  maxBuffer: 64 * 1024 * 1024,
+}).trim();
+// Include untracked, non-ignored files so a newly created surface cannot evade
+// local inventory checks until it happens to be staged. CI sees the same set
+// after commit, while local authoring fails closed one step earlier.
+const trackedFiles = git("ls-files", "--cached", "--others", "--exclude-standard")
+  .split("\n")
+  .filter(Boolean)
+  .sort();
+const workingTreePaths = new Set([
+  ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
+  ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
+]);
+const latestCommittedSource = new Map<string, { sha: string; committedAt: string }>();
+let commitSource: { sha: string; committedAt: string } | null = null;
+// First-parent history identifies the commit that delivered each path into the
+// current release lineage. Diffing every merge parent would falsely attribute
+// a file to a later unrelated merge whose side branch simply lacked the file.
+for (const line of git("log", "--first-parent", "--format=@@source:%H%x09%cI", "--name-only", "--no-renames", "HEAD").split("\n")) {
+  if (line.startsWith("@@source:")) {
+    const [sha, committedAt] = line.slice("@@source:".length).split("\t");
+    commitSource = sha && committedAt ? { sha, committedAt } : null;
+  } else if (line && commitSource && !latestCommittedSource.has(line)) {
+    latestCommittedSource.set(line, commitSource);
+  }
+}
 const existing = existsSync(OUTPUT)
   ? JSON.parse(readFileSync(OUTPUT, "utf8")) as Partial<BrandSurfaceManifest>
   : null;
-const initialObservedAt = existing?.surfaces?.[0]?.evidenceMetadata?.observedAt
-  ?? git("show", "-s", "--format=%cI", "HEAD");
 
-const legacyPatterns: ReadonlyArray<[string, RegExp]> = [
-  ["legacy-font-schibsted", /Schibsted|schibsted/i],
-  ["legacy-font-hanken", /Hanken|hanken/i],
-  ["legacy-font-caveat", /\bCaveat\b/g],
-  ["legacy-warm-playful-doctrine", /warm and playful/i],
-  ["legacy-coral-action", /(?:primary|button|action|cta)[^\n]{0,80}(?:#F05A31|coral)|(?:#F05A31|coral)[^\n]{0,80}(?:primary|button|action|cta)/i],
-  ["legacy-shape-language", /\b(?:squiggle|wavy band)\b/i],
-  ["legacy-token-namespace", /(?:--(?:clay|sage|gold|sky|stone|pill)(?:[-_][a-z0-9-]+|\b)|\b(?:clay|sage|gold|sky|stone|pill)-(?:50|100|200|300|400|500|600|700|800|900)\b)/i],
-];
+function sourceProvenance(path: string): Pick<BrandSurfaceRecord["evidenceMetadata"], "observedAt" | "sourceCommitSha" | "sourceCommitTimestamp" | "environment"> {
+  const source = latestCommittedSource.get(path) ?? null;
+  if (workingTreePaths.has(path) || source === null) {
+    return {
+      observedAt: null,
+      sourceCommitSha: null,
+      sourceCommitTimestamp: null,
+      environment: "working-tree-uncommitted",
+    };
+  }
+  return {
+    observedAt: null,
+    sourceCommitSha: source.sha,
+    sourceCommitTimestamp: source.committedAt,
+    environment: "git-source-commit",
+  };
+}
 
 interface Classification {
   type: BrandManifestType;
   audiences: BrandAudience[];
   disposition: BrandDisposition;
   targetProfile: string;
+  reachability?: BrandSurfaceRecord["reachability"];
+  ownerIssue?: `gh#${number}`;
+  deliveryState?: BrandDeliveryState;
+  productionProbe?: string;
+  rollbackBoundary?: string;
 }
 
-const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
+const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
+  { match: (path) => path === ".github/workflows/ci.yml" || path === "package.json" || [
+    "scripts/channel-evidence-check.mts",
+    "scripts/channel-evidence-contract.mts",
+    "scripts/ci-change-scope.mjs",
+    "scripts/evidence-receipt-loader.mts",
+    "scripts/native-interface-gauntlet.mts",
+    "scripts/provider-handoff-check.mts",
+    "scripts/provider-handoff-contract.mts",
+  ].includes(path), value: { type: "evaluator", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "verification", reachability: "internal", ownerIssue: "gh#721", deliveryState: "controlled-current" } },
+  { match: (path) => path === ".cosmo/homa-taste.md", value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "generated-content" } },
+  { match: (path) => [
+    "apps/web/lib/billing/portal.ts",
+    "apps/web/lib/billing/wall.ts",
+    "apps/web/lib/billing/apple-verify.ts",
+    "apps/web/lib/supabase/server.ts",
+    "apps/web/lib/supabase/client.ts",
+  ].includes(path), value: { type: "generator", audiences: ["family", "developer", "provider"], disposition: "replace-active", targetProfile: "provider-constrained", reachability: "internal", ownerIssue: "gh#732", deliveryState: "controlled-current" } },
+  { match: (path) => path === "apps/web/.env.example", value: { type: "authoring-rule", audiences: ["developer", "provider"], disposition: "replace-active", targetProfile: "provider-constrained", reachability: "internal", ownerIssue: "gh#732", deliveryState: "controlled-current" } },
   { match: (path) => path === "apps/web/lib/materials/page-shell.ts", value: { type: "renderer", audiences: ["family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
   { match: (path) => /^apps\/web\/app\/api\/(?:link-phone|email\/unsubscribe)\/route\.ts$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained" } },
@@ -55,65 +123,141 @@ const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classifica
   { match: (path) => /^apps\/mobile\/src\/app\/.+\.tsx$/.test(path), value: { type: "screen", audiences: ["family"], disposition: "replace-active", targetProfile: "native-product" } },
   { match: (path) => /(?:^|\/)(?:email|emails)(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|html)$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "email-constrained" } },
   { match: (path) => /(?:^|\/)sms(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|md)$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "sms-plain-text" } },
-  { match: (path) => /^apps\/web\/(?:lib|app|components)\/.+(?:report|material|print|pdf|compliance|filing).+\.(?:ts|tsx)$/.test(path) && !/\.(?:test|spec)\./.test(path), value: { type: "renderer", audiences: ["family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
+  { match: (path) => /^apps\/web\/(?:lib|app|components)\/.*(?:report|material|print|pdf|compliance|filing).*\.(?:ts|tsx)$/.test(path) && !/\.(?:test|spec)\./.test(path), value: { type: "renderer", audiences: ["family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
+  { match: (path) => path === "apps/web/lib/child-progress/map-model.ts", value: { type: "renderer", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "web-product" } },
+  { match: (path) => /^apps\/web\/(?:app\/.*\.css|components\/design\/.*\.(?:css|ts|tsx))$/.test(path) && !/\.(?:test|spec)\./.test(path), value: { type: "component-family", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "web-product" } },
   { match: (path) => /^apps\/web\/(?:app|components)\/.+\.tsx$/.test(path) && !/\.(?:test|spec)\.tsx$/.test(path), value: { type: "component-family", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product" } },
   { match: (path) => /^apps\/mobile\/src\/(?:components|features|theme|lib)\/.+\.(?:ts|tsx)$/.test(path) && !/\.(?:test|spec)\.(?:ts|tsx)$/.test(path), value: { type: "component-family", audiences: ["family"], disposition: "replace-active", targetProfile: "native-product" } },
-  { match: (path) => /^apps\/mobile\/(?:modules|app\.json|assets\/)/.test(path), value: { type: "asset", audiences: ["family", "provider"], disposition: "regenerate-derived", targetProfile: "native-distribution" } },
+  { match: (path) => /^apps\/mobile\/(?:modules|app\.json|eas\.json|assets\/)/.test(path), value: { type: "asset", audiences: ["family", "provider"], disposition: "regenerate-derived", targetProfile: "native-distribution" } },
+  { match: (path) => /^apps\/(?:web|mobile)\/assets\/fonts\/quiet-authority\/.+\.(?:ttf|otf|woff2?)$/i.test(path), value: { type: "asset", audiences: ["family", "developer"], disposition: "approved-carry-forward", targetProfile: "font-system" } },
   { match: (path) => path === "apps/web/app/globals.css", value: { type: "component-family", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product" } },
   { match: (path) => /^apps\/web\/(?:public|app)\/.+\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|vcf)$/i.test(path), value: { type: "asset", audiences: ["family", "public", "provider"], disposition: "regenerate-derived", targetProfile: "asset-derived" } },
   { match: (path) => /^packages\/design\/src\/contract\/contract\.test\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "approved-profile-rule", targetProfile: "design-contract" } },
   { match: (path) => /^packages\/design\/src\/.+\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "approved-carry-forward", targetProfile: "design-contract" } },
   { match: (path) => /^packages\/design\/generated\/.+\.(?:json|css)$/.test(path), value: { type: "generator", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "design-projection" } },
+  { match: (path) => path === "packages/design/README.md" || path === "apps/web/components/design/README.md" || /^apps\/mobile\/(?:AGENTS|CLAUDE|README)\.md$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^marketing\/evals\/fixtures\/.+\.(?:md|mdx|json|yml|yaml)$/.test(path), value: { type: "golden-fixture", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "verification" } },
   { match: (path) => /^marketing\/evals\/.+\.(?:py|md|mdx|json|yml|yaml)$/.test(path), value: { type: "evaluator", audiences: ["developer"], disposition: "replace-active", targetProfile: "verification" } },
   { match: (path) => /^marketing\/voice\/.+\.(?:md|mdx)$/.test(path) || path === "marketing/AGENTS.md", value: { type: "authoring-rule", audiences: ["developer", "public"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^marketing\//.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich" } },
   { match: (path) => path === "DESIGN.md" || /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^docs\/homa-design\/(?!evidence\/)/.test(path), value: { type: "authoring-rule", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "authoring" } },
+  { match: (path) => path === "docs/homa-curriculum-atlas/materials-patterns.md", value: { type: "authoring-rule", audiences: ["developer", "family", "child"], disposition: "replace-active", targetProfile: "generated-content", ownerIssue: "gh#729" } },
+  { match: (path) => path === "docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md", value: { type: "golden-fixture", audiences: ["developer", "public"], disposition: "replace-active", targetProfile: "marketing-rich", ownerIssue: "gh#729" } },
+  { match: (path) => [
+    "docs/homa-planning/build-log.md",
+    "docs/homa-planning/journeys/04-feature-journeys.md",
+    "docs/homa-planning/journeys/10-reconciliation.md",
+  ].includes(path) || (path.startsWith("docs/homa-planning/plans/") && path !== "docs/homa-planning/plans/2026-08-02-homa-brand-system-approval.html"), value: { type: "authoring-rule", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "authoring", ownerIssue: "gh#729" } },
   { match: (path) => /^\.agents\/skills\/.+\/SKILL\.md$/.test(path), value: { type: "agent-skill", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
-  { match: (path) => /^\.agents\/skills\/.+\.(?:md|ts)$/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
+  { match: (path) => /^\.agents\/skills\/.+/.test(path), value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^apps\/web\/agent\/skills\/.+\/SKILL\.md$/.test(path), value: { type: "agent-skill", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => /^apps\/web\/agent\/skills\/.+\.(?:md|ts)$/.test(path), value: { type: "authoring-rule", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => /^(?:packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)\.ts$/.test(path), value: { type: "authoring-rule", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => /^apps\/web\/agent\/.+\.(?:md|ts)$/.test(path), value: { type: "prompt", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "generated-content" } },
-  { match: (path) => /^scripts\/.+(?:brand|design|social|font|asset|template|prompt|persona|anchor).+\.(?:mjs|mts|ts)$/.test(path), value: { type: "generator", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "authoring" } },
+  { match: (path) => /^scripts\/.*(?:brand|design|social|font|asset|template|prompt|persona|anchor).*\.(?:mjs|mts|ts)$/.test(path), value: { type: "generator", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "authoring" } },
+  { match: (path) => /^scripts\/(?:materials-calibration|packet-render-smoke)\.mts$/.test(path), value: { type: "generator", audiences: ["developer", "family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
   { match: (path) => /(?:^|\/)(?:evals?|evaluators?)\/.+\.(?:ts|tsx|md|json)$/.test(path), value: { type: "evaluator", audiences: ["developer"], disposition: "replace-active", targetProfile: "verification" } },
   { match: (path) => /(?:fixture|golden|anchor)/i.test(path) && /\.(?:json|html|svg|png|jpg|jpeg|pdf|md)$/.test(path), value: { type: "golden-fixture", audiences: ["developer"], disposition: "regenerate-derived", targetProfile: "verification" } },
   { match: (path) => /^supabase\/templates\/.+\.html$/.test(path), value: { type: "template", audiences: ["family", "provider"], disposition: "update-external", targetProfile: "provider-constrained" } },
 ];
 
-const candidateSelectors: Array<(path: string) => boolean> = [
-  (path) => path === "apps/web/lib/materials/page-shell.ts",
-  (path) => /^apps\/web\/(?:app|components)\/.+\.tsx$/.test(path) && !/\.(?:test|spec)\.tsx$/.test(path),
-  (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path),
-  (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path),
-  (path) => /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path),
-  (path) => /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^apps\/web\/app\/globals\.css$/.test(path),
-  (path) => /^apps\/mobile\/(?:src\/(?:app|components|features|theme|lib)|modules|assets\/|app\.json)/.test(path) && !/\.(?:test|spec)\.(?:ts|tsx)$/.test(path),
-  (path) => /(?:^|\/)(?:email|emails|sms)(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|md|html)$/.test(path),
-  (path) => /^apps\/web\/(?:lib|app|components)\/.+(?:report|material|print|pdf|compliance|filing).+\.(?:ts|tsx)$/.test(path) && !/\.(?:test|spec)\./.test(path),
-  (path) => /^apps\/web\/(?:public|app)\/.+\.(?:svg|png|jpg|jpeg|webp|avif|gif|ico|vcf)$/i.test(path),
-  (path) => /^packages\/design\/src\/.+\.ts$/.test(path),
-  (path) => /^packages\/design\/generated\/.+\.(?:json|css)$/.test(path),
-  (path) => /^marketing\//.test(path),
-  (path) => path === "DESIGN.md" || /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^docs\/homa-design\/(?!evidence\/)/.test(path),
-  (path) => /^\.agents\/skills\/.+\.(?:md|ts)$/.test(path),
-  (path) => /^apps\/web\/agent\/.+\.(?:md|ts)$/.test(path),
-  (path) => /^(?:packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)\.ts$/.test(path),
-  (path) => /^scripts\/.+(?:brand|design|social|font|asset|template|prompt|persona|anchor).+\.(?:mjs|mts|ts)$/.test(path),
-  (path) => /(?:^|\/)(?:evals?|evaluators?)\/.+\.(?:ts|tsx|md|json)$/.test(path),
-  (path) => /(?:fixture|golden|anchor)/i.test(path) && /\.(?:json|html|svg|png|jpg|jpeg|pdf|md)$/.test(path),
-  (path) => /^supabase\/templates\/.+\.html$/.test(path),
+function textForLegacyScan(path: string): string {
+  return isLegacyTextPath(path) ? readFileSync(resolve(ROOT, path), "utf8") : "";
+}
+
+const residuePaths = new Set(trackedFiles.filter((path) => {
+  const text = textForLegacyScan(path);
+  return isLegacyFontPath(path) || collectLegacySignatures(path, text).length > 0;
+}));
+const quarantinePaths = new Set(historicalBrandQuarantinePaths);
+if (quarantinePaths.size !== historicalBrandQuarantineRecords.length) {
+  throw new Error("Historical brand quarantine contains a duplicate exact path.");
+}
+const activeAuthorityPaths = new Set([
+  "docs/homa-curriculum-atlas/materials-patterns.md",
+  "docs/homa-planning/build-log.md",
+  "docs/homa-planning/journeys/04-feature-journeys.md",
+  "docs/homa-planning/journeys/10-reconciliation.md",
+]);
+const invalidQuarantinePaths = [...quarantinePaths].filter((path) =>
+  !trackedFiles.includes(path)
+  || !residuePaths.has(path)
+  || activeAuthorityPaths.has(path)
+  || (path.startsWith("docs/homa-planning/plans/")
+    && path !== "docs/homa-planning/plans/2026-08-02-homa-brand-system-approval.html")
+  || /^(?:apps|marketing|packages|supabase)\//.test(path));
+if (invalidQuarantinePaths.length > 0) {
+  throw new Error(`Invalid historical brand quarantine path(s):\n${invalidQuarantinePaths.sort().map((path) => `- ${path}`).join("\n")}`);
+}
+const productionDiscoveryFiles = trackedFiles.filter((path) =>
+  (/(?:^|\/)(?:package|app)\.json$/.test(path)
+    || /^(?:apps|marketing|supabase|\.github\/workflows)\//.test(path)
+    || path === "turbo.json"
+    || path === "vercel.json")
+  && isLegacyTextPath(path));
+const activeAuthoringIndexSources = new Map(
+  trackedFiles
+    .filter((path) => isActiveAuthoringIndexOrRegistryPath(path))
+    .map((path) => [path, readFileSync(resolve(ROOT, path), "utf8")]),
+);
+const quarantineAuthoringIndexViolations = collectHistoricalQuarantineIndexViolations(
+  activeAuthoringIndexSources,
+  quarantinePaths,
+);
+const quarantineRuntimeReferences: string[] = [];
+for (const sourcePath of productionDiscoveryFiles) {
+  const source = readFileSync(resolve(ROOT, sourcePath), "utf8");
+  for (const quarantinePath of quarantinePaths) {
+    if (source.includes(quarantinePath)) quarantineRuntimeReferences.push(`${sourcePath} -> ${quarantinePath}`);
+  }
+}
+const nextConfig = readFileSync(resolve(ROOT, "apps/web/next.config.ts"), "utf8");
+if (nextConfig.includes("../../docs/")
+  || quarantineRuntimeReferences.length > 0
+  || quarantineAuthoringIndexViolations.length > 0) {
+  throw new Error([
+    ...(nextConfig.includes("../../docs/") ? ["apps/web/next.config.ts includes the docs tree in a production bundle"] : []),
+    ...quarantineRuntimeReferences.map((reference) => `Historical quarantine is runtime-discoverable: ${reference}`),
+    ...quarantineAuthoringIndexViolations,
+  ].join("\n"));
+}
+const unclassifiedResiduePaths = [...residuePaths].filter((path) =>
+  !baseRules.some((rule) => rule.match(path)) && !quarantinePaths.has(path));
+if (unclassifiedResiduePaths.length > 0) {
+  throw new Error(`Unclassified legacy residue surface(s):\n${unclassifiedResiduePaths.sort().map((path) => `- ${path}`).join("\n")}`);
+}
+
+const historicalLegacyClassification: Classification = {
+  type: "durable-artifact",
+  audiences: ["developer", "operator"],
+  disposition: "historical-git-only",
+  targetProfile: "historical-private-provenance",
+  reachability: "internal",
+  ownerIssue: "gh#729",
+  deliveryState: "private-provenance",
+  productionProbe: "static:production-bundle-index-and-active-discovery-excluded",
+  rollbackBoundary: "git-quarantine",
+};
+const rules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
+  ...baseRules,
+  { match: (path) => quarantinePaths.has(path), value: historicalLegacyClassification },
 ];
 
-const candidates = trackedFiles.filter((path) => candidateSelectors.some((selector) => selector(path)));
 const classify = (path: string) => {
   const rule = rules.find((candidate) => candidate.match(path));
   if (!rule) throw new Error(`Unclassified brand surface: ${path}`);
   return rule.value;
 };
-for (const path of candidates) classify(path);
+// Discovery and classification intentionally share one rule table. The former
+// selector list could omit a file that the classifier knew how to describe,
+// making a green inventory check self-referential rather than exhaustive.
+const candidates = trackedFiles.filter((path) => rules.some((rule) => rule.match(path)));
 
 function ownerIssue(path: string): `gh#${number}` {
+  if (path === ".cosmo/homa-taste.md") return "gh#739";
+  if (/^apps\/(?:web|mobile)\/assets\/fonts\/quiet-authority\//.test(path)) return "gh#715";
+  if (/^apps\/web\/components\/design\/(?:icon-registry|Icon)\.(?:ts|tsx)$/.test(path) || /icons\.ts$/.test(path)) return "gh#718";
+  if (path === "apps/mobile/eas.json") return "gh#730";
   if (/^apps\/mobile\//.test(path)) return "gh#686";
   if (/^apps\/web\/(?:app|components)\/admin\//.test(path)) return "gh#733";
   if (/report|material|print|pdf|compliance|filing/.test(path)) return "gh#687";
@@ -131,7 +275,16 @@ function ownerIssue(path: string): `gh#${number}` {
   ].includes(path)) return "gh#719";
   if (/^(?:\.agents|apps\/web\/agent|packages\/core\/src\/map\/copy-laws|apps\/web\/lib\/copy-laws-runtime)/.test(path)) return "gh#739";
   if (/^apps\/web\/components\/design\//.test(path)) return "gh#724";
+  if (/^scripts\/(?:brand-surfaces|brand-inventory-completeness-check|brand-residue-check)\.mts$/.test(path)) return "gh#721";
   if (/^(?:DESIGN\.md|docs\/homa-design|packages\/design|scripts\/)/.test(path)) return "gh#717";
+  if (/^apps\/web\/app\/thinking-acts\.css$/.test(path)) return "gh#670";
+  if (/^apps\/web\/app\/app\/tasks\//.test(path)) return "gh#671";
+  if (/^apps\/web\/app\/app\/library\//.test(path)) return "gh#672";
+  if (/^apps\/web\/app\/app\/binder\//.test(path)) return "gh#673";
+  if (/^apps\/web\/app\/app\/(?:planner|calendar|hours|lessons)(?:\/|$)/.test(path)) return "gh#674";
+  if (/^apps\/web\/(?:app\/app\/(?:progress|\[childId\]\/progress)|components\/progress|lib\/child-progress)(?:\/|\.|$)/.test(path)) return "gh#675";
+  if (/^apps\/web\/app\/app\/(?:chat|voice)(?:\/|\.|$)/.test(path)) return "gh#676";
+  if (/^apps\/web\/(?:components\/dashboard|app\/app\/(?:layout|page)\.tsx)/.test(path)) return "gh#669";
   if (/^apps\/web\/app\/app\//.test(path)) return "gh#685";
   return "gh#683";
 }
@@ -188,18 +341,24 @@ function recordFor(path: string): BrandSurfaceRecord {
   const classification = classify(path);
   const bytes = readFileSync(resolve(ROOT, path));
   const sourceHash = sha256(bytes);
-  const text = /\.(?:ts|tsx|js|mjs|mts|css|md|html|json|txt|xml|svg|vcf)$/.test(path) ? bytes.toString("utf8") : "";
-  const legacySignatures = legacyPatterns.filter(([, pattern]) => pattern.test(text)).map(([name]) => name);
+  const text = isLegacyTextPath(path) ? bytes.toString("utf8") : "";
+  const legacySignatures = [...new Set([
+    ...collectLegacySignatures(path, text),
+    ...(isLegacyFontPath(path) ? [LEGACY_FONT_PATH_SIGNATURE] : []),
+  ])].sort(stableCompare);
   const isAdmin = /^apps\/web\/(?:app|components)\/admin\//.test(path);
   const isDev = /^apps\/web\/app\/dev\//.test(path);
   const audiences: BrandAudience[] = isAdmin ? ["operator"] : isDev ? ["developer"] : classification.audiences;
-  const reachability: BrandSurfaceRecord["reachability"] = isAdmin ? "authenticated" : isDev ? "internal" : path.includes("public/") || audiences.includes("public") ? "public" : "authenticated";
+  const reachability: BrandSurfaceRecord["reachability"] = classification.reachability
+    ?? (isAdmin ? "authenticated" : isDev ? "internal" : path.includes("public/") || audiences.includes("public") ? "public" : "authenticated");
   const isNative = classification.targetProfile.startsWith("native");
   const isRendered = ["route", "screen", "component-family", "template", "renderer", "asset"].includes(classification.type);
+  const provenance = sourceProvenance(path);
+  const isHistoricalQuarantine = classification.targetProfile === "historical-private-provenance";
   return {
     id: `surface:${sha256(path).slice(0, 16)}`,
     paths: [path], type: classification.type, reachability, audiences,
-    criticality: criticality(path, audiences), ownerIssue: ownerIssue(path),
+    criticality: criticality(path, audiences), ownerIssue: classification.ownerIssue ?? ownerIssue(path),
     upstreamDomainOwners: [classification.targetProfile],
     dependencies: ["@homa/design"],
     consumers: consumersFor(path, classification.type),
@@ -220,33 +379,50 @@ function recordFor(path: string): BrandSurfaceRecord {
       copyRoles: ["true-clear-memorable", "non-judgmental-child-framing"],
     },
     legacySignatures, currentAssetHashes: [sourceHash], disposition: classification.disposition, featureFlags: [],
-    migrationFlag: null, rollbackBoundary: isNative ? "ota-or-store-binary" : classification.targetProfile.includes("provider") ? "provider-version-restore" : "web-deployment",
+    migrationFlag: null, rollbackBoundary: classification.rollbackBoundary
+      ?? (isNative ? "ota-or-store-binary" : classification.targetProfile.includes("provider") ? "provider-version-restore" : "web-deployment"),
     evidencePath: null,
-    requiredEvidence: isRendered ? ["baseline-pixels-pending", "baseline-interactions-pending", "performance-pending", "accessibility-pending", "residue"] : ["source-fingerprint", "legacy-signature-review"],
-    productionProbe: classification.targetProfile === "authoring" ? "not-production-reachable" : "pending:brand-production-probe",
-    evidenceMetadata: { contractVersion: `@homa/design:${DESIGN_CONTRACT_VERSION}`, harnessVersion: "brand-surfaces-v1", observedAt: initialObservedAt, environment: "clean-checkout-forensics", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
+    requiredEvidence: isHistoricalQuarantine
+      ? ["source-fingerprint", "legacy-signature-review", "production-bundle-exclusion", "index-exclusion", "active-discovery-exclusion"]
+      : isRendered ? ["baseline-pixels-pending", "baseline-interactions-pending", "performance-pending", "accessibility-pending", "residue"] : ["source-fingerprint", "legacy-signature-review"],
+    productionProbe: classification.productionProbe
+      ?? (classification.targetProfile === "authoring" ? "not-production-reachable" : "pending:brand-production-probe"),
+    evidenceMetadata: { contractVersion: `@homa/design:${DESIGN_CONTRACT_VERSION}`, harnessVersion: "brand-surfaces-v1", ...provenance, clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
     productionReadback: null, deletionCommit: null,
-    deliveryState: deliveryState(path, classification.targetProfile), rolloutState: "inventory",
+    deliveryState: classification.deliveryState ?? deliveryState(path, classification.targetProfile), rolloutState: "inventory",
   };
 }
 
 const externalSurfaces = [
   ["provider:stripe-checkout-and-portal", "provider", "gh#732", "journey-critical", "revocable-public", "update-external"],
   ["provider:supabase-auth-email", "provider", "gh#732", "journey-critical", "revocable-public", "update-external"],
+  ["provider:google-identity", "provider", "gh#732", "journey-critical", "revocable-public", "update-external"],
+  ["provider:apple-identity", "provider", "gh#732", "journey-critical", "revocable-public", "update-external"],
+  ["provider:apple-subscription-management", "provider", "gh#732", "journey-critical", "revocable-public", "update-external"],
   ["provider:resend-email", "provider", "gh#688", "journey-critical", "revocable-public", "update-external"],
   ["provider:telnyx-sms-and-voice", "provider", "gh#688", "journey-critical", "revocable-public", "update-external"],
   ["provider:handwrytten", "provider", "gh#740", "supporting", "revocable-public", "update-external"],
   ["provider:apple-app-store", "provider", "gh#689", "journey-critical", "revocable-public", "update-external"],
   ["provider:google-play-reserved", "provider", "gh#689", "utility", "controlled-current", "approved-carry-forward"],
   ["template:future-mobile-push", "template", "gh#688", "utility", "controlled-current", "approved-carry-forward"],
-  ["provider:social-accounts", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
+  ["provider:social-instagram-thankshoma", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
+  ["provider:social-tiktok-thankshoma", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
+  ["provider:social-pinterest-thankshoma", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
+  ["provider:social-facebook-thankshoma", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
+  ["provider:social-youtube-thankshoma", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
+  ["provider:social-x-thankshoma", "provider", "gh#741", "supporting", "revocable-public", "update-external"],
   ["durable:vercel-blob-world-media", "durable-artifact", "gh#741", "supporting", "revocable-public", "migrate-durable"],
   ["durable:vercel-blob-family-artifacts", "durable-artifact", "gh#731", "journey-critical", "private-provenance", "migrate-durable"],
   ["durable:generated-family-reports", "durable-artifact", "gh#731", "journey-critical", "private-provenance", "migrate-durable"],
   ["durable:generated-printables", "durable-artifact", "gh#731", "journey-critical", "private-provenance", "migrate-durable"],
-  ["historical:delivered-email-sms-print-mail", "durable-artifact", "gh#731", "supporting", "delivered-historical", "historical-git-only"],
+  ["historical:resend-delivered-message-archive", "durable-artifact", "gh#731", "supporting", "delivered-historical", "historical-git-only"],
+  ["historical:telnyx-delivered-message-archive", "durable-artifact", "gh#731", "supporting", "delivered-historical", "historical-git-only"],
+  ["historical:family-generated-artifact-revisions", "durable-artifact", "gh#731", "supporting", "delivered-historical", "historical-git-only"],
+  ["historical:handwrytten-template-349914-mailed-copies", "durable-artifact", "gh#740", "supporting", "delivered-historical", "historical-git-only"],
   ["profile:parent-authored-filing-letter", "renderer", "gh#687", "journey-critical", "controlled-current", "approved-profile-rule"],
-  ["profile:required-third-party-marks", "asset", "gh#689", "supporting", "controlled-current", "immutable-external-content"],
+  ["profile:apple-sign-in-provider-mark", "asset", "gh#689", "supporting", "controlled-current", "immutable-external-content"],
+  ["profile:google-sign-in-provider-mark", "asset", "gh#689", "supporting", "controlled-current", "immutable-external-content"],
+  ["profile:apple-app-store-download-badge", "asset", "gh#689", "supporting", "controlled-current", "immutable-external-content"],
 ] as const;
 
 const providerRecords: BrandSurfaceRecord[] = externalSurfaces.map(([key, type, issue, criticalityValue, delivery, disposition]) => ({
@@ -261,7 +437,7 @@ const providerRecords: BrandSurfaceRecord[] = externalSurfaces.map(([key, type, 
   requirements: { atoms: ["semantic-color", "Logo"], patterns: ["one-useful-next-move"], assets: ["approved-provider-asset"], fonts: ["provider-safe-fallback"], copyRoles: ["true-clear-memorable"] },
   legacySignatures: [], currentAssetHashes: [], disposition: disposition as BrandDisposition, featureFlags: [], migrationFlag: null, rollbackBoundary: "provider-or-artifact-version-restore", evidencePath: null,
   requiredEvidence: ["provider-readback-pending", "production-probe-pending", "residue"], productionProbe: "pending:provider-probe",
-  evidenceMetadata: { contractVersion: `@homa/design:${DESIGN_CONTRACT_VERSION}`, harnessVersion: "brand-surfaces-v1", observedAt: initialObservedAt, environment: "clean-checkout-forensics", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
+  evidenceMetadata: { contractVersion: `@homa/design:${DESIGN_CONTRACT_VERSION}`, harnessVersion: "brand-surfaces-v1", observedAt: null, sourceCommitSha: null, sourceCommitTimestamp: null, environment: "inventory-only-no-external-observation", clientRuntimeFingerprint: null, pixels: null, interactions: null, performance: null, accessibility: null, artifactGeneration: null, providerState: null, publicCacheBehavior: null },
   productionReadback: null, deletionCommit: null,
   deliveryState: delivery as BrandDeliveryState, rolloutState: "inventory",
 }));

@@ -1,4 +1,4 @@
-export const BRAND_MANIFEST_SCHEMA_VERSION = 1 as const;
+export const BRAND_MANIFEST_SCHEMA_VERSION = 2 as const;
 
 export const brandManifestTypes = [
   "route",
@@ -106,7 +106,12 @@ export interface BrandSurfaceRecord {
   evidenceMetadata: {
     contractVersion: string;
     harnessVersion: string;
-    observedAt: string;
+    /** Reserved for a real rendered, installed, provider, or production observation. */
+    observedAt: string | null;
+    /** Exact last commit containing this path. Null for changed, untracked, and synthetic rows. */
+    sourceCommitSha: string | null;
+    /** Committer timestamp for sourceCommitSha. This is provenance, never observedAt. */
+    sourceCommitTimestamp: string | null;
     environment: string;
     clientRuntimeFingerprint: string | null;
     pixels: string | null;

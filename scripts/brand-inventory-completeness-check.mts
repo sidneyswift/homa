@@ -7,6 +7,7 @@ import type {
   BrandSurfaceManifest,
   BrandSurfaceRecord,
 } from "../packages/design/src/surfaces.ts";
+import { BRAND_MANIFEST_SCHEMA_VERSION } from "../packages/design/src/surfaces.ts";
 
 export const BRAND_INVENTORY_HARNESS_VERSION = "brand-inventory-v1" as const;
 
@@ -60,9 +61,15 @@ const communicationPath = (path: string): boolean =>
 const marketingPath = (path: string): boolean =>
   path.startsWith("marketing/") || path.startsWith("apps/web/components/marketing/")
   || path.startsWith("durable:vercel-blob-world-media")
-  || path === "provider:social-accounts";
+  || path.startsWith("provider:social-");
 
 const adminPath = (path: string): boolean => path.startsWith("apps/web/app/admin/") || path.startsWith("apps/web/components/admin/");
+
+const prohibitedSemanticCatchalls = new Set([
+  "provider:social-accounts",
+  "historical:delivered-email-sms-print-mail",
+  "profile:required-third-party-marks",
+]);
 
 export const brandInventoryCoverageRules: readonly BrandInventoryCoverageRule[] = [
   {
@@ -142,6 +149,9 @@ function validateRowShape(manifest: BrandSurfaceManifest, issues: BrandInventory
     if (!path || surface.paths.some((entry) => entry.includes("*") || entry.includes("..."))) {
       addIssue(issues, "catch-all-row", "Every inventory row must name an exact path, URL, provider, profile, or durable key.", path || undefined);
     }
+    if (prohibitedSemanticCatchalls.has(path)) {
+      addIssue(issues, "semantic-catch-all-row", "Aggregate account, delivery, and third-party-mark labels must be split into exact provider, archive, or profile rows.", path);
+    }
     if (seenPaths.has(path)) addIssue(issues, "duplicate-path", "A surface path or provider key appears more than once.", path);
     seenPaths.add(path);
     if (seenIds.has(surface.id)) addIssue(issues, "duplicate-id", "A stable surface ID appears more than once.", path);
@@ -151,8 +161,31 @@ function validateRowShape(manifest: BrandSurfaceManifest, issues: BrandInventory
     if (surface.targetProfiles.length === 0) addIssue(issues, "missing-target", "Every surface must name a target profile.", path);
     if (!surface.requiredStates.includes("default")) addIssue(issues, "missing-default-state", "Every surface must include a default state.", path);
     if (surface.approvedTarget !== "quiet-authority-v1") addIssue(issues, "wrong-target", "Every inventory row must target Quiet authority.", path);
-    if (!surface.evidenceMetadata.contractVersion || !surface.evidenceMetadata.harnessVersion || !surface.evidenceMetadata.observedAt || !surface.evidenceMetadata.environment) {
-      addIssue(issues, "incomplete-evidence-metadata", "Inventory evidence needs contract, harness, observed timestamp, and environment metadata.", path);
+    if (!surface.evidenceMetadata.contractVersion || !surface.evidenceMetadata.harnessVersion || !surface.evidenceMetadata.environment) {
+      addIssue(issues, "incomplete-evidence-metadata", "Inventory evidence needs contract, harness, and an honest source environment.", path);
+    }
+    const observation = surface.evidenceMetadata;
+    const isCommittedSource = observation.environment === "git-source-commit";
+    const isSourceWithoutCommit = observation.environment === "working-tree-uncommitted"
+      || observation.environment === "inventory-only-no-external-observation";
+    if (!isCommittedSource && !isSourceWithoutCommit) {
+      addIssue(issues, "unknown-source-environment", "Inventory source provenance must use a closed repository or synthetic environment.", path);
+    }
+    if (observation.observedAt !== null) {
+      addIssue(issues, "unreceipted-observation", "Source history cannot populate observedAt; real rendered, installed, provider, or production observations require separate evidence.", path);
+    }
+    if (isCommittedSource && (
+      !/^[0-9a-f]{40}$/.test(observation.sourceCommitSha ?? "")
+      || observation.sourceCommitTimestamp === null
+      || Number.isNaN(Date.parse(observation.sourceCommitTimestamp))
+    )) {
+      addIssue(issues, "invalid-source-provenance", "A committed source row requires an exact Git SHA and its ISO committer timestamp.", path);
+    }
+    if (isSourceWithoutCommit && (
+      observation.sourceCommitSha !== null
+      || observation.sourceCommitTimestamp !== null
+    )) {
+      addIssue(issues, "unexpected-source-provenance", "Changed, untracked, and synthetic rows cannot inherit commit provenance.", path);
     }
     if (surface.reachability === "external" && ["provider", "durable-artifact"].includes(surface.type) && !["revocable-public", "delivered-historical", "private-provenance"].includes(surface.deliveryState)) {
       addIssue(issues, "external-delivery-state", "External surfaces need a revocable, historical, or private delivery state.", path);
@@ -165,6 +198,7 @@ function validateRowShape(manifest: BrandSurfaceManifest, issues: BrandInventory
 }
 
 function validateManifestPolicy(manifest: BrandSurfaceManifest, issues: BrandInventoryIssue[]): void {
+  if (manifest.schemaVersion !== BRAND_MANIFEST_SCHEMA_VERSION) addIssue(issues, "schema-version", `Inventory schema must be version ${BRAND_MANIFEST_SCHEMA_VERSION}.`);
   if (manifest.designEra !== "quiet-authority-v1") addIssue(issues, "design-era", "Inventory must be pinned to the approved Quiet authority design era.");
   if (!/^[0-9a-f]{40}$/.test(manifest.baselineSourceCommit)) addIssue(issues, "baseline-source", "Inventory baseline source commit must be a full Git SHA.");
   if (!/^[0-9a-f]{64}$/.test(manifest.ownedInputFingerprint)) addIssue(issues, "owned-input-fingerprint", "Inventory must carry a SHA-256 owned-input fingerprint.");

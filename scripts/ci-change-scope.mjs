@@ -70,6 +70,7 @@ export function validateCiResults(scope, results) {
     full: {
       "classify-changes": "success",
       "light-checks": "success",
+      "brand-checks": "success",
       "mobile-checks": "success",
       build: "success",
       checks: "success",
@@ -79,6 +80,7 @@ export function validateCiResults(scope, results) {
     "mobile-only": {
       "classify-changes": "success",
       "light-checks": "success",
+      "brand-checks": "success",
       "mobile-checks": "success",
       build: "skipped",
       checks: "skipped",
@@ -88,6 +90,7 @@ export function validateCiResults(scope, results) {
     "docs-only": {
       "classify-changes": "success",
       "light-checks": "success",
+      "brand-checks": "success",
       "mobile-checks": "skipped",
       build: "skipped",
       checks: "skipped",
@@ -157,6 +160,7 @@ function runGateMode() {
   const results = {
     "classify-changes": process.env.CI_CLASSIFY,
     "light-checks": process.env.CI_LIGHT,
+    "brand-checks": process.env.CI_BRAND,
     "mobile-checks": process.env.CI_MOBILE,
     build: process.env.CI_BUILD,
     checks: process.env.CI_CHECKS,

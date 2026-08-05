@@ -1,13 +1,43 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { resolve } from "node:path";
+import type { LegacyRemovalLedger } from "../packages/design/src/legacy-removal.ts";
 import { brandCriticalities, brandDeliveryStates, brandDispositions, brandManifestTypes, type BrandSurfaceManifest } from "../packages/design/src/surfaces.ts";
+import { LEGACY_FONT_PATH_SIGNATURE } from "../packages/design/src/legacy-signatures.ts";
+import {
+  collectHistoricalQuarantineIndexViolations,
+  historicalBrandQuarantineRecords,
+  historicalQuarantineDocumentationManifestPath,
+  isActiveAuthoringIndexOrRegistryPath,
+} from "../packages/design/src/historical-quarantine.ts";
+import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
 
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/surfaces.json"), "utf8")) as BrandSurfaceManifest;
+const removalLedger = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/legacy-removal.json"), "utf8")) as LegacyRemovalLedger;
 const legacyBaseline = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/legacy-baseline.json"), "utf8")) as { designEra: string; sourceCommit: string; records: Array<{ path: string; sourceHash: string | null; legacySignatures: string[] }> };
 const stableCompare = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
+const git = (...args: string[]) => execFileSync("git", args, {
+  cwd: root,
+  encoding: "utf8",
+  maxBuffer: 64 * 1024 * 1024,
+}).trim();
+const workingTreePaths = new Set([
+  ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
+  ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
+]);
+const latestCommittedSource = new Map<string, { sha: string; committedAt: string }>();
+let committedSource: { sha: string; committedAt: string } | null = null;
+for (const line of git("log", "--first-parent", "--format=@@source:%H%x09%cI", "--name-only", "--no-renames", "HEAD").split("\n")) {
+  if (line.startsWith("@@source:")) {
+    const [sha, committedAt] = line.slice("@@source:".length).split("\t");
+    committedSource = sha && committedAt ? { sha, committedAt } : null;
+  } else if (line && committedSource && !latestCommittedSource.has(line)) {
+    latestCommittedSource.set(line, committedSource);
+  }
+}
 
 test("manifest IDs, paths, and ordering are unique and deterministic", () => {
   const paths = manifest.surfaces.map((surface) => surface.paths[0]!);
@@ -35,6 +65,81 @@ test("easy-to-miss raw HTML, metadata, and contact surfaces stay classified", ()
   ]) assert.ok(paths.has(path), `unclassified hidden surface: ${path}`);
 });
 
+test("inventory discovery covers exact design sources that broad keyword selectors missed", () => {
+  const paths = new Set(manifest.surfaces.flatMap((surface) => surface.paths));
+  for (const path of [
+    "scripts/brand-surfaces.mts",
+    "scripts/design-contract.mts",
+    "scripts/brand-residue-check.mts",
+    "apps/web/lib/materials/render-page.ts",
+    "apps/web/lib/materials/print.ts",
+    "apps/web/components/design/quiet-primitives.css",
+    "apps/web/components/design/icon-registry.ts",
+    "apps/web/assets/fonts/quiet-authority/dm-sans-700-latin.ttf",
+    "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
+    "apps/mobile/eas.json",
+    ".github/workflows/ci.yml",
+    "package.json",
+    "scripts/channel-evidence-contract.mts",
+    "scripts/evidence-receipt-loader.mts",
+    "scripts/native-interface-gauntlet.mts",
+    "scripts/provider-handoff-contract.mts",
+  ]) assert.ok(paths.has(path), `unclassified exact design source: ${path}`);
+});
+
+test("provider handoffs bind every governing source into the hashed inventory", () => {
+  const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+  for (const path of [
+    "apps/web/lib/billing/portal.ts",
+    "apps/web/lib/billing/wall.ts",
+    "apps/web/lib/billing/apple-verify.ts",
+    "apps/web/lib/supabase/server.ts",
+    "apps/web/lib/supabase/client.ts",
+    "apps/web/.env.example",
+  ]) {
+    const surface = byPath.get(path);
+    assert.ok(surface, `missing provider governing source: ${path}`);
+    assert.equal(surface.ownerIssue, "gh#732");
+    assert.deepEqual(surface.targetProfiles, ["provider-constrained"]);
+    assert.match(surface.currentAssetHashes[0] ?? "", /^[0-9a-f]{64}$/);
+  }
+});
+
+test("inventory and residue discovery include untracked non-ignored authoring inputs", () => {
+  const inventorySource = readFileSync(resolve(root, "scripts/brand-surfaces.mts"), "utf8");
+  const residueSource = readFileSync(resolve(root, "scripts/brand-residue-check.mts"), "utf8");
+  for (const source of [inventorySource, residueSource]) {
+    assert.match(source, /ls-files[^\n]+--cached[^\n]+--others[^\n]+--exclude-standard/);
+  }
+});
+
+test("semantic account and delivery catch-alls are split into exact rows", () => {
+  const paths = new Set(manifest.surfaces.flatMap((surface) => surface.paths));
+  for (const path of [
+    "provider:social-accounts",
+    "historical:delivered-email-sms-print-mail",
+    "profile:required-third-party-marks",
+  ]) assert.equal(paths.has(path), false, `semantic catch-all survived: ${path}`);
+  for (const path of [
+    "provider:social-instagram-thankshoma",
+    "provider:social-tiktok-thankshoma",
+    "provider:social-pinterest-thankshoma",
+    "provider:social-facebook-thankshoma",
+    "provider:social-youtube-thankshoma",
+    "provider:social-x-thankshoma",
+    "provider:google-identity",
+    "provider:apple-identity",
+    "provider:apple-subscription-management",
+    "historical:resend-delivered-message-archive",
+    "historical:telnyx-delivered-message-archive",
+    "historical:family-generated-artifact-revisions",
+    "historical:handwrytten-template-349914-mailed-copies",
+    "profile:apple-sign-in-provider-mark",
+    "profile:google-sign-in-provider-mark",
+    "profile:apple-app-store-download-badge",
+  ]) assert.ok(paths.has(path), `missing exact external row: ${path}`);
+});
+
 test("critical externally owned surfaces require a provider rollback rail", () => {
   const external = manifest.surfaces.filter((surface) => surface.reachability === "external");
   assert.ok(external.length > 0);
@@ -58,11 +163,148 @@ test("manifest uses only the approved contract enums and records owned-input fre
   }
 });
 
+test("source provenance binds the exact path commit and never impersonates observation", () => {
+  for (const surface of manifest.surfaces) {
+    const { observedAt, sourceCommitSha, sourceCommitTimestamp, environment } = surface.evidenceMetadata;
+    assert.equal(observedAt, null, surface.paths[0]);
+    if (surface.currentAssetHashes.length === 0) {
+      assert.equal(environment, "inventory-only-no-external-observation", surface.paths[0]);
+      assert.equal(sourceCommitSha, null, surface.paths[0]);
+      assert.equal(sourceCommitTimestamp, null, surface.paths[0]);
+    } else if (workingTreePaths.has(surface.paths[0]!)) {
+      assert.equal(environment, "working-tree-uncommitted", surface.paths[0]);
+      assert.equal(sourceCommitSha, null, surface.paths[0]);
+      assert.equal(sourceCommitTimestamp, null, surface.paths[0]);
+    } else {
+      const expected = latestCommittedSource.get(surface.paths[0]!);
+      assert.ok(expected, `missing Git provenance for ${surface.paths[0]}`);
+      assert.equal(environment, "git-source-commit", surface.paths[0]);
+      assert.equal(sourceCommitSha, expected.sha, surface.paths[0]);
+      assert.equal(sourceCommitTimestamp, expected.committedAt, surface.paths[0]);
+      assert.equal(Number.isNaN(Date.parse(sourceCommitTimestamp ?? "")), false, surface.paths[0]);
+    }
+  }
+});
+
 test("legacy signals are named and never silently discarded", () => {
   const signaled = manifest.surfaces.filter((surface) => surface.legacySignatures.length > 0);
   assert.ok(signaled.length > 0, "expected the baseline to find legacy identity signals");
   for (const surface of signaled) {
     for (const signal of surface.legacySignatures) assert.match(signal, /^legacy-/);
+  }
+});
+
+test("every full-audit residue path has one exact manifest row and one removal-ledger row", () => {
+  const surfacesByPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+  const ledgerBySurface = new Map(removalLedger.records.map((record) => [record.surfaceId, record]));
+  const findings = collectBrandResidueFindings("full");
+  const fontPaths = collectLegacyFontPathResidue("full");
+  const residuePaths = new Set([...findings.map((finding) => finding.path), ...fontPaths]);
+  assert.ok(residuePaths.size > 0, "expected the exhaustive audit to retain an honest removal queue");
+
+  for (const path of residuePaths) {
+    const surface = surfacesByPath.get(path);
+    assert.ok(surface, `full-audit path missing exact manifest row: ${path}`);
+    assert.equal(surface.paths.length, 1, `residue row must bind one exact path: ${path}`);
+    const record = ledgerBySurface.get(surface.id);
+    assert.ok(record, `full-audit path missing removal-ledger row: ${path}`);
+    assert.equal(record.path, path);
+  }
+  for (const finding of findings) {
+    assert.ok(surfacesByPath.get(finding.path)?.legacySignatures.includes(finding.signature),
+      `manifest dropped ${finding.signature} from ${finding.path}`);
+  }
+  for (const path of fontPaths) {
+    assert.ok(surfacesByPath.get(path)?.legacySignatures.includes(LEGACY_FONT_PATH_SIGNATURE),
+      `manifest dropped ${LEGACY_FONT_PATH_SIGNATURE} from ${path}`);
+  }
+});
+
+test("legacy-only historical documents are quarantined as private provenance", () => {
+  const historical = manifest.surfaces.filter((surface) => surface.targetProfiles.includes("historical-private-provenance"));
+  assert.deepEqual(
+    historical.map((surface) => surface.paths[0]!).sort(stableCompare),
+    historicalBrandQuarantineRecords.map((record) => record.path).sort(stableCompare),
+  );
+  for (const surface of historical) {
+    assert.equal(surface.reachability, "internal");
+    assert.equal(surface.deliveryState, "private-provenance");
+    assert.equal(surface.disposition, "historical-git-only");
+    assert.equal(surface.ownerIssue, "gh#729");
+    assert.equal(surface.productionProbe, "static:production-bundle-index-and-active-discovery-excluded");
+    assert.equal(surface.rollbackBoundary, "git-quarantine");
+    for (const requirement of ["production-bundle-exclusion", "index-exclusion", "active-discovery-exclusion"]) {
+      assert.ok(surface.requiredEvidence.includes(requirement), `${surface.paths[0]} missing ${requirement}`);
+    }
+  }
+});
+
+test("every quarantined path is historical in the active documentation registry", () => {
+  const documentationManifest = readFileSync(
+    resolve(root, historicalQuarantineDocumentationManifestPath),
+    "utf8",
+  );
+  const violations = collectHistoricalQuarantineIndexViolations(new Map([
+    [historicalQuarantineDocumentationManifestPath, documentationManifest],
+  ]));
+  assert.deepEqual(violations, []);
+});
+
+test("active authoring discovery catches new indexes without treating evidence as guidance", () => {
+  assert.equal(isActiveAuthoringIndexOrRegistryPath("docs/new-area/README.md"), true);
+  assert.equal(isActiveAuthoringIndexOrRegistryPath("data/new-domain/registry.json"), true);
+  assert.equal(isActiveAuthoringIndexOrRegistryPath("apps/web/lib/new-domain/catalog.ts"), true);
+  assert.equal(isActiveAuthoringIndexOrRegistryPath(".agents/skills/example/SKILL.md"), true);
+  assert.equal(isActiveAuthoringIndexOrRegistryPath("docs/homa-design/evidence/surfaces.json"), false);
+  assert.equal(isActiveAuthoringIndexOrRegistryPath(historicalBrandQuarantineRecords[0]!.path), false);
+});
+
+test("active authoring indexes cannot rediscover quarantined guidance", () => {
+  const quarantinePath = historicalBrandQuarantineRecords[0]!.path;
+  const documentationManifest = [
+    "path\tauthority_class\tlifecycle\tdisposition\tevidence\tnotes",
+    `${quarantinePath}\thistorical-record\thistorical\tunresolved\tExact historical quarantine registry gh#729.\tPrivate provenance only; not live guidance.`,
+  ].join("\n");
+  const violations = collectHistoricalQuarantineIndexViolations(
+    new Map([
+      [historicalQuarantineDocumentationManifestPath, documentationManifest],
+      ["docs/new-area/README.md", `Use ${quarantinePath} as the current design source.`],
+      ["docs/homa-design/evidence/surfaces.json", quarantinePath],
+    ]),
+    new Set([quarantinePath]),
+  );
+  assert.deepEqual(violations, [
+    `Active authoring index references historical quarantine: docs/new-area/README.md -> ${quarantinePath}`,
+  ]);
+});
+
+test("documentation registry labels cannot make quarantined bytes live guidance", () => {
+  const quarantinePath = historicalBrandQuarantineRecords[0]!.path;
+  const badManifest = [
+    "path\tauthority_class\tlifecycle\tdisposition\tevidence\tnotes",
+    `${quarantinePath}\tlive-guidance\tcurrent\tretain-current\tCurrent guide.\tUse this now.`,
+  ].join("\n");
+  const violations = collectHistoricalQuarantineIndexViolations(
+    new Map([[historicalQuarantineDocumentationManifestPath, badManifest]]),
+    new Set([quarantinePath]),
+  );
+  assert.ok(violations.some((violation) => violation.includes("exposes") && violation.includes(quarantinePath)));
+});
+
+test("canonical active authorities cannot enter historical quarantine", () => {
+  const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+  for (const path of [
+    "docs/homa-curriculum-atlas/materials-patterns.md",
+    "docs/homa-planning/build-log.md",
+    "docs/homa-planning/journeys/04-feature-journeys.md",
+    "docs/homa-planning/journeys/10-reconciliation.md",
+    "docs/homa-planning/plans/2026-08-02-homa-interface-modernization.md",
+  ]) {
+    const surface = byPath.get(path);
+    assert.ok(surface, `active authority missing from manifest: ${path}`);
+    assert.equal(surface.disposition, "replace-active", path);
+    assert.equal(surface.ownerIssue, "gh#729", path);
+    assert.equal(surface.targetProfiles.includes("historical-private-provenance"), false, path);
   }
 });
 
