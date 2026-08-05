@@ -13,15 +13,15 @@ const PRIMITIVES_CSS = readFileSync(
 test("Quiet nav preserves the public destinations and their order", () => {
   assert.deepEqual(QUIET_NAV_LINKS, [
     ["How it works", "/#how"],
-    ["Features", "/#features"],
     ["Memberships", "/#memberships"],
+    ["Features", "/#features"],
     ["Our story", "/#stories"],
   ]);
 });
 test("Quiet footer keeps one canonical link set for every public shell", () => {
   const labels = QUIET_FOOTER_COLUMNS.flatMap(([, links]) => links.map(([label]) => label));
   assert.deepEqual(labels, [
-    "Your child's progress report",
+    "Progress reports",
     "How the report works",
     "Homeschool planner",
     "Hours and state rules",
@@ -33,6 +33,10 @@ test("Quiet footer keeps one canonical link set for every public shell", () => {
     "Terms",
     "Contact",
   ]);
+  assert.equal(
+    QUIET_FOOTER_COLUMNS[0][1][0][1],
+    "/features/homeschool-progress-tracker",
+  );
 });
 
 test("Quiet shell CSS has accessible overlay and reduced-motion states", () => {

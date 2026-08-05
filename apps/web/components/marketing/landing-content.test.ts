@@ -14,7 +14,6 @@ import {
   PLATFORM_ITEMS,
   PRODUCT_PREVIEW_COPY,
   SAMPLE_REPORT_COPY,
-  WORKFLOW_ITEMS,
 } from "./landing-content";
 
 const QUIET_LANDING_SOURCE = readFileSync(new URL("./QuietLanding.tsx", import.meta.url), "utf8");
@@ -58,15 +57,6 @@ test("the platform strip states only verified access modes", () => {
     PLATFORM_ITEMS.map(({ label }) => label),
     ["Text message", "Web chat", "Phone friendly"],
   );
-});
-
-test("the how-it-works bridge explains the parent's path without diagnosing her", () => {
-  assert.deepEqual(
-    WORKFLOW_ITEMS.map(({ id }) => id),
-    ["family", "review", "change", "record"],
-  );
-  assert.doesNotMatch(JSON.stringify(WORKFLOW_ITEMS), /you need help/i);
-  assert.match(LANDING_SECTION_COPY.how.headline, /week you actually have/i);
 });
 
 test("the capability section exposes four shipped product nouns in parent-day order", () => {
@@ -113,7 +103,9 @@ test("the landing names built Plus services and keeps unbuilt Max out of checkou
 test("the fictional product example proves Homa can plan for an older child", () => {
   assert.match(PRODUCT_PREVIEW_COPY.eyebrow, /Leo, age 9/i);
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /Leo's unfinished fractions review/i);
-  assert.equal(LANDING_SECTION_COPY.authority.secondaryAction, "See how it works");
+  assert.equal(PRODUCT_PREVIEW_COPY.states.tell.title, "Parent's note");
+  assert.equal(PRODUCT_PREVIEW_COPY.states.tell.control, "Read note");
+  assert.equal(LANDING_SECTION_COPY.authority.secondaryAction, "See prices");
 });
 
 test("each capability card points to its canonical feature page", () => {
@@ -134,7 +126,6 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
     LANDING_SECTION_COPY,
     PLATFORM_ITEMS,
     PRODUCT_PREVIEW_COPY,
-    WORKFLOW_ITEMS,
     CAPABILITY_ITEMS,
     SAMPLE_REPORT_COPY,
     FOUNDER_STORY_COPY,
@@ -168,12 +159,15 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
   assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes per child/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /where each age-based question came from/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /published developmental milestones/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /national grade standards/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /source links/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /not a test or evaluation/i);
   assert.match(SAMPLE_REPORT_COPY.body, /one practical activity for each subject/i);
   assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits your child/i);
   assert.doesNotMatch(
     `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
-    /test|score|questionnaire|observation/i,
+    /score|questionnaire|diagnosis/i,
   );
 });
 
@@ -211,9 +205,24 @@ test("the live landing composition keeps the approved artifact-first opening", (
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /Leo · Tuesday|Teaching time[\s\S]*saved by child/u);
 });
 
+test("the phone reading order moves proof and prices ahead of capability detail", () => {
+  const howAnchor = QUIET_LANDING_SOURCE.indexOf('<div id="how" className="qa-authority">');
+  const reportSection = QUIET_LANDING_SOURCE.indexOf('<section id="sample-report"');
+  const membershipsSection = QUIET_LANDING_SOURCE.indexOf('<section id="memberships"');
+  const featuresSection = QUIET_LANDING_SOURCE.indexOf('<section id="features"');
+
+  assert.ok(howAnchor >= 0);
+  assert.ok(reportSection > howAnchor);
+  assert.ok(membershipsSection > reportSection);
+  assert.ok(featuresSection > membershipsSection);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /<section id="how"/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-pain-grid|WORKFLOW_ITEMS/u);
+  assert.match(QUIET_LANDING_SOURCE, /href="#memberships"/u);
+});
+
 test("the primary action appears in the first visual viewport", () => {
   const openingStart = QUIET_LANDING_SOURCE.indexOf('<section className="qa-opening"');
-  const authorityStart = QUIET_LANDING_SOURCE.indexOf('<div className="qa-authority">');
+  const authorityStart = QUIET_LANDING_SOURCE.indexOf('<div id="how" className="qa-authority">');
   const firstTrialAction = QUIET_LANDING_SOURCE.indexOf("<TrialAction />", openingStart);
 
   assert.ok(openingStart >= 0);

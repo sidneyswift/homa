@@ -52,13 +52,7 @@ export const LANDING_SECTION_COPY = {
     headline: "Tell Homa what changed. Review the updated week.",
     body:
       "Change the plan, add teaching time, and make a practice page in one note. Homa shows you the result before you keep it.",
-    secondaryAction: "See how it works",
-  },
-  how: {
-    eyebrow: "How it works",
-    headline: "Start with the week you actually have.",
-    body:
-      "Add each child once, tell Homa what you use, and describe what this week can hold. She prepares the weekly plan and, for ages 2 to 7, practice pages. You review them, change anything, and tell her when life shifts.",
+    secondaryAction: "See prices",
   },
   features: {
     eyebrow: "What you get",
@@ -90,8 +84,8 @@ export const PRODUCT_PREVIEW_COPY = {
   headline: "Make Tuesday lighter.",
   states: {
     tell: {
-      control: "Parent's note",
-      title: "Three changes for Tuesday",
+      control: "Read note",
+      title: "Parent's note",
       description:
         "Move Leo's unfinished fractions review to Thursday. He finished science after 35 minutes. Make Maya a butterfly counting page for Tuesday.",
       activity: "Shared with Homa",
@@ -117,37 +111,6 @@ export const PRODUCT_PREVIEW_COPY = {
   artifactTitle: "Maya's butterfly counting page is ready to print.",
   artifactBody: "Homa saves the page with Tuesday's weekly plan. You can print the page or ask for a change.",
 } as const;
-
-export type WorkflowId = "family" | "review" | "change" | "record";
-
-export const WORKFLOW_ITEMS: ReadonlyArray<{
-  id: WorkflowId;
-  title: string;
-  body: string;
-}> = [
-  {
-    id: "family",
-    title: "Tell Homa about your family",
-    body: "Add each child, the curriculum you use, and the time you have this week.",
-  },
-  {
-    id: "review",
-    title: "Review what Homa prepares",
-    body: "Homa builds the plan and practice pages. You decide what stays.",
-  },
-  {
-    id: "change",
-    title: "Change the week as life changes",
-    body: "Move a lesson, lighten a day, or ask for a different page without starting over.",
-  },
-  {
-    id: "record",
-    title: "Keep the record",
-    body: "Teaching hours, finished work, photos, and reports stay together for later.",
-  },
-];
-
-export const WORKFLOW_CLOSING = "You stay in charge. Homa keeps the work moving.";
 
 export type CapabilityId = "practice" | "plan" | "binder" | "records";
 
@@ -224,7 +187,7 @@ export const SAMPLE_REPORT_COPY = {
   eyebrow: "The progress report",
   headline: "See what is going well and what to try next.",
   body:
-    "Homa groups your answers by subject, shows where each age-based question came from, and suggests one practical activity for each subject. You decide what fits your child.",
+    "Homa organizes your answers by subject. Early ages use published developmental milestones; school ages use national grade standards, with source links. This is not a test or evaluation. You get one practical activity for each subject, and you decide what fits your child.",
   reassurance:
     "About five minutes per child. You answer from what you have already seen, and your child never has to use Homa.",
   action: "See the sample report",

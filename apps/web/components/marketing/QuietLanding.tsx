@@ -7,7 +7,6 @@ import { QuietAction } from "../design/QuietAction";
 import { QuietFrame } from "../design/QuietFrame";
 import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
-import type { SemanticIconName } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { Logo } from "../brand/Logo";
 import { ReportPreview } from "../../app/onboarding/report-preview";
@@ -22,20 +21,10 @@ import {
   MEMBERSHIP_NOTE,
   PRODUCT_PREVIEW_COPY,
   SAMPLE_REPORT_COPY,
-  WORKFLOW_CLOSING,
-  WORKFLOW_ITEMS,
   type CapabilityId,
-  type WorkflowId,
 } from "./landing-content";
 import { Nav } from "./Nav";
 import { SignupPopupProvider, useSignupPopup } from "./SignupPopupProvider";
-
-const WORKFLOW_ICONS: Record<WorkflowId, SemanticIconName> = {
-  family: "people",
-  review: "document",
-  change: "undo",
-  record: "files",
-};
 
 const QUIET_LANDING_CSS = `
 .quiet-landing { min-width: 320px; overflow-x: clip; background: var(--homa-canvas); color: var(--homa-ink); }
@@ -128,14 +117,7 @@ const QUIET_LANDING_CSS = `
 .qa-section__intro { max-width: 700px; }
 .qa-section h2 { margin: 12px 0 0; color: var(--homa-ink); font-size: clamp(2.45rem, 5vw, 4.4rem); line-height: .94; text-wrap: balance; }
 .qa-section__lead { max-width: 640px; margin: 18px 0 0; color: var(--homa-muted-ink); font-size: 1.05rem; line-height: 1.58; }
-.qa-pain-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 38px; }
 .qa-frame { padding: 20px; }
-.qa-pain-card { min-height: 198px; }
-.qa-pain-card__icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: var(--homa-radius-control); background: var(--homa-highlight-tint); color: var(--homa-highlight-ink); }
-.qa-pain-card h3 { margin: 23px 0 8px; font-size: 1.45rem; line-height: 1; }
-.qa-pain-card p { margin: 0; color: var(--homa-muted-ink); line-height: 1.48; }
-.qa-closing { display: flex; align-items: center; gap: 14px; margin-top: 34px; color: var(--homa-ink); font: 500 clamp(1.35rem, 2.5vw, 1.8rem)/1.15 var(--font-display); }
-.qa-closing::before { content: ""; width: 38px; height: 3px; flex: none; border-radius: 99px; background: var(--homa-visual-coral); }
 .qa-capability-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 38px; }
 .qa-capability-card { display: flex; min-width: 0; flex-direction: column; }
 .qa-capability-card h3 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.1rem); line-height: .98; }
@@ -205,7 +187,6 @@ const QUIET_LANDING_CSS = `
   .qa-opening__world { min-height: 600px; }
   .qa-authority { grid-template-columns: 1fr; }
   .qa-product { max-width: 620px; margin-inline: auto; }
-  .qa-pain-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .qa-story { grid-template-columns: minmax(0, 1fr) 230px; }
 }
 @media (max-width: 700px) {
@@ -222,7 +203,6 @@ const QUIET_LANDING_CSS = `
 }
 @media (max-width: 480px) {
   .qa-section { padding-inline: 16px; }
-  .qa-pain-grid { grid-template-columns: 1fr; }
   .qa-capability-grid { gap: 10px; }
   .qa-frame { padding: 17px; }
   .qa-opening__world { min-height: 680px; }
@@ -354,27 +334,16 @@ export function QuietLanding() {
                 <QuietThread className="qa-opening__thread" label="A coral line connecting today's work to what comes next" />
                 <div className="qa-opening__character" aria-hidden="true"><Logo size={74} variant="mark" tone="dark" /></div>
               </div>
-              <div className="qa-authority">
+              <div id="how" className="qa-authority">
                 <div className="qa-authority__copy">
                   <span className="qa-authority__kicker">{LANDING_SECTION_COPY.authority.eyebrow}</span>
                   <h2>{LANDING_SECTION_COPY.authority.headline}</h2>
                   <p>{LANDING_SECTION_COPY.authority.body}</p>
-                  <div className="qa-authority__actions"><QuietAction kind="secondary" href="#how" icon={<Icon name="next" size={20} />}>{LANDING_SECTION_COPY.authority.secondaryAction}</QuietAction></div>
+                  <div className="qa-authority__actions"><QuietAction kind="secondary" href="#memberships" icon={<Icon name="next" size={20} />}>{LANDING_SECTION_COPY.authority.secondaryAction}</QuietAction></div>
                 </div>
                 <QuietProductMoment />
               </div>
             </div>
-          </section>
-
-          <section id="how" className="qa-band qa-section" aria-labelledby="quiet-how-title">
-            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.how.eyebrow}</div><h2 id="quiet-how-title">{LANDING_SECTION_COPY.how.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.how.body}</p></div>
-            <div className="qa-pain-grid">{WORKFLOW_ITEMS.map(({ id, title, body }) => { const icon = WORKFLOW_ICONS[id]; return <QuietFrame as="article" tone="paper" className="qa-frame qa-pain-card" key={id}><span className="qa-pain-card__icon"><Icon name={icon} size={20} /></span><h3>{title}</h3><p>{body}</p></QuietFrame>; })}</div>
-            <p className="qa-closing">{WORKFLOW_CLOSING}</p>
-          </section>
-
-          <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
-            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.features.eyebrow}</div><h2 id="quiet-features-title">{LANDING_SECTION_COPY.features.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.features.body}</p></div>
-            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body, action }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>{action}</QuietAction></div></QuietFrame>)}</div>
           </section>
 
           <section id="sample-report" className="qa-band qa-section" aria-labelledby="quiet-report-title">
@@ -385,6 +354,11 @@ export function QuietLanding() {
             <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.memberships.eyebrow}</div><h2 id="quiet-memberships-title">{LANDING_SECTION_COPY.memberships.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.memberships.body}</p></div>
             <div className="qa-membership-grid">{MEMBERSHIP_ITEMS.map(({ tier, name, monthlyPrice, annualPrice, body }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-membership-card" key={tier}><h3>{name}</h3><div className="qa-membership-card__price">${monthlyPrice}<span>a month</span></div><div className="qa-membership-card__annual">${annualPrice.toLocaleString("en-US")} once a year</div><p className="qa-membership-card__body">{body}</p></QuietFrame>)}</div>
             <div className="qa-memberships__footer"><p>{MEMBERSHIP_NOTE}</p><TrialAction /></div>
+          </section>
+
+          <section id="features" className="qa-band qa-section" aria-labelledby="quiet-features-title">
+            <div className="qa-section__intro"><div className="qa-eyebrow">{LANDING_SECTION_COPY.features.eyebrow}</div><h2 id="quiet-features-title">{LANDING_SECTION_COPY.features.headline}</h2><p className="qa-section__lead">{LANDING_SECTION_COPY.features.body}</p></div>
+            <div className="qa-capability-grid">{CAPABILITY_ITEMS.map(({ id, title, body, action }) => <QuietFrame as="article" tone="paper" className="qa-frame qa-capability-card" key={id}><h3>{title}</h3><p>{body}</p><div className="qa-capability-card__proof"><QuietCapabilityProof capabilityId={id} /></div><div style={{ marginTop: 18 }}><QuietAction kind="quiet" href={CAPABILITY_FEATURE_HREFS[id]} icon={<Icon name="next" size={16} />}>{action}</QuietAction></div></QuietFrame>)}</div>
           </section>
 
           <section id="stories" className="qa-band qa-section" aria-labelledby="quiet-story-title">
