@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
+  "ownedInputFingerprint": "4b02867a0794b8879c059e7b59e1989f08a2df49cf5040e79de6223e1ea9c42c",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -11231,7 +11231,7 @@
     {
       "surfaceId": "surface:cf7384e7282fda93",
       "path": "scripts/brand-assets.mts",
-      "sourceHash": "cd1c353175e6ba48aedbfff050b80562b5617903ab52d755c417a8398884a7ed",
+      "sourceHash": "1693b51a5351970743d2124d304ff19745ae8a28bfd9046b54e51bfdbf3f67f6",
       "legacySignatures": [],
       "detectedSourceHash": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2",
       "detectedLegacySignatures": [
