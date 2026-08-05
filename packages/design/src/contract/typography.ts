@@ -21,6 +21,18 @@ export const typeRoles = {
   metric: { familyRole: "interface", weights: [600, 700], minSize: 16, maxSizePhone: 36, maxSizeDesktop: 40, lineHeight: 20, tabular: true },
 } as const;
 
+export const displayLineBehavior = {
+  balance: "intentional",
+  preferredMaximumLines: 2,
+  exception: "localization-or-accessibility-expansion",
+} as const;
+
 export type FontRole = keyof typeof fontRoles;
 export type TypeRole = keyof typeof typeRoles;
-export const TYPOGRAPHY_CONTRACT = { version: DESIGN_CONTRACT_VERSION, fontRoles, typeRoles, sentenceCase: true } as const;
+export const TYPOGRAPHY_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  fontRoles,
+  typeRoles,
+  displayLineBehavior,
+  sentenceCase: true,
+} as const;

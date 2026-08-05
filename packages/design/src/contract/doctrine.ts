@@ -123,12 +123,23 @@ export function assertDesignContract(): void {
   if (LAYOUT_CONTRACT.maximumElevationLevels !== 2) throw new Error("Quiet authority permits at most two elevation levels");
   if (LAYOUT_CONTRACT.density.interactiveRowMinimumHeight.titleAndMetadata !== 52 || LAYOUT_CONTRACT.density.interactiveRowMinimumHeight.otherwise !== 44) throw new Error("Interactive row floors drifted");
   if (LAYOUT_CONTRACT.mediaGeometry.objectFit !== "contain" || !LAYOUT_CONTRACT.mediaGeometry.reserveFinalDimensionsBeforeLoad) throw new Error("Artifact previews must reserve dimensions and contain media");
+  if (
+    TYPOGRAPHY_CONTRACT.displayLineBehavior.balance !== "intentional"
+    || TYPOGRAPHY_CONTRACT.displayLineBehavior.preferredMaximumLines !== 2
+    || TYPOGRAPHY_CONTRACT.displayLineBehavior.exception !== "localization-or-accessibility-expansion"
+  ) throw new Error("Display lines must balance around a two-line preference without breaking accessibility or localization");
   const colorTotal = COLOR_CONTRACT.composition.canvasAndPaperTargetPercent
     + COLOR_CONTRACT.composition.midnightAndInkTargetPercent
     + COLOR_CONTRACT.composition.visualCoralTargetPercent
     + COLOR_CONTRACT.composition.semanticColorMaximumPercent;
   if (colorTotal !== 100) throw new Error(`Color composition must total 100, got ${colorTotal}`);
-  if (STATES_CONTRACT.selectedStateContract.colorAlone || STATES_CONTRACT.selectedStateContract.minimumConcurrentCarriers < 2) throw new Error("Selected state needs coordinated non-color carriers");
+  const selectedState = STATES_CONTRACT.selectedStateContract;
+  if (
+    selectedState.colorAlone
+    || selectedState.minimumConcurrentCarriers !== selectedState.carriers.length
+    || selectedState.requiredVisualCarriers.some((carrier) => !selectedState.carriers.includes(carrier))
+    || !selectedState.carriers.includes(selectedState.requiredAccessibleCarrier)
+  ) throw new Error("Selected state needs every coordinated visual and accessible carrier");
   if (BRAND_CONTRACT.roofThread.maximumTurns > 2) throw new Error("Roof thread exceeds the two-turn limit");
   if (BRAND_CONTRACT.signatureComposition.realObjectVisualWeightPercent.minimum !== 55 || BRAND_CONTRACT.signatureComposition.realObjectVisualWeightPercent.maximum !== 70) throw new Error("Real work prominence drifted");
   if (BRAND_CONTRACT.signatureComposition.homaShortEdgePercent.minimum !== 10 || BRAND_CONTRACT.signatureComposition.homaShortEdgePercent.maximum !== 16) throw new Error("Homa composition proportion drifted");

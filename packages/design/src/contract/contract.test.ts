@@ -9,7 +9,7 @@ import { assertDesignContract, assertMatchingContractVersions, DOCTRINE_CONTRACT
 import { LAYOUT_CONTRACT } from "./layout.ts";
 import { MOTION_CONTRACT } from "./motion.ts";
 import { STATES_CONTRACT } from "./states.ts";
-import { fontRoles, typeRoles } from "./typography.ts";
+import { TYPOGRAPHY_CONTRACT, displayLineBehavior, fontRoles, typeRoles } from "./typography.ts";
 import {
   NATIVE_PROJECTION_CONTRACT,
   nativeHapticRoles,
@@ -69,24 +69,26 @@ test("font roles have one meaning and the display floor is enforced", () => {
 });
 
 test("approved type roles, weights, and tracking are exhaustive", () => {
-  assert.deepEqual(Object.keys(typeRoles).sort(), [
-    "body",
-    "bodyLarge",
-    "bodySmall",
-    "caption",
-    "cardTitle",
-    "control",
-    "eyebrow",
-    "hero",
-    "label",
-    "metric",
-    "pageTitle",
-    "sectionTitle",
-  ]);
-  assert.equal(typeRoles.cardTitle.familyRole, "display");
-  assert.deepEqual(typeRoles.cardTitle.weights, [600]);
-  assert.deepEqual(typeRoles.hero.weights, [600]);
-  assert.deepEqual(typeRoles.hero.tracking, { minimumEm: -0.03, maximumEm: -0.025, rule: "wrap-tested" });
+  assert.deepEqual(typeRoles, {
+    hero: { familyRole: "display", weights: [600], phone: { size: 44, lineHeight: 46 }, desktop: { size: 64, lineHeight: 66 }, tracking: { minimumEm: -0.03, maximumEm: -0.025, rule: "wrap-tested" } },
+    pageTitle: { familyRole: "display", weights: [600], minSize: 32, maxSize: 40, minLineHeight: 36, maxLineHeight: 44, tracking: { minimumEm: -0.025, maximumEm: -0.02, rule: "wrap-tested" } },
+    sectionTitle: { familyRole: "display", weights: [600], minSize: 26, maxSize: 32, minLineHeight: 31, maxLineHeight: 37, tracking: { minimumEm: -0.025, maximumEm: -0.02, rule: "wrap-tested" } },
+    cardTitle: { familyRole: "display", weights: [600], phone: { size: 20, lineHeight: 26 }, desktop: { size: 22, lineHeight: 28 }, tracking: { minimumEm: -0.02, maximumEm: 0, rule: "wrap-tested" } },
+    body: { familyRole: "interface", weights: [400], size: 16, lineHeight: 24 },
+    bodyLarge: { familyRole: "interface", weights: [400], size: 18, lineHeight: 28 },
+    bodySmall: { familyRole: "interface", weights: [400], size: 14, lineHeight: 20 },
+    control: { familyRole: "interface", weights: [600], size: 15, lineHeight: 20, minimumSize: 14 },
+    label: { familyRole: "interface", weights: [600], size: 14, lineHeight: 20 },
+    caption: { familyRole: "interface", weights: [500], size: 13, lineHeight: 18, meaningfulCustomerTextFloor: true },
+    eyebrow: { familyRole: "interface", weights: [700], size: 12, lineHeight: 16, tracking: "0.08em", usage: "nonessential-orientation-only" },
+    metric: { familyRole: "interface", weights: [600, 700], minSize: 16, maxSizePhone: 36, maxSizeDesktop: 40, lineHeight: 20, tabular: true },
+  });
+  assert.deepEqual(displayLineBehavior, {
+    balance: "intentional",
+    preferredMaximumLines: 2,
+    exception: "localization-or-accessibility-expansion",
+  });
+  assert.equal(TYPOGRAPHY_CONTRACT.displayLineBehavior, displayLineBehavior);
   for (const role of Object.values(typeRoles)) {
     assert.ok(role.weights.length > 0);
     const allowed = fontRoles[role.familyRole].allowedWeights as readonly number[];
@@ -148,8 +150,10 @@ test("approved composition, selection, density, media, and motion rules are exac
   assert.deepEqual(BRAND_CONTRACT.signatureComposition.realObjectVisualWeightPercent, { minimum: 55, maximum: 70 });
   assert.deepEqual(BRAND_CONTRACT.signatureComposition.homaShortEdgePercent, { minimum: 10, maximum: 16 });
   assert.deepEqual(STATES_CONTRACT.selectedStateContract.carriers, ["surface-tint", "border", "text", "context", "accessible-state"]);
+  assert.deepEqual(STATES_CONTRACT.selectedStateContract.requiredVisualCarriers, ["surface-tint", "border", "text", "context"]);
+  assert.equal(STATES_CONTRACT.selectedStateContract.requiredAccessibleCarrier, "accessible-state");
   assert.equal(STATES_CONTRACT.selectedStateContract.colorAlone, false);
-  assert.equal(STATES_CONTRACT.selectedStateContract.minimumConcurrentCarriers, 2);
+  assert.equal(STATES_CONTRACT.selectedStateContract.minimumConcurrentCarriers, 5);
   assert.deepEqual(LAYOUT_CONTRACT.density.interactiveRowMinimumHeight, { titleAndMetadata: 52, otherwise: 44 });
   assert.equal(LAYOUT_CONTRACT.mediaGeometry.declaredAspectRatio, "required");
   assert.equal(LAYOUT_CONTRACT.mediaGeometry.objectFit, "contain");
@@ -225,13 +229,18 @@ test("every generated source contract fails closed under independent version ske
   }
 });
 
-test("semantic package subpaths are public and resolvable", () => {
+test("every public package subpath is resolvable and evaluable", async () => {
   const packageJson = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")) as { exports: Record<string, string> };
-  const required = ["./tokens", "./brand", "./motion", "./states", "./profiles"] as const;
-  for (const subpath of required) {
+  const requiredSemanticSubpaths = ["./tokens", "./brand", "./motion", "./states", "./profiles"] as const;
+  for (const subpath of requiredSemanticSubpaths) {
+    assert.match(packageJson.exports[subpath] ?? "", /^\.\/src\/.+\.ts$/u);
+  }
+  for (const subpath of Object.keys(packageJson.exports).sort()) {
     assert.match(packageJson.exports[subpath] ?? "", /^\.\/src\/.+\.ts$/u);
     const specifier = `@homa/design/${subpath.slice(2)}`;
-    assert.match(import.meta.resolve(specifier), /^file:.+\.ts$/u);
+    const resolved = subpath === "." ? import.meta.resolve("@homa/design") : import.meta.resolve(specifier);
+    assert.match(resolved, /^file:.+\.ts$/u);
+    await assert.doesNotReject(import(subpath === "." ? "@homa/design" : specifier));
   }
 });
 

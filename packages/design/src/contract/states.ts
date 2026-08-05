@@ -10,8 +10,10 @@ export const semanticStateRoles = {
 } as const;
 export const selectedStateContract = {
   carriers: ["surface-tint", "border", "text", "context", "accessible-state"],
+  requiredVisualCarriers: ["surface-tint", "border", "text", "context"],
+  requiredAccessibleCarrier: "accessible-state",
   colorAlone: false,
-  minimumConcurrentCarriers: 2,
+  minimumConcurrentCarriers: 5,
   functionalAnchor: "midnightAction",
   prohibitedSemanticSubstitutes: ["constructive", "info", "highlight", "error"],
 } as const;

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "b2962bf3b2e582153bb572e2ddab3618eb93da10cbed2184f484880f963f8607",
+  "sourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -2462,8 +2462,15 @@
           "context",
           "accessible-state"
         ],
+        "requiredVisualCarriers": [
+          "surface-tint",
+          "border",
+          "text",
+          "context"
+        ],
+        "requiredAccessibleCarrier": "accessible-state",
         "colorAlone": false,
-        "minimumConcurrentCarriers": 2,
+        "minimumConcurrentCarriers": 5,
         "functionalAnchor": "midnightAction",
         "prohibitedSemanticSubstitutes": [
           "constructive",
@@ -2655,6 +2662,11 @@
           "lineHeight": 20,
           "tabular": true
         }
+      },
+      "displayLineBehavior": {
+        "balance": "intentional",
+        "preferredMaximumLines": 2,
+        "exception": "localization-or-accessibility-expansion"
       },
       "sentenceCase": true
     },

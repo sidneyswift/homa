@@ -411,18 +411,18 @@ This table is the active foundation approved under gh#667. Exact machine values 
 
 | Role | Selected family | Typical compact size | Typical desktop size | Rule |
 |---|---|---:|---:|---|
-| Hero display | EB Garamond 400 to 500 | `44/46px` | `64/66px` | One per composition, editorial promise only, tracking `-0.025em` to `-0.04em` after wrap testing |
-| Page title | EB Garamond 500 | `32/36px` | `40/44px` | Orientation and human question |
-| Section title | EB Garamond 500 | `26/31px` | `32/37px` | May not become UI chrome |
-| Card title | EB Garamond 500 or DM Sans 650 | `20/26px` | `22/28px` | Serif only when the card is an editorial object |
-| Large body | DM Sans 400 to 500 | `18/28px` | `18/28px` | Parent guidance and promises |
-| Body | DM Sans 400 to 500 | `16/24px` | `16/24px` | Default reading text |
-| Small body | DM Sans 400 to 500 | `14/20px` | `14/20px` | Supporting facts, never verdicts by color alone |
+| Hero display | EB Garamond 600 | `44/46px` | `64/66px` | One per composition, editorial promise only, tracking `-0.025em` to `-0.03em` after wrap testing |
+| Page title | EB Garamond 600 | `32/36px` | `40/44px` | Orientation and human question |
+| Section title | EB Garamond 600 | `26/31px` | `32/37px` | May not become UI chrome |
+| Card title | EB Garamond 600 | `20/26px` | `22/28px` | Serif only when the card is an editorial object; functional card labels use the interface label role |
+| Large body | DM Sans 400 | `18/28px` | `18/28px` | Parent guidance and promises |
+| Body | DM Sans 400 | `16/24px` | `16/24px` | Default reading text |
+| Small body | DM Sans 400 | `14/20px` | `14/20px` | Supporting facts, never verdicts by color alone |
 | Control | DM Sans 600 | `15/20px` | `15/20px` | Interactive text is at least `14px` |
 | Label and navigation | DM Sans 600 | `14/20px` | `14/20px` | Scannable and sentence case |
 | Caption | DM Sans 500 | `13/18px` | `13/18px` | Meaningful customer text floor |
 | Eyebrow | DM Sans 700 | `12/16px` | `12/16px` | High contrast, nonessential orientation only |
-| Metric | DM Sans 650 to 700, tabular | `16px` to `36px` | `16px` to `40px` | No monospace merely to imply data |
+| Metric | DM Sans 600 or 700, tabular | `16px` to `36px` | `16px` to `40px` | No monospace merely to imply data |
 | Logo | Fredoka 600 through `Logo` | Existing lockup | Existing lockup | Never hand-typeset the wordmark |
 
 Email maps display roles to Georgia and functional roles to a system sans stack. Print embeds deterministic approved faces and may use a specialist child-reading face for instructional content. Native bundles the approved binaries, preserves Dynamic Type, and validates the largest accessibility categories. No EB Garamond appears below `20px`, in a control, or in dense family data. Merel is not a baseline dependency; reopening it requires a consolidated written license covering production and preview web domains, iOS and Android binaries, over-the-air app delivery, server-generated personalized documents, and static campaign assets.
