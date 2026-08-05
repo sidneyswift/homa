@@ -18,18 +18,11 @@ import {
   PROFILES_CONTRACT,
   STATES_CONTRACT,
   TYPOGRAPHY_CONTRACT,
-  FIXTURE_GALLERY_VERSION,
-  FIXTURE_GALLERY_SCHEMA_VERSION,
   appearanceModes,
   brandChannels,
   channelProfiles,
   characterStates,
   colorTokens,
-  fixtureGalleryAssets,
-  fixtureGalleryPatterns,
-  fixtureGalleryPrimitives,
-  fixtureGalleryProfiles,
-  fixtureGallerySignatures,
   fontRoles,
   interactionStates,
   qualityModes,
@@ -40,6 +33,15 @@ import {
   typeRoles,
 } from "../packages/design/src/contract/index.ts";
 import type { BrandChannel } from "../packages/design/src/contract/channels.ts";
+import {
+  FIXTURE_GALLERY_SCHEMA_VERSION,
+  FIXTURE_GALLERY_VERSION,
+  fixtureGalleryAssets,
+  fixtureGalleryPatterns,
+  fixtureGalleryPrimitives,
+  fixtureGalleryProfiles,
+  fixtureGallerySignatures,
+} from "../packages/design/src/fixtures.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT_PATH = resolve(ROOT, "docs/homa-design/evidence/fixture-gallery.json");
@@ -221,7 +223,7 @@ function buildProfileFixtures(): readonly FixtureRecord[] {
   return fixtureGalleryProfiles.map((profile) => makeFixture(
     "profiles",
     `profile-${profile.id}`,
-    "packages/design/src/contract/fixtures.ts#fixtureGalleryProfiles",
+    "packages/design/src/fixtures.ts#fixtureGalleryProfiles",
     profile.reason,
     { channel: profile.channel, targetProfile: profile.targetProfile, proof: profile.proof, appearance: profile.appearance, qualityModes: profile.qualityModes, viewport: profile.viewport ?? null, device: profile.device ?? null, constraints: profile.constraints },
     [profile.id],

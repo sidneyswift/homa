@@ -6,7 +6,17 @@
     ".": "./src/index.ts",
     "./surfaces": "./src/surfaces.ts",
     "./contract": "./src/contract/index.ts",
+    "./tokens": "./src/tokens.ts",
+    "./brand": "./src/contract/brand.ts",
+    "./channels": "./src/contract/channels.ts",
+    "./fixtures": "./src/fixtures.ts",
+    "./fonts": "./src/contract/fonts.ts",
     "./icons": "./src/contract/icons.ts",
+    "./motion": "./src/contract/motion.ts",
+    "./native": "./src/contract/native.ts",
+    "./profiles": "./src/contract/profiles.ts",
+    "./states": "./src/contract/states.ts",
+    "./typography": "./src/contract/typography.ts",
     "./generators/design-contract": "./src/generators/design-contract.ts"
   },
   "scripts": {

@@ -66,6 +66,8 @@ const authoringRoots = [
   "README.md",
   "apps/mobile/AGENTS.md",
   "apps/mobile/CLAUDE.md",
+  "docs/homa-curriculum-atlas/materials-patterns.md",
+  "docs/homa-planning/14-marketing-demand-engine.md",
   "marketing/AGENTS.md",
   ".agents/skills/",
   "apps/web/agent/",
@@ -82,6 +84,9 @@ const exactAuthoringPaths = new Set([
   "README.md",
   "apps/mobile/AGENTS.md",
   "apps/mobile/CLAUDE.md",
+  "docs/homa-curriculum-atlas/materials-patterns.md",
+  "docs/homa-design/doctrine.md",
+  "docs/homa-planning/14-marketing-demand-engine.md",
   "marketing/AGENTS.md",
   "packages/design/README.md",
 ]);

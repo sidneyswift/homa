@@ -285,9 +285,10 @@ the staged drafts folder never touches the production build.
 - **Routes:** `app/blog/page.tsx` (index: title, description, date, hero) and
   `app/blog/[slug]/page.tsx` (article, statically generated via
   `generateStaticParams`).
-- **Rendering:** `next-mdx-remote` (RSC) + `gray-matter`. Typography and
-  components use the existing hand-copied design tokens; no new colors, type,
-  or components (design-system law).
+- **Rendering:** `next-mdx-remote` (RSC) + `gray-matter`. Typography,
+  components, and generated assets consume semantic `@homa/design` exports
+  and the real Logo adapter. Marketing routes cannot copy exact values or
+  invent local colors, type, geometry, motion, or identity.
 - **Frontmatter contract** (what `marketing-article-writer` must emit and the
   routes consume): `title`, `description`, `date`, `tags`, `hero` (path under
   `/blog/<slug>/`), `ogImage` (defaults to hero).
@@ -393,7 +394,8 @@ edit can remove a rail:
    real names of moms or kids in `raw/` or `signals/`). Engagement data is
    aggregate only.
 4. **Voice laws** (from repo AGENTS.md + `docs/homa-design/`): no em dash, ever;
-   "Homa" in prose, "HOMA" in the wordmark and on UI surfaces; sentence case;
+   the name is always "Homa"; brand marks use the real Logo component or a
+   generated identity asset, never typed substitute lettering; sentence case;
    reassure-before-inform; offers never commands; no "behind" framing; never
    compare siblings.
 5. **Secrets:** no keys in `marketing/` or in any bundle; Resend/Postiz/Higgsfield

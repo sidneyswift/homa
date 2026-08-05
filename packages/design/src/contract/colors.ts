@@ -27,7 +27,7 @@ export const colorUsage = {
   ink: "primary text and structure",
   paper: "reading surfaces and artifacts",
   floating: "temporary elevated surfaces only",
-  visualCoral: "Homa presence, roof thread, punctuation, visual signature",
+  visualCoral: "Homa presence, roof thread, visual signature, and rare campaign or editorial punctuation",
   midnightAction: "filled actions, selected states, structural emphasis",
   brandText: "accessible coral-family text substitute",
   controlBoundary: "quiet control and field boundaries",
@@ -41,6 +41,14 @@ export const colorUsage = {
   errorTint: "real system failure background",
   containedBand: "contained mineral band with paper foreground",
 } as const satisfies Record<ColorToken, string>;
+
+export const colorComposition = {
+  canvasAndPaperTargetPercent: 76,
+  midnightAndInkTargetPercent: 16,
+  visualCoralTargetPercent: 6,
+  semanticColorMaximumPercent: 2,
+  coralPunctuationScope: "rare-campaign-or-editorial-moments-only",
+} as const;
 
 /**
  * Web-only derived aliases that keep secondary ink and quiet boundaries
@@ -121,6 +129,7 @@ export const COLOR_CONTRACT = {
   version: DESIGN_CONTRACT_VERSION,
   tokens: colorTokens,
   usage: colorUsage,
+  composition: colorComposition,
   webCompatibilityTokens,
   nativeTonalScale,
   approvedPairs: approvedColorPairs,

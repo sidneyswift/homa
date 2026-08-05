@@ -1,6 +1,6 @@
 ---
 version: quiet-authority-v1
-contractChecksum: 4955b4cdfe418f127fa9985a038ceb7a733266d0a4bd38aafebb25715176d9f1
+contractChecksum: b2962bf3b2e582153bb572e2ddab3618eb93da10cbed2184f484880f963f8607
 name: "Homa, quiet authority"
 description: "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move."
 colors:
@@ -79,32 +79,29 @@ Homa suggests, the parent decides, and every claim stays truthful.
 
 Mineral canvas and paper carry most of the surface. Midnight owns functional
 actions and selection. Coral is the memorable visual signature, used for the
-roof thread, Homa presence, punctuation, and occasional large visual fields.
+roof thread, Homa presence, and rare campaign or editorial punctuation.
 It is not the default filled button, and white text on coral is not an approved
 normal-text pair. Green, blue, amber, and red are semantic states only.
 
-Approved proportions are approximately 76 percent mineral or paper, 16
-percent midnight structure, 6 percent coral signature, and 2 percent semantic
-state color. The proportion is a discipline, not a quota that overrides a
-truthful state.
+The typed color composition owns the approved proportions. They are a
+discipline, not a quota that overrides a truthful state.
 
 ## Type roles
 
-EB Garamond is the display voice and never renders below 20px. Use it for
-meaningful invitations, page titles, and reflection. DM Sans is the interface
-and body voice, including data and labels. Fredoka is allowed only inside the
-real Logo component. There is no hand font in the active contract.
+EB Garamond is the display voice for meaningful invitations, page, section,
+and card titles, and reflection. DM Sans is the interface and body voice,
+including data and labels. Fredoka is allowed only inside the real Logo
+component. There is no hand font in the active contract.
 
 Use sentence case. Keep a readable measure, test long names and localization,
-and preserve the display voice when a line wraps. Approved web hero sizes are
-44/46 on phone and 64/66 on desktop. Body is 16/24, large body 18/28, small
-body 14/20, control 15/20, caption 13/18, and eyebrow 12/16.
+and preserve the display voice when a line wraps. Exact sizes, line heights,
+weights, tracking, and metric behavior live only in the typed role catalog.
 
 ## Shape, depth, and density
 
-Controls use 12px corners, cards 18px, and large frames 28px. Pills are a
-specific compact treatment, not the default geometry. Use at most two
-elevations and avoid nested bordered cards. A fine warm rule often carries
+Controls, cards, and large frames use distinct contract-owned corner roles.
+Pills are a specific compact treatment, not the default geometry. Keep depth
+restrained and avoid nested bordered cards. A fine warm rule often carries
 more authority than another floating white panel.
 
 ## Motion
@@ -126,8 +123,8 @@ second Homa.
 
 Every applicable interactive state proves keyboard focus, pressed, disabled,
 loading, error, success, forced colors, increased contrast, Reduced Motion,
-200 percent zoom, and 400 percent reflow. Native surfaces prove VoiceOver,
-Dynamic Type, safe areas, keyboard, Reduce Motion, and appearance. PDFs and
+and the contract-owned zoom and reflow profiles. Native surfaces prove
+VoiceOver, Dynamic Type, safe areas, keyboard, Reduce Motion, and appearance. PDFs and
 physical print use their own evidence floors. Source inspection is not proof of
 rendered or delivered behavior.
 

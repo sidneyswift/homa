@@ -28,16 +28,37 @@ Use the typed contract instead of inventing local values.
 | Domain | Quiet authority rule | Typed source |
 | --- | --- | --- |
 | Color | Mineral canvas and paper carry the surface. Midnight owns functional action and selection. Coral is a small visual signature. Green, blue, amber, and red are truthful semantic states. | `colors.ts` |
-| Typography | EB Garamond is display at 20px or larger. DM Sans is interface, body, labels, and data. Fredoka is restricted to the real Logo component. | `typography.ts` |
-| Geometry | Controls are 12px, cards 18px, frames 28px, and spacing follows a 4px base. Pills are compact selection treatments, not default buttons. | `layout.ts` |
-| Depth | Use no more than two elevation levels. Fine rules and mineral space usually carry more authority than another floating panel. | `layout.ts` |
-| Identity | Use the real Logo adapter. The roof-derived coral thread starts at meaningful work, makes no more than two turns, avoids faces, text, and controls, and lands at the next move. | `brand.ts` |
-| Motion | Use `peek → orient → draw → land → still` only when the underlying state is true. Interruptible motion settles under 900ms and Reduced Motion reaches the final still immediately. | `motion.ts` |
+| Typography | EB Garamond carries display roles, including card titles. DM Sans carries interface, body, labels, and data. Fredoka is restricted to the real Logo component. | `typography.ts` |
+| Geometry | Controls, cards, and frames use distinct corner roles with a shared spacing rhythm. Pills are compact selection treatments, not default buttons. | `layout.ts` |
+| Depth | Keep elevation restrained. Fine rules and mineral space usually carry more authority than another floating panel. | `layout.ts` |
+| Identity | Use the real Logo adapter. The roof-derived coral thread starts at meaningful work, stays restrained, avoids faces, text, and controls, and lands at the next move. | `brand.ts` |
+| Motion | Use `peek → orient → draw → land → still` only when the underlying state is true. Motion is interruptible, expires with its truth source, and Reduced Motion reaches the final still immediately. | `motion.ts` |
 | Icons | Name the semantic role first, then resolve it through the platform registry. Functional icons are not character art. Unknown roles fail closed. | `icons.ts` |
 
 Coral is not a universal action color. White on coral is reserved for large
 display treatment, never normal control text. Semantic colors never describe a
 child's worth or act as decoration.
+
+## Composition, density, and media
+
+The real object carries the majority of visual weight. Homa stays supportive
+and becomes the leading object only during active voice or when she is the
+literal system-state object. Canvas and paper remain dominant, midnight carries
+functional structure, coral stays a small signature, and semantic color appears
+only when a true state needs it. Exact proportions live in `colors.ts` and
+`brand.ts`.
+
+Keep related controls close and major regions clearly separated. Interactive
+rows reserve enough height for their information density, with more room when a
+title and metadata share the row. Media declares its aspect ratio, reserves its
+final dimensions before loading, and contains the complete artifact by default.
+Cropping requires an explicit preview affordance. Exact spacing, row floors,
+and media constraints live in `layout.ts`.
+
+Selection uses coordinated surface, boundary, text, context, and accessible
+state carriers. It never depends on color alone and never borrows a semantic
+success, information, attention, or error color merely to look selected. Exact
+carrier and minimum-cue rules live in `states.ts`.
 
 ## Channel reductions
 
@@ -71,8 +92,12 @@ Every appearance mode carries an evidence requirement in the typed contract.
 Do not add an appearance mode because a client supports it. Add the mode to
 the contract, define the fallback and contrast floor, then prove the rendered
 surface. Web and native also prove keyboard or VoiceOver focus, large text,
-200 percent zoom, 400 percent reflow, Reduced Motion, and interruption states
-where applicable.
+the contract-owned zoom and reflow profiles, Reduced Motion, and interruption
+states where applicable.
+
+When a newer state interrupts motion, resolve immediately to the newest truth.
+Every live animation has an expiry condition and stops if its truth source is
+lost. Critical exits and voice handoffs never wait for decorative motion.
 
 ## Content and care
 

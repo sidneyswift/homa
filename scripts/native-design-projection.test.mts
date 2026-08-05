@@ -6,9 +6,10 @@ import test from "node:test";
 
 import {
   NATIVE_PROJECTION_CONTRACT,
-  nativePrimitiveAdapters,
+  nativePrimitiveRequirements,
   nativePrimitiveRoles,
 } from "../packages/design/src/contract/native.ts";
+import { nativePrimitiveRegistry } from "../apps/mobile/src/components/ui/semantic-registry.ts";
 import {
   colors,
   darkColors,
@@ -50,9 +51,16 @@ test("legacy native compatibility is frozen and cannot alias the live contract",
 });
 
 test("every native primitive has a typed adapter implementation", () => {
+  assert.deepEqual(Object.keys(nativePrimitiveRegistry).sort(), [...nativePrimitiveRoles].sort());
+  assert.deepEqual(Object.keys(nativePrimitiveRequirements).sort(), [...nativePrimitiveRoles].sort());
   for (const role of nativePrimitiveRoles) {
-    const adapter = nativePrimitiveAdapters[role];
-    assert.match(primitivesSource, new RegExp(`export function ${adapter.component}\\b`, "u"));
+    const implementation = nativePrimitiveRegistry[role];
+    const requirement = nativePrimitiveRequirements[role];
+    assert.match(implementation.source, /^apps\/mobile\/src\/components\/ui\/semantic\.tsx$/u);
+    assert.ok(implementation.legacyComponents.length > 0, `${role} must name its migration source`);
+    assert.ok(requirement.requiredStates.length > 0, `${role} must name required states`);
+    assert.ok(requirement.accessibility.length > 0, `${role} must name accessibility obligations`);
+    assert.match(primitivesSource, new RegExp(`export function ${implementation.component}\\b`, "u"));
   }
 });
 
