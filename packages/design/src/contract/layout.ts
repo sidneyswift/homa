@@ -8,4 +8,13 @@ export const elevation = {
   overlay: "0 20px 48px rgba(32, 36, 43, 0.14)",
 } as const;
 export const containers = { prose: 720, workspace: 1280, phoneGutter: 20, desktopGutter: 32 } as const;
-export const LAYOUT_CONTRACT = { version: DESIGN_CONTRACT_VERSION, spacing, radii, elevation, containers, maximumElevationLevels: 2, nestedBorderedCardDefault: false } as const;
+export const LAYOUT_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  spacing,
+  radii,
+  elevation,
+  containers,
+  maximumElevationLevels: 2,
+  nestedBorderedCardDefault: false,
+  pillPolicy: { default: false, usage: "compact-selections-only" },
+} as const;

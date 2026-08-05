@@ -1,8 +1,8 @@
 ---
 version: quiet-authority-v1
-contractChecksum: f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0
-name: Homa, quiet authority
-description: A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.
+contractChecksum: 4955b4cdfe418f127fa9985a038ceb7a733266d0a4bd38aafebb25715176d9f1
+name: "Homa, quiet authority"
+description: "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move."
 colors:
   canvas: "#F7F4EE"
   ink: "#20242B"
@@ -22,35 +22,35 @@ colors:
   error-tint: "#F5E5E1"
 typography:
   display:
-    fontFamily: EB Garamond
+    fontFamily: "EB Garamond"
     minimumFontSize: 20px
-    role: meaningful invitations, page titles, and reflective framing
+    role: "meaningful invitations, page titles, reflective framing"
   interface:
-    fontFamily: DM Sans
-    role: UI, body, labels, data, and controls
+    fontFamily: "DM Sans"
+    role: "UI, body, labels, data, and controls"
   wordmark:
-    fontFamily: Fredoka
-    role: real Logo component only
+    fontFamily: "Fredoka"
+    role: "real Logo component only"
 shape:
   control: 12px
   card: 18px
   frame: 28px
-  pill: prohibited as a default shape
+  pill: "compact-selections-only"
 motion:
-  sequence: peek, orient, draw, land, still
-  duration: 120ms to 320ms per movement, under 900ms total
-  reducedMotion: final still immediately
+  sequence: "peek, orient, draw, land, still"
+  duration: "120ms to 320ms per movement, under 900ms total"
+  reducedMotion: "final-still-immediately"
 channels:
-  expressive: web, native
-  staticRich: marketing
-  constrained: email, print, provider
-  plainText: sms, metadata
+  expressive: "web, native"
+  staticRich: "marketing"
+  constrained: "email, print, provider"
+  plainText: "sms, metadata"
 appearance:
-  light: approved token projection
-  darkAdaptive: projection-owned and evidence-gated
-  forcedColors: system colors with preserved semantics
-  increasedContrast: approved tokens with evidence
-  grayscale: print and static-asset proof mode
+  light: "approved-color-tokens"
+  darkAdaptive: "projection-owned-adaptive-tokens"
+  forcedColors: "system-colors"
+  increasedContrast: "approved-color-tokens"
+  grayscale: "approved-color-tokens-and-tones"
 ---
 
 # Homa design system

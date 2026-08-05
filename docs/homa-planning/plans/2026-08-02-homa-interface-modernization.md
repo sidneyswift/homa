@@ -329,7 +329,7 @@ The target renders in Phase 0 must explicitly choose one pattern for each state.
 - Bright clay `#E7602F` as the visual brand color in the Logo, character, and art.
 - Sage for constructive or complete state, gold for selective emphasis, sky for information.
 - Fredoka only through the real `Logo` component.
-- Homa's warm shadows, `22px` card radius, paper cues, real material previews, and character system.
+- Homa's warm shadows, restrained paper cues, real material previews, and character system. The active radius ladder is `12px` for controls, `18px` for cards, and `28px` for large frames.
 
 ### Refine
 
@@ -360,7 +360,7 @@ Quiet authority becomes ownable through repeated behavior, not through more deco
 | Master Homa | One canonical silhouette and character anatomy derived from the real Logo, with approved full-color, one-color, dark-surface, tiny, print, and motion states | Never rebuild Homa from CSS primitives, generic rounded squares, or channel-specific eye and roof geometry |
 | Composition | A real family or learning object leads, Homa provides one useful orientation, and one next move lands at the end of the reading path | Product UI must not become a mascot scene; marketing must still prove a real object or outcome |
 | Object prominence | The real object carries roughly `55%` to `70%` of the composition's visual weight; Homa is normally `10%` to `16%` of the short edge | Homa may become larger only when Homa herself is the active voice or system-state object |
-| Coral roof thread | One `#E7602F` line begins with a small roof gesture, uses round caps, makes no more than two purposeful turns, and connects context to the next move | Use `2px` in product and `3px` in large brand media; never cross a face, readable text, or an interactive control, and never use it as a free-floating doodle, repeated divider, or loading spinner |
+| Coral roof thread | One `#E7602F` line begins with a small roof gesture, uses round caps, makes no more than two purposeful turns, and connects context to the next move | Use `2px` in product and `3px` in large brand media; never cross a face, readable text, or an interactive control, and never use it as free-floating decoration, a repeated divider, or a loading spinner |
 | Typography behavior | EB Garamond frames one meaningful invitation, reflection, or orientation; DM Sans carries facts and action. Display lines are intentionally balanced and normally stop at two lines | Coral punctuation is reserved for rare campaign or editorial moments, never routine product headings or data |
 | Imagery | Natural window light, lived-in objects, child-height or table-height camera, visible process, quiet imperfection, and privacy-safe crops | Avoid staged stock smiles, immaculate schoolroom tableaux, floating supplies, and decorative imagery unrelated to the current task |
 | Shape and elevation | The core radius ladder is `12px` for controls and compact objects, `18px` for cards and sheets, and `28px` for large story frames. Physical artifacts may use paper edges, slight rotation, or a restrained roof-derived corner. One viewport uses at most two elevation levels | Pills are for compact actions, filters, tags, and status, not every container. Functional controls stay geometrically quiet. Rotation belongs only to objects that could physically rotate |
@@ -407,7 +407,7 @@ Color proportions are part of the contract, not a mood-board suggestion. Aim for
 
 ### Selected semantic typography contract
 
-This table is the selected direction under gh#667. It is not active product law until the founder approves the complete omnichannel contract and the canonical design sources are updated.
+This table is the active foundation approved under gh#667. Exact machine values live in `packages/design/src/contract/`, and generated projections must match its version and source checksum.
 
 | Role | Selected family | Typical compact size | Typical desktop size | Rule |
 |---|---|---:|---:|---|
@@ -766,8 +766,8 @@ Legacy baselines live only in a dedicated evidence namespace with design-era met
 
 The first foundation wave establishes a removal ledger and the guard before broad replacement begins. The guard begins with a reviewed, explicit legacy allowlist and requires that allowlist to shrink with each migration. It covers:
 
-- Schibsted Grotesk, Hanken Grotesk, Caveat, and superseded font packages or binaries outside approved historical evidence,
-- retired clay, sage, gold, sky, stone, pill, blob, doodle, squiggle, shadow, radius, and token namespaces,
+- every superseded display, interface, handwriting, and data font package or binary outside approved historical evidence,
+- every superseded palette, shape, depth, decoration, radius, and token namespace,
 - duplicated Logo, eye, roof, wordmark, thread, icon, or character geometry,
 - direct generic-icon imports outside approved adapters,
 - old component paths, local token objects, raw values, inline email and print styling, and route-local legacy style layers,
@@ -801,7 +801,7 @@ No dependent layer advances on intention. It advances only when its gate is gree
 
 | Gate | Required positive proof | Required negative proof |
 |---|---|---|
-| 0. Ruling and doctrine | Ruling register, active docs, content rules, target profiles, and version agree | No active “Warm and playful” authority or conflicting copy law |
+| 0. Ruling and doctrine | Ruling register, active docs, content rules, target profiles, and version agree | No active superseded visual authority or conflicting copy law |
 | 1. Contract | Type/schema tests, exhaustive semantic roles, approved contrast pairs, profile completeness | No duplicate meanings, unresolved values, or platform-only token inventions |
 | 2. Generation | Byte-stable clean regeneration, source checksums, output manifests | No hand-edited or stale projection |
 | 3. Fonts and assets | License, hashes, weights, glyphs, metrics, CLS, Dynamic Type, print embedding, Logo and icon snapshots | No old font import, duplicate master geometry, obsolete asset hash, or unsupported variant |

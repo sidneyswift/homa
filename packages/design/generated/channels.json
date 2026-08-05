@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
+  "sourceChecksum": "4955b4cdfe418f127fa9985a038ceb7a733266d0a4bd38aafebb25715176d9f1",
   "channels": {
     "version": "quiet-authority-v1",
     "brandChannels": [
@@ -1086,6 +1086,8 @@
   "doctrine": {
     "version": "quiet-authority-v1",
     "name": "quiet-authority",
+    "displayName": "Homa, quiet authority",
+    "description": "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.",
     "principles": [
       "real-work-leads",
       "homa-keeps-the-thread",

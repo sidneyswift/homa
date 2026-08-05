@@ -6,11 +6,13 @@
  */
 export {
   colors,
+  darkQuietColors,
   darkColors,
   fontSize,
   nativeProjection,
   palette,
   pressScale,
+  quietColors,
   radius,
   shadows,
   space,

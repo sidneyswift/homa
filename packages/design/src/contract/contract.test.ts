@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { approvedColorPairs, colorTokens, webCompatibilityTokens } from "./colors.ts";
+import { COLOR_CONTRACT, approvedColorPairs, colorTokens, webCompatibilityTokens } from "./colors.ts";
 import { BRAND_CONTRACT } from "./brand.ts";
 import { CHANNELS_CONTRACT, brandChannels, channelProfiles, channelProjections } from "./channels.ts";
 import { CONTENT_CONTRACT } from "./content.ts";
@@ -137,6 +137,9 @@ test("semantic icon adapters are complete and fail closed", () => {
 test("the Quiet authority doctrine is exhaustive and version-aligned", () => {
   assert.doesNotThrow(() => assertDesignContract());
   assert.equal(DOCTRINE_CONTRACT.name, "quiet-authority");
+  assert.equal(DOCTRINE_CONTRACT.displayName, "Homa, quiet authority");
+  assert.match(DOCTRINE_CONTRACT.description, /one useful next move/u);
+  assert.equal(BRAND_CONTRACT.version, DOCTRINE_CONTRACT.version);
   assert.deepEqual([...DOCTRINE_CONTRACT.domains].sort(), [
     "appearance",
     "brand-geometry",
@@ -198,6 +201,16 @@ test("native projection covers every approved primitive role and disposition", (
     assert.ok(adapter.requiredStates.length > 0, `${role} must name required states`);
     assert.ok(adapter.accessibility.length > 0, `${role} must name accessibility obligations`);
   }
+});
+
+test("canonical native contracts expose semantic names only", () => {
+  const serialized = JSON.stringify({ colors: COLOR_CONTRACT, native: NATIVE_PROJECTION_CONTRACT });
+  for (const retiredName of ["stone", "clay", "sage", "gold", "sky", "rose"]) {
+    assert.doesNotMatch(serialized, new RegExp(`\\b${retiredName}\\d*`, "iu"));
+  }
+  assert.ok("tonalScale" in NATIVE_PROJECTION_CONTRACT.theme);
+  assert.ok("constructive" in NATIVE_PROJECTION_CONTRACT.theme.colors.light);
+  assert.ok("highlight" in NATIVE_PROJECTION_CONTRACT.theme.colors.light);
 });
 
 test("native platform contract keeps accessibility and haptics explicit", () => {

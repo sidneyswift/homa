@@ -2,7 +2,7 @@
 
 An AI homeschool assistant that keeps a family's context, helps create learning materials, records school hours, and supports a parent through web, mobile, text, email, and voice surfaces that are present in the repository. Production availability for each channel is verified separately.
 
-> You've got this. HOMA's got the rest.
+> Homeschool, handled.
 
 ## For engineering agents
 
@@ -14,14 +14,14 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 |---|---|
 | `AGENTS.md` | What agents read first: commands, style, boundaries (symlinked as `CLAUDE.md`) |
 | `BUILD.md` | Stable engineering contract and evidence rules, read next |
-| `DESIGN.md` | Spec-compliant design-token summary for design tooling (source: `docs/homa-design/`) |
+| `DESIGN.md` | Generated design summary for tooling, sourced from the typed `packages/design` contract |
 | `apps/web/` | The one deployable: Next.js app with the eve agent mounted inside (`withEve`) |
 | `apps/web/agent/tools/manage_child_progress.ts` | The one Eve tool for trusted ChildProgress evidence, check-ins, pause/resume, handoff, undo, and conflict resolution |
 | `apps/web/lib/child-progress/` | ChildProgress deep module: exact feature-flag gates, legacy writer adapters, atomic corrections, loop-free route policy, strict tool and workflow contracts, family-local live summaries, trusted prompt markers, durable evidence provenance, compatibility writes, and selection |
 | `scripts/reconcile-child-progress.mts`, `reconcile-child-progress-lib.ts`, and `reconcile-child-progress.test.ts` | Explicit final reconciliation command, transaction seam, and lock/dry-run tests for the ChildProgress rollout |
 | `scripts/child-progress-postgres-test.mts` | Secret-free disposable PostgreSQL E2E for ChildProgress migration, isolation boundaries, workflows, compatibility, reconciliation, and cleanup |
 | `apps/web/app/app/progress/` and `apps/web/app/app/[childId]/progress/` | Feature-flagged signed-in live Progress routes that resolve the focused child and read the current ChildProgress projection |
-| `apps/web/components/progress/` | Live Progress hierarchy, unavailable and empty states, conflict sources, and child-focused Ask HOMA navigation |
+| `apps/web/components/progress/` | Live Progress hierarchy, unavailable and empty states, conflict sources, and child-focused Ask Homa navigation |
 | `apps/web/app/app/progress-message-parts.ts` and `progress-*-card.tsx` | Fail-closed web-chat parsing and accessible update, question, conflict, and workflow cards for strict `manage_child_progress` results |
 | `apps/web/lib/child-progress/tool-result-contract.ts` | Shared client-safe `zod/mini` contract for bounded progress tool results, strict timestamps, and conflict evidence sources |
 | `apps/web/app/app/progress-interaction-policy.ts`, `progress-action-lifecycle.ts`, and `chat-send-policy.ts` | Latest-part action identity, accepted-send consumption, queue cancellation release, and draft-preserving card sends |

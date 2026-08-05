@@ -6,11 +6,12 @@
     ".": "./src/index.ts",
     "./surfaces": "./src/surfaces.ts",
     "./contract": "./src/contract/index.ts",
-    "./icons": "./src/contract/icons.ts"
+    "./icons": "./src/contract/icons.ts",
+    "./generators/design-contract": "./src/generators/design-contract.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/contract/contract.test.ts"
+    "test": "node --experimental-strip-types --test src/contract/contract.test.ts src/generators/design-contract.test.ts"
   },
   "devDependencies": {
     "typescript": "^5"

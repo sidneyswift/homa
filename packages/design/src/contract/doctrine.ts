@@ -40,6 +40,8 @@ export const contractDomains = [
 export const DOCTRINE_CONTRACT = {
   version: DESIGN_CONTRACT_VERSION,
   name: doctrineName,
+  displayName: "Homa, quiet authority",
+  description: "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.",
   principles: doctrinePrinciples,
   domains: contractDomains,
   sourceOfTruth: {
