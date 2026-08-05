@@ -128,7 +128,7 @@ test("published blog sources are independently discovered and classified as publ
     "apps/web/content/blog",
     "apps/web/lib/blog.ts",
     "apps/web/lib/blog-clusters.ts",
-  ).split("\n").filter(Boolean);
+  ).split("\n").filter((path) => path && !path.endsWith("/.gitkeep"));
   assert.ok(publishedSources.length >= 8, "expected the public blog publishing system");
 
   for (const path of publishedSources) {
