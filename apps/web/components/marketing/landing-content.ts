@@ -17,6 +17,8 @@ export const MONTHLY_MEMBERSHIP_PRICES = PURCHASABLE_HOMA_PLANS.map(({ tier }) =
 
 const regularMonthlyPrice = tierPriceAmount("regular", "monthly");
 const plusMonthlyPrice = tierPriceAmount("plus", "monthly");
+const regularAnnualPrice = tierPriceAmount("regular", "annual");
+const plusAnnualPrice = tierPriceAmount("plus", "annual");
 
 export const HERO_COPY = {
   eyebrow: "Your homeschool assistant",
@@ -30,7 +32,7 @@ export const HERO_COPY = {
    *  cancellations; naming it raised trial starts in the Blinkist
    *  case). One price, the trial length, and the way out. */
   primaryActionNote:
-    `Choose a monthly membership when you sign up: Homa is $${regularMonthlyPrice} and Homa Plus is $${plusMonthlyPrice}. Both start with 7 free days and require a credit card. We email you before the first charge. Cancel before then to pay nothing.`,
+    `Choose monthly or annual when you sign up. Homa costs $${regularMonthlyPrice} a month or $${regularAnnualPrice.toLocaleString("en-US")} a year. Homa Plus costs $${plusMonthlyPrice} a month or $${plusAnnualPrice.toLocaleString("en-US")} a year. Both memberships start with 7 free days and require a credit card. We email you before the first charge. Cancel before then to pay nothing.`,
   proofLabel: "One membership for your family",
   proof: "Add every child. The price stays the same.",
 } as const;
@@ -74,7 +76,7 @@ export const LANDING_SECTION_COPY = {
     eyebrow: "Start with next week",
     headline: "Let Homa prepare the week.",
     body:
-      "Choose the $19 Homa membership or the $49 Homa Plus membership when you sign up. Both start with 7 free days and require a credit card. We email you before the first charge. Cancel before then to pay nothing.",
+      "Choose Homa for $19 a month or Homa Plus for $49 a month when you sign up. Both start with 7 free days and require a credit card. We email you before the first charge. Cancel before then to pay nothing.",
   },
 } as const;
 

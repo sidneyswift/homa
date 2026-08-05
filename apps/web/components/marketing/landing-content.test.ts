@@ -36,13 +36,18 @@ test("the trial CTA states the card terms before the click", () => {
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /credit card/i);
-  assert.match(HERO_COPY.primaryActionNote, /Homa is \$19 and Homa Plus is \$49/);
+  assert.match(HERO_COPY.primaryActionNote, /Choose monthly or annual when you sign up/);
+  assert.match(HERO_COPY.primaryActionNote, /Homa costs \$19 a month or \$182 a year/);
+  assert.match(HERO_COPY.primaryActionNote, /Homa Plus costs \$49 a month or \$470 a year/);
   assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
   assert.match(HERO_COPY.primaryActionNote, /before the first charge/i);
   assert.match(HERO_COPY.primaryActionNote, /cancel before then/i);
   assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49]);
+  assert.match(LANDING_SECTION_COPY.final.body, /Homa for \$19 a month/i);
+  assert.match(LANDING_SECTION_COPY.final.body, /Homa Plus for \$49 a month/i);
   assert.match(LANDING_SECTION_COPY.final.body, /require a credit card/i);
   assert.doesNotMatch(LANDING_SECTION_COPY.final.body, /and a credit card/i);
+  assert.doesNotMatch(LANDING_SECTION_COPY.final.body, /the \$19 Homa membership/i);
 });
 
 test("metadata and structured offers reuse the catalog-derived landing contract", () => {
