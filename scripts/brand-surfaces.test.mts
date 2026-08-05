@@ -75,6 +75,10 @@ test("inventory discovery covers exact design sources that broad keyword selecto
     "apps/web/lib/materials/print.ts",
     "apps/web/components/design/quiet-primitives.css",
     "apps/web/components/design/icon-registry.ts",
+    "apps/web/components/marketing/ds/use-interaction-media.ts",
+    "apps/web/components/marketing/faq-items.ts",
+    "apps/web/components/marketing/landing-content.ts",
+    "apps/web/components/marketing/use-signed-in.ts",
     "apps/web/assets/fonts/quiet-authority/dm-sans-700-latin.ttf",
     "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
     "apps/mobile/eas.json",
@@ -85,6 +89,31 @@ test("inventory discovery covers exact design sources that broad keyword selecto
     "scripts/native-interface-gauntlet.mts",
     "scripts/provider-handoff-contract.mts",
   ]) assert.ok(paths.has(path), `unclassified exact design source: ${path}`);
+});
+
+test("user-visible copy, policy, and narrative modules stay in brand inventory", () => {
+  const paths = new Set(manifest.surfaces.flatMap((surface) => surface.paths));
+  for (const path of [
+    "apps/web/app/app/assistant-text.ts",
+    "apps/web/app/app/onboarding-chat.ts",
+    "apps/web/app/app/outbound-child-framing-display.ts",
+    "apps/web/app/app/progress-message-parts.ts",
+    "apps/web/app/app/tasks/agent-job-view.ts",
+    "apps/web/app/app/tasks/task-copy.ts",
+    "apps/web/app/app/transcript-days.ts",
+    "apps/web/app/onboarding/sample/narrative.fixture.ts",
+    "apps/web/app/onboarding/sample/sample-answers.ts",
+    "apps/web/app/privacy/subprocessors.ts",
+    "apps/web/app/signin/auth-copy.ts",
+    "apps/web/app/world-real/world-config.ts",
+    "apps/web/app/world/scroll-world-engine.ts",
+    "apps/web/app/world/world-config.ts",
+    "apps/web/components/billing/wall-copy.ts",
+    "apps/web/components/marketing/ds/use-interaction-media.ts",
+    "apps/web/components/marketing/faq-items.ts",
+    "apps/web/components/marketing/landing-content.ts",
+    "apps/web/components/marketing/use-signed-in.ts",
+  ]) assert.ok(paths.has(path), `unclassified user-visible source: ${path}`);
 });
 
 test("provider handoffs bind every governing source into the hashed inventory", () => {
