@@ -10,6 +10,7 @@ import {
 const success = {
   "classify-changes": "success",
   "light-checks": "success",
+  "brand-checks": "success",
   "mobile-checks": "success",
   build: "success",
   checks: "success",
@@ -101,6 +102,8 @@ test("the required-status gate accepts exactly the jobs for each scope", () => {
 
 test("the required-status gate rejects a missing, failed, or surprising job", () => {
   assert.throws(() => validateCiResults("full", { ...success, checks: "failed" }));
+  assert.throws(() => validateCiResults("mobile-only", { ...success, "brand-checks": "failed", build: "skipped", checks: "skipped", "db-checks": "skipped", "e2e-checks": "skipped" }));
+  assert.throws(() => validateCiResults("docs-only", { ...success, "brand-checks": "skipped", "mobile-checks": "skipped", build: "skipped", checks: "skipped", "db-checks": "skipped", "e2e-checks": "skipped" }));
   assert.throws(() => validateCiResults("docs-only", success));
   assert.throws(() => validateCiResults("unknown", success));
 });

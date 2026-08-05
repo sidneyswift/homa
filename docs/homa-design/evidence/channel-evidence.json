@@ -1,10 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "designEra": "quiet-authority-v1",
   "contractVersion": "@homa/design:quiet-authority-v1",
-  "harnessVersion": "channel-evidence-v1",
+  "harnessVersion": "channel-evidence-v3",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
   "records": [
     {
       "id": "channel:email",
@@ -13,17 +12,17 @@
       "surfaceCoverage": {
         "selector": "email",
         "surfaceCount": 16,
-        "surfaceIdsFingerprint": "c03430691117eaf8004c6104aceb718714f6c89f33ff40b66aabbe8a22cd58e1"
+        "surfaceIdsFingerprint": "c03430691117eaf8004c6104aceb718714f6c89f33ff40b66aabbe8a22cd58e1",
+        "scopedInputFingerprint": "13743dd438634e750df2a2174791e7923bf6e85cf8352e613074b5ae03b002f5"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/email.json",
       "fixtureChecksum": "6efc3722530e61905087bcf6f788c632522930ecd032ef7d056726853186bb4e",
       "designEra": "quiet-authority-v1",
       "contractVersion": "@homa/design:quiet-authority-v1",
-      "harnessVersion": "channel-evidence-v1",
+      "harnessVersion": "channel-evidence-v3",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
       "observedAt": null,
-      "environment": "synthetic-contract-fixture",
+      "environment": null,
       "browserOrOperatingSystem": null,
       "deviceModel": null,
       "installedBuildFingerprint": null,
@@ -36,25 +35,77 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "delivery-readback": { "passed": false, "evidencePath": null, "note": "Real client delivery evidence is still required." },
-        "client-apple-mail": { "passed": false, "evidencePath": null, "note": "Apple Mail evidence is still required." },
-        "client-gmail": { "passed": false, "evidencePath": null, "note": "Gmail evidence is still required." },
-        "client-outlook": { "passed": false, "evidencePath": null, "note": "Outlook family evidence is still required." },
-        "state-light": { "passed": false, "evidencePath": null, "note": "Light-mode evidence is still required." },
-        "state-dark": { "passed": false, "evidencePath": null, "note": "Dark-mode evidence is still required." },
-        "state-image-blocked": { "passed": false, "evidencePath": null, "note": "Image-blocked evidence is still required." },
-        "state-forwarded": { "passed": false, "evidencePath": null, "note": "Forwarded-message evidence is still required." },
-        "state-replied": { "passed": false, "evidencePath": null, "note": "Replied-message evidence is still required." },
-        "state-plain-text": { "passed": false, "evidencePath": null, "note": "Plain-text evidence is still required." },
-        "state-unsubscribe": { "passed": false, "evidencePath": null, "note": "Unsubscribe evidence is still required." },
-        "state-zoom": { "passed": false, "evidencePath": null, "note": "Zoom evidence is still required." },
-        "state-screen-reader": { "passed": false, "evidencePath": null, "note": "Screen-reader evidence is still required." }
+        "delivery-readback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "client-apple-mail": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "client-gmail": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "client-outlook": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-light": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-dark": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-image-blocked": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-forwarded": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-replied": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-plain-text": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-unsubscribe": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-zoom": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "state-screen-reader": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
       "largestGap": null,
       "remediation": null,
-      "retainedRisk": "No real email-client delivery has been accepted.",
+      "retainedRisk": null,
       "productionReadback": null,
       "deletionProof": null,
       "providerCapabilitySimulated": false,
@@ -66,18 +117,18 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "parent-pdf",
-        "surfaceCount": 37,
-        "surfaceIdsFingerprint": "08c6a1876995ee3d097385791b2b3e41531cab0a0fe9dd1e8176a0f6d9409e1b"
+        "surfaceCount": 81,
+        "surfaceIdsFingerprint": "3a9bbdd4cc5cdb40d39dba0f4857c29bddb7beb8460cfc0ccd87310ba970305b",
+        "scopedInputFingerprint": "4eda0e85b66d0e2ebed11da19381de33fae80d647451360f547310e7426e18aa"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/parent-pdf.json",
       "fixtureChecksum": "ab26dc0e9cdca23930a5502d0512042c870271890f992a87827d3df218153314",
       "designEra": "quiet-authority-v1",
       "contractVersion": "@homa/design:quiet-authority-v1",
-      "harnessVersion": "channel-evidence-v1",
+      "harnessVersion": "channel-evidence-v3",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
       "observedAt": null,
-      "environment": "synthetic-contract-fixture",
+      "environment": null,
       "browserOrOperatingSystem": null,
       "deviceModel": null,
       "installedBuildFingerprint": null,
@@ -90,23 +141,67 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "language-metadata": { "passed": false, "evidencePath": null, "note": "Tagged parent PDF evidence is still required." },
-        "tagged-structure": { "passed": false, "evidencePath": null, "note": "Tagged structure evidence is still required." },
-        "headings-reading-order": { "passed": false, "evidencePath": null, "note": "Heading and reading-order evidence is still required." },
-        "links-selectable-text": { "passed": false, "evidencePath": null, "note": "Link and selectable-text evidence is still required." },
-        "embedded-fonts": { "passed": false, "evidencePath": null, "note": "Embedded-font evidence is still required." },
-        "browser-parity": { "passed": false, "evidencePath": null, "note": "Browser parity evidence is still required." },
-        "letter": { "passed": false, "evidencePath": null, "note": "Letter-size evidence is still required." },
-        "a4": { "passed": false, "evidencePath": null, "note": "A4 evidence is still required." },
-        "grayscale": { "passed": false, "evidencePath": null, "note": "Grayscale evidence is still required." },
-        "page-breaks": { "passed": false, "evidencePath": null, "note": "Page-break evidence is still required." },
-        "screen-reader": { "passed": false, "evidencePath": null, "note": "Manual screen-reader evidence is still required." }
+        "language-metadata": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "tagged-structure": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "headings-reading-order": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "links-selectable-text": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "embedded-fonts": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "browser-parity": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "letter": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "a4": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "grayscale": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "page-breaks": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "screen-reader": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
       "largestGap": null,
       "remediation": null,
-      "retainedRisk": "No tagged parent-facing PDF has been accepted.",
+      "retainedRisk": null,
       "productionReadback": null,
       "deletionProof": null,
       "providerCapabilitySimulated": false,
@@ -118,18 +213,18 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "physical-print",
-        "surfaceCount": 37,
-        "surfaceIdsFingerprint": "bfcd6404118003270fc6a581a558b0ece90b397e079cfc75ef1b2ce38b039a0d"
+        "surfaceCount": 81,
+        "surfaceIdsFingerprint": "95578f0a7e30611462b3279095ee91a68b47d37166e7d9a03968f91f1c1b5914",
+        "scopedInputFingerprint": "0d6998adfba1e75c79800626f73792d1a1ef775c1ea597e151fe7956d459e3e0"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/physical-print.json",
       "fixtureChecksum": "53d9f100310e6668b99ba2b43775e904a7cb2618fff4acc729c0814cd9327795",
       "designEra": "quiet-authority-v1",
       "contractVersion": "@homa/design:quiet-authority-v1",
-      "harnessVersion": "channel-evidence-v1",
+      "harnessVersion": "channel-evidence-v3",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
       "observedAt": null,
-      "environment": "synthetic-contract-fixture",
+      "environment": null,
       "browserOrOperatingSystem": null,
       "deviceModel": null,
       "installedBuildFingerprint": null,
@@ -142,19 +237,47 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "printer-model": { "passed": false, "evidencePath": null, "note": "Named printer evidence is still required." },
-        "settings-paper": { "passed": false, "evidencePath": null, "note": "Printer settings and paper evidence is still required." },
-        "page-count": { "passed": false, "evidencePath": null, "note": "Page-count evidence is still required." },
-        "crop-margins": { "passed": false, "evidencePath": null, "note": "Crop and margin evidence is still required." },
-        "grayscale": { "passed": false, "evidencePath": null, "note": "Grayscale print evidence is still required." },
-        "color-readability": { "passed": false, "evidencePath": null, "note": "Color-readability evidence is still required." },
-        "scan-or-photo": { "passed": false, "evidencePath": null, "note": "A scan or photograph of output is still required." }
+        "printer-model": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "settings-paper": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "page-count": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "crop-margins": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "grayscale": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "color-readability": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "scan-or-photo": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
       "largestGap": null,
       "remediation": null,
-      "retainedRisk": "No physical printer output has been accepted.",
+      "retainedRisk": null,
       "productionReadback": null,
       "deletionProof": null,
       "providerCapabilitySimulated": false,
@@ -166,18 +289,18 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "provider",
-        "surfaceCount": 9,
-        "surfaceIdsFingerprint": "154c918939554e3a4980400aa296f6b1fb6dc4f9c66f18c7e8ef55eaa990454a"
+        "surfaceCount": 23,
+        "surfaceIdsFingerprint": "4573a1c94a5ca79e918530a93665c4d3012bd5de1b3c3b895648ea223f9ada8a",
+        "scopedInputFingerprint": "2a24abfd1c18ddf152243fdf0e382eb3f898f2b3e309d0751b507ddbb8911a5c"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/provider.json",
       "fixtureChecksum": "61c76f13a8a058f145b811b43cb16322871313915fd090bfe4588044adc21a83",
       "designEra": "quiet-authority-v1",
       "contractVersion": "@homa/design:quiet-authority-v1",
-      "harnessVersion": "channel-evidence-v1",
+      "harnessVersion": "channel-evidence-v3",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
       "observedAt": null,
-      "environment": "synthetic-contract-fixture",
+      "environment": null,
       "browserOrOperatingSystem": null,
       "deviceModel": null,
       "installedBuildFingerprint": null,
@@ -190,20 +313,52 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "capability-inventory": { "passed": false, "evidencePath": null, "note": "Provider capability inventory is still required." },
-        "account-owner": { "passed": false, "evidencePath": null, "note": "Account ownership evidence is still required." },
-        "update-readback": { "passed": false, "evidencePath": null, "note": "Provider update and read-back evidence is still required." },
-        "cache-behavior": { "passed": false, "evidencePath": null, "note": "Cache behavior evidence is still required." },
-        "expiry-fallback": { "passed": false, "evidencePath": null, "note": "Expiry and fallback evidence is still required." },
-        "rollback-restore": { "passed": false, "evidencePath": null, "note": "Rollback and restore evidence is still required." },
-        "restore-time": { "passed": false, "evidencePath": null, "note": "Measured restore-time evidence is still required." },
-        "no-simulated-capability": { "passed": false, "evidencePath": null, "note": "Real provider capability proof is still required." }
+        "capability-inventory": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "account-owner": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "update-readback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "cache-behavior": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "expiry-fallback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "rollback-restore": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "restore-time": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "no-simulated-capability": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
       "largestGap": null,
       "remediation": null,
-      "retainedRisk": "No hosted-provider read-back or restore proof has been accepted.",
+      "retainedRisk": null,
       "productionReadback": null,
       "deletionProof": null,
       "providerCapabilitySimulated": false,
@@ -215,18 +370,18 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "distribution-asset",
-        "surfaceCount": 49,
-        "surfaceIdsFingerprint": "8a097f1561a10807683aff668f17faaf9b1330e657e3c35ed07452f9cef7b86d"
+        "surfaceCount": 50,
+        "surfaceIdsFingerprint": "f8a125204aad0c7cabbce5793fe4aefbb218fd572bc78f80b16c77fa2ef0f9db",
+        "scopedInputFingerprint": "1ab149f936437ab219cd6380820f2e5d8fae2469f3a8bfdfd1173100c85e5328"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/distribution-asset.json",
       "fixtureChecksum": "1b7669dcaca9728eca86d8c7be1e1f68a599f7cabb813286611a981e9cdccf18",
       "designEra": "quiet-authority-v1",
       "contractVersion": "@homa/design:quiet-authority-v1",
-      "harnessVersion": "channel-evidence-v1",
+      "harnessVersion": "channel-evidence-v3",
       "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-      "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
       "observedAt": null,
-      "environment": "synthetic-contract-fixture",
+      "environment": null,
       "browserOrOperatingSystem": null,
       "deviceModel": null,
       "installedBuildFingerprint": null,
@@ -239,25 +394,62 @@
       "automatedOutput": null,
       "timings": null,
       "hardGates": {
-        "contact-sheet": { "passed": false, "evidencePath": null, "note": "Contact-sheet evidence is still required." },
-        "icon-sizes": { "passed": false, "evidencePath": null, "note": "Icon-size evidence is still required." },
-        "splash-sizes": { "passed": false, "evidencePath": null, "note": "Splash-size evidence is still required." },
-        "store-sizes": { "passed": false, "evidencePath": null, "note": "Store-size evidence is still required." },
-        "search-social-metadata": { "passed": false, "evidencePath": null, "note": "Search and social metadata evidence is still required." },
-        "notification-metadata": { "passed": false, "evidencePath": null, "note": "Notification metadata evidence is still required." },
-        "vcard-link-preview": { "passed": false, "evidencePath": null, "note": "vCard and link-preview evidence is still required." },
-        "carrier-media-protocol": { "passed": false, "evidencePath": null, "note": "Carrier media and protocol evidence is still required." },
-        "public-url-readback": { "passed": false, "evidencePath": null, "note": "Public URL read-back evidence is still required." }
+        "contact-sheet": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "icon-sizes": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "splash-sizes": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "store-sizes": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "search-social-metadata": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "notification-metadata": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "vcard-link-preview": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "carrier-media-protocol": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        },
+        "public-url-readback": {
+          "passed": false,
+          "evidencePath": null,
+          "note": null
+        }
       },
       "builderIdentity": null,
       "criticIdentity": null,
       "largestGap": null,
       "remediation": null,
-      "retainedRisk": "No distribution contact-sheet or public URL read-back has been accepted.",
+      "retainedRisk": null,
       "productionReadback": null,
       "deletionProof": null,
       "providerCapabilitySimulated": false,
       "status": "pending"
     }
-  ]
+  ],
+  "manifestSchemaVersion": 3
 }

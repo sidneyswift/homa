@@ -10,6 +10,7 @@ type ManifestSurface = {
   paths?: unknown;
   type?: unknown;
   ownerIssue?: unknown;
+  targetProfiles?: unknown;
   approvedTarget?: unknown;
   disposition?: unknown;
   deliveryState?: unknown;
@@ -44,6 +45,14 @@ const RENDERED_ARTIFACT_SURFACES = [
   "apps/web/app/onboarding/r/[token]/report-view.tsx",
 ] as const;
 
+export function expectedDurableOwner(surface: Pick<ManifestSurface, "targetProfiles">, path: string): string {
+  if (Array.isArray(surface.targetProfiles)
+    && surface.targetProfiles.includes("historical-private-provenance")) return "gh#729";
+  if (path === "durable:vercel-blob-world-media") return "gh#741";
+  if (path === "historical:handwrytten-template-349914-mailed-copies") return "gh#740";
+  return "gh#731";
+}
+
 export type ArtifactBrandEraReport = {
   durableRows: number;
   renderedSources: number;
@@ -76,8 +85,9 @@ export function inspectArtifactBrandEra(root = ROOT): ArtifactBrandEraReport {
     const path = Array.isArray(surface.paths) && typeof surface.paths[0] === "string"
       ? surface.paths[0]
       : "<missing path>";
-    if (surface.ownerIssue !== "gh#731" && path !== "durable:vercel-blob-world-media" && path !== "historical:delivered-email-sms-print-mail") {
-      findings.push(`${path} is not owned by the durable-artifact migration issue`);
+    const expectedOwner = expectedDurableOwner(surface, path);
+    if (surface.ownerIssue !== expectedOwner) {
+      findings.push(`${path} must be owned by ${expectedOwner}, received ${String(surface.ownerIssue)}`);
     }
     if (surface.approvedTarget !== APPROVED_ERA) {
       findings.push(`${path} does not declare ${APPROVED_ERA}`);

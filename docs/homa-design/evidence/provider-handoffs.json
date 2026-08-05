@@ -1,18 +1,27 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "designEra": "quiet-authority-v1",
-  "harnessVersion": "provider-handoff-v1",
+  "harnessVersion": "provider-handoff-v3",
   "ownerIssue": "gh#732",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "e1ecec0564b7d8c4b5ae9c694fa143b89c0d677c30abfa0808d07aaf5beec20d",
   "surfaceCoverage": {
     "selector": "ownerIssue:gh#732",
-    "surfaceCount": 2,
+    "surfaceCount": 11,
     "surfaceIds": [
+      "surface:17ec67dd21971baf",
+      "surface:2b0b7acc6263e1fe",
+      "surface:3cbfe8760471dae5",
+      "surface:4ec10761a73e5654",
+      "surface:5aebe33bdaafb284",
+      "surface:638cd8fafaa24166",
       "surface:6fa1d3818d14e555",
-      "surface:84f00929110b64a6"
+      "surface:84f00929110b64a6",
+      "surface:a33ac9ad107bef27",
+      "surface:c18754c6ae42c1a6",
+      "surface:c8e463bbf676c362"
     ],
-    "surfaceIdsFingerprint": "df1fcf9adcc946d89571cdff3b109eac5ea13c4fd4fdf048f7c1383a7f343101"
+    "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
+    "scopedInputFingerprint": "ffa2c957f6c3d7beee286953632f7ad6cc7a2cd62ff3de7dc43b0d0d175f4509"
   },
   "records": [
     {
@@ -23,20 +32,29 @@
       "status": "pending",
       "providerProfile": "provider-constrained",
       "sourcePaths": [
+        "apps/web/.env.example",
         "apps/web/app/api/billing/confirm/route.ts",
         "apps/web/app/api/billing/portal/route.ts",
         "apps/web/app/api/billing/webhook/route.ts",
-        "apps/web/lib/billing/portal.ts",
-        "apps/web/lib/billing/wall.ts",
-        "apps/web/components/billing/wall-copy.ts",
         "apps/web/app/app/settings/plan-section.tsx",
-        "apps/web/.env.example"
+        "apps/web/components/billing/wall-copy.ts",
+        "apps/web/lib/billing/portal.ts",
+        "apps/web/lib/billing/wall.ts"
       ],
-      "surfaceIds": ["surface:84f00929110b64a6"],
+      "surfaceIds": [
+        "surface:4ec10761a73e5654",
+        "surface:5aebe33bdaafb284",
+        "surface:84f00929110b64a6"
+      ],
       "accountOwner": "Homa billing owner",
       "presentation": {
         "asset": "Stripe-hosted Checkout and Customer Portal surfaces, constrained provider profile",
-        "color": ["--homa-midnight", "--homa-paper", "--homa-ink", "--homa-action"],
+        "color": [
+          "--homa-midnight",
+          "--homa-paper",
+          "--homa-ink",
+          "--homa-action"
+        ],
         "logo": "apps/web/components/brand/Logo.tsx",
         "copy": [
           "apps/web/components/billing/wall-copy.ts",
@@ -47,7 +65,9 @@
       "configurableFields": [
         {
           "key": "checkout-success-redirect",
-          "sourcePaths": ["apps/web/app/api/billing/confirm/route.ts"],
+          "sourcePaths": [
+            "apps/web/app/api/billing/confirm/route.ts"
+          ],
           "environment": "both",
           "accountOwner": "Homa billing owner",
           "updatePath": "Stripe Dashboard payment link after-completion URL, then deploy route contract if the destination changes",
@@ -57,7 +77,10 @@
         },
         {
           "key": "customer-portal-configuration",
-          "sourcePaths": ["apps/web/lib/billing/portal.ts", "apps/web/app/api/billing/portal/route.ts"],
+          "sourcePaths": [
+            "apps/web/lib/billing/portal.ts",
+            "apps/web/app/api/billing/portal/route.ts"
+          ],
           "environment": "both",
           "accountOwner": "Homa billing owner",
           "updatePath": "Stripe Dashboard Billing customer portal configuration",
@@ -67,7 +90,10 @@
         },
         {
           "key": "billing-webhook-endpoint",
-          "sourcePaths": ["apps/web/app/api/billing/webhook/route.ts", "apps/web/.env.example"],
+          "sourcePaths": [
+            "apps/web/app/api/billing/webhook/route.ts",
+            "apps/web/.env.example"
+          ],
           "environment": "production",
           "accountOwner": "Homa billing owner",
           "updatePath": "Stripe Dashboard Developers Webhooks endpoint and STRIPE_WEBHOOK_SECRET in Vercel",
@@ -77,7 +103,10 @@
         }
       ],
       "environment": {
-        "supported": ["sandbox", "production"],
+        "supported": [
+          "sandbox",
+          "production"
+        ],
         "notes": "Test and live Stripe keys are selected server-side. Empty live configuration falls through to test by the existing billing contract."
       },
       "fallback": "No provider error strands a family: Checkout confirmation returns to /app and Portal errors return to settings.",
@@ -93,14 +122,16 @@
       "rollback": {
         "owner": "Homa billing owner",
         "restoreAction": "Restore the previous Stripe hosted configuration and route commit, then verify a sandbox checkout before production re-enable.",
-        "restoreTarget": "Stripe Checkout, Customer Portal, webhook endpoint, and Homa billing mirror"
+        "restoreTarget": "Stripe Checkout, Customer Portal, webhook endpoint, and Homa billing mirror",
+        "rehearsalEvidence": null
       },
       "contracts": [
         "Family identity comes from authenticated Homa context and Stripe client_reference_id must agree.",
         "Entitlements are written only after verified Checkout or webhook evidence and remain idempotent.",
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
-      ]
+      ],
+      "scopedInputFingerprint": "b05406adcd5a214c36356307109267186dfd8e1c51f71ae57bfff06efc504bc0"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -110,20 +141,30 @@
       "status": "pending",
       "providerProfile": "provider-constrained",
       "sourcePaths": [
+        "apps/web/.env.example",
         "apps/web/app/auth/callback/route.ts",
         "apps/web/app/auth/confirm/route.ts",
-        "apps/web/lib/supabase/server.ts",
-        "apps/web/lib/supabase/client.ts",
-        "supabase/templates/recovery.html",
-        "apps/web/app/signin/signin-form.tsx",
         "apps/web/app/forgot-password/page.tsx",
-        "apps/web/.env.example"
+        "apps/web/app/signin/signin-form.tsx",
+        "apps/web/lib/supabase/client.ts",
+        "apps/web/lib/supabase/server.ts",
+        "supabase/templates/recovery.html"
       ],
-      "surfaceIds": ["surface:6fa1d3818d14e555"],
+      "surfaceIds": [
+        "surface:17ec67dd21971baf",
+        "surface:6fa1d3818d14e555",
+        "surface:c18754c6ae42c1a6",
+        "surface:c8e463bbf676c362"
+      ],
       "accountOwner": "Homa identity owner",
       "presentation": {
         "asset": "Supabase Auth email template and callback surfaces, constrained provider profile",
-        "color": ["--homa-paper", "--homa-ink", "--homa-midnight", "--homa-action"],
+        "color": [
+          "--homa-paper",
+          "--homa-ink",
+          "--homa-midnight",
+          "--homa-action"
+        ],
         "logo": "apps/web/components/brand/Logo.tsx",
         "copy": [
           "supabase/templates/recovery.html",
@@ -135,7 +176,9 @@
       "configurableFields": [
         {
           "key": "auth-email-template",
-          "sourcePaths": ["supabase/templates/recovery.html"],
+          "sourcePaths": [
+            "supabase/templates/recovery.html"
+          ],
           "environment": "production",
           "accountOwner": "Homa identity owner",
           "updatePath": "Supabase Dashboard Authentication Email Templates, then capture a real delivered message",
@@ -145,7 +188,11 @@
         },
         {
           "key": "redirect-allow-list",
-          "sourcePaths": ["apps/web/app/auth/callback/route.ts", "apps/web/app/auth/confirm/route.ts", "apps/web/.env.example"],
+          "sourcePaths": [
+            "apps/web/app/auth/callback/route.ts",
+            "apps/web/app/auth/confirm/route.ts",
+            "apps/web/.env.example"
+          ],
           "environment": "both",
           "accountOwner": "Homa identity owner",
           "updatePath": "Supabase Dashboard Authentication URL Configuration and Homa redirect route",
@@ -155,7 +202,10 @@
         }
       ],
       "environment": {
-        "supported": ["sandbox", "production"],
+        "supported": [
+          "sandbox",
+          "production"
+        ],
         "notes": "Local, preview, and production redirect origins must be explicitly allow-listed in Supabase. Production callback uses the forwarded host only after same-origin path validation."
       },
       "fallback": "Expired or failed authentication links return to the relevant Homa recovery screen with a truthful explanation.",
@@ -171,14 +221,16 @@
       "rollback": {
         "owner": "Homa identity owner",
         "restoreAction": "Restore the prior template and redirect configuration, then run a sandbox reset and OAuth exchange before production re-enable.",
-        "restoreTarget": "Supabase email template, redirect allow-list, callback, and recovery routes"
+        "restoreTarget": "Supabase email template, redirect allow-list, callback, and recovery routes",
+        "rehearsalEvidence": null
       },
       "contracts": [
         "Session cookies are minted only by Supabase's verified code exchange.",
         "next paths are same-origin and safe before they influence a redirect.",
         "Expired recovery tokens never create a session and return to the recovery screen.",
         "Tenant identity is derived from the authenticated Supabase session, never provider callback text."
-      ]
+      ],
+      "scopedInputFingerprint": "1034ba26c5241f3f0343d76cad2cd318654592295c7e33e8ccb7fe6723c29510"
     },
     {
       "id": "google-identity",
@@ -188,18 +240,24 @@
       "status": "pending",
       "providerProfile": "provider-constrained",
       "sourcePaths": [
-        "apps/web/app/onboarding/parent-step.tsx",
-        "apps/web/app/signin/signin-form.tsx",
-        "apps/web/app/auth/callback/route.ts",
+        "apps/mobile/app.json",
         "apps/mobile/src/features/auth/google-sign-in.ts",
         "apps/mobile/src/lib/supabase.ts",
-        "apps/mobile/app.json"
+        "apps/web/app/auth/callback/route.ts",
+        "apps/web/app/onboarding/parent-step.tsx",
+        "apps/web/app/signin/signin-form.tsx"
       ],
-      "surfaceIds": [],
+      "surfaceIds": [
+        "surface:2b0b7acc6263e1fe"
+      ],
       "accountOwner": "Homa identity owner",
       "presentation": {
         "asset": "Google hosted consent screen and system browser session, constrained provider profile",
-        "color": ["--homa-paper", "--homa-ink", "--homa-midnight"],
+        "color": [
+          "--homa-paper",
+          "--homa-ink",
+          "--homa-midnight"
+        ],
         "logo": "apps/web/components/brand/GoogleGlyph.tsx",
         "copy": [
           "apps/web/app/onboarding/parent-step.tsx",
@@ -210,7 +268,11 @@
       "configurableFields": [
         {
           "key": "web-oauth-redirect",
-          "sourcePaths": ["apps/web/app/onboarding/parent-step.tsx", "apps/web/app/signin/signin-form.tsx", "apps/web/app/auth/callback/route.ts"],
+          "sourcePaths": [
+            "apps/web/app/onboarding/parent-step.tsx",
+            "apps/web/app/signin/signin-form.tsx",
+            "apps/web/app/auth/callback/route.ts"
+          ],
           "environment": "both",
           "accountOwner": "Homa identity owner",
           "updatePath": "Supabase Google provider settings and redirect allow-list, paired with the Homa callback route",
@@ -220,7 +282,10 @@
         },
         {
           "key": "native-deep-link",
-          "sourcePaths": ["apps/mobile/src/features/auth/google-sign-in.ts", "apps/mobile/app.json"],
+          "sourcePaths": [
+            "apps/mobile/src/features/auth/google-sign-in.ts",
+            "apps/mobile/app.json"
+          ],
           "environment": "both",
           "accountOwner": "Homa identity owner",
           "updatePath": "Supabase redirect allow-list plus the Homa app scheme and shipped native binary",
@@ -230,7 +295,10 @@
         }
       ],
       "environment": {
-        "supported": ["sandbox", "production"],
+        "supported": [
+          "sandbox",
+          "production"
+        ],
         "notes": "Web uses /auth/callback. Native uses the exact homa://auth/callback deep link because the provider allow-list requires a stable literal URI."
       },
       "fallback": "Provider cancellation and callback errors return the user to Homa's sign-in surface without creating partial account state.",
@@ -246,14 +314,16 @@
       "rollback": {
         "owner": "Homa identity owner",
         "restoreAction": "Restore the prior provider redirect configuration and native scheme, then verify one web and one native sign-in in sandbox.",
-        "restoreTarget": "Google provider settings, Supabase redirect allow-list, Homa callback, and native deep link"
+        "restoreTarget": "Google provider settings, Supabase redirect allow-list, Homa callback, and native deep link",
+        "rehearsalEvidence": null
       },
       "contracts": [
         "OAuth returns through a safe same-origin path before Homa creates the session.",
         "Native OAuth uses the system browser instead of an embedded WebView.",
         "A missing or failed code never silently reports a signed-in state.",
         "The authenticated Supabase session remains the only authority for family identity."
-      ]
+      ],
+      "scopedInputFingerprint": "ba0496c36e6995eb80ae63beeea8ca0bd7f1f3f24ccaeb8c9596feee02da2654"
     },
     {
       "id": "apple-identity",
@@ -263,24 +333,35 @@
       "status": "pending",
       "providerProfile": "provider-constrained",
       "sourcePaths": [
-        "apps/mobile/src/features/auth/apple-sign-in.ts",
-        "apps/mobile/src/app/(auth)/signin.tsx",
         "apps/mobile/app.json",
+        "apps/mobile/src/app/(auth)/signin.tsx",
+        "apps/mobile/src/features/auth/apple-sign-in.ts",
         "apps/mobile/src/lib/supabase.ts"
       ],
-      "surfaceIds": [],
+      "surfaceIds": [
+        "surface:3cbfe8760471dae5"
+      ],
       "accountOwner": "Homa identity owner",
       "presentation": {
         "asset": "Apple system Sign in with Apple sheet, constrained provider profile",
-        "color": ["--homa-paper", "--homa-ink", "--homa-midnight"],
+        "color": [
+          "--homa-paper",
+          "--homa-ink",
+          "--homa-midnight"
+        ],
         "logo": "apps/mobile/src/components/brand/logo.tsx",
-        "copy": ["apps/mobile/src/app/(auth)/signin.tsx"],
+        "copy": [
+          "apps/mobile/src/app/(auth)/signin.tsx"
+        ],
         "typography": "Apple system sheet owns provider typography; Homa owns the entry surface and uses DM Sans interface styling"
       },
       "configurableFields": [
         {
           "key": "apple-sign-in-entitlement",
-          "sourcePaths": ["apps/mobile/app.json", "apps/mobile/src/features/auth/apple-sign-in.ts"],
+          "sourcePaths": [
+            "apps/mobile/app.json",
+            "apps/mobile/src/features/auth/apple-sign-in.ts"
+          ],
           "environment": "production",
           "accountOwner": "Homa identity owner",
           "updatePath": "Apple Developer capability and Expo native entitlement, followed by a store-signed build",
@@ -290,7 +371,10 @@
         }
       ],
       "environment": {
-        "supported": ["sandbox", "production"],
+        "supported": [
+          "sandbox",
+          "production"
+        ],
         "notes": "Apple identity is currently a native system-sheet flow. The entitlement, bundle identifier, and Supabase Apple provider client configuration must agree."
       },
       "fallback": "Email sign-in remains available when Apple is unavailable, cancelled, or returns no identity token.",
@@ -306,14 +390,16 @@
       "rollback": {
         "owner": "Homa identity owner",
         "restoreAction": "Keep email and Google sign-in visible, revert the native entitlement/configuration in the next binary, and verify the remaining identity paths.",
-        "restoreTarget": "Apple entitlement, Supabase Apple provider client, and native sign-in entry"
+        "restoreTarget": "Apple entitlement, Supabase Apple provider client, and native sign-in entry",
+        "rehearsalEvidence": null
       },
       "contracts": [
         "Apple's identity token is sent to Supabase's verified signInWithIdToken call.",
         "A cancelled system sheet is not an authentication error and never creates a partial session.",
         "Email and Google remain available as truthful alternatives.",
         "Native identity is tied to the configured bundle identifier, not a client-supplied family ID."
-      ]
+      ],
+      "scopedInputFingerprint": "f92bd94140ff0065513f98666007743d2b99198ce01163d0acaa9d201c42a276"
     },
     {
       "id": "apple-subscription-management",
@@ -323,21 +409,29 @@
       "status": "pending",
       "providerProfile": "provider-constrained",
       "sourcePaths": [
+        "apps/mobile/src/app/settings.tsx",
         "apps/mobile/src/components/billing-gate.tsx",
         "apps/mobile/src/lib/billing.ts",
         "apps/mobile/src/lib/web-links.ts",
-        "apps/mobile/src/app/settings.tsx",
+        "apps/web/.env.example",
         "apps/web/app/api/billing/apple/confirm/route.ts",
         "apps/web/app/api/billing/apple/webhook/route.ts",
         "apps/web/lib/billing/apple-verify.ts",
-        "apps/web/lib/billing/wall.ts",
-        "apps/web/.env.example"
+        "apps/web/lib/billing/wall.ts"
       ],
-      "surfaceIds": [],
+      "surfaceIds": [
+        "surface:638cd8fafaa24166",
+        "surface:a33ac9ad107bef27"
+      ],
       "accountOwner": "Homa billing owner",
       "presentation": {
         "asset": "StoreKit purchase and restore UI plus Apple's subscription-management URL, constrained provider profile",
-        "color": ["--homa-paper", "--homa-ink", "--homa-midnight", "--homa-action"],
+        "color": [
+          "--homa-paper",
+          "--homa-ink",
+          "--homa-midnight",
+          "--homa-action"
+        ],
         "logo": "apps/mobile/src/components/brand/logo.tsx",
         "copy": [
           "apps/mobile/src/components/billing-gate.tsx",
@@ -348,7 +442,10 @@
       "configurableFields": [
         {
           "key": "storekit-product-catalog",
-          "sourcePaths": ["apps/mobile/src/components/billing-gate.tsx", "apps/mobile/src/lib/billing.ts"],
+          "sourcePaths": [
+            "apps/mobile/src/components/billing-gate.tsx",
+            "apps/mobile/src/lib/billing.ts"
+          ],
           "environment": "both",
           "accountOwner": "Homa billing owner",
           "updatePath": "App Store Connect subscription products plus the Homa provider-product catalog",
@@ -358,7 +455,10 @@
         },
         {
           "key": "subscription-management-link",
-          "sourcePaths": ["apps/mobile/src/lib/web-links.ts", "apps/mobile/src/app/settings.tsx"],
+          "sourcePaths": [
+            "apps/mobile/src/lib/web-links.ts",
+            "apps/mobile/src/app/settings.tsx"
+          ],
           "environment": "production",
           "accountOwner": "Homa billing owner",
           "updatePath": "Apple's documented subscription-management URL and native settings entry",
@@ -368,7 +468,10 @@
         },
         {
           "key": "app-store-server-notifications",
-          "sourcePaths": ["apps/web/app/api/billing/apple/webhook/route.ts", "apps/web/lib/billing/apple-verify.ts"],
+          "sourcePaths": [
+            "apps/web/app/api/billing/apple/webhook/route.ts",
+            "apps/web/lib/billing/apple-verify.ts"
+          ],
           "environment": "production",
           "accountOwner": "Homa billing owner",
           "updatePath": "App Store Connect App Store Server Notifications endpoint and Homa JWS verifier",
@@ -378,7 +481,10 @@
         }
       ],
       "environment": {
-        "supported": ["sandbox", "production"],
+        "supported": [
+          "sandbox",
+          "production"
+        ],
         "notes": "The same webhook accepts signed sandbox and production notifications. StoreKit sandbox is required before any production read-back."
       },
       "fallback": "A failed purchase or unavailable catalog keeps the paywall closed to entitlement claims, offers retry or restore, and leaves account access truthful.",
@@ -394,14 +500,135 @@
       "rollback": {
         "owner": "Homa billing owner",
         "restoreAction": "Disable the changed Apple product or notification configuration, restore the prior verifier/catalog, and verify restore and account access before reopening.",
-        "restoreTarget": "StoreKit catalog, Apple subscription management handoff, App Store Server Notifications, and entitlement mirror"
+        "restoreTarget": "StoreKit catalog, Apple subscription management handoff, App Store Server Notifications, and entitlement mirror",
+        "rehearsalEvidence": null
       },
       "contracts": [
         "StoreKit transactions are verified server-side before entitlements change.",
         "appAccountToken must match the authenticated family before an Apple purchase can unlock access.",
         "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
         "Provider outages never become a guessed paid state and never cross family boundaries."
-      ]
+      ],
+      "scopedInputFingerprint": "073894f1d8f94b8945b539c49380e6594fa799e744764992fcfd9b9edf59e5b3"
     }
-  ]
+  ],
+  "manifestSchemaVersion": 3,
+  "sourceCoverage": {
+    "sourceCount": 28,
+    "bindings": [
+      {
+        "path": "apps/mobile/app.json",
+        "sha256": "65f70bcd2ba1938bebf14ddc6643d7ffe6408ea86f5f477a57fcec6839fbe5c5"
+      },
+      {
+        "path": "apps/mobile/src/app/(auth)/signin.tsx",
+        "sha256": "304927a7fa4193cf864b1c894a0da86da0e15034a5d7bda8e3d056e29805e98c"
+      },
+      {
+        "path": "apps/mobile/src/app/settings.tsx",
+        "sha256": "e30d71b9caaefa4a6a452b3448b4200f1990b90215ffefd394ffba601b721a84"
+      },
+      {
+        "path": "apps/mobile/src/components/billing-gate.tsx",
+        "sha256": "628543ed2660c105195888843972120db90539952c0e261b5aebc9eec6c0ae4e"
+      },
+      {
+        "path": "apps/mobile/src/features/auth/apple-sign-in.ts",
+        "sha256": "82d48fbe179390613e9d019e84453f1c7bc9fe4809225c8b9dbdf266a6e6cf9f"
+      },
+      {
+        "path": "apps/mobile/src/features/auth/google-sign-in.ts",
+        "sha256": "715e31b07b74760c1e467fbc3fd40123774916dd1d045d0e09efb26f66981037"
+      },
+      {
+        "path": "apps/mobile/src/lib/billing.ts",
+        "sha256": "d0902f6c790cb36d6d37a8df55a47b29d9ad9f25cdf936de0a6e7ac155ce1945"
+      },
+      {
+        "path": "apps/mobile/src/lib/supabase.ts",
+        "sha256": "eb86cc0f1b630ff24f019cbe1604991dc6342c147fdddc7c201d90a9f7155413"
+      },
+      {
+        "path": "apps/mobile/src/lib/web-links.ts",
+        "sha256": "3fb8d33654b20e11408d95ac4cc6cccb5713c322d3531761838897394362990e"
+      },
+      {
+        "path": "apps/web/.env.example",
+        "sha256": "fc4fbde3b12b3877a2ae9bce71603350441ea3a039a95bedee023a86e93296b5"
+      },
+      {
+        "path": "apps/web/app/api/billing/apple/confirm/route.ts",
+        "sha256": "a12a3b75153e356104a955d2c4c376195a00d41997db8dfab678e13c73660530"
+      },
+      {
+        "path": "apps/web/app/api/billing/apple/webhook/route.ts",
+        "sha256": "ea58585f2acedd8e65974777449f9f41bffd15f33f31456ae38ed23158ac9324"
+      },
+      {
+        "path": "apps/web/app/api/billing/confirm/route.ts",
+        "sha256": "7cf53f09b9203c261f97717342753daac546bfc691a86362bd043ba0b589d671"
+      },
+      {
+        "path": "apps/web/app/api/billing/portal/route.ts",
+        "sha256": "f61d8bd3dcd4927d322780274a9dbbbafcc042fc8986b5c0e45c94ab724ce710"
+      },
+      {
+        "path": "apps/web/app/api/billing/webhook/route.ts",
+        "sha256": "69e938476a592a7788dd2ac8292e1b9b03f99d481bee225936a137e792ba7251"
+      },
+      {
+        "path": "apps/web/app/app/settings/plan-section.tsx",
+        "sha256": "c8b6500c45a259f35104cebba7b4dd9e0188fe1105d98374a4dac9f28c49ddd1"
+      },
+      {
+        "path": "apps/web/app/auth/callback/route.ts",
+        "sha256": "16c0255c9e124bf3426f662f8b958cbc6643647f66b823ad128746a40f958bbb"
+      },
+      {
+        "path": "apps/web/app/auth/confirm/route.ts",
+        "sha256": "74a471991f448233f17f1f0b08928d297e4605f8c7409d1c761aa3abe4d5ca2c"
+      },
+      {
+        "path": "apps/web/app/forgot-password/page.tsx",
+        "sha256": "861f07d9e847e55b65a42daeebf75f4ddc987eb17a9794301cca1f775169cc01"
+      },
+      {
+        "path": "apps/web/app/onboarding/parent-step.tsx",
+        "sha256": "f9959807dd34c798318c4d6a1ffb112ed9f53dca291edfa52adb3d6b154a74ee"
+      },
+      {
+        "path": "apps/web/app/signin/signin-form.tsx",
+        "sha256": "958d7ffbe440c20a7202b70caf89326ea1bf5fcf9e45fa07b9cfd75940c138bb"
+      },
+      {
+        "path": "apps/web/components/billing/wall-copy.ts",
+        "sha256": "30381c070bb8449ffd1f0e61f3f7f56f3b3612eddf84fdd6262de97a757f82f3"
+      },
+      {
+        "path": "apps/web/lib/billing/apple-verify.ts",
+        "sha256": "5d08b19de3da215ea9deaa25ba2bdf4b6b55e4c7004a1dbeebfc13e23c98cafa"
+      },
+      {
+        "path": "apps/web/lib/billing/portal.ts",
+        "sha256": "05a8182eaa0e18fb0879d84fa2f4e98d666e43f7a72ee05eb6743a65a2fc0dfb"
+      },
+      {
+        "path": "apps/web/lib/billing/wall.ts",
+        "sha256": "88d77101ec6009483cf5fac89b8ac38207675cbf160c36dc08e1d15fcc8cb927"
+      },
+      {
+        "path": "apps/web/lib/supabase/client.ts",
+        "sha256": "4fe3491ab3a7cc0916491cbb45686687ae5209fe46aab0a54fcdb3f240a49246"
+      },
+      {
+        "path": "apps/web/lib/supabase/server.ts",
+        "sha256": "a578291039ec2105110880025225bfbb8255aa29e77a3670cec790bca8d59361"
+      },
+      {
+        "path": "supabase/templates/recovery.html",
+        "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
+      }
+    ],
+    "sourceFingerprint": "264e3454e977493de62cc2a8dd737f0182c490b0227820e349ee2e58042b4772"
+  }
 }

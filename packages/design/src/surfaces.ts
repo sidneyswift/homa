@@ -1,4 +1,4 @@
-export const BRAND_MANIFEST_SCHEMA_VERSION = 1 as const;
+export const BRAND_MANIFEST_SCHEMA_VERSION = 3 as const;
 
 export const brandManifestTypes = [
   "route",
@@ -62,12 +62,37 @@ export type BrandAudience =
   | "public"
   | "provider";
 
+export interface BrandRouteHandlerRuntimeBoundary {
+  exposure: "public" | "authenticated" | "internal";
+  credential:
+    | "none-or-possession-token"
+    | "family-context"
+    | "family-device-bearer"
+    | "operator-session"
+    | "provider-signature-or-shared-secret"
+    | "development-gate"
+    | "development-gate-and-family-session"
+    | "scheduler-secret"
+    | "family-session-or-provider-signature";
+  invoker:
+    | "public-or-identity-provider"
+    | "family-client"
+    | "family-device"
+    | "operator-client"
+    | "external-provider"
+    | "developer"
+    | "authenticated-developer-family"
+    | "provider:vercel"
+    | "family-or-provider:vercel-blob";
+}
+
 export interface BrandSurfaceRecord {
   id: string;
   paths: string[];
   type: BrandManifestType;
   reachability: "public" | "authenticated" | "internal" | "generated" | "external";
   audiences: BrandAudience[];
+  runtimeBoundary: BrandRouteHandlerRuntimeBoundary | null;
   criticality: BrandCriticality;
   ownerIssue: `gh#${number}`;
   upstreamDomainOwners: string[];
@@ -106,7 +131,12 @@ export interface BrandSurfaceRecord {
   evidenceMetadata: {
     contractVersion: string;
     harnessVersion: string;
-    observedAt: string;
+    /** Reserved for a real rendered, installed, provider, or production observation. */
+    observedAt: string | null;
+    /** Exact last commit containing this path. Null for changed, untracked, and synthetic rows. */
+    sourceCommitSha: string | null;
+    /** Committer timestamp for sourceCommitSha. This is provenance, never observedAt. */
+    sourceCommitTimestamp: string | null;
     environment: string;
     clientRuntimeFingerprint: string | null;
     pixels: string | null;

@@ -3,6 +3,13 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  collectLegacySignatureMatches,
+  isLegacyFontPath,
+  isLegacyResidueExcludedPath,
+  isLegacyTextPath,
+} from "../packages/design/src/legacy-signatures.ts";
+import { BRAND_MANIFEST_SCHEMA_VERSION } from "../packages/design/src/surfaces.ts";
 
 type LegacyBaselineRecord = {
   path: string;
@@ -14,11 +21,6 @@ type LegacyBaseline = {
   schemaVersion: number;
   sourceCommit: string;
   records: LegacyBaselineRecord[];
-};
-
-type ResidueRule = {
-  name: string;
-  pattern: RegExp;
 };
 
 type GitHubEventPayload = {
@@ -39,68 +41,27 @@ export type BrandResidueFinding = {
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const BASELINE_PATH = resolve(ROOT, "docs/homa-design/evidence/legacy-baseline.json");
-const CHECKER_FILES = new Set([
-  "scripts/brand-residue-check.mts",
-  "scripts/brand-residue-check.test.mts",
-  "scripts/design-authoring-rails-check.mts",
-  "scripts/font-system-check.mts",
-  "scripts/marketing-production-check.mts",
-  // The inventory generator must name the retired signals so it can preserve
-  // their provenance in the immutable baseline.
-  "scripts/brand-surfaces.mts",
-]);
-
-const TEXT_EXTENSIONS = new Set([
-  ".css",
-  ".html",
-  ".js",
-  ".json",
-  ".md",
-  ".mjs",
-  ".mts",
-  ".svg",
-  ".ts",
-  ".tsx",
-  ".txt",
-  ".xml",
-  ".yml",
-  ".yaml",
-]);
-
-const residueRules: readonly ResidueRule[] = [
-  { name: "legacy-font-schibsted", pattern: /schibsted/gi },
-  { name: "legacy-font-hanken", pattern: /hanken/gi },
-  // `caveat` is ordinary prose in Homa's research and curriculum corpus.
-  // The retired font was always authored with the proper-name spelling.
-  { name: "legacy-font-caveat", pattern: /\bCaveat\b/g },
-  { name: "legacy-warm-playful-doctrine", pattern: /warm[\s-]+and[\s-]+playful/gi },
-  {
-    name: "legacy-design-doc-path",
-    pattern: /docs\/homa-design\/(?:components|guidelines|templates|tokens|ui_kits|styles\.css)/gi,
-  },
-  { name: "legacy-color-canvas", pattern: /#FBF7F0/gi },
-  { name: "legacy-color-ink", pattern: /#221E1A/gi },
-  { name: "legacy-color-ink-soft", pattern: /#332E29/gi },
-  { name: "legacy-color-muted", pattern: /#6B6259/gi },
-  { name: "legacy-color-muted-warm", pattern: /#8A7D6C/gi },
-  // #E7602F remains the approved Quiet authority visual-coral token. The
-  // guard targets retired palette values that are no longer in the contract.
-  { name: "legacy-color-coral-dark", pattern: /#C44C22/gi },
-  { name: "legacy-color-coral-deep", pattern: /#9C3B1B/gi },
-  { name: "legacy-color-coral-bright", pattern: /#F1793F/gi },
-  { name: "legacy-color-border", pattern: /#E7DDCE/gi },
-  { name: "legacy-color-border-dark", pattern: /#D6C8B4/gi },
-  { name: "legacy-color-clay-muted", pattern: /#B3A492/gi },
-];
 
 const sha256 = (value: Buffer) => createHash("sha256").update(value).digest("hex");
 
 function gitTrackedFiles(): string[] {
-  return execFileSync("git", ["ls-files", "-z"], { cwd: ROOT })
+  return execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: ROOT })
     .toString("utf8")
     .split("\0")
     .filter(Boolean)
     .sort();
+}
+
+function gitUntrackedFiles(): Set<string> {
+  return new Set(execFileSync("git", ["ls-files", "--others", "--exclude-standard", "-z"], { cwd: ROOT })
+    .toString("utf8")
+    .split("\0")
+    .filter(Boolean));
+}
+
+function withWorkingTree(paths: Set<string>): Set<string> {
+  const changedTracked = gitDiffPaths(["HEAD"]) ?? new Set<string>();
+  return new Set([...paths, ...changedTracked, ...gitUntrackedFiles()]);
 }
 
 function availableBaselineCommit(sourceCommit: string): string | null {
@@ -152,13 +113,13 @@ function changedPathsForRun(sourceCommit: string): Set<string> | null {
       .split(/\s+/);
     if (parents.length >= 3) {
       const mergeDelta = gitDiffPaths(["HEAD^1", "HEAD"]);
-      if (mergeDelta) return mergeDelta;
+      if (mergeDelta) return withWorkingTree(mergeDelta);
     }
     const baseSha = event?.pull_request?.base?.sha;
     const headSha = event?.pull_request?.head?.sha;
     if (typeof baseSha === "string" && typeof headSha === "string") {
       const pullRequestDelta = gitDiffPaths([`${baseSha}...${headSha}`]);
-      if (pullRequestDelta) return pullRequestDelta;
+      if (pullRequestDelta) return withWorkingTree(pullRequestDelta);
     }
   }
   if (process.env.GITHUB_EVENT_NAME === "push") {
@@ -166,32 +127,20 @@ function changedPathsForRun(sourceCommit: string): Set<string> | null {
     const after = event?.after ?? "HEAD";
     if (typeof before === "string" && before !== "0".repeat(40) && typeof after === "string") {
       const pushDelta = gitDiffPaths([before, after]);
-      if (pushDelta) return pushDelta;
+      if (pushDelta) return withWorkingTree(pushDelta);
     }
   }
 
   // Local runs usually have origin/main available. This keeps a worktree
   // that contains a merge commit aligned with the PR's intended delta.
   const localDelta = gitDiffPaths(["origin/main...HEAD"]);
-  if (localDelta) return localDelta;
+  if (localDelta) return withWorkingTree(localDelta);
 
   // Shallow or detached environments may not have the remote ref. Retain a
   // conservative baseline fallback rather than silently scanning everything.
   const baselineCommit = availableBaselineCommit(sourceCommit);
-  return baselineCommit ? gitDiffPaths([baselineCommit, "HEAD"]) : null;
-}
-
-function isTextPath(path: string): boolean {
-  const lastDot = path.lastIndexOf(".");
-  return lastDot >= 0 && TEXT_EXTENSIONS.has(path.slice(lastDot).toLowerCase());
-}
-
-function isExcludedPath(path: string): boolean {
-  return path.startsWith("docs/homa-design/evidence/")
-    || path.startsWith("docs/homa-planning/history/")
-    || path.startsWith("docs/notes/")
-    || /\.(?:test|spec)\.(?:js|mjs|mts|ts|tsx)$/.test(path)
-    || CHECKER_FILES.has(path);
+  const baselineDelta = baselineCommit ? gitDiffPaths([baselineCommit, "HEAD"]) : null;
+  return baselineDelta ? withWorkingTree(baselineDelta) : null;
 }
 
 function baselineHashes(baseline: LegacyBaseline): Map<string, Set<string>> {
@@ -221,31 +170,31 @@ function excerptAt(text: string, offset: number): string {
 
 function findResidue(path: string, text: string, hash: string, allowedHashes: Map<string, Set<string>>): BrandResidueFinding[] {
   const isUnchangedBaseline = allowedHashes.get(path)?.has(hash) ?? false;
-  const findings: BrandResidueFinding[] = [];
-  for (const rule of residueRules) {
-    rule.pattern.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = rule.pattern.exec(text)) !== null) {
-      if (isUnchangedBaseline) continue;
-      findings.push({ path, signature: rule.name, line: lineAt(text, match.index), excerpt: excerptAt(text, match.index) });
-      if (rule.pattern.lastIndex === match.index) rule.pattern.lastIndex += 1;
-    }
-  }
-  return findings;
+  if (isUnchangedBaseline) return [];
+  return collectLegacySignatureMatches(path, text).map((match) => ({
+    path,
+    signature: match.signature,
+    line: lineAt(text, match.index),
+    excerpt: excerptAt(text, match.index),
+  }));
 }
 
 export type BrandResidueScope = "delta" | "full";
 
 export function collectBrandResidueFindings(scope: BrandResidueScope = "delta"): BrandResidueFinding[] {
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8")) as LegacyBaseline;
-  if (baseline.schemaVersion !== 1 || !baseline.sourceCommit || !Array.isArray(baseline.records)) {
+  if (baseline.schemaVersion !== BRAND_MANIFEST_SCHEMA_VERSION || !baseline.sourceCommit || !Array.isArray(baseline.records)) {
     throw new Error(`Unsupported legacy baseline schema in ${relative(ROOT, BASELINE_PATH)}`);
   }
-  const allowedHashes = baselineHashes(baseline);
+  // The delivery-delta guard may use the frozen hashes to distinguish newly
+  // introduced residue from untouched migration work. The final full-tree
+  // audit may not: an unchanged legacy file is still active legacy identity,
+  // not an exemption earned by age.
+  const allowedHashes = scope === "delta" ? baselineHashes(baseline) : new Map<string, Set<string>>();
   const changedPaths = scope === "full" ? null : changedPathsForRun(baseline.sourceCommit);
   const findings: BrandResidueFinding[] = [];
   for (const path of gitTrackedFiles()) {
-    if (isExcludedPath(path) || !isTextPath(path)) continue;
+    if (isLegacyResidueExcludedPath(path) || !isLegacyTextPath(path)) continue;
     const bytes = readFileSync(resolve(ROOT, path));
     const hash = sha256(bytes);
     if (changedPaths && !changedPaths.has(path)) continue;
@@ -260,11 +209,12 @@ export function collectBrandResidueFindings(scope: BrandResidueScope = "delta"):
 export function collectLegacyFontPathResidue(scope: BrandResidueScope = "delta"): string[] {
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8")) as LegacyBaseline;
   const changedPaths = scope === "full" ? null : changedPathsForRun(baseline.sourceCommit);
-  return gitTrackedFiles().filter((path) => /(?:schibsted|hanken|caveat)/i.test(path) && !isExcludedPath(path) && (!changedPaths || changedPaths.has(path)));
+  return gitTrackedFiles().filter((path) => isLegacyFontPath(path) && (!changedPaths || changedPaths.has(path)));
 }
 
 export function assertNoBrandResidue(): void {
   const fullTree = process.argv.includes("--full");
+  const reportOnly = process.argv.includes("--report");
   const scope: BrandResidueScope = fullTree ? "full" : "delta";
   const pathResidue = collectLegacyFontPathResidue(scope);
   const findings = collectBrandResidueFindings(scope);
@@ -280,6 +230,10 @@ export function assertNoBrandResidue(): void {
   const lines = ["Active brand residue detected:"];
   for (const path of pathResidue) lines.push(`- ${path}: legacy-font-path`);
   for (const finding of findings) lines.push(`- ${finding.path}:${finding.line}: ${finding.signature}: ${finding.excerpt}`);
+  if (reportOnly) {
+    console.log(`${lines.join("\n")}\nBrand eradication queue: ${pathResidue.length + findings.length} active finding(s).`);
+    return;
+  }
   throw new Error(lines.join("\n"));
 }
 
