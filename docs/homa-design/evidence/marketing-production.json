@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
-  "surfaceManifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
-  "authoringManifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
-  "ownedInputFingerprint": "8e927e5a2db9cbe121ec04c04522c180b7e7dd40651466183655c84166d1a987",
+  "contractSourceChecksum": "a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4",
+  "surfaceManifestFingerprint": "1299b4fca228e4754b713cb9c40989078891c3e33c733c8f2e21935acd9885ee",
+  "authoringManifestFingerprint": "1299b4fca228e4754b713cb9c40989078891c3e33c733c8f2e21935acd9885ee",
+  "ownedInputFingerprint": "d9b6d925a728427456ef195aad618fa7280e076455d91007faa700117b2b19e9",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -4040,7 +4040,7 @@
         "marketing/assets/brand/"
       ],
       "id": "generator:cf7384e7282fda93",
-      "sourceHash": "cd1c353175e6ba48aedbfff050b80562b5617903ab52d755c417a8398884a7ed"
+      "sourceHash": "1693b51a5351970743d2124d304ff19745ae8a28bfd9046b54e51bfdbf3f67f6"
     },
     {
       "path": "scripts/brand-surfaces.mts",
