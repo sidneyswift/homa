@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "95c4a87aca96cdc5e61dfd2b67617939b687f922ec3088ff5ccb2fd904babbf0"
+    "scopedInputFingerprint": "0752bb577144f41240af2449e90749e33760b9427081e114ca75468128b565ff"
   },
   "records": [
     {
@@ -131,7 +131,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "e3cc4455ffb7d1e34b5356d27ef5e38505105c4fa20738f51c0c109463837685"
+      "scopedInputFingerprint": "273cc4de06a0cd6035700fd7c6cf060fc35f71f86a2f2fb611d28354433eb092"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -509,7 +509,7 @@
         "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
         "Provider outages never become a guessed paid state and never cross family boundaries."
       ],
-      "scopedInputFingerprint": "9ea8e9048260fa13f9965a47c5f33c53aa8c84a8aee1391e2b1b35f4ca8c4fa1"
+      "scopedInputFingerprint": "82b16253565cd024be49c7fd7cf80d187cdfd7f08b51e776fc3ce10afd87c5a8"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -602,7 +602,7 @@
       },
       {
         "path": "apps/web/components/billing/wall-copy.ts",
-        "sha256": "5277bd546c475bef599297687270cd3dceab1e986b3b5ee1e63b68c2d9f16562"
+        "sha256": "2f9f0c06c52414752f2d8d512fd316aa2a606bbc5a4075ea32c9940a1401f662"
       },
       {
         "path": "apps/web/lib/billing/apple-verify.ts",
@@ -614,7 +614,7 @@
       },
       {
         "path": "apps/web/lib/billing/wall.ts",
-        "sha256": "59e1a82fc7ecf2080b0df191c74fbcdf5e967ed7f09fb31d7baaae993158aa53"
+        "sha256": "62f65ac5cd8596663a78b1a99ae42f8eb01d7bd76904013f2a890a8f9b42d45d"
       },
       {
         "path": "apps/web/lib/supabase/client.ts",
@@ -629,6 +629,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "e2c50cb024138950553edcca2c64974c89c80e77ef56164b01355053c534c861"
+    "sourceFingerprint": "731b7d96365a2e1d477fb97a26c3a3f2b6a2a49418640f037be52a51c6c7d0e4"
   }
 }
