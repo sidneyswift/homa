@@ -23,12 +23,12 @@ test("the landing hero names Homa's category and primary action", () => {
   assert.equal(HERO_COPY.headline, "Homeschool, handled.");
   assert.equal(HERO_COPY.primaryAction, "Start your 7 free days");
   assert.equal(HERO_COPY.eyebrow, "Your homeschool assistant");
-  assert.match(HERO_COPY.body, /AI assistant for homeschool parents/i);
+  assert.match(HERO_COPY.body, /your AI homeschool assistant/i);
   assert.match(HERO_COPY.body, /plans the week/i);
   assert.match(HERO_COPY.body, /makes practice pages/i);
   assert.match(HERO_COPY.body, /keeps your records together/i);
   assert.match(HERO_COPY.body, /Your child never has to use Homa/i);
-  assert.match(HERO_COPY.body, /You review every update/i);
+  assert.match(HERO_COPY.body, /You see every update/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -41,9 +41,6 @@ test("the trial CTA states the card terms before the click", () => {
   assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
   assert.match(HERO_COPY.primaryActionNote, /cancel before the first charge/i);
   assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49]);
-  assert.match(LANDING_SECTION_COPY.final.body, /from \$19 a month/i);
-  assert.match(LANDING_SECTION_COPY.final.body, /credit card required/i);
-  assert.match(LANDING_SECTION_COPY.final.body, /cancel before the first charge/i);
 });
 
 test("metadata and structured offers reuse the catalog-derived landing contract", () => {
@@ -72,7 +69,7 @@ test("the landing states the current practice-page age boundary before signup", 
 
   assert.ok(practice);
   assert.match(practice.body, /ages 2 to 7/i);
-  assert.doesNotMatch(HERO_COPY.body, /ages? \d/i);
+  assert.match(HERO_COPY.body, /ages 2 to 7/i);
 });
 
 test("the landing shows every purchasable membership before the final signup ask", () => {
@@ -94,7 +91,7 @@ test("the landing names built Plus services and keeps unbuilt Max out of checkou
 
   assert.ok(plus);
   assert.equal(MEMBERSHIP_ITEMS.some(({ tier }) => tier === "elite"), false);
-  assert.match(plus.body, /phone number for texting or calling Homa/i);
+  assert.match(plus.body, /phone number for texts and calls/i);
   assert.match(plus.body, /curriculum file uploads/i);
   assert.match(plus.body, /weekly plan/i);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /COMING_SOON_MEMBERSHIP|Homa Max|Coming soon/u);
@@ -105,7 +102,6 @@ test("the fictional product example proves Homa can plan for an older child", ()
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /Leo's unfinished fractions review/i);
   assert.equal(PRODUCT_PREVIEW_COPY.states.tell.title, "Parent's note");
   assert.equal(PRODUCT_PREVIEW_COPY.states.tell.control, "Read note");
-  assert.equal(LANDING_SECTION_COPY.authority.secondaryAction, "See what Homa handles");
 });
 
 test("each capability card points to its canonical feature page", () => {
@@ -159,9 +155,9 @@ test("the new landing copy does not publish deferred or unsupported claims", () 
 test("the sample proof explains the mechanism before the result", () => {
   assert.equal(SAMPLE_REPORT_COPY.href, "/onboarding/sample");
   assert.match(SAMPLE_REPORT_COPY.reassurance, /about five minutes per child/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /one practical activity for each subject/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /never turns your child into a number or a verdict/i);
-  assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /compares the results with age or grade references/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /one activity to try next/i);
+  assert.match(SAMPLE_REPORT_COPY.body, /You decide what fits your child/i);
   assert.doesNotMatch(
     `${SAMPLE_REPORT_COPY.body} ${SAMPLE_REPORT_COPY.reassurance}`,
     /score|questionnaire|diagnosis/i,
@@ -204,7 +200,6 @@ test("the live landing composition keeps the approved artifact-first opening", (
 
 test("the phone reading order explains the product before asking for a price decision", () => {
   const howAnchor = QUIET_LANDING_SOURCE.indexOf('<div id="how" className="qa-authority">');
-  const reportSection = QUIET_LANDING_SOURCE.indexOf('<section id="sample-report"');
   const membershipsSection = QUIET_LANDING_SOURCE.indexOf('<section id="memberships"');
   const featuresSection = QUIET_LANDING_SOURCE.indexOf('<section id="features"');
   const faqSection = QUIET_LANDING_SOURCE.indexOf('<section id="faq"');
@@ -212,13 +207,13 @@ test("the phone reading order explains the product before asking for a price dec
 
   assert.ok(howAnchor >= 0);
   assert.ok(featuresSection > howAnchor);
-  assert.ok(reportSection > featuresSection);
-  assert.ok(membershipsSection > reportSection);
+  assert.ok(membershipsSection > featuresSection);
   assert.ok(faqSection > membershipsSection);
   assert.ok(storySection > faqSection);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /<section id="how"/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /<section id="sample-report"|<ReportPreview/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-pain-grid|WORKFLOW_ITEMS/u);
-  assert.match(QUIET_LANDING_SOURCE, /href="#features"/u);
+  assert.match(QUIET_LANDING_SOURCE, /SAMPLE_REPORT_COPY\.href/u);
 });
 
 test("the public landing copy keeps each decision-sized block concise", () => {
@@ -229,10 +224,13 @@ test("the public landing copy keeps each decision-sized block concise", () => {
   assert.ok(wordCount(LANDING_SECTION_COPY.authority.body) <= 18);
   assert.ok(wordCount(LANDING_SECTION_COPY.features.body) <= 12);
   assert.ok(wordCount(LANDING_SECTION_COPY.memberships.body) <= 16);
-  assert.ok(wordCount(LANDING_SECTION_COPY.final.body) <= 22);
 
   for (const capability of CAPABILITY_ITEMS) {
     assert.ok(wordCount(capability.body) <= 28, `${capability.id} copy is too dense`);
+  }
+
+  for (const membership of MEMBERSHIP_ITEMS) {
+    assert.ok(wordCount(membership.body) <= 20, `${membership.tier} copy is too dense`);
   }
 
   assert.ok(wordCount(SAMPLE_REPORT_COPY.reassurance) <= 14);
@@ -270,9 +268,9 @@ test("the product moment exposes a keyboard-safe, reduced-motion state demo", ()
   assert.match(QUIET_LANDING_SOURCE, /prefers-reduced-motion: reduce/u);
   assert.match(QUIET_LANDING_SOURCE, /qa-product__control:focus-visible/u);
   assert.match(QUIET_LANDING_SOURCE, /@keyframes qa-thread-draw/u);
-  assert.deepEqual(Object.keys(PRODUCT_PREVIEW_COPY.states), ["tell", "updating", "ready"]);
+  assert.deepEqual(Object.keys(PRODUCT_PREVIEW_COPY.states), ["tell", "ready"]);
   assert.doesNotMatch(JSON.stringify(PRODUCT_PREVIEW_COPY.states), /\bIdle\b|\bListening\b|\bWorking\b/u);
-  assert.doesNotMatch(QUIET_LANDING_SOURCE, /\.qa-product__state\[data-state="tell"\]/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /data-state="updating"|qa-mark-orient|qa-wave/u);
 });
 
 test("the product moment records only teaching time the parent supplied", () => {
@@ -280,8 +278,40 @@ test("the product moment records only teaching time the parent supplied", () => 
   assert.match(PRODUCT_PREVIEW_COPY.dayBody, /35 minutes of science are recorded/iu);
   assert.match(PRODUCT_PREVIEW_COPY.states.tell.description, /unfinished fractions review/iu);
   assert.match(PRODUCT_PREVIEW_COPY.dayBody, /fractions review moved to Thursday/iu);
-  assert.doesNotMatch(
-    PRODUCT_PREVIEW_COPY.states.updating.description,
-    /35 minutes|fractions review|counting page/iu,
+  assert.match(PRODUCT_PREVIEW_COPY.states.ready.description, /plan, hours, and page are updated/iu);
+});
+
+test("the landing keeps one sales decision instead of repeating showcase sections", () => {
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /id="sample-report"|qa-report__preview|qa-cta__inner/u);
+  assert.match(QUIET_LANDING_SOURCE, /SAMPLE_REPORT_COPY\.action/u);
+  assert.equal((QUIET_LANDING_SOURCE.match(/<TrialAction \/>/gu) ?? []).length, 2);
+});
+
+test("the landing describes immediate updates instead of a review gate", () => {
+  const copy = JSON.stringify({
+    HERO_COPY,
+    LANDING_SECTION_COPY,
+    PRODUCT_PREVIEW_COPY,
+    CAPABILITY_ITEMS,
+  });
+
+  assert.match(LANDING_SECTION_COPY.authority.body, /You see the result and can ask for changes/i);
+  assert.doesNotMatch(copy, /review every update|before you keep|ready to review/i);
+});
+
+test("the binder promise matches the current finalized-materials route", () => {
+  const binder = CAPABILITY_ITEMS.find(({ id }) => id === "binder");
+
+  assert.ok(binder);
+  assert.match(binder.body, /Homa-made practice page/i);
+  assert.match(binder.body, /saved in your binder/i);
+  assert.doesNotMatch(binder.body, /photos?|reports?|finished work|notes/i);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /Leo&apos;s lab notes|Finished work/u);
+});
+
+test("the membership CTA repeats the complete trial disclosure", () => {
+  assert.match(
+    QUIET_LANDING_SOURCE,
+    /<div className="qa-memberships__footer"><p>\{MEMBERSHIP_NOTE\} \{HERO_COPY\.primaryActionNote\}<\/p><TrialAction \/><\/div>/u,
   );
 });

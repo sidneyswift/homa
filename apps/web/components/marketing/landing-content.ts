@@ -21,7 +21,7 @@ export const HERO_COPY = {
   eyebrow: "Your homeschool assistant",
   headline: "Homeschool, handled.",
   body:
-    "Homa is an AI assistant for homeschool parents. She plans the week, makes practice pages, and keeps your records together. Your child never has to use Homa. You review every update.",
+    "Homa is your AI homeschool assistant. She plans the week, makes practice pages for ages 2 to 7, and keeps your records together. Your child never has to use Homa. You see every update.",
   primaryAction: "Start your 7 free days",
   /** Under the primary CTA, everywhere it appears: the card ask must be
    *  visible BEFORE the click (trial-transparency research 2026-07-26:
@@ -50,8 +50,7 @@ export const LANDING_SECTION_COPY = {
     eyebrow: "How it works",
     headline: "Tell Homa what changed.",
     body:
-      "She updates the plan, records the hours, and prepares the page. You review the result.",
-    secondaryAction: "See what Homa handles",
+      "She updates plans, records hours, and makes pages. You see the result and can ask for changes.",
   },
   features: {
     eyebrow: "What Homa handles",
@@ -65,13 +64,7 @@ export const LANDING_SECTION_COPY = {
   },
   faq: {
     eyebrow: "Questions",
-    headline: "The details, without the fine print.",
-  },
-  final: {
-    eyebrow: "Start with next week",
-    headline: "Let Homa handle the plan.",
-    body:
-      `7 free days, then from $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
+    headline: "Common questions.",
   },
 } as const;
 
@@ -87,18 +80,11 @@ export const PRODUCT_PREVIEW_COPY = {
         "Move Leo's unfinished fractions review to Thursday. He finished science after 35 minutes. Make Maya a butterfly counting page for Tuesday.",
       activity: "Sent to Homa",
     },
-    updating: {
-      control: "Homa updates",
-      title: "Homa is updating the week",
-      description:
-        "She moves the lesson, records the time, and makes the practice page.",
-      activity: "Making changes",
-    },
     ready: {
-      control: "Review changes",
-      title: "Ready to review",
-      description: "Check each change before you keep it.",
-      activity: "Ready to review",
+      control: "See Homa's update",
+      title: "Three changes made",
+      description: "The plan, hours, and page are updated. Ask Homa to change anything that does not fit.",
+      activity: "Updated",
     },
   },
   dayTitle: "The week is up to date",
@@ -144,7 +130,7 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
     id: "binder",
     title: "The binder",
     body:
-      "Add finished work, photos, and notes. Homa keeps them with reports and practice pages, ready to find later.",
+      "When a Homa-made practice page is ready, it is saved in your binder to open or print again.",
     action: "See the binder",
   },
   {
@@ -158,8 +144,9 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
 
 const LANDING_MEMBERSHIP_BODIES: Readonly<Record<PlanTier, string>> = {
   regular:
-    "Weekly plans, printable practice pages, teaching-hour records, and web chat are included.",
-  plus: tierDescription("plus"),
+    "Weekly plans, practice pages, progress reports, saved printables, teaching-hour records, and web chat.",
+  plus:
+    "Everything in Homa, plus a phone number for texts and calls, and curriculum file uploads for the weekly plan.",
   elite: tierDescription("elite"),
 };
 
@@ -184,7 +171,7 @@ export const SAMPLE_REPORT_COPY = {
   eyebrow: "Progress report",
   headline: "See what is going well and what to try next.",
   body:
-    "Answer from what you have already seen. Homa turns your answers into one practical activity for each subject. It never turns your child into a number or a verdict. You decide what fits.",
+    "Homa organizes your answers by subject, compares the results with age or grade references, and suggests one activity to try next. You decide what fits your child.",
   reassurance:
     "About five minutes per child. Your child never has to use Homa.",
   action: "See the sample report",
