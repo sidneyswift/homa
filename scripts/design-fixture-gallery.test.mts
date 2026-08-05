@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
 
+import { brandChannels } from "../packages/design/src/contract/channels.ts";
+import { fixtureGalleryAssets } from "../packages/design/src/fixtures.ts";
 import type { FixtureGalleryManifest } from "./design-fixture-gallery.mts";
 import {
   buildFixtureGalleryManifest,
@@ -16,11 +18,11 @@ const committed = JSON.parse(readFileSync(manifestPath, "utf8")) as FixtureGalle
 test("fixture gallery covers every contract category and profile obligation", () => {
   const report = validateFixtureGallery(committed);
   assert.equal(report.status, "pass", JSON.stringify(report.issues, null, 2));
-  assert.equal(committed.fixtureCount, 277);
+  assert.equal(committed.fixtureCount, Object.values(committed.categories).reduce((total, fixtures) => total + fixtures.length, 0));
   assert.ok(report.categoryCounts.atoms >= 100);
-  assert.equal(report.categoryCounts.assets, 31);
-  assert.equal(report.categoryCounts.channels, 8);
-  assert.equal(report.categoryCounts.reductions, 8);
+  assert.equal(report.categoryCounts.assets, fixtureGalleryAssets.length);
+  assert.equal(report.categoryCounts.channels, brandChannels.length);
+  assert.equal(report.categoryCounts.reductions, brandChannels.length);
   assert.equal(report.categoryCounts.profiles, committed.profileMatrix.length);
   assert.equal(committed.categories.profiles.length, committed.profileMatrix.length);
 });

@@ -8,4 +8,25 @@ export const semanticStateRoles = {
   highlight: { label: "attention", ink: "highlightInk", tint: "highlightTint" },
   error: { label: "system failure", ink: "errorInk", tint: "errorTint" },
 } as const;
-export const STATES_CONTRACT = { version: DESIGN_CONTRACT_VERSION, interactionStates, qualityModes, semanticStateRoles } as const;
+export const selectedStateContract = {
+  carriers: ["surface-tint", "border", "text", "context", "accessible-state"],
+  requiredVisualCarriers: ["surface-tint", "border", "text", "context"],
+  requiredAccessibleCarrier: "accessible-state",
+  colorAlone: false,
+  minimumConcurrentCarriers: 5,
+  functionalAnchor: "midnightAction",
+  prohibitedSemanticSubstitutes: ["constructive", "info", "highlight", "error"],
+} as const;
+export const stateCarrierPolicy = {
+  everyStateHasLanguageOrAccessibleState: true,
+  semanticColorRequiresTruth: true,
+  childWorthIsNeverAState: true,
+} as const;
+export const STATES_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  interactionStates,
+  qualityModes,
+  semanticStateRoles,
+  selectedStateContract,
+  stateCarrierPolicy,
+} as const;

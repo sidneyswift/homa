@@ -11,9 +11,9 @@
  *
  * Found the hard way on 2026-07-22: `border-border-default` had 31 uses
  * across the binder, material cards and the founder console, every one of
- * them drawing a near-black 1px edge on a warm cream surface where a soft
- * stone edge was intended. `text-sage-700` was doing the same thing to a
- * bullet on the lesson page.
+ * them drawing a near-black 1px edge where a quiet boundary was intended. A
+ * nonexistent constructive text utility was doing the same thing to a bullet
+ * on the lesson page.
  *
  * How it decides what to inspect. Validating every utility would drown in
  * stock Tailwind (`text-sm`, `border-dashed`, `bg-white`), so this checks
@@ -127,8 +127,8 @@ export function findTokenViolations(
   for (const [index, line] of lines.entries()) {
     for (const match of line.matchAll(pattern)) {
       const [, prefix, value] = match;
-      // A CSS custom property, not a utility: `bg-[var(--accent-sage-soft)]`
-      // contains the literal text `accent-sage-soft`, and an arbitrary value
+      // A CSS custom property, not a utility: `bg-[var(--custom-inline-color)]`
+      // contains utility-like text, and an arbitrary value
       // defines its own colour rather than resolving a token. The `--`
       // immediately before the match is what tells them apart.
       if (line.slice(0, match.index).endsWith("--")) continue;

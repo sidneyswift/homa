@@ -8,23 +8,19 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-
-const { wrapPrintableDocument } = await import(
-  "../apps/web/lib/materials/page-shell"
-);
-const { renderPrintableHtml } = await import(
-  "../apps/web/lib/materials/render-page"
-);
+import { wrapPrintableDocument } from "../apps/web/lib/materials/page-shell";
+import { renderPrintableHtml } from "../apps/web/lib/materials/render-page";
+import { colorTokens } from "../packages/design/src/contract/colors.ts";
 
 const outDir = "/tmp/packet-smoke";
 mkdirSync(outDir, { recursive: true });
 
 function week(n: number, sounds: string, story: string): string {
   return `<style>
-  .page { font-family: sans-serif; color: #221e1a; }
-  h1 { font-size: 32px; text-align: center; color: #1f6fb2; margin: 4px 0 2px; }
-  .sub { text-align: center; font-size: 18px; color: #555; }
-  .story { font-size: 22px; line-height: 1.7; background: #fbf7f1; border: 2px solid #b3a492; border-radius: 14px; padding: 16px 20px; margin-top: 24px; }
+  .page { font-family: sans-serif; color: ${colorTokens.ink}; }
+  h1 { font-size: 32px; text-align: center; color: ${colorTokens.infoInk}; margin: 4px 0 2px; }
+  .sub { text-align: center; font-size: 18px; color: ${colorTokens.ink}; }
+  .story { font-size: 22px; line-height: 1.7; background: ${colorTokens.paper}; border: 2px solid ${colorTokens.controlBoundary}; border-radius: 12px; padding: 16px 20px; margin-top: 24px; }
 </style>
 <div class="page">
   <h1>Story's Sound Blending Adventure</h1>

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "surfaceManifestFingerprint": "2b3715702b86cd8c8a1c10f49c6ad010b04268a31a9ca11dd9059ee03a020646",
-  "authoringManifestFingerprint": "2b3715702b86cd8c8a1c10f49c6ad010b04268a31a9ca11dd9059ee03a020646",
-  "ownedInputFingerprint": "7aab985fe9adc5f931e6d7cac9f155710ac881e52f1eed978b9fb40f5bc4ef3d",
+  "contractSourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
+  "surfaceManifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
+  "authoringManifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
+  "ownedInputFingerprint": "8e927e5a2db9cbe121ec04c04522c180b7e7dd40651466183655c84166d1a987",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -69,8 +69,8 @@
         "voice"
       ],
       "state": "active",
-      "sourceHash": "e7122feae5621a25930df90bf2fb136bba0af4adf71afd48016d6b053ec62d61",
-      "bytes": 4487,
+      "sourceHash": "611216f664c3f717ddb2de37c6687f7c918da2556220ff73a6a02c4cd3dd6cfd",
+      "bytes": 4590,
       "legacySignatures": []
     },
     {
@@ -151,19 +151,8 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:67015de50322342e",
-      "path": "marketing/assets/brand/phone/homa-pfp-clay-1024.png",
-      "roles": [
-        "asset"
-      ],
-      "state": "active",
-      "sourceHash": "61093d18904d4aa316a83ad60669a7ba85b738d932c429cc4e93155c18f06d60",
-      "bytes": 35966,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:acd75892712600bb",
-      "path": "marketing/assets/brand/phone/homa-pfp-cream-1024.png",
+      "id": "marketing:52a00f4ba3244a36",
+      "path": "marketing/assets/brand/phone/homa-pfp-canvas-1024.png",
       "roles": [
         "asset"
       ],
@@ -173,8 +162,19 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:cdbbe2dfe26bdaee",
-      "path": "marketing/assets/brand/phone/homa-pfp-night-1024.png",
+      "id": "marketing:471d025c83d117e1",
+      "path": "marketing/assets/brand/phone/homa-pfp-coral-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "61093d18904d4aa316a83ad60669a7ba85b738d932c429cc4e93155c18f06d60",
+      "bytes": 35966,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:27140509c74325c2",
+      "path": "marketing/assets/brand/phone/homa-pfp-midnight-1024.png",
       "roles": [
         "asset"
       ],
@@ -184,8 +184,8 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:2035ffe8d8b07b33",
-      "path": "marketing/assets/brand/phone/homa-wallpaper-cream.png",
+      "id": "marketing:b906a3d8a3e474fa",
+      "path": "marketing/assets/brand/phone/homa-wallpaper-canvas.png",
       "roles": [
         "asset"
       ],
@@ -195,8 +195,8 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:4666d3438f80746f",
-      "path": "marketing/assets/brand/phone/homa-wallpaper-night.png",
+      "id": "marketing:943b701a590d0a1a",
+      "path": "marketing/assets/brand/phone/homa-wallpaper-midnight.png",
       "roles": [
         "asset"
       ],
@@ -4040,7 +4040,7 @@
         "marketing/assets/brand/"
       ],
       "id": "generator:cf7384e7282fda93",
-      "sourceHash": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2"
+      "sourceHash": "cd1c353175e6ba48aedbfff050b80562b5617903ab52d755c417a8398884a7ed"
     },
     {
       "path": "scripts/brand-surfaces.mts",
@@ -4052,7 +4052,7 @@
         "docs/homa-design/evidence/surfaces.json"
       ],
       "id": "generator:05b36b5e3e9fc248",
-      "sourceHash": "56d62b2c5201c60163de6020359b8a4bc1b00aaef43dd1f42bde87c1c8127acc"
+      "sourceHash": "51b9c57e154ee0b03ff9133d21448118d1634de45a0d137732636a6f5d0a5a32"
     },
     {
       "path": "scripts/socials-starter-pack-assets.mts",
@@ -4064,7 +4064,7 @@
         "marketing/assets/socials-starter-pack/"
       ],
       "id": "generator:c2bf7151a939f030",
-      "sourceHash": "8588c78431b68a94fa7e00f53b5decab3e244e13b7513ce203128a190eeacfb7"
+      "sourceHash": "9c244579d1c6d98db7c626597794de141fb967c1730393daef28df569cd0cac8"
     }
   ],
   "integrations": [

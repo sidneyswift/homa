@@ -1,18 +1,20 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
-import { approvedColorPairs, colorTokens, webCompatibilityTokens } from "./colors.ts";
+import { COLOR_CONTRACT, approvedColorPairs, colorTokens, webCompatibilityTokens } from "./colors.ts";
 import { BRAND_CONTRACT } from "./brand.ts";
 import { CHANNELS_CONTRACT, brandChannels, channelProfiles, channelProjections } from "./channels.ts";
 import { CONTENT_CONTRACT } from "./content.ts";
-import { assertDesignContract, DOCTRINE_CONTRACT } from "./doctrine.ts";
+import { assertDesignContract, assertMatchingContractVersions, DOCTRINE_CONTRACT, versionedContracts } from "./doctrine.ts";
+import { LAYOUT_CONTRACT } from "./layout.ts";
 import { MOTION_CONTRACT } from "./motion.ts";
 import { STATES_CONTRACT } from "./states.ts";
-import { fontRoles, typeRoles } from "./typography.ts";
+import { TYPOGRAPHY_CONTRACT, displayLineBehavior, fontRoles, typeRoles } from "./typography.ts";
 import {
   NATIVE_PROJECTION_CONTRACT,
   nativeHapticRoles,
   nativePlatformContract,
-  nativePrimitiveAdapters,
+  nativePrimitiveRequirements,
   nativePrimitiveRoles,
 } from "./native.ts";
 import {
@@ -31,6 +33,7 @@ import {
   semanticIconAliases,
   semanticIcons,
 } from "./icons.ts";
+import { IDENTITY_CONTRACT } from "./identity.ts";
 
 function luminance(hex: string): number {
   const channels = [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255).map((value) => value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
@@ -63,6 +66,34 @@ test("font roles have one meaning and the display floor is enforced", () => {
   assert.equal(fontRoles.interface.family, "DM Sans");
   assert.equal(fontRoles.wordmark.purpose, "real Logo component only");
   for (const role of Object.values(typeRoles)) assert.ok(role.familyRole in fontRoles);
+});
+
+test("approved type roles, weights, and tracking are exhaustive", () => {
+  assert.deepEqual(typeRoles, {
+    hero: { familyRole: "display", weights: [600], phone: { size: 44, lineHeight: 46 }, desktop: { size: 64, lineHeight: 66 }, tracking: { minimumEm: -0.03, maximumEm: -0.025, rule: "wrap-tested" } },
+    pageTitle: { familyRole: "display", weights: [600], minSize: 32, maxSize: 40, minLineHeight: 36, maxLineHeight: 44, tracking: { minimumEm: -0.025, maximumEm: -0.02, rule: "wrap-tested" } },
+    sectionTitle: { familyRole: "display", weights: [600], minSize: 26, maxSize: 32, minLineHeight: 31, maxLineHeight: 37, tracking: { minimumEm: -0.025, maximumEm: -0.02, rule: "wrap-tested" } },
+    cardTitle: { familyRole: "display", weights: [600], phone: { size: 20, lineHeight: 26 }, desktop: { size: 22, lineHeight: 28 }, tracking: { minimumEm: -0.02, maximumEm: 0, rule: "wrap-tested" } },
+    body: { familyRole: "interface", weights: [400], size: 16, lineHeight: 24 },
+    bodyLarge: { familyRole: "interface", weights: [400], size: 18, lineHeight: 28 },
+    bodySmall: { familyRole: "interface", weights: [400], size: 14, lineHeight: 20 },
+    control: { familyRole: "interface", weights: [600], size: 15, lineHeight: 20, minimumSize: 14 },
+    label: { familyRole: "interface", weights: [600], size: 14, lineHeight: 20 },
+    caption: { familyRole: "interface", weights: [500], size: 13, lineHeight: 18, meaningfulCustomerTextFloor: true },
+    eyebrow: { familyRole: "interface", weights: [700], size: 12, lineHeight: 16, tracking: "0.08em", usage: "nonessential-orientation-only" },
+    metric: { familyRole: "interface", weights: [600, 700], minSize: 16, maxSizePhone: 36, maxSizeDesktop: 40, lineHeight: 20, tabular: true },
+  });
+  assert.deepEqual(displayLineBehavior, {
+    balance: "intentional",
+    preferredMaximumLines: 2,
+    exception: "localization-or-accessibility-expansion",
+  });
+  assert.equal(TYPOGRAPHY_CONTRACT.displayLineBehavior, displayLineBehavior);
+  for (const role of Object.values(typeRoles)) {
+    assert.ok(role.weights.length > 0);
+    const allowed = fontRoles[role.familyRole].allowedWeights as readonly number[];
+    for (const weight of role.weights) assert.ok(allowed.includes(weight), `${role.familyRole} does not permit ${weight}`);
+  }
 });
 
 test("font registry records licensed sources and checked-in binary identity", () => {
@@ -108,9 +139,35 @@ test("state and motion contracts cannot imply a child verdict", () => {
   assert.equal(BRAND_CONTRACT.roofThread.maximumTurns, 2);
 });
 
-test("the active contract has no retired font or shape authority", () => {
-  const serialized = JSON.stringify({ colorTokens, fontRoles, typeRoles, FONT_SYSTEM_CONTRACT, BRAND_CONTRACT, CONTENT_CONTRACT });
-  for (const retired of ["Schibsted", "Hanken", "Caveat", "blob", "squiggle", "wavy"]) assert.equal(serialized.includes(retired), false, retired);
+test("approved composition, selection, density, media, and motion rules are exact", () => {
+  assert.deepEqual(COLOR_CONTRACT.composition, {
+    canvasAndPaperTargetPercent: 76,
+    midnightAndInkTargetPercent: 16,
+    visualCoralTargetPercent: 6,
+    semanticColorMaximumPercent: 2,
+    coralPunctuationScope: "rare-campaign-or-editorial-moments-only",
+  });
+  assert.deepEqual(BRAND_CONTRACT.signatureComposition.realObjectVisualWeightPercent, { minimum: 55, maximum: 70 });
+  assert.deepEqual(BRAND_CONTRACT.signatureComposition.homaShortEdgePercent, { minimum: 10, maximum: 16 });
+  assert.deepEqual(STATES_CONTRACT.selectedStateContract.carriers, ["surface-tint", "border", "text", "context", "accessible-state"]);
+  assert.deepEqual(STATES_CONTRACT.selectedStateContract.requiredVisualCarriers, ["surface-tint", "border", "text", "context"]);
+  assert.equal(STATES_CONTRACT.selectedStateContract.requiredAccessibleCarrier, "accessible-state");
+  assert.equal(STATES_CONTRACT.selectedStateContract.colorAlone, false);
+  assert.equal(STATES_CONTRACT.selectedStateContract.minimumConcurrentCarriers, 5);
+  assert.deepEqual(LAYOUT_CONTRACT.density.interactiveRowMinimumHeight, { titleAndMetadata: 52, otherwise: 44 });
+  assert.equal(LAYOUT_CONTRACT.mediaGeometry.declaredAspectRatio, "required");
+  assert.equal(LAYOUT_CONTRACT.mediaGeometry.objectFit, "contain");
+  assert.equal(LAYOUT_CONTRACT.mediaGeometry.reserveFinalDimensionsBeforeLoad, true);
+  assert.equal(MOTION_CONTRACT.interruption.cancellation, "resolve-immediately-to-newest-true-state");
+  assert.equal(MOTION_CONTRACT.interruption.expiry, "required-for-every-live-motion");
+  assert.equal(MOTION_CONTRACT.interruption.truthSourceLoss, "stop-and-resolve-to-current-state");
+});
+
+test("the active contract has no retired identity, font, or shape authority", () => {
+  const serialized = JSON.stringify({ colorTokens, fontRoles, typeRoles, FONT_SYSTEM_CONTRACT, BRAND_CONTRACT, IDENTITY_CONTRACT, CONTENT_CONTRACT });
+  for (const retired of ["Schibsted", "Hanken", "Caveat", "blob", "squiggle", "wavy", "clay", "cream", "night"] as const) {
+    assert.doesNotMatch(serialized, new RegExp(`\\b${retired}\\b`, "iu"), retired);
+  }
 });
 
 test("semantic icon vocabulary has a concrete platform alias for every name", () => {
@@ -137,6 +194,9 @@ test("semantic icon adapters are complete and fail closed", () => {
 test("the Quiet authority doctrine is exhaustive and version-aligned", () => {
   assert.doesNotThrow(() => assertDesignContract());
   assert.equal(DOCTRINE_CONTRACT.name, "quiet-authority");
+  assert.equal(DOCTRINE_CONTRACT.displayName, "Homa, quiet authority");
+  assert.match(DOCTRINE_CONTRACT.description, /one useful next move/u);
+  assert.equal(BRAND_CONTRACT.version, DOCTRINE_CONTRACT.version);
   assert.deepEqual([...DOCTRINE_CONTRACT.domains].sort(), [
     "appearance",
     "brand-geometry",
@@ -156,6 +216,31 @@ test("the Quiet authority doctrine is exhaustive and version-aligned", () => {
     assert.ok(channelProfiles[channel].targetProfiles.length > 0);
     assert.ok(channelProfiles[channel].allowedAppearance.length > 0);
     assert.ok(channelProfiles[channel].preservedElements.length > 0);
+  }
+});
+
+test("every generated source contract fails closed under independent version skew", () => {
+  assert.equal(versionedContracts.length, 14);
+  for (let index = 0; index < versionedContracts.length; index += 1) {
+    const mutated = versionedContracts.map((contract, contractIndex) => contractIndex === index
+      ? { ...contract, version: `wrong-version-${index}` }
+      : contract);
+    assert.throws(() => assertMatchingContractVersions(mutated), /Design contract version drift/u);
+  }
+});
+
+test("every public package subpath is resolvable and evaluable", async () => {
+  const packageJson = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")) as { exports: Record<string, string> };
+  const requiredSemanticSubpaths = ["./tokens", "./brand", "./motion", "./states", "./profiles"] as const;
+  for (const subpath of requiredSemanticSubpaths) {
+    assert.match(packageJson.exports[subpath] ?? "", /^\.\/src\/.+\.ts$/u);
+  }
+  for (const subpath of Object.keys(packageJson.exports).sort()) {
+    assert.match(packageJson.exports[subpath] ?? "", /^\.\/src\/.+\.ts$/u);
+    const specifier = `@homa/design/${subpath.slice(2)}`;
+    const resolved = subpath === "." ? import.meta.resolve("@homa/design") : import.meta.resolve(specifier);
+    assert.match(resolved, /^file:.+\.ts$/u);
+    await assert.doesNotReject(import(subpath === "." ? "@homa/design" : specifier));
   }
 });
 
@@ -189,15 +274,22 @@ test("constrained projections derive safe delivery rules from the active contrac
 test("native projection covers every approved primitive role and disposition", () => {
   assert.equal(NATIVE_PROJECTION_CONTRACT.version, "quiet-authority-v1");
   assert.equal(NATIVE_PROJECTION_CONTRACT.schemaVersion, 1);
-  assert.deepEqual(Object.keys(nativePrimitiveAdapters).sort(), [...nativePrimitiveRoles].sort());
+  assert.deepEqual(Object.keys(nativePrimitiveRequirements).sort(), [...nativePrimitiveRoles].sort());
   for (const role of nativePrimitiveRoles) {
-    const adapter = nativePrimitiveAdapters[role];
-    assert.match(adapter.component, /^Native[A-Z]/u);
-    assert.match(adapter.source, /^apps\/mobile\/src\/components\/ui\/semantic\.tsx$/u);
-    assert.ok(adapter.legacyComponents.length > 0, `${role} must name its migration source`);
-    assert.ok(adapter.requiredStates.length > 0, `${role} must name required states`);
-    assert.ok(adapter.accessibility.length > 0, `${role} must name accessibility obligations`);
+    const requirement = nativePrimitiveRequirements[role];
+    assert.ok(requirement.requiredStates.length > 0, `${role} must name required states`);
+    assert.ok(requirement.accessibility.length > 0, `${role} must name accessibility obligations`);
   }
+});
+
+test("canonical native contracts expose semantic names only", () => {
+  const serialized = JSON.stringify({ colors: COLOR_CONTRACT, native: NATIVE_PROJECTION_CONTRACT });
+  for (const retiredName of ["stone", "clay", "sage", "gold", "sky", "rose"]) {
+    assert.doesNotMatch(serialized, new RegExp(`\\b${retiredName}\\d*`, "iu"));
+  }
+  assert.ok("tonalScale" in NATIVE_PROJECTION_CONTRACT.theme);
+  assert.ok("constructive" in NATIVE_PROJECTION_CONTRACT.theme.colors.light);
+  assert.ok("highlight" in NATIVE_PROJECTION_CONTRACT.theme.colors.light);
 });
 
 test("native platform contract keeps accessibility and haptics explicit", () => {

@@ -39,4 +39,19 @@ export const imageryDirection = {
   crop: "preserve-object-and-next-move-safe-zone",
   prohibited: ["staged-stock-as-universal-proof", "character-over-object", "decorative-thread-without-meaning"] as const,
 } as const;
-export const BRAND_CONTRACT = { version: DESIGN_CONTRACT_VERSION, logoGeometry, roofThread, characterStates, imageryDirection } as const;
+
+export const signatureComposition = {
+  realObjectVisualWeightPercent: { minimum: 55, maximum: 70 },
+  homaShortEdgePercent: { minimum: 10, maximum: 16 },
+  readingOrder: ["real-work", "homa-orientation", "one-useful-next-move"],
+  homaMayLeadOnlyWhen: ["active-voice", "system-state-object"],
+} as const;
+
+export const BRAND_CONTRACT = {
+  version: DESIGN_CONTRACT_VERSION,
+  logoGeometry,
+  roofThread,
+  characterStates,
+  imageryDirection,
+  signatureComposition,
+} as const;

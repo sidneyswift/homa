@@ -61,6 +61,14 @@ export type DesignAuthoringRailsReport = {
 };
 
 const authoringRoots = [
+  "AGENTS.md",
+  "BUILD.md",
+  "README.md",
+  "apps/mobile/AGENTS.md",
+  "apps/mobile/CLAUDE.md",
+  "docs/homa-curriculum-atlas/materials-patterns.md",
+  "docs/homa-planning/14-marketing-demand-engine.md",
+  "marketing/AGENTS.md",
   ".agents/skills/",
   "apps/web/agent/",
   "marketing/voice/",
@@ -68,6 +76,20 @@ const authoringRoots = [
   "docs/homa-design/",
   "packages/design/src/contract/",
 ] as const;
+
+const exactAuthoringPaths = new Set([
+  "AGENTS.md",
+  "BUILD.md",
+  "DESIGN.md",
+  "README.md",
+  "apps/mobile/AGENTS.md",
+  "apps/mobile/CLAUDE.md",
+  "docs/homa-curriculum-atlas/materials-patterns.md",
+  "docs/homa-design/doctrine.md",
+  "docs/homa-planning/14-marketing-demand-engine.md",
+  "marketing/AGENTS.md",
+  "packages/design/README.md",
+]);
 
 const approvedProfileRules = [
   {
@@ -87,7 +109,7 @@ function isTextPath(path: string): boolean {
 }
 
 function expectedAuthoringType(path: string): AuthoringType | null {
-  if (path === "marketing/AGENTS.md" || path === "docs/homa-design/SKILL.md" || path === "docs/homa-design/readme.md") return "authoring-rule";
+  if (exactAuthoringPaths.has(path) || path === "docs/homa-design/SKILL.md" || path === "docs/homa-design/readme.md") return "authoring-rule";
   if (path.startsWith("packages/design/src/contract/") && path.endsWith(".ts")) return "authoring-rule";
   if (path.startsWith("marketing/voice/") && isTextPath(path)) return "authoring-rule";
   if (path.startsWith("marketing/evals/fixtures/") && isTextPath(path)) return "golden-fixture";
@@ -127,14 +149,10 @@ function excerptAt(text: string, offset: number): string {
 
 type ResidueRule = { name: string; pattern: RegExp; applies: (path: string, text: string, offset: number) => boolean };
 
-const activeDesignPath = (path: string) => path.startsWith(".agents/skills/")
-  || path.startsWith("apps/web/agent/")
-  || path.startsWith("marketing/voice/")
-  || path.startsWith("marketing/evals/")
-  || path.startsWith("docs/homa-design/")
-  || path.startsWith("packages/design/src/contract/");
+const activeDesignPath = (path: string) => expectedAuthoringType(path) !== null;
 
 const residueRules: readonly ResidueRule[] = [
+  { name: "legacy-wordmark-casing", pattern: /HOMA (?:appears|only in (?:the )?wordmark)/g, applies: () => true },
   { name: "legacy-font", pattern: /\b(?:Schibsted|Hanken|Caveat)\b/g, applies: () => true },
   { name: "legacy-warm-playful-doctrine", pattern: /warm[\s-]+and[\s-]+playful/gi, applies: () => true },
   { name: "legacy-design-doc-path", pattern: /docs\/homa-design\/(?:components|guidelines|templates|tokens|ui_kits|styles\.css)/gi, applies: () => true },
