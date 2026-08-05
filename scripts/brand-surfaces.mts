@@ -102,9 +102,12 @@ const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classi
     "scripts/channel-evidence-contract.mts",
     "scripts/ci-change-scope.mjs",
     "scripts/evidence-receipt-loader.mts",
+    "scripts/marketing-production-check.mts",
+    "scripts/marketing-production-check.test.mts",
     "scripts/native-interface-gauntlet.mts",
     "scripts/provider-handoff-check.mts",
     "scripts/provider-handoff-contract.mts",
+    "scripts/seo-contract-check.mts",
   ].includes(path), value: { type: "evaluator", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "verification", reachability: "internal", ownerIssue: "gh#721", deliveryState: "controlled-current" } },
   { match: (path) => path === ".cosmo/homa-taste.md", value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "generated-content" } },
   { match: (path) => [
@@ -116,6 +119,10 @@ const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classi
   ].includes(path), value: { type: "generator", audiences: ["family", "developer", "provider"], disposition: "replace-active", targetProfile: "provider-constrained", reachability: "internal", ownerIssue: "gh#732", deliveryState: "controlled-current" } },
   { match: (path) => path === "apps/web/.env.example", value: { type: "authoring-rule", audiences: ["developer", "provider"], disposition: "replace-active", targetProfile: "provider-constrained", reachability: "internal", ownerIssue: "gh#732", deliveryState: "controlled-current" } },
   { match: (path) => path === "apps/web/lib/materials/page-shell.ts", value: { type: "renderer", audiences: ["family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
+  { match: (path) => /^apps\/web\/app\/blog(?:\/.+)?\/(?:page|layout|loading|error|not-found|opengraph-image|twitter-image|apple-icon)\.tsx$/.test(path), value: { type: "route", audiences: ["public"], disposition: "replace-active", targetProfile: "web-product", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => path === "apps/web/app/blog/rss.xml/route.ts", value: { type: "renderer", audiences: ["public", "provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => /^apps\/web\/content\/blog\/.+\.mdx$/.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => path === "apps/web/lib/blog.ts" || path === "apps/web/lib/blog-clusters.ts", value: { type: "generator", audiences: ["public", "developer"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/web\/app\/api\/(?:link-phone|email\/unsubscribe)\/route\.ts$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained" } },
   { match: (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path) || /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path), value: { type: "generator", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained" } },
@@ -330,7 +337,7 @@ function criticality(path: string, audiences: BrandAudience[]): BrandCriticality
 
 function deliveryState(path: string, targetProfile: string): BrandDeliveryState {
   if (targetProfile.startsWith("native")) return "installed-client";
-  if (/^(?:apps\/web\/public|marketing\/assets|apps\/web\/app\/(?:blog|world))/.test(path)) return "revocable-public";
+  if (/^(?:apps\/web\/public|apps\/web\/content\/blog|marketing\/assets|apps\/web\/app\/(?:blog|world))/.test(path)) return "revocable-public";
   return "controlled-current";
 }
 

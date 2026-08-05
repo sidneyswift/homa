@@ -86,8 +86,11 @@ test("inventory discovery covers exact design sources that broad keyword selecto
     "package.json",
     "scripts/channel-evidence-contract.mts",
     "scripts/evidence-receipt-loader.mts",
+    "scripts/marketing-production-check.mts",
+    "scripts/marketing-production-check.test.mts",
     "scripts/native-interface-gauntlet.mts",
     "scripts/provider-handoff-contract.mts",
+    "scripts/seo-contract-check.mts",
   ]) assert.ok(paths.has(path), `unclassified exact design source: ${path}`);
 });
 
@@ -114,6 +117,41 @@ test("user-visible copy, policy, and narrative modules stay in brand inventory",
     "apps/web/components/marketing/landing-content.ts",
     "apps/web/components/marketing/use-signed-in.ts",
   ]) assert.ok(paths.has(path), `unclassified user-visible source: ${path}`);
+});
+
+test("published blog sources are independently discovered and classified as public", () => {
+  const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+  const publishedSources = git(
+    "ls-files",
+    "--",
+    "apps/web/app/blog",
+    "apps/web/content/blog",
+    "apps/web/lib/blog.ts",
+    "apps/web/lib/blog-clusters.ts",
+  ).split("\n").filter(Boolean);
+  assert.ok(publishedSources.length >= 8, "expected the public blog publishing system");
+
+  for (const path of publishedSources) {
+    const surface = byPath.get(path);
+    assert.ok(surface, `public blog source missing from manifest: ${path}`);
+    assert.equal(surface.reachability, "public", path);
+    assert.ok(surface.audiences.includes("public"), path);
+    assert.equal(surface.deliveryState, "revocable-public", path);
+    assert.equal(surface.ownerIssue, "gh#683", path);
+  }
+
+  const expectedTypes = new Map<string, BrandSurfaceManifest["surfaces"][number]["type"]>([
+    ["apps/web/app/blog/page.tsx", "route"],
+    ["apps/web/app/blog/page/[page]/page.tsx", "route"],
+    ["apps/web/app/blog/[slug]/page.tsx", "route"],
+    ["apps/web/app/blog/topics/[cluster]/page.tsx", "route"],
+    ["apps/web/app/blog/rss.xml/route.ts", "renderer"],
+    ["apps/web/content/blog/how-to-track-homeschool-hours-without-losing-the-week.mdx", "template"],
+    ["apps/web/lib/blog.ts", "generator"],
+    ["apps/web/lib/blog-clusters.ts", "generator"],
+  ]);
+  for (const [path, type] of expectedTypes) assert.equal(byPath.get(path)?.type, type, path);
+  assert.deepEqual(byPath.get("apps/web/app/blog/rss.xml/route.ts")?.audiences, ["public", "provider"]);
 });
 
 test("provider handoffs bind every governing source into the hashed inventory", () => {

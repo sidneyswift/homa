@@ -58,8 +58,15 @@ const communicationPath = (path: string): boolean =>
   /(?:email|sms|mms|telnyx|resend|push)/i.test(path)
   || path === "provider:handwrytten";
 
+const publicContentPath = (path: string): boolean =>
+  path.startsWith("apps/web/app/blog/")
+  || path.startsWith("apps/web/content/blog/")
+  || path === "apps/web/lib/blog.ts"
+  || path === "apps/web/lib/blog-clusters.ts";
+
 const marketingPath = (path: string): boolean =>
   path.startsWith("marketing/") || path.startsWith("apps/web/components/marketing/")
+  || publicContentPath(path)
   || path.startsWith("durable:vercel-blob-world-media")
   || path.startsWith("provider:social-");
 
@@ -111,6 +118,14 @@ export const brandInventoryCoverageRules: readonly BrandInventoryCoverageRule[] 
     select: (surface) => marketingPath(pathOf(surface)),
     requiredTypes: ["component-family", "template", "provider"],
     requiredOwners: ["gh#683", "gh#741"],
+  },
+  {
+    id: "published-content",
+    description: "Public blog routes, articles, feed, taxonomy, and publishing source",
+    minimumRows: 8,
+    select: (surface) => publicContentPath(pathOf(surface)),
+    requiredTypes: ["route", "renderer", "template", "generator"],
+    requiredOwners: ["gh#683"],
   },
   {
     id: "native",

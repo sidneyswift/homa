@@ -13,7 +13,7 @@ test("inventory completeness covers every cross-surface domain", () => {
   const report = buildBrandInventoryCoverageReport(manifest);
   assert.equal(report.status, "pass", JSON.stringify(report.issues, null, 2));
   assert.ok(report.surfaceCount > 1_000);
-  for (const rule of ["authoring", "artifacts", "providers", "admin", "marketing", "native", "external-channels"]) {
+  for (const rule of ["authoring", "artifacts", "providers", "admin", "marketing", "published-content", "native", "external-channels"]) {
     assert.ok((report.rowsByRule[rule] ?? 0) > 0, `missing inventory domain: ${rule}`);
   }
 });
@@ -38,6 +38,21 @@ test("a disappearing domain fails closed instead of passing on manifest shape", 
   assert.equal(report.status, "fail");
   assert.ok(report.issues.some((issue) => issue.code === "coverage-minimum" && issue.message.startsWith("native requires")));
   assert.ok(report.issues.some((issue) => issue.code === "coverage-type" && issue.message.includes("native is missing a screen")));
+});
+
+test("published blog content cannot disappear behind the classifier", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  mutated.surfaces = mutated.surfaces.filter((surface) => {
+    const path = surface.paths[0] ?? "";
+    return !path.startsWith("apps/web/app/blog/")
+      && !path.startsWith("apps/web/content/blog/")
+      && path !== "apps/web/lib/blog.ts"
+      && path !== "apps/web/lib/blog-clusters.ts";
+  });
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.equal(report.status, "fail");
+  assert.ok(report.issues.some((issue) => issue.code === "coverage-minimum" && issue.message.startsWith("published-content requires")));
+  assert.ok(report.issues.some((issue) => issue.code === "coverage-type" && issue.message.includes("published-content is missing a route")));
 });
 
 test("catch-all inventory rows are rejected", () => {
