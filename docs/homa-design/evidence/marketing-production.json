@@ -3,9 +3,9 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "surfaceManifestFingerprint": "44ff408432b88ada40f503ef6c4e27c9473155420a0410f5d6c064d3ca7a335a",
-  "authoringManifestFingerprint": "44ff408432b88ada40f503ef6c4e27c9473155420a0410f5d6c064d3ca7a335a",
-  "ownedInputFingerprint": "ee9a0695ab8d1f577cd81dec24143826971cc3662c213f70d101175aa0468516",
+  "surfaceManifestFingerprint": "3f1236a8603bc6cf95c1f76f1b3ba238b49d96c7f2192d857e9ca932380c6810",
+  "authoringManifestFingerprint": "3f1236a8603bc6cf95c1f76f1b3ba238b49d96c7f2192d857e9ca932380c6810",
+  "ownedInputFingerprint": "911dcd8df3fb82e5d6cbabb767ce110bdf410d23aa7738f34913affb4e1c2581",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -627,8 +627,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "943ab19951cba340a9485632b759ebc6491463431323f42b9655dbb9f3ed91ac",
-      "bytes": 682,
+      "sourceHash": "22be41f3c52b1b2bbfbeb2a1d5e670df75dc61b88e64e117d397f340a7770060",
+      "bytes": 681,
       "legacySignatures": []
     },
     {
@@ -683,8 +683,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "8fad9fe0c7dd470308d36c246d1f2c8616e46960208454ebf617b630a2a5290e",
-      "bytes": 694,
+      "sourceHash": "e6e1a8cd3e0254d04fa4af78472af64e490e5132801d32748e64e519fbe433f1",
+      "bytes": 693,
       "legacySignatures": []
     },
     {
@@ -739,8 +739,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d5a4d4cfcbac48088e2dc0b39ffff00205a2aac71099c8837845c7319e9ae1b5",
-      "bytes": 669,
+      "sourceHash": "4292fb0fb2444fed0178ef2906303092f95ad36a43fe181d037469e946a609ae",
+      "bytes": 668,
       "legacySignatures": []
     },
     {
@@ -795,8 +795,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "aa77fbd9d59edb64783486b7eafe1065567d9a9febd57f08b173882795d58aaa",
-      "bytes": 657,
+      "sourceHash": "a6d181ba6c89851628ff04e540061064af2ccaaed3203c0a4e657ca22972f7f9",
+      "bytes": 656,
       "legacySignatures": []
     },
     {
@@ -851,8 +851,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "bb6848d54daa0053441008e48d6dbca2bb80165b1e1e2a471152dbaa8c02aa48",
-      "bytes": 659,
+      "sourceHash": "0f3a51c1683d5c24664106eb4c83ba1ad447a42b7e44c656dc8e037965d8cd08",
+      "bytes": 658,
       "legacySignatures": []
     },
     {
@@ -907,8 +907,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d772fd9a91c8c63bf6dd76337a2052d5cf663df11a4552365601eb439b200365",
-      "bytes": 655,
+      "sourceHash": "5a02a103c81d3f9c9eaefd9d863259349d525838e8e17671e9ecff138a3486d5",
+      "bytes": 654,
       "legacySignatures": []
     },
     {
@@ -963,8 +963,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "41da5f388e3efcef15c835be0e16495e84f1b9cb68ae7dc548bf2093127b73cf",
-      "bytes": 668,
+      "sourceHash": "bd8815cab791f1aa3530a22ded21b6f769ec79bf67d947eacede9f11f0967b59",
+      "bytes": 667,
       "legacySignatures": []
     },
     {
@@ -1121,8 +1121,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "fae8bd3cffca488472ad2fdc6308b7a00e5ebe6b340053c46b27751c63e6b020",
-      "bytes": 656,
+      "sourceHash": "b1e6e16a1c35724752e6ef5a17910b1513746d4c63d58c0d092e794f93049b6c",
+      "bytes": 655,
       "legacySignatures": []
     },
     {
@@ -1177,8 +1177,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "fc230297909bdae8dc9f9a45d04b15c10adcf057d5b5b5ac7f06607d3156de6c",
-      "bytes": 658,
+      "sourceHash": "6f88422049e34c0cf2d388ac405e097203b7ea4a4536dd088686167f88b5d01f",
+      "bytes": 657,
       "legacySignatures": []
     },
     {
@@ -1233,8 +1233,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "b351713c664d51e68c079994c9b43c63f47491b95d7a5cfafee756cf6c29a7ee",
-      "bytes": 656,
+      "sourceHash": "3f44ab8c86ca83faa6c9492c85cb95e3f7f7299a25ffce27da096fc41fa9bfb2",
+      "bytes": 655,
       "legacySignatures": []
     },
     {
@@ -1289,8 +1289,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "16e9c5a59f9407456d964378d05ec18bf554126b4b75b85e9f3bd10f961b9664",
-      "bytes": 660,
+      "sourceHash": "d1cf779d176b72d28f6635feb33d82a8e5ea14759b9bba0e91b9db4bb6e1e19d",
+      "bytes": 659,
       "legacySignatures": []
     },
     {
@@ -1345,8 +1345,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "ed4396bb8745be272f783ddafc91a4e91d57a68c5016dd4655cdbbb77e78d705",
-      "bytes": 758,
+      "sourceHash": "0451d501554f42b05939d201eb6c111f6abe9cb47160bbaf05cee8ba2b29259c",
+      "bytes": 757,
       "legacySignatures": []
     },
     {
@@ -1401,8 +1401,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "a06df338979467b381cf57893f1abe02499a14e58d5c0db67fed6177567d046d",
-      "bytes": 656,
+      "sourceHash": "f42dee7a6489434439e943d19b7ecd67b3fb0f2d21027aa2cc9b4aebf7dc254b",
+      "bytes": 655,
       "legacySignatures": []
     },
     {
@@ -1457,8 +1457,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "ee1ae8ebabeed14b8970ed2dff328f8f0eb12ff9262d1a30349e4ee34603bfef",
-      "bytes": 659,
+      "sourceHash": "ea6b8518da599c64531d4c48711bf89c1c262ffed176175a900b87b6b0ec9906",
+      "bytes": 658,
       "legacySignatures": []
     },
     {
@@ -1513,8 +1513,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "80b1a1ce612d59ad80bafd5ef354a381edff8dcc0f4c73d298018e34df1d0321",
-      "bytes": 667,
+      "sourceHash": "6b41348bf1ae72c2a419371dd4a55f7c50ce3c8cc9819e1ffd0cb1b63a0d69bf",
+      "bytes": 666,
       "legacySignatures": []
     },
     {
@@ -1569,8 +1569,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "e02ae8f964667feb3db532180379f6eb3cf03c5782a93a943f02a5a84377fdd9",
-      "bytes": 665,
+      "sourceHash": "26f1f1250918f2a30faf80c41ad25003b926d4265eef013755f1ccaa55add8d2",
+      "bytes": 664,
       "legacySignatures": []
     },
     {
@@ -1625,8 +1625,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "82e78d70f86fa4eaaedeea14eb3a4f5ec0d1c4be695ae0b97e546eca57380e98",
-      "bytes": 674,
+      "sourceHash": "a7300d9027beb434c0f9ee0af401d0ea943017965fc08c1eb861557cc22a47d7",
+      "bytes": 673,
       "legacySignatures": []
     },
     {
@@ -1681,8 +1681,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "5ef1fc52a75b01dcd68e130534bcb696a3e529d73a20f9473272b7610ea5fea4",
-      "bytes": 655,
+      "sourceHash": "aa26c790b49a8d5f57544cb333f5384638a903d052dda6cd906ab18fac2717b6",
+      "bytes": 654,
       "legacySignatures": []
     },
     {
@@ -1737,8 +1737,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "c8aff09a0ef130747fb00e55b65485766f0487d3b3318b5ae048350c7af0d022",
-      "bytes": 652,
+      "sourceHash": "2f54cf4eeac69afbdf20bd1bd3449d15466c77df3605d386c434f68eb53d5cfb",
+      "bytes": 651,
       "legacySignatures": []
     },
     {
@@ -1793,8 +1793,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d392b555fd71fbb339625bb4f44243b6de0b35ae0bebe633850177f31d67c9fb",
-      "bytes": 655,
+      "sourceHash": "bc490a1209f616e2af5230e0911820e127f1880a7d33e12451e8684fa7bfb281",
+      "bytes": 654,
       "legacySignatures": []
     },
     {
