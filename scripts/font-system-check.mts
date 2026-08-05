@@ -34,6 +34,7 @@ const ACTIVE_PREFIXES = [
 ];
 const ROOT_ACTIVE_FILES = new Set(["DESIGN.md", "package.json", "pnpm-lock.yaml"]);
 const CHECKER_FILES = new Set([
+  "packages/design/src/legacy-signatures.ts",
   "scripts/font-system-check.mts",
   "scripts/font-system-check.test.mts",
   "scripts/brand-residue-check.mts",

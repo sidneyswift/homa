@@ -28,4 +28,11 @@ test("ordinary prose and historical evidence stay outside the font scan", () => 
     findLegacyFontResidue("docs/homa-design/evidence/legacy/warm-playful/readme.md", 'font-family: "Hanken Grotesk";'),
     [],
   );
+  assert.deepEqual(
+    findLegacyFontResidue(
+      "packages/design/src/legacy-signatures.ts",
+      'const signatures = ["Schibsted Grotesk", "Hanken Grotesk", "Caveat"];',
+    ),
+    [],
+  );
 });
