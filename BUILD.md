@@ -51,7 +51,7 @@ Historical phase narratives and shipped-work notes live in `docs/homa-planning/b
 - `packages/design`: the typed Quiet authority contract and deterministic projections. Web and mobile still keep synchronized runtime copies while #720 and #724 migrate them to shared primitives.
 - `supabase/migrations`: local migration history. Local file presence never proves remote application.
 - `docs/homa-planning`: product contract, ticket backlog, dated plans, decisions, runbooks, and historical research.
-- `docs/homa-design`: canonical design source.
+- `docs/homa-design`: normative human doctrine and usage guide. Exact values and allowed combinations live in `packages/design`.
 - `docs/homa-benchmarks`: dated benchmark evidence and source material for the map bank.
 
 The route and package-specific maps belong in `apps/web/README.md` and `apps/mobile/README.md`. Do not duplicate them here.
@@ -76,7 +76,7 @@ If a capability is absent from the current repository or lacks production eviden
 4. Product language never uses red or a "behind" label for a child's progress and never compares siblings. Honest downward trajectory segments are allowed when the surrounding treatment stays neutral and growth-oriented. The trajectory chart plots a measured below-age frontier as its real negative months (founder ruling 2026-07-13, `trajectory-real-negative-months`); copy surfaces keep growth framing and `monthsAhead` stays non-negative.
 5. Child-photo personalization requires the D4 consent, retention, provider, and no-face-recognition floor. Private-by-default sharing for minors' media remains an unresolved founder decision and must not be invented.
 6. Distress content follows the companion-not-therapist and distress-data-firewall rules. Sensitive health and diagnosis memory remains an MJ-13 implementation gap under founder ruling D6.
-7. Homa copy uses sentence case, reassurance before information, offers rather than commands, and no em dash. HOMA appears in the wordmark and on UI surfaces; Homa appears in prose and conversation.
+7. Homa copy uses sentence case, reassurance before information, offers rather than commands, and no em dash. The name is always written Homa, including in the real Logo component. Never type a substitute wordmark.
 8. eve version changes require `node scripts/eve-upgrade-check.mjs` and the procedure in `docs/homa-planning/runbooks/eve-version-bump.md`. Agent-module changes also require `pnpm --filter web exec eve build`.
 9. Production schema and production code ship together. Breaking migrations never lead the code that reads them. Use code-first deployment or expand-contract; additive migrations may lead.
 10. Imports remain at the top of the file. Do not add inline imports.

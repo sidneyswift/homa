@@ -5,7 +5,7 @@
  *
  * Outputs:
  * - apps/web/public/brand/homa-lockup.svg / .png    (mark + bounced wordmark, light surfaces)
- * - apps/web/public/brand/homa-lockup-dark.svg / .png (reversed: clay-400 mark, white wordmark)
+ * - apps/web/public/brand/homa-lockup-dark.svg / .png (reversed: visual-coral mark, paper wordmark)
  * - apps/web/public/brand/homa-mark.svg             (the little-home mark alone)
  * - apps/web/public/brand/homa-mark-512.png
  * - apps/web/app/icon.svg                           (SVG favicon, same mark)
@@ -391,19 +391,19 @@ async function main() {
   console.log("wrote marketing homa-mark.svg + 512/120 PNGs");
 
   // Phone-ready rasters with SOLID backgrounds (iOS composites transparent
-  // avatars onto an auto-picked color that can swallow the clay house).
+  // avatars onto an auto-picked color that can swallow the coral house).
   // Colorways are the brand card's three sanctioned surface treatments.
   const inverseAvatarMark = markSvgColored("avatar", {
     body: "#FFFFFF",
     eyes: VISUAL_CORAL,
     pupils: "#FFFFFF",
   });
-  const nightAvatarMark = markSvgColored("avatar", {
+  const midnightAvatarMark = markSvgColored("avatar", {
     body: VISUAL_CORAL,
     eyes: "#FFFFFF",
     pupils: INK,
   });
-  const nightStandardMark = markSvgColored("standard", {
+  const midnightStandardMark = markSvgColored("standard", {
     body: VISUAL_CORAL,
     eyes: "#FFFFFF",
     pupils: INK,
@@ -414,9 +414,9 @@ async function main() {
 
   const pfpCanvas = { width: 1024, height: 1024 };
   const pfps = [
-    { name: "homa-pfp-clay-1024.png", svg: inverseAvatarMark, background: VISUAL_CORAL },
-    { name: "homa-pfp-cream-1024.png", svg: avatarMark, background: MINERAL_CANVAS },
-    { name: "homa-pfp-night-1024.png", svg: nightAvatarMark, background: CONTAINED_BAND },
+    { name: "homa-pfp-coral-1024.png", svg: inverseAvatarMark, background: VISUAL_CORAL },
+    { name: "homa-pfp-canvas-1024.png", svg: avatarMark, background: MINERAL_CANVAS },
+    { name: "homa-pfp-midnight-1024.png", svg: midnightAvatarMark, background: CONTAINED_BAND },
   ];
   for (const { name, svg, background } of pfps) {
     await writeOutput(
@@ -424,14 +424,14 @@ async function main() {
       await renderMarkOnBackground({ markSvgText: svg, markWidth: 780, canvas: pfpCanvas, background }),
     );
   }
-  console.log("wrote phone pfps (clay, cream, night) at 1024");
+  console.log("wrote phone pfps (coral, canvas, midnight) at 1024");
 
   // 1320x2868 = iPhone Pro Max native; smaller iPhones scale it down cleanly.
   // Mark sits a touch above center so iOS name/clock chrome doesn't crowd it.
   const wallCanvas = { width: 1320, height: 2868 };
   const walls = [
-    { name: "homa-wallpaper-cream.png", svg: markSvg(), background: MINERAL_CANVAS },
-    { name: "homa-wallpaper-night.png", svg: nightStandardMark, background: CONTAINED_BAND },
+    { name: "homa-wallpaper-canvas.png", svg: markSvg(), background: MINERAL_CANVAS },
+    { name: "homa-wallpaper-midnight.png", svg: midnightStandardMark, background: CONTAINED_BAND },
   ];
   for (const { name, svg, background } of walls) {
     await writeOutput(
@@ -445,7 +445,7 @@ async function main() {
       }),
     );
   }
-  console.log("wrote phone wallpapers (cream, night) at 1320x2868");
+  console.log("wrote phone wallpapers (canvas, midnight) at 1320x2868");
 
   const icoEntries = [];
   for (const size of [16, 32, 48]) {

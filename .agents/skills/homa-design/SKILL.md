@@ -5,7 +5,12 @@ description: Use when building or styling any Homa-branded interface, page, comp
 
 # Homa Design System
 
-The design system's source of truth lives at `docs/homa-design/` (kept there, not inside this skill folder, so it stays browsable as project documentation and stays a single copy). Read `docs/homa-design/SKILL.md` first for the quick reference, then `docs/homa-design/doctrine.md` for the cross-surface rules, `docs/homa-design/readme.md` for the full guide, and `packages/design/src/contract/` for typed values. Generated projections are checked by `pnpm check:design-parity` and `pnpm check:design-authoring`.
+The normative human doctrine lives in `docs/homa-design/`; exact values and
+allowed combinations live in `packages/design/src/contract/`. Read
+`docs/homa-design/SKILL.md` first for the workflow, then
+`docs/homa-design/doctrine.md` for cross-surface rules and
+`docs/homa-design/readme.md` for the full guide. Generated projections are
+checked by `pnpm check:design-parity` and `pnpm check:design-authoring`.
 
 Do not edit generated projections by hand. Run the contract and brand
 generators, then use their check modes in CI.

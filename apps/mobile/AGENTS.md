@@ -7,9 +7,11 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 - Read the repo root `AGENTS.md` first: voice laws (no em dash ever,
   sentence case, reassure-before-inform), security boundaries, and the
   design-system rule all apply here unchanged.
-- Tokens and the Logo are hand-copied into `src/theme/tokens.ts` and
-  `src/components/brand/logo.tsx` from `docs/homa-design/` (via
-  `apps/web`'s copies). If design tokens change, update those files too.
+- Exact design values come from `@homa/design/contract` through
+  `src/theme/native-projection.ts`. `src/theme/tokens.ts` is a temporary
+  compatibility export for routes owned by #720, never an authority or a
+  place to add values. The native Logo adapter consumes generated identity
+  geometry and may not redraw or rename Homa locally.
 - This app is a client only. `familyId` never comes from client input,
   for agent identity. Some app writes pass the selected `family_id` back
   to Supabase, but they run under the caller's RLS context and must be

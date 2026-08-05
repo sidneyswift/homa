@@ -1,85 +1,64 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  BRAND_CONTRACT,
-  CHANNELS_CONTRACT,
-  COLOR_CONTRACT,
-  CONTENT_CONTRACT,
-  DESIGN_CONTRACT_SCHEMA_VERSION,
-  DESIGN_CONTRACT_VERSION,
-  FONT_SYSTEM_CONTRACT,
-  ICON_CONTRACT,
-  IDENTITY_CONTRACT,
-  LAYOUT_CONTRACT,
-  MOTION_CONTRACT,
-  PROFILES_CONTRACT,
-  STATES_CONTRACT,
-  TYPOGRAPHY_CONTRACT,
-  DOCTRINE_CONTRACT,
-  assertDesignContract,
-  NATIVE_PROJECTION_CONTRACT,
-} from "../packages/design/src/contract/index.ts";
+  DESIGN_GENERATED_DIRECTORY,
+  createDesignArtifacts,
+  findGeneratedProjectionInventoryViolations,
+} from "../packages/design/src/generators/design-contract.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const OUT_DIR = resolve(ROOT, "packages/design/generated");
-const DESIGN_PATH = resolve(ROOT, "DESIGN.md");
 const CHECK = process.argv.includes("--check");
+const outputRootIndex = process.argv.indexOf("--output-root");
+if (outputRootIndex >= 0 && !process.argv[outputRootIndex + 1]) throw new Error("--output-root requires a path");
+const OUTPUT_ROOT = outputRootIndex >= 0 ? resolve(process.argv[outputRootIndex + 1]!) : ROOT;
+const designTemplate = readFileSync(resolve(ROOT, "DESIGN.md"), "utf8");
+const generated = createDesignArtifacts(
+  designTemplate,
+  (value) => createHash("sha256").update(value).digest("hex"),
+);
 
-assertDesignContract();
-
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
-  if (value && typeof value === "object") {
-    return `{${Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([key, child]) => `${JSON.stringify(key)}:${canonical(child)}`).join(",")}}`;
-  }
-  return JSON.stringify(value);
-}
-
-const source = {
-  brand: BRAND_CONTRACT,
-  channels: CHANNELS_CONTRACT,
-  colors: COLOR_CONTRACT,
-  content: CONTENT_CONTRACT,
-  fonts: FONT_SYSTEM_CONTRACT,
-  identity: IDENTITY_CONTRACT,
-  icons: ICON_CONTRACT,
-  layout: LAYOUT_CONTRACT,
-  motion: MOTION_CONTRACT,
-  profiles: PROFILES_CONTRACT,
-  states: STATES_CONTRACT,
-  typography: TYPOGRAPHY_CONTRACT,
-  doctrine: DOCTRINE_CONTRACT,
-  native: NATIVE_PROJECTION_CONTRACT,
-};
-const sourceChecksum = createHash("sha256").update(canonical(source)).digest("hex");
-const header = `Homa design contract ${DESIGN_CONTRACT_VERSION}; source-sha256 ${sourceChecksum}`;
-const outputs: Record<string, string> = {
-  "contract.json": `${JSON.stringify({ schemaVersion: DESIGN_CONTRACT_SCHEMA_VERSION, version: DESIGN_CONTRACT_VERSION, sourceChecksum, source }, null, 2)}\n`,
-  "native.json": `${JSON.stringify({ version: DESIGN_CONTRACT_VERSION, sourceChecksum, colors: COLOR_CONTRACT.tokens, nativeColorScale: COLOR_CONTRACT.nativeColorScale, typography: TYPOGRAPHY_CONTRACT, fonts: FONT_SYSTEM_CONTRACT, layout: LAYOUT_CONTRACT, motion: MOTION_CONTRACT, states: STATES_CONTRACT, profiles: PROFILES_CONTRACT, channels: CHANNELS_CONTRACT, doctrine: DOCTRINE_CONTRACT, projection: NATIVE_PROJECTION_CONTRACT }, null, 2)}\n`,
-  "channels.json": `${JSON.stringify({ version: DESIGN_CONTRACT_VERSION, sourceChecksum, channels: CHANNELS_CONTRACT, profiles: PROFILES_CONTRACT.targetProfiles, typography: TYPOGRAPHY_CONTRACT, fonts: FONT_SYSTEM_CONTRACT, content: CONTENT_CONTRACT, doctrine: DOCTRINE_CONTRACT }, null, 2)}\n`,
-  "fonts.json": `${JSON.stringify(FONT_SYSTEM_CONTRACT, null, 2)}\n`,
-  "web.css": `/* ${header} */\n:root {\n${Object.entries(COLOR_CONTRACT.tokens).map(([name, value]) => `  --homa-${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${value};`).join("\n")}\n${Object.entries(COLOR_CONTRACT.webCompatibilityTokens).map(([name, value]) => `  --homa-${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${value};`).join("\n")}\n  --homa-radius-control: ${LAYOUT_CONTRACT.radii.control}px;\n  --homa-radius-card: ${LAYOUT_CONTRACT.radii.card}px;\n  --homa-radius-frame: ${LAYOUT_CONTRACT.radii.frame}px;\n  --homa-motion-ease-out: ${MOTION_CONTRACT.easeOut};\n  --homa-motion-ease-in-out: ${MOTION_CONTRACT.easeInOut};\n  --homa-motion-fast: ${MOTION_CONTRACT.durations.fast}ms;\n  --homa-motion-base: ${MOTION_CONTRACT.durations.base}ms;\n  --homa-motion-slow: ${MOTION_CONTRACT.durations.slow}ms;\n  --homa-font-display: EB Garamond, Georgia, Times New Roman, serif;\n  --homa-font-interface: DM Sans, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;\n  --homa-font-wordmark: Fredoka, Arial Rounded MT Bold, Arial, sans-serif;\n}\n`,
-};
-const designDocument = readFileSync(DESIGN_PATH, "utf8");
-const checksumLine = `contractChecksum: ${sourceChecksum}`;
-const designWithChecksum = /^contractChecksum:\s*.*$/m.test(designDocument)
-  ? designDocument.replace(/^contractChecksum:\s*.*$/m, checksumLine)
-  : designDocument.replace(/^version:\s*.*$/m, (line) => `${line}\n${checksumLine}`);
-
-if (!CHECK) mkdirSync(OUT_DIR, { recursive: true });
-for (const [name, content] of Object.entries(outputs)) {
-  const output = resolve(OUT_DIR, name);
-  if (CHECK) {
-    if (!existsSync(output) || readFileSync(output, "utf8") !== content) throw new Error(`Generated design projection is stale: ${output}`);
-  } else {
-    writeFileSync(output, content);
+function writeArtifacts(outputRoot: string): void {
+  for (const artifact of generated.artifacts) {
+    const output = resolve(outputRoot, artifact.relativePath);
+    mkdirSync(dirname(output), { recursive: true });
+    writeFileSync(output, artifact.content);
   }
 }
+
+function generatedProjectionInventory(root: string): string[] {
+  const directory = resolve(root, DESIGN_GENERATED_DIRECTORY);
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory, { withFileTypes: true })
+    .map((entry) => `${DESIGN_GENERATED_DIRECTORY}/${entry.name}`)
+    .sort((left, right) => left.localeCompare(right));
+}
+
 if (CHECK) {
-  if (designDocument !== designWithChecksum) throw new Error(`DESIGN.md contract checksum is stale. Expected ${sourceChecksum}`);
+  const temporaryRoot = mkdtempSync(resolve(tmpdir(), "homa-design-contract-"));
+  try {
+    writeArtifacts(temporaryRoot);
+    const temporaryInventory = generatedProjectionInventory(temporaryRoot);
+    const committedInventory = generatedProjectionInventory(ROOT);
+    const temporaryViolations = findGeneratedProjectionInventoryViolations(temporaryInventory, generated.artifacts);
+    const committedViolations = findGeneratedProjectionInventoryViolations(committedInventory, generated.artifacts);
+    if (temporaryViolations.length > 0 || committedViolations.length > 0) {
+      throw new Error(`Generated design artifact inventory drift:\n${[...temporaryViolations, ...committedViolations].join("\n")}`);
+    }
+    for (const artifact of generated.artifacts) {
+      const temporaryOutput = resolve(temporaryRoot, artifact.relativePath);
+      const committedOutput = resolve(ROOT, artifact.relativePath);
+      if (!existsSync(committedOutput) || readFileSync(committedOutput, "utf8") !== readFileSync(temporaryOutput, "utf8")) {
+        throw new Error(`Generated design artifact is stale: ${committedOutput}`);
+      }
+    }
+  } finally {
+    rmSync(temporaryRoot, { recursive: true, force: true });
+  }
 } else {
-  writeFileSync(DESIGN_PATH, designWithChecksum);
+  writeArtifacts(OUTPUT_ROOT);
 }
-console.log(`${CHECK ? "Checked" : "Wrote"} ${Object.keys(outputs).length} design projections at ${OUT_DIR} (${sourceChecksum})`);
+
+console.log(`${CHECK ? "Checked" : "Wrote"} ${generated.artifacts.length} design artifacts from a clean output root (${generated.sourceChecksum})`);

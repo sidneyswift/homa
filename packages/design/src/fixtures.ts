@@ -1,7 +1,7 @@
-import { DESIGN_CONTRACT_VERSION } from "./version.ts";
-import type { BrandChannel } from "./channels.ts";
-import { identityAssetCatalog } from "./identity.ts";
-import type { TargetProfile } from "./profiles.ts";
+import { DESIGN_CONTRACT_VERSION } from "./contract/version.ts";
+import type { BrandChannel } from "./contract/channels.ts";
+import { identityAssetCatalog } from "./contract/identity.ts";
+import type { TargetProfile } from "./contract/profiles.ts";
 
 /**
  * The fixture gallery is a contract index, not a screenshot archive. Each

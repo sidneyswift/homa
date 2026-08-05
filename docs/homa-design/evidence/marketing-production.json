@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
-  "contractSourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
-  "surfaceManifestFingerprint": "3f1236a8603bc6cf95c1f76f1b3ba238b49d96c7f2192d857e9ca932380c6810",
-  "authoringManifestFingerprint": "3f1236a8603bc6cf95c1f76f1b3ba238b49d96c7f2192d857e9ca932380c6810",
-  "ownedInputFingerprint": "911dcd8df3fb82e5d6cbabb767ce110bdf410d23aa7738f34913affb4e1c2581",
+  "contractSourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
+  "surfaceManifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
+  "authoringManifestFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
+  "ownedInputFingerprint": "8e927e5a2db9cbe121ec04c04522c180b7e7dd40651466183655c84166d1a987",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
     "marketing/voice/house-style.md",
@@ -69,8 +69,8 @@
         "voice"
       ],
       "state": "active",
-      "sourceHash": "e7122feae5621a25930df90bf2fb136bba0af4adf71afd48016d6b053ec62d61",
-      "bytes": 4487,
+      "sourceHash": "611216f664c3f717ddb2de37c6687f7c918da2556220ff73a6a02c4cd3dd6cfd",
+      "bytes": 4590,
       "legacySignatures": []
     },
     {
@@ -151,19 +151,8 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:67015de50322342e",
-      "path": "marketing/assets/brand/phone/homa-pfp-clay-1024.png",
-      "roles": [
-        "asset"
-      ],
-      "state": "active",
-      "sourceHash": "61093d18904d4aa316a83ad60669a7ba85b738d932c429cc4e93155c18f06d60",
-      "bytes": 35966,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:acd75892712600bb",
-      "path": "marketing/assets/brand/phone/homa-pfp-cream-1024.png",
+      "id": "marketing:52a00f4ba3244a36",
+      "path": "marketing/assets/brand/phone/homa-pfp-canvas-1024.png",
       "roles": [
         "asset"
       ],
@@ -173,8 +162,19 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:cdbbe2dfe26bdaee",
-      "path": "marketing/assets/brand/phone/homa-pfp-night-1024.png",
+      "id": "marketing:471d025c83d117e1",
+      "path": "marketing/assets/brand/phone/homa-pfp-coral-1024.png",
+      "roles": [
+        "asset"
+      ],
+      "state": "active",
+      "sourceHash": "61093d18904d4aa316a83ad60669a7ba85b738d932c429cc4e93155c18f06d60",
+      "bytes": 35966,
+      "legacySignatures": []
+    },
+    {
+      "id": "marketing:27140509c74325c2",
+      "path": "marketing/assets/brand/phone/homa-pfp-midnight-1024.png",
       "roles": [
         "asset"
       ],
@@ -184,8 +184,8 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:2035ffe8d8b07b33",
-      "path": "marketing/assets/brand/phone/homa-wallpaper-cream.png",
+      "id": "marketing:b906a3d8a3e474fa",
+      "path": "marketing/assets/brand/phone/homa-wallpaper-canvas.png",
       "roles": [
         "asset"
       ],
@@ -195,8 +195,8 @@
       "legacySignatures": []
     },
     {
-      "id": "marketing:4666d3438f80746f",
-      "path": "marketing/assets/brand/phone/homa-wallpaper-night.png",
+      "id": "marketing:943b701a590d0a1a",
+      "path": "marketing/assets/brand/phone/homa-wallpaper-midnight.png",
       "roles": [
         "asset"
       ],
@@ -605,8 +605,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "877cbfc75cc47d5cf819a9e9c7259e11f424b87ca16b513a905498836fd50362",
-      "bytes": 6451,
+      "sourceHash": "fb6743508271fe93bafef6c8e4715ed424555796b91de9dd3bff6578d2350290",
+      "bytes": 6450,
       "legacySignatures": []
     },
     {
@@ -618,29 +618,6 @@
       "state": "active",
       "sourceHash": "e388dbf4873c5f342b66285ff705ab8a7dea18b9ccb68398a902aedf6fc3fbfc",
       "bytes": 140,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:5033186af45e1044",
-      "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "22be41f3c52b1b2bbfbeb2a1d5e670df75dc61b88e64e117d397f340a7770060",
-      "bytes": 681,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:f875e0df023da6f1",
-      "path": "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "9a6b3769e11f99e3ac89b6067ea2a8fda0ab674fb13240d5c78e2adf5447fe23",
-      "bytes": 261152,
       "legacySignatures": []
     },
     {
@@ -661,8 +638,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "e46207f597fb92e2625223e3d6771b0b21e6fce52a5916eb96a99caf62f448c6",
-      "bytes": 7094,
+      "sourceHash": "c97fc1fbe49605e88b2b9ec7635d3cca2f6b2699102034f5d7107b45cf5ae6a5",
+      "bytes": 7093,
       "legacySignatures": []
     },
     {
@@ -674,29 +651,6 @@
       "state": "active",
       "sourceHash": "0e7c0723dae46fd382d2773be2e18c8da797712659c3b1802cd69f9e9f59c0c8",
       "bytes": 127,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:94801474bdd2f59e",
-      "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "e6e1a8cd3e0254d04fa4af78472af64e490e5132801d32748e64e519fbe433f1",
-      "bytes": 693,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:eac02ac0d9dc6ce0",
-      "path": "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "53ff2f2ea2ad7b3312360b147d08509327af7bb26bb3f0bb77cae1fd91c3c8a1",
-      "bytes": 341188,
       "legacySignatures": []
     },
     {
@@ -717,8 +671,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "01692e8d52583e278b619a066288eebe0198d235ed3707622f9fd12a2762a107",
-      "bytes": 6301,
+      "sourceHash": "5cfe37b6ef7c8b768325434f5f4cbfb464bc03f689ac1e4dc218c97423fe1c8f",
+      "bytes": 6300,
       "legacySignatures": []
     },
     {
@@ -730,29 +684,6 @@
       "state": "active",
       "sourceHash": "eb2e7134a8daa886d0e90b7a9d05c08f05a10f5b95ae8abb9b7a6ad7b32438ae",
       "bytes": 132,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:811fbc45825d0379",
-      "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "4292fb0fb2444fed0178ef2906303092f95ad36a43fe181d037469e946a609ae",
-      "bytes": 668,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:8268a0095dd88d80",
-      "path": "marketing/content/published/2026-08-03-homeschool-progress-report-examples/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "b7f7f3c2f55df7b8ca5e82c8c11f6b9e609380f7e984060a3453e63e169e64d0",
-      "bytes": 247282,
       "legacySignatures": []
     },
     {
@@ -773,8 +704,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "4a951f4e5262eae200a2075996800a73bde4180b8006626b5b06e4ef85d9b38c",
-      "bytes": 6508,
+      "sourceHash": "e4648d5076460fb48559a67e13badfef86f8503fd21d5f67c6144b9384af7033",
+      "bytes": 6507,
       "legacySignatures": []
     },
     {
@@ -786,29 +717,6 @@
       "state": "active",
       "sourceHash": "a4e5500cc0f478d2ce677e00abaff1b089e1564df05e15a1cf47ddd362f47833",
       "bytes": 138,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:e7f3b57e0bc54a1c",
-      "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "a6d181ba6c89851628ff04e540061064af2ccaaed3203c0a4e657ca22972f7f9",
-      "bytes": 656,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:efb1ce133200d7bd",
-      "path": "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "5629d9f15bd82ad7724b9bd057216cca02495987f659c7489a7efb781e34db26",
-      "bytes": 291516,
       "legacySignatures": []
     },
     {
@@ -829,8 +737,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "af256e2b1f10f82d39bfc94d0947228bef8a46eeaff560de6aa53302d90baa26",
-      "bytes": 5794,
+      "sourceHash": "0c4305eb95a782dbb45e1341e0f9a5e0781abc89f351b665ec69d2614d348fdd",
+      "bytes": 5793,
       "legacySignatures": []
     },
     {
@@ -842,29 +750,6 @@
       "state": "active",
       "sourceHash": "05583de9935977245119849acf58f6d974dce8ed2701fa27e869cf9fe0dee2af",
       "bytes": 136,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:3adf4173fb42f6db",
-      "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "0f3a51c1683d5c24664106eb4c83ba1ad447a42b7e44c656dc8e037965d8cd08",
-      "bytes": 658,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:4a5764bfcb1dd79f",
-      "path": "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "f7a5218b72b3195229a18b8c1601517449b8a95b411fa588d7974091575618d9",
-      "bytes": 315790,
       "legacySignatures": []
     },
     {
@@ -885,8 +770,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "557fa0d85bf027804636def871087f3e05c6be1d7a70cc9e133fe9246c51a79c",
-      "bytes": 6540,
+      "sourceHash": "0a200b56c2108b89ec8a3d2e6b52b416a7102fbc9eb59c9f2590c1ef59b34536",
+      "bytes": 6539,
       "legacySignatures": []
     },
     {
@@ -898,29 +783,6 @@
       "state": "active",
       "sourceHash": "e5d27977bd0d2562c01ae34027098b7069204d7dd282c122ba71047820080c36",
       "bytes": 135,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:0bf5eecde8005610",
-      "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "5a02a103c81d3f9c9eaefd9d863259349d525838e8e17671e9ecff138a3486d5",
-      "bytes": 654,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:b847a3040c849914",
-      "path": "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "080d2c92783749447983f594d776aa2bd556a9611ffef47a29252b106d62459f",
-      "bytes": 301048,
       "legacySignatures": []
     },
     {
@@ -941,8 +803,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "c9ac9dc54845ca97ba7ab0828dbc3d83b0388822edc00fb21d61965915d18b75",
-      "bytes": 5986,
+      "sourceHash": "df5a6eeb0cd7e730710c3375ebedaa1a052634f3d778eb42c07b491c8bff7f56",
+      "bytes": 5985,
       "legacySignatures": []
     },
     {
@@ -954,29 +816,6 @@
       "state": "active",
       "sourceHash": "0863bb4ed3fadc6c233662879e9d65fe9bca0b89de4cdca06489c060a31416de",
       "bytes": 131,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:d7b6cddf64e941ee",
-      "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "bd8815cab791f1aa3530a22ded21b6f769ec79bf67d947eacede9f11f0967b59",
-      "bytes": 667,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:378e9eec79c2cbe4",
-      "path": "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "b023be33ceb39d6c181c43686425baec2e80644112187d21d68a390e5f1ed6b2",
-      "bytes": 305878,
       "legacySignatures": []
     },
     {
@@ -1099,8 +938,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "413084ec3915ec34b859fa0be9982dae943eea41bbeb62a36d78250f02e3cd45",
-      "bytes": 6195,
+      "sourceHash": "615384cc02a61cfde7ede522d60362224230a289ff25810f870771ba27b38e50",
+      "bytes": 6194,
       "legacySignatures": []
     },
     {
@@ -1112,29 +951,6 @@
       "state": "active",
       "sourceHash": "2f7ae343860bf4018ebd2834e50b572dfd6f9215e89f270f0f90807c996f558f",
       "bytes": 131,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:b848a6c4a177450c",
-      "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "b1e6e16a1c35724752e6ef5a17910b1513746d4c63d58c0d092e794f93049b6c",
-      "bytes": 655,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:9bc85745de08948f",
-      "path": "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "a5b11b6feae5f1dfc0405acf85b2273c4db4e46183298552242f76aa35b4d251",
-      "bytes": 267762,
       "legacySignatures": []
     },
     {
@@ -1155,8 +971,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "1ccddef63b978f65434f148971f657c40db1ac427fdc2dd888bd6cd04913dea4",
-      "bytes": 7069,
+      "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d",
+      "bytes": 7068,
       "legacySignatures": []
     },
     {
@@ -1168,29 +984,6 @@
       "state": "active",
       "sourceHash": "ec960588e5daa4992814b8794ed6ba6a4a6bb677cffec59a97302a82ee898708",
       "bytes": 137,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:a18c86d25e878769",
-      "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "6f88422049e34c0cf2d388ac405e097203b7ea4a4536dd088686167f88b5d01f",
-      "bytes": 657,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:7b9554471feece78",
-      "path": "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "d214459ad0799356a536ab40cb34d73f9dfd7354f8998e3037ecf77db0ef2e78",
-      "bytes": 308664,
       "legacySignatures": []
     },
     {
@@ -1211,8 +1004,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "9630e7d682b87d7a7fdfc96237e04baf76b7d58d036c4ac8c9a6d00a726a78c4",
-      "bytes": 6984,
+      "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251",
+      "bytes": 6983,
       "legacySignatures": []
     },
     {
@@ -1224,29 +1017,6 @@
       "state": "active",
       "sourceHash": "0a939b7cdc35d9939320bffe75d44b5bd8a60b9407142f345ca10a51d4b6f4e3",
       "bytes": 142,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:2a868721550d021e",
-      "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "3f44ab8c86ca83faa6c9492c85cb95e3f7f7299a25ffce27da096fc41fa9bfb2",
-      "bytes": 655,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:b239a8c152360e3e",
-      "path": "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "81046e9bccebd91781515553585d23f5045a4fda224c43f84618ae0528f5e593",
-      "bytes": 236486,
       "legacySignatures": []
     },
     {
@@ -1267,8 +1037,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "1d7d7475d668f81e440988702d5314109b08e1d4007b8c62dd7c88461c86307e",
-      "bytes": 7641,
+      "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203",
+      "bytes": 7640,
       "legacySignatures": []
     },
     {
@@ -1280,29 +1050,6 @@
       "state": "active",
       "sourceHash": "a8292398e9ccd5515ffb8f0de32d571aaaae0e16e3e392ea1e0fb81d7579efdc",
       "bytes": 149,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:485f6819a3f66033",
-      "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "d1cf779d176b72d28f6635feb33d82a8e5ea14759b9bba0e91b9db4bb6e1e19d",
-      "bytes": 659,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:40b95cfad6930438",
-      "path": "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "4780c9cf6262fa24a933a0a492c5a8fe323d2540a25715c693aee0b0ec2df960",
-      "bytes": 239442,
       "legacySignatures": []
     },
     {
@@ -1323,8 +1070,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "0f695088cc091c37d4e76251de64597444a62537f1ff4da1193b7c6c3dbf1876",
-      "bytes": 7018,
+      "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f",
+      "bytes": 7017,
       "legacySignatures": []
     },
     {
@@ -1336,29 +1083,6 @@
       "state": "active",
       "sourceHash": "b02884bfb9e13721f595b34e62f66711ae8a24c7de0f7987691576ec15d0d5d2",
       "bytes": 147,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:28fbfdadce2195ce",
-      "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "0451d501554f42b05939d201eb6c111f6abe9cb47160bbaf05cee8ba2b29259c",
-      "bytes": 757,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:bea8e13033b845a8",
-      "path": "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "446b6de6624b2987737a3071488ca762f8bf9891dc380e7ed80eeda4b77a9aaa",
-      "bytes": 177598,
       "legacySignatures": []
     },
     {
@@ -1379,8 +1103,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "d20bfc741917f185fef718e62e74b07f27cd004a8d0c8b8ecd9d85951e2eef37",
-      "bytes": 7007,
+      "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6",
+      "bytes": 7006,
       "legacySignatures": []
     },
     {
@@ -1392,29 +1116,6 @@
       "state": "active",
       "sourceHash": "d1919988eed6ada97520157c97eda64bbd67e132928d7bae17060b0c3892a0ca",
       "bytes": 134,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:e78528bcb31e62fe",
-      "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "f42dee7a6489434439e943d19b7ecd67b3fb0f2d21027aa2cc9b4aebf7dc254b",
-      "bytes": 655,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:40edc3aad763ad00",
-      "path": "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "6e04857588134cce7905761e4af634f1e097f647eb37740bcd54b5eafbd7777b",
-      "bytes": 311550,
       "legacySignatures": []
     },
     {
@@ -1435,8 +1136,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "1f32de01552880063f53c966e08ad99b894f45b20aa82f7b893d4340962ed55b",
-      "bytes": 6829,
+      "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f",
+      "bytes": 6828,
       "legacySignatures": []
     },
     {
@@ -1448,29 +1149,6 @@
       "state": "active",
       "sourceHash": "61ec5fc9e5eab8eabe68eb8501054ee47dd6ce1e742ce412a7a407d86377a863",
       "bytes": 137,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:cf36ee78f10c8207",
-      "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "ea6b8518da599c64531d4c48711bf89c1c262ffed176175a900b87b6b0ec9906",
-      "bytes": 658,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:0056849fc18674fa",
-      "path": "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "212824923a2bd647d9f6f730a2f3b6005df2c5ce7a97796b6af21deb9bdd295a",
-      "bytes": 230236,
       "legacySignatures": []
     },
     {
@@ -1491,8 +1169,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "af76f26c2f6bfd18637f7cdb3ab26a7f3039e2edefd2564937f40c3afa1ff9b8",
-      "bytes": 5851,
+      "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630",
+      "bytes": 5850,
       "legacySignatures": []
     },
     {
@@ -1504,29 +1182,6 @@
       "state": "active",
       "sourceHash": "128def67d910d50af80e24214a3a9c27860bd91b5ccfe3f22fd4d44156d10975",
       "bytes": 139,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:c6b5963bd78b3fb3",
-      "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "6b41348bf1ae72c2a419371dd4a55f7c50ce3c8cc9819e1ffd0cb1b63a0d69bf",
-      "bytes": 666,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:964c8b809233e528",
-      "path": "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "39243897fda88ba51c8b8d5b676f1d3a35f80610864958780ad34b7f2a115e76",
-      "bytes": 278184,
       "legacySignatures": []
     },
     {
@@ -1547,8 +1202,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "1c6f4558895a688f21b743799de8b738867fe63287ad791647795c6b7f21fa15",
-      "bytes": 7062,
+      "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796",
+      "bytes": 7061,
       "legacySignatures": []
     },
     {
@@ -1560,29 +1215,6 @@
       "state": "active",
       "sourceHash": "5ed3021eca0eab9b480ee4c4db3f2faa4340fd55fca63ef56e8971d91e953a57",
       "bytes": 137,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:be922d300d7c3d41",
-      "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "26f1f1250918f2a30faf80c41ad25003b926d4265eef013755f1ccaa55add8d2",
-      "bytes": 664,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:d64d79db4b61fb92",
-      "path": "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "8f85760e78695de352cbd9f9790f5169ae4a2295f6824b1660c50f506e65df06",
-      "bytes": 246088,
       "legacySignatures": []
     },
     {
@@ -1603,8 +1235,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "863883f520afa74d512e16a4a44f81a3718a408157531b5ed157afe8a34033fc",
-      "bytes": 6957,
+      "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9",
+      "bytes": 6956,
       "legacySignatures": []
     },
     {
@@ -1616,29 +1248,6 @@
       "state": "active",
       "sourceHash": "8f0bfa6acdb3ef6834600ac0dcf87b55e1100ea85e3408f47e7675b19f9bb7c9",
       "bytes": 148,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:ddb2d583bb44f82a",
-      "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "a7300d9027beb434c0f9ee0af401d0ea943017965fc08c1eb861557cc22a47d7",
-      "bytes": 673,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:320a1aaedbadd80a",
-      "path": "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "e2106d82933bb083e738b5d837c3d80df540344bc8efa4ec98af0fc40cf37752",
-      "bytes": 312940,
       "legacySignatures": []
     },
     {
@@ -1659,8 +1268,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "2c789dfc8bd24b58cf12cce251fabfcc0e2ff5483ace570a32076ede7bd8372d",
-      "bytes": 5239,
+      "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9",
+      "bytes": 5238,
       "legacySignatures": []
     },
     {
@@ -1672,29 +1281,6 @@
       "state": "active",
       "sourceHash": "763d9775028e80e3daee5dd319b48bb5701b510814d8ae0cff075d449acdf8b8",
       "bytes": 130,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:f6ed08a9d46809e3",
-      "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "aa26c790b49a8d5f57544cb333f5384638a903d052dda6cd906ab18fac2717b6",
-      "bytes": 654,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:bc370acdb155b93b",
-      "path": "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "f6927dfdde10793685f1c5ec326a3666cf3ec2bdde28a47d2778cccab77ff898",
-      "bytes": 285784,
       "legacySignatures": []
     },
     {
@@ -1715,8 +1301,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "c7955a497ef24cdb6c9fdb5e1942c9085e3f55b8aefca41a4106716d6ee0e6d3",
-      "bytes": 6478,
+      "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54",
+      "bytes": 6477,
       "legacySignatures": []
     },
     {
@@ -1728,29 +1314,6 @@
       "state": "active",
       "sourceHash": "c232b115fe02bdd5553563f602cfb453240588393e9ae34f65cb445a41885322",
       "bytes": 136,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:ec418949953ce9c6",
-      "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "2f54cf4eeac69afbdf20bd1bd3449d15466c77df3605d386c434f68eb53d5cfb",
-      "bytes": 651,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:4fc4ffbdf2260925",
-      "path": "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "099ba5c9e1e222a26903c251dbece1003aeed3ce327e541291dd5214bbc5b4d2",
-      "bytes": 262470,
       "legacySignatures": []
     },
     {
@@ -1771,8 +1334,8 @@
         "published-bundle"
       ],
       "state": "active",
-      "sourceHash": "184dfa06310bb5383e57e2a029f2299ef81d9f88babe379ee4aabb5f7ed47924",
-      "bytes": 5784,
+      "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27",
+      "bytes": 5783,
       "legacySignatures": []
     },
     {
@@ -1784,29 +1347,6 @@
       "state": "active",
       "sourceHash": "025038dde77bf4592e9e0961dcdfc85150df5ca2ccad02307846130bf4a01a97",
       "bytes": 129,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:e65a039a54ba5a12",
-      "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/images/README.md",
-      "roles": [
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "bc490a1209f616e2af5230e0911820e127f1880a7d33e12451e8684fa7bfb281",
-      "bytes": 654,
-      "legacySignatures": []
-    },
-    {
-      "id": "marketing:f5fdf1a693b70804",
-      "path": "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/images/hero.webp",
-      "roles": [
-        "asset",
-        "published-bundle"
-      ],
-      "state": "active",
-      "sourceHash": "efcf6c852f0ed073cc84b84b422fdca5cd05b6e3af61d8c9b372914dfc570a09",
-      "bytes": 276170,
       "legacySignatures": []
     },
     {
@@ -3465,7 +3005,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "877cbfc75cc47d5cf819a9e9c7259e11f424b87ca16b513a905498836fd50362"
+          "sourceHash": "fb6743508271fe93bafef6c8e4715ed424555796b91de9dd3bff6578d2350290"
         }
       ],
       "scorecard": {
@@ -3506,7 +3046,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "e46207f597fb92e2625223e3d6771b0b21e6fce52a5916eb96a99caf62f448c6"
+          "sourceHash": "c97fc1fbe49605e88b2b9ec7635d3cca2f6b2699102034f5d7107b45cf5ae6a5"
         }
       ],
       "scorecard": {
@@ -3547,7 +3087,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "01692e8d52583e278b619a066288eebe0198d235ed3707622f9fd12a2762a107"
+          "sourceHash": "5cfe37b6ef7c8b768325434f5f4cbfb464bc03f689ac1e4dc218c97423fe1c8f"
         }
       ],
       "scorecard": {
@@ -3588,7 +3128,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "4a951f4e5262eae200a2075996800a73bde4180b8006626b5b06e4ef85d9b38c"
+          "sourceHash": "e4648d5076460fb48559a67e13badfef86f8503fd21d5f67c6144b9384af7033"
         }
       ],
       "scorecard": {
@@ -3629,7 +3169,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "af256e2b1f10f82d39bfc94d0947228bef8a46eeaff560de6aa53302d90baa26"
+          "sourceHash": "0c4305eb95a782dbb45e1341e0f9a5e0781abc89f351b665ec69d2614d348fdd"
         }
       ],
       "scorecard": {
@@ -3670,7 +3210,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "557fa0d85bf027804636def871087f3e05c6be1d7a70cc9e133fe9246c51a79c"
+          "sourceHash": "0a200b56c2108b89ec8a3d2e6b52b416a7102fbc9eb59c9f2590c1ef59b34536"
         }
       ],
       "scorecard": {
@@ -3711,7 +3251,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "c9ac9dc54845ca97ba7ab0828dbc3d83b0388822edc00fb21d61965915d18b75"
+          "sourceHash": "df5a6eeb0cd7e730710c3375ebedaa1a052634f3d778eb42c07b491c8bff7f56"
         }
       ],
       "scorecard": {
@@ -3801,7 +3341,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "413084ec3915ec34b859fa0be9982dae943eea41bbeb62a36d78250f02e3cd45"
+          "sourceHash": "615384cc02a61cfde7ede522d60362224230a289ff25810f870771ba27b38e50"
         }
       ],
       "scorecard": {
@@ -3842,7 +3382,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "1ccddef63b978f65434f148971f657c40db1ac427fdc2dd888bd6cd04913dea4"
+          "sourceHash": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d"
         }
       ],
       "scorecard": {
@@ -3883,7 +3423,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "9630e7d682b87d7a7fdfc96237e04baf76b7d58d036c4ac8c9a6d00a726a78c4"
+          "sourceHash": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251"
         }
       ],
       "scorecard": {
@@ -3924,7 +3464,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "1d7d7475d668f81e440988702d5314109b08e1d4007b8c62dd7c88461c86307e"
+          "sourceHash": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203"
         }
       ],
       "scorecard": {
@@ -3965,7 +3505,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "0f695088cc091c37d4e76251de64597444a62537f1ff4da1193b7c6c3dbf1876"
+          "sourceHash": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f"
         }
       ],
       "scorecard": {
@@ -4006,7 +3546,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "d20bfc741917f185fef718e62e74b07f27cd004a8d0c8b8ecd9d85951e2eef37"
+          "sourceHash": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6"
         }
       ],
       "scorecard": {
@@ -4047,7 +3587,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "1f32de01552880063f53c966e08ad99b894f45b20aa82f7b893d4340962ed55b"
+          "sourceHash": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f"
         }
       ],
       "scorecard": {
@@ -4088,7 +3628,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "af76f26c2f6bfd18637f7cdb3ab26a7f3039e2edefd2564937f40c3afa1ff9b8"
+          "sourceHash": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630"
         }
       ],
       "scorecard": {
@@ -4129,7 +3669,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "1c6f4558895a688f21b743799de8b738867fe63287ad791647795c6b7f21fa15"
+          "sourceHash": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796"
         }
       ],
       "scorecard": {
@@ -4170,7 +3710,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "863883f520afa74d512e16a4a44f81a3718a408157531b5ed157afe8a34033fc"
+          "sourceHash": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9"
         }
       ],
       "scorecard": {
@@ -4211,7 +3751,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "2c789dfc8bd24b58cf12cce251fabfcc0e2ff5483ace570a32076ede7bd8372d"
+          "sourceHash": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9"
         }
       ],
       "scorecard": {
@@ -4252,7 +3792,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "c7955a497ef24cdb6c9fdb5e1942c9085e3f55b8aefca41a4106716d6ee0e6d3"
+          "sourceHash": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54"
         }
       ],
       "scorecard": {
@@ -4293,7 +3833,7 @@
           "channel": "blog",
           "status": "approved",
           "exists": true,
-          "sourceHash": "184dfa06310bb5383e57e2a029f2299ef81d9f88babe379ee4aabb5f7ed47924"
+          "sourceHash": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27"
         }
       ],
       "scorecard": {
@@ -4500,7 +4040,7 @@
         "marketing/assets/brand/"
       ],
       "id": "generator:cf7384e7282fda93",
-      "sourceHash": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2"
+      "sourceHash": "cd1c353175e6ba48aedbfff050b80562b5617903ab52d755c417a8398884a7ed"
     },
     {
       "path": "scripts/brand-surfaces.mts",
@@ -4512,7 +4052,7 @@
         "docs/homa-design/evidence/surfaces.json"
       ],
       "id": "generator:05b36b5e3e9fc248",
-      "sourceHash": "56d62b2c5201c60163de6020359b8a4bc1b00aaef43dd1f42bde87c1c8127acc"
+      "sourceHash": "51b9c57e154ee0b03ff9133d21448118d1634de45a0d137732636a6f5d0a5a32"
     },
     {
       "path": "scripts/socials-starter-pack-assets.mts",
@@ -4524,7 +4064,7 @@
         "marketing/assets/socials-starter-pack/"
       ],
       "id": "generator:c2bf7151a939f030",
-      "sourceHash": "8588c78431b68a94fa7e00f53b5decab3e244e13b7513ce203128a190eeacfb7"
+      "sourceHash": "9c244579d1c6d98db7c626597794de141fb967c1730393daef28df569cd0cac8"
     }
   ],
   "integrations": [

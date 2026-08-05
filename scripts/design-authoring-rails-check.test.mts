@@ -19,6 +19,13 @@ test("authoring rails evidence is green and covers every required row type", () 
 });
 
 test("authoring classification keeps skills, prompts, evaluators, and fixtures distinct", () => {
+  assert.equal(classifyAuthoringExpectation("AGENTS.md")?.type, "authoring-rule");
+  assert.equal(classifyAuthoringExpectation("BUILD.md")?.type, "authoring-rule");
+  assert.equal(classifyAuthoringExpectation("apps/mobile/AGENTS.md")?.type, "authoring-rule");
+  assert.equal(classifyAuthoringExpectation("marketing/AGENTS.md")?.type, "authoring-rule");
+  assert.equal(classifyAuthoringExpectation("docs/homa-design/doctrine.md")?.type, "authoring-rule");
+  assert.equal(classifyAuthoringExpectation("docs/homa-planning/14-marketing-demand-engine.md")?.type, "authoring-rule");
+  assert.equal(classifyAuthoringExpectation("docs/homa-curriculum-atlas/materials-patterns.md")?.type, "authoring-rule");
   assert.equal(classifyAuthoringExpectation(".agents/skills/homa-design/SKILL.md")?.type, "agent-skill");
   assert.equal(classifyAuthoringExpectation("apps/web/agent/prompt-suggestions.md")?.type, "prompt");
   assert.equal(classifyAuthoringExpectation("marketing/evals/score_bundle.py")?.type, "evaluator");
@@ -28,6 +35,11 @@ test("authoring classification keeps skills, prompts, evaluators, and fixtures d
 
 test("residue scan catches retired authored values but ignores content vocabulary and the negative sentinel", () => {
   assert.equal(scanAuthoringText(".agents/skills/marketing-illustrator/SKILL.md", "use #FBF7F0 for the hero")[0]?.rule, "legacy-palette-value");
+  assert.equal(scanAuthoringText("marketing/AGENTS.md", "use #FBF7F0 for the hero")[0]?.rule, "legacy-palette-value");
+  assert.equal(scanAuthoringText("BUILD.md", "HOMA appears in the wordmark")[0]?.rule, "legacy-wordmark-casing");
+  assert.equal(scanAuthoringText("docs/homa-design/doctrine.md", "HOMA appears in the wordmark")[0]?.rule, "legacy-wordmark-casing");
+  assert.equal(scanAuthoringText("docs/homa-planning/14-marketing-demand-engine.md", "use #FBF7F0 for the hero")[0]?.rule, "legacy-palette-value");
+  assert.equal(scanAuthoringText("docs/homa-curriculum-atlas/materials-patterns.md", "use Schibsted for worksheets")[0]?.rule, "legacy-font");
   assert.deepEqual(scanAuthoringText("apps/web/agent/skills/materials-studio/references/recipes/art-project-instructions.md", "make a doodle art page with clay"), []);
   assert.deepEqual(scanAuthoringText("packages/design/src/contract/contract.test.ts", "assert no Schibsted, Hanken, Caveat, squiggle"), []);
 });

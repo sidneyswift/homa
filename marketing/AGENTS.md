@@ -30,7 +30,8 @@ Read before doing anything in this folder. These are restated in every
    the planning docs in marketing copy; real verbatims only
    (journeys/01 §0 quote honesty rule).
 4. **Voice laws** (repo AGENTS.md + `docs/homa-design/` + `voice/house-style.md`):
-   no em dash, ever; "Homa" in prose, "HOMA" only in wordmark treatments;
+   no em dash, ever; the name is always "Homa"; render the real Logo component
+   or generated identity asset instead of typing a substitute wordmark;
    sentence case; reassure before inform; offers, never commands; no "behind"
    framing; never compare siblings; no fabricated numbers or social proof.
 5. **No secrets here.** No API keys, tokens, or credentials in this folder or in
@@ -58,7 +59,8 @@ content clusters), `swipe/` (saved hooks worth studying), `campaigns/`
 (time-boxed pushes), `experiments/` (A/B results), `creators/` (collab tracking).
 
 Never in this folder: positioning or persona source material (lives in
-`docs/homa-planning/`, reference it), design tokens (`docs/homa-design/`),
+`docs/homa-planning/`, reference it), exact design values (live in
+`packages/design/src/contract/`),
 anything from the three banned paths in law 3.
 
 ## How to run things

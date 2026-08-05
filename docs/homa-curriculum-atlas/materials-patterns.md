@@ -282,7 +282,7 @@ Page aesthetics create loyalty that survives pedagogical doubt, and
   design loyalty (`comparisons/math.md`); TPT's winners are visually
   consistent seller-brands (`marketplaces/teachers-pay-teachers.md`).
 - Homa spec: generated materials use the Homa design system
-  (`docs/homa-design/`, warm-and-playful tokens) with consistent,
+  (the Quiet authority doctrine plus `packages/design`) with consistent,
   recognizable layout DNA across every page, so a Homa page is
   identifiable at arm's length. Typography, spacing, and illustration
   style come from the design system, never from model defaults.

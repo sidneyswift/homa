@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "3f1236a8603bc6cf95c1f76f1b3ba238b49d96c7f2192d857e9ca932380c6810",
+  "ownedInputFingerprint": "68cf45ea8336ba7e4b37b52bcd832ea3e9b52670838cf17ed6700ebeb482d6ae",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -6351,10 +6351,8 @@
     {
       "surfaceId": "surface:ce2a215d05920297",
       "path": "docs/homa-curriculum-atlas/materials-patterns.md",
-      "sourceHash": "d854fa1a4fce2e5d369d2a011930c6eac82ce0e7cccb8d8bfa4941b2c1d9ba60",
-      "legacySignatures": [
-        "legacy-warm-playful-doctrine"
-      ],
+      "sourceHash": "f5b8ce19e6219fa181ddeee2439f0954efbeb4acd5556184a8709a94032a8ac9",
+      "legacySignatures": [],
       "detectedSourceHash": "d854fa1a4fce2e5d369d2a011930c6eac82ce0e7cccb8d8bfa4941b2c1d9ba60",
       "detectedLegacySignatures": [
         "legacy-warm-playful-doctrine"
@@ -6378,7 +6376,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -10567,14 +10565,8 @@
     {
       "surfaceId": "surface:da853996ad708767",
       "path": "docs/homa-planning/plans/2026-08-02-homa-interface-modernization.md",
-      "sourceHash": "1dcb5cf81e4813119b5e16f5653ecb16cf7d4f0f83c41005ec55a5fac8ddfbb4",
-      "legacySignatures": [
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shape-language",
-        "legacy-warm-playful-doctrine"
-      ],
+      "sourceHash": "a5db2c52b148d58dfcbe69003794775123560ddfbc7b9dbcbbe3cb311ee8656a",
+      "legacySignatures": [],
       "detectedSourceHash": "1dcb5cf81e4813119b5e16f5653ecb16cf7d4f0f83c41005ec55a5fac8ddfbb4",
       "detectedLegacySignatures": [
         "legacy-font-caveat",
@@ -10606,7 +10598,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -11239,7 +11231,7 @@
     {
       "surfaceId": "surface:cf7384e7282fda93",
       "path": "scripts/brand-assets.mts",
-      "sourceHash": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2",
+      "sourceHash": "cd1c353175e6ba48aedbfff050b80562b5617903ab52d755c417a8398884a7ed",
       "legacySignatures": [],
       "detectedSourceHash": "672d9b0411eb4f5c36e359763db16cc57929e723bdb61732932d61aa89a772b2",
       "detectedLegacySignatures": [
@@ -11290,7 +11282,7 @@
     {
       "surfaceId": "surface:a939e878a397d068",
       "path": "scripts/design-authoring-rails-check.mts",
-      "sourceHash": "807ad21a4c092c024e8e08c30b49ca57aa6609c342f946e4cc50ce3310ffc9fc",
+      "sourceHash": "a707b77362a8a5c9155f202f440eb06d59588face09358b21e6d20fc5cbf288f",
       "legacySignatures": [],
       "detectedSourceHash": "bc4a7158ea202e3fb84d265fb1ec96ad57e730912c58d54ea59118c38846c4f8",
       "detectedLegacySignatures": [
@@ -11347,7 +11339,7 @@
     {
       "surfaceId": "surface:ad85aba601a61db1",
       "path": "scripts/design-authoring-rails-check.test.mts",
-      "sourceHash": "c63b42fdd6d9fbaafb9860ced96834a2c4f2079177796e0907488ff75b86ab47",
+      "sourceHash": "8c40d36e1cff2a069a126a4b16913486784191cf72050c3a592fd125f7e93490",
       "legacySignatures": [],
       "detectedSourceHash": "c63b42fdd6d9fbaafb9860ced96834a2c4f2079177796e0907488ff75b86ab47",
       "detectedLegacySignatures": [
@@ -11404,10 +11396,8 @@
     {
       "surfaceId": "surface:1291077ef5055f66",
       "path": "scripts/design-tokens-check.mts",
-      "sourceHash": "69bfbb0e125c1e58a32b1eab50b25a504e466e77031169f80f97fa2fac4b537d",
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
+      "sourceHash": "a38c66f3ba31012dc8a241714da226d92964cd4e23679af2a958cdc8902b21ab",
+      "legacySignatures": [],
       "detectedSourceHash": "69bfbb0e125c1e58a32b1eab50b25a504e466e77031169f80f97fa2fac4b537d",
       "detectedLegacySignatures": [
         "legacy-token-namespace"
@@ -11431,7 +11421,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -11677,11 +11667,8 @@
     {
       "surfaceId": "surface:475295b17938644a",
       "path": "scripts/packet-render-smoke.mts",
-      "sourceHash": "c44825a3269fe77afccf4d167aac4bb01ca9b591d5bfcf21aba0be815493c31e",
-      "legacySignatures": [
-        "legacy-color-clay-muted",
-        "legacy-color-ink"
-      ],
+      "sourceHash": "17343ee4bf22ed9fd4d651053ef23ef0b1def238e8d3fe17e5c67d274b5772be",
+      "legacySignatures": [],
       "detectedSourceHash": "c44825a3269fe77afccf4d167aac4bb01ca9b591d5bfcf21aba0be815493c31e",
       "detectedLegacySignatures": [
         "legacy-color-clay-muted",
@@ -11707,7 +11694,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -11733,11 +11720,8 @@
     {
       "surfaceId": "surface:c2bf7151a939f030",
       "path": "scripts/socials-starter-pack-assets.mts",
-      "sourceHash": "8588c78431b68a94fa7e00f53b5decab3e244e13b7513ce203128a190eeacfb7",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-coral-bright"
-      ],
+      "sourceHash": "9c244579d1c6d98db7c626597794de141fb967c1730393daef28df569cd0cac8",
+      "legacySignatures": [],
       "detectedSourceHash": "8588c78431b68a94fa7e00f53b5decab3e244e13b7513ce203128a190eeacfb7",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -11763,7 +11747,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,

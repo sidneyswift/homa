@@ -25,6 +25,8 @@ a row beyond its recorded rollout state or supplies production evidence.
 `legacy-baseline.json` is the hash-specific warm-playful baseline. It is a
 quarantined comparison namespace, not an active allowlist. It is excluded from
 product bundles, indexing, generators, and active design discovery.
+The former executable kit, token manifest, templates, and screenshot bundle
+are deleted from `HEAD`; their bytes remain recoverable from Git history only.
 
 `legacy-removal.json` is the generated, fail-closed removal ledger owned by
 gh#729. Each row retains its original detection hash and signatures while also

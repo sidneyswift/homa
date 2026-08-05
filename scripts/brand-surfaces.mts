@@ -179,6 +179,7 @@ const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classi
   { match: (path) => /^marketing\/voice\/.+\.(?:md|mdx)$/.test(path) || path === "marketing/AGENTS.md", value: { type: "authoring-rule", audiences: ["developer", "public"], disposition: "replace-active", targetProfile: "authoring" } },
   { match: (path) => /^marketing\//.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich" } },
   { match: (path) => path === "DESIGN.md" || /^(?:AGENTS|BUILD|README)\.md$/.test(path) || /^docs\/homa-design\/(?!evidence\/)/.test(path), value: { type: "authoring-rule", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "authoring" } },
+  { match: (path) => path === "docs/homa-planning/14-marketing-demand-engine.md", value: { type: "authoring-rule", audiences: ["developer", "operator", "public"], disposition: "replace-active", targetProfile: "authoring", ownerIssue: "gh#739" } },
   { match: (path) => path === "docs/homa-curriculum-atlas/materials-patterns.md", value: { type: "authoring-rule", audiences: ["developer", "family", "child"], disposition: "replace-active", targetProfile: "generated-content", ownerIssue: "gh#729" } },
   { match: (path) => path === "docs/homa-planning/journeys/evidence/raw/2026-07-07-tester-voice-memos.md", value: { type: "golden-fixture", audiences: ["developer", "public"], disposition: "replace-active", targetProfile: "marketing-rich", ownerIssue: "gh#729" } },
   { match: (path) => [

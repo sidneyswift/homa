@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
+  "sourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
   "colors": {
     "canvas": "#F7F4EE",
     "ink": "#20242B",
@@ -20,48 +20,48 @@
     "errorTint": "#F5E5E1",
     "containedBand": "#27374D"
   },
-  "nativeColorScale": {
-    "stone50": "#F7F4EE",
-    "stone100": "#EEEAE2",
-    "stone200": "#DED8CC",
-    "stone300": "#918B83",
-    "stone400": "#77736B",
-    "stone500": "#68645E",
-    "stone600": "#5B5852",
-    "stone700": "#3F3D39",
-    "stone800": "#20242B",
-    "stone900": "#20242B",
-    "clay50": "#FBE8DF",
-    "clay100": "#F8D8CC",
-    "clay200": "#F1B29A",
-    "clay300": "#EA8969",
-    "clay400": "#E7602F",
-    "clay500": "#E7602F",
-    "clay600": "#A33F22",
-    "clay700": "#A33F22",
-    "sage50": "#E5EFE8",
-    "sage100": "#D7E9DC",
-    "sage200": "#B5D2BD",
-    "sage300": "#85B595",
-    "sage400": "#5F9271",
-    "sage500": "#335C46",
-    "sage600": "#335C46",
-    "sage700": "#284938",
-    "sage800": "#1F382A",
-    "gold100": "#F7EBC7",
-    "gold300": "#EBCF82",
-    "gold400": "#D6AC43",
-    "gold500": "#76560F",
-    "goldInk": "#76560F",
-    "goldInkStrong": "#4D380A",
-    "sky50": "#E4EFF2",
-    "sky100": "#E4EFF2",
-    "sky300": "#AFCED5",
-    "sky500": "#2F5968",
-    "sky600": "#2F5968",
-    "rose100": "#F5E5E1",
-    "rose500": "#923F33",
-    "rose600": "#703027"
+  "nativeTonalScale": {
+    "neutral50": "#F7F4EE",
+    "neutral100": "#EEEAE2",
+    "neutral200": "#DED8CC",
+    "neutral300": "#918B83",
+    "neutral400": "#77736B",
+    "neutral500": "#68645E",
+    "neutral600": "#5B5852",
+    "neutral700": "#3F3D39",
+    "neutral800": "#20242B",
+    "neutral900": "#20242B",
+    "brand50": "#FBE8DF",
+    "brand100": "#F8D8CC",
+    "brand200": "#F1B29A",
+    "brand300": "#EA8969",
+    "brand400": "#E7602F",
+    "brand500": "#E7602F",
+    "brand600": "#A33F22",
+    "brand700": "#A33F22",
+    "constructive50": "#E5EFE8",
+    "constructive100": "#D7E9DC",
+    "constructive200": "#B5D2BD",
+    "constructive300": "#85B595",
+    "constructive400": "#5F9271",
+    "constructive500": "#335C46",
+    "constructive600": "#335C46",
+    "constructive700": "#284938",
+    "constructive800": "#1F382A",
+    "highlight100": "#F7EBC7",
+    "highlight300": "#EBCF82",
+    "highlight400": "#D6AC43",
+    "highlight500": "#76560F",
+    "highlightInk": "#76560F",
+    "highlightInkStrong": "#4D380A",
+    "information50": "#E4EFF2",
+    "information100": "#E4EFF2",
+    "information300": "#AFCED5",
+    "information500": "#2F5968",
+    "information600": "#2F5968",
+    "error100": "#F5E5E1",
+    "error500": "#923F33",
+    "error600": "#703027"
   },
   "typography": {
     "version": "quiet-authority-v1",
@@ -102,6 +102,9 @@
     "typeRoles": {
       "hero": {
         "familyRole": "display",
+        "weights": [
+          600
+        ],
         "phone": {
           "size": 44,
           "lineHeight": 46
@@ -109,64 +112,139 @@
         "desktop": {
           "size": 64,
           "lineHeight": 66
+        },
+        "tracking": {
+          "minimumEm": -0.03,
+          "maximumEm": -0.025,
+          "rule": "wrap-tested"
         }
       },
       "pageTitle": {
         "familyRole": "display",
+        "weights": [
+          600
+        ],
         "minSize": 32,
         "maxSize": 40,
         "minLineHeight": 36,
-        "maxLineHeight": 44
+        "maxLineHeight": 44,
+        "tracking": {
+          "minimumEm": -0.025,
+          "maximumEm": -0.02,
+          "rule": "wrap-tested"
+        }
       },
       "sectionTitle": {
         "familyRole": "display",
+        "weights": [
+          600
+        ],
         "minSize": 26,
         "maxSize": 32,
         "minLineHeight": 31,
-        "maxLineHeight": 37
+        "maxLineHeight": 37,
+        "tracking": {
+          "minimumEm": -0.025,
+          "maximumEm": -0.02,
+          "rule": "wrap-tested"
+        }
+      },
+      "cardTitle": {
+        "familyRole": "display",
+        "weights": [
+          600
+        ],
+        "phone": {
+          "size": 20,
+          "lineHeight": 26
+        },
+        "desktop": {
+          "size": 22,
+          "lineHeight": 28
+        },
+        "tracking": {
+          "minimumEm": -0.02,
+          "maximumEm": 0,
+          "rule": "wrap-tested"
+        }
       },
       "body": {
         "familyRole": "interface",
+        "weights": [
+          400
+        ],
         "size": 16,
         "lineHeight": 24
       },
       "bodyLarge": {
         "familyRole": "interface",
+        "weights": [
+          400
+        ],
         "size": 18,
         "lineHeight": 28
       },
       "bodySmall": {
         "familyRole": "interface",
+        "weights": [
+          400
+        ],
         "size": 14,
         "lineHeight": 20
       },
       "control": {
         "familyRole": "interface",
+        "weights": [
+          600
+        ],
         "size": 15,
-        "lineHeight": 20
+        "lineHeight": 20,
+        "minimumSize": 14
       },
       "label": {
         "familyRole": "interface",
+        "weights": [
+          600
+        ],
         "size": 14,
         "lineHeight": 20
       },
       "caption": {
         "familyRole": "interface",
+        "weights": [
+          500
+        ],
         "size": 13,
-        "lineHeight": 18
+        "lineHeight": 18,
+        "meaningfulCustomerTextFloor": true
       },
       "eyebrow": {
         "familyRole": "interface",
+        "weights": [
+          700
+        ],
         "size": 12,
         "lineHeight": 16,
-        "tracking": "0.08em"
+        "tracking": "0.08em",
+        "usage": "nonessential-orientation-only"
       },
       "metric": {
         "familyRole": "interface",
-        "size": 16,
+        "weights": [
+          600,
+          700
+        ],
+        "minSize": 16,
+        "maxSizePhone": 36,
+        "maxSizeDesktop": 40,
         "lineHeight": 20,
         "tabular": true
       }
+    },
+    "displayLineBehavior": {
+      "balance": "intentional",
+      "preferredMaximumLines": 2,
+      "exception": "localization-or-accessibility-expansion"
     },
     "sentenceCase": true
   },
@@ -676,8 +754,44 @@
       "phoneGutter": 20,
       "desktopGutter": 32
     },
+    "density": {
+      "phoneOuterPadding": {
+        "minimum": 16,
+        "maximum": 20
+      },
+      "desktopContentPadding": {
+        "minimum": 32,
+        "maximum": 40
+      },
+      "relatedControlsGap": {
+        "minimum": 8,
+        "maximum": 12
+      },
+      "cardInternalGap": {
+        "minimum": 12,
+        "maximum": 16
+      },
+      "majorRegionGap": {
+        "phone": 24,
+        "desktop": 32
+      },
+      "interactiveRowMinimumHeight": {
+        "titleAndMetadata": 52,
+        "otherwise": 44
+      }
+    },
+    "mediaGeometry": {
+      "declaredAspectRatio": "required",
+      "objectFit": "contain",
+      "reserveFinalDimensionsBeforeLoad": true,
+      "cropRequiresExplicitPreviewAffordance": true
+    },
     "maximumElevationLevels": 2,
-    "nestedBorderedCardDefault": false
+    "nestedBorderedCardDefault": false,
+    "pillPolicy": {
+      "default": false,
+      "usage": "compact-selections-only"
+    }
   },
   "motion": {
     "version": "quiet-authority-v1",
@@ -698,7 +812,69 @@
     "easeInOut": "cubic-bezier(0.5, 0, 0.2, 1)",
     "pressScale": 0.98,
     "reducedMotionEndpoint": "final-still-immediately",
-    "loopPolicy": "truthful-live-state-only"
+    "loopPolicy": "truthful-live-state-only",
+    "semanticRoles": {
+      "press": {
+        "duration": 120,
+        "properties": [
+          "scale"
+        ],
+        "endpoint": "accepted-direct-manipulation"
+      },
+      "select": {
+        "duration": {
+          "minimum": 120,
+          "maximum": 200
+        },
+        "properties": [
+          "color",
+          "border",
+          "opacity"
+        ],
+        "endpoint": "selected-context-linked"
+      },
+      "reveal": {
+        "duration": 200,
+        "travelPx": {
+          "minimum": 4,
+          "maximum": 8
+        },
+        "properties": [
+          "transform",
+          "opacity"
+        ],
+        "endpoint": "content-relevant"
+      },
+      "context": {
+        "duration": {
+          "minimum": 200,
+          "maximum": 320
+        },
+        "origin": "physical-origin",
+        "endpoint": "context-open-or-closed"
+      },
+      "objectContinuity": {
+        "durationMaximum": 320,
+        "properties": [
+          "transform",
+          "opacity"
+        ],
+        "endpoint": "same-object-new-state"
+      },
+      "completion": {
+        "durationMaximum": 320,
+        "repetitions": 1,
+        "prerequisite": "server-or-device-truth",
+        "endpoint": "confirmed-completion"
+      }
+    },
+    "interruption": {
+      "cancellation": "resolve-immediately-to-newest-true-state",
+      "expiry": "required-for-every-live-motion",
+      "truthSourceLoss": "stop-and-resolve-to-current-state",
+      "criticalExitMayDelay": false,
+      "voiceHandoffMayDelay": false
+    }
   },
   "states": {
     "version": "quiet-authority-v1",
@@ -746,6 +922,36 @@
         "ink": "errorInk",
         "tint": "errorTint"
       }
+    },
+    "selectedStateContract": {
+      "carriers": [
+        "surface-tint",
+        "border",
+        "text",
+        "context",
+        "accessible-state"
+      ],
+      "requiredVisualCarriers": [
+        "surface-tint",
+        "border",
+        "text",
+        "context"
+      ],
+      "requiredAccessibleCarrier": "accessible-state",
+      "colorAlone": false,
+      "minimumConcurrentCarriers": 5,
+      "functionalAnchor": "midnightAction",
+      "prohibitedSemanticSubstitutes": [
+        "constructive",
+        "info",
+        "highlight",
+        "error"
+      ]
+    },
+    "stateCarrierPolicy": {
+      "everyStateHasLanguageOrAccessibleState": true,
+      "semanticColorRequiresTruth": true,
+      "childWorthIsNeverAState": true
     }
   },
   "profiles": {
@@ -1246,6 +1452,8 @@
   "doctrine": {
     "version": "quiet-authority-v1",
     "name": "quiet-authority",
+    "displayName": "Homa, quiet authority",
+    "description": "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.",
     "principles": [
       "real-work-leads",
       "homa-keeps-the-thread",
@@ -1281,48 +1489,48 @@
     "schemaVersion": 1,
     "source": "@homa/design/contract",
     "theme": {
-      "palette": {
-        "stone50": "#F7F4EE",
-        "stone100": "#EEEAE2",
-        "stone200": "#DED8CC",
-        "stone300": "#918B83",
-        "stone400": "#77736B",
-        "stone500": "#68645E",
-        "stone600": "#5B5852",
-        "stone700": "#3F3D39",
-        "stone800": "#20242B",
-        "stone900": "#20242B",
-        "clay50": "#FBE8DF",
-        "clay100": "#F8D8CC",
-        "clay200": "#F1B29A",
-        "clay300": "#EA8969",
-        "clay400": "#E7602F",
-        "clay500": "#E7602F",
-        "clay600": "#A33F22",
-        "clay700": "#A33F22",
-        "sage50": "#E5EFE8",
-        "sage100": "#D7E9DC",
-        "sage200": "#B5D2BD",
-        "sage300": "#85B595",
-        "sage400": "#5F9271",
-        "sage500": "#335C46",
-        "sage600": "#335C46",
-        "sage700": "#284938",
-        "sage800": "#1F382A",
-        "gold100": "#F7EBC7",
-        "gold300": "#EBCF82",
-        "gold400": "#D6AC43",
-        "gold500": "#76560F",
-        "goldInk": "#76560F",
-        "goldInkStrong": "#4D380A",
-        "sky50": "#E4EFF2",
-        "sky100": "#E4EFF2",
-        "sky300": "#AFCED5",
-        "sky500": "#2F5968",
-        "sky600": "#2F5968",
-        "rose100": "#F5E5E1",
-        "rose500": "#923F33",
-        "rose600": "#703027"
+      "tonalScale": {
+        "neutral50": "#F7F4EE",
+        "neutral100": "#EEEAE2",
+        "neutral200": "#DED8CC",
+        "neutral300": "#918B83",
+        "neutral400": "#77736B",
+        "neutral500": "#68645E",
+        "neutral600": "#5B5852",
+        "neutral700": "#3F3D39",
+        "neutral800": "#20242B",
+        "neutral900": "#20242B",
+        "brand50": "#FBE8DF",
+        "brand100": "#F8D8CC",
+        "brand200": "#F1B29A",
+        "brand300": "#EA8969",
+        "brand400": "#E7602F",
+        "brand500": "#E7602F",
+        "brand600": "#A33F22",
+        "brand700": "#A33F22",
+        "constructive50": "#E5EFE8",
+        "constructive100": "#D7E9DC",
+        "constructive200": "#B5D2BD",
+        "constructive300": "#85B595",
+        "constructive400": "#5F9271",
+        "constructive500": "#335C46",
+        "constructive600": "#335C46",
+        "constructive700": "#284938",
+        "constructive800": "#1F382A",
+        "highlight100": "#F7EBC7",
+        "highlight300": "#EBCF82",
+        "highlight400": "#D6AC43",
+        "highlight500": "#76560F",
+        "highlightInk": "#76560F",
+        "highlightInkStrong": "#4D380A",
+        "information50": "#E4EFF2",
+        "information100": "#E4EFF2",
+        "information300": "#AFCED5",
+        "information500": "#2F5968",
+        "information600": "#2F5968",
+        "error100": "#F5E5E1",
+        "error500": "#923F33",
+        "error600": "#703027"
       },
       "colors": {
         "light": {
@@ -1338,10 +1546,10 @@
           "brandHover": "#A33F22",
           "brandSoft": "#FBE8DF",
           "onBrand": "#FFFEFC",
-          "sage": "#335C46",
-          "sageSoft": "#E5EFE8",
-          "gold": "#76560F",
-          "goldSoft": "#F7EBC7",
+          "constructive": "#335C46",
+          "constructiveSoft": "#E5EFE8",
+          "highlight": "#76560F",
+          "highlightSoft": "#F7EBC7",
           "border": "#918B83",
           "borderSubtle": "#DED8CC",
           "focusRing": "#E7602F",
@@ -1364,10 +1572,10 @@
           "brandHover": "#F0835A",
           "brandSoft": "#573426",
           "onBrand": "#FFFEFC",
-          "sage": "#9BC5A8",
-          "sageSoft": "#294737",
-          "gold": "#EBCF82",
-          "goldSoft": "#51431F",
+          "constructive": "#9BC5A8",
+          "constructiveSoft": "#294737",
+          "highlight": "#EBCF82",
+          "highlightSoft": "#51431F",
           "border": "#53677D",
           "borderSubtle": "#40546A",
           "focusRing": "#F0835A",
@@ -1415,6 +1623,9 @@
         "typeRoles": {
           "hero": {
             "familyRole": "display",
+            "weights": [
+              600
+            ],
             "phone": {
               "size": 44,
               "lineHeight": 46
@@ -1422,61 +1633,131 @@
             "desktop": {
               "size": 64,
               "lineHeight": 66
+            },
+            "tracking": {
+              "minimumEm": -0.03,
+              "maximumEm": -0.025,
+              "rule": "wrap-tested"
             }
           },
           "pageTitle": {
             "familyRole": "display",
+            "weights": [
+              600
+            ],
             "minSize": 32,
             "maxSize": 40,
             "minLineHeight": 36,
-            "maxLineHeight": 44
+            "maxLineHeight": 44,
+            "tracking": {
+              "minimumEm": -0.025,
+              "maximumEm": -0.02,
+              "rule": "wrap-tested"
+            }
           },
           "sectionTitle": {
             "familyRole": "display",
+            "weights": [
+              600
+            ],
             "minSize": 26,
             "maxSize": 32,
             "minLineHeight": 31,
-            "maxLineHeight": 37
+            "maxLineHeight": 37,
+            "tracking": {
+              "minimumEm": -0.025,
+              "maximumEm": -0.02,
+              "rule": "wrap-tested"
+            }
+          },
+          "cardTitle": {
+            "familyRole": "display",
+            "weights": [
+              600
+            ],
+            "phone": {
+              "size": 20,
+              "lineHeight": 26
+            },
+            "desktop": {
+              "size": 22,
+              "lineHeight": 28
+            },
+            "tracking": {
+              "minimumEm": -0.02,
+              "maximumEm": 0,
+              "rule": "wrap-tested"
+            }
           },
           "body": {
             "familyRole": "interface",
+            "weights": [
+              400
+            ],
             "size": 16,
             "lineHeight": 24
           },
           "bodyLarge": {
             "familyRole": "interface",
+            "weights": [
+              400
+            ],
             "size": 18,
             "lineHeight": 28
           },
           "bodySmall": {
             "familyRole": "interface",
+            "weights": [
+              400
+            ],
             "size": 14,
             "lineHeight": 20
           },
           "control": {
             "familyRole": "interface",
+            "weights": [
+              600
+            ],
             "size": 15,
-            "lineHeight": 20
+            "lineHeight": 20,
+            "minimumSize": 14
           },
           "label": {
             "familyRole": "interface",
+            "weights": [
+              600
+            ],
             "size": 14,
             "lineHeight": 20
           },
           "caption": {
             "familyRole": "interface",
+            "weights": [
+              500
+            ],
             "size": 13,
-            "lineHeight": 18
+            "lineHeight": 18,
+            "meaningfulCustomerTextFloor": true
           },
           "eyebrow": {
             "familyRole": "interface",
+            "weights": [
+              700
+            ],
             "size": 12,
             "lineHeight": 16,
-            "tracking": "0.08em"
+            "tracking": "0.08em",
+            "usage": "nonessential-orientation-only"
           },
           "metric": {
             "familyRole": "interface",
-            "size": 16,
+            "weights": [
+              600,
+              700
+            ],
+            "minSize": 16,
+            "maxSizePhone": 36,
+            "maxSizeDesktop": 40,
             "lineHeight": 20,
             "tabular": true
           }
@@ -1651,7 +1932,69 @@
         "easeInOut": "cubic-bezier(0.5, 0, 0.2, 1)",
         "pressScale": 0.98,
         "reducedMotionEndpoint": "final-still-immediately",
-        "loopPolicy": "truthful-live-state-only"
+        "loopPolicy": "truthful-live-state-only",
+        "semanticRoles": {
+          "press": {
+            "duration": 120,
+            "properties": [
+              "scale"
+            ],
+            "endpoint": "accepted-direct-manipulation"
+          },
+          "select": {
+            "duration": {
+              "minimum": 120,
+              "maximum": 200
+            },
+            "properties": [
+              "color",
+              "border",
+              "opacity"
+            ],
+            "endpoint": "selected-context-linked"
+          },
+          "reveal": {
+            "duration": 200,
+            "travelPx": {
+              "minimum": 4,
+              "maximum": 8
+            },
+            "properties": [
+              "transform",
+              "opacity"
+            ],
+            "endpoint": "content-relevant"
+          },
+          "context": {
+            "duration": {
+              "minimum": 200,
+              "maximum": 320
+            },
+            "origin": "physical-origin",
+            "endpoint": "context-open-or-closed"
+          },
+          "objectContinuity": {
+            "durationMaximum": 320,
+            "properties": [
+              "transform",
+              "opacity"
+            ],
+            "endpoint": "same-object-new-state"
+          },
+          "completion": {
+            "durationMaximum": 320,
+            "repetitions": 1,
+            "prerequisite": "server-or-device-truth",
+            "endpoint": "confirmed-completion"
+          }
+        },
+        "interruption": {
+          "cancellation": "resolve-immediately-to-newest-true-state",
+          "expiry": "required-for-every-live-motion",
+          "truthSourceLoss": "stop-and-resolve-to-current-state",
+          "criticalExitMayDelay": false,
+          "voiceHandoffMayDelay": false
+        }
       }
     },
     "primitiveRoles": [
@@ -1667,15 +2010,8 @@
       "feedback",
       "artifact"
     ],
-    "primitiveAdapters": {
+    "primitiveRequirements": {
       "text": {
-        "component": "NativeText",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "new-primitive",
-        "legacyComponents": [
-          "react-native/Text",
-          "route-local text styles"
-        ],
         "requiredStates": [
           "rest",
           "dynamic-type",
@@ -1687,13 +2023,6 @@
         ]
       },
       "surface": {
-        "component": "NativeSurface",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "new-primitive",
-        "legacyComponents": [
-          "Card",
-          "route-local View surfaces"
-        ],
         "requiredStates": [
           "rest",
           "appearance",
@@ -1705,14 +2034,6 @@
         ]
       },
       "action": {
-        "component": "NativeAction",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "wrap-existing",
-        "legacyComponents": [
-          "Button",
-          "IconButton",
-          "route-local Pressable"
-        ],
         "requiredStates": [
           "rest",
           "pressed",
@@ -1735,13 +2056,6 @@
         ]
       },
       "field": {
-        "component": "NativeField",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "wrap-existing",
-        "legacyComponents": [
-          "TextField",
-          "route-local TextInput"
-        ],
         "requiredStates": [
           "rest",
           "pressed",
@@ -1764,14 +2078,6 @@
         ]
       },
       "choice": {
-        "component": "NativeChoice",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "new-primitive",
-        "legacyComponents": [
-          "route-local radio",
-          "route-local checkbox",
-          "route-local Switch"
-        ],
         "requiredStates": [
           "rest",
           "pressed",
@@ -1794,14 +2100,6 @@
         ]
       },
       "status": {
-        "component": "NativeStatus",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "wrap-existing",
-        "legacyComponents": [
-          "InlineError",
-          "LoadingStatus",
-          "route-local status rows"
-        ],
         "requiredStates": [
           "loading",
           "success",
@@ -1817,13 +2115,6 @@
         ]
       },
       "identity": {
-        "component": "NativeIdentity",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "wrap-existing",
-        "legacyComponents": [
-          "Logo",
-          "Homa character adapters"
-        ],
         "requiredStates": [
           "rest",
           "appearance",
@@ -1835,14 +2126,6 @@
         ]
       },
       "navigation": {
-        "component": "NativeNavigation",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "new-primitive",
-        "legacyComponents": [
-          "SidebarNav",
-          "AppDrawer",
-          "route-local navigation Pressable"
-        ],
         "requiredStates": [
           "rest",
           "pressed",
@@ -1858,13 +2141,6 @@
         ]
       },
       "sheet": {
-        "component": "NativeSheet",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "wrap-existing",
-        "legacyComponents": [
-          "AccessibleModal",
-          "route-local Modal"
-        ],
         "requiredStates": [
           "rest",
           "loading",
@@ -1881,13 +2157,6 @@
         ]
       },
       "feedback": {
-        "component": "NativeFeedback",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "new-primitive",
-        "legacyComponents": [
-          "useAccessibilityAnnouncement",
-          "route-local completion cues"
-        ],
         "requiredStates": [
           "pressed",
           "success",
@@ -1903,14 +2172,6 @@
         ]
       },
       "artifact": {
-        "component": "NativeArtifact",
-        "source": "apps/mobile/src/components/ui/semantic.tsx",
-        "disposition": "new-primitive",
-        "legacyComponents": [
-          "material cards",
-          "report previews",
-          "route-local artifact rows"
-        ],
         "requiredStates": [
           "rest",
           "pressed",

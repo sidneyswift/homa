@@ -1,6 +1,6 @@
 {
   "version": "quiet-authority-v1",
-  "sourceChecksum": "f93cca77ba011e465fe6042456c6d4e3fe5618648c1450e4ca54b78e67362bc0",
+  "sourceChecksum": "8dfdc79078a991464726c7e23cb97fefcca6664c17b3a8016d561c688178a4c0",
   "channels": {
     "version": "quiet-authority-v1",
     "brandChannels": [
@@ -532,6 +532,9 @@
     "typeRoles": {
       "hero": {
         "familyRole": "display",
+        "weights": [
+          600
+        ],
         "phone": {
           "size": 44,
           "lineHeight": 46
@@ -539,64 +542,139 @@
         "desktop": {
           "size": 64,
           "lineHeight": 66
+        },
+        "tracking": {
+          "minimumEm": -0.03,
+          "maximumEm": -0.025,
+          "rule": "wrap-tested"
         }
       },
       "pageTitle": {
         "familyRole": "display",
+        "weights": [
+          600
+        ],
         "minSize": 32,
         "maxSize": 40,
         "minLineHeight": 36,
-        "maxLineHeight": 44
+        "maxLineHeight": 44,
+        "tracking": {
+          "minimumEm": -0.025,
+          "maximumEm": -0.02,
+          "rule": "wrap-tested"
+        }
       },
       "sectionTitle": {
         "familyRole": "display",
+        "weights": [
+          600
+        ],
         "minSize": 26,
         "maxSize": 32,
         "minLineHeight": 31,
-        "maxLineHeight": 37
+        "maxLineHeight": 37,
+        "tracking": {
+          "minimumEm": -0.025,
+          "maximumEm": -0.02,
+          "rule": "wrap-tested"
+        }
+      },
+      "cardTitle": {
+        "familyRole": "display",
+        "weights": [
+          600
+        ],
+        "phone": {
+          "size": 20,
+          "lineHeight": 26
+        },
+        "desktop": {
+          "size": 22,
+          "lineHeight": 28
+        },
+        "tracking": {
+          "minimumEm": -0.02,
+          "maximumEm": 0,
+          "rule": "wrap-tested"
+        }
       },
       "body": {
         "familyRole": "interface",
+        "weights": [
+          400
+        ],
         "size": 16,
         "lineHeight": 24
       },
       "bodyLarge": {
         "familyRole": "interface",
+        "weights": [
+          400
+        ],
         "size": 18,
         "lineHeight": 28
       },
       "bodySmall": {
         "familyRole": "interface",
+        "weights": [
+          400
+        ],
         "size": 14,
         "lineHeight": 20
       },
       "control": {
         "familyRole": "interface",
+        "weights": [
+          600
+        ],
         "size": 15,
-        "lineHeight": 20
+        "lineHeight": 20,
+        "minimumSize": 14
       },
       "label": {
         "familyRole": "interface",
+        "weights": [
+          600
+        ],
         "size": 14,
         "lineHeight": 20
       },
       "caption": {
         "familyRole": "interface",
+        "weights": [
+          500
+        ],
         "size": 13,
-        "lineHeight": 18
+        "lineHeight": 18,
+        "meaningfulCustomerTextFloor": true
       },
       "eyebrow": {
         "familyRole": "interface",
+        "weights": [
+          700
+        ],
         "size": 12,
         "lineHeight": 16,
-        "tracking": "0.08em"
+        "tracking": "0.08em",
+        "usage": "nonessential-orientation-only"
       },
       "metric": {
         "familyRole": "interface",
-        "size": 16,
+        "weights": [
+          600,
+          700
+        ],
+        "minSize": 16,
+        "maxSizePhone": 36,
+        "maxSizeDesktop": 40,
         "lineHeight": 20,
         "tabular": true
       }
+    },
+    "displayLineBehavior": {
+      "balance": "intentional",
+      "preferredMaximumLines": 2,
+      "exception": "localization-or-accessibility-expansion"
     },
     "sentenceCase": true
   },
@@ -1086,6 +1164,8 @@
   "doctrine": {
     "version": "quiet-authority-v1",
     "name": "quiet-authority",
+    "displayName": "Homa, quiet authority",
+    "description": "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move.",
     "principles": [
       "real-work-leads",
       "homa-keeps-the-thread",
