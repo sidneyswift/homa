@@ -11,6 +11,13 @@ or unclassified work. Rows use the approved manifest types, the three
 criticality levels, the ten dispositions, and the five delivery states from
 the implementation plan.
 
+Pull requests that change generated brand evidence must land with a merge
+commit, never squash or rebase merge. Source rows bind the exact authored
+commit lineage, which cannot name a future squash commit. A two-parent checkout
+may use its second parent only when the complete Git tree is byte-identical;
+any tree difference stays stale and requires rebase plus regeneration. Main CI
+therefore fails closed if the wrong merge mode rewrites that provenance.
+
 The `brand-inventory-v1` completeness guard is part of
 `pnpm check:brand-surfaces`. It fails closed when authoring, artifacts,
 providers, admin, marketing, native, or external-channel coverage disappears,
