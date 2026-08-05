@@ -33,6 +33,7 @@ import {
   classifyGeneratedWebRouteHandlerBoundary,
   generatedWebRouteHandlerRuntimePolicy,
 } from "./brand-route-boundary.mts";
+import { collectLatestCommittedSources, resolveBrandSourceRef } from "./brand-source-provenance.mts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = resolve(ROOT, "docs/homa-design/evidence/surfaces.json");
@@ -58,19 +59,14 @@ const workingTreePaths = new Set([
   ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
   ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
 ]);
-const latestCommittedSource = new Map<string, { sha: string; committedAt: string }>();
-let commitSource: { sha: string; committedAt: string } | null = null;
 // First-parent history identifies the commit that delivered each path into the
 // current release lineage. Diffing every merge parent would falsely attribute
 // a file to a later unrelated merge whose side branch simply lacked the file.
-for (const line of git("log", "--first-parent", "--format=@@source:%H%x09%cI", "--name-only", "--no-renames", "HEAD").split("\n")) {
-  if (line.startsWith("@@source:")) {
-    const [sha, committedAt] = line.slice("@@source:".length).split("\t");
-    commitSource = sha && committedAt ? { sha, committedAt } : null;
-  } else if (line && commitSource && !latestCommittedSource.has(line)) {
-    latestCommittedSource.set(line, commitSource);
-  }
-}
+// A synthetic PR merge whose tree exactly equals its second parent uses that
+// parent as the content source. A merge with any tree change stays on HEAD and
+// fails stale evidence until the branch is rebased and regenerated.
+const provenanceRef = resolveBrandSourceRef(git);
+const latestCommittedSource = collectLatestCommittedSources(git, provenanceRef);
 const existing = existsSync(OUTPUT)
   ? JSON.parse(readFileSync(OUTPUT, "utf8")) as Partial<BrandSurfaceManifest>
   : null;

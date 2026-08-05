@@ -27,6 +27,7 @@ import {
   validatedWebRouteHandlerRuntimePolicy,
 } from "./brand-inventory-completeness-check.mts";
 import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
+import { collectLatestCommittedSources, resolveBrandSourceRef, type GitTextCommand } from "./brand-source-provenance.mts";
 
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/surfaces.json"), "utf8")) as BrandSurfaceManifest;
@@ -42,16 +43,39 @@ const workingTreePaths = new Set([
   ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
   ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
 ]);
-const latestCommittedSource = new Map<string, { sha: string; committedAt: string }>();
-let committedSource: { sha: string; committedAt: string } | null = null;
-for (const line of git("log", "--first-parent", "--format=@@source:%H%x09%cI", "--name-only", "--no-renames", "HEAD").split("\n")) {
-  if (line.startsWith("@@source:")) {
-    const [sha, committedAt] = line.slice("@@source:".length).split("\t");
-    committedSource = sha && committedAt ? { sha, committedAt } : null;
-  } else if (line && committedSource && !latestCommittedSource.has(line)) {
-    latestCommittedSource.set(line, committedSource);
-  }
+const latestCommittedSource = collectLatestCommittedSources(git);
+
+function stubGit(responses: Readonly<Record<string, string>>): GitTextCommand {
+  return (...args) => {
+    const key = args.join(" ");
+    const response = responses[key];
+    assert.notEqual(response, undefined, `unexpected Git command: ${key}`);
+    return response!;
+  };
 }
+
+test("source provenance unwraps a byte-identical two-parent checkout", () => {
+  const gitStub = stubGit({
+    "rev-list --parents -n 1 HEAD": "merge base content",
+    "rev-parse merge^{tree}": "tree-content",
+    "rev-parse content^{tree}": "tree-content",
+  });
+  assert.equal(resolveBrandSourceRef(gitStub), "content");
+});
+
+test("source provenance keeps a merge that introduces any tree change", () => {
+  const gitStub = stubGit({
+    "rev-list --parents -n 1 HEAD": "merge base content",
+    "rev-parse merge^{tree}": "tree-merged",
+    "rev-parse content^{tree}": "tree-content",
+  });
+  assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
+});
+
+test("source provenance keeps an ordinary one-parent checkout", () => {
+  const gitStub = stubGit({ "rev-list --parents -n 1 HEAD": "head parent" });
+  assert.equal(resolveBrandSourceRef(gitStub), "HEAD");
+});
 
 test("manifest IDs, paths, and ordering are unique and deterministic", () => {
   const paths = manifest.surfaces.map((surface) => surface.paths[0]!);
