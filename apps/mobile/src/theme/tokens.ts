@@ -1,8 +1,7 @@
 /**
- * Compatibility names for existing mobile routes. The values are projected
- * from @homa/design/contract in native-projection.ts. New primitives should
- * import the projection directly, while route migrations can keep these
- * semantic names until their local styles are replaced.
+ * Frozen compatibility names for existing mobile routes. New primitives use
+ * the `quiet*` exports from native-projection.ts. Route migrations remove
+ * these names instead of changing their values in place.
  */
 export {
   colors,
@@ -13,6 +12,12 @@ export {
   palette,
   pressScale,
   quietColors,
+  quietElevation,
+  quietPressScale,
+  quietRadii,
+  quietSpace,
+  quietTonalScale,
+  quietTypeScale,
   radius,
   shadows,
   space,
