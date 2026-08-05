@@ -28,7 +28,10 @@ import {
 } from "../packages/design/src/historical-quarantine.ts";
 import {
   assertNoUnresolvedInterceptingRoutes,
+  assertNoUnresolvedRouteHandlers,
   classifyGeneratedWebRouteBoundary,
+  classifyGeneratedWebRouteHandlerBoundary,
+  generatedWebRouteHandlerRuntimePolicy,
 } from "./brand-route-boundary.mts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -50,6 +53,7 @@ const trackedFiles = git("ls-files", "--cached", "--others", "--exclude-standard
   .filter(Boolean)
   .sort();
 assertNoUnresolvedInterceptingRoutes(trackedFiles);
+assertNoUnresolvedRouteHandlers(trackedFiles);
 const workingTreePaths = new Set([
   ...git("diff", "--name-only", "HEAD").split("\n").filter(Boolean),
   ...git("ls-files", "--others", "--exclude-standard").split("\n").filter(Boolean),
@@ -127,15 +131,24 @@ const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classi
   { match: (path) => path === "apps/web/lib/materials/page-shell.ts", value: { type: "renderer", audiences: ["family", "child"], disposition: "regenerate-derived", targetProfile: "artifact-print" } },
   { match: (path) => /^apps\/web\/app\/blog(?:\/.+)?\/(?:page|layout|loading|error|not-found|opengraph-image|twitter-image|apple-icon)\.tsx$/.test(path), value: { type: "route", audiences: ["public"], disposition: "replace-active", targetProfile: "web-product", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => path === "apps/web/app/blog/rss.xml/route.ts", value: { type: "renderer", audiences: ["public", "provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => path === "apps/web/app/homa.vcf/route.ts", value: { type: "renderer", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => /^apps\/web\/app\/auth\/(?:callback|confirm)\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["public", "provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/web\/content\/blog\/.+\.mdx$/.test(path), value: { type: "template", audiences: ["public"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => path === "apps/web/lib/blog.ts" || path === "apps/web/lib/blog-clusters.ts", value: { type: "generator", audiences: ["public", "developer"], disposition: "replace-active", targetProfile: "marketing-rich", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => classifyGeneratedWebRouteBoundary(path) === "family", value: { type: "route", audiences: ["family"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
   { match: (path) => classifyGeneratedWebRouteBoundary(path) === "operator", value: { type: "route", audiences: ["operator"], disposition: "replace-active", targetProfile: "web-product", reachability: "authenticated", deliveryState: "controlled-current" } },
   { match: (path) => classifyGeneratedWebRouteBoundary(path) === "developer", value: { type: "route", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", deliveryState: "controlled-current" } },
   { match: (path) => classifyGeneratedWebRouteBoundary(path) === "public", value: { type: "route", audiences: ["public"], disposition: "replace-active", targetProfile: "web-product", reachability: "public", deliveryState: "revocable-public" } },
-  { match: (path) => /^apps\/web\/app\/api\/(?:link-phone|email\/unsubscribe)\/route\.ts$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained" } },
-  { match: (path) => /^apps\/web\/app\/.+\/route\.ts$/.test(path), value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained" } },
-  { match: (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path) || /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path), value: { type: "generator", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "public", value: { type: "renderer", audiences: ["public"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "public", deliveryState: "revocable-public" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "family", value: { type: "renderer", audiences: ["family"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "family-device", value: { type: "renderer", audiences: ["family", "developer"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "operator", value: { type: "renderer", audiences: ["operator"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "provider", value: { type: "renderer", audiences: ["provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "developer", value: { type: "renderer", audiences: ["developer"], disposition: "replace-active", targetProfile: "verification", reachability: "internal", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "developer-family", value: { type: "renderer", audiences: ["developer", "family"], disposition: "replace-active", targetProfile: "verification", reachability: "internal", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "internal-service", value: { type: "renderer", audiences: ["developer", "operator"], disposition: "replace-active", targetProfile: "verification", reachability: "internal", deliveryState: "controlled-current" } },
+  { match: (path) => classifyGeneratedWebRouteHandlerBoundary(path) === "mixed-family-provider", value: { type: "renderer", audiences: ["family", "provider"], disposition: "replace-active", targetProfile: "web-constrained", reachability: "authenticated", deliveryState: "controlled-current" } },
+  { match: (path) => /^apps\/web\/app\/(?:manifest|robots|sitemap)\.ts$/.test(path) || /^apps\/web\/public\/(?:ai|llms|llms-full)\.txt$/.test(path), value: { type: "generator", audiences: ["public", "provider"], disposition: "regenerate-derived", targetProfile: "metadata-constrained", reachability: "public", deliveryState: "revocable-public" } },
   { match: (path) => /^apps\/mobile\/src\/app\/.+\.tsx$/.test(path), value: { type: "screen", audiences: ["family"], disposition: "replace-active", targetProfile: "native-product" } },
   { match: (path) => /(?:^|\/)(?:email|emails)(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|html)$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "email-constrained" } },
   { match: (path) => /(?:^|\/)sms(?:\/|[-.])/.test(path) && /\.(?:ts|tsx|md)$/.test(path), value: { type: "template", audiences: ["family"], disposition: "replace-active", targetProfile: "sms-plain-text" } },
@@ -292,6 +305,7 @@ function ownerIssue(path: string): `gh#${number}` {
   if (path === "apps/mobile/eas.json") return "gh#730";
   if (/^apps\/mobile\//.test(path)) return "gh#686";
   if (/^apps\/web\/(?:app|components)\/admin\//.test(path)) return "gh#733";
+  if (/^(?:apps\/web\/app\/blog|apps\/web\/content\/blog|apps\/web\/lib\/blog(?:-clusters)?\.ts$)/.test(path)) return "gh#683";
   if (/report|material|print|pdf|compliance|filing/.test(path)) return "gh#687";
   if (/^marketing\//.test(path)) return "gh#741";
   if (/(?:email|sms|telnyx|handwrytten)/.test(path)) return "gh#688";
@@ -371,6 +385,7 @@ function consumersFor(path: string, type: BrandManifestType): string[] {
 
 function recordFor(path: string): BrandSurfaceRecord {
   const classification = classify(path);
+  const runtimeBoundary = generatedWebRouteHandlerRuntimePolicy(path);
   const bytes = readFileSync(resolve(ROOT, path));
   const sourceHash = sha256(bytes);
   const text = isLegacyTextPath(path) ? bytes.toString("utf8") : "";
@@ -389,7 +404,7 @@ function recordFor(path: string): BrandSurfaceRecord {
   const isHistoricalQuarantine = classification.targetProfile === "historical-private-provenance";
   return {
     id: `surface:${sha256(path).slice(0, 16)}`,
-    paths: [path], type: classification.type, reachability, audiences,
+    paths: [path], type: classification.type, reachability, audiences, runtimeBoundary,
     criticality: criticality(path, audiences), ownerIssue: classification.ownerIssue ?? ownerIssue(path),
     upstreamDomainOwners: [classification.targetProfile],
     dependencies: ["@homa/design"],
@@ -461,7 +476,7 @@ const providerRecords: BrandSurfaceRecord[] = externalSurfaces.map(([key, type, 
   id: `surface:${sha256(key).slice(0, 16)}`,
   paths: [key], type: type as BrandManifestType,
   reachability: key.includes("google-play") || key.includes("future-mobile-push") ? "internal" : "external",
-  audiences: ["family", "provider"], criticality: criticalityValue as BrandCriticality, ownerIssue: issue as `gh#${number}`,
+  audiences: ["family", "provider"], runtimeBoundary: null, criticality: criticalityValue as BrandCriticality, ownerIssue: issue as `gh#${number}`,
   upstreamDomainOwners: ["constrained-projection"], dependencies: ["@homa/design/constrained-projection"], requiredStates: ["default", "failure", "fallback"], viewports: [], devices: [], clients: ["provider-client"], assistiveModes: [], appearanceModes: ["provider-supported"],
   consumers: ["provider-projection", "brand-surface-manifest"],
   baseline: { fixtureChecksum: null, renderPath: null, interactionRecordingPath: null }, approvedTarget: "quiet-authority-v1",

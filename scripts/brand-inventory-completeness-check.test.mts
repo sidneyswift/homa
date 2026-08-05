@@ -72,6 +72,47 @@ test("public and authenticated web route boundaries fail closed", () => {
   assert.ok(boundaryIssues.some((issue) => issue.surfacePath === "apps/web/app/app/page.tsx"));
 });
 
+test("route handler audience, access, and delivery tampering fails closed", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  const waitlist = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/api/waitlist/route.ts");
+  const stripeWebhook = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/api/billing/webhook/route.ts");
+  const developer = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/api/dev/oidc-status/route.ts");
+  const familyDevice = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/api/sync/ingest/route.ts");
+  const mixedUpload = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/api/library/upload/route.ts");
+  assert.ok(waitlist && stripeWebhook && developer && familyDevice && mixedUpload);
+
+  waitlist.reachability = "authenticated";
+  waitlist.deliveryState = "controlled-current";
+  waitlist.audiences = ["family"];
+  stripeWebhook.audiences = ["family", "provider"];
+  developer.reachability = "authenticated";
+  developer.audiences = ["family"];
+  assert.ok(familyDevice.runtimeBoundary);
+  familyDevice.runtimeBoundary.credential = "family-context";
+  mixedUpload.audiences = ["family"];
+
+  const report = buildBrandInventoryCoverageReport(mutated);
+  const boundaryPaths = new Set(report.issues
+    .filter((issue) => issue.code === "route-handler-boundary")
+    .map((issue) => issue.surfacePath));
+  assert.ok(boundaryPaths.has("apps/web/app/api/waitlist/route.ts"));
+  assert.ok(boundaryPaths.has("apps/web/app/api/billing/webhook/route.ts"));
+  assert.ok(boundaryPaths.has("apps/web/app/api/dev/oidc-status/route.ts"));
+  assert.ok(boundaryPaths.has("apps/web/app/api/sync/ingest/route.ts"));
+  assert.ok(boundaryPaths.has("apps/web/app/api/library/upload/route.ts"));
+});
+
+test("an unreviewed route handler cannot enter edited evidence", () => {
+  const mutated = structuredClone(manifest) as BrandSurfaceManifest;
+  const source = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/api/waitlist/route.ts");
+  assert.ok(source);
+  source.paths = ["apps/web/app/api/new-unreviewed/route.ts"];
+  const report = buildBrandInventoryCoverageReport(mutated);
+  assert.ok(report.issues.some((issue) =>
+    issue.code === "route-handler-unresolved"
+    && issue.surfacePath === "apps/web/app/api/new-unreviewed/route.ts"));
+});
+
 test("an intercepting route cannot enter the manifest as public", () => {
   const mutated = structuredClone(manifest) as BrandSurfaceManifest;
   const landing = mutated.surfaces.find((surface) => surface.paths[0] === "apps/web/app/page.tsx");

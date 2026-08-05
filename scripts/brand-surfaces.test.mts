@@ -14,9 +14,18 @@ import {
 } from "../packages/design/src/historical-quarantine.ts";
 import {
   assertNoUnresolvedInterceptingRoutes,
+  assertNoUnresolvedRouteHandlers,
   classifyGeneratedWebRouteBoundary,
+  classifyGeneratedWebRouteHandlerBoundary,
+  generatedWebRouteHandlerRuntimePolicy,
+  reviewedWebRouteHandlerBoundaries,
 } from "./brand-route-boundary.mts";
-import { classifyValidatedWebRouteBoundary } from "./brand-inventory-completeness-check.mts";
+import {
+  classifyValidatedWebRouteBoundary,
+  classifyValidatedWebRouteHandlerBoundary,
+  validatedWebRouteHandlerBoundaries,
+  validatedWebRouteHandlerRuntimePolicy,
+} from "./brand-inventory-completeness-check.mts";
 import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
 
 const root = resolve(import.meta.dirname, "..");
@@ -68,6 +77,116 @@ test("easy-to-miss raw HTML, metadata, and contact surfaces stay classified", ()
     "apps/web/app/homa.vcf/route.ts",
     "supabase/templates/recovery.html",
   ]) assert.ok(paths.has(path), `unclassified hidden surface: ${path}`);
+});
+
+test("public metadata and authentication entry points require public rollback proof", () => {
+  const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+  for (const path of [
+    "apps/web/app/manifest.ts",
+    "apps/web/app/robots.ts",
+    "apps/web/app/sitemap.ts",
+    "apps/web/public/ai.txt",
+    "apps/web/public/llms.txt",
+    "apps/web/public/llms-full.txt",
+    "apps/web/app/homa.vcf/route.ts",
+    "apps/web/app/auth/callback/route.ts",
+    "apps/web/app/auth/confirm/route.ts",
+  ]) {
+    const surface = byPath.get(path);
+    assert.ok(surface, `public source missing from manifest: ${path}`);
+    assert.equal(surface.reachability, "public", path);
+    assert.equal(surface.deliveryState, "revocable-public", path);
+    assert.ok(surface.audiences.includes("public"), path);
+  }
+});
+
+test("every route handler has matching independent fail-closed boundary reviews", () => {
+  const routeHandlers = git("ls-files", "--", "apps/web/app/**/route.ts").split("\n").filter(Boolean).sort(stableCompare);
+  assert.equal(routeHandlers.length, 112);
+  assert.deepEqual(Object.keys(reviewedWebRouteHandlerBoundaries).sort(stableCompare), routeHandlers);
+  assert.deepEqual(Object.keys(validatedWebRouteHandlerBoundaries).sort(stableCompare), routeHandlers);
+
+  const counts = new Map<string, number>();
+  for (const path of routeHandlers) {
+    const generated = classifyGeneratedWebRouteHandlerBoundary(path);
+    const validated = classifyValidatedWebRouteHandlerBoundary(path);
+    assert.notEqual(generated, "unresolved", path);
+    assert.notEqual(validated, "unresolved", path);
+    assert.equal(generated, validated, path);
+    assert.deepEqual(generatedWebRouteHandlerRuntimePolicy(path), validatedWebRouteHandlerRuntimePolicy(path), path);
+    counts.set(String(generated), (counts.get(String(generated)) ?? 0) + 1);
+  }
+  assert.deepEqual(Object.fromEntries(counts), {
+    operator: 2,
+    family: 81,
+    provider: 10,
+    developer: 2,
+    "developer-family": 1,
+    public: 11,
+    "mixed-family-provider": 1,
+    "internal-service": 2,
+    "family-device": 2,
+  });
+
+  const unknown = "apps/web/app/api/new-unreviewed/route.ts";
+  assert.equal(classifyGeneratedWebRouteHandlerBoundary(unknown), "unresolved");
+  assert.equal(classifyValidatedWebRouteHandlerBoundary(unknown), "unresolved");
+  assert.throws(() => assertNoUnresolvedRouteHandlers([unknown]), /explicit reviewed runtime boundary/);
+});
+
+test("route handler fixtures retain public, family, operator, provider, developer, and mixed semantics", () => {
+  const byPath = new Map(manifest.surfaces.map((surface) => [surface.paths[0]!, surface]));
+  const fixtures = new Map([
+    ["apps/web/app/api/waitlist/route.ts", "public"],
+    ["apps/web/app/api/link-phone/route.ts", "public"],
+    ["apps/web/app/api/email/unsubscribe/route.ts", "public"],
+    ["apps/web/app/auth/callback/route.ts", "public"],
+    ["apps/web/app/api/chat/history/route.ts", "family"],
+    ["apps/web/app/api/map/plan/board/route.ts", "family"],
+    ["apps/web/app/api/map/state/route.ts", "family"],
+    ["apps/web/app/admin/studio/anchor/[id]/route.ts", "operator"],
+    ["apps/web/app/api/billing/webhook/route.ts", "provider"],
+    ["apps/web/app/api/billing/apple/webhook/route.ts", "provider"],
+    ["apps/web/app/api/email/webhook/route.ts", "provider"],
+    ["apps/web/app/api/dev/oidc-status/route.ts", "developer"],
+    ["apps/web/app/api/dev/reset-onboarding/route.ts", "developer-family"],
+    ["apps/web/app/api/map/cron/route.ts", "internal-service"],
+    ["apps/web/app/api/sync/ingest/route.ts", "family-device"],
+    ["apps/web/app/api/library/upload/route.ts", "mixed-family-provider"],
+  ] as const);
+
+  for (const [path, boundary] of fixtures) {
+    const surface = byPath.get(path);
+    assert.ok(surface, path);
+    assert.equal(classifyGeneratedWebRouteHandlerBoundary(path), boundary, path);
+    assert.equal(classifyValidatedWebRouteHandlerBoundary(path), boundary, path);
+    assert.deepEqual(surface.runtimeBoundary, generatedWebRouteHandlerRuntimePolicy(path), path);
+    assert.deepEqual(surface.runtimeBoundary, validatedWebRouteHandlerRuntimePolicy(path), path);
+    assert.equal(surface.type, "renderer", path);
+    if (boundary === "public") {
+      assert.equal(surface.reachability, "public", path);
+      assert.equal(surface.deliveryState, "revocable-public", path);
+      assert.ok(surface.audiences.includes("public"), path);
+    } else if (boundary === "developer") {
+      assert.equal(surface.reachability, "internal", path);
+      assert.deepEqual(surface.audiences, ["developer"], path);
+    } else if (boundary === "developer-family") {
+      assert.equal(surface.reachability, "internal", path);
+      assert.deepEqual(surface.audiences, ["developer", "family"], path);
+    } else if (boundary === "internal-service") {
+      assert.equal(surface.reachability, "internal", path);
+      assert.deepEqual(surface.audiences, ["developer", "operator"], path);
+    } else if (boundary === "family-device") {
+      assert.equal(surface.reachability, "authenticated", path);
+      assert.deepEqual(surface.audiences, ["family", "developer"], path);
+    } else if (boundary === "mixed-family-provider") {
+      assert.equal(surface.reachability, "authenticated", path);
+      assert.deepEqual(surface.audiences, ["family", "provider"], path);
+    } else {
+      assert.equal(surface.reachability, "authenticated", path);
+      assert.deepEqual(surface.audiences, [boundary], path);
+    }
+  }
 });
 
 test("inventory discovery covers exact design sources that broad keyword selectors missed", () => {
