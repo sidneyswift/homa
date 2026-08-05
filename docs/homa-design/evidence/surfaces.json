@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "226a3d8f2b81da713511585cbf032fe54b613fb9f91b22f253c1eb1cbae1b85a",
+  "ownedInputFingerprint": "106c289ccec3ec2e80e3bb3f03d3ae178a942f0352374c6f1cff7c161f273da2",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -80063,7 +80063,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "71099faa4a286d302a19e2e55d4522e5681586e791db11af573e0d2c4df99d6d",
+        "fixtureChecksum": "756ea010dc1424b179768ae747b292a209c0d58e8dc68a53bf245c16b89d2058",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -80098,7 +80098,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "71099faa4a286d302a19e2e55d4522e5681586e791db11af573e0d2c4df99d6d"
+        "756ea010dc1424b179768ae747b292a209c0d58e8dc68a53bf245c16b89d2058"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -97946,7 +97946,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "69b1400091ef6e5d55bc098f1fac6208e62746171bf6ca99aa41ffb3cb5bb988",
+        "fixtureChecksum": "05a79fe60a61ed7165d028e37d69ce9986b952cd4bb9fa0535669a82b8cadb69",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -97981,7 +97981,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "69b1400091ef6e5d55bc098f1fac6208e62746171bf6ca99aa41ffb3cb5bb988"
+        "05a79fe60a61ed7165d028e37d69ce9986b952cd4bb9fa0535669a82b8cadb69"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -117397,7 +117397,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "d4907197b18b0fcc1c5e39302b8bca6ab3ce851ea7be06e768f2c7558c118863",
+        "fixtureChecksum": "6bddc9628337971413f58b6befd692299c1fc92954a05c8d5aeabbe26f55b680",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -117422,7 +117422,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "d4907197b18b0fcc1c5e39302b8bca6ab3ce851ea7be06e768f2c7558c118863"
+        "6bddc9628337971413f58b6befd692299c1fc92954a05c8d5aeabbe26f55b680"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -119215,7 +119215,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "1b42f492de6799785144fe50e45d4a5edfe5d2081977518cd8ac4252f0fffc9e",
+        "fixtureChecksum": "45707cebe2b94b7377fa8aaac2b4abca46591cd4907330bfcc77e877350ebbcd",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -119240,7 +119240,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "1b42f492de6799785144fe50e45d4a5edfe5d2081977518cd8ac4252f0fffc9e"
+        "45707cebe2b94b7377fa8aaac2b4abca46591cd4907330bfcc77e877350ebbcd"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -119304,7 +119304,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "58686a78874bc52163d69022d394849993b79824ef3f57219267a6a695571740",
+        "fixtureChecksum": "1e61d8fd12771d388bff5bbf5597b7262df041f691f77c36ac50ac0f7065e76c",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -119329,7 +119329,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "58686a78874bc52163d69022d394849993b79824ef3f57219267a6a695571740"
+        "1e61d8fd12771d388bff5bbf5597b7262df041f691f77c36ac50ac0f7065e76c"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -126325,9 +126325,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:83bfa543606445e1",
+      "id": "surface:f8db19a6ea617f32",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/article.mdx"
+        "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -126371,7 +126371,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "b664b297aa17b6a0d3cebdb02ea5628ae4ecf013d3af121dce87868ac61c373f",
+        "fixtureChecksum": "fb6743508271fe93bafef6c8e4715ed424555796b91de9dd3bff6578d2350290",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126406,7 +126406,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "b664b297aa17b6a0d3cebdb02ea5628ae4ecf013d3af121dce87868ac61c373f"
+        "fb6743508271fe93bafef6c8e4715ed424555796b91de9dd3bff6578d2350290"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126441,9 +126441,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:df55100b50f6760e",
+      "id": "surface:32cfe34dc3e96b21",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/meta.yml"
+        "marketing/content/published/2026-08-03-homeschool-hours-tracker-app-or-spreadsheet/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -126487,7 +126487,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "7a359a774bc1b8e53eb300450d8c863a29d9cf87e954f1a5ba738ec5b329fe31",
+        "fixtureChecksum": "73acd0af9f4b8d86492471989bd4e62dfa065ebf9c9276081fde8745582e2655",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126522,7 +126522,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "7a359a774bc1b8e53eb300450d8c863a29d9cf87e954f1a5ba738ec5b329fe31"
+        "73acd0af9f4b8d86492471989bd4e62dfa065ebf9c9276081fde8745582e2655"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126557,9 +126557,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:bdd08b6bb889f7be",
+      "id": "surface:b2170d7ef438f91d",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist/article.mdx"
+        "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -126603,7 +126603,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "966821c00b7ca5124b1c13bcbe5941232dde22830183478b4c038c719e48ee27",
+        "fixtureChecksum": "c97fc1fbe49605e88b2b9ec7635d3cca2f6b2699102034f5d7107b45cf5ae6a5",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126638,7 +126638,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "966821c00b7ca5124b1c13bcbe5941232dde22830183478b4c038c719e48ee27"
+        "c97fc1fbe49605e88b2b9ec7635d3cca2f6b2699102034f5d7107b45cf5ae6a5"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126673,9 +126673,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:95864172ff0b5a46",
+      "id": "surface:54c19358e9888567",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-portfolio-checklist/meta.yml"
+        "marketing/content/published/2026-08-03-homeschool-portfolio-checklist/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -126719,7 +126719,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "d401d70ae3a548c7f7cd88860e12b03c88cfdf3e8ad27c810257605bb5304d59",
+        "fixtureChecksum": "0c746b07dc31147568c3e4876403c58bb469cafbd35e382e5be5bf216dde583e",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126754,7 +126754,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "d401d70ae3a548c7f7cd88860e12b03c88cfdf3e8ad27c810257605bb5304d59"
+        "0c746b07dc31147568c3e4876403c58bb469cafbd35e382e5be5bf216dde583e"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126789,9 +126789,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:e259d575ff8fcf8c",
+      "id": "surface:aeb558879ce0c3fb",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples/article.mdx"
+        "marketing/content/published/2026-08-03-homeschool-progress-report-examples/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -126835,7 +126835,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "d5448939a3fb1cd0566fdde1989a01192f19cd589a4ad85639cc2fae7ae2b832",
+        "fixtureChecksum": "5cfe37b6ef7c8b768325434f5f4cbfb464bc03f689ac1e4dc218c97423fe1c8f",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126870,7 +126870,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "d5448939a3fb1cd0566fdde1989a01192f19cd589a4ad85639cc2fae7ae2b832"
+        "5cfe37b6ef7c8b768325434f5f4cbfb464bc03f689ac1e4dc218c97423fe1c8f"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -126905,9 +126905,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:058e52538d58c65a",
+      "id": "surface:ce1dc05fd5959105",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-progress-report-examples/meta.yml"
+        "marketing/content/published/2026-08-03-homeschool-progress-report-examples/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -126951,7 +126951,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "e11de7f2da4679b794a2b0184c67e25572be1df1921b055eb14b04f7feae8c67",
+        "fixtureChecksum": "a4fb4594768c461d61a86ceb8808978524ba3ef7ce5fc859c51ef73d4466dd97",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -126986,7 +126986,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "e11de7f2da4679b794a2b0184c67e25572be1df1921b055eb14b04f7feae8c67"
+        "a4fb4594768c461d61a86ceb8808978524ba3ef7ce5fc859c51ef73d4466dd97"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127021,9 +127021,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:65e93c98f5bfbc17",
+      "id": "surface:e3e8b01cdca5da2a",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children/article.mdx"
+        "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -127067,7 +127067,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "4d10b3a5344324cebbc915a24c287fc35624208792dfd0d3be21f48ee425d680",
+        "fixtureChecksum": "e4648d5076460fb48559a67e13badfef86f8503fd21d5f67c6144b9384af7033",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127102,7 +127102,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "4d10b3a5344324cebbc915a24c287fc35624208792dfd0d3be21f48ee425d680"
+        "e4648d5076460fb48559a67e13badfef86f8503fd21d5f67c6144b9384af7033"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127137,9 +127137,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:29a8fc43bb8d18c9",
+      "id": "surface:f2b31ce50bf89758",
       "paths": [
-        "marketing/content/drafts/2026-08-03-homeschool-schedule-for-multiple-children/meta.yml"
+        "marketing/content/published/2026-08-03-homeschool-schedule-for-multiple-children/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -127183,7 +127183,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "d9be2009c4cd491d2ce1031a52355eeb27eb5e39da42aa69bcff77b1fd2dad0d",
+        "fixtureChecksum": "7a1845353fe9971b66b0e833d73331ee173dde34a0d209ee5a974edf6809d844",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127218,7 +127218,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "d9be2009c4cd491d2ce1031a52355eeb27eb5e39da42aa69bcff77b1fd2dad0d"
+        "7a1845353fe9971b66b0e833d73331ee173dde34a0d209ee5a974edf6809d844"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127253,9 +127253,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:1ebf75f17e0e4a4f",
+      "id": "surface:61a4a10a100784ce",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working/article.mdx"
+        "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -127299,7 +127299,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "3ffb6d566d24c44af211bd0982175171323cb11386e72403bdb6baf440685ed3",
+        "fixtureChecksum": "0c4305eb95a782dbb45e1341e0f9a5e0781abc89f351b665ec69d2614d348fdd",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127334,7 +127334,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "3ffb6d566d24c44af211bd0982175171323cb11386e72403bdb6baf440685ed3"
+        "0c4305eb95a782dbb45e1341e0f9a5e0781abc89f351b665ec69d2614d348fdd"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127369,9 +127369,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:7d7ed1b9c556e8cb",
+      "id": "surface:47cd97653747fc53",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-know-if-homeschooling-is-working/meta.yml"
+        "marketing/content/published/2026-08-03-how-to-know-if-homeschooling-is-working/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -127415,7 +127415,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "60d10f0d5d56bd441a277fb5a4331230c30c5119e193fe2858d4b54009424cee",
+        "fixtureChecksum": "cbb4b5ac263838431bbedecd4256288ec7153cd01e6d829e055acac8941ca26d",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127450,7 +127450,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "60d10f0d5d56bd441a277fb5a4331230c30c5119e193fe2858d4b54009424cee"
+        "cbb4b5ac263838431bbedecd4256288ec7153cd01e6d829e055acac8941ca26d"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127485,9 +127485,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:d4b440c2e48c3dad",
+      "id": "surface:f6ada650df24122b",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page/article.mdx"
+        "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -127531,7 +127531,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "05c4557ae04f9dcb6e87a9c58a3ccfd97acdf9649aea956ebf18665b8b78c008",
+        "fixtureChecksum": "0a200b56c2108b89ec8a3d2e6b52b416a7102fbc9eb59c9f2590c1ef59b34536",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127566,7 +127566,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "05c4557ae04f9dcb6e87a9c58a3ccfd97acdf9649aea956ebf18665b8b78c008"
+        "0a200b56c2108b89ec8a3d2e6b52b416a7102fbc9eb59c9f2590c1ef59b34536"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127601,9 +127601,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:12d6041cf3a7c1f1",
+      "id": "surface:6192b197f9f22afb",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-make-a-homeschool-practice-page/meta.yml"
+        "marketing/content/published/2026-08-03-how-to-make-a-homeschool-practice-page/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -127647,7 +127647,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "3433d4484178dd4dafca11bcd1e505043279f07cdd062f0e3c76e80cb8d4ab34",
+        "fixtureChecksum": "27c026cf2756faa9558d68d6cfab95074afb77a48ded0724822f1bb54b955f5d",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127682,7 +127682,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "3433d4484178dd4dafca11bcd1e505043279f07cdd062f0e3c76e80cb8d4ab34"
+        "27c026cf2756faa9558d68d6cfab95074afb77a48ded0724822f1bb54b955f5d"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127717,9 +127717,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:e1e7ca4ed69015ab",
+      "id": "surface:ef422fb2e1bab3b3",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records/article.mdx"
+        "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/article.mdx"
       ],
       "type": "template",
       "reachability": "public",
@@ -127763,7 +127763,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "f2a2bb27fc38308f149eebe2e6b52e9a1b9f539d62b0b3193b7757072e9bf183",
+        "fixtureChecksum": "df5a6eeb0cd7e730710c3375ebedaa1a052634f3d778eb42c07b491c8bff7f56",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127798,7 +127798,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "f2a2bb27fc38308f149eebe2e6b52e9a1b9f539d62b0b3193b7757072e9bf183"
+        "df5a6eeb0cd7e730710c3375ebedaa1a052634f3d778eb42c07b491c8bff7f56"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -127833,9 +127833,9 @@
       "rolloutState": "inventory"
     },
     {
-      "id": "surface:6b7d7f60167d7338",
+      "id": "surface:e1ba8eb5a0a486f6",
       "paths": [
-        "marketing/content/drafts/2026-08-03-how-to-organize-homeschool-records/meta.yml"
+        "marketing/content/published/2026-08-03-how-to-organize-homeschool-records/meta.yml"
       ],
       "type": "template",
       "reachability": "public",
@@ -127879,7 +127879,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "f961178f903fd26f1f540006203426acda54f9e6d6d0f8a4593141de84addd37",
+        "fixtureChecksum": "3480b3fbcbc1604588b7f3701422106ca119f4002767359ea81910afa5fd0e07",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -127914,3023 +127914,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "f961178f903fd26f1f540006203426acda54f9e6d6d0f8a4593141de84addd37"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:5dc8837389c04588",
-      "paths": [
-        "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "681650d781f250b2b0c549f608527cf89b23a3b13fccaa4b85409ff3dba0dff4",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "681650d781f250b2b0c549f608527cf89b23a3b13fccaa4b85409ff3dba0dff4"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:4885dcd790e654de",
-      "paths": [
-        "marketing/content/drafts/2026-08-03-weekly-homeschool-planner-template/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "429dc77d7b50a47f9a7679e1b1cf896be1e79319d23b309b4553d2a67ca16b70",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "429dc77d7b50a47f9a7679e1b1cf896be1e79319d23b309b4553d2a67ca16b70"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:33b74677704cc1c1",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:c59694b09eef205e",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-homeschool-reading-log-that-stays-useful/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "38441460739cc766a08b34b78735a575a5da707922c55a33d3d31c2ceb3a4b60",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "38441460739cc766a08b34b78735a575a5da707922c55a33d3d31c2ceb3a4b60"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:9175f3c055d26443",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:31ec1ac8e7033da0",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-many-problems-should-a-practice-page-have/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "4b38ff484ba7dfe7320f298948678aae8d1d907a377f9bfcc095727c35678e6c",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "4b38ff484ba7dfe7320f298948678aae8d1d907a377f9bfcc095727c35678e6c"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:b084414ce53ad876",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:66b51a475d017acc",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "60ea60a889d18bd1e0d06092df67bc3ea147689330580e0a89976c5bad0d295e",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "60ea60a889d18bd1e0d06092df67bc3ea147689330580e0a89976c5bad0d295e"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:6bd4a5d916e4d539",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "journey-critical",
-      "ownerIssue": "gh#687",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:5f0fd263286df438",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-check-a-generated-worksheet-before-printing/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "journey-critical",
-      "ownerIssue": "gh#687",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "8e0d75f6f1c68d31228e31bd2eca4d349dfa9c9ac72cd114a3225f6c3a82e35f",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "8e0d75f6f1c68d31228e31bd2eca4d349dfa9c9ac72cd114a3225f6c3a82e35f"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:3cb97b4ae65351a4",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:7494dfe127ee867d",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-choose-homeschool-work-samples/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "7097660d3fd41b1104e3dbb0beb520db851830d1665094e4de6d4ea9626c5468",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "7097660d3fd41b1104e3dbb0beb520db851830d1665094e4de6d4ea9626c5468"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:864618aed0e09cb6",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:2d0784e51188f02f",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-document-homeschool-math-progress/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "5f8adb2385941cefe5eff7c0953a7becdd0c6c2d25db00bc58767c4abef25949",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "5f8adb2385941cefe5eff7c0953a7becdd0c6c2d25db00bc58767c4abef25949"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:4f2b09a3d3c04ac6",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:dcb67f544df61ed0",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-make-a-flexible-homeschool-schedule/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "f48d733a6a0027ba1e8374fe06aad030e825230674d8010e75fbcd8eed4df51d",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "f48d733a6a0027ba1e8374fe06aad030e825230674d8010e75fbcd8eed4df51d"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:98a837965acc43ae",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:a6f2aca6234bc849",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-track-homeschool-reading-progress/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "2e94bc91656d69c08cda1df4408b2c7b776ec1e6705969c173d5dea4693585e9",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "2e94bc91656d69c08cda1df4408b2c7b776ec1e6705969c173d5dea4693585e9"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:ca25c452488f07ba",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "journey-critical",
-      "ownerIssue": "gh#687",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:69423c7d7999ba7f",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "journey-critical",
-      "ownerIssue": "gh#687",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "cbd562b82b3fa3bfdd09bd98f4e188466d7e0333563481a48043a72b3e23c4b0",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "cbd562b82b3fa3bfdd09bd98f4e188466d7e0333563481a48043a72b3e23c4b0"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:8304e0435cd3489d",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:a0240a4e7f2d5da2",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-simple-homeschool-daily-checklist/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "0a534f4cc3ac535b03d9272459dc41934113c9819dc402744df5c901478168bc",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "0a534f4cc3ac535b03d9272459dc41934113c9819dc402744df5c901478168bc"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:0011f52df3597e40",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:94129f3d835a5370",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-what-to-write-in-a-homeschool-daily-log/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "edac1fc6e8d193c2b434b6af822bb9f1423524865820ea27539e83b140448d3a",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "edac1fc6e8d193c2b434b6af822bb9f1423524865820ea27539e83b140448d3a"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:a641c4b65cc2f25f",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long/article.mdx"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "baseline-pixels-pending",
-        "baseline-interactions-pending",
-        "performance-pending",
-        "accessibility-pending",
-        "residue"
-      ],
-      "productionProbe": "pending:brand-production-probe",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": "2026-08-03T02:18:10-04:00",
-        "environment": "clean-checkout-forensics",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:ad82acfd8c894d35",
-      "paths": [
-        "marketing/content/drafts/2026-08-04-when-homeschool-lessons-run-long/meta.yml"
-      ],
-      "type": "template",
-      "reachability": "public",
-      "audiences": [
-        "public"
-      ],
-      "criticality": "supporting",
-      "ownerIssue": "gh#741",
-      "upstreamDomainOwners": [
-        "marketing-rich"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "brand-surface-manifest"
-      ],
-      "requiredStates": [
-        "default"
-      ],
-      "viewports": [
-        "320px",
-        "390px",
-        "768px",
-        "1440px",
-        "200%-zoom",
-        "400%-reflow"
-      ],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [
-        "keyboard",
-        "VoiceOver-Safari",
-        "NVDA-Chromium",
-        "Reduced-Motion",
-        "increased-contrast"
-      ],
-      "appearanceModes": [
-        "light",
-        "approved-adaptive",
-        "grayscale-when-applicable"
-      ],
-      "baseline": {
-        "fixtureChecksum": "6ce88f2bad9abf595fbb991b4a4f9e0ffa3907d0e2df3b2c844c546cf259e99b",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "marketing-rich"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [
-          "truthful-state",
-          "one-useful-next-move"
-        ],
-        "assets": [
-          "master-Homa-identity",
-          "roof-thread-when-earned"
-        ],
-        "fonts": [
-          "EB-Garamond-display",
-          "DM-Sans-interface",
-          "Fredoka-Logo-only"
-        ],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "6ce88f2bad9abf595fbb991b4a4f9e0ffa3907d0e2df3b2c844c546cf259e99b"
+        "3480b3fbcbc1604588b7f3701422106ca119f4002767359ea81910afa5fd0e07"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -131977,6 +128961,3022 @@
       "legacySignatures": [],
       "currentAssetHashes": [
         "d0e08402e66031d96d22ae38a17c29b5a0416909f99878687b5846f945c93eba"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:cc6125b85a94b248",
+      "paths": [
+        "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "615384cc02a61cfde7ede522d60362224230a289ff25810f870771ba27b38e50",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "615384cc02a61cfde7ede522d60362224230a289ff25810f870771ba27b38e50"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:b7de032dcbb0bb1a",
+      "paths": [
+        "marketing/content/published/2026-08-03-weekly-homeschool-planner-template/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "2a8e54c1f1738edf082679ab3789ac6f935fd5f0db685d901f2c468cc0559a5f",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "2a8e54c1f1738edf082679ab3789ac6f935fd5f0db685d901f2c468cc0559a5f"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:5cefc54617aeee97",
+      "paths": [
+        "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "4a48d0fbdbfcc17d67fb3549dca84a9822d7ccdba8b1d4f74318891f63438c4d"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:27d0c23699b00dae",
+      "paths": [
+        "marketing/content/published/2026-08-04-homeschool-reading-log-that-stays-useful/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "1bce72fb8de0e90ecf9113c9fcb1fb7f0e42c01ce47c23d58761b43e077e688f",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "1bce72fb8de0e90ecf9113c9fcb1fb7f0e42c01ce47c23d58761b43e077e688f"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:db5e0aa50073956a",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "d296a89e274482ab5bc021bd8a83fa1572041c876a3ab705fd38d11264bf9251"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:e279d3b4761759fb",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-many-problems-should-a-practice-page-have/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "689cd48d68c5e039ea27fe05bebed0b98c73639278c20b0ba6e998b93690bdfe",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "689cd48d68c5e039ea27fe05bebed0b98c73639278c20b0ba6e998b93690bdfe"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:268578a24c7c1357",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "50525ce5554d877e93ef2cd3c5ec2e1956a5cb1e86ddfeb4171bd96c1ad14203"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:98b55382380b47ed",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "e9a6449bd9abcaccd4411ea6a50a1787f2f9ce239f5a6167124af5973f1199a3",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "e9a6449bd9abcaccd4411ea6a50a1787f2f9ce239f5a6167124af5973f1199a3"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:3af9f990f7e26df2",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "a686048a4fdeafbc9c35affb72d3c9cf5666e4ba59d42441cb743068ee4cef7f"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:580e5b4fd211f7a3",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-check-a-generated-worksheet-before-printing/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "17b48558d8b35f103768d6b9cdafbd89f9239a6c8e48d1a83c0811697b5c3545",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "17b48558d8b35f103768d6b9cdafbd89f9239a6c8e48d1a83c0811697b5c3545"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:b46cd315d77ff102",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "634c5518ddbb6741102cc25e6205dd3f5eca0768dd7d9b04ce7c6a1dfca047a6"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:e87f02dc88255b61",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-choose-homeschool-work-samples/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "72b9a92984637994b2e3ed5babdc9a3bd32cea6728abba118a23943c0f8d4904",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "72b9a92984637994b2e3ed5babdc9a3bd32cea6728abba118a23943c0f8d4904"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:ffbc4447c22370b2",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "4a0b536541da4fe5dac6892754437c02e386182cb37e3e53f9bf4114877cb39f"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:905a5681a498b9b6",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-document-homeschool-math-progress/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "1347c5b06de7f89e2b4835db876078e004c52042ef5a9edd5b9a37b89da958d9",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "1347c5b06de7f89e2b4835db876078e004c52042ef5a9edd5b9a37b89da958d9"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:fdbbe97d8b1992b7",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "9605c0a3f012e99f79062f04e4a0c2b0109e110f35f66ea8b9e095e8c66b1630"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:6670f6aaea014684",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-make-a-flexible-homeschool-schedule/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "4736ce994aef578ab69a4899a8ae2ce48c6d8802d1227caa650c0d717ec8536f",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "4736ce994aef578ab69a4899a8ae2ce48c6d8802d1227caa650c0d717ec8536f"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:847766ef90164cf5",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "edcf28e543cdf419d7fe1889a78fab873718a6a76e3d3110e48ea96dbac4c796"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:4b3833662083f0f7",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-track-homeschool-reading-progress/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "0239a7c21cc63e0d439d33bc1d19c96dc822f93a4e8b8636f8da05013ec0a333",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "0239a7c21cc63e0d439d33bc1d19c96dc822f93a4e8b8636f8da05013ec0a333"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:f4582b3c9d325d74",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "d347154b630c760b4c3ef2c9549d13043b04937adce4f3bb1320b634551e21f9"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:a4d4d023c64a1d8e",
+      "paths": [
+        "marketing/content/published/2026-08-04-how-to-write-a-homeschool-narrative-progress-report/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "journey-critical",
+      "ownerIssue": "gh#687",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "88a2777677da6f89318b46fd25a9d4630a5bece809b2baefeea450c66fd1e483",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "88a2777677da6f89318b46fd25a9d4630a5bece809b2baefeea450c66fd1e483"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:42cfca84d86a16fa",
+      "paths": [
+        "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "2c4bf9a1595c065b285b52138097cd569bd1aa67b6e7ff6745932591870b4ce9"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:453123d2de861b01",
+      "paths": [
+        "marketing/content/published/2026-08-04-simple-homeschool-daily-checklist/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "6ef89ee4ad36841aada043340b014dfbc51c140ae20a3d693b6927bdf17d10b2",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "6ef89ee4ad36841aada043340b014dfbc51c140ae20a3d693b6927bdf17d10b2"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:ad2045feaa179100",
+      "paths": [
+        "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "d87c608c20f63e9c807ebe38b218da69473fb499117f0f8ee5a10dbf7ba0cd54"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:3b3acc8ca13100d4",
+      "paths": [
+        "marketing/content/published/2026-08-04-what-to-write-in-a-homeschool-daily-log/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "b0fbcf5ced2d322c45df934b2820e8dbf496c4d7f99447c60e4c1a2cd1dacb50",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "b0fbcf5ced2d322c45df934b2820e8dbf496c4d7f99447c60e4c1a2cd1dacb50"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:9134d7a57c473b5e",
+      "paths": [
+        "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/article.mdx"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "aabb140c0666061098fe4d93338e5517a23d234a286264517fbf2125f748ce27"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "baseline-pixels-pending",
+        "baseline-interactions-pending",
+        "performance-pending",
+        "accessibility-pending",
+        "residue"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": "2026-08-03T02:18:10-04:00",
+        "environment": "clean-checkout-forensics",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:c321d06042ed0ace",
+      "paths": [
+        "marketing/content/published/2026-08-04-when-homeschool-lessons-run-long/meta.yml"
+      ],
+      "type": "template",
+      "reachability": "public",
+      "audiences": [
+        "public"
+      ],
+      "criticality": "supporting",
+      "ownerIssue": "gh#741",
+      "upstreamDomainOwners": [
+        "marketing-rich"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "brand-surface-manifest"
+      ],
+      "requiredStates": [
+        "default"
+      ],
+      "viewports": [
+        "320px",
+        "390px",
+        "768px",
+        "1440px",
+        "200%-zoom",
+        "400%-reflow"
+      ],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [
+        "keyboard",
+        "VoiceOver-Safari",
+        "NVDA-Chromium",
+        "Reduced-Motion",
+        "increased-contrast"
+      ],
+      "appearanceModes": [
+        "light",
+        "approved-adaptive",
+        "grayscale-when-applicable"
+      ],
+      "baseline": {
+        "fixtureChecksum": "12ce7e5424e419f9b037a3e98f73dd7b0fa1a2681261a39c8cc374e7e2c50036",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "marketing-rich"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [
+          "truthful-state",
+          "one-useful-next-move"
+        ],
+        "assets": [
+          "master-Homa-identity",
+          "roof-thread-when-earned"
+        ],
+        "fonts": [
+          "EB-Garamond-display",
+          "DM-Sans-interface",
+          "Fredoka-Logo-only"
+        ],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "12ce7e5424e419f9b037a3e98f73dd7b0fa1a2681261a39c8cc374e7e2c50036"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -139801,7 +139801,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "952033bb6ff33e74168ec092198ff6d38ae51829440c1b2b90ce41f14031ddcb",
+        "fixtureChecksum": "450c7c178f53ebf5e8834fe008131041a316f90860859e813ddd0c79d236edf3",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -139836,7 +139836,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "952033bb6ff33e74168ec092198ff6d38ae51829440c1b2b90ce41f14031ddcb"
+        "450c7c178f53ebf5e8834fe008131041a316f90860859e813ddd0c79d236edf3"
       ],
       "disposition": "replace-active",
       "featureFlags": [],

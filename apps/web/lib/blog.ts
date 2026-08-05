@@ -125,10 +125,3 @@ export function getRelatedBlogPosts(post: BlogPost, limit = 3): BlogPost[] {
 
   return related.slice(0, limit);
 }
-
-export function formatBlogDate(date: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "long",
-    timeZone: "UTC",
-  }).format(new Date(`${date}T00:00:00Z`));
-}

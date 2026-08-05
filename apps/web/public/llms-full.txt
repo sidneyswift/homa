@@ -72,8 +72,31 @@ A: Homa has no child account or child-facing AI chat. A parent may choose to try
 - Sample report: https://thankshoma.com/onboarding/sample
 - Report method and sources: https://thankshoma.com/onboarding/method
 - Blog: https://thankshoma.com/blog
+- Homeschool planning guides: https://thankshoma.com/blog/topics/planning
 - Homeschool records guides: https://thankshoma.com/blog/topics/records
+- Homeschool progress guides: https://thankshoma.com/blog/topics/progress
+- Homeschool practice guides: https://thankshoma.com/blog/topics/practice
+- A homeschool portfolio checklist that does not keep everything: https://thankshoma.com/blog/homeschool-portfolio-checklist
+- A homeschool reading log that stays useful after the book is done: https://thankshoma.com/blog/homeschool-reading-log-that-stays-useful
+- A simple homeschool daily checklist with room for a real day: https://thankshoma.com/blog/simple-homeschool-daily-checklist
+- A weekly homeschool planner template for weeks that change: https://thankshoma.com/blog/weekly-homeschool-planner-template
+- Homeschool hours tracker app or spreadsheet: https://thankshoma.com/blog/homeschool-hours-tracker-app-or-spreadsheet
+- Homeschool progress report examples: https://thankshoma.com/blog/homeschool-progress-report-examples
+- How many problems should a practice page have?: https://thankshoma.com/blog/how-many-problems-should-a-practice-page-have
+- How to adapt a worksheet without changing the lesson: https://thankshoma.com/blog/how-to-adapt-a-worksheet-without-changing-the-lesson
+- How to check a generated worksheet before printing: https://thankshoma.com/blog/how-to-check-a-generated-worksheet-before-printing
+- How to choose homeschool work samples: https://thankshoma.com/blog/how-to-choose-homeschool-work-samples
+- How to document homeschool math progress: https://thankshoma.com/blog/how-to-document-homeschool-math-progress
+- How to know if homeschooling is working: https://thankshoma.com/blog/how-to-know-if-homeschooling-is-working
+- How to make a flexible homeschool schedule: https://thankshoma.com/blog/how-to-make-a-flexible-homeschool-schedule
+- How to make a homeschool schedule for multiple children: https://thankshoma.com/blog/homeschool-schedule-for-multiple-children
+- How to make a practice page: https://thankshoma.com/blog/how-to-make-a-homeschool-practice-page
+- How to organize homeschool records: https://thankshoma.com/blog/how-to-organize-homeschool-records
 - How to track homeschool hours without losing the week: https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week
+- How to track homeschool reading progress: https://thankshoma.com/blog/how-to-track-homeschool-reading-progress
+- How to write a homeschool narrative progress report: https://thankshoma.com/blog/how-to-write-a-homeschool-narrative-progress-report
+- What to do when a homeschool lesson runs long: https://thankshoma.com/blog/when-homeschool-lessons-run-long
+- What to write in a homeschool daily log: https://thankshoma.com/blog/what-to-write-in-a-homeschool-daily-log
 - Feature pages: https://thankshoma.com/features/homeschool-planner
 - Privacy policy: https://thankshoma.com/privacy
 - Terms of service: https://thankshoma.com/terms

@@ -11,7 +11,6 @@ import { Nav } from "../../../components/marketing/Nav";
 import { HERO_COPY } from "../../../components/marketing/landing-content";
 import {
   blogPostExists,
-  formatBlogDate,
   getRelatedBlogPosts,
   listBlogPosts,
   readBlogPost,
@@ -145,10 +144,7 @@ export default async function BlogPostPage({
               {post.title}
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-body">{post.description}</p>
-            <p className="mt-4 text-sm text-muted">
-              By Homa · Published {formatBlogDate(post.date)}
-              {post.updated !== post.date ? ` · Updated ${formatBlogDate(post.updated)}` : ""}
-            </p>
+            <p className="mt-4 text-sm text-muted">By Homa</p>
             {post.hero ? (
               <Image
                 src={post.hero}

@@ -27,15 +27,17 @@ test("bundle records preserve grounding, format approvals, and refusal evidence"
   for (const row of manifest.rows.filter((candidate) => candidate.path.startsWith("marketing/content/drafts/2026-07-05-"))) {
     assert.equal(row.state, "historical-quarantined", row.path);
   }
-  const published = manifest.bundles.find((bundle) => bundle.path.startsWith("marketing/content/published/"));
-  assert.ok(published);
-  assert.equal(published.distribution.exists, true);
-  assert.equal(published.distribution.publishedFormats, 1);
-  assert.equal(published.distribution.refusedFormats, 1);
-  assert.deepEqual(published.distribution.urls, ["https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week"]);
+  const hoursLaunch = manifest.bundles.find(
+    (bundle) => bundle.id === "2026-08-03-how-to-track-homeschool-hours-without-losing-the-week",
+  );
+  assert.ok(hoursLaunch);
+  assert.equal(hoursLaunch.distribution.exists, true);
+  assert.equal(hoursLaunch.distribution.publishedFormats, 1);
+  assert.equal(hoursLaunch.distribution.refusedFormats, 1);
+  assert.deepEqual(hoursLaunch.distribution.urls, ["https://thankshoma.com/blog/how-to-track-homeschool-hours-without-losing-the-week"]);
 });
 
-test("the staged SEO wave is complete and remains unpublished", () => {
+test("the founder-approved SEO wave is published as one closed article library", () => {
   const expectedIds = [
     "2026-08-03-homeschool-hours-tracker-app-or-spreadsheet",
     "2026-08-03-homeschool-portfolio-checklist",
@@ -45,14 +47,29 @@ test("the staged SEO wave is complete and remains unpublished", () => {
     "2026-08-03-how-to-make-a-homeschool-practice-page",
     "2026-08-03-how-to-organize-homeschool-records",
     "2026-08-03-weekly-homeschool-planner-template",
+    "2026-08-04-homeschool-reading-log-that-stays-useful",
+    "2026-08-04-how-many-problems-should-a-practice-page-have",
+    "2026-08-04-how-to-adapt-a-worksheet-without-changing-the-lesson",
+    "2026-08-04-how-to-check-a-generated-worksheet-before-printing",
+    "2026-08-04-how-to-choose-homeschool-work-samples",
+    "2026-08-04-how-to-document-homeschool-math-progress",
+    "2026-08-04-how-to-make-a-flexible-homeschool-schedule",
+    "2026-08-04-how-to-track-homeschool-reading-progress",
+    "2026-08-04-how-to-write-a-homeschool-narrative-progress-report",
+    "2026-08-04-simple-homeschool-daily-checklist",
+    "2026-08-04-what-to-write-in-a-homeschool-daily-log",
+    "2026-08-04-when-homeschool-lessons-run-long",
   ];
   const wave = manifest.bundles.filter((bundle) => expectedIds.includes(bundle.id));
   assert.deepEqual(wave.map((bundle) => bundle.id).sort(), expectedIds);
   for (const bundle of wave) {
-    assert.equal(bundle.lifecycle, "draft", bundle.path);
-    assert.deepEqual(bundle.approval, { approved: 0, draft: 1, killed: 0, blockedByProvider: 0 }, bundle.path);
-    assert.equal(bundle.distribution.exists, false, bundle.path);
-    assert.equal(bundle.distribution.publishedFormats, 0, bundle.path);
+    const slug = bundle.id.replace(/^2026-08-\d{2}-/, "");
+    assert.equal(bundle.lifecycle, "published", bundle.path);
+    assert.deepEqual(bundle.approval, { approved: 1, draft: 0, killed: 0, blockedByProvider: 0 }, bundle.path);
+    assert.equal(bundle.distribution.exists, true, bundle.path);
+    assert.equal(bundle.distribution.publishedFormats, 1, bundle.path);
+    assert.equal(bundle.distribution.refusedFormats, 0, bundle.path);
+    assert.deepEqual(bundle.distribution.urls, [`https://thankshoma.com/blog/${slug}`], bundle.path);
   }
 });
 

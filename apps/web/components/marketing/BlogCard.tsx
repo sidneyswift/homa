@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { BlogPost } from "../../lib/blog";
-import { formatBlogDate } from "../../lib/blog";
 import { getBlogCluster } from "../../lib/blog-clusters";
 
 export function BlogCard({ post }: { post: BlogPost }) {
@@ -28,7 +27,6 @@ export function BlogCard({ post }: { post: BlogPost }) {
           <p className="text-sm font-semibold text-brand">
             {cluster?.shortName ?? post.cluster}
           </p>
-          <p className="mt-1 text-sm text-muted">{formatBlogDate(post.date)}</p>
           <h2 className="mt-2 font-display text-xl font-semibold leading-snug text-strong">
             {post.title}
           </h2>
