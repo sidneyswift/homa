@@ -37,20 +37,118 @@ const IGNORED_DISPOSITIONS = new Set([
 ]);
 const IGNORED_FILE_KINDS = new Set(["file", "symlink"]);
 const SENSITIVE_IGNORED_FILENAMES = new Set([
+  ".envrc",
   ".git-credentials",
   ".netrc",
   ".npmrc",
   ".pgpass",
+  ".pypirc",
+  "application-default-credentials.json",
   "auth.json",
+  "credentials",
+  "credentials.json",
   "google-services.json",
   "googleservice-info.plist",
   "kubeconfig",
+  "local.settings.json",
   "release.keystore",
   "service-account.json",
   "service_account.json",
 ]);
-const SENSITIVE_IGNORED_NAME =
-  /(?:^|[._-])(?:access[_-]?token|api[_-]?(?:key|token)|client[_-]?secret|credentials?|passw(?:or)?d|private[_-]?key|refresh[_-]?token|secrets?|service[_-]?account|tokens?)(?:[._-]|$)/u;
+const SENSITIVE_CREDENTIAL_EXTENSIONS = new Set([
+  "bks",
+  "cer",
+  "crt",
+  "csr",
+  "der",
+  "jceks",
+  "jks",
+  "key",
+  "keychain",
+  "keychain-db",
+  "kdbx",
+  "keystore",
+  "mobileprovision",
+  "ovpn",
+  "p12",
+  "p7b",
+  "p7c",
+  "p8",
+  "pem",
+  "pfx",
+  "pkcs12",
+  "ppk",
+  "truststore",
+]);
+const SENSITIVE_STANDALONE_WORDS = new Set([
+  "certificate",
+  "certificates",
+  "credential",
+  "credentials",
+  "keychain",
+  "keystore",
+  "passwd",
+  "password",
+  "secret",
+  "secrets",
+  "token",
+  "tokens",
+  "truststore",
+]);
+const SENSITIVE_COMPOUND_WORDS = new Set([
+  "accesskey",
+  "accesstoken",
+  "apikey",
+  "apitoken",
+  "applicationdefaultcredentials",
+  "authkey",
+  "clientsecret",
+  "privatekey",
+  "refreshtoken",
+  "serviceaccount",
+  "serviceaccountkey",
+  "signingkey",
+]);
+const SENSITIVE_WORD_SEQUENCES = [
+  ["access", "key"],
+  ["access", "token"],
+  ["api", "key"],
+  ["api", "token"],
+  ["application", "default", "credentials"],
+  ["auth", "key"],
+  ["client", "secret"],
+  ["google", "application", "credentials"],
+  ["id", "dsa"],
+  ["id", "ecdsa"],
+  ["id", "ed25519"],
+  ["id", "rsa"],
+  ["private", "key"],
+  ["refresh", "token"],
+  ["service", "account"],
+  ["signing", "key"],
+];
+const REGENERABLE_DIRECTORY_NAMES = new Set([
+  ".cache",
+  ".expo",
+  ".gradle",
+  ".next",
+  ".nuxt",
+  ".output",
+  ".parcel-cache",
+  ".turbo",
+  ".vite",
+  "build",
+  "cache",
+  "coverage",
+  "deriveddata",
+  "dist",
+  "generated",
+  "node_modules",
+  "out",
+  "output",
+  "target",
+  "tmp",
+]);
 const TASKLESS_APPROVER = "sidneyswift";
 const TASKLESS_REASON = "legacy-lane-predates-task-tracking";
 const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
@@ -231,20 +329,69 @@ function comparePaths(left, right) {
   return 0;
 }
 
+function pathSegments(path) {
+  return path.replaceAll("\\", "/").split("/").filter(Boolean);
+}
+
+function normalizedNameWords(value) {
+  return value
+    .normalize("NFKC")
+    .replace(/([a-z0-9])([A-Z])/gu, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/gu, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/u)
+    .filter(Boolean);
+}
+
+function containsWordSequence(words, sequence) {
+  for (let index = 0; index <= words.length - sequence.length; index += 1) {
+    if (sequence.every((word, offset) => words[index + offset] === word)) return true;
+  }
+  return false;
+}
+
+function isEnvironmentFileName(leaf) {
+  const words = normalizedNameWords(leaf);
+  return (
+    words.some((word) => ["env", "environment", "environments", "envrc"].includes(word)) ||
+    containsWordSequence(words, ["config", "local"]) ||
+    containsWordSequence(words, ["local", "config"]) ||
+    containsWordSequence(words, ["local", "settings"]) ||
+    containsWordSequence(words, ["settings", "local"])
+  );
+}
+
+function hasSensitiveName(words) {
+  if (words.some((word) => SENSITIVE_STANDALONE_WORDS.has(word))) return true;
+  if (words.some((word) => SENSITIVE_COMPOUND_WORDS.has(word))) return true;
+  return SENSITIVE_WORD_SEQUENCES.some((sequence) => containsWordSequence(words, sequence));
+}
+
 function isSensitiveIgnoredPath(path) {
-  const segments = path.replaceAll("\\", "/").split("/").filter(Boolean);
+  const segments = pathSegments(path);
   const lowerSegments = segments.map((segment) => segment.toLowerCase());
   const leaf = lowerSegments.at(-1) ?? "";
   const parent = lowerSegments.at(-2) ?? "";
+  const extension = leaf.includes(".") ? leaf.slice(leaf.lastIndexOf(".") + 1) : "";
 
-  if (lowerSegments.some((segment) => segment === ".aws" || segment === ".ssh")) return true;
+  if (
+    lowerSegments.some((segment) =>
+      [".aws", ".direnv", ".gnupg", ".kube", ".ssh"].includes(segment),
+    )
+  ) {
+    return true;
+  }
   if (parent === ".docker" && leaf === "config.json") return true;
-  if (/^\.env(?:\.|$)/u.test(leaf)) return true;
-  if (/^config\.local(?:\.|$)/u.test(leaf)) return true;
-  if (/\.(?:crt|jks|key|keystore|p12|pem|pfx)$/u.test(leaf)) return true;
+  if (isEnvironmentFileName(leaf)) return true;
+  if (SENSITIVE_CREDENTIAL_EXTENSIONS.has(extension)) return true;
   if (SENSITIVE_IGNORED_FILENAMES.has(leaf)) return true;
   if (/^id_(?:dsa|ecdsa|ed25519|rsa)(?:\.pub)?$/u.test(leaf)) return true;
-  return lowerSegments.some((segment) => SENSITIVE_IGNORED_NAME.test(segment));
+  return segments.some((segment) => hasSensitiveName(normalizedNameWords(segment)));
+}
+
+function isApprovedRegenerablePath(path) {
+  const parentSegments = pathSegments(path).slice(0, -1);
+  return parentSegments.some((segment) => REGENERABLE_DIRECTORY_NAMES.has(segment.toLowerCase()));
 }
 
 function sameFileState(left, right) {
@@ -786,8 +933,15 @@ function validateIgnoredDispositions(current, evidence, now) {
     requiredString(decision.reason, `Ignored path ${decision.path} reason`);
     const decidedAt = parsedTime(decision.decidedAt, `Ignored path ${decision.path} decidedAt`);
     if (decidedAt > now) block(`Ignored path ${decision.path} decision is in the future.`);
-    if (isSensitiveIgnoredPath(decision.path) && disposition === "regenerable") {
-      block(`Sensitive ignored path ${decision.path} cannot be classified as regenerable.`);
+    if (disposition === "regenerable") {
+      if (isSensitiveIgnoredPath(decision.path)) {
+        block(`Sensitive ignored path ${decision.path} cannot be classified as regenerable.`);
+      }
+      if (!isApprovedRegenerablePath(decision.path)) {
+        block(
+          `Ignored path ${decision.path} is outside an approved generated, cache, build, or output directory.`,
+        );
+      }
     }
     if (disposition === "backed-up-private") {
       requiredString(decision.recoveryReference, `Ignored path ${decision.path} recoveryReference`);

@@ -139,12 +139,20 @@ ignored file invalidates the evidence. Allowed decisions are:
 - `discard-approved`, with a reason.
 - `backed-up-private`, with a reason and private recovery reference.
 
+`regenerable` is valid only when the file is inside an explicit generated, cache,
+build, coverage, distribution, output, temporary, or dependency directory. A root
+ignored file or an ignored file in an ordinary source directory needs a deliberate
+discard or private-backup decision instead.
+
 Secret-shaped ignored paths cannot be classified as regenerable, including a
-secret-shaped file nested inside an otherwise generated directory. This includes
-environment files, `.pgpass`, `.docker/config.json`, service-account files,
-keystores, `config.local`, credentials, bounded secret and token names, private keys,
-and certificates. Ordinary names such as `tokenizer-cache.json` are not treated as
-secrets merely because they contain the letters `token`.
+secret-shaped file nested inside an otherwise generated directory. Detection
+normalizes camelCase, underscores, hyphens, dots, and letter case. It includes
+environment-file variants such as `.envrc`, `.pgpass`, `.docker/config.json`,
+service-account and application-default credential files, `AuthKey` files,
+`config.local`, bounded secret and token names, SSH key names, and standard key,
+certificate, and keystore extensions such as `.p8`, `.pem`, `.p12`, `.pfx`, and
+`.jks`. Ordinary names such as `tokenizer-cache.json` are not treated as secrets
+merely because they contain the letters `token`.
 
 Recovery kinds are:
 

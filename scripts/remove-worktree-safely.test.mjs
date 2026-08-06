@@ -202,6 +202,7 @@ function makeFixture({
   thinBundle = false,
   ignored = false,
   ignoredFilename = "generated.txt",
+  ignoredPath,
   ignoredDisposition = "regenerable",
   taskless = false,
   lateIgnoredDuringFinalGithub = false,
@@ -216,6 +217,7 @@ function makeFixture({
   const evidencePath = join(root, "removal-evidence.json");
   const taskSnapshotPath = join(root, "task-snapshot.json");
   const fakeGithubCounterPath = join(root, "fake-gh-counter.txt");
+  const fixtureIgnoredPath = ignoredPath ?? join(".cache", ignoredFilename);
 
   checked("git", ["init", "--bare", remote]);
   checked("git", ["init", "-b", "main", primary]);
@@ -236,7 +238,10 @@ function makeFixture({
   git(fixture, primary, ["config", "user.email", "cleanup-test@example.test"]);
   git(fixture, primary, ["config", `url.file://${remote}.insteadOf`, githubOrigin]);
   writeFileSync(join(primary, "README.md"), "Disposable worktree integration fixture.\n");
-  writeFileSync(join(primary, ".gitignore"), ".cache/\n.late/\n");
+  writeFileSync(
+    join(primary, ".gitignore"),
+    ".cache/\n.late/\n.next/\n.output/\nbuild/\ncoverage/\ndist/\ngenerated/\n*.scratch\n",
+  );
   mkdirSync(join(primary, "scripts"));
   copyFileSync(wrapperSource, join(primary, "scripts", "remove-worktree-safely.mjs"));
   git(fixture, primary, ["add", "."]);
@@ -255,8 +260,8 @@ function makeFixture({
     git(fixture, target, ["commit", "-m", "test: local-only recovery"]);
   }
   if (ignored) {
-    mkdirSync(dirname(join(target, ".cache", ignoredFilename)), { recursive: true });
-    writeFileSync(join(target, ".cache", ignoredFilename), "regenerable\n");
+    mkdirSync(dirname(join(target, fixtureIgnoredPath)), { recursive: true });
+    writeFileSync(join(target, fixtureIgnoredPath), "regenerable\n");
   }
 
   const realGitPath = checked("which", ["git"]);
@@ -324,7 +329,7 @@ function makeFixture({
   const ignoredDispositions = ignored
     ? [
         {
-          ...ignoredFileEvidence(target, join(".cache", ignoredFilename)),
+          ...ignoredFileEvidence(target, fixtureIgnoredPath),
           disposition: ignoredDisposition,
           reason: "Disposable generated fixture content.",
           decidedAt: now,
@@ -539,34 +544,77 @@ test("changed ignored content invalidates the recorded fingerprint", (t) => {
 });
 
 test("sensitive files nested under ignored directories cannot be called regenerable", () => {
-  for (const ignoredFilename of [
-    ".env.local",
-    ".pgpass",
-    ".docker/config.json",
-    "service-account.json",
-    "release.keystore",
-    "config.local",
-    "stripe-client-secret.json",
-    "github-token.json",
+  for (const ignoredPath of [
+    ".cache/.env.local",
+    ".cache/.env",
+    ".cache/.envrc",
+    ".cache/.envrc.local",
+    ".cache/production.env",
+    ".cache/tool.envrc",
+    ".cache/environment.local.json",
+    ".cache/.pgpass",
+    ".cache/.docker/config.json",
+    ".cache/AuthKey_ABC123.p8",
+    ".cache/service-account.json",
+    ".cache/serviceAccountKey.json",
+    ".cache/release.keystore",
+    ".cache/config.local",
+    ".cache/stripe-client-secret.json",
+    ".cache/github-token.json",
+    ".cache/tls.pem",
+    ".cache/signing.p12",
+    ".cache/signing.pfx",
+    ".cache/release.jks",
+    ".cache/client.ppk",
+    ".cache/signing.pkcs12",
+    ".cache/release.truststore",
+    ".cache/certificate.cer",
+    ".cache/private.key",
+    ".cache/id_rsa",
+    ".cache/id_ed25519",
+    ".cache/application-default-credentials.json",
+    ".cache/application_default_credentials.json",
+    ".cache/applicationDefaultCredentials.json",
   ]) {
-    const fixture = makeFixture({ ignored: true, ignoredFilename });
+    const fixture = makeFixture({ ignored: true, ignoredPath });
     try {
       const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
-      assert.equal(result.status, 2, `${ignoredFilename}: ${result.stderr}`);
-      assert.match(result.stderr, /cannot be classified as regenerable/iu, ignoredFilename);
+      assert.equal(result.status, 2, `${ignoredPath}: ${result.stderr}`);
+      assert.match(result.stderr, /cannot be classified as regenerable/iu, ignoredPath);
     } finally {
       rmSync(fixture.root, { recursive: true, force: true });
     }
   }
 });
 
-test("an ordinary tokenizer cache can be recorded as regenerable", (t) => {
-  const fixture = makeFixture({ ignored: true, ignoredFilename: "tokenizer-cache.json" });
+test("ordinary tokenizer caches and build artifacts can be recorded as regenerable", () => {
+  for (const ignoredPath of [
+    ".cache/tokenizer-cache.json",
+    ".next/cache/webpack/client.pack",
+    ".output/server/index.mjs",
+    "build/chunks/app-123.js",
+    "coverage/lcov.info",
+    "dist/assets/site.css",
+    "generated/schema-types.ts",
+  ]) {
+    const fixture = makeFixture({ ignored: true, ignoredPath });
+    try {
+      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      assert.equal(result.status, 0, `${ignoredPath}: ${result.stderr}`);
+      assert.equal(JSON.parse(result.stdout).ignoredPathDecisions, 1, ignoredPath);
+    } finally {
+      rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("a root ignored file cannot be called regenerable", (t) => {
+  const fixture = makeFixture({ ignored: true, ignoredPath: "draft.scratch" });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
   const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
-  assert.equal(result.status, 0, result.stderr);
-  assert.equal(JSON.parse(result.stdout).ignoredPathDecisions, 1);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /approved generated, cache, build, or output directory/iu);
 });
 
 test("ignored filenames containing newlines are inventoried without ambiguity", (t) => {
