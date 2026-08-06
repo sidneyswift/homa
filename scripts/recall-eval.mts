@@ -103,8 +103,10 @@ const CHECKS: Check[] = [
 ];
 
 async function main(): Promise<number> {
+  await sql`select 1 as live_fixture_database_ready`;
   const familyRows = await sql<{ id: string }[]>`
-    insert into public.families (name) values ('Recall eval (synthetic)')
+    insert into public.families (name, sandbox)
+    values ('Recall eval (synthetic)', true)
     returning id
   `;
   const familyId = familyRows[0].id;
@@ -163,7 +165,8 @@ async function main(): Promise<number> {
 
     // The tenancy probe: another family's recall must see none of this.
     const strangers = await sql<{ id: string }[]>`
-      insert into public.families (name) values ('Recall eval bystander (synthetic)')
+      insert into public.families (name, sandbox)
+      values ('Recall eval bystander (synthetic)', true)
       returning id
     `;
     const strangerId = strangers[0].id;

@@ -44,6 +44,7 @@ const coveredTables = new Set();
 const fixtureFamilyIds = [];
 const fixtureKnowledgeIds = [];
 const fixtureUserIds = [];
+const fixtureUserEmails = [];
 let morningResearchBriefV2SchemaAvailable = false;
 let morningOfferFunnelSchemaAvailable = false;
 let familyBillingSubscriptionsSchemaAvailable = false;
@@ -132,6 +133,7 @@ async function jsonResponse(response, label) {
 async function signUpFixtureUser(label, suffix) {
   const email = `isolation-${label}-${suffix}@example.com`;
   const password = `Homa-isolation-${suffix}-${label}-A1!`;
+  fixtureUserEmails.push(email.toLowerCase());
   const signedUp = await authRequest("signup", { email, password });
   let accessToken = signedUp.access_token;
   let userId = signedUp.user?.id;
@@ -163,6 +165,15 @@ async function createFixtureFamily(user, label) {
   const familyId = Array.isArray(body) ? body[0]?.family_id : body?.family_id;
   if (!familyId) throw new Error(`create_my_family for ${label} returned no family_id`);
   fixtureFamilyIds.push(familyId);
+  const sandboxRows = await sql`
+    update public.families
+    set sandbox = true
+    where id = ${familyId}
+    returning id
+  `;
+  if (sandboxRows.length !== 1) {
+    throw new Error(`fixture family ${label} was not marked as sandbox`);
+  }
   return familyId;
 }
 
@@ -2367,6 +2378,12 @@ async function cleanupIsolationFixtures() {
     if (fixtureUserIds.length > 0) {
       await sql`delete from auth.users where id in ${sql(fixtureUserIds)}`;
     }
+    if (fixtureUserEmails.length > 0) {
+      await sql`
+        delete from auth.users
+        where lower(email) in ${sql(fixtureUserEmails)}
+      `;
+    }
   } catch (error) {
     report(
       "authenticated fixture cleanup",
@@ -2458,6 +2475,7 @@ async function expectAuthenticatedIsolation() {
   }
 
   try {
+    await sql`select 1 as live_fixture_database_ready`;
     const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const familyAUser = await signUpFixtureUser("a", suffix);
     const familyBUser = await signUpFixtureUser("b", suffix);
@@ -4837,10 +4855,9 @@ for (const table of [
 await expectEmptyRead("child_curriculum_calls");
 await expectEmptyRead("child_curricula");
 // Raw call transcripts (migration #25): family-scoped by is_family_member.
-// Only the server-only connection writes (capture webhook + sync job), so
-// anon reads nothing and has no write policy; unknown-caller rows carry a
-// null family_id and are invisible to every Data API role by construction.
-await expectEmptyRead("call_transcripts");
+// Only the server-only connection writes (capture webhook + sync job), and
+// Data API privileges are revoked from anonymous callers entirely.
+await expectReadDenied("call_transcripts");
 // The durable chat record (migration #34): members read their own rows;
 // only the persist-conversation hook's server connection ever writes.
 await expectReadDenied("conversation_messages");
