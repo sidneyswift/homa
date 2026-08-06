@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "60f65a870ad1de1f4595b69b7c7ff2f81429d27c7d6baa1f73ae3362a1c9a2e2",
+  "ownedInputFingerprint": "2ee531393be8b8d068de5e369baf6075128a55da3a966217c64b6ab75a14532c",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -6455,7 +6455,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
+      "sourceHash": "6adac9000af52557a1a717eaf1b320959191f0a9a814a1c460610f7e31d0a19f",
       "legacySignatures": [
         "legacy-design-doc-path",
         "legacy-font-caveat",
@@ -6579,7 +6579,7 @@
     {
       "surfaceId": "surface:1aac9cfdef6206ce",
       "path": "docs/homa-planning/journeys/10-reconciliation.md",
-      "sourceHash": "e2ca1ca294cb2e4e739a96957d9b84251c1d2910acd2e16c089b2433ebede8d9",
+      "sourceHash": "a9c56693ae5026c67e29a6f0d147ff289cc42c8df61f7cd57c1f467581c24721",
       "legacySignatures": [
         "legacy-design-doc-path"
       ],
