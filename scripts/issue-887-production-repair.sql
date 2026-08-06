@@ -4,13 +4,32 @@
 
 begin;
 
-set local lock_timeout = '5s';
 set local statement_timeout = '120s';
 set local idle_in_transaction_session_timeout = '150s';
 
 select pg_catalog.pg_advisory_xact_lock(
   pg_catalog.hashtextextended('homa:issue:887:production-repair', 0)
 );
+
+-- Lock mutable production state before reading it. Every repair session uses
+-- this order: migration ledger, families, then the billing ledger when it
+-- already exists. The issue advisory lock serializes repair sessions before
+-- they enter the relation-lock sequence.
+lock table supabase_migrations.schema_migrations
+  in share row exclusive mode;
+lock table public.families in share row exclusive mode;
+
+do $lock_existing_billing_ledger$
+begin
+  begin
+    execute
+      'lock table public.family_billing_subscriptions in share row exclusive mode';
+  exception
+    when undefined_table then
+      null;
+  end;
+end
+$lock_existing_billing_ledger$;
 
 create temporary table issue_887_expected_migrations (
   version text primary key,

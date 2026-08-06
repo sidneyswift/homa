@@ -10,33 +10,33 @@ import { parse } from "yaml";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = readFileSync(
   resolve(repositoryRoot, ".github/workflows/issue-887-production-repair.yml"),
-  "utf8",
+  "utf8"
 );
 const repair = readFileSync(
   resolve(repositoryRoot, "scripts/issue-887-production-repair.sql"),
-  "utf8",
+  "utf8"
 );
 const harness = readFileSync(
   resolve(repositoryRoot, "scripts/issue-887-production-repair-postgres.mjs"),
-  "utf8",
+  "utf8"
 );
 const originalMigration = readFileSync(
   resolve(
     repositoryRoot,
-    "supabase/migrations/20260801110000_family_billing_subscriptions.sql",
-  ),
+    "supabase/migrations/20260801110000_family_billing_subscriptions.sql"
+  )
 );
 const aclMigration = readFileSync(
   resolve(
     repositoryRoot,
-    "supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql",
-  ),
+    "supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql"
+  )
 );
 const correctionMigration = readFileSync(
   resolve(
     repositoryRoot,
-    "supabase/migrations/20260806093000_correct_billing_provider_product_identity.sql",
-  ),
+    "supabase/migrations/20260806093000_correct_billing_provider_product_identity.sql"
+  )
 );
 const workflowDocument = parse(workflow);
 
@@ -47,16 +47,16 @@ function sha256(contents) {
 test("workflow is bound to production, Homa, and immutable reviewed inputs", () => {
   assert.equal(
     workflowDocument.jobs.apply.if,
-    "github.repository == 'sidneyswift/homa' && github.repository_owner == 'sidneyswift' && github.ref == 'refs/heads/main' && github.ref_name == 'main' && github.event.repository.default_branch == 'main' && github.actor == 'sidneyswift' && github.triggering_actor == 'sidneyswift'",
+    "github.repository == 'sidneyswift/homa' && github.repository_owner == 'sidneyswift' && github.ref == 'refs/heads/main' && github.ref_name == 'main' && github.event.repository.default_branch == 'main' && github.actor == 'sidneyswift' && github.triggering_actor == 'sidneyswift'"
   );
   assert.equal(workflowDocument.jobs.apply.environment, "production");
   assert.equal(
     workflowDocument.jobs.apply.steps[0].uses,
-    "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+    "actions/checkout@11d5960a326750d5838078e36cf38b85af677262"
   );
   assert.equal(
     workflowDocument.jobs.apply.steps[0].with.ref,
-    "${{ github.sha }}",
+    "${{ github.sha }}"
   );
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 887/u);
   assert.match(workflow, /production_deployed_sha/u);
@@ -75,7 +75,7 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
   assert.doesNotMatch(workflow, /actions\/checkout@v\d/u);
   assert.equal(
     sha256(originalMigration),
-    "0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198",
+    "0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198"
   );
   assert.match(workflow, new RegExp(sha256(originalMigration), "u"));
   assert.match(workflow, new RegExp(sha256(aclMigration), "u"));
@@ -83,16 +83,17 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
   assert.match(workflow, new RegExp(sha256(repair), "u"));
   assert.equal(
     workflow.match(/-f scripts\/issue-887-production-repair\.sql/g)?.length,
-    2,
+    2
   );
   const firstApply = workflowDocument.jobs.apply.steps.find(
-    (step) => step.name === "Apply and verify the exact repair in one fresh connection",
+    (step) =>
+      step.name === "Apply and verify the exact repair in one fresh connection"
   )?.run;
   assert.match(firstApply, /ISSUE_887_REPAIR=repaired/u);
   assert.doesNotMatch(firstApply, /ISSUE_887_REPAIR=verified_noop/u);
   assert.match(firstApply, /repair_markers/u);
   const freshNoop = workflowDocument.jobs.apply.steps.find(
-    (step) => step.name === "Prove a fresh connection is a verified no-op",
+    (step) => step.name === "Prove a fresh connection is a verified no-op"
   )?.run;
   assert.match(freshNoop, /ISSUE_887_REPAIR=verified_noop/u);
   assert.match(freshNoop, /repair_markers/u);
@@ -102,7 +103,7 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
 test("immutable original and forward migrations converge ACL and product identity", () => {
   assert.equal(
     sha256(originalMigration),
-    "0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198",
+    "0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198"
   );
   const original = originalMigration.toString("utf8");
   assert.match(original, /from anon, authenticated/u);
@@ -113,13 +114,13 @@ test("immutable original and forward migrations converge ACL and product identit
   assert.match(acl, /grant all privileges[\s\S]*service_role/u);
   assert.equal(
     sha256(correctionMigration),
-    "07e432ffbf449427ac43a7f4433dae3f5b083cbb9b185edff75a774b310464c7",
+    "07e432ffbf449427ac43a7f4433dae3f5b083cbb9b185edff75a774b310464c7"
   );
   const correction = correctionMigration.toString("utf8");
   assert.equal(correction.match(/^update /gmu)?.length, 1);
   assert.match(
     correction,
-    /set provider_product_id = null[\s\S]*subscription\.provider = 'stripe'[\s\S]*subscription\.provider_product_id = family\.stripe_price_id/u,
+    /set provider_product_id = null[\s\S]*subscription\.provider = 'stripe'[\s\S]*subscription\.provider_product_id = family\.stripe_price_id/u
   );
   assert.doesNotMatch(correction, /update public\.families/u);
   assert.doesNotMatch(correction, /subscription\.provider = 'apple'/u);
@@ -136,14 +137,33 @@ test("repair pins state, snapshot, ledger, and the complete database contract", 
   assert.ok(repair.indexOf(includes[0]) < repair.indexOf(includes[1]));
   assert.ok(repair.indexOf(includes[1]) < repair.indexOf(includes[2]));
   assert.ok(repair.indexOf(includes[2]) < repair.lastIndexOf("commit;"));
-  assert.match(repair, /pg_advisory_xact_lock/u);
-  assert.match(repair, /set local lock_timeout = '5s'/u);
+  const advisoryLock = repair.indexOf("pg_advisory_xact_lock");
+  const migrationLedgerLock = repair.indexOf(
+    "lock table supabase_migrations.schema_migrations"
+  );
+  const familiesLock = repair.indexOf(
+    "lock table public.families in share row exclusive mode"
+  );
+  const existingBillingLedgerLock = repair.indexOf(
+    "lock table public.family_billing_subscriptions in share row exclusive mode"
+  );
+  const firstStateRead = repair.indexOf("insert into issue_887_repair_state");
+  assert.ok(advisoryLock > repair.indexOf("begin;"));
+  assert.ok(advisoryLock < migrationLedgerLock);
+  assert.ok(migrationLedgerLock < familiesLock);
+  assert.ok(familiesLock < existingBillingLedgerLock);
+  assert.ok(existingBillingLedgerLock < firstStateRead);
+  assert.match(repair, /when undefined_table then[\s\S]*null/u);
+  assert.doesNotMatch(repair, /lock_timeout/u);
   assert.match(repair, /set local statement_timeout = '120s'/u);
   assert.match(
     repair,
-    /expected fresh, original-only, original-plus-ACL, or complete state/u,
+    /expected fresh, original-only, original-plus-ACL, or complete state/u
   );
-  assert.match(repair, /existing migration ledger differs from canonical history/u);
+  assert.match(
+    repair,
+    /existing migration ledger differs from canonical history/u
+  );
   assert.match(repair, /snapshot\.stripe_records <> 3/u);
   assert.match(repair, /snapshot\.distinct_stripe_subscription_ids <> 3/u);
   assert.match(repair, /snapshot\.apple_records <> 0/u);
@@ -195,15 +215,21 @@ test("repair pins state, snapshot, ledger, and the complete database contract", 
   assert.match(repair, /repair_transaction_timestamp/u);
   assert.match(repair, /changed more than proven Stripe product mirrors/u);
   assert.match(repair, /verified no-op changed an existing billing row/u);
-  assert.match(repair, /fresh issue 887 backfill has an unexpected observation timestamp/u);
-  assert.match(repair, /existing issue 887 backfill has an unexpected observation timestamp/u);
+  assert.match(
+    repair,
+    /fresh issue 887 backfill has an unexpected observation timestamp/u
+  );
+  assert.match(
+    repair,
+    /existing issue 887 backfill has an unexpected observation timestamp/u
+  );
   assert.match(repair, /ISSUE_887_REPAIR=[\s\S]*verified_noop/u);
   assert.match(repair, /harden_family_billing_subscriptions_acl/u);
   assert.doesNotMatch(repair, /original_sha256=/u);
   assert.doesNotMatch(repair, /executable_sha256=/u);
 });
 
-test("disposable harness covers exact metadata, isolation, collision, and rollback paths", () => {
+test("disposable harness covers exact metadata, isolation, concurrency, collision, and rollback paths", () => {
   assert.match(harness, /applyRepair\(\);[\s\S]*verified_noop/u);
   assert.match(harness, /string_agg\([\s\S]*array_to_string\(statements/u);
   assert.match(harness, /runPsql\(\["-c", reconstructed\.rawStdout\]\)/u);
@@ -214,7 +240,32 @@ test("disposable harness covers exact metadata, isolation, collision, and rollba
   assert.match(harness, /original-plus-ACL state/u);
   assert.match(harness, /has_table_privilege/u);
   assert.match(harness, /set role service_role/u);
-  assert.match(harness, /issue_887_pause_on_grant/u);
+  assert.match(harness, /issue_887_pause_after_relation_locks/u);
+  assert.match(harness, /acceptedStartingStates/u);
+  for (const startingState of [
+    'name: "fresh"',
+    'name: "original_only"',
+    'name: "original_plus_acl"',
+    'name: "complete"',
+  ]) {
+    assert.match(harness, new RegExp(startingState, "u"));
+  }
+  assert.match(harness, /proveWritersBlockForAcceptedState/u);
+  assert.match(harness, /waitForRepairRelationLocks/u);
+  assert.match(harness, /waitForWriterToBlock/u);
+  assert.match(
+    harness,
+    /update public\.family_billing_subscriptions[\s\S]*set provider_product_id = provider_product_id[\s\S]*where provider = 'stripe'/u
+  );
+  assert.match(harness, /proveTwoRepairSessionsSerialize/u);
+  assert.match(
+    harness,
+    /second exact repair to wait on the issue advisory lock/u
+  );
+  assert.match(
+    harness,
+    /ISSUE_887_REPAIR=repaired[\s\S]*ISSUE_887_REPAIR=verified_noop/u
+  );
   assert.match(harness, /ShareRowExclusiveLock/u);
   assert.match(harness, /RowExclusiveLock/u);
   assert.match(harness, /duplicateSubscription/u);
@@ -234,8 +285,14 @@ test("disposable harness covers exact metadata, isolation, collision, and rollba
   assert.match(harness, /generated column/u);
   assert.match(harness, /identity column/u);
   assert.match(harness, /service_maintain_count/u);
-  assert.match(harness, /existing migration ledger differs from canonical history/u);
+  assert.match(
+    harness,
+    /existing migration ledger differs from canonical history/u
+  );
   assert.match(harness, /injected mid-migration failure/u);
-  assert.match(harness, /mid-migration failure left billing relation or ledger residue/u);
+  assert.match(
+    harness,
+    /mid-migration failure left billing relation or ledger residue/u
+  );
   assert.ok((harness.match(/migration state is mixed/g)?.length ?? 0) >= 8);
 });

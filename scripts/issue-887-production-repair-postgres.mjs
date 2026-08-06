@@ -8,31 +8,34 @@ import { fileURLToPath } from "node:url";
 import postgres from "postgres";
 
 const databaseUrl = process.env.HOMA_EVAL_DATABASE_URL;
-assert.ok(databaseUrl, "HOMA_EVAL_DATABASE_URL must point at a disposable database");
+assert.ok(
+  databaseUrl,
+  "HOMA_EVAL_DATABASE_URL must point at a disposable database"
+);
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repairPath = join(
   repositoryRoot,
   "scripts",
-  "issue-887-production-repair.sql",
+  "issue-887-production-repair.sql"
 );
 const originalMigrationPath = join(
   repositoryRoot,
   "supabase",
   "migrations",
-  "20260801110000_family_billing_subscriptions.sql",
+  "20260801110000_family_billing_subscriptions.sql"
 );
 const aclMigrationPath = join(
   repositoryRoot,
   "supabase",
   "migrations",
-  "20260806092000_harden_family_billing_subscriptions_acl.sql",
+  "20260806092000_harden_family_billing_subscriptions_acl.sql"
 );
 const correctionMigrationPath = join(
   repositoryRoot,
   "supabase",
   "migrations",
-  "20260806093000_correct_billing_provider_product_identity.sql",
+  "20260806093000_correct_billing_provider_product_identity.sql"
 );
 const psql = process.env.HOMA_POSTGRES_BIN
   ? join(process.env.HOMA_POSTGRES_BIN, "psql")
@@ -45,10 +48,7 @@ function databaseUrlFor(role) {
   return url.toString();
 }
 
-function runPsql(
-  actions,
-  { expectedStatus = 0, role = "postgres" } = {},
-) {
+function runPsql(actions, { expectedStatus = 0, role = "postgres" } = {}) {
   const result = spawnSync(
     psql,
     [
@@ -64,14 +64,18 @@ function runPsql(
       env: process.env,
       maxBuffer: 8 * 1024 * 1024,
       timeout: 180_000,
-    },
+    }
   );
 
   if (result.error) throw result.error;
   if (expectedStatus === 0) {
     assert.equal(result.status, 0, result.stderr || "issue 887 repair failed");
   } else {
-    assert.notEqual(result.status, 0, "issue 887 repair unexpectedly succeeded");
+    assert.notEqual(
+      result.status,
+      0,
+      "issue 887 repair unexpectedly succeeded"
+    );
   }
   return {
     rawStdout: result.stdout,
@@ -100,7 +104,7 @@ function spawnPsql(actions, { role = "postgres", applicationName } = {}) {
         ...(applicationName ? { PGAPPNAME: applicationName } : {}),
       },
       stdio: ["ignore", "pipe", "pipe"],
-    },
+    }
   );
   let stdout = "";
   let stderr = "";
@@ -152,7 +156,9 @@ function sqlLiteral(value) {
 }
 
 function canonicalStatementArray(path) {
-  return `array[${canonicalMigrationStatements(path).map(sqlLiteral).join(", ")}]::text[]`;
+  return `array[${canonicalMigrationStatements(path)
+    .map(sqlLiteral)
+    .join(", ")}]::text[]`;
 }
 
 function insertCanonicalLedger(version, name, path) {
@@ -174,7 +180,7 @@ function installCanonicalOriginalState() {
   insertCanonicalLedger(
     "20260801110000",
     "family_billing_subscriptions",
-    originalMigrationPath,
+    originalMigrationPath
   );
 }
 
@@ -184,8 +190,53 @@ function installCanonicalAclState() {
   insertCanonicalLedger(
     "20260806092000",
     "harden_family_billing_subscriptions_acl",
-    aclMigrationPath,
+    aclMigrationPath
   );
+}
+
+function installCanonicalCompleteState() {
+  installCanonicalAclState();
+  runPsql(["-f", correctionMigrationPath]);
+  insertCanonicalLedger(
+    "20260806093000",
+    "correct_billing_provider_product_identity",
+    correctionMigrationPath
+  );
+}
+
+function installPauseAfterRelationLocks(applicationName, pauseLockKey) {
+  runPsql([
+    "-c",
+    `
+      create or replace function public.issue_887_pause_after_relation_locks()
+      returns event_trigger
+      language plpgsql
+      as $pause$
+      begin
+        if tg_tag = 'CREATE TABLE'
+          and current_setting('application_name') = ${sqlLiteral(
+            applicationName
+          )}
+        then
+          perform pg_catalog.pg_advisory_xact_lock(${pauseLockKey}::bigint);
+        end if;
+      end
+      $pause$;
+      create event trigger issue_887_pause_after_relation_locks
+        on ddl_command_start
+        execute function public.issue_887_pause_after_relation_locks();
+    `,
+  ]);
+}
+
+function removePauseAfterRelationLocks() {
+  runPsql([
+    "-c",
+    `
+      drop event trigger if exists issue_887_pause_after_relation_locks;
+      drop function if exists public.issue_887_pause_after_relation_locks();
+    `,
+  ]);
 }
 
 runPsql(
@@ -216,7 +267,7 @@ runPsql(
         grant all privileges on tables to anon, authenticated, service_role;
     `,
   ],
-  { role: "homa_eval" },
+  { role: "homa_eval" }
 );
 
 assert.equal(canonicalMigrationStatements(originalMigrationPath).length, 7);
@@ -229,16 +280,21 @@ const fixtureIds = [
   "88700000-0000-4000-8000-000000000003",
 ];
 
-function resetFresh({ duplicateSubscription = false, nullStatus = false } = {}) {
-  const thirdSubscription = duplicateSubscription ? "sub_issue_887_02" : "sub_issue_887_03";
+function resetFresh({
+  duplicateSubscription = false,
+  nullStatus = false,
+} = {}) {
+  const thirdSubscription = duplicateSubscription
+    ? "sub_issue_887_02"
+    : "sub_issue_887_03";
   const thirdStatus = nullStatus ? "null" : "'past_due'";
   runPsql([
     "-c",
     `
       drop event trigger if exists issue_887_fail_on_grant;
-      drop event trigger if exists issue_887_pause_on_grant;
+      drop event trigger if exists issue_887_pause_after_relation_locks;
       drop function if exists public.issue_887_fail_on_grant();
-      drop function if exists public.issue_887_pause_on_grant();
+      drop function if exists public.issue_887_pause_after_relation_locks();
       drop table if exists public.family_billing_subscriptions cascade;
       drop table if exists public.issue_887_partition_parent cascade;
       drop table if exists public.issue_887_family_index_collision cascade;
@@ -313,7 +369,7 @@ function applyRepair(expectedMarker = "ISSUE_887_REPAIR=repaired") {
   assert.deepEqual(
     repairMarkers(result),
     [expectedMarker],
-    `expected exactly ${expectedMarker}, got ${result.stdout.join(" | ")}`,
+    `expected exactly ${expectedMarker}, got ${result.stdout.join(" | ")}`
   );
   return result;
 }
@@ -322,6 +378,87 @@ function assertRepairFailure(pattern) {
   const result = runPsql(["-f", repairPath], { expectedStatus: 1 });
   assert.match(result.stderr, pattern);
   return result;
+}
+
+function spawnedRepairMarkers(result) {
+  return result.stdout
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("ISSUE_887_REPAIR="));
+}
+
+async function waitForRepairRelationLocks(
+  observerSql,
+  applicationName,
+  requiredRelations
+) {
+  await waitFor(
+    `${applicationName} to hold every required relation lock`,
+    async () => {
+      const rows = await observerSql`
+      select
+        namespace.nspname as schema_name,
+        relation.relname as relation_name,
+        relation_lock.mode,
+        relation_lock.granted,
+        exists (
+          select 1
+          from pg_catalog.pg_locks advisory_wait
+          where advisory_wait.pid = activity.pid
+            and advisory_wait.locktype = 'advisory'
+            and not advisory_wait.granted
+        ) as waiting_on_advisory
+      from pg_catalog.pg_stat_activity activity
+      join pg_catalog.pg_locks relation_lock
+        on relation_lock.pid = activity.pid
+       and relation_lock.locktype = 'relation'
+      join pg_catalog.pg_class relation
+        on relation.oid = relation_lock.relation
+      join pg_catalog.pg_namespace namespace
+        on namespace.oid = relation.relnamespace
+      where activity.application_name = ${applicationName}
+    `;
+      const heldRelations = new Set(
+        rows
+          .filter(
+            (row) =>
+              row.mode === "ShareRowExclusiveLock" &&
+              row.granted === true &&
+              row.waiting_on_advisory === true
+          )
+          .map((row) => `${row.schema_name}.${row.relation_name}`)
+      );
+      return requiredRelations.every((relation) => heldRelations.has(relation));
+    }
+  );
+}
+
+async function waitForWriterToBlock(
+  observerSql,
+  applicationName,
+  schemaName,
+  relationName
+) {
+  await waitFor(`${applicationName} to wait behind the repair`, async () => {
+    const rows = await observerSql`
+      select exists (
+        select 1
+        from pg_catalog.pg_stat_activity activity
+        join pg_catalog.pg_locks relation_lock
+          on relation_lock.pid = activity.pid
+        join pg_catalog.pg_class relation
+          on relation.oid = relation_lock.relation
+        join pg_catalog.pg_namespace namespace
+          on namespace.oid = relation.relnamespace
+        where activity.application_name = ${applicationName}
+          and namespace.nspname = ${schemaName}
+          and relation.relname = ${relationName}
+          and relation_lock.mode = 'RowExclusiveLock'
+          and not relation_lock.granted
+      ) as waiting
+    `;
+    return rows[0]?.waiting === true;
+  });
 }
 
 runPsql(["-f", originalMigrationPath]);
@@ -399,7 +536,7 @@ const forwardAcl = runPsql([
 assert.deepEqual(
   forwardAcl.stdout,
   ["t"],
-  "forward migration did not create the exact owner and service_role ACL",
+  "forward migration did not create the exact owner and service_role ACL"
 );
 runPsql(["-c", "drop table public.family_billing_subscriptions;"]);
 
@@ -544,7 +681,10 @@ const reconstructed = runPsql([
   `,
 ]);
 assert.match(reconstructed.rawStdout, /create table if not exists/u);
-assert.match(reconstructed.rawStdout, /grant all privileges[\s\S]*service_role/u);
+assert.match(
+  reconstructed.rawStdout,
+  /grant all privileges[\s\S]*service_role/u
+);
 assert.match(reconstructed.rawStdout, /set provider_product_id = null/u);
 runPsql(["-c", reconstructed.rawStdout]);
 applyRepair("ISSUE_887_REPAIR=verified_noop");
@@ -566,7 +706,7 @@ const canonicalOriginalOnly = runPsql([
 assert.deepEqual(
   canonicalOriginalOnly.stdout,
   ["t"],
-  "canonical original-only state did not preserve genuine migration history",
+  "canonical original-only state did not preserve genuine migration history"
 );
 applyRepair();
 applyRepair("ISSUE_887_REPAIR=verified_noop");
@@ -593,7 +733,7 @@ const canonicalOriginalPlusAcl = runPsql([
 assert.deepEqual(
   canonicalOriginalPlusAcl.stdout,
   ["t"],
-  "original-plus-ACL state did not preserve both canonical ledgers",
+  "original-plus-ACL state did not preserve both canonical ledgers"
 );
 applyRepair();
 applyRepair("ISSUE_887_REPAIR=verified_noop");
@@ -749,11 +889,14 @@ const transactionalTamperCases = [
 ];
 
 for (const [label, mutation, errorPattern] of transactionalTamperCases) {
-  const rejected = runPsql(
-    ["-c", `begin; ${mutation};`, "-f", repairPath],
-    { expectedStatus: 1 },
+  const rejected = runPsql(["-c", `begin; ${mutation};`, "-f", repairPath], {
+    expectedStatus: 1,
+  });
+  assert.match(
+    rejected.stderr,
+    errorPattern,
+    `${label} tamper was not rejected`
   );
-  assert.match(rejected.stderr, errorPattern, `${label} tamper was not rejected`);
   applyRepair("ISSUE_887_REPAIR=verified_noop");
 }
 
@@ -781,11 +924,11 @@ const partitionDrift = runPsql(
     "-f",
     repairPath,
   ],
-  { expectedStatus: 1 },
+  { expectedStatus: 1 }
 );
 assert.match(
   partitionDrift.stderr,
-  /relation metadata differs from the reviewed contract/u,
+  /relation metadata differs from the reviewed contract/u
 );
 applyRepair("ISSUE_887_REPAIR=verified_noop");
 
@@ -953,10 +1096,7 @@ const nullStatusRollback = runPsql([
 assert.deepEqual(nullStatusRollback.stdout, ["t|t"]);
 
 resetFresh();
-runPsql([
-  "-c",
-  "create table public.family_billing_subscriptions (id uuid);",
-]);
+runPsql(["-c", "create table public.family_billing_subscriptions (id uuid);"]);
 assertRepairFailure(/migration state is mixed/u);
 
 resetFresh();
@@ -1004,135 +1144,284 @@ runPsql([
 ]);
 assertRepairFailure(/canonical history/u);
 
-resetFresh();
-const concurrencyLockKey = 887_060_920_000;
-const blockerPool = postgres(databaseUrlFor("postgres"), {
-  max: 1,
-  onnotice: () => {},
-});
-const observerSql = postgres(databaseUrlFor("postgres"), {
-  max: 1,
-  onnotice: () => {},
-});
-const blockerSql = await blockerPool.reserve();
-let blockerHeld = false;
-let concurrentRepair;
-let concurrentWriter;
-try {
-  await blockerSql`select pg_catalog.pg_advisory_lock(${concurrencyLockKey}::bigint)`;
-  blockerHeld = true;
-  runPsql([
-    "-c",
-    `
-      create or replace function public.issue_887_pause_on_grant()
-      returns event_trigger
-      language plpgsql
-      as $pause$
-      begin
-        if tg_tag = 'GRANT' then
-          perform pg_catalog.pg_advisory_xact_lock(${concurrencyLockKey}::bigint);
-        end if;
-      end
-      $pause$;
-      create event trigger issue_887_pause_on_grant
-        on ddl_command_start
-        execute function public.issue_887_pause_on_grant();
-    `,
-  ]);
+const pauseAfterRelationLocksKey = 887_060_920_000;
+const acceptedStartingStates = [
+  {
+    name: "fresh",
+    install: () => {},
+    ledgerExists: false,
+    expectedMarker: "ISSUE_887_REPAIR=repaired",
+  },
+  {
+    name: "original_only",
+    install: installCanonicalOriginalState,
+    ledgerExists: true,
+    expectedMarker: "ISSUE_887_REPAIR=repaired",
+  },
+  {
+    name: "original_plus_acl",
+    install: installCanonicalAclState,
+    ledgerExists: true,
+    expectedMarker: "ISSUE_887_REPAIR=repaired",
+  },
+  {
+    name: "complete",
+    install: installCanonicalCompleteState,
+    ledgerExists: true,
+    expectedMarker: "ISSUE_887_REPAIR=verified_noop",
+  },
+];
 
-  concurrentRepair = spawnPsql(["-f", repairPath], {
-    applicationName: "issue_887_concurrency_repair",
-  });
-  await waitFor("fresh repair to hold the families write lock", async () => {
-    const rows = await observerSql`
-      select exists (
-        select 1
-        from pg_catalog.pg_stat_activity activity
-        join pg_catalog.pg_locks family_lock
-          on family_lock.pid = activity.pid
-        where activity.application_name = 'issue_887_concurrency_repair'
-          and family_lock.relation = 'public.families'::regclass
-          and family_lock.mode = 'ShareRowExclusiveLock'
-          and family_lock.granted
-          and exists (
-            select 1
-            from pg_catalog.pg_locks advisory_wait
-            where advisory_wait.pid = activity.pid
-              and advisory_wait.locktype = 'advisory'
-              and not advisory_wait.granted
-          )
-      ) as ready
-    `;
-    return rows[0]?.ready === true;
-  });
+async function proveWritersBlockForAcceptedState(startingState) {
+  resetFresh();
+  startingState.install();
 
-  concurrentWriter = spawnPsql(
-    [
-      "-c",
-      `
-        set statement_timeout = '20s';
+  const repairApplicationName = `issue887_lock_probe_${startingState.name}`;
+  const blockerPool = postgres(databaseUrlFor("postgres"), {
+    max: 1,
+    onnotice: () => {},
+  });
+  const observerSql = postgres(databaseUrlFor("postgres"), {
+    max: 1,
+    onnotice: () => {},
+  });
+  const blockerSql = await blockerPool.reserve();
+  const writerDefinitions = [
+    {
+      name: "migration_ledger",
+      schemaName: "supabase_migrations",
+      relationName: "schema_migrations",
+      statement: `
+        update supabase_migrations.schema_migrations
+        set name = name
+        where version = '20260801110000';
+      `,
+    },
+    {
+      name: "families",
+      schemaName: "public",
+      relationName: "families",
+      statement: `
         update public.families
         set name = name
         where id = '${fixtureIds[0]}'::uuid;
       `,
-    ],
-    { applicationName: "issue_887_concurrency_writer" },
-  );
-  await waitFor("concurrent family writer to wait behind the repair", async () => {
-    const rows = await observerSql`
-      select exists (
-        select 1
-        from pg_catalog.pg_stat_activity activity
-        join pg_catalog.pg_locks family_lock
-          on family_lock.pid = activity.pid
-        where activity.application_name = 'issue_887_concurrency_writer'
-          and family_lock.relation = 'public.families'::regclass
-          and family_lock.mode = 'RowExclusiveLock'
-          and not family_lock.granted
-      ) as waiting
+    },
+  ];
+  if (startingState.ledgerExists) {
+    writerDefinitions.push({
+      name: "stripe_subscription",
+      schemaName: "public",
+      relationName: "family_billing_subscriptions",
+      statement: `
+        update public.family_billing_subscriptions
+        set provider_product_id = provider_product_id
+        where provider = 'stripe';
+      `,
+    });
+  }
+
+  let blockerHeld = false;
+  let triggerInstalled = false;
+  let repairRun;
+  const writerRuns = [];
+  try {
+    await blockerSql`select pg_catalog.pg_advisory_lock(${pauseAfterRelationLocksKey}::bigint)`;
+    blockerHeld = true;
+    installPauseAfterRelationLocks(
+      repairApplicationName,
+      pauseAfterRelationLocksKey
+    );
+    triggerInstalled = true;
+
+    repairRun = spawnPsql(["-f", repairPath], {
+      applicationName: repairApplicationName,
+    });
+    const requiredRelations = [
+      "supabase_migrations.schema_migrations",
+      "public.families",
+    ];
+    if (startingState.ledgerExists) {
+      requiredRelations.push("public.family_billing_subscriptions");
+    }
+    await waitForRepairRelationLocks(
+      observerSql,
+      repairApplicationName,
+      requiredRelations
+    );
+
+    for (const writer of writerDefinitions) {
+      const applicationName = `issue887_${startingState.name}_${writer.name}`;
+      const run = spawnPsql(
+        [
+          "-c",
+          `
+            set statement_timeout = '20s';
+            ${writer.statement}
+          `,
+        ],
+        { applicationName }
+      );
+      writerRuns.push({ ...run, applicationName, writer });
+    }
+    await Promise.all(
+      writerRuns.map((run) =>
+        waitForWriterToBlock(
+          observerSql,
+          run.applicationName,
+          run.writer.schemaName,
+          run.writer.relationName
+        )
+      )
+    );
+
+    const unlockRows = await blockerSql`
+      select pg_catalog.pg_advisory_unlock(
+        ${pauseAfterRelationLocksKey}::bigint
+      ) as unlocked
     `;
-    return rows[0]?.waiting === true;
-  });
+    assert.equal(unlockRows[0]?.unlocked, true);
+    blockerHeld = false;
 
-  const unlockRows = await blockerSql`
-    select pg_catalog.pg_advisory_unlock(${concurrencyLockKey}::bigint) as unlocked
-  `;
-  assert.equal(unlockRows[0]?.unlocked, true);
-  blockerHeld = false;
+    const [repairResult, ...writerResults] = await Promise.all([
+      repairRun.completion,
+      ...writerRuns.map((run) => run.completion),
+    ]);
+    assert.equal(repairResult.status, 0, repairResult.stderr);
+    assert.deepEqual(spawnedRepairMarkers(repairResult), [
+      startingState.expectedMarker,
+    ]);
+    for (const writerResult of writerResults) {
+      assert.equal(writerResult.status, 0, writerResult.stderr);
+    }
+  } finally {
+    if (blockerHeld) {
+      await blockerSql`select pg_catalog.pg_advisory_unlock(${pauseAfterRelationLocksKey}::bigint)`;
+    }
+    for (const running of [repairRun, ...writerRuns]) {
+      if (running?.child.exitCode === null) running.child.kill("SIGKILL");
+    }
+    await Promise.allSettled(
+      [repairRun, ...writerRuns]
+        .filter(Boolean)
+        .map((running) => running.completion)
+    );
+    if (triggerInstalled) removePauseAfterRelationLocks();
+    blockerSql.release();
+    await Promise.all([blockerPool.end(), observerSql.end()]);
+  }
 
-  const repairResult = await concurrentRepair.completion;
-  assert.equal(repairResult.status, 0, repairResult.stderr);
-  assert.deepEqual(
-    repairResult.stdout
-      .split(/\r?\n/u)
-      .map((line) => line.trim())
-      .filter((line) => line.startsWith("ISSUE_887_REPAIR=")),
-    ["ISSUE_887_REPAIR=repaired"],
-  );
-  const writerResult = await concurrentWriter.completion;
-  assert.equal(writerResult.status, 0, writerResult.stderr);
-} finally {
-  if (blockerHeld) {
-    await blockerSql`select pg_catalog.pg_advisory_unlock(${concurrencyLockKey}::bigint)`;
-  }
-  for (const running of [concurrentRepair, concurrentWriter]) {
-    if (running?.child.exitCode === null) running.child.kill("SIGKILL");
-  }
-  await Promise.allSettled(
-    [concurrentRepair, concurrentWriter]
-      .filter(Boolean)
-      .map((running) => running.completion),
-  );
-  blockerSql.release();
-  await Promise.all([blockerPool.end(), observerSql.end()]);
+  applyRepair("ISSUE_887_REPAIR=verified_noop");
 }
-runPsql([
-  "-c",
-  `
-    drop event trigger issue_887_pause_on_grant;
-    drop function public.issue_887_pause_on_grant();
-  `,
-]);
+
+for (const startingState of acceptedStartingStates) {
+  await proveWritersBlockForAcceptedState(startingState);
+}
+
+async function proveTwoRepairSessionsSerialize() {
+  resetFresh();
+  const firstApplicationName = "issue887_dual_repair_first";
+  const secondApplicationName = "issue887_dual_repair_second";
+  const blockerPool = postgres(databaseUrlFor("postgres"), {
+    max: 1,
+    onnotice: () => {},
+  });
+  const observerSql = postgres(databaseUrlFor("postgres"), {
+    max: 1,
+    onnotice: () => {},
+  });
+  const blockerSql = await blockerPool.reserve();
+  let blockerHeld = false;
+  let triggerInstalled = false;
+  let firstRepair;
+  let secondRepair;
+  try {
+    await blockerSql`select pg_catalog.pg_advisory_lock(${pauseAfterRelationLocksKey}::bigint)`;
+    blockerHeld = true;
+    installPauseAfterRelationLocks(
+      firstApplicationName,
+      pauseAfterRelationLocksKey
+    );
+    triggerInstalled = true;
+
+    firstRepair = spawnPsql(["-f", repairPath], {
+      applicationName: firstApplicationName,
+    });
+    await waitForRepairRelationLocks(observerSql, firstApplicationName, [
+      "supabase_migrations.schema_migrations",
+      "public.families",
+    ]);
+
+    secondRepair = spawnPsql(["-f", repairPath], {
+      applicationName: secondApplicationName,
+    });
+    await waitFor(
+      "second exact repair to wait on the issue advisory lock",
+      async () => {
+        const rows = await observerSql`
+        select exists (
+          select 1
+          from pg_catalog.pg_stat_activity first_activity
+          join pg_catalog.pg_locks first_lock
+            on first_lock.pid = first_activity.pid
+          join pg_catalog.pg_stat_activity second_activity
+            on true
+          join pg_catalog.pg_locks second_lock
+            on second_lock.pid = second_activity.pid
+          where first_activity.application_name = ${firstApplicationName}
+            and second_activity.application_name = ${secondApplicationName}
+            and first_lock.locktype = 'advisory'
+            and first_lock.granted
+            and second_lock.locktype = 'advisory'
+            and not second_lock.granted
+            and first_lock.classid = second_lock.classid
+            and first_lock.objid = second_lock.objid
+            and first_lock.objsubid = second_lock.objsubid
+        ) as serialized
+      `;
+        return rows[0]?.serialized === true;
+      }
+    );
+
+    const unlockRows = await blockerSql`
+      select pg_catalog.pg_advisory_unlock(
+        ${pauseAfterRelationLocksKey}::bigint
+      ) as unlocked
+    `;
+    assert.equal(unlockRows[0]?.unlocked, true);
+    blockerHeld = false;
+
+    const [firstResult, secondResult] = await Promise.all([
+      firstRepair.completion,
+      secondRepair.completion,
+    ]);
+    assert.equal(firstResult.status, 0, firstResult.stderr);
+    assert.equal(secondResult.status, 0, secondResult.stderr);
+    assert.deepEqual(spawnedRepairMarkers(firstResult), [
+      "ISSUE_887_REPAIR=repaired",
+    ]);
+    assert.deepEqual(spawnedRepairMarkers(secondResult), [
+      "ISSUE_887_REPAIR=verified_noop",
+    ]);
+  } finally {
+    if (blockerHeld) {
+      await blockerSql`select pg_catalog.pg_advisory_unlock(${pauseAfterRelationLocksKey}::bigint)`;
+    }
+    for (const running of [firstRepair, secondRepair]) {
+      if (running?.child.exitCode === null) running.child.kill("SIGKILL");
+    }
+    await Promise.allSettled(
+      [firstRepair, secondRepair]
+        .filter(Boolean)
+        .map((running) => running.completion)
+    );
+    if (triggerInstalled) removePauseAfterRelationLocks();
+    blockerSql.release();
+    await Promise.all([blockerPool.end(), observerSql.end()]);
+  }
+}
+
+await proveTwoRepairSessionsSerialize();
 applyRepair("ISSUE_887_REPAIR=verified_noop");
 
 resetFresh();
@@ -1152,7 +1441,7 @@ runPsql(["-f", correctionMigrationPath]);
 insertCanonicalLedger(
   "20260806093000",
   "correct_billing_provider_product_identity",
-  correctionMigrationPath,
+  correctionMigrationPath
 );
 assertRepairFailure(/migration state is mixed/u);
 
@@ -1217,7 +1506,7 @@ const rollbackState = runPsql([
 assert.deepEqual(
   rollbackState.stdout,
   ["t|t|t|t|t|t"],
-  "mid-migration failure left billing relation or ledger residue",
+  "mid-migration failure left billing relation or ledger residue"
 );
 
 runPsql([
@@ -1231,5 +1520,5 @@ applyRepair();
 applyRepair("ISSUE_887_REPAIR=verified_noop");
 
 console.log(
-  "Issue 887 repair passed canonical history, staged forwards, effective ACL, concurrency, metadata, collision, mixed-state, no-op, and rollback probes.",
+  "Issue 887 repair passed canonical history, staged forwards, effective ACL, all-state writer locking, two-session serialization, metadata, collision, mixed-state, no-op, and rollback probes."
 );
