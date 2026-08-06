@@ -23,8 +23,13 @@ values
   (
     '20260801110000',
     array[
-      '-- Issue 887 original_sha256=0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198 executable_sha256=5ed8f1bf0df5d940cd61de1427a7aa1adaa09582f2528ba7240b180fedaa7909',
-      $issue_887_original_table$create table if not exists public.family_billing_subscriptions (
+      $issue_887_original_table$-- One provider-neutral subscription ledger for Homa membership. Stripe,
+-- App Store, and future Google Play subscriptions all resolve into the same
+-- tier and term, so a family can use every Homa surface without a duplicate
+-- purchase. The provider-specific families columns stay as compatibility
+-- mirrors while all readers move to this ledger.
+
+create table if not exists public.family_billing_subscriptions (
   id uuid primary key default gen_random_uuid(),
   family_id uuid not null references public.families (id) on delete cascade,
   provider text not null check (provider in ('stripe', 'apple', 'google')),
@@ -40,17 +45,18 @@ values
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (provider, provider_subscription_id)
-);$issue_887_original_table$,
+)$issue_887_original_table$,
       $issue_887_original_family_index$create index if not exists family_billing_subscriptions_family_observed_idx
-  on public.family_billing_subscriptions (family_id, last_observed_at desc);$issue_887_original_family_index$,
+  on public.family_billing_subscriptions (family_id, last_observed_at desc)$issue_887_original_family_index$,
       $issue_887_original_customer_index$create index if not exists family_billing_subscriptions_provider_customer_idx
   on public.family_billing_subscriptions (provider, provider_customer_id)
-  where provider_customer_id is not null;$issue_887_original_customer_index$,
-      'alter table public.family_billing_subscriptions enable row level security;',
-      $issue_887_original_revoke$revoke all on table public.family_billing_subscriptions
-  from public, anon, authenticated;$issue_887_original_revoke$,
-      'grant all privileges on table public.family_billing_subscriptions to service_role;',
-      $issue_887_original_stripe$insert into public.family_billing_subscriptions (
+  where provider_customer_id is not null$issue_887_original_customer_index$,
+      'alter table public.family_billing_subscriptions enable row level security',
+      'revoke all on table public.family_billing_subscriptions from anon, authenticated',
+      $issue_887_original_stripe$-- Preserve every already-recorded paid family. Term is intentionally null for
+-- historic mirrors because a product or price id alone is not authoritative
+-- enough to infer the renewal cadence.
+insert into public.family_billing_subscriptions (
   family_id, provider, provider_subscription_id, provider_customer_id,
   provider_product_id, plan_tier, billing_period, status,
   current_period_end, last_observed_at
@@ -68,7 +74,7 @@ on conflict (provider, provider_subscription_id) do update
       status = excluded.status,
       current_period_end = excluded.current_period_end,
       last_observed_at = excluded.last_observed_at,
-      updated_at = now();$issue_887_original_stripe$,
+      updated_at = now()$issue_887_original_stripe$,
       $issue_887_original_apple$insert into public.family_billing_subscriptions (
   family_id, provider, provider_subscription_id, provider_customer_id,
   provider_product_id, plan_tier, billing_period, status,
@@ -86,26 +92,43 @@ on conflict (provider, provider_subscription_id) do update
       status = excluded.status,
       current_period_end = excluded.current_period_end,
       last_observed_at = excluded.last_observed_at,
-      updated_at = now();$issue_887_original_apple$
+      updated_at = now()$issue_887_original_apple$
     ]::text[],
     'family_billing_subscriptions'
   ),
   (
+    '20260806092000',
+    array[
+      $issue_887_acl_revoke$-- Normalize the provider-neutral billing ledger to one server-only ACL.
+-- This is forward-only because the original migration is immutable history.
+
+revoke all on table public.family_billing_subscriptions
+  from public, anon, authenticated$issue_887_acl_revoke$,
+      'grant all privileges on table public.family_billing_subscriptions to service_role'
+    ]::text[],
+    'harden_family_billing_subscriptions_acl'
+  ),
+  (
     '20260806093000',
     array[
-      '-- Issue 887 source sha256=07e432ffbf449427ac43a7f4433dae3f5b083cbb9b185edff75a774b310464c7',
-      $issue_887_correction$update public.family_billing_subscriptions as subscription
+      $issue_887_correction$-- The first provider-neutral billing backfill copied a Stripe price ID into
+-- provider_product_id. Those identifiers describe different Stripe objects.
+-- Clear only the value that can be proven to be the legacy compatibility
+-- mirror. A verified Stripe Product ID can be recorded by a provider event.
+
+update public.family_billing_subscriptions as subscription
 set provider_product_id = null
 from public.families as family
 where subscription.family_id = family.id
   and subscription.provider = 'stripe'
-  and subscription.provider_product_id = family.stripe_price_id;$issue_887_correction$
+  and subscription.provider_product_id = family.stripe_price_id$issue_887_correction$
     ]::text[],
     'correct_billing_provider_product_identity'
   );
 
 create temporary table issue_887_repair_state (
   original_ledger_existed boolean not null,
+  acl_ledger_existed boolean not null,
   correction_ledger_existed boolean not null,
   table_existed boolean not null,
   primary_index_existed boolean not null,
@@ -117,6 +140,7 @@ create temporary table issue_887_repair_state (
 
 insert into issue_887_repair_state (
   original_ledger_existed,
+  acl_ledger_existed,
   correction_ledger_existed,
   table_existed,
   primary_index_existed,
@@ -130,6 +154,11 @@ select
     select 1
     from supabase_migrations.schema_migrations
     where version = '20260801110000'
+  ),
+  exists (
+    select 1
+    from supabase_migrations.schema_migrations
+    where version = '20260806092000'
   ),
   exists (
     select 1
@@ -153,10 +182,25 @@ begin
 
   if exists (
     select 1
+    from supabase_migrations.schema_migrations actual
+    join issue_887_expected_migrations expected
+      on expected.version = actual.version
+    where actual.name is distinct from expected.name
+      or actual.statements is distinct from expected.statements
+  ) then
+    raise exception
+      'issue 887 existing migration ledger differs from canonical history';
+  end if;
+
+  if exists (
+    select 1
     from supabase_migrations.schema_migrations migration
     where (
       migration.name = 'family_billing_subscriptions'
       and migration.version <> '20260801110000'
+    ) or (
+      migration.name = 'harden_family_billing_subscriptions_acl'
+      and migration.version <> '20260806092000'
     ) or (
       migration.name = 'correct_billing_provider_product_identity'
       and migration.version <> '20260806093000'
@@ -164,6 +208,7 @@ begin
   ) or not (
     (
       not repair_state.original_ledger_existed
+      and not repair_state.acl_ledger_existed
       and not repair_state.correction_ledger_existed
       and not repair_state.table_existed
       and not repair_state.primary_index_existed
@@ -173,6 +218,7 @@ begin
     )
     or (
       repair_state.original_ledger_existed
+      and not repair_state.acl_ledger_existed
       and not repair_state.correction_ledger_existed
       and repair_state.table_existed
       and repair_state.primary_index_existed
@@ -182,6 +228,17 @@ begin
     )
     or (
       repair_state.original_ledger_existed
+      and repair_state.acl_ledger_existed
+      and not repair_state.correction_ledger_existed
+      and repair_state.table_existed
+      and repair_state.primary_index_existed
+      and repair_state.unique_index_existed
+      and repair_state.family_index_existed
+      and repair_state.customer_index_existed
+    )
+    or (
+      repair_state.original_ledger_existed
+      and repair_state.acl_ledger_existed
       and repair_state.correction_ledger_existed
       and repair_state.table_existed
       and repair_state.primary_index_existed
@@ -191,7 +248,7 @@ begin
     )
   ) then
     raise exception
-      'issue 887 migration state is mixed; expected fresh, original-only, or complete state';
+      'issue 887 migration state is mixed; expected fresh, original-only, original-plus-ACL, or complete state';
   end if;
 end
 $state_check$;
@@ -305,6 +362,7 @@ from public.family_billing_subscriptions as subscription;
 
 select
   not original_ledger_existed as issue_887_apply_original,
+  not acl_ledger_existed as issue_887_apply_acl,
   not correction_ledger_existed as issue_887_apply_correction
 from issue_887_repair_state
 \gset
@@ -320,6 +378,19 @@ insert into supabase_migrations.schema_migrations (
 select version, statements, name
 from issue_887_expected_migrations
 where version = '20260801110000';
+\endif
+
+\if :issue_887_apply_acl
+\ir ../supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql
+
+insert into supabase_migrations.schema_migrations (
+  version,
+  statements,
+  name
+)
+select version, statements, name
+from issue_887_expected_migrations
+where version = '20260806092000';
 \endif
 
 \if :issue_887_apply_correction
@@ -351,6 +422,8 @@ declare
   customer_index_oid oid :=
     to_regclass('public.family_billing_subscriptions_provider_customer_idx');
   expected_owner_oid oid;
+  anon_role_oid oid;
+  authenticated_role_oid oid;
   service_role_oid oid;
   family_id_attnum smallint;
   families_id_attnum smallint;
@@ -371,7 +444,19 @@ begin
   from pg_catalog.pg_roles
   where rolname = 'service_role';
 
-  if expected_owner_oid is null or service_role_oid is null then
+  select oid into anon_role_oid
+  from pg_catalog.pg_roles
+  where rolname = 'anon';
+
+  select oid into authenticated_role_oid
+  from pg_catalog.pg_roles
+  where rolname = 'authenticated';
+
+  if expected_owner_oid is null
+    or anon_role_oid is null
+    or authenticated_role_oid is null
+    or service_role_oid is null
+  then
     raise exception 'expected production table roles are absent';
   end if;
 
@@ -916,6 +1001,53 @@ begin
 
   if exists (
     select 1
+    from unnest(array[
+      'SELECT',
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'TRUNCATE',
+      'REFERENCES',
+      'TRIGGER'
+    ]::text[]) requested_privilege(privilege_name)
+    where pg_catalog.has_table_privilege(
+      anon_role_oid,
+      relation_oid,
+      requested_privilege.privilege_name
+    )
+      or pg_catalog.has_table_privilege(
+        authenticated_role_oid,
+        relation_oid,
+        requested_privilege.privilege_name
+      )
+  ) then
+    raise exception
+      'family_billing_subscriptions grants an effective client table privilege';
+  end if;
+
+  if exists (
+    select 1
+    from unnest(array[
+      'SELECT',
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'TRUNCATE',
+      'REFERENCES',
+      'TRIGGER'
+    ]::text[]) requested_privilege(privilege_name)
+    where not pg_catalog.has_table_privilege(
+      service_role_oid,
+      relation_oid,
+      requested_privilege.privilege_name
+    )
+  ) then
+    raise exception
+      'family_billing_subscriptions service role lacks an effective table privilege';
+  end if;
+
+  if exists (
+    select 1
     from issue_887_expected_migrations expected
     left join supabase_migrations.schema_migrations actual
       on actual.version = expected.version
@@ -925,8 +1057,12 @@ begin
   ) or (
     select count(*)
     from supabase_migrations.schema_migrations
-    where version in ('20260801110000', '20260806093000')
-  ) <> 2 then
+    where version in (
+      '20260801110000',
+      '20260806092000',
+      '20260806093000'
+    )
+  ) <> 3 then
     raise exception 'issue 887 migration ledger evidence is absent or altered';
   end if;
 

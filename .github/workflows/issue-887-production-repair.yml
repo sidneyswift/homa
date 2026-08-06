@@ -7,6 +7,10 @@ on:
         description: Type APPLY ISSUE 887
         required: true
         type: string
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -37,9 +41,14 @@ jobs:
       - name: Validate authorization and immutable inputs
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
         run: |
           if [ "$CONFIRMATION" != "APPLY ISSUE 887" ]; then
             echo "Confirmation must exactly match APPLY ISSUE 887."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The confirmed READY production deployment must match this main commit."
             exit 1
           fi
           if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
@@ -67,10 +76,18 @@ jobs:
           node scripts/migration-version-check.mjs
 
           original_migration="supabase/migrations/20260801110000_family_billing_subscriptions.sql"
-          expected_original="5ed8f1bf0df5d940cd61de1427a7aa1adaa09582f2528ba7240b180fedaa7909"
+          expected_original="0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198"
           actual_original="$(sha256sum "$original_migration" | cut -d' ' -f1)"
           if [ "$actual_original" != "$expected_original" ]; then
             echo "Original billing migration hash does not match the reviewed issue #887 input."
+            exit 1
+          fi
+
+          acl_migration="supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql"
+          expected_acl="7eaf70397d421d647f1319d13904b265a6e7fed940572ef1d2552e69d6816bd7"
+          actual_acl="$(sha256sum "$acl_migration" | cut -d' ' -f1)"
+          if [ "$actual_acl" != "$expected_acl" ]; then
+            echo "Billing ACL migration hash does not match the reviewed issue #887 input."
             exit 1
           fi
 
@@ -83,7 +100,7 @@ jobs:
           fi
 
           repair_script="scripts/issue-887-production-repair.sql"
-          expected_repair="4c1449352c1b653da6dd79bb2a000cb3663a7d8b9ac82b23df596df2befa5ef5"
+          expected_repair="be3d0dca952d9bece2d52351a83bc9252fb53f94e663e9722cec15ec47c98549"
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair wrapper hash does not match the reviewed issue #887 input."

@@ -26,6 +26,12 @@ const originalMigration = readFileSync(
     "supabase/migrations/20260801110000_family_billing_subscriptions.sql",
   ),
 );
+const aclMigration = readFileSync(
+  resolve(
+    repositoryRoot,
+    "supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql",
+  ),
+);
 const correctionMigration = readFileSync(
   resolve(
     repositoryRoot,
@@ -53,6 +59,8 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
     "${{ github.sha }}",
   );
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 887/u);
+  assert.match(workflow, /production_deployed_sha/u);
+  assert.match(workflow, /PRODUCTION_DEPLOYED_SHA.*GITHUB_SHA/u);
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
   assert.match(workflow, /GITHUB_REPOSITORY_OWNER.*sidneyswift/u);
   assert.match(workflow, /GITHUB_REF.*refs\/heads\/main/u);
@@ -65,7 +73,12 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
   assert.match(workflow, /cancel-in-progress: false/u);
   assert.doesNotMatch(workflow, /actions\/checkout@v\d/u);
+  assert.equal(
+    sha256(originalMigration),
+    "0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198",
+  );
   assert.match(workflow, new RegExp(sha256(originalMigration), "u"));
+  assert.match(workflow, new RegExp(sha256(aclMigration), "u"));
   assert.match(workflow, new RegExp(sha256(correctionMigration), "u"));
   assert.match(workflow, new RegExp(sha256(repair), "u"));
   assert.equal(
@@ -86,14 +99,18 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
   assert.doesNotMatch(workflow, /supabase\s+db\s+push/u);
 });
 
-test("executable migration pins the server ACL and correction changes only proven Stripe mirrors", () => {
+test("immutable original and forward migrations converge ACL and product identity", () => {
   assert.equal(
     sha256(originalMigration),
-    "5ed8f1bf0df5d940cd61de1427a7aa1adaa09582f2528ba7240b180fedaa7909",
+    "0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198",
   );
   const original = originalMigration.toString("utf8");
-  assert.match(original, /from public, anon, authenticated/u);
-  assert.match(original, /grant all privileges[\s\S]*service_role/u);
+  assert.match(original, /from anon, authenticated/u);
+  assert.doesNotMatch(original, /from public, anon, authenticated/u);
+  assert.doesNotMatch(original, /grant all privileges[\s\S]*service_role/u);
+  const acl = aclMigration.toString("utf8");
+  assert.match(acl, /from public, anon, authenticated/u);
+  assert.match(acl, /grant all privileges[\s\S]*service_role/u);
   assert.equal(
     sha256(correctionMigration),
     "07e432ffbf449427ac43a7f4433dae3f5b083cbb9b185edff75a774b310464c7",
@@ -112,14 +129,21 @@ test("repair pins state, snapshot, ledger, and the complete database contract", 
   const includes = repair.match(/^\\ir .*$/gmu) ?? [];
   assert.deepEqual(includes, [
     "\\ir ../supabase/migrations/20260801110000_family_billing_subscriptions.sql",
+    "\\ir ../supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql",
     "\\ir ../supabase/migrations/20260806093000_correct_billing_provider_product_identity.sql",
   ]);
   assert.ok(repair.indexOf("begin;") < repair.indexOf(includes[0]));
-  assert.ok(repair.indexOf(includes[1]) < repair.lastIndexOf("commit;"));
+  assert.ok(repair.indexOf(includes[0]) < repair.indexOf(includes[1]));
+  assert.ok(repair.indexOf(includes[1]) < repair.indexOf(includes[2]));
+  assert.ok(repair.indexOf(includes[2]) < repair.lastIndexOf("commit;"));
   assert.match(repair, /pg_advisory_xact_lock/u);
   assert.match(repair, /set local lock_timeout = '5s'/u);
   assert.match(repair, /set local statement_timeout = '120s'/u);
-  assert.match(repair, /expected fresh, original-only, or complete state/u);
+  assert.match(
+    repair,
+    /expected fresh, original-only, original-plus-ACL, or complete state/u,
+  );
+  assert.match(repair, /existing migration ledger differs from canonical history/u);
   assert.match(repair, /snapshot\.stripe_records <> 3/u);
   assert.match(repair, /snapshot\.distinct_stripe_subscription_ids <> 3/u);
   assert.match(repair, /snapshot\.apple_records <> 0/u);
@@ -161,6 +185,9 @@ test("repair pins state, snapshot, ledger, and the complete database contract", 
   assert.match(repair, /privilege\.is_grantable/u);
   assert.match(repair, /attribute\.attacl is not null/u);
   assert.match(repair, /ACL differs from contract/u);
+  assert.match(repair, /has_table_privilege/u);
+  assert.match(repair, /effective client table privilege/u);
+  assert.match(repair, /service role lacks an effective table privilege/u);
   assert.match(repair, /migration ledger evidence is absent or altered/u);
   assert.match(repair, /provider_product_id is not null/u);
   assert.match(repair, /billing_period is not null/u);
@@ -171,12 +198,9 @@ test("repair pins state, snapshot, ledger, and the complete database contract", 
   assert.match(repair, /fresh issue 887 backfill has an unexpected observation timestamp/u);
   assert.match(repair, /existing issue 887 backfill has an unexpected observation timestamp/u);
   assert.match(repair, /ISSUE_887_REPAIR=[\s\S]*verified_noop/u);
-  assert.match(
-    repair,
-    /original_sha256=0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198/u,
-  );
-  assert.match(repair, new RegExp(sha256(originalMigration), "u"));
-  assert.match(repair, new RegExp(sha256(correctionMigration), "u"));
+  assert.match(repair, /harden_family_billing_subscriptions_acl/u);
+  assert.doesNotMatch(repair, /original_sha256=/u);
+  assert.doesNotMatch(repair, /executable_sha256=/u);
 });
 
 test("disposable harness covers exact metadata, isolation, collision, and rollback paths", () => {
@@ -184,6 +208,15 @@ test("disposable harness covers exact metadata, isolation, collision, and rollba
   assert.match(harness, /string_agg\([\s\S]*array_to_string\(statements/u);
   assert.match(harness, /runPsql\(\["-c", reconstructed\.rawStdout\]\)/u);
   assert.match(harness, /forwardCorrection/u);
+  assert.match(harness, /installCanonicalOriginalState/u);
+  assert.match(harness, /installCanonicalAclState/u);
+  assert.match(harness, /canonical original-only state/u);
+  assert.match(harness, /original-plus-ACL state/u);
+  assert.match(harness, /has_table_privilege/u);
+  assert.match(harness, /set role service_role/u);
+  assert.match(harness, /issue_887_pause_on_grant/u);
+  assert.match(harness, /ShareRowExclusiveLock/u);
+  assert.match(harness, /RowExclusiveLock/u);
   assert.match(harness, /duplicateSubscription/u);
   assert.match(harness, /nullStatus/u);
   assert.match(harness, /issue_887_family_index_collision/u);
@@ -201,8 +234,8 @@ test("disposable harness covers exact metadata, isolation, collision, and rollba
   assert.match(harness, /generated column/u);
   assert.match(harness, /identity column/u);
   assert.match(harness, /service_maintain_count/u);
-  assert.match(harness, /migration ledger evidence is absent or altered/u);
+  assert.match(harness, /existing migration ledger differs from canonical history/u);
   assert.match(harness, /injected mid-migration failure/u);
   assert.match(harness, /mid-migration failure left billing relation or ledger residue/u);
-  assert.equal(harness.match(/migration state is mixed/g)?.length, 8);
+  assert.ok((harness.match(/migration state is mixed/g)?.length ?? 0) >= 8);
 });

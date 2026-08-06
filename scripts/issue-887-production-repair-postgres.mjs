@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+
+import postgres from "postgres";
 
 const databaseUrl = process.env.HOMA_EVAL_DATABASE_URL;
 assert.ok(databaseUrl, "HOMA_EVAL_DATABASE_URL must point at a disposable database");
@@ -17,6 +21,18 @@ const originalMigrationPath = join(
   "supabase",
   "migrations",
   "20260801110000_family_billing_subscriptions.sql",
+);
+const aclMigrationPath = join(
+  repositoryRoot,
+  "supabase",
+  "migrations",
+  "20260806092000_harden_family_billing_subscriptions_acl.sql",
+);
+const correctionMigrationPath = join(
+  repositoryRoot,
+  "supabase",
+  "migrations",
+  "20260806093000_correct_billing_provider_product_identity.sql",
 );
 const psql = process.env.HOMA_POSTGRES_BIN
   ? join(process.env.HOMA_POSTGRES_BIN, "psql")
@@ -67,6 +83,111 @@ function runPsql(
   };
 }
 
+function spawnPsql(actions, { role = "postgres", applicationName } = {}) {
+  const child = spawn(
+    psql,
+    [
+      "--dbname",
+      databaseUrlFor(role),
+      "-qX",
+      "-v",
+      "ON_ERROR_STOP=1",
+      ...actions,
+    ],
+    {
+      env: {
+        ...process.env,
+        ...(applicationName ? { PGAPPNAME: applicationName } : {}),
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  let stdout = "";
+  let stderr = "";
+  child.stdout.setEncoding("utf8");
+  child.stderr.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk;
+  });
+
+  const completion = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new Error(`psql timed out: ${stderr || stdout}`));
+    }, 30_000);
+    child.once("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+    child.once("close", (status) => {
+      clearTimeout(timeout);
+      resolve({ status, stdout, stderr });
+    });
+  });
+
+  return { child, completion };
+}
+
+async function waitFor(description, predicate, timeoutMs = 10_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await predicate()) return;
+    await delay(50);
+  }
+  throw new Error(`Timed out waiting for ${description}`);
+}
+
+function canonicalMigrationStatements(path) {
+  return readFileSync(path, "utf8")
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter(Boolean);
+}
+
+function sqlLiteral(value) {
+  return `'${value.replaceAll("'", "''")}'`;
+}
+
+function canonicalStatementArray(path) {
+  return `array[${canonicalMigrationStatements(path).map(sqlLiteral).join(", ")}]::text[]`;
+}
+
+function insertCanonicalLedger(version, name, path) {
+  runPsql([
+    "-c",
+    `
+      insert into supabase_migrations.schema_migrations (version, statements, name)
+      values (
+        ${sqlLiteral(version)},
+        ${canonicalStatementArray(path)},
+        ${sqlLiteral(name)}
+      );
+    `,
+  ]);
+}
+
+function installCanonicalOriginalState() {
+  runPsql(["-f", originalMigrationPath]);
+  insertCanonicalLedger(
+    "20260801110000",
+    "family_billing_subscriptions",
+    originalMigrationPath,
+  );
+}
+
+function installCanonicalAclState() {
+  installCanonicalOriginalState();
+  runPsql(["-f", aclMigrationPath]);
+  insertCanonicalLedger(
+    "20260806092000",
+    "harden_family_billing_subscriptions_acl",
+    aclMigrationPath,
+  );
+}
+
 runPsql(
   [
     "-c",
@@ -98,6 +219,10 @@ runPsql(
   { role: "homa_eval" },
 );
 
+assert.equal(canonicalMigrationStatements(originalMigrationPath).length, 7);
+assert.equal(canonicalMigrationStatements(aclMigrationPath).length, 2);
+assert.equal(canonicalMigrationStatements(correctionMigrationPath).length, 1);
+
 const fixtureIds = [
   "88700000-0000-4000-8000-000000000001",
   "88700000-0000-4000-8000-000000000002",
@@ -111,7 +236,9 @@ function resetFresh({ duplicateSubscription = false, nullStatus = false } = {}) 
     "-c",
     `
       drop event trigger if exists issue_887_fail_on_grant;
+      drop event trigger if exists issue_887_pause_on_grant;
       drop function if exists public.issue_887_fail_on_grant();
+      drop function if exists public.issue_887_pause_on_grant();
       drop table if exists public.family_billing_subscriptions cascade;
       drop table if exists public.issue_887_partition_parent cascade;
       drop table if exists public.issue_887_family_index_collision cascade;
@@ -122,6 +249,7 @@ function resetFresh({ duplicateSubscription = false, nullStatus = false } = {}) 
       where version in (
         '20260801110000',
         '20260806092999',
+        '20260806092000',
         '20260806093000'
       );
       delete from public.families
@@ -197,6 +325,14 @@ function assertRepairFailure(pattern) {
 }
 
 runPsql(["-f", originalMigrationPath]);
+runPsql([
+  "-c",
+  `
+    grant select on table public.family_billing_subscriptions to public, authenticated;
+    revoke truncate on table public.family_billing_subscriptions from service_role;
+  `,
+]);
+runPsql(["-f", aclMigrationPath]);
 const forwardAcl = runPsql([
   "-Atc",
   `
@@ -287,36 +423,179 @@ const exactResult = runPsql([
 ]);
 assert.deepEqual(exactResult.stdout, ["3|0|0|0"]);
 
+const effectivePrivileges = runPsql([
+  "-Atc",
+  `
+    with requested(privilege_name) as (
+      values
+        ('SELECT'),
+        ('INSERT'),
+        ('UPDATE'),
+        ('DELETE'),
+        ('TRUNCATE'),
+        ('REFERENCES'),
+        ('TRIGGER')
+    )
+    select concat_ws(
+      '|',
+      bool_and(not pg_catalog.has_table_privilege(
+        'anon',
+        'public.family_billing_subscriptions',
+        privilege_name
+      )),
+      bool_and(not pg_catalog.has_table_privilege(
+        'authenticated',
+        'public.family_billing_subscriptions',
+        privilege_name
+      )),
+      bool_and(pg_catalog.has_table_privilege(
+        'service_role',
+        'public.family_billing_subscriptions',
+        privilege_name
+      ))
+    )
+    from requested;
+  `,
+]);
+assert.deepEqual(effectivePrivileges.stdout, ["t|t|t"]);
+
+const functionalServiceRole = runPsql([
+  "-Atc",
+  `
+    begin;
+    set role service_role;
+    insert into public.family_billing_subscriptions (
+      id,
+      family_id,
+      provider,
+      provider_subscription_id,
+      plan_tier,
+      status
+    ) values (
+      '88700000-0000-4000-8000-000000000099'::uuid,
+      '${fixtureIds[0]}'::uuid,
+      'google',
+      'issue_887_service_role_probe',
+      'regular',
+      'active'
+    );
+    select count(*)
+    from public.family_billing_subscriptions
+    where id = '88700000-0000-4000-8000-000000000099'::uuid;
+    update public.family_billing_subscriptions
+    set status = 'canceled'
+    where id = '88700000-0000-4000-8000-000000000099'::uuid;
+    delete from public.family_billing_subscriptions
+    where id = '88700000-0000-4000-8000-000000000099'::uuid;
+    truncate table public.family_billing_subscriptions;
+    rollback;
+    select 1;
+  `,
+]);
+assert.deepEqual(functionalServiceRole.stdout, ["1"]);
+
 const ledgerEvidence = runPsql([
   "-Atc",
   `
-    select concat_ws('|', version, name, statements[1])
+    select concat_ws('|', version, name, cardinality(statements))
     from supabase_migrations.schema_migrations
-    where version in ('20260801110000', '20260806093000')
+    where version in ('20260801110000', '20260806092000', '20260806093000')
     order by version;
   `,
 ]);
 assert.deepEqual(ledgerEvidence.stdout, [
-  "20260801110000|family_billing_subscriptions|-- Issue 887 original_sha256=0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198 executable_sha256=5ed8f1bf0df5d940cd61de1427a7aa1adaa09582f2528ba7240b180fedaa7909",
-  "20260806093000|correct_billing_provider_product_identity|-- Issue 887 source sha256=07e432ffbf449427ac43a7f4433dae3f5b083cbb9b185edff75a774b310464c7",
+  "20260801110000|family_billing_subscriptions|7",
+  "20260806092000|harden_family_billing_subscriptions_acl|2",
+  "20260806093000|correct_billing_provider_product_identity|1",
 ]);
+
+const exactLedgerEvidence = runPsql([
+  "-Atc",
+  `
+    select count(*) = 3
+      and bool_and(case version
+        when '20260801110000' then
+          name = 'family_billing_subscriptions'
+          and statements = ${canonicalStatementArray(originalMigrationPath)}
+        when '20260806092000' then
+          name = 'harden_family_billing_subscriptions_acl'
+          and statements = ${canonicalStatementArray(aclMigrationPath)}
+        when '20260806093000' then
+          name = 'correct_billing_provider_product_identity'
+          and statements = ${canonicalStatementArray(correctionMigrationPath)}
+        else false
+      end)
+    from supabase_migrations.schema_migrations
+    where version in ('20260801110000', '20260806092000', '20260806093000');
+  `,
+]);
+assert.deepEqual(exactLedgerEvidence.stdout, ["t"]);
 
 const reconstructed = runPsql([
   "-Atc",
   `
     select string_agg(
-      array_to_string(statements, E'\n'),
+      array_to_string(statements, E';\n') || E';\n',
       E'\n'
       order by version
     )
     from supabase_migrations.schema_migrations
-    where version in ('20260801110000', '20260806093000');
+    where version in ('20260801110000', '20260806092000', '20260806093000');
   `,
 ]);
 assert.match(reconstructed.rawStdout, /create table if not exists/u);
 assert.match(reconstructed.rawStdout, /grant all privileges[\s\S]*service_role/u);
 assert.match(reconstructed.rawStdout, /set provider_product_id = null/u);
 runPsql(["-c", reconstructed.rawStdout]);
+applyRepair("ISSUE_887_REPAIR=verified_noop");
+
+resetFresh();
+installCanonicalOriginalState();
+const canonicalOriginalOnly = runPsql([
+  "-Atc",
+  `
+    select count(*) = 1
+      and bool_and(
+        name = 'family_billing_subscriptions'
+        and statements = ${canonicalStatementArray(originalMigrationPath)}
+      )
+    from supabase_migrations.schema_migrations
+    where version = '20260801110000';
+  `,
+]);
+assert.deepEqual(
+  canonicalOriginalOnly.stdout,
+  ["t"],
+  "canonical original-only state did not preserve genuine migration history",
+);
+applyRepair();
+applyRepair("ISSUE_887_REPAIR=verified_noop");
+
+resetFresh();
+installCanonicalAclState();
+const canonicalOriginalPlusAcl = runPsql([
+  "-Atc",
+  `
+    select count(*) = 2
+      and bool_and(case version
+        when '20260801110000' then
+          name = 'family_billing_subscriptions'
+          and statements = ${canonicalStatementArray(originalMigrationPath)}
+        when '20260806092000' then
+          name = 'harden_family_billing_subscriptions_acl'
+          and statements = ${canonicalStatementArray(aclMigrationPath)}
+        else false
+      end)
+    from supabase_migrations.schema_migrations
+    where version in ('20260801110000', '20260806092000');
+  `,
+]);
+assert.deepEqual(
+  canonicalOriginalPlusAcl.stdout,
+  ["t"],
+  "original-plus-ACL state did not preserve both canonical ledgers",
+);
+applyRepair();
 applyRepair("ISSUE_887_REPAIR=verified_noop");
 
 runPsql([
@@ -414,6 +693,11 @@ const transactionalTamperCases = [
     /ACL differs from contract/u,
   ],
   [
+    "effective client role membership",
+    "grant service_role to authenticated",
+    /effective client table privilege/u,
+  ],
+  [
     "dropped column",
     `alter table public.family_billing_subscriptions
        add column issue_887_hidden text;
@@ -460,7 +744,7 @@ const transactionalTamperCases = [
     `update supabase_migrations.schema_migrations
        set statements = array['select 1;']::text[]
        where version = '20260806093000'`,
-    /migration ledger evidence is absent or altered/u,
+    /existing migration ledger differs from canonical history/u,
   ],
 ];
 
@@ -527,7 +811,7 @@ const collisionRollback = runPsql([
       (
         select count(*) = 0
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -557,7 +841,7 @@ const providerCollisionRollback = runPsql([
       (
         select count(*) = 0
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -589,7 +873,7 @@ const primaryCollisionRollback = runPsql([
       (
         select count(*) = 0
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -624,7 +908,7 @@ const uniqueCollisionRollback = runPsql([
       (
         select count(*) = 0
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -643,7 +927,7 @@ const duplicateRollback = runPsql([
       (
         select count(*) = 0
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -661,7 +945,7 @@ const nullStatusRollback = runPsql([
       (
         select count(*) = 0
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -672,6 +956,21 @@ resetFresh();
 runPsql([
   "-c",
   "create table public.family_billing_subscriptions (id uuid);",
+]);
+assertRepairFailure(/migration state is mixed/u);
+
+resetFresh();
+runPsql([
+  "-c",
+  `
+    insert into supabase_migrations.schema_migrations
+      (version, statements, name)
+    values (
+      '20260806092999',
+      array['select 1;'],
+      'harden_family_billing_subscriptions_acl'
+    );
+  `,
 ]);
 assertRepairFailure(/migration state is mixed/u);
 
@@ -696,9 +995,165 @@ runPsql([
   `
     insert into supabase_migrations.schema_migrations
       (version, statements, name)
+    values (
+      '20260806092000',
+      array['select 1;'],
+      'harden_family_billing_subscriptions_acl'
+    );
+  `,
+]);
+assertRepairFailure(/canonical history/u);
+
+resetFresh();
+const concurrencyLockKey = 887_060_920_000;
+const blockerPool = postgres(databaseUrlFor("postgres"), {
+  max: 1,
+  onnotice: () => {},
+});
+const observerSql = postgres(databaseUrlFor("postgres"), {
+  max: 1,
+  onnotice: () => {},
+});
+const blockerSql = await blockerPool.reserve();
+let blockerHeld = false;
+let concurrentRepair;
+let concurrentWriter;
+try {
+  await blockerSql`select pg_catalog.pg_advisory_lock(${concurrencyLockKey}::bigint)`;
+  blockerHeld = true;
+  runPsql([
+    "-c",
+    `
+      create or replace function public.issue_887_pause_on_grant()
+      returns event_trigger
+      language plpgsql
+      as $pause$
+      begin
+        if tg_tag = 'GRANT' then
+          perform pg_catalog.pg_advisory_xact_lock(${concurrencyLockKey}::bigint);
+        end if;
+      end
+      $pause$;
+      create event trigger issue_887_pause_on_grant
+        on ddl_command_start
+        execute function public.issue_887_pause_on_grant();
+    `,
+  ]);
+
+  concurrentRepair = spawnPsql(["-f", repairPath], {
+    applicationName: "issue_887_concurrency_repair",
+  });
+  await waitFor("fresh repair to hold the families write lock", async () => {
+    const rows = await observerSql`
+      select exists (
+        select 1
+        from pg_catalog.pg_stat_activity activity
+        join pg_catalog.pg_locks family_lock
+          on family_lock.pid = activity.pid
+        where activity.application_name = 'issue_887_concurrency_repair'
+          and family_lock.relation = 'public.families'::regclass
+          and family_lock.mode = 'ShareRowExclusiveLock'
+          and family_lock.granted
+          and exists (
+            select 1
+            from pg_catalog.pg_locks advisory_wait
+            where advisory_wait.pid = activity.pid
+              and advisory_wait.locktype = 'advisory'
+              and not advisory_wait.granted
+          )
+      ) as ready
+    `;
+    return rows[0]?.ready === true;
+  });
+
+  concurrentWriter = spawnPsql(
+    [
+      "-c",
+      `
+        set statement_timeout = '20s';
+        update public.families
+        set name = name
+        where id = '${fixtureIds[0]}'::uuid;
+      `,
+    ],
+    { applicationName: "issue_887_concurrency_writer" },
+  );
+  await waitFor("concurrent family writer to wait behind the repair", async () => {
+    const rows = await observerSql`
+      select exists (
+        select 1
+        from pg_catalog.pg_stat_activity activity
+        join pg_catalog.pg_locks family_lock
+          on family_lock.pid = activity.pid
+        where activity.application_name = 'issue_887_concurrency_writer'
+          and family_lock.relation = 'public.families'::regclass
+          and family_lock.mode = 'RowExclusiveLock'
+          and not family_lock.granted
+      ) as waiting
+    `;
+    return rows[0]?.waiting === true;
+  });
+
+  const unlockRows = await blockerSql`
+    select pg_catalog.pg_advisory_unlock(${concurrencyLockKey}::bigint) as unlocked
+  `;
+  assert.equal(unlockRows[0]?.unlocked, true);
+  blockerHeld = false;
+
+  const repairResult = await concurrentRepair.completion;
+  assert.equal(repairResult.status, 0, repairResult.stderr);
+  assert.deepEqual(
+    repairResult.stdout
+      .split(/\r?\n/u)
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("ISSUE_887_REPAIR=")),
+    ["ISSUE_887_REPAIR=repaired"],
+  );
+  const writerResult = await concurrentWriter.completion;
+  assert.equal(writerResult.status, 0, writerResult.stderr);
+} finally {
+  if (blockerHeld) {
+    await blockerSql`select pg_catalog.pg_advisory_unlock(${concurrencyLockKey}::bigint)`;
+  }
+  for (const running of [concurrentRepair, concurrentWriter]) {
+    if (running?.child.exitCode === null) running.child.kill("SIGKILL");
+  }
+  await Promise.allSettled(
+    [concurrentRepair, concurrentWriter]
+      .filter(Boolean)
+      .map((running) => running.completion),
+  );
+  blockerSql.release();
+  await Promise.all([blockerPool.end(), observerSql.end()]);
+}
+runPsql([
+  "-c",
+  `
+    drop event trigger issue_887_pause_on_grant;
+    drop function public.issue_887_pause_on_grant();
+  `,
+]);
+applyRepair("ISSUE_887_REPAIR=verified_noop");
+
+resetFresh();
+runPsql([
+  "-c",
+  `
+    insert into supabase_migrations.schema_migrations
+      (version, statements, name)
     values ('20260801110000', array['select 1;'], 'family_billing_subscriptions');
   `,
 ]);
+assertRepairFailure(/canonical history/u);
+
+resetFresh();
+installCanonicalOriginalState();
+runPsql(["-f", correctionMigrationPath]);
+insertCanonicalLedger(
+  "20260806093000",
+  "correct_billing_provider_product_identity",
+  correctionMigrationPath,
+);
 assertRepairFailure(/migration state is mixed/u);
 
 resetFresh();
@@ -714,7 +1169,7 @@ runPsql([
     );
   `,
 ]);
-assertRepairFailure(/migration state is mixed/u);
+assertRepairFailure(/canonical history/u);
 
 resetFresh();
 runPsql([
@@ -754,7 +1209,7 @@ const rollbackState = runPsql([
       not exists (
         select 1
         from supabase_migrations.schema_migrations
-        where version in ('20260801110000', '20260806093000')
+        where version in ('20260801110000', '20260806092000', '20260806093000')
       )
     );
   `,
@@ -776,5 +1231,5 @@ applyRepair();
 applyRepair("ISSUE_887_REPAIR=verified_noop");
 
 console.log(
-  "Issue 887 repair passed defaults, apply, replay, fresh no-op, correction, exact metadata, ACL, collision, mixed-state, and rollback probes.",
+  "Issue 887 repair passed canonical history, staged forwards, effective ACL, concurrency, metadata, collision, mixed-state, no-op, and rollback probes.",
 );
