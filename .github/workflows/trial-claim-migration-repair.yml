@@ -91,28 +91,22 @@ jobs:
               )::text
           ")"
 
-          case "$state" in
-            "true|true")
-              echo "The schema and migration ledger are already repaired."
-              ;;
-            "true|false")
-              echo "The additive schema exists; repairing only its missing ledger entry."
-              supabase migration repair "$version" --status applied --db-url "$MIGRATION_DATABASE_URL"
-              ;;
-            "false|false")
-              echo "Applying the one reviewed additive migration."
-              psql "$MIGRATION_DATABASE_URL" -X -v ON_ERROR_STOP=1 --single-transaction -f "$migration"
-              supabase migration repair "$version" --status applied --db-url "$MIGRATION_DATABASE_URL"
-              ;;
-            "false|true")
-              echo "Migration history claims the repair ran, but the table is absent. Stopping."
-              exit 1
-              ;;
-            *)
-              echo "Unexpected production preflight result."
-              exit 1
-              ;;
-          esac
+          if [ "$state" = "true|true" ]; then
+            echo "The schema and migration ledger are already repaired."
+          elif [ "$state" = "true|false" ]; then
+            echo "The additive schema exists; repairing only its missing ledger entry."
+            supabase migration repair "$version" --status applied --db-url "$MIGRATION_DATABASE_URL"
+          elif [ "$state" = "false|false" ]; then
+            echo "Applying the one reviewed additive migration."
+            psql "$MIGRATION_DATABASE_URL" -X -v ON_ERROR_STOP=1 --single-transaction -f "$migration"
+            supabase migration repair "$version" --status applied --db-url "$MIGRATION_DATABASE_URL"
+          elif [ "$state" = "false|true" ]; then
+            echo "Migration history claims the repair ran, but the table is absent. Stopping."
+            exit 1
+          else
+            echo "Unexpected production preflight result."
+            exit 1
+          fi
 
       - name: Verify table, RLS, grants, and migration history
         run: |
