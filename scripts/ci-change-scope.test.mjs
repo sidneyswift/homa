@@ -1,11 +1,23 @@
 import assert from "node:assert/strict";
+import { execFileSync, spawnSync } from "node:child_process";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, resolve } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   classifyCiFiles,
   shouldSkipVercelPreview,
   validateCiResults,
 } from "./ci-change-scope.mjs";
+
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const changeScopeScript = resolve(repositoryRoot, "scripts/ci-change-scope.mjs");
+
+function git(cwd, args) {
+  return execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
+}
 
 const success = {
   "classify-changes": "success",
@@ -75,6 +87,117 @@ test("web preview skipping fails closed for build inputs", () => {
 test("an empty or malformed diff never skips work", () => {
   assert.equal(classifyCiFiles([]), "full");
   assert.equal(shouldSkipVercelPreview([]), false);
+});
+
+test("Vercel checks every commit since the last successful branch deployment", () => {
+  const fixture = mkdtempSync(resolve(tmpdir(), "homa-vercel-change-scope-"));
+  try {
+    git(fixture, ["init"]);
+    git(fixture, ["config", "user.email", "fixture@invalid.example"]);
+    git(fixture, ["config", "user.name", "Fixture"]);
+    mkdirSync(resolve(fixture, "docs"), { recursive: true });
+    writeFileSync(resolve(fixture, "docs/readme.md"), "base\n");
+    git(fixture, ["add", "."]);
+    git(fixture, ["commit", "-m", "base"]);
+    const previousSha = git(fixture, ["rev-parse", "HEAD"]);
+
+    mkdirSync(resolve(fixture, "apps/web/app"), { recursive: true });
+    writeFileSync(resolve(fixture, "apps/web/app/page.tsx"), "export default function Page() {}\n");
+    git(fixture, ["add", "."]);
+    git(fixture, ["commit", "-m", "change product"]);
+    writeFileSync(resolve(fixture, "docs/evidence.json"), "{}\n");
+    git(fixture, ["add", "."]);
+    git(fixture, ["commit", "-m", "update evidence"]);
+    const currentSha = git(fixture, ["rev-parse", "HEAD"]);
+
+    const result = spawnSync(process.execPath, [changeScopeScript, "vercel"], {
+      cwd: fixture,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        VERCEL_ENV: "preview",
+        VERCEL_GIT_PREVIOUS_SHA: previousSha,
+        VERCEL_GIT_COMMIT_SHA: currentSha,
+      },
+    });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /Vercel change scope: build/u);
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test("Vercel builds when the previous deployment SHA is missing, invalid, or unavailable", () => {
+  for (const previousSha of [undefined, "not-a-commit", "HEAD^", "0".repeat(40)]) {
+    const env = { ...process.env, VERCEL_ENV: "preview" };
+    delete env.VERCEL_GIT_COMMIT_SHA;
+    if (previousSha) env.VERCEL_GIT_PREVIOUS_SHA = previousSha;
+    else delete env.VERCEL_GIT_PREVIOUS_SHA;
+    const result = spawnSync(process.execPath, [changeScopeScript, "vercel"], {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+      env,
+    });
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /Vercel change scope: build/u);
+  }
+
+  const priorCommit = git(repositoryRoot, ["rev-parse", "HEAD^"]);
+  const mismatchedHead = spawnSync(process.execPath, [changeScopeScript, "vercel"], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      VERCEL_ENV: "preview",
+      VERCEL_GIT_PREVIOUS_SHA: priorCommit,
+      VERCEL_GIT_COMMIT_SHA: priorCommit,
+    },
+  });
+  assert.equal(mismatchedHead.status, 1, mismatchedHead.stderr);
+  assert.match(mismatchedHead.stderr, /does not match HEAD/u);
+});
+
+test("Vercel builds for deleted or moved web files", () => {
+  for (const scenario of ["delete", "move-to-docs"]) {
+    const fixture = mkdtempSync(resolve(tmpdir(), `homa-vercel-${scenario}-`));
+    try {
+      git(fixture, ["init"]);
+      git(fixture, ["config", "user.email", "fixture@invalid.example"]);
+      git(fixture, ["config", "user.name", "Fixture"]);
+      mkdirSync(resolve(fixture, "apps/web/app"), { recursive: true });
+      mkdirSync(resolve(fixture, "docs"), { recursive: true });
+      writeFileSync(resolve(fixture, "apps/web/app/page.tsx"), "export default function Page() {}\n");
+      writeFileSync(resolve(fixture, "docs/readme.md"), "base\n");
+      git(fixture, ["add", "."]);
+      git(fixture, ["commit", "-m", "base"]);
+      const previousSha = git(fixture, ["rev-parse", "HEAD"]);
+
+      if (scenario === "delete") {
+        rmSync(resolve(fixture, "apps/web/app/page.tsx"));
+      } else {
+        git(fixture, ["mv", "apps/web/app/page.tsx", "docs/page.tsx"]);
+      }
+      writeFileSync(resolve(fixture, "docs/evidence.json"), "{}\n");
+      git(fixture, ["add", "-A"]);
+      git(fixture, ["commit", "-m", scenario]);
+      const currentSha = git(fixture, ["rev-parse", "HEAD"]);
+
+      const result = spawnSync(process.execPath, [changeScopeScript, "vercel"], {
+        cwd: fixture,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          VERCEL_ENV: "preview",
+          VERCEL_GIT_PREVIOUS_SHA: previousSha,
+          VERCEL_GIT_COMMIT_SHA: currentSha,
+        },
+      });
+      assert.equal(result.status, 1, `${scenario}: ${result.stderr}`);
+      assert.match(result.stderr, /Vercel change scope: build/u);
+    } finally {
+      rmSync(fixture, { recursive: true, force: true });
+    }
+  }
 });
 
 test("the required-status gate accepts exactly the jobs for each scope", () => {
