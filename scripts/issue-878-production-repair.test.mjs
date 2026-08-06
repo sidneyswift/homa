@@ -84,6 +84,13 @@ test("repair applies only the reviewed pair inside one bounded transaction", () 
   assert.match(repair, /ISSUE_878_REPAIR=[\s\S]*verified_noop/u);
   assert.match(repair, new RegExp(sha256(sandboxMigration), "u"));
   assert.match(repair, new RegExp(sha256(deleteMigration), "u"));
+  assert.match(repair, /pg_get_functiondef/u);
+  assert.match(repair, /issue_878_sandbox_ledger_statements/u);
+  assert.match(repair, /issue_878_delete_ledger_statements/u);
+  assert.match(
+    repair,
+    /revoke execute on function public\.create_my_family\(text, text, text\) from service_role/u,
+  );
 });
 
 test("repair verifies metadata, grants, and rollback-only behavior probes", () => {

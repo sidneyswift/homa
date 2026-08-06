@@ -106,6 +106,7 @@ function runPsql(actions, expectedStatus = 0) {
     assert.notEqual(result.status, 0, "issue 878 repair unexpectedly succeeded");
   }
   return {
+    rawStdout: result.stdout,
     stdout: result.stdout
       .split(/\r?\n/u)
       .map((line) => line.trim())
@@ -150,16 +151,83 @@ assert.ok(freshSession.stdout.includes("ISSUE_878_REPAIR=verified_noop"));
 const exactLedger = runPsql([
   "-Atc",
   `
-    select concat_ws('|', version, name, statements[2])
+    select concat_ws(
+      '|',
+      version,
+      name,
+      pg_catalog.cardinality(statements),
+      pg_catalog.strpos(statements[1], 'sha256=') > 0
+    )
     from supabase_migrations.schema_migrations
     where version in ('20260806034000', '20260806035000')
     order by version;
   `,
 ]);
 assert.deepEqual(exactLedger.stdout, [
-  `20260806034000|sandbox_live_auth_fixtures|-- sha256=${sandboxHash}`,
-  `20260806035000|family_delete_progress_trigger|-- sha256=${deleteHash}`,
+  "20260806034000|sandbox_live_auth_fixtures|5|t",
+  "20260806035000|family_delete_progress_trigger|2|t",
 ]);
+
+function reconstructedMigration(version) {
+  return runPsql([
+    "-Atc",
+    `
+      select pg_catalog.array_to_string(statements, E';\\n') || E';\\n'
+      from supabase_migrations.schema_migrations
+      where version = '${version}';
+    `,
+  ]).rawStdout;
+}
+
+const reconstructedSandbox = reconstructedMigration("20260806034000");
+const reconstructedDelete = reconstructedMigration("20260806035000");
+assert.match(reconstructedSandbox, new RegExp(`sha256=${sandboxHash}`, "u"));
+assert.match(reconstructedSandbox, /create or replace function public\.create_my_family/iu);
+assert.match(reconstructedDelete, new RegExp(`sha256=${deleteHash}`, "u"));
+assert.match(
+  reconstructedDelete,
+  /create or replace function private\.pause_check_ins_for_removed_member/iu,
+);
+
+runPsql([
+  "-c",
+  `
+    create or replace function public.create_my_family(
+      family_name text default 'My family',
+      family_us_state text default null,
+      parent_name text default null
+    )
+    returns table (family_id uuid)
+    language plpgsql
+    security definer
+    set search_path = ''
+    as $unsafe$
+    begin
+      raise exception 'unsafe fetched-migration probe';
+    end
+    $unsafe$;
+    grant execute on function public.create_my_family(text, text, text)
+      to service_role;
+
+    create or replace function private.pause_check_ins_for_removed_member()
+    returns trigger
+    language plpgsql
+    security definer
+    set search_path = ''
+    as $unsafe$
+    begin
+      if tg_op = 'DELETE' then return old; end if;
+      return new;
+    end
+    $unsafe$;
+  `,
+  "-c",
+  reconstructedSandbox,
+  "-c",
+  reconstructedDelete,
+]);
+const fetchedReplay = runPsql(["-f", repairPath]);
+assert.ok(fetchedReplay.stdout.includes("ISSUE_878_REPAIR=verified_noop"));
 
 runPsql([
   "-c",
@@ -220,12 +288,15 @@ assert.match(tampered.stderr, /ledger hash evidence is absent or altered/u);
 runPsql([
   "-c",
   `
-    update supabase_migrations.schema_migrations
-    set statements = array[
-      '-- Issue 878 exact migration applied atomically',
-      '-- sha256=${sandboxHash}'
-    ]::text[]
-    where version = '20260806034000';
+    delete from supabase_migrations.schema_migrations
+    where version in ('20260806034000', '20260806035000');
+  `,
+  "-f",
+  repairPath,
+]);
+runPsql([
+  "-c",
+  `
     delete from supabase_migrations.schema_migrations
     where version = '20260806035000';
   `,
@@ -236,16 +307,22 @@ assert.match(mixed.stderr, /migration ledger is mixed/u);
 const finalLedger = runPsql([
   "-Atc",
   `
-    select concat_ws('|', version, name, statements[2])
+    select concat_ws(
+      '|',
+      version,
+      name,
+      pg_catalog.cardinality(statements),
+      pg_catalog.strpos(statements[1], 'sha256=') > 0
+    )
     from supabase_migrations.schema_migrations
     where version in ('20260806034000', '20260806035000')
     order by version;
   `,
 ]);
 assert.deepEqual(finalLedger.stdout, [
-  `20260806034000|sandbox_live_auth_fixtures|-- sha256=${sandboxHash}`,
+  "20260806034000|sandbox_live_auth_fixtures|5|t",
 ]);
 
 console.log(
-  "Issue 878 repair passed application, repeat, fresh-client, tamper, mixed-state, and rollback-only probes.",
+  "Issue 878 repair passed application, repeat, fetched replay, tamper, mixed-state, and rollback-only probes.",
 );

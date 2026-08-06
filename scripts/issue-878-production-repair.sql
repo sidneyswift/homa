@@ -55,7 +55,44 @@ from issue_878_repair_state
 \if :issue_878_apply
 \ir ../supabase/migrations/20260806034000_sandbox_live_auth_fixtures.sql
 \ir ../supabase/migrations/20260806035000_family_delete_progress_trigger.sql
+\endif
 
+create or replace function pg_temp.issue_878_sandbox_ledger_statements()
+returns text[]
+language sql
+stable
+as $ledger$
+  select array[
+    pg_catalog.format(
+      E'/* Homa issue 878: exact 20260806034000_sandbox_live_auth_fixtures.sql applied atomically. */\n/* sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7 */\n%s',
+      pg_catalog.pg_get_functiondef(
+        'public.create_my_family(text,text,text)'::regprocedure
+      )
+    ),
+    'revoke all on function public.create_my_family(text, text, text) from public',
+    'revoke execute on function public.create_my_family(text, text, text) from anon',
+    'revoke execute on function public.create_my_family(text, text, text) from service_role',
+    'grant execute on function public.create_my_family(text, text, text) to authenticated'
+  ]::text[]
+$ledger$;
+
+create or replace function pg_temp.issue_878_delete_ledger_statements()
+returns text[]
+language sql
+stable
+as $ledger$
+  select array[
+    pg_catalog.format(
+      E'/* Homa issue 878: exact 20260806035000_family_delete_progress_trigger.sql applied atomically. */\n/* sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8 */\n%s',
+      pg_catalog.pg_get_functiondef(
+        'private.pause_check_ins_for_removed_member()'::regprocedure
+      )
+    ),
+    'revoke all on function private.pause_check_ins_for_removed_member() from public, anon, authenticated'
+  ]::text[]
+$ledger$;
+
+\if :issue_878_apply
 insert into supabase_migrations.schema_migrations (
   version,
   statements,
@@ -64,18 +101,12 @@ insert into supabase_migrations.schema_migrations (
 values
   (
     '20260806034000',
-    array[
-      '-- Issue 878 exact migration applied atomically',
-      '-- sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
-    ]::text[],
+    pg_temp.issue_878_sandbox_ledger_statements(),
     'sandbox_live_auth_fixtures'
   ),
   (
     '20260806035000',
-    array[
-      '-- Issue 878 exact migration applied atomically',
-      '-- sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8'
-    ]::text[],
+    pg_temp.issue_878_delete_ledger_statements(),
     'family_delete_progress_trigger'
   );
 \endif
@@ -251,19 +282,13 @@ begin
     from supabase_migrations.schema_migrations
     where version = '20260806034000'
       and name = 'sandbox_live_auth_fixtures'
-      and statements = array[
-        '-- Issue 878 exact migration applied atomically',
-        '-- sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
-      ]::text[]
+      and statements = pg_temp.issue_878_sandbox_ledger_statements()
   ) or not exists (
     select 1
     from supabase_migrations.schema_migrations
     where version = '20260806035000'
       and name = 'family_delete_progress_trigger'
-      and statements = array[
-        '-- Issue 878 exact migration applied atomically',
-        '-- sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8'
-      ]::text[]
+      and statements = pg_temp.issue_878_delete_ledger_statements()
   ) then
     raise exception 'issue 878 migration ledger hash evidence is absent or altered';
   end if;
