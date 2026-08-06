@@ -54,7 +54,9 @@ Inventory these sources separately:
 - Stale registrations, beginning with `git worktree prune --dry-run`.
 
 Never infer repository identity from a directory name. Resolve the checkout root,
-Git directory, common Git directory, and stored origin. A standalone clone can
+Git directory, common Git directory, and stored origin. The safe removal wrapper
+also requires the target to share the common Git directory and origin of the Homa
+checkout containing the wrapper. A standalone clone can
 occupy a path once used by a missing linked worktree while containing unrelated
 work.
 
@@ -89,8 +91,9 @@ A clean status is necessary but is not enough to classify a checkout as removabl
 2. Separate unrelated edits. Never commit a mixed checkout as one change.
 3. For commits already on a trusted remote, record the exact remote ref and commit.
 4. For local-only commits, create a Git bundle outside the source worktree and
-   outside `/private/tmp`. Verify it, restore it into a disposable clone, and compare
-   the restored HEAD and tree with the source.
+   outside `/private/tmp`. The wrapper restores it into a new empty repository and
+   compares the restored HEAD and tree with the source. A bundle that depends on
+   prerequisite objects outside itself fails this proof.
 5. For tracked edits, create a binary-capable patch. Restore it in a disposable
    checkout before accepting it.
 6. For useful untracked files, copy the sanitized files into the recovery package.
@@ -114,26 +117,31 @@ uses force, deletes a branch, deletes a remote ref, or mutates GitHub.
 
 ### Prepare reviewed evidence
 
-Store the evidence file outside the target worktree and outside `/private/tmp`.
-Capture it within thirty minutes of execution. It must identify the exact primary
-checkout, common Git directory, stored origin URL, target path, registered path,
-target Git directory, branch, HEAD, tree, base ref, and binary patch checksum.
+Store schema version 2 evidence outside the target worktree and outside
+`/private/tmp`. Capture it within thirty minutes of execution. It must identify the
+exact primary checkout, common Git directory, stored origin URL, target path,
+registered path, target Git directory, branch, HEAD, tree, base ref, and binary
+patch checksum.
 
-Every exact ignored path needs one evidence decision. There is no repository-wide
-ignored-directory exemption. Allowed decisions are:
+Every ignored file needs one evidence decision bound to its relative path, file or
+symlink type, byte size, and SHA-256 digest. The wrapper gets this inventory from
+Git's NUL-delimited ignored-file listing, so newlines in names are unambiguous. A
+directory-level decision is not enough. Adding, removing, renaming, or changing one
+ignored file invalidates the evidence. Allowed decisions are:
 
 - `regenerable`, with a reason.
 - `discard-approved`, with a reason.
 - `backed-up-private`, with a reason and private recovery reference.
 
-Secret-shaped ignored paths cannot be classified as regenerable.
+Secret-shaped ignored paths cannot be classified as regenerable, including a
+secret-shaped file nested inside an otherwise generated directory.
 
 Recovery kinds are:
 
 - `integrated` when the exact HEAD is already an ancestor of current remote main.
 - `remote-branch` when the trusted remote ref resolves to the exact HEAD.
-- `bundle` when a durable verified bundle advertises the exact local-only HEAD and
-  a disposable restore produced the same HEAD and tree.
+- `bundle` when a durable bundle advertises the exact local-only HEAD and the
+  wrapper's own empty-repository restore produces the same HEAD and tree.
 
 An open issue needs a verified handoff comment containing the old path, branch,
 full HEAD, and replacement lane when one exists. A closed issue needs recorded
@@ -142,14 +150,14 @@ completion evidence.
 ### Export the Desktop task snapshot
 
 Immediately before each execution attempt, use the Codex app task-list tool to
-export all open and recent Homa tasks. Do not use a new app-server process as a
-substitute. A separate process can read stored tasks but cannot prove the Desktop
-app's live ownership state.
+export all open and recent Homa tasks. Store the snapshot outside the target
+worktree. Do not use a new app-server process as a substitute. A separate process
+can read stored tasks but cannot prove the Desktop app's live ownership state.
 
 The execution snapshot is valid for thirty seconds. The wrapper re-reads it after
-the final Git and GitHub checks. If it is stale, malformed, incomplete, contains a
-matching active task, or contains an unknown task state, execution stops. Inspection
-mode accepts a snapshot up to ten minutes old because it changes nothing.
+the final GitHub checks. If it is stale, malformed, contains a matching active task,
+or contains an unknown task state, execution stops. Inspection mode accepts a
+snapshot up to ten minutes old because it changes nothing.
 
 The snapshot shape is:
 
@@ -160,19 +168,44 @@ The snapshot shape is:
   "coverage": "all-open-and-recent-homa-tasks",
   "capturedAt": "2026-08-06T03:00:00.000Z",
   "repositoryOrigin": "https://github.com/sidneyswift/homa.git",
-  "tasks": []
+  "tasks": [
+    {
+      "id": "task-id",
+      "status": "completed",
+      "branch": "codex/gh-872-short-slug",
+      "worktree": "/absolute/worktree/path",
+      "handoff": {
+        "outcome": "Completed outcome",
+        "issue": "#872",
+        "branch": "codex/gh-872-short-slug",
+        "worktree": "/absolute/worktree/path",
+        "commitOrPr": "full commit or pull request URL",
+        "checks": "Exact checks",
+        "productionState": "Verified state or not applicable",
+        "nextStep": "Remove the worktree",
+        "recordedAt": "2026-08-06T03:00:00.000Z"
+      }
+    }
+  ]
 }
 ```
 
 Every matching finished task includes a handoff with outcome, issue, branch,
 worktree, commit or pull request, checks, production state, next step, and recorded
-time. When the complete search finds no match, evidence must explicitly set
-`task.noMatchingTaskConfirmed` to true. A matching active task always blocks.
+time. Automatic removal requires at least one matching finished task. A matching
+active task always blocks.
 
-Task metadata cannot prove that an unrelated agent has not started operating on a
-path after the snapshot. The named cleanup operator must keep a repository freeze
-during the execution window. The wrapper is fail-closed evidence validation, not an
-operating-system lock against an uncooperative process.
+The JSON fields prove freshness and internal consistency, not app-authenticated
+provenance. The operator remains responsible for exporting the complete task-list
+result. A taskless legacy lane uses a separate manual path: evidence records a fresh
+`task.legacyTasklessOverride` with `approvedBy`, `reason`, and `approvedAt`, and the
+command includes `--legacy-taskless-confirmation "ALLOW TASKLESS /absolute/worktree/path"`.
+Do not use that override for a lane with a matching task.
+
+Task metadata cannot prove that an unrelated agent has been omitted from a snapshot
+or started operating on a path after the snapshot. The named cleanup operator must
+keep a repository freeze during the execution window. The wrapper is fail-closed
+evidence validation, not an operating-system lock against an uncooperative process.
 
 ### Inspect, then execute
 
@@ -186,7 +219,9 @@ node scripts/remove-worktree-safely.mjs \
 ```
 
 Review the exact identity, issue, pull request, task, ignored-file, and recovery
-result. Refresh the Desktop task snapshot, then execute within thirty seconds:
+result. Refresh the Desktop task snapshot, then execute within thirty seconds. The
+wrapper completes GitHub and task checks first, then recomputes recovery, status,
+and ignored-file fingerprints immediately before removal:
 
 ```sh
 node scripts/remove-worktree-safely.mjs \
@@ -236,16 +271,19 @@ Use this order:
 2. Merge through the repository's normal integration method.
 3. Verify deployment and live behavior when production is affected.
 4. Update or close the issue with commit, pull request, checks, deploy, and probe evidence.
-5. Export a fresh Desktop task snapshot and remove the clean worktree.
-6. Delete the proven merged local branch, then any separately approved remote branch.
-7. Post the task handoff and archive the task.
-8. Recount active lanes and choose the next issue by user value and priority.
+5. Post the task handoff and let the lane task reach a finished state.
+6. From the cleanup coordinator, export a fresh Desktop task snapshot and remove
+   the clean worktree.
+7. Delete the proven merged local branch, then any separately approved remote branch.
+8. Archive the finished lane task.
+9. Recount active lanes and choose the next issue by user value and priority.
 
 ## Advisory Claude Code hook
 
 The project hook at [.claude/hooks/block-dangerous-git.mjs](../../../.claude/hooks/block-dangerous-git.mjs)
 is a tripwire. It blocks direct worktree removal and common destructive Git forms,
-including nested shell text, Git `-C`, hard reset, forced clean, forced branch delete,
+including nested shell text, Git `-C`, hard reset, forced clean, forced branch delete
+in combined or separate short-flag forms, direct worktree remove or prune,
 whole-worktree restore, and push commands issued through Claude Code Bash.
 
 It is not an authorization or security boundary. It cannot govern another shell,

@@ -56,16 +56,18 @@ function dangerousGitReason(tokens) {
     if (name === "worktree" && args.includes("remove")) {
       return "Direct worktree removal is disabled. Use scripts/remove-worktree-safely.mjs.";
     }
+    if (name === "worktree" && args.includes("prune")) {
+      return "Direct worktree pruning requires an explicit reviewed action outside this advisory hook.";
+    }
     if (name === "reset" && args.some((argument) => argument === "--hard" || argument.startsWith("--hard="))) {
       return "Hard reset is disabled by the project Git safety policy.";
     }
     if (name === "clean" && (args.includes("--force") || hasShortFlag(args, "f"))) {
       return "Forced Git clean is disabled by the project Git safety policy.";
     }
-    if (
-      name === "branch" &&
-      (args.includes("-D") || (args.includes("--delete") && args.includes("--force")))
-    ) {
+    const deletesBranch = args.includes("-D") || args.includes("--delete") || hasShortFlag(args, "d");
+    const forcesBranch = args.includes("-D") || args.includes("--force") || hasShortFlag(args, "f");
+    if (name === "branch" && deletesBranch && forcesBranch) {
       return "Forced branch deletion is disabled by the project Git safety policy.";
     }
     if (["checkout", "restore"].includes(name) && (args.includes(".") || args.includes(":/"))) {

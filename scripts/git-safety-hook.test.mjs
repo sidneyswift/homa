@@ -21,6 +21,10 @@ for (const command of [
   "zsh -lc \"git reset --hard HEAD~1\"",
   "command /usr/bin/git clean -fdx",
   "git branch --delete --force stale-branch",
+  "git branch -d -f stale-branch",
+  "git branch --delete -f stale-branch",
+  "git branch -df stale-branch",
+  "git worktree prune --expire now",
   "git restore .",
   "git push --force-with-lease origin main",
 ]) {

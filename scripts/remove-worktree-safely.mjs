@@ -1,9 +1,19 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  realpathSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { spawnSync } from "node:child_process";
-import { isAbsolute, relative, resolve, sep } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const EVIDENCE_MAX_AGE_MS = 30 * 60 * 1000;
@@ -30,7 +40,10 @@ const IGNORED_DISPOSITIONS = new Set([
   "discard-approved",
   "regenerable",
 ]);
-const SENSITIVE_IGNORED_PATH = /(^|\/)(?:\.env(?:\.|$)|[^/]*\.(?:crt|key)$|[^/]*(?:credential|secret)[^/]*)/iu;
+const IGNORED_FILE_KINDS = new Set(["file", "symlink"]);
+const SENSITIVE_IGNORED_PATH =
+  /(^|\/)(?:\.env(?:\.|$)|\.npmrc$|\.netrc$|\.aws(?:\/|$)|\.ssh(?:\/|$)|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?$|google-services\.json$|GoogleService-Info\.plist$|[^/]*\.(?:crt|key|pem|p12|pfx)$|[^/]*(?:credential|secret|token)[^/]*)/iu;
+const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 
 export class RemovalBlockedError extends Error {
   constructor(message) {
@@ -177,12 +190,87 @@ export function parseWorktreePorcelain(output) {
   return records;
 }
 
-function ignoredEntriesFromStatus(output) {
-  return output
-    .split("\n")
-    .filter((line) => line.startsWith("!! "))
-    .map((line) => line.slice(3).replace(/^"|"$/gu, ""))
-    .sort();
+function comparePaths(left, right) {
+  if (left.path < right.path) return -1;
+  if (left.path > right.path) return 1;
+  return 0;
+}
+
+function sameFileState(left, right) {
+  return ["dev", "ino", "mode", "size", "mtimeNs"].every(
+    (field) => String(left[field]) === String(right[field]),
+  );
+}
+
+function ignoredFileFingerprint(target, path) {
+  if (isAbsolute(path)) block(`Ignored path ${JSON.stringify(path)} must be relative.`);
+  const absolutePath = resolve(target, path);
+  if (absolutePath === target || !isInside(absolutePath, target)) {
+    block(`Ignored path ${JSON.stringify(path)} escapes the target worktree.`);
+  }
+
+  let before;
+  try {
+    before = lstatSync(absolutePath, { bigint: true });
+  } catch (error) {
+    block(
+      `Ignored path ${JSON.stringify(path)} disappeared during inspection: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+
+  let kind;
+  let content;
+  if (before.isFile()) {
+    kind = "file";
+    content = readFileSync(absolutePath);
+  } else if (before.isSymbolicLink()) {
+    kind = "symlink";
+    content = readlinkSync(absolutePath, { encoding: "buffer" });
+  } else {
+    block(`Ignored path ${JSON.stringify(path)} has unsupported file type.`);
+  }
+
+  const after = lstatSync(absolutePath, { bigint: true });
+  if (!sameFileState(before, after)) {
+    block(`Ignored path ${JSON.stringify(path)} changed while it was being fingerprinted.`);
+  }
+  return {
+    path,
+    kind,
+    sizeBytes: String(before.size),
+    sha256: sha256(content),
+  };
+}
+
+function ignoredEntriesFromGit(target) {
+  const output = git(target, [
+    "ls-files",
+    "--others",
+    "--ignored",
+    "--exclude-standard",
+    "-z",
+  ]);
+  const paths = output.split("\0").filter(Boolean);
+  if (new Set(paths).size !== paths.length) block("Git returned a duplicate ignored path.");
+  return paths.map((path) => ignoredFileFingerprint(target, path)).sort(comparePaths);
+}
+
+function inspectScriptRepository() {
+  const scriptDirectory = dirname(SCRIPT_PATH);
+  const root = absoluteRealPath(
+    git(scriptDirectory, ["rev-parse", "--show-toplevel"]).trim(),
+    "script repository root",
+  );
+  return {
+    root,
+    commonGitDir: absoluteRealPath(
+      git(root, ["rev-parse", "--path-format=absolute", "--git-common-dir"]).trim(),
+      "script repository common Git directory",
+    ),
+    origin: normalizeOrigin(git(root, ["config", "--get", "remote.origin.url"]).trim()),
+  };
 }
 
 function currentBranch(path) {
@@ -198,21 +286,57 @@ function branchIssueNumber(branch) {
   return match ? Number(match[1]) : null;
 }
 
-function inspectBundle(path, target) {
+function inspectBundle(path, target, expectedHead, expectedTree, objectFormat) {
   const artifact = absoluteRealPath(path, "recovery.artifactPath");
   const privateTmp = resolve("/private/tmp");
   if (isInside(artifact, privateTmp)) block("The recovery artifact is under /private/tmp and is not durable.");
   if (isInside(artifact, target)) block("The recovery artifact is inside the worktree it protects.");
   if (!statSync(artifact).isFile()) block("The recovery artifact must be a file.");
-  checked("git", ["bundle", "verify", artifact]);
-  const heads = checked("git", ["bundle", "list-heads", artifact])
+  const artifactSha256 = sha256(readFileSync(artifact));
+  checked("git", ["bundle", "verify", artifact], { cwd: target });
+  const advertisedHeads = checked("git", ["bundle", "list-heads", artifact], { cwd: target })
     .split("\n")
     .filter(Boolean)
-    .map((line) => line.split(/\s+/u)[0]);
-  return { artifact, artifactSha256: sha256(readFileSync(artifact)), heads };
+    .map((line) => {
+      const [head, reference] = line.split(/\s+/u);
+      return { head, reference };
+    });
+  const advertised = advertisedHeads.find((entry) => entry.head === expectedHead);
+  if (!advertised) block("The recovery bundle does not advertise the source HEAD.");
+
+  const restoreRoot = mkdtempSync(join(tmpdir(), "homa-worktree-bundle-restore-"));
+  const restoreRepository = join(restoreRoot, "restored.git");
+  try {
+    checked("git", ["init", "--bare", `--object-format=${objectFormat}`, restoreRepository]);
+    checked("git", [
+      "-C",
+      restoreRepository,
+      "fetch",
+      "--no-tags",
+      artifact,
+      `${advertised.reference}:refs/heads/recovered`,
+    ]);
+    const restoredHead = checked("git", ["-C", restoreRepository, "rev-parse", "refs/heads/recovered"]).trim();
+    const restoredTree = checked(
+      "git",
+      ["-C", restoreRepository, "rev-parse", "refs/heads/recovered^{tree}"],
+    ).trim();
+    assertEqual(restoredHead, expectedHead, "Restored bundle head");
+    assertEqual(restoredTree, expectedTree, "Restored bundle tree");
+    assertEqual(sha256(readFileSync(artifact)), artifactSha256, "Recovery bundle content during restore");
+    return {
+      artifact,
+      artifactSha256,
+      heads: advertisedHeads.map((entry) => entry.head),
+      restoredHead,
+      restoredTree,
+    };
+  } finally {
+    rmSync(restoreRoot, { recursive: true, force: true });
+  }
 }
 
-export function inspectLocalState(targetInput, evidence) {
+export function inspectLocalState(targetInput, evidence, expectedRepository = inspectScriptRepository()) {
   const target = absoluteRealPath(targetInput, "target");
   const topLevel = absoluteRealPath(git(target, ["rev-parse", "--show-toplevel"]).trim(), "worktree root");
   assertEqual(target, topLevel, "Target worktree root");
@@ -244,15 +368,22 @@ export function inspectLocalState(targetInput, evidence) {
     "primary common Git directory",
   );
   assertEqual(commonGitDir, repositoryCommonGitDir, "Common Git directory");
+  assertEqual(
+    commonGitDir,
+    expectedRepository.commonGitDir,
+    "Target compared with script repository common Git directory",
+  );
 
   const origin = normalizeOrigin(git(target, ["config", "--get", "remote.origin.url"]).trim());
   const repositoryOrigin = normalizeOrigin(
     git(repositoryRoot, ["config", "--get", "remote.origin.url"]).trim(),
   );
   assertEqual(origin, repositoryOrigin, "Origin identity");
+  assertEqual(origin, expectedRepository.origin, "Target compared with script repository origin");
 
   const head = git(target, ["rev-parse", "HEAD"]).trim();
   const tree = git(target, ["rev-parse", "HEAD^{tree}"]).trim();
+  const objectFormat = git(target, ["rev-parse", "--show-object-format"]).trim();
   const branch = currentBranch(target);
   const baseRef = evidence?.worktree?.baseRef ?? "origin/main";
   const baseBranchMatch = baseRef.match(/^origin\/(.+)$/u);
@@ -266,14 +397,6 @@ export function inspectLocalState(targetInput, evidence) {
 
   const uniqueCommitCount = Number(git(target, ["rev-list", "--count", `${baseRef}..HEAD`]).trim());
   const integrated = gitResult(target, ["merge-base", "--is-ancestor", "HEAD", baseRef]).status === 0;
-  const statusLines = git(target, ["status", "--porcelain=v2", "--untracked-files=all"])
-    .split("\n")
-    .filter(Boolean);
-  const ignoredEntries = ignoredEntriesFromStatus(
-    git(target, ["status", "--porcelain=v1", "--ignored=matching", "--untracked-files=all"]),
-  );
-  const patchSha256 = sha256(git(target, ["diff", "--binary", "HEAD", "--"]));
-
   let remoteHead = null;
   let bundle = null;
   if (evidence?.recovery?.kind === "remote-branch") {
@@ -282,8 +405,14 @@ export function inspectLocalState(targetInput, evidence) {
     const remote = git(target, ["ls-remote", "--heads", "origin", reference]).trim();
     remoteHead = remote ? remote.split(/\s+/u)[0] : null;
   } else if (evidence?.recovery?.kind === "bundle") {
-    bundle = inspectBundle(evidence.recovery.artifactPath, target);
+    bundle = inspectBundle(evidence.recovery.artifactPath, target, head, tree, objectFormat);
   }
+
+  const statusLines = git(target, ["status", "--porcelain=v2", "--untracked-files=all"])
+    .split("\n")
+    .filter(Boolean);
+  const patchSha256 = sha256(git(target, ["diff", "--binary", "HEAD", "--"]));
+  const ignoredEntries = ignoredEntriesFromGit(target);
 
   return {
     target,
@@ -400,7 +529,11 @@ export function validateTaskSnapshot(
   snapshot,
   current,
   evidence,
-  { now = Date.now(), maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS } = {},
+  {
+    now = Date.now(),
+    maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
+    legacyTasklessConfirmation,
+  } = {},
 ) {
   if (snapshot.schemaVersion !== 1) block("Task snapshot schemaVersion must be 1.");
   if (snapshot.source !== "codex-list-threads") {
@@ -437,8 +570,28 @@ export function validateTaskSnapshot(
     );
     validateHandoff(task.handoff, taskId, current, evidence.issue.number, now);
   }
-  if (matchingTasks.length === 0 && evidence.task?.noMatchingTaskConfirmed !== true) {
-    block("No matching task was found, but evidence.task.noMatchingTaskConfirmed is not true.");
+  if (matchingTasks.length === 0) {
+    const expectedConfirmation = `ALLOW TASKLESS ${current.target}`;
+    if (legacyTasklessConfirmation !== expectedConfirmation) {
+      block(
+        "Automatic removal requires a matching finished task with a handoff. " +
+          `A legacy taskless lane needs --legacy-taskless-confirmation ${JSON.stringify(expectedConfirmation)}.`,
+      );
+    }
+    const override = evidence.task?.legacyTasklessOverride;
+    if (!override || typeof override !== "object") {
+      block("A legacy taskless lane needs evidence.task.legacyTasklessOverride.");
+    }
+    requiredString(override.approvedBy, "task.legacyTasklessOverride.approvedBy");
+    requiredString(override.reason, "task.legacyTasklessOverride.reason");
+    assertFresh(
+      override.approvedAt,
+      "task.legacyTasklessOverride.approvedAt",
+      EVIDENCE_MAX_AGE_MS,
+      now,
+    );
+  } else if (legacyTasklessConfirmation !== undefined) {
+    block("A legacy taskless confirmation cannot be used when a matching task exists.");
   }
 
   if (evidence.issue?.disposition === "replacement-active") {
@@ -468,8 +621,31 @@ export function validateTaskSnapshot(
 function validateIgnoredDispositions(current, evidence, now) {
   const decisions = evidence.worktree.ignoredDispositions ?? [];
   if (!Array.isArray(decisions)) block("worktree.ignoredDispositions must be an array.");
-  const paths = decisions.map((decision) => requiredString(decision?.path, "ignored disposition path")).sort();
-  assertEqual(JSON.stringify(paths), JSON.stringify(current.ignoredEntries), "Exact ignored path inventory");
+  const fingerprints = decisions
+    .map((decision) => ({
+      path: requiredString(decision?.path, "ignored disposition path"),
+      kind: requiredString(decision?.kind, `Ignored path ${decision?.path} kind`),
+      sizeBytes: requiredString(decision?.sizeBytes, `Ignored path ${decision?.path} sizeBytes`),
+      sha256: requiredString(decision?.sha256, `Ignored path ${decision?.path} sha256`),
+    }))
+    .sort(comparePaths);
+  for (const fingerprint of fingerprints) {
+    if (!IGNORED_FILE_KINDS.has(fingerprint.kind)) {
+      block(`Ignored path ${fingerprint.path} has unknown kind ${fingerprint.kind}.`);
+    }
+    if (!/^\d+$/u.test(fingerprint.sizeBytes)) {
+      block(`Ignored path ${fingerprint.path} sizeBytes must be an unsigned integer string.`);
+    }
+    if (!/^[a-f0-9]{64}$/u.test(fingerprint.sha256)) {
+      block(`Ignored path ${fingerprint.path} sha256 must be a lowercase SHA-256 digest.`);
+    }
+  }
+  assertEqual(
+    JSON.stringify(fingerprints),
+    JSON.stringify(current.ignoredEntries),
+    "Exact ignored file fingerprint",
+  );
+  const paths = fingerprints.map((fingerprint) => fingerprint.path);
   if (new Set(paths).size !== paths.length) block("Ignored path decisions contain a duplicate path.");
 
   for (const decision of decisions) {
@@ -516,6 +692,10 @@ function validateRecovery(current, recovery, now) {
     if (!current.bundle) block("Bundle recovery was not inspected.");
     assertEqual(current.bundle.artifactSha256, recovery.artifactSha256, "Recovery bundle checksum");
     if (!current.bundle.heads.includes(current.head)) block("The recovery bundle does not advertise the source HEAD.");
+    assertEqual(current.bundle.restoredHead, current.head, "Recovery bundle restored head");
+    assertEqual(current.bundle.restoredTree, current.tree, "Recovery bundle restored tree");
+    assertEqual(recovery.restoredHead, current.bundle.restoredHead, "Evidence restored bundle head");
+    assertEqual(recovery.restoredTree, current.bundle.restoredTree, "Evidence restored bundle tree");
     return;
   }
   block(`Unknown recovery kind ${JSON.stringify(recovery.kind)}.`);
@@ -528,8 +708,9 @@ export function assessRemoval({
   github,
   now = Date.now(),
   taskMaxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
+  legacyTasklessConfirmation,
 }) {
-  if (evidence.schemaVersion !== 1) block("Evidence schemaVersion must be 1.");
+  if (evidence.schemaVersion !== 2) block("Evidence schemaVersion must be 2.");
   assertFresh(evidence.capturedAt, "Evidence capturedAt", EVIDENCE_MAX_AGE_MS, now);
   assertEqual(
     absoluteRealPath(evidence.repository.root, "evidence repository root"),
@@ -603,7 +784,11 @@ export function assessRemoval({
     block(`GitHub issue has unknown state ${github.issue.state}.`);
   }
 
-  const matchingTasks = validateTaskSnapshot(taskSnapshot, current, evidence, { now, maxAgeMs: taskMaxAgeMs });
+  const matchingTasks = validateTaskSnapshot(taskSnapshot, current, evidence, {
+    now,
+    maxAgeMs: taskMaxAgeMs,
+    legacyTasklessConfirmation,
+  });
   validateRecovery(current, evidence.recovery, now);
   return {
     status: "SAFE_TO_REMOVE",
@@ -630,7 +815,9 @@ function parseArgs(argv) {
     else if (argument === "--task-snapshot") options.taskSnapshot = argv[++index];
     else if (argument === "--confirmation") options.confirmation = argv[++index];
     else if (argument === "--remote-branch-action") options.remoteBranchAction = argv[++index];
-    else block(`Unknown argument ${argument}.`);
+    else if (argument === "--legacy-taskless-confirmation") {
+      options.legacyTasklessConfirmation = argv[++index];
+    } else block(`Unknown argument ${argument}.`);
   }
   for (const name of ["target", "evidence", "taskSnapshot"]) {
     requiredString(options[name], `--${name.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`)}`);
@@ -647,6 +834,13 @@ function ensureDurableEvidence(path, target) {
   if (isInside(evidencePath, target)) block("The removal evidence file cannot live inside the worktree being removed.");
 }
 
+function ensureTaskSnapshotOutsideTarget(path, target) {
+  const taskSnapshotPath = absoluteRealPath(path, "task snapshot");
+  if (isInside(taskSnapshotPath, target)) {
+    block("The task snapshot cannot live inside the worktree being removed.");
+  }
+}
+
 function confirmRemovalGone(current) {
   if (existsSync(current.target)) block("Git returned success, but the worktree path still exists.");
   const records = parseWorktreePorcelain(git(current.repositoryRoot, ["worktree", "list", "--porcelain", "-z"]));
@@ -661,11 +855,18 @@ function main() {
   const taskSnapshotPath = absoluteRealPath(options.taskSnapshot, "task snapshot");
   const evidence = readJson(evidencePath, "Evidence file");
   const taskSnapshot = readJson(taskSnapshotPath, "Task snapshot");
-  const current = inspectLocalState(options.target, evidence);
+  const expectedRepository = inspectScriptRepository();
+  const current = inspectLocalState(options.target, evidence, expectedRepository);
   const issueNumber = branchIssueNumber(current.branch) ?? evidence.issue?.number;
   if (!Number.isInteger(issueNumber)) block("Could not determine the owning issue number.");
   const github = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
-  const assessment = assessRemoval({ current, evidence, taskSnapshot, github });
+  const assessment = assessRemoval({
+    current,
+    evidence,
+    taskSnapshot,
+    github,
+    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+  });
 
   if (!options.execute) {
     console.log(JSON.stringify(assessment, null, 2));
@@ -676,18 +877,25 @@ function main() {
   }
   assertEqual(options.confirmation, assessment.confirmation, "Removal confirmation");
   ensureDurableEvidence(evidencePath, current.target);
+  ensureTaskSnapshotOutsideTarget(taskSnapshotPath, current.target);
 
-  const finalCurrent = inspectLocalState(options.target, evidence);
-  const finalGithub = inspectGithub(finalCurrent, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
-  assessRemoval({ current: finalCurrent, evidence, taskSnapshot, github: finalGithub });
-
+  const finalGithub = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
   const refreshedTaskSnapshot = readJson(taskSnapshotPath, "Final task snapshot");
+  validateTaskSnapshot(refreshedTaskSnapshot, current, evidence, {
+    maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
+    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+  });
+
+  // Network and task checks happen first. This local fingerprint is the last
+  // potentially slow authorization step before normal, non-force removal.
+  const finalCurrent = inspectLocalState(options.target, evidence, expectedRepository);
   const finalAssessment = assessRemoval({
     current: finalCurrent,
     evidence,
     taskSnapshot: refreshedTaskSnapshot,
     github: finalGithub,
     taskMaxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
+    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
   });
   assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
 
@@ -714,7 +922,7 @@ function main() {
   );
 }
 
-const isEntrypoint = process.argv[1] === fileURLToPath(import.meta.url);
+const isEntrypoint = process.argv[1] ? realpathSync(process.argv[1]) === SCRIPT_PATH : false;
 if (isEntrypoint) {
   try {
     main();
