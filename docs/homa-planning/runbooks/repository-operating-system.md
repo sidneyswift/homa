@@ -63,6 +63,11 @@ object stores, and similar caller state cannot redirect inspection. A standalone
 clone can occupy a path once used by a missing linked worktree while containing
 unrelated work.
 
+The wrapper reads current GitHub branch commits through authenticated `gh api`
+requests, not `git ls-remote`. Private-origin inspection therefore does not depend
+on an ambient Git credential helper, while every local Git command remains isolated
+from caller-supplied Git configuration.
+
 For every checkout, record:
 
 - Physical path and resolved repository identity.
@@ -302,9 +307,88 @@ ancestry or merged pull request evidence proves integration. Remote deletion is 
 separate action requiring the current issue owner or a repository maintainer to name
 the exact remote and branch after recovery and handoff are proven.
 
-For stale registrations, compare the dry-run prune output with standalone clones,
-then prune only confirmed stale metadata. Pruning metadata is not permission to
-delete a directory.
+## Retire damaged worktree registrations
+
+A damaged registration is a linked-worktree administrative record whose recorded
+root `.git` entry is missing. Do not pass that path to the normal linked-worktree
+wrapper. A path can disappear and later be replaced by an unrelated directory,
+standalone clone, nested repository, bare repository, or symbolic link.
+
+Only [the damaged-registration guard](../../../scripts/retire-damaged-worktree-registrations.mjs)
+may retire this metadata. Run it from the trusted primary Homa checkout during a
+repository freeze. It refuses to run from a linked worktree, from an untracked or
+modified copy of itself, against a different common Git directory, or against a
+different origin.
+
+### Capture and approve the complete batch
+
+Wait at least two seconds after the last registration change, then write the
+read-only inventory to a durable physical path with no symbolic-link or path-alias
+boundary. It must be outside the primary checkout, common Git directory, every
+candidate path, and every operating-system temporary root:
+
+```sh
+node scripts/retire-damaged-worktree-registrations.mjs --inventory \
+  > /durable/path/damaged-registration-evidence.json
+```
+
+The inventory parses Git's exact NUL-delimited registration set and matches every
+secondary registration to one administrative record. It records repository and
+script identity; full HEAD and branch or detached state; administrative `gitdir`,
+`HEAD`, `commondir`, and index fingerprints; path state; the complete prunable
+set checksum; and a fixed prune cutoff two seconds older than capture. Git's own
+verbose dry run must name exactly that administrative set.
+
+Review every path and administrative record. Set `approval.approvedBy` to
+`sidneyswift`, set `approval.approvedAt` to a current ISO timestamp after
+`capturedAt`, and write a specific reason. Do not change any other field. Then
+reinspect without mutation:
+
+```sh
+node scripts/retire-damaged-worktree-registrations.mjs \
+  --evidence /durable/path/damaged-registration-evidence.json
+```
+
+The result supplies the exact confirmation. Execute only that approved batch:
+
+```sh
+node scripts/retire-damaged-worktree-registrations.mjs \
+  --evidence /durable/path/damaged-registration-evidence.json \
+  --execute \
+  --confirmation "RETIRE DAMAGED REGISTRATIONS <set-sha256>"
+```
+
+Immediately before any path moves, the guard re-reads the evidence checksum and
+recomputes the complete eligible set. Each eligible registration must have a
+missing root `.git` entry, Git's exact prunable reason, a matching administrative
+record, and an existing local commit for its recorded HEAD. A directory still at
+the registered path must be an ordinary directory with no parent-repository
+fallback, root or nested Git metadata, bare repository, symbolic-link boundary,
+or overlap with the primary checkout or another candidate.
+
+Surviving ordinary directories are atomically moved into owner-only sibling
+directories on the same filesystem and kept as `preserved-worktree`. No file
+bytes are deleted. An already absent path is eligible only through the exact
+registration, administrative-record, and dry-run proof. The guard then recomputes
+the approved identities and dry-run set before running Git's metadata-only
+`worktree prune` with the fixed approved cutoff. A registration created after
+capture is too new for that cutoff.
+
+After prune, the guard proves that only approved registrations disappeared. It
+reports every preserved path, any new registration, and anything that arrived at
+an original path during execution. It keeps local and remote branches. If the
+operation stops after sealing some directories, the error also reports where
+their bytes remain. Inspect those paths before another attempt.
+
+Never substitute direct `git worktree remove` for this path. If missing content
+reappears at the wrong moment, that command can become content deletion. The fixed
+cutoff and postcondition make official prune suitable for the administrative
+records only.
+
+This guard coordinates trusted same-account processes; it is not a security
+boundary against a process that can directly rewrite and backdate
+`.git/worktrees` records. Keep the repository freeze until the final report is
+reviewed.
 
 ## Standalone clones and path collisions
 

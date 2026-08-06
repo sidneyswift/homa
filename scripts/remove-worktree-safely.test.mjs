@@ -65,7 +65,7 @@ function makeFakeGithub(binPath) {
   writeFileSync(
     script,
     `#!/usr/bin/env node
-const { mkdirSync, readFileSync, writeFileSync } = require("node:fs");
+const { appendFileSync, mkdirSync, readFileSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
 const args = process.argv.slice(2);
 if (process.env.FAKE_ASSERT_GIT_ENV === "1") {
@@ -110,6 +110,29 @@ if (args[0] === "issue" && args[1] === "view") {
     number: 872,
     state: "CLOSED",
     url: "https://github.com/sidneyswift/homa/issues/872"
+  }));
+  process.exit(0);
+}
+if (args[0] === "api" && args[1]?.includes("/git/ref/heads/")) {
+  const hostnameIndex = args.indexOf("--hostname");
+  if (hostnameIndex === -1 || args[hostnameIndex + 1] !== "github.com") {
+    process.stderr.write("GitHub reference lookup did not pin github.com.\\n");
+    process.exit(98);
+  }
+  const marker = "/git/ref/heads/";
+  const branch = decodeURIComponent(args[1].slice(args[1].indexOf(marker) + marker.length));
+  const heads = JSON.parse(process.env.FAKE_GH_REF_HEADS ?? "{}");
+  const sha = heads[branch];
+  if (process.env.FAKE_GH_REF_LOG) {
+    appendFileSync(process.env.FAKE_GH_REF_LOG, args[1] + "\\n");
+  }
+  if (typeof sha !== "string") {
+    process.stderr.write("gh: Not Found (HTTP 404)\\n");
+    process.exit(1);
+  }
+  process.stdout.write(JSON.stringify({
+    ref: "refs/heads/" + branch,
+    object: { type: "commit", sha }
   }));
   process.exit(0);
 }
@@ -167,6 +190,10 @@ if (process.env.FAKE_ASSERT_GIT_ENV === "1") {
     process.exit(97);
   }
 }
+if (process.env.FAKE_GIT_REJECT_LS_REMOTE === "1" && args.includes("ls-remote")) {
+  process.stderr.write("Git network authentication is intentionally unavailable in this fixture.\\n");
+  process.exit(96);
+}
 const moveIndex = args.indexOf("move");
 if (process.env.FAKE_GIT_LATE_IGNORED_ON_MOVE === "1" && moveIndex > 0 && args[moveIndex - 1] === "worktree") {
   const source = args[moveIndex + 1];
@@ -205,6 +232,7 @@ function git(fixture, cwd, args) {
 
 function makeFixture({
   localOnly = false,
+  remoteBranch = false,
   thinBundle = false,
   ignored = false,
   ignoredFilename = "generated.txt",
@@ -217,6 +245,7 @@ function makeFixture({
   recreateOriginalSymlinkDuringMove = false,
   trackedBareRepository = false,
 } = {}) {
+  assert.equal(localOnly && remoteBranch, false, "A fixture cannot use two recovery kinds.");
   const root = mkdtempSync(join(homedir(), ".homa-worktree-wrapper-"));
   const remote = join(root, "remote.git");
   const primary = join(root, "primary");
@@ -225,6 +254,7 @@ function makeFixture({
   const evidencePath = join(root, "removal-evidence.json");
   const taskSnapshotPath = join(root, "task-snapshot.json");
   const fakeGithubCounterPath = join(root, "fake-gh-counter.txt");
+  const fakeGithubRefLogPath = join(root, "fake-gh-ref-log.txt");
   const fixtureIgnoredPath = ignoredPath ?? join(".cache", ignoredFilename);
 
   checked("git", ["init", "--bare", remote]);
@@ -239,6 +269,7 @@ function makeFixture({
     evidencePath,
     taskSnapshotPath,
     fakeGithubCounterPath,
+    fakeGithubRefLogPath,
     env,
   };
 
@@ -295,6 +326,12 @@ function makeFixture({
     git(fixture, target, ["add", "local-only.txt"]);
     git(fixture, target, ["commit", "-m", "test: local-only recovery"]);
   }
+  if (remoteBranch) {
+    writeFileSync(join(target, "remote-branch.txt"), "Preserved by the private remote branch.\n");
+    git(fixture, target, ["add", "remote-branch.txt"]);
+    git(fixture, target, ["commit", "-m", "test: remote branch recovery"]);
+    git(fixture, target, ["push", "-u", "origin", "codex/gh-872-disposable"]);
+  }
   if (ignored) {
     mkdirSync(dirname(join(target, fixtureIgnoredPath)), { recursive: true });
     writeFileSync(join(target, fixtureIgnoredPath), "regenerable\n");
@@ -308,8 +345,9 @@ function makeFixture({
     PATH: `${fakeBin}:${process.env.PATH}`,
     FAKE_GH_LOCAL_ONLY: localOnly ? "1" : "0",
     FAKE_GH_COUNTER_PATH: fakeGithubCounterPath,
-    FAKE_GH_LATE_IGNORED_CALL: lateIgnoredDuringFinalGithub ? "4" : "0",
+    FAKE_GH_LATE_IGNORED_CALL: lateIgnoredDuringFinalGithub ? "5" : "0",
     FAKE_GH_LATE_IGNORED_TARGET: target,
+    FAKE_GH_REF_LOG: fakeGithubRefLogPath,
     FAKE_GH_ASSOCIATED_PULL: "0",
     FAKE_GIT_LATE_IGNORED_ON_MOVE: lateIgnoredDuringMove ? "1" : "0",
     FAKE_GIT_LATE_IGNORED_ON_REMOVE: lateIgnoredDuringRemove ? "1" : "0",
@@ -319,6 +357,11 @@ function makeFixture({
   const now = new Date().toISOString();
   const head = git(fixture, target, ["rev-parse", "HEAD"]);
   fixture.env.FAKE_GH_ASSOCIATED_HEAD = head;
+  const baseHead = git(fixture, target, ["rev-parse", "origin/main"]);
+  fixture.env.FAKE_GH_REF_HEADS = JSON.stringify({
+    main: baseHead,
+    ...(remoteBranch ? { "codex/gh-872-disposable": head } : {}),
+  });
   const tree = git(fixture, target, ["rev-parse", "HEAD^{tree}"]);
   const commonGitDir = realpathSync(git(fixture, target, ["rev-parse", "--path-format=absolute", "--git-common-dir"]));
   const gitDir = realpathSync(git(fixture, target, ["rev-parse", "--path-format=absolute", "--git-dir"]));
@@ -349,6 +392,17 @@ function makeFixture({
       artifactSha256: sha256File(bundlePath),
       restoredHead,
       restoredTree,
+      restoreTestedAt: now,
+    };
+  } else if (remoteBranch) {
+    recovery = {
+      kind: "remote-branch",
+      reference: "refs/heads/codex/gh-872-disposable",
+      sourceHead: head,
+      sourceTree: tree,
+      patchSha256,
+      restoredHead: head,
+      restoredTree: tree,
       restoreTestedAt: now,
     };
   } else {
@@ -497,6 +551,29 @@ test("execution removes the registration and preserves sealed checkout content",
   assert.equal(existsSync(outcome.preservedPath), true);
   assert.equal(existsSync(join(outcome.preservedPath, ".git")), true);
   assert.doesNotMatch(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
+});
+
+test("private origin references use authenticated GitHub API without Git credentials", (t) => {
+  const fixture = makeFixture({ remoteBranch: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const env = {
+    ...fixture.env,
+    FAKE_ASSERT_GIT_ENV: "1",
+    FAKE_GIT_REJECT_LS_REMOTE: "1",
+  };
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env });
+  assert.equal(result.status, 0, result.stderr);
+  const assessment = JSON.parse(result.stdout);
+  assert.equal(assessment.status, "SAFE_TO_REMOVE");
+  assert.equal(assessment.recovery, "remote-branch");
+  assert.deepEqual(
+    readFileSync(fixture.fakeGithubRefLogPath, "utf8").trim().split("\n"),
+    [
+      "repos/sidneyswift/homa/git/ref/heads/main",
+      "repos/sidneyswift/homa/git/ref/heads/codex%2Fgh-872-disposable",
+    ],
+  );
 });
 
 test("a nested Git directory with unique history blocks a clean outer worktree", (t) => {

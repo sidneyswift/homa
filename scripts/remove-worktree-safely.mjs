@@ -342,6 +342,36 @@ export function githubRepositoryFromOrigin(value) {
   return `${match[1]}/${match[2]}`;
 }
 
+function githubBranchHead(origin, branch, objectFormat, { allowMissing = false } = {}) {
+  const repository = githubRepositoryFromOrigin(origin);
+  const branchName = requiredString(branch, "GitHub branch");
+  const endpoint = `repos/${repository}/git/ref/heads/${encodeURIComponent(branchName)}`;
+  const result = commandResult("gh", [
+    "api",
+    endpoint,
+    "--hostname",
+    "github.com",
+    "--header",
+    "Accept: application/vnd.github+json",
+  ]);
+  if (result.status !== 0) {
+    if (allowMissing && /\(HTTP 404\)/u.test(result.stderr)) return null;
+    block(`Could not verify GitHub branch ${branchName}: ${result.stderr.trim() || "no error text"}`);
+  }
+
+  const response = parseCommandJson(result.stdout, `GitHub branch ${branchName} lookup`);
+  assertEqual(response.ref, `refs/heads/${branchName}`, `GitHub branch ${branchName} reference`);
+  if (response.object?.type !== "commit") {
+    block(`GitHub branch ${branchName} did not resolve to a commit.`);
+  }
+  const head = requiredString(response.object.sha, `GitHub branch ${branchName} head`);
+  const expectedLength = objectFormat === "sha1" ? 40 : objectFormat === "sha256" ? 64 : null;
+  if (expectedLength === null || !new RegExp(`^[a-f0-9]{${expectedLength}}$`, "u").test(head)) {
+    block(`GitHub branch ${branchName} returned an invalid ${objectFormat} object ID.`);
+  }
+  return head;
+}
+
 export function parseWorktreePorcelain(output) {
   const records = [];
   let record = null;
@@ -765,8 +795,7 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
   const baseResult = gitResult(target, ["rev-parse", "--verify", baseRef]);
   if (baseResult.status !== 0) block(`Base reference ${baseRef} cannot be verified.`);
   const localBaseHead = baseResult.stdout.trim();
-  const remoteBase = git(target, ["ls-remote", "--heads", "origin", `refs/heads/${baseBranchMatch[1]}`]).trim();
-  const remoteBaseHead = remoteBase ? remoteBase.split(/\s+/u)[0] : null;
+  const remoteBaseHead = githubBranchHead(origin, baseBranchMatch[1], objectFormat);
   assertEqual(localBaseHead, remoteBaseHead, `Local base ${baseRef} compared with its remote`);
 
   const uniqueCommitCount = Number(git(target, ["rev-list", "--count", `${baseRef}..HEAD`]).trim());
@@ -776,8 +805,9 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
   if (evidence?.recovery?.kind === "remote-branch") {
     if (!branch) block("A detached worktree cannot use remote-branch recovery.");
     const reference = requiredString(evidence.recovery.reference, "recovery.reference");
-    const remote = git(target, ["ls-remote", "--heads", "origin", reference]).trim();
-    remoteHead = remote ? remote.split(/\s+/u)[0] : null;
+    const referenceMatch = reference.match(/^refs\/heads\/(.+)$/u);
+    if (!referenceMatch) block("recovery.reference must name a GitHub branch.");
+    remoteHead = githubBranchHead(origin, referenceMatch[1], objectFormat, { allowMissing: true });
   } else if (evidence?.recovery?.kind === "bundle") {
     bundle = inspectBundle(evidence.recovery.artifactPath, target, head, tree, objectFormat);
   }
