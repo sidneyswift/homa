@@ -61,6 +61,14 @@ const evidenceDerivationContractMigrationPath = path.join(
   repoRoot,
   "supabase/migrations/20260802210000_child_progress_evidence_derivation_not_null.sql",
 );
+const eventsFamilyDeleteMigrationPath = path.join(
+  repoRoot,
+  "supabase/migrations/20260802225000_events_family_delete_cascade.sql",
+);
+const familyDeleteProgressTriggerMigrationPath = path.join(
+  repoRoot,
+  "supabase/migrations/20260806035000_family_delete_progress_trigger.sql",
+);
 const familyId = "00000000-0000-0000-0000-000000000001";
 const childId = "00000000-0000-0000-0000-000000000002";
 const adultA = "00000000-0000-0000-0000-000000000003";
@@ -6058,6 +6066,99 @@ async function runAdapterAssertions(input: {
     await runFamilyFoldLockAssertions(sql, writerSql, blockerSql);
     await runFamilyFoldCompatibilityAssertions(sql);
 
+    const wholeFamilyDeleteFamilyId = randomUUID();
+    const wholeFamilyDeleteChildId = randomUUID();
+    const wholeFamilyDeleteAdultId = randomUUID();
+    await sql`
+      insert into auth.users (id)
+      values (${wholeFamilyDeleteAdultId})
+    `;
+    await sql`
+      insert into public.families (id)
+      values (${wholeFamilyDeleteFamilyId})
+    `;
+    await sql`
+      insert into public.children (id, family_id, name, birth_month)
+      values (
+        ${wholeFamilyDeleteChildId},
+        ${wholeFamilyDeleteFamilyId},
+        'Whole-family delete child',
+        '2019-07-01'
+      )
+    `;
+    await sql`
+      insert into public.family_members (
+        family_id, user_id, role, display_name
+      )
+      values (
+        ${wholeFamilyDeleteFamilyId},
+        ${wholeFamilyDeleteAdultId},
+        'parent',
+        'Delete fixture adult'
+      )
+    `;
+    await sql`
+      insert into public.progress_check_ins (
+        child_id,
+        family_id,
+        idempotency_key,
+        purpose,
+        scope,
+        state,
+        active_member_user_id,
+        prompt_recipient_member_user_id,
+        current_item_id,
+        pending_runtime_session_id,
+        pending_turn_id
+      )
+      values (
+        ${wholeFamilyDeleteChildId},
+        ${wholeFamilyDeleteFamilyId},
+        'postgres-whole-family-delete-start',
+        'subject_deep_dive',
+        '{"subject_ids":["science"]}'::jsonb,
+        'active',
+        ${wholeFamilyDeleteAdultId},
+        ${wholeFamilyDeleteAdultId},
+        'science.life-cycles',
+        'whole-family-delete-session',
+        'whole-family-delete-turn'
+      )
+    `;
+    await sql`
+      delete from public.families
+      where id = ${wholeFamilyDeleteFamilyId}
+    `;
+    const [wholeFamilyDeleted] = await sql<
+      { families: number; events: number }[]
+    >`
+      select
+        (
+          select count(*)::integer
+          from public.families
+          where id = ${wholeFamilyDeleteFamilyId}
+        )
+          as families,
+        (
+          select count(*)::integer
+          from public.events
+          where family_id = ${wholeFamilyDeleteFamilyId}
+        )
+          as events
+    `;
+    assert.deepEqual(wholeFamilyDeleted, { families: 0, events: 0 });
+    await sql`
+      delete from public.children
+      where id = ${wholeFamilyDeleteChildId}
+    `;
+    await sql`
+      delete from auth.users
+      where id = ${wholeFamilyDeleteAdultId}
+    `;
+    console.log(
+      "PASS  child-progress-e2e whole-family-delete-skips-member-pause-event",
+    );
+
     console.log(
       "PASS  child-progress-e2e two-adults-takeover-conflict-replay-resolution",
     );
@@ -6377,6 +6478,43 @@ async function main(): Promise<void> {
         database,
         "-f",
         evidenceDerivationContractMigrationPath,
+      ],
+      env,
+    );
+    await run(
+      path.join(postgresBin, "psql"),
+      [
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        socketDir,
+        "-p",
+        String(port),
+        "-U",
+        username,
+        "-d",
+        database,
+        "-f",
+        eventsFamilyDeleteMigrationPath,
+      ],
+      env,
+    );
+    await run(
+      path.join(postgresBin, "psql"),
+      [
+        "--single-transaction",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        socketDir,
+        "-p",
+        String(port),
+        "-U",
+        username,
+        "-d",
+        database,
+        "-f",
+        familyDeleteProgressTriggerMigrationPath,
       ],
       env,
     );
