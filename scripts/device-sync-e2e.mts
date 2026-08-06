@@ -17,6 +17,12 @@
 import { createHash, randomBytes } from "node:crypto";
 import assert from "node:assert/strict";
 
+if (!process.env.HOMA_EVAL_DATABASE_URL) {
+  throw new Error(
+    "device-sync-e2e requires HOMA_EVAL_DATABASE_URL from pnpm eval:sandbox",
+  );
+}
+
 process.env.HOMA_DEVICE_SYNC_ENABLED = "true";
 
 const { mapDb } = await import("../apps/web/lib/map/db");
@@ -39,8 +45,8 @@ function envelope(kind: string, dedupeKey: string, payload: Record<string, unkno
 async function main() {
   // 1. Fixture family + child + device (server-side seed, sandbox only).
   const [family] = await sql<{ id: string }[]>`
-    insert into public.families (name, email, time_zone)
-    values ('Sync E2E family', 'sync-e2e@example.test', 'America/New_York')
+    insert into public.families (name, email, time_zone, sandbox)
+    values ('Sync E2E family', 'sync-e2e@example.test', 'America/New_York', true)
     returning id
   `;
   const [child] = await sql<{ id: string }[]>`
@@ -157,8 +163,8 @@ async function main() {
 
   // 10. Tenancy: a second family's delta never shows this family's rows.
   const [otherFamily] = await sql<{ id: string }[]>`
-    insert into public.families (name, email, time_zone)
-    values ('Other family', 'other@example.test', 'America/New_York')
+    insert into public.families (name, email, time_zone, sandbox)
+    values ('Other family', 'other@example.test', 'America/New_York', true)
     returning id
   `;
   const otherDelta = await getSyncPullDelta(otherFamily.id, { since: null });

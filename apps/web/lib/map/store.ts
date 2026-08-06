@@ -135,6 +135,8 @@ const FAMILY_COLUMNS = `id, email, first_name, last_name, us_state, status, sour
 interface StartAnonymousInput {
   source: string;
   utm: Record<string, string>;
+  /** Server-owned test provenance. Real product callers omit this. */
+  sandbox?: boolean;
 }
 
 /**
@@ -150,8 +152,16 @@ export async function startAnonymousFamily(
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
   const inserted = await sql<{ id: string }[]>`
-    insert into public.families (email, source, utm, resume_token_hash)
-    values (null, ${input.source}, ${sql.json(input.utm)}, ${tokenHash})
+    insert into public.families (
+      email, source, utm, resume_token_hash, sandbox
+    )
+    values (
+      null,
+      ${input.source},
+      ${sql.json(input.utm)},
+      ${tokenHash},
+      ${input.sandbox === true}
+    )
     returning id
   `;
   return { familyId: inserted[0].id, resumeToken };

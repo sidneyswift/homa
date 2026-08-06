@@ -1,0 +1,119 @@
+name: Apply issue 878 production repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type APPLY ISSUE 878
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-issue-878-repair
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'
+    name: Apply two audited issue 878 migrations
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+
+      - name: Validate authorization and immutable inputs
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$CONFIRMATION" != "APPLY ISSUE 878" ]; then
+            echo "Confirmation must exactly match APPLY ISSUE 878."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
+            echo "This repair may run only in sidneyswift/homa."
+            exit 1
+          fi
+          node scripts/migration-version-check.mjs
+
+          sandbox_migration="supabase/migrations/20260806034000_sandbox_live_auth_fixtures.sql"
+          expected_sandbox="4d6f2bd199a66206746ae3139e3b418397a1d953f4c9139ce5d6001798e3dd85"
+          actual_sandbox="$(sha256sum "$sandbox_migration" | cut -d' ' -f1)"
+          if [ "$actual_sandbox" != "$expected_sandbox" ]; then
+            echo "Sandbox migration hash does not match the reviewed issue #878 input."
+            exit 1
+          fi
+
+          delete_migration="supabase/migrations/20260806035000_family_delete_progress_trigger.sql"
+          expected_delete="841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8"
+          actual_delete="$(sha256sum "$delete_migration" | cut -d' ' -f1)"
+          if [ "$actual_delete" != "$expected_delete" ]; then
+            echo "Family deletion migration hash does not match the reviewed issue #878 input."
+            exit 1
+          fi
+
+          repair_script="scripts/issue-878-production-repair.sql"
+          expected_repair="138e9fa399ed02dbfd62d232d0990586608c542ee969c7bc957d06132cf75987"
+          actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
+          if [ "$actual_repair" != "$expected_repair" ]; then
+            echo "Repair wrapper hash does not match the reviewed issue #878 input."
+            exit 1
+          fi
+
+      - name: Confirm PostgreSQL client availability
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-client-16
+          fi
+          psql --version
+
+      - name: Build a masked production database URL
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const password = process.env.SUPABASE_DB_PASSWORD;
+          if (!publicUrl || !password) {
+            throw new Error("Production Supabase URL or database password is missing");
+          }
+          const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
+          const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
+          databaseUrl.username = `postgres.${ref}`;
+          databaseUrl.password = password;
+          databaseUrl.searchParams.set("sslmode", "require");
+          process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
+          appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
+          NODE
+
+      - name: Apply and verify the exact repair in one transaction
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/issue-878-production-repair.sql)"
+          echo "$result"
+          repair_marker="$(printf '%s\n' "$result" | tail -n 1)"
+          if [ "$repair_marker" != "ISSUE_878_REPAIR=repaired" ] \
+            && [ "$repair_marker" != "ISSUE_878_REPAIR=verified_noop" ]; then
+            echo "The atomic repair did not return a recognized result."
+            exit 1
+          fi
+
+      - name: Prove an immediate repeat is a verified no-op
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/issue-878-production-repair.sql)"
+          echo "$result"
+          repair_marker="$(printf '%s\n' "$result" | tail -n 1)"
+          if [ "$repair_marker" != "ISSUE_878_REPAIR=verified_noop" ]; then
+            echo "The second issue #878 repair pass was not a verified no-op."
+            exit 1
+          fi

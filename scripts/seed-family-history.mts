@@ -207,6 +207,23 @@ async function main(): Promise<void> {
   }
   const client = postgres(connectionString, { max: 1 });
   try {
+    if (!sandboxUrl && args.familyId) {
+      const target = await client<{ sandbox: boolean; email: string | null }[]>`
+        select sandbox, email
+        from public.families
+        where id = ${args.familyId}::uuid
+      `;
+      const family = target[0];
+      if (
+        !family?.sandbox ||
+        !family.email ||
+        !/\+homatest[^@]*@/iu.test(family.email)
+      ) {
+        throw new Error(
+          "--family-id may target only an existing sandbox +homatest family in production",
+        );
+      }
+    }
     await client.unsafe(sql);
     console.log(`Seeded family ${familyId}.`);
     if (sandboxUrl) console.log("Target: disposable eval sandbox.");
