@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "2ee531393be8b8d068de5e369baf6075128a55da3a966217c64b6ab75a14532c",
+  "ownedInputFingerprint": "47bbe8404f53efb70916f1bf67674d535701f1e0fd627158a4f8db4cc1556d4d",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -6455,16 +6455,8 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "6adac9000af52557a1a717eaf1b320959191f0a9a814a1c460610f7e31d0a19f",
-      "legacySignatures": [
-        "legacy-design-doc-path",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-rounded-pill",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": "ca0c9d7a6e4b1b563e051c57b4c02c2ba4f49c7c2df5c9e0a04e5157ad1a610e",
+      "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
         "legacy-design-doc-path",
@@ -6500,7 +6492,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -6579,10 +6571,8 @@
     {
       "surfaceId": "surface:1aac9cfdef6206ce",
       "path": "docs/homa-planning/journeys/10-reconciliation.md",
-      "sourceHash": "a9c56693ae5026c67e29a6f0d147ff289cc42c8df61f7cd57c1f467581c24721",
-      "legacySignatures": [
-        "legacy-design-doc-path"
-      ],
+      "sourceHash": "dced5d67a97b52af8db58c6f238388fc5b2a1f6fd9fbd49d84672c79c8bc3b24",
+      "legacySignatures": [],
       "detectedSourceHash": "e2ca1ca294cb2e4e739a96957d9b84251c1d2910acd2e16c089b2433ebede8d9",
       "detectedLegacySignatures": [
         "legacy-design-doc-path"
@@ -6606,7 +6596,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
