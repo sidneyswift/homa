@@ -58,7 +58,7 @@ jobs:
           fi
 
           repair_script="scripts/issue-878-production-repair.sql"
-          expected_repair="3291e6ca3dca65bbd98cc731955df27ffeae069592a53fd3eea5e3e4a5f5c3e6"
+          expected_repair="4432ae6ad3e634c22a1662c890cd952e0c7259e0cfa4b9a91ce2e3228ffdebb4"
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair wrapper hash does not match the reviewed issue #878 input."

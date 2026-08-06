@@ -157,8 +157,8 @@ const exactLedger = runPsql([
   `,
 ]);
 assert.deepEqual(exactLedger.stdout, [
-  `20260806034000|sandbox_live_auth_fixtures|sha256=${sandboxHash}`,
-  `20260806035000|family_delete_progress_trigger|sha256=${deleteHash}`,
+  `20260806034000|sandbox_live_auth_fixtures|-- sha256=${sandboxHash}`,
+  `20260806035000|family_delete_progress_trigger|-- sha256=${deleteHash}`,
 ]);
 
 runPsql([
@@ -222,8 +222,8 @@ runPsql([
   `
     update supabase_migrations.schema_migrations
     set statements = array[
-      'Issue 878 exact migration applied atomically',
-      'sha256=${sandboxHash}'
+      '-- Issue 878 exact migration applied atomically',
+      '-- sha256=${sandboxHash}'
     ]::text[]
     where version = '20260806034000';
     delete from supabase_migrations.schema_migrations
@@ -243,7 +243,7 @@ const finalLedger = runPsql([
   `,
 ]);
 assert.deepEqual(finalLedger.stdout, [
-  `20260806034000|sandbox_live_auth_fixtures|sha256=${sandboxHash}`,
+  `20260806034000|sandbox_live_auth_fixtures|-- sha256=${sandboxHash}`,
 ]);
 
 console.log(

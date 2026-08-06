@@ -65,16 +65,16 @@ values
   (
     '20260806034000',
     array[
-      'Issue 878 exact migration applied atomically',
-      'sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
+      '-- Issue 878 exact migration applied atomically',
+      '-- sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
     ]::text[],
     'sandbox_live_auth_fixtures'
   ),
   (
     '20260806035000',
     array[
-      'Issue 878 exact migration applied atomically',
-      'sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8'
+      '-- Issue 878 exact migration applied atomically',
+      '-- sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8'
     ]::text[],
     'family_delete_progress_trigger'
   );
@@ -252,8 +252,8 @@ begin
     where version = '20260806034000'
       and name = 'sandbox_live_auth_fixtures'
       and statements = array[
-        'Issue 878 exact migration applied atomically',
-        'sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
+        '-- Issue 878 exact migration applied atomically',
+        '-- sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
       ]::text[]
   ) or not exists (
     select 1
@@ -261,8 +261,8 @@ begin
     where version = '20260806035000'
       and name = 'family_delete_progress_trigger'
       and statements = array[
-        'Issue 878 exact migration applied atomically',
-        'sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8'
+        '-- Issue 878 exact migration applied atomically',
+        '-- sha256=841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8'
       ]::text[]
   ) then
     raise exception 'issue 878 migration ledger hash evidence is absent or altered';
