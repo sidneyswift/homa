@@ -62,6 +62,7 @@ const {
 
 const sql = mapDb();
 const userIds: string[] = [];
+const userEmails: string[] = [];
 let familyId: string | null = null;
 let stubFamilyId: string | null = null;
 const failures: string[] = [];
@@ -98,6 +99,7 @@ async function authRequest(pathname: string, body: unknown) {
 async function signUp(label: string, suffix: string) {
   const email = `continuity-${label}-${suffix}@example.com`;
   const password = `Homa-continuity-${suffix}-${label}-A1!`;
+  userEmails.push(email.toLowerCase());
   const result = await authRequest("signup", { email, password });
   const userId = result.user?.id as string | undefined;
   const accessToken = result.access_token as string | undefined;
@@ -138,9 +140,19 @@ async function createFamily(
 const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 try {
+  await sql`select 1 as live_fixture_database_ready`;
   const sidney = await signUp("sidney", suffix);
   const alessa = await signUp("alessa", suffix);
   familyId = await createFamily(sidney);
+  const sandboxRows = await sql<{ id: string }[]>`
+    update public.families
+    set sandbox = true
+    where id = ${familyId}
+    returning id
+  `;
+  if (sandboxRows.length !== 1) {
+    throw new Error("continuity fixture family was not marked as sandbox");
+  }
   await sql`
     update public.family_members
     set display_name = 'Sidney fixture'
@@ -526,8 +538,8 @@ try {
   );
 
   const stubs = await sql<{ id: string }[]>`
-    insert into public.families (name, status)
-    values ('Continuity fold stub', 'open')
+    insert into public.families (name, status, sandbox)
+    values ('Continuity fold stub', 'open', true)
     returning id
   `;
   stubFamilyId = stubs[0].id;
@@ -566,6 +578,9 @@ try {
   }
   if (userIds.length > 0) {
     await sql`delete from auth.users where id in ${sql(userIds)}`;
+  }
+  if (userEmails.length > 0) {
+    await sql`delete from auth.users where lower(email) in ${sql(userEmails)}`;
   }
   await sql.end();
 }

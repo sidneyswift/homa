@@ -98,6 +98,7 @@ export async function resetOnboardingFamily(input: {
   const { familyId: freshId } = await startAnonymousFamily({
     source: "organic",
     utm: {},
+    sandbox: true,
   });
   const { familyId, resumeToken } = await attachAuthUser({
     familyId: freshId,
@@ -105,9 +106,9 @@ export async function resetOnboardingFamily(input: {
     email: input.email,
   });
 
-  // attachAuthUser marks sandbox from the email alias. Stamping it here
-  // too means a family reset once can always be reset again, whatever
-  // address it was created with.
+  // The first insert is already sandboxed, attachAuthUser preserves that from
+  // the email alias, and this final stamp keeps reset idempotent even for an
+  // older test account created before either protection existed.
   await sql`update public.families set sandbox = true where id = ${familyId}`;
 
   return { previousFamilyId: input.familyId, familyId, resumeToken };

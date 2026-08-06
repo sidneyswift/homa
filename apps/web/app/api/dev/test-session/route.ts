@@ -24,10 +24,11 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  * 2. Never without HOMA_DEV_TEST_SESSIONS. A local build with a
  *    production-shaped env still cannot reach it by accident.
  * 3. The email is GENERATED here and never read from the request. It
- *    always carries the reserved +homatest alias, which is what marks
- *    the family sandbox at the account moment (founder ask 2026-07-14),
- *    so a session from this route can only ever produce a family that is
- *    fenced out of funnels, physical mail, and the founder's alerts.
+ *    always carries the reserved +homatest alias. The anonymous family is
+ *    created sandboxed in its first insert, and the alias preserves that
+ *    classification when the Auth account attaches (founder ask 2026-07-14),
+ *    so a session from this route can only ever produce a family fenced out
+ *    of funnels, physical mail, and the founder's alerts.
  * 4. The password is random per call and is returned once, to the
  *    caller who just asked for it, so a walk can sign back in on a
  *    second device. It is never stored anywhere by this route.
@@ -99,7 +100,11 @@ async function provisionTestSession(): Promise<
     if (signInError) return { ok: false, message: signInError.message };
 
     const { familyId: anonymousId, resumeToken: anonymousToken } =
-      await startAnonymousFamily({ source: "organic", utm: {} });
+      await startAnonymousFamily({
+        source: "organic",
+        utm: {},
+        sandbox: true,
+      });
     await setMapResumeCookie(anonymousToken);
 
     const { familyId, resumeToken } = await attachAuthUser({
