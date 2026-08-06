@@ -745,6 +745,50 @@ the phone rebuild (#280), where the channel is actually created and all three
 consumers must be resolved together. The failure it guards against cannot
 fire before then.
 
+## 2026-07-28 · iOS launch epic: founder rules in-app purchase, not the companion-first plan
+
+This session investigated the iOS app end to end, filed epic gh#299 with
+arcs A through H, shipped and closed arc A (release truth: an OTA
+fingerprint-drift guard, verified live against production build 6) and
+arc B (compliance pack: real account deletion and AI-processing consent,
+both SECURITY DEFINER functions tested end to end against production with
+throwaway accounts). The session's own plan (`docs/homa-planning/plans/
+2026-07-28-ios-app-store-launch.md`) recommended a two-release strategy:
+a quiet web-subscription-only companion first (R1), Apple in-app purchase
+added later once the app had organic traction (R2). That recommendation
+was presented to the founder as FD-1 and overridden.
+
+**Founder ruling, verbatim: "we def need payment in app, and make it as
+easy as possible, with apple pay or w/e is used."** IAP is priority work,
+not deferred; registered as `ios-iap-priority`.
+
+Two more IAP decisions were asked and ruled in the same exchange:
+
+- **Pricing is weekly**, computed as the monthly sticker divided by four
+  ("make it weekly, but follow the same monthly prices... just whatever
+  divided by 4 is. keep the same annual options"): Homa $19/mo becomes
+  $4.75/wk for the iOS purchase; annual pricing is untouched. Registered
+  as `ios-iap-weekly-pricing`.
+- **Only the base $19 plan sells in the app for now.** The founder's
+  first instinct was that Plus and Max were already built ("We are
+  building everything now. in other agents"), which did not match this
+  session's own findings minutes earlier: gh#293 (closed, but its own
+  resolution states "nothing is gated by `plan_tier`" today), gh#295
+  (open, the tiers do not even align as one ladder), and gh#297 (open,
+  titled exactly "two paywall tiers are sold before they are built").
+  Asked to confirm which was current, the founder agreed: "Still being
+  worked on, not done yet." Registered as `ios-iap-base-tier-only`; the
+  iOS paywall shows only what can actually be delivered.
+
+All three registered in `docs/homa-planning/journeys/10-reconciliation.md`
+§5. Arc F (gh#305, StoreKit + two-provider entitlement) is re-scoped from
+"after R1 ships" to present priority; its ticket and the epic are updated
+to match. Worth naming plainly: the founder's stated belief about
+concurrent work did not survive a two-minute check against this repo's
+own tracker, and the ruling changed once shown the discrepancy rather
+than the discrepancy being smoothed over. That is the reconciliation this
+log exists to make possible.
+
 ## 2026-07-28 · Founder correction: the logo is the logo, and the name is always "Homa"
 
 Founder, on being told an email rendered the wordmark lowercase and that
@@ -1723,12 +1767,13 @@ Two live instances, both parent-visible:
   material-card's page arrows, the binder's filter pills, empty states and
   dashed drop targets, and most of `/admin` have been drawing a near-black
   1px edge on warm cream where stone-300 was intended.
-- `text-sage-700`, 1 use, the "What worked" bullet on the lesson page.
+- The retired 700-weight sage text utility, 1 use, the "What worked"
+  bullet on the lesson page.
   `--sage-700` is in the palette but was never lifted into `@theme`, so the
   bullet renders body-coloured.
 
-Both now name the declared tokens (`border-border`, `text-sage`). No design
-change: this is the colour each author already asked for.
+Both now name declared semantic tokens. No design change: this is the colour
+each author already asked for.
 
 **Decided alone:** that the missing-token failure needs a guard, not just a
 fix. An undefined colour token fails silently and completely, since it
@@ -6698,7 +6743,7 @@ layers:
   gate caught the contradiction. The lazy first-tap build + consent
   semantics are unchanged. The arrow glyph is now aria-hidden.
 - **Eyebrow color unified at sage-700** (report-view, kid-view x2,
-  plan page x2): text-sage (sage-500) on the sage-50 card is about
+  plan page x2): the retired sage-500 text utility on the sage-50 card is about
   3.2:1, under the 4.5:1 AA bar at 10px; report-preview.tsx already
   used sage-700 (about 6.5:1). Letter bookends (greeting and sign-off)
   now share text-lg.
@@ -6808,8 +6853,8 @@ bounced Fredoka wordmark), centered, nothing else, per the ruling.
 Decisions made alone:
 
 - **Dancing Script 700 as a stationery-craft exception.** The system
-  has no lush script: Fredoka is wordmark-only, Caveat is Homa's
-  margin hand (sage, product notes), Schibsted read as "default
+  has no lush script: Fredoka is wordmark-only, the former margin-hand
+  family serves product notes, and the former body family read as "default
   font" on cardstock (the founder's "cheap"), and EB Garamond italic
   reads editorial-cold for this audience. A flowing script is what
   card craft uses for a front hero. Scoped to this physical artifact
@@ -6818,7 +6863,7 @@ Decisions made alone:
   check (front-alt-garamond.html).
 - **Clay script + gold sparkles as the two devices.** The hero
   carries the brand through color instead of a mark; the sparkles
-  come from the sanctioned doodle vocabulary (hand-placed, rotated),
+  come from the sanctioned hand-drawn mark vocabulary (hand-placed, rotated),
   sized and positioned off the "u" swash after a composition pass
   (330px overflowed the trim-safe zone; final 280px with ~125px edge
   clearance at 300dpi).
@@ -6870,7 +6915,7 @@ end to end: card id 349912, "Homa thank you (brand v2)", now the
 production HANDWRYTTEN_CARD_ID (was catalog card 186, Kraft). Built
 from design-system tokens, never image-model output: the front is a
 workbook page (ruled cream paper + the clay margin rule, "Thank you"
-in Schibsted 700 with the clay accent word on "you", the little-home
+in the former sans family at weight 700 with the clay accent word on "you", the little-home
 mark standing on a baseline rule beneath it), the back is the lockup
 with the bounced Fredoka wordmark and the official tagline in EB
 Garamond italic. Two playful devices per surface, inside the restraint
@@ -10006,7 +10051,7 @@ cross-tenant issue and matches the existing pattern. NOT yet done: the
 authed read module + the workspace UI (Phase B, built together against
 the real render needs), and the invite-only copy sweep (Phase C).
 
-## 2026-07-07 (night) · Ribbon ticker bug: words vanishing mid-loop, fixed (founder screenshot: "this squiggle is missing words")
+## 2026-07-07 (night) · Ribbon ticker bug: words vanishing mid-loop, fixed after a founder screenshot
 
 Root cause: the ticker's `<textPath>` (added earlier tonight) rode the
 ribbon's own visible curve, only ~1570 user-units long. Animating
@@ -12065,11 +12110,11 @@ v2 visual system, closing the loop the grilling session opened.
    map", no product exists yet for that CTA to honestly lead to.
 2. **Design**: homa-design v2 tokens (colors, radius, shadows, fonts) copied
    into `apps/web/app/globals.css` and wired through Tailwind v4's
-   `@theme inline`, so classes like `bg-brand`, `text-strong`, `rounded-pill`
-   work directly. Fonts (Newsreader, Hanken Grotesk, Caveat, JetBrains Mono)
+   `@theme inline`, so the then-current theme utilities worked directly.
+   Fonts (Newsreader, the former body and handwriting families, JetBrains Mono)
    load via `next/font/google` instead of the design system's raw `@import`,
-   for self-hosting and zero layout shift. `Logo` component ported from
-   `docs/homa-design/components/brand/Logo.jsx`. This is a hand-copied
+   for self-hosting and zero layout shift. The `Logo` component was ported
+   from the retired design kit, whose removed path remains in git history. This is a hand-copied
    subset, not the formal `packages/design` workspace package; M1-17 still
    owns porting the full component library.
 3. **Verification**: typecheck + production build green; rendered and
@@ -12335,8 +12380,8 @@ Test users deleted from homa-prod (0 remain). Typecheck, build, lints green.
 - `packages/core/src/us-states.ts`: US state list for the form.
 - `apps/web/app/page.tsx`: landing page (hero variant B, efficacy lead; final
   copy + homa-design v2 styling as of the copy/design pass above).
-- `apps/web/components/brand/Logo.tsx`: brand lockup, ported from
-  `docs/homa-design/components/brand/Logo.jsx`.
+- `apps/web/components/brand/Logo.tsx`: brand lockup, ported from the retired
+  design kit, whose removed path remains in git history.
 - `apps/web/app/conference/page.tsx`: QR conference variant (`/conference`).
 - `apps/web/app/api/waitlist/route.ts`: validated capture endpoint; duplicate
   email = success (idempotent retries).
