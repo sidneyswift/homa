@@ -90,6 +90,7 @@ async function waitForAssistant(): Promise<string | null> {
 }
 
 try {
+  await sql`select 1 as live_fixture_database_ready`;
   const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const email = `continuity-agent-${suffix}@example.com`;
   const password = `Homa-continuity-${suffix}-A1!`;
@@ -126,12 +127,16 @@ try {
     ? familyJson[0]?.family_id
     : familyJson?.family_id;
   if (!familyId) throw new Error("Create family returned no id.");
-  await sql`
+  const sandboxRows = await sql<{ id: string }[]>`
     update public.families
-    set email = ${email}, time_zone = 'America/New_York',
+    set sandbox = true, email = ${email}, time_zone = 'America/New_York',
         profile_completed_at = now()
     where id = ${familyId}
+    returning id
   `;
+  if (sandboxRows.length !== 1) {
+    throw new Error("continuity agent fixture family was not marked as sandbox");
+  }
   await sql`
     update public.family_members set display_name = 'Sam fixture'
     where family_id = ${familyId} and user_id = ${userId}

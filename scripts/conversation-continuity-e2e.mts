@@ -138,9 +138,19 @@ async function createFamily(
 const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 try {
+  await sql`select 1 as live_fixture_database_ready`;
   const sidney = await signUp("sidney", suffix);
   const alessa = await signUp("alessa", suffix);
   familyId = await createFamily(sidney);
+  const sandboxRows = await sql<{ id: string }[]>`
+    update public.families
+    set sandbox = true
+    where id = ${familyId}
+    returning id
+  `;
+  if (sandboxRows.length !== 1) {
+    throw new Error("continuity fixture family was not marked as sandbox");
+  }
   await sql`
     update public.family_members
     set display_name = 'Sidney fixture'

@@ -163,6 +163,15 @@ async function createFixtureFamily(user, label) {
   const familyId = Array.isArray(body) ? body[0]?.family_id : body?.family_id;
   if (!familyId) throw new Error(`create_my_family for ${label} returned no family_id`);
   fixtureFamilyIds.push(familyId);
+  const sandboxRows = await sql`
+    update public.families
+    set sandbox = true
+    where id = ${familyId}
+    returning id
+  `;
+  if (sandboxRows.length !== 1) {
+    throw new Error(`fixture family ${label} was not marked as sandbox`);
+  }
   return familyId;
 }
 
@@ -2458,6 +2467,7 @@ async function expectAuthenticatedIsolation() {
   }
 
   try {
+    await sql`select 1 as live_fixture_database_ready`;
     const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const familyAUser = await signUpFixtureUser("a", suffix);
     const familyBUser = await signUpFixtureUser("b", suffix);

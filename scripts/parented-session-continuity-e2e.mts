@@ -186,6 +186,7 @@ let familyId: string | null = null;
 let userId: string | null = null;
 
 try {
+  await sql`select 1 as live_fixture_database_ready`;
   const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const email = `parented-session-${suffix}@example.com`;
   const password = `Homa-parented-session-${suffix}-A1!`;
@@ -199,12 +200,16 @@ try {
   }
 
   familyId = await createFamily(accessToken);
-  await sql`
+  const sandboxRows = await sql<{ id: string }[]>`
     update public.families
-    set email = ${email}, time_zone = 'America/New_York',
+    set sandbox = true, email = ${email}, time_zone = 'America/New_York',
         profile_completed_at = now()
     where id = ${familyId}
+    returning id
   `;
+  if (sandboxRows.length !== 1) {
+    throw new Error("parented session fixture family was not marked as sandbox");
+  }
   await sql`
     update public.family_members
     set display_name = 'Sam fixture'
