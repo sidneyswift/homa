@@ -49,7 +49,7 @@
         <h3>Race-safe ownership</h3>
         <p><strong>What:</strong> one database primary key serializes concurrent claims. The same family can retry; another family can claim only after the prior owner is explicitly lapsed.</p>
         <p><strong>Why:</strong> a read-then-write check would let two concurrent checkouts both pass.</p>
-        <p><strong>Where:</strong> <code>apps/web/lib/billing/duplicate-trial.ts:60-100</code>, <code>supabase/migrations/20260804090000_stripe_trial_card_claims.sql:6-17</code>.</p>
+        <p><strong>Where:</strong> <code>apps/web/lib/billing/duplicate-trial.ts:60-100</code>, <code>supabase/migrations/20260805200000_reconcile_trial_claim_migration.sql</code>.</p>
       </section>
       <section class="card">
         <h3>No new entitlement for the later checkout</h3>
@@ -67,7 +67,7 @@
       <h2>Existing behavior this relies on</h2>
       <section class="card dependency">
         <p>Stripe must provide a card payment method and a stable fingerprint. Wallet-token and non-card checkouts intentionally remain outside this exact guard. Stripe’s cancellation API must remain idempotent for an already-canceled subscription.</p>
-        <p>The production database must receive migration <code>20260804090000_stripe_trial_card_claims.sql</code> after the deployed application is ready. The isolation check is already armed to prove the final RLS posture.</p>
+        <p>The production database must receive migration <code>20260805200000_reconcile_trial_claim_migration.sql</code>. Issue #873 supersedes the original filename after a duplicate version prevented the table from reaching production. The isolation check is already armed to prove the final RLS posture.</p>
       </section>
 
       <h2>Merge quiz</h2>

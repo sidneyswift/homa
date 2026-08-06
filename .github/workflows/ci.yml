@@ -65,6 +65,9 @@ jobs:
       - name: Change classifier tests
         run: node --test scripts/ci-change-scope.test.mjs
 
+      - name: Supabase migration versions are unique
+        run: node scripts/migration-version-check.mjs && node --test scripts/migration-version-check.test.mjs
+
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: node scripts/em-dash-check.mjs
 
