@@ -42,7 +42,7 @@ jobs:
           node scripts/migration-version-check.mjs
 
           sandbox_migration="supabase/migrations/20260806034000_sandbox_live_auth_fixtures.sql"
-          expected_sandbox="4d6f2bd199a66206746ae3139e3b418397a1d953f4c9139ce5d6001798e3dd85"
+          expected_sandbox="e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7"
           actual_sandbox="$(sha256sum "$sandbox_migration" | cut -d' ' -f1)"
           if [ "$actual_sandbox" != "$expected_sandbox" ]; then
             echo "Sandbox migration hash does not match the reviewed issue #878 input."
@@ -58,7 +58,7 @@ jobs:
           fi
 
           repair_script="scripts/issue-878-production-repair.sql"
-          expected_repair="138e9fa399ed02dbfd62d232d0990586608c542ee969c7bc957d06132cf75987"
+          expected_repair="d9ac8309217392e7cd54308c1202d7e723cd01c2f5047dc22b182d002267de3b"
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair wrapper hash does not match the reviewed issue #878 input."

@@ -52,4 +52,5 @@ $$;
 
 revoke all on function public.create_my_family(text, text, text) from public;
 revoke execute on function public.create_my_family(text, text, text) from anon;
+revoke execute on function public.create_my_family(text, text, text) from service_role;
 grant execute on function public.create_my_family(text, text, text) to authenticated;
