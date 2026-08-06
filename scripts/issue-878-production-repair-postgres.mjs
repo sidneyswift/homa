@@ -17,7 +17,7 @@ const psql = process.env.HOMA_POSTGRES_BIN
   : "psql";
 
 const sandboxHash =
-  "4d6f2bd199a66206746ae3139e3b418397a1d953f4c9139ce5d6001798e3dd85";
+  "e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7";
 const deleteHash =
   "841ce177e122e393a8d5e37590b3290e2c6b3e1f1a813f158995ee0681c854d8";
 
@@ -58,6 +58,7 @@ const setup = `
   revoke all on function public.create_my_family(text, text, text) from public;
   revoke execute on function public.create_my_family(text, text, text) from anon;
   grant execute on function public.create_my_family(text, text, text) to authenticated;
+  grant execute on function public.create_my_family(text, text, text) to service_role;
 
   create or replace function private.pause_check_ins_for_removed_member()
   returns trigger
@@ -125,6 +126,23 @@ assert.deepEqual(
   reusedSession.stdout.filter((line) => line.startsWith("ISSUE_878_REPAIR=")),
   ["ISSUE_878_REPAIR=repaired", "ISSUE_878_REPAIR=verified_noop"],
 );
+
+const createFamilyExecuteGrants = runPsql([
+  "-Atc",
+  `
+    select role.rolname
+    from pg_catalog.aclexplode(
+      (select proacl
+       from pg_catalog.pg_proc
+       where oid = 'public.create_my_family(text,text,text)'::regprocedure)
+    ) privilege
+    join pg_catalog.pg_roles role
+      on role.oid = privilege.grantee
+    where privilege.privilege_type = 'EXECUTE'
+    order by role.rolname;
+  `,
+]);
+assert.deepEqual(createFamilyExecuteGrants.stdout, ["authenticated", "postgres"]);
 
 const freshSession = runPsql(["-f", repairPath]);
 assert.ok(freshSession.stdout.includes("ISSUE_878_REPAIR=verified_noop"));

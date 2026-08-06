@@ -66,7 +66,7 @@ values
     '20260806034000',
     array[
       'Issue 878 exact migration applied atomically',
-      'sha256=4d6f2bd199a66206746ae3139e3b418397a1d953f4c9139ce5d6001798e3dd85'
+      'sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
     ]::text[],
     'sandbox_live_auth_fixtures'
   ),
@@ -253,7 +253,7 @@ begin
       and name = 'sandbox_live_auth_fixtures'
       and statements = array[
         'Issue 878 exact migration applied atomically',
-        'sha256=4d6f2bd199a66206746ae3139e3b418397a1d953f4c9139ce5d6001798e3dd85'
+        'sha256=e1ccac4fab7d7346e91e39ae864d35e82b35ce13894f3ed2d6811492fdf993c7'
       ]::text[]
   ) or not exists (
     select 1

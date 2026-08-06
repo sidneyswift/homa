@@ -87,6 +87,10 @@ test("repair applies only the reviewed pair inside one bounded transaction", () 
 });
 
 test("repair verifies metadata, grants, and rollback-only behavior probes", () => {
+  assert.match(
+    sandboxMigration.toString("utf8"),
+    /revoke execute on function public\.create_my_family\(text, text, text\) from service_role/u,
+  );
   assert.match(repair, /prosecdef/u);
   assert.match(repair, /rolname = 'postgres'/u);
   assert.equal(repair.match(/proowner <> expected_owner_oid/g)?.length, 2);
