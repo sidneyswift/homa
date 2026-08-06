@@ -37,21 +37,28 @@ function sha256(contents) {
 test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
   assert.equal(
     workflowDocument.jobs.apply.if,
-    "github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'",
+    "github.repository == 'sidneyswift/homa' && github.repository_owner == 'sidneyswift' && github.ref == 'refs/heads/main' && github.ref_name == 'main' && github.event.repository.default_branch == 'main' && github.actor == 'sidneyswift' && github.triggering_actor == 'sidneyswift'",
+  );
+  assert.equal(
+    workflowDocument.concurrency.group,
+    "production-issue-878-repair-v2",
   );
   assert.equal(workflowDocument.jobs.apply.environment, "production");
   assert.equal(
     workflowDocument.jobs.apply.steps[0].uses,
     "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
   );
-  assert.match(workflow, /environment: production/u);
-  assert.match(
-    workflow,
-    /if: github\.ref == 'refs\/heads\/main' && github\.actor == 'sidneyswift'/u,
-  );
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 878/u);
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
-  assert.match(workflow, /ref: main/u);
+  assert.match(workflow, /GITHUB_REPOSITORY_OWNER.*sidneyswift/u);
+  assert.match(workflow, /GITHUB_REF.*refs\/heads\/main/u);
+  assert.match(workflow, /GITHUB_REF_NAME.*main/u);
+  assert.match(workflow, /repository\.default_branch.*main/u);
+  assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/u);
+  assert.match(workflow, /git rev-parse HEAD/u);
+  assert.match(workflow, /checked_out_sha.*GITHUB_SHA/u);
+  assert.match(workflow, /git ls-remote --exit-code origin refs\/heads\/main/u);
+  assert.match(workflow, /remote_main_sha.*GITHUB_SHA/u);
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
   assert.match(workflow, /cancel-in-progress: false/u);
   assert.match(
@@ -66,6 +73,17 @@ test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
     workflow.match(/-f scripts\/issue-878-production-repair\.sql/g)?.length,
     2,
   );
+  const firstApply = workflowDocument.jobs.apply.steps.find(
+    (step) => step.name === "Apply and verify the exact repair in one fresh connection",
+  )?.run;
+  assert.match(firstApply, /ISSUE_878_REPAIR=repaired/u);
+  assert.doesNotMatch(firstApply, /ISSUE_878_REPAIR=verified_noop/u);
+  assert.match(firstApply, /repair_markers/u);
+  const freshNoop = workflowDocument.jobs.apply.steps.find(
+    (step) => step.name === "Prove an immediate repeat is a verified no-op",
+  )?.run;
+  assert.match(freshNoop, /ISSUE_878_REPAIR=verified_noop/u);
+  assert.match(freshNoop, /repair_markers/u);
   assert.doesNotMatch(workflow, /supabase\s+db\s+push/u);
 });
 
