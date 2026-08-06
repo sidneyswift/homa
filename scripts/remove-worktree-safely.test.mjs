@@ -215,6 +215,7 @@ function makeFixture({
   lateIgnoredDuringMove = false,
   lateIgnoredDuringRemove = false,
   recreateOriginalSymlinkDuringMove = false,
+  trackedBareRepository = false,
 } = {}) {
   const root = mkdtempSync(join(homedir(), ".homa-worktree-wrapper-"));
   const remote = join(root, "remote.git");
@@ -250,6 +251,29 @@ function makeFixture({
     join(primary, "tracked-container", "history.txt"),
     "Outer repository tracks this exact file.\n",
   );
+  const ordinarySource = join(primary, "ordinary-source.git");
+  mkdirSync(join(ordinarySource, "objects"), { recursive: true });
+  mkdirSync(join(ordinarySource, "refs"), { recursive: true });
+  writeFileSync(join(ordinarySource, "HEAD"), "export const pageHead = 'ordinary source';\n");
+  writeFileSync(join(ordinarySource, "config"), "export const config = { bare: false };\n");
+  writeFileSync(join(ordinarySource, "objects", "index.ts"), "export const objects = [];\n");
+  writeFileSync(join(ordinarySource, "refs", "routes.ts"), "export const refs = [];\n");
+  if (trackedBareRepository) {
+    const nestedSource = join(root, "nested-history-source");
+    const nestedBareRepository = join(primary, "history.git");
+    checked("git", ["init", "-b", "nested-main", nestedSource]);
+    git(fixture, nestedSource, ["config", "user.name", "Nested bare history test"]);
+    git(fixture, nestedSource, ["config", "user.email", "nested-bare@example.test"]);
+    writeFileSync(join(nestedSource, "unique-history.txt"), "Only the nested bare repository has this commit.\n");
+    git(fixture, nestedSource, ["add", "unique-history.txt"]);
+    git(fixture, nestedSource, ["commit", "-m", "test: unique bare history"]);
+    fixture.nestedBareHead = git(fixture, nestedSource, ["rev-parse", "HEAD"]);
+    checked("git", ["init", "--bare", nestedBareRepository]);
+    git(fixture, nestedSource, ["remote", "add", "nested-bare", nestedBareRepository]);
+    git(fixture, nestedSource, ["push", "nested-bare", "nested-main"]);
+    checked("git", ["--git-dir", nestedBareRepository, "symbolic-ref", "HEAD", "refs/heads/nested-main"]);
+    rmSync(nestedSource, { recursive: true, force: true });
+  }
   writeFileSync(
     join(primary, ".gitignore"),
     ".cache/\n.late/\n.next/\n.output/\nbuild/\ncoverage/\ndist/\ngenerated/\n*.scratch\n",
@@ -517,6 +541,43 @@ test("a nested .git file blocks a clean outer worktree", (t) => {
   assert.equal(existsSync(join(fixture.target, "tracked-container", ".git")), true);
 });
 
+test("a tracked nested bare repository with unique history blocks cleanup", (t) => {
+  const fixture = makeFixture({ trackedBareRepository: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const nestedBareRepository = join(fixture.target, "history.git");
+
+  assert.equal(git(fixture, fixture.target, ["status", "--porcelain=v2", "--untracked-files=all"]), "");
+  assert.notEqual(
+    run("git", ["cat-file", "-e", `${fixture.nestedBareHead}^{commit}`], {
+      cwd: fixture.target,
+      env: fixture.env,
+    }).status,
+    0,
+  );
+  assert.equal(
+    git(fixture, fixture.target, ["--git-dir", nestedBareRepository, "rev-parse", "HEAD"]),
+    fixture.nestedBareHead,
+  );
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /nested bare Git repository/iu);
+  assert.equal(
+    git(fixture, fixture.target, ["--git-dir", nestedBareRepository, "rev-parse", "HEAD"]),
+    fixture.nestedBareHead,
+  );
+});
+
+test("an ordinary source folder with Git-shaped names is not a bare repository", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(result.stdout).status, "SAFE_TO_REMOVE");
+  assert.equal(existsSync(join(fixture.target, "ordinary-source.git", "objects", "index.ts")), true);
+});
+
 test("a fresh active task blocks the destructive executor and preserves the worktree", (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
@@ -697,6 +758,27 @@ test("sensitive files nested under ignored directories cannot be called regenera
     ".cache/application-default-credentials.json",
     ".cache/application_default_credentials.json",
     ".cache/applicationDefaultCredentials.json",
+  ]) {
+    const fixture = makeFixture({ ignored: true, ignoredPath });
+    try {
+      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      assert.equal(result.status, 2, `${ignoredPath}: ${result.stderr}`);
+      assert.match(result.stderr, /cannot be classified as regenerable/iu, ignoredPath);
+    } finally {
+      rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("known sensitive filenames stay sensitive through backup suffix chains", () => {
+  for (const ignoredPath of [
+    ".cache/.npmrc.bak",
+    ".cache/.pgpass.bak",
+    ".cache/.netrc.old",
+    ".cache/auth.json.backup",
+    ".cache/google-services.json.backup",
+    ".cache/googleservice-info.plist.old",
+    ".cache/kubeconfig.bak",
   ]) {
     const fixture = makeFixture({ ignored: true, ignoredPath });
     try {

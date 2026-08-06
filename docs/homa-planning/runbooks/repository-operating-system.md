@@ -157,11 +157,17 @@ certificate, and keystore extensions such as `.p8`, `.pem`, `.p12`, `.pfx`, and
 `.jks`, including backup suffix chains such as `.pem.bak`, `.p12.backup`,
 `.crt.old`, and `.key.bak`. Ordinary names such as `tokenizer-cache.json` are not
 treated as secrets merely because they contain the letters `token`.
+An exact sensitive filename stays sensitive when more dot suffixes are appended,
+so `.npmrc.bak`, `.pgpass.bak`, `auth.json.backup`, and longer backup chains cannot
+be relabeled as regenerable.
 
 The wrapper also walks the physical checkout without following symlinks and blocks
 any nested `.git` file or directory. Git status can hide a nested repository when
 the outer repository already tracks its visible files. Its separate object history
-must never be treated as disposable outer-worktree content.
+must never be treated as disposable outer-worktree content. Nested bare repositories
+also block when they have a valid Git `HEAD`, a regular config with `core.bare=true`,
+and real `objects` and `refs` directories. A folder name or Git-shaped source files
+alone do not trigger that classification.
 
 Recovery kinds are:
 

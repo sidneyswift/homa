@@ -412,6 +412,12 @@ function hasSensitiveCredentialExtension(leaf) {
     .some((suffix) => SENSITIVE_CREDENTIAL_EXTENSIONS.has(suffix));
 }
 
+function hasKnownSensitiveFilename(leaf) {
+  return [...SENSITIVE_IGNORED_FILENAMES].some(
+    (sensitiveName) => leaf === sensitiveName || leaf.startsWith(`${sensitiveName}.`),
+  );
+}
+
 function isSensitiveIgnoredPath(path) {
   const segments = pathSegments(path);
   const lowerSegments = segments.map((segment) => segment.toLowerCase());
@@ -428,7 +434,7 @@ function isSensitiveIgnoredPath(path) {
   if (parent === ".docker" && leaf === "config.json") return true;
   if (isEnvironmentFileName(leaf)) return true;
   if (hasSensitiveCredentialExtension(leaf)) return true;
-  if (SENSITIVE_IGNORED_FILENAMES.has(leaf)) return true;
+  if (hasKnownSensitiveFilename(leaf)) return true;
   if (/^id_(?:dsa|ecdsa|ed25519|rsa)(?:\.pub)?$/u.test(leaf)) return true;
   return segments.some((segment) => hasSensitiveName(normalizedNameWords(segment)));
 }
@@ -499,6 +505,60 @@ function ignoredEntriesFromGit(target) {
   return paths.map((path) => ignoredFileFingerprint(target, path)).sort(comparePaths);
 }
 
+function isBareGitRepositoryDirectory(absolutePath, entries) {
+  const names = new Set(entries.map((entry) => entry.name));
+  if (!["HEAD", "config", "objects", "refs"].every((name) => names.has(name))) return false;
+
+  let headStats;
+  let configStats;
+  let objectsStats;
+  let refsStats;
+  try {
+    headStats = lstatSync(join(absolutePath, "HEAD"));
+    configStats = lstatSync(join(absolutePath, "config"));
+    objectsStats = lstatSync(join(absolutePath, "objects"));
+    refsStats = lstatSync(join(absolutePath, "refs"));
+  } catch (error) {
+    block(
+      `Bare Git repository candidate changed during inspection: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  if (
+    !headStats.isFile() ||
+    headStats.size > 4096 ||
+    !configStats.isFile() ||
+    !objectsStats.isDirectory() ||
+    !refsStats.isDirectory()
+  ) {
+    return false;
+  }
+
+  let head;
+  try {
+    head = readFileSync(join(absolutePath, "HEAD"), "utf8").trim();
+  } catch (error) {
+    block(
+      `Bare Git repository HEAD is unreadable: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  if (!/^(?:ref: refs\/[^\0\r\n]+|[a-f0-9]{40}|[a-f0-9]{64})$/iu.test(head)) return false;
+
+  const bare = commandResult("git", [
+    "config",
+    "--file",
+    join(absolutePath, "config"),
+    "--no-includes",
+    "--type=bool",
+    "--get",
+    "core.bare",
+  ]);
+  return bare.status === 0 && bare.stdout.trim() === "true";
+}
+
 function assertNoNestedGitEntries(target) {
   const pending = [{ absolutePath: target, relativePath: "" }];
   while (pending.length > 0) {
@@ -513,6 +573,15 @@ function assertNoNestedGitEntries(target) {
         `Could not inspect ${JSON.stringify(current.relativePath || ".")} for nested Git metadata: ${
           error instanceof Error ? error.message : String(error)
         }`,
+      );
+    }
+
+    if (
+      current.relativePath !== "" &&
+      isBareGitRepositoryDirectory(current.absolutePath, entries)
+    ) {
+      block(
+        `Nested bare Git repository ${JSON.stringify(current.relativePath)} preserves separate Git history.`,
       );
     }
 
