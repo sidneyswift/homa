@@ -285,10 +285,12 @@ begin
       from pg_catalog.pg_attribute attribute
       where attribute.attrelid = table_oid
         and attribute.attnum > 0
-        and not attribute.attisdropped
         and (
-          attribute.attidentity <> ''
-          or attribute.attgenerated <> ''
+          attribute.attisdropped
+          or (
+            attribute.attidentity <> ''
+            or attribute.attgenerated <> ''
+          )
         )
     )
   then
@@ -553,6 +555,19 @@ begin
       from pg_catalog.aclexplode(table_contract.relacl)
       where grantee = authenticated_oid
         and privilege_type <> 'SELECT'
+    )
+    or exists (
+      select 1
+      from pg_catalog.aclexplode(table_contract.relacl) privilege
+      where privilege.grantor <> expected_owner_oid
+        or privilege.is_grantable
+    )
+    or exists (
+      select 1
+      from pg_catalog.pg_attribute attribute
+      where attribute.attrelid = table_oid
+        and attribute.attnum > 0
+        and attribute.attacl is not null
     )
     or exists (
       select privilege.privilege_type

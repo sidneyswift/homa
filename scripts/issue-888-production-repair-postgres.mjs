@@ -399,6 +399,31 @@ const transactionalTamperCases = [
     /ACL differs from contract/u,
   ],
   [
+    "ACL grant option",
+    "grant select on table public.month_plan_approvals to service_role with grant option",
+    /ACL differs from contract/u,
+  ],
+  [
+    "ACL grantor",
+    `revoke select on table public.month_plan_approvals from authenticated;
+     grant select on table public.month_plan_approvals to service_role with grant option;
+     set role service_role;
+     grant select on table public.month_plan_approvals to authenticated;
+     reset role`,
+    /ACL differs from contract/u,
+  ],
+  [
+    "column ACL",
+    "grant update (approved_at) on table public.month_plan_approvals to authenticated",
+    /ACL differs from contract/u,
+  ],
+  [
+    "dropped column",
+    `alter table public.month_plan_approvals add column issue_888_hidden text;
+     alter table public.month_plan_approvals drop column issue_888_hidden`,
+    /columns differ from the reviewed six-column contract/u,
+  ],
+  [
     "policy",
     `create policy "issue 888 extra policy" on public.month_plan_approvals
       for select to authenticated using (true)`,
@@ -493,6 +518,23 @@ const indexCollision = runPsql(
   1,
 );
 assert.match(indexCollision.stderr, /relation state is mixed/u);
+
+const primaryIndexCollision = runPsql(
+  [
+    "-c",
+    `begin;
+     delete from supabase_migrations.schema_migrations
+       where version in ('20260801201500', '20260806040000');
+     drop table public.month_plan_approvals;
+     create table public.issue_888_primary_collision (
+       id uuid constraint month_plan_approvals_pkey primary key
+     );`,
+    "-f",
+    repairPath,
+  ],
+  1,
+);
+assert.match(primaryIndexCollision.stderr, /relation state is mixed/u);
 
 runPsql([
   "-c",

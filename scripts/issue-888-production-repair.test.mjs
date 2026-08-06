@@ -61,7 +61,7 @@ test("workflow is owner-only, production-pinned, and hashes inputs before connec
   const apply = workflowDocument.jobs.apply;
   assert.equal(
     apply.if,
-    "github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'",
+    "github.repository == 'sidneyswift/homa' && github.repository_owner == 'sidneyswift' && github.ref == 'refs/heads/main' && github.ref_name == 'main' && github.event.repository.default_branch == 'main' && github.actor == 'sidneyswift' && github.triggering_actor == 'sidneyswift'",
   );
   assert.equal(apply.environment, "production");
   assert.equal(apply["timeout-minutes"], 10);
@@ -69,9 +69,14 @@ test("workflow is owner-only, production-pinned, and hashes inputs before connec
     apply.steps[0].uses,
     "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
   );
-  assert.equal(apply.steps[0].with.ref, "main");
+  assert.equal(apply.steps[0].with.ref, "${{ github.sha }}");
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 888/u);
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
+  assert.match(workflow, /GITHUB_REPOSITORY_OWNER.*sidneyswift/u);
+  assert.match(workflow, /GITHUB_REF_NAME.*main/u);
+  assert.match(workflow, /git rev-parse HEAD/u);
+  assert.match(workflow, /git ls-remote --exit-code origin refs\/heads\/main/u);
+  assert.match(workflow, /remote_main_sha.*GITHUB_SHA/u);
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
   assert.match(workflow, /cancel-in-progress: false/u);
   assert.doesNotMatch(workflow, /actions\/checkout@v\d/u);
@@ -84,15 +89,11 @@ test("workflow is owner-only, production-pinned, and hashes inputs before connec
   );
   assert.equal(
     workflow.match(/-f scripts\/issue-888-production-repair\.sql/g)?.length,
-    3,
+    2,
   );
   assert.match(
     workflow,
-    /repair_markers\[0\].*ISSUE_888_REPAIR=repaired/u,
-  );
-  assert.match(
-    workflow,
-    /repair_markers\[1\].*ISSUE_888_REPAIR=verified_noop/u,
+    /repair_markers\[0\].*ISSUE_888_REPAIR=repaired[\s\S]*fresh connection[\s\S]*repair_markers\[0\].*ISSUE_888_REPAIR=verified_noop/u,
   );
   assert.match(workflow, /fresh connection is a verified no-op/u);
   assert.doesNotMatch(workflow, /supabase\s+db\s+push/u);
@@ -145,6 +146,10 @@ test("repair verifies the complete schema, policy, index, and dynamic ACL contra
   assert.match(repair, /pg_catalog\.acldefault\('r'/u);
   assert.match(repair, /expected_all_privilege_count/u);
   assert.match(repair, /privilege_type <> 'SELECT'/u);
+  assert.match(repair, /privilege\.grantor <> expected_owner_oid/u);
+  assert.match(repair, /privilege\.is_grantable/u);
+  assert.match(repair, /attribute\.attacl is not null/u);
+  assert.match(repair, /attribute\.attisdropped/u);
   assert.match(repair, /service_role_oid/u);
   assert.match(repair, /authenticated truncate was not denied/u);
 });
@@ -161,6 +166,11 @@ test("disposable harness covers behavior, tampering, collisions, and rollback", 
   assert.match(harness, /transactionalTamperCases/u);
   assert.match(harness, /tableCollision/u);
   assert.match(harness, /indexCollision/u);
+  assert.match(harness, /primaryIndexCollision/u);
+  assert.match(harness, /ACL grant option/u);
+  assert.match(harness, /ACL grantor/u);
+  assert.match(harness, /column ACL/u);
+  assert.match(harness, /dropped column/u);
   assert.match(harness, /migration ledger is mixed/u);
   assert.match(harness, /relation state is mixed/u);
   assert.match(harness, /injected mid-migration failure/u);
