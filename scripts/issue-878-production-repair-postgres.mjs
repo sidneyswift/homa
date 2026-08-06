@@ -72,6 +72,18 @@ const setup = `
   $unsafe$;
   revoke all on function private.pause_check_ins_for_removed_member()
     from public, anon, authenticated;
+
+  do $owner$
+  begin
+    if not exists (
+      select 1 from pg_catalog.pg_roles where rolname = 'postgres'
+    ) then
+      execute 'create role postgres nologin superuser';
+    end if;
+  end
+  $owner$;
+  alter function public.create_my_family(text, text, text) owner to postgres;
+  alter function private.pause_check_ins_for_removed_member() owner to postgres;
 `;
 
 function runPsql(actions, expectedStatus = 0) {
@@ -129,6 +141,31 @@ const exactLedger = runPsql([
 assert.deepEqual(exactLedger.stdout, [
   `20260806034000|sandbox_live_auth_fixtures|sha256=${sandboxHash}`,
   `20260806035000|family_delete_progress_trigger|sha256=${deleteHash}`,
+]);
+
+runPsql([
+  "-c",
+  "alter function public.create_my_family(text, text, text) owner to homa_eval;",
+]);
+const wrongCreateOwner = runPsql(["-f", repairPath], 1);
+assert.match(wrongCreateOwner.stderr, /create_my_family owner is not postgres/u);
+runPsql([
+  "-c",
+  "alter function public.create_my_family(text, text, text) owner to postgres;",
+]);
+
+runPsql([
+  "-c",
+  "alter function private.pause_check_ins_for_removed_member() owner to homa_eval;",
+]);
+const wrongPauseOwner = runPsql(["-f", repairPath], 1);
+assert.match(
+  wrongPauseOwner.stderr,
+  /pause_check_ins_for_removed_member owner is not postgres/u,
+);
+runPsql([
+  "-c",
+  "alter function private.pause_check_ins_for_removed_member() owner to postgres;",
 ]);
 
 const residue = runPsql([

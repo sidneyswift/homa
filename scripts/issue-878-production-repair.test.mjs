@@ -5,6 +5,8 @@ import test from "node:test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { parse } from "yaml";
+
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = readFileSync(
   resolve(repositoryRoot, ".github/workflows/issue-878-production-repair.yml"),
@@ -14,6 +16,7 @@ const repair = readFileSync(
   resolve(repositoryRoot, "scripts/issue-878-production-repair.sql"),
   "utf8",
 );
+const workflowDocument = parse(workflow);
 const sandboxMigration = readFileSync(
   resolve(
     repositoryRoot,
@@ -32,12 +35,30 @@ function sha256(contents) {
 }
 
 test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
+  assert.equal(
+    workflowDocument.jobs.apply.if,
+    "github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'",
+  );
+  assert.equal(workflowDocument.jobs.apply.environment, "production");
+  assert.equal(
+    workflowDocument.jobs.apply.steps[0].uses,
+    "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+  );
   assert.match(workflow, /environment: production/u);
+  assert.match(
+    workflow,
+    /if: github\.ref == 'refs\/heads\/main' && github\.actor == 'sidneyswift'/u,
+  );
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 878/u);
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
   assert.match(workflow, /ref: main/u);
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
   assert.match(workflow, /cancel-in-progress: false/u);
+  assert.match(
+    workflow,
+    /actions\/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4\.4\.0/u,
+  );
+  assert.doesNotMatch(workflow, /actions\/checkout@v\d/u);
   assert.match(workflow, new RegExp(sha256(sandboxMigration), "u"));
   assert.match(workflow, new RegExp(sha256(deleteMigration), "u"));
   assert.match(workflow, new RegExp(sha256(repair), "u"));
@@ -67,6 +88,13 @@ test("repair applies only the reviewed pair inside one bounded transaction", () 
 
 test("repair verifies metadata, grants, and rollback-only behavior probes", () => {
   assert.match(repair, /prosecdef/u);
+  assert.match(repair, /rolname = 'postgres'/u);
+  assert.equal(repair.match(/proowner <> expected_owner_oid/g)?.length, 2);
+  assert.match(repair, /create_my_family owner is not postgres/u);
+  assert.match(
+    repair,
+    /pause_check_ins_for_removed_member owner is not postgres/u,
+  );
   assert.match(repair, /search_path=""/u);
   assert.match(repair, /aclexplode/u);
   assert.match(repair, /family_members_pause_check_ins_before_removal/u);

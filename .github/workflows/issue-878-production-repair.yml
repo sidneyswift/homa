@@ -17,12 +17,13 @@ concurrency:
 
 jobs:
   apply:
+    if: github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'
     name: Apply two audited issue 878 migrations
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
 
@@ -57,7 +58,7 @@ jobs:
           fi
 
           repair_script="scripts/issue-878-production-repair.sql"
-          expected_repair="ffbe65321da2d4090b6d75ce33fd23530a9d0b1629a3e969ad8a2b33b7aac473"
+          expected_repair="138e9fa399ed02dbfd62d232d0990586608c542ee969c7bc957d06132cf75987"
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair wrapper hash does not match the reviewed issue #878 input."

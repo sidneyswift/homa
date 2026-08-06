@@ -90,6 +90,7 @@ declare
   pause_member_oid oid :=
     to_regprocedure('private.pause_check_ins_for_removed_member()');
   authenticated_oid oid;
+  expected_owner_oid oid;
   create_family_contract record;
   pause_member_contract record;
 begin
@@ -99,6 +100,14 @@ begin
 
   if authenticated_oid is null then
     raise exception 'authenticated database role is absent';
+  end if;
+
+  select oid into expected_owner_oid
+  from pg_catalog.pg_roles
+  where rolname = 'postgres';
+
+  if expected_owner_oid is null then
+    raise exception 'expected production function owner postgres is absent';
   end if;
 
   if create_family_oid is null or (
@@ -116,6 +125,10 @@ begin
   select procedure.* into strict create_family_contract
   from pg_catalog.pg_proc procedure
   where procedure.oid = create_family_oid;
+
+  if create_family_contract.proowner <> expected_owner_oid then
+    raise exception 'create_my_family owner is not postgres';
+  end if;
 
   if create_family_contract.proargtypes <> '25 25 25'::oidvector
     or create_family_contract.proallargtypes <> array[
@@ -187,6 +200,10 @@ begin
   select procedure.* into strict pause_member_contract
   from pg_catalog.pg_proc procedure
   where procedure.oid = pause_member_oid;
+
+  if pause_member_contract.proowner <> expected_owner_oid then
+    raise exception 'pause_check_ins_for_removed_member owner is not postgres';
+  end if;
 
   if pause_member_contract.pronargs <> 0
     or pause_member_contract.prorettype <> 'trigger'::regtype
