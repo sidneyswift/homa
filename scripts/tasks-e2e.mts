@@ -113,12 +113,12 @@ if (Number(preExisting[0].count) > 0) {
 const familyRows = await sql<{ id: string }[]>`
   insert into public.families
     (name, us_state, parent_display_name, first_name, email, time_zone,
-     profile_completed_at, created_at, context, status)
+     profile_completed_at, created_at, context, status, sandbox)
   values
     ('E2E Tasks Family', 'TX', 'Evie', 'Evie', 'delivered@resend.dev', ${zone},
      now(), now() - interval '2 days',
      ${sql.json({ styles: ["montessori"], curriculums: ["Heggerty"] } as never)},
-     'claimed')
+     'claimed', true)
   returning id
 `;
 const familyId = familyRows[0].id;

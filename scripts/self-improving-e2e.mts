@@ -35,9 +35,10 @@ const TEST_SESSION_ID = "e2e-self-improving-test-session";
 async function setup(): Promise<void> {
   // Ensure a test family exists (upsert pattern)
   await sql`
-    insert into public.families (id, name, time_zone)
-    values (${TEST_FAMILY_ID}::uuid, 'E2E Self-Improving Test', 'America/New_York')
-    on conflict (id) do nothing
+    insert into public.families (id, name, time_zone, sandbox)
+    values (${TEST_FAMILY_ID}::uuid, 'E2E Self-Improving Test', 'America/New_York', true)
+    on conflict (id) do update
+    set sandbox = true, updated_at = now()
   `;
 }
 
@@ -380,6 +381,7 @@ async function main(): Promise<void> {
   console.log("Self-Improving System E2E Tests\n");
 
   try {
+    await sql`select 1 as live_fixture_database_ready`;
     await setup();
 
     await testSignalClassification();

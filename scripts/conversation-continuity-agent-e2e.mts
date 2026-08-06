@@ -52,6 +52,7 @@ const base = argValue("--base") ?? "http://localhost:3233";
 const sql = mapDb();
 let familyId: string | null = null;
 let userId: string | null = null;
+let fixtureEmail: string | null = null;
 const startedAt = new Date();
 
 async function authRequest(pathname: string, body: unknown) {
@@ -93,6 +94,7 @@ try {
   await sql`select 1 as live_fixture_database_ready`;
   const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const email = `continuity-agent-${suffix}@example.com`;
+  fixtureEmail = email;
   const password = `Homa-continuity-${suffix}-A1!`;
   const auth = await authRequest("signup", { email, password });
   userId = auth.user?.id ?? null;
@@ -238,6 +240,9 @@ try {
   }
   if (userId) {
     await sql`delete from auth.users where id = ${userId}`;
+  }
+  if (fixtureEmail) {
+    await sql`delete from auth.users where lower(email) = ${fixtureEmail.toLowerCase()}`;
   }
   await sql.end();
 }

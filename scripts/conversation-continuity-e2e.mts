@@ -62,6 +62,7 @@ const {
 
 const sql = mapDb();
 const userIds: string[] = [];
+const userEmails: string[] = [];
 let familyId: string | null = null;
 let stubFamilyId: string | null = null;
 const failures: string[] = [];
@@ -98,6 +99,7 @@ async function authRequest(pathname: string, body: unknown) {
 async function signUp(label: string, suffix: string) {
   const email = `continuity-${label}-${suffix}@example.com`;
   const password = `Homa-continuity-${suffix}-${label}-A1!`;
+  userEmails.push(email.toLowerCase());
   const result = await authRequest("signup", { email, password });
   const userId = result.user?.id as string | undefined;
   const accessToken = result.access_token as string | undefined;
@@ -536,8 +538,13 @@ try {
   );
 
   const stubs = await sql<{ id: string }[]>`
-    insert into public.families (name, status)
-    values ('Continuity fold stub', 'open')
+    insert into public.families (name, email, status, sandbox)
+    values (
+      'Continuity fold stub',
+      'continuity-fold-stub@example.test',
+      'open',
+      true
+    )
     returning id
   `;
   stubFamilyId = stubs[0].id;
@@ -576,6 +583,9 @@ try {
   }
   if (userIds.length > 0) {
     await sql`delete from auth.users where id in ${sql(userIds)}`;
+  }
+  if (userEmails.length > 0) {
+    await sql`delete from auth.users where lower(email) in ${sql(userEmails)}`;
   }
   await sql.end();
 }

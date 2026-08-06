@@ -44,6 +44,7 @@ const coveredTables = new Set();
 const fixtureFamilyIds = [];
 const fixtureKnowledgeIds = [];
 const fixtureUserIds = [];
+const fixtureUserEmails = [];
 let morningResearchBriefV2SchemaAvailable = false;
 let morningOfferFunnelSchemaAvailable = false;
 let familyBillingSubscriptionsSchemaAvailable = false;
@@ -132,6 +133,7 @@ async function jsonResponse(response, label) {
 async function signUpFixtureUser(label, suffix) {
   const email = `isolation-${label}-${suffix}@example.com`;
   const password = `Homa-isolation-${suffix}-${label}-A1!`;
+  fixtureUserEmails.push(email.toLowerCase());
   const signedUp = await authRequest("signup", { email, password });
   let accessToken = signedUp.access_token;
   let userId = signedUp.user?.id;
@@ -2375,6 +2377,12 @@ async function cleanupIsolationFixtures() {
     }
     if (fixtureUserIds.length > 0) {
       await sql`delete from auth.users where id in ${sql(fixtureUserIds)}`;
+    }
+    if (fixtureUserEmails.length > 0) {
+      await sql`
+        delete from auth.users
+        where lower(email) in ${sql(fixtureUserEmails)}
+      `;
     }
   } catch (error) {
     report(
