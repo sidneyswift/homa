@@ -142,19 +142,34 @@ test("Vercel builds when the previous deployment SHA is missing, invalid, or una
     assert.match(result.stderr, /Vercel change scope: build/u);
   }
 
-  const priorCommit = git(repositoryRoot, ["rev-parse", "HEAD^"]);
-  const mismatchedHead = spawnSync(process.execPath, [changeScopeScript, "vercel"], {
-    cwd: repositoryRoot,
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      VERCEL_ENV: "preview",
-      VERCEL_GIT_PREVIOUS_SHA: priorCommit,
-      VERCEL_GIT_COMMIT_SHA: priorCommit,
-    },
-  });
-  assert.equal(mismatchedHead.status, 1, mismatchedHead.stderr);
-  assert.match(mismatchedHead.stderr, /does not match HEAD/u);
+  const fixture = mkdtempSync(resolve(tmpdir(), "homa-vercel-mismatched-head-"));
+  try {
+    git(fixture, ["init"]);
+    git(fixture, ["config", "user.email", "fixture@invalid.example"]);
+    git(fixture, ["config", "user.name", "Fixture"]);
+    writeFileSync(resolve(fixture, "first.txt"), "first\n");
+    git(fixture, ["add", "."]);
+    git(fixture, ["commit", "-m", "first"]);
+    const priorCommit = git(fixture, ["rev-parse", "HEAD"]);
+    writeFileSync(resolve(fixture, "second.txt"), "second\n");
+    git(fixture, ["add", "."]);
+    git(fixture, ["commit", "-m", "second"]);
+
+    const mismatchedHead = spawnSync(process.execPath, [changeScopeScript, "vercel"], {
+      cwd: fixture,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        VERCEL_ENV: "preview",
+        VERCEL_GIT_PREVIOUS_SHA: priorCommit,
+        VERCEL_GIT_COMMIT_SHA: priorCommit,
+      },
+    });
+    assert.equal(mismatchedHead.status, 1, mismatchedHead.stderr);
+    assert.match(mismatchedHead.stderr, /does not match HEAD/u);
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });
 
 test("Vercel builds for deleted or moved web files", () => {
