@@ -90,7 +90,9 @@ jobs:
         run: |
           result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/trial-claim-migration-repair.sql)"
           echo "$result"
-          if ! grep -Eq '^ISSUE_873_REPAIR=(repaired|verified_noop)$' <<<"$result"; then
+          repair_marker="$(printf '%s\n' "$result" | tail -n 1)"
+          if [ "$repair_marker" != "ISSUE_873_REPAIR=repaired" ] \
+            && [ "$repair_marker" != "ISSUE_873_REPAIR=verified_noop" ]; then
             echo "The atomic repair did not return a recognized result."
             exit 1
           fi
@@ -99,7 +101,8 @@ jobs:
         run: |
           result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/trial-claim-migration-repair.sql)"
           echo "$result"
-          if ! grep -q '^ISSUE_873_REPAIR=verified_noop$' <<<"$result"; then
+          repair_marker="$(printf '%s\n' "$result" | tail -n 1)"
+          if [ "$repair_marker" != "ISSUE_873_REPAIR=verified_noop" ]; then
             echo "The second repair pass was not a verified no-op."
             exit 1
           fi
