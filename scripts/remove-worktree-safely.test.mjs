@@ -18,6 +18,7 @@ import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { retirementScanSha256 } from "./remove-worktree-safely.mjs";
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const wrapperSource = join(repositoryRoot, "scripts", "remove-worktree-safely.mjs");
@@ -427,6 +428,24 @@ function makeFixture({
         },
       ]
     : [];
+  if (ignoredDispositions[0]?.disposition === "backed-up-private") {
+    const backupRoot = join(root, "private-backup");
+    const backupPath = join(backupRoot, "ignored-file.backup");
+    mkdirSync(backupRoot, { mode: 0o700 });
+    chmodSync(backupRoot, 0o700);
+    copyFileSync(join(target, fixtureIgnoredPath), backupPath);
+    chmodSync(backupPath, 0o600);
+    const backupFingerprint = ignoredFileEvidence(backupRoot, "ignored-file.backup");
+    ignoredDispositions[0].backup = {
+      artifactPath: backupPath,
+      artifactSha256: backupFingerprint.sha256,
+      artifactSizeBytes: backupFingerprint.sizeBytes,
+      sourceSha256: ignoredDispositions[0].sha256,
+      sourceSizeBytes: ignoredDispositions[0].sizeBytes,
+      checkedAt: now,
+    };
+    fixture.privateBackupPath = backupPath;
+  }
   const evidence = {
     schemaVersion: 2,
     capturedAt: now,
@@ -463,12 +482,57 @@ function makeFixture({
       : {},
     recovery,
   };
+  const scan = {
+    version: 1,
+    nonce: "a".repeat(64),
+    sha256: retirementScanSha256({
+      target: realpathSync(target),
+      registeredPath: realpathSync(target),
+      repositoryRoot: realpathSync(primary),
+      commonGitDir,
+      origin: "https://github.com/sidneyswift/homa",
+      head,
+      tree,
+      branch: "codex/gh-872-disposable",
+      baseRef: "origin/main",
+      uniqueCommitCount: localOnly || remoteBranch ? 1 : 0,
+      integrated: !localOnly && !remoteBranch,
+      statusLines: [],
+      ignoredEntries: ignoredDispositions.map(({ path, kind, sizeBytes, sha256 }) => ({
+        path,
+        kind,
+        sizeBytes,
+        sha256,
+      })),
+      patchSha256,
+      remoteHead: remoteBranch ? head : null,
+      bundle: localOnly && !thinBundle
+        ? {
+            artifactSha256: recovery.artifactSha256,
+            restoredHead: recovery.restoredHead,
+            restoredTree: recovery.restoredTree,
+          }
+        : null,
+    }),
+  };
+  evidence.scan = scan;
+  evidence.approval = {
+    approvedBy: "sidneyswift",
+    approvedAt: now,
+    reason: "Reviewed the exact generated cleanup evidence.",
+    scanNonce: scan.nonce,
+    scanSha256: scan.sha256,
+  };
   const taskSnapshot = {
     schemaVersion: 1,
     source: "codex-list-threads",
     coverage: "all-open-and-recent-homa-tasks",
     capturedAt: now,
     repositoryOrigin: githubOrigin,
+    retirementScan: {
+      nonce: scan.nonce,
+      sha256: scan.sha256,
+    },
     tasks: taskless
       ? []
       : [
@@ -516,6 +580,7 @@ function wrapperArgs(
     fixture.taskSnapshotPath,
   ];
   if (execute) {
+    args[args.indexOf(fixture.taskSnapshotPath)] = "-";
     args.push(
       "--execute",
       "--remote-branch-action",
@@ -530,6 +595,13 @@ function wrapperArgs(
   return args;
 }
 
+function executionOptions(fixture, environment = fixture.env) {
+  return {
+    env: environment,
+    input: readFileSync(fixture.taskSnapshotPath),
+  };
+}
+
 function quarantineRoots(fixture) {
   return readdirSync(fixture.root, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && entry.name.startsWith(".homa-worktree-quarantine-"))
@@ -540,7 +612,11 @@ test("execution removes the registration and preserves sealed checkout content",
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 0, result.stderr);
   const outcome = JSON.parse(result.stdout);
   assert.equal(outcome.status, "WORKTREE_REGISTRATION_REMOVED");
@@ -551,6 +627,38 @@ test("execution removes the registration and preserves sealed checkout content",
   assert.equal(existsSync(outcome.preservedPath), true);
   assert.equal(existsSync(join(outcome.preservedPath, ".git")), true);
   assert.doesNotMatch(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
+});
+
+test("the generator writes bound mode-0600 evidence and a review queue", (t) => {
+  const fixture = makeFixture({ ignored: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const evidenceOut = join(fixture.root, "generated-evidence.json");
+  const reviewQueueOut = join(fixture.root, "generated-review-queue.json");
+
+  const result = run(
+    process.execPath,
+    [
+      fixture.wrapper,
+      "--generate",
+      "--target",
+      fixture.target,
+      "--evidence-out",
+      evidenceOut,
+      "--review-queue-out",
+      reviewQueueOut,
+    ],
+    { env: fixture.env },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(lstatSync(evidenceOut).mode & 0o777, 0o600);
+  assert.equal(lstatSync(reviewQueueOut).mode & 0o777, 0o600);
+  const evidence = JSON.parse(readFileSync(evidenceOut, "utf8"));
+  const queue = JSON.parse(readFileSync(reviewQueueOut, "utf8"));
+  assert.equal(evidence.schemaVersion, 2);
+  assert.match(evidence.scan.nonce, /^[a-f0-9]{64}$/u);
+  assert.equal(evidence.scan.sha256, queue.scan.sha256);
+  assert.equal(queue.items.some((item) => item.kind === "approval"), true);
+  assert.equal(queue.items.some((item) => item.kind === "execution-task-snapshot"), true);
 });
 
 test("private origin references use authenticated GitHub API without Git credentials", (t) => {
@@ -670,7 +778,11 @@ test("a fresh active task blocks the destructive executor and preserves the work
   ];
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /still running/u);
   assert.equal(existsSync(fixture.target), true);
@@ -684,7 +796,11 @@ test("execution rejects a task snapshot older than thirty seconds", (t) => {
   taskSnapshot.capturedAt = new Date(Date.now() - 31_000).toISOString();
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /Task snapshot capturedAt is stale/u);
   assert.equal(existsSync(fixture.target), true);
@@ -697,7 +813,11 @@ test("execution rejects a task snapshot captured in the future", (t) => {
   taskSnapshot.capturedAt = new Date(Date.now() + 60_000).toISOString();
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /Task snapshot capturedAt is in the future/u);
   assert.equal(existsSync(fixture.target), true);
@@ -917,6 +1037,29 @@ test("a thin bundle that cannot restore into an empty repository is rejected", (
   assert.equal(existsSync(fixture.target), true);
 });
 
+test("an exact owner-only private backup is revalidated", (t) => {
+  const fixture = makeFixture({ ignored: true, ignoredDisposition: "backed-up-private" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const accepted = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(accepted.status, 0, accepted.stderr);
+
+  writeFileSync(fixture.privateBackupPath, "changed backup bytes\n");
+  const changed = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(changed.status, 2);
+  assert.match(changed.stderr, /private backup|backup checksum|exact private backup/iu);
+});
+
+test("a private backup with group access is rejected", (t) => {
+  const fixture = makeFixture({ ignored: true, ignoredDisposition: "backed-up-private" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  chmodSync(fixture.privateBackupPath, 0o640);
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /readable or writable by another user/iu);
+});
+
 test("an ambient alternate object directory cannot make a thin bundle look complete", (t) => {
   const fixture = makeFixture({ localOnly: true, thinBundle: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
@@ -1095,9 +1238,11 @@ test("ignored content created during final GitHub checks blocks removal", (t) =>
   const fixture = makeFixture({ lateIgnoredDuringFinalGithub: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
-    env: fixture.env,
-  });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /ignored file fingerprint changed/iu);
   assert.equal(existsSync(join(fixture.target, ".late", "arrived-during-github.txt")), true);
@@ -1107,9 +1252,11 @@ test("content arriving at the move boundary is quarantined and preserved", (t) =
   const fixture = makeFixture({ lateIgnoredDuringMove: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
-    env: fixture.env,
-  });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /moved to quarantine/iu);
   assert.equal(existsSync(fixture.target), false);
@@ -1127,9 +1274,11 @@ test("ignored content arriving after quarantine reinspection is never deleted", 
   const fixture = makeFixture({ lateIgnoredDuringRemove: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
-    env: fixture.env,
-  });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /content is preserved.*Git refused normal registration removal/iu);
   assert.equal(existsSync(fixture.target), false);
@@ -1150,9 +1299,11 @@ test("a broken symlink recreated at the original path blocks removal", (t) => {
   const fixture = makeFixture({ recreateOriginalSymlinkDuringMove: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
-    env: fixture.env,
-  });
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    executionOptions(fixture),
+  );
   assert.equal(result.status, 2);
   assert.match(result.stderr, /original|atomic move|quarantine/iu);
   assert.equal(lstatSync(fixture.target).isSymbolicLink(), true);

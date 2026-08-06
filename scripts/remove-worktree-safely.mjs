@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import {
   chmodSync,
+  closeSync,
   existsSync,
+  fsyncSync,
   lstatSync,
   mkdtempSync,
+  openSync,
   readFileSync,
+  readSync,
   readlinkSync,
   readdirSync,
   realpathSync,
@@ -14,6 +18,7 @@ import {
   rmdirSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -155,6 +160,9 @@ const REGENERABLE_DIRECTORY_NAMES = new Set([
 const TASKLESS_APPROVER = "sidneyswift";
 const TASKLESS_REASON = "legacy-lane-predates-task-tracking";
 const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
+const EVIDENCE_APPROVER = "sidneyswift";
+const PRIVATE_FILE_MODE = 0o600;
+const STREAM_CHUNK_BYTES = 1024 * 1024;
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 
 export class RemovalBlockedError extends Error {
@@ -205,6 +213,59 @@ function checked(command, args, options) {
   return result.stdout;
 }
 
+function checkedNulRecords(command, args, options = {}) {
+  const outputRoot = mkdtempSync(join(tmpdir(), "homa-worktree-inventory-"));
+  const outputPath = join(outputRoot, "records.bin");
+  let outputDescriptor;
+  try {
+    outputDescriptor = openSync(outputPath, "wx", PRIVATE_FILE_MODE);
+    const result = spawnSync(command, args, {
+      cwd: options.cwd,
+      env: sanitizedSubprocessEnvironment(options.env ?? process.env),
+      encoding: "utf8",
+      stdio: ["ignore", outputDescriptor, "pipe"],
+      maxBuffer: 20 * 1024 * 1024,
+    });
+    closeSync(outputDescriptor);
+    outputDescriptor = undefined;
+    if (result.error) block(`Could not run ${command}: ${result.error.message}`);
+    if ((result.status ?? 1) !== 0) {
+      block(`${command} ${args.join(" ")} failed: ${result.stderr?.trim() || "no error text"}`);
+    }
+
+    const records = [];
+    const buffer = Buffer.allocUnsafe(STREAM_CHUNK_BYTES);
+    let pending = Buffer.alloc(0);
+    const inputDescriptor = openSync(outputPath, "r");
+    try {
+      for (;;) {
+        const bytesRead = readSync(inputDescriptor, buffer, 0, buffer.length, null);
+        if (bytesRead === 0) break;
+        let chunk = Buffer.concat([pending, buffer.subarray(0, bytesRead)]);
+        for (;;) {
+          const boundary = chunk.indexOf(0);
+          if (boundary === -1) break;
+          const record = chunk.subarray(0, boundary);
+          const text = record.toString("utf8");
+          if (!record.equals(Buffer.from(text, "utf8"))) {
+            block(`${command} returned a path that is not valid UTF-8.`);
+          }
+          records.push(text);
+          chunk = chunk.subarray(boundary + 1);
+        }
+        pending = Buffer.from(chunk);
+      }
+    } finally {
+      closeSync(inputDescriptor);
+    }
+    if (pending.length !== 0) block(`${command} returned a non-NUL-terminated inventory.`);
+    return records;
+  } finally {
+    if (outputDescriptor !== undefined) closeSync(outputDescriptor);
+    rmSync(outputRoot, { recursive: true, force: true });
+  }
+}
+
 function git(path, args) {
   return checked("git", ["-C", path, ...args]);
 }
@@ -217,10 +278,99 @@ function sha256(content) {
   return createHash("sha256").update(content).digest("hex");
 }
 
+function streamedRegularFile(path, label) {
+  const before = lstatSync(path, { bigint: true });
+  if (!before.isFile() || before.isSymbolicLink()) {
+    block(`${label} must be a regular file, not a symbolic link.`);
+  }
+  const hash = createHash("sha256");
+  const buffer = Buffer.allocUnsafe(STREAM_CHUNK_BYTES);
+  let descriptor;
+  let bytesReadTotal = 0n;
+  try {
+    descriptor = openSync(path, "r");
+    for (;;) {
+      const bytesRead = readSync(descriptor, buffer, 0, buffer.length, null);
+      if (bytesRead === 0) break;
+      hash.update(buffer.subarray(0, bytesRead));
+      bytesReadTotal += BigInt(bytesRead);
+    }
+  } catch (error) {
+    block(`${label} is unreadable: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    if (descriptor !== undefined) closeSync(descriptor);
+  }
+  const after = lstatSync(path, { bigint: true });
+  if (!sameFileState(before, after) || bytesReadTotal !== before.size) {
+    block(`${label} changed while it was being fingerprinted.`);
+  }
+  return {
+    stats: before,
+    sizeBytes: String(before.size),
+    sha256: hash.digest("hex"),
+  };
+}
+
+function atomicPrivateJson(path, value, label) {
+  if (!isAbsolute(path) || resolve(path) !== path) block(`${label} path must be absolute and normalized.`);
+  const parent = dirname(path);
+  const parentStats = lstatSync(parent, { bigint: true });
+  if (!parentStats.isDirectory() || parentStats.isSymbolicLink() || realpathSync(parent) !== parent) {
+    block(`${label} parent must be one real directory with no path alias.`);
+  }
+  const temporary = join(parent, `.${randomBytes(16).toString("hex")}.tmp`);
+  const content = `${JSON.stringify(value, null, 2)}\n`;
+  let descriptor;
+  try {
+    descriptor = openSync(temporary, "wx", PRIVATE_FILE_MODE);
+    writeFileSync(descriptor, content, { encoding: "utf8" });
+    fsyncSync(descriptor);
+    closeSync(descriptor);
+    descriptor = undefined;
+    chmodSync(temporary, PRIVATE_FILE_MODE);
+    renameSync(temporary, path);
+    chmodSync(path, PRIVATE_FILE_MODE);
+  } catch (error) {
+    if (descriptor !== undefined) closeSync(descriptor);
+    try {
+      rmSync(temporary, { force: true });
+    } catch {
+      // Leave an unexpected artifact visible rather than hiding the original failure.
+    }
+    block(`Could not write ${label} atomically: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const stats = lstatSync(path, { bigint: true });
+  if (!stats.isFile() || stats.isSymbolicLink() || (stats.mode & 0o777n) !== BigInt(PRIVATE_FILE_MODE)) {
+    block(`${label} was not written as an owner-only regular file.`);
+  }
+}
+
 function readJson(path, label) {
   let parsed;
   try {
     parsed = JSON.parse(readFileSync(path, "utf8"));
+  } catch (error) {
+    block(`${label} is not readable JSON: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    block(`${label} must contain one JSON object.`);
+  }
+  return parsed;
+}
+
+function readJsonFromStandardInput(label) {
+  let content;
+  try {
+    content = readFileSync(0);
+  } catch (error) {
+    block(`${label} could not be read from standard input: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (content.length > 10 * 1024 * 1024) block(`${label} is unexpectedly large.`);
+  const text = content.toString("utf8");
+  if (!content.equals(Buffer.from(text, "utf8"))) block(`${label} is not valid UTF-8 JSON.`);
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
   } catch (error) {
     block(`${label} is not readable JSON: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -499,13 +649,18 @@ function ignoredFileFingerprint(target, path) {
   }
 
   let kind;
-  let content;
+  let sizeBytes;
+  let contentSha256;
   if (before.isFile()) {
     kind = "file";
-    content = readFileSync(absolutePath);
+    const streamed = streamedRegularFile(absolutePath, `Ignored path ${JSON.stringify(path)}`);
+    sizeBytes = streamed.sizeBytes;
+    contentSha256 = streamed.sha256;
   } else if (before.isSymbolicLink()) {
     kind = "symlink";
-    content = readlinkSync(absolutePath, { encoding: "buffer" });
+    const content = readlinkSync(absolutePath, { encoding: "buffer" });
+    sizeBytes = String(before.size);
+    contentSha256 = sha256(content);
   } else {
     block(`Ignored path ${JSON.stringify(path)} has unsupported file type.`);
   }
@@ -517,20 +672,21 @@ function ignoredFileFingerprint(target, path) {
   return {
     path,
     kind,
-    sizeBytes: String(before.size),
-    sha256: sha256(content),
+    sizeBytes,
+    sha256: contentSha256,
   };
 }
 
 function ignoredEntriesFromGit(target) {
-  const output = git(target, [
+  const paths = checkedNulRecords("git", [
+    "-C",
+    target,
     "ls-files",
     "--others",
     "--ignored",
     "--exclude-standard",
     "-z",
   ]);
-  const paths = output.split("\0").filter(Boolean);
   if (new Set(paths).size !== paths.length) block("Git returned a duplicate ignored path.");
   return paths.map((path) => ignoredFileFingerprint(target, path)).sort(comparePaths);
 }
@@ -991,6 +1147,12 @@ export function validateTaskSnapshot(
   }
   assertFresh(snapshot.capturedAt, "Task snapshot capturedAt", maxAgeMs, now);
   assertEqual(normalizeOrigin(snapshot.repositoryOrigin), current.origin, "Task snapshot repository origin");
+  const retirementScan = snapshot.retirementScan;
+  if (!retirementScan || typeof retirementScan !== "object" || Array.isArray(retirementScan)) {
+    block("Task snapshot retirementScan binding is required.");
+  }
+  assertEqual(retirementScan.nonce, evidence.scan?.nonce, "Task snapshot scan nonce");
+  assertEqual(retirementScan.sha256, evidence.scan?.sha256, "Task snapshot scan digest");
   if (!Array.isArray(snapshot.tasks)) block("Task snapshot tasks must be an array.");
   if (!github || typeof github !== "object") block("Verified GitHub state is required for task validation.");
 
@@ -1129,7 +1291,46 @@ function validateIgnoredDispositions(current, evidence, now) {
       }
     }
     if (disposition === "backed-up-private") {
-      requiredString(decision.recoveryReference, `Ignored path ${decision.path} recoveryReference`);
+      const backup = decision.backup;
+      if (!backup || typeof backup !== "object" || Array.isArray(backup)) {
+        block(`Ignored path ${decision.path} needs exact private backup evidence.`);
+      }
+      const artifactPath = absoluteRealPath(
+        requiredString(backup.artifactPath, `Ignored path ${decision.path} backup.artifactPath`),
+        `Ignored path ${decision.path} backup artifact`,
+      );
+      requireDurableArtifactPath(artifactPath, `Ignored path ${decision.path} private backup`);
+      if (isInside(artifactPath, current.target)) {
+        block(`Ignored path ${decision.path} private backup is inside the worktree being removed.`);
+      }
+      const artifact = streamedRegularFile(
+        artifactPath,
+        `Ignored path ${decision.path} private backup artifact`,
+      );
+      const artifactParent = lstatSync(dirname(artifactPath), { bigint: true });
+      if (!artifactParent.isDirectory() || artifactParent.isSymbolicLink()) {
+        block(`Ignored path ${decision.path} private backup parent is not a real directory.`);
+      }
+      if (typeof process.getuid === "function" && artifact.stats.uid !== BigInt(process.getuid())) {
+        block(`Ignored path ${decision.path} private backup is not owned by the current user.`);
+      }
+      if (
+        typeof process.getuid === "function" &&
+        artifactParent.uid !== BigInt(process.getuid())
+      ) {
+        block(`Ignored path ${decision.path} private backup parent is not owned by the current user.`);
+      }
+      if ((artifact.stats.mode & 0o077n) !== 0n || (artifactParent.mode & 0o077n) !== 0n) {
+        block(`Ignored path ${decision.path} private backup is readable or writable by another user.`);
+      }
+      assertEqual(backup.artifactSha256, artifact.sha256, `Ignored path ${decision.path} backup checksum`);
+      assertEqual(backup.artifactSizeBytes, artifact.sizeBytes, `Ignored path ${decision.path} backup size`);
+      assertEqual(backup.sourceSha256, decision.sha256, `Ignored path ${decision.path} backed-up source checksum`);
+      assertEqual(backup.sourceSizeBytes, decision.sizeBytes, `Ignored path ${decision.path} backed-up source size`);
+      assertEqual(artifact.sha256, decision.sha256, `Ignored path ${decision.path} exact private backup content`);
+      assertEqual(artifact.sizeBytes, decision.sizeBytes, `Ignored path ${decision.path} exact private backup bytes`);
+      const checkedAt = parsedTime(backup.checkedAt, `Ignored path ${decision.path} backup.checkedAt`);
+      if (checkedAt > now) block(`Ignored path ${decision.path} backup.checkedAt is in the future.`);
     }
   }
   return decisions;
@@ -1170,6 +1371,60 @@ function validateRecovery(current, recovery, now) {
   block(`Unknown recovery kind ${JSON.stringify(recovery.kind)}.`);
 }
 
+export function retirementScanSha256(current) {
+  return sha256(
+    JSON.stringify({
+      target: current.target,
+      registeredPath: current.registeredPath,
+      repositoryRoot: current.repositoryRoot,
+      commonGitDir: current.commonGitDir,
+      origin: current.origin,
+      head: current.head,
+      tree: current.tree,
+      branch: current.branch,
+      baseRef: current.baseRef,
+      uniqueCommitCount: current.uniqueCommitCount,
+      integrated: current.integrated,
+      statusLines: current.statusLines,
+      ignoredEntries: current.ignoredEntries,
+      patchSha256: current.patchSha256,
+      remoteHead: current.remoteHead,
+      bundleArtifactSha256: current.bundle?.artifactSha256 ?? null,
+      bundleRestoredHead: current.bundle?.restoredHead ?? null,
+      bundleRestoredTree: current.bundle?.restoredTree ?? null,
+    }),
+  );
+}
+
+function validateScanBinding(current, evidence, now) {
+  const scan = evidence.scan;
+  if (!scan || typeof scan !== "object" || Array.isArray(scan)) {
+    block("Evidence scan binding is required.");
+  }
+  if (scan.version !== 1) block("Evidence scan.version must be 1.");
+  const nonce = requiredString(scan.nonce, "Evidence scan.nonce");
+  if (!/^[a-f0-9]{64}$/u.test(nonce)) block("Evidence scan.nonce must be 32 random bytes in lowercase hex.");
+  assertEqual(scan.sha256, retirementScanSha256(current), "Evidence scan digest");
+
+  const approval = evidence.approval;
+  if (!approval || typeof approval !== "object" || Array.isArray(approval)) {
+    block("Evidence approval is required.");
+  }
+  assertEqual(
+    requiredString(approval.approvedBy, "approval.approvedBy"),
+    EVIDENCE_APPROVER,
+    "Evidence approver",
+  );
+  requiredString(approval.reason, "approval.reason");
+  const approvedAt = parsedTime(approval.approvedAt, "approval.approvedAt");
+  if (approvedAt > now) block("approval.approvedAt is in the future.");
+  const capturedAt = parsedTime(evidence.capturedAt, "Evidence capturedAt");
+  if (approvedAt < capturedAt) block("approval.approvedAt predates the generated scan.");
+  assertEqual(approval.scanNonce, nonce, "Approval scan nonce");
+  assertEqual(approval.scanSha256, scan.sha256, "Approval scan digest");
+  return scan;
+}
+
 export function assessRemoval({
   current,
   evidence,
@@ -1178,6 +1433,7 @@ export function assessRemoval({
   now = Date.now(),
   taskMaxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
   legacyTasklessConfirmation,
+  skipTaskValidation = false,
 }) {
   if (evidence.schemaVersion !== 2) block("Evidence schemaVersion must be 2.");
   assertFresh(evidence.capturedAt, "Evidence capturedAt", EVIDENCE_MAX_AGE_MS, now);
@@ -1210,6 +1466,7 @@ export function assessRemoval({
   assertEqual(evidence.worktree.branch ?? null, current.branch, "Evidence branch");
   assertEqual(evidence.worktree.baseRef, current.baseRef, "Evidence base reference");
   assertEqual(evidence.worktree.patchSha256, current.patchSha256, "Evidence patch checksum");
+  const scan = validateScanBinding(current, evidence, now);
 
   if (current.statusLines.length > 0) {
     block(`Worktree has tracked or untracked changes: ${current.statusLines.slice(0, 5).join(" | ")}`);
@@ -1253,12 +1510,14 @@ export function assessRemoval({
     block(`GitHub issue has unknown state ${github.issue.state}.`);
   }
 
-  const matchingTasks = validateTaskSnapshot(taskSnapshot, current, evidence, {
-    now,
-    maxAgeMs: taskMaxAgeMs,
-    legacyTasklessConfirmation,
-    github,
-  });
+  const matchingTasks = skipTaskValidation
+    ? []
+    : validateTaskSnapshot(taskSnapshot, current, evidence, {
+        now,
+        maxAgeMs: taskMaxAgeMs,
+        legacyTasklessConfirmation,
+        github,
+      });
   validateRecovery(current, evidence.recovery, now);
   return {
     status: "SAFE_TO_REMOVE",
@@ -1270,24 +1529,44 @@ export function assessRemoval({
     ignoredPathDecisions: ignoredDecisions.length,
     matchingTaskIds: matchingTasks.map((task) => task.id),
     recovery: evidence.recovery.kind,
+    scanNonce: scan.nonce,
+    scanSha256: scan.sha256,
     remoteBranchAction: "keep",
     confirmation: `REMOVE ${current.target}`,
   };
 }
 
 function parseArgs(argv) {
-  const options = { execute: false };
+  const options = { execute: false, generate: false };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--execute") options.execute = true;
+    else if (argument === "--generate") options.generate = true;
     else if (argument === "--target") options.target = argv[++index];
     else if (argument === "--evidence") options.evidence = argv[++index];
+    else if (argument === "--evidence-out") options.evidenceOut = argv[++index];
+    else if (argument === "--review-queue-out") options.reviewQueueOut = argv[++index];
+    else if (argument === "--base-ref") options.baseRef = argv[++index];
+    else if (argument === "--issue-number") options.issueNumber = Number(argv[++index]);
+    else if (argument === "--recovery-bundle") options.recoveryBundle = argv[++index];
+    else if (argument === "--handoff-url") options.handoffUrl = argv[++index];
+    else if (argument === "--issue-disposition") options.issueDisposition = argv[++index];
     else if (argument === "--task-snapshot") options.taskSnapshot = argv[++index];
     else if (argument === "--confirmation") options.confirmation = argv[++index];
     else if (argument === "--remote-branch-action") options.remoteBranchAction = argv[++index];
     else if (argument === "--legacy-taskless-confirmation") {
       options.legacyTasklessConfirmation = argv[++index];
     } else block(`Unknown argument ${argument}.`);
+  }
+  if (options.generate) {
+    if (options.execute) block("--generate cannot be combined with --execute.");
+    for (const name of ["target", "evidenceOut", "reviewQueueOut"]) {
+      requiredString(options[name], `--${name.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`)}`);
+    }
+    for (const forbidden of ["evidence", "taskSnapshot", "confirmation", "remoteBranchAction"]) {
+      if (options[forbidden] !== undefined) block(`--generate cannot be combined with --${forbidden}.`);
+    }
+    return options;
   }
   for (const name of ["target", "evidence", "taskSnapshot"]) {
     requiredString(options[name], `--${name.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`)}`);
@@ -1299,13 +1578,6 @@ function ensureDurableEvidence(path, target) {
   const evidencePath = absoluteRealPath(path, "evidence file");
   requireDurableArtifactPath(evidencePath, "The removal evidence file");
   if (isInside(evidencePath, target)) block("The removal evidence file cannot live inside the worktree being removed.");
-}
-
-function ensureTaskSnapshotOutsideTarget(path, target) {
-  const taskSnapshotPath = absoluteRealPath(path, "task snapshot");
-  if (isInside(taskSnapshotPath, target)) {
-    block("The task snapshot cannot live inside the worktree being removed.");
-  }
 }
 
 function confirmRemovalGone(current) {
@@ -1337,7 +1609,7 @@ function sameQuarantinedState(before, after) {
   }
 }
 
-function quarantineWorktree(current, evidence, expectedRepository, now) {
+function prepareQuarantine(current) {
   const sourceDevice = statSync(current.target).dev;
   const quarantineRoot = mkdtempSync(join(dirname(current.target), ".homa-worktree-quarantine-"));
   try {
@@ -1357,8 +1629,12 @@ function quarantineWorktree(current, evidence, expectedRepository, now) {
     if (error instanceof RemovalBlockedError) throw error;
     block(`Could not create the private quarantine: ${error instanceof Error ? error.message : String(error)}`);
   }
-
   const quarantinePath = join(quarantineRoot, "worktree");
+  return { quarantineRoot, quarantinePath };
+}
+
+function quarantineWorktree(current, evidence, expectedRepository, now, prepared) {
+  const { quarantineRoot, quarantinePath } = prepared;
   const move = commandResult("git", [
     "-C",
     current.repositoryRoot,
@@ -1448,12 +1724,207 @@ function sealQuarantinedWorktree(quarantine) {
   return { ...quarantine, preservedPath };
 }
 
+function generatedRecovery(current, now) {
+  const common = {
+    sourceHead: current.head,
+    sourceTree: current.tree,
+    patchSha256: current.patchSha256,
+    restoredHead: current.head,
+    restoredTree: current.tree,
+    restoreTestedAt: now,
+  };
+  if (current.integrated && current.uniqueCommitCount === 0) {
+    return { kind: "integrated", ...common };
+  }
+  if (current.remoteHead === current.head && current.branch) {
+    return { kind: "remote-branch", reference: `refs/heads/${current.branch}`, ...common };
+  }
+  if (current.bundle) {
+    return {
+      kind: "bundle",
+      artifactPath: current.bundle.artifact,
+      artifactSha256: current.bundle.artifactSha256,
+      ...common,
+    };
+  }
+  block("The lane has local-only commits. Generate a full recovery bundle and pass --recovery-bundle.");
+}
+
+function generateRetirementEvidence(options) {
+  const expectedRepository = inspectScriptRepository();
+  const baseRef = options.baseRef ?? "origin/main";
+  const seedEvidence = {
+    worktree: { baseRef },
+    recovery: options.recoveryBundle
+      ? { kind: "bundle", artifactPath: options.recoveryBundle }
+      : { kind: "integrated" },
+  };
+  let current = inspectLocalState(options.target, seedEvidence, expectedRepository);
+  if (!current.integrated && current.branch && !options.recoveryBundle) {
+    const remoteHead = githubBranchHead(current.origin, current.branch, git(current.target, ["rev-parse", "--show-object-format"]).trim(), {
+      allowMissing: true,
+    });
+    if (remoteHead === current.head) {
+      current = inspectLocalState(
+        options.target,
+        {
+          worktree: { baseRef },
+          recovery: { kind: "remote-branch", reference: `refs/heads/${current.branch}` },
+        },
+        expectedRepository,
+      );
+    }
+  }
+  const generatedAt = new Date().toISOString();
+  const recovery = generatedRecovery(current, generatedAt);
+  const issueNumber = branchIssueNumber(current.branch) ?? options.issueNumber;
+  if (!Number.isInteger(issueNumber) || issueNumber < 1) {
+    block("The generator needs --issue-number when the branch does not carry a gh issue number.");
+  }
+  const github = inspectGithub(
+    current,
+    issueNumber,
+    options.handoffUrl,
+    recovery.kind,
+  );
+  const ignoredDispositions = current.ignoredEntries.map((entry) => {
+    const automatic = !isSensitiveIgnoredPath(entry.path) && isApprovedRegenerablePath(entry.path);
+    return {
+      ...entry,
+      disposition: automatic ? "regenerable" : "review-required",
+      reason: automatic ? "Generated or cached content can be recreated from the retained source." : "",
+      decidedAt: automatic ? generatedAt : "",
+    };
+  });
+  const scan = {
+    version: 1,
+    nonce: randomBytes(32).toString("hex"),
+    sha256: retirementScanSha256(current),
+  };
+  const issueDisposition = github.issue.state === "CLOSED"
+    ? "closed"
+    : options.issueDisposition ?? "review-required";
+  const evidence = {
+    schemaVersion: 2,
+    capturedAt: generatedAt,
+    repository: {
+      root: current.repositoryRoot,
+      commonGitDir: current.commonGitDir,
+      origin: current.origin,
+    },
+    worktree: {
+      path: current.target,
+      registeredPath: current.registeredPath,
+      gitDir: current.gitDir,
+      head: current.head,
+      tree: current.tree,
+      branch: current.branch,
+      baseRef: current.baseRef,
+      patchSha256: current.patchSha256,
+      ignoredDispositions,
+    },
+    issue: {
+      number: github.issue.number,
+      state: github.issue.state,
+      url: github.issue.url,
+      disposition: issueDisposition,
+      ...(options.handoffUrl ? { handoffUrl: options.handoffUrl } : {}),
+    },
+    task: {},
+    recovery,
+    scan,
+    approval: {
+      approvedBy: "",
+      approvedAt: "",
+      reason: "",
+      scanNonce: scan.nonce,
+      scanSha256: scan.sha256,
+    },
+  };
+  const reviewItems = [
+    {
+      kind: "approval",
+      action: "Review every evidence field, then complete the approval object without changing the scan binding.",
+    },
+  ];
+  for (const decision of ignoredDispositions.filter((entry) => entry.disposition === "review-required")) {
+    reviewItems.push({
+      kind: isSensitiveIgnoredPath(decision.path) ? "private-backup" : "ignored-file",
+      path: decision.path,
+      sha256: decision.sha256,
+      sizeBytes: decision.sizeBytes,
+      action: isSensitiveIgnoredPath(decision.path)
+        ? "Create an exact owner-only durable backup and record its artifact proof."
+        : "Choose discard-approved or backed-up-private and record the exact decision.",
+    });
+  }
+  if (github.issue.state === "OPEN" && issueDisposition === "review-required") {
+    reviewItems.push({
+      kind: "open-issue",
+      issue: github.issue.number,
+      action: "Record an updated-open or replacement-active handoff comment and its exact URL.",
+    });
+  }
+  reviewItems.push({
+    kind: "execution-task-snapshot",
+    action: "Pipe a fresh complete Codex Desktop task snapshot with this scan nonce and digest at execution time.",
+  });
+
+  const evidenceOut = resolve(options.evidenceOut);
+  const reviewQueueOut = resolve(options.reviewQueueOut);
+  for (const [path, label] of [
+    [evidenceOut, "Evidence output"],
+    [reviewQueueOut, "Review queue output"],
+  ]) {
+    if (path !== options[label === "Evidence output" ? "evidenceOut" : "reviewQueueOut"]) {
+      block(`${label} path must be absolute and normalized.`);
+    }
+    requireDurableArtifactPath(path, label);
+    if (isInside(path, current.target) || isInside(path, current.commonGitDir)) {
+      block(`${label} cannot be inside the target worktree or common Git directory.`);
+    }
+  }
+  atomicPrivateJson(evidenceOut, evidence, "retirement evidence");
+  atomicPrivateJson(
+    reviewQueueOut,
+    {
+      schemaVersion: 1,
+      generatedAt,
+      evidencePath: evidenceOut,
+      scan,
+      target: current.target,
+      issue: github.issue.number,
+      items: reviewItems,
+    },
+    "retirement review queue",
+  );
+  return {
+    status: "RETIREMENT_EVIDENCE_GENERATED",
+    evidencePath: evidenceOut,
+    reviewQueuePath: reviewQueueOut,
+    reviewItemCount: reviewItems.length,
+    scan,
+  };
+}
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
+  if (options.generate) {
+    console.log(JSON.stringify(generateRetirementEvidence(options), null, 2));
+    return;
+  }
   const evidencePath = absoluteRealPath(options.evidence, "evidence file");
-  const taskSnapshotPath = absoluteRealPath(options.taskSnapshot, "task snapshot");
+  if (options.execute && options.taskSnapshot !== "-") {
+    block("Execution requires --task-snapshot - so the fresh Codex Desktop snapshot arrives on standard input.");
+  }
+  if (!options.execute && options.taskSnapshot === "-") {
+    block("Inspection requires a task snapshot file. Standard input is reserved for the execution boundary.");
+  }
+  const taskSnapshotPath = options.taskSnapshot === "-"
+    ? null
+    : absoluteRealPath(options.taskSnapshot, "task snapshot");
   const evidence = readJson(evidencePath, "Evidence file");
-  const taskSnapshot = readJson(taskSnapshotPath, "Task snapshot");
+  const taskSnapshot = taskSnapshotPath ? readJson(taskSnapshotPath, "Task snapshot") : null;
   const expectedRepository = inspectScriptRepository();
   const current = inspectLocalState(options.target, evidence, expectedRepository);
   ensureDurableEvidence(evidencePath, current.target);
@@ -1466,6 +1937,7 @@ function main() {
     taskSnapshot,
     github,
     legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+    skipTaskValidation: options.execute,
   });
 
   if (!options.execute) {
@@ -1476,30 +1948,36 @@ function main() {
     block("Execution requires --remote-branch-action keep. This wrapper never deletes remote branches.");
   }
   assertEqual(options.confirmation, assessment.confirmation, "Removal confirmation");
-  ensureTaskSnapshotOutsideTarget(taskSnapshotPath, current.target);
 
   const finalGithub = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
-  const refreshedTaskSnapshot = readJson(taskSnapshotPath, "Final task snapshot");
-  validateTaskSnapshot(refreshedTaskSnapshot, current, evidence, {
+  const finalCurrent = inspectLocalState(options.target, evidence, expectedRepository);
+  const finalAssessment = assessRemoval({
+    current: finalCurrent,
+    evidence,
+    taskSnapshot: null,
+    github: finalGithub,
+    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+    skipTaskValidation: true,
+  });
+  assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
+
+  const preparedQuarantine = prepareQuarantine(finalCurrent);
+  const refreshedTaskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
+  validateTaskSnapshot(refreshedTaskSnapshot, finalCurrent, evidence, {
     maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
     legacyTasklessConfirmation: options.legacyTasklessConfirmation,
     github: finalGithub,
   });
 
-  // Network and task checks happen first. This fingerprint authorizes only the
-  // quarantine move. The moved worktree is inspected again before removal.
-  const finalCurrent = inspectLocalState(options.target, evidence, expectedRepository);
-  const finalAssessment = assessRemoval({
-    current: finalCurrent,
+  // No Git or network call occurs after the task proof and before this move.
+  // Git performs the registered same-filesystem move as the preservation boundary.
+  const quarantine = quarantineWorktree(
+    finalCurrent,
     evidence,
-    taskSnapshot: refreshedTaskSnapshot,
-    github: finalGithub,
-    taskMaxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
-    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
-  });
-  assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
-
-  const quarantine = quarantineWorktree(finalCurrent, evidence, expectedRepository, Date.now());
+    expectedRepository,
+    Date.now(),
+    preparedQuarantine,
+  );
   const sealed = sealQuarantinedWorktree(quarantine);
   const removal = commandResult("git", [
     "-C",
