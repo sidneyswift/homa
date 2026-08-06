@@ -1,0 +1,150 @@
+name: Apply issue 888 production repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type APPLY ISSUE 888
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-issue-888-repair
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'
+    name: Apply two audited issue 888 migrations
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+
+      - name: Validate authorization and immutable inputs
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$CONFIRMATION" != "APPLY ISSUE 888" ]; then
+            echo "Confirmation must exactly match APPLY ISSUE 888."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
+            echo "This repair may run only in sidneyswift/homa."
+            exit 1
+          fi
+          node scripts/migration-version-check.mjs
+
+          original_migration="supabase/migrations/20260801201500_month_plan_approvals.sql"
+          expected_original="82e13e2cb85667f8ec9e5d8f561fcc63332e34c90b19b168f2aad462065e8d66"
+          actual_original="$(sha256sum "$original_migration" | cut -d' ' -f1)"
+          if [ "$actual_original" != "$expected_original" ]; then
+            echo "Original month-plan migration hash does not match the reviewed issue #888 input."
+            exit 1
+          fi
+
+          boundary_migration="supabase/migrations/20260806040000_month_plan_approvals_write_boundary.sql"
+          expected_boundary="9fabf67838a95a6cf6df569d275d0314c8304523ca9a494334da2a80bcab5a12"
+          actual_boundary="$(sha256sum "$boundary_migration" | cut -d' ' -f1)"
+          if [ "$actual_boundary" != "$expected_boundary" ]; then
+            echo "Month-plan write-boundary migration hash does not match the reviewed issue #888 input."
+            exit 1
+          fi
+
+          repair_script="scripts/issue-888-production-repair.sql"
+          expected_repair="680a2b324c83b78ea1e6ae02ccd27f00005804bd004e1d12233fa1a8f6e618fb"
+          actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
+          if [ "$actual_repair" != "$expected_repair" ]; then
+            echo "Repair wrapper hash does not match the reviewed issue #888 input."
+            exit 1
+          fi
+
+      - name: Confirm PostgreSQL client availability
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-client-16
+          fi
+          psql --version
+
+      - name: Build a masked production database URL
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const password = process.env.SUPABASE_DB_PASSWORD;
+          if (!publicUrl || !password) {
+            throw new Error("Production Supabase URL or database password is missing");
+          }
+          const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
+          const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
+          databaseUrl.username = `postgres.${ref}`;
+          databaseUrl.password = password;
+          databaseUrl.searchParams.set("sslmode", "require");
+          process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
+          appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
+          NODE
+
+      - name: Prove the production target is the reviewed clean state
+        run: |
+          state="$(psql "$MIGRATION_DATABASE_URL" -qXAt -v ON_ERROR_STOP=1 -c "
+            select concat_ws('|',
+              to_regclass('public.month_plan_approvals') is null,
+              to_regclass('public.month_plan_approvals_pkey') is null,
+              to_regclass('public.month_plan_approvals_family_month_idx') is null,
+              not exists (
+                select 1 from supabase_migrations.schema_migrations
+                where version = '20260801201500'
+              ),
+              not exists (
+                select 1 from supabase_migrations.schema_migrations
+                where version = '20260806040000'
+              ),
+              to_regclass('public.families') is not null,
+              to_regprocedure('public.is_family_member(uuid)') is not null
+            );
+          ")"
+          if [ "$state" != "true|true|true|true|true|true|true" ] \
+            && [ "$state" != "t|t|t|t|t|t|t" ]; then
+            echo "Production is not the reviewed clean issue #888 state."
+            exit 1
+          fi
+
+      - name: Apply the exact repair and prove an immediate repeat
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -f scripts/issue-888-production-repair.sql \
+            -f scripts/issue-888-production-repair.sql)"
+          echo "$result"
+          mapfile -t repair_markers < <(
+            printf '%s\n' "$result" | grep '^ISSUE_888_REPAIR='
+          )
+          if [ "${#repair_markers[@]}" -ne 2 ] \
+            || [ "${repair_markers[0]}" != "ISSUE_888_REPAIR=repaired" ] \
+            || [ "${repair_markers[1]}" != "ISSUE_888_REPAIR=verified_noop" ]; then
+            echo "The issue #888 repair did not report repaired then verified_noop."
+            exit 1
+          fi
+
+      - name: Prove a fresh connection is a verified no-op
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -f scripts/issue-888-production-repair.sql)"
+          echo "$result"
+          repair_marker="$(printf '%s\n' "$result" | grep '^ISSUE_888_REPAIR=')"
+          if [ "$repair_marker" != "ISSUE_888_REPAIR=verified_noop" ]; then
+            echo "The fresh issue #888 repair pass was not a verified no-op."
+            exit 1
+          fi
