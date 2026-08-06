@@ -96,7 +96,7 @@ try {
         when f.name = 'E2E Tasks Family' and f.email = 'delivered@resend.dev'
           then 'task fixture'
         when f.name = 'Continuity fold stub'
-          and f.email = 'continuity-fold-stub@example.test'
+          and f.email is null
           then 'continuity fold fixture'
         else 'device-sync fixture'
       end as reason,
@@ -131,7 +131,7 @@ try {
         or (f.name = 'E2E Tasks Family' and f.email = 'delivered@resend.dev')
         or (
           f.name = 'Continuity fold stub'
-          and f.email = 'continuity-fold-stub@example.test'
+          and f.email is null
         )
         or (f.name = 'Sync E2E family' and f.email = 'sync-e2e@example.test')
         or (f.name = 'Other family' and f.email = 'other@example.test')
@@ -193,7 +193,7 @@ try {
             or (f.name = 'E2E Tasks Family' and f.email = 'delivered@resend.dev')
             or (
               f.name = 'Continuity fold stub'
-              and f.email = 'continuity-fold-stub@example.test'
+              and f.email is null
             )
             or (f.name = 'Sync E2E family' and f.email = 'sync-e2e@example.test')
             or (f.name = 'Other family' and f.email = 'other@example.test')

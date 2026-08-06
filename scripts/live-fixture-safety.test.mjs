@@ -180,3 +180,24 @@ test("reserved fixture retirement is manual, bounded, and soft-only", () => {
   assert.doesNotMatch(source, /delete from auth\.users/u);
   assert.doesNotMatch(source, /delete from public\.families/u);
 });
+
+test("the continuity fold fixture remains anonymous and exactly retireable", () => {
+  const continuity = readFileSync(
+    path.join(repoRoot, "scripts/conversation-continuity-e2e.mts"),
+    "utf8",
+  );
+  const retirement = readFileSync(
+    path.join(repoRoot, "scripts/retire-reserved-live-fixtures.mts"),
+    "utf8",
+  );
+
+  assert.match(
+    continuity,
+    /insert into public\.families \(name, status, sandbox\)[\s\S]*?'Continuity fold stub'[\s\S]*?true/u,
+  );
+  assert.doesNotMatch(continuity, /continuity-fold-stub@example\.test/u);
+  assert.match(
+    retirement,
+    /f\.name = 'Continuity fold stub'[\s\S]*?and f\.email is null/u,
+  );
+});

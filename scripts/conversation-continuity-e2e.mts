@@ -538,13 +538,8 @@ try {
   );
 
   const stubs = await sql<{ id: string }[]>`
-    insert into public.families (name, email, status, sandbox)
-    values (
-      'Continuity fold stub',
-      'continuity-fold-stub@example.test',
-      'open',
-      true
-    )
+    insert into public.families (name, status, sandbox)
+    values ('Continuity fold stub', 'open', true)
     returning id
   `;
   stubFamilyId = stubs[0].id;
