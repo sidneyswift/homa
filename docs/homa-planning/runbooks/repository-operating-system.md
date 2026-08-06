@@ -56,9 +56,12 @@ Inventory these sources separately:
 Never infer repository identity from a directory name. Resolve the checkout root,
 Git directory, common Git directory, and stored origin. The safe removal wrapper
 also requires the target to share the common Git directory and origin of the Homa
-checkout containing the wrapper. A standalone clone can
-occupy a path once used by a missing linked worktree while containing unrelated
-work.
+checkout containing the wrapper. It removes every ambient `GIT_*` variable before
+each Git or GitHub subprocess, then installs its own no-prompt, no-replacement,
+no-system-config environment. `GIT_DIR`, `GIT_WORK_TREE`, injected config, alternate
+object stores, and similar caller state cannot redirect inspection. A standalone
+clone can occupy a path once used by a missing linked worktree while containing
+unrelated work.
 
 For every checkout, record:
 
@@ -92,8 +95,10 @@ A clean status is necessary but is not enough to classify a checkout as removabl
 3. For commits already on a trusted remote, record the exact remote ref and commit.
 4. For local-only commits, create a Git bundle outside the source worktree and
    outside `/private/tmp`. The wrapper restores it into a new empty repository and
-   compares the restored HEAD and tree with the source. A bundle that depends on
-   prerequisite objects outside itself fails this proof.
+   compares the restored HEAD and tree with the source. The empty repository has no
+   object alternates, ignores caller object indirection, and passes a full strict
+   object check. A bundle that depends on prerequisite objects outside itself fails
+   this proof.
 5. For tracked edits, create a binary-capable patch. Restore it in a disposable
    checkout before accepting it.
 6. For useful untracked files, copy the sanitized files into the recovery package.
@@ -121,7 +126,8 @@ Store schema version 2 evidence outside the target worktree and outside
 `/private/tmp`. Capture it within thirty minutes of execution. It must identify the
 exact primary checkout, common Git directory, stored origin URL, target path,
 registered path, target Git directory, branch, HEAD, tree, base ref, and binary
-patch checksum.
+patch checksum. Evidence, recovery, ignored-file, replacement, task, check, and
+approval timestamps must be valid and cannot be in the future.
 
 Every ignored file needs one evidence decision bound to its relative path, file or
 symlink type, byte size, and SHA-256 digest. The wrapper gets this inventory from
@@ -134,7 +140,11 @@ ignored file invalidates the evidence. Allowed decisions are:
 - `backed-up-private`, with a reason and private recovery reference.
 
 Secret-shaped ignored paths cannot be classified as regenerable, including a
-secret-shaped file nested inside an otherwise generated directory.
+secret-shaped file nested inside an otherwise generated directory. This includes
+environment files, `.pgpass`, `.docker/config.json`, service-account files,
+keystores, `config.local`, credentials, bounded secret and token names, private keys,
+and certificates. Ordinary names such as `tokenizer-cache.json` are not treated as
+secrets merely because they contain the letters `token`.
 
 Recovery kinds are:
 
@@ -155,9 +165,10 @@ worktree. Do not use a new app-server process as a substitute. A separate proces
 can read stored tasks but cannot prove the Desktop app's live ownership state.
 
 The execution snapshot is valid for thirty seconds. The wrapper re-reads it after
-the final GitHub checks. If it is stale, malformed, contains a matching active task,
-or contains an unknown task state, execution stops. Inspection mode accepts a
-snapshot up to ten minutes old because it changes nothing.
+the final GitHub checks. If it is stale, future-dated, malformed, contains a matching
+active task, or contains a matching task whose status is anything other than the
+exact value `completed`, execution stops. Inspection mode accepts a snapshot up to
+ten minutes old because it changes nothing.
 
 The snapshot shape is:
 
@@ -180,9 +191,15 @@ The snapshot shape is:
         "branch": "codex/gh-872-short-slug",
         "worktree": "/absolute/worktree/path",
         "commitOrPr": "full commit or pull request URL",
-        "checks": "Exact checks",
+        "checks": {
+          "executed": true,
+          "status": "passed",
+          "commands": ["exact command that ran"],
+          "completedAt": "2026-08-06T03:00:00.000Z"
+        },
         "productionState": "Verified state or not applicable",
-        "nextStep": "Remove the worktree",
+        "nextStep": "cleanup-coordinator-remove-worktree",
+        "handoffComplete": true,
         "recordedAt": "2026-08-06T03:00:00.000Z"
       }
     }
@@ -190,22 +207,28 @@ The snapshot shape is:
 }
 ```
 
-Every matching finished task includes a handoff with outcome, issue, branch,
-worktree, commit or pull request, checks, production state, next step, and recorded
-time. Automatic removal requires at least one matching finished task. A matching
-active task always blocks.
+Every matching task must be `completed` and include an exact handoff. The issue is
+exactly `#<number>` or its GitHub issue URL. `commitOrPr` is exactly the current HEAD,
+its GitHub commit URL, or an associated pull request URL whose head is the current
+HEAD. Checks explicitly record execution, passing status, at least one command, and
+completion time. The next step is exactly `cleanup-coordinator-remove-worktree` and
+`handoffComplete` is true. Automatic removal requires at least one matching task. A
+matching active, cancelled, interrupted, archived, or otherwise noncompleted task
+always blocks.
 
 The JSON fields prove freshness and internal consistency, not app-authenticated
 provenance. The operator remains responsible for exporting the complete task-list
 result. A taskless legacy lane uses a separate manual path: evidence records a fresh
 `task.legacyTasklessOverride` with `approvedBy`, `reason`, and `approvedAt`, and the
 command includes `--legacy-taskless-confirmation "ALLOW TASKLESS /absolute/worktree/path"`.
-Do not use that override for a lane with a matching task.
+The approver must be exactly `sidneyswift` and the reason exactly
+`legacy-lane-predates-task-tracking`. Do not use that override for a lane with a
+matching task.
 
-Task metadata cannot prove that an unrelated agent has been omitted from a snapshot
-or started operating on a path after the snapshot. The named cleanup operator must
-keep a repository freeze during the execution window. The wrapper is fail-closed
-evidence validation, not an operating-system lock against an uncooperative process.
+Task metadata cannot prove that an unrelated agent was omitted from a snapshot. The
+named cleanup operator must keep a repository freeze during the execution window.
+The private quarantine closes the ordinary final path race, but it is not an
+operating-system lock against an uncooperative process running as the same account.
 
 ### Inspect, then execute
 
@@ -221,7 +244,11 @@ node scripts/remove-worktree-safely.mjs \
 Review the exact identity, issue, pull request, task, ignored-file, and recovery
 result. Refresh the Desktop task snapshot, then execute within thirty seconds. The
 wrapper completes GitHub and task checks first, then recomputes recovery, status,
-and ignored-file fingerprints immediately before removal:
+and ignored-file fingerprints. It creates a private sibling directory on the same
+filesystem, atomically moves the worktree into it, and reinspects the moved worktree.
+Only an unchanged quarantined worktree receives normal, non-force removal. If
+anything arrived at the move boundary or the reinspection differs, execution stops
+and reports the preserved quarantine path:
 
 ```sh
 node scripts/remove-worktree-safely.mjs \
@@ -233,7 +260,8 @@ node scripts/remove-worktree-safely.mjs \
   --confirmation "REMOVE /absolute/worktree/path"
 ```
 
-After success, confirm the path and registration are gone. The local branch remains.
+After success, confirm the original path, quarantine path, and registration are gone.
+The local branch remains.
 Delete a merged local branch separately with normal `git branch -d` only after
 ancestry or merged pull request evidence proves integration. Remote deletion is a
 separate action requiring the current issue owner or a repository maintainer to name
@@ -282,8 +310,8 @@ Use this order:
 
 The project hook at [.claude/hooks/block-dangerous-git.mjs](../../../.claude/hooks/block-dangerous-git.mjs)
 is a tripwire. It blocks direct worktree removal and common destructive Git forms,
-including nested shell text, Git `-C`, hard reset, forced clean, forced branch delete
-in combined or separate short-flag forms, direct worktree remove or prune,
+including nested shell text, Git `-C`, hard reset, forced clean, any branch deletion
+in combined, separate, or abbreviated option forms, direct worktree remove or prune,
 whole-worktree restore, and push commands issued through Claude Code Bash.
 
 It is not an authorization or security boundary. It cannot govern another shell,

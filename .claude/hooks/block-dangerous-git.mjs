@@ -45,6 +45,11 @@ function hasShortFlag(args, flag) {
   return args.some((argument) => new RegExp(`^-[^-]*${flag}`, "u").test(argument));
 }
 
+function isLongOptionOrAbbreviation(argument, fullOption) {
+  const option = argument.split("=", 1)[0];
+  return option.startsWith("--") && option.length >= 3 && fullOption.startsWith(option);
+}
+
 function dangerousGitReason(tokens) {
   for (let index = 0; index < tokens.length; index += 1) {
     if (!isGitToken(tokens[index])) continue;
@@ -65,10 +70,13 @@ function dangerousGitReason(tokens) {
     if (name === "clean" && (args.includes("--force") || hasShortFlag(args, "f"))) {
       return "Forced Git clean is disabled by the project Git safety policy.";
     }
-    const deletesBranch = args.includes("-D") || args.includes("--delete") || hasShortFlag(args, "d");
-    const forcesBranch = args.includes("-D") || args.includes("--force") || hasShortFlag(args, "f");
-    if (name === "branch" && deletesBranch && forcesBranch) {
-      return "Forced branch deletion is disabled by the project Git safety policy.";
+    const deletesBranch = args.some(
+      (argument) =>
+        /^-[^-]*[dD]/u.test(argument) ||
+        isLongOptionOrAbbreviation(argument, "--delete"),
+    );
+    if (name === "branch" && deletesBranch) {
+      return "Branch deletion is disabled by the project Git safety policy.";
     }
     if (["checkout", "restore"].includes(name) && (args.includes(".") || args.includes(":/"))) {
       return "Whole-worktree checkout or restore is disabled by the project Git safety policy.";

@@ -2,12 +2,14 @@
 
 import { createHash } from "node:crypto";
 import {
+  chmodSync,
   existsSync,
   lstatSync,
   mkdtempSync,
   readFileSync,
   readlinkSync,
   realpathSync,
+  rmdirSync,
   rmSync,
   statSync,
 } from "node:fs";
@@ -28,21 +30,30 @@ const ACTIVE_TASK_STATES = new Set([
   "running",
   "waiting",
 ]);
-const FINISHED_TASK_STATES = new Set([
-  "archived",
-  "cancelled",
-  "completed",
-  "done",
-  "interrupted",
-]);
 const IGNORED_DISPOSITIONS = new Set([
   "backed-up-private",
   "discard-approved",
   "regenerable",
 ]);
 const IGNORED_FILE_KINDS = new Set(["file", "symlink"]);
-const SENSITIVE_IGNORED_PATH =
-  /(^|\/)(?:\.env(?:\.|$)|\.npmrc$|\.netrc$|\.aws(?:\/|$)|\.ssh(?:\/|$)|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?$|google-services\.json$|GoogleService-Info\.plist$|[^/]*\.(?:crt|key|pem|p12|pfx)$|[^/]*(?:credential|secret|token)[^/]*)/iu;
+const SENSITIVE_IGNORED_FILENAMES = new Set([
+  ".git-credentials",
+  ".netrc",
+  ".npmrc",
+  ".pgpass",
+  "auth.json",
+  "google-services.json",
+  "googleservice-info.plist",
+  "kubeconfig",
+  "release.keystore",
+  "service-account.json",
+  "service_account.json",
+]);
+const SENSITIVE_IGNORED_NAME =
+  /(?:^|[._-])(?:access[_-]?token|api[_-]?(?:key|token)|client[_-]?secret|credentials?|passw(?:or)?d|private[_-]?key|refresh[_-]?token|secrets?|service[_-]?account|tokens?)(?:[._-]|$)/u;
+const TASKLESS_APPROVER = "sidneyswift";
+const TASKLESS_REASON = "legacy-lane-predates-task-tracking";
+const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 
 export class RemovalBlockedError extends Error {
@@ -56,11 +67,25 @@ function block(message) {
   throw new RemovalBlockedError(message);
 }
 
+function sanitizedSubprocessEnvironment(inputEnvironment = process.env) {
+  const environment = {};
+  for (const [key, value] of Object.entries(inputEnvironment)) {
+    if (!key.toUpperCase().startsWith("GIT_")) environment[key] = value;
+  }
+  return {
+    ...environment,
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_NOSYSTEM: "1",
+    GIT_NO_REPLACE_OBJECTS: "1",
+    GIT_TERMINAL_PROMPT: "0",
+  };
+}
+
 function commandResult(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd,
     encoding: "utf8",
-    env: options.env ?? process.env,
+    env: sanitizedSubprocessEnvironment(options.env ?? process.env),
     maxBuffer: 20 * 1024 * 1024,
   });
   if (result.error) block(`Could not run ${command}: ${result.error.message}`);
@@ -135,7 +160,7 @@ function parsedTime(value, label) {
 
 function assertFresh(value, label, maxAgeMs, now) {
   const time = parsedTime(value, label);
-  if (time > now + 60_000) block(`${label} is in the future.`);
+  if (time > now) block(`${label} is in the future.`);
   if (now - time > maxAgeMs) block(`${label} is stale. Capture it again immediately before removal.`);
   return time;
 }
@@ -151,6 +176,16 @@ function absoluteRealPath(path, label) {
     return realpathSync(path);
   } catch (error) {
     block(`${label} does not resolve: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+function pathEntryExists(path, label) {
+  try {
+    lstatSync(path);
+    return true;
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "ENOENT") return false;
+    block(`Could not inspect ${label}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -194,6 +229,22 @@ function comparePaths(left, right) {
   if (left.path < right.path) return -1;
   if (left.path > right.path) return 1;
   return 0;
+}
+
+function isSensitiveIgnoredPath(path) {
+  const segments = path.replaceAll("\\", "/").split("/").filter(Boolean);
+  const lowerSegments = segments.map((segment) => segment.toLowerCase());
+  const leaf = lowerSegments.at(-1) ?? "";
+  const parent = lowerSegments.at(-2) ?? "";
+
+  if (lowerSegments.some((segment) => segment === ".aws" || segment === ".ssh")) return true;
+  if (parent === ".docker" && leaf === "config.json") return true;
+  if (/^\.env(?:\.|$)/u.test(leaf)) return true;
+  if (/^config\.local(?:\.|$)/u.test(leaf)) return true;
+  if (/\.(?:crt|jks|key|keystore|p12|pem|pfx)$/u.test(leaf)) return true;
+  if (SENSITIVE_IGNORED_FILENAMES.has(leaf)) return true;
+  if (/^id_(?:dsa|ecdsa|ed25519|rsa)(?:\.pub)?$/u.test(leaf)) return true;
+  return lowerSegments.some((segment) => SENSITIVE_IGNORED_NAME.test(segment));
 }
 
 function sameFileState(left, right) {
@@ -307,14 +358,35 @@ function inspectBundle(path, target, expectedHead, expectedTree, objectFormat) {
   const restoreRoot = mkdtempSync(join(tmpdir(), "homa-worktree-bundle-restore-"));
   const restoreRepository = join(restoreRoot, "restored.git");
   try {
-    checked("git", ["init", "--bare", `--object-format=${objectFormat}`, restoreRepository]);
+    checked("git", ["init", "--bare", "--template=", `--object-format=${objectFormat}`, restoreRepository]);
+    for (const name of ["alternates", "http-alternates"]) {
+      if (existsSync(join(restoreRepository, "objects", "info", name))) {
+        block(`The empty restore repository inherited ${name} object indirection.`);
+      }
+    }
     checked("git", [
       "-C",
       restoreRepository,
+      "-c",
+      "fetch.fsckObjects=true",
       "fetch",
       "--no-tags",
       artifact,
       `${advertised.reference}:refs/heads/recovered`,
+    ]);
+    for (const name of ["alternates", "http-alternates"]) {
+      if (existsSync(join(restoreRepository, "objects", "info", name))) {
+        block(`The bundle restore introduced ${name} object indirection.`);
+      }
+    }
+    checked("git", [
+      "-C",
+      restoreRepository,
+      "fsck",
+      "--full",
+      "--strict",
+      "--no-dangling",
+      "refs/heads/recovered",
     ]);
     const restoredHead = checked("git", ["-C", restoreRepository, "rev-parse", "refs/heads/recovered"]).trim();
     const restoredTree = checked(
@@ -461,15 +533,15 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
     "--header",
     "Accept: application/vnd.github+json",
   ]);
-  let commitPulls = [];
+  let associatedPullRequests = [];
   if (commitPullResult.status === 0) {
-    commitPulls = parseCommandJson(commitPullResult.stdout, "GitHub commit pull request lookup")
-      .filter((pull) => pull.state === "open")
+    associatedPullRequests = parseCommandJson(commitPullResult.stdout, "GitHub commit pull request lookup")
       .map((pull) => ({
         number: pull.number,
         url: pull.html_url,
         headRefOid: pull.head?.sha ?? null,
         headRefName: pull.head?.ref ?? null,
+        state: pull.state,
       }));
   } else {
     const missingLocalOnlyCommit = /\(HTTP (?:404|422)\)/u.test(commitPullResult.stderr);
@@ -479,7 +551,12 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
   }
 
   const pullMap = new Map();
-  for (const pull of [...branchPulls, ...commitPulls]) pullMap.set(pull.number, pull);
+  for (const pull of [
+    ...branchPulls,
+    ...associatedPullRequests.filter((pull) => pull.state === "open"),
+  ]) {
+    pullMap.set(pull.number, pull);
+  }
   const issue = parseCommandJson(
     checked("gh", ["issue", "view", String(issueNumber), "--repo", repository, "--json", "number,state,url"]),
     "GitHub issue lookup",
@@ -495,10 +572,16 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
     );
     handoffComment = { url: comment.html_url, issueUrl: comment.issue_url, body: comment.body };
   }
-  return { repository, openPullRequests: [...pullMap.values()], issue, handoffComment };
+  return {
+    repository,
+    openPullRequests: [...pullMap.values()],
+    associatedPullRequests,
+    issue,
+    handoffComment,
+  };
 }
 
-function validateHandoff(handoff, taskId, current, issueNumber, now) {
+function validateHandoff(handoff, taskId, current, github, now) {
   if (!handoff || typeof handoff !== "object") block(`Task ${taskId} has no recorded handoff.`);
   for (const field of [
     "outcome",
@@ -506,22 +589,53 @@ function validateHandoff(handoff, taskId, current, issueNumber, now) {
     "branch",
     "worktree",
     "commitOrPr",
-    "checks",
     "productionState",
     "nextStep",
   ]) {
     requiredString(handoff[field], `Task ${taskId} handoff.${field}`);
   }
   const recordedAt = parsedTime(handoff.recordedAt, `Task ${taskId} handoff.recordedAt`);
-  if (recordedAt > now + 60_000) block(`Task ${taskId} handoff.recordedAt is in the future.`);
+  if (recordedAt > now) block(`Task ${taskId} handoff.recordedAt is in the future.`);
   if (current.branch) assertEqual(handoff.branch, current.branch, `Task ${taskId} handoff branch`);
   assertEqual(
     absoluteRealPath(handoff.worktree, `Task ${taskId} handoff worktree`),
     current.target,
     `Task ${taskId} handoff worktree`,
   );
-  if (!handoff.issue.includes(`#${issueNumber}`) && !handoff.issue.includes(`/issues/${issueNumber}`)) {
+  const exactIssueReferences = new Set([`#${github.issue.number}`, github.issue.url]);
+  if (!exactIssueReferences.has(handoff.issue)) {
     block(`Task ${taskId} handoff points to a different issue.`);
+  }
+
+  const commitUrl = `https://github.com/${github.repository}/commit/${current.head}`;
+  const associatedPull = github.associatedPullRequests.find(
+    (pull) => pull.url === handoff.commitOrPr && pull.headRefOid === current.head,
+  );
+  if (handoff.commitOrPr !== current.head && handoff.commitOrPr !== commitUrl && !associatedPull) {
+    block(`Task ${taskId} handoff.commitOrPr must exactly name HEAD or an associated pull request.`);
+  }
+
+  const checks = handoff.checks;
+  if (!checks || typeof checks !== "object" || Array.isArray(checks)) {
+    block(`Task ${taskId} handoff.checks must be an object that records executed checks.`);
+  }
+  if (checks.executed !== true) block(`Task ${taskId} handoff.checks.executed must be true.`);
+  if (checks.status !== "passed") block(`Task ${taskId} handoff.checks.status must be passed.`);
+  if (
+    !Array.isArray(checks.commands) ||
+    checks.commands.length === 0 ||
+    checks.commands.some((command) => typeof command !== "string" || command.trim() === "")
+  ) {
+    block(`Task ${taskId} handoff.checks.commands must list at least one executed command.`);
+  }
+  const checksCompletedAt = parsedTime(
+    checks.completedAt,
+    `Task ${taskId} handoff.checks.completedAt`,
+  );
+  if (checksCompletedAt > now) block(`Task ${taskId} handoff.checks.completedAt is in the future.`);
+  assertEqual(handoff.nextStep, CLEANUP_NEXT_STEP, `Task ${taskId} handoff nextStep`);
+  if (handoff.handoffComplete !== true) {
+    block(`Task ${taskId} handoff.handoffComplete must be true.`);
   }
 }
 
@@ -533,6 +647,7 @@ export function validateTaskSnapshot(
     now = Date.now(),
     maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
     legacyTasklessConfirmation,
+    github,
   } = {},
 ) {
   if (snapshot.schemaVersion !== 1) block("Task snapshot schemaVersion must be 1.");
@@ -545,6 +660,7 @@ export function validateTaskSnapshot(
   assertFresh(snapshot.capturedAt, "Task snapshot capturedAt", maxAgeMs, now);
   assertEqual(normalizeOrigin(snapshot.repositoryOrigin), current.origin, "Task snapshot repository origin");
   if (!Array.isArray(snapshot.tasks)) block("Task snapshot tasks must be an array.");
+  if (!github || typeof github !== "object") block("Verified GitHub state is required for task validation.");
 
   const matchingTasks = snapshot.tasks.filter((task) => {
     let taskWorktree = null;
@@ -559,16 +675,18 @@ export function validateTaskSnapshot(
   });
   for (const task of matchingTasks) {
     const taskId = requiredString(task.id, "task.id");
-    const status = requiredString(task.status, `Task ${taskId} status`).toLowerCase();
-    if (ACTIVE_TASK_STATES.has(status)) block(`Task ${taskId} is still ${status} in this lane.`);
-    if (!FINISHED_TASK_STATES.has(status)) block(`Task ${taskId} has an unknown status ${status}.`);
+    const status = requiredString(task.status, `Task ${taskId} status`);
+    if (ACTIVE_TASK_STATES.has(status.toLowerCase())) block(`Task ${taskId} is still ${status} in this lane.`);
+    if (status !== "completed") {
+      block(`Task ${taskId} status must be completed, found ${status}.`);
+    }
     if (current.branch) assertEqual(task.branch, current.branch, `Task ${taskId} branch`);
     assertEqual(
       absoluteRealPath(requiredString(task.worktree, `Task ${taskId} worktree`), `Task ${taskId} worktree`),
       current.target,
       `Task ${taskId} worktree`,
     );
-    validateHandoff(task.handoff, taskId, current, evidence.issue.number, now);
+    validateHandoff(task.handoff, taskId, current, github, now);
   }
   if (matchingTasks.length === 0) {
     const expectedConfirmation = `ALLOW TASKLESS ${current.target}`;
@@ -582,8 +700,16 @@ export function validateTaskSnapshot(
     if (!override || typeof override !== "object") {
       block("A legacy taskless lane needs evidence.task.legacyTasklessOverride.");
     }
-    requiredString(override.approvedBy, "task.legacyTasklessOverride.approvedBy");
-    requiredString(override.reason, "task.legacyTasklessOverride.reason");
+    assertEqual(
+      requiredString(override.approvedBy, "task.legacyTasklessOverride.approvedBy"),
+      TASKLESS_APPROVER,
+      "task.legacyTasklessOverride.approvedBy",
+    );
+    assertEqual(
+      requiredString(override.reason, "task.legacyTasklessOverride.reason"),
+      TASKLESS_REASON,
+      "task.legacyTasklessOverride.reason",
+    );
     assertFresh(
       override.approvedAt,
       "task.legacyTasklessOverride.approvedAt",
@@ -602,7 +728,11 @@ export function validateTaskSnapshot(
     for (const field of ["taskId", "branch", "worktree", "oldLaneFrozenAt"]) {
       requiredString(replacement[field], `issue.replacement.${field}`);
     }
-    parsedTime(replacement.oldLaneFrozenAt, "issue.replacement.oldLaneFrozenAt");
+    const oldLaneFrozenAt = parsedTime(
+      replacement.oldLaneFrozenAt,
+      "issue.replacement.oldLaneFrozenAt",
+    );
+    if (oldLaneFrozenAt > now) block("issue.replacement.oldLaneFrozenAt is in the future.");
     const replacementTask = snapshot.tasks.find((task) => task.id === replacement.taskId);
     if (!replacementTask) block("The replacement task is absent from the fresh task snapshot.");
     if (!ACTIVE_TASK_STATES.has(String(replacementTask.status).toLowerCase())) {
@@ -655,8 +785,8 @@ function validateIgnoredDispositions(current, evidence, now) {
     }
     requiredString(decision.reason, `Ignored path ${decision.path} reason`);
     const decidedAt = parsedTime(decision.decidedAt, `Ignored path ${decision.path} decidedAt`);
-    if (decidedAt > now + 60_000) block(`Ignored path ${decision.path} decision is in the future.`);
-    if (SENSITIVE_IGNORED_PATH.test(decision.path) && disposition === "regenerable") {
+    if (decidedAt > now) block(`Ignored path ${decision.path} decision is in the future.`);
+    if (isSensitiveIgnoredPath(decision.path) && disposition === "regenerable") {
       block(`Sensitive ignored path ${decision.path} cannot be classified as regenerable.`);
     }
     if (disposition === "backed-up-private") {
@@ -674,7 +804,7 @@ function validateRecovery(current, recovery, now) {
   assertEqual(recovery.restoredHead, current.head, "Restored head");
   assertEqual(recovery.restoredTree, current.tree, "Restored tree");
   const restoreTestedAt = parsedTime(recovery.restoreTestedAt, "recovery.restoreTestedAt");
-  if (restoreTestedAt > now + 60_000) block("recovery.restoreTestedAt is in the future.");
+  if (restoreTestedAt > now) block("recovery.restoreTestedAt is in the future.");
 
   if (recovery.kind === "integrated") {
     if (!current.integrated || current.uniqueCommitCount !== 0) {
@@ -788,6 +918,7 @@ export function assessRemoval({
     now,
     maxAgeMs: taskMaxAgeMs,
     legacyTasklessConfirmation,
+    github,
   });
   validateRecovery(current, evidence.recovery, now);
   return {
@@ -842,10 +973,117 @@ function ensureTaskSnapshotOutsideTarget(path, target) {
 }
 
 function confirmRemovalGone(current) {
-  if (existsSync(current.target)) block("Git returned success, but the worktree path still exists.");
+  if (pathEntryExists(current.target, "removed worktree path")) {
+    block("Git returned success, but the worktree path still exists.");
+  }
   const records = parseWorktreePorcelain(git(current.repositoryRoot, ["worktree", "list", "--porcelain", "-z"]));
   if (records.some((record) => resolve(record.worktree) === current.registeredPath)) {
     block("Git returned success, but the worktree registration still exists.");
+  }
+}
+
+function sameQuarantinedState(before, after) {
+  for (const field of [
+    "repositoryRoot",
+    "gitDir",
+    "commonGitDir",
+    "origin",
+    "head",
+    "tree",
+    "branch",
+    "baseRef",
+    "uniqueCommitCount",
+    "integrated",
+    "patchSha256",
+    "remoteHead",
+  ]) {
+    assertEqual(after[field], before[field], `Quarantined worktree ${field}`);
+  }
+}
+
+function quarantineWorktree(current, evidence, expectedRepository, now) {
+  const sourceDevice = statSync(current.target).dev;
+  const quarantineRoot = mkdtempSync(join(dirname(current.target), ".homa-worktree-quarantine-"));
+  try {
+    chmodSync(quarantineRoot, 0o700);
+    if (statSync(quarantineRoot).dev !== sourceDevice) {
+      rmdirSync(quarantineRoot);
+      block("The private quarantine is not on the worktree filesystem.");
+    }
+  } catch (error) {
+    if (pathEntryExists(quarantineRoot, "private quarantine directory")) {
+      try {
+        rmdirSync(quarantineRoot);
+      } catch {
+        // Keep an unexpected nonempty directory for inspection.
+      }
+    }
+    if (error instanceof RemovalBlockedError) throw error;
+    block(`Could not create the private quarantine: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  const quarantinePath = join(quarantineRoot, "worktree");
+  const move = commandResult("git", [
+    "-C",
+    current.repositoryRoot,
+    "worktree",
+    "move",
+    current.registeredPath,
+    quarantinePath,
+  ]);
+  if (move.status !== 0) {
+    if (
+      pathEntryExists(quarantinePath, "possible quarantine path") ||
+      !pathEntryExists(current.target, "original worktree path")
+    ) {
+      block(
+        `Worktree may have moved to quarantine ${quarantinePath}, but Git reported failure: ${move.stderr.trim()}`,
+      );
+    }
+    try {
+      rmdirSync(quarantineRoot);
+    } catch {
+      // Leave the private directory in place if it is no longer empty.
+    }
+    block(`Git refused the same-filesystem worktree quarantine move: ${move.stderr.trim()}`);
+  }
+
+  if (
+    pathEntryExists(current.target, "original worktree path after quarantine move") ||
+    !pathEntryExists(quarantinePath, "quarantined worktree path")
+  ) {
+    block(`Worktree moved to quarantine ${quarantinePath}, but the atomic move could not be confirmed.`);
+  }
+
+  try {
+    const movedEvidence = {
+      ...evidence,
+      worktree: {
+        ...evidence.worktree,
+        path: quarantinePath,
+        registeredPath: quarantinePath,
+      },
+    };
+    const quarantined = inspectLocalState(quarantinePath, movedEvidence, expectedRepository);
+    assertEqual(quarantined.target, realpathSync(quarantinePath), "Quarantined worktree path");
+    assertEqual(quarantined.registeredPath, quarantinePath, "Quarantined registered path");
+    sameQuarantinedState(current, quarantined);
+    if (quarantined.statusLines.length > 0) {
+      block(
+        `Quarantined worktree has tracked or untracked changes: ${quarantined.statusLines
+          .slice(0, 5)
+          .join(" | ")}`,
+      );
+    }
+    validateIgnoredDispositions(quarantined, evidence, now);
+    validateRecovery(quarantined, evidence.recovery, now);
+    return { quarantineRoot, quarantinePath, quarantined };
+  } catch (error) {
+    block(
+      `Worktree moved to quarantine ${quarantinePath}, but removal stopped: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
 }
 
@@ -884,10 +1122,11 @@ function main() {
   validateTaskSnapshot(refreshedTaskSnapshot, current, evidence, {
     maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
     legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+    github: finalGithub,
   });
 
-  // Network and task checks happen first. This local fingerprint is the last
-  // potentially slow authorization step before normal, non-force removal.
+  // Network and task checks happen first. This fingerprint authorizes only the
+  // quarantine move. The moved worktree is inspected again before removal.
   const finalCurrent = inspectLocalState(options.target, evidence, expectedRepository);
   const finalAssessment = assessRemoval({
     current: finalCurrent,
@@ -899,15 +1138,40 @@ function main() {
   });
   assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
 
+  const quarantine = quarantineWorktree(finalCurrent, evidence, expectedRepository, Date.now());
   const removal = commandResult("git", [
     "-C",
-    finalCurrent.repositoryRoot,
+    quarantine.quarantined.repositoryRoot,
     "worktree",
     "remove",
-    finalCurrent.registeredPath,
+    quarantine.quarantined.registeredPath,
   ]);
-  if (removal.status !== 0) block(`Git refused the normal worktree removal: ${removal.stderr.trim()}`);
-  confirmRemovalGone(finalCurrent);
+  if (removal.status !== 0) {
+    block(
+      `Worktree remains in quarantine ${quarantine.quarantinePath}: Git refused normal removal: ${removal.stderr.trim()}`,
+    );
+  }
+  try {
+    confirmRemovalGone(quarantine.quarantined);
+  } catch (error) {
+    block(
+      `Worktree removal from quarantine ${quarantine.quarantinePath} could not be confirmed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  if (pathEntryExists(finalCurrent.target, "original worktree path after removal")) {
+    block("The original worktree path reappeared after quarantine removal.");
+  }
+  try {
+    rmdirSync(quarantine.quarantineRoot);
+  } catch (error) {
+    block(
+      `The worktree was removed, but its empty quarantine directory could not be removed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
   console.log(
     JSON.stringify(
       {

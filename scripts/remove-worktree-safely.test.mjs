@@ -9,6 +9,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   realpathSync,
   rmSync,
   writeFileSync,
@@ -67,6 +68,27 @@ function makeFakeGithub(binPath) {
 const { mkdirSync, readFileSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
 const args = process.argv.slice(2);
+if (process.env.FAKE_ASSERT_GIT_ENV === "1") {
+  const allowed = new Set([
+    "GIT_CONFIG_GLOBAL",
+    "GIT_CONFIG_NOSYSTEM",
+    "GIT_NO_REPLACE_OBJECTS",
+    "GIT_TERMINAL_PROMPT"
+  ]);
+  const unexpected = Object.keys(process.env).filter(
+    (key) => key.toUpperCase().startsWith("GIT_") && !allowed.has(key)
+  );
+  if (
+    unexpected.length > 0 ||
+    process.env.GIT_CONFIG_GLOBAL !== "/dev/null" ||
+    process.env.GIT_CONFIG_NOSYSTEM !== "1" ||
+    process.env.GIT_NO_REPLACE_OBJECTS !== "1" ||
+    process.env.GIT_TERMINAL_PROMPT !== "0"
+  ) {
+    process.stderr.write("unsafe Git environment reached gh: " + unexpected.join(",") + "\\n");
+    process.exit(97);
+  }
+}
 const counterPath = process.env.FAKE_GH_COUNTER_PATH;
 let callCount = 0;
 if (counterPath) {
@@ -96,11 +118,76 @@ if (args[0] === "api" && args[1]?.includes("/pulls")) {
     process.stderr.write("gh: No commit found for SHA (HTTP 422)\\n");
     process.exit(1);
   }
-  process.stdout.write("[]");
+  const pullNumber = Number(process.env.FAKE_GH_ASSOCIATED_PULL ?? "0");
+  process.stdout.write(pullNumber > 0 ? JSON.stringify([{
+    number: pullNumber,
+    state: "closed",
+    html_url: "https://github.com/sidneyswift/homa/pull/" + pullNumber,
+    head: {
+      sha: process.env.FAKE_GH_ASSOCIATED_HEAD,
+      ref: "codex/gh-872-disposable"
+    }
+  }]) : "[]");
   process.exit(0);
 }
 process.stderr.write("Unexpected gh call: " + args.join(" ") + "\\n");
 process.exit(1);
+`,
+  );
+  chmodSync(script, 0o755);
+}
+
+function makeFakeGit(binPath, realGitPath) {
+  const script = join(binPath, "git");
+  writeFileSync(
+    script,
+    `#!/usr/bin/env node
+const { mkdirSync, symlinkSync, writeFileSync } = require("node:fs");
+const { join } = require("node:path");
+const { spawnSync } = require("node:child_process");
+const args = process.argv.slice(2);
+if (process.env.FAKE_ASSERT_GIT_ENV === "1") {
+  const allowed = new Set([
+    "GIT_CONFIG_GLOBAL",
+    "GIT_CONFIG_NOSYSTEM",
+    "GIT_NO_REPLACE_OBJECTS",
+    "GIT_TERMINAL_PROMPT"
+  ]);
+  const unexpected = Object.keys(process.env).filter(
+    (key) => key.toUpperCase().startsWith("GIT_") && !allowed.has(key)
+  );
+  if (
+    unexpected.length > 0 ||
+    process.env.GIT_CONFIG_GLOBAL !== "/dev/null" ||
+    process.env.GIT_CONFIG_NOSYSTEM !== "1" ||
+    process.env.GIT_NO_REPLACE_OBJECTS !== "1" ||
+    process.env.GIT_TERMINAL_PROMPT !== "0"
+  ) {
+    process.stderr.write("unsafe Git environment reached git: " + unexpected.join(",") + "\\n");
+    process.exit(97);
+  }
+}
+const moveIndex = args.indexOf("move");
+if (process.env.FAKE_GIT_LATE_IGNORED_ON_MOVE === "1" && moveIndex > 0 && args[moveIndex - 1] === "worktree") {
+  const source = args[moveIndex + 1];
+  mkdirSync(join(source, ".late"), { recursive: true });
+  writeFileSync(join(source, ".late", "arrived-during-move.txt"), "must survive quarantine\\n");
+}
+const result = spawnSync(${JSON.stringify(realGitPath)}, args, {
+  encoding: "utf8",
+  env: process.env
+});
+if (
+  result.status === 0 &&
+  process.env.FAKE_GIT_RECREATE_ORIGINAL_SYMLINK === "1" &&
+  moveIndex > 0 &&
+  args[moveIndex - 1] === "worktree"
+) {
+  symlinkSync("/definitely/missing/homa-worktree", args[moveIndex + 1]);
+}
+process.stdout.write(result.stdout ?? "");
+process.stderr.write(result.stderr ?? "");
+process.exit(result.status ?? 1);
 `,
   );
   chmodSync(script, 0o755);
@@ -118,6 +205,8 @@ function makeFixture({
   ignoredDisposition = "regenerable",
   taskless = false,
   lateIgnoredDuringFinalGithub = false,
+  lateIgnoredDuringMove = false,
+  recreateOriginalSymlinkDuringMove = false,
 } = {}) {
   const root = mkdtempSync(join(tmpdir(), "homa-worktree-wrapper-"));
   const remote = join(root, "remote.git");
@@ -130,12 +219,7 @@ function makeFixture({
 
   checked("git", ["init", "--bare", remote]);
   checked("git", ["init", "-b", "main", primary]);
-  const env = {
-    ...process.env,
-    GIT_CONFIG_COUNT: "1",
-    GIT_CONFIG_KEY_0: `url.file://${remote}.insteadOf`,
-    GIT_CONFIG_VALUE_0: githubOrigin,
-  };
+  const env = { ...process.env };
   const fixture = {
     root,
     remote,
@@ -150,6 +234,7 @@ function makeFixture({
 
   git(fixture, primary, ["config", "user.name", "Homa cleanup test"]);
   git(fixture, primary, ["config", "user.email", "cleanup-test@example.test"]);
+  git(fixture, primary, ["config", `url.file://${remote}.insteadOf`, githubOrigin]);
   writeFileSync(join(primary, "README.md"), "Disposable worktree integration fixture.\n");
   writeFileSync(join(primary, ".gitignore"), ".cache/\n.late/\n");
   mkdirSync(join(primary, "scripts"));
@@ -170,11 +255,13 @@ function makeFixture({
     git(fixture, target, ["commit", "-m", "test: local-only recovery"]);
   }
   if (ignored) {
-    mkdirSync(join(target, ".cache"));
+    mkdirSync(dirname(join(target, ".cache", ignoredFilename)), { recursive: true });
     writeFileSync(join(target, ".cache", ignoredFilename), "regenerable\n");
   }
 
+  const realGitPath = checked("which", ["git"]);
   makeFakeGithub(fakeBin);
+  makeFakeGit(fakeBin, realGitPath);
   fixture.env = {
     ...fixture.env,
     PATH: `${fakeBin}:${process.env.PATH}`,
@@ -182,10 +269,14 @@ function makeFixture({
     FAKE_GH_COUNTER_PATH: fakeGithubCounterPath,
     FAKE_GH_LATE_IGNORED_CALL: lateIgnoredDuringFinalGithub ? "4" : "0",
     FAKE_GH_LATE_IGNORED_TARGET: target,
+    FAKE_GH_ASSOCIATED_PULL: "0",
+    FAKE_GIT_LATE_IGNORED_ON_MOVE: lateIgnoredDuringMove ? "1" : "0",
+    FAKE_GIT_RECREATE_ORIGINAL_SYMLINK: recreateOriginalSymlinkDuringMove ? "1" : "0",
   };
 
   const now = new Date().toISOString();
   const head = git(fixture, target, ["rev-parse", "HEAD"]);
+  fixture.env.FAKE_GH_ASSOCIATED_HEAD = head;
   const tree = git(fixture, target, ["rev-parse", "HEAD^{tree}"]);
   const commonGitDir = realpathSync(git(fixture, target, ["rev-parse", "--path-format=absolute", "--git-common-dir"]));
   const gitDir = realpathSync(git(fixture, target, ["rev-parse", "--path-format=absolute", "--git-dir"]));
@@ -268,8 +359,8 @@ function makeFixture({
     task: taskless
       ? {
           legacyTasklessOverride: {
-            approvedBy: "Homa cleanup test",
-            reason: "Disposable legacy lane has no Codex task.",
+            approvedBy: "sidneyswift",
+            reason: "legacy-lane-predates-task-tracking",
             approvedAt: now,
           },
         }
@@ -296,9 +387,15 @@ function makeFixture({
               branch: "codex/gh-872-disposable",
               worktree: target,
               commitOrPr: head,
-              checks: "Focused fixture checks passed.",
+              checks: {
+                executed: true,
+                status: "passed",
+                commands: ["node --test disposable-cleanup.test.mjs"],
+                completedAt: now,
+              },
               productionState: "No production effect.",
-              nextStep: "Remove the disposable worktree.",
+              nextStep: "cleanup-coordinator-remove-worktree",
+              handoffComplete: true,
               recordedAt: now,
             },
           },
@@ -337,6 +434,12 @@ function wrapperArgs(
   return args;
 }
 
+function quarantineRoots(fixture) {
+  return readdirSync(fixture.root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith(".homa-worktree-quarantine-"))
+    .map((entry) => join(fixture.root, entry.name));
+}
+
 test("the destructive executor removes only the proven disposable worktree", (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
@@ -345,6 +448,7 @@ test("the destructive executor removes only the proven disposable worktree", (t)
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(result.stdout).status, "REMOVED");
   assert.equal(existsSync(fixture.target), false);
+  assert.deepEqual(quarantineRoots(fixture), []);
   assert.doesNotMatch(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
 });
 
@@ -380,6 +484,19 @@ test("execution rejects a task snapshot older than thirty seconds", (t) => {
   const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /Task snapshot capturedAt is stale/u);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("execution rejects a task snapshot captured in the future", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const taskSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  taskSnapshot.capturedAt = new Date(Date.now() + 60_000).toISOString();
+  writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
+
+  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /Task snapshot capturedAt is in the future/u);
   assert.equal(existsSync(fixture.target), true);
 });
 
@@ -421,13 +538,35 @@ test("changed ignored content invalidates the recorded fingerprint", (t) => {
   assert.match(result.stderr, /ignored file fingerprint changed/iu);
 });
 
-test("a sensitive file nested under an ignored directory cannot be called regenerable", (t) => {
-  const fixture = makeFixture({ ignored: true, ignoredFilename: ".env.local" });
+test("sensitive files nested under ignored directories cannot be called regenerable", () => {
+  for (const ignoredFilename of [
+    ".env.local",
+    ".pgpass",
+    ".docker/config.json",
+    "service-account.json",
+    "release.keystore",
+    "config.local",
+    "stripe-client-secret.json",
+    "github-token.json",
+  ]) {
+    const fixture = makeFixture({ ignored: true, ignoredFilename });
+    try {
+      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      assert.equal(result.status, 2, `${ignoredFilename}: ${result.stderr}`);
+      assert.match(result.stderr, /cannot be classified as regenerable/iu, ignoredFilename);
+    } finally {
+      rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("an ordinary tokenizer cache can be recorded as regenerable", (t) => {
+  const fixture = makeFixture({ ignored: true, ignoredFilename: "tokenizer-cache.json" });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
   const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
-  assert.equal(result.status, 2);
-  assert.match(result.stderr, /cannot be classified as regenerable/iu);
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(result.stdout).ignoredPathDecisions, 1);
 });
 
 test("ignored filenames containing newlines are inventoried without ambiguity", (t) => {
@@ -447,6 +586,133 @@ test("a thin bundle that cannot restore into an empty repository is rejected", (
   assert.equal(result.status, 2);
   assert.match(result.stderr, /prerequisite|restore|fetch/iu);
   assert.equal(existsSync(fixture.target), true);
+});
+
+test("an ambient alternate object directory cannot make a thin bundle look complete", (t) => {
+  const fixture = makeFixture({ localOnly: true, thinBundle: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const env = {
+    ...fixture.env,
+    GIT_ALTERNATE_OBJECT_DIRECTORIES: join(fixture.primary, ".git", "objects"),
+  };
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /prerequisite|restore|fetch|missing/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("ambient Git repository overrides cannot redirect inspection", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const poison = join(fixture.root, "poison.git");
+  checked("git", ["init", "--bare", poison]);
+  const env = {
+    ...fixture.env,
+    GIT_DIR: poison,
+    GIT_WORK_TREE: fixture.primary,
+    GIT_OBJECT_DIRECTORY: join(poison, "objects"),
+    GIT_CONFIG_COUNT: "1",
+    GIT_CONFIG_KEY_0: "remote.origin.url",
+    GIT_CONFIG_VALUE_0: "https://github.com/attacker/other.git",
+    GIT_ALTERNATE_OBJECT_DIRECTORIES: join(fixture.primary, ".git", "objects"),
+    GIT_COMMON_DIR: join(fixture.primary, ".git"),
+    GIT_REPLACE_REF_BASE: "refs/evil/",
+    GIT_TEMPLATE_DIR: fixture.primary,
+    GIT_FAKE_ESCAPE: "must-not-survive",
+    git_LOWER_POISON: "must-not-survive",
+    FAKE_ASSERT_GIT_ENV: "1",
+  };
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(result.stdout).status, "SAFE_TO_REMOVE");
+});
+
+test("evidence decisions and recovery timestamps cannot be in the future", (t) => {
+  const fixture = makeFixture({ ignored: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const baseline = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const future = new Date(Date.now() + 60_000).toISOString();
+  const cases = [
+    ["capturedAt", (evidence) => { evidence.capturedAt = future; }, /Evidence capturedAt.*future/iu],
+    [
+      "ignored decision",
+      (evidence) => { evidence.worktree.ignoredDispositions[0].decidedAt = future; },
+      /decision is in the future/iu,
+    ],
+    [
+      "restore test",
+      (evidence) => { evidence.recovery.restoreTestedAt = future; },
+      /restoreTestedAt is in the future/iu,
+    ],
+  ];
+
+  for (const [label, mutate, expected] of cases) {
+    const evidence = structuredClone(baseline);
+    mutate(evidence);
+    writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+    const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+    assert.equal(result.status, 2, `${label}: ${result.stderr}`);
+    assert.match(result.stderr, expected, label);
+  }
+});
+
+test("a task handoff needs exact completion evidence", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const baseline = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  const future = new Date(Date.now() + 60_000).toISOString();
+  const cases = [
+    ["cancelled status", (task) => { task.status = "cancelled"; }, /status|completed/iu],
+    ["partial issue token", (task) => { task.handoff.issue = "#8720"; }, /different issue/iu],
+    ["suffixed commit", (task) => { task.handoff.commitOrPr += "-extra"; }, /commitOrPr/iu],
+    ["unexecuted checks", (task) => { task.handoff.checks.executed = false; }, /checks\.executed/iu],
+    ["failed checks", (task) => { task.handoff.checks.status = "failed"; }, /checks\.status/iu],
+    ["empty check commands", (task) => { task.handoff.checks.commands = []; }, /checks\.commands/iu],
+    ["future check time", (task) => { task.handoff.checks.completedAt = future; }, /checks\.completedAt.*future/iu],
+    ["wrong next step", (task) => { task.handoff.nextStep = "delete-it"; }, /nextStep/iu],
+    ["incomplete handoff", (task) => { task.handoff.handoffComplete = false; }, /handoffComplete/iu],
+    ["future handoff", (task) => { task.handoff.recordedAt = future; }, /recordedAt.*future/iu],
+  ];
+
+  for (const [label, mutate, expected] of cases) {
+    const snapshot = structuredClone(baseline);
+    mutate(snapshot.tasks[0]);
+    writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
+    const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+    assert.equal(result.status, 2, `${label}: ${result.stderr}`);
+    assert.match(result.stderr, expected, label);
+  }
+});
+
+test("a handoff can point exactly to its commit URL or an associated pull request", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const snapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  const head = snapshot.tasks[0].handoff.commitOrPr;
+
+  snapshot.tasks[0].handoff.commitOrPr = `https://github.com/sidneyswift/homa/commit/${head}`;
+  writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
+  const commitResult = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(commitResult.status, 0, commitResult.stderr);
+
+  snapshot.tasks[0].handoff.commitOrPr = "https://github.com/sidneyswift/homa/pull/912";
+  writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
+  const pullResult = run(process.execPath, wrapperArgs(fixture), {
+    env: { ...fixture.env, FAKE_GH_ASSOCIATED_PULL: "912" },
+  });
+  assert.equal(pullResult.status, 0, pullResult.stderr);
+
+  const wrongHeadResult = run(process.execPath, wrapperArgs(fixture), {
+    env: {
+      ...fixture.env,
+      FAKE_GH_ASSOCIATED_PULL: "912",
+      FAKE_GH_ASSOCIATED_HEAD: "0000000000000000000000000000000000000000",
+    },
+  });
+  assert.equal(wrongHeadResult.status, 2);
+  assert.match(wrongHeadResult.stderr, /commitOrPr/iu);
 });
 
 test("automatic removal rejects a hand-written empty task snapshot", (t) => {
@@ -470,6 +736,32 @@ test("a taskless legacy lane needs a separate exact confirmation", (t) => {
   assert.equal(JSON.parse(result.stdout).status, "SAFE_TO_REMOVE");
 });
 
+test("a taskless override needs the exact approver, reason, and a nonfuture timestamp", (t) => {
+  const fixture = makeFixture({ taskless: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const baseline = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const cases = [
+    ["approver", (override) => { override.approvedBy = "someone-else"; }, /approvedBy/iu],
+    ["reason", (override) => { override.reason = "seems safe"; }, /reason/iu],
+    [
+      "future approval",
+      (override) => { override.approvedAt = new Date(Date.now() + 60_000).toISOString(); },
+      /approvedAt.*future/iu,
+    ],
+  ];
+
+  for (const [label, mutate, expected] of cases) {
+    const evidence = structuredClone(baseline);
+    mutate(evidence.task.legacyTasklessOverride);
+    writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+    const result = run(process.execPath, wrapperArgs(fixture, { legacyTaskless: true }), {
+      env: fixture.env,
+    });
+    assert.equal(result.status, 2, `${label}: ${result.stderr}`);
+    assert.match(result.stderr, expected, label);
+  }
+});
+
 test("ignored content created during final GitHub checks blocks removal", (t) => {
   const fixture = makeFixture({ lateIgnoredDuringFinalGithub: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
@@ -480,6 +772,41 @@ test("ignored content created during final GitHub checks blocks removal", (t) =>
   assert.equal(result.status, 2);
   assert.match(result.stderr, /ignored file fingerprint changed/iu);
   assert.equal(existsSync(join(fixture.target, ".late", "arrived-during-github.txt")), true);
+});
+
+test("content arriving at the move boundary is quarantined and preserved", (t) => {
+  const fixture = makeFixture({ lateIgnoredDuringMove: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
+    env: fixture.env,
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /moved to quarantine/iu);
+  assert.equal(existsSync(fixture.target), false);
+  const roots = quarantineRoots(fixture);
+  assert.equal(roots.length, 1);
+  const quarantinedWorktree = join(roots[0], "worktree");
+  assert.equal(existsSync(join(quarantinedWorktree, ".late", "arrived-during-move.txt")), true);
+  assert.match(
+    git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]),
+    new RegExp(quarantinedWorktree.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "u"),
+  );
+});
+
+test("a broken symlink recreated at the original path blocks removal", (t) => {
+  const fixture = makeFixture({ recreateOriginalSymlinkDuringMove: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
+    env: fixture.env,
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /original|atomic move|quarantine/iu);
+  assert.equal(lstatSync(fixture.target).isSymbolicLink(), true);
+  const roots = quarantineRoots(fixture);
+  assert.equal(roots.length, 1);
+  assert.equal(existsSync(join(roots[0], "worktree")), true);
 });
 
 test("the Homa wrapper rejects a target from a different common Git directory", (t) => {

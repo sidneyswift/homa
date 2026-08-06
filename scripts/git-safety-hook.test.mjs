@@ -24,6 +24,13 @@ for (const command of [
   "git branch -d -f stale-branch",
   "git branch --delete -f stale-branch",
   "git branch -df stale-branch",
+  "git branch -d merged-branch",
+  "git branch -D stale-branch",
+  "git branch -Df stale-branch",
+  "git branch -fD stale-branch",
+  "git branch --delet stale-branch",
+  "git branch --delete=stale-branch",
+  "git branch --delet --forc stale-branch",
   "git worktree prune --expire now",
   "git restore .",
   "git push --force-with-lease origin main",
@@ -38,7 +45,6 @@ for (const command of [
 for (const command of [
   "git status --short",
   "git -C /tmp/example worktree list --porcelain",
-  "git branch -d merged-branch",
   "node scripts/remove-worktree-safely.mjs --help",
 ]) {
   test(`allows ${command}`, () => {
