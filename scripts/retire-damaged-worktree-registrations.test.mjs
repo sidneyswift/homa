@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   chmodSync,
   copyFileSync,
@@ -12,6 +13,7 @@ import {
   realpathSync,
   renameSync,
   rmSync,
+  statSync,
   symlinkSync,
   unlinkSync,
   utimesSync,
@@ -32,6 +34,7 @@ function run(command, args, options = {}) {
     cwd: options.cwd,
     encoding: "utf8",
     env: options.env ?? process.env,
+    input: options.input,
     maxBuffer: 20 * 1024 * 1024,
   });
 }
@@ -98,6 +101,28 @@ process.exit(result.status ?? 1);
   chmodSync(script, 0o755);
 }
 
+function makeFakeGithub(binPath) {
+  const script = join(binPath, "gh");
+  writeFileSync(
+    script,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === "issue" && args[1] === "view") {
+  const number = Number(args[2]);
+  process.stdout.write(JSON.stringify({
+    number,
+    state: "CLOSED",
+    url: "https://github.com/sidneyswift/homa/issues/" + number
+  }));
+  process.exit(0);
+}
+process.stderr.write("Unexpected gh call: " + args.join(" ") + "\\n");
+process.exit(1);
+`,
+  );
+  chmodSync(script, 0o755);
+}
+
 function addDamagedRegistration(fixture, name, { detached = false, missingPath = false } = {}) {
   const target = join(fixture.root, name);
   const args = ["worktree", "add"];
@@ -136,6 +161,7 @@ function makeFixture({ registrations = [{ name: "lane" }] } = {}) {
   git(primary, ["commit", "-m", "fixture"]);
 
   makeFakeGit(fakeBin);
+  makeFakeGithub(fakeBin);
   const commonGitDir = realpathSync(join(primary, ".git"));
   const fixture = {
     root,
@@ -167,42 +193,132 @@ function makeFixture({ registrations = [{ name: "lane" }] } = {}) {
   return fixture;
 }
 
-function runGuard(fixture, args, environment = {}) {
+function runGuard(fixture, args, environment = {}, input) {
   return run(process.execPath, [fixture.guard, ...args], {
     cwd: fixture.primary,
     env: { ...fixture.env, ...environment },
+    input: input === undefined ? undefined : `${JSON.stringify(input)}\n`,
   });
+}
+
+function writeEvidence(fixture, evidence) {
+  writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+  chmodSync(fixture.evidencePath, 0o600);
+}
+
+function writeTaskSnapshot(fixture) {
+  writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(fixture.taskSnapshot, null, 2)}\n`);
+}
+
+function tasklessArgs(confirmations) {
+  return confirmations.flatMap((confirmation) => ["--legacy-taskless-confirmation", confirmation]);
 }
 
 function captureEvidence(fixture) {
   const inventory = runGuard(fixture, ["--inventory"]);
   assert.equal(inventory.status, 0, inventory.stderr);
   const evidence = JSON.parse(inventory.stdout);
+  const now = new Date().toISOString();
+  const tasks = [];
+  for (const registration of evidence.registrations) {
+    const branch = registration.branch?.replace(/^refs\/heads\//u, "") ?? null;
+    if (registration.detached) {
+      const recoveryReference = `refs/homa/recovery/tests/${registration.adminName}`;
+      git(fixture.primary, ["update-ref", recoveryReference, registration.head]);
+      registration.recovery = {
+        kind: "retained-ref",
+        reference: recoveryReference,
+        sourceHead: registration.head,
+        sourceTree: registration.tree,
+      };
+      registration.issue = {
+        number: 900,
+        state: "CLOSED",
+        url: "https://github.com/sidneyswift/homa/issues/900",
+        disposition: "closed",
+      };
+    }
+    tasks.push({
+      id: `completed-${registration.adminName}`,
+      status: "completed",
+      branch,
+      worktree: registration.path,
+      handoff: {
+        outcome: "Fixture lane is fully preserved and ready for metadata retirement.",
+        issue: `#${registration.issue.number}`,
+        branch: branch ?? "",
+        worktree: registration.path,
+        commitOrPr: registration.head,
+        checks: {
+          executed: true,
+          status: "passed",
+          commands: ["node --test damaged-registration-fixture.test.mjs"],
+          completedAt: now,
+        },
+        productionState: "No production effect.",
+        nextStep: "cleanup-coordinator-remove-worktree",
+        handoffComplete: true,
+        recordedAt: now,
+      },
+    });
+  }
   evidence.approval = {
     approvedBy: "sidneyswift",
-    approvedAt: new Date().toISOString(),
+    approvedAt: now,
     reason: "Reviewed damaged linked-worktree registrations",
+    scanNonce: evidence.scan.nonce,
+    scanSha256: evidence.scan.sha256,
   };
-  writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+  writeEvidence(fixture, evidence);
+  fixture.taskSnapshot = {
+    schemaVersion: 1,
+    source: "codex-list-threads",
+    coverage: "all-open-and-recent-homa-tasks",
+    capturedAt: now,
+    repositoryOrigin: githubOrigin,
+    retirementScan: evidence.scan,
+    tasks,
+  };
+  fixture.taskSnapshotPath = join(fixture.root, "task-snapshot.json");
+  writeTaskSnapshot(fixture);
   return evidence;
 }
 
-function assess(fixture) {
-  return runGuard(fixture, ["--evidence", fixture.evidencePath]);
+function assess(fixture, confirmations = []) {
+  return runGuard(fixture, [
+    "--evidence",
+    fixture.evidencePath,
+    "--task-snapshot",
+    fixture.taskSnapshotPath,
+    ...tasklessArgs(confirmations),
+  ]);
 }
 
-function execute(fixture, confirmation, environment = {}) {
+function execute(
+  fixture,
+  confirmation,
+  environment = {},
+  { confirmations = [], input = fixture.taskSnapshot } = {},
+) {
   return runGuard(
     fixture,
     [
       "--evidence",
       fixture.evidencePath,
+      "--task-snapshot",
+      "-",
       "--execute",
       "--confirmation",
       confirmation,
+      ...tasklessArgs(confirmations),
     ],
     environment,
+    input,
   );
+}
+
+function sha256File(path) {
+  return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
 function withFixture(t, options) {
@@ -210,6 +326,192 @@ function withFixture(t, options) {
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   return fixture;
 }
+
+test("generator writes private schema-v2 evidence and a concrete review queue", (t) => {
+  const fixture = withFixture(t, {
+    registrations: [{ name: "attached-lane" }, { name: "detached-lane", detached: true }],
+  });
+  const evidenceOut = join(fixture.root, "generated-evidence.json");
+  const reviewQueueOut = join(fixture.root, "generated-review-queue.json");
+  const result = runGuard(fixture, [
+    "--generate",
+    "--evidence-out",
+    evidenceOut,
+    "--review-queue-out",
+    reviewQueueOut,
+  ]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(statSync(evidenceOut).mode & 0o777, 0o600);
+  assert.equal(statSync(reviewQueueOut).mode & 0o777, 0o600);
+
+  const evidence = JSON.parse(readFileSync(evidenceOut, "utf8"));
+  const reviewQueue = JSON.parse(readFileSync(reviewQueueOut, "utf8"));
+  assert.equal(evidence.schemaVersion, 2);
+  assert.match(evidence.scan.nonce, /^[a-f0-9]{64}$/u);
+  assert.equal(evidence.approval.scanNonce, evidence.scan.nonce);
+  assert.equal(evidence.approval.scanSha256, evidence.scan.sha256);
+  assert.equal(evidence.registrations.length, 2);
+  for (const registration of evidence.registrations) {
+    assert.equal(typeof registration.path, "string");
+    assert.match(registration.head, /^[a-f0-9]{40}$/u);
+    assert.match(registration.tree, /^[a-f0-9]{40}$/u);
+    assert.equal(typeof registration.issue, "object");
+    assert.equal(typeof registration.task, "object");
+    assert.equal(typeof registration.recovery, "object");
+    assert.equal(typeof registration.pathInventory.manifestSha256, "string");
+  }
+  assert.deepEqual(reviewQueue.scan, evidence.scan);
+  assert.equal(
+    reviewQueue.items.some((item) => item.kind === "issue" && item.path.endsWith("detached-lane")),
+    true,
+  );
+  assert.equal(
+    reviewQueue.items.some((item) => item.kind === "recovery" && item.path.endsWith("detached-lane")),
+    true,
+  );
+  assert.equal(
+    reviewQueue.items.filter((item) => item.kind === "task-ownership").length,
+    2,
+  );
+
+  const collision = runGuard(fixture, [
+    "--generate",
+    "--evidence-out",
+    evidenceOut,
+    "--review-queue-out",
+    evidenceOut,
+  ]);
+  assert.equal(collision.status, 2);
+  assert.match(collision.stderr, /must be different/iu);
+});
+
+test("streams a surviving file larger than the subprocess output limit", (t) => {
+  const fixture = withFixture(t);
+  const largePath = join(fixture.registrations[0].target, "large-surviving-file.bin");
+  writeFileSync(largePath, Buffer.alloc(21 * 1024 * 1024, 0x61));
+  const evidence = captureEvidence(fixture);
+  assert.equal(
+    BigInt(evidence.registrations[0].pathInventory.totalBytes) > 20n * 1024n * 1024n,
+    true,
+  );
+  const result = assess(fixture);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("one active task blocks the complete batch before any path moves", (t) => {
+  const fixture = withFixture(t, {
+    registrations: [{ name: "lane-one" }, { name: "lane-two" }],
+  });
+  const evidence = captureEvidence(fixture);
+  fixture.taskSnapshot.tasks[1].status = "running";
+  fixture.taskSnapshot.capturedAt = new Date().toISOString();
+  const result = execute(fixture, `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /batch retirement.*task.*still running/iu);
+  assert.equal(fixture.registrations.every((registration) => existsSync(registration.target)), true);
+});
+
+test("a taskless override is lane-specific and needs its exact separate confirmation", (t) => {
+  const fixture = withFixture(t, {
+    registrations: [{ name: "legacy-lane" }, { name: "tracked-lane" }],
+  });
+  const evidence = captureEvidence(fixture);
+  const legacy = evidence.registrations.find((registration) => registration.path.endsWith("legacy-lane"));
+  const approvedAt = new Date().toISOString();
+  legacy.task.legacyTasklessOverride = {
+    approvedBy: "sidneyswift",
+    approvedAt,
+    reason: "legacy-lane-predates-task-tracking",
+    scanNonce: evidence.scan.nonce,
+  };
+  fixture.taskSnapshot.tasks = fixture.taskSnapshot.tasks.filter(
+    (task) => task.worktree !== legacy.path,
+  );
+  fixture.taskSnapshot.capturedAt = approvedAt;
+  writeEvidence(fixture, evidence);
+  writeTaskSnapshot(fixture);
+
+  const missingConfirmation = assess(fixture);
+  assert.equal(missingConfirmation.status, 2);
+  assert.match(missingConfirmation.stderr, /needs --legacy-taskless-confirmation/iu);
+  assert.equal(fixture.registrations.every((registration) => existsSync(registration.target)), true);
+
+  const separateConfirmation = `ALLOW TASKLESS ${legacy.path}`;
+  const inspection = assess(fixture, [separateConfirmation]);
+  assert.equal(inspection.status, 0, inspection.stderr);
+  const assessment = JSON.parse(inspection.stdout);
+  assert.equal(assessment.tasks.overrideCount, 1);
+  fixture.taskSnapshot.capturedAt = new Date().toISOString();
+  const result = execute(fixture, assessment.confirmation, {}, {
+    confirmations: [separateConfirmation],
+  });
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("a changed retained recovery reference blocks retirement", (t) => {
+  const fixture = withFixture(t, { registrations: [{ name: "detached-lane", detached: true }] });
+  const evidence = captureEvidence(fixture);
+  git(fixture.primary, ["update-ref", "-d", evidence.registrations[0].recovery.reference]);
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /recovery reference.*does not exist/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("a durable bundle must restore the exact detached HEAD and tree in an empty repository", (t) => {
+  const fixture = withFixture(t, { registrations: [{ name: "detached-lane", detached: true }] });
+  const evidence = captureEvidence(fixture);
+  const registration = evidence.registrations[0];
+  const retainedReference = registration.recovery.reference;
+  const artifactPath = join(fixture.root, "detached-lane.bundle");
+  git(fixture.primary, ["bundle", "create", artifactPath, retainedReference]);
+  chmodSync(artifactPath, 0o600);
+  registration.recovery = {
+    kind: "bundle",
+    artifactPath,
+    artifactSha256: sha256File(artifactPath),
+    artifactSizeBytes: String(statSync(artifactPath, { bigint: true }).size),
+    advertisedHead: registration.head,
+    restoredHead: registration.head,
+    restoredTree: registration.tree,
+    restoreTestedAt: new Date().toISOString(),
+    sourceHead: registration.head,
+    sourceTree: registration.tree,
+  };
+  git(fixture.primary, ["update-ref", "-d", retainedReference]);
+  writeEvidence(fixture, evidence);
+  const result = assess(fixture);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("a changed surviving directory blocks the whole approved set", (t) => {
+  const fixture = withFixture(t, {
+    registrations: [{ name: "lane-one" }, { name: "lane-two" }],
+  });
+  captureEvidence(fixture);
+  writeFileSync(join(fixture.registrations[1].target, "changed-after-scan.txt"), "new bytes\n");
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /exact approved prunable set.*changed/iu);
+  assert.equal(fixture.registrations.every((registration) => existsSync(registration.target)), true);
+});
+
+test("execution refuses a task snapshot file instead of boundary-fresh stdin", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  const result = runGuard(fixture, [
+    "--evidence",
+    fixture.evidencePath,
+    "--task-snapshot",
+    fixture.taskSnapshotPath,
+    "--execute",
+    "--confirmation",
+    `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`,
+  ]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /requires --task-snapshot -/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
 
 test("batch retirement preserves every byte and uses metadata-only prune", (t) => {
   const fixture = withFixture(t, {
@@ -223,6 +525,7 @@ test("batch retirement preserves every byte and uses metadata-only prune", (t) =
 
   const result = execute(fixture, assessment.confirmation);
   assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
   const report = JSON.parse(result.stdout);
   assert.equal(report.status, "DAMAGED_REGISTRATIONS_RETIRED");
   assert.equal(report.registrations.length, 2);
@@ -272,7 +575,12 @@ test("blocks evidence reached through a symbolic-link parent", (t) => {
   renameSync(fixture.evidencePath, evidenceFile);
   symlinkSync(evidenceDirectory, evidenceAlias);
 
-  const result = runGuard(fixture, ["--evidence", join(evidenceAlias, "approved.json")]);
+  const result = runGuard(fixture, [
+    "--evidence",
+    join(evidenceAlias, "approved.json"),
+    "--task-snapshot",
+    fixture.taskSnapshotPath,
+  ]);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /evidence path|symbolic-link|path-alias/iu);
 });

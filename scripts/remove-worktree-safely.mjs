@@ -1872,6 +1872,9 @@ function generateRetirementEvidence(options) {
 
   const evidenceOut = resolve(options.evidenceOut);
   const reviewQueueOut = resolve(options.reviewQueueOut);
+  if (evidenceOut === reviewQueueOut) {
+    block("Evidence and review queue output paths must be different.");
+  }
   for (const [path, label] of [
     [evidenceOut, "Evidence output"],
     [reviewQueueOut, "Review queue output"],
@@ -1962,6 +1965,13 @@ function main() {
   assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
 
   const preparedQuarantine = prepareQuarantine(finalCurrent);
+  process.stderr.write(
+    `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT ${JSON.stringify({
+      scanNonce: evidence.scan.nonce,
+      scanSha256: evidence.scan.sha256,
+      maxAgeSeconds: EXECUTION_TASK_REFRESH_MAX_AGE_MS / 1000,
+    })}\n`,
+  );
   const refreshedTaskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
   validateTaskSnapshot(refreshedTaskSnapshot, finalCurrent, evidence, {
     maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,

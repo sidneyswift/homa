@@ -132,10 +132,30 @@ uses force, deletes a branch, deletes a remote ref, or mutates GitHub.
 Store schema version 2 evidence outside the target worktree and outside every
 operating-system temporary root named above. Capture it within thirty minutes of
 execution. It must identify the exact primary checkout, common Git directory,
-stored origin URL, target path,
-registered path, target Git directory, branch, HEAD, tree, base ref, and binary
-patch checksum. Evidence, recovery, ignored-file, replacement, task, check, and
-approval timestamps must be valid and cannot be in the future.
+stored origin URL, target path, registered path, target Git directory, branch,
+HEAD, tree, base ref, and binary patch checksum. Evidence, recovery, ignored-file,
+replacement, task, check, and approval timestamps must be valid and cannot be in
+the future.
+
+Generate the evidence and its review queue as owner-only mode-0600 files. The
+paths must be distinct, absolute, durable, and outside the target and common Git
+directory:
+
+```sh
+node scripts/remove-worktree-safely.mjs \
+  --generate \
+  --target /absolute/worktree/path \
+  --evidence-out /durable/private/removal-evidence.json \
+  --review-queue-out /durable/private/removal-review.json
+```
+
+Use `--issue-number` when the branch does not contain its issue number. Use
+`--recovery-bundle`, `--handoff-url`, or `--issue-disposition` when the generated
+queue calls for them. The generator classifies only known build and cache files
+automatically. It leaves every sensitive or ordinary ignored file, incomplete
+issue handoff, approval, and execution task proof in the review queue.
+The human approval keeps the generated `scanNonce` and `scanSha256` unchanged,
+so it cannot be copied onto a different scan.
 
 Every ignored file needs one evidence decision bound to its relative path, file or
 symlink type, byte size, and SHA-256 digest. The wrapper gets this inventory from
@@ -146,6 +166,12 @@ ignored file invalidates the evidence. Allowed decisions are:
 - `regenerable`, with a reason.
 - `discard-approved`, with a reason.
 - `backed-up-private`, with a reason and private recovery reference.
+
+A private backup is accepted only when the source and backup have the same byte
+count and SHA-256 digest at validation time. The backup file and its immediate
+parent must belong to the current user and grant no group or other access. The
+backup must remain outside temporary storage and outside the worktree being
+removed.
 
 `regenerable` is valid only when the file is inside an explicit generated, cache,
 build, coverage, distribution, output, temporary, or dependency directory. A root
@@ -207,6 +233,10 @@ The snapshot shape is:
   "coverage": "all-open-and-recent-homa-tasks",
   "capturedAt": "2026-08-06T03:00:00.000Z",
   "repositoryOrigin": "https://github.com/sidneyswift/homa.git",
+  "retirementScan": {
+    "nonce": "64 lowercase hexadecimal characters copied from evidence.scan.nonce",
+    "sha256": "exact evidence.scan.sha256"
+  },
   "tasks": [
     {
       "id": "task-id",
@@ -247,8 +277,9 @@ always blocks.
 The JSON fields prove freshness and internal consistency, not app-authenticated
 provenance. The operator remains responsible for exporting the complete task-list
 result. A taskless legacy lane uses a separate manual path: evidence records a fresh
-`task.legacyTasklessOverride` with `approvedBy`, `reason`, and `approvedAt`, and the
-command includes `--legacy-taskless-confirmation "ALLOW TASKLESS /absolute/worktree/path"`.
+`task.legacyTasklessOverride` with `approvedBy`, `reason`, `approvedAt`, and the
+exact `scanNonce`, and the command includes
+`--legacy-taskless-confirmation "ALLOW TASKLESS /absolute/worktree/path"`.
 The approver must be exactly `sidneyswift` and the reason exactly
 `legacy-lane-predates-task-tracking`. Do not use that override for a lane with a
 matching task.
@@ -271,24 +302,25 @@ node scripts/remove-worktree-safely.mjs \
 ```
 
 Review the exact identity, issue, pull request, task, ignored-file, and recovery
-result. Refresh the Desktop task snapshot, then execute within thirty seconds. The
-wrapper completes GitHub and task checks first, then recomputes recovery, nested
-Git metadata, status, and ignored-file fingerprints. It creates a private sibling
-directory on the same filesystem, atomically moves the worktree into it, and
-reinspects the moved worktree. An unchanged checkout is atomically sealed at a
-separate `preserved-worktree` path before normal, non-force `git worktree remove`
-runs against the now-missing registered path. Git can remove the registration, but
-it cannot recursively delete the sealed content. If a file recreates the registered
-path at the final boundary, Git refuses removal or the postcondition blocks, and the
-late file remains present beside the sealed copy. If anything arrived at the move
-boundary or an inspection differs, execution also stops and reports the preserved
-path:
+result. Start execution with standard input open. The wrapper completes GitHub and
+slow local checks first, creates a private sibling directory on the same filesystem,
+then prints `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT` with the expected scan binding.
+Only then export the complete Desktop task list, send its normalized JSON to the
+process, and close input. The snapshot must be less than thirty seconds old. No Git
+or network command runs between that task proof and the atomic move. The moved
+worktree is reinspected and sealed at a separate `preserved-worktree` path before
+normal, non-force `git worktree remove` runs against the now-missing registered
+path. Git can remove the registration, but it cannot recursively delete the sealed
+content. If a file recreates the registered path at the final boundary, Git refuses
+removal or the postcondition blocks, and the late file remains present beside the
+sealed copy. If anything arrived at the move boundary or an inspection differs,
+execution also stops and reports the preserved path:
 
 ```sh
 node scripts/remove-worktree-safely.mjs \
   --target /absolute/worktree/path \
   --evidence /durable/path/removal-evidence.json \
-  --task-snapshot /absolute/path/codex-task-snapshot.json \
+  --task-snapshot - \
   --execute \
   --remote-branch-action keep \
   --confirmation "REMOVE /absolute/worktree/path"
@@ -322,49 +354,91 @@ different origin.
 
 ### Capture and approve the complete batch
 
-Wait at least two seconds after the last registration change, then write the
-read-only inventory to a durable physical path with no symbolic-link or path-alias
-boundary. It must be outside the primary checkout, common Git directory, every
-candidate path, and every operating-system temporary root:
-
-```sh
-node scripts/retire-damaged-worktree-registrations.mjs --inventory \
-  > /durable/path/damaged-registration-evidence.json
-```
-
-The inventory parses Git's exact NUL-delimited registration set and matches every
-secondary registration to one administrative record. It records repository and
-script identity; full HEAD and branch or detached state; administrative `gitdir`,
-`HEAD`, `commondir`, and index fingerprints; path state; the complete prunable
-set checksum; and a fixed prune cutoff two seconds older than capture. Git's own
-verbose dry run must name exactly that administrative set.
-
-Review every path and administrative record. Set `approval.approvedBy` to
-`sidneyswift`, set `approval.approvedAt` to a current ISO timestamp after
-`capturedAt`, and write a specific reason. Do not change any other field. Then
-reinspect without mutation:
+Wait at least two seconds after the last registration change, then generate the
+schema version 2 evidence and review queue. Both paths must be distinct, durable,
+owner-only mode-0600 files with no symbolic-link or path-alias boundary. They must
+be outside the primary checkout, common Git directory, every candidate path, and
+every operating-system temporary root:
 
 ```sh
 node scripts/retire-damaged-worktree-registrations.mjs \
-  --evidence /durable/path/damaged-registration-evidence.json
+  --generate \
+  --evidence-out /durable/private/damaged-registration-evidence.json \
+  --review-queue-out /durable/private/damaged-registration-review.json
 ```
 
-The result supplies the exact confirmation. Execute only that approved batch:
+The generator streams every surviving regular file and administrative index in
+bounded chunks. It records repository and script identity; exact path state and
+directory manifest; full HEAD and tree; branch or detached state; administrative
+`gitdir`, `HEAD`, `commondir`, and index fingerprints; a random scan nonce; the
+complete set digest; and a fixed prune cutoff two seconds older than capture.
+Git's verbose dry run must name exactly that administrative set.
+
+Review every queue item. Each registration must have all of these before the batch
+can pass:
+
+- One exact issue. A closed issue records `closed`. An open issue records an
+  `updated-open` or `replacement-active` disposition and a verified handoff comment
+  containing the old path, branch when present, HEAD, and recovery reference.
+- One recovery proof. Use a retained local branch or `refs/homa/recovery/*` ref at
+  the exact HEAD and tree, or an owner-only durable Git bundle. The guard verifies
+  the bundle, restores it into a new empty repository with no object alternates,
+  runs strict object checks, and compares the restored HEAD and tree.
+- One completed task handoff in the task snapshot. A truly old lane with no task
+  may instead carry its own `task.legacyTasklessOverride`, bound to the scan nonce,
+  plus its own command-line confirmation. An override never covers another lane.
+
+Set `approval.approvedBy` to `sidneyswift`, set `approval.approvedAt` to a current
+ISO timestamp after `capturedAt`, write a specific reason, and leave
+`approval.scanNonce` and `approval.scanSha256` unchanged. Reinspect with a complete
+Desktop task snapshot up to ten minutes old:
 
 ```sh
 node scripts/retire-damaged-worktree-registrations.mjs \
-  --evidence /durable/path/damaged-registration-evidence.json \
+  --evidence /durable/private/damaged-registration-evidence.json \
+  --task-snapshot /durable/private/codex-task-snapshot.json
+```
+
+The task snapshot uses the shape shown above and copies the damaged evidence
+`scan.nonce` and `scan.sha256` into `retirementScan`. Every task matching any lane
+by branch or path must be exactly `completed` with a complete handoff. One active,
+waiting, interrupted, cancelled, or otherwise noncompleted matching task blocks
+the entire batch before any path moves. For this damaged-registration guard,
+`handoff.commitOrPr` must be the exact HEAD or its exact Homa commit URL.
+
+For a taskless lane, add this argument once for that exact path during inspection
+and execution:
+
+```sh
+--legacy-taskless-confirmation "ALLOW TASKLESS /absolute/legacy-lane/path"
+```
+
+The safe inspection result supplies the exact batch confirmation. Start execution
+with standard input open. After the slow checks, the guard prints
+`READY_FOR_FINAL_CODEX_TASK_SNAPSHOT` and the expected scan binding. Export a new
+complete Desktop task snapshot at that point, bind it to the same scan, send the
+normalized JSON to standard input, and close input within thirty seconds:
+
+```sh
+node scripts/retire-damaged-worktree-registrations.mjs \
+  --evidence /durable/private/damaged-registration-evidence.json \
+  --task-snapshot - \
   --execute \
   --confirmation "RETIRE DAMAGED REGISTRATIONS <set-sha256>"
 ```
 
-Immediately before any path moves, the guard re-reads the evidence checksum and
-recomputes the complete eligible set. Each eligible registration must have a
-missing root `.git` entry, Git's exact prunable reason, a matching administrative
-record, and an existing local commit for its recorded HEAD. A directory still at
-the registered path must be an ordinary directory with no parent-repository
-fallback, root or nested Git metadata, bare repository, symbolic-link boundary,
-or overlap with the primary checkout or another candidate.
+Before reading that final task proof, the guard re-reads the evidence checksum,
+recomputes the complete eligible set, revalidates every issue and recovery proof,
+and prepares private same-filesystem destinations. Each eligible registration
+must have a missing root `.git` entry, Git's exact prunable reason, a matching
+administrative record, and an existing local commit for its recorded HEAD. A
+directory still at the registered path must be an ordinary directory with no
+parent-repository fallback, root or nested Git metadata, bare repository,
+symbolic-link boundary, or overlap with the primary checkout or another candidate.
+
+After the fresh task proof passes, the guard moves every surviving directory before
+running another Git or network command. This keeps the active-task proof adjacent
+to the preservation boundary for the complete batch.
 
 Surviving ordinary directories are atomically moved into owner-only sibling
 directories on the same filesystem and kept as `preserved-worktree`. No file

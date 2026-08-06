@@ -618,6 +618,7 @@ test("execution removes the registration and preserves sealed checkout content",
     executionOptions(fixture),
   );
   assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
   const outcome = JSON.parse(result.stdout);
   assert.equal(outcome.status, "WORKTREE_REGISTRATION_REMOVED");
   assert.equal(existsSync(fixture.target), false);
@@ -659,6 +660,23 @@ test("the generator writes bound mode-0600 evidence and a review queue", (t) => 
   assert.equal(evidence.scan.sha256, queue.scan.sha256);
   assert.equal(queue.items.some((item) => item.kind === "approval"), true);
   assert.equal(queue.items.some((item) => item.kind === "execution-task-snapshot"), true);
+
+  const collision = run(
+    process.execPath,
+    [
+      fixture.wrapper,
+      "--generate",
+      "--target",
+      fixture.target,
+      "--evidence-out",
+      evidenceOut,
+      "--review-queue-out",
+      evidenceOut,
+    ],
+    { env: fixture.env },
+  );
+  assert.equal(collision.status, 2);
+  assert.match(collision.stderr, /must be different/iu);
 });
 
 test("private origin references use authenticated GitHub API without Git credentials", (t) => {
@@ -915,7 +933,7 @@ test("changed ignored content invalidates the recorded fingerprint", (t) => {
 
   const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
   assert.equal(result.status, 2);
-  assert.match(result.stderr, /ignored file fingerprint changed/iu);
+  assert.match(result.stderr, /evidence scan digest changed|ignored file fingerprint changed/iu);
 });
 
 test("sensitive files nested under ignored directories cannot be called regenerable", () => {
@@ -1244,7 +1262,7 @@ test("ignored content created during final GitHub checks blocks removal", (t) =>
     executionOptions(fixture),
   );
   assert.equal(result.status, 2);
-  assert.match(result.stderr, /ignored file fingerprint changed/iu);
+  assert.match(result.stderr, /evidence scan digest changed|ignored file fingerprint changed/iu);
   assert.equal(existsSync(join(fixture.target, ".late", "arrived-during-github.txt")), true);
 });
 
