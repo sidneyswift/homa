@@ -41,16 +41,22 @@ function sha256(contents) {
 test("workflow is bound to production, Homa, and immutable reviewed inputs", () => {
   assert.equal(
     workflowDocument.jobs.apply.if,
-    "github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'",
+    "github.ref == 'refs/heads/main' && github.actor == 'sidneyswift' && github.triggering_actor == 'sidneyswift'",
   );
   assert.equal(workflowDocument.jobs.apply.environment, "production");
   assert.equal(
     workflowDocument.jobs.apply.steps[0].uses,
     "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
   );
+  assert.equal(
+    workflowDocument.jobs.apply.steps[0].with.ref,
+    "${{ github.sha }}",
+  );
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 887/u);
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
-  assert.match(workflow, /ref: main/u);
+  assert.match(workflow, /GITHUB_REF.*refs\/heads\/main/u);
+  assert.match(workflow, /git rev-parse HEAD/u);
+  assert.match(workflow, /checked_out_sha.*GITHUB_SHA/u);
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
   assert.match(workflow, /cancel-in-progress: false/u);
   assert.doesNotMatch(workflow, /actions\/checkout@v\d/u);
@@ -61,6 +67,11 @@ test("workflow is bound to production, Homa, and immutable reviewed inputs", () 
     workflow.match(/-f scripts\/issue-887-production-repair\.sql/g)?.length,
     2,
   );
+  const firstApply = workflowDocument.jobs.apply.steps.find(
+    (step) => step.name === "Apply and verify the exact repair in one transaction",
+  )?.run;
+  assert.match(firstApply, /ISSUE_887_REPAIR=repaired/u);
+  assert.doesNotMatch(firstApply, /ISSUE_887_REPAIR=verified_noop/u);
   assert.doesNotMatch(workflow, /supabase\s+db\s+push/u);
 });
 
@@ -144,6 +155,8 @@ test("disposable harness covers apply, no-op, reconstruction, and refusal paths"
   assert.match(harness, /duplicateSubscription/u);
   assert.match(harness, /nullStatus/u);
   assert.match(harness, /issue_887_collision_holder/u);
+  assert.match(harness, /issue_887_provider_collision_holder/u);
+  assert.match(harness, /family_billing_subscriptions_provider_customer_idx/u);
   assert.match(harness, /columns differ from the reviewed contract/u);
   assert.match(harness, /must have zero RLS policies/u);
   assert.match(harness, /grants TRIGGER to denied role authenticated/u);

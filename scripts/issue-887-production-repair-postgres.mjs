@@ -365,6 +365,36 @@ const collisionRollback = runPsql([
 assert.deepEqual(collisionRollback.stdout, ["t|t|t"]);
 runPsql(["-c", "drop table public.issue_887_collision_holder;"]);
 
+resetFresh();
+runPsql([
+  "-c",
+  "create table public.issue_887_provider_collision_holder (provider text, provider_customer_id text); create index family_billing_subscriptions_provider_customer_idx on public.issue_887_provider_collision_holder (provider, provider_customer_id) where provider_customer_id is not null;",
+]);
+assertRepairFailure(/indexes differ from the reviewed contract/u);
+const providerCollisionRollback = runPsql([
+  "-Atc",
+  `
+    select concat_ws(
+      '|',
+      to_regclass('public.family_billing_subscriptions') is null,
+      (
+        select index_record.indrelid =
+          'public.issue_887_provider_collision_holder'::regclass
+        from pg_catalog.pg_index index_record
+        where index_record.indexrelid =
+          'public.family_billing_subscriptions_provider_customer_idx'::regclass
+      ),
+      (
+        select count(*) = 0
+        from supabase_migrations.schema_migrations
+        where version in ('20260801110000', '20260806093000')
+      )
+    );
+  `,
+]);
+assert.deepEqual(providerCollisionRollback.stdout, ["t|t|t"]);
+runPsql(["-c", "drop table public.issue_887_provider_collision_holder;"]);
+
 resetFresh({ duplicateSubscription: true });
 assertRepairFailure(/live billing snapshot differs/u);
 const duplicateRollback = runPsql([

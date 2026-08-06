@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   apply:
-    if: github.ref == 'refs/heads/main' && github.actor == 'sidneyswift'
+    if: github.ref == 'refs/heads/main' && github.actor == 'sidneyswift' && github.triggering_actor == 'sidneyswift'
     name: Apply audited issue 887 billing repair
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: main
+          ref: ${{ github.sha }}
 
       - name: Validate authorization and immutable inputs
         env:
@@ -37,6 +37,15 @@ jobs:
           fi
           if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
             echo "This repair may run only in sidneyswift/homa."
+            exit 1
+          fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "This repair may run only from the main branch."
+            exit 1
+          fi
+          checked_out_sha="$(git rev-parse HEAD)"
+          if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
+            echo "The checked-out commit does not match the dispatched workflow commit."
             exit 1
           fi
           node scripts/migration-version-check.mjs
@@ -102,9 +111,8 @@ jobs:
           result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/issue-887-production-repair.sql)"
           echo "$result"
           repair_marker="$(printf '%s\n' "$result" | tail -n 1)"
-          if [ "$repair_marker" != "ISSUE_887_REPAIR=repaired" ] \
-            && [ "$repair_marker" != "ISSUE_887_REPAIR=verified_noop" ]; then
-            echo "The atomic repair did not return a recognized result."
+          if [ "$repair_marker" != "ISSUE_887_REPAIR=repaired" ]; then
+            echo "The first issue #887 repair pass did not perform the reviewed repair."
             exit 1
           fi
 
