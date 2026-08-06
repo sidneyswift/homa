@@ -164,6 +164,15 @@ test("required isolation checks never perform historical fixture cleanup", () =>
   assert.doesNotMatch(source, /created_at < now\(\) - interval '6 hours'/u);
 });
 
+test("raw call transcripts require an explicit anonymous read denial", () => {
+  const source = readFileSync(
+    path.join(repoRoot, "scripts/isolation-check.mjs"),
+    "utf8",
+  );
+  assert.match(source, /expectReadDenied\("call_transcripts"\)/u);
+  assert.doesNotMatch(source, /expectEmptyRead\("call_transcripts"\)/u);
+});
+
 test("reserved fixture retirement is manual, bounded, and soft-only", () => {
   const source = readFileSync(
     path.join(repoRoot, "scripts/retire-reserved-live-fixtures.mts"),

@@ -4855,10 +4855,9 @@ for (const table of [
 await expectEmptyRead("child_curriculum_calls");
 await expectEmptyRead("child_curricula");
 // Raw call transcripts (migration #25): family-scoped by is_family_member.
-// Only the server-only connection writes (capture webhook + sync job), so
-// anon reads nothing and has no write policy; unknown-caller rows carry a
-// null family_id and are invisible to every Data API role by construction.
-await expectEmptyRead("call_transcripts");
+// Only the server-only connection writes (capture webhook + sync job), and
+// Data API privileges are revoked from anonymous callers entirely.
+await expectReadDenied("call_transcripts");
 // The durable chat record (migration #34): members read their own rows;
 // only the persist-conversation hook's server connection ever writes.
 await expectReadDenied("conversation_messages");
