@@ -8,7 +8,9 @@ import {
   mkdtempSync,
   readFileSync,
   readlinkSync,
+  readdirSync,
   realpathSync,
+  renameSync,
   rmdirSync,
   rmSync,
   statSync,
@@ -58,6 +60,7 @@ const SENSITIVE_IGNORED_FILENAMES = new Set([
 const SENSITIVE_CREDENTIAL_EXTENSIONS = new Set([
   "bks",
   "cer",
+  "cert",
   "crt",
   "csr",
   "der",
@@ -277,6 +280,41 @@ function absoluteRealPath(path, label) {
   }
 }
 
+function canonicalPathIfPresent(path) {
+  try {
+    return realpathSync(path);
+  } catch {
+    return resolve(path);
+  }
+}
+
+function isEphemeralOperatingSystemTemporaryPath(path) {
+  const temporaryRoots = [
+    tmpdir(),
+    "/tmp",
+    "/private/tmp",
+    "/var/tmp",
+    "/private/var/tmp",
+    "/dev/shm",
+    process.env.XDG_RUNTIME_DIR,
+  ]
+    .filter((candidate) => typeof candidate === "string" && candidate.trim() !== "")
+    .map(canonicalPathIfPresent);
+  if (temporaryRoots.some((root) => isInside(path, root))) return true;
+
+  const portablePath = path.replaceAll("\\", "/");
+  return (
+    /^\/(?:private\/)?var\/folders\/[^/]+\/[^/]+\/T(?:\/|$)/u.test(portablePath) ||
+    /^\/run\/user\/\d+(?:\/|$)/u.test(portablePath)
+  );
+}
+
+function requireDurableArtifactPath(path, label) {
+  if (isEphemeralOperatingSystemTemporaryPath(path)) {
+    block(`${label} is under ephemeral operating-system temporary storage and is not durable.`);
+  }
+}
+
 function pathEntryExists(path, label) {
   try {
     lstatSync(path);
@@ -367,12 +405,18 @@ function hasSensitiveName(words) {
   return SENSITIVE_WORD_SEQUENCES.some((sequence) => containsWordSequence(words, sequence));
 }
 
+function hasSensitiveCredentialExtension(leaf) {
+  return leaf
+    .split(".")
+    .slice(1)
+    .some((suffix) => SENSITIVE_CREDENTIAL_EXTENSIONS.has(suffix));
+}
+
 function isSensitiveIgnoredPath(path) {
   const segments = pathSegments(path);
   const lowerSegments = segments.map((segment) => segment.toLowerCase());
   const leaf = lowerSegments.at(-1) ?? "";
   const parent = lowerSegments.at(-2) ?? "";
-  const extension = leaf.includes(".") ? leaf.slice(leaf.lastIndexOf(".") + 1) : "";
 
   if (
     lowerSegments.some((segment) =>
@@ -383,7 +427,7 @@ function isSensitiveIgnoredPath(path) {
   }
   if (parent === ".docker" && leaf === "config.json") return true;
   if (isEnvironmentFileName(leaf)) return true;
-  if (SENSITIVE_CREDENTIAL_EXTENSIONS.has(extension)) return true;
+  if (hasSensitiveCredentialExtension(leaf)) return true;
   if (SENSITIVE_IGNORED_FILENAMES.has(leaf)) return true;
   if (/^id_(?:dsa|ecdsa|ed25519|rsa)(?:\.pub)?$/u.test(leaf)) return true;
   return segments.some((segment) => hasSensitiveName(normalizedNameWords(segment)));
@@ -455,6 +499,48 @@ function ignoredEntriesFromGit(target) {
   return paths.map((path) => ignoredFileFingerprint(target, path)).sort(comparePaths);
 }
 
+function assertNoNestedGitEntries(target) {
+  const pending = [{ absolutePath: target, relativePath: "" }];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    let entries;
+    try {
+      entries = readdirSync(current.absolutePath, { withFileTypes: true }).sort((left, right) =>
+        left.name.localeCompare(right.name),
+      );
+    } catch (error) {
+      block(
+        `Could not inspect ${JSON.stringify(current.relativePath || ".")} for nested Git metadata: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+
+    for (const entry of entries) {
+      const relativePath = current.relativePath
+        ? `${current.relativePath}/${entry.name}`
+        : entry.name;
+      if (entry.name.toLowerCase() === ".git") {
+        if (current.relativePath === "") continue;
+        block(`Nested .git entry ${JSON.stringify(relativePath)} preserves separate Git history.`);
+      }
+
+      const absolutePath = join(current.absolutePath, entry.name);
+      let stats;
+      try {
+        stats = lstatSync(absolutePath);
+      } catch (error) {
+        block(
+          `Could not inspect ${JSON.stringify(relativePath)} for nested Git metadata: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+      if (stats.isDirectory()) pending.push({ absolutePath, relativePath });
+    }
+  }
+}
+
 function inspectScriptRepository() {
   const scriptDirectory = dirname(SCRIPT_PATH);
   const root = absoluteRealPath(
@@ -486,8 +572,7 @@ function branchIssueNumber(branch) {
 
 function inspectBundle(path, target, expectedHead, expectedTree, objectFormat) {
   const artifact = absoluteRealPath(path, "recovery.artifactPath");
-  const privateTmp = resolve("/private/tmp");
-  if (isInside(artifact, privateTmp)) block("The recovery artifact is under /private/tmp and is not durable.");
+  requireDurableArtifactPath(artifact, "The recovery artifact");
   if (isInside(artifact, target)) block("The recovery artifact is inside the worktree it protects.");
   if (!statSync(artifact).isFile()) block("The recovery artifact must be a file.");
   const artifactSha256 = sha256(readFileSync(artifact));
@@ -559,6 +644,7 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
   const target = absoluteRealPath(targetInput, "target");
   const topLevel = absoluteRealPath(git(target, ["rev-parse", "--show-toplevel"]).trim(), "worktree root");
   assertEqual(target, topLevel, "Target worktree root");
+  assertNoNestedGitEntries(target);
 
   const worktrees = parseWorktreePorcelain(git(target, ["worktree", "list", "--porcelain", "-z"]));
   if (worktrees.length === 0) block("Git reported no registered worktrees.");
@@ -1112,10 +1198,7 @@ function parseArgs(argv) {
 
 function ensureDurableEvidence(path, target) {
   const evidencePath = absoluteRealPath(path, "evidence file");
-  const privateTmp = resolve("/private/tmp");
-  if (isInside(evidencePath, privateTmp)) {
-    block("The removal evidence file must be stored outside /private/tmp before execution.");
-  }
+  requireDurableArtifactPath(evidencePath, "The removal evidence file");
   if (isInside(evidencePath, target)) block("The removal evidence file cannot live inside the worktree being removed.");
 }
 
@@ -1241,6 +1324,31 @@ function quarantineWorktree(current, evidence, expectedRepository, now) {
   }
 }
 
+function sealQuarantinedWorktree(quarantine) {
+  const preservedPath = join(quarantine.quarantineRoot, "preserved-worktree");
+  if (pathEntryExists(preservedPath, "possible preserved worktree path")) {
+    block(`The preserved worktree path already exists at ${preservedPath}.`);
+  }
+  try {
+    renameSync(quarantine.quarantinePath, preservedPath);
+  } catch (error) {
+    block(
+      `Could not atomically seal the quarantined worktree at ${preservedPath}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  if (
+    pathEntryExists(quarantine.quarantinePath, "registered quarantine path after sealing") ||
+    !pathEntryExists(preservedPath, "preserved worktree after sealing")
+  ) {
+    block(
+      `The worktree may be preserved at ${preservedPath}, but the atomic seal could not be confirmed.`,
+    );
+  }
+  return { ...quarantine, preservedPath };
+}
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const evidencePath = absoluteRealPath(options.evidence, "evidence file");
@@ -1249,6 +1357,7 @@ function main() {
   const taskSnapshot = readJson(taskSnapshotPath, "Task snapshot");
   const expectedRepository = inspectScriptRepository();
   const current = inspectLocalState(options.target, evidence, expectedRepository);
+  ensureDurableEvidence(evidencePath, current.target);
   const issueNumber = branchIssueNumber(current.branch) ?? evidence.issue?.number;
   if (!Number.isInteger(issueNumber)) block("Could not determine the owning issue number.");
   const github = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
@@ -1268,7 +1377,6 @@ function main() {
     block("Execution requires --remote-branch-action keep. This wrapper never deletes remote branches.");
   }
   assertEqual(options.confirmation, assessment.confirmation, "Removal confirmation");
-  ensureDurableEvidence(evidencePath, current.target);
   ensureTaskSnapshotOutsideTarget(taskSnapshotPath, current.target);
 
   const finalGithub = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
@@ -1293,23 +1401,24 @@ function main() {
   assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
 
   const quarantine = quarantineWorktree(finalCurrent, evidence, expectedRepository, Date.now());
+  const sealed = sealQuarantinedWorktree(quarantine);
   const removal = commandResult("git", [
     "-C",
-    quarantine.quarantined.repositoryRoot,
+    sealed.quarantined.repositoryRoot,
     "worktree",
     "remove",
-    quarantine.quarantined.registeredPath,
+    sealed.quarantined.registeredPath,
   ]);
   if (removal.status !== 0) {
     block(
-      `Worktree remains in quarantine ${quarantine.quarantinePath}: Git refused normal removal: ${removal.stderr.trim()}`,
+      `Worktree content is preserved at ${sealed.preservedPath}: Git refused normal registration removal: ${removal.stderr.trim()}`,
     );
   }
   try {
-    confirmRemovalGone(quarantine.quarantined);
+    confirmRemovalGone(sealed.quarantined);
   } catch (error) {
     block(
-      `Worktree removal from quarantine ${quarantine.quarantinePath} could not be confirmed: ${
+      `Worktree content is preserved at ${sealed.preservedPath}, but registration removal could not be confirmed: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );
@@ -1317,20 +1426,12 @@ function main() {
   if (pathEntryExists(finalCurrent.target, "original worktree path after removal")) {
     block("The original worktree path reappeared after quarantine removal.");
   }
-  try {
-    rmdirSync(quarantine.quarantineRoot);
-  } catch (error) {
-    block(
-      `The worktree was removed, but its empty quarantine directory could not be removed: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
   console.log(
     JSON.stringify(
       {
-        status: "REMOVED",
+        status: "WORKTREE_REGISTRATION_REMOVED",
         target: finalCurrent.target,
+        preservedPath: sealed.preservedPath,
         localBranchAction: "keep",
         remoteBranchAction: "keep",
       },

@@ -94,11 +94,13 @@ A clean status is necessary but is not enough to classify a checkout as removabl
 2. Separate unrelated edits. Never commit a mixed checkout as one change.
 3. For commits already on a trusted remote, record the exact remote ref and commit.
 4. For local-only commits, create a Git bundle outside the source worktree and
-   outside `/private/tmp`. The wrapper restores it into a new empty repository and
-   compares the restored HEAD and tree with the source. The empty repository has no
-   object alternates, ignores caller object indirection, and passes a full strict
-   object check. A bundle that depends on prerequisite objects outside itself fails
-   this proof.
+   outside every operating-system temporary root. This includes `/tmp`,
+   `/private/tmp`, `/var/tmp`, runtime directories, memory-backed temporary storage,
+   and macOS per-user `/var/folders/.../T` directories. The wrapper restores it into
+   a new empty repository and compares the restored HEAD and tree with the source.
+   The empty repository has no object alternates, ignores caller object indirection,
+   and passes a full strict object check. A bundle that depends on prerequisite
+   objects outside itself fails this proof.
 5. For tracked edits, create a binary-capable patch. Restore it in a disposable
    checkout before accepting it.
 6. For useful untracked files, copy the sanitized files into the recovery package.
@@ -122,9 +124,10 @@ uses force, deletes a branch, deletes a remote ref, or mutates GitHub.
 
 ### Prepare reviewed evidence
 
-Store schema version 2 evidence outside the target worktree and outside
-`/private/tmp`. Capture it within thirty minutes of execution. It must identify the
-exact primary checkout, common Git directory, stored origin URL, target path,
+Store schema version 2 evidence outside the target worktree and outside every
+operating-system temporary root named above. Capture it within thirty minutes of
+execution. It must identify the exact primary checkout, common Git directory,
+stored origin URL, target path,
 registered path, target Git directory, branch, HEAD, tree, base ref, and binary
 patch checksum. Evidence, recovery, ignored-file, replacement, task, check, and
 approval timestamps must be valid and cannot be in the future.
@@ -151,8 +154,14 @@ environment-file variants such as `.envrc`, `.pgpass`, `.docker/config.json`,
 service-account and application-default credential files, `AuthKey` files,
 `config.local`, bounded secret and token names, SSH key names, and standard key,
 certificate, and keystore extensions such as `.p8`, `.pem`, `.p12`, `.pfx`, and
-`.jks`. Ordinary names such as `tokenizer-cache.json` are not treated as secrets
-merely because they contain the letters `token`.
+`.jks`, including backup suffix chains such as `.pem.bak`, `.p12.backup`,
+`.crt.old`, and `.key.bak`. Ordinary names such as `tokenizer-cache.json` are not
+treated as secrets merely because they contain the letters `token`.
+
+The wrapper also walks the physical checkout without following symlinks and blocks
+any nested `.git` file or directory. Git status can hide a nested repository when
+the outer repository already tracks its visible files. Its separate object history
+must never be treated as disposable outer-worktree content.
 
 Recovery kinds are:
 
@@ -235,8 +244,9 @@ matching task.
 
 Task metadata cannot prove that an unrelated agent was omitted from a snapshot. The
 named cleanup operator must keep a repository freeze during the execution window.
-The private quarantine closes the ordinary final path race, but it is not an
-operating-system lock against an uncooperative process running as the same account.
+The atomic seal prevents the wrapper from recursively deleting content after the
+final scan, but it is not an operating-system lock against an uncooperative process
+changing earlier repository state while checks run.
 
 ### Inspect, then execute
 
@@ -251,12 +261,17 @@ node scripts/remove-worktree-safely.mjs \
 
 Review the exact identity, issue, pull request, task, ignored-file, and recovery
 result. Refresh the Desktop task snapshot, then execute within thirty seconds. The
-wrapper completes GitHub and task checks first, then recomputes recovery, status,
-and ignored-file fingerprints. It creates a private sibling directory on the same
-filesystem, atomically moves the worktree into it, and reinspects the moved worktree.
-Only an unchanged quarantined worktree receives normal, non-force removal. If
-anything arrived at the move boundary or the reinspection differs, execution stops
-and reports the preserved quarantine path:
+wrapper completes GitHub and task checks first, then recomputes recovery, nested
+Git metadata, status, and ignored-file fingerprints. It creates a private sibling
+directory on the same filesystem, atomically moves the worktree into it, and
+reinspects the moved worktree. An unchanged checkout is atomically sealed at a
+separate `preserved-worktree` path before normal, non-force `git worktree remove`
+runs against the now-missing registered path. Git can remove the registration, but
+it cannot recursively delete the sealed content. If a file recreates the registered
+path at the final boundary, Git refuses removal or the postcondition blocks, and the
+late file remains present beside the sealed copy. If anything arrived at the move
+boundary or an inspection differs, execution also stops and reports the preserved
+path:
 
 ```sh
 node scripts/remove-worktree-safely.mjs \
@@ -268,8 +283,14 @@ node scripts/remove-worktree-safely.mjs \
   --confirmation "REMOVE /absolute/worktree/path"
 ```
 
-After success, confirm the original path, quarantine path, and registration are gone.
-The local branch remains.
+After success, confirm the original path and registration are gone and the reported
+`preservedPath` exists. The wrapper deliberately keeps that sealed checkout copy,
+so closing a registered worktree never silently deletes a file that arrived after
+the final scan. Physical deletion of the sealed copy is a separate disposal action
+after its path is reviewed and explicitly approved. Because the seal stays on the
+source filesystem to make the rename atomic, it is not a durability claim. Relocate
+anything that needs longer retention to the approved private archive. The local
+branch remains.
 Delete a merged local branch separately with normal `git branch -d` only after
 ancestry or merged pull request evidence proves integration. Remote deletion is a
 separate action requiring the current issue owner or a repository maintainer to name

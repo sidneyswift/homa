@@ -14,7 +14,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -173,6 +173,12 @@ if (process.env.FAKE_GIT_LATE_IGNORED_ON_MOVE === "1" && moveIndex > 0 && args[m
   mkdirSync(join(source, ".late"), { recursive: true });
   writeFileSync(join(source, ".late", "arrived-during-move.txt"), "must survive quarantine\\n");
 }
+const removeIndex = args.indexOf("remove");
+if (process.env.FAKE_GIT_LATE_IGNORED_ON_REMOVE === "1" && removeIndex > 0 && args[removeIndex - 1] === "worktree") {
+  const source = args[removeIndex + 1];
+  mkdirSync(join(source, ".late"), { recursive: true });
+  writeFileSync(join(source, ".late", "arrived-during-remove.txt"), "must survive removal\\n");
+}
 const result = spawnSync(${JSON.stringify(realGitPath)}, args, {
   encoding: "utf8",
   env: process.env
@@ -207,9 +213,10 @@ function makeFixture({
   taskless = false,
   lateIgnoredDuringFinalGithub = false,
   lateIgnoredDuringMove = false,
+  lateIgnoredDuringRemove = false,
   recreateOriginalSymlinkDuringMove = false,
 } = {}) {
-  const root = mkdtempSync(join(tmpdir(), "homa-worktree-wrapper-"));
+  const root = mkdtempSync(join(homedir(), ".homa-worktree-wrapper-"));
   const remote = join(root, "remote.git");
   const primary = join(root, "primary");
   const target = join(root, "lane");
@@ -238,6 +245,11 @@ function makeFixture({
   git(fixture, primary, ["config", "user.email", "cleanup-test@example.test"]);
   git(fixture, primary, ["config", `url.file://${remote}.insteadOf`, githubOrigin]);
   writeFileSync(join(primary, "README.md"), "Disposable worktree integration fixture.\n");
+  mkdirSync(join(primary, "tracked-container"));
+  writeFileSync(
+    join(primary, "tracked-container", "history.txt"),
+    "Outer repository tracks this exact file.\n",
+  );
   writeFileSync(
     join(primary, ".gitignore"),
     ".cache/\n.late/\n.next/\n.output/\nbuild/\ncoverage/\ndist/\ngenerated/\n*.scratch\n",
@@ -276,6 +288,7 @@ function makeFixture({
     FAKE_GH_LATE_IGNORED_TARGET: target,
     FAKE_GH_ASSOCIATED_PULL: "0",
     FAKE_GIT_LATE_IGNORED_ON_MOVE: lateIgnoredDuringMove ? "1" : "0",
+    FAKE_GIT_LATE_IGNORED_ON_REMOVE: lateIgnoredDuringRemove ? "1" : "0",
     FAKE_GIT_RECREATE_ORIGINAL_SYMLINK: recreateOriginalSymlinkDuringMove ? "1" : "0",
   };
 
@@ -445,16 +458,63 @@ function quarantineRoots(fixture) {
     .map((entry) => join(fixture.root, entry.name));
 }
 
-test("the destructive executor removes only the proven disposable worktree", (t) => {
+test("execution removes the registration and preserves sealed checkout content", (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
   const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), { env: fixture.env });
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(JSON.parse(result.stdout).status, "REMOVED");
+  const outcome = JSON.parse(result.stdout);
+  assert.equal(outcome.status, "WORKTREE_REGISTRATION_REMOVED");
   assert.equal(existsSync(fixture.target), false);
-  assert.deepEqual(quarantineRoots(fixture), []);
+  const roots = quarantineRoots(fixture);
+  assert.equal(roots.length, 1);
+  assert.equal(outcome.preservedPath, join(roots[0], "preserved-worktree"));
+  assert.equal(existsSync(outcome.preservedPath), true);
+  assert.equal(existsSync(join(outcome.preservedPath, ".git")), true);
   assert.doesNotMatch(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
+});
+
+test("a nested Git directory with unique history blocks a clean outer worktree", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const nestedRoot = join(fixture.target, "tracked-container");
+
+  git(fixture, nestedRoot, ["init", "-b", "nested-main"]);
+  git(fixture, nestedRoot, ["config", "user.name", "Nested history test"]);
+  git(fixture, nestedRoot, ["config", "user.email", "nested-history@example.test"]);
+  git(fixture, nestedRoot, ["add", "history.txt"]);
+  git(fixture, nestedRoot, ["commit", "-m", "test: unique nested history"]);
+  const nestedHead = git(fixture, nestedRoot, ["rev-parse", "HEAD"]);
+
+  assert.equal(git(fixture, fixture.target, ["status", "--porcelain=v2", "--untracked-files=all"]), "");
+  assert.notEqual(
+    run("git", ["cat-file", "-e", `${nestedHead}^{commit}`], {
+      cwd: fixture.target,
+      env: fixture.env,
+    }).status,
+    0,
+  );
+
+  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /nested \.git entry/iu);
+  assert.equal(git(fixture, nestedRoot, ["rev-parse", "HEAD"]), nestedHead);
+});
+
+test("a nested .git file blocks a clean outer worktree", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  writeFileSync(
+    join(fixture.target, "tracked-container", ".git"),
+    "gitdir: /durable/private/nested-history.git\n",
+  );
+
+  assert.equal(git(fixture, fixture.target, ["status", "--porcelain=v2", "--untracked-files=all"]), "");
+  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /nested \.git entry/iu);
+  assert.equal(existsSync(join(fixture.target, "tracked-container", ".git")), true);
 });
 
 test("a fresh active task blocks the destructive executor and preserves the worktree", (t) => {
@@ -517,6 +577,63 @@ test("a verified bundle preserves a local-only commit when GitHub returns 422", 
   assert.equal(existsSync(fixture.target), true);
 });
 
+test("bundle recovery rejects the operating system temporary directory", (t) => {
+  const fixture = makeFixture({ localOnly: true });
+  const temporaryRoot = mkdtempSync(join(tmpdir(), "homa-temporary-bundle-"));
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  t.after(() => rmSync(temporaryRoot, { recursive: true, force: true }));
+  const evidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const temporaryBundle = join(temporaryRoot, "recovery.bundle");
+  copyFileSync(evidence.recovery.artifactPath, temporaryBundle);
+  evidence.recovery.artifactPath = temporaryBundle;
+  writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+
+  if (process.platform === "darwin") {
+    assert.match(
+      realpathSync(temporaryBundle),
+      /^\/private\/var\/folders\/[^/]+\/[^/]+\/T\//u,
+    );
+  }
+  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /ephemeral operating-system temporary storage/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("evidence rejects every available operating system temporary root", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const temporaryRoots = [
+    ...new Set(
+      [tmpdir(), "/private/tmp", "/var/tmp"]
+        .filter((candidate) => existsSync(candidate))
+        .map((candidate) => realpathSync(candidate)),
+    ),
+  ];
+
+  for (const temporaryBase of temporaryRoots) {
+    const temporaryRoot = mkdtempSync(join(temporaryBase, "homa-temporary-evidence-"));
+    try {
+      const temporaryEvidence = join(temporaryRoot, "removal-evidence.json");
+      copyFileSync(fixture.evidencePath, temporaryEvidence);
+      const result = run(
+        process.execPath,
+        wrapperArgs({ ...fixture, evidencePath: temporaryEvidence }),
+        { env: fixture.env },
+      );
+      assert.equal(result.status, 2, `${temporaryBase}: ${result.stderr}`);
+      assert.match(
+        result.stderr,
+        /ephemeral operating-system temporary storage/iu,
+        temporaryBase,
+      );
+      assert.equal(existsSync(fixture.target), true);
+    } finally {
+      rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  }
+});
+
 test("ignored content needs an exact recorded disposition", (t) => {
   const fixture = makeFixture({ ignored: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
@@ -562,14 +679,19 @@ test("sensitive files nested under ignored directories cannot be called regenera
     ".cache/stripe-client-secret.json",
     ".cache/github-token.json",
     ".cache/tls.pem",
+    ".cache/tls.pem.bak",
     ".cache/signing.p12",
+    ".cache/signing.p12.backup",
     ".cache/signing.pfx",
     ".cache/release.jks",
+    ".cache/release.jks.old",
     ".cache/client.ppk",
     ".cache/signing.pkcs12",
     ".cache/release.truststore",
     ".cache/certificate.cer",
+    ".cache/server.crt.old",
     ".cache/private.key",
+    ".cache/private.key.bak",
     ".cache/id_rsa",
     ".cache/id_ed25519",
     ".cache/application-default-credentials.json",
@@ -839,6 +961,29 @@ test("content arriving at the move boundary is quarantined and preserved", (t) =
   assert.match(
     git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]),
     new RegExp(quarantinedWorktree.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "u"),
+  );
+});
+
+test("ignored content arriving after quarantine reinspection is never deleted", (t) => {
+  const fixture = makeFixture({ lateIgnoredDuringRemove: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
+    env: fixture.env,
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /content is preserved.*Git refused normal registration removal/iu);
+  assert.equal(existsSync(fixture.target), false);
+  const roots = quarantineRoots(fixture);
+  assert.equal(roots.length, 1);
+  assert.equal(existsSync(join(roots[0], "preserved-worktree", "README.md")), true);
+  assert.equal(
+    existsSync(join(roots[0], "worktree", ".late", "arrived-during-remove.txt")),
+    true,
+  );
+  assert.match(
+    git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]),
+    /codex\/gh-872-disposable/u,
   );
 });
 
