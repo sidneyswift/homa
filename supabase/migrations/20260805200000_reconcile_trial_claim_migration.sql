@@ -1,3 +1,18 @@
+-- Two different migrations were accidentally assigned version
+-- 20260804090000. Supabase records only the version, so a database could
+-- receive either effect while treating both filenames as applied. Repeat both
+-- idempotent effects under one unique version to converge every environment.
+
+do $$
+begin
+  if to_regprocedure(
+    'public.toggle_plan_activity_check(uuid,text,smallint,smallint,boolean)'
+  ) is not null then
+    execute 'revoke all on function public.toggle_plan_activity_check(uuid, text, smallint, smallint, boolean) from public, anon, authenticated';
+  end if;
+end
+$$;
+
 -- A Stripe card fingerprint is a provider-owned, opaque equality signal. It
 -- prevents two active Homa trial families from scheduling future charges on
 -- the same exact card, without inferring identity from family-entered data.
