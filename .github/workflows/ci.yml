@@ -68,6 +68,9 @@ jobs:
       - name: Supabase migration versions are unique
         run: node scripts/migration-version-check.mjs && node --test scripts/migration-version-check.test.mjs
 
+      - name: Repository cleanup guardrails
+        run: node --test scripts/git-safety-hook.test.mjs scripts/remove-worktree-safely.test.mjs
+
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: node scripts/em-dash-check.mjs
 
