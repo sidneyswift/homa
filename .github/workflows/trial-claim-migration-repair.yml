@@ -42,10 +42,17 @@ jobs:
             echo "Migration hash does not match the reviewed issue #873 input."
             exit 1
           fi
-
-      - uses: supabase/setup-cli@v2
-        with:
-          version: 2.111.0
+          repair_script="scripts/trial-claim-migration-repair.sql"
+          expected_repair="e52785921a24f638dabbcb2700cd9b0a5b5583a61f421f635f3aa262bdb048e1"
+          actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
+          if [ "$actual_repair" != "$expected_repair" ]; then
+            echo "Repair transaction hash does not match the reviewed issue #873 input."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
+            echo "This repair may run only in sidneyswift/homa."
+            exit 1
+          fi
 
       - name: Confirm PostgreSQL client availability
         run: |
@@ -68,6 +75,9 @@ jobs:
             throw new Error("Production Supabase URL or database password is missing");
           }
           const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
           const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
           databaseUrl.username = `postgres.${ref}`;
           databaseUrl.password = password;
@@ -76,35 +86,21 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
           NODE
 
-      - name: Apply only the issue 873 migration and repair its ledger entry
+      - name: Apply and record the exact repair in one transaction
         run: |
-          version="20260805200000"
-          migration="supabase/migrations/20260805200000_reconcile_trial_claim_migration.sql"
-          state="$(psql "$MIGRATION_DATABASE_URL" -AtX -v ON_ERROR_STOP=1 -v version="$version" -c "
-            select
-              (to_regclass('public.stripe_trial_card_claims') is not null)::text
-              || '|'
-              || exists(
-                select 1
-                from supabase_migrations.schema_migrations
-                where version = :'version'
-              )::text
-          ")"
-
-          if [ "$state" = "true|true" ]; then
-            echo "The schema and migration ledger are already repaired."
-          elif [ "$state" = "true|false" ]; then
-            echo "The additive schema exists; repairing only its missing ledger entry."
-            supabase migration repair "$version" --status applied --db-url "$MIGRATION_DATABASE_URL"
-          elif [ "$state" = "false|false" ]; then
-            echo "Applying the one reviewed additive migration."
-            psql "$MIGRATION_DATABASE_URL" -X -v ON_ERROR_STOP=1 --single-transaction -f "$migration"
-            supabase migration repair "$version" --status applied --db-url "$MIGRATION_DATABASE_URL"
-          elif [ "$state" = "false|true" ]; then
-            echo "Migration history claims the repair ran, but the table is absent. Stopping."
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/trial-claim-migration-repair.sql)"
+          echo "$result"
+          if ! grep -Eq '^ISSUE_873_REPAIR=(repaired|verified_noop)$' <<<"$result"; then
+            echo "The atomic repair did not return a recognized result."
             exit 1
-          else
-            echo "Unexpected production preflight result."
+          fi
+
+      - name: Prove an immediate repeat is a no-op
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/trial-claim-migration-repair.sql)"
+          echo "$result"
+          if ! grep -q '^ISSUE_873_REPAIR=verified_noop$' <<<"$result"; then
+            echo "The second repair pass was not a verified no-op."
             exit 1
           fi
 
@@ -131,13 +127,35 @@ jobs:
               )::text,
               exists(
                 select 1
+                from pg_constraint
+                where conrelid = 'public.stripe_trial_card_claims'::regclass
+                  and contype = 'p'
+                  and pg_get_constraintdef(oid) = 'PRIMARY KEY (card_fingerprint)'
+              )::text,
+              exists(
+                select 1
+                from pg_constraint
+                where conrelid = 'public.stripe_trial_card_claims'::regclass
+                  and contype = 'f'
+                  and confrelid = 'public.families'::regclass
+                  and confdeltype = 'c'
+              )::text,
+              (to_regclass('public.stripe_trial_card_claims_family_idx') is not null)::text,
+              not exists(
+                select 1
+                from pg_policy
+                where polrelid = 'public.stripe_trial_card_claims'::regclass
+                  and polpermissive
+              )::text,
+              exists(
+                select 1
                 from supabase_migrations.schema_migrations
                 where version = '20260805200000'
               )::text
             )
           ")"
-          if [ "$verification" != "true|true|false|false|true" ]; then
+          if [ "$verification" != "true|true|false|false|true|true|true|true|true" ]; then
             echo "Production verification failed without reading claim rows."
             exit 1
           fi
-          echo "Production verification passed: table present, RLS on, client grants absent, migration recorded."
+          echo "Production verification passed: exact keys and index present, RLS on, client grants and permissive policies absent, migration recorded."
