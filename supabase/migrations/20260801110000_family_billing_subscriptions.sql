@@ -30,7 +30,9 @@ create index if not exists family_billing_subscriptions_provider_customer_idx
   where provider_customer_id is not null;
 
 alter table public.family_billing_subscriptions enable row level security;
-revoke all on table public.family_billing_subscriptions from anon, authenticated;
+revoke all on table public.family_billing_subscriptions
+  from public, anon, authenticated;
+grant all privileges on table public.family_billing_subscriptions to service_role;
 
 -- Preserve every already-recorded paid family. Term is intentionally null for
 -- historic mirrors because a product or price id alone is not authoritative
