@@ -1,17 +1,16 @@
+import { planAvailableForPurchase } from "@homa/core";
+
 import { TIER_NAMES, tierDelta } from "../../../components/billing/wall-copy";
 import type { FamilyPlanState } from "../../../lib/billing/wall";
 import { SectionHeading } from "./section-heading";
 
 /**
- * Which plan she is on, and the way to add Homa Plus (gh#412).
+ * Which plan she is on, plus an upgrade only while that plan is actually
+ * available for a new purchase (gh#297, gh#412).
  *
- * This exists because of a sentence. The channel gate tells a parent who
- * texts on the base plan: "Everything is waiting for you on the web, and
- * texting with Homa is part of Homa Plus. You can add it whenever you
- * like, in your settings." Settings had no plan anything. Its only
- * billing control was a portal link shown to families with a Stripe
- * customer, which was 1 of 82. So the parent the gate turned away was
- * precisely the parent for whom this page was empty.
+ * Checkout URLs can outlive a sales decision in deployment configuration.
+ * The shared catalog therefore wins over a leftover URL. Existing Plus and
+ * Elite families still see their current plan; only the new offer disappears.
  *
  * Copy is reused verbatim, never rewritten and never edited in flight.
  * TIER_NAMES and tierDelta are the sanctioned per-tier promises and they
@@ -20,14 +19,14 @@ import { SectionHeading } from "./section-heading";
  * from them is a line-wrap decision recorded above the string. String
  * surgery here would quietly reopen all of that.
  *
- * No price on the button. tierMonthlyButton exists for the paywall,
- * where a parent is deciding whether to buy at all; here she is deciding
- * whether to add something to an account she already has, and the
- * checkout page states the charge before she commits.
+ * If Plus becomes purchasable again, the checkout page states the charge
+ * before she commits.
  */
 export function PlanSection({ plan }: { plan: FamilyPlanState }) {
   const alreadyReached = plan.tier === "plus" || plan.tier === "elite";
-  const upgradeUrl = plan.plusCheckout?.monthlyUrl ?? null;
+  const upgradeUrl = planAvailableForPurchase("plus")
+    ? (plan.plusCheckout?.monthlyUrl ?? null)
+    : null;
 
   return (
     <section className="quiet-frame quiet-frame--paper rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm" data-brand-layer="plan-section">
