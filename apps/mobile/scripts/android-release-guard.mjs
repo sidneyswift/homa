@@ -18,7 +18,7 @@ const EAS_LITERAL_ACTION = /^[a-z][a-z0-9:_-]*$/iu;
 const SHELL_DYNAMIC_WORD = /[$*?]/u;
 const SHELL_ASSIGNMENT = /^[a-z_][a-z0-9_]*=/iu;
 const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until|sudo|nohup|time)$/u;
-const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = "07402c768408130dbbdc25d667650c10b96c88fd80aa74bd8c6d51a5003ccad2";
+const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = "c910f1f8bd2228cac11155672ce6de19d0e527c5f071606e504333dec3c06fd7";
 const require = createRequire(import.meta.url);
 
 function asRecord(value) {

@@ -144,7 +144,7 @@ jobs:
           check_hash "scripts/issue-606-runtime-drain-contract.mjs" \
             "d5b3fe5eae9247c77c36401588cb0ceb0a7ae2ec7b5ade42cd72ff86fd2acb48"
           check_hash "scripts/issue-606-vercel-deployment-contract.mjs" \
-            "80733f5c38eb56a1b56f4bdbc585412397b0eb5f6fa6743efed4e4dab1b4cbb8"
+            "1a8a87954140b52e018776fad4b9eb9e23442ac3cef4e6b87ea70ccc68e461b7"
           check_hash "scripts/issue-606-vercel-project-protection-contract.mjs" \
             "4f545d9ba27e4e4363dfa9434467c72343d67cf13ba5c2013ef2232aed056a7b"
 
