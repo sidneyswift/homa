@@ -393,10 +393,13 @@ directory manifest; full HEAD and tree; branch or detached state; an explicit
 allowlisted inventory and content fingerprint for every administrative file; a
 random scan nonce; the complete set digest; and a fixed prune cutoff two seconds
 older than capture. The required administrative files are `gitdir`, `HEAD`,
-`commondir`, and `index`. The only optional paths currently accepted are `ORIG_HEAD`,
-`config.worktree`, `locked`, `logs/HEAD`, and an empty `refs` directory. Any other
-path blocks the batch for review. Git's verbose dry run must name exactly that
-administrative set.
+`commondir`, and `index`. The optional paths accepted after explicit review are
+`AUTO_MERGE`, `CLAUDE_BASE`, `COMMIT_EDITMSG`, `FETCH_HEAD`, `ORIG_HEAD`,
+`REBASE_HEAD`, `config.worktree`, `gc.log`, `locked`, `logs/HEAD`, an empty `refs`
+directory, and the exact `hooks/post-commit` path. The guard fingerprints every
+accepted file, preserves its bytes in the private administrative backup, and copies
+files as mode `0600` so a preserved hook cannot execute. Any other path blocks the
+batch for review. Git's verbose dry run must name exactly that administrative set.
 
 The guard compares each prunable administrative index with its recorded HEAD without
 refreshing or rewriting the index. If the index differs from HEAD, retirement fails

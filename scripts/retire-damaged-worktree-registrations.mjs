@@ -44,11 +44,19 @@ const ACTIVE_TASK_STATES = new Set(["active", "idle", "in_progress", "needs_inpu
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 const WORKTREE_RECORD_KEYS = new Set(["worktree", "HEAD", "branch", "bare", "detached", "locked", "prunable"]);
 const ADMINISTRATIVE_RECORD_ALLOWLIST = new Map([
+  ["AUTO_MERGE", "file"],
+  ["CLAUDE_BASE", "file"],
+  ["COMMIT_EDITMSG", "file"],
+  ["FETCH_HEAD", "file"],
   ["HEAD", "file"],
   ["ORIG_HEAD", "file"],
+  ["REBASE_HEAD", "file"],
   ["commondir", "file"],
   ["config.worktree", "file"],
+  ["gc.log", "file"],
   ["gitdir", "file"],
+  ["hooks", "directory"],
+  ["hooks/post-commit", "file"],
   ["index", "file"],
   ["locked", "file"],
   ["logs", "directory"],
