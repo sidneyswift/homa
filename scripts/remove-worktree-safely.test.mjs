@@ -12,6 +12,7 @@ import {
   readdirSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { homedir, tmpdir } from "node:os";
@@ -905,6 +906,9 @@ test("the generator writes bound mode-0600 evidence and a review queue", (t) => 
 test("the generator streams exactly 101001 ignored files without truncation", (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const realGitOnlyBin = join(fixture.root, "real-git-only-bin");
+  mkdirSync(realGitOnlyBin);
+  symlinkSync(checked("which", ["git"]), join(realGitOnlyBin, "git"));
   const ignoredRoot = join(fixture.target, ".cache", "large-inventory");
   mkdirSync(ignoredRoot, { recursive: true });
   for (let index = 0; index < 101_001; index += 1) {
@@ -927,7 +931,7 @@ test("the generator streams exactly 101001 ignored files without truncation", (t
     {
       env: {
         ...fixture.env,
-        PATH: `${dirname(checked("which", ["git"]))}:${fixture.fakeBin}:${process.env.PATH}`,
+        PATH: `${realGitOnlyBin}:${fixture.fakeBin}:${process.env.PATH}`,
       },
     },
   );
