@@ -21,7 +21,7 @@ const DOCUMENTATION_FILES = new Set([
 ]);
 
 function normalizeFiles(files) {
-  return files.map((file) => file.trim().replace(/^\.\//, "")).filter(Boolean);
+  return files.map((file) => file.replace(/^\.\//, "")).filter(Boolean);
 }
 
 function isDocumentationFile(file) {
@@ -113,20 +113,31 @@ export function validateCiResults(scope, results) {
 
 export function changedFiles(base = "HEAD^", head = "HEAD") {
   return normalizeFiles(
-    execFileSync("git", ["diff", "--name-only", "--diff-filter=ACMRT", base, head], {
+    execFileSync("git", ["diff", "--name-only", "-z", "--no-renames", "--diff-filter=ACDMRT", base, head], {
       encoding: "utf8",
-    }).split("\n"),
+    }).split("\0"),
   );
 }
 
-function readChangedFilesOrBuild() {
+function readChangedFilesOrBuild(base = "HEAD^", head = "HEAD") {
   try {
-    return changedFiles();
+    return changedFiles(base, head);
   } catch (error) {
     console.error(
       `Could not inspect the Git diff, so the full build will run: ${error instanceof Error ? error.message : String(error)}`,
     );
     return null;
+  }
+}
+
+function isExactCommit(sha) {
+  try {
+    const resolved = execFileSync("git", ["rev-parse", "--verify", `${sha}^{commit}`], {
+      encoding: "utf8",
+    }).trim();
+    return resolved.toLowerCase() === sha.toLowerCase();
+  } catch {
+    return false;
   }
 }
 
@@ -144,7 +155,42 @@ function runVercelMode() {
     return;
   }
 
-  const files = readChangedFilesOrBuild();
+  const previousSha = process.env.VERCEL_GIT_PREVIOUS_SHA?.trim();
+  if (!previousSha) {
+    console.error("Vercel change scope: build, no prior successful branch deployment SHA");
+    process.exitCode = 1;
+    return;
+  }
+  if (!/^[0-9a-f]{40}$/iu.test(previousSha)) {
+    console.error("Vercel change scope: build, previous deployment SHA is invalid");
+    process.exitCode = 1;
+    return;
+  }
+  if (!isExactCommit(previousSha)) {
+    console.error("Vercel change scope: build, previous deployment commit is unavailable");
+    process.exitCode = 1;
+    return;
+  }
+
+  const providedCurrentSha = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
+  if (providedCurrentSha && !/^[0-9a-f]{40}$/iu.test(providedCurrentSha)) {
+    console.error("Vercel change scope: build, current deployment SHA is invalid");
+    process.exitCode = 1;
+    return;
+  }
+  if (providedCurrentSha && !isExactCommit(providedCurrentSha)) {
+    console.error("Vercel change scope: build, current deployment commit is unavailable");
+    process.exitCode = 1;
+    return;
+  }
+  const checkedOutSha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  if (providedCurrentSha && checkedOutSha.toLowerCase() !== providedCurrentSha.toLowerCase()) {
+    console.error("Vercel change scope: build, current deployment SHA does not match HEAD");
+    process.exitCode = 1;
+    return;
+  }
+  const currentSha = providedCurrentSha || "HEAD";
+  const files = readChangedFilesOrBuild(previousSha, currentSha);
   if (files === null || !shouldSkipVercelPreview(files)) {
     console.error("Vercel change scope: build");
     process.exitCode = 1;
