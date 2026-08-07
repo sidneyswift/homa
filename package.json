@@ -117,6 +117,7 @@
     "child-progress:e2e": "pnpm test:child-progress:postgres",
     "test:child-progress:postgres": "NODE_OPTIONS=--conditions=react-server tsx scripts/child-progress-postgres-test.mts",
     "test:duplicate-trial:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json --test lib/billing/duplicate-trial-postgres.test.ts",
+    "test:trial-claim-repair:postgres": "pnpm eval:sandbox --exec node ../../scripts/trial-claim-migration-repair-postgres.mjs",
     "test:duplicate-trial:stripe": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json --test lib/billing/duplicate-trial-stripe-e2e.test.ts",
     "hours-log:e2e": "pnpm test:hours-log:postgres",
     "test:hours-log:postgres": "NODE_OPTIONS=--conditions=react-server tsx scripts/hours-log-race-test.mts",
