@@ -45,6 +45,8 @@ export const OFFER_RECOVERY_MAX_ATTEMPTS = 2;
 export interface RecoverableOffer {
   sourceDeliveryId: string;
   familyId: string;
+  /** Exact current adult who received and accepted the source offer. */
+  recipientMemberUserId: string;
   channel: string;
   /** The assistant message that made the offer, so the recovery turn knows
    * exactly what it promised to build. */
@@ -120,6 +122,7 @@ export async function findRecoverableOffers(
     {
       source_delivery_id: string;
       family_id: string;
+      recipient_member_user_id: string;
       channel: string;
       offer_text: string | null;
       attempts: number | null;
@@ -129,6 +132,7 @@ export async function findRecoverableOffers(
     select
       d.id as source_delivery_id,
       d.family_id,
+      d.recipient_member_user_id::text,
       d.channel,
       m.content as offer_text,
       coalesce(rec.attempts, 0) as attempts,
@@ -137,8 +141,17 @@ export async function findRecoverableOffers(
     from public.conversation_open_loops l
     join public.conversation_deliveries d
       on d.id = l.delivery_id and d.family_id = l.family_id
+    join public.conversation_messages resolver
+      on resolver.id = l.resolved_by_message_id
+     and resolver.family_id = d.family_id
+     and resolver.episode_id = d.episode_id
+     and resolver.role = 'user'
+     and resolver.member_user_id = d.recipient_member_user_id
     join public.homa_task_runs r
       on r.id = d.task_run_id and r.family_id = d.family_id
+    join public.family_members recipient
+      on recipient.family_id = d.family_id
+     and recipient.user_id = d.recipient_member_user_id
     join public.families f on f.id = l.family_id
     left join public.conversation_messages m
       on m.id = d.message_id and m.family_id = d.family_id
@@ -151,6 +164,7 @@ export async function findRecoverableOffers(
       and l.resolved_at < ${now.toISOString()}::timestamptz - ${`${config.staleMinutes} minutes`}::interval
       and l.resolved_at >= ${now.toISOString()}::timestamptz - ${`${config.windowHours} hours`}::interval
       and not f.sandbox
+      and f.status <> 'deleted'
       and coalesce(rec.attempts, 0) < ${config.maxAttempts}
       and rec.recovered_at is null
       and not exists (
@@ -167,11 +181,53 @@ export async function findRecoverableOffers(
     .map((row) => ({
       sourceDeliveryId: row.source_delivery_id,
       familyId: row.family_id,
+      recipientMemberUserId: row.recipient_member_user_id,
       channel: row.channel,
       offerText: row.offer_text,
       attempts: row.attempts ?? 0,
       minutesSinceAccepted: row.minutes_since_accepted,
     }));
+}
+
+/**
+ * Revalidates a recovery's exact adult at the final transport boundary.
+ * The accepted source delivery is the authority. Copied channel state,
+ * family-level addresses, and old phone ownership never are.
+ */
+export async function findCurrentOfferRecoveryRecipient(
+  input: { familyId: string; sourceDeliveryId: string },
+  database: Sql = mapDb(),
+): Promise<string | null> {
+  const rows = await database<{ recipient_member_user_id: string }[]>`
+    select delivery.recipient_member_user_id::text
+    from public.conversation_deliveries delivery
+    join public.conversation_open_loops loop
+      on loop.delivery_id = delivery.id
+     and loop.family_id = delivery.family_id
+    join public.conversation_messages resolver
+      on resolver.id = loop.resolved_by_message_id
+     and resolver.family_id = delivery.family_id
+     and resolver.episode_id = delivery.episode_id
+     and resolver.role = 'user'
+     and resolver.member_user_id = delivery.recipient_member_user_id
+    join public.family_members current_member
+      on current_member.family_id = delivery.family_id
+     and current_member.user_id = delivery.recipient_member_user_id
+    join public.homa_task_runs task_run
+      on task_run.id = delivery.task_run_id
+     and task_run.family_id = delivery.family_id
+    join public.families family on family.id = delivery.family_id
+    where delivery.id = ${input.sourceDeliveryId}
+      and delivery.family_id = ${input.familyId}
+      and delivery.status = 'sent'
+      and delivery.recipient_member_user_id is not null
+      and loop.state = 'resolved'
+      and loop.resolved_outcome = 'accepted'
+      and task_run.kind = 'morning_brief'
+      and family.status <> 'deleted'
+    limit 1
+  `;
+  return rows[0]?.recipient_member_user_id ?? null;
 }
 
 /** Records one recovery attempt before dispatch, so a crash mid-dispatch

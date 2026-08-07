@@ -25,6 +25,7 @@ import {
 } from "./issue-606-runtime-drain-contract.mjs";
 import { classifyIssue606ProductionRun } from "./issue-606-production-run-contract.mjs";
 import { validateIssue606VercelDeployment } from "./issue-606-vercel-deployment-contract.mjs";
+import { validateIssue606VercelProjectProtection } from "./issue-606-vercel-project-protection-contract.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workflowPath = resolve(
@@ -47,11 +48,13 @@ const hashedInputs = [
   "supabase/migrations/20260802033000_conversation_privacy_per_adult.sql",
   "supabase/migrations/20260805110000_eve_web_session_owners.sql",
   "supabase/migrations/20260807040000_conversation_privacy_attribution_containment.sql",
+  "supabase/migrations/20260807050000_conversation_privacy_attribution_write_guards.sql",
   "scripts/issue-606-production-repair.sql",
   "scripts/issue-606-production-release-git-contract.mjs",
   "scripts/issue-606-production-run-contract.mjs",
   "scripts/issue-606-runtime-drain-contract.mjs",
   "scripts/issue-606-vercel-deployment-contract.mjs",
+  "scripts/issue-606-vercel-project-protection-contract.mjs",
 ];
 
 function sha256(contents) {
@@ -130,6 +133,8 @@ function readyDeployment() {
     target: "production",
     aliasAssigned: true,
     alias: ["thankshoma.com"],
+    plan: "pro",
+    config: { fluid: true, functionTimeout: 300 },
     gitSource: {
       type: "github",
       sha,
@@ -239,6 +244,9 @@ test("Vercel contract accepts only the exact promoted Homa main deployment", () 
     { readySubstate: "ROLLING" },
     { target: "staging" },
     { alias: ["preview.example"] },
+    { plan: "enterprise" },
+    { config: { fluid: false, functionTimeout: 300 } },
+    { config: { fluid: true, functionTimeout: 301 } },
     { gitSource: { ...fixture.gitSource, sha: "b".repeat(40) } },
   ]) {
     assert.throws(() =>
@@ -247,6 +255,26 @@ test("Vercel contract accepts only the exact promoted Homa main deployment", () 
         deploymentId: fixture.id,
         finalSha: fixture.sha,
       })
+    );
+  }
+});
+
+test("Vercel project contract requires protection on generated deployment URLs", () => {
+  const fixture = {
+    id: "prj_pKBD87W4tmlT7lnYRgrs8WYociTz",
+    ssoProtection: { deploymentType: "all_except_custom_domains" },
+  };
+  assert.match(
+    validateIssue606VercelProjectProtection(fixture).contractSha256,
+    /^[0-9a-f]{64}$/u
+  );
+  for (const mutation of [
+    { id: "prj_other" },
+    { ssoProtection: { deploymentType: "none" } },
+    { ssoProtection: null },
+  ]) {
+    assert.throws(() =>
+      validateIssue606VercelProjectProtection({ ...fixture, ...mutation })
     );
   }
 });
@@ -277,7 +305,13 @@ test("workflow is founder-only and bound to reviewed Git and Vercel production",
   assert.match(workflow, /production_deployed_sha/u);
   assert.match(workflow, /production_deployment_id/u);
   assert.match(workflow, /withGitRepoInfo=true/u);
+  assert.match(workflow, /v13\/deployments\/thankshoma\.com/u);
   assert.match(vercelContract, /thankshoma\.com/u);
+  assert.match(workflow, /issue-606-vercel-project-protection-contract\.mjs/u);
+  assert.equal(
+    workflow.match(/v9\/projects\/prj_pKBD87W4tmlT7lnYRgrs8WYociTz/g)?.length,
+    3
+  );
   assert.match(workflow, /issue-606-production-release-git-contract\.mjs/u);
   assert.match(workflow, /--reviewed-sha="\$REVIEWED_REPAIR_SHA"/u);
   assert.match(workflow, /git ls-remote --exit-code origin refs\/heads\/main/u);
@@ -345,6 +379,7 @@ test("repair is one bounded, locked transaction over the exact correction", () =
   const includes = repair.match(/^\\ir .*$/gmu) ?? [];
   assert.deepEqual(includes, [
     "\\ir ../supabase/migrations/20260807040000_conversation_privacy_attribution_containment.sql",
+    "\\ir ../supabase/migrations/20260807050000_conversation_privacy_attribution_write_guards.sql",
   ]);
   assert.ok(repair.indexOf("begin;") < repair.indexOf(includes[0]));
   assert.ok(repair.indexOf(includes[0]) < repair.lastIndexOf("commit;"));
@@ -381,6 +416,10 @@ test("repair proves exact ownership, grants, cleanup, and ledger evidence", () =
   assert.match(
     repair,
     /sha256=a158765ad96a27830f7c92f80c038adfcc43b32e0971b3624f12302e579a3db9/u
+  );
+  assert.match(
+    repair,
+    /sha256=0719e3420734903e41d3f3192c75f620c3791e44ee28522cff9d3d09f8e5696a/u
   );
   assert.match(repair, /correction ledger evidence is absent or altered/u);
 });

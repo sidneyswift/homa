@@ -92,8 +92,9 @@ function candidateBelongsToMember(
   memberUserId: string | null,
 ): boolean {
   return (
-    candidate.recipientMemberUserId === memberUserId ||
-    candidate.destinationAuthenticated
+    memberUserId !== null &&
+    candidate.recipientMemberUserId !== null &&
+    candidate.recipientMemberUserId === memberUserId
   );
 }
 

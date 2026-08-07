@@ -627,6 +627,7 @@ jobs:
         run: |
           pnpm check:issue-606-containment
           pnpm test:issue-606-containment:postgres
+          pnpm conversation-privacy:e2e
           pnpm test:issue-606-production-repair:postgres
 
       - name: Issue 878 production repair disposable PostgreSQL E2E

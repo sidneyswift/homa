@@ -22,6 +22,8 @@ describe("continuity reply claim", () => {
       tx as unknown as TransactionSql,
       {
       familyId: "family-1",
+      memberUserId: "member-1",
+      destinationHash: null,
       deliveryId: "delivery-1",
       messageId: "message-1",
       replyToMessageId: "message-outbound-1",
@@ -35,6 +37,9 @@ describe("continuity reply claim", () => {
     assert.match(calls[0]?.sql ?? "", /resolved_outcome/u);
     assert.match(calls[0]?.sql ?? "", /resolution_method/u);
     assert.match(calls[0]?.sql ?? "", /classifier_version/u);
+    assert.match(calls[0]?.sql ?? "", /recipient_member_user_id/u);
+    assert.match(calls[0]?.sql ?? "", /family_members/u);
+    assert.ok(calls[0]?.values.includes("member-1"));
     assert.ok(calls[0]?.values.includes("accepted"));
     assert.ok(calls[0]?.values.includes("bounded_polarity"));
     assert.ok(calls[0]?.values.includes("reply-intent-v3"));

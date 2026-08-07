@@ -57,6 +57,15 @@ export function validateIssue606VercelDeployment({
   ) {
     throw new Error("The Homa production alias is not on this deployment.");
   }
+  if (deployment.plan !== "pro") {
+    throw new Error("The exact Homa production deployment is not on Pro.");
+  }
+  if (deployment.config?.fluid !== true) {
+    throw new Error("The exact Homa production deployment is not using Fluid Compute.");
+  }
+  if (deployment.config?.functionTimeout !== 300) {
+    throw new Error("The exact Homa production deployment timeout is not 300 seconds.");
+  }
   const gitSource = deployment.gitSource;
   if (
     !gitSource ||
@@ -82,6 +91,9 @@ export function validateIssue606VercelDeployment({
     `ready_substate=${deployment.readySubstate}`,
     `target=${deployment.target}`,
     `production_alias=${HOMA_PRODUCTION_ALIAS}`,
+    `plan=${deployment.plan}`,
+    `fluid=${deployment.config.fluid}`,
+    `function_timeout_seconds=${deployment.config.functionTimeout}`,
     `git_sha=${gitSource.sha}`,
   ].join("\n");
   return {

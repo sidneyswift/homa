@@ -6,14 +6,14 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Vercel's current Node function ceiling is 800 seconds with Fluid Compute
-// and 900 seconds without it on Enterprise. Homa requests the plan maximum,
-// so the larger documented ceiling is the safe old-instance bound.
+// Homa production is on Vercel Pro with Fluid Compute enabled. Its current
+// Node function ceiling is 800 seconds. The deployment contract proves that
+// exact plan and mode before repair, after drain, and at finalization.
 // https://vercel.com/docs/functions/configuring-functions/duration
-export const VERCEL_NODE_ABSOLUTE_CEILING_SECONDS = 900;
-export const OLD_INSTANCE_DRAIN_MARGIN_SECONDS = 120;
+export const VERCEL_PRO_FLUID_CEILING_SECONDS = 800;
+export const OLD_INSTANCE_DRAIN_MARGIN_SECONDS = 220;
 export const ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS =
-  VERCEL_NODE_ABSOLUTE_CEILING_SECONDS + OLD_INSTANCE_DRAIN_MARGIN_SECONDS;
+  VERCEL_PRO_FLUID_CEILING_SECONDS + OLD_INSTANCE_DRAIN_MARGIN_SECONDS;
 
 export function validateIssue606RuntimeDrainContract(repositoryRoot) {
   const patch = readFileSync(
@@ -43,12 +43,12 @@ export function validateIssue606RuntimeDrainContract(repositoryRoot) {
   assert.match(ci, /VERCEL=1 pnpm --filter web exec eve build/u);
   assert.match(ci, /VERCEL=1 pnpm check:eve-stream-duration/u);
   assert.ok(
-    ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS > VERCEL_NODE_ABSOLUTE_CEILING_SECONDS
+    ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS > VERCEL_PRO_FLUID_CEILING_SECONDS
   );
 
   const contract = [
     "eve_max_duration=max",
-    `vercel_node_absolute_ceiling_seconds=${VERCEL_NODE_ABSOLUTE_CEILING_SECONDS}`,
+    `vercel_pro_fluid_ceiling_seconds=${VERCEL_PRO_FLUID_CEILING_SECONDS}`,
     `drain_margin_seconds=${OLD_INSTANCE_DRAIN_MARGIN_SECONDS}`,
     `drain_seconds=${ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS}`,
   ].join("\n");

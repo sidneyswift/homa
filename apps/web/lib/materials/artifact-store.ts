@@ -167,12 +167,13 @@ export interface MaterialRowInput {
   source: MaterialSource;
   revises: string | null;
   channel: "web" | "sms" | "email" | "dispatch" | "subject_lesson";
-  /** Non-null only for a caller-mode material redeemed against an
-   * accepted offer delivery (conversation-continuity offer fulfillment);
-   * a subject-lesson worksheet is never offer-sourced, so these two
-   * provenance fields are mutually exclusive in practice, never both
-   * non-null on one row. */
+  /** Fulfillment provenance written only after this exact material id was
+   * reserved against an accepted offer. */
   sourceOfferDeliveryId: string | null;
+  /** Accepted offer that authorizes this write. It stays populated for a
+   * review-failed internal draft that must not consume fulfillment. */
+  sourceAuthorizationDeliveryId: string | null;
+  sourceOfferRecipientMemberUserId: string | null;
   subjectLessonId: string | null;
   subjectLessonAttempt: number | null;
   subjectLessonSubjectId: string | null;
@@ -381,15 +382,63 @@ export async function insertMaterialRowPinned(
       (id, family_id, child_id, title, kind, skill, subject, curriculum, theme,
        characters, pdf_url, preview_url, html, source, revises, channel,
        generation, source_offer_delivery_id)
-    values
-      (${input.id}, ${input.familyId}, ${childId}, ${input.title}, ${input.kind},
-       ${input.skill}, ${input.subject}, ${input.curriculum}, ${input.theme},
-       ${input.characters}, ${input.pdfUrl}, ${input.previewUrl},
-       ${input.html}, ${input.source}, ${input.revises}, ${input.channel},
-       ${input.generation ? sql.json(input.generation as never) : null},
-       ${input.sourceOfferDeliveryId})
+    select
+      ${input.id}, ${input.familyId}, ${childId}, ${input.title}, ${input.kind},
+      ${input.skill}, ${input.subject}, ${input.curriculum}, ${input.theme},
+      ${input.characters}, ${input.pdfUrl}, ${input.previewUrl},
+      ${input.html}, ${input.source}, ${input.revises}, ${input.channel},
+      ${input.generation ? sql.json(input.generation as never) : null},
+      ${input.sourceOfferDeliveryId}
+    where ${input.sourceAuthorizationDeliveryId}::uuid is null
+       or exists (
+         select 1
+         from public.conversation_deliveries delivery
+         join public.conversation_open_loops loop
+           on loop.delivery_id = delivery.id
+          and loop.family_id = delivery.family_id
+         join public.conversation_messages resolver
+           on resolver.id = loop.resolved_by_message_id
+          and resolver.family_id = delivery.family_id
+          and resolver.episode_id = delivery.episode_id
+          and resolver.role = 'user'
+          and resolver.member_user_id = delivery.recipient_member_user_id
+         join public.homa_task_runs source_run
+           on source_run.id = delivery.task_run_id
+          and source_run.family_id = delivery.family_id
+         join public.family_members current_member
+           on current_member.family_id = delivery.family_id
+          and current_member.user_id = delivery.recipient_member_user_id
+         join public.families family on family.id = delivery.family_id
+         where delivery.id = ${input.sourceAuthorizationDeliveryId}::uuid
+           and delivery.family_id = ${input.familyId}::uuid
+           and delivery.recipient_member_user_id =
+             ${input.sourceOfferRecipientMemberUserId}::uuid
+           and delivery.status = 'sent'
+           and loop.state = 'resolved'
+           and loop.resolved_outcome = 'accepted'
+           and loop.resolved_at >= now() - interval '24 hours'
+           and source_run.kind = 'morning_brief'
+           and family.status <> 'deleted'
+           and (
+             ${input.sourceOfferDeliveryId}::uuid is null
+             or exists (
+               select 1
+               from public.conversation_offer_fulfillments fulfillment
+               where fulfillment.family_id = delivery.family_id
+                 and fulfillment.source_delivery_id = delivery.id
+                 and fulfillment.kind = 'material'
+                 and fulfillment.reference_id = ${input.id}::uuid
+             )
+           )
+       )
     returning id
   `;
+  if (!rows[0]) {
+    return {
+      ok: false,
+      note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
+    };
+  }
   return { ok: true, id: rows[0].id };
 }
 

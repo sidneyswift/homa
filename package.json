@@ -129,6 +129,7 @@
     "test:family-library-training:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/family-library-training-e2e.mts",
     "test:live-fixture-sandbox:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/live-fixture-sandbox-e2e.mts",
     "test:issue-606-containment:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json ../../scripts/issue-606-privacy-containment-postgres.mts",
+    "conversation-privacy:e2e": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/conversation-privacy-e2e.mts",
     "test:issue-606-production-repair:postgres": "pnpm eval:sandbox --exec node ../../scripts/issue-606-production-repair-postgres.mjs",
     "test:issue-878-production-repair:postgres": "pnpm eval:sandbox --exec node ../../scripts/issue-878-production-repair-postgres.mjs",
     "test:issue-887-production-repair:postgres": "pnpm eval:sandbox --exec node ../../scripts/issue-887-production-repair-postgres.mjs",

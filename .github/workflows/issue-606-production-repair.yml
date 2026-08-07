@@ -125,16 +125,20 @@ jobs:
             "0b379d6bfc406ae4b1dac3aafe5c857d7131fd02dc6d3453deb867b7704256d3"
           check_hash "supabase/migrations/20260807040000_conversation_privacy_attribution_containment.sql" \
             "a158765ad96a27830f7c92f80c038adfcc43b32e0971b3624f12302e579a3db9"
+          check_hash "supabase/migrations/20260807050000_conversation_privacy_attribution_write_guards.sql" \
+            "0719e3420734903e41d3f3192c75f620c3791e44ee28522cff9d3d09f8e5696a"
           check_hash "scripts/issue-606-production-repair.sql" \
-            "63989489b9a8e1f6a03b7585e80b724007e9c70f63d72164175a33cff94fde34"
+            "e920b44acc7c7351ae1b17a61642f7ca35b8deab61c850fcc5a51ca1d3c801c2"
           check_hash "scripts/issue-606-production-release-git-contract.mjs" \
-            "cb45468576a90b4172d4880f29fb0631407f82da27e004972050c22ee414c9e8"
+            "e7a4ac37fa72bd21a23a5c42c2edd777905c0564efc9e167e20b8c3594e541a5"
           check_hash "scripts/issue-606-production-run-contract.mjs" \
             "9316f3351fd4c964c6b4953b98b739240cc505510908b6f80add461c766bb25d"
           check_hash "scripts/issue-606-runtime-drain-contract.mjs" \
-            "4c6d8d2012621dceaa97f582c230a0129f5d628962a00d6cb79b83e39e7e79ea"
+            "d5b3fe5eae9247c77c36401588cb0ceb0a7ae2ec7b5ade42cd72ff86fd2acb48"
           check_hash "scripts/issue-606-vercel-deployment-contract.mjs" \
-            "97bf03803258c15cac275b32b7c7ebbcb7744b5bf2df00c6da4250fa3e1f6bc6"
+            "80733f5c38eb56a1b56f4bdbc585412397b0eb5f6fa6743efed4e4dab1b4cbb8"
+          check_hash "scripts/issue-606-vercel-project-protection-contract.mjs" \
+            "4f545d9ba27e4e4363dfa9434467c72343d67cf13ba5c2013ef2232aed056a7b"
 
           release_binding="$(node scripts/issue-606-production-release-git-contract.mjs \
             --final-sha="$GITHUB_SHA" \
@@ -194,7 +198,7 @@ jobs:
           fi
           echo "ISSUE_606_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
 
-      - name: Prove the exact Vercel deployment is READY and promoted
+      - name: Prove the exact alias deployment and project protection
         env:
           PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -204,12 +208,17 @@ jobs:
             exit 1
           fi
           deployment_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-vercel.XXXXXX.json")"
-          trap 'rm -f "$deployment_json"' EXIT
-          chmod 600 "$deployment_json"
+          project_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-project.XXXXXX.json")"
+          trap 'rm -f "$deployment_json" "$project_json"' EXIT
+          chmod 600 "$deployment_json" "$project_json"
           curl --fail --silent --show-error --retry 3 --retry-all-errors \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v13/deployments/$PRODUCTION_DEPLOYMENT_ID?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
+            "https://api.vercel.com/v13/deployments/thankshoma.com?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
             > "$deployment_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/prj_pKBD87W4tmlT7lnYRgrs8WYociTz?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC" \
+            > "$project_json"
           deployment_contract="$(node scripts/issue-606-vercel-deployment-contract.mjs \
             --deployment-json="$deployment_json" \
             --deployment-id="$PRODUCTION_DEPLOYMENT_ID" \
@@ -227,9 +236,20 @@ jobs:
             echo "The Vercel deployment contract emitted invalid evidence."
             exit 1
           fi
+          project_contract="$(node scripts/issue-606-vercel-project-protection-contract.mjs \
+            --project-json="$project_json")"
+          mapfile -t project_protection_hashes < <(
+            printf '%s\n' "$project_contract" | sed -n 's/^ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=//p'
+          )
+          if [ "${#project_protection_hashes[@]}" -ne 1 ] \
+            || ! [[ "${project_protection_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The Vercel project protection contract emitted invalid evidence."
+            exit 1
+          fi
           {
             echo "ISSUE_606_VERCEL_DEPLOYMENT_ID=${deployment_ids[0]}"
             echo "ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256=${deployment_hashes[0]}"
+            echo "ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=${project_protection_hashes[0]}"
           } >> "$GITHUB_ENV"
 
       - name: Confirm PostgreSQL client availability
@@ -368,18 +388,23 @@ jobs:
           fi
           sleep "$ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS"
 
-      - name: Re-prove the exact Vercel deployment after the drain
+      - name: Re-prove the alias deployment and protection after the drain
         env:
           PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           deployment_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-vercel.XXXXXX.json")"
-          trap 'rm -f "$deployment_json"' EXIT
-          chmod 600 "$deployment_json"
+          project_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-project.XXXXXX.json")"
+          trap 'rm -f "$deployment_json" "$project_json"' EXIT
+          chmod 600 "$deployment_json" "$project_json"
           curl --fail --silent --show-error --retry 3 --retry-all-errors \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v13/deployments/$PRODUCTION_DEPLOYMENT_ID?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
+            "https://api.vercel.com/v13/deployments/thankshoma.com?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
             > "$deployment_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/prj_pKBD87W4tmlT7lnYRgrs8WYociTz?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC" \
+            > "$project_json"
           deployment_contract="$(node scripts/issue-606-vercel-deployment-contract.mjs \
             --deployment-json="$deployment_json" \
             --deployment-id="$PRODUCTION_DEPLOYMENT_ID" \
@@ -390,6 +415,16 @@ jobs:
           if [ "${#deployment_hashes[@]}" -ne 1 ] \
             || [ "${deployment_hashes[0]}" != "$ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256" ]; then
             echo "The production deployment changed during the old-instance drain."
+            exit 1
+          fi
+          project_contract="$(node scripts/issue-606-vercel-project-protection-contract.mjs \
+            --project-json="$project_json")"
+          mapfile -t project_protection_hashes < <(
+            printf '%s\n' "$project_contract" | sed -n 's/^ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=//p'
+          )
+          if [ "${#project_protection_hashes[@]}" -ne 1 ] \
+            || [ "${project_protection_hashes[0]}" != "$ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256" ]; then
+            echo "Generated deployment URL protection changed during the drain."
             exit 1
           fi
 
@@ -468,12 +503,17 @@ jobs:
           fi
 
           deployment_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-vercel.XXXXXX.json")"
-          trap 'rm -f "$deployment_json"' EXIT
-          chmod 600 "$deployment_json"
+          project_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-project.XXXXXX.json")"
+          trap 'rm -f "$deployment_json" "$project_json"' EXIT
+          chmod 600 "$deployment_json" "$project_json"
           curl --fail --silent --show-error --retry 3 --retry-all-errors \
             -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v13/deployments/$PRODUCTION_DEPLOYMENT_ID?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
+            "https://api.vercel.com/v13/deployments/thankshoma.com?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
             > "$deployment_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/prj_pKBD87W4tmlT7lnYRgrs8WYociTz?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC" \
+            > "$project_json"
           deployment_contract="$(node scripts/issue-606-vercel-deployment-contract.mjs \
             --deployment-json="$deployment_json" \
             --deployment-id="$PRODUCTION_DEPLOYMENT_ID" \
@@ -484,6 +524,16 @@ jobs:
           if [ "${#deployment_hashes[@]}" -ne 1 ] \
             || [ "${deployment_hashes[0]}" != "$ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256" ]; then
             echo "The exact production deployment changed before evidence finalization."
+            exit 1
+          fi
+          project_contract="$(node scripts/issue-606-vercel-project-protection-contract.mjs \
+            --project-json="$project_json")"
+          mapfile -t project_protection_hashes < <(
+            printf '%s\n' "$project_contract" | sed -n 's/^ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=//p'
+          )
+          if [ "${#project_protection_hashes[@]}" -ne 1 ] \
+            || [ "${project_protection_hashes[0]}" != "$ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256" ]; then
+            echo "Generated deployment URL protection changed before evidence finalization."
             exit 1
           fi
           echo "ISSUE_606_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
@@ -522,6 +572,7 @@ jobs:
             printf 'remote_main_sha=%s\n' "$ISSUE_606_REMOTE_MAIN_SHA"
             printf 'sensitive_manifest_sha256=%s\n' "$ISSUE_606_SENSITIVE_MANIFEST_SHA256"
             printf 'vercel_contract_sha256=%s\n' "$ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256"
+            printf 'vercel_project_protection_contract_sha256=%s\n' "$ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256"
             printf 'runtime_drain_contract_sha256=%s\n' "$ISSUE_606_RUNTIME_DRAIN_CONTRACT_SHA256"
             printf 'old_instance_drain_seconds=%s\n' "$ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS"
             printf 'repair_sql_sha256=%s\n' "$repair_sha256"

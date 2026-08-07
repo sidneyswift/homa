@@ -12,6 +12,7 @@ export interface OfferFulfillmentResult {
 
 export interface OfferFulfillmentReservation extends OfferFulfillmentResult {
   referenceId: string | null;
+  recipientMemberUserId: string | null;
 }
 
 export interface OfferFulfillmentCompletion {
@@ -44,30 +45,196 @@ export function acceptedOfferDeliveryIdFromAttributes(
     : null;
 }
 
+export function acceptedOfferRecoveryDeliveryIdFromAttributes(
+  attributes: unknown,
+): string | null {
+  if (!attributes || typeof attributes !== "object") return null;
+  const values = attributes as {
+    channel?: unknown;
+    offerRecovery?: unknown;
+    taskRunId?: unknown;
+  };
+  if (
+    values.channel !== "dispatch" ||
+    values.offerRecovery !== "true" ||
+    (values.taskRunId !== null && values.taskRunId !== undefined)
+  ) {
+    return null;
+  }
+  return acceptedOfferDeliveryIdFromAttributes(attributes);
+}
+
+export async function validateAcceptedOfferFulfillmentRecipientWithDatabase(
+  database: Sql,
+  input: {
+    familyId: string;
+    sourceDeliveryId: string;
+    expectedRecipientMemberUserId: string | null;
+  },
+): Promise<string | null> {
+  const rows = await database<{ recipient_member_user_id: string }[]>`
+    select delivery.recipient_member_user_id::text
+    from public.conversation_deliveries delivery
+    join public.conversation_open_loops loop
+      on loop.delivery_id = delivery.id
+     and loop.family_id = delivery.family_id
+    join public.conversation_messages resolver
+      on resolver.id = loop.resolved_by_message_id
+     and resolver.family_id = delivery.family_id
+     and resolver.episode_id = delivery.episode_id
+     and resolver.role = 'user'
+     and resolver.member_user_id = delivery.recipient_member_user_id
+    join public.homa_task_runs task_run
+      on task_run.id = delivery.task_run_id
+     and task_run.family_id = delivery.family_id
+    join public.family_members current_member
+      on current_member.family_id = delivery.family_id
+     and current_member.user_id = delivery.recipient_member_user_id
+    join public.families family on family.id = delivery.family_id
+    where delivery.id = ${input.sourceDeliveryId}
+      and delivery.family_id = ${input.familyId}
+      and delivery.recipient_member_user_id =
+        ${input.expectedRecipientMemberUserId}::uuid
+      and delivery.status = 'sent'
+      and loop.state = 'resolved'
+      and loop.resolved_outcome = 'accepted'
+      and loop.resolved_at >= now() - interval '24 hours'
+      and task_run.kind = 'morning_brief'
+      and family.status <> 'deleted'
+    limit 1
+  `;
+  return rows[0]?.recipient_member_user_id ?? null;
+}
+
+export async function validateAcceptedOfferFulfillmentRecipient(input: {
+  familyId: string;
+  sourceDeliveryId: string;
+  expectedRecipientMemberUserId: string | null;
+}): Promise<string | null> {
+  return await validateAcceptedOfferFulfillmentRecipientWithDatabase(
+    mapDb(),
+    input,
+  );
+}
+
+export async function acceptedOfferDestinationStillCurrentWithDatabase(
+  database: Sql,
+  input: {
+    familyId: string;
+    sourceDeliveryId: string;
+    expectedRecipientMemberUserId: string | null;
+    channel: "sms" | "email";
+    destination: string;
+  },
+): Promise<boolean> {
+  const destination =
+    input.channel === "email"
+      ? input.destination.trim().toLowerCase()
+      : input.destination.trim();
+  if (!input.expectedRecipientMemberUserId || !destination) return false;
+
+  const rows = await database<{ current: boolean }[]>`
+    select exists (
+      select 1
+      from public.conversation_deliveries delivery
+      join public.conversation_open_loops loop
+        on loop.delivery_id = delivery.id
+       and loop.family_id = delivery.family_id
+      join public.conversation_messages resolver
+        on resolver.id = loop.resolved_by_message_id
+       and resolver.family_id = delivery.family_id
+       and resolver.episode_id = delivery.episode_id
+       and resolver.role = 'user'
+       and resolver.member_user_id = delivery.recipient_member_user_id
+      join public.homa_task_runs task_run
+        on task_run.id = delivery.task_run_id
+       and task_run.family_id = delivery.family_id
+      join public.family_members current_member
+        on current_member.family_id = delivery.family_id
+       and current_member.user_id = delivery.recipient_member_user_id
+      join public.families family on family.id = delivery.family_id
+      join auth.users recipient
+        on recipient.id = delivery.recipient_member_user_id
+      left join public.family_phones phone
+        on phone.family_id = delivery.family_id
+       and phone.member_user_id = delivery.recipient_member_user_id
+      where delivery.id = ${input.sourceDeliveryId}
+        and delivery.family_id = ${input.familyId}
+        and delivery.recipient_member_user_id =
+          ${input.expectedRecipientMemberUserId}::uuid
+        and delivery.status = 'sent'
+        and loop.state = 'resolved'
+        and loop.resolved_outcome = 'accepted'
+        and loop.resolved_at >= now() - interval '24 hours'
+        and task_run.kind = 'morning_brief'
+        and family.status <> 'deleted'
+        and case ${input.channel}
+          when 'sms' then phone.phone_e164 = ${destination}
+          when 'email' then lower(recipient.email) = ${destination}
+          else false
+        end
+    ) as current
+  `;
+  return rows[0]?.current ?? false;
+}
+
+export async function acceptedOfferDestinationStillCurrent(input: {
+  familyId: string;
+  sourceDeliveryId: string;
+  expectedRecipientMemberUserId: string | null;
+  channel: "sms" | "email";
+  destination: string;
+}): Promise<boolean> {
+  return await acceptedOfferDestinationStillCurrentWithDatabase(
+    mapDb(),
+    input,
+  );
+}
+
 export async function reserveAcceptedOfferFulfillmentWithDatabase(
   database: Sql,
   input: {
     familyId: string;
     sourceDeliveryId: string | null;
+    expectedRecipientMemberUserId: string | null;
     kind: OfferFulfillmentKind;
     referenceId: string;
   },
 ): Promise<OfferFulfillmentReservation> {
   const rows = await database<
-    Array<OfferFulfillmentResult & { reference_id: string | null }>
+    Array<
+      OfferFulfillmentResult & {
+        reference_id: string | null;
+        recipient_member_user_id: string | null;
+      }
+    >
   >`
     with eligible as (
-      select d.id
+      select d.id, d.recipient_member_user_id
       from public.conversation_deliveries d
       join public.conversation_open_loops l
         on l.delivery_id = d.id
        and l.family_id = d.family_id
+      join public.conversation_messages resolver
+        on resolver.id = l.resolved_by_message_id
+       and resolver.family_id = d.family_id
+       and resolver.episode_id = d.episode_id
+       and resolver.role = 'user'
+       and resolver.member_user_id = d.recipient_member_user_id
       join public.homa_task_runs r
         on r.id = d.task_run_id
        and r.family_id = d.family_id
+      join public.family_members current_member
+        on current_member.family_id = d.family_id
+       and current_member.user_id = d.recipient_member_user_id
+      join public.families family on family.id = d.family_id
       where d.id = ${input.sourceDeliveryId}
         and d.family_id = ${input.familyId}
         and d.status = 'sent'
+        and d.recipient_member_user_id is not null
+        and d.recipient_member_user_id =
+          ${input.expectedRecipientMemberUserId}::uuid
+        and family.status <> 'deleted'
         and r.kind = 'morning_brief'
         and l.state = 'resolved'
         and l.resolved_outcome = 'accepted'
@@ -104,12 +271,15 @@ export async function reserveAcceptedOfferFulfillmentWithDatabase(
     select
       exists (select 1 from eligible) as eligible,
       exists (select 1 from written) as wrote,
-      (select reference_id::text from selected limit 1) as reference_id
+      (select reference_id::text from selected limit 1) as reference_id,
+      (select recipient_member_user_id::text from eligible limit 1)
+        as recipient_member_user_id
   `;
   return {
     eligible: rows[0]?.eligible ?? false,
     wrote: rows[0]?.wrote ?? false,
     referenceId: rows[0]?.reference_id ?? null,
+    recipientMemberUserId: rows[0]?.recipient_member_user_id ?? null,
   };
 }
 
@@ -204,6 +374,7 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
   input: {
     familyId: string;
     sourceDeliveryId: string | null;
+    expectedRecipientMemberUserId: string | null;
     kind: OfferFulfillmentKind;
     referenceId: string;
     emit: OfferFulfillmentEvent;
@@ -240,11 +411,17 @@ export async function recordAcceptedOfferFulfillmentWithDatabase(
 export async function reserveAcceptedOfferFulfillment(input: {
   familyId: string;
   sourceDeliveryId: string | null;
+  expectedRecipientMemberUserId: string | null;
   kind: OfferFulfillmentKind;
   referenceId: string;
 }): Promise<OfferFulfillmentReservation> {
   if (!input.sourceDeliveryId) {
-    return { eligible: false, wrote: false, referenceId: null };
+    return {
+      eligible: false,
+      wrote: false,
+      referenceId: null,
+      recipientMemberUserId: null,
+    };
   }
   return await reserveAcceptedOfferFulfillmentWithDatabase(mapDb(), input);
 }
@@ -272,6 +449,7 @@ export async function completeAcceptedOfferFulfillment(input: {
 export async function recordAcceptedOfferFulfillment(input: {
   familyId: string;
   sourceDeliveryId: string | null;
+  expectedRecipientMemberUserId: string | null;
   kind: OfferFulfillmentKind;
   referenceId: string;
 }): Promise<OfferFulfillmentResult> {

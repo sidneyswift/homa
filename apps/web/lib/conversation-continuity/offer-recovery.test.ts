@@ -3,6 +3,8 @@ import { test } from "node:test";
 
 import {
   buildFulfillmentRecoveryMessage,
+  findCurrentOfferRecoveryRecipient,
+  findRecoverableOffers,
   planOfferRecovery,
   recoverUnfulfilledOffers,
   DEFAULT_OFFER_RECOVERY_CONFIG,
@@ -13,6 +15,7 @@ function offer(overrides: Partial<RecoverableOffer> = {}): RecoverableOffer {
   return {
     sourceDeliveryId: "11111111-1111-4111-8111-111111111111",
     familyId: "22222222-2222-4222-8222-222222222222",
+    recipientMemberUserId: "33333333-3333-4333-8333-333333333333",
     channel: "sms",
     offerText: "Want me to make Noah a worksheet for project planning?",
     attempts: 0,
@@ -51,6 +54,61 @@ test("buildFulfillmentRecoveryMessage quotes the offer and forbids re-asking", (
   assert.match(message, /already accepted/);
   assert.match(message, /Do not ask again/);
   assert.match(message, /worksheet for project planning/);
+});
+
+test("findRecoverableOffers requires the source delivery's current exact adult", async () => {
+  let query = "";
+  const database = ((strings: TemplateStringsArray) => {
+    query = strings.join("?");
+    return Promise.resolve([]);
+  }) as never;
+  assert.deepEqual(
+    await findRecoverableOffers(
+      database,
+      new Date("2026-08-07T12:00:00.000Z"),
+    ),
+    [],
+  );
+  assert.match(query, /d\.recipient_member_user_id::text/u);
+  assert.match(
+    query,
+    /join public\.family_members recipient[\s\S]*recipient\.family_id = d\.family_id[\s\S]*recipient\.user_id = d\.recipient_member_user_id/u,
+  );
+  assert.match(
+    query,
+    /join public\.conversation_messages resolver[\s\S]*resolver\.id = l\.resolved_by_message_id[\s\S]*resolver\.member_user_id = d\.recipient_member_user_id/u,
+  );
+  assert.match(query, /f\.status <> 'deleted'/u);
+});
+
+test("findCurrentOfferRecoveryRecipient verifies current membership and resolver provenance", async () => {
+  let query = "";
+  const database = ((strings: TemplateStringsArray) => {
+    query = strings.join("?");
+    return Promise.resolve([
+      { recipient_member_user_id: "33333333-3333-4333-8333-333333333333" },
+    ]);
+  }) as never;
+  assert.equal(
+    await findCurrentOfferRecoveryRecipient(
+      {
+        familyId: "22222222-2222-4222-8222-222222222222",
+        sourceDeliveryId: "11111111-1111-4111-8111-111111111111",
+      },
+      database,
+    ),
+    "33333333-3333-4333-8333-333333333333",
+  );
+  assert.match(
+    query,
+    /resolver\.id = loop\.resolved_by_message_id[\s\S]*resolver\.member_user_id = delivery\.recipient_member_user_id/u,
+  );
+  assert.match(
+    query,
+    /current_member\.user_id = delivery\.recipient_member_user_id/u,
+  );
+  assert.match(query, /task_run\.kind = 'morning_brief'/u);
+  assert.match(query, /family\.status <> 'deleted'/u);
 });
 
 test("recoverUnfulfilledOffers records an attempt before it dispatches", async () => {

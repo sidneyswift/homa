@@ -60,20 +60,13 @@ export class PostgresContinuityRepository implements ContinuityRepository {
           )
         )
         and d.replied_at is null
-        and (
-          (
-            ${input.memberUserId}::uuid is not null
-            and d.recipient_member_user_id = ${input.memberUserId}
-            and exists (
-              select 1
-              from public.family_members current_member
-              where current_member.family_id = d.family_id
-                and current_member.user_id = ${input.memberUserId}
-            )
-          )
-          or
-          (${input.destinationHash}::text is not null
-           and d.destination_hash = ${input.destinationHash})
+        and ${input.memberUserId}::uuid is not null
+        and d.recipient_member_user_id = ${input.memberUserId}
+        and exists (
+          select 1
+          from public.family_members current_member
+          where current_member.family_id = d.family_id
+            and current_member.user_id = ${input.memberUserId}
         )
       order by d.sent_at desc
       limit 10
@@ -252,22 +245,61 @@ export class PostgresContinuityRepository implements ContinuityRepository {
                when ${useDatabaseClock} then clock_timestamp()
                else ${binding.lastSeenAt.toISOString()}::timestamptz
              end
-      where ${binding.memberUserId}::uuid is null
-         or exists (
-           select 1
-           from public.family_members current_member
-           where current_member.family_id = ${binding.familyId}
-             and current_member.user_id = ${binding.memberUserId}
-         )
+      where exists (
+        select 1
+        from public.conversation_episodes target_episode
+        where target_episode.id = ${binding.episodeId}
+          and target_episode.family_id = ${binding.familyId}
+          and (
+            (
+              ${binding.memberUserId}::uuid is not null
+              and exists (
+                select 1
+                from public.family_members current_member
+                where current_member.family_id = target_episode.family_id
+                  and current_member.user_id = ${binding.memberUserId}
+              )
+              and (
+                target_episode.member_user_id = ${binding.memberUserId}
+                or exists (
+                  select 1
+                  from public.conversation_deliveries own_delivery
+                  where own_delivery.family_id = target_episode.family_id
+                    and own_delivery.episode_id = target_episode.id
+                    and own_delivery.recipient_member_user_id =
+                        ${binding.memberUserId}
+                    and own_delivery.status = 'sent'
+                )
+                or (
+                  target_episode.member_user_id is null
+                  and not exists (
+                    select 1
+                    from public.conversation_messages episode_message
+                    where episode_message.family_id = target_episode.family_id
+                      and episode_message.episode_id = target_episode.id
+                  )
+                  and not exists (
+                    select 1
+                    from public.conversation_deliveries episode_delivery
+                    where episode_delivery.family_id = target_episode.family_id
+                      and episode_delivery.episode_id = target_episode.id
+                  )
+                )
+              )
+            )
+            or (
+              ${binding.memberUserId}::uuid is null
+              and target_episode.scope = 'member'
+              and target_episode.member_user_id is null
+            )
+          )
+      )
       on conflict (channel, thread_key_hash) do update
       set family_id = excluded.family_id,
           member_user_id = case
             when ${preserveExistingBinding}
               and public.conversation_thread_bindings.family_id = excluded.family_id
-              then coalesce(
-                excluded.member_user_id,
-                public.conversation_thread_bindings.member_user_id
-              )
+              then public.conversation_thread_bindings.member_user_id
             else excluded.member_user_id
           end,
           runtime_session_id = case
@@ -282,10 +314,12 @@ export class PostgresContinuityRepository implements ContinuityRepository {
               then public.conversation_thread_bindings.episode_id
             else excluded.episode_id
           end,
-          pending_offer_delivery_id = coalesce(
-            excluded.pending_offer_delivery_id,
-            public.conversation_thread_bindings.pending_offer_delivery_id
-          ),
+          pending_offer_delivery_id = case
+            when ${preserveExistingBinding}
+              and public.conversation_thread_bindings.family_id = excluded.family_id
+              then public.conversation_thread_bindings.pending_offer_delivery_id
+            else excluded.pending_offer_delivery_id
+          end,
           last_seen_at = case
             when ${preserveExistingBinding}
               and public.conversation_thread_bindings.family_id = excluded.family_id

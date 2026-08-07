@@ -191,10 +191,28 @@ declare
   episode_oid oid := pg_catalog.to_regprocedure(
     'public.conversation_episode_owned_by_caller(uuid,uuid)'
   );
+  guard_oids oid[] := array[
+    pg_catalog.to_regprocedure(
+      'public.conversation_complete_session_member(uuid,text)'
+    ),
+    pg_catalog.to_regprocedure(
+      'public.conversation_complete_episode_member(uuid,uuid)'
+    ),
+    pg_catalog.to_regprocedure('public.conversation_guard_message_owner()'),
+    pg_catalog.to_regprocedure('public.conversation_guard_episode_owner()'),
+    pg_catalog.to_regprocedure('public.conversation_guard_call_owner()'),
+    pg_catalog.to_regprocedure(
+      'public.conversation_revalidate_user_provenance()'
+    )
+  ];
   authenticated_oid oid;
+  anon_oid oid;
+  service_role_oid oid;
   expected_owner_oid oid;
   session_contract record;
   episode_contract record;
+  guard_contract record;
+  guard_count integer := 0;
   message_qual text;
   episode_qual text;
 begin
@@ -202,14 +220,25 @@ begin
   from pg_catalog.pg_roles
   where rolname = 'authenticated';
 
+  select oid into anon_oid
+  from pg_catalog.pg_roles
+  where rolname = 'anon';
+
+  select oid into service_role_oid
+  from pg_catalog.pg_roles
+  where rolname = 'service_role';
+
   select oid into expected_owner_oid
   from pg_catalog.pg_roles
   where rolname = 'postgres';
 
   if authenticated_oid is null
+    or anon_oid is null
+    or service_role_oid is null
     or expected_owner_oid is null
     or session_oid is null
     or episode_oid is null
+    or array_position(guard_oids, null) is not null
   then
     return false;
   end if;
@@ -233,6 +262,39 @@ begin
     or episode_contract.proconfig
       is distinct from array['search_path=""']::text[]
   then
+    return false;
+  end if;
+
+  for guard_contract in
+    select procedure.*
+    from pg_catalog.pg_proc procedure
+    where procedure.oid = any(guard_oids)
+  loop
+    guard_count := guard_count + 1;
+    if guard_contract.proowner <> expected_owner_oid
+      or not guard_contract.prosecdef
+      or guard_contract.proconfig
+        is distinct from array['search_path=""']::text[]
+      or pg_catalog.has_function_privilege(
+        authenticated_oid,
+        guard_contract.oid,
+        'EXECUTE'
+      )
+      or pg_catalog.has_function_privilege(
+        anon_oid,
+        guard_contract.oid,
+        'EXECUTE'
+      )
+      or pg_catalog.has_function_privilege(
+        service_role_oid,
+        guard_contract.oid,
+        'EXECUTE'
+      )
+    then
+      return false;
+    end if;
+  end loop;
+  if guard_count <> 6 then
     return false;
   end if;
 
@@ -286,6 +348,30 @@ begin
     and pg_catalog.strpos(episode_qual, 'conversation_episode_owned_by_caller') > 0
     and pg_catalog.strpos(episode_qual, 'is_family_member') > 0
     and pg_catalog.strpos(episode_qual, 'conversation_deliveries') = 0
+    and (
+      select count(*) = 4
+      from pg_catalog.pg_trigger trigger
+      where not trigger.tgisinternal
+        and trigger.tgenabled = 'O'
+        and (
+          (
+            trigger.tgrelid = 'public.conversation_messages'::regclass
+            and trigger.tgname in (
+              'conversation_guard_message_owner',
+              'conversation_revalidate_user_provenance'
+            )
+          )
+          or (
+            trigger.tgrelid = 'public.conversation_episodes'::regclass
+            and trigger.tgname = 'conversation_guard_episode_owner'
+          )
+          or (
+            trigger.tgrelid = 'public.call_transcripts'::regclass
+            and trigger.tgname = 'conversation_guard_call_owner'
+          )
+        )
+        and trigger.tgfoid = any(guard_oids)
+    )
     and pg_catalog.col_description(
       'public.call_transcripts'::regclass,
       (
@@ -304,6 +390,7 @@ $contract$;
 
 create temporary table issue_606_repair_state (
   correction_ledger_existed boolean not null,
+  write_guard_ledger_existed boolean not null,
   contract_was_safe boolean not null,
   assistants_before bigint not null,
   episodes_before bigint not null,
@@ -317,6 +404,11 @@ select
     from supabase_migrations.schema_migrations
     where version = '20260807040000'
   ),
+  exists (
+    select 1
+    from supabase_migrations.schema_migrations
+    where version = '20260807050000'
+  ),
   pg_temp.issue_606_contract_ok(),
   counts.unsafe_assistants,
   counts.unsafe_episodes,
@@ -324,6 +416,7 @@ select
 from pg_temp.issue_606_unsafe_counts() counts;
 
 \ir ../supabase/migrations/20260807040000_conversation_privacy_attribution_containment.sql
+\ir ../supabase/migrations/20260807050000_conversation_privacy_attribution_write_guards.sql
 
 create or replace function pg_temp.issue_606_ledger_statements(
   p_workflow_run_id text
@@ -355,6 +448,80 @@ as $ledger$
   ]::text[]
 $ledger$;
 
+create or replace function pg_temp.issue_606_write_guard_ledger_statements(
+  p_workflow_run_id text
+)
+returns text[]
+language sql
+stable
+set search_path = ''
+as $ledger$
+  select array[
+    pg_catalog.format(
+      E'/* Homa issue 606: forward write guards applied atomically. */\n/* sha256=0719e3420734903e41d3f3192c75f620c3791e44ee28522cff9d3d09f8e5696a */\n%s',
+      pg_catalog.pg_get_functiondef(
+        'public.conversation_complete_session_member(uuid,text)'::regprocedure
+      )
+    ),
+    pg_catalog.pg_get_functiondef(
+      'public.conversation_complete_episode_member(uuid,uuid)'::regprocedure
+    ),
+    pg_catalog.pg_get_functiondef(
+      'public.conversation_guard_message_owner()'::regprocedure
+    ),
+    pg_catalog.pg_get_functiondef(
+      'public.conversation_guard_episode_owner()'::regprocedure
+    ),
+    pg_catalog.pg_get_functiondef(
+      'public.conversation_guard_call_owner()'::regprocedure
+    ),
+    pg_catalog.pg_get_functiondef(
+      'public.conversation_revalidate_user_provenance()'::regprocedure
+    ),
+    pg_catalog.pg_get_triggerdef(
+      (
+        select trigger.oid
+        from pg_catalog.pg_trigger trigger
+        where trigger.tgrelid = 'public.conversation_messages'::regclass
+          and trigger.tgname = 'conversation_guard_message_owner'
+          and not trigger.tgisinternal
+      )
+    ),
+    pg_catalog.pg_get_triggerdef(
+      (
+        select trigger.oid
+        from pg_catalog.pg_trigger trigger
+        where trigger.tgrelid = 'public.conversation_messages'::regclass
+          and trigger.tgname = 'conversation_revalidate_user_provenance'
+          and not trigger.tgisinternal
+      )
+    ),
+    pg_catalog.pg_get_triggerdef(
+      (
+        select trigger.oid
+        from pg_catalog.pg_trigger trigger
+        where trigger.tgrelid = 'public.conversation_episodes'::regclass
+          and trigger.tgname = 'conversation_guard_episode_owner'
+          and not trigger.tgisinternal
+      )
+    ),
+    pg_catalog.pg_get_triggerdef(
+      (
+        select trigger.oid
+        from pg_catalog.pg_trigger trigger
+        where trigger.tgrelid = 'public.call_transcripts'::regclass
+          and trigger.tgname = 'conversation_guard_call_owner'
+          and not trigger.tgisinternal
+      )
+    ),
+    '/* Cleanup and write guards are replayed from the hash-pinned correction files. */',
+    pg_catalog.format(
+      '/* Homa issue 606 workflow_run_id=%s */',
+      p_workflow_run_id
+    )
+  ]::text[]
+$ledger$;
+
 select not correction_ledger_existed as issue_606_insert_ledger
 from issue_606_repair_state
 \gset
@@ -371,6 +538,25 @@ values (
     (select workflow_run_id from issue_606_execution_context)
   ),
   'conversation_privacy_attribution_containment'
+);
+\endif
+
+select not write_guard_ledger_existed as issue_606_insert_write_guard_ledger
+from issue_606_repair_state
+\gset
+
+\if :issue_606_insert_write_guard_ledger
+insert into supabase_migrations.schema_migrations (
+  version,
+  statements,
+  name
+)
+values (
+  '20260807050000',
+  pg_temp.issue_606_write_guard_ledger_statements(
+    (select workflow_run_id from issue_606_execution_context)
+  ),
+  'conversation_privacy_attribution_write_guards'
 );
 \endif
 
@@ -402,6 +588,18 @@ begin
       )
   ) then
     raise exception 'issue 606 correction ledger evidence is absent or altered';
+  end if;
+
+  if not exists (
+    select 1
+    from supabase_migrations.schema_migrations
+    where version = '20260807050000'
+      and name = 'conversation_privacy_attribution_write_guards'
+      and statements = pg_temp.issue_606_write_guard_ledger_statements(
+        (select workflow_run_id from issue_606_execution_context)
+      )
+  ) then
+    raise exception 'issue 606 write-guard ledger evidence is absent or altered';
   end if;
 end
 $assert_repair$;
@@ -438,6 +636,7 @@ from issue_606_after_counts after;
 
 select 'ISSUE_606_REPAIR=' || case
   when state.correction_ledger_existed
+    and state.write_guard_ledger_existed
     and state.contract_was_safe
     and state.assistants_before = 0
     and state.episodes_before = 0

@@ -198,7 +198,10 @@ const prerequisiteSql = `
   create schema auth;
   create schema private;
   create table auth.users (id uuid primary key);
-  create table public.families (id uuid primary key);
+  create table public.families (
+    id uuid primary key,
+    status text not null default 'active'
+  );
   create table public.family_members (
     family_id uuid not null references public.families (id) on delete cascade,
     user_id uuid not null references auth.users (id) on delete cascade,
@@ -309,6 +312,7 @@ const prerequisiteSql = `
     content text,
     visibility text not null default 'internal',
     episode_id uuid,
+    member_user_id uuid,
     replied_delivery_id uuid,
     created_at timestamptz not null default now()
   );

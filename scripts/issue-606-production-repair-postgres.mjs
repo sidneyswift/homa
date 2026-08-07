@@ -60,7 +60,8 @@ const setup = `
   where version in (
     '20260802033000',
     '20260805110000',
-    '20260807040000'
+    '20260807040000',
+    '20260807050000'
   );
   insert into supabase_migrations.schema_migrations
     (version, statements, name)
@@ -83,6 +84,27 @@ const setup = `
     owner to postgres;
   alter function public.conversation_episode_owned_by_caller(uuid, uuid)
     owner to postgres;
+  alter function public.conversation_complete_session_member(uuid, text)
+    owner to postgres;
+  alter function public.conversation_complete_episode_member(uuid, uuid)
+    owner to postgres;
+  alter function public.conversation_guard_message_owner()
+    owner to postgres;
+  alter function public.conversation_guard_episode_owner()
+    owner to postgres;
+  alter function public.conversation_guard_call_owner()
+    owner to postgres;
+  alter function public.conversation_revalidate_user_provenance()
+    owner to postgres;
+
+  alter table public.conversation_messages
+    disable trigger conversation_guard_message_owner;
+  alter table public.conversation_messages
+    disable trigger conversation_revalidate_user_provenance;
+  alter table public.conversation_episodes
+    disable trigger conversation_guard_episode_owner;
+  alter table public.call_transcripts
+    disable trigger conversation_guard_call_owner;
 
   insert into auth.users (id) values
     ('60610000-0000-4000-8000-000000000001'),
@@ -222,6 +244,52 @@ const ledger = runPsql([
 assert.deepEqual(ledger.lines, [
   "20260807040000|conversation_privacy_attribution_containment|8|t|t",
 ]);
+
+const writeGuardLedger = runPsql([
+  "-Atc",
+  `
+    select concat_ws('|', version, name, cardinality(statements),
+      strpos(statements[1], 'sha256=0719e3420734903e41d3f3192c75f620c3791e44ee28522cff9d3d09f8e5696a') > 0,
+      statements[12] = '/* Homa issue 606 workflow_run_id=60610001 */')
+    from supabase_migrations.schema_migrations
+    where version = '20260807050000';
+  `,
+]);
+assert.deepEqual(writeGuardLedger.lines, [
+  "20260807050000|conversation_privacy_attribution_write_guards|12|t|t",
+]);
+
+runPsql([
+  "-c",
+  `
+    update public.conversation_messages
+    set member_user_id = '60610000-0000-4000-8000-000000000001'
+    where session_id = 'issue606-repair-mixed' and role = 'assistant';
+    update public.conversation_episodes
+    set member_user_id = '60610000-0000-4000-8000-000000000001'
+    where summary_version = 'repair-mixed';
+    update public.call_transcripts
+    set member_user_id = '60610000-0000-4000-8000-000000000001'
+    where conversation_id = 'issue606-repair-call';
+  `,
+]);
+const guardedState = runPsql([
+  "-Atc",
+  `
+    select concat_ws('|',
+      coalesce((select member_user_id::text
+        from public.conversation_messages
+        where session_id = 'issue606-repair-mixed' and role = 'assistant'),
+        'null'),
+      coalesce((select member_user_id::text
+        from public.conversation_episodes
+        where summary_version = 'repair-mixed'), 'null'),
+      coalesce((select member_user_id::text
+        from public.call_transcripts
+        where conversation_id = 'issue606-repair-call'), 'null'));
+  `,
+]);
+assert.deepEqual(guardedState.lines, ["null|null|null"]);
 
 runPsql([
   "-c",

@@ -18,7 +18,14 @@ import type { FamilyDeliveryRecipient } from "./delivery-ledger";
 export function selectTaskDeliveryRecipients(
   recipients: FamilyDeliveryRecipient[],
   recipientMemberUserId: string | null,
+  requireExactRecipient = false,
 ): FamilyDeliveryRecipient[] {
+  if (requireExactRecipient) {
+    if (recipientMemberUserId === null) return [];
+    return recipients.filter(
+      (recipient) => recipient.memberUserId === recipientMemberUserId,
+    );
+  }
   const members = recipients.filter(
     (recipient) => recipient.memberUserId !== null,
   );
