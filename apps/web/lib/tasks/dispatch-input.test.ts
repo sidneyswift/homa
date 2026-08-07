@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { acceptedOfferRecoveryDeliveryIdFromAttributes } from "../conversation-continuity/offer-fulfillment";
 import type { BriefV2Context } from "./brief-context";
 import {
   buildDispatchAuth,
@@ -35,6 +36,7 @@ function task(overrides: Partial<DueFamilyTask> = {}): DueFamilyTask {
     phoneNumbers: ["+15550001111"],
     email: "evie@example.com",
     recipientMemberUserId: "user-1",
+    sourceOfferDeliveryId: null,
     ...overrides,
   };
 }
@@ -472,5 +474,40 @@ describe("dispatch session identity", () => {
       recipientMemberUserId: "user-1",
       deliveryVersion: "legacy",
     });
+  });
+
+  it("carries accepted-offer provenance through every later task run", () => {
+    const offerTask = task({
+      kind: "custom",
+      sourceOfferDeliveryId: "delivery-1",
+    });
+    assert.deepEqual(
+      buildDispatchAuth(offerTask, "run-1", "episode-1", "legacy")
+        .attributes,
+      {
+        channel: "dispatch",
+        familyId: "family-1",
+        taskRunId: "run-1",
+        taskKind: "custom",
+        episodeId: "episode-1",
+        deliveryVersion: "legacy",
+        memberUserId: "user-1",
+      },
+    );
+    const target = buildDispatchTarget(
+      offerTask,
+      "run-1",
+      "episode-1",
+      "legacy",
+    );
+    assert.equal(target.requireExactRecipient, true);
+    assert.equal(target.sourceOfferDeliveryId, "delivery-1");
+    assert.equal(
+      acceptedOfferRecoveryDeliveryIdFromAttributes(
+        buildDispatchAuth(offerTask, "run-1", "episode-1", "legacy")
+          .attributes,
+      ),
+      null,
+    );
   });
 });

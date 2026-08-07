@@ -3,12 +3,15 @@ import { after, before, describe, it } from "node:test";
 
 import {
   acceptedOfferDeliveryIdFromAttributes,
+  acceptedOfferRecoveryDeliveryIdFromAttributes,
   completeAcceptedOfferFulfillmentWithDatabase,
   recordAcceptedOfferFulfillmentWithDatabase,
   reserveAcceptedOfferFulfillmentWithDatabase,
 } from "../conversation-continuity/offer-fulfillment";
 import {
   createDisposableResearchBriefPostgresHarness,
+  adultAId,
+  adultASecondId,
   familyAId,
   familyBId,
   runId,
@@ -22,6 +25,7 @@ const deliveryId = "00000000-0000-4000-b000-000000000081";
 const episodeId = "00000000-0000-4000-9000-000000000081";
 const materialId = "00000000-0000-4000-c000-000000000081";
 const foreignMaterialId = "00000000-0000-4000-c000-000000000082";
+const resolverMessageId = "00000000-0000-4000-a000-000000000091";
 
 describe("accepted offer fulfillment", () => {
   before(async () => {
@@ -29,31 +33,41 @@ describe("accepted offer fulfillment", () => {
     const db = harness.database();
     await db`
       insert into public.conversation_messages (
-        id, family_id, task_run_id, role, content, visibility
+        id, family_id, task_run_id, role, content, visibility, episode_id
       )
       values (
         ${messageId}, ${familyAId}, ${runId(1)}, 'assistant',
-        'Want me to make a word strip?', 'family'
+        'Want me to make a word strip?', 'family', ${episodeId}
+      )
+    `;
+    await db`
+      insert into public.conversation_messages (
+        id, family_id, role, content, visibility, episode_id, member_user_id
+      )
+      values (
+        ${resolverMessageId}, ${familyAId}, 'user', 'Yes', 'family',
+        ${episodeId}, ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_deliveries (
         id, family_id, episode_id, message_id, task_run_id, channel, status,
-        sent_at
+        sent_at, recipient_member_user_id
       )
       values (
         ${deliveryId}, ${familyAId}, ${episodeId}, ${messageId}, ${runId(1)},
-        'sms', 'sent', now()
+        'sms', 'sent', now(), ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_open_loops (
-        family_id, message_id, delivery_id, kind, state, expires_at,
-        resolved_at, resolved_outcome
+        family_id, episode_id, message_id, delivery_id, kind, state,
+        expires_at, resolved_at, resolved_outcome, resolved_by_message_id
       )
       values (
-        ${familyAId}, ${messageId}, ${deliveryId}, 'yes_no', 'resolved',
-        now() + interval '24 hours', now(), 'accepted'
+        ${familyAId}, ${episodeId}, ${messageId}, ${deliveryId}, 'yes_no',
+        'resolved', now() + interval '24 hours', now(), 'accepted',
+        ${resolverMessageId}
       )
     `;
     await db`
@@ -80,6 +94,51 @@ describe("accepted offer fulfillment", () => {
       null,
     );
     assert.equal(acceptedOfferDeliveryIdFromAttributes(null), null);
+    assert.equal(
+      acceptedOfferRecoveryDeliveryIdFromAttributes({
+        channel: "dispatch",
+        offerRecovery: "true",
+        acceptedOfferDeliveryId: deliveryId,
+      }),
+      deliveryId,
+    );
+    assert.equal(
+      acceptedOfferRecoveryDeliveryIdFromAttributes({
+        channel: "dispatch",
+        offerRecovery: "true",
+        taskRunId: runId(1),
+        acceptedOfferDeliveryId: deliveryId,
+      }),
+      null,
+    );
+    assert.equal(
+      acceptedOfferRecoveryDeliveryIdFromAttributes({
+        channel: "dispatch",
+        acceptedOfferDeliveryId: deliveryId,
+      }),
+      null,
+    );
+  });
+
+  it("rejects an adult whose auth does not match the accepted delivery", async () => {
+    assert.deepEqual(
+      await reserveAcceptedOfferFulfillmentWithDatabase(
+        harness.database(),
+        {
+          familyId: familyAId,
+          sourceDeliveryId: deliveryId,
+          expectedRecipientMemberUserId: adultASecondId,
+          kind: "material",
+          referenceId: "00000000-0000-4000-c000-000000000099",
+        },
+      ),
+      {
+        eligible: false,
+        wrote: false,
+        referenceId: null,
+        recipientMemberUserId: null,
+      },
+    );
   });
 
   it("records one scoped fulfillment for an accepted morning offer", async () => {
@@ -89,6 +148,7 @@ describe("accepted offer fulfillment", () => {
       {
         familyId: familyAId,
         sourceDeliveryId: deliveryId,
+        expectedRecipientMemberUserId: adultAId,
         kind: "material",
         referenceId: materialId,
         emit: async (event) => {
@@ -109,6 +169,7 @@ describe("accepted offer fulfillment", () => {
       {
         familyId: familyAId,
         sourceDeliveryId: deliveryId,
+        expectedRecipientMemberUserId: adultAId,
         kind: "material",
         referenceId: materialId,
         emit: async () => assert.fail("duplicate should not emit"),
@@ -124,6 +185,7 @@ describe("accepted offer fulfillment", () => {
       {
         familyId: familyAId,
         sourceDeliveryId: deliveryId,
+        expectedRecipientMemberUserId: adultAId,
         kind: "material",
         referenceId: foreignMaterialId,
         emit: async () => assert.fail("foreign result should not emit"),
@@ -139,6 +201,7 @@ describe("accepted offer fulfillment", () => {
       {
         familyId: familyAId,
         sourceDeliveryId: null,
+        expectedRecipientMemberUserId: adultAId,
         kind: "material",
         referenceId: materialId,
         emit: async () => assert.fail("missing source should not emit"),
@@ -153,35 +216,47 @@ describe("accepted offer fulfillment", () => {
     const taskMessageId = "00000000-0000-4000-a000-000000000085";
     const taskDeliveryId = "00000000-0000-4000-b000-000000000085";
     const taskEpisodeId = "00000000-0000-4000-9000-000000000085";
+    const taskResolverMessageId =
+      "00000000-0000-4000-a000-000000000095";
     const scheduleId = "00000000-0000-4000-d000-000000000085";
     await db`
       insert into public.conversation_messages (
-        id, family_id, task_run_id, role, content, visibility
+        id, family_id, task_run_id, role, content, visibility, episode_id
       )
       values (
         ${taskMessageId}, ${familyAId}, ${runId(7)}, 'assistant',
-        'Want me to schedule that?', 'family'
+        'Want me to schedule that?', 'family', ${taskEpisodeId}
+      )
+    `;
+    await db`
+      insert into public.conversation_messages (
+        id, family_id, role, content, visibility, episode_id, member_user_id
+      )
+      values (
+        ${taskResolverMessageId}, ${familyAId}, 'user', 'Yes', 'family',
+        ${taskEpisodeId}, ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_deliveries (
         id, family_id, episode_id, message_id, task_run_id, channel, status,
-        sent_at
+        sent_at, recipient_member_user_id
       )
       values (
         ${taskDeliveryId}, ${familyAId}, ${taskEpisodeId},
-        ${taskMessageId}, ${runId(7)}, 'sms', 'sent', now()
+        ${taskMessageId}, ${runId(7)}, 'sms', 'sent', now(), ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_open_loops (
         family_id, episode_id, message_id, delivery_id, kind, state,
-        expires_at, resolved_at, resolved_outcome
+        expires_at, resolved_at, resolved_outcome, resolved_by_message_id
       )
       values (
         ${familyAId}, ${taskEpisodeId}, ${taskMessageId},
         ${taskDeliveryId}, 'yes_no', 'resolved',
-        now() + interval '24 hours', now(), 'accepted'
+        now() + interval '24 hours', now(), 'accepted',
+        ${taskResolverMessageId}
       )
     `;
     await db`
@@ -198,6 +273,7 @@ describe("accepted offer fulfillment", () => {
     const result = await recordAcceptedOfferFulfillmentWithDatabase(db, {
       familyId: familyAId,
       sourceDeliveryId: taskDeliveryId,
+      expectedRecipientMemberUserId: adultAId,
       kind: "task",
       referenceId: scheduleId,
       emit: async () => undefined,
@@ -211,35 +287,48 @@ describe("accepted offer fulfillment", () => {
     const outboxMessageId = "00000000-0000-4000-a000-000000000086";
     const outboxDeliveryId = "00000000-0000-4000-b000-000000000086";
     const outboxEpisodeId = "00000000-0000-4000-9000-000000000086";
+    const outboxResolverMessageId =
+      "00000000-0000-4000-a000-000000000096";
     const outboxMaterialId = "00000000-0000-4000-c000-000000000086";
     await db`
       insert into public.conversation_messages (
-        id, family_id, task_run_id, role, content, visibility
+        id, family_id, task_run_id, role, content, visibility, episode_id
       )
       values (
         ${outboxMessageId}, ${familyAId}, ${runId(8)}, 'assistant',
-        'Want me to make a review-passed page?', 'family'
+        'Want me to make a review-passed page?', 'family',
+        ${outboxEpisodeId}
+      )
+    `;
+    await db`
+      insert into public.conversation_messages (
+        id, family_id, role, content, visibility, episode_id, member_user_id
+      )
+      values (
+        ${outboxResolverMessageId}, ${familyAId}, 'user', 'Yes', 'family',
+        ${outboxEpisodeId}, ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_deliveries (
         id, family_id, episode_id, message_id, task_run_id, channel, status,
-        sent_at
+        sent_at, recipient_member_user_id
       )
       values (
         ${outboxDeliveryId}, ${familyAId}, ${outboxEpisodeId},
-        ${outboxMessageId}, ${runId(8)}, 'sms', 'sent', now()
+        ${outboxMessageId}, ${runId(8)}, 'sms', 'sent', now(), ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_open_loops (
         family_id, episode_id, message_id, delivery_id, kind, state,
-        expires_at, resolved_at, resolved_outcome
+        expires_at, resolved_at, resolved_outcome, resolved_by_message_id
       )
       values (
         ${familyAId}, ${outboxEpisodeId}, ${outboxMessageId},
         ${outboxDeliveryId}, 'yes_no', 'resolved',
-        now() + interval '24 hours', now(), 'accepted'
+        now() + interval '24 hours', now(), 'accepted',
+        ${outboxResolverMessageId}
       )
     `;
 
@@ -248,6 +337,7 @@ describe("accepted offer fulfillment", () => {
       {
         familyId: familyAId,
         sourceDeliveryId: outboxDeliveryId,
+        expectedRecipientMemberUserId: adultAId,
         kind: "material",
         referenceId: outboxMaterialId,
       },
@@ -256,6 +346,7 @@ describe("accepted offer fulfillment", () => {
       eligible: true,
       wrote: true,
       referenceId: outboxMaterialId,
+      recipientMemberUserId: adultAId,
     });
     const [beforeTarget] = await db<{ fulfilled: boolean }[]>`
       select exists (
@@ -300,35 +391,47 @@ describe("accepted offer fulfillment", () => {
     const delayedMessageId = "00000000-0000-4000-a000-000000000083";
     const delayedDeliveryId = "00000000-0000-4000-b000-000000000083";
     const delayedEpisodeId = "00000000-0000-4000-9000-000000000083";
+    const delayedResolverMessageId =
+      "00000000-0000-4000-a000-000000000093";
     const delayedMaterialId = "00000000-0000-4000-c000-000000000083";
     await db`
       insert into public.conversation_messages (
-        id, family_id, task_run_id, role, content, visibility
+        id, family_id, task_run_id, role, content, visibility, episode_id
       )
       values (
         ${delayedMessageId}, ${familyAId}, ${runId(5)}, 'assistant',
-        'Want me to set that up?', 'family'
+        'Want me to set that up?', 'family', ${delayedEpisodeId}
+      )
+    `;
+    await db`
+      insert into public.conversation_messages (
+        id, family_id, role, content, visibility, episode_id, member_user_id
+      )
+      values (
+        ${delayedResolverMessageId}, ${familyAId}, 'user', 'Yes', 'family',
+        ${delayedEpisodeId}, ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_deliveries (
         id, family_id, episode_id, message_id, task_run_id, channel, status,
-        sent_at
+        sent_at, recipient_member_user_id
       )
       values (
         ${delayedDeliveryId}, ${familyAId}, ${delayedEpisodeId},
-        ${delayedMessageId}, ${runId(5)}, 'sms', 'sent', now()
+        ${delayedMessageId}, ${runId(5)}, 'sms', 'sent', now(), ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_open_loops (
         family_id, episode_id, message_id, delivery_id, kind, state,
-        expires_at, resolved_at, resolved_outcome
+        expires_at, resolved_at, resolved_outcome, resolved_by_message_id
       )
       values (
         ${familyAId}, ${delayedEpisodeId}, ${delayedMessageId},
         ${delayedDeliveryId}, 'yes_no', 'resolved',
-        now() + interval '24 hours', now(), 'accepted'
+        now() + interval '24 hours', now(), 'accepted',
+        ${delayedResolverMessageId}
       )
     `;
     await db`
@@ -347,6 +450,7 @@ describe("accepted offer fulfillment", () => {
     const result = await recordAcceptedOfferFulfillmentWithDatabase(db, {
       familyId: familyAId,
       sourceDeliveryId: delayedDeliveryId,
+      expectedRecipientMemberUserId: adultAId,
       kind: "material",
       referenceId: delayedMaterialId,
       emit: async () => undefined,
@@ -366,36 +470,48 @@ describe("accepted offer fulfillment", () => {
     const staleMessageId = "00000000-0000-4000-a000-000000000084";
     const staleDeliveryId = "00000000-0000-4000-b000-000000000084";
     const staleEpisodeId = "00000000-0000-4000-9000-000000000084";
+    const staleResolverMessageId =
+      "00000000-0000-4000-a000-000000000094";
     const staleMaterialId = "00000000-0000-4000-c000-000000000084";
     await db`
       insert into public.conversation_messages (
-        id, family_id, task_run_id, role, content, visibility
+        id, family_id, task_run_id, role, content, visibility, episode_id
       )
       values (
         ${staleMessageId}, ${familyAId}, ${runId(6)}, 'assistant',
-        'Want me to make that?', 'family'
+        'Want me to make that?', 'family', ${staleEpisodeId}
+      )
+    `;
+    await db`
+      insert into public.conversation_messages (
+        id, family_id, role, content, visibility, episode_id, member_user_id
+      )
+      values (
+        ${staleResolverMessageId}, ${familyAId}, 'user', 'Yes', 'family',
+        ${staleEpisodeId}, ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_deliveries (
         id, family_id, episode_id, message_id, task_run_id, channel, status,
-        sent_at
+        sent_at, recipient_member_user_id
       )
       values (
         ${staleDeliveryId}, ${familyAId}, ${staleEpisodeId},
         ${staleMessageId}, ${runId(6)}, 'sms', 'sent',
-        now() - interval '3 days'
+        now() - interval '3 days', ${adultAId}
       )
     `;
     await db`
       insert into public.conversation_open_loops (
         family_id, episode_id, message_id, delivery_id, kind, state,
-        expires_at, resolved_at, resolved_outcome
+        expires_at, resolved_at, resolved_outcome, resolved_by_message_id
       )
       values (
         ${familyAId}, ${staleEpisodeId}, ${staleMessageId},
         ${staleDeliveryId}, 'yes_no', 'resolved',
-        now() - interval '2 days', now() - interval '2 days', 'accepted'
+        now() - interval '2 days', now() - interval '2 days', 'accepted',
+        ${staleResolverMessageId}
       )
     `;
     await db`
@@ -406,6 +522,7 @@ describe("accepted offer fulfillment", () => {
     const result = await recordAcceptedOfferFulfillmentWithDatabase(db, {
       familyId: familyAId,
       sourceDeliveryId: staleDeliveryId,
+      expectedRecipientMemberUserId: adultAId,
       kind: "material",
       referenceId: staleMaterialId,
       emit: async () => assert.fail("stale offer should not emit"),

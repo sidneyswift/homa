@@ -691,7 +691,7 @@ describe("conversation reply resolution", () => {
     }
   });
 
-  it("accepts a legacy null-recipient delivery authenticated by the same phone", () => {
+  it("does not let destination authentication claim a null legacy recipient", () => {
     const result = resolveReplyIntent({
       text: "Yes",
       now: NOW,
@@ -706,7 +706,29 @@ describe("conversation reply resolution", () => {
       ],
     });
 
-    assert.equal(result.kind, "matched");
+    assert.equal(result.kind, "none");
+  });
+
+  it("does not let a reassigned phone override another adult recipient", () => {
+    const result = resolveReplyIntent({
+      text: "Yes",
+      now: NOW,
+      memberUserId: "adult-b",
+      explicitDeliveryId: null,
+      providerReplyTo: null,
+      candidates: [
+        candidate({
+          recipientMemberUserId: "adult-a",
+          destinationAuthenticated: true,
+          messageContent: "Adult A private offer",
+        }),
+      ],
+    });
+
+    assert.equal(result.kind, "none");
+    if (result.kind === "none") {
+      assert.deepEqual(result.nearbyCandidates, []);
+    }
   });
 
   it("uses content words or displayed ordinals to clarify reactive questions", () => {

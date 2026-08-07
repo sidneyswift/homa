@@ -35,6 +35,10 @@ import {
   openReplyLoop,
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
+import {
+  acceptedOfferDeliveryIdFromAttributes,
+  acceptedOfferDestinationStillCurrent,
+} from "../../lib/conversation-continuity/offer-fulfillment";
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
 import {
   findFamilyIdentityByPhone,
@@ -177,6 +181,7 @@ const { bot, channel, send } = chatSdkChannel({
     async "message.completed"(event, channel, ctx) {
       if (event.finishReason !== "stop" || !event.message?.trim()) return;
       const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
+        acceptedOfferDeliveryId?: string;
         familyId?: string;
         memberUserId?: string;
         phoneNumber?: string;
@@ -263,6 +268,37 @@ const { bot, channel, send } = chatSdkChannel({
           await openLoopAfterOutcome("uncertain");
         }
         return;
+      }
+      const acceptedOfferDeliveryId =
+        acceptedOfferDeliveryIdFromAttributes(attributes);
+      if (acceptedOfferDeliveryId) {
+        let destinationIsCurrent = false;
+        try {
+          destinationIsCurrent =
+            await acceptedOfferDestinationStillCurrent({
+              familyId: attributes.familyId,
+              sourceDeliveryId: acceptedOfferDeliveryId,
+              expectedRecipientMemberUserId:
+                attributes.memberUserId ?? null,
+              channel: "sms",
+              destination: attributes.phoneNumber,
+            });
+        } catch (error) {
+          console.error(
+            "telnyx channel: accepted offer recipient recheck failed:",
+            error instanceof Error ? error.message : "unknown",
+          );
+        }
+        if (!destinationIsCurrent) {
+          await finishDeliveryAttempt(attempt, {
+            delivered: false,
+            error: "accepted offer recipient is no longer current",
+          });
+          if (attributes.inboundReceiptId) {
+            await completeInboundReceipt(attributes.inboundReceiptId);
+          }
+          return;
+        }
       }
       try {
         const posted = (await channel.thread.post(messageText)) as {

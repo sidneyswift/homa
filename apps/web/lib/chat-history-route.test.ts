@@ -62,10 +62,12 @@ describe("chatHistoryResponse", () => {
 });
 
 describe("chat history completeness contract", () => {
-  it("rejects every partial query before mobile replaces local scrollback", async () => {
+  it("fails closed without reviving unowned legacy or companion rows", async () => {
     const source = await readFile(new URL("./chat-history.ts", import.meta.url), "utf8");
-    assert.match(source, /if \(legacy\.error\) return null;/u);
-    assert.match(source, /if \(companionQuery\.error\) return null;/u);
+    assert.doesNotMatch(source, /legacyMine|companionQuery|singleAdult/u);
+    assert.match(source, /\.eq\("member_user_id", input\.userId\)/u);
+    assert.match(source, /\.eq\("recipient_member_user_id", input\.userId\)/u);
+    assert.match(source, /\.eq\("status", "sent"\)/u);
     assert.match(source, /if \(delivered\.error\) return null;/u);
     assert.match(source, /if \(deliveredMessages\.error\) return null;/u);
     assert.match(source, /if \(materialQuery\.error\) return null;/u);

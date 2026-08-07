@@ -38,6 +38,13 @@ export async function extractCallMemories(conversationId: string): Promise<boole
     where conversation_id = ${conversationId}
       and memory_extracted_at is null
       and family_id is not null
+      and member_user_id is not null
+      and exists (
+        select 1
+        from public.family_members current_member
+        where current_member.family_id = call_transcripts.family_id
+          and current_member.user_id = call_transcripts.member_user_id
+      )
     returning id, family_id, child_id, line, transcript_text
   `;
   const row = claimed[0];

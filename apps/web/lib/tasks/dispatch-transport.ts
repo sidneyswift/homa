@@ -3,6 +3,7 @@ import {
   type FamilyDeliveryRecipient,
 } from "../conversation-continuity/delivery-ledger";
 import { buildSignedReplyAddress } from "../conversation-continuity/email-reply-auth";
+import { findCurrentOfferRecoveryRecipient } from "../conversation-continuity/offer-recovery";
 import { selectTaskDeliveryRecipients } from "../conversation-continuity/task-recipients";
 import {
   deliverTaskMessage,
@@ -30,6 +31,8 @@ export interface LiveDispatchTransportInput {
   text: string;
   deliveryMode: "text" | "email" | "none";
   recipientMemberUserId: string | null;
+  requireExactRecipient?: boolean;
+  sourceOfferDeliveryId?: string | null;
   label: string | null;
   deliveryVersion: TaskDeliveryVersion;
 }
@@ -55,6 +58,10 @@ export interface LiveDispatchTransportDependencies {
    * destination region is unreachable (Telnyx 40309), so an un-textable
    * number is not retried every day. Returns how many schedules moved. */
   markSmsRegionUnsupported(familyId: string): Promise<number>;
+  resolveRecoveryRecipient?(input: {
+    familyId: string;
+    sourceDeliveryId: string;
+  }): Promise<string | null>;
 }
 
 export async function submitDispatchTaskEmail(
@@ -100,10 +107,34 @@ export async function deliverLiveDispatchTask(
   },
   onTransportAccepted?: (channel: "sms" | "email" | "none") => void,
 ) {
+  const recoveryRecipient = input.sourceOfferDeliveryId
+    ? await (
+        dependencies.resolveRecoveryRecipient ??
+        findCurrentOfferRecoveryRecipient
+      )({
+        familyId: input.familyId,
+        sourceDeliveryId: input.sourceOfferDeliveryId,
+      })
+    : null;
+  const recipientMemberUserId = input.sourceOfferDeliveryId
+    ? recoveryRecipient
+    : input.recipientMemberUserId;
   const recipients = selectTaskDeliveryRecipients(
     await dependencies.listRecipients(input.familyId),
-    input.recipientMemberUserId,
+    recipientMemberUserId,
+    input.sourceOfferDeliveryId ? true : input.requireExactRecipient,
   );
+  if (
+    (input.sourceOfferDeliveryId || input.requireExactRecipient) &&
+    recipients.length === 0
+  ) {
+    return {
+      status: "failed" as const,
+      deliveredChannel: null,
+      deliveredCount: 0,
+      failedCount: 1,
+    };
+  }
   return await deliverTaskMessage(
     {
       familyId: input.familyId,

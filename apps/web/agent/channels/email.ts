@@ -31,6 +31,10 @@ import {
   resolvedContinuityAttributes,
 } from "../../lib/conversation-continuity/ledger";
 import { replyContractForReactiveMessage } from "../../lib/conversation-continuity/delivery-policy";
+import {
+  acceptedOfferDeliveryIdFromAttributes,
+  acceptedOfferDestinationStillCurrent,
+} from "../../lib/conversation-continuity/offer-fulfillment";
 import { deliverReactiveEmailWithRetry } from "../../lib/conversation-continuity/reactive-email-delivery";
 import {
   findFamilyIdentityByEmail,
@@ -415,6 +419,7 @@ export default defineChannel({
       const to = channel.state.toEmail;
       const familyId = channel.state.familyId;
       const attributes = (ctx.session.auth.current?.attributes ?? {}) as {
+        acceptedOfferDeliveryId?: string;
         memberUserId?: string;
         inboundReceiptId?: string;
       };
@@ -453,6 +458,8 @@ export default defineChannel({
       const genericContract = replyContractForReactiveMessage(
         messageText,
       );
+      const acceptedOfferDeliveryId =
+        acceptedOfferDeliveryIdFromAttributes(attributes);
       const openLoopAfterOutcome = async (
         attempt: Awaited<ReturnType<typeof beginDeliveryAttempt>>,
         deliveryOutcome: "sent" | "uncertain" | "failed",
@@ -494,6 +501,19 @@ export default defineChannel({
               providerThreadKey: `email:${to.toLowerCase()}`,
             }),
           sendEmail: async (attempt) => {
+            if (
+              acceptedOfferDeliveryId &&
+              !(await acceptedOfferDestinationStillCurrent({
+                familyId,
+                sourceDeliveryId: acceptedOfferDeliveryId,
+                expectedRecipientMemberUserId:
+                  attributes.memberUserId ?? null,
+                channel: "email",
+                destination: to,
+              }))
+            ) {
+              return { status: "rejected" };
+            }
             const replySecret = process.env.RESEND_INBOUND_SECRET;
             return await submitAgentComposedEmail(
               to,

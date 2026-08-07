@@ -82,6 +82,14 @@ export default defineBoundedTool({
     limit: z.number().int().min(1).max(10).default(5),
   }),
   async execute(input, ctx) {
+    const attributes = ctx.session.auth.current?.attributes as
+      | { memberUserId?: string; supabaseAccessToken?: string; familyId?: string }
+      | undefined;
+    const memberUserId =
+      typeof attributes?.memberUserId === "string" &&
+      attributes.memberUserId.length > 0
+        ? attributes.memberUserId
+        : null;
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
@@ -95,6 +103,7 @@ export default defineBoundedTool({
     if (access.mode === "pinned") {
       const results = await recallPinned({
         familyId: access.familyId,
+        memberUserId,
         query: input.query,
         scope: input.scope,
         limit: input.limit,
@@ -125,11 +134,12 @@ export default defineBoundedTool({
     const hits: RecallHit[] = [];
     const searchText = { type: "websearch" as const, config: "english" };
 
-    if (input.scope === "calls" || input.scope === "all") {
+    if (memberUserId && (input.scope === "calls" || input.scope === "all")) {
       const { data } = await db
         .from("call_transcripts")
         .select("line, transcript_text, started_at")
         .eq("family_id", familyId)
+        .eq("member_user_id", memberUserId)
         .textSearch("transcript_text", input.query, searchText)
         .order("started_at", { ascending: false })
         .limit(input.limit);
@@ -142,34 +152,37 @@ export default defineBoundedTool({
       }
     }
 
-    if (input.scope === "chats" || input.scope === "all") {
-      // chat-privacy-per-adult (2026-07-12): another adult's own words
-      // never surface in this adult's recall. Their user rows carry
-      // their member_user_id and are excluded here; unattributed rows
-      // (Homa's replies, legacy history) stay searchable. Full
-      // enforcement, including the semantic RPC, lands with the M1-02
-      // policy tightening (build-log follow-up).
-      const attrs = ctx.session.auth.current?.attributes as
-        | { memberUserId?: string }
-        | undefined;
-      const callerFilter =
-        typeof attrs?.memberUserId === "string" && attrs.memberUserId.length > 0
-          ? `member_user_id.eq.${attrs.memberUserId},member_user_id.is.null`
-          : null;
+    if (memberUserId && (input.scope === "chats" || input.scope === "all")) {
       // visibility = 'family' mirrors the continuity RLS policy (internal
       // dispatch prompts and undelivered drafts are server-only), the same
       // belt-on-brace as the family_id filter above the database's wall.
-      let chatQuery = db
+      const candidates = await db
         .from("conversation_messages")
-        .select("role, content, channel, created_at")
+        .select("id, role, content, channel, created_at, member_user_id")
         .eq("family_id", familyId)
         .eq("visibility", "family")
         .textSearch("content", input.query, searchText)
         .order("created_at", { ascending: false })
         .limit(input.limit);
-      if (callerFilter) chatQuery = chatQuery.or(callerFilter);
-      const { data } = await chatQuery;
-      for (const row of data ?? []) {
+
+      const candidateIds = (candidates.data ?? []).map((row) => row.id);
+      const deliveries = candidateIds.length === 0
+        ? { data: [] }
+        : await db
+            .from("conversation_deliveries")
+            .select("message_id")
+            .eq("family_id", familyId)
+            .eq("recipient_member_user_id", memberUserId)
+            .eq("status", "sent")
+            .in("message_id", candidateIds);
+      const deliveredIds = new Set(
+        (deliveries.data ?? []).map((row) => row.message_id),
+      );
+      for (const row of candidates.data ?? []) {
+        if (
+          row.member_user_id !== memberUserId &&
+          !deliveredIds.has(row.id)
+        ) continue;
         const speaker = row.role === "user" ? "the parent" : "Homa";
         hits.push({
           when: dayOf(row.created_at, timeZone),
@@ -204,7 +217,11 @@ export default defineBoundedTool({
     // for the allergy) and word choices FTS's AND-semantics miss. The
     // RPC is SECURITY INVOKER, so the caller's own RLS decides which
     // rows exist for it; no family parameter can be gotten wrong.
-    if (hits.length < input.limit) {
+    const mayRecallSemantically =
+      memberUserId !== null ||
+      input.scope === "memories" ||
+      input.scope === "all";
+    if (hits.length < input.limit && mayRecallSemantically) {
       const queryEmbedding = await embedText(input.query, { familyId });
       if (queryEmbedding) {
         // Ask only for the scope requested (gh#375). The RPC used to rank
@@ -213,24 +230,18 @@ export default defineBoundedTool({
         // budget on rows the filter below then discarded. That is why a
         // parent was told her phone call did not exist while its
         // transcript sat embedded in the table from 49 minutes earlier.
-        const scopes =
-          input.scope === "all" ? null : [SEMANTIC_SOURCE_BY_SCOPE[input.scope]];
-        let semantic = await db
+        const scopes = memberUserId === null
+          ? [SEMANTIC_SOURCE_BY_SCOPE.memories]
+          : input.scope === "all"
+            ? null
+            : [SEMANTIC_SOURCE_BY_SCOPE[input.scope]];
+        const semantic = await db
           .rpc("recall_semantic", {
             query_embedding: queryEmbedding,
             match_limit: input.limit,
             scopes,
           })
-          .then((response) => response.data, () => null);
-        if (semantic === null) {
-          // The scoped signature lands with its migration. If code is
-          // ahead of schema for a deploy, fall back rather than lose
-          // recall entirely; the old shape still answers, just wider.
-          ({ data: semantic } = await db.rpc("recall_semantic", {
-            query_embedding: queryEmbedding,
-            match_limit: input.limit,
-          }));
-        }
+          .then((response) => response.data, () => []);
         const scopeOf: Record<string, "calls" | "chats" | "memories"> = {
           call: "calls",
           chat: "chats",
@@ -260,9 +271,6 @@ export default defineBoundedTool({
     const results = hits.slice(0, input.limit);
 
     // Best-effort analytics under the caller's own token (chat.% policy).
-    const attributes = ctx.session.auth.current?.attributes as
-      | { supabaseAccessToken?: string; familyId?: string }
-      | undefined;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (url && key && attributes?.supabaseAccessToken && attributes.familyId) {

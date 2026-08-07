@@ -138,6 +138,8 @@ async function createFamily(
 }
 
 const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const sidneyRuntimeSessionId = `sms-sidney-${suffix}`;
+const alessaRuntimeSessionId = `sms-alessa-${suffix}`;
 
 try {
   await sql`select 1 as live_fixture_database_ready`;
@@ -446,7 +448,7 @@ try {
     memberUserId: sidney.userId,
     channel: "sms",
     transportThreadKey: `telnyx:homa:${sidneyPhone}`,
-    runtimeSessionId: "sms-sidney",
+    runtimeSessionId: sidneyRuntimeSessionId,
     providerMessageId: `provider-sidney-${suffix}`,
     providerReplyTo: null,
     destinationKey: sidneyPhone,
@@ -470,7 +472,7 @@ try {
         providerMessageId: `provider-sidney-${suffix}`,
       }),
     },
-    sessionId: "sms-sidney",
+    sessionId: sidneyRuntimeSessionId,
     channel: "sms",
     sequence: 1,
     role: "user",
@@ -490,11 +492,12 @@ try {
   `;
   report(
     "Sidney loop resolved while Alessa remains open",
-    statesAfterSidney.some(
-      (row) =>
-        row.recipient_member_user_id === sidney.userId &&
-        row.state === "resolved",
-    ) &&
+    sidneyReply.replyClaimed &&
+      statesAfterSidney.some(
+        (row) =>
+          row.recipient_member_user_id === sidney.userId &&
+          row.state === "resolved",
+      ) &&
       statesAfterSidney.some(
         (row) =>
           row.recipient_member_user_id === alessa.userId &&
@@ -507,7 +510,7 @@ try {
     memberUserId: alessa.userId,
     channel: "sms",
     transportThreadKey: `telnyx:homa:${alessaPhone}`,
-    runtimeSessionId: "sms-alessa",
+    runtimeSessionId: alessaRuntimeSessionId,
     providerMessageId: `provider-alessa-${suffix}`,
     providerReplyTo: null,
     destinationKey: alessaPhone,

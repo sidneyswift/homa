@@ -252,6 +252,12 @@ export function buildDispatchTarget(
     label: task.label,
     episodeId,
     recipientMemberUserId: task.recipientMemberUserId,
+    ...(task.sourceOfferDeliveryId
+      ? {
+          requireExactRecipient: true,
+          sourceOfferDeliveryId: task.sourceOfferDeliveryId,
+        }
+      : {}),
     deliveryVersion,
   };
 }
@@ -276,6 +282,11 @@ export function buildDispatchAuth(
       taskKind: task.kind,
       episodeId,
       deliveryVersion,
+      ...(task.sourceOfferDeliveryId && task.recipientMemberUserId
+        ? {
+            memberUserId: task.recipientMemberUserId,
+          }
+        : {}),
     },
   };
 }
