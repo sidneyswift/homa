@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "0752bb577144f41240af2449e90749e33760b9427081e114ca75468128b565ff"
+    "scopedInputFingerprint": "6f87ce1f4e6c1041fdaa751a7cd010fb8422e9ed4cf40779bd756350985a0fb3"
   },
   "records": [
     {
@@ -131,7 +131,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "d504311e3cea4da9a8b5a90c9003e01ff01a640f869588c1b191f35c9eaa47a9"
+      "scopedInputFingerprint": "4a55fecc5d0f7beb503e8f964232563034e71e0ce5655a47200464f103d76d81"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -509,7 +509,7 @@
         "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
         "Provider outages never become a guessed paid state and never cross family boundaries."
       ],
-      "scopedInputFingerprint": "82b16253565cd024be49c7fd7cf80d187cdfd7f08b51e776fc3ce10afd87c5a8"
+      "scopedInputFingerprint": "899bfb441680d217ef4165e018cd67e0cf99a2a3651ace8461d79d54cfc34fd6"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -614,7 +614,7 @@
       },
       {
         "path": "apps/web/lib/billing/wall.ts",
-        "sha256": "62f65ac5cd8596663a78b1a99ae42f8eb01d7bd76904013f2a890a8f9b42d45d"
+        "sha256": "7a03174d1cd9c5e9e6e307ef60d72fe7be3392c19fd85fc82d1bd3a483606d3e"
       },
       {
         "path": "apps/web/lib/supabase/client.ts",
@@ -629,6 +629,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "5bbf325b5ab4605da360014fecc1fb4246712e31cef026f8634a4fcc7c44e669"
+    "sourceFingerprint": "45aa37708bc1ac21c503da05c7cc4ffc3c6d0a3b98f8bc740efe850ef774a787"
   }
 }

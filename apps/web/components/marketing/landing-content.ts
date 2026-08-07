@@ -29,7 +29,7 @@ export const HERO_COPY = {
    *  cancellations; naming it raised trial starts in the Blinkist
    *  case). One price, the trial length, and the way out. */
   primaryActionNote:
-    `7 free days, then from $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
+    `7 free days, then $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
   proofLabel: "Your whole family",
   proof: "Add every child at no extra cost.",
 } as const;

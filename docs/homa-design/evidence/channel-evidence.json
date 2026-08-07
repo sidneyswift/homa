@@ -291,7 +291,7 @@
         "selector": "provider",
         "surfaceCount": 23,
         "surfaceIdsFingerprint": "4573a1c94a5ca79e918530a93665c4d3012bd5de1b3c3b895648ea223f9ada8a",
-        "scopedInputFingerprint": "d515589abf7b0ba06dcf018c481f94edd94a136435afb021fc55042ad61e15ef"
+        "scopedInputFingerprint": "7d0bfbef832a41e2f370c9af882322b86d51168382005ff44276d50262843620"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/provider.json",
       "fixtureChecksum": "61c76f13a8a058f145b811b43cb16322871313915fd090bfe4588044adc21a83",

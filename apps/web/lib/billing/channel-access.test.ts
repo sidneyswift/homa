@@ -87,7 +87,7 @@ test("the refusal lines name the limit before the available web path", () => {
     ["Calling Homa isn't available on your plan.", CHANNEL_GATE_VOICE_LINE],
   ] as const) {
     assert.ok(line.startsWith(prefix));
-    assert.match(line, /Open Homa in your phone's browser to keep going\.$/u);
+    assert.match(line, /You can keep going with Homa in your phone's browser\.$/u);
     assert.doesNotMatch(line, /Homa Plus|settings|right now/iu);
     assert.doesNotMatch(line, /\bsorry\b|\bunfortunately\b|\bcannot\b|\bcan't\b/i);
     assert.doesNotMatch(line, /\bmust\b|\bneed to\b|\bupgrade\b/iu);

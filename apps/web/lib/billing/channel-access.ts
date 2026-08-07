@@ -170,9 +170,9 @@ export async function familyHasChannel(familyId: string | null): Promise<boolean
  * Plus is unavailable for a new purchase.
  */
 export const CHANNEL_GATE_SMS_LINE =
-  "Texting with Homa isn't available on your plan. Open Homa in your phone's browser to keep going.";
+  "Texting with Homa isn't available on your plan. You can keep going with Homa in your phone's browser.";
 
 /** The same fact for a caller, shortened: she is holding a phone to her
  *  ear and cannot re-read a sentence. */
 export const CHANNEL_GATE_VOICE_LINE =
-  "Calling Homa isn't available on your plan. Open Homa in your phone's browser to keep going.";
+  "Calling Homa isn't available on your plan. You can keep going with Homa in your phone's browser.";

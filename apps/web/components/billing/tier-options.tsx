@@ -52,9 +52,9 @@ const TIER_ORDER: PlanTier[] = PURCHASABLE_HOMA_PLANS.map(({ tier }) => tier);
  *    popularity claim with no customers to support it, and the
  *    "Recommended" that replaced it was flagged by all ten parents in
  *    the review panel, three as a reason to leave: an endorsement on
- *    the pricier row turns a yes-or-no into a which-one. Plus routes on
- *    its own line instead. Full reasoning in wall-copy.ts above
- *    TIER_NAMES.
+ *    the pricier row turns a yes-or-no into a which-one. When more than
+ *    one tier is available, each routes on its own line instead. Full
+ *    reasoning lives in wall-copy.ts above TIER_NAMES.
  *
  * A tier with no checkout at all (Payment Links not configured for this
  * environment) doesn't render; regular is always present or the wall

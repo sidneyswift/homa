@@ -37,7 +37,7 @@ test("the trial CTA states the card terms before the click", () => {
   // discovered at the card screen.
   assert.match(HERO_COPY.primaryActionNote, /7 free days/);
   assert.match(HERO_COPY.primaryActionNote, /credit card/i);
-  assert.match(HERO_COPY.primaryActionNote, /from \$19 a month/i);
+  assert.match(HERO_COPY.primaryActionNote, /then \$19 a month/i);
   assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
   assert.match(HERO_COPY.primaryActionNote, /cancel before the first charge/i);
   assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19]);
