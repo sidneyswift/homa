@@ -69,6 +69,7 @@ export const ISSUE_606_RELEASE_SENSITIVE_PATHS = Object.freeze([
   "scripts/isolation-check.mjs",
   "scripts/issue-606-privacy-containment-postgres.mts",
   "scripts/issue-606-production-release-git-contract.mjs",
+  "scripts/issue-606-release-seal-workflow-contract.mjs",
   "scripts/issue-606-production-repair-postgres.mjs",
   "scripts/issue-606-production-repair.test.mjs",
   "scripts/issue-606-production-repair.sql",
@@ -151,6 +152,18 @@ export function validateIssue606ReleaseGitContract({
     );
   }
 
+  const finalTreeSha = git(repositoryRoot, [
+    "show",
+    "-s",
+    "--format=%T",
+    finalSha,
+  ]);
+  const reviewedTreeSha = git(repositoryRoot, [
+    "show",
+    "-s",
+    "--format=%T",
+    reviewedSha,
+  ]);
   const sensitiveBlobs = {};
   for (const path of ISSUE_606_RELEASE_SENSITIVE_PATHS) {
     const finalBlob = blobSha(repositoryRoot, finalSha, path);
@@ -163,18 +176,19 @@ export function validateIssue606ReleaseGitContract({
     sensitiveBlobs[path] = finalBlob;
   }
 
+  if (finalTreeSha !== reviewedTreeSha) {
+    throw new Error(
+      "The production merge tree is not byte-exactly the reviewed issue #606 tree."
+    );
+  }
+
   const sensitiveManifest = ISSUE_606_RELEASE_SENSITIVE_PATHS.map(
     (path) => `${path}=${sensitiveBlobs[path]}\n`
   ).join("");
 
   return {
-    finalTreeSha: git(repositoryRoot, ["show", "-s", "--format=%T", finalSha]),
-    reviewedTreeSha: git(repositoryRoot, [
-      "show",
-      "-s",
-      "--format=%T",
-      reviewedSha,
-    ]),
+    finalTreeSha,
+    reviewedTreeSha,
     sensitiveBlobs,
     sensitiveManifestSha256: createHash("sha256")
       .update(sensitiveManifest)

@@ -20,6 +20,12 @@ import {
   validateIssue606ReleaseGitContract,
 } from "./issue-606-production-release-git-contract.mjs";
 import {
+  ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT,
+  ISSUE_606_RELEASE_SEAL_SIGNER_PRINCIPAL,
+  ISSUE_606_RELEASE_SEAL_SIGNER_PUBLIC_KEY,
+  validateIssue606ReleaseSealWorkflow,
+} from "./issue-606-release-seal-workflow-contract.mjs";
+import {
   ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS,
   validateIssue606RuntimeDrainContract,
 } from "./issue-606-runtime-drain-contract.mjs";
@@ -51,6 +57,7 @@ const hashedInputs = [
   "supabase/migrations/20260807050000_conversation_privacy_attribution_write_guards.sql",
   "scripts/issue-606-production-repair.sql",
   "scripts/issue-606-production-release-git-contract.mjs",
+  "scripts/issue-606-release-seal-workflow-contract.mjs",
   "scripts/issue-606-production-run-contract.mjs",
   "scripts/issue-606-runtime-drain-contract.mjs",
   "scripts/issue-606-vercel-deployment-contract.mjs",
@@ -59,6 +66,11 @@ const hashedInputs = [
 
 function sha256(contents) {
   return createHash("sha256").update(contents).digest("hex");
+}
+
+function replaceExactlyOnce(contents, from, to) {
+  assert.equal(contents.split(from).length - 1, 1, `fixture fragment: ${from}`);
+  return contents.replace(from, to);
 }
 
 function git(repository, args) {
@@ -75,7 +87,10 @@ function writeRepositoryFile(repository, path, contents) {
   writeFileSync(absolutePath, `${contents}\n`, "utf8");
 }
 
-function syntheticReleaseRepository(alteredPath = null) {
+function syntheticReleaseRepository(
+  alteredPath = null,
+  { unrelatedMainChange = false } = {},
+) {
   const repository = mkdtempSync(
     join(tmpdir(), "homa-issue-606-git-contract-")
   );
@@ -100,13 +115,15 @@ function syntheticReleaseRepository(alteredPath = null) {
   const reviewedSha = git(repository, ["rev-parse", "HEAD"]);
 
   git(repository, ["checkout", "--quiet", "-b", "production", baseSha]);
-  writeRepositoryFile(
-    repository,
-    "unrelated.txt",
-    "main changed independently"
-  );
-  git(repository, ["add", "unrelated.txt"]);
-  git(repository, ["commit", "--quiet", "-m", "main"]);
+  if (unrelatedMainChange) {
+    writeRepositoryFile(
+      repository,
+      "unrelated.txt",
+      "main changed independently",
+    );
+    git(repository, ["add", "unrelated.txt"]);
+    git(repository, ["commit", "--quiet", "-m", "main"]);
+  }
   git(repository, ["merge", "--quiet", "--no-ff", "reviewed", "-m", "merge"]);
 
   if (alteredPath) {
@@ -166,9 +183,26 @@ test("release Git contract accepts only byte-exact reviewed sensitive paths", ()
       reviewedSha: fixture.reviewedSha,
     });
     assert.match(result.sensitiveManifestSha256, /^[0-9a-f]{64}$/u);
-    assert.notEqual(result.finalTreeSha, result.reviewedTreeSha);
+    assert.equal(result.finalTreeSha, result.reviewedTreeSha);
   } finally {
     rmSync(fixture.repository, { recursive: true, force: true });
+  }
+
+  const unrelatedMain = syntheticReleaseRepository(null, {
+    unrelatedMainChange: true,
+  });
+  try {
+    assert.throws(
+      () =>
+        validateIssue606ReleaseGitContract({
+          repositoryRoot: unrelatedMain.repository,
+          finalSha: unrelatedMain.finalSha,
+          reviewedSha: unrelatedMain.reviewedSha,
+        }),
+      /merge tree is not byte-exactly the reviewed/u,
+    );
+  } finally {
+    rmSync(unrelatedMain.repository, { recursive: true, force: true });
   }
 
   for (const alteredPath of ISSUE_606_RELEASE_SENSITIVE_PATHS) {
@@ -190,6 +224,98 @@ test("release Git contract accepts only byte-exact reviewed sensitive paths", ()
     } finally {
       rmSync(altered.repository, { recursive: true, force: true });
     }
+  }
+});
+
+test("release seal workflow contract rejects weakened exact-head attestations", () => {
+  const accepted = validateIssue606ReleaseSealWorkflow(workflow);
+  assert.match(accepted.contractSha256, /^[0-9a-f]{64}$/u);
+  assert.equal(
+    ISSUE_606_RELEASE_SEAL_SIGNER_PRINCIPAL,
+    "158200036+sidneyswift@users.noreply.github.com"
+  );
+  assert.match(ISSUE_606_RELEASE_SEAL_SIGNER_PUBLIC_KEY, /^ssh-rsa /u);
+  assert.equal(
+    ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT,
+    "SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c"
+  );
+
+  const adversarialMutations = [
+    [
+      "bad object type",
+      'if [ "$release_seal_tag_type" != "tag" ]; then',
+      'if [ "$release_seal_tag_type" != "commit" ]; then',
+    ],
+    [
+      "bad tag name",
+      '${release_seal_tag_names[0]}" != "$RELEASE_SEAL_TAG',
+      '${release_seal_tag_names[0]}" != "$GITHUB_SHA',
+    ],
+    [
+      "bad direct target",
+      '${release_seal_tag_objects[0]}" != "$REVIEWED_REPAIR_SHA',
+      '${release_seal_tag_objects[0]}" != "$GITHUB_SHA',
+    ],
+    [
+      "bad tagger",
+      "RELEASE_SEAL_TAGGER_IDENTITY: Sidney Swift <158200036+sidneyswift@users.noreply.github.com>",
+      "RELEASE_SEAL_TAGGER_IDENTITY: Release Bot <release@invalid.example>",
+    ],
+    [
+      "bad message",
+      "contract=homa-issue-606-exact-head-review-v1",
+      "contract=homa-issue-606-exact-head-review-v2",
+    ],
+    [
+      "bad signature command",
+      'verify-tag "$release_seal_ref" 2>&1',
+      'verify-commit "$release_seal_ref" 2>&1',
+    ],
+    [
+      "bad pinned key",
+      "RELEASE_SEAL_SIGNER_PUBLIC_KEY: ssh-rsa ",
+      "RELEASE_SEAL_SIGNER_PUBLIC_KEY: ssh-ed25519 ",
+    ],
+    [
+      "bad namespace",
+      'namespaces="git"',
+      'namespaces="file"',
+    ],
+    [
+      "bad fingerprint",
+      "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c",
+      "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    ],
+    [
+      "absent tag accepted",
+      'if [ "${#remote_release_seal_refs[@]}" -ne 1 ]; then',
+      'if [ "${#remote_release_seal_refs[@]}" -gt 1 ]; then',
+    ],
+    [
+      "multiple tags accepted",
+      'if [ "${#remote_release_seal_refs[@]}" -ne 1 ]; then',
+      'if [ "${#remote_release_seal_refs[@]}" -eq 0 ]; then',
+    ],
+    [
+      "prefetched tag accepted",
+      'if [ "${#preexisting_tag_refs[@]}" -ne 0 ]; then',
+      'if [ "${#preexisting_tag_refs[@]}" -gt 1 ]; then',
+    ],
+    [
+      "broad tag fetch",
+      '"refs/tags/$RELEASE_SEAL_TAG:refs/tags/$RELEASE_SEAL_TAG"',
+      '"refs/tags/*:refs/tags/*"',
+    ],
+  ];
+  for (const [label, from, to] of adversarialMutations) {
+    assert.throws(
+      () =>
+        validateIssue606ReleaseSealWorkflow(
+          replaceExactlyOnce(workflow, from, to)
+        ),
+      Error,
+      label
+    );
   }
 });
 
@@ -287,9 +413,14 @@ test("workflow is founder-only and bound to reviewed Git and Vercel production",
     apply.steps[0].uses,
     "actions/checkout@11d5960a326750d5838078e36cf38b85af677262"
   );
-  assert.equal(apply.steps[0].with["fetch-depth"], 0);
+  assert.equal(apply.steps[0].with["fetch-depth"], 2);
+  assert.equal(apply.steps[0].with["fetch-tags"], false);
   assert.equal(
-    workflowDocument.on.workflow_dispatch.inputs.reviewed_repair_sha.required,
+    workflowDocument.on.workflow_dispatch.inputs.reviewed_repair_sha,
+    undefined
+  );
+  assert.equal(
+    workflowDocument.on.workflow_dispatch.inputs.reviewed_repair_tag.required,
     true
   );
   assert.equal(
@@ -313,7 +444,9 @@ test("workflow is founder-only and bound to reviewed Git and Vercel production",
     3
   );
   assert.match(workflow, /issue-606-production-release-git-contract\.mjs/u);
+  assert.match(workflow, /issue-606-release-seal-workflow-contract\.mjs/u);
   assert.match(workflow, /--reviewed-sha="\$REVIEWED_REPAIR_SHA"/u);
+  assert.match(workflow, /--format='%P'/u);
   assert.match(workflow, /git ls-remote --exit-code origin refs\/heads\/main/u);
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 606/u);
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
@@ -326,6 +459,21 @@ test("workflow is founder-only and bound to reviewed Git and Vercel production",
       workflow,
       new RegExp(sha256(readFileSync(resolve(repositoryRoot, input))), "u")
     );
+  }
+});
+
+test("workflow YAML and every Bash run block are syntax-valid", () => {
+  const steps = workflowDocument.jobs.apply.steps;
+  const runBlocks = steps
+    .map((step) => step.run)
+    .filter((run) => typeof run === "string");
+  assert.ok(runBlocks.length > 0);
+  for (const run of runBlocks) {
+    execFileSync("bash", ["-n"], {
+      input: run,
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
   }
 });
 

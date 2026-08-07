@@ -7,8 +7,8 @@ on:
         description: Type APPLY ISSUE 606
         required: true
         type: string
-      reviewed_repair_sha:
-        description: Paste the exact reviewed pull request head SHA
+      reviewed_repair_tag:
+        description: Paste the exact operator release seal tag
         required: true
         type: string
       production_deployment_id:
@@ -45,12 +45,12 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 0
+          fetch-depth: 2
+          fetch-tags: false
 
       - name: Validate authorization and immutable inputs
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
-          REVIEWED_REPAIR_SHA: ${{ inputs.reviewed_repair_sha }}
           PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
           PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
         run: |
@@ -66,10 +66,16 @@ jobs:
             echo "The GitHub run id is not a positive integer."
             exit 1
           fi
-          if ! [[ "$REVIEWED_REPAIR_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "The reviewed repair SHA must be an exact lowercase Git SHA."
+          final_parent_line="$(git show -s --format='%P' "$GITHUB_SHA")"
+          read -r final_first_parent reviewed_repair_sha extra_parent \
+            <<< "$final_parent_line"
+          if ! [[ "$final_first_parent" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "$reviewed_repair_sha" =~ ^[0-9a-f]{40}$ ]] \
+            || [ -n "${extra_parent:-}" ]; then
+            echo "The production commit must have exactly two Git commit parents."
             exit 1
           fi
+          REVIEWED_REPAIR_SHA="$reviewed_repair_sha"
           if ! [[ "$PRODUCTION_DEPLOYMENT_ID" =~ ^dpl_[A-Za-z0-9]+$ ]]; then
             echo "The Vercel production deployment id is malformed."
             exit 1
@@ -130,7 +136,9 @@ jobs:
           check_hash "scripts/issue-606-production-repair.sql" \
             "e920b44acc7c7351ae1b17a61642f7ca35b8deab61c850fcc5a51ca1d3c801c2"
           check_hash "scripts/issue-606-production-release-git-contract.mjs" \
-            "e7a4ac37fa72bd21a23a5c42c2edd777905c0564efc9e167e20b8c3594e541a5"
+            "3e7c73ce59b46d7d2d2cd1cc4868130571066a5f4912afeb0ee969633bb18ab4"
+          check_hash "scripts/issue-606-release-seal-workflow-contract.mjs" \
+            "d72a936989d325ae2f18b0a34b6e4e3479a7c8afbd4d6670c579d2c877d1ef00"
           check_hash "scripts/issue-606-production-run-contract.mjs" \
             "9316f3351fd4c964c6b4953b98b739240cc505510908b6f80add461c766bb25d"
           check_hash "scripts/issue-606-runtime-drain-contract.mjs" \
@@ -139,6 +147,19 @@ jobs:
             "80733f5c38eb56a1b56f4bdbc585412397b0eb5f6fa6743efed4e4dab1b4cbb8"
           check_hash "scripts/issue-606-vercel-project-protection-contract.mjs" \
             "4f545d9ba27e4e4363dfa9434467c72343d67cf13ba5c2013ef2232aed056a7b"
+
+          release_seal_workflow_contract="$(
+            node scripts/issue-606-release-seal-workflow-contract.mjs
+          )"
+          mapfile -t release_seal_workflow_hashes < <(
+            printf '%s\n' "$release_seal_workflow_contract" |
+              sed -n 's/^ISSUE_606_RELEASE_SEAL_WORKFLOW_CONTRACT_SHA256=//p'
+          )
+          if [ "${#release_seal_workflow_hashes[@]}" -ne 1 ] \
+            || ! [[ "${release_seal_workflow_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The operator release seal workflow contract did not emit one exact hash."
+            exit 1
+          fi
 
           release_binding="$(node scripts/issue-606-production-release-git-contract.mjs \
             --final-sha="$GITHUB_SHA" \
@@ -178,16 +199,190 @@ jobs:
           fi
 
           {
+            echo "REVIEWED_REPAIR_SHA=$REVIEWED_REPAIR_SHA"
             echo "ISSUE_606_FINAL_TREE_SHA=${final_trees[0]}"
             echo "ISSUE_606_REVIEWED_TREE_SHA=${reviewed_trees[0]}"
             echo "ISSUE_606_SENSITIVE_MANIFEST_SHA256=${sensitive_hashes[0]}"
             echo "ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS=${drain_seconds[0]}"
             echo "ISSUE_606_RUNTIME_DRAIN_CONTRACT_SHA256=${drain_hashes[0]}"
+            echo "ISSUE_606_RELEASE_SEAL_WORKFLOW_CONTRACT_SHA256=${release_seal_workflow_hashes[0]}"
+          } >> "$GITHUB_ENV"
+
+      - name: Verify the exact-head operator release seal
+        env:
+          RELEASE_SEAL_TAG: ${{ inputs.reviewed_repair_tag }}
+          RELEASE_SEAL_TAGGER_IDENTITY: Sidney Swift <158200036+sidneyswift@users.noreply.github.com>
+          RELEASE_SEAL_SIGNER_PRINCIPAL: 158200036+sidneyswift@users.noreply.github.com
+          RELEASE_SEAL_SIGNER_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC//QLjrJ7HIgNVh1aPVtwhyYhMD1QsTuaVJB+5ORK3275oqqBR/o2TMPCOOSDtyUki3MCvEVb2lrTSdY+X6jtFYyZREhbfIoJeAMY5e0bF9W3uQshfggkKVNsJdCT0S0AMwgoQmA51E6vx/GwrFdNJ0fODSlRxDnqrzgRjdJ8uJEsYOsd5cBX9oLr4nUxSMhIiTfJii+XtrXDRazL6Kg36YhXHvhovwWCjs+QMFJjdcgz3aZV7XXjGifXlsfssuEawkPV7JWbeFVecBZ3Al7SKnx/ZjwrYr9hAu+3gnUjCP0V9bhBCJMH4PtZ+PnQ8tTDJ7MchHFsiaXKIyFhpdvviwxrhK8y6XFX0Hs5IbRJiRxUETCKw+1F6xumm3RXjtJdvAb6lLDBW4o+4w14Js75pWkbgVCzbpWrHhXOi3zCKVPzPDwNpNZLNvYSTkBFTFrVeGc4r6cqaia5zZV1PuZcPWTQjGZZfMX73iZyRz89vkkQt8BIOhv0P3DmQl2z8bmCPP4EjoYeKMNyx1TA4D5AUPgR2eCw8YbCzSZ1KmAjuM0CeRXf0YPvptp/5DWUtGqKHbZhgUFrpCiRb/b5YIvy8rD0fuMnGJwFoVzxclHkrsEeA7HZs4seqPyISif0AURXIKn1ItDbI0aJmMciTnWT6RPhReZ14MEvlNE4/MflcLw==
+          RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c
+        run: |
+          # This SSH signature is the repository owner's deliberate production release seal.
+          # It binds the exact reviewed head and public council ruling. It does not prove reviewer identity.
+          if ! [[ "$RELEASE_SEAL_TAG" =~ ^issue-606-reviewed-[0-9a-f]{40}$ ]]; then
+            echo "The operator release seal tag name is malformed."
+            exit 1
+          fi
+          if [ "$RELEASE_SEAL_TAG" != "issue-606-reviewed-$REVIEWED_REPAIR_SHA" ]; then
+            echo "The operator release seal tag name does not bind the derived reviewed SHA."
+            exit 1
+          fi
+          mapfile -t preexisting_tag_refs < <(
+            git for-each-ref --format='%(refname)' refs/tags/
+          )
+          if [ "${#preexisting_tag_refs[@]}" -ne 0 ]; then
+            echo "The checkout unexpectedly contains pre-fetched tags."
+            exit 1
+          fi
+          mapfile -t remote_release_seal_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$RELEASE_SEAL_TAG"
+          )
+          if [ "${#remote_release_seal_refs[@]}" -ne 1 ]; then
+            echo "The exact operator release seal is absent or ambiguous."
+            exit 1
+          fi
+          read -r remote_release_seal_object remote_release_seal_ref \
+            remote_release_seal_extra <<< "${remote_release_seal_refs[0]}"
+          if ! [[ "$remote_release_seal_object" =~ ^[0-9a-f]{40}$ ]] \
+            || [ "$remote_release_seal_ref" != "refs/tags/$RELEASE_SEAL_TAG" ] \
+            || [ -n "${remote_release_seal_extra:-}" ]; then
+            echo "The remote operator release seal ref is malformed."
+            exit 1
+          fi
+          git fetch --no-tags --force origin \
+            "refs/tags/$RELEASE_SEAL_TAG:refs/tags/$RELEASE_SEAL_TAG"
+          mapfile -t local_tag_refs < <(
+            git for-each-ref --format='%(refname)' refs/tags/
+          )
+          if [ "${#local_tag_refs[@]}" -ne 1 ] \
+            || [ "${local_tag_refs[0]}" != "refs/tags/$RELEASE_SEAL_TAG" ]; then
+            echo "The exact operator release seal was not fetched alone."
+            exit 1
+          fi
+
+          release_seal_ref="refs/tags/$RELEASE_SEAL_TAG"
+          release_seal_tag_type="$(git cat-file -t "$release_seal_ref")"
+          if [ "$release_seal_tag_type" != "tag" ]; then
+            echo "The operator release seal ref is not an annotated tag object."
+            exit 1
+          fi
+          mapfile -t release_seal_tag_objects < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^object //p'
+          )
+          mapfile -t release_seal_tag_types < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^type //p'
+          )
+          mapfile -t release_seal_tag_names < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^tag //p'
+          )
+          mapfile -t release_seal_tagger_headers < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^tagger //p'
+          )
+          mapfile -t release_seal_tagger_identities < <(
+            git cat-file tag "$release_seal_ref" |
+              sed -n 's/^tagger \(Sidney Swift <158200036+sidneyswift@users\.noreply\.github\.com>\) [1-9][0-9]* [+-][0-9]\{4\}$/\1/p'
+          )
+          if [ "${#release_seal_tag_objects[@]}" -ne 1 ] \
+            || [ "${release_seal_tag_objects[0]}" != "$REVIEWED_REPAIR_SHA" ] \
+            || [ "${#release_seal_tag_types[@]}" -ne 1 ] \
+            || [ "${release_seal_tag_types[0]}" != "commit" ] \
+            || [ "${#release_seal_tag_names[@]}" -ne 1 ] \
+            || [ "${release_seal_tag_names[0]}" != "$RELEASE_SEAL_TAG" ] \
+            || [ "${#release_seal_tagger_headers[@]}" -ne 1 ] \
+            || [ "${#release_seal_tagger_identities[@]}" -ne 1 ] \
+            || [ "${release_seal_tagger_identities[0]}" != "$RELEASE_SEAL_TAGGER_IDENTITY" ]; then
+            echo "The annotated seal headers do not bind the exact reviewed commit and tagger."
+            exit 1
+          fi
+          release_seal_target="$(git rev-parse "$release_seal_ref^{}")"
+          if [ "$release_seal_target" != "$REVIEWED_REPAIR_SHA" ]; then
+            echo "The operator release seal does not peel to the reviewed commit."
+            exit 1
+          fi
+          release_seal_tag_object_sha="$(git rev-parse "$release_seal_ref")"
+          if [ "$release_seal_tag_object_sha" != "$remote_release_seal_object" ]; then
+            echo "The fetched operator seal object differs from the exact remote ref."
+            exit 1
+          fi
+
+          mapfile -t release_seal_message_lines < <(
+            git cat-file tag "$release_seal_ref" | awk '
+              !in_message {
+                if ($0 == "") in_message = 1
+                next
+              }
+              $0 == "-----BEGIN SSH SIGNATURE-----" { exit }
+              { print }
+            '
+          )
+          if [ "${#release_seal_message_lines[@]}" -ne 5 ] \
+            || [ "${release_seal_message_lines[0]}" != "contract=homa-issue-606-exact-head-review-v1" ] \
+            || [ "${release_seal_message_lines[1]}" != "issue=https://github.com/sidneyswift/homa/issues/606" ] \
+            || [ "${release_seal_message_lines[2]}" != "reviewed-sha=$REVIEWED_REPAIR_SHA" ] \
+            || [ "${release_seal_message_lines[3]}" != "deploy-containment=GO" ] \
+            || [ "${release_seal_message_lines[4]}" != "close-issue-606=NO-GO" ]; then
+            echo "The operator release seal message is not the exact five-line ruling."
+            exit 1
+          fi
+
+          umask 077
+          allowed_signers_file="$(
+            mktemp "$RUNNER_TEMP/homa-issue-606-allowed-signers.XXXXXX"
+          )"
+          trap 'rm -f "$allowed_signers_file"' EXIT
+          printf '%s namespaces="git" %s\n' \
+            "$RELEASE_SEAL_SIGNER_PRINCIPAL" \
+            "$RELEASE_SEAL_SIGNER_PUBLIC_KEY" \
+            > "$allowed_signers_file"
+          chmod 600 "$allowed_signers_file"
+          if [ "$(stat -c '%a' "$allowed_signers_file")" != "600" ]; then
+            echo "The operator release seal allowed signers file is not owner-only."
+            exit 1
+          fi
+          if ! release_seal_verification="$(
+            git -c gpg.ssh.allowedSignersFile="$allowed_signers_file" \
+              verify-tag "$release_seal_ref" 2>&1
+          )"; then
+            echo "The operator release seal signature is invalid."
+            exit 1
+          fi
+          expected_release_seal_signature="Good \"git\" signature for $RELEASE_SEAL_SIGNER_PRINCIPAL with RSA key $RELEASE_SEAL_SIGNER_FINGERPRINT"
+          mapfile -t release_seal_signature_lines < <(
+            printf '%s\n' "$release_seal_verification" |
+              sed -n '/^Good "git" signature for /p'
+          )
+          if [ "${#release_seal_signature_lines[@]}" -ne 1 ] \
+            || [ "${release_seal_signature_lines[0]}" != "$expected_release_seal_signature" ]; then
+            echo "The operator release seal signer principal or RSA fingerprint is not pinned."
+            exit 1
+          fi
+
+          mapfile -t post_verify_remote_tag_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$RELEASE_SEAL_TAG"
+          )
+          if [ "${#post_verify_remote_tag_refs[@]}" -ne 1 ]; then
+            echo "The operator release seal disappeared after signature verification."
+            exit 1
+          fi
+          read -r post_verify_remote_tag_object post_verify_remote_tag_ref \
+            post_verify_remote_tag_extra <<< "${post_verify_remote_tag_refs[0]}"
+          if [ "$post_verify_remote_tag_object" != "$release_seal_tag_object_sha" ] \
+            || [ "$post_verify_remote_tag_ref" != "refs/tags/$RELEASE_SEAL_TAG" ] \
+            || [ -n "${post_verify_remote_tag_extra:-}" ]; then
+            echo "The remote operator release seal changed after signature verification."
+            exit 1
+          fi
+          {
+            echo "ISSUE_606_RELEASE_SEAL_TAG=$RELEASE_SEAL_TAG"
+            echo "ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA=$release_seal_tag_object_sha"
+            echo "ISSUE_606_RELEASE_SEAL_SIGNER_PRINCIPAL=$RELEASE_SEAL_SIGNER_PRINCIPAL"
+            echo "ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT=$RELEASE_SEAL_SIGNER_FINGERPRINT"
           } >> "$GITHUB_ENV"
 
       - name: Prove the reviewed commit is still the main head
         run: |
-          git fetch --force origin +refs/heads/main:refs/remotes/origin/main
+          git fetch --no-tags --force origin +refs/heads/main:refs/remotes/origin/main
           fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
           remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
           if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
@@ -301,6 +496,22 @@ jobs:
 
       - name: Prove the production target is an allowed starting state
         run: |
+          mapfile -t pre_database_remote_tag_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG"
+          )
+          if [ "${#pre_database_remote_tag_refs[@]}" -ne 1 ]; then
+            echo "The operator release seal disappeared before the first production database connection."
+            exit 1
+          fi
+          read -r pre_database_remote_tag_object pre_database_remote_tag_ref \
+            pre_database_remote_tag_extra <<< "${pre_database_remote_tag_refs[0]}"
+          if [ "$pre_database_remote_tag_object" != "$ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA" ] \
+            || [ "$pre_database_remote_tag_ref" != "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG" ] \
+            || [ -n "${pre_database_remote_tag_extra:-}" ]; then
+            echo "The operator release seal changed before the first production database connection."
+            exit 1
+          fi
           state="$(psql "$MIGRATION_DATABASE_URL" -qXAt -v ON_ERROR_STOP=1 -c "
             select concat_ws('|',
               exists (
@@ -475,19 +686,34 @@ jobs:
           done
           printf '%s\n' "${markers[@]}" | tee -a "$ISSUE_606_EVIDENCE_LOG"
 
-      - name: Re-prove main and reviewed inputs after the no-op
+      - name: Re-prove main and release inputs after the no-op
         env:
-          REVIEWED_REPAIR_SHA: ${{ inputs.reviewed_repair_sha }}
           PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          git fetch --force origin +refs/heads/main:refs/remotes/origin/main
+          git fetch --no-tags --force origin +refs/heads/main:refs/remotes/origin/main
           fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
           remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
           if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
             || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
             || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
             echo "Main moved before issue #606 evidence was finalized."
+            exit 1
+          fi
+          mapfile -t final_remote_tag_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG"
+          )
+          if [ "${#final_remote_tag_refs[@]}" -ne 1 ]; then
+            echo "The operator release seal disappeared before evidence finalization."
+            exit 1
+          fi
+          read -r final_remote_tag_object final_remote_tag_ref final_remote_tag_extra \
+            <<< "${final_remote_tag_refs[0]}"
+          if [ "$final_remote_tag_object" != "$ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA" ] \
+            || [ "$final_remote_tag_ref" != "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG" ] \
+            || [ -n "${final_remote_tag_extra:-}" ]; then
+            echo "The operator release seal changed before evidence finalization."
             exit 1
           fi
           release_binding="$(node scripts/issue-606-production-release-git-contract.mjs \
@@ -540,7 +766,6 @@ jobs:
 
       - name: Emit sanitized immutable evidence hashes
         env:
-          REVIEWED_REPAIR_SHA: ${{ inputs.reviewed_repair_sha }}
           PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
           PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
         run: |
@@ -567,6 +792,12 @@ jobs:
             printf 'evidence_kind=%s\n' "$ISSUE_606_EVIDENCE_KIND"
             printf 'final_main_sha=%s\n' "$GITHUB_SHA"
             printf 'reviewed_repair_sha=%s\n' "$REVIEWED_REPAIR_SHA"
+            printf 'reviewed_repair_tag=%s\n' "$ISSUE_606_RELEASE_SEAL_TAG"
+            printf 'release_seal_tag_object_sha=%s\n' "$ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA"
+            printf 'release_seal_signer_principal=%s\n' "$ISSUE_606_RELEASE_SEAL_SIGNER_PRINCIPAL"
+            printf 'release_seal_signer_fingerprint=%s\n' "$ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT"
+            printf 'release_seal_workflow_contract_sha256=%s\n' "$ISSUE_606_RELEASE_SEAL_WORKFLOW_CONTRACT_SHA256"
+            printf 'release_seal_semantics=repository-owner-operator-seal-plus-public-council-record\n'
             printf 'production_deployment_id=%s\n' "$PRODUCTION_DEPLOYMENT_ID"
             printf 'production_deployed_sha=%s\n' "$PRODUCTION_DEPLOYED_SHA"
             printf 'remote_main_sha=%s\n' "$ISSUE_606_REMOTE_MAIN_SHA"
