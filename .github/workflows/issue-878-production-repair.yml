@@ -11,6 +11,10 @@ on:
         description: Paste the exact READY production deployment commit SHA
         required: true
         type: string
+      reviewed_repair_sha:
+        description: Paste the exact reviewed PR head commit SHA
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -37,11 +41,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 2
 
       - name: Validate authorization and immutable inputs
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
           PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+          REVIEWED_REPAIR_SHA: ${{ inputs.reviewed_repair_sha }}
         run: |
           if [ "$CONFIRMATION" != "APPLY ISSUE 878" ]; then
             echo "Confirmation must exactly match APPLY ISSUE 878."
@@ -49,6 +55,10 @@ jobs:
           fi
           if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
             echo "The confirmed READY production deployment must match this main commit."
+            exit 1
+          fi
+          if ! printf '%s' "$REVIEWED_REPAIR_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "The reviewed repair commit must be one full lowercase Git SHA."
             exit 1
           fi
           if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
@@ -71,6 +81,27 @@ jobs:
           checked_out_sha="$(git rev-parse HEAD)"
           if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
             echo "The checked-out commit does not match the dispatched workflow commit."
+            exit 1
+          fi
+
+          read -r -a merge_line <<< "$(git rev-list --parents -n 1 "$GITHUB_SHA")"
+          if [ "${#merge_line[@]}" -ne 3 ]; then
+            echo "The deployed main commit must be the two-parent merge of the reviewed repair."
+            exit 1
+          fi
+          if [ "${merge_line[2]}" != "$REVIEWED_REPAIR_SHA" ]; then
+            echo "The reviewed repair commit is not the deployed merge's second parent."
+            exit 1
+          fi
+          reviewed_paths=(
+            .github/workflows/issue-878-production-repair.yml
+            scripts/migration-version-check.mjs
+            scripts/issue-878-production-repair.sql
+            supabase/migrations/20260806034000_sandbox_live_auth_fixtures.sql
+            supabase/migrations/20260806035000_family_delete_progress_trigger.sql
+          )
+          if ! git diff --quiet "$REVIEWED_REPAIR_SHA" "$GITHUB_SHA" -- "${reviewed_paths[@]}"; then
+            echo "A reviewed issue #878 release input changed while merging to main."
             exit 1
           fi
           node scripts/migration-version-check.mjs
@@ -146,9 +177,18 @@ jobs:
           mapfile -t repair_markers < <(
             printf '%s\n' "$result" | grep '^ISSUE_878_REPAIR='
           )
-          if [ "${#repair_markers[@]}" -ne 1 ] \
-            || [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=repaired" ]; then
-            echo "The first issue #878 repair connection did not report exactly one repair."
+          if [ "${#repair_markers[@]}" -ne 1 ]; then
+            echo "The first issue #878 connection did not report exactly one marker."
+            exit 1
+          fi
+          if [ "$GITHUB_RUN_ATTEMPT" = "1" ]; then
+            if [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=repaired" ]; then
+              echo "The first issue #878 attempt did not report exactly one repair."
+              exit 1
+            fi
+          elif [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=repaired" ] \
+            && [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=verified_noop" ]; then
+            echo "The recovered issue #878 attempt reported an invalid marker."
             exit 1
           fi
 
@@ -162,5 +202,13 @@ jobs:
           if [ "${#repair_markers[@]}" -ne 1 ] \
             || [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=verified_noop" ]; then
             echo "The fresh issue #878 connection did not report exactly one verified no-op."
+            exit 1
+          fi
+
+      - name: Prove main stayed frozen through the repair
+        run: |
+          remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          if [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "The main branch moved while the issue #878 repair was running."
             exit 1
           fi

@@ -4,13 +4,16 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const databaseUrl = process.env.HOMA_EVAL_DATABASE_URL;
-assert.ok(databaseUrl, "HOMA_EVAL_DATABASE_URL must point at a disposable database");
+assert.ok(
+  databaseUrl,
+  "HOMA_EVAL_DATABASE_URL must point at a disposable database"
+);
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repairPath = join(
   repositoryRoot,
   "scripts",
-  "issue-878-production-repair.sql",
+  "issue-878-production-repair.sql"
 );
 const psql = process.env.HOMA_POSTGRES_BIN
   ? join(process.env.HOMA_POSTGRES_BIN, "psql")
@@ -96,14 +99,18 @@ function runPsql(actions, expectedStatus = 0) {
       env: process.env,
       maxBuffer: 4 * 1024 * 1024,
       timeout: 180_000,
-    },
+    }
   );
 
   if (result.error) throw result.error;
   if (expectedStatus === 0) {
     assert.equal(result.status, 0, result.stderr || "issue 878 repair failed");
   } else {
-    assert.notEqual(result.status, 0, "issue 878 repair unexpectedly succeeded");
+    assert.notEqual(
+      result.status,
+      0,
+      "issue 878 repair unexpectedly succeeded"
+    );
   }
   return {
     rawStdout: result.stdout,
@@ -125,7 +132,7 @@ const reusedSession = runPsql([
 ]);
 assert.deepEqual(
   reusedSession.stdout.filter((line) => line.startsWith("ISSUE_878_REPAIR=")),
-  ["ISSUE_878_REPAIR=repaired", "ISSUE_878_REPAIR=verified_noop"],
+  ["ISSUE_878_REPAIR=repaired", "ISSUE_878_REPAIR=verified_noop"]
 );
 
 const createFamilyExecuteGrants = runPsql([
@@ -143,10 +150,21 @@ const createFamilyExecuteGrants = runPsql([
     order by role.rolname;
   `,
 ]);
-assert.deepEqual(createFamilyExecuteGrants.stdout, ["authenticated", "postgres"]);
+assert.deepEqual(createFamilyExecuteGrants.stdout, [
+  "authenticated",
+  "postgres",
+]);
 
 const freshSession = runPsql(["-f", repairPath]);
 assert.ok(freshSession.stdout.includes("ISSUE_878_REPAIR=verified_noop"));
+
+const recoveredAttempt = runPsql(["-f", repairPath, "-f", repairPath]);
+assert.deepEqual(
+  recoveredAttempt.stdout.filter((line) =>
+    line.startsWith("ISSUE_878_REPAIR=")
+  ),
+  ["ISSUE_878_REPAIR=verified_noop", "ISSUE_878_REPAIR=verified_noop"]
+);
 
 const exactLedger = runPsql([
   "-Atc",
@@ -182,11 +200,14 @@ function reconstructedMigration(version) {
 const reconstructedSandbox = reconstructedMigration("20260806034000");
 const reconstructedDelete = reconstructedMigration("20260806035000");
 assert.match(reconstructedSandbox, new RegExp(`sha256=${sandboxHash}`, "u"));
-assert.match(reconstructedSandbox, /create or replace function public\.create_my_family/iu);
+assert.match(
+  reconstructedSandbox,
+  /create or replace function public\.create_my_family/iu
+);
 assert.match(reconstructedDelete, new RegExp(`sha256=${deleteHash}`, "u"));
 assert.match(
   reconstructedDelete,
-  /create or replace function private\.pause_check_ins_for_removed_member/iu,
+  /create or replace function private\.pause_check_ins_for_removed_member/iu
 );
 
 runPsql([
@@ -234,7 +255,10 @@ runPsql([
   "alter function public.create_my_family(text, text, text) owner to homa_eval;",
 ]);
 const wrongCreateOwner = runPsql(["-f", repairPath], 1);
-assert.match(wrongCreateOwner.stderr, /create_my_family owner is not postgres/u);
+assert.match(
+  wrongCreateOwner.stderr,
+  /create_my_family owner is not postgres/u
+);
 runPsql([
   "-c",
   "alter function public.create_my_family(text, text, text) owner to postgres;",
@@ -247,7 +271,7 @@ runPsql([
 const wrongPauseOwner = runPsql(["-f", repairPath], 1);
 assert.match(
   wrongPauseOwner.stderr,
-  /pause_check_ins_for_removed_member owner is not postgres/u,
+  /pause_check_ins_for_removed_member owner is not postgres/u
 );
 runPsql([
   "-c",
@@ -272,7 +296,10 @@ const residue = runPsql([
     from auth.users;
   `,
 ]);
-assert.ok(residue.stdout.includes("0|0|0"), "rollback-only probes left residue");
+assert.ok(
+  residue.stdout.includes("0|0|0"),
+  "rollback-only probes left residue"
+);
 
 runPsql([
   "-c",
@@ -324,5 +351,5 @@ assert.deepEqual(finalLedger.stdout, [
 ]);
 
 console.log(
-  "Issue 878 repair passed application, repeat, fetched replay, tamper, mixed-state, and rollback-only probes.",
+  "Issue 878 repair passed application, repeat, fetched replay, tamper, mixed-state, and rollback-only probes."
 );
