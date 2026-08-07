@@ -230,6 +230,16 @@ begin
     raise exception 'month_plan_approvals table is absent';
   end if;
 
+  if exists (
+    select 1
+    from pg_catalog.pg_inherits inheritance
+    where inheritance.inhrelid = table_oid
+      or inheritance.inhparent = table_oid
+  ) then
+    raise exception
+      'month_plan_approvals must have no pg_inherits parent or child relationship';
+  end if;
+
   select relation.* into strict table_contract
   from pg_catalog.pg_class relation
   join pg_catalog.pg_namespace namespace

@@ -549,8 +549,90 @@ const partitionChild = runPsql(
 );
 assert.match(
   partitionChild.stderr,
-  /relation metadata differs from the reviewed contract/u
+  /must have no pg_inherits parent or child relationship/u
 );
+
+runPsql([
+  "-c",
+  `create table public.issue_888_inheritance_parent (
+     draft_id uuid,
+     family_id uuid,
+     month_start date,
+     final_revision smallint,
+     revision_history jsonb,
+     approved_at timestamptz
+   );
+   alter table public.month_plan_approvals
+     inherit public.issue_888_inheritance_parent;`,
+]);
+const inheritedTarget = runPsql(["-f", repairPath], 1);
+assert.match(
+  inheritedTarget.stderr,
+  /must have no pg_inherits parent or child relationship/u
+);
+runPsql([
+  "-c",
+  `alter table public.month_plan_approvals
+     no inherit public.issue_888_inheritance_parent;
+   drop table public.issue_888_inheritance_parent;`,
+]);
+assert.deepEqual(repairMarkers(runPsql(["-f", repairPath])), [
+  "ISSUE_888_REPAIR=verified_noop",
+]);
+
+const inheritedResidueFamilyId = randomUUID();
+const inheritedResidueDraftId = randomUUID();
+runPsql([
+  "-c",
+  `insert into public.families (id, name, sandbox)
+     values (
+       '${inheritedResidueFamilyId}',
+       'Issue 888 inherited residue family',
+       true
+     );
+   create table public.issue_888_inherited_receipts ()
+     inherits (public.month_plan_approvals);
+   insert into public.issue_888_inherited_receipts (
+     draft_id,
+     family_id,
+     month_start,
+     final_revision,
+     revision_history
+   ) values (
+     '${inheritedResidueDraftId}',
+     '${inheritedResidueFamilyId}',
+     date '2026-12-01',
+     1,
+     '[]'::jsonb
+   );`,
+]);
+const inheritedChild = runPsql(["-f", repairPath], 1);
+assert.match(
+  inheritedChild.stderr,
+  /must have no pg_inherits parent or child relationship/u
+);
+runPsql([
+  "-c",
+  `delete from public.families where id = '${inheritedResidueFamilyId}';`,
+]);
+assert.deepEqual(
+  runPsql([
+    "-Atc",
+    `select count(*) from only public.issue_888_inherited_receipts
+     where family_id = '${inheritedResidueFamilyId}';`,
+  ]).lines,
+  ["1"],
+  "family deletion unexpectedly removed an unconstrained inherited child row"
+);
+runPsql([
+  "-c",
+  `delete from only public.issue_888_inherited_receipts
+     where family_id = '${inheritedResidueFamilyId}';
+   drop table public.issue_888_inherited_receipts;`,
+]);
+assert.deepEqual(repairMarkers(runPsql(["-f", repairPath])), [
+  "ISSUE_888_REPAIR=verified_noop",
+]);
 
 const tableCollision = runPsql(
   [
@@ -690,5 +772,5 @@ assert.deepEqual(
 );
 
 console.log(
-  "Issue 888 repair passed Supabase-default, application, replay, fresh-session, behavior, tamper, collision, mixed-state, and rollback probes."
+  "Issue 888 repair passed Supabase-default, application, replay, fresh-session, behavior, inheritance, tamper, collision, mixed-state, and rollback probes."
 );

@@ -1,11 +1,24 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import test from "node:test";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 import { parse } from "yaml";
+
+import {
+  ISSUE_888_RELEASE_SENSITIVE_PATHS,
+  validateIssue888ReleaseGitContract,
+} from "./issue-888-production-release-git-contract.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workflowPath = resolve(
@@ -28,6 +41,10 @@ const boundaryPath = resolve(
   repositoryRoot,
   "supabase/migrations/20260806040000_month_plan_approvals_write_boundary.sql"
 );
+const releaseContractPath = resolve(
+  repositoryRoot,
+  "scripts/issue-888-production-release-git-contract.mjs"
+);
 const monthPlanDraftPath = resolve(
   repositoryRoot,
   "apps/web/lib/month-plan-draft.ts"
@@ -42,12 +59,102 @@ const repair = readFileSync(repairPath, "utf8");
 const harness = readFileSync(harnessPath, "utf8");
 const original = readFileSync(originalPath);
 const boundary = readFileSync(boundaryPath);
+const releaseContract = readFileSync(releaseContractPath);
 const monthPlanDraft = readFileSync(monthPlanDraftPath, "utf8");
 const captureLoop = readFileSync(captureLoopPath, "utf8");
 const workflowDocument = parse(workflow);
 
+// Handoff to #876, which lives on another branch. Refresh this exact source
+// hash and required-step list in REQUIRED_REPAIR_WORKFLOWS after #888 lands.
+// PR #890 tracks #888 but must not close it until the production repair and
+// deployed approval, repeat, receipt, isolation, and deletion journeys pass.
+const ISSUE_888_CLEANUP_CONSUMER_HANDOFF = Object.freeze({
+  workflowSourceSha256:
+    "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185",
+  requiredSteps: Object.freeze([
+    "Validate authorization and immutable inputs",
+    "Confirm PostgreSQL client availability",
+    "Prove the reviewed commit is still the main head",
+    "Build a masked production database URL",
+    "Create an owner-only sanitized evidence log",
+    "Prove the production target is an allowed starting state",
+    "Apply or recover the exact repair",
+    "Prove a fresh connection is a verified no-op",
+    "Re-prove main and reviewed inputs after the no-op",
+    "Emit sanitized immutable evidence hashes",
+  ]),
+  requiredDatabaseChecks: Object.freeze([
+    "pg_inherits parent and child rejection",
+    "partition child rejection",
+    "clustered index rejection",
+    "replica identity index rejection",
+  ]),
+});
+
 function sha256(contents) {
   return createHash("sha256").update(contents).digest("hex");
+}
+
+function git(repository, args) {
+  return execFileSync("git", args, {
+    cwd: repository,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+}
+
+function writeRepositoryFile(repository, path, contents) {
+  const absolutePath = join(repository, path);
+  mkdirSync(dirname(absolutePath), { recursive: true });
+  writeFileSync(absolutePath, `${contents}\n`, "utf8");
+}
+
+function syntheticReleaseRepository(alteredPath = null) {
+  const repository = mkdtempSync(
+    join(tmpdir(), "homa-issue-888-git-contract-")
+  );
+  git(repository, ["init", "--quiet"]);
+  git(repository, ["config", "user.name", "Issue 888 test"]);
+  git(repository, ["config", "user.email", "issue-888@invalid.example"]);
+
+  for (const path of ISSUE_888_RELEASE_SENSITIVE_PATHS) {
+    writeRepositoryFile(repository, path, `base:${path}`);
+  }
+  writeRepositoryFile(repository, "unrelated.txt", "base");
+  git(repository, ["add", "."]);
+  git(repository, ["commit", "--quiet", "-m", "base"]);
+  const baseSha = git(repository, ["rev-parse", "HEAD"]);
+
+  git(repository, ["checkout", "--quiet", "-b", "reviewed"]);
+  for (const path of ISSUE_888_RELEASE_SENSITIVE_PATHS) {
+    writeRepositoryFile(repository, path, `reviewed:${path}`);
+  }
+  git(repository, ["add", "."]);
+  git(repository, ["commit", "--quiet", "-m", "reviewed"]);
+  const reviewedSha = git(repository, ["rev-parse", "HEAD"]);
+
+  git(repository, ["checkout", "--quiet", "main"]);
+  assert.equal(git(repository, ["rev-parse", "HEAD"]), baseSha);
+  writeRepositoryFile(
+    repository,
+    "unrelated.txt",
+    "main changed independently"
+  );
+  git(repository, ["add", "unrelated.txt"]);
+  git(repository, ["commit", "--quiet", "-m", "main"]);
+  git(repository, ["merge", "--quiet", "--no-ff", "reviewed", "-m", "merge"]);
+
+  if (alteredPath) {
+    writeRepositoryFile(repository, alteredPath, `altered:${alteredPath}`);
+    git(repository, ["add", alteredPath]);
+    git(repository, ["commit", "--quiet", "--amend", "--no-edit"]);
+  }
+
+  return {
+    repository,
+    reviewedSha,
+    finalSha: git(repository, ["rev-parse", "HEAD"]),
+  };
 }
 
 test("reviewed migrations stay byte-exact and executable", () => {
@@ -67,6 +174,60 @@ test("reviewed migrations stay byte-exact and executable", () => {
   );
 });
 
+test("release Git contract accepts an exact reviewed merge with unrelated main changes", () => {
+  assert.deepEqual(ISSUE_888_RELEASE_SENSITIVE_PATHS, [
+    ".github/workflows/issue-888-production-repair.yml",
+    "scripts/issue-888-production-release-git-contract.mjs",
+    "scripts/issue-888-production-repair.sql",
+    "scripts/migration-version-check.mjs",
+    "supabase/migrations/20260801201500_month_plan_approvals.sql",
+    "supabase/migrations/20260806040000_month_plan_approvals_write_boundary.sql",
+  ]);
+  const fixture = syntheticReleaseRepository();
+  try {
+    const result = validateIssue888ReleaseGitContract({
+      repositoryRoot: fixture.repository,
+      finalSha: fixture.finalSha,
+      reviewedSha: fixture.reviewedSha,
+    });
+    assert.match(result.sensitiveManifestSha256, /^[0-9a-f]{64}$/u);
+    assert.notEqual(result.finalTreeSha, result.reviewedTreeSha);
+  } finally {
+    rmSync(fixture.repository, { recursive: true, force: true });
+  }
+});
+
+test("release Git contract rejects a correct second parent with any altered sensitive input", () => {
+  for (const alteredPath of ISSUE_888_RELEASE_SENSITIVE_PATHS) {
+    const fixture = syntheticReleaseRepository(alteredPath);
+    try {
+      const parents = git(fixture.repository, [
+        "show",
+        "-s",
+        "--format=%P",
+        fixture.finalSha,
+      ]).split(/\s+/u);
+      assert.equal(parents[1], fixture.reviewedSha);
+      assert.throws(
+        () =>
+          validateIssue888ReleaseGitContract({
+            repositoryRoot: fixture.repository,
+            finalSha: fixture.finalSha,
+            reviewedSha: fixture.reviewedSha,
+          }),
+        (error) => {
+          assert.ok(error instanceof Error);
+          assert.match(error.message, /differs between the reviewed head/u);
+          assert.ok(error.message.includes(alteredPath));
+          return true;
+        }
+      );
+    } finally {
+      rmSync(fixture.repository, { recursive: true, force: true });
+    }
+  }
+});
+
 test("workflow is owner-only, production-pinned, and hashes inputs before connecting", () => {
   const apply = workflowDocument.jobs.apply;
   assert.equal(
@@ -75,6 +236,8 @@ test("workflow is owner-only, production-pinned, and hashes inputs before connec
   );
   assert.equal(apply.environment, "production");
   assert.equal(apply["timeout-minutes"], 10);
+  assert.equal(workflowDocument.permissions.actions, "read");
+  assert.equal(workflowDocument.permissions.contents, "read");
   assert.equal(
     workflowDocument.concurrency.group,
     "production-issue-888-repair-v2"
@@ -95,20 +258,43 @@ test("workflow is owner-only, production-pinned, and hashes inputs before connec
   assert.equal(apply.steps[0].with.ref, "${{ github.sha }}");
   assert.equal(apply.steps[0].with["fetch-depth"], 0);
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 888/u);
-  assert.match(workflow, /GITHUB_RUN_ATTEMPT.*1/u);
-  assert.match(workflow, /refuses workflow reruns/u);
+  assert.match(workflow, /GITHUB_RUN_ATTEMPT[\s\S]*positive integer/u);
+  assert.match(
+    workflow,
+    /actions\/runs\/\$GITHUB_RUN_ID\/attempts\/\$previous_attempt/u
+  );
+  assert.match(workflow, /cancelled\|failure\|timed_out/u);
+  assert.match(
+    workflow,
+    /Only an unsuccessful prior attempt may enter recovery/u
+  );
+  assert.match(workflow, /previous_attempt_conclusion=%s/u);
+  assert.match(workflow, /GITHUB_RUN_ATTEMPT" = "1/u);
+  assert.match(workflow, /Attempt 1 requires the reviewed absent/u);
+  assert.match(workflow, /recovery attempt requires the reviewed complete/u);
+  assert.match(workflow, /repaired-and-verified-noop/u);
+  assert.match(workflow, /verified-existing-and-noop/u);
   assert.match(workflow, /REVIEWED_REPAIR_SHA.*reviewed_repair_sha/u);
   assert.match(workflow, /PRODUCTION_DEPLOYED_SHA.*production_deployed_sha/u);
   assert.match(workflow, /PRODUCTION_DEPLOYED_SHA.*GITHUB_SHA/u);
-  assert.match(workflow, /merge_parents\[1\].*REVIEWED_REPAIR_SHA/u);
-  assert.match(workflow, /git merge-base --is-ancestor/u);
+  assert.match(
+    workflow,
+    /issue-888-production-release-git-contract\.mjs[\s\S]*--final-sha="\$GITHUB_SHA"[\s\S]*--reviewed-sha="\$REVIEWED_REPAIR_SHA"/u
+  );
+  assert.match(workflow, new RegExp(sha256(releaseContract), "u"));
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
   assert.match(workflow, /GITHUB_REPOSITORY_OWNER.*sidneyswift/u);
   assert.match(workflow, /GITHUB_REF_NAME.*main/u);
+  assert.match(workflow, /repository\.default_branch.*main/u);
   assert.match(workflow, /git rev-parse HEAD/u);
   assert.match(workflow, /git ls-remote --exit-code origin refs\/heads\/main/u);
   assert.match(workflow, /fetched_main_sha.*GITHUB_SHA/u);
   assert.match(workflow, /remote_main_sha.*GITHUB_SHA/u);
+  assert.match(workflow, /Re-prove main and reviewed inputs after the no-op/u);
+  assert.ok(
+    workflow.indexOf("Re-prove main and reviewed inputs after the no-op") <
+      workflow.indexOf("Emit sanitized immutable evidence hashes")
+  );
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
   assert.match(workflow, /cancel-in-progress: false/u);
   assert.doesNotMatch(workflow, /actions\/checkout@v\d/u);
@@ -123,22 +309,84 @@ test("workflow is owner-only, production-pinned, and hashes inputs before connec
     workflow.match(/-f scripts\/issue-888-production-repair\.sql/g)?.length,
     2
   );
-  assert.match(
-    workflow,
-    /repair_markers\[0\].*ISSUE_888_REPAIR=repaired[\s\S]*fresh connection[\s\S]*repair_markers\[0\].*ISSUE_888_REPAIR=verified_noop/u
-  );
+  const firstConnection = apply.steps.find(
+    (step) => step.name === "Apply or recover the exact repair"
+  )?.run;
+  assert.match(firstConnection, /ISSUE_888_EXPECTED_FIRST_MARKER/u);
+  assert.match(firstConnection, /repair_markers/u);
+  const secondConnection = apply.steps.find(
+    (step) => step.name === "Prove a fresh connection is a verified no-op"
+  )?.run;
+  assert.match(secondConnection, /ISSUE_888_REPAIR=verified_noop/u);
+  assert.match(secondConnection, /repair_markers/u);
   assert.match(workflow, /fresh connection is a verified no-op/u);
   assert.match(workflow, /ISSUE_888_SANITIZED_LOG_SHA256=/u);
   assert.match(workflow, /ISSUE_888_RECEIPT_SHA256=/u);
   assert.match(workflow, /contract=homa-issue-888-production-repair-v1/u);
   assert.match(workflow, /workflow_sha256=/u);
   assert.match(workflow, /run_attempt=%s/u);
+  assert.match(workflow, /evidence_kind=%s/u);
   assert.match(workflow, /reviewed_repair_sha=%s/u);
   assert.match(workflow, /production_deployed_sha=%s/u);
   assert.match(workflow, /remote_main_sha=%s/u);
+  assert.match(workflow, /sensitive_manifest_sha256=%s/u);
   assert.match(workflow, /sanitized_log_sha256=%s/u);
   assert.doesNotMatch(workflow, /echo "\$result"/u);
   assert.doesNotMatch(workflow, /supabase\s+db\s+push/u);
+});
+
+test("cleanup consumer handoff pins the final workflow and adversarial database checks", () => {
+  assert.equal(
+    sha256(workflow),
+    ISSUE_888_CLEANUP_CONSUMER_HANDOFF.workflowSourceSha256
+  );
+  const stepNames = workflowDocument.jobs.apply.steps.map((step) => step.name);
+  for (const requiredStep of ISSUE_888_CLEANUP_CONSUMER_HANDOFF.requiredSteps) {
+    assert.equal(
+      stepNames.filter((stepName) => stepName === requiredStep).length,
+      1,
+      `cleanup consumer step is not exact: ${requiredStep}`
+    );
+  }
+  for (const requiredCheck of [
+    /must have no pg_inherits parent or child relationship/u,
+    /table_contract\.relispartition/u,
+    /primary_index_contract\.indisclustered/u,
+    /family_index_contract\.indisclustered/u,
+    /primary_index_contract\.indisreplident/u,
+    /family_index_contract\.indisreplident/u,
+  ]) {
+    assert.match(repair, requiredCheck);
+  }
+  assert.equal(
+    ISSUE_888_CLEANUP_CONSUMER_HANDOFF.requiredDatabaseChecks.length,
+    4
+  );
+});
+
+test("workflow state matrix separates first repair from cancellation recovery", () => {
+  const startingStateStep = workflowDocument.jobs.apply.steps.find(
+    (step) =>
+      step.name === "Prove the production target is an allowed starting state"
+  )?.run;
+  assert.ok(startingStateStep);
+  const recoveryBoundary = startingStateStep.indexOf("else");
+  assert.ok(recoveryBoundary > 0);
+  const firstAttempt = startingStateStep.slice(0, recoveryBoundary);
+  const recoveryAttempt = startingStateStep.slice(recoveryBoundary);
+  assert.match(firstAttempt, /true\|true\|true\|true\|true\|true\|true/u);
+  assert.match(firstAttempt, /ISSUE_888_REPAIR=repaired/u);
+  assert.match(firstAttempt, /repaired-and-verified-noop/u);
+  assert.doesNotMatch(firstAttempt, /verified-existing-and-noop/u);
+  assert.match(
+    recoveryAttempt,
+    /false\|false\|false\|false\|false\|true\|true/u
+  );
+  assert.match(recoveryAttempt, /ISSUE_888_REPAIR=verified_noop/u);
+  assert.match(recoveryAttempt, /verified-existing-and-noop/u);
+  assert.doesNotMatch(recoveryAttempt, /ISSUE_888_REPAIR=repaired/u);
+  assert.match(firstAttempt, /exit 1/u);
+  assert.match(recoveryAttempt, /exit 1/u);
 });
 
 test("repair applies only the reviewed pair inside one bounded transaction", () => {
@@ -199,6 +447,13 @@ test("ledger arrays retain all executable statements and source hashes", () => {
 test("repair verifies the complete schema, policy, index, and dynamic ACL contract", () => {
   assert.match(repair, /columns differ from the reviewed six-column contract/u);
   assert.match(repair, /table_contract\.relispartition/u);
+  assert.match(repair, /pg_catalog\.pg_inherits inheritance/u);
+  assert.match(repair, /inheritance\.inhrelid = table_oid/u);
+  assert.match(repair, /inheritance\.inhparent = table_oid/u);
+  assert.match(
+    repair,
+    /must have no pg_inherits parent or child relationship/u
+  );
   assert.match(repair, /exactly five reviewed constraints/u);
   assert.match(repair, /confdeltype = 'c'/u);
   assert.match(repair, /exactly two reviewed indexes/u);
@@ -260,6 +515,12 @@ test("disposable harness covers behavior, tampering, collisions, and rollback", 
   assert.match(harness, /clustered index/u);
   assert.match(harness, /replica identity index/u);
   assert.match(harness, /issue_888_partition_parent/u);
+  assert.match(harness, /issue_888_inheritance_parent/u);
+  assert.match(harness, /issue_888_inherited_receipts/u);
+  assert.match(
+    harness,
+    /family deletion unexpectedly removed an unconstrained inherited child row/u
+  );
   assert.match(harness, /migration ledger is mixed/u);
   assert.match(harness, /relation state is mixed/u);
   assert.match(harness, /injected mid-migration failure/u);
