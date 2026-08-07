@@ -40,7 +40,7 @@ test("the trial CTA states the card terms before the click", () => {
   assert.match(HERO_COPY.primaryActionNote, /from \$19 a month/i);
   assert.doesNotMatch(HERO_COPY.primaryActionNote, /\$199/);
   assert.match(HERO_COPY.primaryActionNote, /cancel before the first charge/i);
-  assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19, 49]);
+  assert.deepEqual(MONTHLY_MEMBERSHIP_PRICES, [19]);
 });
 
 test("metadata and structured offers reuse the catalog-derived landing contract", () => {
@@ -53,7 +53,7 @@ test("metadata and structured offers reuse the catalog-derived landing contract"
 test("the platform strip states only verified access modes", () => {
   assert.deepEqual(
     PLATFORM_ITEMS.map(({ label }) => label),
-    ["Text message", "Web chat", "Phone friendly"],
+    ["Web chat on your phone or computer"],
   );
 });
 
@@ -75,10 +75,7 @@ test("the landing states the current practice-page age boundary before signup", 
 test("the landing shows every purchasable membership before the final signup ask", () => {
   assert.deepEqual(
     MEMBERSHIP_ITEMS.map(({ name, monthlyPrice, annualPrice }) => ({ name, monthlyPrice, annualPrice })),
-    [
-      { name: "Homa", monthlyPrice: 19, annualPrice: 182 },
-      { name: "Homa Plus", monthlyPrice: 49, annualPrice: 470 },
-    ],
+    [{ name: "Homa", monthlyPrice: 19, annualPrice: 182 }],
   );
   assert.match(LANDING_SECTION_COPY.memberships.headline, /whole family/i);
   assert.match(LANDING_SECTION_COPY.memberships.body, /no extra cost/i);
@@ -86,15 +83,19 @@ test("the landing shows every purchasable membership before the final signup ask
   assert.match(MEMBERSHIP_NOTE, /stop renewal anytime/i);
 });
 
-test("the landing names built Plus services and keeps unbuilt Max out of checkout", () => {
-  const plus = MEMBERSHIP_ITEMS.find(({ tier }) => tier === "plus");
-
-  assert.ok(plus);
-  assert.equal(MEMBERSHIP_ITEMS.some(({ tier }) => tier === "elite"), false);
-  assert.match(plus.body, /phone number for texts and calls/i);
-  assert.match(plus.body, /curriculum file uploads/i);
-  assert.match(plus.body, /weekly plan/i);
+test("the landing keeps unavailable plans and channels out of the offer", () => {
+  assert.deepEqual(MEMBERSHIP_ITEMS.map(({ tier }) => tier), ["regular"]);
+  assert.deepEqual(PLATFORM_ITEMS.map(({ kind }) => kind), ["web"]);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /COMING_SOON_MEMBERSHIP|Homa Max|Coming soon/u);
+});
+
+test("the weekly plan describes the base-plan setup without a Plus promise", () => {
+  const plan = CAPABILITY_ITEMS.find(({ id }) => id === "plan");
+
+  assert.ok(plan);
+  assert.match(plan.body, /Tell Homa what each child studies and when/u);
+  assert.match(plan.body, /move a lesson without rebuilding the plan/u);
+  assert.doesNotMatch(plan.body, /Homa Plus|upload/iu);
 });
 
 test("the fictional product example proves Homa can plan for an older child", () => {

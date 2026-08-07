@@ -81,15 +81,16 @@ test("a family with no created_at is judged on her plan, never grandfathered", (
   );
 });
 
-test("the refusal lines offer a door and never apologise or command", () => {
-  for (const line of [CHANNEL_GATE_SMS_LINE, CHANNEL_GATE_VOICE_LINE]) {
-    // Reassure before inform: what is still true comes before the limit.
-    assert.match(line, /waiting for you on the web/i);
-    assert.match(line, /Homa Plus/);
-    assert.match(line, /whenever you like/i);
-    // Offers never commands, and nothing broke, so nothing apologises.
+test("the refusal lines name the limit before the available web path", () => {
+  for (const [prefix, line] of [
+    ["Texting with Homa isn't available on your plan.", CHANNEL_GATE_SMS_LINE],
+    ["Calling Homa isn't available on your plan.", CHANNEL_GATE_VOICE_LINE],
+  ] as const) {
+    assert.ok(line.startsWith(prefix));
+    assert.match(line, /Open Homa in your phone's browser to keep going\.$/u);
+    assert.doesNotMatch(line, /Homa Plus|settings|right now/iu);
     assert.doesNotMatch(line, /\bsorry\b|\bunfortunately\b|\bcannot\b|\bcan't\b/i);
-    assert.doesNotMatch(line, /\bmust\b|\bneed to\b|\bupgrade\b/i);
+    assert.doesNotMatch(line, /\bmust\b|\bneed to\b|\bupgrade\b/iu);
     assert.doesNotMatch(line, /—/);
   }
 });

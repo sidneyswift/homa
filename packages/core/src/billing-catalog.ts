@@ -33,7 +33,7 @@ export interface PlanDefinition {
  */
 export const HOMA_PLANS: readonly PlanDefinition[] = [
   { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182, salesState: "available" },
-  { tier: "plus", name: "Homa Plus", monthlyUsd: 49, annualUsd: 470, salesState: "available" },
+  { tier: "plus", name: "Homa Plus", monthlyUsd: 49, annualUsd: 470, salesState: "coming_soon" },
   { tier: "elite", name: "Homa Max", monthlyUsd: 199, annualUsd: 1910, salesState: "coming_soon" },
 ];
 

@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 
-import type { WallDoor } from "@homa/core";
+import { PURCHASABLE_HOMA_PLANS, type WallDoor } from "@homa/core";
 
 import type { BillingPeriod, PlanTier, TierCheckout } from "../../lib/billing/wall-types";
 import { sendWallBeacon } from "./wall-beacon";
@@ -19,7 +19,7 @@ import {
   tierPriceUnit,
 } from "./wall-copy";
 
-const TIER_ORDER: PlanTier[] = ["regular", "plus", "elite"];
+const TIER_ORDER: PlanTier[] = PURCHASABLE_HOMA_PLANS.map(({ tier }) => tier);
 
 /**
  * The tier picker: one row per available plan and one button
