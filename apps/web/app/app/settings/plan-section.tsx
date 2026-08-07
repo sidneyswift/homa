@@ -15,9 +15,9 @@ import { SectionHeading } from "./section-heading";
  * Copy is reused verbatim, never rewritten and never edited in flight.
  * TIER_NAMES and tierDelta are the sanctioned per-tier promises and they
  * carry rulings about what may and may not be claimed: the Plus row's
- * exact words were argued down to eight, and the reason email is missing
- * from them is a line-wrap decision recorded above the string. String
- * surgery here would quietly reopen all of that.
+ * exact words name the channels and the curriculum-planning outcome from
+ * the later family-library tier ruling. String surgery here would quietly
+ * reopen that contract.
  *
  * If Plus becomes purchasable again, the checkout page states the charge
  * before she commits.

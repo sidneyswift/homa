@@ -143,8 +143,7 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
 const LANDING_MEMBERSHIP_BODIES: Readonly<Record<PlanTier, string>> = {
   regular:
     "Weekly plans, practice pages, progress reports, saved printables, teaching-hour records, and web chat.",
-  plus:
-    "Everything in Homa, plus a phone number for texts and calls, and curriculum file uploads for the weekly plan.",
+  plus: tierDescription("plus"),
   elite: tierDescription("elite"),
 };
 

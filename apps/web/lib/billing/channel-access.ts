@@ -172,6 +172,14 @@ export async function familyHasChannel(familyId: string | null): Promise<boolean
 export const CHANNEL_GATE_SMS_LINE =
   "Texting with Homa isn't available on your plan. You can keep going with Homa in your phone's browser.";
 
+/** Email needs its own words and a direct web action. Reusing the SMS
+ *  sentence here tells a parent who emailed Homa that she texted, then
+ *  makes the real plan boundary look like a broken inbox. */
+export const CHANNEL_GATE_EMAIL_SUBJECT = "Keep going with Homa on the web";
+
+export const CHANNEL_GATE_EMAIL_LINE =
+  "Emailing Homa isn't available on your plan. Your conversation can keep going with Homa on the web.";
+
 /** The same fact for a caller, shortened: she is holding a phone to her
  *  ear and cannot re-read a sentence. */
 export const CHANNEL_GATE_VOICE_LINE =

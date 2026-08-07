@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  CHANNEL_GATE_EMAIL_LINE,
+  CHANNEL_GATE_EMAIL_SUBJECT,
   CHANNEL_GATE_SMS_LINE,
   CHANNEL_GATE_VOICE_LINE,
   channelAccessDecision,
@@ -84,13 +87,30 @@ test("a family with no created_at is judged on her plan, never grandfathered", (
 test("the refusal lines name the limit before the available web path", () => {
   for (const [prefix, line] of [
     ["Texting with Homa isn't available on your plan.", CHANNEL_GATE_SMS_LINE],
+    ["Emailing Homa isn't available on your plan.", CHANNEL_GATE_EMAIL_LINE],
     ["Calling Homa isn't available on your plan.", CHANNEL_GATE_VOICE_LINE],
   ] as const) {
     assert.ok(line.startsWith(prefix));
-    assert.match(line, /You can keep going with Homa in your phone's browser\.$/u);
+    assert.match(line, /keep going with Homa (?:in your phone's browser|on the web)\.$/u);
     assert.doesNotMatch(line, /Homa Plus|settings|right now/iu);
     assert.doesNotMatch(line, /\bsorry\b|\bunfortunately\b|\bcannot\b|\bcan't\b/i);
     assert.doesNotMatch(line, /\bmust\b|\bneed to\b|\bupgrade\b/iu);
     assert.doesNotMatch(line, /—/);
   }
+});
+
+test("the email denial uses email words and a direct web action", async () => {
+  const source = await readFile(
+    new URL("../../agent/channels/email.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.equal(CHANNEL_GATE_EMAIL_SUBJECT, "Keep going with Homa on the web");
+  assert.match(source, /CHANNEL_GATE_EMAIL_SUBJECT/u);
+  assert.match(source, /CHANNEL_GATE_EMAIL_LINE/u);
+  assert.match(source, /label: "Open Homa"/u);
+  assert.match(source, /siteUrl\(\)[\s\S]*?\/app/u);
+  assert.match(source, /because you emailed from your family's address/u);
+  assert.doesNotMatch(source, /CHANNEL_GATE_SMS_LINE/u);
+  assert.doesNotMatch(CHANNEL_GATE_EMAIL_LINE, /\btext(?:ing)?\b/iu);
 });
