@@ -7,6 +7,10 @@ on:
         description: Type APPLY ISSUE 878
         required: true
         type: string
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -37,9 +41,14 @@ jobs:
       - name: Validate authorization and immutable inputs
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
         run: |
           if [ "$CONFIRMATION" != "APPLY ISSUE 878" ]; then
             echo "Confirmation must exactly match APPLY ISSUE 878."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The confirmed READY production deployment must match this main commit."
             exit 1
           fi
           if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then

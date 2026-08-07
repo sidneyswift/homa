@@ -49,6 +49,12 @@ test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
     "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
   );
   assert.match(workflow, /confirmation[\s\S]*APPLY ISSUE 878/u);
+  assert.equal(
+    workflowDocument.on.workflow_dispatch.inputs.production_deployed_sha.required,
+    true,
+  );
+  assert.match(workflow, /PRODUCTION_DEPLOYED_SHA.*production_deployed_sha/u);
+  assert.match(workflow, /PRODUCTION_DEPLOYED_SHA.*GITHUB_SHA/u);
   assert.match(workflow, /GITHUB_REPOSITORY.*sidneyswift\/homa/u);
   assert.match(workflow, /GITHUB_REPOSITORY_OWNER.*sidneyswift/u);
   assert.match(workflow, /GITHUB_REF.*refs\/heads\/main/u);
