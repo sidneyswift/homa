@@ -131,7 +131,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "4a55fecc5d0f7beb503e8f964232563034e71e0ce5655a47200464f103d76d81"
+      "scopedInputFingerprint": "152e5fd6eaef3fddc4846683b40f3690ac5e06ac0b5cf2876c14726c29bf161f"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -323,7 +323,7 @@
         "A missing or failed code never silently reports a signed-in state.",
         "The authenticated Supabase session remains the only authority for family identity."
       ],
-      "scopedInputFingerprint": "ba0496c36e6995eb80ae63beeea8ca0bd7f1f3f24ccaeb8c9596feee02da2654"
+      "scopedInputFingerprint": "37d3f7225a44b353ffcf0decd75bbf832d8739d0bccce3d0fdd86cd6a7d543d9"
     },
     {
       "id": "apple-identity",
@@ -509,7 +509,7 @@
         "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
         "Provider outages never become a guessed paid state and never cross family boundaries."
       ],
-      "scopedInputFingerprint": "899bfb441680d217ef4165e018cd67e0cf99a2a3651ace8461d79d54cfc34fd6"
+      "scopedInputFingerprint": "781912ba9157b2d13d73898457dd55648ea0048b20752c3a578f4866f073e17a"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -530,7 +530,7 @@
       },
       {
         "path": "apps/mobile/src/components/billing-gate.tsx",
-        "sha256": "e2155bc7841725f253906b80d6c0d91509ca51dc8bb8f1cd09871a0c97402322"
+        "sha256": "866952b6236a8a2fa0e2e966235c4cb8d37a6c15b47bf0468539abacd918b413"
       },
       {
         "path": "apps/mobile/src/features/auth/apple-sign-in.ts",
@@ -578,7 +578,7 @@
       },
       {
         "path": "apps/web/app/app/settings/plan-section.tsx",
-        "sha256": "062ae10551c7c68635cf1a837e8d8d26393b052ab4f83463374ff6206db773c7"
+        "sha256": "d22cccdbd983d92e6df742947d38fce616b6dafabe94c8059aebb321860cb801"
       },
       {
         "path": "apps/web/app/auth/callback/route.ts",
@@ -594,7 +594,7 @@
       },
       {
         "path": "apps/web/app/onboarding/parent-step.tsx",
-        "sha256": "f9959807dd34c798318c4d6a1ffb112ed9f53dca291edfa52adb3d6b154a74ee"
+        "sha256": "6e0f65355172e7592a908b20e1ab1d2d4a08d7d4e2bcd7e0065208030c675297"
       },
       {
         "path": "apps/web/app/signin/signin-form.tsx",
@@ -602,7 +602,7 @@
       },
       {
         "path": "apps/web/components/billing/wall-copy.ts",
-        "sha256": "2f9f0c06c52414752f2d8d512fd316aa2a606bbc5a4075ea32c9940a1401f662"
+        "sha256": "0e51b79d3b3681b3cbe070fc53a722dd5820659af85588f4a7b8d60f8ee0d8fc"
       },
       {
         "path": "apps/web/lib/billing/apple-verify.ts",
@@ -629,6 +629,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "45aa37708bc1ac21c503da05c7cc4ffc3c6d0a3b98f8bc740efe850ef774a787"
+    "sourceFingerprint": "ac1664be9526bee7f5f6b44eb1e9acc06ca7d171cd9719101ba684c6289d8cf0"
   }
 }

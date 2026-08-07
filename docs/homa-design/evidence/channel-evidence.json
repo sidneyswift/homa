@@ -13,7 +13,7 @@
         "selector": "email",
         "surfaceCount": 16,
         "surfaceIdsFingerprint": "c03430691117eaf8004c6104aceb718714f6c89f33ff40b66aabbe8a22cd58e1",
-        "scopedInputFingerprint": "56e10bb07031267a6f608ecfd79b978f978e2d1d37de7eb36c9c52acdca384cb"
+        "scopedInputFingerprint": "21ea7c0b0603c9ec0ed7725b90d64854a956e3dabd12caeda8e08605f3814d32"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/email.json",
       "fixtureChecksum": "6efc3722530e61905087bcf6f788c632522930ecd032ef7d056726853186bb4e",
