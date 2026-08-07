@@ -30,6 +30,7 @@ function scheduledTask(scheduleId: string): DueFamilyTask {
     phoneNumbers: [],
     email: "parent@example.test",
     recipientMemberUserId: adultAId,
+    sourceOfferDeliveryId: null,
   };
 }
 

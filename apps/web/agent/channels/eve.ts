@@ -12,6 +12,11 @@ import {
   canonicalInboundAuthAttributes,
 } from "../../lib/conversation-continuity/canonical-inbound";
 import {
+  createCachedRouteAuth,
+  protectEveSessionRoutes,
+} from "../../lib/conversation-continuity/eve-session-channel";
+import { eveSessionOwnerStore } from "../../lib/conversation-continuity/eve-session-owners";
+import {
   loadRecentContinuityForMember,
   resolveInboundContinuity,
   resolvedContinuityAttributes,
@@ -202,8 +207,14 @@ function supabaseAuth(): AuthFn<Request> {
   };
 }
 
-export default eveChannel({
-  auth: [supabaseAuth(), vercelOidc(), evalFamilyFixtureAuth(localDev())],
+const eveRouteAuth = createCachedRouteAuth([
+  supabaseAuth(),
+  vercelOidc(),
+  evalFamilyFixtureAuth(localDev()),
+]);
+
+const channel = eveChannel({
+  auth: eveRouteAuth.auth,
   async onMessage(ctx, message) {
     const auth = defaultEveAuth(ctx);
     if (!auth) return { auth };
@@ -388,4 +399,9 @@ export default eveChannel({
       return { auth, context: turnContext };
     }
   },
+});
+
+export default protectEveSessionRoutes(channel, {
+  resolveAuth: eveRouteAuth.resolve,
+  owners: eveSessionOwnerStore,
 });

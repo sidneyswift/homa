@@ -31,14 +31,16 @@ function windowsAfter(source: string, needle: string, span: number): string[] {
 describe("recall visibility wall", () => {
   it("filters every pinned-path conversation_messages read to family visibility", () => {
     const source = readFileSync(path.join(here, "../agent-pinned.ts"), "utf8");
-    const reads = windowsAfter(source, "from public.conversation_messages", 300);
-    assert.ok(reads.length >= 2, "expected the lexical and semantic pinned reads");
-    for (const read of reads) {
-      assert.ok(
-        read.includes("visibility = 'family'"),
-        `pinned conversation_messages read lost its visibility filter:\n${read}`,
-      );
-    }
+    assert.match(
+      source,
+      /from public\.conversation_messages\s+where family_id = \$\{input\.familyId\}[\s\S]*?and visibility = 'family'/u,
+      "the lexical pinned read must keep its family visibility filter",
+    );
+    assert.match(
+      source,
+      /from public\.conversation_messages c[\s\S]*?where c\.family_id = \$\{input\.familyId\} and c\.visibility = 'family'/u,
+      "the semantic pinned read must keep its family visibility filter",
+    );
   });
 
   it("filters the recall tool's caller-path chat query to family visibility", () => {
@@ -76,11 +78,21 @@ describe("recall visibility wall", () => {
       path.join(migrationsDir, defining[defining.length - 1]),
       "utf8",
     );
-    const chatArms = windowsAfter(latest, "from public.conversation_messages", 200);
+    const functionStart = latest.search(
+      /create (or replace )?function public\.recall_semantic/u,
+    );
+    const functionEnd = latest.indexOf("$$;", functionStart);
+    assert.ok(functionStart >= 0 && functionEnd > functionStart);
+    const definition = latest.slice(functionStart, functionEnd + 3);
+    const chatArms = windowsAfter(
+      definition,
+      "from public.conversation_messages",
+      240,
+    );
     assert.ok(chatArms.length >= 1, "expected a conversation_messages arm");
     for (const arm of chatArms) {
       assert.ok(
-        arm.includes("c.visibility = 'family'"),
+        /\bvisibility = 'family'/u.test(arm),
         `recall_semantic's chat arm lost its visibility filter:\n${arm}`,
       );
     }

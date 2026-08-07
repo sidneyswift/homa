@@ -53,6 +53,8 @@ export async function claimReplyResolutionWithTransaction(
   tx: TransactionSql,
   input: {
     familyId: string;
+    memberUserId: string | null;
+    destinationHash: string | null;
     deliveryId: string;
     messageId: string;
     replyToMessageId: string | null;
@@ -70,6 +72,40 @@ export async function claimReplyResolutionWithTransaction(
         classifier_version = ${input.classifierVersion ?? null}
     where delivery_id = ${input.deliveryId}
       and family_id = ${input.familyId} and state = 'open'
+      and ${input.memberUserId}::uuid is not null
+      and exists (
+        select 1
+        from public.family_members current_member
+        where current_member.family_id = ${input.familyId}
+          and current_member.user_id = ${input.memberUserId}
+      )
+      and exists (
+        select 1
+        from public.conversation_deliveries claimed_delivery
+        where claimed_delivery.id = conversation_open_loops.delivery_id
+          and claimed_delivery.family_id = conversation_open_loops.family_id
+          and (
+            claimed_delivery.recipient_member_user_id = ${input.memberUserId}
+            or (
+              claimed_delivery.recipient_member_user_id is null
+              and ${input.destinationHash}::text is not null
+              and claimed_delivery.destination_hash = ${input.destinationHash}
+            )
+          )
+          and (
+            ${input.replyToMessageId}::uuid is null
+            or claimed_delivery.message_id = ${input.replyToMessageId}
+          )
+          and exists (
+            select 1
+            from public.conversation_messages reply_message
+            where reply_message.id = ${input.messageId}
+              and reply_message.family_id = claimed_delivery.family_id
+              and reply_message.episode_id = claimed_delivery.episode_id
+              and reply_message.role = 'user'
+              and reply_message.member_user_id = ${input.memberUserId}
+          )
+      )
     returning id
   `;
   if (!claimedLoop[0]) return false;
@@ -81,12 +117,21 @@ export async function claimReplyResolutionWithTransaction(
         updated_at = now()
     where id = ${input.deliveryId} and family_id = ${input.familyId}
       and replied_at is null
+      and (
+        recipient_member_user_id = ${input.memberUserId}
+        or (
+          recipient_member_user_id is null
+          and ${input.destinationHash}::text is not null
+          and destination_hash = ${input.destinationHash}
+        )
+      )
   `;
   await tx`
     update public.conversation_messages
     set reply_to_message_id = ${input.replyToMessageId},
         replied_delivery_id = ${input.deliveryId}
     where id = ${input.messageId} and family_id = ${input.familyId}
+      and member_user_id = ${input.memberUserId}
   `;
   if (input.replyToMessageId) {
     await tx`
@@ -95,6 +140,21 @@ export async function claimReplyResolutionWithTransaction(
       where id = ${input.replyToMessageId}
         and family_id = ${input.familyId}
         and role = 'assistant'
+        and exists (
+          select 1
+          from public.conversation_deliveries own_delivery
+          where own_delivery.id = ${input.deliveryId}
+            and own_delivery.family_id = conversation_messages.family_id
+            and own_delivery.message_id = conversation_messages.id
+            and (
+              own_delivery.recipient_member_user_id = ${input.memberUserId}
+              or (
+                own_delivery.recipient_member_user_id is null
+                and ${input.destinationHash}::text is not null
+                and own_delivery.destination_hash = ${input.destinationHash}
+              )
+            )
+        )
     `;
   }
   return true;
@@ -203,11 +263,12 @@ export function resolvedContinuityAttributes(
 
 export async function createProactiveEpisode(input: {
   familyId: string;
+  memberUserId?: string | null;
   now?: Date;
 }): Promise<string> {
   return await new PostgresContinuityRepository().createEpisode({
     familyId: input.familyId,
-    memberUserId: null,
+    memberUserId: input.memberUserId ?? null,
     now: input.now ?? new Date(),
   });
 }
@@ -227,6 +288,45 @@ async function episodeForRuntimeSession(
     const rows = await sql<{ id: string }[]>`
       select id from public.conversation_episodes
       where id = ${explicitEpisodeId} and family_id = ${familyId}
+        and (
+          (${memberUserId}::uuid is not null and (
+            exists (
+              select 1
+              from public.family_members current_member
+              where current_member.family_id = conversation_episodes.family_id
+                and current_member.user_id = ${memberUserId}
+            )
+            and (
+              member_user_id = ${memberUserId}
+              or exists (
+                select 1 from public.conversation_deliveries delivery
+                where delivery.episode_id = conversation_episodes.id
+                  and delivery.family_id = conversation_episodes.family_id
+                  and delivery.recipient_member_user_id = ${memberUserId}
+                  and delivery.status = 'sent'
+              )
+              or (
+                member_user_id is null
+                and not exists (
+                  select 1
+                  from public.conversation_messages episode_message
+                  where episode_message.family_id =
+                        conversation_episodes.family_id
+                    and episode_message.episode_id = conversation_episodes.id
+                )
+                and not exists (
+                  select 1
+                  from public.conversation_deliveries episode_delivery
+                  where episode_delivery.family_id =
+                        conversation_episodes.family_id
+                    and episode_delivery.episode_id = conversation_episodes.id
+                )
+              )
+            )
+          ))
+          or (${memberUserId}::uuid is null and ${channel} = 'dispatch'
+              and scope = 'member' and member_user_id is null)
+        )
     `;
     if (rows[0]) {
       await new PostgresContinuityRepository().upsertBinding(
@@ -249,6 +349,17 @@ async function episodeForRuntimeSession(
   const bound = await sql<{ episode_id: string }[]>`
     select episode_id from public.conversation_thread_bindings
     where family_id = ${familyId} and runtime_session_id = ${sessionId}
+      and member_user_id is not distinct from ${memberUserId}
+      and (
+        ${memberUserId}::uuid is null
+        or exists (
+          select 1
+          from public.family_members current_member
+          where current_member.family_id =
+                public.conversation_thread_bindings.family_id
+            and current_member.user_id = ${memberUserId}
+        )
+      )
     order by last_seen_at desc
     limit 1
   `;
@@ -349,8 +460,7 @@ export async function persistCanonicalMessage(
   const content = input.content.trim().slice(0, 8000);
   if (!familyId || content.length === 0) return null;
 
-  const memberUserId =
-    input.role === "user" ? (attrs.memberUserId ?? null) : null;
+  const memberUserId = attrs.memberUserId ?? null;
   const episodeId = await episodeForRuntimeSession(
     familyId,
     memberUserId,
@@ -473,7 +583,12 @@ export async function persistCanonicalMessage(
 
     await tx`
       update public.conversation_episodes
-      set last_activity_at = now()
+      set last_activity_at = now(),
+          member_user_id = case
+            when ${input.role} = 'user' then ${memberUserId}
+            else member_user_id
+          end,
+          scope = 'member'
       where id = ${episodeId} and family_id = ${familyId}
     `;
 
@@ -482,6 +597,8 @@ export async function persistCanonicalMessage(
     if (repliedDeliveryId && input.role === "user") {
       replyClaimed = await claimReplyResolutionWithTransaction(tx, {
         familyId,
+        memberUserId,
+        destinationHash: null,
         deliveryId: repliedDeliveryId,
         messageId,
         replyToMessageId: attrs.replyToMessageId ?? null,
@@ -527,6 +644,7 @@ export async function markCanonicalMessageDelivered(input: {
 
 export async function loadContinuityContext(input: {
   familyId: string;
+  memberUserId: string | null;
   episodeId?: string | null;
   runtimeSessionId: string;
 }): Promise<string> {
@@ -538,6 +656,15 @@ export async function loadContinuityContext(input: {
         select episode_id from public.conversation_thread_bindings
         where family_id = ${input.familyId}
           and runtime_session_id = ${input.runtimeSessionId}
+          and member_user_id is not distinct from ${input.memberUserId}
+          and ${input.memberUserId}::uuid is not null
+          and exists (
+            select 1
+            from public.family_members current_member
+            where current_member.family_id =
+                  public.conversation_thread_bindings.family_id
+              and current_member.user_id = ${input.memberUserId}
+          )
         order by last_seen_at desc
         limit 1
       `
@@ -546,6 +673,7 @@ export async function loadContinuityContext(input: {
   const messages = await new PostgresContinuityRepository().listEpisodeMessages(
     input.familyId,
     episodeId,
+    input.memberUserId,
     input.runtimeSessionId,
   );
   return renderContinuityContext(messages);
@@ -565,6 +693,7 @@ export async function loadRecentContinuityForMember(input: {
   const messages = await repository.listEpisodeMessages(
     input.familyId,
     episodeId,
+    input.memberUserId,
     null,
   );
   return renderContinuityContext(messages);

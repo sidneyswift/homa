@@ -218,6 +218,7 @@ describe("research brief PostgreSQL schema", () => {
         phoneNumbers: [],
         email: "parent@example.test",
         recipientMemberUserId: adultAId,
+        sourceOfferDeliveryId: null,
       },
       new Date("2026-07-16T13:00:00.000Z"),
       {
@@ -274,6 +275,7 @@ describe("research brief PostgreSQL schema", () => {
         phoneNumbers: [],
         email: "sandbox@example.test",
         recipientMemberUserId: adultAId,
+        sourceOfferDeliveryId: null,
       },
       runAt,
       { deliveryVersion: sandboxVersion },
@@ -296,6 +298,7 @@ describe("research brief PostgreSQL schema", () => {
         phoneNumbers: [],
         email: "regular@example.test",
         recipientMemberUserId: adultAId,
+        sourceOfferDeliveryId: null,
       },
       runAt,
       { deliveryVersion: regularVersion },
@@ -328,6 +331,7 @@ describe("research brief PostgreSQL schema", () => {
         phoneNumbers: [],
         email: "sandbox@example.test",
         recipientMemberUserId: adultAId,
+        sourceOfferDeliveryId: null,
       },
       { deliveryVersion: "research_brief_v2" },
     );

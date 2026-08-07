@@ -9,7 +9,6 @@ import {
   buildFulfillmentRecoveryMessage,
   recoverUnfulfilledOffers,
 } from "../../lib/conversation-continuity/offer-recovery";
-import { getFamilyPhones } from "../../lib/family-phone";
 import { mapDb } from "../../lib/map/db";
 import { chatOnboardingEnabled } from "../../lib/onboarding/state";
 import {
@@ -118,6 +117,9 @@ export default defineSchedule({
           createEpisode: async (scheduledTask) =>
             await createProactiveEpisode({
               familyId: scheduledTask.familyId,
+              memberUserId: scheduledTask.sourceOfferDeliveryId
+                ? scheduledTask.recipientMemberUserId
+                : null,
               now,
             }),
           receive: async ({
@@ -211,6 +213,9 @@ export default defineSchedule({
               createEpisode: async (manualTask) =>
                 await createProactiveEpisode({
                   familyId: manualTask.familyId,
+                  memberUserId: manualTask.sourceOfferDeliveryId
+                    ? manualTask.recipientMemberUserId
+                    : null,
                   now,
                 }),
               sendSession: async ({ message, auth, target }) =>
@@ -281,13 +286,9 @@ export default defineSchedule({
         if (process.env.HOMA_OFFER_RECOVERY_ENABLED === "true") {
           await recoverUnfulfilledOffers(
             async (offer) => {
-              const sql = mapDb();
-              const [family] = await sql<{ email: string | null }[]>`
-                select email from public.families where id = ${offer.familyId}
-              `;
-              const phones = await getFamilyPhones(offer.familyId);
               const episodeId = await createProactiveEpisode({
                 familyId: offer.familyId,
+                memberUserId: offer.recipientMemberUserId,
                 now,
               });
               // No runId on purpose: a recovery has no homa_task_runs row,
@@ -299,12 +300,15 @@ export default defineSchedule({
                 message: buildFulfillmentRecoveryMessage(offer.offerText),
                 target: {
                   familyId: offer.familyId,
-                  phoneNumbers: phones.map((row) => row.phone_e164),
-                  email: family?.email ?? null,
+                  phoneNumbers: [],
+                  email: null,
                   episodeId,
                   kind: "custom" as const,
                   deliveryPref:
                     offer.channel === "email" ? "email" : "text",
+                  recipientMemberUserId: offer.recipientMemberUserId,
+                  requireExactRecipient: true,
+                  sourceOfferDeliveryId: offer.sourceDeliveryId,
                 },
                 auth: {
                   authenticator: "dispatcher",
@@ -315,7 +319,9 @@ export default defineSchedule({
                     familyId: offer.familyId,
                     taskKind: "custom",
                     episodeId,
+                    memberUserId: offer.recipientMemberUserId,
                     acceptedOfferDeliveryId: offer.sourceDeliveryId,
+                    offerRecovery: "true",
                   },
                 },
               });

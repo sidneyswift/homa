@@ -1,3 +1,4 @@
+import type { Sql } from "postgres";
 import { z } from "zod";
 
 import { mapDb } from "../map/db";
@@ -154,8 +155,10 @@ export async function listFamilyTasks(familyId: string): Promise<FamilyTaskRow[]
   return rows.map(toRow);
 }
 
-async function familyTimeZone(familyId: string): Promise<string | null> {
-  const sql = mapDb();
+async function familyTimeZone(
+  familyId: string,
+  sql: Sql = mapDb(),
+): Promise<string | null> {
   const rows = await sql<{ time_zone: string | null }[]>`
     select time_zone from public.families where id = ${familyId}
   `;
@@ -172,19 +175,20 @@ export async function createCustomTask(
   recipientMemberUserId: string | null = null,
   sourceOfferDeliveryId: string | null = null,
   taskId: string | null = null,
+  database: Sql = mapDb(),
 ): Promise<{ ok: true; id: string } | { ok: false; note: string }> {
   const parsed = customTaskInputSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, note: parsed.error.issues[0]?.message ?? "Invalid task." };
   }
-  const timeZone = await familyTimeZone(familyId);
+  const sql = database;
+  const timeZone = await familyTimeZone(familyId, sql);
   if (!timeZone) {
     return {
       ok: false,
       note: "The family's time zone is not set yet. Set it at /app/settings first so tasks run at the right hour.",
     };
   }
-  const sql = mapDb();
   const existing = await sql<{ count: string }[]>`
     select count(*)::text as count from public.agent_schedules
     where family_id = ${familyId} and kind = 'custom'
@@ -206,14 +210,56 @@ export async function createCustomTask(
       (id, family_id, kind, next_run_at, local_hour, weekdays, delivery_pref,
        label, prompt, created_by, recipient_member_user_id,
        source_offer_delivery_id)
-    values
-      (coalesce(${taskId}::uuid, gen_random_uuid()), ${familyId}, 'custom',
-       ${nextRun.toISOString()}, ${parsed.data.localHour},
-       ${sql.array(parsed.data.weekdays)}::smallint[], ${parsed.data.deliveryPref},
-       ${parsed.data.label}, ${parsed.data.prompt}, ${createdBy},
-       ${recipientMemberUserId}, ${sourceOfferDeliveryId})
+    select
+      coalesce(${taskId}::uuid, gen_random_uuid()), ${familyId}, 'custom',
+      ${nextRun.toISOString()}, ${parsed.data.localHour},
+      ${sql.array(parsed.data.weekdays)}::smallint[], ${parsed.data.deliveryPref},
+      ${parsed.data.label}, ${parsed.data.prompt}, ${createdBy},
+      ${recipientMemberUserId}, ${sourceOfferDeliveryId}
+    where ${sourceOfferDeliveryId}::uuid is null
+       or exists (
+         select 1
+         from public.conversation_deliveries delivery
+         join public.conversation_open_loops loop
+           on loop.delivery_id = delivery.id
+          and loop.family_id = delivery.family_id
+         join public.conversation_messages resolver
+           on resolver.id = loop.resolved_by_message_id
+          and resolver.family_id = delivery.family_id
+          and resolver.episode_id = delivery.episode_id
+          and resolver.role = 'user'
+          and resolver.member_user_id = delivery.recipient_member_user_id
+         join public.homa_task_runs source_run
+           on source_run.id = delivery.task_run_id
+          and source_run.family_id = delivery.family_id
+         join public.family_members current_member
+           on current_member.family_id = delivery.family_id
+          and current_member.user_id = delivery.recipient_member_user_id
+         join public.families family on family.id = delivery.family_id
+         join public.conversation_offer_fulfillments fulfillment
+           on fulfillment.family_id = delivery.family_id
+          and fulfillment.source_delivery_id = delivery.id
+          and fulfillment.kind = 'task'
+          and fulfillment.reference_id = ${taskId}::uuid
+         where delivery.id = ${sourceOfferDeliveryId}::uuid
+           and delivery.family_id = ${familyId}::uuid
+           and delivery.recipient_member_user_id =
+             ${recipientMemberUserId}::uuid
+           and delivery.status = 'sent'
+           and loop.state = 'resolved'
+           and loop.resolved_outcome = 'accepted'
+           and loop.resolved_at >= now() - interval '24 hours'
+           and source_run.kind = 'morning_brief'
+           and family.status <> 'deleted'
+       )
     returning id
   `;
+  if (!rows[0]) {
+    return {
+      ok: false,
+      note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the task.",
+    };
+  }
   return { ok: true, id: rows[0].id };
 }
 

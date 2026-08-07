@@ -9,6 +9,7 @@ import {
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
   acceptedOfferDeliveryIdFromAttributes,
+  acceptedOfferRecoveryDeliveryIdFromAttributes,
   completeAcceptedOfferFulfillment,
   reserveAcceptedOfferFulfillment,
 } from "../../lib/conversation-continuity/offer-fulfillment";
@@ -65,8 +66,12 @@ export default defineBoundedTool({
   }),
   async execute(input, ctx) {
     const attributes = ctx.session.auth.current?.attributes;
+    const recoverySourceOfferDeliveryId =
+      acceptedOfferRecoveryDeliveryIdFromAttributes(attributes);
     const refusal = refuseScheduleSpawnedSession(attributes);
-    if (refusal) return { created: false, note: refusal };
+    if (refusal && !recoverySourceOfferDeliveryId) {
+      return { created: false, note: refusal };
+    }
 
     let familyId: string;
     try {
@@ -83,27 +88,45 @@ export default defineBoundedTool({
     // without an account falls back to the account owner.
     const memberUserId = (attributes as { memberUserId?: unknown } | undefined)
       ?.memberUserId;
+    const authenticatedMemberUserId =
+      typeof memberUserId === "string" ? memberUserId : null;
     const sourceOfferDeliveryId =
       acceptedOfferDeliveryIdFromAttributes(attributes);
     let taskId: string = randomUUID();
     let reservedSourceDeliveryId: string | null = null;
+    let recoveryRecipientMemberUserId: string | null = null;
     if (sourceOfferDeliveryId) {
       try {
         const reservation = await reserveAcceptedOfferFulfillment({
           familyId,
           sourceDeliveryId: sourceOfferDeliveryId,
+          expectedRecipientMemberUserId: authenticatedMemberUserId,
           kind: "task",
           referenceId: taskId,
         });
-        if (reservation.referenceId) {
-          taskId = reservation.referenceId;
-          reservedSourceDeliveryId = sourceOfferDeliveryId;
+        if (
+          !reservation.eligible ||
+          !reservation.referenceId ||
+          !reservation.recipientMemberUserId
+        ) {
+          return {
+            created: false,
+            note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the task.",
+          };
         }
+        taskId = reservation.referenceId;
+        reservedSourceDeliveryId = sourceOfferDeliveryId;
+        recoveryRecipientMemberUserId =
+          reservation.recipientMemberUserId;
       } catch (error) {
         console.error(
           "create_task fulfillment reservation failed:",
           error instanceof Error ? error.message : "unknown",
         );
+        return {
+          created: false,
+          note: "Homa could not verify the accepted offer's exact recipient, so the task was not created.",
+        };
       }
     }
     const receiptContext = voiceToolReceiptContext({
@@ -113,7 +136,8 @@ export default defineBoundedTool({
       turnId: ctx.session.turn.id,
     });
     const recipientMemberUserId =
-      typeof memberUserId === "string" ? memberUserId : null;
+      recoveryRecipientMemberUserId ??
+      authenticatedMemberUserId;
     const mutate = () => createCustomTask(
       familyId,
       input,

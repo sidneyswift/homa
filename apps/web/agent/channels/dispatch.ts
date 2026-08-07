@@ -4,6 +4,7 @@ import {
   setTaskRunRuntimeSession,
 } from "../../lib/conversation-continuity/delivery-ledger";
 import { dispatchContinuationToken } from "../../lib/conversation-continuity/dispatch-session-token";
+import { acceptedOfferDeliveryIdFromAttributes } from "../../lib/conversation-continuity/offer-fulfillment";
 import {
   createProactiveEpisode,
   persistCanonicalMessage,
@@ -78,6 +79,8 @@ interface DispatchState extends ResearchBriefDispatchState {
   phoneNumbers: string[];
   email: string | null;
   label: string | null;
+  requireExactRecipient: boolean;
+  sourceOfferDeliveryId: string | null;
 }
 
 interface DispatchTargetInput {
@@ -90,6 +93,8 @@ interface DispatchTargetInput {
   deliveryPref?: "text" | "email" | "none";
   label?: string | null;
   recipientMemberUserId?: string | null;
+  requireExactRecipient?: boolean;
+  sourceOfferDeliveryId?: string | null;
   deliveryVersion?: TaskDeliveryVersion;
 }
 
@@ -116,6 +121,8 @@ function dispatchSendOptions(target: DispatchTargetInput) {
       deliveryPref: target.deliveryPref ?? "text",
       label: target.label ?? null,
       recipientMemberUserId: target.recipientMemberUserId ?? null,
+      requireExactRecipient: target.requireExactRecipient ?? false,
+      sourceOfferDeliveryId: target.sourceOfferDeliveryId ?? null,
       deliveryVersion: target.deliveryVersion ?? "legacy",
       transportAccepted: false,
       delivered: false,
@@ -135,6 +142,8 @@ export default defineChannel({
     deliveryPref: "text",
     label: null,
     recipientMemberUserId: null,
+    requireExactRecipient: false,
+    sourceOfferDeliveryId: null,
     deliveryVersion: "legacy",
     transportAccepted: false,
     delivered: false,
@@ -184,6 +193,8 @@ export default defineChannel({
         deliveryPref,
         label,
         recipientMemberUserId,
+        requireExactRecipient,
+        sourceOfferDeliveryId,
       } = channel.state;
       if (!familyId) return;
 
@@ -244,13 +255,18 @@ export default defineChannel({
         deliveryPhase = "transport";
         const delivery = await deliverLiveDispatchTask({
           familyId,
-          episodeId,
+          episodeId: message.episodeId,
           messageId: message.id,
           taskRunId: runId,
           kind,
           text,
           deliveryMode: deliveryPref,
           recipientMemberUserId,
+          requireExactRecipient,
+          sourceOfferDeliveryId:
+            acceptedOfferDeliveryIdFromAttributes(
+              ctx.session.auth.current?.attributes,
+            ) ?? sourceOfferDeliveryId,
           label,
           deliveryVersion: channel.state.deliveryVersion,
         });
@@ -377,7 +393,12 @@ export default defineChannel({
             deliveryVersion,
           }),
         createEpisode: async (manualTask) =>
-          await createProactiveEpisode({ familyId: manualTask.familyId }),
+          await createProactiveEpisode({
+            familyId: manualTask.familyId,
+            memberUserId: manualTask.sourceOfferDeliveryId
+              ? manualTask.recipientMemberUserId
+              : null,
+          }),
         sendSession: async ({ message, auth, target }) =>
           await send(message, {
             auth,

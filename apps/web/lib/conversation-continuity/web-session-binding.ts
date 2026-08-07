@@ -84,6 +84,12 @@ export async function readWebSessionBinding(input: {
     where binding.family_id = ${input.familyId}
       and binding.channel = 'web'
       and binding.thread_key_hash = ${webSessionThreadHash(input.memberUserId)}
+      and exists (
+        select 1
+        from public.family_members current_member
+        where current_member.family_id = binding.family_id
+          and current_member.user_id = ${input.memberUserId}
+      )
       and (
         binding.member_user_id = ${input.memberUserId}
         or binding.member_user_id is null

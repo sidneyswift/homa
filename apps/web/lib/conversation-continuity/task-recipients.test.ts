@@ -128,4 +128,34 @@ describe("task delivery recipient selection", () => {
       ["member:mom-user-id"],
     );
   });
+
+  it("fails closed when an exact recovery recipient left", () => {
+    assert.deepEqual(
+      selectTaskDeliveryRecipients(
+        [MOM, INVITED_DAD, FAMILY_EMAIL],
+        "gone-user-id",
+        true,
+      ),
+      [],
+    );
+    assert.deepEqual(
+      selectTaskDeliveryRecipients(
+        [MOM, INVITED_DAD, FAMILY_EMAIL],
+        null,
+        true,
+      ),
+      [],
+    );
+  });
+
+  it("keeps exact recovery delivery on the accepting adult", () => {
+    assert.deepEqual(
+      selectTaskDeliveryRecipients(
+        [MOM, INVITED_DAD, UNATTRIBUTED_PHONE, FAMILY_EMAIL],
+        "dad-user-id",
+        true,
+      ).map((recipient) => recipient.recipientKey),
+      ["member:dad-user-id"],
+    );
+  });
 });

@@ -143,10 +143,10 @@ describe("web session binding", () => {
     );
   });
 
-  it("preserves member ownership and user activity across assistant writes only within one family", () => {
+  it("preserves one coherent binding tuple across assistant writes only within one family", () => {
     assert.match(
       repositorySource,
-      /when \$\{preserveExistingBinding\}\s+and public\.conversation_thread_bindings\.family_id = excluded\.family_id\s+then coalesce\(\s+excluded\.member_user_id,\s+public\.conversation_thread_bindings\.member_user_id\s+\)\s+else excluded\.member_user_id/u,
+      /when \$\{preserveExistingBinding\}\s+and public\.conversation_thread_bindings\.family_id = excluded\.family_id\s+then public\.conversation_thread_bindings\.member_user_id\s+else excluded\.member_user_id/u,
     );
     assert.match(
       repositorySource,
@@ -159,6 +159,14 @@ describe("web session binding", () => {
     assert.match(
       repositorySource,
       /when \$\{preserveExistingBinding\}\s+and public\.conversation_thread_bindings\.family_id = excluded\.family_id\s+then public\.conversation_thread_bindings\.episode_id\s+else excluded\.episode_id/u,
+    );
+    assert.match(
+      repositorySource,
+      /when \$\{preserveExistingBinding\}\s+and public\.conversation_thread_bindings\.family_id = excluded\.family_id\s+then public\.conversation_thread_bindings\.pending_offer_delivery_id\s+else excluded\.pending_offer_delivery_id/u,
+    );
+    assert.doesNotMatch(
+      repositorySource,
+      /pending_offer_delivery_id = coalesce/u,
     );
     assert.match(repositorySource, /when \$\{useDatabaseClock\} then clock_timestamp\(\)/u);
     assert.match(

@@ -1,0 +1,826 @@
+name: Apply issue 606 production repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type APPLY ISSUE 606
+        required: true
+        type: string
+      reviewed_repair_tag:
+        description: Paste the exact operator release seal tag
+        required: true
+        type: string
+      production_deployment_id:
+        description: Paste the exact promoted Vercel production deployment ID
+        required: true
+        type: string
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-issue-606-repair-v2
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      github.repository == 'sidneyswift/homa' &&
+      github.repository_owner == 'sidneyswift' &&
+      github.ref == 'refs/heads/main' &&
+      github.ref_name == 'main' &&
+      github.event.repository.default_branch == 'main' &&
+      github.actor == 'sidneyswift' &&
+      github.triggering_actor == 'sidneyswift'
+    name: Apply audited issue 606 privacy containment
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          fetch-tags: false
+
+      - name: Validate authorization and immutable inputs
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          if [ "$CONFIRMATION" != "APPLY ISSUE 606" ]; then
+            echo "Confirmation must exactly match APPLY ISSUE 606."
+            exit 1
+          fi
+          if ! [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]; then
+            echo "The GitHub run attempt is not a positive integer."
+            exit 1
+          fi
+          if ! [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]*$ ]]; then
+            echo "The GitHub run id is not a positive integer."
+            exit 1
+          fi
+          final_parent_line="$(git show -s --format='%P' "$GITHUB_SHA")"
+          read -r final_first_parent reviewed_repair_sha extra_parent \
+            <<< "$final_parent_line"
+          if ! [[ "$final_first_parent" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "$reviewed_repair_sha" =~ ^[0-9a-f]{40}$ ]] \
+            || [ -n "${extra_parent:-}" ]; then
+            echo "The production commit must have exactly two Git commit parents."
+            exit 1
+          fi
+          REVIEWED_REPAIR_SHA="$reviewed_repair_sha"
+          if ! [[ "$PRODUCTION_DEPLOYMENT_ID" =~ ^dpl_[A-Za-z0-9]+$ ]]; then
+            echo "The Vercel production deployment id is malformed."
+            exit 1
+          fi
+          if ! [[ "$PRODUCTION_DEPLOYED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The production deployment SHA must be an exact lowercase Git SHA."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The confirmed READY production deployment must match this main commit."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
+            echo "This repair may run only in sidneyswift/homa."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY_OWNER" != "sidneyswift" ]; then
+            echo "This repair may run only for the sidneyswift repository owner."
+            exit 1
+          fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ] || [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "This repair may run only from the main branch."
+            exit 1
+          fi
+          default_branch="$(jq -r '.repository.default_branch // ""' "$GITHUB_EVENT_PATH")"
+          if [ "$default_branch" != "main" ]; then
+            echo "This repair may run only when main is the repository default branch."
+            exit 1
+          fi
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ]; then
+            echo "The checked-out commit does not match the dispatched workflow commit."
+            exit 1
+          fi
+          if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "The workflow checkout is not clean."
+            exit 1
+          fi
+          node scripts/migration-version-check.mjs
+
+          check_hash() {
+            local path="$1"
+            local expected="$2"
+            local actual
+            actual="$(sha256sum "$path" | cut -d' ' -f1)"
+            if [ "$actual" != "$expected" ]; then
+              echo "$path does not match the reviewed issue #606 input."
+              exit 1
+            fi
+          }
+          check_hash "supabase/migrations/20260802033000_conversation_privacy_per_adult.sql" \
+            "df3dfe2bb04fea51cf4751cfea927f600612ee0459a60bcab2f6496ca2a495fd"
+          check_hash "supabase/migrations/20260805110000_eve_web_session_owners.sql" \
+            "0b379d6bfc406ae4b1dac3aafe5c857d7131fd02dc6d3453deb867b7704256d3"
+          check_hash "supabase/migrations/20260807040000_conversation_privacy_attribution_containment.sql" \
+            "a158765ad96a27830f7c92f80c038adfcc43b32e0971b3624f12302e579a3db9"
+          check_hash "supabase/migrations/20260807050000_conversation_privacy_attribution_write_guards.sql" \
+            "0719e3420734903e41d3f3192c75f620c3791e44ee28522cff9d3d09f8e5696a"
+          check_hash "scripts/issue-606-production-repair.sql" \
+            "e920b44acc7c7351ae1b17a61642f7ca35b8deab61c850fcc5a51ca1d3c801c2"
+          check_hash "scripts/issue-606-production-release-git-contract.mjs" \
+            "3e7c73ce59b46d7d2d2cd1cc4868130571066a5f4912afeb0ee969633bb18ab4"
+          check_hash "scripts/issue-606-release-seal-workflow-contract.mjs" \
+            "d72a936989d325ae2f18b0a34b6e4e3479a7c8afbd4d6670c579d2c877d1ef00"
+          check_hash "scripts/issue-606-production-run-contract.mjs" \
+            "9316f3351fd4c964c6b4953b98b739240cc505510908b6f80add461c766bb25d"
+          check_hash "scripts/issue-606-runtime-drain-contract.mjs" \
+            "d5b3fe5eae9247c77c36401588cb0ceb0a7ae2ec7b5ade42cd72ff86fd2acb48"
+          check_hash "scripts/issue-606-vercel-deployment-contract.mjs" \
+            "80733f5c38eb56a1b56f4bdbc585412397b0eb5f6fa6743efed4e4dab1b4cbb8"
+          check_hash "scripts/issue-606-vercel-project-protection-contract.mjs" \
+            "4f545d9ba27e4e4363dfa9434467c72343d67cf13ba5c2013ef2232aed056a7b"
+
+          release_seal_workflow_contract="$(
+            node scripts/issue-606-release-seal-workflow-contract.mjs
+          )"
+          mapfile -t release_seal_workflow_hashes < <(
+            printf '%s\n' "$release_seal_workflow_contract" |
+              sed -n 's/^ISSUE_606_RELEASE_SEAL_WORKFLOW_CONTRACT_SHA256=//p'
+          )
+          if [ "${#release_seal_workflow_hashes[@]}" -ne 1 ] \
+            || ! [[ "${release_seal_workflow_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The operator release seal workflow contract did not emit one exact hash."
+            exit 1
+          fi
+
+          release_binding="$(node scripts/issue-606-production-release-git-contract.mjs \
+            --final-sha="$GITHUB_SHA" \
+            --reviewed-sha="$REVIEWED_REPAIR_SHA")"
+          mapfile -t final_trees < <(
+            printf '%s\n' "$release_binding" | sed -n 's/^ISSUE_606_FINAL_TREE_SHA=//p'
+          )
+          mapfile -t reviewed_trees < <(
+            printf '%s\n' "$release_binding" | sed -n 's/^ISSUE_606_REVIEWED_TREE_SHA=//p'
+          )
+          mapfile -t sensitive_hashes < <(
+            printf '%s\n' "$release_binding" | sed -n 's/^ISSUE_606_SENSITIVE_MANIFEST_SHA256=//p'
+          )
+          if [ "${#final_trees[@]}" -ne 1 ] \
+            || [ "${#reviewed_trees[@]}" -ne 1 ] \
+            || [ "${#sensitive_hashes[@]}" -ne 1 ] \
+            || ! [[ "${final_trees[0]}" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "${reviewed_trees[0]}" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "${sensitive_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The release Git contract did not emit exact sanitized bindings."
+            exit 1
+          fi
+
+          drain_contract="$(node scripts/issue-606-runtime-drain-contract.mjs)"
+          mapfile -t drain_seconds < <(
+            printf '%s\n' "$drain_contract" | sed -n 's/^ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS=//p'
+          )
+          mapfile -t drain_hashes < <(
+            printf '%s\n' "$drain_contract" | sed -n 's/^ISSUE_606_RUNTIME_DRAIN_CONTRACT_SHA256=//p'
+          )
+          if [ "${#drain_seconds[@]}" -ne 1 ] \
+            || [ "${drain_seconds[0]}" != "1020" ] \
+            || [ "${#drain_hashes[@]}" -ne 1 ] \
+            || ! [[ "${drain_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The old-instance drain contract is not the reviewed bound."
+            exit 1
+          fi
+
+          {
+            echo "REVIEWED_REPAIR_SHA=$REVIEWED_REPAIR_SHA"
+            echo "ISSUE_606_FINAL_TREE_SHA=${final_trees[0]}"
+            echo "ISSUE_606_REVIEWED_TREE_SHA=${reviewed_trees[0]}"
+            echo "ISSUE_606_SENSITIVE_MANIFEST_SHA256=${sensitive_hashes[0]}"
+            echo "ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS=${drain_seconds[0]}"
+            echo "ISSUE_606_RUNTIME_DRAIN_CONTRACT_SHA256=${drain_hashes[0]}"
+            echo "ISSUE_606_RELEASE_SEAL_WORKFLOW_CONTRACT_SHA256=${release_seal_workflow_hashes[0]}"
+          } >> "$GITHUB_ENV"
+
+      - name: Verify the exact-head operator release seal
+        env:
+          RELEASE_SEAL_TAG: ${{ inputs.reviewed_repair_tag }}
+          RELEASE_SEAL_TAGGER_IDENTITY: Sidney Swift <158200036+sidneyswift@users.noreply.github.com>
+          RELEASE_SEAL_SIGNER_PRINCIPAL: 158200036+sidneyswift@users.noreply.github.com
+          RELEASE_SEAL_SIGNER_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC//QLjrJ7HIgNVh1aPVtwhyYhMD1QsTuaVJB+5ORK3275oqqBR/o2TMPCOOSDtyUki3MCvEVb2lrTSdY+X6jtFYyZREhbfIoJeAMY5e0bF9W3uQshfggkKVNsJdCT0S0AMwgoQmA51E6vx/GwrFdNJ0fODSlRxDnqrzgRjdJ8uJEsYOsd5cBX9oLr4nUxSMhIiTfJii+XtrXDRazL6Kg36YhXHvhovwWCjs+QMFJjdcgz3aZV7XXjGifXlsfssuEawkPV7JWbeFVecBZ3Al7SKnx/ZjwrYr9hAu+3gnUjCP0V9bhBCJMH4PtZ+PnQ8tTDJ7MchHFsiaXKIyFhpdvviwxrhK8y6XFX0Hs5IbRJiRxUETCKw+1F6xumm3RXjtJdvAb6lLDBW4o+4w14Js75pWkbgVCzbpWrHhXOi3zCKVPzPDwNpNZLNvYSTkBFTFrVeGc4r6cqaia5zZV1PuZcPWTQjGZZfMX73iZyRz89vkkQt8BIOhv0P3DmQl2z8bmCPP4EjoYeKMNyx1TA4D5AUPgR2eCw8YbCzSZ1KmAjuM0CeRXf0YPvptp/5DWUtGqKHbZhgUFrpCiRb/b5YIvy8rD0fuMnGJwFoVzxclHkrsEeA7HZs4seqPyISif0AURXIKn1ItDbI0aJmMciTnWT6RPhReZ14MEvlNE4/MflcLw==
+          RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c
+        run: |
+          # This SSH signature is the repository owner's deliberate production release seal.
+          # It binds the exact reviewed head and public council ruling. It does not prove reviewer identity.
+          if ! [[ "$RELEASE_SEAL_TAG" =~ ^issue-606-reviewed-[0-9a-f]{40}$ ]]; then
+            echo "The operator release seal tag name is malformed."
+            exit 1
+          fi
+          if [ "$RELEASE_SEAL_TAG" != "issue-606-reviewed-$REVIEWED_REPAIR_SHA" ]; then
+            echo "The operator release seal tag name does not bind the derived reviewed SHA."
+            exit 1
+          fi
+          mapfile -t preexisting_tag_refs < <(
+            git for-each-ref --format='%(refname)' refs/tags/
+          )
+          if [ "${#preexisting_tag_refs[@]}" -ne 0 ]; then
+            echo "The checkout unexpectedly contains pre-fetched tags."
+            exit 1
+          fi
+          mapfile -t remote_release_seal_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$RELEASE_SEAL_TAG"
+          )
+          if [ "${#remote_release_seal_refs[@]}" -ne 1 ]; then
+            echo "The exact operator release seal is absent or ambiguous."
+            exit 1
+          fi
+          read -r remote_release_seal_object remote_release_seal_ref \
+            remote_release_seal_extra <<< "${remote_release_seal_refs[0]}"
+          if ! [[ "$remote_release_seal_object" =~ ^[0-9a-f]{40}$ ]] \
+            || [ "$remote_release_seal_ref" != "refs/tags/$RELEASE_SEAL_TAG" ] \
+            || [ -n "${remote_release_seal_extra:-}" ]; then
+            echo "The remote operator release seal ref is malformed."
+            exit 1
+          fi
+          git fetch --no-tags --force origin \
+            "refs/tags/$RELEASE_SEAL_TAG:refs/tags/$RELEASE_SEAL_TAG"
+          mapfile -t local_tag_refs < <(
+            git for-each-ref --format='%(refname)' refs/tags/
+          )
+          if [ "${#local_tag_refs[@]}" -ne 1 ] \
+            || [ "${local_tag_refs[0]}" != "refs/tags/$RELEASE_SEAL_TAG" ]; then
+            echo "The exact operator release seal was not fetched alone."
+            exit 1
+          fi
+
+          release_seal_ref="refs/tags/$RELEASE_SEAL_TAG"
+          release_seal_tag_type="$(git cat-file -t "$release_seal_ref")"
+          if [ "$release_seal_tag_type" != "tag" ]; then
+            echo "The operator release seal ref is not an annotated tag object."
+            exit 1
+          fi
+          mapfile -t release_seal_tag_objects < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^object //p'
+          )
+          mapfile -t release_seal_tag_types < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^type //p'
+          )
+          mapfile -t release_seal_tag_names < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^tag //p'
+          )
+          mapfile -t release_seal_tagger_headers < <(
+            git cat-file tag "$release_seal_ref" | sed -n 's/^tagger //p'
+          )
+          mapfile -t release_seal_tagger_identities < <(
+            git cat-file tag "$release_seal_ref" |
+              sed -n 's/^tagger \(Sidney Swift <158200036+sidneyswift@users\.noreply\.github\.com>\) [1-9][0-9]* [+-][0-9]\{4\}$/\1/p'
+          )
+          if [ "${#release_seal_tag_objects[@]}" -ne 1 ] \
+            || [ "${release_seal_tag_objects[0]}" != "$REVIEWED_REPAIR_SHA" ] \
+            || [ "${#release_seal_tag_types[@]}" -ne 1 ] \
+            || [ "${release_seal_tag_types[0]}" != "commit" ] \
+            || [ "${#release_seal_tag_names[@]}" -ne 1 ] \
+            || [ "${release_seal_tag_names[0]}" != "$RELEASE_SEAL_TAG" ] \
+            || [ "${#release_seal_tagger_headers[@]}" -ne 1 ] \
+            || [ "${#release_seal_tagger_identities[@]}" -ne 1 ] \
+            || [ "${release_seal_tagger_identities[0]}" != "$RELEASE_SEAL_TAGGER_IDENTITY" ]; then
+            echo "The annotated seal headers do not bind the exact reviewed commit and tagger."
+            exit 1
+          fi
+          release_seal_target="$(git rev-parse "$release_seal_ref^{}")"
+          if [ "$release_seal_target" != "$REVIEWED_REPAIR_SHA" ]; then
+            echo "The operator release seal does not peel to the reviewed commit."
+            exit 1
+          fi
+          release_seal_tag_object_sha="$(git rev-parse "$release_seal_ref")"
+          if [ "$release_seal_tag_object_sha" != "$remote_release_seal_object" ]; then
+            echo "The fetched operator seal object differs from the exact remote ref."
+            exit 1
+          fi
+
+          mapfile -t release_seal_message_lines < <(
+            git cat-file tag "$release_seal_ref" | awk '
+              !in_message {
+                if ($0 == "") in_message = 1
+                next
+              }
+              $0 == "-----BEGIN SSH SIGNATURE-----" { exit }
+              { print }
+            '
+          )
+          if [ "${#release_seal_message_lines[@]}" -ne 5 ] \
+            || [ "${release_seal_message_lines[0]}" != "contract=homa-issue-606-exact-head-review-v1" ] \
+            || [ "${release_seal_message_lines[1]}" != "issue=https://github.com/sidneyswift/homa/issues/606" ] \
+            || [ "${release_seal_message_lines[2]}" != "reviewed-sha=$REVIEWED_REPAIR_SHA" ] \
+            || [ "${release_seal_message_lines[3]}" != "deploy-containment=GO" ] \
+            || [ "${release_seal_message_lines[4]}" != "close-issue-606=NO-GO" ]; then
+            echo "The operator release seal message is not the exact five-line ruling."
+            exit 1
+          fi
+
+          umask 077
+          allowed_signers_file="$(
+            mktemp "$RUNNER_TEMP/homa-issue-606-allowed-signers.XXXXXX"
+          )"
+          trap 'rm -f "$allowed_signers_file"' EXIT
+          printf '%s namespaces="git" %s\n' \
+            "$RELEASE_SEAL_SIGNER_PRINCIPAL" \
+            "$RELEASE_SEAL_SIGNER_PUBLIC_KEY" \
+            > "$allowed_signers_file"
+          chmod 600 "$allowed_signers_file"
+          if [ "$(stat -c '%a' "$allowed_signers_file")" != "600" ]; then
+            echo "The operator release seal allowed signers file is not owner-only."
+            exit 1
+          fi
+          if ! release_seal_verification="$(
+            git -c gpg.ssh.allowedSignersFile="$allowed_signers_file" \
+              verify-tag "$release_seal_ref" 2>&1
+          )"; then
+            echo "The operator release seal signature is invalid."
+            exit 1
+          fi
+          expected_release_seal_signature="Good \"git\" signature for $RELEASE_SEAL_SIGNER_PRINCIPAL with RSA key $RELEASE_SEAL_SIGNER_FINGERPRINT"
+          mapfile -t release_seal_signature_lines < <(
+            printf '%s\n' "$release_seal_verification" |
+              sed -n '/^Good "git" signature for /p'
+          )
+          if [ "${#release_seal_signature_lines[@]}" -ne 1 ] \
+            || [ "${release_seal_signature_lines[0]}" != "$expected_release_seal_signature" ]; then
+            echo "The operator release seal signer principal or RSA fingerprint is not pinned."
+            exit 1
+          fi
+
+          mapfile -t post_verify_remote_tag_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$RELEASE_SEAL_TAG"
+          )
+          if [ "${#post_verify_remote_tag_refs[@]}" -ne 1 ]; then
+            echo "The operator release seal disappeared after signature verification."
+            exit 1
+          fi
+          read -r post_verify_remote_tag_object post_verify_remote_tag_ref \
+            post_verify_remote_tag_extra <<< "${post_verify_remote_tag_refs[0]}"
+          if [ "$post_verify_remote_tag_object" != "$release_seal_tag_object_sha" ] \
+            || [ "$post_verify_remote_tag_ref" != "refs/tags/$RELEASE_SEAL_TAG" ] \
+            || [ -n "${post_verify_remote_tag_extra:-}" ]; then
+            echo "The remote operator release seal changed after signature verification."
+            exit 1
+          fi
+          {
+            echo "ISSUE_606_RELEASE_SEAL_TAG=$RELEASE_SEAL_TAG"
+            echo "ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA=$release_seal_tag_object_sha"
+            echo "ISSUE_606_RELEASE_SEAL_SIGNER_PRINCIPAL=$RELEASE_SEAL_SIGNER_PRINCIPAL"
+            echo "ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT=$RELEASE_SEAL_SIGNER_FINGERPRINT"
+          } >> "$GITHUB_ENV"
+
+      - name: Prove the reviewed commit is still the main head
+        run: |
+          git fetch --no-tags --force origin +refs/heads/main:refs/remotes/origin/main
+          fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
+          remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
+            || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
+            || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "Checked out, fetched, and remote main are not the dispatched commit."
+            exit 1
+          fi
+          echo "ISSUE_606_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
+
+      - name: Prove the exact alias deployment and project protection
+        env:
+          PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "The Vercel deployment verifier token is missing."
+            exit 1
+          fi
+          deployment_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-vercel.XXXXXX.json")"
+          project_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-project.XXXXXX.json")"
+          trap 'rm -f "$deployment_json" "$project_json"' EXIT
+          chmod 600 "$deployment_json" "$project_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v13/deployments/thankshoma.com?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
+            > "$deployment_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/prj_pKBD87W4tmlT7lnYRgrs8WYociTz?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC" \
+            > "$project_json"
+          deployment_contract="$(node scripts/issue-606-vercel-deployment-contract.mjs \
+            --deployment-json="$deployment_json" \
+            --deployment-id="$PRODUCTION_DEPLOYMENT_ID" \
+            --final-sha="$GITHUB_SHA")"
+          mapfile -t deployment_ids < <(
+            printf '%s\n' "$deployment_contract" | sed -n 's/^ISSUE_606_VERCEL_DEPLOYMENT_ID=//p'
+          )
+          mapfile -t deployment_hashes < <(
+            printf '%s\n' "$deployment_contract" | sed -n 's/^ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256=//p'
+          )
+          if [ "${#deployment_ids[@]}" -ne 1 ] \
+            || [ "${deployment_ids[0]}" != "$PRODUCTION_DEPLOYMENT_ID" ] \
+            || [ "${#deployment_hashes[@]}" -ne 1 ] \
+            || ! [[ "${deployment_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The Vercel deployment contract emitted invalid evidence."
+            exit 1
+          fi
+          project_contract="$(node scripts/issue-606-vercel-project-protection-contract.mjs \
+            --project-json="$project_json")"
+          mapfile -t project_protection_hashes < <(
+            printf '%s\n' "$project_contract" | sed -n 's/^ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=//p'
+          )
+          if [ "${#project_protection_hashes[@]}" -ne 1 ] \
+            || ! [[ "${project_protection_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The Vercel project protection contract emitted invalid evidence."
+            exit 1
+          fi
+          {
+            echo "ISSUE_606_VERCEL_DEPLOYMENT_ID=${deployment_ids[0]}"
+            echo "ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256=${deployment_hashes[0]}"
+            echo "ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=${project_protection_hashes[0]}"
+          } >> "$GITHUB_ENV"
+
+      - name: Confirm PostgreSQL client availability
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-client-16
+          fi
+          psql --version
+
+      - name: Build a masked production database URL
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const password = process.env.SUPABASE_DB_PASSWORD;
+          if (!publicUrl || !password) {
+            throw new Error("Production Supabase URL or database password is missing");
+          }
+          const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
+          const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
+          databaseUrl.username = `postgres.${ref}`;
+          databaseUrl.password = password;
+          databaseUrl.searchParams.set("sslmode", "require");
+          process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
+          appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
+          NODE
+
+      - name: Create an owner-only sanitized evidence log
+        run: |
+          evidence_dir="$(mktemp -d "$RUNNER_TEMP/homa-issue-606-evidence.XXXXXX")"
+          chmod 700 "$evidence_dir"
+          evidence_log="$evidence_dir/repair.log"
+          evidence_receipt="$evidence_dir/receipt.txt"
+          umask 077
+          : > "$evidence_log"
+          chmod 600 "$evidence_log"
+          {
+            echo "ISSUE_606_EVIDENCE_DIR=$evidence_dir"
+            echo "ISSUE_606_EVIDENCE_LOG=$evidence_log"
+            echo "ISSUE_606_EVIDENCE_RECEIPT=$evidence_receipt"
+          } >> "$GITHUB_ENV"
+
+      - name: Prove the production target is an allowed starting state
+        run: |
+          mapfile -t pre_database_remote_tag_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG"
+          )
+          if [ "${#pre_database_remote_tag_refs[@]}" -ne 1 ]; then
+            echo "The operator release seal disappeared before the first production database connection."
+            exit 1
+          fi
+          read -r pre_database_remote_tag_object pre_database_remote_tag_ref \
+            pre_database_remote_tag_extra <<< "${pre_database_remote_tag_refs[0]}"
+          if [ "$pre_database_remote_tag_object" != "$ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA" ] \
+            || [ "$pre_database_remote_tag_ref" != "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG" ] \
+            || [ -n "${pre_database_remote_tag_extra:-}" ]; then
+            echo "The operator release seal changed before the first production database connection."
+            exit 1
+          fi
+          state="$(psql "$MIGRATION_DATABASE_URL" -qXAt -v ON_ERROR_STOP=1 -c "
+            select concat_ws('|',
+              exists (
+                select 1 from supabase_migrations.schema_migrations
+                where version = '20260807040000'
+                  and name = 'conversation_privacy_attribution_containment'
+              ),
+              to_regprocedure('public.conversation_session_owned_by_caller(uuid,text)') is not null,
+              to_regprocedure('public.conversation_episode_owned_by_caller(uuid,uuid)') is not null,
+              coalesce((
+                select strpos(pg_get_expr(polqual, polrelid),
+                  'conversation_session_owned_by_caller') > 0
+                from pg_policy
+                where polrelid = 'public.conversation_messages'::regclass
+                  and polname = 'adults read their own conversation messages'
+              ), false),
+              coalesce((
+                select strpos(pg_get_expr(polqual, polrelid),
+                  'conversation_episode_owned_by_caller') > 0
+                from pg_policy
+                where polrelid = 'public.conversation_episodes'::regclass
+                  and polname = 'adults read their own conversation episodes'
+              ), false),
+              coalesce((
+                select ('/* Homa issue 606 workflow_run_id=' || '$GITHUB_RUN_ID' || ' */')
+                  = any(statements)
+                from supabase_migrations.schema_migrations
+                where version = '20260807040000'
+                  and name = 'conversation_privacy_attribution_containment'
+              ), false)
+            );
+          ")"
+          run_contract="$(node scripts/issue-606-production-run-contract.mjs \
+            --run-attempt="$GITHUB_RUN_ATTEMPT" \
+            --state="$state")"
+          mapfile -t first_modes < <(
+            printf '%s\n' "$run_contract" | sed -n 's/^ISSUE_606_FIRST_CONNECTION_MODE=//p'
+          )
+          mapfile -t evidence_kinds < <(
+            printf '%s\n' "$run_contract" | sed -n 's/^ISSUE_606_EVIDENCE_KIND=//p'
+          )
+          if [ "${#first_modes[@]}" -ne 1 ] \
+            || [ "${#evidence_kinds[@]}" -ne 1 ]; then
+            echo "The issue #606 run contract emitted invalid evidence."
+            exit 1
+          fi
+          {
+            echo "ISSUE_606_FIRST_CONNECTION_MODE=${first_modes[0]}"
+            echo "ISSUE_606_EVIDENCE_KIND=${evidence_kinds[0]}"
+          } >> "$GITHUB_ENV"
+
+      - name: Apply or recover the exact repair
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -v issue_606_run_id="$GITHUB_RUN_ID" \
+            -f scripts/issue-606-production-repair.sql)"
+          mapfile -t markers < <(printf '%s\n' "$result" | grep '^ISSUE_606_')
+          if [ "${#markers[@]}" -ne 7 ] \
+            || [[ ! "${markers[0]}" =~ ^ISSUE_606_ASSISTANTS_CLEARED=[0-9]+$ ]] \
+            || [[ ! "${markers[1]}" =~ ^ISSUE_606_EPISODES_CLEARED=[0-9]+$ ]] \
+            || [[ ! "${markers[2]}" =~ ^ISSUE_606_CALLS_CLEARED=[0-9]+$ ]] \
+            || [ "${markers[3]}" != "ISSUE_606_UNSAFE_ASSISTANTS=false" ] \
+            || [ "${markers[4]}" != "ISSUE_606_UNSAFE_EPISODES=false" ] \
+            || [ "${markers[5]}" != "ISSUE_606_OWNED_CALLS=false" ]; then
+            echo "The first issue #606 connection did not return the exact safe marker set."
+            exit 1
+          fi
+          if [ "$ISSUE_606_FIRST_CONNECTION_MODE" = "repair-required" ]; then
+            if [ "${markers[6]}" != "ISSUE_606_REPAIR=repaired" ]; then
+              echo "Attempt 1 did not apply the required issue #606 repair."
+              exit 1
+            fi
+          elif [ "${markers[6]}" != "ISSUE_606_REPAIR=repaired" ] \
+            && [ "${markers[6]}" != "ISSUE_606_REPAIR=verified_noop" ]; then
+            echo "The recovery connection returned an invalid issue #606 state."
+            exit 1
+          fi
+          printf '%s\n' "${markers[@]}" | tee "$ISSUE_606_EVIDENCE_LOG"
+
+      - name: Wait beyond every old production request
+        run: |
+          if [ "$ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS" != "1020" ]; then
+            echo "The old-instance drain duration changed after validation."
+            exit 1
+          fi
+          sleep "$ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS"
+
+      - name: Re-prove the alias deployment and protection after the drain
+        env:
+          PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-vercel.XXXXXX.json")"
+          project_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-project.XXXXXX.json")"
+          trap 'rm -f "$deployment_json" "$project_json"' EXIT
+          chmod 600 "$deployment_json" "$project_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v13/deployments/thankshoma.com?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
+            > "$deployment_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/prj_pKBD87W4tmlT7lnYRgrs8WYociTz?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC" \
+            > "$project_json"
+          deployment_contract="$(node scripts/issue-606-vercel-deployment-contract.mjs \
+            --deployment-json="$deployment_json" \
+            --deployment-id="$PRODUCTION_DEPLOYMENT_ID" \
+            --final-sha="$GITHUB_SHA")"
+          mapfile -t deployment_hashes < <(
+            printf '%s\n' "$deployment_contract" | sed -n 's/^ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256=//p'
+          )
+          if [ "${#deployment_hashes[@]}" -ne 1 ] \
+            || [ "${deployment_hashes[0]}" != "$ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256" ]; then
+            echo "The production deployment changed during the old-instance drain."
+            exit 1
+          fi
+          project_contract="$(node scripts/issue-606-vercel-project-protection-contract.mjs \
+            --project-json="$project_json")"
+          mapfile -t project_protection_hashes < <(
+            printf '%s\n' "$project_contract" | sed -n 's/^ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=//p'
+          )
+          if [ "${#project_protection_hashes[@]}" -ne 1 ] \
+            || [ "${project_protection_hashes[0]}" != "$ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256" ]; then
+            echo "Generated deployment URL protection changed during the drain."
+            exit 1
+          fi
+
+      - name: Run the final cleanup after the old-instance drain
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -v issue_606_run_id="$GITHUB_RUN_ID" \
+            -f scripts/issue-606-production-repair.sql)"
+          mapfile -t markers < <(printf '%s\n' "$result" | grep '^ISSUE_606_')
+          if [ "${#markers[@]}" -ne 7 ] \
+            || [[ ! "${markers[0]}" =~ ^ISSUE_606_ASSISTANTS_CLEARED=[0-9]+$ ]] \
+            || [[ ! "${markers[1]}" =~ ^ISSUE_606_EPISODES_CLEARED=[0-9]+$ ]] \
+            || [[ ! "${markers[2]}" =~ ^ISSUE_606_CALLS_CLEARED=[0-9]+$ ]] \
+            || [ "${markers[3]}" != "ISSUE_606_UNSAFE_ASSISTANTS=false" ] \
+            || [ "${markers[4]}" != "ISSUE_606_UNSAFE_EPISODES=false" ] \
+            || [ "${markers[5]}" != "ISSUE_606_OWNED_CALLS=false" ] \
+            || { [ "${markers[6]}" != "ISSUE_606_REPAIR=repaired" ] \
+              && [ "${markers[6]}" != "ISSUE_606_REPAIR=verified_noop" ]; }; then
+            echo "The post-drain cleanup did not return the exact safe marker set."
+            exit 1
+          fi
+          printf '%s\n' "${markers[@]}" | tee -a "$ISSUE_606_EVIDENCE_LOG"
+
+      - name: Prove a fresh connection is a verified no-op
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -v issue_606_run_id="$GITHUB_RUN_ID" \
+            -f scripts/issue-606-production-repair.sql)"
+          mapfile -t markers < <(printf '%s\n' "$result" | grep '^ISSUE_606_')
+          expected=(
+            "ISSUE_606_ASSISTANTS_CLEARED=0"
+            "ISSUE_606_EPISODES_CLEARED=0"
+            "ISSUE_606_CALLS_CLEARED=0"
+            "ISSUE_606_UNSAFE_ASSISTANTS=false"
+            "ISSUE_606_UNSAFE_EPISODES=false"
+            "ISSUE_606_OWNED_CALLS=false"
+            "ISSUE_606_REPAIR=verified_noop"
+          )
+          if [ "${#markers[@]}" -ne "${#expected[@]}" ]; then
+            echo "The final issue #606 proof returned an unexpected marker count."
+            exit 1
+          fi
+          for index in "${!expected[@]}"; do
+            if [ "${markers[$index]}" != "${expected[$index]}" ]; then
+              echo "The final issue #606 connection was not a verified no-op."
+              exit 1
+            fi
+          done
+          printf '%s\n' "${markers[@]}" | tee -a "$ISSUE_606_EVIDENCE_LOG"
+
+      - name: Re-prove main and release inputs after the no-op
+        env:
+          PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          git fetch --no-tags --force origin +refs/heads/main:refs/remotes/origin/main
+          fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
+          remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
+            || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
+            || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "Main moved before issue #606 evidence was finalized."
+            exit 1
+          fi
+          mapfile -t final_remote_tag_refs < <(
+            git ls-remote --exit-code --refs origin \
+              "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG"
+          )
+          if [ "${#final_remote_tag_refs[@]}" -ne 1 ]; then
+            echo "The operator release seal disappeared before evidence finalization."
+            exit 1
+          fi
+          read -r final_remote_tag_object final_remote_tag_ref final_remote_tag_extra \
+            <<< "${final_remote_tag_refs[0]}"
+          if [ "$final_remote_tag_object" != "$ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA" ] \
+            || [ "$final_remote_tag_ref" != "refs/tags/$ISSUE_606_RELEASE_SEAL_TAG" ] \
+            || [ -n "${final_remote_tag_extra:-}" ]; then
+            echo "The operator release seal changed before evidence finalization."
+            exit 1
+          fi
+          release_binding="$(node scripts/issue-606-production-release-git-contract.mjs \
+            --final-sha="$GITHUB_SHA" \
+            --reviewed-sha="$REVIEWED_REPAIR_SHA")"
+          mapfile -t sensitive_hashes < <(
+            printf '%s\n' "$release_binding" | sed -n 's/^ISSUE_606_SENSITIVE_MANIFEST_SHA256=//p'
+          )
+          if [ "${#sensitive_hashes[@]}" -ne 1 ] \
+            || [ "${sensitive_hashes[0]}" != "$ISSUE_606_SENSITIVE_MANIFEST_SHA256" ]; then
+            echo "Reviewed issue #606 inputs changed before evidence finalization."
+            exit 1
+          fi
+
+          deployment_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-vercel.XXXXXX.json")"
+          project_json="$(mktemp "$RUNNER_TEMP/homa-issue-606-project.XXXXXX.json")"
+          trap 'rm -f "$deployment_json" "$project_json"' EXIT
+          chmod 600 "$deployment_json" "$project_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v13/deployments/thankshoma.com?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC&withGitRepoInfo=true" \
+            > "$deployment_json"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/prj_pKBD87W4tmlT7lnYRgrs8WYociTz?teamId=team_BEuVWnWjCmzv8aVLJp1HU6TC" \
+            > "$project_json"
+          deployment_contract="$(node scripts/issue-606-vercel-deployment-contract.mjs \
+            --deployment-json="$deployment_json" \
+            --deployment-id="$PRODUCTION_DEPLOYMENT_ID" \
+            --final-sha="$GITHUB_SHA")"
+          mapfile -t deployment_hashes < <(
+            printf '%s\n' "$deployment_contract" | sed -n 's/^ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256=//p'
+          )
+          if [ "${#deployment_hashes[@]}" -ne 1 ] \
+            || [ "${deployment_hashes[0]}" != "$ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256" ]; then
+            echo "The exact production deployment changed before evidence finalization."
+            exit 1
+          fi
+          project_contract="$(node scripts/issue-606-vercel-project-protection-contract.mjs \
+            --project-json="$project_json")"
+          mapfile -t project_protection_hashes < <(
+            printf '%s\n' "$project_contract" | sed -n 's/^ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256=//p'
+          )
+          if [ "${#project_protection_hashes[@]}" -ne 1 ] \
+            || [ "${project_protection_hashes[0]}" != "$ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256" ]; then
+            echo "Generated deployment URL protection changed before evidence finalization."
+            exit 1
+          fi
+          echo "ISSUE_606_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
+
+      - name: Emit sanitized immutable evidence hashes
+        env:
+          PRODUCTION_DEPLOYMENT_ID: ${{ inputs.production_deployment_id }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          mapfile -t markers < "$ISSUE_606_EVIDENCE_LOG"
+          if [ "${#markers[@]}" -ne 21 ] \
+            || [ "${markers[20]}" != "ISSUE_606_REPAIR=verified_noop" ]; then
+            echo "The sanitized issue #606 evidence log is not exact."
+            exit 1
+          fi
+          sanitized_log_sha256="$(sha256sum "$ISSUE_606_EVIDENCE_LOG" | cut -d' ' -f1)"
+          workflow_sha256="$(sha256sum .github/workflows/issue-606-production-repair.yml | cut -d' ' -f1)"
+          repair_sha256="$(sha256sum scripts/issue-606-production-repair.sql | cut -d' ' -f1)"
+          if [ -e "$ISSUE_606_EVIDENCE_RECEIPT" ]; then
+            echo "The issue #606 evidence receipt path already exists."
+            exit 1
+          fi
+          umask 077
+          {
+            printf 'contract=homa-issue-606-production-repair-v2\n'
+            printf 'repository=%s\n' "$GITHUB_REPOSITORY"
+            printf 'workflow_sha256=%s\n' "$workflow_sha256"
+            printf 'run_id=%s\n' "$GITHUB_RUN_ID"
+            printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'evidence_kind=%s\n' "$ISSUE_606_EVIDENCE_KIND"
+            printf 'final_main_sha=%s\n' "$GITHUB_SHA"
+            printf 'reviewed_repair_sha=%s\n' "$REVIEWED_REPAIR_SHA"
+            printf 'reviewed_repair_tag=%s\n' "$ISSUE_606_RELEASE_SEAL_TAG"
+            printf 'release_seal_tag_object_sha=%s\n' "$ISSUE_606_RELEASE_SEAL_TAG_OBJECT_SHA"
+            printf 'release_seal_signer_principal=%s\n' "$ISSUE_606_RELEASE_SEAL_SIGNER_PRINCIPAL"
+            printf 'release_seal_signer_fingerprint=%s\n' "$ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT"
+            printf 'release_seal_workflow_contract_sha256=%s\n' "$ISSUE_606_RELEASE_SEAL_WORKFLOW_CONTRACT_SHA256"
+            printf 'release_seal_semantics=repository-owner-operator-seal-plus-public-council-record\n'
+            printf 'production_deployment_id=%s\n' "$PRODUCTION_DEPLOYMENT_ID"
+            printf 'production_deployed_sha=%s\n' "$PRODUCTION_DEPLOYED_SHA"
+            printf 'remote_main_sha=%s\n' "$ISSUE_606_REMOTE_MAIN_SHA"
+            printf 'sensitive_manifest_sha256=%s\n' "$ISSUE_606_SENSITIVE_MANIFEST_SHA256"
+            printf 'vercel_contract_sha256=%s\n' "$ISSUE_606_VERCEL_DEPLOYMENT_CONTRACT_SHA256"
+            printf 'vercel_project_protection_contract_sha256=%s\n' "$ISSUE_606_VERCEL_PROJECT_PROTECTION_CONTRACT_SHA256"
+            printf 'runtime_drain_contract_sha256=%s\n' "$ISSUE_606_RUNTIME_DRAIN_CONTRACT_SHA256"
+            printf 'old_instance_drain_seconds=%s\n' "$ISSUE_606_OLD_INSTANCE_DRAIN_SECONDS"
+            printf 'repair_sql_sha256=%s\n' "$repair_sha256"
+            printf 'sanitized_log_sha256=%s\n' "$sanitized_log_sha256"
+          } > "$ISSUE_606_EVIDENCE_RECEIPT"
+          chmod 600 "$ISSUE_606_EVIDENCE_RECEIPT"
+          receipt_sha256="$(sha256sum "$ISSUE_606_EVIDENCE_RECEIPT" | cut -d' ' -f1)"
+          cat "$ISSUE_606_EVIDENCE_RECEIPT"
+          printf 'ISSUE_606_SANITIZED_LOG_SHA256=%s\n' "$sanitized_log_sha256"
+          printf 'ISSUE_606_RECEIPT_SHA256=%s\n' "$receipt_sha256"
+
+      - name: Remove transient evidence files
+        if: always()
+        run: |
+          if [ -n "${ISSUE_606_EVIDENCE_DIR:-}" ] \
+            && [[ "$ISSUE_606_EVIDENCE_DIR" == "$RUNNER_TEMP"/homa-issue-606-evidence.* ]] \
+            && [ -d "$ISSUE_606_EVIDENCE_DIR" ]; then
+            find "$ISSUE_606_EVIDENCE_DIR" -maxdepth 1 -type f -delete
+            rmdir "$ISSUE_606_EVIDENCE_DIR"
+          fi
