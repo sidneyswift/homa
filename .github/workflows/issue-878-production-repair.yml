@@ -96,6 +96,7 @@ jobs:
           reviewed_paths=(
             .github/workflows/issue-878-production-repair.yml
             scripts/migration-version-check.mjs
+            scripts/issue-878-production-repair-marker-policy.mjs
             scripts/issue-878-production-repair.sql
             supabase/migrations/20260806034000_sandbox_live_auth_fixtures.sql
             supabase/migrations/20260806035000_family_delete_progress_trigger.sql
@@ -127,6 +128,14 @@ jobs:
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair wrapper hash does not match the reviewed issue #878 input."
+            exit 1
+          fi
+
+          marker_policy="scripts/issue-878-production-repair-marker-policy.mjs"
+          expected_marker_policy="c63d049650f26e80c36f8bd984ecc4ddfd23d4acdfb29ad4a117874a3a9786cd"
+          actual_marker_policy="$(sha256sum "$marker_policy" | cut -d' ' -f1)"
+          if [ "$actual_marker_policy" != "$expected_marker_policy" ]; then
+            echo "Repair marker policy hash does not match the reviewed issue #878 input."
             exit 1
           fi
 
@@ -170,7 +179,7 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
           NODE
 
-      - name: Apply and verify the exact repair in one fresh connection
+      - name: Apply the exact repair in one fresh connection
         run: |
           result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/issue-878-production-repair.sql)"
           echo "$result"
@@ -181,16 +190,8 @@ jobs:
             echo "The first issue #878 connection did not report exactly one marker."
             exit 1
           fi
-          if [ "$GITHUB_RUN_ATTEMPT" = "1" ]; then
-            if [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=repaired" ]; then
-              echo "The first issue #878 attempt did not report exactly one repair."
-              exit 1
-            fi
-          elif [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=repaired" ] \
-            && [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=verified_noop" ]; then
-            echo "The recovered issue #878 attempt reported an invalid marker."
-            exit 1
-          fi
+          node scripts/issue-878-production-repair-marker-policy.mjs \
+            apply "${repair_markers[@]}"
 
       - name: Prove an immediate repeat is a verified no-op
         run: |
@@ -199,11 +200,8 @@ jobs:
           mapfile -t repair_markers < <(
             printf '%s\n' "$result" | grep '^ISSUE_878_REPAIR='
           )
-          if [ "${#repair_markers[@]}" -ne 1 ] \
-            || [ "${repair_markers[0]}" != "ISSUE_878_REPAIR=verified_noop" ]; then
-            echo "The fresh issue #878 connection did not report exactly one verified no-op."
-            exit 1
-          fi
+          node scripts/issue-878-production-repair-marker-policy.mjs \
+            verify "${repair_markers[@]}"
 
       - name: Prove main stayed frozen through the repair
         run: |

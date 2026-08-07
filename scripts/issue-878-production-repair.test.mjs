@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { dirname, resolve } from "node:path";
@@ -16,6 +17,11 @@ const repair = readFileSync(
   resolve(repositoryRoot, "scripts/issue-878-production-repair.sql"),
   "utf8"
 );
+const markerPolicyPath = resolve(
+  repositoryRoot,
+  "scripts/issue-878-production-repair-marker-policy.mjs"
+);
+const markerPolicy = readFileSync(markerPolicyPath);
 const workflowDocument = parse(workflow);
 const sandboxMigration = readFileSync(
   resolve(
@@ -74,6 +80,10 @@ test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
   assert.match(workflow, /merge_line\[2\].*REVIEWED_REPAIR_SHA/u);
   assert.match(workflow, /git diff --quiet.*REVIEWED_REPAIR_SHA.*GITHUB_SHA/u);
   assert.match(workflow, /scripts\/migration-version-check\.mjs/u);
+  assert.match(
+    workflow,
+    /scripts\/issue-878-production-repair-marker-policy\.mjs/u
+  );
   assert.match(workflow, /git ls-remote --exit-code origin refs\/heads\/main/u);
   assert.match(workflow, /remote_main_sha.*GITHUB_SHA/u);
   assert.match(workflow, /kzplntcdtsvdowntvlza/u);
@@ -86,22 +96,27 @@ test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
   assert.match(workflow, new RegExp(sha256(sandboxMigration), "u"));
   assert.match(workflow, new RegExp(sha256(deleteMigration), "u"));
   assert.match(workflow, new RegExp(sha256(repair), "u"));
+  assert.match(workflow, new RegExp(sha256(markerPolicy), "u"));
   assert.equal(
     workflow.match(/-f scripts\/issue-878-production-repair\.sql/g)?.length,
     2
   );
   const firstApply = workflowDocument.jobs.apply.steps.find(
-    (step) =>
-      step.name === "Apply and verify the exact repair in one fresh connection"
+    (step) => step.name === "Apply the exact repair in one fresh connection"
   )?.run;
-  assert.match(firstApply, /ISSUE_878_REPAIR=repaired/u);
-  assert.match(firstApply, /GITHUB_RUN_ATTEMPT/u);
-  assert.match(firstApply, /ISSUE_878_REPAIR=verified_noop/u);
+  assert.match(
+    firstApply,
+    /issue-878-production-repair-marker-policy\.mjs \\\s+apply/u
+  );
+  assert.doesNotMatch(firstApply, /GITHUB_RUN_ATTEMPT/u);
   assert.match(firstApply, /repair_markers/u);
   const freshNoop = workflowDocument.jobs.apply.steps.find(
     (step) => step.name === "Prove an immediate repeat is a verified no-op"
   )?.run;
-  assert.match(freshNoop, /ISSUE_878_REPAIR=verified_noop/u);
+  assert.match(
+    freshNoop,
+    /issue-878-production-repair-marker-policy\.mjs \\\s+verify/u
+  );
   assert.match(freshNoop, /repair_markers/u);
   assert.equal(
     workflow.match(/git ls-remote --exit-code origin refs\/heads\/main/g)
@@ -109,6 +124,29 @@ test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
     2
   );
   assert.doesNotMatch(workflow, /supabase\s+db\s+push/u);
+});
+
+test("workflow marker policy refuses no-op replay certification", () => {
+  function runPolicy(attempt, mode, marker) {
+    return spawnSync(process.execPath, [markerPolicyPath, mode, marker], {
+      encoding: "utf8",
+      env: { ...process.env, GITHUB_RUN_ATTEMPT: attempt },
+    });
+  }
+
+  const replay = runPolicy("2", "apply", "ISSUE_878_REPAIR=verified_noop");
+  assert.notEqual(replay.status, 0);
+  assert.match(replay.stderr, /post-commit interruption requires separate/u);
+
+  const recoveredBeforeCommit = runPolicy(
+    "2",
+    "apply",
+    "ISSUE_878_REPAIR=repaired"
+  );
+  assert.equal(recoveredBeforeCommit.status, 0, recoveredBeforeCommit.stderr);
+
+  const repeat = runPolicy("2", "verify", "ISSUE_878_REPAIR=verified_noop");
+  assert.equal(repeat.status, 0, repeat.stderr);
 });
 
 test("repair applies only the reviewed pair inside one bounded transaction", () => {
