@@ -626,6 +626,12 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:issue-878-production-repair:postgres
 
+      - name: Issue 887 production repair disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: |
+          pnpm check:migration-versions
+          pnpm test:issue-887-production-repair:postgres
+
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).
       - name: hours_log dedupe disposable PostgreSQL E2E

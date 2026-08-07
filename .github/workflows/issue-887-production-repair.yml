@@ -1,0 +1,174 @@
+name: Apply issue 887 production repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type APPLY ISSUE 887
+        required: true
+        type: string
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-issue-887-repair
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      github.repository == 'sidneyswift/homa' &&
+      github.repository_owner == 'sidneyswift' &&
+      github.ref == 'refs/heads/main' &&
+      github.ref_name == 'main' &&
+      github.event.repository.default_branch == 'main' &&
+      github.actor == 'sidneyswift' &&
+      github.triggering_actor == 'sidneyswift'
+    name: Apply audited issue 887 billing repair
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Validate authorization and immutable inputs
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          if [ "$CONFIRMATION" != "APPLY ISSUE 887" ]; then
+            echo "Confirmation must exactly match APPLY ISSUE 887."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The confirmed READY production deployment must match this main commit."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
+            echo "This repair may run only in sidneyswift/homa."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY_OWNER" != "sidneyswift" ]; then
+            echo "This repair may run only for the sidneyswift repository owner."
+            exit 1
+          fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ] || [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "This repair may run only from the main branch."
+            exit 1
+          fi
+          default_branch="$(jq -r '.repository.default_branch // ""' "$GITHUB_EVENT_PATH")"
+          if [ "$default_branch" != "main" ]; then
+            echo "This repair may run only when main is the repository default branch."
+            exit 1
+          fi
+          checked_out_sha="$(git rev-parse HEAD)"
+          if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
+            echo "The checked-out commit does not match the dispatched workflow commit."
+            exit 1
+          fi
+          node scripts/migration-version-check.mjs
+
+          original_migration="supabase/migrations/20260801110000_family_billing_subscriptions.sql"
+          expected_original="0215e6ea62dde4f9a64f2d62e08ab89121e8b06a838812d39fc2f660f0fe8198"
+          actual_original="$(sha256sum "$original_migration" | cut -d' ' -f1)"
+          if [ "$actual_original" != "$expected_original" ]; then
+            echo "Original billing migration hash does not match the reviewed issue #887 input."
+            exit 1
+          fi
+
+          acl_migration="supabase/migrations/20260806092000_harden_family_billing_subscriptions_acl.sql"
+          expected_acl="7eaf70397d421d647f1319d13904b265a6e7fed940572ef1d2552e69d6816bd7"
+          actual_acl="$(sha256sum "$acl_migration" | cut -d' ' -f1)"
+          if [ "$actual_acl" != "$expected_acl" ]; then
+            echo "Billing ACL migration hash does not match the reviewed issue #887 input."
+            exit 1
+          fi
+
+          correction_migration="supabase/migrations/20260806093000_correct_billing_provider_product_identity.sql"
+          expected_correction="07e432ffbf449427ac43a7f4433dae3f5b083cbb9b185edff75a774b310464c7"
+          actual_correction="$(sha256sum "$correction_migration" | cut -d' ' -f1)"
+          if [ "$actual_correction" != "$expected_correction" ]; then
+            echo "Billing identity correction hash does not match the reviewed issue #887 input."
+            exit 1
+          fi
+
+          repair_script="scripts/issue-887-production-repair.sql"
+          expected_repair="271b7489b65b8bb6eae24ba507699e449d5b4e902d127c390de4698a620e598d"
+          actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
+          if [ "$actual_repair" != "$expected_repair" ]; then
+            echo "Repair wrapper hash does not match the reviewed issue #887 input."
+            exit 1
+          fi
+
+      - name: Confirm PostgreSQL client availability
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-client-16
+          fi
+          psql --version
+
+      - name: Prove the reviewed commit is still the main head
+        run: |
+          remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          if [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "The main branch moved after this workflow was dispatched."
+            exit 1
+          fi
+
+      - name: Build a masked production database URL
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const password = process.env.SUPABASE_DB_PASSWORD;
+          if (!publicUrl || !password) {
+            throw new Error("Production Supabase URL or database password is missing");
+          }
+          const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
+          const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
+          databaseUrl.username = `postgres.${ref}`;
+          databaseUrl.password = password;
+          databaseUrl.searchParams.set("sslmode", "require");
+          process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
+          appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
+          NODE
+
+      - name: Apply and verify the exact repair in one fresh connection
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/issue-887-production-repair.sql)"
+          echo "$result"
+          mapfile -t repair_markers < <(
+            printf '%s\n' "$result" | grep '^ISSUE_887_REPAIR='
+          )
+          if [ "${#repair_markers[@]}" -ne 1 ] \
+            || [ "${repair_markers[0]}" != "ISSUE_887_REPAIR=repaired" ]; then
+            echo "The first issue #887 repair connection did not report exactly one repair."
+            exit 1
+          fi
+
+      - name: Prove a fresh connection is a verified no-op
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 -f scripts/issue-887-production-repair.sql)"
+          echo "$result"
+          mapfile -t repair_markers < <(
+            printf '%s\n' "$result" | grep '^ISSUE_887_REPAIR='
+          )
+          if [ "${#repair_markers[@]}" -ne 1 ] \
+            || [ "${repair_markers[0]}" != "ISSUE_887_REPAIR=verified_noop" ]; then
+            echo "The fresh issue #887 connection did not report exactly one verified no-op."
+            exit 1
+          fi
