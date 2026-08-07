@@ -138,7 +138,7 @@ jobs:
           check_hash "scripts/issue-606-production-release-git-contract.mjs" \
             "3e7c73ce59b46d7d2d2cd1cc4868130571066a5f4912afeb0ee969633bb18ab4"
           check_hash "scripts/issue-606-release-seal-workflow-contract.mjs" \
-            "8acf56f0333cf0484f3518799f34f5f1a542cd91d8133e80cfc40f49deb51aa3"
+            "b8285d14c6b94294221a8dcdde26243825abb71d33397145d993397f09b85732"
           check_hash "scripts/issue-606-production-run-contract.mjs" \
             "9316f3351fd4c964c6b4953b98b739240cc505510908b6f80add461c766bb25d"
           check_hash "scripts/issue-606-runtime-drain-contract.mjs" \
@@ -213,8 +213,8 @@ jobs:
           RELEASE_SEAL_TAG: ${{ inputs.reviewed_repair_tag }}
           RELEASE_SEAL_TAGGER_IDENTITY: Sidney Swift <158200036+sidneyswift@users.noreply.github.com>
           RELEASE_SEAL_SIGNER_PRINCIPAL: 158200036+sidneyswift@users.noreply.github.com
-          RELEASE_SEAL_SIGNER_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCrrHpRQNQbibZ6f6bNfUuqkAKl8a0ILf/f8AAGEJAD6+N1l8LnieUOX8IrouWebonoUq6m3NIU1P8p2qLbiVH5WenaUzEqidpg30fE1yinFRsxpcmZpwLUTdJaABlJ0iWnOszFcKKC9k5wfcib5AxIJRlAQ6MCwvDoKVgrmqs73NasJxRaaOq67iubuEEl14xFGAmWJDVfwtbmLTSb0kx1Bf1vxkpmxkyxZ3fj0qq+7WL2C60+ay6U/dsWb8nvYpG6R9ZfEL6cxYrwrhx5RQOTBwREfQxum3jyYds/FpVdD9s9WWceedxcjIVHdTh2fYg9xzq07dZgq1KI7ffK3uHaMXPPSO77CjcSdscghQuk1GdKKQ+87l2GirB/4yBpCgrOE3cvFF/G8z8++aUVjQm7pi8+0cz/6Vui/2eFc+6QTWQEDszEgV0ZYhjIR9EgySlM/W+ak4cs8kcz6R9jG+wAwAn6JfjsX5hRRepJ1Hlt4H2XPAfMw4jW03kO2ksVHl9gCNLTPDabhXh4QBjMdZBNqyZmMTRmIjQ3GBxfbFzkScJZ0sAruLyO5gIHGu+uA8XowyPUMyPq9eh/DM7Z7tkMXT+28V1qzHXcqweijYIdAQ3SNr7LS1cEZfqPAo2nFJi3F8uSZOYbU6jDS+nbkzvXGU5DLzAjj0C6/ClQZcGkvQ==
-          RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:8Zm/8UplhxXqjM1BVG4Pvp0ufExKrY8tfivr/tgpSvg
+          RELEASE_SEAL_SIGNER_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCzF6U/UfsDqJbO9qcKpZ4D5GuBuvBjGF3Mj8/A9IgKGA0b/W5zhUfn9P0pBXr073H8M0J2WeOqlaFCi49g+xpVWiaHfpc/EN/flsheWEspsBOHDvx5dSVx1qMXtrw25Pg66/qxkNDRpsZmxn1P7FEnJ4jfX9loaNuWCBRR9CnTUmJpPcvMw7RELG96qYeIILw/DrOiaFRnWv2WmRnEc9t/DZeoc9qMxsWIf0OWKz+8KL6Ky0Wj1L/+hYQigalbVE7M2KZJFmhXbLXB8K+gqWrx/GaqHyiAau8Jar4p79eNOgv1yOPZt5QmNabVXY3fgXLuDNyummuLstu6/P4E0XTCJLA7/1Nw7rTWPnIbsmWKizeqdhPDUJzUms56kRCHhsNOFKDhyTBmQf8RhtS2uz0gw8cQchu2BIcuOiPtyHvRPUBHJwCXNmA0RwqMuQU6KWu71eKzMS87aQMmkd1aapmqWXeQI5CNyxL74M3bbVg3VLqPa5R9af9fl/FkLasIRlQQkYUaMiP1U2+Lq3ubi0SLfCeQUJyZYvG/IiVd7YouNZSUuzb/bf9uQB+uyNScBlGATrkZfMaV8SWG5X1FE5WYseN7M9Ipw9t5DYPeRO3rC3MZW/rpsfRDhK1DcBeflQALvGgBQQcbtPN8xnoyxv7g7YBddABAbcW5A7r5rRrykw==
+          RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:OhlRKNYiqh/Yq8CS/mbQJmUnzLKYFyKBh2jznTelsAY
         run: |
           # This SSH signature is the repository owner's deliberate production release seal.
           # It binds the exact reviewed head and public council ruling. It does not prove reviewer identity.
