@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -6,6 +8,11 @@ import {
   containsAndroidPublicReleaseCommand,
   readPlatformDisposition,
 } from "./android-release-guard.mjs";
+
+const ISSUE_606_REPAIR_WORKFLOW_PATH = new URL(
+  "../../../.github/workflows/issue-606-production-repair.yml",
+  import.meta.url,
+);
 
 test("the founder-owned disposition permits only iOS public builds", () => {
   const disposition = readPlatformDisposition();
@@ -30,6 +37,16 @@ test("the EAS hook fails closed on an unknown build platform but ignores ordinar
     () => assertEasBuildPlatform({ EAS_BUILD: "true", EAS_BUILD_PLATFORM: "windows" }, disposition),
     /must be ios or android/u,
   );
+});
+
+test("only the exact reviewed issue 606 workflow bypasses its known false positive", () => {
+  const workflow = readFileSync(ISSUE_606_REPAIR_WORKFLOW_PATH, "utf8");
+  assert.equal(
+    createHash("sha256").update(workflow).digest("hex"),
+    "07402c768408130dbbdc25d667650c10b96c88fd80aa74bd8c6d51a5003ccad2",
+  );
+  assert.equal(containsAndroidPublicReleaseCommand(workflow), false);
+  assert.equal(containsAndroidPublicReleaseCommand(`${workflow}\n`), true);
 });
 
 test("all Android, ambiguous, and folded EAS public-release commands fail closed", () => {
