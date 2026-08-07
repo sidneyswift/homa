@@ -622,6 +622,13 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:live-fixture-sandbox:postgres
 
+      - name: Issue 606 privacy containment disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: |
+          pnpm check:issue-606-containment
+          pnpm test:issue-606-containment:postgres
+          pnpm test:issue-606-production-repair:postgres
+
       - name: Issue 878 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:issue-878-production-repair:postgres

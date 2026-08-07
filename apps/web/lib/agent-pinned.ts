@@ -337,6 +337,7 @@ export interface PinnedHoursRow {
 
 export async function recallPinned(input: {
   familyId: string;
+  memberUserId: string | null;
   query: string;
   scope: "calls" | "chats" | "memories" | "all";
   limit: number;
@@ -353,6 +354,13 @@ export async function recallPinned(input: {
       select line, transcript_text, started_at::text as started_at
       from public.call_transcripts
       where family_id = ${input.familyId}
+        and member_user_id = ${input.memberUserId}
+        and exists (
+          select 1
+          from public.family_members current_member
+          where current_member.family_id = call_transcripts.family_id
+            and current_member.user_id = ${input.memberUserId}
+        )
         and to_tsvector('english', transcript_text)
             @@ websearch_to_tsquery('english', ${input.query})
       order by started_at desc nulls last
@@ -373,6 +381,51 @@ export async function recallPinned(input: {
       from public.conversation_messages
       where family_id = ${input.familyId}
         and visibility = 'family'
+        and ${input.memberUserId}::uuid is not null
+        and exists (
+          select 1
+          from public.family_members current_member
+          where current_member.family_id = conversation_messages.family_id
+            and current_member.user_id = ${input.memberUserId}
+        )
+        and (
+          (
+            role = 'user'
+            and member_user_id = ${input.memberUserId}
+          )
+          or (
+            role = 'assistant'
+            and member_user_id = ${input.memberUserId}
+            and exists (
+              select 1
+              from public.conversation_messages user_message
+              where user_message.family_id =
+                    conversation_messages.family_id
+                and user_message.session_id =
+                    conversation_messages.session_id
+                and user_message.role = 'user'
+            )
+            and not exists (
+              select 1
+              from public.conversation_messages user_message
+              where user_message.family_id =
+                    conversation_messages.family_id
+                and user_message.session_id =
+                    conversation_messages.session_id
+                and user_message.role = 'user'
+                and user_message.member_user_id
+                  is distinct from ${input.memberUserId}
+            )
+          )
+          or exists (
+            select 1
+            from public.conversation_deliveries delivery
+            where delivery.family_id = conversation_messages.family_id
+              and delivery.message_id = conversation_messages.id
+              and delivery.recipient_member_user_id = ${input.memberUserId}
+              and delivery.status = 'sent'
+          )
+        )
         and to_tsvector('english', content) @@ websearch_to_tsquery('english', ${input.query})
       order by created_at desc
       limit ${input.limit}
@@ -419,10 +472,13 @@ export async function recallPinned(input: {
   // embedded, from 49 minutes earlier: the lexical arm above cannot
   // match a transcript that never says the parent's words, and the arm
   // meant to catch exactly that was looking somewhere else.
-  if (hits.length < input.limit) {
-    const wantMemories = input.scope === "memories" || input.scope === "all";
-    const wantChats = input.scope === "chats" || input.scope === "all";
-    const wantCalls = input.scope === "calls" || input.scope === "all";
+  const wantMemories = input.scope === "memories" || input.scope === "all";
+  const wantChats = input.scope === "chats" || input.scope === "all";
+  const wantCalls = input.scope === "calls" || input.scope === "all";
+  if (
+    hits.length < input.limit &&
+    (input.memberUserId !== null || wantMemories)
+  ) {
     const queryEmbedding = await embedText(input.query, { familyId: input.familyId });
     if (queryEmbedding) {
       const rows = await sql<
@@ -448,6 +504,47 @@ export async function recallPinned(input: {
           where c.family_id = ${input.familyId} and c.visibility = 'family'
             and c.embedding is not null
             and ${wantChats}::boolean
+            and ${input.memberUserId}::uuid is not null
+            and exists (
+              select 1
+              from public.family_members current_member
+              where current_member.family_id = c.family_id
+                and current_member.user_id = ${input.memberUserId}
+            )
+            and (
+              (
+                c.role = 'user'
+                and c.member_user_id = ${input.memberUserId}
+              )
+              or (
+                c.role = 'assistant'
+                and c.member_user_id = ${input.memberUserId}
+                and exists (
+                  select 1
+                  from public.conversation_messages user_message
+                  where user_message.family_id = c.family_id
+                    and user_message.session_id = c.session_id
+                    and user_message.role = 'user'
+                )
+                and not exists (
+                  select 1
+                  from public.conversation_messages user_message
+                  where user_message.family_id = c.family_id
+                    and user_message.session_id = c.session_id
+                    and user_message.role = 'user'
+                    and user_message.member_user_id
+                      is distinct from ${input.memberUserId}
+                )
+              )
+              or exists (
+                select 1
+                from public.conversation_deliveries delivery
+                where delivery.family_id = c.family_id
+                  and delivery.message_id = c.id
+                  and delivery.recipient_member_user_id = ${input.memberUserId}
+                  and delivery.status = 'sent'
+              )
+            )
           union all
           select 'calls', t.started_at::text,
                  case when t.line = 'curriculum' then 'phone call (report review)' else 'phone call' end,
@@ -456,6 +553,13 @@ export async function recallPinned(input: {
           from public.call_transcripts t
           where t.family_id = ${input.familyId} and t.embedding is not null
             and ${wantCalls}::boolean
+            and t.member_user_id = ${input.memberUserId}
+            and exists (
+              select 1
+              from public.family_members current_member
+              where current_member.family_id = t.family_id
+                and current_member.user_id = ${input.memberUserId}
+            )
         ) ranked
         order by distance asc
         limit ${input.limit}

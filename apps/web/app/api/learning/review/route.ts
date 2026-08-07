@@ -11,9 +11,9 @@ import { createSupabaseServerClient } from "../../../../lib/supabase/server";
  * to be worth a review pass, claims the window, and runs the extraction
  * in after() so the response returns immediately.
  *
- * Auth: the caller's own cookie session resolves their family under RLS;
- * the sessionId from the body is only ever used TOGETHER with that
- * familyId (a session id belonging to another family matches zero rows).
+ * Auth: the caller's session resolves both family and adult identity. The
+ * service query accepts only rows owned by that adult or successfully
+ * delivered to that adult. A session id never grants access by itself.
  * The model never chooses what gets reviewed; message accumulation does.
  */
 
@@ -57,12 +57,21 @@ export async function POST(request: Request): Promise<Response> {
   if (!auth) {
     return Response.json({ queued: false }, { status: 401 });
   }
-  const { data: membership } = await auth.supabase
+  const { data: membership, error: membershipError } = await auth.supabase
     .from("family_members")
-    .select("family_id")
+    .select("family_id, created_at, families!inner(status)")
     .eq("user_id", auth.userId)
+    .neq("families.status", "deleted")
+    .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (membershipError) {
+    console.error(
+      "post-turn review membership lookup failed:",
+      membershipError.message,
+    );
+    return Response.json({ queued: false });
+  }
   const familyId = membership?.family_id;
   if (!familyId) return Response.json({ queued: false });
 
@@ -79,7 +88,11 @@ export async function POST(request: Request): Promise<Response> {
 
   after(async () => {
     try {
-      await runSessionReview(familyId, sessionId);
+      await runSessionReview({
+        familyId,
+        memberUserId: auth.userId,
+        sessionId,
+      });
     } catch (error) {
       console.error(
         "post-turn review failed:",

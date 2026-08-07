@@ -1,5 +1,6 @@
 import { mapDb, type DbJson } from "../map/db";
 import { emitMapEvent } from "../map/events";
+import { loadAdultSessionReviewMessages } from "../conversation-visibility";
 import {
   extractMemoriesFromText,
   MIN_TEXT_CHARS_FOR_EXTRACTION,
@@ -36,34 +37,29 @@ function parseReviewMinMessages(value: string | undefined): number {
 const REVIEW_MIN_MESSAGES = parseReviewMinMessages(process.env.HOMA_REVIEW_MIN_MESSAGES);
 const REVIEW_WINDOW_MAX_MESSAGES = 60;
 
-interface MessageRow {
-  sequence: number;
-  role: "user" | "assistant";
-  content: string;
-}
-
 export async function runSessionReview(
-  familyId: string,
-  sessionId: string,
+  input: {
+    familyId: string;
+    memberUserId: string;
+    sessionId: string;
+  },
 ): Promise<void> {
   const sql = mapDb();
 
   const lastReviewed = await sql<{ upto_sequence: number }[]>`
     select coalesce(max(upto_sequence), -1) as upto_sequence
     from public.learning_reviews
-    where session_id = ${sessionId} and family_id = ${familyId}
+    where session_id = ${input.sessionId} and family_id = ${input.familyId}
   `;
   const since = lastReviewed[0]?.upto_sequence ?? -1;
 
-  const messages = await sql<MessageRow[]>`
-    select sequence, role, content
-    from public.conversation_messages
-    where family_id = ${familyId}
-      and session_id = ${sessionId}
-      and sequence > ${since}
-    order by sequence asc
-    limit ${REVIEW_WINDOW_MAX_MESSAGES}
-  `;
+  const messages = await loadAdultSessionReviewMessages(sql, {
+    familyId: input.familyId,
+    memberUserId: input.memberUserId,
+    sessionId: input.sessionId,
+    afterSequence: since,
+    limit: REVIEW_WINDOW_MAX_MESSAGES,
+  });
   if (messages.length < REVIEW_MIN_MESSAGES) return;
 
   const uptoSequence = messages[messages.length - 1].sequence;
@@ -72,7 +68,7 @@ export async function runSessionReview(
   // for the same window inserts nothing and stands down.
   const claimed = await sql<{ id: string }[]>`
     insert into public.learning_reviews (family_id, session_id, upto_sequence)
-    values (${familyId}, ${sessionId}, ${uptoSequence})
+    values (${input.familyId}, ${input.sessionId}, ${uptoSequence})
     on conflict (session_id, upto_sequence) do nothing
     returning id
   `;
@@ -93,11 +89,11 @@ export async function runSessionReview(
 
   try {
     const outcome = await extractMemoriesFromText({
-      familyId,
+      familyId: input.familyId,
       source: "review",
       text,
       conversationLabel: "recent chat messages with this family",
-      sessionId,
+      sessionId: input.sessionId,
     });
     await sql`
       update public.learning_reviews
@@ -105,7 +101,7 @@ export async function runSessionReview(
       where id = ${claim.id}
     `;
     await emitMapEvent("memory.review_extracted", {
-      family_id: familyId,
+      family_id: input.familyId,
       saved: outcome.saved.length,
       skipped: outcome.skipped.length,
       messages_reviewed: messages.length,

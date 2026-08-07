@@ -227,6 +227,28 @@ async function episodeForRuntimeSession(
     const rows = await sql<{ id: string }[]>`
       select id from public.conversation_episodes
       where id = ${explicitEpisodeId} and family_id = ${familyId}
+        and (
+          (${memberUserId}::uuid is not null and (
+            exists (
+              select 1
+              from public.family_members current_member
+              where current_member.family_id = conversation_episodes.family_id
+                and current_member.user_id = ${memberUserId}
+            )
+            and (
+              member_user_id = ${memberUserId}
+              or exists (
+                select 1 from public.conversation_deliveries delivery
+                where delivery.episode_id = conversation_episodes.id
+                  and delivery.family_id = conversation_episodes.family_id
+                  and delivery.recipient_member_user_id = ${memberUserId}
+                  and delivery.status = 'sent'
+              )
+            )
+          ))
+          or (${memberUserId}::uuid is null and ${channel} = 'dispatch'
+              and scope = 'member' and member_user_id is null)
+        )
     `;
     if (rows[0]) {
       await new PostgresContinuityRepository().upsertBinding(
@@ -249,6 +271,17 @@ async function episodeForRuntimeSession(
   const bound = await sql<{ episode_id: string }[]>`
     select episode_id from public.conversation_thread_bindings
     where family_id = ${familyId} and runtime_session_id = ${sessionId}
+      and member_user_id is not distinct from ${memberUserId}
+      and (
+        ${memberUserId}::uuid is null
+        or exists (
+          select 1
+          from public.family_members current_member
+          where current_member.family_id =
+                public.conversation_thread_bindings.family_id
+            and current_member.user_id = ${memberUserId}
+        )
+      )
     order by last_seen_at desc
     limit 1
   `;
@@ -349,8 +382,7 @@ export async function persistCanonicalMessage(
   const content = input.content.trim().slice(0, 8000);
   if (!familyId || content.length === 0) return null;
 
-  const memberUserId =
-    input.role === "user" ? (attrs.memberUserId ?? null) : null;
+  const memberUserId = attrs.memberUserId ?? null;
   const episodeId = await episodeForRuntimeSession(
     familyId,
     memberUserId,
@@ -527,6 +559,7 @@ export async function markCanonicalMessageDelivered(input: {
 
 export async function loadContinuityContext(input: {
   familyId: string;
+  memberUserId: string | null;
   episodeId?: string | null;
   runtimeSessionId: string;
 }): Promise<string> {
@@ -538,6 +571,15 @@ export async function loadContinuityContext(input: {
         select episode_id from public.conversation_thread_bindings
         where family_id = ${input.familyId}
           and runtime_session_id = ${input.runtimeSessionId}
+          and member_user_id is not distinct from ${input.memberUserId}
+          and ${input.memberUserId}::uuid is not null
+          and exists (
+            select 1
+            from public.family_members current_member
+            where current_member.family_id =
+                  public.conversation_thread_bindings.family_id
+              and current_member.user_id = ${input.memberUserId}
+          )
         order by last_seen_at desc
         limit 1
       `
@@ -546,6 +588,7 @@ export async function loadContinuityContext(input: {
   const messages = await new PostgresContinuityRepository().listEpisodeMessages(
     input.familyId,
     episodeId,
+    input.memberUserId,
     input.runtimeSessionId,
   );
   return renderContinuityContext(messages);
@@ -565,6 +608,7 @@ export async function loadRecentContinuityForMember(input: {
   const messages = await repository.listEpisodeMessages(
     input.familyId,
     episodeId,
+    input.memberUserId,
     null,
   );
   return renderContinuityContext(messages);

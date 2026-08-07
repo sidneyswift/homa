@@ -175,8 +175,8 @@ async function upsert(
   await sql`
     insert into public.call_transcripts
       (conversation_id, line, assistant_id, channel, family_id, child_id,
-       caller_e164, agent_e164, messages, message_count, transcript_text,
-       embedding, started_at, ended_at)
+       member_user_id, caller_e164, agent_e164, messages, message_count,
+       transcript_text, embedding, started_at, ended_at)
     values (
       ${conversation.id},
       ${lineOf(conversation.metadata)},
@@ -184,6 +184,7 @@ async function upsert(
       ${conversation.metadata?.telnyx_conversation_channel ?? null},
       ${owner.familyId},
       ${owner.childId},
+      null,
       ${owner.caller},
       ${owner.agent},
       ${sql.json(messages as unknown as postgres.JSONValue)},
@@ -199,6 +200,7 @@ async function upsert(
       channel = excluded.channel,
       family_id = excluded.family_id,
       child_id = excluded.child_id,
+      member_user_id = null,
       caller_e164 = excluded.caller_e164,
       agent_e164 = excluded.agent_e164,
       messages = excluded.messages,

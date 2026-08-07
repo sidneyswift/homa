@@ -45,6 +45,7 @@ export interface ContinuityRepository {
   }): Promise<PendingDeliveryCandidate[]>;
   findBinding(
     familyId: string,
+    memberUserId: string | null,
     channel: ContinuityChannel,
     threadKeyHash: string,
   ): Promise<EpisodeBinding | null>;
@@ -65,6 +66,7 @@ export interface ContinuityRepository {
   listEpisodeMessages(
     familyId: string,
     episodeId: string,
+    memberUserId: string | null,
     excludeRuntimeSessionId: string | null,
   ): Promise<EpisodeMessage[]>;
 }
@@ -145,6 +147,7 @@ export async function resolveInboundTurn(
   });
   const binding = await repository.findBinding(
     input.familyId,
+    input.memberUserId,
     input.channel,
     threadKeyHash,
   );
@@ -199,6 +202,7 @@ export async function resolveInboundTurn(
     const messages = await repository.listEpisodeMessages(
       input.familyId,
       episodeId,
+      input.memberUserId,
       input.runtimeSessionId,
     );
     if (
