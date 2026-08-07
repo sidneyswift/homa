@@ -311,6 +311,11 @@ status header, or session memory is a substitute for an issue.
 
 ## Code style & voice
 
+Repository lane ownership, inventory, preservation, worktree removal, branch
+cleanup, pull request decisions, and task closeout follow the canonical
+[repository operating system](docs/homa-planning/runbooks/repository-operating-system.md).
+Do not restate that lifecycle in another context file.
+
 - No em dash, ever, anywhere (code comments, UI copy, docs, commit messages). Use a comma, period, colon, or mid-dot instead.
 - The name is always written "Homa". Never type "HOMA". The logo is the logo: where the brand appears as a mark, render the real `Logo` component (`apps/web/components/brand/Logo.tsx`, which spells "Homa"), never a hand-typed imitation of it. Founder correction 2026-07-28, `brand-casing-homa`, which retires global D8's old "HOMA on UI surfaces" wording.
 - Sentence case, no red/"behind" framing about a child, never compare siblings, never a verdict on a child. She decides and Homa suggests: recommend plainly, never issue an order, never hedge into mush.
