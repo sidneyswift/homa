@@ -616,9 +616,22 @@ const functionalServiceRole = runPsql([
       'regular',
       'active'
     );
-    select count(*)
-    from public.family_billing_subscriptions
-    where id = '88700000-0000-4000-8000-000000000099'::uuid;
+    do $service_role_probe$
+    declare
+      visible_rows integer;
+    begin
+      select count(*)
+      into visible_rows
+      from public.family_billing_subscriptions
+      where id = '88700000-0000-4000-8000-000000000099'::uuid;
+
+      if visible_rows <> 1 then
+        raise exception
+          'service_role probe found % rows after insert, expected 1',
+          visible_rows;
+      end if;
+    end
+    $service_role_probe$;
     update public.family_billing_subscriptions
     set status = 'canceled'
     where id = '88700000-0000-4000-8000-000000000099'::uuid;
@@ -626,10 +639,10 @@ const functionalServiceRole = runPsql([
     where id = '88700000-0000-4000-8000-000000000099'::uuid;
     truncate table public.family_billing_subscriptions;
     rollback;
-    select 1;
+    select 'service_role_dml_ok';
   `,
 ]);
-assert.deepEqual(functionalServiceRole.stdout, ["1"]);
+assert.deepEqual(functionalServiceRole.stdout, ["service_role_dml_ok"]);
 
 const ledgerEvidence = runPsql([
   "-Atc",
