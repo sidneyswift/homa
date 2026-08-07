@@ -23,6 +23,7 @@ class FakeContinuityRepository implements ContinuityRepository {
 
   async findBinding(
     _familyId: string,
+    _memberUserId: string | null,
     channel: EpisodeBinding["channel"],
     threadKeyHash: string,
   ): Promise<EpisodeBinding | null> {
@@ -59,7 +60,9 @@ class FakeContinuityRepository implements ContinuityRepository {
   async listEpisodeMessages(
     _familyId: string,
     episodeId: string,
+    _memberUserId: string | null,
   ): Promise<EpisodeMessage[]> {
+    void _memberUserId;
     return this.messages.get(episodeId) ?? [];
   }
 }
@@ -206,6 +209,46 @@ describe("conversation continuity service", () => {
     assert.equal(result.resolution, "none");
     assert.equal(result.episodeId, "episode-created-1");
     assert.equal(repository.createdEpisodes.length, 1);
+  });
+
+  it("does not render, bind, or claim another adult's offer after phone reassignment", async () => {
+    const repository = new FakeContinuityRepository();
+    repository.pending = [
+      pendingFor("adult-a", {
+        destinationAuthenticated: true,
+        episodeId: "episode-adult-a",
+        messageContent: "Adult A private offer",
+      }),
+    ];
+    repository.messages.set("episode-adult-a", [
+      {
+        role: "assistant",
+        visibility: "family",
+        content: "Adult A private history",
+        happenedAt: new Date("2026-07-11T13:18:52.000Z"),
+        runtimeSessionId: "runtime-adult-a",
+      },
+    ]);
+
+    const result = await resolveInboundTurn(repository, {
+      familyId: "family-1",
+      memberUserId: "adult-b",
+      channel: "sms",
+      transportThreadKey: "telnyx:homa:reassigned-phone",
+      runtimeSessionId: "runtime-adult-b",
+      providerReplyTo: null,
+      destinationKey: "+15555550123",
+      text: "Yes",
+      now: NOW,
+    });
+
+    assert.equal(result.resolution, "none");
+    assert.equal(result.replyToMessageId, null);
+    assert.equal(result.repliedDeliveryId, null);
+    assert.equal(result.episodeId, "episode-created-1");
+    assert.equal(result.contextMarkdown, "");
+    assert.equal(repository.bindings[0]?.episodeId, "episode-created-1");
+    assert.doesNotMatch(result.contextMarkdown, /Adult A/u);
   });
 
   it("returns all plausible open messages without choosing when a short reply is ambiguous", async () => {

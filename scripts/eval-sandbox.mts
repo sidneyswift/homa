@@ -96,7 +96,12 @@ create function storage.foldername(name text) returns text[]
 create function public.rls_auto_enable() returns event_trigger
   language plpgsql
   as $$ begin end $$;
+grant usage on schema auth to anon, authenticated, service_role;
 grant usage on schema extensions to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all privileges on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all privileges on sequences to anon, authenticated, service_role;
 alter database ${DB_NAME} set search_path = public, extensions;
 `;
 

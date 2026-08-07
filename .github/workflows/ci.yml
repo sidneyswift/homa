@@ -68,6 +68,9 @@ jobs:
       - name: Supabase migration versions are unique
         run: node scripts/migration-version-check.mjs && node --test scripts/migration-version-check.test.mjs
 
+      - name: Repository cleanup guardrails (110 focused tests)
+        run: node --test scripts/git-safety-hook.test.mjs scripts/remove-worktree-safely.test.mjs scripts/retire-damaged-worktree-registrations.test.mjs
+
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
         run: node scripts/em-dash-check.mjs
 
@@ -619,6 +622,14 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:live-fixture-sandbox:postgres
 
+      - name: Issue 606 privacy containment disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: |
+          pnpm check:issue-606-containment
+          pnpm test:issue-606-containment:postgres
+          pnpm conversation-privacy:e2e
+          pnpm test:issue-606-production-repair:postgres
+
       - name: Issue 878 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:issue-878-production-repair:postgres
@@ -626,6 +637,12 @@ jobs:
       - name: Issue 888 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:issue-888-production-repair:postgres
+
+      - name: Issue 887 production repair disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: |
+          pnpm check:migration-versions
+          pnpm test:issue-887-production-repair:postgres
 
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).

@@ -25,6 +25,7 @@ const task: DueFamilyTask = {
   phoneNumbers: [],
   email: "parent@example.test",
   recipientMemberUserId: "member-1",
+  sourceOfferDeliveryId: null,
 };
 
 const readyPreflight: TaskDispatchPreflightResult = {

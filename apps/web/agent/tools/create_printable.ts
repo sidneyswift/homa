@@ -9,9 +9,11 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import {
+  acceptedOfferDestinationStillCurrent,
   acceptedOfferDeliveryIdFromAttributes,
   completeAcceptedOfferFulfillment,
   reserveAcceptedOfferFulfillment,
+  validateAcceptedOfferFulfillmentRecipient,
 } from "../../lib/conversation-continuity/offer-fulfillment";
 import { emitFamilyAssetUsed } from "../../lib/library/family-asset-events";
 import { resolveMaterialFamilySources } from "../../lib/library/family-asset-provenance";
@@ -360,9 +362,33 @@ const createPrintable = defineBoundedTool({
       | {
           channel?: string;
           phoneNumber?: string;
+          memberUserId?: string;
           acceptedOfferDeliveryId?: string;
         }
       | undefined;
+    const sourceOfferDeliveryId =
+      acceptedOfferDeliveryIdFromAttributes(attributes);
+    const expectedRecipientMemberUserId =
+      typeof attributes?.memberUserId === "string"
+        ? attributes.memberUserId
+        : null;
+    if (sourceOfferDeliveryId) {
+      const recipientMemberUserId =
+        await validateAcceptedOfferFulfillmentRecipient({
+          familyId,
+          sourceDeliveryId: sourceOfferDeliveryId,
+          expectedRecipientMemberUserId,
+        });
+      if (
+        !expectedRecipientMemberUserId ||
+        recipientMemberUserId !== expectedRecipientMemberUserId
+      ) {
+        return {
+          created: false,
+          note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
+        };
+      }
+    }
     const trustedLesson = readSubjectLessonTrustedContext(attributes);
     const subjectLessonRestriction = subjectLessonPrintableRestriction(
       input,
@@ -706,40 +732,65 @@ const createPrintable = defineBoundedTool({
       pageGeometry: rendered.pageGeometry,
       underfillNotes: underfillNotesApplyTo(kind),
     });
-    const sourceOfferDeliveryId =
-      review?.pass === true
-        ? acceptedOfferDeliveryIdFromAttributes(attributes)
-        : null;
     let materialId: string = randomUUID();
     let reservedSourceDeliveryId: string | null = null;
     if (sourceOfferDeliveryId) {
       try {
-        const reservation = await reserveAcceptedOfferFulfillment({
-          familyId,
-          sourceDeliveryId: sourceOfferDeliveryId,
-          kind: "material",
-          referenceId: materialId,
-        });
-        // `wrote` only when THIS call created the reservation. On any
-        // later call for the same accepted offer the insert above is a
-        // no-op and the query returns the EXISTING reference, which is
-        // the id of the material the first call already inserted.
-        // Adopting it made the insert below collide on the primary key,
-        // so once a family accepted a morning-brief offer and got one
-        // material, every further material in that session failed with
-        // `duplicate key value violates unique constraint
-        // "worksheets_pkey"` and she simply got nothing. Four in a row
-        // for one family on 2026-07-28, surfaced by the tool-failure
-        // alert the same day it was built (gh#372).
-        if (reservation.wrote && reservation.referenceId) {
-          materialId = reservation.referenceId;
-          reservedSourceDeliveryId = sourceOfferDeliveryId;
+        if (review !== null && !review.pass) {
+          const recipientMemberUserId =
+            await validateAcceptedOfferFulfillmentRecipient({
+              familyId,
+              sourceDeliveryId: sourceOfferDeliveryId,
+              expectedRecipientMemberUserId,
+            });
+          if (
+            !expectedRecipientMemberUserId ||
+            recipientMemberUserId !== expectedRecipientMemberUserId
+          ) {
+            return {
+              created: false,
+              note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
+            };
+          }
+        } else {
+          const reservation = await reserveAcceptedOfferFulfillment({
+            familyId,
+            sourceDeliveryId: sourceOfferDeliveryId,
+            expectedRecipientMemberUserId,
+            kind: "material",
+            referenceId: materialId,
+          });
+          if (!reservation.eligible || !reservation.recipientMemberUserId) {
+            return {
+              created: false,
+              note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
+            };
+          }
+          // `wrote` only when THIS call created the reservation. On any
+          // later call for the same accepted offer the insert above is a
+          // no-op and the query returns the EXISTING reference, which is
+          // the id of the material the first call already inserted.
+          // Adopting it made the insert below collide on the primary key,
+          // so once a family accepted a morning-brief offer and got one
+          // material, every further material in that session failed with
+          // `duplicate key value violates unique constraint
+          // "worksheets_pkey"` and she simply got nothing. Four in a row
+          // for one family on 2026-07-28, surfaced by the tool-failure
+          // alert the same day it was built (gh#372).
+          if (reservation.wrote && reservation.referenceId) {
+            materialId = reservation.referenceId;
+            reservedSourceDeliveryId = sourceOfferDeliveryId;
+          }
         }
       } catch (error) {
         console.error(
           "create_printable fulfillment reservation failed:",
           error instanceof Error ? error.message : "unknown",
         );
+        return {
+          created: false,
+          note: "Homa could not verify the accepted offer's exact recipient, so the material was not created.",
+        };
       }
     }
 
@@ -814,7 +865,10 @@ const createPrintable = defineBoundedTool({
         html: storedHtml,
         source,
         revises: input.revisesId ?? null,
-        sourceOfferDeliveryId: null,
+        sourceOfferDeliveryId: reservedSourceDeliveryId,
+        sourceAuthorizationDeliveryId: sourceOfferDeliveryId,
+        sourceOfferRecipientMemberUserId:
+          expectedRecipientMemberUserId,
         channel,
         ...(trustedLesson
           ? {
@@ -871,6 +925,7 @@ const createPrintable = defineBoundedTool({
           source,
           revises: input.revisesId ?? null,
           channel,
+          source_offer_delivery_id: reservedSourceDeliveryId,
           generation,
         })
         .select("id")
@@ -925,15 +980,27 @@ const createPrintable = defineBoundedTool({
     let previewSentByText = false;
     if (channel === "sms" && reviewPassed && attributes?.phoneNumber) {
       const materialSmsIntro = `${input.title} is ready to print:`;
-      previewSentByText = await sendHomaSms(
-        attributes.phoneNumber,
-        materialSmsIntro,
-        [previewUrl, pdfUrl],
-      );
+      const smsDestination = attributes.phoneNumber;
+      const acceptedOfferSmsDestinationIsCurrent = async () =>
+        !sourceOfferDeliveryId ||
+        (await acceptedOfferDestinationStillCurrent({
+          familyId,
+          sourceDeliveryId: sourceOfferDeliveryId,
+          expectedRecipientMemberUserId,
+          channel: "sms",
+          destination: smsDestination,
+        }));
+      if (await acceptedOfferSmsDestinationIsCurrent()) {
+        previewSentByText = await sendHomaSms(
+          smsDestination,
+          materialSmsIntro,
+          [previewUrl, pdfUrl],
+        );
+      }
       sentByText = previewSentByText;
-      if (!sentByText) {
+      if (!sentByText && (await acceptedOfferSmsDestinationIsCurrent())) {
         sentByText = await sendHomaSms(
-          attributes.phoneNumber,
+          smsDestination,
           `${materialSmsIntro} ${pdfUrl}`,
         );
       }

@@ -59,6 +59,9 @@ export interface DueFamilyTask {
   /** The one adult this task delivers to (founder ruling 2026-07-12).
    * Null on legacy rows; delivery falls back to the account owner. */
   recipientMemberUserId: string | null;
+  /** Accepted offer that created this task. When present, every run must
+   * revalidate and deliver only to that offer's exact accepting adult. */
+  sourceOfferDeliveryId: string | null;
 }
 
 const SEEDABLE_KINDS = ["journal_prompt", "morning_brief"] as const;
@@ -237,6 +240,7 @@ export async function claimDueFamilyTasks(options: {
       label: string | null;
       prompt: string | null;
       recipient_member_user_id: string | null;
+      source_offer_delivery_id: string | null;
       first_name: string | null;
       parent_display_name: string | null;
       email: string | null;
@@ -259,11 +263,12 @@ export async function claimDueFamilyTasks(options: {
       )
       returning s.id, s.family_id, s.kind, s.local_hour, s.weekdays,
                 s.delivery_pref, s.label, s.prompt,
-                s.recipient_member_user_id
+                s.recipient_member_user_id, s.source_offer_delivery_id
     )
     select claimed.id as schedule_id, claimed.kind, claimed.local_hour,
            claimed.weekdays, claimed.delivery_pref, claimed.label,
            claimed.prompt, claimed.recipient_member_user_id,
+           claimed.source_offer_delivery_id,
            f.id as family_id, f.sandbox as family_sandbox, f.time_zone,
            f.first_name, f.parent_display_name, f.email,
            coalesce(
@@ -296,6 +301,7 @@ export async function claimDueFamilyTasks(options: {
     phoneNumbers: row.phone_numbers,
     email: row.email,
     recipientMemberUserId: row.recipient_member_user_id,
+    sourceOfferDeliveryId: row.source_offer_delivery_id,
   }));
 }
 
@@ -338,6 +344,7 @@ export async function loadFamilyTaskForRun(
       label: string | null;
       prompt: string | null;
       recipient_member_user_id: string | null;
+      source_offer_delivery_id: string | null;
       family_id: string;
       family_sandbox: boolean;
       first_name: string | null;
@@ -349,6 +356,7 @@ export async function loadFamilyTaskForRun(
   >`
     select s.id as schedule_id, s.kind, s.enabled, s.local_hour, s.weekdays,
            s.delivery_pref, s.label, s.prompt, s.recipient_member_user_id,
+           s.source_offer_delivery_id,
            f.id as family_id, f.sandbox as family_sandbox, f.time_zone,
            f.first_name, f.parent_display_name, f.email,
            coalesce(
@@ -417,6 +425,7 @@ export async function loadFamilyTaskForRun(
       phoneNumbers: row.phone_numbers,
       email: row.email,
       recipientMemberUserId: row.recipient_member_user_id,
+      sourceOfferDeliveryId: row.source_offer_delivery_id,
     },
   };
 }

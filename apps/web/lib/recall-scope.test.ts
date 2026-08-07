@@ -87,11 +87,11 @@ describe("recall semantic scope contract", () => {
     }
   });
 
-  it("keeps a fallback so code ahead of schema still recalls something", () => {
-    assert.match(
+  it("does not retry a failed scoped RPC with a wider history search", () => {
+    assert.doesNotMatch(
       recallSource,
       /semantic === null/u,
-      "a failed scoped RPC must retry unscoped rather than lose recall",
+      "a failed scoped RPC must fail closed instead of widening raw history",
     );
   });
 

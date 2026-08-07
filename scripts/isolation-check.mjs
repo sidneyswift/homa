@@ -54,6 +54,7 @@ let familyLibrarySchemaAvailable = false;
 let familyAssetPlanLinksSchemaAvailable = false;
 let familyCurriculumMappingSchemaAvailable = false;
 let progressNextMovesSchemaAvailable = false;
+let eveWebSessionOwnersSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
 const sql = dbPassword
@@ -2505,6 +2506,13 @@ async function expectAuthenticatedIsolation() {
       "family_phone_access_epochs",
       "auth member cannot read phone access epochs",
     );
+    if (eveWebSessionOwnersSchemaAvailable) {
+      await expectAuthenticatedReadDenied(
+        familyAUser.accessToken,
+        "eve_web_session_owners",
+        "auth member cannot read Eve session ownership records",
+      );
+    }
     await expectAuthenticatedInsertDenied(
       familyAUser.accessToken,
       "family_sms_invites",
@@ -4781,6 +4789,28 @@ await expectReadDenied("family_phones");
 // Session-access generations retain phone identity after unlinking and are
 // server-only for the same reason as family_phones.
 await expectReadDenied("family_phone_access_epochs");
+// Eve runtime session ids and continuation-token hashes are server-only.
+// Session creation now provisions this table before Eve starts work, so a code
+// deploy must never lead the additive migration. Absence is a rollout failure,
+// not an acceptable skipped check.
+{
+  const response = await rest(
+    "eve_web_session_owners?select=session_id&limit=1",
+    { headers: { Prefer: "" } },
+  );
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("eve_web_session_owners");
+    report(
+      "eve_web_session_owners is present before the session-ownership code deploys",
+      false,
+      "apply 20260805110000_eve_web_session_owners.sql first",
+    );
+  } else {
+    eveWebSessionOwnersSchemaAvailable = true;
+    await expectReadDenied("eve_web_session_owners");
+  }
+}
 // One-world onboarding tables (migration #24): the family row is the
 // account container from the first tap, memberless until signup, so
 // anonymous traffic must see nothing in any of them, ever.

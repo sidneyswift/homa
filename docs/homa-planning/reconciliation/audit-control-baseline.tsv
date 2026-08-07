@@ -297,6 +297,7 @@ docs/homa-planning/report-simplify-plan.md	tracked	present	7ed9c6eb7da9b6180a6b1
 docs/homa-planning/runbooks/benchmark-freshness.md	tracked	present	005903fdf880d677d83690e7dc36555046eeddd9a9238c71e9e26fa84136e473	8039a00a8489c482d4d5a844e6522b61981d7e78	audit-snapshot:2026-07-11T11:30:00-04:00
 docs/homa-planning/runbooks/eve-version-bump.md	tracked	present	f04b27c8788f153349caee2f2b21e597ed358487919db3b259aa62adb9aa38aa	3dcc5e726eafe0d09c8b2da8306bc6772ac9fbb8	audit-snapshot:2026-07-11T11:30:00-04:00
 docs/homa-planning/runbooks/map-renorm.md	tracked	present	5d606e5eaa7bc2b5b16ee6d56ab3949cef8a1bf61df7b7c7f6a8356c1f84bca7	8bde102695f350b7a75016853ff3c9d6e0e0b02b	audit-snapshot:2026-07-11T11:30:00-04:00
+docs/homa-planning/runbooks/repository-operating-system.md	audit-created	present	e0de366ba661151a8eb1efb43c5b66069e624d2fcad39be196b2b5b71d367431	-	audit-snapshot:2026-08-06T05:58:55Z
 docs/homa-planning/runbooks/state-requirements-refresh.md	tracked	present	c2f8221ad6318bf3f6081645e436a1286b2aa0b779feca0a6f6312ea90848ad6	d1f18dd76ffa2f4305ec3ef3df04639405d67292	audit-snapshot:2026-07-11T11:30:00-04:00
 docs/homa-planning/send-to-printer-plan.md	tracked	present	78142775564d6b782173da2194ca2cfba67d83960f89a1a48023cfdeab0032e4	5e67469b24639f7b8a7a3f3b80e330038dd1099d	audit-snapshot:2026-07-11T11:30:00-04:00
 docs/homa-planning/sms-onboarding-plan.md	tracked	present	64a8efec63fcea38eb87f644c174adaa3c9a6944dbaf2a765b2dc88e375eec61	1fc4aa88b398b5737b2d5474685d627053b7fa73	audit-snapshot:2026-07-11T11:30:00-04:00

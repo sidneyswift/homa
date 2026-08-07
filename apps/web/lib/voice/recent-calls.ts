@@ -14,8 +14,8 @@ import { mapDb } from "../map/db";
  *
  * Per-adult by ruling, not by preference (`voice-transcript-per-adult`,
  * 2026-07-28). A call belongs to the adult who made it, the way their chats
- * do, so the query joins `family_phones` on the caller's number and filters
- * to this member. Without a member id it returns nothing: failing closed on
+ * do, so the query filters the owner persisted when the transcript lands.
+ * Without a member id it returns nothing: failing closed on
  * a privacy rule is the only safe default, and the surface this fixes (web
  * chat) always has one.
  *
@@ -104,10 +104,14 @@ export async function loadRecentCallsContext(
   const rows = await sql<RecentCallRow[]>`
     select t.line, t.summary, t.transcript_text, t.started_at::text as started_at
     from public.call_transcripts t
-    join public.family_phones p
-      on p.phone_e164 = t.caller_e164 and p.family_id = t.family_id
     where t.family_id = ${input.familyId}
-      and p.member_user_id = ${input.memberUserId}
+      and t.member_user_id = ${input.memberUserId}
+      and exists (
+        select 1
+        from public.family_members current_member
+        where current_member.family_id = t.family_id
+          and current_member.user_id = ${input.memberUserId}
+      )
       and t.started_at >= ${since}
     order by t.started_at desc
     limit ${MAX_CALLS}

@@ -239,6 +239,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       try {
         continuityContext = await dependencies.loadContinuityContext({
           familyId: attributes.familyId,
+          memberUserId: attributes.memberUserId ?? null,
           episodeId: attributes.episodeId ?? null,
           runtimeSessionId: input.sessionId,
         });
@@ -352,6 +353,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       try {
         continuityContext = await dependencies.loadContinuityContext({
           familyId: attributes.familyId,
+          memberUserId: attributes.memberUserId ?? null,
           episodeId: attributes.episodeId ?? null,
           runtimeSessionId: input.sessionId,
         });

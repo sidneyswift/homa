@@ -347,6 +347,7 @@ describe("slim morning brief dynamic context", () => {
         attributes: {
           channel: "dispatch",
           familyId: "family-1",
+          memberUserId: "member-1",
           taskKind: "morning_brief",
           episodeId: "episode-1",
           deliveryVersion: "research_brief_v2",
@@ -379,6 +380,7 @@ describe("slim morning brief dynamic context", () => {
           continuityLoads += 1;
           assert.deepEqual(input, {
             familyId: "family-1",
+            memberUserId: "member-1",
             episodeId: "episode-1",
             runtimeSessionId: "session-1",
           });
