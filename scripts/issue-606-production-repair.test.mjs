@@ -248,7 +248,7 @@ test("release seal workflow contract rejects weakened exact-head attestations", 
   assert.match(ISSUE_606_RELEASE_SEAL_SIGNER_PUBLIC_KEY, /^ssh-rsa /u);
   assert.equal(
     ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT,
-    "SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c"
+    "SHA256:8Zm/8UplhxXqjM1BVG4Pvp0ufExKrY8tfivr/tgpSvg"
   );
 
   const adversarialMutations = [
@@ -294,7 +294,7 @@ test("release seal workflow contract rejects weakened exact-head attestations", 
     ],
     [
       "bad fingerprint",
-      "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c",
+      "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:8Zm/8UplhxXqjM1BVG4Pvp0ufExKrY8tfivr/tgpSvg",
       "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     ],
     [
