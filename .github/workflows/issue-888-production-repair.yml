@@ -7,12 +7,20 @@ on:
         description: Type APPLY ISSUE 888
         required: true
         type: string
+      reviewed_repair_sha:
+        description: Paste the exact reviewed pull request head SHA
+        required: true
+        type: string
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: production-issue-888-repair
+  group: production-issue-888-repair-v2
   cancel-in-progress: false
 
 jobs:
@@ -33,13 +41,32 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
 
       - name: Validate authorization and immutable inputs
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
+          REVIEWED_REPAIR_SHA: ${{ inputs.reviewed_repair_sha }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
         run: |
           if [ "$CONFIRMATION" != "APPLY ISSUE 888" ]; then
             echo "Confirmation must exactly match APPLY ISSUE 888."
+            exit 1
+          fi
+          if [ "$GITHUB_RUN_ATTEMPT" != "1" ]; then
+            echo "Issue #888 is a one-dispatch repair and refuses workflow reruns."
+            exit 1
+          fi
+          if ! [[ "$REVIEWED_REPAIR_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The reviewed repair SHA must be an exact lowercase Git SHA."
+            exit 1
+          fi
+          if ! [[ "$PRODUCTION_DEPLOYED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The production deployment SHA must be an exact lowercase Git SHA."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The confirmed READY production deployment must match this main commit."
             exit 1
           fi
           if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ]; then
@@ -57,6 +84,20 @@ jobs:
           checked_out_sha="$(git rev-parse HEAD)"
           if [ "$checked_out_sha" != "$GITHUB_SHA" ]; then
             echo "The checked-out commit does not match the dispatched workflow commit."
+            exit 1
+          fi
+          mapfile -t merge_parents < <(git show -s --format='%P' "$GITHUB_SHA" | tr ' ' '\n')
+          if [ "${#merge_parents[@]}" -ne 2 ] \
+            || [ "${merge_parents[1]}" != "$REVIEWED_REPAIR_SHA" ]; then
+            echo "The production commit is not the reviewed issue #888 merge commit."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$REVIEWED_REPAIR_SHA" "$GITHUB_SHA"; then
+            echo "The reviewed issue #888 head is not an ancestor of this main commit."
+            exit 1
+          fi
+          if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "The workflow checkout is not clean."
             exit 1
           fi
           node scripts/migration-version-check.mjs
@@ -78,7 +119,7 @@ jobs:
           fi
 
           repair_script="scripts/issue-888-production-repair.sql"
-          expected_repair="65242ea13959e5d9ae675cb858ce16e86822ace287c0881f227c63ec7ef4d0aa"
+          expected_repair="43feb4c73ff588d01ccd957cf68b67ff0a3573d50563d00eac71cc5013ecbda2"
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair wrapper hash does not match the reviewed issue #888 input."
@@ -95,11 +136,17 @@ jobs:
 
       - name: Prove the reviewed commit is still the main head
         run: |
+          git fetch --force origin +refs/heads/main:refs/remotes/origin/main
+          fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
           remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
-          if [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
-            echo "The main branch moved after this workflow was dispatched."
+          checked_out_sha="$(git rev-parse HEAD)"
+          if [ "$checked_out_sha" != "$GITHUB_SHA" ] \
+            || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
+            || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "Checked out, fetched, and remote main are not the dispatched commit."
             exit 1
           fi
+          echo "ISSUE_888_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
 
       - name: Build a masked production database URL
         env:
@@ -124,6 +171,19 @@ jobs:
           process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
           appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
           NODE
+
+      - name: Create an owner-only sanitized evidence log
+        run: |
+          evidence_dir="$(mktemp -d "$RUNNER_TEMP/homa-issue-888-evidence.XXXXXX")"
+          chmod 700 "$evidence_dir"
+          evidence_log="$evidence_dir/repair.log"
+          evidence_receipt="$evidence_dir/receipt.txt"
+          umask 077
+          : > "$evidence_log"
+          chmod 600 "$evidence_log"
+          echo "ISSUE_888_EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+          echo "ISSUE_888_EVIDENCE_LOG=$evidence_log" >> "$GITHUB_ENV"
+          echo "ISSUE_888_EVIDENCE_RECEIPT=$evidence_receipt" >> "$GITHUB_ENV"
 
       - name: Prove the production target is the reviewed clean state
         run: |
@@ -154,7 +214,6 @@ jobs:
         run: |
           result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
             -f scripts/issue-888-production-repair.sql)"
-          echo "$result"
           mapfile -t repair_markers < <(
             printf '%s\n' "$result" | grep '^ISSUE_888_REPAIR='
           )
@@ -163,12 +222,12 @@ jobs:
             echo "The first issue #888 repair connection did not report exactly one repair."
             exit 1
           fi
+          printf '%s\n' "${repair_markers[0]}" | tee "$ISSUE_888_EVIDENCE_LOG"
 
       - name: Prove a fresh connection is a verified no-op
         run: |
           result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
             -f scripts/issue-888-production-repair.sql)"
-          echo "$result"
           mapfile -t repair_markers < <(
             printf '%s\n' "$result" | grep '^ISSUE_888_REPAIR='
           )
@@ -176,4 +235,60 @@ jobs:
             || [ "${repair_markers[0]}" != "ISSUE_888_REPAIR=verified_noop" ]; then
             echo "The fresh issue #888 connection did not report exactly one verified no-op."
             exit 1
+          fi
+          printf '%s\n' "${repair_markers[0]}" | tee -a "$ISSUE_888_EVIDENCE_LOG"
+
+      - name: Emit sanitized immutable evidence hashes
+        env:
+          REVIEWED_REPAIR_SHA: ${{ inputs.reviewed_repair_sha }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          mapfile -t repair_markers < "$ISSUE_888_EVIDENCE_LOG"
+          if [ "${#repair_markers[@]}" -ne 2 ] \
+            || [ "${repair_markers[0]}" != "ISSUE_888_REPAIR=repaired" ] \
+            || [ "${repair_markers[1]}" != "ISSUE_888_REPAIR=verified_noop" ]; then
+            echo "The sanitized issue #888 evidence log is not exact."
+            exit 1
+          fi
+
+          sanitized_log_sha256="$(sha256sum "$ISSUE_888_EVIDENCE_LOG" | cut -d' ' -f1)"
+          workflow_sha256="$(sha256sum .github/workflows/issue-888-production-repair.yml | cut -d' ' -f1)"
+          repair_sha256="$(sha256sum scripts/issue-888-production-repair.sql | cut -d' ' -f1)"
+
+          if [ -e "$ISSUE_888_EVIDENCE_RECEIPT" ]; then
+            echo "The issue #888 evidence receipt path already exists."
+            exit 1
+          fi
+          umask 077
+          {
+            printf 'contract=homa-issue-888-production-repair-v1\n'
+            printf 'repository=%s\n' "$GITHUB_REPOSITORY"
+            printf 'workflow_path=.github/workflows/issue-888-production-repair.yml\n'
+            printf 'workflow_sha256=%s\n' "$workflow_sha256"
+            printf 'run_id=%s\n' "$GITHUB_RUN_ID"
+            printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'final_main_sha=%s\n' "$GITHUB_SHA"
+            printf 'reviewed_repair_sha=%s\n' "$REVIEWED_REPAIR_SHA"
+            printf 'production_deployed_sha=%s\n' "$PRODUCTION_DEPLOYED_SHA"
+            printf 'remote_main_sha=%s\n' "$ISSUE_888_REMOTE_MAIN_SHA"
+            printf 'repair_sql_sha256=%s\n' "$repair_sha256"
+            printf 'first_connection=%s\n' "${repair_markers[0]}"
+            printf 'second_connection=%s\n' "${repair_markers[1]}"
+            printf 'sanitized_log_sha256=%s\n' "$sanitized_log_sha256"
+          } > "$ISSUE_888_EVIDENCE_RECEIPT"
+          chmod 600 "$ISSUE_888_EVIDENCE_RECEIPT"
+
+          receipt_sha256="$(sha256sum "$ISSUE_888_EVIDENCE_RECEIPT" | cut -d' ' -f1)"
+          cat "$ISSUE_888_EVIDENCE_RECEIPT"
+          printf 'ISSUE_888_SANITIZED_LOG_SHA256=%s\n' "$sanitized_log_sha256"
+          printf 'ISSUE_888_RECEIPT_SHA256=%s\n' "$receipt_sha256"
+
+      - name: Remove transient evidence files
+        if: always()
+        run: |
+          if [ -n "${ISSUE_888_EVIDENCE_DIR:-}" ] \
+            && [[ "$ISSUE_888_EVIDENCE_DIR" == "$RUNNER_TEMP"/homa-issue-888-evidence.* ]] \
+            && [ -d "$ISSUE_888_EVIDENCE_DIR" ]; then
+            find "$ISSUE_888_EVIDENCE_DIR" -maxdepth 1 -type f -delete
+            rmdir "$ISSUE_888_EVIDENCE_DIR"
           fi

@@ -5,19 +5,22 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const databaseUrl = process.env.HOMA_EVAL_DATABASE_URL;
-assert.ok(databaseUrl, "HOMA_EVAL_DATABASE_URL must point at a disposable database");
+assert.ok(
+  databaseUrl,
+  "HOMA_EVAL_DATABASE_URL must point at a disposable database"
+);
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repairPath = join(
   repositoryRoot,
   "scripts",
-  "issue-888-production-repair.sql",
+  "issue-888-production-repair.sql"
 );
 const originalMigrationPath = join(
   repositoryRoot,
   "supabase",
   "migrations",
-  "20260801201500_month_plan_approvals.sql",
+  "20260801201500_month_plan_approvals.sql"
 );
 const psql = process.env.HOMA_POSTGRES_BIN
   ? join(process.env.HOMA_POSTGRES_BIN, "psql")
@@ -32,7 +35,11 @@ const postgresUrl = new URL(databaseUrl);
 postgresUrl.username = "postgres";
 postgresUrl.password = "";
 
-function runPsql(actions, expectedStatus = 0, targetUrl = postgresUrl.toString()) {
+function runPsql(
+  actions,
+  expectedStatus = 0,
+  targetUrl = postgresUrl.toString()
+) {
   const result = spawnSync(
     psql,
     ["--dbname", targetUrl, "-qX", "-v", "ON_ERROR_STOP=1", ...actions],
@@ -41,14 +48,18 @@ function runPsql(actions, expectedStatus = 0, targetUrl = postgresUrl.toString()
       env: process.env,
       maxBuffer: 8 * 1024 * 1024,
       timeout: 180_000,
-    },
+    }
   );
 
   if (result.error) throw result.error;
   if (expectedStatus === 0) {
     assert.equal(result.status, 0, result.stderr || "issue 888 repair failed");
   } else {
-    assert.notEqual(result.status, 0, "issue 888 repair unexpectedly succeeded");
+    assert.notEqual(
+      result.status,
+      0,
+      "issue 888 repair unexpectedly succeeded"
+    );
   }
 
   return {
@@ -98,7 +109,7 @@ runPsql(
     `,
   ],
   0,
-  databaseUrl,
+  databaseUrl
 );
 
 runPsql(["-f", originalMigrationPath]);
@@ -145,7 +156,7 @@ const reproducedDefaults = runPsql([
 assert.deepEqual(
   reproducedDefaults.lines,
   ["t"],
-  "disposable setup did not reproduce Supabase default table grants",
+  "disposable setup did not reproduce Supabase default table grants"
 );
 runPsql(["-c", "drop table public.month_plan_approvals;"]);
 
@@ -190,7 +201,10 @@ const fetchedMigration = runPsql([
     where version in ('20260801201500', '20260806040000');
   `,
 ]).stdout.trim();
-assert.match(fetchedMigration, /create table if not exists public\.month_plan_approvals/u);
+assert.match(
+  fetchedMigration,
+  /create table if not exists public\.month_plan_approvals/u
+);
 assert.match(fetchedMigration, /grant all privileges[\s\S]*service_role/u);
 
 runPsql(["-c", "drop table public.month_plan_approvals;"]);
@@ -271,7 +285,10 @@ const familyRead = runPsql([
     where draft_id in ('${firstDraftId}', '${secondDraftId}');
   `,
 ]);
-assert.ok(familyRead.lines.includes("1|1|0"), "family RLS did not isolate receipts");
+assert.ok(
+  familyRead.lines.includes("1|1|0"),
+  "family RLS did not isolate receipts"
+);
 
 for (const [operation, sql] of [
   [
@@ -296,12 +313,12 @@ for (const [operation, sql] of [
       "-c",
       `set request.jwt.claim.sub = '${firstUserId}'; set role authenticated; ${sql};`,
     ],
-    1,
+    1
   );
   assert.match(
     denied.stderr,
     /permission denied for table month_plan_approvals/u,
-    `authenticated ${operation} did not fail at the table privilege boundary`,
+    `authenticated ${operation} did not fail at the table privilege boundary`
   );
 }
 
@@ -363,7 +380,11 @@ const invalidCases = [
 ];
 for (const [label, sql, errorPattern] of invalidCases) {
   const rejected = runPsql(["-c", sql], 1);
-  assert.match(rejected.stderr, errorPattern, `${label} constraint was not enforced`);
+  assert.match(
+    rejected.stderr,
+    errorPattern,
+    `${label} constraint was not enforced`
+  );
 }
 
 const cascadeDraftId = randomUUID();
@@ -384,7 +405,7 @@ assert.deepEqual(
     `select count(*) from public.month_plan_approvals where draft_id = '${cascadeDraftId}';`,
   ]).lines,
   ["0"],
-  "family deletion did not cascade to month plan approvals",
+  "family deletion did not cascade to month plan approvals"
 );
 
 const transactionalTamperCases = [
@@ -445,6 +466,17 @@ const transactionalTamperCases = [
     /family-month index differs from contract/u,
   ],
   [
+    "clustered index",
+    "cluster public.month_plan_approvals using month_plan_approvals_pkey",
+    /primary index differs from contract/u,
+  ],
+  [
+    "replica identity index",
+    `alter table public.month_plan_approvals
+       replica identity using index month_plan_approvals_pkey`,
+    /primary index differs from contract/u,
+  ],
+  [
     "ledger",
     `update supabase_migrations.schema_migrations
       set statements = array['select 1']::text[]
@@ -455,11 +487,15 @@ const transactionalTamperCases = [
 
 for (const [label, mutation, errorPattern] of transactionalTamperCases) {
   const rejected = runPsql(["-c", `begin; ${mutation};`, "-f", repairPath], 1);
-  assert.match(rejected.stderr, errorPattern, `${label} tamper was not rejected`);
+  assert.match(
+    rejected.stderr,
+    errorPattern,
+    `${label} tamper was not rejected`
+  );
   assert.deepEqual(
     repairMarkers(runPsql(["-f", repairPath])),
     ["ISSUE_888_REPAIR=verified_noop"],
-    `${label} tamper escaped its failed transaction`,
+    `${label} tamper escaped its failed transaction`
   );
 }
 
@@ -472,7 +508,7 @@ const ledgerMixed = runPsql(
     "-f",
     repairPath,
   ],
-  1,
+  1
 );
 assert.match(ledgerMixed.stderr, /migration ledger is mixed/u);
 
@@ -483,9 +519,38 @@ const relationMixed = runPsql(
     "-f",
     repairPath,
   ],
-  1,
+  1
 );
 assert.match(relationMixed.stderr, /relation state is mixed/u);
+
+const partitionChild = runPsql(
+  [
+    "-c",
+    `begin;
+     drop table public.month_plan_approvals;
+     create table public.issue_888_partition_parent (
+       draft_id uuid not null,
+       family_id uuid not null references public.families (id) on delete cascade,
+       month_start date not null check (extract(day from month_start) = 1),
+       final_revision smallint not null check (final_revision >= 1),
+       revision_history jsonb not null check (jsonb_typeof(revision_history) = 'array'),
+       approved_at timestamptz not null default now()
+     ) partition by list (family_id);
+     create table public.month_plan_approvals
+       partition of public.issue_888_partition_parent default;
+     alter table public.month_plan_approvals
+       add constraint month_plan_approvals_pkey primary key (draft_id);
+     create index month_plan_approvals_family_month_idx
+       on public.month_plan_approvals (family_id, month_start desc);`,
+    "-f",
+    repairPath,
+  ],
+  1
+);
+assert.match(
+  partitionChild.stderr,
+  /relation metadata differs from the reviewed contract/u
+);
 
 const tableCollision = runPsql(
   [
@@ -498,7 +563,7 @@ const tableCollision = runPsql(
     "-f",
     repairPath,
   ],
-  1,
+  1
 );
 assert.match(tableCollision.stderr, /relation state is mixed/u);
 
@@ -515,7 +580,7 @@ const indexCollision = runPsql(
     "-f",
     repairPath,
   ],
-  1,
+  1
 );
 assert.match(indexCollision.stderr, /relation state is mixed/u);
 
@@ -532,7 +597,7 @@ const primaryIndexCollision = runPsql(
     "-f",
     repairPath,
   ],
-  1,
+  1
 );
 assert.match(primaryIndexCollision.stderr, /relation state is mixed/u);
 
@@ -578,7 +643,7 @@ const rollbackState = runPsql([
 assert.deepEqual(
   rollbackState.lines,
   ["t|t|t|t"],
-  "mid-migration failure left relation or ledger residue",
+  "mid-migration failure left relation or ledger residue"
 );
 
 runPsql([
@@ -618,8 +683,12 @@ const residue = runPsql([
     from auth.users;
   `,
 ]);
-assert.deepEqual(residue.lines, ["0|0|0"], "issue 888 harness left fixture residue");
+assert.deepEqual(
+  residue.lines,
+  ["0|0|0"],
+  "issue 888 harness left fixture residue"
+);
 
 console.log(
-  "Issue 888 repair passed Supabase-default, application, replay, fresh-session, behavior, tamper, collision, mixed-state, and rollback probes.",
+  "Issue 888 repair passed Supabase-default, application, replay, fresh-session, behavior, tamper, collision, mixed-state, and rollback probes."
 );

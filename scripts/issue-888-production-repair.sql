@@ -12,6 +12,26 @@ select pg_catalog.pg_advisory_xact_lock(
   pg_catalog.hashtextextended('homa:issue:888:production-repair', 0)
 );
 
+-- Freeze the migration ledger, parent rows, and any existing receipt table
+-- before reading the starting state. The advisory lock serializes two repair
+-- sessions, while these relation locks stop ordinary writers from changing a
+-- reviewed state between validation and commit.
+lock table supabase_migrations.schema_migrations
+  in share row exclusive mode;
+lock table public.families in share row exclusive mode;
+
+do $lock_existing_receipt_table$
+begin
+  begin
+    execute
+      'lock table public.month_plan_approvals in share row exclusive mode';
+  exception
+    when undefined_table then
+      null;
+  end;
+end
+$lock_existing_receipt_table$;
+
 create temporary table issue_888_repair_state (
   original_ledger_existed boolean not null,
   boundary_ledger_existed boolean not null,
@@ -220,6 +240,7 @@ begin
 
   if table_contract.relkind <> 'r'
     or table_contract.relpersistence <> 'p'
+    or table_contract.relispartition
     or table_contract.relowner <> expected_owner_oid
     or not table_contract.relrowsecurity
     or table_contract.relforcerowsecurity
@@ -425,10 +446,14 @@ begin
     or primary_index_contract.access_method_name <> 'btree'
     or not primary_index_contract.indisunique
     or not primary_index_contract.indisprimary
+    or not primary_index_contract.indimmediate
     or not primary_index_contract.indisvalid
     or not primary_index_contract.indisready
     or not primary_index_contract.indislive
     or primary_index_contract.indisexclusion
+    or primary_index_contract.indnullsnotdistinct
+    or primary_index_contract.indisclustered
+    or primary_index_contract.indisreplident
     or primary_index_contract.indnkeyatts <> 1
     or primary_index_contract.indnatts <> 1
     or primary_index_contract.indkey::text <> '1'
@@ -469,10 +494,14 @@ begin
     or family_index_contract.access_method_name <> 'btree'
     or family_index_contract.indisunique
     or family_index_contract.indisprimary
+    or not family_index_contract.indimmediate
     or not family_index_contract.indisvalid
     or not family_index_contract.indisready
     or not family_index_contract.indislive
     or family_index_contract.indisexclusion
+    or family_index_contract.indnullsnotdistinct
+    or family_index_contract.indisclustered
+    or family_index_contract.indisreplident
     or family_index_contract.indnkeyatts <> 2
     or family_index_contract.indnatts <> 2
     or family_index_contract.indkey::text <> '2 3'
