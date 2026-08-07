@@ -31,7 +31,7 @@ const CLAIM_LEDGER_PATH =
 const AUDIT_CONTROL_BASELINE_PATH =
   "docs/homa-planning/reconciliation/audit-control-baseline.tsv";
 const AUDIT_CONTROL_BASELINE_SHA256 =
-  "bb0e7b06bf5307976e83a460d8d7c1cad87a82dc36f925a4b19f244faca9b969";
+  "d556e09be3bd04398a9f481f6dc93a12f61b79ba58555698a28144d9f9a4d6e9";
 
 const PROHIBITED_PREFIXES = [
   "homa-macmini/",
