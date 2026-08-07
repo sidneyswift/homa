@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   chmodSync,
@@ -23,6 +23,7 @@ import { homedir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { acquireRepositoryCleanupLock as acquireOrdinaryCleanupLock } from "./remove-worktree-safely.mjs";
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const guardSource = join(repositoryRoot, "scripts", "retire-damaged-worktree-registrations.mjs");
@@ -141,6 +142,16 @@ function addDamagedRegistration(fixture, name, { detached = false, missingPath =
   const registration = { target, sentinelInode, manuallyPreservedPath };
   fixture.registrations.push(registration);
   return registration;
+}
+
+function administrativeDirectoryForTarget(fixture, target) {
+  const expectedGitdir = join(target, ".git");
+  const worktreesRoot = join(fixture.commonGitDir, "worktrees");
+  for (const name of readdirSync(worktreesRoot)) {
+    const adminDir = join(worktreesRoot, name);
+    if (readFileSync(join(adminDir, "gitdir"), "utf8").trim() === expectedGitdir) return adminDir;
+  }
+  assert.fail(`No administrative record found for ${target}`);
 }
 
 function makeFixture({ registrations = [{ name: "lane" }] } = {}) {
@@ -294,15 +305,58 @@ function assess(fixture, confirmations = []) {
   ]);
 }
 
+function runAfterReady(command, args, options, snapshotFactory) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: options.cwd,
+      env: options.env ?? process.env,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let sent = false;
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+      if (sent) return;
+      const match = stderr.match(/READY_FOR_FINAL_CODEX_TASK_SNAPSHOT (\{[^\n]+\})\n/u);
+      if (!match) return;
+      sent = true;
+      try {
+        const ready = JSON.parse(match[1]);
+        child.stdin.end(`${JSON.stringify(snapshotFactory(ready))}\n`);
+      } catch (error) {
+        child.kill();
+        reject(error);
+      }
+    });
+    child.on("error", reject);
+    child.on("close", (status, signal) => {
+      resolve({
+        status: status ?? 1,
+        signal,
+        stdout,
+        stderr,
+        readyObserved: sent,
+      });
+    });
+  });
+}
+
 function execute(
   fixture,
   confirmation,
   environment = {},
-  { confirmations = [], input = fixture.taskSnapshot } = {},
+  { confirmations = [], input = fixture.taskSnapshot, mutateSnapshot, bindToReady = true } = {},
 ) {
-  return runGuard(
-    fixture,
+  return runAfterReady(
+    process.execPath,
     [
+      fixture.guard,
       "--evidence",
       fixture.evidencePath,
       "--task-snapshot",
@@ -312,8 +366,19 @@ function execute(
       confirmation,
       ...tasklessArgs(confirmations),
     ],
-    environment,
-    input,
+    { cwd: fixture.primary, env: { ...fixture.env, ...environment } },
+    (ready) => {
+      const snapshot = structuredClone(input);
+      if (bindToReady) {
+        snapshot.capturedAt = new Date(Math.max(Date.now(), Date.parse(ready.readyAt))).toISOString();
+        snapshot.executionBoundary = {
+          nonce: ready.executionNonce,
+          readyAt: ready.readyAt,
+        };
+      }
+      if (mutateSnapshot) mutateSnapshot(snapshot, ready);
+      return snapshot;
+    },
   );
 }
 
@@ -333,13 +398,7 @@ test("generator writes private schema-v2 evidence and a concrete review queue", 
   });
   const evidenceOut = join(fixture.root, "generated-evidence.json");
   const reviewQueueOut = join(fixture.root, "generated-review-queue.json");
-  const result = runGuard(fixture, [
-    "--generate",
-    "--evidence-out",
-    evidenceOut,
-    "--review-queue-out",
-    reviewQueueOut,
-  ]);
+  const result = runGuard(fixture, ["--generate", "--evidence-out", evidenceOut, "--review-queue-out", reviewQueueOut]);
   assert.equal(result.status, 0, result.stderr);
   assert.equal(statSync(evidenceOut).mode & 0o777, 0o600);
   assert.equal(statSync(reviewQueueOut).mode & 0o777, 0o600);
@@ -369,20 +428,195 @@ test("generator writes private schema-v2 evidence and a concrete review queue", 
     reviewQueue.items.some((item) => item.kind === "recovery" && item.path.endsWith("detached-lane")),
     true,
   );
-  assert.equal(
-    reviewQueue.items.filter((item) => item.kind === "task-ownership").length,
-    2,
-  );
+  assert.equal(reviewQueue.items.filter((item) => item.kind === "task-ownership").length, 2);
 
-  const collision = runGuard(fixture, [
-    "--generate",
-    "--evidence-out",
-    evidenceOut,
-    "--review-queue-out",
-    evidenceOut,
-  ]);
+  const collision = runGuard(fixture, ["--generate", "--evidence-out", evidenceOut, "--review-queue-out", evidenceOut]);
   assert.equal(collision.status, 2);
   assert.match(collision.stderr, /must be different/iu);
+});
+
+test("an unexpected administrative file blocks the complete retirement inventory", (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  writeFileSync(join(adminDir, "unreviewed-state"), "must not be pruned silently\n");
+  const result = runGuard(fixture, ["--inventory"]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /unexpected path.*unreviewed-state.*extend the allowlist/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("a distinct committed staged and working version blocks damaged retirement", (t) => {
+  const fixture = withFixture(t);
+  const registration = fixture.registrations[0];
+  const adminDir = administrativeDirectoryForTarget(fixture, registration.target);
+  const threeVersionPath = join(registration.target, "three-version.txt");
+  assert.notEqual(run(realGit, ["--git-dir", adminDir, "show", "HEAD:three-version.txt"]).status, 0);
+  writeFileSync(threeVersionPath, "staged version\n");
+  checked(realGit, [`--git-dir=${adminDir}`, `--work-tree=${registration.target}`, "add", "three-version.txt"]);
+  assert.equal(checked(realGit, [`--git-dir=${adminDir}`, "show", ":three-version.txt"]), "staged version");
+  writeFileSync(threeVersionPath, "working version\n");
+  assert.equal(readFileSync(threeVersionPath, "utf8"), "working version\n");
+
+  const result = runGuard(fixture, ["--inventory"]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /staged index tree.*differs from committed tree.*not independently recoverable/iu);
+  assert.equal(readFileSync(threeVersionPath, "utf8"), "working version\n");
+  assert.equal(checked(realGit, [`--git-dir=${adminDir}`, "show", ":three-version.txt"]), "staged version");
+});
+
+test("a prebuffered damaged-lane snapshot cannot satisfy READY", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  const result = runGuard(
+    fixture,
+    [
+      "--evidence",
+      fixture.evidencePath,
+      "--task-snapshot",
+      "-",
+      "--execute",
+      "--confirmation",
+      `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`,
+    ],
+    {},
+    fixture.taskSnapshot,
+  );
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
+  assert.match(result.stderr, /executionBoundary|predates READY/iu);
+  const backupRoots = readdirSync(fixture.root).filter((name) =>
+    name.startsWith(".homa-damaged-registration-backups-"),
+  );
+  assert.equal(backupRoots.length, 1);
+  assert.equal(lstatSync(join(fixture.root, backupRoots[0])).mode & 0o777, 0o700);
+  assert.match(result.stderr, new RegExp(backupRoots[0], "u"));
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("damaged-lane execution timestamps and bindings fail closed", async (t) => {
+  const cases = [
+    [
+      "earlier than READY",
+      (snapshot, ready) => {
+        snapshot.capturedAt = new Date(Date.parse(ready.readyAt) - 1).toISOString();
+      },
+      /predates READY/iu,
+    ],
+    [
+      "malformed",
+      (snapshot) => {
+        snapshot.capturedAt = "not-a-time";
+      },
+      /ISO timestamp/iu,
+    ],
+    [
+      "non-normalized timezone",
+      (snapshot, ready) => {
+        snapshot.capturedAt = ready.readyAt.replace(/Z$/u, "+00:00");
+      },
+      /normalized ISO timestamp/iu,
+    ],
+    [
+      "stale",
+      (snapshot) => {
+        snapshot.capturedAt = new Date(Date.now() - 31_000).toISOString();
+      },
+      /snapshot is stale/iu,
+    ],
+    [
+      "future",
+      (snapshot) => {
+        snapshot.capturedAt = new Date(Date.now() + 31_000).toISOString();
+      },
+      /capturedAt is in the future/iu,
+    ],
+    [
+      "wrong execution nonce",
+      (snapshot) => {
+        snapshot.executionBoundary.nonce = "f".repeat(64);
+      },
+      /execution boundary nonce changed/iu,
+    ],
+    [
+      "wrong scan nonce",
+      (snapshot) => {
+        snapshot.retirementScan.nonce = "f".repeat(64);
+      },
+      /scan nonce changed/iu,
+    ],
+    [
+      "wrong scan digest",
+      (snapshot) => {
+        snapshot.retirementScan.sha256 = "f".repeat(64);
+      },
+      /scan digest changed/iu,
+    ],
+  ];
+  for (const [name, mutateSnapshot, expected] of cases) {
+    await t.test(name, async (t) => {
+      const fixture = withFixture(t);
+      const evidence = captureEvidence(fixture);
+      const result = await execute(
+        fixture,
+        `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`,
+        {},
+        { mutateSnapshot },
+      );
+      assert.equal(result.status, 2, result.stderr);
+      assert.match(result.stderr, expected);
+      assert.equal(existsSync(fixture.registrations[0].target), true);
+    });
+  }
+});
+
+test("a damaged snapshot cannot be replayed across READY events", async (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  let replayedSnapshot;
+  const first = await execute(
+    fixture,
+    `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`,
+    {},
+    {
+      mutateSnapshot(snapshot) {
+        replayedSnapshot = structuredClone(snapshot);
+        snapshot.retirementScan.sha256 = "f".repeat(64);
+      },
+    },
+  );
+  assert.equal(first.status, 2, first.stderr);
+  const second = await execute(
+    fixture,
+    `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`,
+    {},
+    { input: replayedSnapshot, bindToReady: false },
+  );
+  assert.equal(second.status, 2, second.stderr);
+  assert.match(second.stderr, /execution boundary (?:nonce|readyAt) changed|predates READY/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("the damaged executor holds the shared lock while waiting for task proof", async (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  let contentionObserved = false;
+  const result = await execute(
+    fixture,
+    `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`,
+    {},
+    {
+      mutateSnapshot() {
+        assert.equal(existsSync(join(fixture.commonGitDir, "homa-repository-cleanup.lock")), true);
+        assert.throws(
+          () => acquireOrdinaryCleanupLock(fixture.commonGitDir, "concurrent-ordinary-attempt"),
+          /already exists/iu,
+        );
+        contentionObserved = true;
+      },
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(contentionObserved, true);
 });
 
 test("streams a surviving file larger than the subprocess output limit", (t) => {
@@ -390,28 +624,28 @@ test("streams a surviving file larger than the subprocess output limit", (t) => 
   const largePath = join(fixture.registrations[0].target, "large-surviving-file.bin");
   writeFileSync(largePath, Buffer.alloc(21 * 1024 * 1024, 0x61));
   const evidence = captureEvidence(fixture);
-  assert.equal(
-    BigInt(evidence.registrations[0].pathInventory.totalBytes) > 20n * 1024n * 1024n,
-    true,
-  );
+  assert.equal(BigInt(evidence.registrations[0].pathInventory.totalBytes) > 20n * 1024n * 1024n, true);
   const result = assess(fixture);
   assert.equal(result.status, 0, result.stderr);
 });
 
-test("one active task blocks the complete batch before any path moves", (t) => {
+test("one active task blocks the complete batch before any path moves", async (t) => {
   const fixture = withFixture(t, {
     registrations: [{ name: "lane-one" }, { name: "lane-two" }],
   });
   const evidence = captureEvidence(fixture);
   fixture.taskSnapshot.tasks[1].status = "running";
   fixture.taskSnapshot.capturedAt = new Date().toISOString();
-  const result = execute(fixture, `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`);
+  const result = await execute(fixture, `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /batch retirement.*task.*still running/iu);
-  assert.equal(fixture.registrations.every((registration) => existsSync(registration.target)), true);
+  assert.equal(
+    fixture.registrations.every((registration) => existsSync(registration.target)),
+    true,
+  );
 });
 
-test("a taskless override is lane-specific and needs its exact separate confirmation", (t) => {
+test("a taskless override is lane-specific and needs its exact separate confirmation", async (t) => {
   const fixture = withFixture(t, {
     registrations: [{ name: "legacy-lane" }, { name: "tracked-lane" }],
   });
@@ -424,9 +658,7 @@ test("a taskless override is lane-specific and needs its exact separate confirma
     reason: "legacy-lane-predates-task-tracking",
     scanNonce: evidence.scan.nonce,
   };
-  fixture.taskSnapshot.tasks = fixture.taskSnapshot.tasks.filter(
-    (task) => task.worktree !== legacy.path,
-  );
+  fixture.taskSnapshot.tasks = fixture.taskSnapshot.tasks.filter((task) => task.worktree !== legacy.path);
   fixture.taskSnapshot.capturedAt = approvedAt;
   writeEvidence(fixture, evidence);
   writeTaskSnapshot(fixture);
@@ -434,7 +666,10 @@ test("a taskless override is lane-specific and needs its exact separate confirma
   const missingConfirmation = assess(fixture);
   assert.equal(missingConfirmation.status, 2);
   assert.match(missingConfirmation.stderr, /needs --legacy-taskless-confirmation/iu);
-  assert.equal(fixture.registrations.every((registration) => existsSync(registration.target)), true);
+  assert.equal(
+    fixture.registrations.every((registration) => existsSync(registration.target)),
+    true,
+  );
 
   const separateConfirmation = `ALLOW TASKLESS ${legacy.path}`;
   const inspection = assess(fixture, [separateConfirmation]);
@@ -442,14 +677,21 @@ test("a taskless override is lane-specific and needs its exact separate confirma
   const assessment = JSON.parse(inspection.stdout);
   assert.equal(assessment.tasks.overrideCount, 1);
   fixture.taskSnapshot.capturedAt = new Date().toISOString();
-  const result = execute(fixture, assessment.confirmation, {}, {
-    confirmations: [separateConfirmation],
-  });
+  const result = await execute(
+    fixture,
+    assessment.confirmation,
+    {},
+    {
+      confirmations: [separateConfirmation],
+    },
+  );
   assert.equal(result.status, 0, result.stderr);
 });
 
 test("a changed retained recovery reference blocks retirement", (t) => {
-  const fixture = withFixture(t, { registrations: [{ name: "detached-lane", detached: true }] });
+  const fixture = withFixture(t, {
+    registrations: [{ name: "detached-lane", detached: true }],
+  });
   const evidence = captureEvidence(fixture);
   git(fixture.primary, ["update-ref", "-d", evidence.registrations[0].recovery.reference]);
   const result = assess(fixture);
@@ -459,7 +701,9 @@ test("a changed retained recovery reference blocks retirement", (t) => {
 });
 
 test("a durable bundle must restore the exact detached HEAD and tree in an empty repository", (t) => {
-  const fixture = withFixture(t, { registrations: [{ name: "detached-lane", detached: true }] });
+  const fixture = withFixture(t, {
+    registrations: [{ name: "detached-lane", detached: true }],
+  });
   const evidence = captureEvidence(fixture);
   const registration = evidence.registrations[0];
   const retainedReference = registration.recovery.reference;
@@ -493,7 +737,10 @@ test("a changed surviving directory blocks the whole approved set", (t) => {
   const result = assess(fixture);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /exact approved prunable set.*changed/iu);
-  assert.equal(fixture.registrations.every((registration) => existsSync(registration.target)), true);
+  assert.equal(
+    fixture.registrations.every((registration) => existsSync(registration.target)),
+    true,
+  );
 });
 
 test("execution refuses a task snapshot file instead of boundary-fresh stdin", (t) => {
@@ -513,7 +760,7 @@ test("execution refuses a task snapshot file instead of boundary-fresh stdin", (
   assert.equal(existsSync(fixture.registrations[0].target), true);
 });
 
-test("batch retirement preserves every byte and uses metadata-only prune", (t) => {
+test("batch retirement preserves every byte and uses metadata-only prune", async (t) => {
   const fixture = withFixture(t, {
     registrations: [{ name: "lane-one" }, { name: "lane-two", detached: true }],
   });
@@ -523,26 +770,62 @@ test("batch retirement preserves every byte and uses metadata-only prune", (t) =
   const assessment = JSON.parse(inspection.stdout);
   assert.equal(assessment.status, "SAFE_TO_RETIRE_DAMAGED_REGISTRATIONS");
 
-  const result = execute(fixture, assessment.confirmation);
+  let restoreProofObservedAtReady = false;
+  const result = await execute(
+    fixture,
+    assessment.confirmation,
+    {},
+    {
+      mutateSnapshot() {
+        const commandsAtReady = readFileSync(fixture.fakeGitLog, "utf8")
+          .trim()
+          .split("\n")
+          .filter(Boolean)
+          .map((line) => JSON.parse(line));
+        restoreProofObservedAtReady = commandsAtReady.some((args) =>
+          args.some((argument) => typeof argument === "string" && argument.includes(".homa-admin-restore-")),
+        );
+      },
+    },
+  );
   assert.equal(result.status, 0, result.stderr);
+  assert.equal(restoreProofObservedAtReady, true);
   assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
   const report = JSON.parse(result.stdout);
   assert.equal(report.status, "DAMAGED_REGISTRATIONS_RETIRED");
   assert.equal(report.registrations.length, 2);
+  assert.equal(report.pruneDeletedOriginalAdministrativeBytes, true);
+  assert.equal(report.administrativeBytesPreserved, true);
+  assert.equal(lstatSync(report.administrativeBackupRoot).mode & 0o777, 0o700);
   for (const retired of report.registrations) {
     const source = fixture.registrations.find((entry) => entry.target === retired.originalPath);
     assert.equal(existsSync(retired.originalPath), false);
     assert.equal(existsSync(join(retired.preservedPath, "surviving-bytes.txt")), true);
     assert.equal(lstatSync(join(retired.preservedPath, "surviving-bytes.txt")).ino, source.sentinelInode);
     assert.equal(lstatSync(dirname(retired.preservedPath)).mode & 0o777, 0o700);
+    assert.equal(retired.workingTreeRestoreTested, true);
+    assert.equal(retired.administrativeBackup.indexBytesPreserved, true);
+    assert.equal(retired.administrativeBackup.restoreTested, true);
+    assert.equal(retired.administrativeBackup.restoredCommittedTree, retired.administrativeBackup.restoredStagedTree);
+    assert.equal(
+      sha256File(join(retired.administrativeBackup.backupPath, "index")),
+      retired.administrativeBackup.indexSha256,
+    );
+    assert.equal(lstatSync(join(retired.administrativeBackup.backupPath, "index")).mode & 0o777, 0o600);
   }
   assert.equal(git(fixture.primary, ["worktree", "list", "--porcelain", "-z"]).includes("gh-900"), false);
   const commands = readFileSync(fixture.fakeGitLog, "utf8")
     .trim()
     .split("\n")
     .map((line) => JSON.parse(line));
-  assert.equal(commands.some((args) => args.includes("prune") && args.includes(`--expire=${evidence.pruneCutoff}`)), true);
-  assert.equal(commands.some((args) => args.includes("remove")), false);
+  assert.equal(
+    commands.some((args) => args.includes("prune") && args.includes(`--expire=${evidence.pruneCutoff}`)),
+    true,
+  );
+  assert.equal(
+    commands.some((args) => args.includes("remove")),
+    false,
+  );
 });
 
 test("blocks parent-repository fallback without moving bytes", (t) => {
@@ -618,12 +901,14 @@ test("blocks a symlink collision at the registered path", (t) => {
   assert.equal(lstatSync(registration.target).isSymbolicLink(), true);
 });
 
-test("retires exactly proven metadata when the registered path is already absent", (t) => {
-  const fixture = withFixture(t, { registrations: [{ name: "missing-lane", missingPath: true }] });
+test("retires exactly proven metadata when the registered path is already absent", async (t) => {
+  const fixture = withFixture(t, {
+    registrations: [{ name: "missing-lane", missingPath: true }],
+  });
   const evidence = captureEvidence(fixture);
   const inspection = assess(fixture);
   assert.equal(inspection.status, 0, inspection.stderr);
-  const result = execute(fixture, JSON.parse(inspection.stdout).confirmation);
+  const result = await execute(fixture, JSON.parse(inspection.stdout).confirmation);
   assert.equal(result.status, 0, result.stderr);
   const report = JSON.parse(result.stdout);
   assert.equal(report.registrations[0].preservedPath, null);
@@ -631,23 +916,23 @@ test("retires exactly proven metadata when the registered path is already absent
   assert.equal(report.setSha256, evidence.setSha256);
 });
 
-test("blocks when a new stale registration makes the approved set incomplete", (t) => {
+test("blocks when a new stale registration makes the approved set incomplete", async (t) => {
   const fixture = withFixture(t);
   captureEvidence(fixture);
   addDamagedRegistration(fixture, "unapproved-lane");
-  const result = execute(fixture, `RETIRE DAMAGED REGISTRATIONS ignored`);
+  const result = await execute(fixture, `RETIRE DAMAGED REGISTRATIONS ignored`);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /exact approved prunable set|set changed/iu);
   assert.equal(existsSync(fixture.registrations[0].target), true);
 });
 
-test("preserves and reports a path recreated immediately before prune", (t) => {
+test("preserves and reports a path recreated immediately before prune", async (t) => {
   const fixture = withFixture(t);
   captureEvidence(fixture);
   const inspection = assess(fixture);
   assert.equal(inspection.status, 0, inspection.stderr);
   const originalPath = fixture.registrations[0].target;
-  const result = execute(fixture, JSON.parse(inspection.stdout).confirmation, {
+  const result = await execute(fixture, JSON.parse(inspection.stdout).confirmation, {
     FAKE_GIT_LATE_PATH: originalPath,
   });
   assert.equal(result.status, 0, result.stderr);
@@ -657,18 +942,21 @@ test("preserves and reports a path recreated immediately before prune", (t) => {
   assert.equal(existsSync(report.registrations[0].preservedPath), true);
 });
 
-test("a stale registration created at prune time is too new for the fixed cutoff", (t) => {
+test("a stale registration created at prune time is too new for the fixed cutoff", async (t) => {
   const fixture = withFixture(t);
   captureEvidence(fixture);
   const inspection = assess(fixture);
   assert.equal(inspection.status, 0, inspection.stderr);
   const newStalePath = join(fixture.root, "arrived-stale");
-  const result = execute(fixture, JSON.parse(inspection.stdout).confirmation, {
+  const result = await execute(fixture, JSON.parse(inspection.stdout).confirmation, {
     FAKE_GIT_NEW_STALE_PATH: newStalePath,
   });
   assert.equal(result.status, 0, result.stderr);
   const report = JSON.parse(result.stdout);
-  assert.equal(report.newRegistrations.some((record) => record.path === newStalePath), true);
+  assert.equal(
+    report.newRegistrations.some((record) => record.path === newStalePath),
+    true,
+  );
   assert.match(git(fixture.primary, ["worktree", "list", "--porcelain"]), /arrived-stale/u);
 });
 

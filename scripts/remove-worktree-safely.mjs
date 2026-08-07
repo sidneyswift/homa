@@ -18,6 +18,7 @@ import {
   rmdirSync,
   rmSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { spawnSync } from "node:child_process";
@@ -28,20 +29,8 @@ import { fileURLToPath } from "node:url";
 const EVIDENCE_MAX_AGE_MS = 30 * 60 * 1000;
 const TASK_SNAPSHOT_MAX_AGE_MS = 10 * 60 * 1000;
 const EXECUTION_TASK_REFRESH_MAX_AGE_MS = 30 * 1000;
-const ACTIVE_TASK_STATES = new Set([
-  "active",
-  "idle",
-  "in_progress",
-  "needs_input",
-  "pending",
-  "running",
-  "waiting",
-]);
-const IGNORED_DISPOSITIONS = new Set([
-  "backed-up-private",
-  "discard-approved",
-  "regenerable",
-]);
+const ACTIVE_TASK_STATES = new Set(["active", "idle", "in_progress", "needs_input", "pending", "running", "waiting"]);
+const IGNORED_DISPOSITIONS = new Set(["backed-up-private", "discard-approved", "regenerable"]);
 const IGNORED_FILE_KINDS = new Set(["file", "symlink"]);
 const SENSITIVE_IGNORED_FILENAMES = new Set([
   ".envrc",
@@ -163,6 +152,7 @@ const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
 const EVIDENCE_APPROVER = "sidneyswift";
 const PRIVATE_FILE_MODE = 0o600;
 const STREAM_CHUNK_BYTES = 1024 * 1024;
+const CLEANUP_LOCK_FILENAME = "homa-repository-cleanup.lock";
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 
 export class RemovalBlockedError extends Error {
@@ -174,6 +164,110 @@ export class RemovalBlockedError extends Error {
 
 function block(message) {
   throw new RemovalBlockedError(message);
+}
+
+export function acquireRepositoryCleanupLock(commonGitDir, actor) {
+  const lockPath = join(commonGitDir, CLEANUP_LOCK_FILENAME);
+  const token = randomBytes(32).toString("hex");
+  const content = Buffer.from(
+    `${JSON.stringify({
+      schemaVersion: 1,
+      actor,
+      pid: process.pid,
+      repositoryCommonGitDir: commonGitDir,
+      acquiredAt: new Date().toISOString(),
+      token,
+    })}\n`,
+    "utf8",
+  );
+  let descriptor;
+  try {
+    descriptor = openSync(lockPath, "wx", PRIVATE_FILE_MODE);
+    writeFileSync(descriptor, content);
+    fsyncSync(descriptor);
+    closeSync(descriptor);
+    descriptor = undefined;
+    chmodSync(lockPath, PRIVATE_FILE_MODE);
+  } catch (error) {
+    if (descriptor !== undefined) closeSync(descriptor);
+    if (error && typeof error === "object" && error.code === "EEXIST") {
+      block(
+        `Repository cleanup lock ${lockPath} already exists. Its age is not authority to remove it; inspect it manually and fail closed while ownership is ambiguous.`,
+      );
+    }
+    block(
+      `Could not acquire repository cleanup lock ${lockPath}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  const stats = lstatSync(lockPath, { bigint: true });
+  if (!stats.isFile() || stats.isSymbolicLink() || (stats.mode & 0o777n) !== BigInt(PRIVATE_FILE_MODE)) {
+    block(`Repository cleanup lock ${lockPath} is not an owner-only regular file.`);
+  }
+  if (typeof process.getuid === "function" && stats.uid !== BigInt(process.getuid())) {
+    block(`Repository cleanup lock ${lockPath} is not owned by the current user.`);
+  }
+  if (!readFileSync(lockPath).equals(content)) {
+    block(`Repository cleanup lock ${lockPath} changed while it was acquired.`);
+  }
+  return {
+    path: lockPath,
+    token,
+    content,
+    identity: {
+      dev: String(stats.dev),
+      ino: String(stats.ino),
+      mode: String(stats.mode),
+      uid: String(stats.uid),
+      size: String(stats.size),
+    },
+  };
+}
+
+export function releaseRepositoryCleanupLock(lock) {
+  const stats = lstatSync(lock.path, { bigint: true });
+  const identity = {
+    dev: String(stats.dev),
+    ino: String(stats.ino),
+    mode: String(stats.mode),
+    uid: String(stats.uid),
+    size: String(stats.size),
+  };
+  assertEqual(JSON.stringify(identity), JSON.stringify(lock.identity), "Repository cleanup lock identity");
+  if (!stats.isFile() || stats.isSymbolicLink() || (stats.mode & 0o777n) !== BigInt(PRIVATE_FILE_MODE)) {
+    block(`Repository cleanup lock ${lock.path} changed type or permissions.`);
+  }
+  if (!readFileSync(lock.path).equals(lock.content)) {
+    block(`Repository cleanup lock ${lock.path} changed content.`);
+  }
+  unlinkSync(lock.path);
+  if (existsSync(lock.path)) block(`Repository cleanup lock ${lock.path} still exists after release.`);
+}
+
+function withRepositoryCleanupLock(commonGitDir, actor, action) {
+  const lock = acquireRepositoryCleanupLock(commonGitDir, actor);
+  let result;
+  let actionError;
+  try {
+    result = action(lock);
+  } catch (error) {
+    actionError = error;
+  }
+  try {
+    releaseRepositoryCleanupLock(lock);
+  } catch (releaseError) {
+    if (actionError) {
+      block(
+        `Cleanup stopped and its repository lock could not be released safely. Original error: ${
+          actionError instanceof Error ? actionError.message : String(actionError)
+        }. Lock error: ${releaseError instanceof Error ? releaseError.message : String(releaseError)}`,
+      );
+    }
+    throw releaseError;
+  }
+  if (actionError) throw actionError;
+  return result;
 }
 
 function sanitizedSubprocessEnvironment(inputEnvironment = process.env) {
@@ -409,8 +503,16 @@ function parsedTime(value, label) {
   return time;
 }
 
-function assertFresh(value, label, maxAgeMs, now) {
+function normalizedIsoTime(value, label) {
   const time = parsedTime(value, label);
+  if (new Date(time).toISOString() !== value) {
+    block(`${label} must be a normalized ISO timestamp.`);
+  }
+  return time;
+}
+
+function assertFresh(value, label, maxAgeMs, now) {
+  const time = normalizedIsoTime(value, label);
   if (time > now) block(`${label} is in the future.`);
   if (now - time > maxAgeMs) block(`${label} is stale. Capture it again immediately before removal.`);
   return time;
@@ -604,11 +706,7 @@ function isSensitiveIgnoredPath(path) {
   const leaf = lowerSegments.at(-1) ?? "";
   const parent = lowerSegments.at(-2) ?? "";
 
-  if (
-    lowerSegments.some((segment) =>
-      [".aws", ".direnv", ".gnupg", ".kube", ".ssh"].includes(segment),
-    )
-  ) {
+  if (lowerSegments.some((segment) => [".aws", ".direnv", ".gnupg", ".kube", ".ssh"].includes(segment))) {
     return true;
   }
   if (parent === ".docker" && leaf === "config.json") return true;
@@ -625,9 +723,7 @@ function isApprovedRegenerablePath(path) {
 }
 
 function sameFileState(left, right) {
-  return ["dev", "ino", "mode", "size", "mtimeNs"].every(
-    (field) => String(left[field]) === String(right[field]),
-  );
+  return ["dev", "ino", "mode", "size", "mtimeNs"].every((field) => String(left[field]) === String(right[field]));
 }
 
 function ignoredFileFingerprint(target, path) {
@@ -725,11 +821,7 @@ function isBareGitRepositoryDirectory(absolutePath, entries) {
   try {
     head = readFileSync(join(absolutePath, "HEAD"), "utf8").trim();
   } catch (error) {
-    block(
-      `Bare Git repository HEAD is unreadable: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
+    block(`Bare Git repository HEAD is unreadable: ${error instanceof Error ? error.message : String(error)}`);
   }
   if (!/^(?:ref: refs\/[^\0\r\n]+|[a-f0-9]{40}|[a-f0-9]{64})$/iu.test(head)) return false;
 
@@ -762,19 +854,12 @@ function assertNoNestedGitEntries(target) {
       );
     }
 
-    if (
-      current.relativePath !== "" &&
-      isBareGitRepositoryDirectory(current.absolutePath, entries)
-    ) {
-      block(
-        `Nested bare Git repository ${JSON.stringify(current.relativePath)} preserves separate Git history.`,
-      );
+    if (current.relativePath !== "" && isBareGitRepositoryDirectory(current.absolutePath, entries)) {
+      block(`Nested bare Git repository ${JSON.stringify(current.relativePath)} preserves separate Git history.`);
     }
 
     for (const entry of entries) {
-      const relativePath = current.relativePath
-        ? `${current.relativePath}/${entry.name}`
-        : entry.name;
+      const relativePath = current.relativePath ? `${current.relativePath}/${entry.name}` : entry.name;
       if (entry.name.toLowerCase() === ".git") {
         if (current.relativePath === "") continue;
         block(`Nested .git entry ${JSON.stringify(relativePath)} preserves separate Git history.`);
@@ -832,7 +917,9 @@ function inspectBundle(path, target, expectedHead, expectedTree, objectFormat) {
   if (!statSync(artifact).isFile()) block("The recovery artifact must be a file.");
   const artifactSha256 = sha256(readFileSync(artifact));
   checked("git", ["bundle", "verify", artifact], { cwd: target });
-  const advertisedHeads = checked("git", ["bundle", "list-heads", artifact], { cwd: target })
+  const advertisedHeads = checked("git", ["bundle", "list-heads", artifact], {
+    cwd: target,
+  })
     .split("\n")
     .filter(Boolean)
     .map((line) => {
@@ -866,20 +953,9 @@ function inspectBundle(path, target, expectedHead, expectedTree, objectFormat) {
         block(`The bundle restore introduced ${name} object indirection.`);
       }
     }
-    checked("git", [
-      "-C",
-      restoreRepository,
-      "fsck",
-      "--full",
-      "--strict",
-      "--no-dangling",
-      "refs/heads/recovered",
-    ]);
+    checked("git", ["-C", restoreRepository, "fsck", "--full", "--strict", "--no-dangling", "refs/heads/recovered"]);
     const restoredHead = checked("git", ["-C", restoreRepository, "rev-parse", "refs/heads/recovered"]).trim();
-    const restoredTree = checked(
-      "git",
-      ["-C", restoreRepository, "rev-parse", "refs/heads/recovered^{tree}"],
-    ).trim();
+    const restoredTree = checked("git", ["-C", restoreRepository, "rev-parse", "refs/heads/recovered^{tree}"]).trim();
     assertEqual(restoredHead, expectedHead, "Restored bundle head");
     assertEqual(restoredTree, expectedTree, "Restored bundle tree");
     assertEqual(sha256(readFileSync(artifact)), artifactSha256, "Recovery bundle content during restore");
@@ -935,9 +1011,7 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
   );
 
   const origin = normalizeOrigin(git(target, ["config", "--get", "remote.origin.url"]).trim());
-  const repositoryOrigin = normalizeOrigin(
-    git(repositoryRoot, ["config", "--get", "remote.origin.url"]).trim(),
-  );
+  const repositoryOrigin = normalizeOrigin(git(repositoryRoot, ["config", "--get", "remote.origin.url"]).trim());
   assertEqual(origin, repositoryOrigin, "Origin identity");
   assertEqual(origin, expectedRepository.origin, "Target compared with script repository origin");
 
@@ -963,14 +1037,14 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
     const reference = requiredString(evidence.recovery.reference, "recovery.reference");
     const referenceMatch = reference.match(/^refs\/heads\/(.+)$/u);
     if (!referenceMatch) block("recovery.reference must name a GitHub branch.");
-    remoteHead = githubBranchHead(origin, referenceMatch[1], objectFormat, { allowMissing: true });
+    remoteHead = githubBranchHead(origin, referenceMatch[1], objectFormat, {
+      allowMissing: true,
+    });
   } else if (evidence?.recovery?.kind === "bundle") {
     bundle = inspectBundle(evidence.recovery.artifactPath, target, head, tree, objectFormat);
   }
 
-  const statusLines = git(target, ["status", "--porcelain=v2", "--untracked-files=all"])
-    .split("\n")
-    .filter(Boolean);
+  const statusLines = git(target, ["status", "--porcelain=v2", "--untracked-files=all"]).split("\n").filter(Boolean);
   const patchSha256 = sha256(git(target, ["diff", "--binary", "HEAD", "--"]));
   const ignoredEntries = ignoredEntriesFromGit(target);
 
@@ -1023,14 +1097,15 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
   ]);
   let associatedPullRequests = [];
   if (commitPullResult.status === 0) {
-    associatedPullRequests = parseCommandJson(commitPullResult.stdout, "GitHub commit pull request lookup")
-      .map((pull) => ({
+    associatedPullRequests = parseCommandJson(commitPullResult.stdout, "GitHub commit pull request lookup").map(
+      (pull) => ({
         number: pull.number,
         url: pull.html_url,
         headRefOid: pull.head?.sha ?? null,
         headRefName: pull.head?.ref ?? null,
         state: pull.state,
-      }));
+      }),
+    );
   } else {
     const missingLocalOnlyCommit = /\(HTTP (?:404|422)\)/u.test(commitPullResult.stderr);
     if (recoveryKind !== "bundle" || !missingLocalOnlyCommit) {
@@ -1039,10 +1114,7 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
   }
 
   const pullMap = new Map();
-  for (const pull of [
-    ...branchPulls,
-    ...associatedPullRequests.filter((pull) => pull.state === "open"),
-  ]) {
+  for (const pull of [...branchPulls, ...associatedPullRequests.filter((pull) => pull.state === "open")]) {
     pullMap.set(pull.number, pull);
   }
   const issue = parseCommandJson(
@@ -1058,7 +1130,11 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
       checked("gh", ["api", `repos/${repository}/issues/comments/${commentMatch[1]}`]),
       "GitHub issue handoff lookup",
     );
-    handoffComment = { url: comment.html_url, issueUrl: comment.issue_url, body: comment.body };
+    handoffComment = {
+      url: comment.html_url,
+      issueUrl: comment.issue_url,
+      body: comment.body,
+    };
   }
   return {
     repository,
@@ -1071,15 +1147,7 @@ function inspectGithub(current, issueNumber, handoffUrl, recoveryKind) {
 
 function validateHandoff(handoff, taskId, current, github, now) {
   if (!handoff || typeof handoff !== "object") block(`Task ${taskId} has no recorded handoff.`);
-  for (const field of [
-    "outcome",
-    "issue",
-    "branch",
-    "worktree",
-    "commitOrPr",
-    "productionState",
-    "nextStep",
-  ]) {
+  for (const field of ["outcome", "issue", "branch", "worktree", "commitOrPr", "productionState", "nextStep"]) {
     requiredString(handoff[field], `Task ${taskId} handoff.${field}`);
   }
   const recordedAt = parsedTime(handoff.recordedAt, `Task ${taskId} handoff.recordedAt`);
@@ -1116,10 +1184,7 @@ function validateHandoff(handoff, taskId, current, github, now) {
   ) {
     block(`Task ${taskId} handoff.checks.commands must list at least one executed command.`);
   }
-  const checksCompletedAt = parsedTime(
-    checks.completedAt,
-    `Task ${taskId} handoff.checks.completedAt`,
-  );
+  const checksCompletedAt = parsedTime(checks.completedAt, `Task ${taskId} handoff.checks.completedAt`);
   if (checksCompletedAt > now) block(`Task ${taskId} handoff.checks.completedAt is in the future.`);
   assertEqual(handoff.nextStep, CLEANUP_NEXT_STEP, `Task ${taskId} handoff nextStep`);
   if (handoff.handoffComplete !== true) {
@@ -1131,12 +1196,7 @@ export function validateTaskSnapshot(
   snapshot,
   current,
   evidence,
-  {
-    now = Date.now(),
-    maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
-    legacyTasklessConfirmation,
-    github,
-  } = {},
+  { now = Date.now(), maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS, legacyTasklessConfirmation, github, executionBoundary } = {},
 ) {
   if (snapshot.schemaVersion !== 1) block("Task snapshot schemaVersion must be 1.");
   if (snapshot.source !== "codex-list-threads") {
@@ -1145,7 +1205,28 @@ export function validateTaskSnapshot(
   if (snapshot.coverage !== "all-open-and-recent-homa-tasks") {
     block("Task snapshot must cover all open and recent Homa tasks.");
   }
-  assertFresh(snapshot.capturedAt, "Task snapshot capturedAt", maxAgeMs, now);
+  const capturedAt = assertFresh(snapshot.capturedAt, "Task snapshot capturedAt", maxAgeMs, now);
+  if (executionBoundary) {
+    if (
+      !snapshot.executionBoundary ||
+      typeof snapshot.executionBoundary !== "object" ||
+      Array.isArray(snapshot.executionBoundary)
+    ) {
+      block("Task snapshot executionBoundary binding is required after READY.");
+    }
+    assertEqual(snapshot.executionBoundary.nonce, executionBoundary.nonce, "Task snapshot execution boundary nonce");
+    assertEqual(
+      snapshot.executionBoundary.readyAt,
+      executionBoundary.readyAt,
+      "Task snapshot execution boundary readyAt",
+    );
+    const readyAt = normalizedIsoTime(executionBoundary.readyAt, "Execution boundary readyAt");
+    if (capturedAt < readyAt) {
+      block("Task snapshot capturedAt predates READY.");
+    }
+  } else if (snapshot.executionBoundary !== undefined) {
+    block("Inspection task snapshots cannot claim an executionBoundary binding.");
+  }
   assertEqual(normalizeOrigin(snapshot.repositoryOrigin), current.origin, "Task snapshot repository origin");
   const retirementScan = snapshot.retirementScan;
   if (!retirementScan || typeof retirementScan !== "object" || Array.isArray(retirementScan)) {
@@ -1204,12 +1285,7 @@ export function validateTaskSnapshot(
       TASKLESS_REASON,
       "task.legacyTasklessOverride.reason",
     );
-    assertFresh(
-      override.approvedAt,
-      "task.legacyTasklessOverride.approvedAt",
-      EVIDENCE_MAX_AGE_MS,
-      now,
-    );
+    assertFresh(override.approvedAt, "task.legacyTasklessOverride.approvedAt", EVIDENCE_MAX_AGE_MS, now);
   } else if (legacyTasklessConfirmation !== undefined) {
     block("A legacy taskless confirmation cannot be used when a matching task exists.");
   }
@@ -1222,10 +1298,7 @@ export function validateTaskSnapshot(
     for (const field of ["taskId", "branch", "worktree", "oldLaneFrozenAt"]) {
       requiredString(replacement[field], `issue.replacement.${field}`);
     }
-    const oldLaneFrozenAt = parsedTime(
-      replacement.oldLaneFrozenAt,
-      "issue.replacement.oldLaneFrozenAt",
-    );
+    const oldLaneFrozenAt = parsedTime(replacement.oldLaneFrozenAt, "issue.replacement.oldLaneFrozenAt");
     if (oldLaneFrozenAt > now) block("issue.replacement.oldLaneFrozenAt is in the future.");
     const replacementTask = snapshot.tasks.find((task) => task.id === replacement.taskId);
     if (!replacementTask) block("The replacement task is absent from the fresh task snapshot.");
@@ -1264,11 +1337,7 @@ function validateIgnoredDispositions(current, evidence, now) {
       block(`Ignored path ${fingerprint.path} sha256 must be a lowercase SHA-256 digest.`);
     }
   }
-  assertEqual(
-    JSON.stringify(fingerprints),
-    JSON.stringify(current.ignoredEntries),
-    "Exact ignored file fingerprint",
-  );
+  assertEqual(JSON.stringify(fingerprints), JSON.stringify(current.ignoredEntries), "Exact ignored file fingerprint");
   const paths = fingerprints.map((fingerprint) => fingerprint.path);
   if (new Set(paths).size !== paths.length) block("Ignored path decisions contain a duplicate path.");
 
@@ -1285,9 +1354,7 @@ function validateIgnoredDispositions(current, evidence, now) {
         block(`Sensitive ignored path ${decision.path} cannot be classified as regenerable.`);
       }
       if (!isApprovedRegenerablePath(decision.path)) {
-        block(
-          `Ignored path ${decision.path} is outside an approved generated, cache, build, or output directory.`,
-        );
+        block(`Ignored path ${decision.path} is outside an approved generated, cache, build, or output directory.`);
       }
     }
     if (disposition === "backed-up-private") {
@@ -1303,10 +1370,7 @@ function validateIgnoredDispositions(current, evidence, now) {
       if (isInside(artifactPath, current.target)) {
         block(`Ignored path ${decision.path} private backup is inside the worktree being removed.`);
       }
-      const artifact = streamedRegularFile(
-        artifactPath,
-        `Ignored path ${decision.path} private backup artifact`,
-      );
+      const artifact = streamedRegularFile(artifactPath, `Ignored path ${decision.path} private backup artifact`);
       const artifactParent = lstatSync(dirname(artifactPath), { bigint: true });
       if (!artifactParent.isDirectory() || artifactParent.isSymbolicLink()) {
         block(`Ignored path ${decision.path} private backup parent is not a real directory.`);
@@ -1314,10 +1378,7 @@ function validateIgnoredDispositions(current, evidence, now) {
       if (typeof process.getuid === "function" && artifact.stats.uid !== BigInt(process.getuid())) {
         block(`Ignored path ${decision.path} private backup is not owned by the current user.`);
       }
-      if (
-        typeof process.getuid === "function" &&
-        artifactParent.uid !== BigInt(process.getuid())
-      ) {
+      if (typeof process.getuid === "function" && artifactParent.uid !== BigInt(process.getuid())) {
         block(`Ignored path ${decision.path} private backup parent is not owned by the current user.`);
       }
       if ((artifact.stats.mode & 0o077n) !== 0n || (artifactParent.mode & 0o077n) !== 0n) {
@@ -1410,11 +1471,7 @@ function validateScanBinding(current, evidence, now) {
   if (!approval || typeof approval !== "object" || Array.isArray(approval)) {
     block("Evidence approval is required.");
   }
-  assertEqual(
-    requiredString(approval.approvedBy, "approval.approvedBy"),
-    EVIDENCE_APPROVER,
-    "Evidence approver",
-  );
+  assertEqual(requiredString(approval.approvedBy, "approval.approvedBy"), EVIDENCE_APPROVER, "Evidence approver");
   requiredString(approval.reason, "approval.reason");
   const approvedAt = parsedTime(approval.approvedAt, "approval.approvedAt");
   if (approvedAt > now) block("approval.approvedAt is in the future.");
@@ -1648,9 +1705,7 @@ function quarantineWorktree(current, evidence, expectedRepository, now, prepared
       pathEntryExists(quarantinePath, "possible quarantine path") ||
       !pathEntryExists(current.target, "original worktree path")
     ) {
-      block(
-        `Worktree may have moved to quarantine ${quarantinePath}, but Git reported failure: ${move.stderr.trim()}`,
-      );
+      block(`Worktree may have moved to quarantine ${quarantinePath}, but Git reported failure: ${move.stderr.trim()}`);
     }
     try {
       rmdirSync(quarantineRoot);
@@ -1682,9 +1737,7 @@ function quarantineWorktree(current, evidence, expectedRepository, now, prepared
     sameQuarantinedState(current, quarantined);
     if (quarantined.statusLines.length > 0) {
       block(
-        `Quarantined worktree has tracked or untracked changes: ${quarantined.statusLines
-          .slice(0, 5)
-          .join(" | ")}`,
+        `Quarantined worktree has tracked or untracked changes: ${quarantined.statusLines.slice(0, 5).join(" | ")}`,
       );
     }
     validateIgnoredDispositions(quarantined, evidence, now);
@@ -1717,9 +1770,7 @@ function sealQuarantinedWorktree(quarantine) {
     pathEntryExists(quarantine.quarantinePath, "registered quarantine path after sealing") ||
     !pathEntryExists(preservedPath, "preserved worktree after sealing")
   ) {
-    block(
-      `The worktree may be preserved at ${preservedPath}, but the atomic seal could not be confirmed.`,
-    );
+    block(`The worktree may be preserved at ${preservedPath}, but the atomic seal could not be confirmed.`);
   }
   return { ...quarantine, preservedPath };
 }
@@ -1737,7 +1788,11 @@ function generatedRecovery(current, now) {
     return { kind: "integrated", ...common };
   }
   if (current.remoteHead === current.head && current.branch) {
-    return { kind: "remote-branch", reference: `refs/heads/${current.branch}`, ...common };
+    return {
+      kind: "remote-branch",
+      reference: `refs/heads/${current.branch}`,
+      ...common,
+    };
   }
   if (current.bundle) {
     return {
@@ -1761,15 +1816,23 @@ function generateRetirementEvidence(options) {
   };
   let current = inspectLocalState(options.target, seedEvidence, expectedRepository);
   if (!current.integrated && current.branch && !options.recoveryBundle) {
-    const remoteHead = githubBranchHead(current.origin, current.branch, git(current.target, ["rev-parse", "--show-object-format"]).trim(), {
-      allowMissing: true,
-    });
+    const remoteHead = githubBranchHead(
+      current.origin,
+      current.branch,
+      git(current.target, ["rev-parse", "--show-object-format"]).trim(),
+      {
+        allowMissing: true,
+      },
+    );
     if (remoteHead === current.head) {
       current = inspectLocalState(
         options.target,
         {
           worktree: { baseRef },
-          recovery: { kind: "remote-branch", reference: `refs/heads/${current.branch}` },
+          recovery: {
+            kind: "remote-branch",
+            reference: `refs/heads/${current.branch}`,
+          },
         },
         expectedRepository,
       );
@@ -1781,12 +1844,7 @@ function generateRetirementEvidence(options) {
   if (!Number.isInteger(issueNumber) || issueNumber < 1) {
     block("The generator needs --issue-number when the branch does not carry a gh issue number.");
   }
-  const github = inspectGithub(
-    current,
-    issueNumber,
-    options.handoffUrl,
-    recovery.kind,
-  );
+  const github = inspectGithub(current, issueNumber, options.handoffUrl, recovery.kind);
   const ignoredDispositions = current.ignoredEntries.map((entry) => {
     const automatic = !isSensitiveIgnoredPath(entry.path) && isApprovedRegenerablePath(entry.path);
     return {
@@ -1801,9 +1859,7 @@ function generateRetirementEvidence(options) {
     nonce: randomBytes(32).toString("hex"),
     sha256: retirementScanSha256(current),
   };
-  const issueDisposition = github.issue.state === "CLOSED"
-    ? "closed"
-    : options.issueDisposition ?? "review-required";
+  const issueDisposition = github.issue.state === "CLOSED" ? "closed" : options.issueDisposition ?? "review-required";
   const evidence = {
     schemaVersion: 2,
     capturedAt: generatedAt,
@@ -1923,9 +1979,8 @@ function main() {
   if (!options.execute && options.taskSnapshot === "-") {
     block("Inspection requires a task snapshot file. Standard input is reserved for the execution boundary.");
   }
-  const taskSnapshotPath = options.taskSnapshot === "-"
-    ? null
-    : absoluteRealPath(options.taskSnapshot, "task snapshot");
+  const taskSnapshotPath =
+    options.taskSnapshot === "-" ? null : absoluteRealPath(options.taskSnapshot, "task snapshot");
   const evidence = readJson(evidencePath, "Evidence file");
   const taskSnapshot = taskSnapshotPath ? readJson(taskSnapshotPath, "Task snapshot") : null;
   const expectedRepository = inspectScriptRepository();
@@ -1952,80 +2007,80 @@ function main() {
   }
   assertEqual(options.confirmation, assessment.confirmation, "Removal confirmation");
 
-  const finalGithub = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
-  const finalCurrent = inspectLocalState(options.target, evidence, expectedRepository);
-  const finalAssessment = assessRemoval({
-    current: finalCurrent,
-    evidence,
-    taskSnapshot: null,
-    github: finalGithub,
-    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
-    skipTaskValidation: true,
-  });
-  assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
+  const report = withRepositoryCleanupLock(current.commonGitDir, "ordinary-worktree-removal", () => {
+    const finalGithub = inspectGithub(current, issueNumber, evidence.issue?.handoffUrl, evidence.recovery?.kind);
+    const finalCurrent = inspectLocalState(options.target, evidence, expectedRepository);
+    const finalAssessment = assessRemoval({
+      current: finalCurrent,
+      evidence,
+      taskSnapshot: null,
+      github: finalGithub,
+      legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+      skipTaskValidation: true,
+    });
+    assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
 
-  const preparedQuarantine = prepareQuarantine(finalCurrent);
-  process.stderr.write(
-    `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT ${JSON.stringify({
-      scanNonce: evidence.scan.nonce,
-      scanSha256: evidence.scan.sha256,
-      maxAgeSeconds: EXECUTION_TASK_REFRESH_MAX_AGE_MS / 1000,
-    })}\n`,
-  );
-  const refreshedTaskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
-  validateTaskSnapshot(refreshedTaskSnapshot, finalCurrent, evidence, {
-    maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
-    legacyTasklessConfirmation: options.legacyTasklessConfirmation,
-    github: finalGithub,
-  });
+    const preparedQuarantine = prepareQuarantine(finalCurrent);
+    const executionBoundary = {
+      nonce: randomBytes(32).toString("hex"),
+      readyAt: new Date().toISOString(),
+    };
+    process.stderr.write(
+      `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT ${JSON.stringify({
+        scanNonce: evidence.scan.nonce,
+        scanSha256: evidence.scan.sha256,
+        executionNonce: executionBoundary.nonce,
+        readyAt: executionBoundary.readyAt,
+        maxAgeSeconds: EXECUTION_TASK_REFRESH_MAX_AGE_MS / 1000,
+      })}\n`,
+    );
+    const refreshedTaskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
+    validateTaskSnapshot(refreshedTaskSnapshot, finalCurrent, evidence, {
+      maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
+      legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+      github: finalGithub,
+      executionBoundary,
+    });
 
-  // No Git or network call occurs after the task proof and before this move.
-  // Git performs the registered same-filesystem move as the preservation boundary.
-  const quarantine = quarantineWorktree(
-    finalCurrent,
-    evidence,
-    expectedRepository,
-    Date.now(),
-    preparedQuarantine,
-  );
-  const sealed = sealQuarantinedWorktree(quarantine);
-  const removal = commandResult("git", [
-    "-C",
-    sealed.quarantined.repositoryRoot,
-    "worktree",
-    "remove",
-    sealed.quarantined.registeredPath,
-  ]);
-  if (removal.status !== 0) {
-    block(
-      `Worktree content is preserved at ${sealed.preservedPath}: Git refused normal registration removal: ${removal.stderr.trim()}`,
-    );
-  }
-  try {
-    confirmRemovalGone(sealed.quarantined);
-  } catch (error) {
-    block(
-      `Worktree content is preserved at ${sealed.preservedPath}, but registration removal could not be confirmed: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
-  if (pathEntryExists(finalCurrent.target, "original worktree path after removal")) {
-    block("The original worktree path reappeared after quarantine removal.");
-  }
-  console.log(
-    JSON.stringify(
-      {
-        status: "WORKTREE_REGISTRATION_REMOVED",
-        target: finalCurrent.target,
-        preservedPath: sealed.preservedPath,
-        localBranchAction: "keep",
-        remoteBranchAction: "keep",
-      },
-      null,
-      2,
-    ),
-  );
+    // No Git or network call occurs after the task proof and before this move.
+    // Git performs the registered same-filesystem move as the preservation boundary.
+    const quarantine = quarantineWorktree(finalCurrent, evidence, expectedRepository, Date.now(), preparedQuarantine);
+    const sealed = sealQuarantinedWorktree(quarantine);
+    const removal = commandResult("git", [
+      "-C",
+      sealed.quarantined.repositoryRoot,
+      "worktree",
+      "remove",
+      sealed.quarantined.registeredPath,
+    ]);
+    if (removal.status !== 0) {
+      block(
+        `Worktree content is preserved at ${
+          sealed.preservedPath
+        }: Git refused normal registration removal: ${removal.stderr.trim()}`,
+      );
+    }
+    try {
+      confirmRemovalGone(sealed.quarantined);
+    } catch (error) {
+      block(
+        `Worktree content is preserved at ${sealed.preservedPath}, but registration removal could not be confirmed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+    if (pathEntryExists(finalCurrent.target, "original worktree path after removal")) {
+      block("The original worktree path reappeared after quarantine removal.");
+    }
+    return {
+      status: "WORKTREE_REGISTRATION_REMOVED",
+      target: finalCurrent.target,
+      preservedPath: sealed.preservedPath,
+      localBranchAction: "keep",
+      remoteBranchAction: "keep",
+    };
+  });
+  console.log(JSON.stringify(report, null, 2));
 }
 
 const isEntrypoint = process.argv[1] ? realpathSync(process.argv[1]) === SCRIPT_PATH : false;

@@ -5,9 +5,12 @@ import { spawnSync } from "node:child_process";
 import {
   chmodSync,
   closeSync,
+  constants as fileConstants,
+  copyFileSync,
   existsSync,
   fsyncSync,
   lstatSync,
+  mkdirSync,
   mkdtempSync,
   openSync,
   readFileSync,
@@ -18,6 +21,7 @@ import {
   renameSync,
   rmSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -35,25 +39,23 @@ const TASKLESS_REASON = "legacy-lane-predates-task-tracking";
 const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
 const PRIVATE_FILE_MODE = 0o600;
 const STREAM_CHUNK_BYTES = 1024 * 1024;
-const ACTIVE_TASK_STATES = new Set([
-  "active",
-  "idle",
-  "in_progress",
-  "needs_input",
-  "pending",
-  "running",
-  "waiting",
-]);
+const CLEANUP_LOCK_FILENAME = "homa-repository-cleanup.lock";
+const ACTIVE_TASK_STATES = new Set(["active", "idle", "in_progress", "needs_input", "pending", "running", "waiting"]);
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
-const WORKTREE_RECORD_KEYS = new Set([
-  "worktree",
-  "HEAD",
-  "branch",
-  "bare",
-  "detached",
-  "locked",
-  "prunable",
+const WORKTREE_RECORD_KEYS = new Set(["worktree", "HEAD", "branch", "bare", "detached", "locked", "prunable"]);
+const ADMINISTRATIVE_RECORD_ALLOWLIST = new Map([
+  ["HEAD", "file"],
+  ["ORIG_HEAD", "file"],
+  ["commondir", "file"],
+  ["config.worktree", "file"],
+  ["gitdir", "file"],
+  ["index", "file"],
+  ["locked", "file"],
+  ["logs", "directory"],
+  ["logs/HEAD", "file"],
+  ["refs", "directory"],
 ]);
+const REQUIRED_ADMINISTRATIVE_RECORD_FILES = new Set(["HEAD", "commondir", "gitdir", "index"]);
 
 export class DamagedRegistrationBlockedError extends Error {
   constructor(message) {
@@ -64,6 +66,110 @@ export class DamagedRegistrationBlockedError extends Error {
 
 function block(message) {
   throw new DamagedRegistrationBlockedError(message);
+}
+
+export function acquireRepositoryCleanupLock(commonGitDir, actor) {
+  const lockPath = join(commonGitDir, CLEANUP_LOCK_FILENAME);
+  const token = randomBytes(32).toString("hex");
+  const content = Buffer.from(
+    `${JSON.stringify({
+      schemaVersion: 1,
+      actor,
+      pid: process.pid,
+      repositoryCommonGitDir: commonGitDir,
+      acquiredAt: new Date().toISOString(),
+      token,
+    })}\n`,
+    "utf8",
+  );
+  let descriptor;
+  try {
+    descriptor = openSync(lockPath, "wx", PRIVATE_FILE_MODE);
+    writeFileSync(descriptor, content);
+    fsyncSync(descriptor);
+    closeSync(descriptor);
+    descriptor = undefined;
+    chmodSync(lockPath, PRIVATE_FILE_MODE);
+  } catch (error) {
+    if (descriptor !== undefined) closeSync(descriptor);
+    if (error && typeof error === "object" && error.code === "EEXIST") {
+      block(
+        `Repository cleanup lock ${lockPath} already exists. Its age is not authority to remove it; inspect it manually and fail closed while ownership is ambiguous.`,
+      );
+    }
+    block(
+      `Could not acquire repository cleanup lock ${lockPath}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  const stats = lstatSync(lockPath, { bigint: true });
+  if (!stats.isFile() || stats.isSymbolicLink() || (stats.mode & 0o777n) !== BigInt(PRIVATE_FILE_MODE)) {
+    block(`Repository cleanup lock ${lockPath} is not an owner-only regular file.`);
+  }
+  if (typeof process.getuid === "function" && stats.uid !== BigInt(process.getuid())) {
+    block(`Repository cleanup lock ${lockPath} is not owned by the current user.`);
+  }
+  if (!readFileSync(lockPath).equals(content)) {
+    block(`Repository cleanup lock ${lockPath} changed while it was acquired.`);
+  }
+  return {
+    path: lockPath,
+    token,
+    content,
+    identity: {
+      dev: String(stats.dev),
+      ino: String(stats.ino),
+      mode: String(stats.mode),
+      uid: String(stats.uid),
+      size: String(stats.size),
+    },
+  };
+}
+
+export function releaseRepositoryCleanupLock(lock) {
+  const stats = lstatSync(lock.path, { bigint: true });
+  const identity = {
+    dev: String(stats.dev),
+    ino: String(stats.ino),
+    mode: String(stats.mode),
+    uid: String(stats.uid),
+    size: String(stats.size),
+  };
+  assertEqual(JSON.stringify(identity), JSON.stringify(lock.identity), "Repository cleanup lock identity");
+  if (!stats.isFile() || stats.isSymbolicLink() || (stats.mode & 0o777n) !== BigInt(PRIVATE_FILE_MODE)) {
+    block(`Repository cleanup lock ${lock.path} changed type or permissions.`);
+  }
+  if (!readFileSync(lock.path).equals(lock.content)) {
+    block(`Repository cleanup lock ${lock.path} changed content.`);
+  }
+  unlinkSync(lock.path);
+  if (existsSync(lock.path)) block(`Repository cleanup lock ${lock.path} still exists after release.`);
+}
+
+function withRepositoryCleanupLock(commonGitDir, actor, action) {
+  const lock = acquireRepositoryCleanupLock(commonGitDir, actor);
+  let result;
+  let actionError;
+  try {
+    result = action(lock);
+  } catch (error) {
+    actionError = error;
+  }
+  try {
+    releaseRepositoryCleanupLock(lock);
+  } catch (releaseError) {
+    if (actionError) {
+      block(
+        `Cleanup stopped and its repository lock could not be released safely. Original error: ${
+          actionError instanceof Error ? actionError.message : String(actionError)
+        }. Lock error: ${releaseError instanceof Error ? releaseError.message : String(releaseError)}`,
+      );
+    }
+    throw releaseError;
+  }
+  if (actionError) throw actionError;
+  return result;
 }
 
 function requiredString(value, label) {
@@ -140,9 +246,7 @@ function pathEntry(path, label) {
 }
 
 function sameFileState(left, right) {
-  return ["dev", "ino", "mode", "size", "mtimeNs"].every(
-    (field) => String(left[field]) === String(right[field]),
-  );
+  return ["dev", "ino", "mode", "size", "mtimeNs"].every((field) => String(left[field]) === String(right[field]));
 }
 
 function stableRegularFile(path, label, maxBytes = 1024 * 1024) {
@@ -203,7 +307,9 @@ function atomicPrivateJson(path, value, label) {
   let descriptor;
   try {
     descriptor = openSync(temporary, "wx", PRIVATE_FILE_MODE);
-    writeFileSync(descriptor, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8" });
+    writeFileSync(descriptor, `${JSON.stringify(value, null, 2)}\n`, {
+      encoding: "utf8",
+    });
     fsyncSync(descriptor);
     closeSync(descriptor);
     descriptor = undefined;
@@ -403,9 +509,7 @@ function inspectScriptRepository() {
   const scriptDirectory = dirname(SCRIPT_PATH);
   const primaryPath = realpathSync(git(scriptDirectory, ["rev-parse", "--show-toplevel"]).trim());
   canonicalExistingDirectory(primaryPath, "Script repository root");
-  const gitDir = realpathSync(
-    git(primaryPath, ["rev-parse", "--path-format=absolute", "--git-dir"]).trim(),
-  );
+  const gitDir = realpathSync(git(primaryPath, ["rev-parse", "--path-format=absolute", "--git-dir"]).trim());
   const commonGitDir = realpathSync(
     git(primaryPath, ["rev-parse", "--path-format=absolute", "--git-common-dir"]).trim(),
   );
@@ -459,22 +563,89 @@ function directoryIdentity(stats) {
   };
 }
 
+function administrativeRecordInventory(adminDir, adminName) {
+  const pending = [{ absolutePath: adminDir, relativePath: "" }];
+  const inventory = [];
+  for (let cursor = 0; cursor < pending.length; cursor += 1) {
+    const current = pending[cursor];
+    let entries;
+    try {
+      entries = readdirSync(current.absolutePath, { withFileTypes: true }).sort((left, right) =>
+        left.name.localeCompare(right.name),
+      );
+    } catch (error) {
+      block(
+        `Could not inventory administrative record ${adminName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+    for (const entry of entries) {
+      const relativePath = current.relativePath ? `${current.relativePath}/${entry.name}` : entry.name;
+      const expectedKind = ADMINISTRATIVE_RECORD_ALLOWLIST.get(relativePath);
+      if (!expectedKind) {
+        block(
+          `Administrative record ${adminName} contains unexpected path ${JSON.stringify(relativePath)}. ` +
+            "Review and explicitly extend the allowlist before retirement.",
+        );
+      }
+      const absolutePath = join(current.absolutePath, entry.name);
+      const stats = pathEntry(absolutePath, `Administrative path ${adminName}/${relativePath}`);
+      if (!stats || stats.isSymbolicLink()) {
+        block(`Administrative path ${adminName}/${relativePath} is missing or symbolic.`);
+      }
+      const actualKind = stats.isDirectory() ? "directory" : stats.isFile() ? "file" : "unsupported";
+      assertEqual(actualKind, expectedKind, `Administrative path kind for ${adminName}/${relativePath}`);
+      if (actualKind === "directory") {
+        inventory.push({ path: relativePath, kind: "directory" });
+        pending.push({ absolutePath, relativePath });
+      } else {
+        const file = streamedRegularFile(absolutePath, `Administrative file ${adminName}/${relativePath}`);
+        inventory.push({
+          path: relativePath,
+          kind: "file",
+          sizeBytes: file.sizeBytes,
+          sha256: file.sha256,
+        });
+      }
+    }
+  }
+  const present = new Set(inventory.map((entry) => entry.path));
+  for (const required of REQUIRED_ADMINISTRATIVE_RECORD_FILES) {
+    if (!present.has(required)) block(`Administrative record ${adminName} is missing required file ${required}.`);
+  }
+  inventory.sort((left, right) => left.path.localeCompare(right.path));
+  return {
+    version: 1,
+    entries: inventory,
+    manifestSha256: sha256(JSON.stringify(inventory)),
+  };
+}
+
+function administrativeIndexMatchesHead(adminName, adminDir, indexFingerprint, head) {
+  const result = commandResult("git", [`--git-dir=${adminDir}`, "diff-index", "--cached", "--quiet", head, "--"]);
+  if (![0, 1].includes(result.status)) {
+    block(
+      `Administrative index for ${adminName} cannot be compared with HEAD: ${result.stderr.trim() || "no error text"}`,
+    );
+  }
+  const after = streamedRegularFile(join(adminDir, "index"), `Administrative index for ${adminName}`);
+  assertEqual(after.sha256, indexFingerprint.sha256, `Administrative index bytes for ${adminName}`);
+  assertEqual(after.sizeBytes, indexFingerprint.sizeBytes, `Administrative index size for ${adminName}`);
+  return result.status === 0;
+}
+
 function adminRecordView(repository, adminName, adminDir, porcelain) {
   noControlCharacters(adminName, "Worktree administrative directory name");
   if (!/^[A-Za-z0-9._-]+$/u.test(adminName)) {
     block(`Worktree administrative directory ${JSON.stringify(adminName)} has an unsafe name.`);
   }
   const adminStats = canonicalExistingDirectory(adminDir, `Worktree administrative record ${adminName}`);
+  const administrativeInventory = administrativeRecordInventory(adminDir, adminName);
   const gitdir = singleLineFile(join(adminDir, "gitdir"), `Administrative gitdir for ${adminName}`);
   const headFile = singleLineFile(join(adminDir, "HEAD"), `Administrative HEAD for ${adminName}`);
-  const commondir = singleLineFile(
-    join(adminDir, "commondir"),
-    `Administrative commondir for ${adminName}`,
-  );
-  const indexFile = streamedRegularFile(
-    join(adminDir, "index"),
-    `Administrative index for ${adminName}`,
-  );
+  const commondir = singleLineFile(join(adminDir, "commondir"), `Administrative commondir for ${adminName}`);
+  const indexFile = streamedRegularFile(join(adminDir, "index"), `Administrative index for ${adminName}`);
   const gitdirLink = exactAbsolutePath(gitdir.text, `Administrative gitdir link for ${adminName}`);
   if (basename(gitdirLink) !== ".git") {
     block(`Administrative gitdir link for ${adminName} does not name a root .git link.`);
@@ -527,6 +698,8 @@ function adminRecordView(repository, adminName, adminDir, porcelain) {
   if (!objectIdPattern(repository.objectFormat).test(tree)) {
     block(`Administrative tree for ${adminName} is not a valid ${repository.objectFormat} object ID.`);
   }
+  const indexMatchesHead = administrativeIndexMatchesHead(adminName, adminDir, indexFile, record.head);
+  const indexTree = indexMatchesHead ? tree : null;
 
   const adminRecordSha256 = sha256(
     JSON.stringify({
@@ -540,6 +713,9 @@ function adminRecordView(repository, adminName, adminDir, porcelain) {
       headSha256: headFile.sha256,
       commondirSha256: commondir.sha256,
       indexSha256: indexFile.sha256,
+      indexSizeBytes: indexFile.sizeBytes,
+      indexTree,
+      administrativeInventory,
       adminDirectoryIdentity: directoryIdentity(adminStats),
       adminFileIdentities: {
         gitdir: directoryIdentity(gitdir.stats),
@@ -558,6 +734,11 @@ function adminRecordView(repository, adminName, adminDir, porcelain) {
     administrativeHead: headFile.text,
     commondir: commondir.text,
     adminRecordSha256,
+    administrativeInventory,
+    indexSha256: indexFile.sha256,
+    indexSizeBytes: indexFile.sizeBytes,
+    indexTree,
+    indexMatchesHead,
     adminDirectoryIdentity: directoryIdentity(adminStats),
     adminFileIdentities: {
       gitdir: directoryIdentity(gitdir.stats),
@@ -582,7 +763,9 @@ function enumerateAdministrativeRecords(repository, porcelain) {
       left.name.localeCompare(right.name),
     );
   } catch (error) {
-    block(`Could not enumerate worktree administrative records: ${error instanceof Error ? error.message : String(error)}`);
+    block(
+      `Could not enumerate worktree administrative records: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
   const records = entries.map((entry) => {
     if (!entry.isDirectory() || entry.isSymbolicLink()) {
@@ -753,7 +936,11 @@ function streamDirectoryInventory(target) {
 
 function inspectRegisteredPath(repository, registration) {
   const target = registration.path;
-  if (target === repository.primaryPath || isInside(target, repository.primaryPath) || isInside(repository.primaryPath, target)) {
+  if (
+    target === repository.primaryPath ||
+    isInside(target, repository.primaryPath) ||
+    isInside(repository.primaryPath, target)
+  ) {
     block(`Damaged registration path ${target} overlaps the trusted primary checkout.`);
   }
   nearestExistingAncestor(target, `Damaged registration path ${target}`);
@@ -780,7 +967,11 @@ function inspectRegisteredPath(repository, registration) {
   }
   assertNoGitRepositories(target);
   const pathInventory = streamDirectoryInventory(target);
-  return { pathState: "directory", pathIdentity: directoryIdentity(targetStats), pathInventory };
+  return {
+    pathState: "directory",
+    pathIdentity: directoryIdentity(targetStats),
+    pathInventory,
+  };
 }
 
 function repositoryEvidence(repository) {
@@ -812,6 +1003,11 @@ function registrationEvidence(registration) {
     administrativeHead: registration.administrativeHead,
     commondir: registration.commondir,
     adminRecordSha256: registration.adminRecordSha256,
+    administrativeInventory: registration.administrativeInventory,
+    indexSha256: registration.indexSha256,
+    indexSizeBytes: registration.indexSizeBytes,
+    indexTree: registration.indexTree,
+    indexMatchesHead: registration.indexMatchesHead,
     adminDirectoryIdentity: registration.adminDirectoryIdentity,
     adminFileIdentities: registration.adminFileIdentities,
     pathState: registration.pathState,
@@ -833,9 +1029,7 @@ function compareByPath(left, right) {
 }
 
 function inspectRegistrationState(repository, { allowNoPrunable = false } = {}) {
-  const rawRecords = parseWorktreePorcelain(
-    git(repository.primaryPath, ["worktree", "list", "--porcelain", "-z"]),
-  );
+  const rawRecords = parseWorktreePorcelain(git(repository.primaryPath, ["worktree", "list", "--porcelain", "-z"]));
   const porcelain = rawRecords.map((record) => recordView(record, repository.objectFormat));
   const paths = porcelain.map((record) => record.path);
   if (new Set(paths).size !== paths.length) block("Git returned duplicate registered worktree paths.");
@@ -860,13 +1054,22 @@ function inspectRegistrationState(repository, { allowNoPrunable = false } = {}) 
     }
     if (registration.prunableReason === null) continue;
     if (registration.lockedReason !== null) block(`Prunable registration ${registration.path} is locked.`);
+    if (!registration.indexMatchesHead) {
+      block(
+        `Prunable registration ${registration.path} has staged index tree ${registration.indexTree}, ` +
+          `which differs from committed tree ${registration.tree}. Retirement is blocked because unique staged bytes are not independently recoverable.`,
+      );
+    }
     assertEqual(
       registration.prunableReason,
       "gitdir file points to non-existent location",
       `Prunable reason for ${registration.path}`,
     );
     if (rootGitStats) block(`Prunable registration ${registration.path} has a root .git collision.`);
-    candidates.push({ ...registration, ...inspectRegisteredPath(repository, registration) });
+    candidates.push({
+      ...registration,
+      ...inspectRegisteredPath(repository, registration),
+    });
   }
   if (!allowNoPrunable && candidates.length === 0) {
     block("There are no eligible damaged worktree registrations.");
@@ -913,11 +1116,13 @@ function pruneDryRun(repository, cutoff) {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
-  return lines.map((line) => {
-    const match = line.match(/^Removing worktrees\/([^:]+): /u);
-    if (!match) block(`Git prune dry-run returned an unknown line: ${line}`);
-    return match[1];
-  }).sort();
+  return lines
+    .map((line) => {
+      const match = line.match(/^Removing worktrees\/([^:]+): /u);
+      if (!match) block(`Git prune dry-run returned an unknown line: ${line}`);
+      return match[1];
+    })
+    .sort();
 }
 
 function assertDryRunExact(repository, candidates, cutoff) {
@@ -927,9 +1132,7 @@ function assertDryRunExact(repository, candidates, cutoff) {
 }
 
 function shortBranch(registration) {
-  return registration.branch?.startsWith("refs/heads/")
-    ? registration.branch.slice("refs/heads/".length)
-    : null;
+  return registration.branch?.startsWith("refs/heads/") ? registration.branch.slice("refs/heads/".length) : null;
 }
 
 function branchIssueNumber(registration) {
@@ -943,12 +1146,7 @@ function inspectRetainedReference(repository, registration, reference) {
   if (!/^refs\/(?:heads|homa\/recovery)\/[A-Za-z0-9._/-]+$/u.test(retainedReference)) {
     block(`Recovery reference for ${registration.path} is outside the retained reference namespaces.`);
   }
-  const headResult = gitResult(repository.primaryPath, [
-    "show-ref",
-    "--verify",
-    "--hash",
-    retainedReference,
-  ]);
+  const headResult = gitResult(repository.primaryPath, ["show-ref", "--verify", "--hash", retainedReference]);
   if (headResult.status !== 0) block(`Recovery reference ${retainedReference} does not exist locally.`);
   const head = headResult.stdout.trim();
   assertEqual(head, registration.head, `Recovery reference head for ${registration.path}`);
@@ -958,15 +1156,16 @@ function inspectRetainedReference(repository, registration, reference) {
 }
 
 function inspectBundle(repository, registration, artifactInput) {
-  const artifactInputPath = exactAbsolutePath(
-    artifactInput,
-    `Recovery bundle path for ${registration.path}`,
-  );
+  const artifactInputPath = exactAbsolutePath(artifactInput, `Recovery bundle path for ${registration.path}`);
   let artifact;
   try {
     artifact = realpathSync(artifactInputPath);
   } catch (error) {
-    block(`Recovery bundle for ${registration.path} does not resolve: ${error instanceof Error ? error.message : String(error)}`);
+    block(
+      `Recovery bundle for ${registration.path} does not resolve: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
   assertEqual(artifact, artifactInputPath, `Recovery bundle canonical path for ${registration.path}`);
   if (isEphemeralOperatingSystemTemporaryPath(artifact)) {
@@ -982,8 +1181,12 @@ function inspectBundle(repository, registration, artifactInput) {
   if ((file.stats.mode & 0o077n) !== 0n) {
     block(`Recovery bundle for ${registration.path} is not owner-only.`);
   }
-  checked("git", ["bundle", "verify", artifact], { cwd: repository.primaryPath });
-  const heads = checked("git", ["bundle", "list-heads", artifact], { cwd: repository.primaryPath })
+  checked("git", ["bundle", "verify", artifact], {
+    cwd: repository.primaryPath,
+  });
+  const heads = checked("git", ["bundle", "list-heads", artifact], {
+    cwd: repository.primaryPath,
+  })
     .split("\n")
     .filter(Boolean)
     .map((line) => {
@@ -996,13 +1199,7 @@ function inspectBundle(repository, registration, artifactInput) {
   const restoreRoot = mkdtempSync(join(tmpdir(), "homa-damaged-bundle-restore-"));
   const restoredRepository = join(restoreRoot, "restored.git");
   try {
-    checked("git", [
-      "init",
-      "--bare",
-      "--template=",
-      `--object-format=${repository.objectFormat}`,
-      restoredRepository,
-    ]);
+    checked("git", ["init", "--bare", "--template=", `--object-format=${repository.objectFormat}`, restoredRepository]);
     for (const name of ["alternates", "http-alternates"]) {
       if (existsSync(join(restoredRepository, "objects", "info", name))) {
         block(`Empty recovery repository for ${registration.path} inherited ${name} object indirection.`);
@@ -1023,33 +1220,12 @@ function inspectBundle(repository, registration, artifactInput) {
         block(`Recovery bundle for ${registration.path} introduced ${name} object indirection.`);
       }
     }
-    checked("git", [
-      "-C",
-      restoredRepository,
-      "fsck",
-      "--full",
-      "--strict",
-      "--no-dangling",
-      "refs/heads/recovered",
-    ]);
-    const restoredHead = checked("git", [
-      "-C",
-      restoredRepository,
-      "rev-parse",
-      "refs/heads/recovered",
-    ]).trim();
-    const restoredTree = checked("git", [
-      "-C",
-      restoredRepository,
-      "rev-parse",
-      "refs/heads/recovered^{tree}",
-    ]).trim();
+    checked("git", ["-C", restoredRepository, "fsck", "--full", "--strict", "--no-dangling", "refs/heads/recovered"]);
+    const restoredHead = checked("git", ["-C", restoredRepository, "rev-parse", "refs/heads/recovered"]).trim();
+    const restoredTree = checked("git", ["-C", restoredRepository, "rev-parse", "refs/heads/recovered^{tree}"]).trim();
     assertEqual(restoredHead, registration.head, `Restored bundle head for ${registration.path}`);
     assertEqual(restoredTree, registration.tree, `Restored bundle tree for ${registration.path}`);
-    const restoredArtifact = streamedRegularFile(
-      artifact,
-      `Recovery bundle for ${registration.path}`,
-    );
+    const restoredArtifact = streamedRegularFile(artifact, `Recovery bundle for ${registration.path}`);
     assertEqual(
       restoredArtifact.sha256,
       file.sha256,
@@ -1094,12 +1270,23 @@ function validateRecovery(repository, registration, evidenceRecovery) {
   if (inspected.kind === "retained-ref") {
     assertEqual(evidenceRecovery.reference, inspected.reference, `Retained reference for ${registration.path}`);
   } else {
-    assertEqual(evidenceRecovery.advertisedHead, inspected.advertisedHead, `Bundle advertised HEAD for ${registration.path}`);
+    assertEqual(
+      evidenceRecovery.advertisedHead,
+      inspected.advertisedHead,
+      `Bundle advertised HEAD for ${registration.path}`,
+    );
     assertEqual(evidenceRecovery.artifactSha256, inspected.artifactSha256, `Bundle checksum for ${registration.path}`);
-    assertEqual(evidenceRecovery.artifactSizeBytes, inspected.artifactSizeBytes, `Bundle size for ${registration.path}`);
+    assertEqual(
+      evidenceRecovery.artifactSizeBytes,
+      inspected.artifactSizeBytes,
+      `Bundle size for ${registration.path}`,
+    );
     assertEqual(evidenceRecovery.restoredHead, inspected.restoredHead, `Bundle restored HEAD for ${registration.path}`);
     assertEqual(evidenceRecovery.restoredTree, inspected.restoredTree, `Bundle restored tree for ${registration.path}`);
-    const restoreTestedAt = parsedTime(evidenceRecovery.restoreTestedAt, `Recovery restoreTestedAt for ${registration.path}`);
+    const restoreTestedAt = parsedTime(
+      evidenceRecovery.restoreTestedAt,
+      `Recovery restoreTestedAt for ${registration.path}`,
+    );
     if (restoreTestedAt > Date.now()) block(`Recovery restoreTestedAt for ${registration.path} is in the future.`);
   }
   return inspected;
@@ -1122,15 +1309,7 @@ function inspectGithubIssue(repository, issueNumber, handoffUrl) {
   if (!Number.isInteger(issueNumber) || issueNumber < 1) block("Registration issue number must be a positive integer.");
   const repositoryName = new URL(`${repository.origin}/`).pathname.replace(/^\//u, "").replace(/\/$/u, "");
   const issue = parseCommandJson(
-    checked("gh", [
-      "issue",
-      "view",
-      String(issueNumber),
-      "--repo",
-      repositoryName,
-      "--json",
-      "number,state,url",
-    ]),
+    checked("gh", ["issue", "view", String(issueNumber), "--repo", repositoryName, "--json", "number,state,url"]),
     `GitHub issue ${issueNumber}`,
   );
   let handoffComment = null;
@@ -1234,7 +1413,7 @@ function validateBatchTaskSnapshot(
   snapshot,
   state,
   evidence,
-  { now = Date.now(), maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS, tasklessConfirmations = [] } = {},
+  { now = Date.now(), maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS, tasklessConfirmations = [], executionBoundary } = {},
 ) {
   if (snapshot.schemaVersion !== 1) block("Task snapshot schemaVersion must be 1.");
   if (snapshot.source !== "codex-list-threads") block("Task snapshot source must be codex-list-threads.");
@@ -1244,6 +1423,25 @@ function validateBatchTaskSnapshot(
   const capturedAt = normalizedIsoTime(snapshot.capturedAt, "Task snapshot capturedAt");
   if (capturedAt > now) block("Task snapshot capturedAt is in the future.");
   if (now - capturedAt > maxAgeMs) block("Task snapshot is stale. Capture it at the execution boundary.");
+  if (executionBoundary) {
+    if (
+      !snapshot.executionBoundary ||
+      typeof snapshot.executionBoundary !== "object" ||
+      Array.isArray(snapshot.executionBoundary)
+    ) {
+      block("Task snapshot executionBoundary binding is required after READY.");
+    }
+    assertEqual(snapshot.executionBoundary.nonce, executionBoundary.nonce, "Task snapshot execution boundary nonce");
+    assertEqual(
+      snapshot.executionBoundary.readyAt,
+      executionBoundary.readyAt,
+      "Task snapshot execution boundary readyAt",
+    );
+    const readyAt = normalizedIsoTime(executionBoundary.readyAt, "Execution boundary readyAt");
+    if (capturedAt < readyAt) block("Task snapshot capturedAt predates READY.");
+  } else if (snapshot.executionBoundary !== undefined) {
+    block("Inspection task snapshots cannot claim an executionBoundary binding.");
+  }
   assertEqual(normalizeOrigin(snapshot.repositoryOrigin), EXPECTED_ORIGIN, "Task snapshot repository origin");
   if (!snapshot.retirementScan || typeof snapshot.retirementScan !== "object") {
     block("Task snapshot retirementScan binding is required.");
@@ -1267,9 +1465,7 @@ function validateBatchTaskSnapshot(
     const evidenceRegistration = evidenceByPath.get(registration.path);
     const branch = shortBranch(registration);
     const matching = snapshot.tasks.filter((task) => {
-      const taskPath = typeof task.worktree === "string" && isAbsolute(task.worktree)
-        ? resolve(task.worktree)
-        : null;
+      const taskPath = typeof task.worktree === "string" && isAbsolute(task.worktree) ? resolve(task.worktree) : null;
       return (branch !== null && task.branch === branch) || taskPath === registration.path;
     });
     for (const task of matching) {
@@ -1302,7 +1498,9 @@ function validateBatchTaskSnapshot(
       assertEqual(override.scanNonce, evidence.scan.nonce, `Taskless override scan nonce for ${registration.path}`);
       const confirmation = `ALLOW TASKLESS ${registration.path}`;
       if (!confirmationSet.has(confirmation)) {
-        block(`Registration ${registration.path} needs --legacy-taskless-confirmation ${JSON.stringify(confirmation)}.`);
+        block(
+          `Registration ${registration.path} needs --legacy-taskless-confirmation ${JSON.stringify(confirmation)}.`,
+        );
       }
       usedConfirmations.add(confirmation);
     } else if (evidenceRegistration.task?.legacyTasklessOverride) {
@@ -1316,10 +1514,16 @@ function validateBatchTaskSnapshot(
     taskCount: taskIds.length,
     matchedTaskCount: state.candidates.reduce((count, registration) => {
       const branch = shortBranch(registration);
-      return count + snapshot.tasks.filter((task) =>
-        (branch !== null && task.branch === branch) ||
-        (typeof task.worktree === "string" && isAbsolute(task.worktree) && resolve(task.worktree) === registration.path),
-      ).length;
+      return (
+        count +
+        snapshot.tasks.filter(
+          (task) =>
+            (branch !== null && task.branch === branch) ||
+            (typeof task.worktree === "string" &&
+              isAbsolute(task.worktree) &&
+              resolve(task.worktree) === registration.path),
+        ).length
+      );
     }, 0),
     overrideCount: usedConfirmations.size,
   };
@@ -1343,40 +1547,42 @@ function makeInventory(repository, state, now = Date.now()) {
     nonce: randomBytes(32).toString("hex"),
     sha256: sha256(JSON.stringify(scanRegistrations)),
   };
-  const registrations = state.candidates.map((registration) => {
-    const scanned = registrationEvidence(registration);
-    const issueNumber = branchIssueNumber(registration);
-    let issue;
-    if (issueNumber === null) {
-      issue = {
-        number: null,
-        state: "review-required",
-        url: "",
-        disposition: "review-required",
-      };
-    } else {
-      const github = inspectGithubIssue(repository, issueNumber);
-      issue = {
-        number: github.issue.number,
-        state: github.issue.state,
-        url: github.issue.url,
-        disposition: github.issue.state === "CLOSED" ? "closed" : "review-required",
-      };
-    }
-    const recovery = registration.branch
-      ? {
-          kind: "retained-ref",
-          reference: registration.branch,
-          sourceHead: registration.head,
-          sourceTree: registration.tree,
-        }
-      : {
-          kind: "review-required",
-          sourceHead: registration.head,
-          sourceTree: registration.tree,
+  const registrations = state.candidates
+    .map((registration) => {
+      const scanned = registrationEvidence(registration);
+      const issueNumber = branchIssueNumber(registration);
+      let issue;
+      if (issueNumber === null) {
+        issue = {
+          number: null,
+          state: "review-required",
+          url: "",
+          disposition: "review-required",
         };
-    return { ...scanned, issue, task: {}, recovery };
-  }).sort(compareByPath);
+      } else {
+        const github = inspectGithubIssue(repository, issueNumber);
+        issue = {
+          number: github.issue.number,
+          state: github.issue.state,
+          url: github.issue.url,
+          disposition: github.issue.state === "CLOSED" ? "closed" : "review-required",
+        };
+      }
+      const recovery = registration.branch
+        ? {
+            kind: "retained-ref",
+            reference: registration.branch,
+            sourceHead: registration.head,
+            sourceTree: registration.tree,
+          }
+        : {
+            kind: "review-required",
+            sourceHead: registration.head,
+            sourceTree: registration.tree,
+          };
+      return { ...scanned, issue, task: {}, recovery };
+    })
+    .sort(compareByPath);
   return {
     schemaVersion: 2,
     capturedAt,
@@ -1574,6 +1780,151 @@ function assertExactRegistrationIdentity(state, evidence) {
   assertEqual(JSON.stringify(actual), JSON.stringify(expected), "The exact approved prunable set after sealing");
 }
 
+function copyAdministrativeRecord(sourceRoot, destinationRoot, inventory, label) {
+  mkdirSync(destinationRoot, { mode: 0o700 });
+  chmodSync(destinationRoot, 0o700);
+  for (const entry of inventory.entries) {
+    const source = join(sourceRoot, entry.path);
+    const destination = join(destinationRoot, entry.path);
+    if (entry.kind === "directory") {
+      mkdirSync(destination, { mode: 0o700 });
+      chmodSync(destination, 0o700);
+      continue;
+    }
+    copyFileSync(source, destination, fileConstants.COPYFILE_EXCL);
+    chmodSync(destination, PRIVATE_FILE_MODE);
+  }
+  const copied = administrativeRecordInventory(destinationRoot, label);
+  assertEqual(JSON.stringify(copied), JSON.stringify(inventory), `Administrative backup inventory for ${label}`);
+  return copied;
+}
+
+function createAdministrativeBackupRoot(evidenceFile, evidence, repository, registrations, executionNonce) {
+  const backupRoot = join(
+    dirname(evidenceFile.absolutePath),
+    `.homa-damaged-registration-backups-${evidence.setSha256}-${executionNonce}`,
+  );
+  if (isInside(backupRoot, repository.primaryPath) || isInside(backupRoot, repository.commonGitDir)) {
+    block(`Administrative backup root ${backupRoot} overlaps the primary checkout or common Git directory.`);
+  }
+  for (const registration of registrations) {
+    if (isInside(backupRoot, registration.path) || isInside(registration.path, backupRoot)) {
+      block(`Administrative backup root ${backupRoot} overlaps approved path ${registration.path}.`);
+    }
+  }
+  if (pathEntry(backupRoot, "Administrative backup root") !== null) {
+    block(`Administrative backup root ${backupRoot} already exists. Refusing to overwrite or reuse it.`);
+  }
+  mkdirSync(backupRoot, { mode: 0o700 });
+  chmodSync(backupRoot, 0o700);
+  const stats = statSync(backupRoot, { bigint: true });
+  if (!stats.isDirectory() || (stats.mode & 0o777n) !== 0o700n) {
+    block(`Administrative backup root ${backupRoot} is not owner-only.`);
+  }
+  if (typeof process.getuid === "function" && stats.uid !== BigInt(process.getuid())) {
+    block(`Administrative backup root ${backupRoot} is not owned by the current user.`);
+  }
+  return backupRoot;
+}
+
+function restoreTestAdministrativeBackup(repository, registration, backupPath) {
+  const restoreRoot = mkdtempSync(join(repository.commonGitDir, ".homa-admin-restore-"));
+  chmodSync(restoreRoot, 0o700);
+  const restoredAdmin = join(restoreRoot, registration.adminName);
+  try {
+    copyAdministrativeRecord(
+      backupPath,
+      restoredAdmin,
+      registration.administrativeInventory,
+      `${registration.adminName} restore test`,
+    );
+    const restoredHead = checked("git", [
+      `--git-dir=${restoredAdmin}`,
+      "rev-parse",
+      "--verify",
+      "HEAD^{commit}",
+    ]).trim();
+    const restoredCommittedTree = checked("git", [
+      `--git-dir=${restoredAdmin}`,
+      "rev-parse",
+      "--verify",
+      "HEAD^{tree}",
+    ]).trim();
+    const restoredIndex = streamedRegularFile(
+      join(restoredAdmin, "index"),
+      `Restored administrative index for ${registration.adminName}`,
+    );
+    const restoredIndexMatchesHead = administrativeIndexMatchesHead(
+      `${registration.adminName} restore test`,
+      restoredAdmin,
+      restoredIndex,
+      restoredHead,
+    );
+    if (!restoredIndexMatchesHead) {
+      block(`Restored administrative index for ${registration.path} no longer matches its HEAD.`);
+    }
+    const restoredStagedTree = restoredCommittedTree;
+    assertEqual(restoredHead, registration.head, `Restored administrative HEAD for ${registration.path}`);
+    assertEqual(restoredCommittedTree, registration.tree, `Restored committed tree for ${registration.path}`);
+    assertEqual(restoredStagedTree, registration.indexTree, `Restored staged tree for ${registration.path}`);
+    assertEqual(restoredIndex.sha256, registration.indexSha256, `Restored index bytes for ${registration.path}`);
+    assertEqual(restoredIndex.sizeBytes, registration.indexSizeBytes, `Restored index size for ${registration.path}`);
+    return {
+      restoreTested: true,
+      restoredHead,
+      restoredCommittedTree,
+      restoredStagedTree,
+      restoredIndexSha256: restoredIndex.sha256,
+    };
+  } finally {
+    rmSync(restoreRoot, { recursive: true, force: true });
+  }
+}
+
+function preserveAdministrativeRecord(repository, registration, backupRoot) {
+  const backupPath = join(backupRoot, registration.adminName);
+  const copiedInventory = copyAdministrativeRecord(
+    registration.adminDir,
+    backupPath,
+    registration.administrativeInventory,
+    registration.adminName,
+  );
+  const sourceAfterCopy = administrativeRecordInventory(registration.adminDir, registration.adminName);
+  assertEqual(
+    JSON.stringify(sourceAfterCopy),
+    JSON.stringify(registration.administrativeInventory),
+    `Administrative source inventory after backup for ${registration.path}`,
+  );
+  const restore = restoreTestAdministrativeBackup(repository, registration, backupPath);
+  return {
+    backupPath,
+    backupMode: "0700-directory-with-0600-files",
+    administrativeManifestSha256: copiedInventory.manifestSha256,
+    indexBytesPreserved: true,
+    indexSha256: registration.indexSha256,
+    indexSizeBytes: registration.indexSizeBytes,
+    indexTree: registration.indexTree,
+    indexMatchesHead: registration.indexMatchesHead,
+    allIndexObjectsReachableFromHead: registration.indexMatchesHead,
+    ...restore,
+  };
+}
+
+function revalidateAdministrativePreservation(registration, backup) {
+  const sourceInventory = administrativeRecordInventory(registration.adminDir, registration.adminName);
+  assertEqual(
+    JSON.stringify(sourceInventory),
+    JSON.stringify(registration.administrativeInventory),
+    `Administrative source inventory at the sealing boundary for ${registration.path}`,
+  );
+  const backupInventory = administrativeRecordInventory(backup.backupPath, `${registration.adminName} durable backup`);
+  assertEqual(
+    JSON.stringify(backupInventory),
+    JSON.stringify(registration.administrativeInventory),
+    `Administrative backup inventory at the sealing boundary for ${registration.path}`,
+  );
+}
+
 function prepareRegistrationSeal(registration) {
   if (registration.pathState === "absent") {
     return { registration, quarantineRoot: null, preservedPath: null };
@@ -1594,7 +1945,11 @@ function prepareRegistrationSeal(registration) {
     quarantineRoot = mkdtempSync(join(parent, ".homa-damaged-worktree-"));
     chmodSync(quarantineRoot, 0o700);
   } catch (error) {
-    block(`Could not create a private sealing directory beside ${registration.path}: ${error instanceof Error ? error.message : String(error)}`);
+    block(
+      `Could not create a private sealing directory beside ${registration.path}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
   const quarantineStats = statSync(quarantineRoot, { bigint: true });
   if (quarantineStats.dev !== sourceStats.dev) {
@@ -1643,7 +1998,10 @@ function sealRegistration(prepared) {
   if (!preservedStats || !preservedStats.isDirectory()) {
     block(`Approved content may have moved to ${preservedPath}, but the atomic seal could not be confirmed.`);
   }
-  if (String(preservedStats.dev) !== registration.pathIdentity.dev || String(preservedStats.ino) !== registration.pathIdentity.ino) {
+  if (
+    String(preservedStats.dev) !== registration.pathIdentity.dev ||
+    String(preservedStats.ino) !== registration.pathIdentity.ino
+  ) {
     block(`Approved content is preserved at ${preservedPath}, but its directory identity changed during sealing.`);
   }
   return {
@@ -1700,13 +2058,7 @@ function verifyPrune(before, after, approvedPaths) {
     .sort(compareByPath);
 }
 
-function executeRetirement(
-  repository,
-  evidenceFile,
-  evidence,
-  assessment,
-  tasklessConfirmations,
-) {
+function executeRetirement(repository, evidenceFile, evidence, assessment, tasklessConfirmations) {
   const refreshedEvidence = readJsonEvidence(evidenceFile.absolutePath);
   assertEqual(refreshedEvidence.sha256, evidenceFile.sha256, "Evidence file checksum before mutation");
   const finalState = inspectRegistrationState(repository);
@@ -1714,23 +2066,47 @@ function executeRetirement(
   assertEqual(assessment.confirmation, `RETIRE DAMAGED REGISTRATIONS ${evidence.setSha256}`, "Execution confirmation");
   assertEqual(finalAssessment.confirmation, assessment.confirmation, "Final execution confirmation");
   const preparedSeals = finalState.candidates.map(prepareRegistrationSeal);
-  process.stderr.write(
-    `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT ${JSON.stringify({
-      scanNonce: evidence.scan.nonce,
-      scanSha256: evidence.scan.sha256,
-      maxAgeSeconds: EXECUTION_TASK_MAX_AGE_MS / 1000,
-    })}\n`,
-  );
-  const taskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
-  validateBatchTaskSnapshot(taskSnapshot, finalState, evidence, {
-    maxAgeMs: EXECUTION_TASK_MAX_AGE_MS,
-    tasklessConfirmations,
-  });
-
+  const executionBoundary = {
+    nonce: randomBytes(32).toString("hex"),
+    readyAt: new Date().toISOString(),
+  };
   const sealed = [];
+  let administrativeBackupRoot = null;
+  let administrativeBackups = [];
   try {
-    // The complete batch moves immediately after the live task proof. No Git or
-    // network command occurs until every surviving directory is preserved.
+    administrativeBackupRoot = createAdministrativeBackupRoot(
+      evidenceFile,
+      evidence,
+      repository,
+      finalState.candidates,
+      executionBoundary.nonce,
+    );
+    administrativeBackups = finalState.candidates.map((registration) =>
+      preserveAdministrativeRecord(repository, registration, administrativeBackupRoot),
+    );
+    executionBoundary.readyAt = new Date().toISOString();
+    process.stderr.write(
+      `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT ${JSON.stringify({
+        scanNonce: evidence.scan.nonce,
+        scanSha256: evidence.scan.sha256,
+        executionNonce: executionBoundary.nonce,
+        readyAt: executionBoundary.readyAt,
+        maxAgeSeconds: EXECUTION_TASK_MAX_AGE_MS / 1000,
+      })}\n`,
+    );
+    const taskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
+    validateBatchTaskSnapshot(taskSnapshot, finalState, evidence, {
+      maxAgeMs: EXECUTION_TASK_MAX_AGE_MS,
+      tasklessConfirmations,
+      executionBoundary,
+    });
+
+    for (let index = 0; index < finalState.candidates.length; index += 1) {
+      revalidateAdministrativePreservation(finalState.candidates[index], administrativeBackups[index]);
+    }
+    // After the live task proof, only exact filesystem checks and atomic moves
+    // occur. No Git or network command runs until every surviving directory is
+    // preserved.
     for (const prepared of preparedSeals) sealed.push(sealRegistration(prepared));
     for (const entry of sealed) verifySealedRegistration(entry);
     const afterSeal = inspectRegistrationState(repository);
@@ -1747,7 +2123,9 @@ function executeRetirement(
     if (prune.status !== 0) {
       block(`Git refused metadata-only prune: ${prune.stderr.trim() || "no error text"}`);
     }
-    const afterPrune = inspectRegistrationState(repository, { allowNoPrunable: true });
+    const afterPrune = inspectRegistrationState(repository, {
+      allowNoPrunable: true,
+    });
     const newRegistrations = verifyPrune(
       afterSeal,
       afterPrune,
@@ -1761,23 +2139,30 @@ function executeRetirement(
       status: "DAMAGED_REGISTRATIONS_RETIRED",
       setSha256: evidence.setSha256,
       pruneCutoff: evidence.pruneCutoff,
-      registrations: sealed.map(({ registration: _registration, ...entry }) => entry),
+      administrativeBackupRoot,
+      registrations: sealed.map(({ registration, ...entry }, index) => ({
+        ...entry,
+        workingTreeState: registration.pathState,
+        workingTreeInventory: registration.pathInventory,
+        workingTreeRestoreTested: registration.pathState === "directory",
+        administrativeBackup: administrativeBackups[index],
+      })),
       lateArrivalPaths,
       newRegistrations,
       localBranchAction: "keep",
       remoteBranchAction: "keep",
-      bytesDeleted: false,
+      pruneDeletedOriginalAdministrativeBytes: true,
+      administrativeBytesPreserved: true,
     };
   } catch (error) {
-    const preservedPaths = sealed
-      .map((entry) => entry.preservedPath)
-      .filter(Boolean);
+    const preservedPaths = sealed.map((entry) => entry.preservedPath).filter(Boolean);
     const latePaths = evidence.registrations
       .map((registration) => registration.path)
       .filter((path) => pathEntry(path, `Possible late path at ${path}`) !== null);
     const detail = error instanceof Error ? error.message : String(error);
     block(
       `Damaged-registration retirement stopped. Preserved paths: ${JSON.stringify(preservedPaths)}. ` +
+        `Administrative backup root: ${JSON.stringify(administrativeBackupRoot)}. ` +
         `Paths currently present at registered locations: ${JSON.stringify(latePaths)}. ${detail}`,
     );
   }
@@ -1802,8 +2187,7 @@ function parseArgs(argv) {
     else if (argument === "--task-snapshot") options.taskSnapshot = argv[++index];
     else if (argument === "--legacy-taskless-confirmation") {
       options.tasklessConfirmations.push(argv[++index]);
-    }
-    else if (argument === "--confirmation") options.confirmation = argv[++index];
+    } else if (argument === "--confirmation") options.confirmation = argv[++index];
     else if (argument === "--help" || argument === "-h") options.help = true;
     else block(`Unknown argument ${argument}.`);
   }
@@ -1837,8 +2221,7 @@ function parseArgs(argv) {
     }
   } else if (options.taskSnapshot === "-") {
     block("Inspection requires a task snapshot file. Standard input is reserved for execution.");
-  }
-  else if (options.confirmation !== undefined) block("--confirmation is valid only with --execute.");
+  } else if (options.confirmation !== undefined) block("--confirmation is valid only with --execute.");
   return options;
 }
 
@@ -1873,13 +2256,19 @@ function main() {
     validateEvidenceFileLocation(reviewQueueOut, repository, state.candidates);
     atomicPrivateJson(evidenceOut, evidence, "damaged-registration evidence");
     atomicPrivateJson(reviewQueueOut, makeReviewQueue(evidence), "damaged-registration review queue");
-    console.log(JSON.stringify({
-      status: "DAMAGED_REGISTRATION_EVIDENCE_GENERATED",
-      evidencePath: evidenceOut,
-      reviewQueuePath: reviewQueueOut,
-      registrationCount: evidence.registrations.length,
-      scan: evidence.scan,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          status: "DAMAGED_REGISTRATION_EVIDENCE_GENERATED",
+          evidencePath: evidenceOut,
+          reviewQueuePath: reviewQueueOut,
+          registrationCount: evidence.registrations.length,
+          scan: evidence.scan,
+        },
+        null,
+        2,
+      ),
+    );
     return;
   }
   const evidenceFile = readJsonEvidence(options.evidence);
@@ -1894,12 +2283,8 @@ function main() {
     return;
   }
   assertEqual(options.confirmation, assessment.confirmation, "Execution confirmation");
-  const report = executeRetirement(
-    repository,
-    evidenceFile,
-    evidenceFile.evidence,
-    assessment,
-    options.tasklessConfirmations,
+  const report = withRepositoryCleanupLock(repository.commonGitDir, "damaged-registration-retirement", () =>
+    executeRetirement(repository, evidenceFile, evidenceFile.evidence, assessment, options.tasklessConfirmations),
   );
   console.log(JSON.stringify(report, null, 2));
 }

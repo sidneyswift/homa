@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
   chmodSync,
   copyFileSync,
@@ -18,7 +18,15 @@ import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { retirementScanSha256 } from "./remove-worktree-safely.mjs";
+import {
+  acquireRepositoryCleanupLock as acquireOrdinaryCleanupLock,
+  releaseRepositoryCleanupLock as releaseOrdinaryCleanupLock,
+  retirementScanSha256,
+} from "./remove-worktree-safely.mjs";
+import {
+  acquireRepositoryCleanupLock as acquireDamagedCleanupLock,
+  releaseRepositoryCleanupLock as releaseDamagedCleanupLock,
+} from "./retire-damaged-worktree-registrations.mjs";
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const wrapperSource = join(repositoryRoot, "scripts", "remove-worktree-safely.mjs");
@@ -279,10 +287,7 @@ function makeFixture({
   git(fixture, primary, ["config", `url.file://${remote}.insteadOf`, githubOrigin]);
   writeFileSync(join(primary, "README.md"), "Disposable worktree integration fixture.\n");
   mkdirSync(join(primary, "tracked-container"));
-  writeFileSync(
-    join(primary, "tracked-container", "history.txt"),
-    "Outer repository tracks this exact file.\n",
-  );
+  writeFileSync(join(primary, "tracked-container", "history.txt"), "Outer repository tracks this exact file.\n");
   const ordinarySource = join(primary, "ordinary-source.git");
   mkdirSync(join(ordinarySource, "objects"), { recursive: true });
   mkdirSync(join(ordinarySource, "refs"), { recursive: true });
@@ -365,6 +370,7 @@ function makeFixture({
   });
   const tree = git(fixture, target, ["rev-parse", "HEAD^{tree}"]);
   const commonGitDir = realpathSync(git(fixture, target, ["rev-parse", "--path-format=absolute", "--git-common-dir"]));
+  fixture.commonGitDir = commonGitDir;
   const gitDir = realpathSync(git(fixture, target, ["rev-parse", "--path-format=absolute", "--git-dir"]));
   const patchSha256 = createHash("sha256").update("").digest("hex");
   let recovery;
@@ -506,13 +512,14 @@ function makeFixture({
       })),
       patchSha256,
       remoteHead: remoteBranch ? head : null,
-      bundle: localOnly && !thinBundle
-        ? {
-            artifactSha256: recovery.artifactSha256,
-            restoredHead: recovery.restoredHead,
-            restoredTree: recovery.restoredTree,
-          }
-        : null,
+      bundle:
+        localOnly && !thinBundle
+          ? {
+              artifactSha256: recovery.artifactSha256,
+              restoredHead: recovery.restoredHead,
+              restoredTree: recovery.restoredTree,
+            }
+          : null,
     }),
   };
   evidence.scan = scan;
@@ -566,10 +573,7 @@ function makeFixture({
   return fixture;
 }
 
-function wrapperArgs(
-  fixture,
-  { execute = false, legacyTaskless = false, wrapper = fixture.wrapper } = {},
-) {
+function wrapperArgs(fixture, { execute = false, legacyTaskless = false, wrapper = fixture.wrapper } = {}) {
   const args = [
     realpathSync(wrapper),
     "--target",
@@ -595,11 +599,64 @@ function wrapperArgs(
   return args;
 }
 
-function executionOptions(fixture, environment = fixture.env) {
-  return {
-    env: environment,
-    input: readFileSync(fixture.taskSnapshotPath),
+function boundTaskSnapshot(fixture, ready, mutate) {
+  const snapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  snapshot.capturedAt = new Date(Math.max(Date.now(), Date.parse(ready.readyAt))).toISOString();
+  snapshot.executionBoundary = {
+    nonce: ready.executionNonce,
+    readyAt: ready.readyAt,
   };
+  if (mutate) mutate(snapshot, ready);
+  return snapshot;
+}
+
+function runAfterReady(command, args, options, snapshotFactory) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: options.cwd,
+      env: options.env ?? process.env,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let sent = false;
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+      if (sent) return;
+      const match = stderr.match(/READY_FOR_FINAL_CODEX_TASK_SNAPSHOT (\{[^\n]+\})\n/u);
+      if (!match) return;
+      sent = true;
+      try {
+        const ready = JSON.parse(match[1]);
+        const snapshot = snapshotFactory(ready);
+        child.stdin.end(`${JSON.stringify(snapshot)}\n`);
+      } catch (error) {
+        child.kill();
+        reject(error);
+      }
+    });
+    child.on("error", reject);
+    child.on("close", (status, signal) => {
+      resolve({
+        status: status ?? 1,
+        signal,
+        stdout,
+        stderr,
+        readyObserved: sent,
+      });
+    });
+  });
+}
+
+function executeWrapper(fixture, { environment = fixture.env, mutateSnapshot } = {}) {
+  return runAfterReady(process.execPath, wrapperArgs(fixture, { execute: true }), { env: environment }, (ready) =>
+    boundTaskSnapshot(fixture, ready, mutateSnapshot),
+  );
 }
 
 function quarantineRoots(fixture) {
@@ -608,15 +665,11 @@ function quarantineRoots(fixture) {
     .map((entry) => join(fixture.root, entry.name));
 }
 
-test("execution removes the registration and preserves sealed checkout content", (t) => {
+test("execution removes the registration and preserves sealed checkout content", async (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture);
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
   const outcome = JSON.parse(result.stdout);
@@ -628,6 +681,170 @@ test("execution removes the registration and preserves sealed checkout content",
   assert.equal(existsSync(outcome.preservedPath), true);
   assert.equal(existsSync(join(outcome.preservedPath, ".git")), true);
   assert.doesNotMatch(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
+});
+
+test("a prebuffered task snapshot cannot satisfy the READY boundary", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const result = run(process.execPath, wrapperArgs(fixture, { execute: true }), {
+    env: fixture.env,
+    input: readFileSync(fixture.taskSnapshotPath),
+  });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
+  assert.match(result.stderr, /executionBoundary|predates READY/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("execution task timestamps and bindings fail closed", async (t) => {
+  const cases = [
+    [
+      "earlier than READY",
+      (snapshot, ready) => {
+        snapshot.capturedAt = new Date(Date.parse(ready.readyAt) - 1).toISOString();
+      },
+      /predates READY/iu,
+    ],
+    [
+      "malformed",
+      (snapshot) => {
+        snapshot.capturedAt = "not-a-time";
+      },
+      /ISO timestamp/iu,
+    ],
+    [
+      "non-normalized timezone",
+      (snapshot, ready) => {
+        snapshot.capturedAt = ready.readyAt.replace(/Z$/u, "+00:00");
+      },
+      /normalized ISO timestamp/iu,
+    ],
+    [
+      "wrong execution nonce",
+      (snapshot) => {
+        snapshot.executionBoundary.nonce = "f".repeat(64);
+      },
+      /execution boundary nonce changed/iu,
+    ],
+    [
+      "wrong scan nonce",
+      (snapshot) => {
+        snapshot.retirementScan.nonce = "f".repeat(64);
+      },
+      /scan nonce changed/iu,
+    ],
+    [
+      "wrong scan digest",
+      (snapshot) => {
+        snapshot.retirementScan.sha256 = "f".repeat(64);
+      },
+      /scan digest changed/iu,
+    ],
+  ];
+  for (const [name, mutateSnapshot, expected] of cases) {
+    await t.test(name, async (t) => {
+      const fixture = makeFixture();
+      t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+      const result = await executeWrapper(fixture, { mutateSnapshot });
+      assert.equal(result.status, 2, result.stderr);
+      assert.match(result.stderr, expected);
+      assert.equal(existsSync(fixture.target), true);
+    });
+  }
+});
+
+test("capturedAt equal to READY is accepted only with the fresh execution nonce", async (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const result = await executeWrapper(fixture, {
+    mutateSnapshot(snapshot, ready) {
+      snapshot.capturedAt = ready.readyAt;
+    },
+  });
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("a snapshot captured for an earlier READY event cannot be replayed", async (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  let replayedSnapshot;
+  const first = await executeWrapper(fixture, {
+    mutateSnapshot(snapshot) {
+      replayedSnapshot = structuredClone(snapshot);
+      snapshot.retirementScan.sha256 = "f".repeat(64);
+    },
+  });
+  assert.equal(first.status, 2, first.stderr);
+  assert.equal(typeof replayedSnapshot, "object");
+
+  const second = await runAfterReady(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true }),
+    { env: fixture.env },
+    () => replayedSnapshot,
+  );
+  assert.equal(second.status, 2, second.stderr);
+  assert.match(second.stderr, /execution boundary (?:nonce|readyAt) changed|predates READY/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("the ordinary executor holds the shared lock while waiting for live task proof", async (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  let contentionObserved = false;
+  const result = await executeWrapper(fixture, {
+    mutateSnapshot() {
+      assert.equal(existsSync(join(fixture.commonGitDir, "homa-repository-cleanup.lock")), true);
+      assert.throws(
+        () => acquireDamagedCleanupLock(fixture.commonGitDir, "concurrent-damaged-attempt"),
+        /already exists/iu,
+      );
+      contentionObserved = true;
+    },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(contentionObserved, true);
+});
+
+test("ordinary and damaged cleanup implementations contend on one repository lock", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const ordinary = acquireOrdinaryCleanupLock(fixture.commonGitDir, "ordinary-test-holder");
+  assert.equal(lstatSync(ordinary.path).mode & 0o777, 0o600);
+  assert.throws(
+    () => acquireDamagedCleanupLock(fixture.commonGitDir, "damaged-test-contender"),
+    /already exists.*fail closed/iu,
+  );
+  releaseOrdinaryCleanupLock(ordinary);
+
+  const damaged = acquireDamagedCleanupLock(fixture.commonGitDir, "damaged-test-holder");
+  assert.throws(
+    () => acquireOrdinaryCleanupLock(fixture.commonGitDir, "ordinary-test-contender"),
+    /already exists.*fail closed/iu,
+  );
+  releaseDamagedCleanupLock(damaged);
+  assert.equal(existsSync(join(fixture.commonGitDir, "homa-repository-cleanup.lock")), false);
+});
+
+test("an old cleanup lock is never guessed stale or removed automatically", async (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const lockPath = join(fixture.commonGitDir, "homa-repository-cleanup.lock");
+  writeFileSync(
+    lockPath,
+    `${JSON.stringify({
+      acquiredAt: "2000-01-01T00:00:00.000Z",
+      actor: "unknown",
+    })}\n`,
+    { mode: 0o600 },
+  );
+  chmodSync(lockPath, 0o600);
+  const result = await executeWrapper(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /already exists.*age is not authority/iu);
+  assert.equal(existsSync(lockPath), true);
+  assert.equal(existsSync(fixture.target), true);
 });
 
 test("the generator writes bound mode-0600 evidence and a review queue", (t) => {
@@ -658,8 +875,14 @@ test("the generator writes bound mode-0600 evidence and a review queue", (t) => 
   assert.equal(evidence.schemaVersion, 2);
   assert.match(evidence.scan.nonce, /^[a-f0-9]{64}$/u);
   assert.equal(evidence.scan.sha256, queue.scan.sha256);
-  assert.equal(queue.items.some((item) => item.kind === "approval"), true);
-  assert.equal(queue.items.some((item) => item.kind === "execution-task-snapshot"), true);
+  assert.equal(
+    queue.items.some((item) => item.kind === "approval"),
+    true,
+  );
+  assert.equal(
+    queue.items.some((item) => item.kind === "execution-task-snapshot"),
+    true,
+  );
 
   const collision = run(
     process.execPath,
@@ -679,6 +902,42 @@ test("the generator writes bound mode-0600 evidence and a review queue", (t) => 
   assert.match(collision.stderr, /must be different/iu);
 });
 
+test("the generator streams exactly 101001 ignored files without truncation", (t) => {
+  const fixture = makeFixture();
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const ignoredRoot = join(fixture.target, ".cache", "large-inventory");
+  mkdirSync(ignoredRoot, { recursive: true });
+  for (let index = 0; index < 101_001; index += 1) {
+    writeFileSync(join(ignoredRoot, `${String(index).padStart(6, "0")}.cache`), "");
+  }
+  const evidenceOut = join(fixture.root, "large-inventory-evidence.json");
+  const reviewQueueOut = join(fixture.root, "large-inventory-review.json");
+  const result = run(
+    process.execPath,
+    [
+      fixture.wrapper,
+      "--generate",
+      "--target",
+      fixture.target,
+      "--evidence-out",
+      evidenceOut,
+      "--review-queue-out",
+      reviewQueueOut,
+    ],
+    {
+      env: {
+        ...fixture.env,
+        PATH: `${dirname(checked("which", ["git"]))}:${fixture.fakeBin}:${process.env.PATH}`,
+      },
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  const evidence = JSON.parse(readFileSync(evidenceOut, "utf8"));
+  assert.equal(evidence.worktree.ignoredDispositions.length, 101_001);
+  assert.equal(evidence.worktree.ignoredDispositions[0].path.includes("000000.cache"), true);
+  assert.equal(evidence.worktree.ignoredDispositions.at(-1).path.includes("101000.cache"), true);
+});
+
 test("private origin references use authenticated GitHub API without Git credentials", (t) => {
   const fixture = makeFixture({ remoteBranch: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
@@ -693,13 +952,10 @@ test("private origin references use authenticated GitHub API without Git credent
   const assessment = JSON.parse(result.stdout);
   assert.equal(assessment.status, "SAFE_TO_REMOVE");
   assert.equal(assessment.recovery, "remote-branch");
-  assert.deepEqual(
-    readFileSync(fixture.fakeGithubRefLogPath, "utf8").trim().split("\n"),
-    [
-      "repos/sidneyswift/homa/git/ref/heads/main",
-      "repos/sidneyswift/homa/git/ref/heads/codex%2Fgh-872-disposable",
-    ],
-  );
+  assert.deepEqual(readFileSync(fixture.fakeGithubRefLogPath, "utf8").trim().split("\n"), [
+    "repos/sidneyswift/homa/git/ref/heads/main",
+    "repos/sidneyswift/homa/git/ref/heads/codex%2Fgh-872-disposable",
+  ]);
 });
 
 test("a nested Git directory with unique history blocks a clean outer worktree", (t) => {
@@ -723,7 +979,9 @@ test("a nested Git directory with unique history blocks a clean outer worktree",
     0,
   );
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /nested \.git entry/iu);
   assert.equal(git(fixture, nestedRoot, ["rev-parse", "HEAD"]), nestedHead);
@@ -732,13 +990,12 @@ test("a nested Git directory with unique history blocks a clean outer worktree",
 test("a nested .git file blocks a clean outer worktree", (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
-  writeFileSync(
-    join(fixture.target, "tracked-container", ".git"),
-    "gitdir: /durable/private/nested-history.git\n",
-  );
+  writeFileSync(join(fixture.target, "tracked-container", ".git"), "gitdir: /durable/private/nested-history.git\n");
 
   assert.equal(git(fixture, fixture.target, ["status", "--porcelain=v2", "--untracked-files=all"]), "");
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /nested \.git entry/iu);
   assert.equal(existsSync(join(fixture.target, "tracked-container", ".git")), true);
@@ -762,7 +1019,9 @@ test("a tracked nested bare repository with unique history blocks cleanup", (t) 
     fixture.nestedBareHead,
   );
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /nested bare Git repository/iu);
   assert.equal(
@@ -775,13 +1034,15 @@ test("an ordinary source folder with Git-shaped names is not a bare repository",
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(result.stdout).status, "SAFE_TO_REMOVE");
   assert.equal(existsSync(join(fixture.target, "ordinary-source.git", "objects", "index.ts")), true);
 });
 
-test("a fresh active task blocks the destructive executor and preserves the worktree", (t) => {
+test("a fresh active task blocks the destructive executor and preserves the worktree", async (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   const taskSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
@@ -796,46 +1057,42 @@ test("a fresh active task blocks the destructive executor and preserves the work
   ];
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /still running/u);
   assert.equal(existsSync(fixture.target), true);
   assert.match(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
 });
 
-test("execution rejects a task snapshot older than thirty seconds", (t) => {
+test("execution rejects a task snapshot older than thirty seconds", async (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   const taskSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
   taskSnapshot.capturedAt = new Date(Date.now() - 31_000).toISOString();
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture, {
+    mutateSnapshot(snapshot) {
+      snapshot.capturedAt = new Date(Date.now() - 31_000).toISOString();
+    },
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /Task snapshot capturedAt is stale/u);
   assert.equal(existsSync(fixture.target), true);
 });
 
-test("execution rejects a task snapshot captured in the future", (t) => {
+test("execution rejects a task snapshot captured in the future", async (t) => {
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   const taskSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
   taskSnapshot.capturedAt = new Date(Date.now() + 60_000).toISOString();
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture, {
+    mutateSnapshot(snapshot) {
+      snapshot.capturedAt = new Date(Date.now() + 60_000).toISOString();
+    },
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /Task snapshot capturedAt is in the future/u);
   assert.equal(existsSync(fixture.target), true);
@@ -845,7 +1102,9 @@ test("a verified bundle preserves a local-only commit when GitHub returns 422", 
   const fixture = makeFixture({ localOnly: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 0, result.stderr);
   const assessment = JSON.parse(result.stdout);
   assert.equal(assessment.status, "SAFE_TO_REMOVE");
@@ -865,12 +1124,11 @@ test("bundle recovery rejects the operating system temporary directory", (t) => 
   writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
 
   if (process.platform === "darwin") {
-    assert.match(
-      realpathSync(temporaryBundle),
-      /^\/private\/var\/folders\/[^/]+\/[^/]+\/T\//u,
-    );
+    assert.match(realpathSync(temporaryBundle), /^\/private\/var\/folders\/[^/]+\/[^/]+\/T\//u);
   }
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /ephemeral operating-system temporary storage/iu);
   assert.equal(existsSync(fixture.target), true);
@@ -892,17 +1150,11 @@ test("evidence rejects every available operating system temporary root", (t) => 
     try {
       const temporaryEvidence = join(temporaryRoot, "removal-evidence.json");
       copyFileSync(fixture.evidencePath, temporaryEvidence);
-      const result = run(
-        process.execPath,
-        wrapperArgs({ ...fixture, evidencePath: temporaryEvidence }),
-        { env: fixture.env },
-      );
+      const result = run(process.execPath, wrapperArgs({ ...fixture, evidencePath: temporaryEvidence }), {
+        env: fixture.env,
+      });
       assert.equal(result.status, 2, `${temporaryBase}: ${result.stderr}`);
-      assert.match(
-        result.stderr,
-        /ephemeral operating-system temporary storage/iu,
-        temporaryBase,
-      );
+      assert.match(result.stderr, /ephemeral operating-system temporary storage/iu, temporaryBase);
       assert.equal(existsSync(fixture.target), true);
     } finally {
       rmSync(temporaryRoot, { recursive: true, force: true });
@@ -914,14 +1166,18 @@ test("ignored content needs an exact recorded disposition", (t) => {
   const fixture = makeFixture({ ignored: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const accepted = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const accepted = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(accepted.status, 0, accepted.stderr);
   assert.equal(JSON.parse(accepted.stdout).ignoredPathDecisions, 1);
 
   const evidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
   evidence.worktree.ignoredDispositions = [];
   writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
-  const rejected = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const rejected = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(rejected.status, 2);
   assert.match(rejected.stderr, /Exact ignored file fingerprint changed/u);
 });
@@ -931,7 +1187,9 @@ test("changed ignored content invalidates the recorded fingerprint", (t) => {
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   writeFileSync(join(fixture.target, ".cache", "generated.txt"), "different bytes\n");
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /evidence scan digest changed|ignored file fingerprint changed/iu);
 });
@@ -976,7 +1234,9 @@ test("sensitive files nested under ignored directories cannot be called regenera
   ]) {
     const fixture = makeFixture({ ignored: true, ignoredPath });
     try {
-      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      const result = run(process.execPath, wrapperArgs(fixture), {
+        env: fixture.env,
+      });
       assert.equal(result.status, 2, `${ignoredPath}: ${result.stderr}`);
       assert.match(result.stderr, /cannot be classified as regenerable/iu, ignoredPath);
     } finally {
@@ -997,7 +1257,9 @@ test("known sensitive filenames stay sensitive through backup suffix chains", ()
   ]) {
     const fixture = makeFixture({ ignored: true, ignoredPath });
     try {
-      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      const result = run(process.execPath, wrapperArgs(fixture), {
+        env: fixture.env,
+      });
       assert.equal(result.status, 2, `${ignoredPath}: ${result.stderr}`);
       assert.match(result.stderr, /cannot be classified as regenerable/iu, ignoredPath);
     } finally {
@@ -1018,7 +1280,9 @@ test("ordinary tokenizer caches and build artifacts can be recorded as regenerab
   ]) {
     const fixture = makeFixture({ ignored: true, ignoredPath });
     try {
-      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      const result = run(process.execPath, wrapperArgs(fixture), {
+        env: fixture.env,
+      });
       assert.equal(result.status, 0, `${ignoredPath}: ${result.stderr}`);
       assert.equal(JSON.parse(result.stdout).ignoredPathDecisions, 1, ignoredPath);
     } finally {
@@ -1031,16 +1295,23 @@ test("a root ignored file cannot be called regenerable", (t) => {
   const fixture = makeFixture({ ignored: true, ignoredPath: "draft.scratch" });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /approved generated, cache, build, or output directory/iu);
 });
 
 test("ignored filenames containing newlines are inventoried without ambiguity", (t) => {
-  const fixture = makeFixture({ ignored: true, ignoredFilename: "line\nbreak.txt" });
+  const fixture = makeFixture({
+    ignored: true,
+    ignoredFilename: "line\nbreak.txt",
+  });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(result.stdout).ignoredPathDecisions, 1);
 });
@@ -1049,31 +1320,45 @@ test("a thin bundle that cannot restore into an empty repository is rejected", (
   const fixture = makeFixture({ localOnly: true, thinBundle: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /prerequisite|restore|fetch/iu);
   assert.equal(existsSync(fixture.target), true);
 });
 
 test("an exact owner-only private backup is revalidated", (t) => {
-  const fixture = makeFixture({ ignored: true, ignoredDisposition: "backed-up-private" });
+  const fixture = makeFixture({
+    ignored: true,
+    ignoredDisposition: "backed-up-private",
+  });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const accepted = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const accepted = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(accepted.status, 0, accepted.stderr);
 
   writeFileSync(fixture.privateBackupPath, "changed backup bytes\n");
-  const changed = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const changed = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(changed.status, 2);
   assert.match(changed.stderr, /private backup|backup checksum|exact private backup/iu);
 });
 
 test("a private backup with group access is rejected", (t) => {
-  const fixture = makeFixture({ ignored: true, ignoredDisposition: "backed-up-private" });
+  const fixture = makeFixture({
+    ignored: true,
+    ignoredDisposition: "backed-up-private",
+  });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   chmodSync(fixture.privateBackupPath, 0o640);
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /readable or writable by another user/iu);
 });
@@ -1125,15 +1410,25 @@ test("evidence decisions and recovery timestamps cannot be in the future", (t) =
   const baseline = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
   const future = new Date(Date.now() + 60_000).toISOString();
   const cases = [
-    ["capturedAt", (evidence) => { evidence.capturedAt = future; }, /Evidence capturedAt.*future/iu],
+    [
+      "capturedAt",
+      (evidence) => {
+        evidence.capturedAt = future;
+      },
+      /Evidence capturedAt.*future/iu,
+    ],
     [
       "ignored decision",
-      (evidence) => { evidence.worktree.ignoredDispositions[0].decidedAt = future; },
+      (evidence) => {
+        evidence.worktree.ignoredDispositions[0].decidedAt = future;
+      },
       /decision is in the future/iu,
     ],
     [
       "restore test",
-      (evidence) => { evidence.recovery.restoreTestedAt = future; },
+      (evidence) => {
+        evidence.recovery.restoreTestedAt = future;
+      },
       /restoreTestedAt is in the future/iu,
     ],
   ];
@@ -1142,7 +1437,9 @@ test("evidence decisions and recovery timestamps cannot be in the future", (t) =
     const evidence = structuredClone(baseline);
     mutate(evidence);
     writeFileSync(fixture.evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
-    const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+    const result = run(process.execPath, wrapperArgs(fixture), {
+      env: fixture.env,
+    });
     assert.equal(result.status, 2, `${label}: ${result.stderr}`);
     assert.match(result.stderr, expected, label);
   }
@@ -1154,23 +1451,85 @@ test("a task handoff needs exact completion evidence", (t) => {
   const baseline = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
   const future = new Date(Date.now() + 60_000).toISOString();
   const cases = [
-    ["cancelled status", (task) => { task.status = "cancelled"; }, /status|completed/iu],
-    ["partial issue token", (task) => { task.handoff.issue = "#8720"; }, /different issue/iu],
-    ["suffixed commit", (task) => { task.handoff.commitOrPr += "-extra"; }, /commitOrPr/iu],
-    ["unexecuted checks", (task) => { task.handoff.checks.executed = false; }, /checks\.executed/iu],
-    ["failed checks", (task) => { task.handoff.checks.status = "failed"; }, /checks\.status/iu],
-    ["empty check commands", (task) => { task.handoff.checks.commands = []; }, /checks\.commands/iu],
-    ["future check time", (task) => { task.handoff.checks.completedAt = future; }, /checks\.completedAt.*future/iu],
-    ["wrong next step", (task) => { task.handoff.nextStep = "delete-it"; }, /nextStep/iu],
-    ["incomplete handoff", (task) => { task.handoff.handoffComplete = false; }, /handoffComplete/iu],
-    ["future handoff", (task) => { task.handoff.recordedAt = future; }, /recordedAt.*future/iu],
+    [
+      "cancelled status",
+      (task) => {
+        task.status = "cancelled";
+      },
+      /status|completed/iu,
+    ],
+    [
+      "partial issue token",
+      (task) => {
+        task.handoff.issue = "#8720";
+      },
+      /different issue/iu,
+    ],
+    [
+      "suffixed commit",
+      (task) => {
+        task.handoff.commitOrPr += "-extra";
+      },
+      /commitOrPr/iu,
+    ],
+    [
+      "unexecuted checks",
+      (task) => {
+        task.handoff.checks.executed = false;
+      },
+      /checks\.executed/iu,
+    ],
+    [
+      "failed checks",
+      (task) => {
+        task.handoff.checks.status = "failed";
+      },
+      /checks\.status/iu,
+    ],
+    [
+      "empty check commands",
+      (task) => {
+        task.handoff.checks.commands = [];
+      },
+      /checks\.commands/iu,
+    ],
+    [
+      "future check time",
+      (task) => {
+        task.handoff.checks.completedAt = future;
+      },
+      /checks\.completedAt.*future/iu,
+    ],
+    [
+      "wrong next step",
+      (task) => {
+        task.handoff.nextStep = "delete-it";
+      },
+      /nextStep/iu,
+    ],
+    [
+      "incomplete handoff",
+      (task) => {
+        task.handoff.handoffComplete = false;
+      },
+      /handoffComplete/iu,
+    ],
+    [
+      "future handoff",
+      (task) => {
+        task.handoff.recordedAt = future;
+      },
+      /recordedAt.*future/iu,
+    ],
   ];
 
   for (const [label, mutate, expected] of cases) {
     const snapshot = structuredClone(baseline);
     mutate(snapshot.tasks[0]);
     writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
-    const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+    const result = run(process.execPath, wrapperArgs(fixture), {
+      env: fixture.env,
+    });
     assert.equal(result.status, 2, `${label}: ${result.stderr}`);
     assert.match(result.stderr, expected, label);
   }
@@ -1184,7 +1543,9 @@ test("a handoff can point exactly to its commit URL or an associated pull reques
 
   snapshot.tasks[0].handoff.commitOrPr = `https://github.com/sidneyswift/homa/commit/${head}`;
   writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
-  const commitResult = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const commitResult = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(commitResult.status, 0, commitResult.stderr);
 
   snapshot.tasks[0].handoff.commitOrPr = "https://github.com/sidneyswift/homa/pull/912";
@@ -1209,7 +1570,9 @@ test("automatic removal rejects a hand-written empty task snapshot", (t) => {
   const fixture = makeFixture({ taskless: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+  const result = run(process.execPath, wrapperArgs(fixture), {
+    env: fixture.env,
+  });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /matching finished task/iu);
   assert.equal(existsSync(fixture.target), true);
@@ -1231,11 +1594,25 @@ test("a taskless override needs the exact approver, reason, and a nonfuture time
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
   const baseline = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
   const cases = [
-    ["approver", (override) => { override.approvedBy = "someone-else"; }, /approvedBy/iu],
-    ["reason", (override) => { override.reason = "seems safe"; }, /reason/iu],
+    [
+      "approver",
+      (override) => {
+        override.approvedBy = "someone-else";
+      },
+      /approvedBy/iu,
+    ],
+    [
+      "reason",
+      (override) => {
+        override.reason = "seems safe";
+      },
+      /reason/iu,
+    ],
     [
       "future approval",
-      (override) => { override.approvedAt = new Date(Date.now() + 60_000).toISOString(); },
+      (override) => {
+        override.approvedAt = new Date(Date.now() + 60_000).toISOString();
+      },
       /approvedAt.*future/iu,
     ],
   ];
@@ -1252,29 +1629,21 @@ test("a taskless override needs the exact approver, reason, and a nonfuture time
   }
 });
 
-test("ignored content created during final GitHub checks blocks removal", (t) => {
+test("ignored content created during final GitHub checks blocks removal", async (t) => {
   const fixture = makeFixture({ lateIgnoredDuringFinalGithub: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /evidence scan digest changed|ignored file fingerprint changed/iu);
   assert.equal(existsSync(join(fixture.target, ".late", "arrived-during-github.txt")), true);
 });
 
-test("content arriving at the move boundary is quarantined and preserved", (t) => {
+test("content arriving at the move boundary is quarantined and preserved", async (t) => {
   const fixture = makeFixture({ lateIgnoredDuringMove: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /moved to quarantine/iu);
   assert.equal(existsSync(fixture.target), false);
@@ -1288,40 +1657,26 @@ test("content arriving at the move boundary is quarantined and preserved", (t) =
   );
 });
 
-test("ignored content arriving after quarantine reinspection is never deleted", (t) => {
+test("ignored content arriving after quarantine reinspection is never deleted", async (t) => {
   const fixture = makeFixture({ lateIgnoredDuringRemove: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /content is preserved.*Git refused normal registration removal/iu);
   assert.equal(existsSync(fixture.target), false);
   const roots = quarantineRoots(fixture);
   assert.equal(roots.length, 1);
   assert.equal(existsSync(join(roots[0], "preserved-worktree", "README.md")), true);
-  assert.equal(
-    existsSync(join(roots[0], "worktree", ".late", "arrived-during-remove.txt")),
-    true,
-  );
-  assert.match(
-    git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]),
-    /codex\/gh-872-disposable/u,
-  );
+  assert.equal(existsSync(join(roots[0], "worktree", ".late", "arrived-during-remove.txt")), true);
+  assert.match(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
 });
 
-test("a broken symlink recreated at the original path blocks removal", (t) => {
+test("a broken symlink recreated at the original path blocks removal", async (t) => {
   const fixture = makeFixture({ recreateOriginalSymlinkDuringMove: true });
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { execute: true }),
-    executionOptions(fixture),
-  );
+  const result = await executeWrapper(fixture);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /original|atomic move|quarantine/iu);
   assert.equal(lstatSync(fixture.target).isSymbolicLink(), true);
@@ -1334,11 +1689,7 @@ test("the Homa wrapper rejects a target from a different common Git directory", 
   const fixture = makeFixture();
   t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
 
-  const result = run(
-    process.execPath,
-    wrapperArgs(fixture, { wrapper: wrapperSource }),
-    { env: fixture.env },
-  );
+  const result = run(process.execPath, wrapperArgs(fixture, { wrapper: wrapperSource }), { env: fixture.env });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /script repository common Git directory/iu);
   assert.equal(existsSync(fixture.target), true);

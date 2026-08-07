@@ -218,11 +218,13 @@ export all open and recent Homa tasks. Store the snapshot outside the target
 worktree. Do not use a new app-server process as a substitute. A separate process
 can read stored tasks but cannot prove the Desktop app's live ownership state.
 
-The execution snapshot is valid for thirty seconds. The wrapper re-reads it after
-the final GitHub checks. If it is stale, future-dated, malformed, contains a matching
-active task, or contains a matching task whose status is anything other than the
-exact value `completed`, execution stops. Inspection mode accepts a snapshot up to
-ten minutes old because it changes nothing.
+The execution snapshot is valid for thirty seconds. The wrapper reads it only after
+printing a fresh READY record. `capturedAt` must be a normalized UTC ISO timestamp
+at or after that record's `readyAt`, no later than the read time, and bound to the
+record's random execution nonce. If it is prebuffered, replayed, stale, future-dated,
+malformed, contains a matching active task, or contains a matching task whose status
+is anything other than the exact value `completed`, execution stops. Inspection mode
+accepts a snapshot up to ten minutes old because it changes nothing.
 
 The snapshot shape is:
 
@@ -265,6 +267,19 @@ The snapshot shape is:
 }
 ```
 
+Inspection snapshots omit `executionBoundary`. After READY, copy the fresh values
+printed by that exact process into the newly exported execution snapshot:
+
+```json
+{
+  "capturedAt": "normalized UTC timestamp at or after readyAt",
+  "executionBoundary": {
+    "nonce": "exact executionNonce printed by this READY event",
+    "readyAt": "exact readyAt printed by this READY event"
+  }
+}
+```
+
 Every matching task must be `completed` and include an exact handoff. The issue is
 exactly `#<number>` or its GitHub issue URL. `commitOrPr` is exactly the current HEAD,
 its GitHub commit URL, or an associated pull request URL whose head is the current
@@ -286,9 +301,13 @@ matching task.
 
 Task metadata cannot prove that an unrelated agent was omitted from a snapshot. The
 named cleanup operator must keep a repository freeze during the execution window.
-The atomic seal prevents the wrapper from recursively deleting content after the
-final scan, but it is not an operating-system lock against an uncooperative process
-changing earlier repository state while checks run.
+Both cleanup executors also acquire the same repository-scoped
+`.git/homa-repository-cleanup.lock` as an owner-only mode-0600 file. That exclusive
+lock covers the final rescan, READY output, task attestation, mutation, and
+postcondition. Contention always blocks. The scripts never infer that an old lock is
+stale or remove it automatically; inspect ambiguous lock ownership manually. This
+coordinates the cleanup executors but cannot stop an uncooperative process that
+directly ignores the lock and rewrites Git metadata.
 
 ### Inspect, then execute
 
@@ -304,10 +323,11 @@ node scripts/remove-worktree-safely.mjs \
 Review the exact identity, issue, pull request, task, ignored-file, and recovery
 result. Start execution with standard input open. The wrapper completes GitHub and
 slow local checks first, creates a private sibling directory on the same filesystem,
-then prints `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT` with the expected scan binding.
-Only then export the complete Desktop task list, send its normalized JSON to the
-process, and close input. The snapshot must be less than thirty seconds old. No Git
-or network command runs between that task proof and the atomic move. The moved
+then prints `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT` with the expected scan binding,
+`executionNonce`, and `readyAt`. Only then export the complete Desktop task list,
+copy the exact execution boundary into it, send its normalized JSON to the process,
+and close input. The snapshot must be captured at or after READY and less than thirty
+seconds old. No Git or network command runs between that task proof and the atomic move. The moved
 worktree is reinspected and sealed at a separate `preserved-worktree` path before
 normal, non-force `git worktree remove` runs against the now-missing registered
 path. Git can remove the registration, but it cannot recursively delete the sealed
@@ -369,10 +389,19 @@ node scripts/retire-damaged-worktree-registrations.mjs \
 
 The generator streams every surviving regular file and administrative index in
 bounded chunks. It records repository and script identity; exact path state and
-directory manifest; full HEAD and tree; branch or detached state; administrative
-`gitdir`, `HEAD`, `commondir`, and index fingerprints; a random scan nonce; the
-complete set digest; and a fixed prune cutoff two seconds older than capture.
-Git's verbose dry run must name exactly that administrative set.
+directory manifest; full HEAD and tree; branch or detached state; an explicit
+allowlisted inventory and content fingerprint for every administrative file; a
+random scan nonce; the complete set digest; and a fixed prune cutoff two seconds
+older than capture. The required administrative files are `gitdir`, `HEAD`,
+`commondir`, and `index`. The only optional paths currently accepted are `ORIG_HEAD`,
+`config.worktree`, `locked`, `logs/HEAD`, and an empty `refs` directory. Any other
+path blocks the batch for review. Git's verbose dry run must name exactly that
+administrative set.
+
+The guard compares each prunable administrative index with its recorded HEAD without
+refreshing or rewriting the index. If the index differs from HEAD, retirement fails
+closed. This protects a uniquely staged version that a HEAD ref or ordinary bundle
+does not preserve.
 
 Review every queue item. Each registration must have all of these before the batch
 can pass:
@@ -414,10 +443,11 @@ and execution:
 ```
 
 The safe inspection result supplies the exact batch confirmation. Start execution
-with standard input open. After the slow checks, the guard prints
-`READY_FOR_FINAL_CODEX_TASK_SNAPSHOT` and the expected scan binding. Export a new
-complete Desktop task snapshot at that point, bind it to the same scan, send the
-normalized JSON to standard input, and close input within thirty seconds:
+with standard input open. After the slow checks and administrative backup restore
+proof, the guard prints `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT`, the expected scan
+binding, a random `executionNonce`, and `readyAt`. Export a new complete Desktop task
+snapshot at that point, bind it to both the same scan and exact execution boundary,
+send the normalized JSON to standard input, and close input within thirty seconds:
 
 ```sh
 node scripts/retire-damaged-worktree-registrations.mjs \
@@ -436,17 +466,31 @@ directory still at the registered path must be an ordinary directory with no
 parent-repository fallback, root or nested Git metadata, bare repository,
 symbolic-link boundary, or overlap with the primary checkout or another candidate.
 
-After the fresh task proof passes, the guard moves every surviving directory before
-running another Git or network command. This keeps the active-task proof adjacent
-to the preservation boundary for the complete batch.
+Before READY, the guard creates a collision-resistant owner-only backup root beside
+the durable evidence file. It copies every allowlisted administrative file with mode
+0600, verifies the complete manifest and exact index bytes, then reconstructs the
+administrative record in a disposable same-depth location. The restore test separately
+verifies recorded HEAD, committed tree, staged tree, and index checksum. Because
+eligible indexes must match HEAD, all indexed objects are reachable through the
+already verified recovery ref or bundle.
+
+After the fresh task proof passes, the guard rechecks both the source and backup
+manifests using filesystem-only reads. It then moves every surviving directory before
+running another Git or network command. This keeps the active-task proof adjacent to
+the preservation boundary for the complete batch. If the task proof blocks, the
+owner-only backup remains at the exact path named in the error instead of being
+silently deleted.
 
 Surviving ordinary directories are atomically moved into owner-only sibling
-directories on the same filesystem and kept as `preserved-worktree`. No file
-bytes are deleted. An already absent path is eligible only through the exact
-registration, administrative-record, and dry-run proof. The guard then recomputes
-the approved identities and dry-run set before running Git's metadata-only
-`worktree prune` with the fixed approved cutoff. A registration created after
-capture is too new for that cutoff.
+directories on the same filesystem and kept as `preserved-worktree`; their working
+tree inventory is verified again after the move. An already absent path is eligible
+only through the exact registration, administrative-record, and dry-run proof. The
+guard then recomputes the approved identities and dry-run set before running Git's
+metadata-only `worktree prune` with the fixed approved cutoff. A registration created
+after capture is too new for that cutoff. Prune deletes the original administrative
+record, including its original index file, so the receipt says that explicitly. It
+also records the durable backup path, exact index checksum, and successful restore
+test. It never claims that prune deleted zero bytes.
 
 After prune, the guard proves that only approved registrations disappeared. It
 reports every preserved path, any new registration, and anything that arrived at
@@ -463,6 +507,24 @@ This guard coordinates trusted same-account processes; it is not a security
 boundary against a process that can directly rewrite and backdate
 `.git/worktrees` records. Keep the repository freeze until the final report is
 reviewed.
+
+## Repository governance verification manifest
+
+The focused Node 24 gate currently contains 110 TAP tests: 23 command-hook tests,
+50 ordinary worktree tests, and 37 damaged-registration tests. The CI command is the
+source of truth and must run all three files together:
+
+```sh
+node --test \
+  scripts/git-safety-hook.test.mjs \
+  scripts/remove-worktree-safely.test.mjs \
+  scripts/retire-damaged-worktree-registrations.test.mjs
+```
+
+The suite includes true READY-then-stdin exchanges, prebuffer/replay/time/binding
+negatives, cross-executor lock contention, staged-index refusal, administrative
+backup restore, collision and late-arrival races, owner-only evidence, large-file
+streaming, and an exact 101001-file ignored inventory.
 
 ## Standalone clones and path collisions
 
