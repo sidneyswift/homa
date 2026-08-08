@@ -524,6 +524,7 @@ function makeFixture({
     }),
   };
   evidence.scan = scan;
+  if (taskless) evidence.task.legacyTasklessOverride.scanNonce = scan.nonce;
   evidence.approval = {
     approvedBy: "sidneyswift",
     approvedAt: now,
@@ -1618,6 +1619,13 @@ test("a taskless override needs the exact approver, reason, and a nonfuture time
         override.approvedAt = new Date(Date.now() + 60_000).toISOString();
       },
       /approvedAt.*future/iu,
+    ],
+    [
+      "wrong scan nonce",
+      (override) => {
+        override.scanNonce = "f".repeat(64);
+      },
+      /scanNonce/iu,
     ],
   ];
 

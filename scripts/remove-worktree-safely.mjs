@@ -1286,6 +1286,11 @@ export function validateTaskSnapshot(
       "task.legacyTasklessOverride.reason",
     );
     assertFresh(override.approvedAt, "task.legacyTasklessOverride.approvedAt", EVIDENCE_MAX_AGE_MS, now);
+    assertEqual(
+      requiredString(override.scanNonce, "task.legacyTasklessOverride.scanNonce"),
+      evidence.scan.nonce,
+      "task.legacyTasklessOverride.scanNonce",
+    );
   } else if (legacyTasklessConfirmation !== undefined) {
     block("A legacy taskless confirmation cannot be used when a matching task exists.");
   }
