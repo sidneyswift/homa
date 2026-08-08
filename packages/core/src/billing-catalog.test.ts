@@ -20,10 +20,11 @@ describe("Homa billing catalog", () => {
   });
 
   it("separates new offers from permanent receipt recognition", () => {
-    assert.deepEqual(PURCHASABLE_HOMA_PLANS.map(({ tier }) => tier), ["regular", "plus"]);
+    assert.deepEqual(PURCHASABLE_HOMA_PLANS.map(({ tier }) => tier), ["regular"]);
     assert.equal(planAvailableForPurchase("regular"), true);
-    assert.equal(planAvailableForPurchase("plus"), true);
+    assert.equal(planAvailableForPurchase("plus"), false);
     assert.equal(planAvailableForPurchase("elite"), false);
+    assert.ok(providerProduct("apple", "com.thankshoma.homa.plus.monthly"));
     assert.ok(providerProduct("apple", "com.thankshoma.homa.elite.monthly"));
   });
 

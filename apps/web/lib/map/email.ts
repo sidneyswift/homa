@@ -466,13 +466,19 @@ export async function sendRetestEmail(
  * subject/bodyLines before calling this; it is not repeated here so
  * both call sites share one gate helper instead of drifting.
  */
+interface AgentComposedEmailPresentation {
+  cta?: { label: string; url: string };
+  footerNote?: string;
+  outerNote?: string;
+}
+
 function agentComposedEmailArgs(
   to: string,
   subject: string,
   bodyLines: string[],
   replyTo?: string,
   familyId?: string | null,
-  cta?: { label: string; url: string },
+  presentation: AgentComposedEmailPresentation = {},
 ): SendArgs {
   return {
     to,
@@ -481,8 +487,11 @@ function agentComposedEmailArgs(
     heading: subject,
     bodyLines,
     replyTo,
-    ...(cta ? { cta } : {}),
-    footerNote: "Homa sent this because you asked, or it followed naturally from a conversation.",
+    ...(presentation.cta ? { cta: presentation.cta } : {}),
+    footerNote:
+      presentation.footerNote ??
+      "Homa sent this because you asked, or it followed naturally from a conversation.",
+    ...(presentation.outerNote ? { outerNote: presentation.outerNote } : {}),
     ...(familyId !== undefined
       ? { ledger: { kind: "agent_composed", familyId } }
       : {}),
@@ -495,9 +504,10 @@ export async function sendAgentComposedEmail(
   bodyLines: string[],
   replyTo?: string,
   familyId?: string | null,
+  presentation: AgentComposedEmailPresentation = {},
 ): Promise<boolean> {
   return send(
-    agentComposedEmailArgs(to, subject, bodyLines, replyTo, familyId),
+    agentComposedEmailArgs(to, subject, bodyLines, replyTo, familyId, presentation),
   );
 }
 
@@ -510,8 +520,10 @@ export async function sendAgentMaterialEmail(
 ): Promise<boolean> {
   return send(
     agentComposedEmailArgs(to, subject, bodyLines, undefined, familyId, {
-      label: `Open ${material.title}`,
-      url: material.pdfUrl,
+      cta: {
+        label: `Open ${material.title}`,
+        url: material.pdfUrl,
+      },
     }),
   );
 }

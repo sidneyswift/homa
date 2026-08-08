@@ -29,7 +29,7 @@ export const HERO_COPY = {
    *  cancellations; naming it raised trial starts in the Blinkist
    *  case). One price, the trial length, and the way out. */
   primaryActionNote:
-    `7 free days, then from $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
+    `7 free days, then $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
   proofLabel: "Your whole family",
   proof: "Add every child at no extra cost.",
 } as const;
@@ -40,9 +40,7 @@ export const PLATFORM_ITEMS: ReadonlyArray<{
   kind: PlatformKind;
   label: string;
 }> = [
-  { kind: "message", label: "Text message" },
-  { kind: "web", label: "Web chat" },
-  { kind: "phone", label: "Phone friendly" },
+  { kind: "web", label: "Web chat on your phone or computer" },
 ];
 
 export const LANDING_SECTION_COPY = {
@@ -60,7 +58,7 @@ export const LANDING_SECTION_COPY = {
   memberships: {
     eyebrow: "Simple pricing",
     headline: "One price for your whole family.",
-    body: "Choose Homa or Homa Plus. Add every child at no extra cost.",
+    body: "Add every child at no extra cost.",
   },
   faq: {
     eyebrow: "Questions",
@@ -116,7 +114,7 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
     id: "plan",
     title: "The weekly plan",
     body:
-      "Homa builds each child's week from the schedule and curriculum details you share. Homa Plus can read curriculum files for you. Move a lesson without rebuilding the plan.",
+      "Tell Homa what each child studies and when. She builds the week, and you can move a lesson without rebuilding the plan.",
     action: "See the weekly plan",
   },
   {
@@ -145,8 +143,7 @@ export const CAPABILITY_ITEMS: ReadonlyArray<{
 const LANDING_MEMBERSHIP_BODIES: Readonly<Record<PlanTier, string>> = {
   regular:
     "Weekly plans, practice pages, progress reports, saved printables, teaching-hour records, and web chat.",
-  plus:
-    "Everything in Homa, plus a phone number for texts and calls, and curriculum file uploads for the weekly plan.",
+  plus: tierDescription("plus"),
   elite: tierDescription("elite"),
 };
 
