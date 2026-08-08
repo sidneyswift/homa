@@ -65,8 +65,16 @@ test("keeps the issue 873 schema and ledger repair in one transaction", () => {
   assert.ok(repairSql.indexOf("begin;") < migrationInclude);
   assert.ok(migrationInclude < ledgerInsert);
   assert.ok(ledgerInsert < repairSql.lastIndexOf("commit;"));
+  assert.match(
+    repairSql,
+    /create or replace function pg_temp\.assert_trial_claim_table\(required boolean\)/u,
+  );
   assert.match(repairSql, /perform pg_temp\.assert_trial_claim_table\(false\)/u);
   assert.match(repairSql, /select pg_temp\.assert_trial_claim_table\(true\)/u);
+  assert.match(
+    repairSql,
+    /drop function pg_temp\.assert_trial_claim_table\(boolean\)/u,
+  );
   assert.match(repairSql, /on conflict \(version\) do nothing/u);
 });
 
@@ -88,6 +96,11 @@ test("binds the production workflow to the audited repair and proves a no-op rer
     2,
   );
   assert.match(workflow, /ISSUE_873_REPAIR=verified_noop/u);
+  assert.match(
+    workflow,
+    /\(not exists\([\s\S]*from pg_policy[\s\S]*and polpermissive[\s\S]*\)\)::text/u,
+  );
+  assert.doesNotMatch(workflow, /^\s+not exists\(/mu);
   assert.doesNotMatch(workflow, /supabase migration repair/u);
   assert.match(workflow, new RegExp(repairHash, "u"));
 });

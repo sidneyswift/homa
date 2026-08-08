@@ -445,6 +445,90 @@ test("an unexpected administrative file blocks the complete retirement inventory
   assert.equal(existsSync(fixture.registrations[0].target), true);
 });
 
+test("an unreviewed hook path blocks the complete retirement inventory", (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  mkdirSync(join(adminDir, "hooks"));
+  writeFileSync(join(adminDir, "hooks", "pre-commit"), "#!/bin/sh\nexit 1\n");
+
+  const result = runGuard(fixture, ["--inventory"]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /unexpected path.*hooks\/pre-commit.*extend the allowlist/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("reviewed administrative files are fingerprinted and preserved as inert private evidence", async (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  const head = git(fixture.primary, ["rev-parse", "HEAD"]);
+  const tree = git(fixture.primary, ["rev-parse", "HEAD^{tree}"]);
+  const reviewedFiles = new Map([
+    ["AUTO_MERGE", `${tree}\n`],
+    ["CLAUDE_BASE", head],
+    ["COMMIT_EDITMSG", "reviewed worktree state\n"],
+    ["FETCH_HEAD", `${head}\t\tbranch 'main' of example.test\n`],
+    ["REBASE_HEAD", `${head}\n`],
+    ["gc.log", "automatic cleanup deferred\n"],
+    ["hooks/post-commit", "#!/bin/sh\nexit 99\n"],
+  ]);
+  mkdirSync(join(adminDir, "hooks"));
+  for (const [relativePath, content] of reviewedFiles) {
+    writeFileSync(join(adminDir, relativePath), content);
+  }
+  chmodSync(join(adminDir, "hooks", "post-commit"), 0o755);
+  const oldAdministrativeTime = new Date(Date.now() - 10_000);
+  for (const relativePath of reviewedFiles.keys()) {
+    utimesSync(join(adminDir, relativePath), oldAdministrativeTime, oldAdministrativeTime);
+  }
+  utimesSync(join(adminDir, "hooks"), oldAdministrativeTime, oldAdministrativeTime);
+  utimesSync(adminDir, oldAdministrativeTime, oldAdministrativeTime);
+
+  const evidence = captureEvidence(fixture);
+  const registration = evidence.registrations[0];
+  for (const [relativePath, content] of reviewedFiles) {
+    const entry = registration.administrativeInventory.entries.find((candidate) => candidate.path === relativePath);
+    assert.equal(entry?.kind, "file");
+    assert.equal(entry?.sizeBytes, String(Buffer.byteLength(content)));
+    assert.equal(entry?.sha256, createHash("sha256").update(content).digest("hex"));
+  }
+  assert.equal(
+    registration.administrativeInventory.entries.some(
+      (entry) => entry.path === "hooks" && entry.kind === "directory",
+    ),
+    true,
+  );
+
+  const inspection = assess(fixture);
+  assert.equal(inspection.status, 0, inspection.stderr);
+  const assessment = JSON.parse(inspection.stdout);
+  const result = await execute(fixture, assessment.confirmation);
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  const backupPath = report.registrations[0].administrativeBackup.backupPath;
+  for (const [relativePath, content] of reviewedFiles) {
+    assert.equal(readFileSync(join(backupPath, relativePath), "utf8"), content);
+    assert.equal(lstatSync(join(backupPath, relativePath)).mode & 0o777, 0o600);
+  }
+  assert.equal(lstatSync(join(backupPath, "hooks")).mode & 0o777, 0o700);
+});
+
+test("a reviewed administrative file changed after capture blocks the batch", (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  const fetchHead = join(adminDir, "FETCH_HEAD");
+  writeFileSync(fetchHead, `${git(fixture.primary, ["rev-parse", "HEAD"])}\t\tinitial\n`);
+  const oldAdministrativeTime = new Date(Date.now() - 10_000);
+  utimesSync(fetchHead, oldAdministrativeTime, oldAdministrativeTime);
+  utimesSync(adminDir, oldAdministrativeTime, oldAdministrativeTime);
+  captureEvidence(fixture);
+  writeFileSync(fetchHead, `${git(fixture.primary, ["rev-parse", "HEAD"])}\t\tchanged\n`);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /exact approved prunable set|changed/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
 test("a distinct committed staged and working version blocks damaged retirement", (t) => {
   const fixture = withFixture(t);
   const registration = fixture.registrations[0];
