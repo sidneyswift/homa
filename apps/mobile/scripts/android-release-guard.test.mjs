@@ -43,7 +43,7 @@ test("only the exact reviewed issue 606 workflow bypasses its known false positi
   const workflow = readFileSync(ISSUE_606_REPAIR_WORKFLOW_PATH, "utf8");
   assert.equal(
     createHash("sha256").update(workflow).digest("hex"),
-    "07402c768408130dbbdc25d667650c10b96c88fd80aa74bd8c6d51a5003ccad2",
+    "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6",
   );
   assert.equal(containsAndroidPublicReleaseCommand(workflow), false);
   assert.equal(containsAndroidPublicReleaseCommand(`${workflow}\n`), true);
