@@ -513,8 +513,8 @@ reviewed.
 
 ## Repository governance verification manifest
 
-The focused Node 24 gate currently contains 110 TAP tests: 23 command-hook tests,
-50 ordinary worktree tests, and 37 damaged-registration tests. The CI command is the
+The focused Node 24 gate currently contains 113 TAP tests: 23 command-hook tests,
+50 ordinary worktree tests, and 40 damaged-registration tests. The CI command is the
 source of truth and must run all three files together:
 
 ```sh
