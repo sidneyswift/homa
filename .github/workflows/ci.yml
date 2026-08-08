@@ -637,6 +637,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:issue-878-production-repair:postgres
 
+      - name: Issue 888 production repair disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:issue-888-production-repair:postgres
+
       - name: Issue 887 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: |
