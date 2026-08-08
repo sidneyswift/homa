@@ -96,6 +96,11 @@ test("binds the production workflow to the audited repair and proves a no-op rer
     2,
   );
   assert.match(workflow, /ISSUE_873_REPAIR=verified_noop/u);
+  assert.match(
+    workflow,
+    /\(not exists\([\s\S]*from pg_policy[\s\S]*and polpermissive[\s\S]*\)\)::text/u,
+  );
+  assert.doesNotMatch(workflow, /^\s+not exists\(/mu);
   assert.doesNotMatch(workflow, /supabase migration repair/u);
   assert.match(workflow, new RegExp(repairHash, "u"));
 });
