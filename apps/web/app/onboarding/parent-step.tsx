@@ -157,8 +157,8 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
             with strengths and gives you a useful next step for every subject.
           </p>
           <p className="quiet-onboarding__parent-copy">
-            {WALL_MECHANICS_LINE} Homa memberships start at ${tierPriceAmount("regular", "monthly")} a
-            month after that. Cancel before the first charge to pay nothing.
+            Homa memberships start at ${tierPriceAmount("regular", "monthly")} a month after your 7
+            free days. {WALL_MECHANICS_LINE}
           </p>
 
           {/* Open form, no card: the report preview is the page's one card,

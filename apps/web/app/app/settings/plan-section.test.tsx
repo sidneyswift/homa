@@ -8,15 +8,6 @@ import { TIER_NAMES, tierDelta } from "../../../components/billing/wall-copy";
 import type { FamilyPlanState } from "../../../lib/billing/wall";
 import { PlanSection } from "./plan-section";
 
-/**
- * The door the channel gate's denial line promises (gh#412).
- *
- * A parent on the base plan who texts is told "you can add it whenever
- * you like, in your settings". Before this section, settings held no
- * plan anything for her: the only billing control was a portal link
- * gated on having a Stripe customer, which 81 of 82 families did not.
- */
-
 function state(overrides: Partial<FamilyPlanState> = {}): FamilyPlanState {
   return {
     tier: "regular",
@@ -37,19 +28,17 @@ describe("PlanSection", () => {
     assert.match(html, /homa-soft-boundary/u);
   });
 
-  it("gives a base-tier family the way to add Plus, which is the whole point", () => {
+  it("does not offer an unavailable Plus plan from a stale checkout URL", () => {
     const html = renderToStaticMarkup(<PlanSection plan={state()} />);
-    assert.match(html, /Add Homa Plus/u);
-    assert.match(html, /buy\.stripe\.test\/plus-monthly/u);
+    assert.doesNotMatch(html, /Add Homa Plus/u);
+    assert.doesNotMatch(html, /buy\.stripe\.test\/plus-monthly/u);
   });
 
-  it("shows a base family with no Stripe customer the same offer", () => {
-    // The exact population the channel gate denies. If this ever renders
-    // empty, the denial line is lying again.
+  it("does not offer Plus to a base family without a Stripe customer", () => {
     const html = renderToStaticMarkup(
       <PlanSection plan={state({ hasBillingRelationship: false })} />,
     );
-    assert.match(html, /Add Homa Plus/u);
+    assert.doesNotMatch(html, /Add Homa Plus/u);
   });
 
   it("names her current plan", () => {
@@ -74,46 +63,13 @@ describe("PlanSection", () => {
     assert.match(html, new RegExp(TIER_NAMES.regular, "u"));
   });
 
-  it("uses the sanctioned tier copy verbatim, never a second description", () => {
+  it("keeps the sanctioned current-tier description", () => {
     const html = renderToStaticMarkup(<PlanSection plan={state()} />);
-    // Escaping differs in HTML, so compare on a distinctive fragment.
-    const plusPromise = tierDelta("plus").replace(/&/gu, "&amp;");
-    assert.ok(
-      html.includes(plusPromise) || html.includes(tierDelta("plus")),
-      "the Plus promise must be tierDelta's exact words",
-    );
+    assert.match(html, new RegExp(tierDelta("regular"), "u"));
   });
 });
 
-describe("the denial line and the door it names", () => {
-  it("keeps pointing at settings only while settings can actually sell Plus", () => {
-    const gate = readFileSync(
-      path.join(
-        path.resolve(import.meta.dirname, "..", "..", "..", "lib", "billing"),
-        "channel-access.ts",
-      ),
-      "utf8",
-    );
-    const namesSettings = /in your settings/iu.test(gate);
-    if (!namesSettings) return; // Copy moved the door; nothing to hold shut.
-
-    const section = readFileSync(
-      path.join(import.meta.dirname, "plan-section.tsx"),
-      "utf8",
-    );
-    const page = readFileSync(path.join(import.meta.dirname, "page.tsx"), "utf8");
-    assert.match(
-      section,
-      /plusCheckout/u,
-      "the denial line sends her to settings, so settings must offer Plus",
-    );
-    assert.match(
-      page,
-      /<PlanSection/u,
-      "the section must actually be rendered on the settings page",
-    );
-  });
-
+describe("subscription management", () => {
   it("routes App Store customers to Apple's subscription manager", () => {
     const page = readFileSync(path.join(import.meta.dirname, "page.tsx"), "utf8");
     assert.match(page, /plan\.billingProvider === "apple"/u);
