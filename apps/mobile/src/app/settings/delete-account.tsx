@@ -26,11 +26,12 @@ export default function DeleteAccountScreen() {
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [typedConfirmation, setTypedConfirmation] = useState("");
   useAccessibilityAnnouncement(
-    deleting
-      ? "Deleting this family's Homa data"
-      : confirming
-        ? "Are you sure? Homa confirms billing before access closes."
-        : null,
+    statusMessage
+      ?? (deleting
+        ? "Deleting this family's Homa data"
+        : confirming
+          ? "Are you sure? Homa confirms billing before access closes."
+          : null),
   );
 
   useEffect(() => {
@@ -150,7 +151,6 @@ export default function DeleteAccountScreen() {
         {errorMessage ? <InlineError message={errorMessage} /> : null}
         {statusMessage ? (
           <Text
-            accessibilityLiveRegion="polite"
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
           >
             {statusMessage}

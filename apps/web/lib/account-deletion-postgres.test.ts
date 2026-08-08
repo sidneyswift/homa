@@ -28,6 +28,7 @@ import {
 } from "./billing/apple-purchase-interlock";
 import { EVAL_ISOLATION_FLAG } from "./eval-isolation";
 import {
+  classifyFamilyFoldArtifactSchema,
   foldFamilyDataIntoTx,
   foldStubFamilyIntoTx,
 } from "./family-fold";
@@ -70,6 +71,174 @@ const NOOP_DELETION_JOB: AccountDeletionJobDependencies = {
   ...NOOP_STRIPE_RECONCILIATION,
   ...NOOP_ARTIFACT_WORKER,
 };
+
+test("family fold distinguishes old, partial, and ready deletion schemas", () => {
+  assert.equal(classifyFamilyFoldArtifactSchema({
+    hard_delete_guard_present: false,
+    tombstones_present: false,
+    prefixes_present: false,
+    candidates_present: false,
+  }), "legacy");
+  assert.equal(classifyFamilyFoldArtifactSchema({
+    hard_delete_guard_present: true,
+    tombstones_present: true,
+    prefixes_present: true,
+    candidates_present: true,
+  }), "ready");
+  assert.equal(classifyFamilyFoldArtifactSchema({
+    hard_delete_guard_present: true,
+    tombstones_present: false,
+    prefixes_present: false,
+    candidates_present: false,
+  }), "partial");
+  assert.equal(classifyFamilyFoldArtifactSchema({
+    hard_delete_guard_present: false,
+    tombstones_present: true,
+    prefixes_present: false,
+    candidates_present: false,
+  }), "partial");
+});
+
+test(
+  "family fold keeps an untouched legacy schema operational",
+  { skip: databaseUrl === undefined, timeout: 30_000 },
+  async () => {
+    assert.ok(databaseUrl);
+    const sql = postgres(databaseUrl, { prepare: false, max: 1 });
+    const sourceFamilyId = randomUUID();
+    const destinationFamilyId = randomUUID();
+    const rollback = new Error("roll back legacy schema fixture");
+
+    try {
+      await assert.rejects(
+        sql.begin(async (tx) => {
+          await tx`
+            drop trigger families_hard_delete_protocol_guard
+            on public.families
+          `;
+          await tx`
+            drop table
+              public.family_artifact_prefix_candidates,
+              public.family_artifact_prefixes,
+              public.account_deletion_artifact_tombstones
+            cascade
+          `;
+          await tx`
+            insert into public.families (id, name, email)
+            values
+              (${sourceFamilyId}, 'Legacy fold source', null),
+              (${destinationFamilyId}, 'Legacy fold destination', 'legacy@example.invalid')
+          `;
+
+          assert.equal(
+            await foldStubFamilyIntoTx(
+              tx,
+              sourceFamilyId,
+              destinationFamilyId,
+            ),
+            true,
+          );
+          const [state] = await tx<Array<{ source: number; destination: number }>>`
+            select
+              count(*) filter (where id = ${sourceFamilyId})::integer as source,
+              count(*) filter (where id = ${destinationFamilyId})::integer as destination
+            from public.families
+          `;
+          assert.deepEqual(state, { source: 0, destination: 1 });
+          throw rollback;
+        }),
+        (error) => error === rollback,
+      );
+    } finally {
+      await sql.end({ timeout: 5 });
+    }
+  },
+);
+
+test(
+  "family fold rejects disabled and rebound deletion guards",
+  { skip: databaseUrl === undefined, timeout: 30_000 },
+  async () => {
+    assert.ok(databaseUrl);
+    const sql = postgres(databaseUrl, { prepare: false, max: 1 });
+    const disabledSourceFamilyId = randomUUID();
+    const disabledDestinationFamilyId = randomUUID();
+    const reboundSourceFamilyId = randomUUID();
+    const reboundDestinationFamilyId = randomUUID();
+    const rollback = new Error("roll back deletion guard fixtures");
+
+    try {
+      await assert.rejects(
+        sql.begin(async (tx) => {
+          await tx`
+            insert into public.families (id, name, email)
+            values
+              (${disabledSourceFamilyId}, 'Disabled guard source', null),
+              (${disabledDestinationFamilyId}, 'Disabled guard destination', 'disabled@example.invalid'),
+              (${reboundSourceFamilyId}, 'Rebound guard source', null),
+              (${reboundDestinationFamilyId}, 'Rebound guard destination', 'rebound@example.invalid')
+          `;
+          await tx`
+            alter table public.families
+            disable trigger families_hard_delete_protocol_guard
+          `;
+          assert.equal(
+            await foldStubFamilyIntoTx(
+              tx,
+              disabledSourceFamilyId,
+              disabledDestinationFamilyId,
+            ),
+            false,
+          );
+
+          await tx`
+            drop trigger families_hard_delete_protocol_guard
+            on public.families
+          `;
+          await tx`
+            create function public.test_rebound_family_delete_guard()
+            returns trigger
+            language plpgsql
+            as $$
+            begin
+              return old;
+            end;
+            $$
+          `;
+          await tx`
+            create trigger families_hard_delete_protocol_guard
+            before delete on public.families
+            for each row execute function public.test_rebound_family_delete_guard()
+          `;
+          assert.equal(
+            await foldStubFamilyIntoTx(
+              tx,
+              reboundSourceFamilyId,
+              reboundDestinationFamilyId,
+            ),
+            false,
+          );
+
+          const [state] = await tx<Array<{ families: number }>>`
+            select count(*)::integer as families
+            from public.families
+            where id in (
+              ${disabledSourceFamilyId},
+              ${disabledDestinationFamilyId},
+              ${reboundSourceFamilyId},
+              ${reboundDestinationFamilyId}
+            )
+          `;
+          assert.equal(state.families, 4);
+          throw rollback;
+        }),
+        (error) => error === rollback,
+      );
+    } finally {
+      await sql.end({ timeout: 5 });
+    }
+  },
+);
 
 async function fixtureCounts(
   sql: ReturnType<typeof postgres>,
