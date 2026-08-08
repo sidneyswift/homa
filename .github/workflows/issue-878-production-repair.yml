@@ -57,7 +57,11 @@ jobs:
             echo "The confirmed READY production deployment must match this main commit."
             exit 1
           fi
-          if ! printf '%s' "$REVIEWED_REPAIR_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+          if [ "$(printf '%s' "$REVIEWED_REPAIR_SHA" | wc -c | tr -d ' ')" -ne 40 ]; then
+            echo "The reviewed repair commit must be one full lowercase Git SHA."
+            exit 1
+          fi
+          if [ "$REVIEWED_REPAIR_SHA" != "$(printf '%s' "$REVIEWED_REPAIR_SHA" | tr -cd '0-9a-f')" ]; then
             echo "The reviewed repair commit must be one full lowercase Git SHA."
             exit 1
           fi
