@@ -144,12 +144,12 @@ jobs:
                   and confdeltype = 'c'
               )::text,
               (to_regclass('public.stripe_trial_card_claims_family_idx') is not null)::text,
-              not exists(
+              (not exists(
                 select 1
                 from pg_policy
                 where polrelid = 'public.stripe_trial_card_claims'::regclass
                   and polpermissive
-              )::text,
+              ))::text,
               exists(
                 select 1
                 from supabase_migrations.schema_migrations
