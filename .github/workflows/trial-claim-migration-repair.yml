@@ -43,7 +43,7 @@ jobs:
             exit 1
           fi
           repair_script="scripts/trial-claim-migration-repair.sql"
-          expected_repair="e52785921a24f638dabbcb2700cd9b0a5b5583a61f421f635f3aa262bdb048e1"
+          expected_repair="abb82cf4553d7ad220c4e28eba3d02122232b419a6f83466fd53acd908f44a79"
           actual_repair="$(sha256sum "$repair_script" | cut -d' ' -f1)"
           if [ "$actual_repair" != "$expected_repair" ]; then
             echo "Repair transaction hash does not match the reviewed issue #873 input."

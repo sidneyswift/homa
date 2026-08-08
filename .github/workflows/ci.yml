@@ -590,6 +590,9 @@ jobs:
           sudo apt-get install --yes postgresql-16 postgresql-16-pgvector
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
+      - name: Trial claim repair survives a reused PostgreSQL session
+        run: pnpm test:trial-claim-repair:postgres
+
       - name: Morning research brief format
         run: pnpm check:research-brief
 
