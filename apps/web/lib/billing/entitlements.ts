@@ -6,6 +6,7 @@ import {
   type BillingProvider,
   type PlanTier,
 } from "@homa/core";
+import type { TransactionSql } from "postgres";
 
 import { mapDb } from "../map/db";
 
@@ -148,10 +149,26 @@ export async function familyBillingEntitlement(
  */
 export async function recordBillingSubscription(
   familyId: string,
-  subscription: Omit<BillingSubscriptionRecord, "observedAt">,
+  subscription: Omit<BillingSubscriptionRecord, "observedAt"> & {
+    observedAt?: string;
+  },
 ): Promise<void> {
   const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
+  await sql.begin(async (tx) => {
+    await recordBillingSubscriptionInTransaction(tx, familyId, subscription);
+  });
+}
+
+/** Same monotonic provider write, participating in a caller-owned transaction. */
+export async function recordBillingSubscriptionInTransaction(
+  tx: TransactionSql,
+  familyId: string,
+  subscription: Omit<BillingSubscriptionRecord, "observedAt"> & {
+    observedAt?: string;
+  },
+): Promise<void> {
+  const observedAt = subscription.observedAt ?? new Date().toISOString();
+  const rows = await tx<{ id: string }[]>`
     insert into public.family_billing_subscriptions (
       family_id, provider, provider_subscription_id, provider_customer_id,
       provider_product_id, plan_tier, billing_period, status,
@@ -160,7 +177,7 @@ export async function recordBillingSubscription(
       ${familyId}, ${subscription.provider}, ${subscription.providerSubscriptionId},
       ${subscription.providerCustomerId}, ${subscription.providerProductId},
       ${subscription.tier}, ${subscription.period}, ${subscription.status},
-      ${subscription.currentPeriodEnd}, now()
+      ${subscription.currentPeriodEnd}, ${observedAt}
     )
     on conflict (provider, provider_subscription_id) do update
       set provider_customer_id = excluded.provider_customer_id,
@@ -169,12 +186,22 @@ export async function recordBillingSubscription(
           billing_period = excluded.billing_period,
           status = excluded.status,
           current_period_end = excluded.current_period_end,
-          last_observed_at = now(),
+          last_observed_at = excluded.last_observed_at,
           updated_at = now()
       where public.family_billing_subscriptions.family_id = excluded.family_id
+        and public.family_billing_subscriptions.last_observed_at
+          <= excluded.last_observed_at
     returning id
   `;
-  if (!rows[0]) {
-    throw new Error("billing subscription is already linked to a different family");
-  }
+  if (rows[0]) return;
+
+  const existing = await tx<Array<{ family_id: string; last_observed_at: string }>>`
+    select family_id, last_observed_at::text as last_observed_at
+    from public.family_billing_subscriptions
+    where provider = ${subscription.provider}
+      and provider_subscription_id = ${subscription.providerSubscriptionId}
+    limit 1
+  `;
+  if (existing[0]?.family_id === familyId) return;
+  throw new Error("billing subscription is already linked to a different family");
 }

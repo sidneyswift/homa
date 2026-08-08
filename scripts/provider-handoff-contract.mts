@@ -200,12 +200,20 @@ export const providerSurfacePathsByHandoffId = {
 export const providerSourcePathsByHandoffId = {
   "stripe-checkout-and-portal": [
     "apps/web/.env.example",
+    "apps/web/app/api/billing/checkout/route.ts",
     "apps/web/app/api/billing/confirm/route.ts",
     "apps/web/app/api/billing/portal/route.ts",
     "apps/web/app/api/billing/webhook/route.ts",
     "apps/web/app/app/settings/plan-section.tsx",
     "apps/web/components/billing/wall-copy.ts",
+    "apps/web/lib/account-deletion-billing.ts",
+    "apps/web/lib/account-deletion.ts",
+    "apps/web/lib/billing/checkout-intent.ts",
+    "apps/web/lib/billing/entitlements.ts",
     "apps/web/lib/billing/portal.ts",
+    "apps/web/lib/billing/server-checkout.ts",
+    "apps/web/lib/billing/stripe-checkout-config.ts",
+    "apps/web/lib/billing/stripe-server-checkout.ts",
     "apps/web/lib/billing/wall.ts",
   ],
   "supabase-auth-email-and-callback": [
@@ -235,13 +243,20 @@ export const providerSourcePathsByHandoffId = {
   "apple-subscription-management": [
     "apps/mobile/src/app/settings.tsx",
     "apps/mobile/src/components/billing-gate.tsx",
+    "apps/mobile/src/features/billing/constants.ts",
     "apps/mobile/src/lib/billing.ts",
     "apps/mobile/src/lib/web-links.ts",
     "apps/web/.env.example",
     "apps/web/app/api/billing/apple/confirm/route.ts",
+    "apps/web/app/api/billing/apple/purchase-interlock/route.ts",
     "apps/web/app/api/billing/apple/webhook/route.ts",
+    "apps/web/lib/account-deletion.ts",
+    "apps/web/lib/billing/apple-purchase-interlock.ts",
     "apps/web/lib/billing/apple-verify.ts",
+    "apps/web/lib/billing/entitlements.ts",
     "apps/web/lib/billing/wall.ts",
+    "packages/core/src/billing-catalog.ts",
+    "supabase/migrations/20260808184500_apple_purchase_interlock.sql",
   ],
 } as const satisfies Record<ProviderHandoffId, readonly string[]>;
 
@@ -373,7 +388,7 @@ export function reconcileProviderHandoffBindings(
 }
 
 function resetProviderHandoffProof(record: ProviderHandoffRecord): void {
-  record.status = "pending";
+  record.status = record.status === "blocked" ? "blocked" : "pending";
   record.readback.status = "pending";
   record.readback.evidencePath = null;
   record.readback.observedAt = null;
@@ -458,6 +473,18 @@ export function validateProviderHandoffs(input: {
       for (const field of record.configurableFields) {
         if (!field || !isNonEmpty(field.key)) add(issues, "field-key", "Every configurable provider field needs a key.", recordId);
         validatePathList(issues, field?.sourcePaths, "field-source-paths", recordId, sourceChecksums);
+        if (Array.isArray(field?.sourcePaths)) {
+          for (const path of field.sourcePaths) {
+            if (isNonEmpty(path) && !record.sourcePaths.includes(path)) {
+              add(
+                issues,
+                "field-source-outside-record",
+                `Configurable field ${String(field.key)} names a source outside its record fingerprint: ${path}.`,
+                recordId,
+              );
+            }
+          }
+        }
         for (const value of [field?.accountOwner, field?.updatePath, field?.fallback, field?.cacheBehavior, field?.rollback]) {
           if (!isNonEmpty(value)) add(issues, "field-detail", `Configurable field ${String(field?.key)} is missing an operational detail.`, recordId);
         }

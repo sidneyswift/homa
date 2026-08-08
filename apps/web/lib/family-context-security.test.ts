@@ -121,7 +121,12 @@ describe("subject lesson pinned family context", () => {
       resolvePinnedFamilyId(attributes),
       "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     );
-    assert.deepEqual(await resolveAgentAccess(attributes), {
+    const accessDependencies = {
+      nowSeconds: () => Math.floor(Date.now() / 1_000),
+      verifyFamilyMembership: async () => true,
+      verifyFamilyArtifactAccess: async () => {},
+    };
+    assert.deepEqual(await resolveAgentAccess(attributes, accessDependencies), {
       mode: "pinned",
       familyId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     });
@@ -130,7 +135,7 @@ describe("subject lesson pinned family context", () => {
       const nearMiss = { ...attributes, channel };
       assert.equal(resolvePinnedFamilyId(nearMiss), null);
       await assert.rejects(
-        () => resolveAgentAccess(nearMiss),
+        () => resolveAgentAccess(nearMiss, accessDependencies),
         MissingFamilyContextError,
       );
     }

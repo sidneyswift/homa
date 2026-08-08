@@ -67,7 +67,66 @@ async function lockFamilyRowsForFold(
     for update
   `;
   await testHooks.afterFamilyLocks?.();
-  return rows.length === 2 ? rows : null;
+  if (rows.length !== 2) return null;
+
+  // Account deletion and family folding lock the same family rows. Once a
+  // deletion tombstone exists, refusing the fold keeps its Blob cleanup set
+  // complete. Also reject impossible alias ownership before any family data
+  // moves, rather than stealing another family's historical storage prefix.
+  const unsafeArtifactOwnership = await tx<Array<{ unsafe: boolean }>>`
+    select exists (
+      select 1
+      from public.account_deletion_artifact_tombstones tombstone
+      where tombstone.family_id in (${sourceFamilyId}, ${destinationFamilyId})
+    ) or exists (
+      select 1
+      from public.family_artifact_prefixes prefix
+      join public.account_deletion_artifact_tombstones tombstone
+        on tombstone.family_id = prefix.artifact_family_id
+      where prefix.owner_family_id in (${sourceFamilyId}, ${destinationFamilyId})
+    ) or exists (
+      select 1
+      from public.family_artifact_prefixes prefix
+      where prefix.artifact_family_id in (
+        ${sourceFamilyId},
+        ${destinationFamilyId}
+      )
+    ) or exists (
+      select 1
+      from public.family_artifact_prefix_candidates candidate
+      where candidate.artifact_family_id in (
+        ${sourceFamilyId},
+        ${destinationFamilyId}
+      )
+    ) or exists (
+      select 1
+      from public.family_artifact_prefix_candidates candidate
+      join public.family_artifact_prefixes prefix
+        on prefix.artifact_family_id = candidate.artifact_family_id
+      where prefix.owner_family_id in (
+        ${sourceFamilyId},
+        ${destinationFamilyId}
+      )
+        and candidate.owner_family_id not in (
+          ${sourceFamilyId},
+          ${destinationFamilyId}
+        )
+    ) or exists (
+      select 1
+      from public.family_artifact_prefix_candidates candidate
+      join public.family_artifact_prefix_candidates other
+        on other.artifact_family_id = candidate.artifact_family_id
+       and other.owner_family_id not in (
+         ${sourceFamilyId},
+         ${destinationFamilyId}
+       )
+      where candidate.owner_family_id in (
+        ${sourceFamilyId},
+        ${destinationFamilyId}
+      )
+    ) as unsafe
+  `;
+  return unsafeArtifactOwnership[0]?.unsafe ? null : rows;
 }
 
 async function countFamilyMembersAfterLock(
@@ -190,6 +249,50 @@ async function moveLockedFamilyDataIntoTx(
     update public.children
     set family_id = ${destinationFamilyId}
     where family_id = ${sourceFamilyId}
+  `;
+  // Carry prefixes inherited by an earlier fold before the source family
+  // cascade can remove their ownership rows.
+  await tx`
+    update public.family_artifact_prefixes
+    set owner_family_id = ${destinationFamilyId}
+    where owner_family_id = ${sourceFamilyId}
+  `;
+  await tx`
+    insert into public.family_artifact_prefix_candidates as existing (
+      owner_family_id,
+      artifact_family_id,
+      evidence_kind,
+      evidence_count,
+      observed_at
+    )
+    select
+      ${destinationFamilyId},
+      candidate.artifact_family_id,
+      candidate.evidence_kind,
+      candidate.evidence_count,
+      candidate.observed_at
+    from public.family_artifact_prefix_candidates candidate
+    where candidate.owner_family_id = ${sourceFamilyId}
+    on conflict (owner_family_id, artifact_family_id, evidence_kind)
+    do update set
+      evidence_count = existing.evidence_count + excluded.evidence_count,
+      observed_at = least(existing.observed_at, excluded.observed_at)
+  `;
+  await tx`
+    delete from public.family_artifact_prefix_candidates
+    where owner_family_id = ${sourceFamilyId}
+  `;
+  // Record the source disposition before deleting it. Both statements remain
+  // in one transaction, so readers can observe neither partial state.
+  await tx`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (${destinationFamilyId}, ${sourceFamilyId})
+  `;
+  await tx`
+    select set_config('homa.family_delete_mode', 'family-fold-v2', true)
   `;
   await tx`
     delete from public.families

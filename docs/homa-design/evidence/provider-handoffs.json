@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "6f87ce1f4e6c1041fdaa751a7cd010fb8422e9ed4cf40779bd756350985a0fb3"
+    "scopedInputFingerprint": "a6e846d10270f346b5c5b84657d961a8f0784f6db6927252043af46950f11a62"
   },
   "records": [
     {
@@ -33,12 +33,20 @@
       "providerProfile": "provider-constrained",
       "sourcePaths": [
         "apps/web/.env.example",
+        "apps/web/app/api/billing/checkout/route.ts",
         "apps/web/app/api/billing/confirm/route.ts",
         "apps/web/app/api/billing/portal/route.ts",
         "apps/web/app/api/billing/webhook/route.ts",
         "apps/web/app/app/settings/plan-section.tsx",
         "apps/web/components/billing/wall-copy.ts",
+        "apps/web/lib/account-deletion-billing.ts",
+        "apps/web/lib/account-deletion.ts",
+        "apps/web/lib/billing/checkout-intent.ts",
+        "apps/web/lib/billing/entitlements.ts",
         "apps/web/lib/billing/portal.ts",
+        "apps/web/lib/billing/server-checkout.ts",
+        "apps/web/lib/billing/stripe-checkout-config.ts",
+        "apps/web/lib/billing/stripe-server-checkout.ts",
         "apps/web/lib/billing/wall.ts"
       ],
       "surfaceIds": [
@@ -64,16 +72,37 @@
       },
       "configurableFields": [
         {
-          "key": "checkout-success-redirect",
+          "key": "server-checkout-and-price-recovery",
           "sourcePaths": [
-            "apps/web/app/api/billing/confirm/route.ts"
+            "apps/web/app/api/billing/checkout/route.ts",
+            "apps/web/lib/billing/checkout-intent.ts",
+            "apps/web/lib/billing/server-checkout.ts",
+            "apps/web/lib/billing/stripe-checkout-config.ts",
+            "apps/web/lib/billing/stripe-server-checkout.ts",
+            "apps/web/lib/billing/wall.ts"
           ],
           "environment": "both",
           "accountOwner": "Homa billing owner",
-          "updatePath": "Stripe Dashboard payment link after-completion URL, then deploy route contract if the destination changes",
-          "fallback": "Return to /app when session_id is missing, unverifiable, or the family is not authenticated",
-          "cacheBehavior": "Stripe owns the hosted checkout response; Homa never caches session or entitlement state",
-          "rollback": "Restore the previous Payment Link completion URL and redeploy only if the route contract changed"
+          "updatePath": "Deploy the Homa checkout route and its server configuration. Keep every Stripe Payment Link inactive; configured legacy link URLs identify only the exact recurring Price ids used to create Checkout Sessions.",
+          "fallback": "Reject an invalid or expired family intent, a closing family, missing configuration, any active Payment Link, or an inexact price mapping before requesting a Checkout Session.",
+          "cacheBehavior": "Homa checkout intents expire after five minutes. Checkout Session URLs are one-time provider destinations and are not persisted or cached by Homa.",
+          "rollback": "Disable Homa checkout entry points or restore the prior safe server-checkout commit while every Stripe Payment Link remains inactive. Never roll back by reactivating a public Payment Link."
+        },
+        {
+          "key": "checkout-success-and-cancel-destinations",
+          "sourcePaths": [
+            "apps/web/.env.example",
+            "apps/web/app/api/billing/checkout/route.ts",
+            "apps/web/app/api/billing/confirm/route.ts",
+            "apps/web/lib/billing/server-checkout.ts",
+            "apps/web/lib/billing/stripe-checkout-config.ts"
+          ],
+          "environment": "both",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Set the trusted Homa site origin in Vercel and deploy Homa. The server builds the success URL at /api/billing/confirm and the cancel URL at /app; Stripe Dashboard does not own either destination.",
+          "fallback": "Never follow a returned destination outside checkout.stripe.com. Missing, unverifiable, or unauthenticated confirmation returns to /app without granting access.",
+          "cacheBehavior": "Homa does not cache checkout destinations, Checkout Session verification, or entitlement state.",
+          "rollback": "Restore the previous trusted Homa origin and safe server route, keep Payment Links inactive, and verify both success and cancel paths in Stripe sandbox before production re-enable."
         },
         {
           "key": "customer-portal-configuration",
@@ -100,6 +129,23 @@
           "fallback": "Acknowledge unknown families safely, return 503 when the endpoint is intentionally dark, and let Stripe retry transient failures",
           "cacheBehavior": "Webhook events are processed idempotently into the family billing mirror, never from a cached browser state",
           "rollback": "Disable the endpoint in Stripe, restore the prior secret, and reconcile the family mirror before re-enabling"
+        },
+        {
+          "key": "account-deletion-billing-reconciliation",
+          "sourcePaths": [
+            "apps/web/lib/account-deletion-billing.ts",
+            "apps/web/lib/account-deletion.ts",
+            "apps/web/lib/billing/entitlements.ts",
+            "apps/web/lib/billing/server-checkout.ts",
+            "apps/web/lib/billing/stripe-checkout-config.ts",
+            "apps/web/lib/billing/stripe-server-checkout.ts"
+          ],
+          "environment": "both",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Deploy the Homa deletion protocol with exhaustive, exact-family Stripe reconciliation before family access can close.",
+          "fallback": "Preserve family access when Stripe is unavailable or uncertain, a configured Payment Link is active, pagination is incomplete, tenant ownership conflicts, or a subscription does not reach a terminal provider state.",
+          "cacheBehavior": "Homa does not cache deletion-time Stripe reads. The durable deletion job records only the bounded reconciliation outcome needed for safe retry.",
+          "rollback": "Keep account deletion unavailable until the prior code and provider state are reconciled, and keep every Stripe Payment Link inactive throughout rollback."
         }
       ],
       "environment": {
@@ -107,11 +153,11 @@
           "sandbox",
           "production"
         ],
-        "notes": "Test and live Stripe keys are selected server-side. Empty live configuration falls through to test by the existing billing contract."
+        "notes": "Test and live Stripe keys are selected server-side. Configured Payment Link URLs are server-only price lookup inputs and every matching Stripe Payment Link must remain inactive."
       },
-      "fallback": "No provider error strands a family: Checkout confirmation returns to /app and Portal errors return to settings.",
+      "fallback": "Checkout fails closed when the intent, family, configuration, link-inactivity, or exact-price checks fail, and an untrusted returned destination is never followed. Confirmation returns to /app and Portal errors return to settings.",
       "cache": "No checkout, portal, customer, or entitlement response is cached by Homa.",
-      "updatePath": "Stripe Dashboard plus the route and environment owners named above.",
+      "updatePath": "Homa server checkout deployment and Vercel environment configuration, plus Stripe Prices, inactive Payment Link reference objects, Customer Portal, and webhook configuration.",
       "readback": {
         "status": "pending",
         "apiAvailable": true,
@@ -121,17 +167,21 @@
       },
       "rollback": {
         "owner": "Homa billing owner",
-        "restoreAction": "Restore the previous Stripe hosted configuration and route commit, then verify a sandbox checkout before production re-enable.",
-        "restoreTarget": "Stripe Checkout, Customer Portal, webhook endpoint, and Homa billing mirror",
+        "restoreAction": "Disable Homa checkout entry points or restore the previous safe server-checkout commit while keeping every Payment Link inactive, then verify sandbox checkout, cancellation, confirmation, and account-deletion reconciliation before production re-enable.",
+        "restoreTarget": "Homa-owned checkout route, Stripe Checkout Sessions, inactive price-reference links, Customer Portal, webhook endpoint, and Homa billing mirror",
         "rehearsalEvidence": null
       },
       "contracts": [
-        "Family identity comes from authenticated Homa context and Stripe client_reference_id must agree.",
+        "The client receives only a five-minute Homa checkout intent bound to the authenticated family, tier, and billing period.",
+        "Every Payment Link in the Stripe account remains inactive; configured legacy URLs recover only an exact recurring Price id with quantity one.",
+        "Homa creates success and cancel URLs from its trusted configured origin and follows only checkout.stripe.com as the returned provider destination.",
+        "Checkout Sessions collect a card before the explicit seven-day trial and carry the family id in client_reference_id, session metadata, and subscription metadata.",
         "Entitlements are written only after verified Checkout or webhook evidence and remain idempotent.",
+        "Before family access closes for deletion, Homa expires every open exact-family Checkout Session and confirms every verified family-owned Stripe subscription is terminal; provider uncertainty preserves access.",
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "152e5fd6eaef3fddc4846683b40f3690ac5e06ac0b5cf2876c14726c29bf161f"
+      "scopedInputFingerprint": "885d52595d25732a6cd236a2aae047843a9eb36681e6efd09612a860fde9f490"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -230,7 +280,7 @@
         "Expired recovery tokens never create a session and return to the recovery screen.",
         "Tenant identity is derived from the authenticated Supabase session, never provider callback text."
       ],
-      "scopedInputFingerprint": "1034ba26c5241f3f0343d76cad2cd318654592295c7e33e8ccb7fe6723c29510"
+      "scopedInputFingerprint": "2198c84fa585a11e8d89a6bd88cc312a516537ff6453174952840315979c5577"
     },
     {
       "id": "google-identity",
@@ -406,18 +456,25 @@
       "provider": "apple",
       "journey": "billing",
       "ownerIssue": "gh#732",
-      "status": "pending",
+      "status": "blocked",
       "providerProfile": "provider-constrained",
       "sourcePaths": [
         "apps/mobile/src/app/settings.tsx",
         "apps/mobile/src/components/billing-gate.tsx",
+        "apps/mobile/src/features/billing/constants.ts",
         "apps/mobile/src/lib/billing.ts",
         "apps/mobile/src/lib/web-links.ts",
         "apps/web/.env.example",
         "apps/web/app/api/billing/apple/confirm/route.ts",
+        "apps/web/app/api/billing/apple/purchase-interlock/route.ts",
         "apps/web/app/api/billing/apple/webhook/route.ts",
+        "apps/web/lib/account-deletion.ts",
+        "apps/web/lib/billing/apple-purchase-interlock.ts",
         "apps/web/lib/billing/apple-verify.ts",
-        "apps/web/lib/billing/wall.ts"
+        "apps/web/lib/billing/entitlements.ts",
+        "apps/web/lib/billing/wall.ts",
+        "packages/core/src/billing-catalog.ts",
+        "supabase/migrations/20260808184500_apple_purchase_interlock.sql"
       ],
       "surfaceIds": [
         "surface:638cd8fafaa24166",
@@ -444,14 +501,38 @@
           "key": "storekit-product-catalog",
           "sourcePaths": [
             "apps/mobile/src/components/billing-gate.tsx",
-            "apps/mobile/src/lib/billing.ts"
+            "apps/mobile/src/features/billing/constants.ts",
+            "apps/mobile/src/lib/billing.ts",
+            "apps/web/app/api/billing/apple/purchase-interlock/route.ts",
+            "packages/core/src/billing-catalog.ts"
           ],
           "environment": "both",
           "accountOwner": "Homa billing owner",
-          "updatePath": "App Store Connect subscription products plus the Homa provider-product catalog",
-          "fallback": "If App Store products cannot load, show a retryable unavailable state and do not guess entitlement",
-          "cacheBehavior": "StoreKit owns product availability; Homa only keeps the in-memory current purchase state",
-          "rollback": "Restore the previous App Store product identifiers and provider catalog, then test restore before re-enabling purchases"
+          "updatePath": "App Store Connect subscription products plus Homa's broad receipt-recognition catalog and narrower new-purchase offer list.",
+          "fallback": "If App Store products cannot load or a product is outside the current new-purchase list, keep purchase unavailable and do not guess entitlement.",
+          "cacheBehavior": "StoreKit owns product availability. Homa persists a durable purchase journal on the device and a family-scoped server interlock until signed provider evidence resolves the attempt.",
+          "rollback": "Keep App Store products unavailable, restore the previous product identifiers and catalog only if historical receipt recognition remains intact, then test restore before re-enabling purchases."
+        },
+        {
+          "key": "purchase-and-deletion-interlock",
+          "sourcePaths": [
+            "apps/mobile/src/components/billing-gate.tsx",
+            "apps/mobile/src/lib/billing.ts",
+            "apps/web/app/api/billing/apple/confirm/route.ts",
+            "apps/web/app/api/billing/apple/purchase-interlock/route.ts",
+            "apps/web/app/api/billing/apple/webhook/route.ts",
+            "apps/web/lib/account-deletion.ts",
+            "apps/web/lib/billing/apple-purchase-interlock.ts",
+            "apps/web/lib/billing/entitlements.ts",
+            "apps/web/lib/billing/wall.ts",
+            "supabase/migrations/20260808184500_apple_purchase_interlock.sql"
+          ],
+          "environment": "both",
+          "accountOwner": "Homa billing owner",
+          "updatePath": "Apply the purchase-interlock migration before deploying the interlock-aware server, then require an attempt-token-capable iOS build before StoreKit products can become available.",
+          "fallback": "Keep App Store products unavailable. Any purchase that may have started retains its durable interlock, and unresolved provider state preserves family access and blocks deletion.",
+          "cacheBehavior": "The mobile crash journal and server interlock survive process loss. Only signed Apple transaction evidence resolves a started attempt into durable billing truth.",
+          "rollback": "Keep App Store products unavailable before reverting interlock-aware code. Never restore family-id purchase tokens or client cancellation of a purchase that may have started."
         },
         {
           "key": "subscription-management-link",
@@ -470,7 +551,10 @@
           "key": "app-store-server-notifications",
           "sourcePaths": [
             "apps/web/app/api/billing/apple/webhook/route.ts",
-            "apps/web/lib/billing/apple-verify.ts"
+            "apps/web/lib/billing/apple-purchase-interlock.ts",
+            "apps/web/lib/billing/apple-verify.ts",
+            "apps/web/lib/billing/entitlements.ts",
+            "apps/web/lib/billing/wall.ts"
           ],
           "environment": "production",
           "accountOwner": "Homa billing owner",
@@ -485,7 +569,7 @@
           "sandbox",
           "production"
         ],
-        "notes": "The same webhook accepts signed sandbox and production notifications. StoreKit sandbox is required before any production read-back."
+        "notes": "The same webhook accepts signed sandbox and production notifications. App Store products remain unavailable until a minimum attempt-token-capable build is enforced, signed auto-renew state is persisted, immediate deletion UX is compliant, and StoreKit sandbox evidence passes."
       },
       "fallback": "A failed purchase or unavailable catalog keeps the paywall closed to entitlement claims, offers retry or restore, and leaves account access truthful.",
       "cache": "Entitlement truth comes from verified StoreKit transactions and the durable family mirror, never from a cached client flag.",
@@ -499,22 +583,24 @@
       },
       "rollback": {
         "owner": "Homa billing owner",
-        "restoreAction": "Disable the changed Apple product or notification configuration, restore the prior verifier/catalog, and verify restore and account access before reopening.",
+        "restoreAction": "Keep App Store products unavailable, disable the changed Apple product or notification configuration, restore only interlock-safe verifier and catalog behavior, and verify restore and account access before reopening.",
         "restoreTarget": "StoreKit catalog, Apple subscription management handoff, App Store Server Notifications, and entitlement mirror",
         "rehearsalEvidence": null
       },
       "contracts": [
         "StoreKit transactions are verified server-side before entitlements change.",
-        "appAccountToken must match the authenticated family before an Apple purchase can unlock access.",
+        "A fresh purchase uses a server-minted attempt id as appAccountToken, which must resolve to the exact authenticated family and signed product before access can change. Legacy family-id tokens are linked-history or restore evidence only, never fresh-claim safety.",
+        "The family-scoped purchase interlock commits before StoreKit opens. Once a purchase may have started, client cancellation cannot remove the deletion fence; signed Apple evidence must resolve it.",
         "Apple subscription statuses normalize into the shared account-access vocabulary used by Stripe.",
-        "Provider outages never become a guessed paid state and never cross family boundaries."
+        "Provider outages never become a guessed paid state and never cross family boundaries.",
+        "App Store products stay unavailable until old builds cannot start a legacy-token purchase and the signed auto-renew plus immediate-deletion activation requirements are certified."
       ],
-      "scopedInputFingerprint": "781912ba9157b2d13d73898457dd55648ea0048b20752c3a578f4866f073e17a"
+      "scopedInputFingerprint": "713a2f566dba4d792629b48c89518eff44d06042b9b1c4206d2854d888830a5b"
     }
   ],
   "manifestSchemaVersion": 3,
   "sourceCoverage": {
-    "sourceCount": 28,
+    "sourceCount": 41,
     "bindings": [
       {
         "path": "apps/mobile/app.json",
@@ -530,7 +616,7 @@
       },
       {
         "path": "apps/mobile/src/components/billing-gate.tsx",
-        "sha256": "866952b6236a8a2fa0e2e966235c4cb8d37a6c15b47bf0468539abacd918b413"
+        "sha256": "7099827b047329d8a9e05c154c0e46a344cc619ac8c07c5bc3e2d3df8d7e2db9"
       },
       {
         "path": "apps/mobile/src/features/auth/apple-sign-in.ts",
@@ -541,8 +627,12 @@
         "sha256": "715e31b07b74760c1e467fbc3fd40123774916dd1d045d0e09efb26f66981037"
       },
       {
+        "path": "apps/mobile/src/features/billing/constants.ts",
+        "sha256": "884da36c25bdc14dc9eaed5bed283a62879f2ca12953dec16e7a43e1cbcab769"
+      },
+      {
         "path": "apps/mobile/src/lib/billing.ts",
-        "sha256": "d0902f6c790cb36d6d37a8df55a47b29d9ad9f25cdf936de0a6e7ac155ce1945"
+        "sha256": "c9749072ce94668a58bb692fb08af03344e7ca2e601663aed34eba3c191eb728"
       },
       {
         "path": "apps/mobile/src/lib/supabase.ts",
@@ -554,15 +644,23 @@
       },
       {
         "path": "apps/web/.env.example",
-        "sha256": "fc4fbde3b12b3877a2ae9bce71603350441ea3a039a95bedee023a86e93296b5"
+        "sha256": "42b26b3b81fa4e552e06d17bce02d93deadd6d562e5522f468a27cde7b0b2ba3"
       },
       {
         "path": "apps/web/app/api/billing/apple/confirm/route.ts",
-        "sha256": "a12a3b75153e356104a955d2c4c376195a00d41997db8dfab678e13c73660530"
+        "sha256": "fbb431e9536969e9028abca27bbd846e7b5680024f48ac4d683d0245edde6d59"
+      },
+      {
+        "path": "apps/web/app/api/billing/apple/purchase-interlock/route.ts",
+        "sha256": "444d04bce43a30336babde63f7ff8b6f4b31efa23b9bd12966147b799762a178"
       },
       {
         "path": "apps/web/app/api/billing/apple/webhook/route.ts",
-        "sha256": "ea58585f2acedd8e65974777449f9f41bffd15f33f31456ae38ed23158ac9324"
+        "sha256": "0ba480910b0068d083dd4d221eedb8de51d9342a5f7c7ef137d6afe8ddbcb2ef"
+      },
+      {
+        "path": "apps/web/app/api/billing/checkout/route.ts",
+        "sha256": "6cd557ed96bf7347890fa72789380b8d60f6f61db8d8509ce3c5a561d96dbf51"
       },
       {
         "path": "apps/web/app/api/billing/confirm/route.ts",
@@ -605,16 +703,48 @@
         "sha256": "0e51b79d3b3681b3cbe070fc53a722dd5820659af85588f4a7b8d60f8ee0d8fc"
       },
       {
+        "path": "apps/web/lib/account-deletion-billing.ts",
+        "sha256": "1ae63152e1f9053a3d7526534c0dccbb6e8fc1d1920d34ee428b5011146f0cae"
+      },
+      {
+        "path": "apps/web/lib/account-deletion.ts",
+        "sha256": "534b157d601290fa5c4ff1c904590d0e695e3d977ac4e076ba74b349981d737d"
+      },
+      {
+        "path": "apps/web/lib/billing/apple-purchase-interlock.ts",
+        "sha256": "e70fc46dfa513fd292877d168e18f75c2f81d8dc16078166d6a75f9468648b8e"
+      },
+      {
         "path": "apps/web/lib/billing/apple-verify.ts",
         "sha256": "5d08b19de3da215ea9deaa25ba2bdf4b6b55e4c7004a1dbeebfc13e23c98cafa"
+      },
+      {
+        "path": "apps/web/lib/billing/checkout-intent.ts",
+        "sha256": "ce1277dc7c1897e33c4ccbae517ba020fbcf7da3cafcf80928c18f5588dd1632"
+      },
+      {
+        "path": "apps/web/lib/billing/entitlements.ts",
+        "sha256": "fbe7cad96ea1aa2e8cd48fa1704ff1a834c459d117c344c8ebc940e4d3eb090c"
       },
       {
         "path": "apps/web/lib/billing/portal.ts",
         "sha256": "05a8182eaa0e18fb0879d84fa2f4e98d666e43f7a72ee05eb6743a65a2fc0dfb"
       },
       {
+        "path": "apps/web/lib/billing/server-checkout.ts",
+        "sha256": "9e60efa36a47fb4fbc2dde7215b89310927b1ed39320b85c19f6815299b9a550"
+      },
+      {
+        "path": "apps/web/lib/billing/stripe-checkout-config.ts",
+        "sha256": "575fb7154739303647f6fbed2ac5039d4d6fb20972e887cbc6e7e49bd354467b"
+      },
+      {
+        "path": "apps/web/lib/billing/stripe-server-checkout.ts",
+        "sha256": "5555b78b3e49a185c0021ca48e22b2db1d0993f4c1821f155e85fa2a2b28ef20"
+      },
+      {
         "path": "apps/web/lib/billing/wall.ts",
-        "sha256": "7a03174d1cd9c5e9e6e307ef60d72fe7be3392c19fd85fc82d1bd3a483606d3e"
+        "sha256": "f614817cac9cb75c24652759598e41c78997294cbaf1440c28ac87ec736d05d2"
       },
       {
         "path": "apps/web/lib/supabase/client.ts",
@@ -625,10 +755,18 @@
         "sha256": "a578291039ec2105110880025225bfbb8255aa29e77a3670cec790bca8d59361"
       },
       {
+        "path": "packages/core/src/billing-catalog.ts",
+        "sha256": "4a7364eeaf79453798b909c9db88c413329338c84e6b0a1d01e384aeada03f2d"
+      },
+      {
+        "path": "supabase/migrations/20260808184500_apple_purchase_interlock.sql",
+        "sha256": "58d41cc2a770cd64e9c5968565e25a9317bf2b10c07a59b519369cd29a3e6e28"
+      },
+      {
         "path": "supabase/templates/recovery.html",
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "ac1664be9526bee7f5f6b44eb1e9acc06ca7d171cd9719101ba684c6289d8cf0"
+    "sourceFingerprint": "77886723a48ef27192f33e1aad4ebac5e5fdec4ad87d9a63e86760c4cf6b40b3"
   }
 }

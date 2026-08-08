@@ -55,8 +55,8 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      get their checklist email automatically the moment their band ships.
  *   3. The retest loop: four weeks after a plan is built, one email invites
  *      the re-check that makes the numbers visibly move.
- *   4. Hygiene: anonymous leads with no email and no kids purge after a
- *      week (see purgeEmptyAnonymousLeads for why this is zero-loss).
+ *   4. Anonymous-lead cleanup is paused until it can use the same durable
+ *      deletion receipt and cleanup worker as account deletion.
  *   5. Call-transcript capture + the post-call memory turn ("save every
  *      call ALWAYS", founder ruling 2026-07-09; agentic ladder items 2-3).
  *      Skips cleanly when TELNYX_API_KEY is absent.

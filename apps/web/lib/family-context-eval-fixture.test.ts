@@ -147,7 +147,11 @@ describe("evalFamilyFixtureAuth", () => {
     const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
     const stamped = await auth(REQUEST);
 
-    const access = await resolveAgentAccess(stamped?.attributes);
+    const access = await resolveAgentAccess(stamped?.attributes, {
+      nowSeconds: () => Math.floor(Date.now() / 1_000),
+      verifyFamilyMembership: async () => true,
+      verifyFamilyArtifactAccess: async () => {},
+    });
     assert.deepEqual(access, {
       mode: "pinned",
       familyId: EVAL_FIXTURE_FAMILY_ID,
@@ -171,7 +175,11 @@ describe("evalFamilyFixtureAuth", () => {
       "true",
     );
     assert.equal(stamped.attributes[EVAL_FIXTURE_SESSION_ATTRIBUTE], "true");
-    assert.deepEqual(await resolveAgentAccess(stamped.attributes), {
+    assert.deepEqual(await resolveAgentAccess(stamped.attributes, {
+      nowSeconds: () => Math.floor(Date.now() / 1_000),
+      verifyFamilyMembership: async () => true,
+      verifyFamilyArtifactAccess: async () => {},
+    }), {
       mode: "pinned",
       familyId: EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
     });

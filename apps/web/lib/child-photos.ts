@@ -1,5 +1,6 @@
 import { del, put } from "@vercel/blob";
 
+import { withFamilyArtifactWriteFence } from "./account-deletion-artifact-fence";
 import { isFamilyArtifactUrl } from "./materials/artifact-store";
 
 /**
@@ -55,11 +56,15 @@ export async function uploadChildPhotoBytes(input: {
   mediaType: string;
 }): Promise<string> {
   const extension = EXTENSION_BY_TYPE[input.mediaType] ?? "jpg";
-  const blob = await put(
-    `${childPhotoPrefix(input.familyId, input.childId)}photo.${extension}`,
-    input.bytes,
-    { access: "public", contentType: input.mediaType, addRandomSuffix: true },
-  );
+  const blob = await withFamilyArtifactWriteFence({
+    familyId: input.familyId,
+    write: async () => await put(
+      `${childPhotoPrefix(input.familyId, input.childId)}photo.${extension}`,
+      input.bytes,
+      { access: "public", contentType: input.mediaType, addRandomSuffix: true },
+    ),
+    cleanup: async (writtenBlob) => await del(writtenBlob.url),
+  });
   return blob.url;
 }
 

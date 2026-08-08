@@ -114,9 +114,10 @@ Governance rules (enforced, not aspirational):
    must reference an `action_costs` entry (lint on the tool registry).
 2. **New model = new row** : switching or adding a model tier requires a COGS estimate
    and credit price before merge. The PR template asks for it.
-3. **Monthly margin review** : a scheduled job joins AI Gateway Custom Reporting
-   (`user`/`tags` actuals) + fal invoices + sandbox usage against credits burned,
-   producing per-action realized margin in the admin console. Reprice when drift >20%.
+3. **Monthly margin review** : a scheduled job joins the local `model_usage` family
+   ledger, AI Gateway tag aggregates, fal invoices, and sandbox usage against credits
+   burned, producing per-action realized margin in the admin console. Reprice when
+   drift >20%.
 4. **Two backstops under the ledger**: eve per-session token limits + AI Gateway
    per-key USD budget caps. Ledger protects margin; backstops protect against bugs.
 
@@ -192,7 +193,7 @@ measured, not simulated, numbers.
 - NEW M1-12 ⛔: `credit_ledger` (append-only, RLS) + `chargeCredits` helper + grant/
   expiry jobs + refund clawback.
 - NEW M1-13 ⛔: `action_costs` registry + CI "no unpriced actions" check + admin
-  margin view fed by Gateway Custom Reporting.
+  margin view fed by local model usage and reconciled Gateway tag aggregates.
 - Auto top-up: folded into M1-12 as the opt-in path (council V1) : no separate ticket.
 - OPEN CALL (Sidney, council #2 in 09): customer-facing credit meter vs invisible
   accounting (flat plans + fair-use, internal ledger unchanged). Plan sizing must also

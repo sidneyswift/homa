@@ -1,6 +1,7 @@
 import { del, list, put } from "@vercel/blob";
 
 import { isEvalIsolationActive } from "../eval-isolation";
+import { withFamilyArtifactWriteFence } from "../account-deletion-artifact-fence";
 import { mapDb } from "../map/db";
 import {
   evalBlobDeleteFamily,
@@ -85,16 +86,26 @@ export async function uploadMaterialArtifacts(input: {
     evalStore
       ? evalBlobPut(evalStore, key, body)
       : put(key, body, { access: "public", contentType, addRandomSuffix: true });
-  const [pdfBlob, ...previewBlobs] = await Promise.all([
-    putBlob(`${base}.pdf`, input.pdf, "application/pdf"),
-    ...input.pageJpegs.map((jpeg, index) =>
-      putBlob(
-        `${base}${index === 0 ? "" : `-p${index + 1}`}.jpg`,
-        jpeg,
-        "image/jpeg",
+  const [pdfBlob, ...previewBlobs] = await withFamilyArtifactWriteFence({
+    familyId: input.familyId,
+    write: async () => await Promise.all([
+      putBlob(`${base}.pdf`, input.pdf, "application/pdf"),
+      ...input.pageJpegs.map((jpeg, index) =>
+        putBlob(
+          `${base}${index === 0 ? "" : `-p${index + 1}`}.jpg`,
+          jpeg,
+          "image/jpeg",
+        ),
       ),
-    ),
-  ]);
+    ]),
+    cleanup: async (blobs) => {
+      if (evalStore) {
+        await evalBlobDeleteFamily(evalStore, input.familyId);
+      } else {
+        await del(blobs.map((blob) => blob.url));
+      }
+    },
+  });
   const pagePreviewUrls = previewBlobs.map((blob) => blob.url);
   return {
     pdfUrl: pdfBlob.url,
@@ -119,13 +130,23 @@ export async function uploadStudioImageBytes(input: {
   const extension = input.mediaType.split("/")[1]?.split("+")[0] || "png";
   const key = `families/${input.familyId}/images/${crypto.randomUUID()}.${extension}`;
   const evalStore = resolveEvalBlobStore(process.env);
-  const blob = evalStore
-    ? await evalBlobPut(evalStore, key, input.bytes)
-    : await put(key, input.bytes, {
-        access: "public",
-        contentType: input.mediaType,
-        addRandomSuffix: true,
-      });
+  const blob = await withFamilyArtifactWriteFence({
+    familyId: input.familyId,
+    write: async () => evalStore
+      ? await evalBlobPut(evalStore, key, input.bytes)
+      : await put(key, input.bytes, {
+          access: "public",
+          contentType: input.mediaType,
+          addRandomSuffix: true,
+        }),
+    cleanup: async (writtenBlob) => {
+      if (evalStore) {
+        await evalBlobDeleteFamily(evalStore, input.familyId);
+      } else {
+        await del(writtenBlob.url);
+      }
+    },
+  });
   return blob.url;
 }
 

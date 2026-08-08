@@ -1,5 +1,14 @@
 import Stripe from "stripe";
 
+import {
+  assertConfiguredPaymentLinksInactive,
+} from "./billing/server-checkout";
+import {
+  configuredServerPaymentLinkUrls,
+  configuredStripeSecretKey,
+} from "./billing/stripe-checkout-config";
+import { createStripeServerCheckoutGateway } from "./billing/stripe-server-checkout";
+
 const STRIPE_LIST_LIMIT = 100;
 const MAX_PAGES_PER_COLLECTION = 100;
 const MAX_DISCOVERED_IDENTIFIERS = 1_000;
@@ -52,6 +61,7 @@ export interface StripeDeletionSubscription {
   id: string;
   customerId: string;
   status: string;
+  metadataFamilyId: string | null;
 }
 
 export interface StripeCheckoutSessionPageRequest {
@@ -67,12 +77,20 @@ export interface StripeSubscriptionPageRequest {
   limit: number;
 }
 
+export interface StripeAllSubscriptionsPageRequest {
+  startingAfter?: string;
+  limit: number;
+}
+
 /** The narrow provider surface needed to make deletion billing-safe. */
 export interface StripeAccountDeletionGateway {
   listCheckoutSessions(
     request: StripeCheckoutSessionPageRequest,
   ): Promise<StripeAccountDeletionPage<StripeDeletionCheckoutSession>>;
   expireCheckoutSession(id: string): Promise<{ id: string; status: string | null }>;
+  listAllSubscriptions(
+    request: StripeAllSubscriptionsPageRequest,
+  ): Promise<StripeAccountDeletionPage<StripeDeletionSubscription>>;
   listSubscriptions(
     request: StripeSubscriptionPageRequest,
   ): Promise<StripeAccountDeletionPage<StripeDeletionSubscription>>;
@@ -147,6 +165,26 @@ function recordSubscription(
   ) {
     throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
   }
+  if (
+    value.metadataFamilyId !== null
+    && (
+      typeof value.metadataFamilyId !== "string"
+      || value.metadataFamilyId.length === 0
+      || value.metadataFamilyId.trim() !== value.metadataFamilyId
+    )
+  ) {
+    throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
+  }
+  const previous = subscriptions.get(id);
+  if (
+    previous
+    && (
+      previous.customerId !== value.customerId
+      || previous.metadataFamilyId !== value.metadataFamilyId
+    )
+  ) {
+    throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
+  }
   subscriptions.set(id, value);
   if (subscriptions.size > MAX_DISCOVERED_IDENTIFIERS) {
     throw new StripeAccountDeletionUncertainError("safety_limit_exceeded");
@@ -168,6 +206,14 @@ function requiredStripeObjectId(value: string | { id: string }): string {
     throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
   }
   return id;
+}
+
+function stripeMetadataFamilyId(value: string | undefined): string | null {
+  if (value === undefined) return null;
+  if (typeof value !== "string" || value.length === 0 || value.trim() !== value) {
+    throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
+  }
+  return value;
 }
 
 /** Translate the installed Stripe SDK into the small deterministic test seam. */
@@ -200,6 +246,24 @@ export function createStripeAccountDeletionGateway(
       const response = await stripe.checkout.sessions.expire(id);
       return { id: response.id, status: response.status };
     },
+    listAllSubscriptions: async (request) => {
+      const response = await stripe.subscriptions.list({
+        status: "all",
+        limit: request.limit,
+        ...(request.startingAfter === undefined
+          ? {}
+          : { starting_after: request.startingAfter }),
+      });
+      return {
+        data: response.data.map((value) => ({
+          id: value.id,
+          customerId: requiredStripeObjectId(value.customer),
+          status: value.status,
+          metadataFamilyId: stripeMetadataFamilyId(value.metadata.family_id),
+        })),
+        hasMore: response.has_more,
+      };
+    },
     listSubscriptions: async (request) => {
       const response = await stripe.subscriptions.list({
         customer: request.customerId,
@@ -214,6 +278,7 @@ export function createStripeAccountDeletionGateway(
           id: value.id,
           customerId: requiredStripeObjectId(value.customer),
           status: value.status,
+          metadataFamilyId: stripeMetadataFamilyId(value.metadata.family_id),
         })),
         hasMore: response.has_more,
       };
@@ -224,14 +289,19 @@ export function createStripeAccountDeletionGateway(
         id: response.id,
         customerId: requiredStripeObjectId(response.customer),
         status: response.status,
+        metadataFamilyId: stripeMetadataFamilyId(response.metadata.family_id),
       };
     },
     cancelSubscription: async (id) => {
-      const response = await stripe.subscriptions.cancel(id);
+      const response = await stripe.subscriptions.cancel(id, {
+        invoice_now: false,
+        prorate: false,
+      });
       return {
         id: response.id,
         customerId: requiredStripeObjectId(response.customer),
         status: response.status,
+        metadataFamilyId: stripeMetadataFamilyId(response.metadata.family_id),
       };
     },
   };
@@ -308,11 +378,18 @@ export function createStripeAccountDeletionReconciler(
 
     try {
       const customerIds = new Set<string>();
-      const knownSubscriptionIds = new Set<string>();
-      for (const id of input.knownCustomerIds) addBoundedExactId(customerIds, id);
-      for (const id of input.knownSubscriptionIds) addBoundedExactId(knownSubscriptionIds, id);
+      const exactFamilyCustomerIds = new Set<string>();
+      const legacySubscriptionIds = new Set<string>();
+      for (const id of input.knownCustomerIds) {
+        addBoundedExactId(customerIds, id);
+        addBoundedExactId(exactFamilyCustomerIds, id);
+      }
+      for (const id of input.knownSubscriptionIds) {
+        addBoundedExactId(legacySubscriptionIds, id);
+      }
 
       const openSessionIds = new Set<string>();
+      const checkoutSubscriptionIds = new Set<string>();
       await visitEveryPage({
         budget,
         list: async (startingAfter) => await gateway.listCheckoutSessions({
@@ -364,13 +441,30 @@ export function createStripeAccountDeletionReconciler(
             addBoundedExactId(customerIds, checkoutSession.customerId);
           }
           if (checkoutSession.subscriptionId !== null) {
-            addBoundedExactId(knownSubscriptionIds, checkoutSession.subscriptionId);
+            addBoundedExactId(checkoutSubscriptionIds, checkoutSession.subscriptionId);
           }
         },
       });
 
-      const subscriptions = new Map<string, StripeDeletionSubscription>();
+      const inspectedSubscriptions = new Map<string, StripeDeletionSubscription>();
+      const verifiedCheckoutSubscriptions = new Map<string, StripeDeletionSubscription>();
+      const verifiedLegacySubscriptions = new Map<string, StripeDeletionSubscription>();
       const listedCustomerIds = new Set<string>();
+
+      await visitEveryPage({
+        budget,
+        list: async (startingAfter) => await gateway.listAllSubscriptions({
+          startingAfter,
+          limit: STRIPE_LIST_LIMIT,
+        }),
+        visit: (subscription) => {
+          if (subscription.metadataFamilyId !== input.familyId) return;
+          recordSubscription(inspectedSubscriptions, subscription);
+          addBoundedExactId(exactFamilyCustomerIds, subscription.customerId);
+          addBoundedExactId(customerIds, subscription.customerId);
+        },
+      });
+
       const customerQueue = [...customerIds];
 
       const listQueuedCustomers = async (): Promise<void> => {
@@ -389,7 +483,10 @@ export function createStripeAccountDeletionReconciler(
               if (subscription.customerId !== customerId) {
                 throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
               }
-              recordSubscription(subscriptions, subscription);
+              recordSubscription(inspectedSubscriptions, subscription);
+              if (subscription.metadataFamilyId === input.familyId) {
+                addBoundedExactId(exactFamilyCustomerIds, customerId);
+              }
             },
           });
         }
@@ -397,27 +494,106 @@ export function createStripeAccountDeletionReconciler(
 
       await listQueuedCustomers();
 
-      for (const subscriptionId of knownSubscriptionIds) {
-        if (subscriptions.has(subscriptionId)) continue;
+      for (const subscriptionId of checkoutSubscriptionIds) {
+        // Legacy Payment Links put client_reference_id in a user-editable URL,
+        // so it discovers candidates but never proves tenant ownership. Stripe
+        // metadata proves ownership. Missing metadata also needs this family's
+        // exact mirror or ledger association.
         const subscription = await providerRequest(budget, async () =>
           await gateway.retrieveSubscription(subscriptionId));
-        if (subscription.id !== subscriptionId) {
+        if (
+          subscription.id !== subscriptionId
+          || (
+            subscription.metadataFamilyId === null
+            && !legacySubscriptionIds.has(subscriptionId)
+          )
+          || (
+            subscription.metadataFamilyId !== null
+            && subscription.metadataFamilyId !== input.familyId
+          )
+        ) {
           throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
         }
-        recordSubscription(subscriptions, subscription);
+        recordSubscription(inspectedSubscriptions, subscription);
+        recordSubscription(verifiedCheckoutSubscriptions, subscription);
+        addBoundedExactId(exactFamilyCustomerIds, subscription.customerId);
         if (!customerIds.has(subscription.customerId)) {
           addBoundedExactId(customerIds, subscription.customerId);
           customerQueue.push(subscription.customerId);
         }
       }
 
-      // A direct subscription lookup can reveal a customer missing from both
-      // local mirrors and Checkout history. Walk that customer's full list too.
+      for (const subscriptionId of legacySubscriptionIds) {
+        // Older rows can predate family metadata. Trust only the exact ID read
+        // from this family's mirror or ledger. Conflicting provider metadata
+        // is never overridden by the local row.
+        const subscription = verifiedCheckoutSubscriptions.get(subscriptionId)
+          ?? await providerRequest(budget, async () =>
+            await gateway.retrieveSubscription(subscriptionId));
+        if (
+          subscription.id !== subscriptionId
+          || (
+            subscription.metadataFamilyId !== null
+            && subscription.metadataFamilyId !== input.familyId
+          )
+        ) {
+          throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
+        }
+        recordSubscription(inspectedSubscriptions, subscription);
+        recordSubscription(verifiedLegacySubscriptions, subscription);
+        addBoundedExactId(exactFamilyCustomerIds, subscription.customerId);
+        if (!customerIds.has(subscription.customerId)) {
+          addBoundedExactId(customerIds, subscription.customerId);
+          customerQueue.push(subscription.customerId);
+        }
+      }
+
+      // Exact subscription lookups can reveal customers absent from Checkout
+      // history. Inspect those customers, but metadata remains the authority
+      // for every sibling subscription discovered through the customer.
       await listQueuedCustomers();
+
+      const subscriptionsToReconcile = new Map<string, StripeDeletionSubscription>();
+      for (const subscription of inspectedSubscriptions.values()) {
+        if (subscription.metadataFamilyId === input.familyId) {
+          recordSubscription(subscriptionsToReconcile, subscription);
+          continue;
+        }
+        const hasExactSubscriptionProof = verifiedCheckoutSubscriptions.has(subscription.id)
+          || verifiedLegacySubscriptions.has(subscription.id);
+        if (
+          subscription.metadataFamilyId === null
+          && exactFamilyCustomerIds.has(subscription.customerId)
+          && !hasExactSubscriptionProof
+          && !TERMINAL_STRIPE_SUBSCRIPTION_STATUSES.has(subscription.status)
+        ) {
+          // A shared customer can legitimately carry another family's
+          // subscription. Without metadata or an exact family association,
+          // cancellation would be unsafe, but ignoring a charge-capable
+          // subscription would make deletion unsafe. Preserve access.
+          throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
+        }
+      }
+      const includeVerifiedExactSubscriptions = (
+        verifiedSubscriptions: ReadonlyMap<string, StripeDeletionSubscription>,
+      ): void => {
+        for (const [subscriptionId, verified] of verifiedSubscriptions) {
+          const latest = inspectedSubscriptions.get(subscriptionId) ?? verified;
+          if (
+            latest.metadataFamilyId !== null
+            && latest.metadataFamilyId !== input.familyId
+          ) {
+            throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
+          }
+          recordSubscription(subscriptionsToReconcile, latest);
+        }
+      };
+      includeVerifiedExactSubscriptions(verifiedCheckoutSubscriptions);
+      includeVerifiedExactSubscriptions(verifiedLegacySubscriptions);
 
       let canceledSubscriptionCount = 0;
       let alreadyTerminalSubscriptionCount = 0;
-      for (const subscription of subscriptions.values()) {
+      for (const subscription of subscriptionsToReconcile.values()) {
         if (TERMINAL_STRIPE_SUBSCRIPTION_STATUSES.has(subscription.status)) {
           alreadyTerminalSubscriptionCount += 1;
           continue;
@@ -427,6 +603,7 @@ export function createStripeAccountDeletionReconciler(
         if (
           canceled.id !== subscription.id
           || canceled.customerId !== subscription.customerId
+          || canceled.metadataFamilyId !== subscription.metadataFamilyId
           || !TERMINAL_STRIPE_SUBSCRIPTION_STATUSES.has(canceled.status)
         ) {
           throw new StripeAccountDeletionUncertainError("unexpected_provider_state");
@@ -437,7 +614,7 @@ export function createStripeAccountDeletionReconciler(
       return {
         expiredCheckoutSessionCount: openSessionIds.size,
         inspectedCustomerCount: listedCustomerIds.size,
-        inspectedSubscriptionCount: subscriptions.size,
+        inspectedSubscriptionCount: inspectedSubscriptions.size,
         canceledSubscriptionCount,
         alreadyTerminalSubscriptionCount,
       };
@@ -448,20 +625,20 @@ export function createStripeAccountDeletionReconciler(
   };
 }
 
-function stripeSecretKey(): string | null {
-  return process.env.STRIPE_LIVE_SECRET_KEY || process.env.STRIPE_TEST_SECRET_KEY || null;
-}
-
 /** Production entry point. Tests use createStripeAccountDeletionReconciler. */
 export async function reconcileStripeAccountDeletion(
   input: StripeAccountDeletionReconciliationInput,
 ): Promise<StripeAccountDeletionReconciliationResult> {
-  const secretKey = stripeSecretKey();
+  const secretKey = configuredStripeSecretKey();
   if (!secretKey) {
     throw new StripeAccountDeletionUncertainError("not_configured");
   }
   try {
     const stripe = new Stripe(secretKey);
+    await assertConfiguredPaymentLinksInactive(
+      createStripeServerCheckoutGateway(stripe),
+      configuredServerPaymentLinkUrls(),
+    );
     return await createStripeAccountDeletionReconciler(
       createStripeAccountDeletionGateway(stripe),
     )(input);

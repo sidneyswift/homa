@@ -1,6 +1,6 @@
 import {
-  APPLE_PROVIDER_PRODUCTS as ALL_APPLE_PROVIDER_PRODUCTS,
-  planAvailableForPurchase,
+  APPLE_NEW_PURCHASE_PRODUCT_IDS,
+  APPLE_NEW_PURCHASE_PRODUCTS,
 } from "@homa/core";
 
 export {
@@ -21,10 +21,6 @@ export {
  * permanent receipt-verification allowlist, while the initial iOS offer is
  * deliberately monthly-only and can change without invalidating old receipts.
  */
-export const APPLE_NATIVE_PROVIDER_PRODUCTS = ALL_APPLE_PROVIDER_PRODUCTS.filter(
-  (product) => product.period === "monthly" && planAvailableForPurchase(product.tier),
-);
+export const APPLE_NATIVE_PROVIDER_PRODUCTS = APPLE_NEW_PURCHASE_PRODUCTS;
 
-export const APPLE_NATIVE_PRODUCT_IDS = APPLE_NATIVE_PROVIDER_PRODUCTS.map(
-  (product) => product.productId,
-);
+export const APPLE_NATIVE_PRODUCT_IDS = APPLE_NEW_PURCHASE_PRODUCT_IDS;

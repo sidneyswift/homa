@@ -26,7 +26,10 @@ import { ChildProgressService } from "../apps/web/lib/child-progress/progress-se
 import { hashContinuityKey } from "../apps/web/lib/conversation-continuity/continuity-service";
 import { openReplyLoopWithDatabase } from "../apps/web/lib/conversation-continuity/delivery-ledger";
 import { replyContractForProgressCheckIn } from "../apps/web/lib/conversation-continuity/delivery-policy";
-import { foldStubFamilyIntoTx } from "../apps/web/lib/family-fold";
+import {
+  foldFamilyDataIntoTx,
+  foldStubFamilyIntoTx,
+} from "../apps/web/lib/family-fold";
 import {
   attachAuthUser,
   removeChild,
@@ -357,6 +360,37 @@ const prerequisiteSql = `
     id uuid primary key default gen_random_uuid(),
     family_id uuid not null,
     kind text not null
+  );
+  -- Family folds and account deletion share these service-only ownership
+  -- records. The focused harness mirrors the production constraints instead
+  -- of applying unrelated billing and library migrations.
+  create table public.account_deletion_jobs (
+    id uuid primary key default gen_random_uuid(),
+    family_id uuid,
+    status text not null,
+    requested_at timestamptz not null default now()
+  );
+  create table public.account_deletion_artifact_tombstones (
+    family_id uuid primary key,
+    deletion_job_id uuid not null
+      references public.account_deletion_jobs(id) on delete cascade,
+    created_at timestamptz not null default now()
+  );
+  create table public.family_artifact_prefixes (
+    artifact_family_id uuid primary key,
+    owner_family_id uuid not null
+      references public.families(id) on delete cascade,
+    inherited_at timestamptz not null default now(),
+    check (artifact_family_id <> owner_family_id)
+  );
+  create table public.family_artifact_prefix_candidates (
+    owner_family_id uuid not null references public.families(id),
+    artifact_family_id uuid not null,
+    evidence_kind text not null,
+    evidence_count integer not null,
+    observed_at timestamptz not null default now(),
+    primary key (owner_family_id, artifact_family_id, evidence_kind),
+    check (artifact_family_id <> owner_family_id)
   );
   create table public.conversation_episodes (
     id uuid primary key default gen_random_uuid(),
@@ -746,6 +780,9 @@ async function runFamilyFoldCompatibilityAssertions(
 ): Promise<void> {
   const stubSourceFamilyId = randomUUID();
   const stubDestinationFamilyId = randomUUID();
+  const finalDestinationFamilyId = randomUUID();
+  const inheritedArtifactFamilyId = randomUUID();
+  const candidateArtifactFamilyId = randomUUID();
   await sql`
     insert into public.families (id, email, context)
     values
@@ -763,6 +800,27 @@ async function runFamilyFoldCompatibilityAssertions(
       label: "stub-family-fold",
     })
   );
+  await sql`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (${stubSourceFamilyId}, ${inheritedArtifactFamilyId})
+  `;
+  await sql`
+    insert into public.family_artifact_prefix_candidates (
+      owner_family_id,
+      artifact_family_id,
+      evidence_kind,
+      evidence_count
+    )
+    values (
+      ${stubSourceFamilyId},
+      ${candidateArtifactFamilyId},
+      'lesson_audio',
+      2
+    )
+  `;
   await sql.begin(async (tx) => {
     await tx`
       delete from public.family_members
@@ -819,6 +877,217 @@ async function runFamilyFoldCompatibilityAssertions(
       where family_id = ${stubSourceFamilyId}
     `;
     assert.equal(sourceHours.count, 0);
+    const inheritedPrefixes = await tx<Array<{ artifact_family_id: string }>>`
+      select artifact_family_id
+      from public.family_artifact_prefixes
+      where owner_family_id = ${stubDestinationFamilyId}
+      order by artifact_family_id
+    `;
+    assert.deepEqual(
+      new Set(inheritedPrefixes.map((row) => row.artifact_family_id)),
+      new Set([stubSourceFamilyId, inheritedArtifactFamilyId]),
+    );
+  });
+  await sql`
+    insert into public.families (id, email, context)
+    values (
+      ${finalDestinationFamilyId},
+      'final-destination@example.com',
+      '{"into":"final"}'::jsonb
+    )
+  `;
+  await sql.begin(async (tx) => {
+    assert.equal(
+      await foldFamilyDataIntoTx(
+        tx,
+        stubDestinationFamilyId,
+        finalDestinationFamilyId,
+      ),
+      true,
+    );
+    await assertFoldedProgress(tx, {
+      sourceFamilyId: stubDestinationFamilyId,
+      destinationFamilyId: finalDestinationFamilyId,
+      fixture: stubFixture,
+    });
+    const transitivePrefixes = await tx<Array<{ artifact_family_id: string }>>`
+      select artifact_family_id
+      from public.family_artifact_prefixes
+      where owner_family_id = ${finalDestinationFamilyId}
+      order by artifact_family_id
+    `;
+    assert.deepEqual(
+      new Set(transitivePrefixes.map((row) => row.artifact_family_id)),
+      new Set([
+        stubSourceFamilyId,
+        stubDestinationFamilyId,
+        inheritedArtifactFamilyId,
+      ]),
+    );
+    const transitiveCandidates = await tx<Array<{
+      artifact_family_id: string;
+      evidence_count: number;
+    }>>`
+      select artifact_family_id, evidence_count
+      from public.family_artifact_prefix_candidates
+      where owner_family_id = ${finalDestinationFamilyId}
+    `;
+    assert.deepEqual([...transitiveCandidates], [{
+      artifact_family_id: candidateArtifactFamilyId,
+      evidence_count: 2,
+    }]);
+  });
+
+  const deletingSourceFamilyId = randomUUID();
+  const deletingDestinationFamilyId = randomUUID();
+  const deletionJobId = randomUUID();
+  await sql`
+    insert into public.families (id, email)
+    values
+      (${deletingSourceFamilyId}, null),
+      (${deletingDestinationFamilyId}, 'deleting-destination@example.com')
+  `;
+  await sql`
+    insert into public.account_deletion_jobs (
+      id,
+      family_id,
+      status
+    )
+    values (${deletionJobId}, ${deletingDestinationFamilyId}, 'preparing')
+  `;
+  await sql`
+    insert into public.account_deletion_artifact_tombstones (
+      family_id,
+      deletion_job_id
+    )
+    values (${deletingDestinationFamilyId}, ${deletionJobId})
+  `;
+  assert.equal(
+    await sql.begin((tx) => foldStubFamilyIntoTx(
+      tx,
+      deletingSourceFamilyId,
+      deletingDestinationFamilyId,
+    )),
+    false,
+  );
+  const [deletionFirstFamilies] = await sql<{ count: number }[]>`
+    select count(*)::integer as count
+    from public.families
+    where id in (${deletingSourceFamilyId}, ${deletingDestinationFamilyId})
+  `;
+  assert.equal(deletionFirstFamilies.count, 2);
+  await sql`delete from public.account_deletion_jobs where id = ${deletionJobId}`;
+  await sql`
+    delete from public.families
+    where id in (${deletingSourceFamilyId}, ${deletingDestinationFamilyId})
+  `;
+
+  const corruptSourceFamilyId = randomUUID();
+  const corruptDestinationFamilyId = randomUUID();
+  await sql`
+    insert into public.families (id, email)
+    values
+      (${corruptSourceFamilyId}, null),
+      (${corruptDestinationFamilyId}, 'corrupt-destination@example.com')
+  `;
+  await sql`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (${corruptDestinationFamilyId}, ${corruptSourceFamilyId})
+  `;
+  assert.equal(
+    await sql.begin((tx) => foldStubFamilyIntoTx(
+      tx,
+      corruptSourceFamilyId,
+      corruptDestinationFamilyId,
+    )),
+    false,
+  );
+  const [corruptFamilies] = await sql<{ count: number }[]>`
+    select count(*)::integer as count
+    from public.families
+    where id in (${corruptSourceFamilyId}, ${corruptDestinationFamilyId})
+  `;
+  assert.equal(corruptFamilies.count, 2);
+
+  const candidateConflictSourceFamilyId = randomUUID();
+  const candidateConflictDestinationFamilyId = randomUUID();
+  const candidateConflictOwnerFamilyId = randomUUID();
+  const candidateConflictArtifactFamilyId = randomUUID();
+  await sql`
+    insert into public.families (id, email)
+    values
+      (${candidateConflictSourceFamilyId}, null),
+      (
+        ${candidateConflictDestinationFamilyId},
+        'candidate-conflict-destination@example.com'
+      ),
+      (
+        ${candidateConflictOwnerFamilyId},
+        'candidate-conflict-owner@example.com'
+      )
+  `;
+  await sql`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (
+      ${candidateConflictSourceFamilyId},
+      ${candidateConflictArtifactFamilyId}
+    )
+  `;
+  await sql`
+    insert into public.family_artifact_prefix_candidates (
+      owner_family_id,
+      artifact_family_id,
+      evidence_kind,
+      evidence_count
+    )
+    values (
+      ${candidateConflictOwnerFamilyId},
+      ${candidateConflictArtifactFamilyId},
+      'material_output',
+      1
+    )
+  `;
+  assert.equal(
+    await sql.begin((tx) => foldStubFamilyIntoTx(
+      tx,
+      candidateConflictSourceFamilyId,
+      candidateConflictDestinationFamilyId,
+    )),
+    false,
+  );
+  const [candidateConflictState] = await sql<Array<{
+    families: number;
+    source_aliases: number;
+    destination_aliases: number;
+    candidates: number;
+  }>>`
+    select
+      (select count(*)::integer from public.families
+        where id in (
+          ${candidateConflictSourceFamilyId},
+          ${candidateConflictDestinationFamilyId},
+          ${candidateConflictOwnerFamilyId}
+        )) as families,
+      (select count(*)::integer from public.family_artifact_prefixes
+        where owner_family_id = ${candidateConflictSourceFamilyId}
+          and artifact_family_id = ${candidateConflictArtifactFamilyId}) as source_aliases,
+      (select count(*)::integer from public.family_artifact_prefixes
+        where owner_family_id = ${candidateConflictDestinationFamilyId}) as destination_aliases,
+      (select count(*)::integer from public.family_artifact_prefix_candidates
+        where owner_family_id = ${candidateConflictOwnerFamilyId}
+          and artifact_family_id = ${candidateConflictArtifactFamilyId}) as candidates
+  `;
+  assert.deepEqual(candidateConflictState, {
+    families: 3,
+    source_aliases: 1,
+    destination_aliases: 0,
+    candidates: 1,
   });
 
   const attachSourceFamilyId = randomUUID();

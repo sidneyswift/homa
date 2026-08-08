@@ -12,6 +12,7 @@ import {
   lessonBlobConfigured,
   lessonBlobToken,
 } from "../../../../lib/lessons/blobs";
+import { assertFamilyArtifactAccess } from "../../../../lib/account-deletion-artifact-fence";
 import {
   lessonRouteRefusal,
   resolveLessonRoute,
@@ -72,6 +73,7 @@ export async function POST(request: Request): Promise<Response> {
       // an authenticated Homa API call after Blob confirms the direct upload.
       webhookPublicKey: "lesson-upload-callbacks-disabled",
       getSignedToken: async (pathname, clientPayload) => {
+        await assertFamilyArtifactAccess(context.auth.familyId);
         if (!pathname.startsWith(lessonsPrefix)) {
           throw new Error(
             "pathname must stay inside this family's lessons/ space",

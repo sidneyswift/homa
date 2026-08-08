@@ -17,6 +17,7 @@ function prodLikeEnvironment(): Record<string, string | undefined> {
     NEXT_PUBLIC_SUPABASE_URL: "https://kzabcdefghijklmnopqrs.supabase.co",
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_x",
     SUPABASE_DB_PASSWORD: "prod-password",
+    SUPABASE_SECRET_KEY: "sb_secret_x",
     BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_x",
     RESEND_API_KEY: "re_x",
     TELNYX_API_KEY: "KEY_x",

@@ -1,4 +1,7 @@
-import { providerProduct } from "@homa/core";
+import {
+  appleProductAvailableForNewPurchase,
+  providerProduct,
+} from "@homa/core";
 
 import {
   appleStatusToSharedVocabulary,
@@ -8,7 +11,12 @@ import {
 import {
   familyIdForAppleOriginalTransaction,
   recordFamilyAppleSubscription,
+  recordVerifiedFamilyAppleSubscriptionStatus,
 } from "../../../../../lib/billing/wall";
+import {
+  pendingApplePurchaseClaimForAttempt,
+  resolveApplePurchaseClaim,
+} from "../../../../../lib/billing/apple-purchase-interlock";
 
 /**
  * POST /api/billing/apple/webhook (App Store Server Notifications V2)
@@ -86,14 +94,6 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: true, handled: false });
   }
 
-  const familyId = await familyIdForAppleOriginalTransaction(originalTransactionId);
-  if (!familyId) {
-    console.error(
-      `billing/apple/webhook: no family linked to original_transaction_id ${originalTransactionId} yet`,
-    );
-    return Response.json({ ok: true, handled: false });
-  }
-
   const product = providerProduct("apple", transaction.productId);
   if (!product) {
     console.error(
@@ -102,14 +102,52 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: true, handled: false });
   }
 
-  await recordFamilyAppleSubscription(familyId, {
+  const [linkedFamilyId, pendingClaim] = await Promise.all([
+    familyIdForAppleOriginalTransaction(originalTransactionId),
+    transaction.appAccountToken
+      ? pendingApplePurchaseClaimForAttempt(transaction.appAccountToken)
+      : Promise.resolve(null),
+  ]);
+  const claim = resolveApplePurchaseClaim({
+    linkedFamilyId,
+    pendingClaim,
+    signedProductId: product.productId,
+  });
+  if (claim.kind === "rejected") {
+    console.error(
+      `billing/apple/webhook: no matching family and product claim for original_transaction_id ${originalTransactionId} yet`,
+    );
+    return Response.json({ ok: true, handled: false });
+  }
+  if (
+    claim.kind === "fresh"
+    && !appleProductAvailableForNewPurchase(product.productId)
+  ) {
+    console.error(
+      `billing/apple/webhook: rejected unavailable new-purchase product ${product.productId}`,
+    );
+    return Response.json({ ok: true, handled: false });
+  }
+
+  const subscription = {
     originalTransactionId,
     status: appleStatusToSharedVocabulary(status),
     productId: product.productId,
     tier: product.tier,
     period: product.period,
     expiresAtMs: transaction.expiresDate ?? null,
-  });
+    purchaseAttemptId: claim.purchaseAttemptId,
+    purchaseDateMs: transaction.purchaseDate ?? null,
+    providerObservedAtMs: notification.signedDate
+      ?? transaction.signedDate
+      ?? transaction.purchaseDate
+      ?? null,
+  };
+  if (claim.kind === "fresh") {
+    await recordFamilyAppleSubscription(claim.familyId, subscription);
+  } else {
+    await recordVerifiedFamilyAppleSubscriptionStatus(claim.familyId, subscription);
+  }
 
   return Response.json({ ok: true, handled: true });
 }

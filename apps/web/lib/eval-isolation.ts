@@ -58,6 +58,8 @@ export const DURABLE_WRITE_ENV_VARS = [
   // Direct Postgres to the production pooler (lib/map/db.ts): telemetry,
   // memories, materials records, everything mapDb touches.
   "SUPABASE_DB_PASSWORD",
+  // Supabase Storage administration: adult avatar deletion.
+  "SUPABASE_SECRET_KEY",
   // Vercel Blob: PDFs, page previews, generated images.
   "BLOB_READ_WRITE_TOKEN",
   // Outbound email.

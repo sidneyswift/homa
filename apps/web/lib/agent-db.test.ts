@@ -34,9 +34,15 @@ function tokenWithExpiry(expirySeconds: number): string {
 function dependencies(overrides: {
   membershipResult?: boolean;
   onVerify?: (familyId: string, memberUserId: string) => void;
+  onArtifactVerify?: (familyId: string) => void;
+  artifactError?: Error;
 }): ResolveAgentAccessDependencies {
   return {
     nowSeconds: () => NOW_SECONDS,
+    verifyFamilyArtifactAccess: async (familyId) => {
+      overrides.onArtifactVerify?.(familyId);
+      if (overrides.artifactError) throw overrides.artifactError;
+    },
     verifyFamilyMembership: async (familyId, memberUserId) => {
       overrides.onVerify?.(familyId, memberUserId);
       return overrides.membershipResult ?? true;
@@ -168,6 +174,39 @@ describe("resolveAgentAccess", () => {
     );
     assert.equal(access.mode, "pinned");
     assert.equal(access.familyId, FAMILY_ID);
+  });
+
+  it("checks the deletion fence on caller, expired, and pinned access", async () => {
+    const checked: string[] = [];
+    const guarded = dependencies({
+      onArtifactVerify: (familyId) => checked.push(familyId),
+    });
+
+    await resolveAgentAccess({
+      channel: "web",
+      familyId: FAMILY_ID,
+      memberUserId: MEMBER_USER_ID,
+      supabaseAccessToken: tokenWithExpiry(NOW_SECONDS + 600),
+    }, guarded);
+    await resolveAgentAccess({
+      channel: "web",
+      familyId: FAMILY_ID,
+      memberUserId: MEMBER_USER_ID,
+      supabaseAccessToken: tokenWithExpiry(NOW_SECONDS - 120),
+    }, guarded);
+    await resolveAgentAccess({ channel: "sms", familyId: FAMILY_ID }, guarded);
+
+    assert.deepEqual(checked, [FAMILY_ID, FAMILY_ID, FAMILY_ID]);
+  });
+
+  it("propagates deletion-fence refusal before granting access", async () => {
+    await assert.rejects(
+      resolveAgentAccess(
+        { channel: "sms", familyId: FAMILY_ID },
+        dependencies({ artifactError: new Error("family deletion active") }),
+      ),
+      /family deletion active/u,
+    );
   });
 
   it("still refuses a session with no usable identity", async () => {

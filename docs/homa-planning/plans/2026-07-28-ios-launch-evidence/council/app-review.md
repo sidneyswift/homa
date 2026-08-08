@@ -173,7 +173,7 @@ Homa's chat is powered by large language models. Safeguards: (1) the assistant i
 
 **Account deletion**
 
-Account deletion is available in the app under Family > Account > Delete account. It permanently deletes the account and the family's personal data, and revokes Sign in with Apple tokens.
+Account deletion is available in the app under Family > Account > Delete this family’s Homa data. It stops Homa-managed billing, closes family access, and permanently deletes the family's records from Homa's database, authentication system, schedules, and stored files. Limited provider records may remain only as described in Homa's privacy policy.
 
 **Contact**
 

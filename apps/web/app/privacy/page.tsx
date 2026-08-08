@@ -90,11 +90,12 @@ export default function PrivacyPage() {
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Delete anytime</h2>
         <p className="mt-3 text-body">
-          Email <a className="text-brand underline-offset-2 hover:underline" href="mailto:hello@mail.thankshoma.com?subject=Please%20delete%20my%20family%27s%20data">hello@mail.thankshoma.com</a>{" "}
-          with the address you signed up with. We delete your account and family records stored in Homa,
-          uploaded files, questionnaire answers, and reports, then confirm within a few days. We
-          may retain limited payment, security, delivery, or backup records when the law requires
-          it or until a provider&apos;s normal retention period ends.
+          Use the deletion option in Homa&apos;s account settings, or email <a className="text-brand underline-offset-2 hover:underline" href="mailto:hello@mail.thankshoma.com?subject=Please%20delete%20my%20family%27s%20data">hello@mail.thankshoma.com</a>{" "}
+          with the address you signed up with. We remove the family&apos;s records from Homa&apos;s
+          database and authentication system, its schedules, and its stored files. We stop
+          Homa-managed billing before access closes. We may retain limited payment, security,
+          delivery, usage, or backup records when the law requires it or until a provider&apos;s
+          normal retention period ends.
         </p>
 
         <h2 className="mt-8 font-display text-xl font-semibold text-strong">Questions</h2>

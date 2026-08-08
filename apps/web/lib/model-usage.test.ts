@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   USAGE_SURFACES,
+  gatewayAttribution,
   modelUsageChannelFromAttributes,
   usageSurfaceFromAttributes,
 } from "./model-usage";
@@ -10,6 +11,13 @@ import {
 describe("model usage surfaces", () => {
   it("registers morning briefs for reporting and Gateway attribution", () => {
     assert.ok(USAGE_SURFACES.includes("morning_brief"));
+  });
+
+  it("keeps family identifiers out of provider-side reporting", () => {
+    assert.deepEqual(
+      gatewayAttribution("11111111-1111-4111-8111-111111111111", "chat"),
+      { tags: ["chat"] },
+    );
   });
 
   it("attributes the internal Progress task to the native product surface", () => {
