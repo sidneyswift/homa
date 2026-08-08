@@ -96,7 +96,7 @@ export function DeleteFamilyDataCard({
         type="button"
         onClick={() => void deleteFamily()}
         disabled={confirmation !== expected || state === "submitting" || state === "complete" || state === "in_progress"}
-        className="mt-5 inline-flex min-h-11 cursor-pointer items-center rounded-pill bg-danger px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-5 inline-flex min-h-11 cursor-pointer items-center rounded-[var(--homa-radius-control)] bg-danger px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {state === "submitting" ? "Deleting…" : "Permanently delete this family’s Homa data"}
       </button>
