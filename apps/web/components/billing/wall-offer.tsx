@@ -4,7 +4,7 @@ import type { WallDoor } from "@homa/core";
 
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import { TierOptions } from "./tier-options";
-import { WALL_EYEBROW, WALL_HEADLINE, WALL_MECHANICS_LINE, wallIncludedLine, wallReportLine } from "./wall-copy";
+import { WALL_EYEBROW, WALL_MECHANICS_LINE, wallHeadline, wallIncludedLine, wallReportLine } from "./wall-copy";
 
 /**
  * The wall's offer card: the words, the two Payment Link buttons, and
@@ -37,7 +37,7 @@ export function WallOffer({
         {WALL_EYEBROW}
       </p>
       <h2 className="quiet-paywall__heading">
-        {WALL_HEADLINE}
+        {wallHeadline(door)}
       </h2>
       {/* Reassure before inform (and the reader gate's bridge): the
           report she already has is hers for good, then the thing she

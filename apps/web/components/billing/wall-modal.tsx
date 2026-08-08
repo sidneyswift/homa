@@ -6,7 +6,7 @@ import type { WallDoor } from "@homa/core";
 
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import { sendWallBeacon } from "./wall-beacon";
-import { WALL_DISMISS, WALL_HEADLINE } from "./wall-copy";
+import { WALL_DISMISS, wallHeadline } from "./wall-copy";
 import { WallOffer } from "./wall-offer";
 
 /**
@@ -71,7 +71,7 @@ export function WallModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={WALL_HEADLINE}
+        aria-label={wallHeadline(door)}
         className="quiet-paywall__modal wall-card wall-card--pricing"
         data-brand-layer="wall-modal"
         onClick={(event) => event.stopPropagation()}

@@ -2,7 +2,8 @@ import { defineChannel, POST } from "eve/channels";
 
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
 import {
-  CHANNEL_GATE_SMS_LINE,
+  CHANNEL_GATE_EMAIL_LINE,
+  CHANNEL_GATE_EMAIL_SUBJECT,
   familyHasChannel,
 } from "../../lib/billing/channel-access";
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
@@ -50,6 +51,7 @@ import {
   getFamilyEmail,
   retrieveResendRfcMessageIdForSubmission,
   sendAgentComposedEmail,
+  siteUrl,
   submitAgentComposedEmail,
 } from "../../lib/map/email";
 import { emitMapEvent } from "../../lib/map/events";
@@ -278,10 +280,20 @@ export default defineChannel({
         if (to) {
           await sendAgentComposedEmail(
             to,
-            "Everything is waiting on the web",
-            [CHANNEL_GATE_SMS_LINE],
+            CHANNEL_GATE_EMAIL_SUBJECT,
+            [CHANNEL_GATE_EMAIL_LINE],
             undefined,
             familyId,
+            {
+              cta: {
+                label: "Open Homa",
+                url: `${siteUrl().replace(/\/+$/u, "")}/app`,
+              },
+              footerNote:
+                "Homa sent this because you emailed from your family's address.",
+              outerNote:
+                "You signed up for Homa at thankshoma.com. Your plan includes Homa on the web.",
+            },
           );
         }
         await completeInboundReceipt(inboundReceipt.id);

@@ -7,10 +7,10 @@ import type { BillingPeriod, PlanTier } from "../../lib/billing/wall-types";
  * (plans/2026-07-11-the-wall.md; copy rulebook:
  * .agents/skills/homa-copy-writer/SKILL.md). The wall is an offer, never
  * a scold, and it only appears at the first tap on an action door. The
- * original "report stays free forever" placement was superseded for new
- * families by the report lock (2026-07-18) and then the signup paywall
- * (founder directive 2026-07-26, TRIAL_GATE_* below); wallReportLine
- * still renders true for the pre-gate families the door wall serves.
+ * original "report stays free forever" placement was superseded by the
+ * report lock (2026-07-18) and then the signup paywall (founder directive
+ * 2026-07-26, TRIAL_GATE_* below). wallReportLine now promises only the
+ * durable fact shared by every path: the report stays saved.
  * Both copy gates ran 2026-07-11 (reader, then editor); the founder
  * read-aloud is the last gate before any flag ever flips.
  *
@@ -33,11 +33,17 @@ export const WALL_EYEBROW = "Homa membership";
 
 export const WALL_HEADLINE = "Try Homa free for 7 days";
 
+export const WALL_CALL_HEADLINE = "Phone calls aren't available to buy right now";
+
+export function wallHeadline(door: WallDoor): string {
+  return door === "call" ? WALL_CALL_HEADLINE : WALL_HEADLINE;
+}
+
 /** The reassurance, first (reader gate: this landing first is what let
  *  her relax): the thing she already has is hers for good. */
 export function wallReportLine(childName?: string | null): string {
   const whose = childName ? `${childName}'s` : "Your child's";
-  return `${whose} progress report is free, forever.`;
+  return `${whose} progress report stays saved, whether you start the trial or not.`;
 }
 
 /** The bridge: what she reached for, named first inside what the 7
@@ -46,21 +52,21 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
   const kid = childName ?? "your child";
   switch (door) {
     case "plan":
-      return `Your 7 free days include the four-week plan you tapped, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the four-week plan you tapped, practice pages made for ${kid}, teaching-hour records, and web chat.`;
     case "month":
       return childName
-        ? `Your 7 free days include ${childName}'s month, worksheets made for ${childName}, phone calls with Homa, and chat.`
-        : `Your 7 free days include the month you tapped, worksheets made for your child, phone calls with Homa, and chat.`;
+        ? `Your 7 free days include ${childName}'s month plan, practice pages made for ${childName}, teaching-hour records, and web chat.`
+        : "Your 7 free days include the month plan you tapped, practice pages made for your child, teaching-hour records, and web chat.";
     case "lesson":
-      return `Your 7 free days include the lesson you tapped, its printable worksheet, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return "Your 7 free days include the lesson you tapped, its printable practice page, weekly plans, teaching-hour records, and web chat.";
     case "call":
-      return `Your 7 free days include the call you asked for, four-week plans, worksheets made for ${kid}, and chat.`;
+      return `You can still try Homa free for 7 days. It includes weekly plans, practice pages made for ${kid}, teaching-hour records, and web chat.`;
     case "chat":
-      return `Your 7 free days include this chat, four-week plans, worksheets made for ${kid}, and phone calls.`;
+      return `Your 7 free days include this web chat, weekly plans, practice pages made for ${kid}, and teaching-hour records.`;
     case "report":
-      return `Your 7 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include every subject in ${kid === "your child" ? "the" : `${kid}'s`} report, weekly plans, practice pages made for ${kid}, teaching-hour records, and web chat.`;
     case "signup":
-      return `Your 7 free days include the questions and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+      return `Your 7 free days include the questions and ${kid === "your child" ? "your child's" : `${kid}'s`} full progress report, weekly plans, practice pages made for ${kid}, teaching-hour records, and web chat.`;
     default: {
       const exhaustive: never = door;
       throw new Error(`Unhandled wall door: ${exhaustive}`);
@@ -70,8 +76,10 @@ export function wallIncludedLine(door: WallDoor, childName?: string | null): str
 
 /** The ask, unmistakable on the first pass (reader gate: "card" alone
  *  read as the card on screen), then one fact per sentence. */
-export const WALL_MECHANICS_LINE =
-  "Add a credit card to start 7 free days. We do not charge it during those 7 days. We email you before the first charge.";
+const TRIAL_TERMS_LINE =
+  "Your card starts the trial. We email you on day 4, three days before the first charge on day 7. Cancel before then in your settings and you pay nothing. You can cancel any month after that the same way.";
+
+export const WALL_MECHANICS_LINE = TRIAL_TERMS_LINE;
 
 /** The children fact as a full sentence (editor gate: "Unlimited kids,
  *  one price" collided with the two prices right above it). tierBullets
@@ -258,11 +266,11 @@ export function tierDelta(tier: PlanTier): string {
       // because it is the one thing on the list a free chatbot cannot
       // be (log_hours writes a durable record), and because it is the
       // legal obligation the highest-load persona came to solve.
-      return "Weekly plans, practice pages, teaching hours logged.";
+      return "Weekly plans, practice pages, teaching-hour records.";
     case "plus":
       // Name the available channels without claiming the lower tier is
       // blocked while channel gating remains dark in production.
-      return "Text or call Homa. Upload curriculum files.";
+      return "Homa answers texts and calls. She builds weekly plans from your curriculum.";
     case "elite":
       // Max is preserved for receipt compatibility, not merchandised as
       // delivered. A mailing address field is not a fulfillment system.
@@ -282,7 +290,7 @@ export function tierDescription(tier: PlanTier): string {
     case "regular":
       return "Homa includes weekly plans, printable practice pages, and teaching-hour records.";
     case "plus":
-      return "Homa Plus includes a phone number for texting or calling Homa, plus curriculum file uploads for your weekly plan.";
+      return "Homa Plus includes a phone number for texting or calling Homa. Homa builds weekly plans from the curriculum you share.";
     case "elite":
       return "Homa Max is coming soon. Printed materials by mail and planning with a person are planned. It is not available to purchase yet.";
     default: {
@@ -325,7 +333,7 @@ export const WALL_SIGNIN_BUTTON = "Sign in";
  */
 export function reportLockReadyLine(childName: string | null, mappedCount: number): string {
   const whose = childName ? `${childName}'s` : "Your child's";
-  return `${whose} full report is ready: ${mappedCount} subjects, scored and saved.`;
+  return `${whose} progress report is saved. It covers ${mappedCount} subjects.`;
 }
 
 export function reportLockHeldLine(
@@ -336,7 +344,7 @@ export function reportLockHeldLine(
   const kid = childName ?? "your child";
   const open = openCount === 1 ? "The subject above is" : `The ${NUMBER_WORDS[openCount] ?? openCount} above are`;
   const held = NUMBER_WORDS[lockedCount] ?? String(lockedCount);
-  return `${open} open in full. Your 7 free days open the other ${held}, plus four-week plans, worksheets made for ${kid}, phone calls with Homa, and chat.`;
+  return `${open} open in full. Your 7 free days open the other ${held}, plus weekly plans, practice pages made for ${kid}, teaching-hour records, and web chat.`;
 }
 
 /** A held subject's whole row: her own answer count (the one honest
@@ -455,8 +463,7 @@ export const TRIAL_GATE_ACCOUNT_READY = "Your account is ready.";
  * days before end and would land on the day of signup for a trial this
  * short.
  */
-export const TRIAL_GATE_CHARGE_NOTE =
-  "Your card starts the trial. We email you on day 4, three days before the first charge on day 7. Cancel before then in your settings and you pay nothing. You can cancel any month after that the same way.";
+export const TRIAL_GATE_CHARGE_NOTE = TRIAL_TERMS_LINE;
 
 /**
  * The same sentence with real dates in place of "day 4" and "day 7".

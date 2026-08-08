@@ -135,7 +135,7 @@ export default async function BinderPage() {
       })
     : null;
   // familyPlanState already degrades to "regular" when billing has a bad
-  // day, which is the safe direction here: the card invites an upgrade
+  // day, which is the safe direction here: paid-only filing stays hidden
   // instead of offering a button that would 402.
   const planTier = packReady
     ? (await familyPlanState(family.id)).tier
@@ -158,11 +158,11 @@ export default async function BinderPage() {
             expectedPages={expectedPages}
           />
         ) : null}
-        {filingKind && stateDetail ? (
+        {filingKind && stateDetail && (planTier === "plus" || planTier === "elite") ? (
           <div className="mt-4">
             <StateFilingCard
               stateName={stateDetail.stateName}
-              entitled={planTier === "plus" || planTier === "elite"}
+              entitled
               kind={filingKind}
               dueLabel={
                 filingDue?.ok && filingDue.deadlines[0]

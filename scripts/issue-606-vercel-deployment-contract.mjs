@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 export const HOMA_VERCEL_PROJECT_ID = "prj_pKBD87W4tmlT7lnYRgrs8WYociTz";
 export const HOMA_VERCEL_TEAM_ID = "team_BEuVWnWjCmzv8aVLJp1HU6TC";
 export const HOMA_PRODUCTION_ALIAS = "thankshoma.com";
+export const HOMA_GITHUB_REPOSITORY_ID = 1241075954;
 
 function exactGitSha(value, label) {
   if (typeof value !== "string" || !/^[0-9a-f]{40}$/u.test(value)) {
@@ -60,8 +61,11 @@ export function validateIssue606VercelDeployment({
   if (deployment.plan !== "pro") {
     throw new Error("The exact Homa production deployment is not on Pro.");
   }
-  if (deployment.config?.fluid !== true) {
+  if (deployment.config?.functionType !== "fluid") {
     throw new Error("The exact Homa production deployment is not using Fluid Compute.");
+  }
+  if (deployment.config?.isUsingActiveCPU !== true) {
+    throw new Error("The exact Homa production deployment is not using Active CPU.");
   }
   if (deployment.config?.functionTimeout !== 300) {
     throw new Error("The exact Homa production deployment timeout is not 300 seconds.");
@@ -70,12 +74,23 @@ export function validateIssue606VercelDeployment({
   if (
     !gitSource ||
     gitSource.type !== "github" ||
+    gitSource.repoId !== HOMA_GITHUB_REPOSITORY_ID ||
     gitSource.sha !== expectedSha ||
-    gitSource.ref !== "main" ||
-    gitSource.org !== "sidneyswift" ||
-    gitSource.repo !== "homa"
+    gitSource.ref !== "main"
   ) {
     throw new Error("The Vercel Git source is not the exact Homa main commit.");
+  }
+  const gitRepo = deployment.gitRepo;
+  if (
+    !gitRepo ||
+    gitRepo.type !== "github" ||
+    gitRepo.repoId !== HOMA_GITHUB_REPOSITORY_ID ||
+    gitRepo.org !== "sidneyswift" ||
+    gitRepo.repo !== "homa" ||
+    gitRepo.path !== "sidneyswift/homa" ||
+    gitRepo.defaultBranch !== "main"
+  ) {
+    throw new Error("The Vercel Git repository is not the exact Homa repository.");
   }
   if (
     typeof deployment.meta?.githubCommitSha === "string" &&
@@ -92,8 +107,12 @@ export function validateIssue606VercelDeployment({
     `target=${deployment.target}`,
     `production_alias=${HOMA_PRODUCTION_ALIAS}`,
     `plan=${deployment.plan}`,
-    `fluid=${deployment.config.fluid}`,
+    `function_type=${deployment.config.functionType}`,
+    `active_cpu=${deployment.config.isUsingActiveCPU}`,
     `function_timeout_seconds=${deployment.config.functionTimeout}`,
+    `github_repository_id=${gitSource.repoId}`,
+    `github_repository=${gitRepo.org}/${gitRepo.repo}`,
+    `github_default_branch=${gitRepo.defaultBranch}`,
     `git_sha=${gitSource.sha}`,
   ].join("\n");
   return {

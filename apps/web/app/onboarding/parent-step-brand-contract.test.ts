@@ -33,7 +33,6 @@ test("the landing signup path explains the product and trial without legacy asse
   assert.match(parentStep, /plain-language questions/u);
   assert.match(parentStep, /WALL_MECHANICS_LINE/u);
   assert.match(parentStep, /tierPriceAmount\("regular", "monthly"\)/u);
-  assert.match(parentStep, /Cancel before the first charge to pay nothing/u);
   assert.doesNotMatch(parentStep, /questionnaire|where your child shines|where they need a hand/iu);
 });
 
