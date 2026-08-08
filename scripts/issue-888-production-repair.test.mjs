@@ -113,7 +113,7 @@ function syntheticReleaseRepository(alteredPath = null) {
   const repository = mkdtempSync(
     join(tmpdir(), "homa-issue-888-git-contract-")
   );
-  git(repository, ["init", "--quiet"]);
+  git(repository, ["init", "--quiet", "--initial-branch=main"]);
   git(repository, ["config", "user.name", "Issue 888 test"]);
   git(repository, ["config", "user.email", "issue-888@invalid.example"]);
 
