@@ -392,6 +392,168 @@ const prerequisiteSql = `
     primary key (owner_family_id, artifact_family_id, evidence_kind),
     check (artifact_family_id <> owner_family_id)
   );
+  -- Mirrors the hard-delete branches of migration 20260808170000 used by this
+  -- harness. The focused schema owns the artifact ledgers above, so it must
+  -- also carry the exact active guard identity that makes that state ready.
+  create function public.guard_family_hard_delete_protocol()
+  returns trigger
+  language plpgsql
+  security definer
+  set search_path = ''
+  as $guard$
+  declare
+    delete_mode text := current_setting('homa.family_delete_mode', true);
+    destination_family_id uuid;
+    active_deletion_job_id uuid;
+  begin
+    if delete_mode = 'family-fold-v2' then
+      select prefix.owner_family_id
+      into destination_family_id
+      from public.family_artifact_prefixes prefix
+      where prefix.artifact_family_id = old.id;
+
+      if destination_family_id is null
+        or not exists (
+          select 1
+          from public.families destination
+          where destination.id = destination_family_id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          where prefix.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.account_deletion_artifact_tombstones tombstone
+          where tombstone.family_id in (old.id, destination_family_id)
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          where prefix.artifact_family_id = destination_family_id
+             or (
+               prefix.artifact_family_id = old.id
+               and prefix.owner_family_id <> destination_family_id
+             )
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.artifact_family_id in (
+            old.id,
+            destination_family_id
+          )
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          join public.family_artifact_prefixes prefix
+            on prefix.artifact_family_id = candidate.artifact_family_id
+          where prefix.owner_family_id = destination_family_id
+            and candidate.owner_family_id <> destination_family_id
+        )
+      then
+        raise exception using
+          errcode = '55000',
+          message = 'family fold did not prove its artifact disposition';
+      end if;
+      return old;
+    end if;
+
+    if delete_mode = 'account-deletion-v2' then
+      select job.id
+      into active_deletion_job_id
+      from public.account_deletion_jobs job
+      where job.family_id = old.id
+        and job.status = 'running';
+
+      if active_deletion_job_id is null
+        or old.status <> 'deleted'
+        or not exists (
+          select 1
+          from public.account_deletion_artifact_tombstones tombstone
+          where tombstone.family_id = old.id
+            and tombstone.deletion_job_id = active_deletion_job_id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          left join public.account_deletion_artifact_tombstones tombstone
+            on tombstone.family_id = prefix.artifact_family_id
+           and tombstone.deletion_job_id = active_deletion_job_id
+          where prefix.owner_family_id = old.id
+            and tombstone.family_id is null
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          join public.families live_artifact_family
+            on live_artifact_family.id = prefix.artifact_family_id
+          where prefix.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.owner_family_id <> old.id
+            and (
+              candidate.artifact_family_id = old.id
+              or exists (
+                select 1
+                from public.family_artifact_prefixes prefix
+                where prefix.owner_family_id = old.id
+                  and prefix.artifact_family_id = candidate.artifact_family_id
+              )
+            )
+        )
+      then
+        raise exception using
+          errcode = '55000',
+          message = 'account deletion did not prove its artifact disposition';
+      end if;
+      return old;
+    end if;
+
+    raise exception using
+      errcode = '55000',
+      message = 'family hard delete requires a recognized transaction protocol';
+  end;
+  $guard$;
+  create trigger families_hard_delete_protocol_guard
+  before delete on public.families
+  for each row execute function public.guard_family_hard_delete_protocol();
+  create function public.guard_family_deletion_status_transition()
+  returns trigger
+  language plpgsql
+  security definer
+  set search_path = ''
+  as $status_guard$
+  begin
+    if new.status = 'deleted'
+      and old.status is distinct from 'deleted'
+      and current_setting('homa.family_delete_mode', true)
+        is distinct from 'account-deletion-v2'
+    then
+      raise exception using
+        errcode = '55000',
+        message = 'family deletion acceptance requires the account deletion protocol';
+    end if;
+    return new;
+  end;
+  $status_guard$;
+  create trigger families_deletion_status_protocol_guard
+  before update of status on public.families
+  for each row execute function public.guard_family_deletion_status_transition();
   create table public.conversation_episodes (
     id uuid primary key default gen_random_uuid(),
     family_id uuid not null
@@ -977,10 +1139,6 @@ async function runFamilyFoldCompatibilityAssertions(
   `;
   assert.equal(deletionFirstFamilies.count, 2);
   await sql`delete from public.account_deletion_jobs where id = ${deletionJobId}`;
-  await sql`
-    delete from public.families
-    where id in (${deletingSourceFamilyId}, ${deletingDestinationFamilyId})
-  `;
 
   const corruptSourceFamilyId = randomUUID();
   const corruptDestinationFamilyId = randomUUID();
@@ -4794,10 +4952,6 @@ async function runAdapterAssertions(input: {
       promptKey: currentProgressPrompt,
       expectedState: "open",
     });
-    await sql`
-      delete from public.families
-      where id = ${progressLoopDecoyFamilyId}
-    `;
     const activeSmsProgress =
       await resolveActiveSmsProgressContextWithDatabase(sql, {
         familyId,
@@ -6394,10 +6548,36 @@ async function runAdapterAssertions(input: {
         'whole-family-delete-turn'
       )
     `;
+    const wholeFamilyDeleteJobId = randomUUID();
     await sql`
-      delete from public.families
-      where id = ${wholeFamilyDeleteFamilyId}
+      insert into public.account_deletion_jobs (id, family_id, status)
+      values (
+        ${wholeFamilyDeleteJobId},
+        ${wholeFamilyDeleteFamilyId},
+        'running'
+      )
     `;
+    await sql`
+      insert into public.account_deletion_artifact_tombstones (
+        family_id,
+        deletion_job_id
+      )
+      values (${wholeFamilyDeleteFamilyId}, ${wholeFamilyDeleteJobId})
+    `;
+    await sql.begin(async (tx) => {
+      await tx`
+        select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+      `;
+      await tx`
+        update public.families
+        set status = 'deleted'
+        where id = ${wholeFamilyDeleteFamilyId}
+      `;
+      await tx`
+        delete from public.families
+        where id = ${wholeFamilyDeleteFamilyId}
+      `;
+    });
     const [wholeFamilyDeleted] = await sql<
       { families: number; events: number }[]
     >`

@@ -258,6 +258,66 @@ test("raw call transcripts require an explicit anonymous read denial", () => {
   assert.doesNotMatch(source, /expectEmptyRead\("call_transcripts"\)/u);
 });
 
+test("account deletion artifact ledgers stay server-only and covered", () => {
+  const isolation = readFileSync(
+    path.join(repoRoot, "scripts/isolation-check.mjs"),
+    "utf8",
+  );
+  const migrations = new Map([
+    [
+      "account_deletion_artifact_tombstones",
+      readFileSync(
+        path.join(
+          repoRoot,
+          "supabase/migrations/20260808171500_account_deletion_avatar_cleanup.sql",
+        ),
+        "utf8",
+      ),
+    ],
+    [
+      "family_artifact_prefixes",
+      readFileSync(
+        path.join(
+          repoRoot,
+          "supabase/migrations/20260808183000_folded_family_artifact_prefixes.sql",
+        ),
+        "utf8",
+      ),
+    ],
+    [
+      "family_artifact_prefix_candidates",
+      readFileSync(
+        path.join(
+          repoRoot,
+          "supabase/migrations/20260808183000_folded_family_artifact_prefixes.sql",
+        ),
+        "utf8",
+      ),
+    ],
+  ]);
+
+  for (const [table, migration] of migrations) {
+    assert.match(
+      migration,
+      new RegExp(
+        `alter table public\\.${table} enable row level security`,
+        "u",
+      ),
+    );
+    assert.match(
+      migration,
+      new RegExp(
+        `revoke all on table public\\.${table}\\s+from public, anon, authenticated`,
+        "u",
+      ),
+    );
+    assert.match(
+      isolation,
+      new RegExp(`expectReadDenied\\("${table}"\\)`, "u"),
+    );
+  }
+});
+
 test("reserved fixture retirement is manual, bounded, and soft-only", () => {
   const source = readFileSync(
     path.join(repoRoot, "scripts/retire-reserved-live-fixtures.mts"),
