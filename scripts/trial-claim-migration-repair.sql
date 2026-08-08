@@ -18,7 +18,7 @@ select
     where version = '20260805200000'
   );
 
-create function pg_temp.assert_trial_claim_table(required boolean)
+create or replace function pg_temp.assert_trial_claim_table(required boolean)
 returns void
 language plpgsql
 as $assert$
@@ -233,6 +233,8 @@ begin
   end if;
 end
 $ledger_check$;
+
+drop function pg_temp.assert_trial_claim_table(boolean);
 
 select 'ISSUE_873_REPAIR=' || case
   when table_existed and ledger_existed then 'verified_noop'
