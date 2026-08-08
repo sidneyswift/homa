@@ -151,13 +151,24 @@ function readyDeployment() {
     aliasAssigned: true,
     alias: ["thankshoma.com"],
     plan: "pro",
-    config: { fluid: true, functionTimeout: 300 },
+    config: {
+      functionType: "fluid",
+      isUsingActiveCPU: true,
+      functionTimeout: 300,
+    },
     gitSource: {
       type: "github",
+      repoId: 1241075954,
       sha,
       ref: "main",
+    },
+    gitRepo: {
+      type: "github",
+      repoId: 1241075954,
       org: "sidneyswift",
       repo: "homa",
+      path: "sidneyswift/homa",
+      defaultBranch: "main",
     },
     meta: { githubCommitSha: sha },
   };
@@ -237,7 +248,7 @@ test("release seal workflow contract rejects weakened exact-head attestations", 
   assert.match(ISSUE_606_RELEASE_SEAL_SIGNER_PUBLIC_KEY, /^ssh-rsa /u);
   assert.equal(
     ISSUE_606_RELEASE_SEAL_SIGNER_FINGERPRINT,
-    "SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c"
+    "SHA256:OhlRKNYiqh/Yq8CS/mbQJmUnzLKYFyKBh2jznTelsAY"
   );
 
   const adversarialMutations = [
@@ -283,7 +294,7 @@ test("release seal workflow contract rejects weakened exact-head attestations", 
     ],
     [
       "bad fingerprint",
-      "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:nUBBILowMQufL41OjenQM1AQMLwqzOq0Rm9KmMUkl3c",
+      "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:OhlRKNYiqh/Yq8CS/mbQJmUnzLKYFyKBh2jznTelsAY",
       "RELEASE_SEAL_SIGNER_FINGERPRINT: SHA256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     ],
     [
@@ -371,9 +382,23 @@ test("Vercel contract accepts only the exact promoted Homa main deployment", () 
     { target: "staging" },
     { alias: ["preview.example"] },
     { plan: "enterprise" },
-    { config: { fluid: false, functionTimeout: 300 } },
-    { config: { fluid: true, functionTimeout: 301 } },
+    { config: { fluid: true, functionTimeout: 300 } },
+    { config: { functionType: "standard", isUsingActiveCPU: true, functionTimeout: 300 } },
+    { config: { functionType: "fluid", functionTimeout: 300 } },
+    { config: { functionType: "fluid", isUsingActiveCPU: false, functionTimeout: 300 } },
+    { config: { functionType: "fluid", isUsingActiveCPU: true, functionTimeout: 301 } },
+    { gitSource: { ...fixture.gitSource, type: "gitlab" } },
+    { gitSource: { ...fixture.gitSource, repoId: 1 } },
+    { gitSource: { ...fixture.gitSource, repoId: "1241075954" } },
     { gitSource: { ...fixture.gitSource, sha: "b".repeat(40) } },
+    { gitRepo: null },
+    { gitRepo: { ...fixture.gitRepo, type: "gitlab" } },
+    { gitRepo: { ...fixture.gitRepo, repoId: 1 } },
+    { gitRepo: { ...fixture.gitRepo, repoId: "1241075954" } },
+    { gitRepo: { ...fixture.gitRepo, org: "other" } },
+    { gitRepo: { ...fixture.gitRepo, repo: "other" } },
+    { gitRepo: { ...fixture.gitRepo, path: "other/homa" } },
+    { gitRepo: { ...fixture.gitRepo, defaultBranch: "develop" } },
   ]) {
     assert.throws(() =>
       validateIssue606VercelDeployment({

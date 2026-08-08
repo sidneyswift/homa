@@ -23,6 +23,15 @@ test("the age FAQ states both the report range and the current practice-page lim
   assert.match(answer, /practice pages currently cover ages 2 to 7/i);
 });
 
+test("the curriculum FAQ explains the available chat setup without selling Plus", () => {
+  const answer = FAQ_ITEMS.find(([question]) => question === "Can I use my own curriculum?")?.[1];
+
+  assert.ok(answer);
+  assert.match(answer, /Tell Homa in chat/u);
+  assert.match(answer, /which curriculum and lessons you use/u);
+  assert.doesNotMatch(answer, /Homa Plus|upload/iu);
+});
+
 test("the privacy FAQ gives a plain use, sale, and deletion boundary", () => {
   const answer = FAQ_ITEMS.find(([question]) => question === "How does Homa use my family's information?")?.[1];
 

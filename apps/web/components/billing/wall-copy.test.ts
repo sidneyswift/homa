@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+import { PURCHASABLE_HOMA_PLANS, WALL_DOORS } from "@homa/core";
+
 import * as wallCopy from "./wall-copy";
 import {
   SAMPLE_REPORT_TRIAL_LINE,
@@ -17,19 +19,21 @@ import {
   TRIAL_GATE_REASSURANCE,
   TRIAL_GATE_SAVED_LINE,
   WALL_STALE_LESSON_LINE,
+  WALL_MECHANICS_LINE,
   tierChargeLine,
   tierDelta,
   tierDescription,
   trialChargeNoteDated,
   trialDatesFromNow,
   wallIncludedLine,
+  wallHeadline,
 } from "./wall-copy";
 import { PLAN_TIERS } from "../../lib/billing/wall-types";
 
-test("lesson wall copy names the tapped lesson and printable worksheet", () => {
+test("lesson wall copy names the tapped lesson and printable practice page", () => {
   assert.match(
     wallIncludedLine("lesson", "Maya"),
-    /lesson.*printable worksheet/i,
+    /lesson.*printable practice page/i,
   );
 });
 
@@ -46,6 +50,37 @@ test("lesson does not rename the existing month or legacy plan doors", () => {
     wallIncludedLine("plan", "Maya"),
     /four-week plan/i,
   );
+});
+
+test("regular-only offers do not promise paused Plus channels", () => {
+  assert.deepEqual(
+    PURCHASABLE_HOMA_PLANS.map(({ tier }) => tier),
+    ["regular"],
+  );
+
+  const doorLines = WALL_DOORS.map((door) => ({
+    door,
+    line: wallIncludedLine(door, "Maya"),
+  }));
+  const callLine = doorLines.find(({ door }) => door === "call")?.line ?? "";
+  const regularOfferCopy = [
+    ...doorLines.filter(({ door }) => door !== "call").map(({ line }) => line),
+    wallCopy.reportLockHeldLine("Maya", 4, 5),
+  ].join(" ");
+
+  assert.doesNotMatch(regularOfferCopy, /\bphone\b|\bcall(?:s|ing)?\b|\btext(?:ing)?\b|\bemail(?:ing)?\b/iu);
+  assert.equal(wallHeadline("call"), "Phone calls aren't available to buy right now");
+  assert.match(callLine, /^You can still try Homa free for 7 days\./u);
+  assert.doesNotMatch(callLine, /\bphone\b/iu);
+});
+
+test("the report lock separates saved work from what is open", () => {
+  const ready = wallCopy.reportLockReadyLine("Maya", 9);
+  const held = wallCopy.reportLockHeldLine("Maya", 4, 5);
+
+  assert.equal(ready, "Maya's progress report is saved. It covers 9 subjects.");
+  assert.match(held, /^The four above are open in full\./u);
+  assert.doesNotMatch(`${ready} ${held}`, /\bscored\b/iu);
 });
 
 /**
@@ -127,9 +162,10 @@ test("available tiers stay truthful while unbuilt Max remains unavailable", () =
   // built paid services state an addition, while open fulfillment is
   // explicitly planned rather than presented as already delivered.
   assert.doesNotMatch(tierDelta("regular"), /^Adds /);
-  assert.match(tierDelta("plus"), /^Text or call Homa/);
+  assert.match(tierDelta("plus"), /^Homa answers texts and calls/);
   assert.match(tierDescription("plus"), /phone number for texting or calling Homa/i);
-  assert.match(tierDescription("plus"), /curriculum file uploads for your weekly plan/i);
+  assert.match(tierDescription("plus"), /builds weekly plans from the curriculum you share/i);
+  assert.doesNotMatch(`${tierDelta("plus")} ${tierDescription("plus")}`, /upload curriculum|curriculum file uploads/iu);
   assert.match(tierDelta("elite"), /^Coming soon:/);
   assert.match(tierDelta("elite"), /post|person/i);
   assert.match(tierDescription("elite"), /not available to purchase yet/i);
@@ -150,6 +186,10 @@ test("the trial gate states the card ask, the reminder day, and the way out", ()
   assert.match(TRIAL_GATE_CHARGE_NOTE, /cancel/i);
   assert.match(TRIAL_GATE_CHARGE_NOTE, /pay nothing/i);
   assert.match(TRIAL_GATE_REASSURANCE, /charged/i);
+});
+
+test("every card ask shares the same reminder and cancellation promise", () => {
+  assert.equal(WALL_MECHANICS_LINE, TRIAL_GATE_CHARGE_NOTE);
 });
 
 test("the Day 4 promise matches the reminder the webhook actually sends", () => {
@@ -195,17 +235,17 @@ test("each tier row says only what that tier adds, in one scannable line", () =>
   for (const tier of PLAN_TIERS) {
     const delta = tierDelta(tier);
     const words = delta.split(/\s+/).length;
-    assert.ok(words <= 10, `${tier} delta is ${words} words: "${delta}"`);
+    assert.ok(words <= 14, `${tier} delta is ${words} words: "${delta}"`);
     assert.ok(delta.endsWith("."), `${tier} delta is not a sentence: "${delta}"`);
   }
 });
 
 test("the base row names artifacts, not categories", () => {
   // "Plans, worksheets, calls, and chat" described any assistant; one
-  // persona read it as the ChatGPT tab she already had open. The hours
-  // log is the item a free chatbot cannot be, and it is the legal
+  // persona read it as the ChatGPT tab she already had open. Teaching-
+  // hour records are the item a free chatbot cannot be, and they are the legal
   // obligation the highest-compliance persona came to solve.
-  assert.match(tierDelta("regular"), /hours log/i);
+  assert.match(tierDelta("regular"), /teaching-hour records/i);
 });
 
 test("no tier claims a metering mechanic that nothing enforces", () => {

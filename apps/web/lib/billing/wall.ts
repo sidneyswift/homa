@@ -578,8 +578,8 @@ export interface FamilyPlanState {
   tier: PlanTier;
   /** The active purchase rail, when the canonical ledger is available. */
   billingProvider: BillingProvider | null;
-  /** Checkout for the tier that adds Homa reaching her, or null when
-   *  the Plus payment links are not configured in this environment. */
+  /** Legacy Plus checkout metadata for existing account flows. New offer
+   *  visibility comes only from the purchasable-plan catalog. */
   plusCheckout: TierCheckout | null;
   /** True once she has a Stripe customer, which is what the portal needs. */
   hasBillingRelationship: boolean;
@@ -594,11 +594,9 @@ export interface FamilyPlanState {
  * door: a parent looking at her own account should see which plan she is
  * on whether or not anything is currently being withheld.
  *
- * This exists because the channel gate's denial line tells her she can
- * add Homa Plus "in your settings", and until now settings had no plan
- * anything: the only billing control was a portal link shown to families
- * with a Stripe customer, which is 1 of 82 (gh#412). Telling a parent to
- * go somewhere that has nothing for her is worse than saying no.
+ * This lets settings show the recorded plan and payment-management path
+ * without reusing wall-admission logic. Existing Plus stays recognizable;
+ * new offer visibility comes only from the purchasable-plan catalog.
  */
 export async function familyPlanState(familyId: string): Promise<FamilyPlanState> {
   const sql = mapDb();

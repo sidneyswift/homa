@@ -165,16 +165,22 @@ export async function familyHasChannel(familyId: string | null): Promise<boolean
  *
  * Copy laws for this line, all of them the reason it is worded exactly
  * this way (rulebook: .agents/skills/homa-copy-writer/SKILL.md).
- * Reassure before inform, so it opens with the thing that is still
- * true rather than with the refusal. Offers, never commands: it names
- * where the door is and does not tell her to walk through it. No
- * apology, because nothing broke. And it never says "upgrade", which
- * is our word for our pricing, not hers.
+ * Name the unavailable action first, then give the concrete web path.
+ * No apology, because nothing broke. And never promise an upgrade while
+ * Plus is unavailable for a new purchase.
  */
 export const CHANNEL_GATE_SMS_LINE =
-  "Everything is waiting for you on the web, and texting with Homa is part of Homa Plus. You can add it whenever you like, in your settings.";
+  "Texting with Homa isn't available on your plan. You can keep going with Homa in your phone's browser.";
+
+/** Email needs its own words and a direct web action. Reusing the SMS
+ *  sentence here tells a parent who emailed Homa that she texted, then
+ *  makes the real plan boundary look like a broken inbox. */
+export const CHANNEL_GATE_EMAIL_SUBJECT = "Keep going with Homa on the web";
+
+export const CHANNEL_GATE_EMAIL_LINE =
+  "Emailing Homa isn't available on your plan. Your conversation can keep going with Homa on the web.";
 
 /** The same fact for a caller, shortened: she is holding a phone to her
  *  ear and cannot re-read a sentence. */
 export const CHANNEL_GATE_VOICE_LINE =
-  "Calling Homa is part of Homa Plus. Everything is waiting for you on the web, and you can add calls in your settings whenever you like.";
+  "Calling Homa isn't available on your plan. You can keep going with Homa in your phone's browser.";

@@ -13,7 +13,7 @@
         "selector": "email",
         "surfaceCount": 16,
         "surfaceIdsFingerprint": "c03430691117eaf8004c6104aceb718714f6c89f33ff40b66aabbe8a22cd58e1",
-        "scopedInputFingerprint": "56e10bb07031267a6f608ecfd79b978f978e2d1d37de7eb36c9c52acdca384cb"
+        "scopedInputFingerprint": "21ea7c0b0603c9ec0ed7725b90d64854a956e3dabd12caeda8e08605f3814d32"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/email.json",
       "fixtureChecksum": "6efc3722530e61905087bcf6f788c632522930ecd032ef7d056726853186bb4e",
@@ -119,7 +119,7 @@
         "selector": "parent-pdf",
         "surfaceCount": 81,
         "surfaceIdsFingerprint": "3a9bbdd4cc5cdb40d39dba0f4857c29bddb7beb8460cfc0ccd87310ba970305b",
-        "scopedInputFingerprint": "8db3aafdddb7008a44ce0f6d84968642b60d3bf8339dc3876fe297a399fbe3ae"
+        "scopedInputFingerprint": "050829a92f34acd9630f6d39f4a2a95aedd6431d40e60ee16d49232246995cf2"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/parent-pdf.json",
       "fixtureChecksum": "ab26dc0e9cdca23930a5502d0512042c870271890f992a87827d3df218153314",
@@ -215,7 +215,7 @@
         "selector": "physical-print",
         "surfaceCount": 81,
         "surfaceIdsFingerprint": "95578f0a7e30611462b3279095ee91a68b47d37166e7d9a03968f91f1c1b5914",
-        "scopedInputFingerprint": "8d52daa4f7ce6a815302f89abf4915f674bc8f95235e05e95efe4ea203d538f9"
+        "scopedInputFingerprint": "8bd045a47cc6d52a3e4312a9797deca69c336193c4a3756ec8c419437e0a761b"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/physical-print.json",
       "fixtureChecksum": "53d9f100310e6668b99ba2b43775e904a7cb2618fff4acc729c0814cd9327795",
@@ -291,7 +291,7 @@
         "selector": "provider",
         "surfaceCount": 23,
         "surfaceIdsFingerprint": "4573a1c94a5ca79e918530a93665c4d3012bd5de1b3c3b895648ea223f9ada8a",
-        "scopedInputFingerprint": "d515589abf7b0ba06dcf018c481f94edd94a136435afb021fc55042ad61e15ef"
+        "scopedInputFingerprint": "7d0bfbef832a41e2f370c9af882322b86d51168382005ff44276d50262843620"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/provider.json",
       "fixtureChecksum": "61c76f13a8a058f145b811b43cb16322871313915fd090bfe4588044adc21a83",
