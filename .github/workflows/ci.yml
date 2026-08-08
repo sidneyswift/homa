@@ -68,7 +68,7 @@ jobs:
       - name: Supabase migration versions are unique
         run: node scripts/migration-version-check.mjs && node --test scripts/migration-version-check.test.mjs
 
-      - name: Repository cleanup guardrails (110 focused tests)
+      - name: Repository cleanup guardrails (113 focused tests)
         run: node --test scripts/git-safety-hook.test.mjs scripts/remove-worktree-safely.test.mjs scripts/retire-damaged-worktree-registrations.test.mjs
 
       - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
@@ -590,6 +590,9 @@ jobs:
           sudo apt-get install --yes postgresql-16 postgresql-16-pgvector
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
+      - name: Trial claim repair survives a reused PostgreSQL session
+        run: pnpm test:trial-claim-repair:postgres
+
       - name: Morning research brief format
         run: pnpm check:research-brief
 
@@ -633,6 +636,10 @@ jobs:
       - name: Issue 878 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:issue-878-production-repair:postgres
+
+      - name: Issue 888 production repair disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:issue-888-production-repair:postgres
 
       - name: Issue 887 production repair disposable PostgreSQL E2E
         timeout-minutes: 10

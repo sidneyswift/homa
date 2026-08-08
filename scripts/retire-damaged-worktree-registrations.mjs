@@ -44,11 +44,19 @@ const ACTIVE_TASK_STATES = new Set(["active", "idle", "in_progress", "needs_inpu
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 const WORKTREE_RECORD_KEYS = new Set(["worktree", "HEAD", "branch", "bare", "detached", "locked", "prunable"]);
 const ADMINISTRATIVE_RECORD_ALLOWLIST = new Map([
+  ["AUTO_MERGE", "file"],
+  ["CLAUDE_BASE", "file"],
+  ["COMMIT_EDITMSG", "file"],
+  ["FETCH_HEAD", "file"],
   ["HEAD", "file"],
   ["ORIG_HEAD", "file"],
+  ["REBASE_HEAD", "file"],
   ["commondir", "file"],
   ["config.worktree", "file"],
+  ["gc.log", "file"],
   ["gitdir", "file"],
+  ["hooks", "directory"],
+  ["hooks/post-commit", "file"],
   ["index", "file"],
   ["locked", "file"],
   ["logs", "directory"],
@@ -1329,16 +1337,72 @@ function inspectGithubIssue(repository, issueNumber, handoffUrl) {
   return { issue, handoffComment };
 }
 
-function validateIssue(repository, registration, evidenceIssue) {
+function inspectGithubPullRequest(repository, pullRequestNumber) {
+  const repositoryName = new URL(`${repository.origin}/`).pathname.replace(/^\//u, "").replace(/\/$/u, "");
+  return parseCommandJson(
+    checked("gh", [
+      "pr",
+      "view",
+      String(pullRequestNumber),
+      "--repo",
+      repositoryName,
+      "--json",
+      "number,state,url",
+    ]),
+    `GitHub pull request ${pullRequestNumber}`,
+  );
+}
+
+function validateBranchIssueNumber(repository, registration, evidenceIssue, context) {
+  const inferred = branchIssueNumber(registration);
+  const override = evidenceIssue.branchNumberOverride;
+  if (inferred === null) {
+    if (override !== undefined) block(`Registration ${registration.path} cannot override a missing branch number.`);
+    return;
+  }
+  if (evidenceIssue.number === inferred) {
+    if (override !== undefined) {
+      block(`Registration ${registration.path} cannot override a branch number that already matches its issue.`);
+    }
+    return;
+  }
+  if (!override || typeof override !== "object" || Array.isArray(override)) {
+    block(
+      `Branch issue for ${registration.path} changed. Expected ${inferred}, found ${evidenceIssue.number}. ` +
+        "A reviewed branchNumberOverride is required.",
+    );
+  }
+  assertEqual(override.inferredNumber, inferred, `Branch-number override source for ${registration.path}`);
+  assertEqual(override.kind, "pull-request", `Branch-number override kind for ${registration.path}`);
+  assertEqual(override.approvedBy, APPROVER, `Branch-number override approver for ${registration.path}`);
+  requiredString(override.reason, `Branch-number override reason for ${registration.path}`);
+  const approvedAt = parsedTime(override.approvedAt, `Branch-number override approvedAt for ${registration.path}`);
+  if (approvedAt < context.capturedAt || approvedAt > context.now) {
+    block(`Branch-number override for ${registration.path} predates the scan or is future-dated.`);
+  }
+  assertEqual(override.scanNonce, context.scanNonce, `Branch-number override scan nonce for ${registration.path}`);
+  const pullRequest = inspectGithubPullRequest(repository, inferred);
+  assertEqual(pullRequest.number, inferred, `Branch-number pull request for ${registration.path}`);
+  assertEqual(pullRequest.url, override.url, `Branch-number pull request URL for ${registration.path}`);
+  if (!new Set(["CLOSED", "MERGED"]).has(pullRequest.state)) {
+    block(`Branch-number pull request for ${registration.path} is ${pullRequest.state}, not completed.`);
+  }
+}
+
+function validateIssue(repository, registration, evidenceIssue, context) {
   if (!evidenceIssue || typeof evidenceIssue !== "object" || Array.isArray(evidenceIssue)) {
     block(`Registration ${registration.path} needs issue evidence.`);
   }
-  const inferred = branchIssueNumber(registration);
-  if (inferred !== null) assertEqual(evidenceIssue.number, inferred, `Branch issue for ${registration.path}`);
+  validateBranchIssueNumber(repository, registration, evidenceIssue, context);
   const current = inspectGithubIssue(repository, evidenceIssue.number, evidenceIssue.handoffUrl);
   assertEqual(current.issue.number, evidenceIssue.number, `GitHub issue number for ${registration.path}`);
   assertEqual(current.issue.state, evidenceIssue.state, `GitHub issue state for ${registration.path}`);
   assertEqual(current.issue.url, evidenceIssue.url, `GitHub issue URL for ${registration.path}`);
+  assertEqual(
+    current.issue.url,
+    `${repository.origin}/issues/${evidenceIssue.number}`,
+    `Canonical GitHub issue URL for ${registration.path}`,
+  );
   if (current.issue.state === "CLOSED") {
     assertEqual(evidenceIssue.disposition, "closed", `Closed issue disposition for ${registration.path}`);
   } else if (current.issue.state === "OPEN") {
@@ -1757,10 +1821,19 @@ function validateEvidence(repository, state, evidence, now = Date.now()) {
   for (const registration of state.candidates) {
     const approved = evidenceByPath.get(registration.path);
     validateRecovery(repository, registration, approved.recovery);
-    validateIssue(repository, registration, {
-      ...approved.issue,
-      recoveryReference: approved.recovery.reference ?? approved.recovery.artifactPath,
-    });
+    validateIssue(
+      repository,
+      registration,
+      {
+        ...approved.issue,
+        recoveryReference: approved.recovery.reference ?? approved.recovery.artifactPath,
+      },
+      {
+        capturedAt,
+        now,
+        scanNonce: evidence.scan.nonce,
+      },
+    );
   }
   assertDryRunExact(repository, state.candidates, evidence.pruneCutoff);
   return {

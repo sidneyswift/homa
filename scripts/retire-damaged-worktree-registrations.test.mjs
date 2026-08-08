@@ -113,7 +113,18 @@ if (args[0] === "issue" && args[1] === "view") {
   process.stdout.write(JSON.stringify({
     number,
     state: "CLOSED",
-    url: "https://github.com/sidneyswift/homa/issues/" + number
+    url: process.env.FAKE_GH_ISSUE_AS_PR === String(number)
+      ? "https://github.com/sidneyswift/homa/pull/" + number
+      : "https://github.com/sidneyswift/homa/issues/" + number
+  }));
+  process.exit(0);
+}
+if (args[0] === "pr" && args[1] === "view") {
+  const number = Number(args[2]);
+  process.stdout.write(JSON.stringify({
+    number,
+    state: process.env.FAKE_GH_PR_STATE || "CLOSED",
+    url: "https://github.com/sidneyswift/homa/pull/" + number
   }));
   process.exit(0);
 }
@@ -295,14 +306,41 @@ function captureEvidence(fixture) {
   return evidence;
 }
 
-function assess(fixture, confirmations = []) {
+function assess(fixture, confirmations = [], environment = {}) {
   return runGuard(fixture, [
     "--evidence",
     fixture.evidencePath,
     "--task-snapshot",
     fixture.taskSnapshotPath,
     ...tasklessArgs(confirmations),
-  ]);
+  ], environment);
+}
+
+function approveBranchNumberOverride(fixture, evidence, overrides = {}) {
+  const registration = evidence.registrations[0];
+  const inferredNumber = 900;
+  const issueNumber = 901;
+  registration.issue = {
+    number: issueNumber,
+    state: "CLOSED",
+    url: `https://github.com/sidneyswift/homa/issues/${issueNumber}`,
+    disposition: "closed",
+    branchNumberOverride: {
+      inferredNumber,
+      kind: "pull-request",
+      url: `https://github.com/sidneyswift/homa/pull/${inferredNumber}`,
+      approvedBy: "sidneyswift",
+      approvedAt: new Date().toISOString(),
+      reason: "The branch number identifies the historical pull request, while issue 901 owns the lane.",
+      scanNonce: evidence.scan.nonce,
+      ...overrides,
+    },
+  };
+  fixture.taskSnapshot.tasks[0].handoff.issue = `#${issueNumber}`;
+  fixture.taskSnapshot.capturedAt = new Date().toISOString();
+  writeEvidence(fixture, evidence);
+  writeTaskSnapshot(fixture);
+  return registration;
 }
 
 function runAfterReady(command, args, options, snapshotFactory) {
@@ -435,6 +473,94 @@ test("generator writes private schema-v2 evidence and a concrete review queue", 
   assert.match(collision.stderr, /must be different/iu);
 });
 
+test("a reviewed branch-number pull request can differ from the owning issue", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("a branch issue mismatch without a reviewed override blocks the batch", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  const registration = evidence.registrations[0];
+  registration.issue = {
+    number: 901,
+    state: "CLOSED",
+    url: "https://github.com/sidneyswift/homa/issues/901",
+    disposition: "closed",
+  };
+  writeEvidence(fixture, evidence);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /reviewed branchNumberOverride is required/iu);
+});
+
+test("a branch-number override must stay bound to the exact scan", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence, { scanNonce: "0".repeat(64) });
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /branch-number override scan nonce/iu);
+});
+
+test("a branch-number override must identify the exact live pull request", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence, {
+    url: "https://github.com/sidneyswift/homa/pull/999",
+  });
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /branch-number pull request URL/iu);
+});
+
+test("an open branch-number pull request cannot authorize cleanup", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence);
+
+  const result = assess(fixture, [], { FAKE_GH_PR_STATE: "OPEN" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /branch-number pull request.*not completed/iu);
+});
+
+test("a pull request cannot masquerade as the separate owning issue", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  evidence.registrations[0].issue.url = "https://github.com/sidneyswift/homa/pull/900";
+  writeEvidence(fixture, evidence);
+
+  const result = assess(fixture, [], { FAKE_GH_ISSUE_AS_PR: "900" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /canonical GitHub issue URL/iu);
+});
+
+test("a matching branch issue cannot carry an unnecessary override", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  evidence.registrations[0].issue.branchNumberOverride = {
+    inferredNumber: 900,
+    kind: "pull-request",
+    url: "https://github.com/sidneyswift/homa/pull/900",
+    approvedBy: "sidneyswift",
+    approvedAt: new Date().toISOString(),
+    reason: "This override is intentionally unnecessary.",
+    scanNonce: evidence.scan.nonce,
+  };
+  writeEvidence(fixture, evidence);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /cannot override a branch number that already matches/iu);
+});
+
 test("an unexpected administrative file blocks the complete retirement inventory", (t) => {
   const fixture = withFixture(t);
   const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
@@ -442,6 +568,90 @@ test("an unexpected administrative file blocks the complete retirement inventory
   const result = runGuard(fixture, ["--inventory"]);
   assert.equal(result.status, 2);
   assert.match(result.stderr, /unexpected path.*unreviewed-state.*extend the allowlist/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("an unreviewed hook path blocks the complete retirement inventory", (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  mkdirSync(join(adminDir, "hooks"));
+  writeFileSync(join(adminDir, "hooks", "pre-commit"), "#!/bin/sh\nexit 1\n");
+
+  const result = runGuard(fixture, ["--inventory"]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /unexpected path.*hooks\/pre-commit.*extend the allowlist/iu);
+  assert.equal(existsSync(fixture.registrations[0].target), true);
+});
+
+test("reviewed administrative files are fingerprinted and preserved as inert private evidence", async (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  const head = git(fixture.primary, ["rev-parse", "HEAD"]);
+  const tree = git(fixture.primary, ["rev-parse", "HEAD^{tree}"]);
+  const reviewedFiles = new Map([
+    ["AUTO_MERGE", `${tree}\n`],
+    ["CLAUDE_BASE", head],
+    ["COMMIT_EDITMSG", "reviewed worktree state\n"],
+    ["FETCH_HEAD", `${head}\t\tbranch 'main' of example.test\n`],
+    ["REBASE_HEAD", `${head}\n`],
+    ["gc.log", "automatic cleanup deferred\n"],
+    ["hooks/post-commit", "#!/bin/sh\nexit 99\n"],
+  ]);
+  mkdirSync(join(adminDir, "hooks"));
+  for (const [relativePath, content] of reviewedFiles) {
+    writeFileSync(join(adminDir, relativePath), content);
+  }
+  chmodSync(join(adminDir, "hooks", "post-commit"), 0o755);
+  const oldAdministrativeTime = new Date(Date.now() - 10_000);
+  for (const relativePath of reviewedFiles.keys()) {
+    utimesSync(join(adminDir, relativePath), oldAdministrativeTime, oldAdministrativeTime);
+  }
+  utimesSync(join(adminDir, "hooks"), oldAdministrativeTime, oldAdministrativeTime);
+  utimesSync(adminDir, oldAdministrativeTime, oldAdministrativeTime);
+
+  const evidence = captureEvidence(fixture);
+  const registration = evidence.registrations[0];
+  for (const [relativePath, content] of reviewedFiles) {
+    const entry = registration.administrativeInventory.entries.find((candidate) => candidate.path === relativePath);
+    assert.equal(entry?.kind, "file");
+    assert.equal(entry?.sizeBytes, String(Buffer.byteLength(content)));
+    assert.equal(entry?.sha256, createHash("sha256").update(content).digest("hex"));
+  }
+  assert.equal(
+    registration.administrativeInventory.entries.some(
+      (entry) => entry.path === "hooks" && entry.kind === "directory",
+    ),
+    true,
+  );
+
+  const inspection = assess(fixture);
+  assert.equal(inspection.status, 0, inspection.stderr);
+  const assessment = JSON.parse(inspection.stdout);
+  const result = await execute(fixture, assessment.confirmation);
+  assert.equal(result.status, 0, result.stderr);
+  const report = JSON.parse(result.stdout);
+  const backupPath = report.registrations[0].administrativeBackup.backupPath;
+  for (const [relativePath, content] of reviewedFiles) {
+    assert.equal(readFileSync(join(backupPath, relativePath), "utf8"), content);
+    assert.equal(lstatSync(join(backupPath, relativePath)).mode & 0o777, 0o600);
+  }
+  assert.equal(lstatSync(join(backupPath, "hooks")).mode & 0o777, 0o700);
+});
+
+test("a reviewed administrative file changed after capture blocks the batch", (t) => {
+  const fixture = withFixture(t);
+  const adminDir = administrativeDirectoryForTarget(fixture, fixture.registrations[0].target);
+  const fetchHead = join(adminDir, "FETCH_HEAD");
+  writeFileSync(fetchHead, `${git(fixture.primary, ["rev-parse", "HEAD"])}\t\tinitial\n`);
+  const oldAdministrativeTime = new Date(Date.now() - 10_000);
+  utimesSync(fetchHead, oldAdministrativeTime, oldAdministrativeTime);
+  utimesSync(adminDir, oldAdministrativeTime, oldAdministrativeTime);
+  captureEvidence(fixture);
+  writeFileSync(fetchHead, `${git(fixture.primary, ["rev-parse", "HEAD"])}\t\tchanged\n`);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /exact approved prunable set|changed/iu);
   assert.equal(existsSync(fixture.registrations[0].target), true);
 });
 

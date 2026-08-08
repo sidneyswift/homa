@@ -393,10 +393,13 @@ directory manifest; full HEAD and tree; branch or detached state; an explicit
 allowlisted inventory and content fingerprint for every administrative file; a
 random scan nonce; the complete set digest; and a fixed prune cutoff two seconds
 older than capture. The required administrative files are `gitdir`, `HEAD`,
-`commondir`, and `index`. The only optional paths currently accepted are `ORIG_HEAD`,
-`config.worktree`, `locked`, `logs/HEAD`, and an empty `refs` directory. Any other
-path blocks the batch for review. Git's verbose dry run must name exactly that
-administrative set.
+`commondir`, and `index`. The optional paths accepted after explicit review are
+`AUTO_MERGE`, `CLAUDE_BASE`, `COMMIT_EDITMSG`, `FETCH_HEAD`, `ORIG_HEAD`,
+`REBASE_HEAD`, `config.worktree`, `gc.log`, `locked`, `logs/HEAD`, an empty `refs`
+directory, and the exact `hooks/post-commit` path. The guard fingerprints every
+accepted file, preserves its bytes in the private administrative backup, and copies
+files as mode `0600` so a preserved hook cannot execute. Any other path blocks the
+batch for review. Git's verbose dry run must name exactly that administrative set.
 
 The guard compares each prunable administrative index with its recorded HEAD without
 refreshing or rewriting the index. If the index differs from HEAD, retirement fails
@@ -409,6 +412,13 @@ can pass:
 - One exact issue. A closed issue records `closed`. An open issue records an
   `updated-open` or `replacement-active` disposition and a verified handoff comment
   containing the old path, branch when present, HEAD, and recovery reference.
+  A `codex/gh-<number>-*` branch normally owns that exact issue. When the embedded
+  number instead identifies a historical pull request, the issue evidence must add
+  a fresh `branchNumberOverride` with the inferred number, exact pull request URL,
+  `kind: "pull-request"`, approver, reason, approval time, and scan nonce. The guard
+  verifies that the pull request is closed or merged and still verifies the separate
+  canonical `/issues/<number>` owning issue and handoff. An open pull request cannot
+  authorize cleanup, and a matching issue cannot carry this override.
 - One recovery proof. Use a retained local branch or `refs/homa/recovery/*` ref at
   the exact HEAD and tree, or an owner-only durable Git bundle. The guard verifies
   the bundle, restores it into a new empty repository with no object alternates,
@@ -510,8 +520,8 @@ reviewed.
 
 ## Repository governance verification manifest
 
-The focused Node 24 gate currently contains 110 TAP tests: 23 command-hook tests,
-50 ordinary worktree tests, and 37 damaged-registration tests. The CI command is the
+The focused Node 24 gate currently contains 120 TAP tests: 23 command-hook tests,
+50 ordinary worktree tests, and 47 damaged-registration tests. The CI command is the
 source of truth and must run all three files together:
 
 ```sh
