@@ -412,6 +412,13 @@ can pass:
 - One exact issue. A closed issue records `closed`. An open issue records an
   `updated-open` or `replacement-active` disposition and a verified handoff comment
   containing the old path, branch when present, HEAD, and recovery reference.
+  A `codex/gh-<number>-*` branch normally owns that exact issue. When the embedded
+  number instead identifies a historical pull request, the issue evidence must add
+  a fresh `branchNumberOverride` with the inferred number, exact pull request URL,
+  `kind: "pull-request"`, approver, reason, approval time, and scan nonce. The guard
+  verifies that the pull request is closed or merged and still verifies the separate
+  canonical `/issues/<number>` owning issue and handoff. An open pull request cannot
+  authorize cleanup, and a matching issue cannot carry this override.
 - One recovery proof. Use a retained local branch or `refs/homa/recovery/*` ref at
   the exact HEAD and tree, or an owner-only durable Git bundle. The guard verifies
   the bundle, restores it into a new empty repository with no object alternates,
@@ -513,8 +520,8 @@ reviewed.
 
 ## Repository governance verification manifest
 
-The focused Node 24 gate currently contains 113 TAP tests: 23 command-hook tests,
-50 ordinary worktree tests, and 40 damaged-registration tests. The CI command is the
+The focused Node 24 gate currently contains 120 TAP tests: 23 command-hook tests,
+50 ordinary worktree tests, and 47 damaged-registration tests. The CI command is the
 source of truth and must run all three files together:
 
 ```sh

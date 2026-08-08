@@ -113,7 +113,18 @@ if (args[0] === "issue" && args[1] === "view") {
   process.stdout.write(JSON.stringify({
     number,
     state: "CLOSED",
-    url: "https://github.com/sidneyswift/homa/issues/" + number
+    url: process.env.FAKE_GH_ISSUE_AS_PR === String(number)
+      ? "https://github.com/sidneyswift/homa/pull/" + number
+      : "https://github.com/sidneyswift/homa/issues/" + number
+  }));
+  process.exit(0);
+}
+if (args[0] === "pr" && args[1] === "view") {
+  const number = Number(args[2]);
+  process.stdout.write(JSON.stringify({
+    number,
+    state: process.env.FAKE_GH_PR_STATE || "CLOSED",
+    url: "https://github.com/sidneyswift/homa/pull/" + number
   }));
   process.exit(0);
 }
@@ -295,14 +306,41 @@ function captureEvidence(fixture) {
   return evidence;
 }
 
-function assess(fixture, confirmations = []) {
+function assess(fixture, confirmations = [], environment = {}) {
   return runGuard(fixture, [
     "--evidence",
     fixture.evidencePath,
     "--task-snapshot",
     fixture.taskSnapshotPath,
     ...tasklessArgs(confirmations),
-  ]);
+  ], environment);
+}
+
+function approveBranchNumberOverride(fixture, evidence, overrides = {}) {
+  const registration = evidence.registrations[0];
+  const inferredNumber = 900;
+  const issueNumber = 901;
+  registration.issue = {
+    number: issueNumber,
+    state: "CLOSED",
+    url: `https://github.com/sidneyswift/homa/issues/${issueNumber}`,
+    disposition: "closed",
+    branchNumberOverride: {
+      inferredNumber,
+      kind: "pull-request",
+      url: `https://github.com/sidneyswift/homa/pull/${inferredNumber}`,
+      approvedBy: "sidneyswift",
+      approvedAt: new Date().toISOString(),
+      reason: "The branch number identifies the historical pull request, while issue 901 owns the lane.",
+      scanNonce: evidence.scan.nonce,
+      ...overrides,
+    },
+  };
+  fixture.taskSnapshot.tasks[0].handoff.issue = `#${issueNumber}`;
+  fixture.taskSnapshot.capturedAt = new Date().toISOString();
+  writeEvidence(fixture, evidence);
+  writeTaskSnapshot(fixture);
+  return registration;
 }
 
 function runAfterReady(command, args, options, snapshotFactory) {
@@ -433,6 +471,94 @@ test("generator writes private schema-v2 evidence and a concrete review queue", 
   const collision = runGuard(fixture, ["--generate", "--evidence-out", evidenceOut, "--review-queue-out", evidenceOut]);
   assert.equal(collision.status, 2);
   assert.match(collision.stderr, /must be different/iu);
+});
+
+test("a reviewed branch-number pull request can differ from the owning issue", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("a branch issue mismatch without a reviewed override blocks the batch", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  const registration = evidence.registrations[0];
+  registration.issue = {
+    number: 901,
+    state: "CLOSED",
+    url: "https://github.com/sidneyswift/homa/issues/901",
+    disposition: "closed",
+  };
+  writeEvidence(fixture, evidence);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /reviewed branchNumberOverride is required/iu);
+});
+
+test("a branch-number override must stay bound to the exact scan", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence, { scanNonce: "0".repeat(64) });
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /branch-number override scan nonce/iu);
+});
+
+test("a branch-number override must identify the exact live pull request", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence, {
+    url: "https://github.com/sidneyswift/homa/pull/999",
+  });
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /branch-number pull request URL/iu);
+});
+
+test("an open branch-number pull request cannot authorize cleanup", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  approveBranchNumberOverride(fixture, evidence);
+
+  const result = assess(fixture, [], { FAKE_GH_PR_STATE: "OPEN" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /branch-number pull request.*not completed/iu);
+});
+
+test("a pull request cannot masquerade as the separate owning issue", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  evidence.registrations[0].issue.url = "https://github.com/sidneyswift/homa/pull/900";
+  writeEvidence(fixture, evidence);
+
+  const result = assess(fixture, [], { FAKE_GH_ISSUE_AS_PR: "900" });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /canonical GitHub issue URL/iu);
+});
+
+test("a matching branch issue cannot carry an unnecessary override", (t) => {
+  const fixture = withFixture(t);
+  const evidence = captureEvidence(fixture);
+  evidence.registrations[0].issue.branchNumberOverride = {
+    inferredNumber: 900,
+    kind: "pull-request",
+    url: "https://github.com/sidneyswift/homa/pull/900",
+    approvedBy: "sidneyswift",
+    approvedAt: new Date().toISOString(),
+    reason: "This override is intentionally unnecessary.",
+    scanNonce: evidence.scan.nonce,
+  };
+  writeEvidence(fixture, evidence);
+
+  const result = assess(fixture);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /cannot override a branch number that already matches/iu);
 });
 
 test("an unexpected administrative file blocks the complete retirement inventory", (t) => {
