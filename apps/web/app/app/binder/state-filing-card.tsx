@@ -13,10 +13,8 @@ import { QuietStatus } from "../../../components/design/QuietStatus";
  * family actually sends their state, as opposed to the pack, which
  * explains what their state asks for.
  *
- * Plus and Elite only (founder ruling 4, 2026-07-29). A regular family
- * sees that it exists and is invited to upgrade, which is why the
- * locked branch renders the same description rather than hiding the
- * feature: the point of the tier is that this is worth paying for.
+ * Plus and Elite only (founder ruling 4, 2026-07-29). The caller keeps
+ * this card out of regular accounts while Plus is unavailable to buy.
  *
  * Like the pack card, this sends no state and no family data. It asks;
  * the server resolves everything from session auth.
@@ -141,16 +139,7 @@ export function StateFilingCard({
             </QuietStatus>
           ) : null}
         </>
-      ) : (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <QuietAction href="/app/settings" icon={<Icon name="next" size={16} />}>
-            See Homa Plus
-          </QuietAction>
-          <span className="text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-            Plus fills your filing in and tells you when it is due.
-          </span>
-        </div>
-      )}
+      ) : null}
 
       {status.kind === "error" ? (
         <QuietStatus tone="error" className="mt-3 text-sm">{status.note}</QuietStatus>

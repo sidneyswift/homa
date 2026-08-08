@@ -274,14 +274,12 @@ function Paywall({
           <Text
             style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}
           >
-            {everTrialed ? "Choose your Homa plan" : "Start your free 7 days"}
+            {everTrialed ? "Continue with Homa" : "Start with Homa"}
           </Text>
           <Text
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
           >
-            {everTrialed
-              ? "Your free days are up. Pick the Homa plan that fits your family."
-              : "Try every Homa surface for 7 days. Pick the plan that fits your family."}
+            Weekly plans, practice pages, progress reports, and teaching-hour records.
           </Text>
 
           {unlockFailed ? (
@@ -352,9 +350,7 @@ function Paywall({
                 label={
                   step === "purchasing" || step === "confirming"
                     ? "One moment…"
-                    : everTrialed
-                      ? `Continue with ${selectedPlan.name}`
-                      : "Start free trial"
+                    : `Subscribe for ${displayPrice} a month`
                 }
                 onPress={() => void handleBuy()}
                 disabled={busy || !familyId}
@@ -362,9 +358,7 @@ function Paywall({
               <Text
                 style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}
               >
-                {everTrialed
-                  ? "Billed through your Apple Account. Cancel anytime in Settings."
-                  : `Then ${displayPrice} a month, billed through your Apple Account. Cancel anytime in Settings.`}
+                Billed monthly through your Apple Account. Cancel in your Apple Account subscription settings.
               </Text>
             </View>
           )}
@@ -376,7 +370,7 @@ function Paywall({
             disabled={busy}
           />
           <Button
-            label="Account settings"
+            label="Open Homa settings"
             variant="ghost"
             onPress={() => router.push("/settings")}
           />

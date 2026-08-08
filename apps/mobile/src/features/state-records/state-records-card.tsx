@@ -203,13 +203,6 @@ export function StateRecordsCard({
                 onPress={() => void make("generate_filing")}
               />
             ) : null}
-            {summary.filing.kind !== "not_required" && !summary.filing.entitled ? (
-              <Button
-                label="See filing upgrade"
-                variant="secondary"
-                onPress={() => router.push("/settings")}
-              />
-            ) : null}
           </View>
 
           <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
