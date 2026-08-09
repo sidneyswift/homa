@@ -2387,10 +2387,20 @@ async function cleanupIsolationFixtures() {
       });
     }
     if (fixtureKnowledgeIds.length > 0) {
-      await sql`
-        delete from public.knowledge_bank
-        where id in ${sql(fixtureKnowledgeIds)}
-      `;
+      await sql.begin(async (transaction) => {
+        await transaction`
+          delete from public.research_brief_preparations
+          where knowledge_bank_id in ${transaction(fixtureKnowledgeIds)}
+        `;
+        await transaction`
+          delete from public.family_knowledge_use
+          where knowledge_bank_id in ${transaction(fixtureKnowledgeIds)}
+        `;
+        await transaction`
+          delete from public.knowledge_bank
+          where id in ${transaction(fixtureKnowledgeIds)}
+        `;
+      });
     }
     if (fixtureUserIds.length > 0) {
       await sql`delete from auth.users where id in ${sql(fixtureUserIds)}`;
