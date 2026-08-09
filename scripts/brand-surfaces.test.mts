@@ -367,7 +367,15 @@ test("published blog sources are independently discovered and classified as publ
 
 test("web route reachability follows the structural proxy boundary", () => {
   const proxySource = readFileSync(resolve(root, "apps/web/proxy.ts"), "utf8");
-  assert.match(proxySource, /path === "\/app" \|\| path\.startsWith\("\/app\/"\)/);
+  const sessionProxySource = readFileSync(
+    resolve(root, "apps/web/lib/supabase/session-proxy.ts"),
+    "utf8",
+  );
+  assert.match(proxySource, /return handleSessionProxy\(request\)/);
+  assert.match(
+    sessionProxySource,
+    /path === "\/app" \|\| path\.startsWith\("\/app\/"\)/,
+  );
 
   const routeFileNames = new Set([
     "apple-icon.tsx",
