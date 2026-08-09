@@ -98,7 +98,22 @@ try {
   );
 } finally {
   if (familyIds.length > 0) {
-    await sql`delete from public.families where id in ${sql(familyIds)}`;
+    await sql.begin(async (transaction) => {
+      await transaction`
+        select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+      `;
+      await transaction`
+        delete from public.agent_schedules
+        where family_id in ${transaction(familyIds)}
+      `;
+      await transaction`
+        update public.families
+        set status = 'deleted', updated_at = now()
+        where id in ${transaction(familyIds)}
+          and sandbox
+          and status <> 'deleted'
+      `;
+    });
   }
   if (userIds.length > 0) {
     await sql`delete from auth.users where id in ${sql(userIds)}`;
