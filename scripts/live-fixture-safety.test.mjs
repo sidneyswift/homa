@@ -155,6 +155,91 @@ test("CI executes the authenticated family sandbox behavior test", () => {
   assert.match(workflow, /pnpm test:live-fixture-sandbox:postgres/u);
 });
 
+test("the live fixture sandbox contract retires its families through the guarded status transition", () => {
+  const source = readFileSync(
+    path.join(repoRoot, "scripts/live-fixture-sandbox-e2e.mts"),
+    "utf8",
+  );
+  const cleanupStart = source.indexOf("} finally {");
+  const modeIndex = source.indexOf("select set_config(", cleanupStart);
+  const statusIndex = source.indexOf("set status = 'deleted'", cleanupStart);
+
+  assert.notEqual(modeIndex, -1, "lacks a guarded retirement mode");
+  assert.notEqual(statusIndex, -1, "lacks its soft retirement");
+  assert.ok(modeIndex < statusIndex, "authorizes retirement after changing family status");
+  assert.match(
+    source.slice(modeIndex, statusIndex),
+    /'homa\.family_delete_mode',\s*'account-deletion-v2',\s*true/u,
+  );
+  assert.match(source.slice(statusIndex), /and sandbox/u);
+  assert.doesNotMatch(source, /delete from public\.families/u);
+});
+
+test("isolation cleanup separates soft retirement from its cascade probe", () => {
+  const source = readFileSync(
+    path.join(repoRoot, "scripts/isolation-check.mjs"),
+    "utf8",
+  );
+  const cleanupStart = source.indexOf("async function cleanupIsolationFixtures");
+  const cascadeStart = source.indexOf("async function expectEventsFamilyDeleteCascade");
+  const authenticatedStart = source.indexOf("async function expectAuthenticatedIsolation");
+  const cleanup = source.slice(cleanupStart, cascadeStart);
+  const cascade = source.slice(cascadeStart, authenticatedStart);
+
+  assert.match(cleanup, /select set_config\(/u);
+  assert.match(cleanup, /set status = 'deleted'/u);
+  assert.match(cleanup, /and sandbox/u);
+  assert.doesNotMatch(cleanup, /delete from public\.families/u);
+
+  const schemaProbe = cascade.indexOf("families_hard_delete_protocol_guard");
+  const jobInsert = cascade.indexOf("insert into public.account_deletion_jobs");
+  const mode = cascade.indexOf("'account-deletion-v2'");
+  const status = cascade.indexOf("set status = 'deleted'");
+  const hardDelete = cascade.indexOf("delete from public.families");
+  assert.ok(schemaProbe >= 0);
+  assert.ok(schemaProbe < jobInsert);
+  assert.ok(jobInsert < mode);
+  assert.ok(mode < status);
+  assert.ok(status < hardDelete);
+  assert.match(cascade, /delete from public\.account_deletion_artifact_tombstones/u);
+  assert.match(cascade, /delete from public\.account_deletion_jobs/u);
+});
+
+test("conversation privacy cleanup uses the guarded account-deletion protocol", () => {
+  const source = readFileSync(
+    path.join(repoRoot, "scripts/conversation-privacy-e2e.mts"),
+    "utf8",
+  );
+  const cleanupStart = source.indexOf("} finally {");
+  const cleanup = source.slice(cleanupStart);
+  const jobInsert = cleanup.indexOf("insert into public.account_deletion_jobs");
+  const mode = cleanup.indexOf("'account-deletion-v2'");
+  const status = cleanup.indexOf("set status = 'deleted'");
+  const hardDelete = cleanup.indexOf("delete from public.families");
+
+  assert.ok(jobInsert >= 0);
+  assert.ok(jobInsert < mode);
+  assert.ok(mode < status);
+  assert.ok(status < hardDelete);
+});
+
+test("isolation cleanup removes knowledge references before fixture knowledge", () => {
+  const source = readFileSync(
+    path.join(repoRoot, "scripts/isolation-check.mjs"),
+    "utf8",
+  );
+  const cleanupStart = source.indexOf("async function cleanupIsolationFixtures");
+  const cascadeStart = source.indexOf("async function expectEventsFamilyDeleteCascade");
+  const cleanup = source.slice(cleanupStart, cascadeStart);
+  const preparations = cleanup.indexOf("delete from public.research_brief_preparations");
+  const uses = cleanup.indexOf("delete from public.family_knowledge_use");
+  const knowledge = cleanup.indexOf("delete from public.knowledge_bank");
+
+  assert.ok(preparations >= 0);
+  assert.ok(preparations < uses);
+  assert.ok(uses < knowledge);
+});
+
 test("required isolation checks never perform historical fixture cleanup", () => {
   const source = readFileSync(
     path.join(repoRoot, "scripts/isolation-check.mjs"),

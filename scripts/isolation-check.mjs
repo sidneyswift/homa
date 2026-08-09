@@ -21,6 +21,7 @@
 import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import { readFileSync, readdirSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import postgres from "postgres";
 
@@ -2368,13 +2369,38 @@ async function cleanupIsolationFixtures() {
   if (!sql) return;
   try {
     if (fixtureFamilyIds.length > 0) {
-      await sql`delete from public.families where id in ${sql(fixtureFamilyIds)}`;
+      await sql.begin(async (transaction) => {
+        await transaction`
+          select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+        `;
+        await transaction`
+          delete from public.agent_schedules
+          where family_id in ${transaction(fixtureFamilyIds)}
+        `;
+        await transaction`
+          update public.families
+          set status = 'deleted', updated_at = now()
+          where id in ${transaction(fixtureFamilyIds)}
+            and sandbox
+            and status <> 'deleted'
+        `;
+      });
     }
     if (fixtureKnowledgeIds.length > 0) {
-      await sql`
-        delete from public.knowledge_bank
-        where id in ${sql(fixtureKnowledgeIds)}
-      `;
+      await sql.begin(async (transaction) => {
+        await transaction`
+          delete from public.research_brief_preparations
+          where knowledge_bank_id in ${transaction(fixtureKnowledgeIds)}
+        `;
+        await transaction`
+          delete from public.family_knowledge_use
+          where knowledge_bank_id in ${transaction(fixtureKnowledgeIds)}
+        `;
+        await transaction`
+          delete from public.knowledge_bank
+          where id in ${transaction(fixtureKnowledgeIds)}
+        `;
+      });
     }
     if (fixtureUserIds.length > 0) {
       await sql`delete from auth.users where id in ${sql(fixtureUserIds)}`;
@@ -2403,6 +2429,7 @@ async function expectEventsFamilyDeleteCascade(controlFamilyId, suffix) {
   const marker = `isolation-${suffix}`;
   let disposableEventId = null;
   let controlEventId = null;
+  let deletionJobId = null;
 
   try {
     const [constraint] = await sql`
@@ -2441,7 +2468,80 @@ async function expectEventsFamilyDeleteCascade(controlFamilyId, suffix) {
     `;
     controlEventId = controlEvent?.id ?? null;
 
-    await sql`delete from public.families where id = ${disposableFamilyId}`;
+    const [protocolState] = await sql`
+      select
+        to_regclass('public.account_deletion_jobs') is not null as jobs,
+        to_regclass('public.account_deletion_artifact_tombstones') is not null
+          as tombstones,
+        to_regclass('public.family_artifact_prefixes') is not null as prefixes,
+        to_regclass('public.family_artifact_prefix_candidates') is not null
+          as candidates,
+        exists (
+          select 1
+          from pg_catalog.pg_trigger trigger_record
+          where trigger_record.tgrelid = 'public.families'::regclass
+            and trigger_record.tgname = 'families_hard_delete_protocol_guard'
+            and not trigger_record.tgisinternal
+            and trigger_record.tgenabled in ('O', 'A')
+            and trigger_record.tgfoid = to_regprocedure(
+              'public.guard_family_hard_delete_protocol()'
+            )
+        ) as hard_delete_guard,
+        exists (
+          select 1
+          from pg_catalog.pg_trigger trigger_record
+          where trigger_record.tgrelid = 'public.families'::regclass
+            and trigger_record.tgname = 'families_deletion_status_protocol_guard'
+            and not trigger_record.tgisinternal
+            and trigger_record.tgenabled in ('O', 'A')
+            and trigger_record.tgfoid = to_regprocedure(
+              'public.guard_family_deletion_status_transition()'
+            )
+        ) as status_guard
+    `;
+    const legacyProtocolState =
+      protocolState?.tombstones === false
+      && protocolState?.prefixes === false
+      && protocolState?.candidates === false
+      && protocolState?.hard_delete_guard === false
+      && protocolState?.status_guard === false;
+    const readyProtocolState =
+      protocolState?.jobs === true
+      && protocolState?.tombstones === true
+      && protocolState?.prefixes === true
+      && protocolState?.candidates === true
+      && protocolState?.hard_delete_guard === true
+      && protocolState?.status_guard === true;
+    if (!legacyProtocolState && !readyProtocolState) {
+      throw new Error("family hard-delete protocol schema is partial or rebound");
+    }
+
+    if (readyProtocolState) {
+      deletionJobId = randomUUID();
+      await sql.begin(async (transaction) => {
+        await transaction`
+          insert into public.account_deletion_jobs (id, family_id, status)
+          values (${deletionJobId}, ${disposableFamilyId}, 'running')
+        `;
+        await transaction`
+          select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+        `;
+        const updated = await transaction`
+          update public.families
+          set status = 'deleted', updated_at = now()
+          where id = ${disposableFamilyId} and sandbox
+          returning id
+        `;
+        if (updated.length !== 1) {
+          throw new Error("events cascade fixture lost its sandbox family");
+        }
+        await transaction`
+          delete from public.families where id = ${disposableFamilyId}
+        `;
+      });
+    } else {
+      await sql`delete from public.families where id = ${disposableFamilyId}`;
+    }
 
     const [result] = await sql`
       select
@@ -2461,6 +2561,17 @@ async function expectEventsFamilyDeleteCascade(controlFamilyId, suffix) {
     );
     if (eventIds.length > 0) {
       await sql`delete from public.events where id in ${sql(eventIds)}`;
+    }
+    if (deletionJobId) {
+      await sql.begin(async (transaction) => {
+        await transaction`
+          delete from public.account_deletion_artifact_tombstones
+          where deletion_job_id = ${deletionJobId}
+        `;
+        await transaction`
+          delete from public.account_deletion_jobs where id = ${deletionJobId}
+        `;
+      });
     }
   }
 }
@@ -5160,6 +5271,80 @@ await expectReadDenied("admin_alert_acknowledgments");
   } else {
     accountDeletionJobsSchemaAvailable = true;
     await expectReadDenied("account_deletion_jobs");
+  }
+}
+// A deleted family UUID's Blob-prefix cleanup marker (family_hard_delete_protocol
+// migration). It deliberately has no family foreign key, since it must outlive
+// the family row it names, but it is still server-only, deny-all state.
+{
+  const response = await rest(`account_deletion_artifact_tombstones?select=family_id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("account_deletion_artifact_tombstones");
+    report(
+      "account_deletion_artifact_tombstones absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("account_deletion_artifact_tombstones");
+  }
+}
+// A family fold's historical Blob prefix, retained so a later account
+// deletion can find every artifact that belongs to the surviving family
+// (folded_family_artifact_prefixes migration). Tenant-scoped by
+// owner_family_id, but never client-readable.
+{
+  const response = await rest(`family_artifact_prefixes?select=artifact_family_id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_artifact_prefixes");
+    report(
+      "family_artifact_prefixes absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("family_artifact_prefixes");
+  }
+}
+// Human-reviewed candidate evidence for a likely pre-fold Blob prefix
+// (folded_family_artifact_prefixes migration). Not an authoritative
+// ownership record, but still deny-all like its parent table.
+{
+  const response = await rest(`family_artifact_prefix_candidates?select=owner_family_id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_artifact_prefix_candidates");
+    report(
+      "family_artifact_prefix_candidates absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("family_artifact_prefix_candidates");
+  }
+}
+// StoreKit in-flight purchase marker that blocks account deletion until
+// verified provider evidence or an exact client cancellation clears it
+// (apple_purchase_interlock migration). Family-locked via family_id, but
+// never client-readable.
+{
+  const response = await rest(`apple_purchase_interlocks?select=attempt_id&limit=1`, {
+    headers: { Prefer: "" },
+  });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("apple_purchase_interlocks");
+    report(
+      "apple_purchase_interlocks absent from target (additive migration not applied yet); nothing exposed",
+      true,
+    );
+  } else {
+    await expectReadDenied("apple_purchase_interlocks");
   }
 }
 // The material studio's run ledger (materials_studio_runs migration):

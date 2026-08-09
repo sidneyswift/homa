@@ -167,6 +167,9 @@ test("repair applies only the reviewed pair inside one bounded transaction", () 
   assert.match(repair, /pg_get_functiondef/u);
   assert.match(repair, /issue_878_sandbox_ledger_statements/u);
   assert.match(repair, /issue_878_delete_ledger_statements/u);
+  assert.match(repair, /insert into public\.account_deletion_jobs/u);
+  assert.match(repair, /'account-deletion-v2'/u);
+  assert.match(repair, /set status = 'deleted'/u);
   assert.match(
     repair,
     /revoke execute on function public\.create_my_family\(text, text, text\) from service_role/u

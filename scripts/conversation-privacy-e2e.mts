@@ -887,7 +887,23 @@ try {
   });
   pass("account deletion anonymizes private rows without exposing them");
 } finally {
-  if (familyId) await sql`delete from public.families where id = ${familyId}`;
+  if (familyId) {
+    await sql.begin(async (transaction) => {
+      await transaction`
+        insert into public.account_deletion_jobs (family_id, status)
+        values (${familyId}, 'running')
+      `;
+      await transaction`
+        select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+      `;
+      await transaction`
+        update public.families
+        set status = 'deleted', updated_at = now()
+        where id = ${familyId}
+      `;
+      await transaction`delete from public.families where id = ${familyId}`;
+    });
+  }
   await sql`delete from auth.users where id in (${sidneyUserId}, ${alessaUserId})`;
   await sql.end();
 }

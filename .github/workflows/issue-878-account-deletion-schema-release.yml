@@ -1,0 +1,403 @@
+name: Apply issue 878 account deletion schema release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type APPLY ISSUE 878 ACCOUNT DELETION SCHEMA ONLY
+        required: true
+        type: string
+      reviewed_release_sha:
+        description: Paste the exact reviewed pull request head SHA
+        required: true
+        type: string
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: production-issue-878-account-deletion-schema-release
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      github.repository == 'sidneyswift/homa' &&
+      github.repository_owner == 'sidneyswift' &&
+      github.ref == 'refs/heads/main' &&
+      github.ref_name == 'main' &&
+      github.event.repository.default_branch == 'main' &&
+      github.actor == 'sidneyswift' &&
+      github.triggering_actor == 'sidneyswift'
+    name: Apply four reviewed account deletion schema migrations
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Validate authorization and immutable inputs
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          GITHUB_TOKEN: ${{ github.token }}
+          REVIEWED_RELEASE_SHA: ${{ inputs.reviewed_release_sha }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          if [ "$CONFIRMATION" != "APPLY ISSUE 878 ACCOUNT DELETION SCHEMA ONLY" ]; then
+            echo "Confirmation must exactly match the schema-only release phrase."
+            exit 1
+          fi
+          if ! [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]; then
+            echo "The GitHub run attempt is not a positive integer."
+            exit 1
+          fi
+          if [ "$GITHUB_RUN_ATTEMPT" = "1" ]; then
+            echo "ISSUE_878_SCHEMA_RECOVERY_PREVIOUS_CONCLUSION=not_applicable" >> "$GITHUB_ENV"
+          else
+            previous_attempt="$((GITHUB_RUN_ATTEMPT - 1))"
+            previous_run="$(curl --fail --silent --show-error \
+              --header "Accept: application/vnd.github+json" \
+              --header "Authorization: Bearer $GITHUB_TOKEN" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$previous_attempt")"
+            previous_binding="$(printf '%s' "$previous_run" | jq -r \
+              '[.id, .run_attempt, .head_sha, .head_branch, .event, .status, .conclusion, .actor.login, .triggering_actor.login, .head_repository.full_name] | @tsv')"
+            IFS=$'\t' read -r \
+              previous_run_id previous_run_attempt previous_head_sha \
+              previous_head_branch previous_event previous_status \
+              previous_conclusion previous_actor previous_triggering_actor \
+              previous_repository <<< "$previous_binding"
+            if [ "$previous_run_id" != "$GITHUB_RUN_ID" ] \
+              || [ "$previous_run_attempt" != "$previous_attempt" ] \
+              || [ "$previous_head_sha" != "$GITHUB_SHA" ] \
+              || [ "$previous_head_branch" != "main" ] \
+              || [ "$previous_event" != "workflow_dispatch" ] \
+              || [ "$previous_status" != "completed" ]; then
+              echo "The previous attempt is not the same completed main dispatch."
+              exit 1
+            fi
+            if [ "$previous_actor" != "sidneyswift" ] \
+              || [ "$previous_triggering_actor" != "sidneyswift" ] \
+              || [ "$previous_repository" != "sidneyswift/homa" ]; then
+              echo "The previous attempt has the wrong repository or actor."
+              exit 1
+            fi
+            case "$previous_conclusion" in
+              cancelled|failure|timed_out)
+                ;;
+              *)
+                echo "Only an unsuccessful prior attempt may enter recovery."
+                exit 1
+                ;;
+            esac
+            echo "ISSUE_878_SCHEMA_RECOVERY_PREVIOUS_CONCLUSION=$previous_conclusion" >> "$GITHUB_ENV"
+          fi
+
+          if ! [[ "$REVIEWED_RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The reviewed release SHA must be an exact lowercase Git SHA."
+            exit 1
+          fi
+          if ! [[ "$PRODUCTION_DEPLOYED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The production deployment SHA must be an exact lowercase Git SHA."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The confirmed READY production deployment must match this main commit."
+            exit 1
+          fi
+          if [ "$GITHUB_REPOSITORY" != "sidneyswift/homa" ] \
+            || [ "$GITHUB_REPOSITORY_OWNER" != "sidneyswift" ]; then
+            echo "This release may run only in sidneyswift/homa."
+            exit 1
+          fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ] \
+            || [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "This release may run only from main."
+            exit 1
+          fi
+          default_branch="$(jq -r '.repository.default_branch // ""' "$GITHUB_EVENT_PATH")"
+          if [ "$default_branch" != "main" ]; then
+            echo "This release requires main as the default branch."
+            exit 1
+          fi
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
+            || [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "The workflow checkout is not the exact clean dispatch commit."
+            exit 1
+          fi
+
+          node scripts/migration-version-check.mjs
+
+          declare -A expected_hashes=(
+            [supabase/migrations/20260808170000_family_hard_delete_protocol.sql]=2f7c819b27e77195aef1db8a4068aea03fd10dd578cf07d3d8c86f9bafda12a6
+            [supabase/migrations/20260808171500_account_deletion_avatar_cleanup.sql]=915b6bc4bd5e644718f7364f886a331b8a20bcb674610e42ee71091c50471a25
+            [supabase/migrations/20260808183000_folded_family_artifact_prefixes.sql]=6eb9de43748106f4e6af46e9b188ece91ce5adab5b57ccc1c52e8da0821c35aa
+            [supabase/migrations/20260808184500_apple_purchase_interlock.sql]=58d41cc2a770cd64e9c5968565e25a9317bf2b10c07a59b519369cd29a3e6e28
+            [supabase/migrations/20260809030000_pause_legacy_account_deletion.sql]=d654b9c3666a67fadcf667861063850394e805aee5d9522e9ea62407c075b96a
+            [scripts/issue-878-account-deletion-schema-release.sql]=563c8754d9c8c59252bc5ae450cc66d7f7b86f7bebf53d22a41a0fc4d5ae3601
+            [scripts/issue-878-account-deletion-schema-release-git-contract.mjs]=54c6bd0b1f0872c90208894599afffb3e91db6cdb41a18e90221cc66e83076c3
+          )
+          for release_path in "${!expected_hashes[@]}"; do
+            actual_hash="$(sha256sum "$release_path" | cut -d' ' -f1)"
+            if [ "$actual_hash" != "${expected_hashes[$release_path]}" ]; then
+              echo "A reviewed schema-release input hash changed: $release_path"
+              exit 1
+            fi
+          done
+
+          release_binding="$(node scripts/issue-878-account-deletion-schema-release-git-contract.mjs \
+            --final-sha="$GITHUB_SHA" \
+            --reviewed-sha="$REVIEWED_RELEASE_SHA")"
+          mapfile -t final_trees < <(
+            printf '%s\n' "$release_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_SCHEMA_RELEASE_FINAL_TREE_SHA=//p'
+          )
+          mapfile -t reviewed_trees < <(
+            printf '%s\n' "$release_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_SCHEMA_RELEASE_REVIEWED_TREE_SHA=//p'
+          )
+          mapfile -t sensitive_hashes < <(
+            printf '%s\n' "$release_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_SCHEMA_RELEASE_SENSITIVE_MANIFEST_SHA256=//p'
+          )
+          if [ "${#final_trees[@]}" -ne 1 ] \
+            || [ "${#reviewed_trees[@]}" -ne 1 ] \
+            || [ "${#sensitive_hashes[@]}" -ne 1 ] \
+            || ! [[ "${final_trees[0]}" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "${reviewed_trees[0]}" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "${sensitive_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The release Git contract did not emit exact sanitized bindings."
+            exit 1
+          fi
+          echo "ISSUE_878_SCHEMA_FINAL_TREE_SHA=${final_trees[0]}" >> "$GITHUB_ENV"
+          echo "ISSUE_878_SCHEMA_REVIEWED_TREE_SHA=${reviewed_trees[0]}" >> "$GITHUB_ENV"
+          echo "ISSUE_878_SCHEMA_SENSITIVE_MANIFEST_SHA256=${sensitive_hashes[0]}" >> "$GITHUB_ENV"
+
+      - name: Confirm PostgreSQL client availability
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-client-16
+          fi
+          psql --version
+
+      - name: Prove the reviewed deployment is still main
+        run: |
+          git fetch --force origin +refs/heads/main:refs/remotes/origin/main
+          fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
+          remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
+            || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
+            || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "Checked out, fetched, and remote main are not the dispatch commit."
+            exit 1
+          fi
+          echo "ISSUE_878_SCHEMA_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
+
+      - name: Build a masked production database URL
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const password = process.env.SUPABASE_DB_PASSWORD;
+          if (!publicUrl || !password) {
+            throw new Error("Production Supabase URL or database password is missing");
+          }
+          const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
+          const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
+          databaseUrl.username = `postgres.${ref}`;
+          databaseUrl.password = password;
+          databaseUrl.searchParams.set("sslmode", "require");
+          process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
+          appendFileSync(process.env.GITHUB_ENV, `MIGRATION_DATABASE_URL=${databaseUrl.toString()}\n`);
+          NODE
+
+      - name: Create an owner-only sanitized evidence log
+        run: |
+          evidence_dir="$(mktemp -d "$RUNNER_TEMP/homa-issue-878-schema-evidence.XXXXXX")"
+          chmod 700 "$evidence_dir"
+          evidence_log="$evidence_dir/release.log"
+          evidence_receipt="$evidence_dir/receipt.txt"
+          umask 077
+          : > "$evidence_log"
+          chmod 600 "$evidence_log"
+          echo "ISSUE_878_SCHEMA_EVIDENCE_DIR=$evidence_dir" >> "$GITHUB_ENV"
+          echo "ISSUE_878_SCHEMA_EVIDENCE_LOG=$evidence_log" >> "$GITHUB_ENV"
+          echo "ISSUE_878_SCHEMA_EVIDENCE_RECEIPT=$evidence_receipt" >> "$GITHUB_ENV"
+
+      - name: Prove the database is an allowed starting state
+        run: |
+          state="$(psql "$MIGRATION_DATABASE_URL" -qXAt -v ON_ERROR_STOP=1 -c "
+            select concat_ws(
+              '|',
+              (
+                select count(*)
+                from supabase_migrations.schema_migrations
+                where version in (
+                  '20260808170000',
+                  '20260808171500',
+                  '20260808183000',
+                  '20260808184500'
+                )
+              ),
+              to_regclass('public.account_deletion_artifact_tombstones') is not null,
+              to_regclass('public.family_artifact_prefixes') is not null,
+              to_regclass('public.family_artifact_prefix_candidates') is not null,
+              to_regclass('public.apple_purchase_interlocks') is not null
+            );
+          ")"
+          absent_state="0|false|false|false|false"
+          absent_state_short="0|f|f|f|f"
+          complete_state="4|true|true|true|true"
+          complete_state_short="4|t|t|t|t"
+          if [ "$GITHUB_RUN_ATTEMPT" = "1" ]; then
+            if [ "$state" != "$absent_state" ] \
+              && [ "$state" != "$absent_state_short" ]; then
+              echo "Attempt 1 requires the reviewed absent schema state."
+              exit 1
+            fi
+            echo "ISSUE_878_SCHEMA_EXPECTED_FIRST_MARKER=ISSUE_878_ACCOUNT_DELETION_SCHEMA=applied" >> "$GITHUB_ENV"
+            echo "ISSUE_878_SCHEMA_EVIDENCE_KIND=applied-and-verified-noop" >> "$GITHUB_ENV"
+          elif [ "$state" = "$absent_state" ] \
+            || [ "$state" = "$absent_state_short" ]; then
+            echo "ISSUE_878_SCHEMA_EXPECTED_FIRST_MARKER=ISSUE_878_ACCOUNT_DELETION_SCHEMA=applied" >> "$GITHUB_ENV"
+            echo "ISSUE_878_SCHEMA_EVIDENCE_KIND=recovered-before-commit" >> "$GITHUB_ENV"
+          elif [ "$state" = "$complete_state" ] \
+            || [ "$state" = "$complete_state_short" ]; then
+            echo "ISSUE_878_SCHEMA_EXPECTED_FIRST_MARKER=ISSUE_878_ACCOUNT_DELETION_SCHEMA=verified_noop" >> "$GITHUB_ENV"
+            echo "ISSUE_878_SCHEMA_EVIDENCE_KIND=recovered-after-commit" >> "$GITHUB_ENV"
+          else
+            echo "Recovery found a mixed schema state."
+            exit 1
+          fi
+
+      - name: Apply or recover the exact schema release
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -f scripts/issue-878-account-deletion-schema-release.sql)"
+          mapfile -t release_markers < <(
+            printf '%s\n' "$result" \
+              | grep '^ISSUE_878_ACCOUNT_DELETION_SCHEMA='
+          )
+          if [ "${#release_markers[@]}" -ne 1 ] \
+            || [ "${release_markers[0]}" != "$ISSUE_878_SCHEMA_EXPECTED_FIRST_MARKER" ]; then
+            echo "The first schema-release connection did not match its reviewed starting state."
+            exit 1
+          fi
+          printf '%s\n' "${release_markers[0]}" | tee "$ISSUE_878_SCHEMA_EVIDENCE_LOG"
+
+      - name: Prove a fresh connection is a verified no-op
+        run: |
+          result="$(psql "$MIGRATION_DATABASE_URL" -qX -v ON_ERROR_STOP=1 \
+            -f scripts/issue-878-account-deletion-schema-release.sql)"
+          mapfile -t release_markers < <(
+            printf '%s\n' "$result" \
+              | grep '^ISSUE_878_ACCOUNT_DELETION_SCHEMA='
+          )
+          if [ "${#release_markers[@]}" -ne 1 ] \
+            || [ "${release_markers[0]}" != "ISSUE_878_ACCOUNT_DELETION_SCHEMA=verified_noop" ]; then
+            echo "The fresh connection did not report one verified no-op."
+            exit 1
+          fi
+          printf '%s\n' "${release_markers[0]}" | tee -a "$ISSUE_878_SCHEMA_EVIDENCE_LOG"
+
+      - name: Re-prove main and reviewed inputs after the no-op
+        env:
+          REVIEWED_RELEASE_SHA: ${{ inputs.reviewed_release_sha }}
+        run: |
+          git fetch --force origin +refs/heads/main:refs/remotes/origin/main
+          fetched_main_sha="$(git rev-parse refs/remotes/origin/main)"
+          remote_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          if [ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ] \
+            || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
+            || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
+            echo "Main moved before schema-release evidence was finalized."
+            exit 1
+          fi
+          release_binding="$(node scripts/issue-878-account-deletion-schema-release-git-contract.mjs \
+            --final-sha="$GITHUB_SHA" \
+            --reviewed-sha="$REVIEWED_RELEASE_SHA")"
+          mapfile -t sensitive_hashes < <(
+            printf '%s\n' "$release_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_SCHEMA_RELEASE_SENSITIVE_MANIFEST_SHA256=//p'
+          )
+          if [ "${#sensitive_hashes[@]}" -ne 1 ] \
+            || [ "${sensitive_hashes[0]}" != "$ISSUE_878_SCHEMA_SENSITIVE_MANIFEST_SHA256" ]; then
+            echo "Reviewed schema-release inputs changed before evidence finalization."
+            exit 1
+          fi
+          echo "ISSUE_878_SCHEMA_REMOTE_MAIN_SHA=$remote_main_sha" >> "$GITHUB_ENV"
+
+      - name: Emit sanitized immutable evidence hashes
+        env:
+          REVIEWED_RELEASE_SHA: ${{ inputs.reviewed_release_sha }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          mapfile -t release_markers < "$ISSUE_878_SCHEMA_EVIDENCE_LOG"
+          if [ "${#release_markers[@]}" -ne 2 ] \
+            || [ "${release_markers[0]}" != "$ISSUE_878_SCHEMA_EXPECTED_FIRST_MARKER" ] \
+            || [ "${release_markers[1]}" != "ISSUE_878_ACCOUNT_DELETION_SCHEMA=verified_noop" ]; then
+            echo "The sanitized schema-release evidence log is not exact."
+            exit 1
+          fi
+
+          sanitized_log_sha256="$(sha256sum "$ISSUE_878_SCHEMA_EVIDENCE_LOG" | cut -d' ' -f1)"
+          workflow_sha256="$(sha256sum .github/workflows/issue-878-account-deletion-schema-release.yml | cut -d' ' -f1)"
+          release_sha256="$(sha256sum scripts/issue-878-account-deletion-schema-release.sql | cut -d' ' -f1)"
+
+          if [ -e "$ISSUE_878_SCHEMA_EVIDENCE_RECEIPT" ]; then
+            echo "The schema-release evidence receipt path already exists."
+            exit 1
+          fi
+          umask 077
+          {
+            printf 'contract=homa-issue-878-account-deletion-schema-release-v1\n'
+            printf 'repository=%s\n' "$GITHUB_REPOSITORY"
+            printf 'workflow_path=.github/workflows/issue-878-account-deletion-schema-release.yml\n'
+            printf 'workflow_sha256=%s\n' "$workflow_sha256"
+            printf 'run_id=%s\n' "$GITHUB_RUN_ID"
+            printf 'run_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'evidence_kind=%s\n' "$ISSUE_878_SCHEMA_EVIDENCE_KIND"
+            printf 'previous_attempt_conclusion=%s\n' "$ISSUE_878_SCHEMA_RECOVERY_PREVIOUS_CONCLUSION"
+            printf 'final_main_sha=%s\n' "$GITHUB_SHA"
+            printf 'reviewed_release_sha=%s\n' "$REVIEWED_RELEASE_SHA"
+            printf 'production_deployed_sha=%s\n' "$PRODUCTION_DEPLOYED_SHA"
+            printf 'remote_main_sha=%s\n' "$ISSUE_878_SCHEMA_REMOTE_MAIN_SHA"
+            printf 'final_tree_sha=%s\n' "$ISSUE_878_SCHEMA_FINAL_TREE_SHA"
+            printf 'reviewed_tree_sha=%s\n' "$ISSUE_878_SCHEMA_REVIEWED_TREE_SHA"
+            printf 'sensitive_manifest_sha256=%s\n' "$ISSUE_878_SCHEMA_SENSITIVE_MANIFEST_SHA256"
+            printf 'release_sql_sha256=%s\n' "$release_sha256"
+            printf 'first_connection=%s\n' "${release_markers[0]}"
+            printf 'second_connection=%s\n' "${release_markers[1]}"
+            printf 'sanitized_log_sha256=%s\n' "$sanitized_log_sha256"
+          } > "$ISSUE_878_SCHEMA_EVIDENCE_RECEIPT"
+          chmod 600 "$ISSUE_878_SCHEMA_EVIDENCE_RECEIPT"
+
+          receipt_sha256="$(sha256sum "$ISSUE_878_SCHEMA_EVIDENCE_RECEIPT" | cut -d' ' -f1)"
+          cat "$ISSUE_878_SCHEMA_EVIDENCE_RECEIPT"
+          printf 'ISSUE_878_SCHEMA_SANITIZED_LOG_SHA256=%s\n' "$sanitized_log_sha256"
+          printf 'ISSUE_878_SCHEMA_RECEIPT_SHA256=%s\n' "$receipt_sha256"
+
+      - name: Remove transient evidence files
+        if: always()
+        run: |
+          if [ -n "${ISSUE_878_SCHEMA_EVIDENCE_DIR:-}" ] \
+            && [[ "$ISSUE_878_SCHEMA_EVIDENCE_DIR" == "$RUNNER_TEMP"/homa-issue-878-schema-evidence.* ]] \
+            && [ -d "$ISSUE_878_SCHEMA_EVIDENCE_DIR" ]; then
+            find "$ISSUE_878_SCHEMA_EVIDENCE_DIR" -maxdepth 1 -type f -delete
+            rmdir "$ISSUE_878_SCHEMA_EVIDENCE_DIR"
+          fi
