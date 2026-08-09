@@ -147,6 +147,8 @@ jobs:
           reviewed_paths=(
             .github/workflows/ci.yml
             .github/workflows/issue-878-account-deletion-containment.yml
+            apps/mobile/scripts/android-release-guard.mjs
+            apps/mobile/scripts/android-release-guard.test.mjs
             apps/mobile/src/app/settings/delete-account.tsx
             apps/web/agent/schedules/account-deletions.ts
             apps/web/app/api/account-deletion/route.ts

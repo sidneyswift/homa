@@ -21,6 +21,7 @@ const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until
 const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
   "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6",
   "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185",
+  "a5be03cb30df8202d10345b91c19e73b8d91af122315c9b032372c7f1e742cab",
 ]);
 const require = createRequire(import.meta.url);
 
@@ -49,9 +50,9 @@ export function readPlatformDisposition(path = DISPOSITION_PATH) {
 }
 
 export function containsAndroidPublicReleaseCommand(value) {
-  // The issue 606 repair workflow has its own exact release-seal contract and
-  // contains shell data that this intentionally conservative scan rejects.
-  // Any byte change loses this exception and falls back to the full scan.
+  // Reviewed non-mobile repair workflows have exact release-seal contracts
+  // and contain shell data that this intentionally conservative scan rejects.
+  // Any byte change loses the exception and falls back to the full scan.
   if (AUDITED_NON_MOBILE_WORKFLOW_SHA256.has(createHash("sha256").update(value).digest("hex"))) return false;
   const commandSources = extractRunScalars(value);
   if (commandSources === null) return true;

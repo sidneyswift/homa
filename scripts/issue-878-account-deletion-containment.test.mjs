@@ -79,6 +79,14 @@ test("workflow is production-bound, immutable, and cancellation-recoverable", ()
   assert.ok(reviewedPaths?.groups?.paths);
   assert.match(
     reviewedPaths.groups.paths,
+    /apps\/mobile\/scripts\/android-release-guard\.mjs/u
+  );
+  assert.match(
+    reviewedPaths.groups.paths,
+    /apps\/mobile\/scripts\/android-release-guard\.test\.mjs/u
+  );
+  assert.match(
+    reviewedPaths.groups.paths,
     /docs\/homa-design\/evidence\/authoring-rails\.json/u
   );
   assert.match(

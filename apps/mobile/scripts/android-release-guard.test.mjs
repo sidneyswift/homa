@@ -17,6 +17,10 @@ const ISSUE_888_REPAIR_WORKFLOW_PATH = new URL(
   "../../../.github/workflows/issue-888-production-repair.yml",
   import.meta.url,
 );
+const ISSUE_878_CONTAINMENT_WORKFLOW_PATH = new URL(
+  "../../../.github/workflows/issue-878-account-deletion-containment.yml",
+  import.meta.url,
+);
 
 test("the founder-owned disposition permits only iOS public builds", () => {
   const disposition = readPlatformDisposition();
@@ -47,6 +51,7 @@ test("only exact reviewed non-mobile repair workflows bypass known false positiv
   for (const [path, expectedHash] of [
     [ISSUE_606_REPAIR_WORKFLOW_PATH, "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6"],
     [ISSUE_888_REPAIR_WORKFLOW_PATH, "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185"],
+    [ISSUE_878_CONTAINMENT_WORKFLOW_PATH, "a5be03cb30df8202d10345b91c19e73b8d91af122315c9b032372c7f1e742cab"],
   ]) {
     const workflow = readFileSync(path, "utf8");
     assert.equal(createHash("sha256").update(workflow).digest("hex"), expectedHash);
