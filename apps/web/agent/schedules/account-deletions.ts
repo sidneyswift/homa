@@ -1,12 +1,9 @@
 import { defineSchedule } from "eve/schedules";
 
-import { retryPendingAccountDeletions } from "../../lib/account-deletion";
-
-/** Reliability floor for account deletion. A failed artifact-store operation
- * stays visible in the audit job and is retried without restoring access. */
+/** Account deletion is paused under #878 until the complete release gate is
+ * proven. Keep the schedule registered but prevent an old queued job from
+ * advancing while the API and legacy database entry points are fenced. */
 export default defineSchedule({
   cron: "*/5 * * * *",
-  run({ waitUntil }) {
-    waitUntil(retryPendingAccountDeletions());
-  },
+  run() {},
 });

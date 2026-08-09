@@ -205,7 +205,7 @@ export default async function SettingsPage({
             />
           ) : null}
 
-          <DeleteFamilyDataCard familyName={family.name} />
+          <DeleteFamilyDataCard />
         </div>
 
         <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-1">
