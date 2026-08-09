@@ -308,8 +308,34 @@ function resetFresh({
         '20260806092000',
         '20260806093000'
       );
+      delete from public.account_deletion_artifact_tombstones tombstone
+      where tombstone.family_id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")})
+        and not exists (
+          select 1 from public.families family
+          where family.id = tombstone.family_id
+        );
+      delete from public.account_deletion_jobs deletion_job
+      where deletion_job.family_id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")})
+        and not exists (
+          select 1 from public.families family
+          where family.id = deletion_job.family_id
+        );
+      insert into public.account_deletion_jobs (family_id, status)
+      select family.id, 'running'
+      from public.families family
+      where family.id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")});
+      select pg_catalog.set_config(
+        'homa.family_delete_mode', 'account-deletion-v2', true
+      );
+      update public.families
+      set status = 'deleted', updated_at = pg_catalog.now()
+      where id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")});
       delete from public.families
       where id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")});
+      delete from public.account_deletion_artifact_tombstones
+      where family_id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")});
+      delete from public.account_deletion_jobs
+      where family_id in (${fixtureIds.map((id) => `'${id}'::uuid`).join(", ")});
 
       insert into public.families (
         id,

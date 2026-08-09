@@ -396,6 +396,13 @@ runPsql([
     ) values (
       '${cascadeDraftId}', '${secondFamilyId}', date '2026-12-01', 1, '[]'
     );
+    insert into public.account_deletion_jobs (family_id, status)
+      values ('${secondFamilyId}', 'running');
+    select pg_catalog.set_config(
+      'homa.family_delete_mode', 'account-deletion-v2', true
+    );
+    update public.families set status = 'deleted', updated_at = pg_catalog.now()
+      where id = '${secondFamilyId}';
     delete from public.families where id = '${secondFamilyId}';
   `,
 ]);
@@ -613,7 +620,16 @@ assert.match(
 );
 runPsql([
   "-c",
-  `delete from public.families where id = '${inheritedResidueFamilyId}';`,
+  `
+    insert into public.account_deletion_jobs (family_id, status)
+      values ('${inheritedResidueFamilyId}', 'running');
+    select pg_catalog.set_config(
+      'homa.family_delete_mode', 'account-deletion-v2', true
+    );
+    update public.families set status = 'deleted', updated_at = pg_catalog.now()
+      where id = '${inheritedResidueFamilyId}';
+    delete from public.families where id = '${inheritedResidueFamilyId}';
+  `,
 ]);
 assert.deepEqual(
   runPsql([
@@ -746,6 +762,14 @@ assert.deepEqual(repairMarkers(runPsql(["-f", repairPath])), [
 runPsql([
   "-c",
   `
+    insert into public.account_deletion_jobs (family_id, status)
+      select id, 'running' from public.families
+      where id in ('${firstFamilyId}', '${secondFamilyId}');
+    select pg_catalog.set_config(
+      'homa.family_delete_mode', 'account-deletion-v2', true
+    );
+    update public.families set status = 'deleted', updated_at = pg_catalog.now()
+      where id in ('${firstFamilyId}', '${secondFamilyId}');
     delete from public.families
     where id in ('${firstFamilyId}', '${secondFamilyId}');
     delete from auth.users
