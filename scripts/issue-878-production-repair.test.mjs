@@ -73,11 +73,17 @@ test("workflow is bound to production, Homa, and exact reviewed inputs", () => {
   assert.match(workflow, /GITHUB_REF_NAME.*main/u);
   assert.match(workflow, /repository\.default_branch.*main/u);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/u);
-  assert.match(workflow, /fetch-depth: 2/u);
+  assert.match(workflow, /fetch-depth: 0/u);
   assert.match(workflow, /git rev-parse HEAD/u);
   assert.match(workflow, /checked_out_sha.*GITHUB_SHA/u);
-  assert.match(workflow, /git rev-list --parents -n 1/u);
-  assert.match(workflow, /merge_line\[2\].*REVIEWED_REPAIR_SHA/u);
+  assert.match(
+    workflow,
+    /expected_reviewed_repair_sha="080b656207e5b70c932e59078758bac9dbe9cff7"/u
+  );
+  assert.match(workflow, /REVIEWED_REPAIR_SHA.*expected_reviewed_repair_sha/u);
+  assert.match(workflow, /git cat-file -e.*REVIEWED_REPAIR_SHA/u);
+  assert.doesNotMatch(workflow, /git rev-list --parents -n 1/u);
+  assert.doesNotMatch(workflow, /merge_line\[2\]/u);
   assert.match(workflow, /git diff --quiet.*REVIEWED_REPAIR_SHA.*GITHUB_SHA/u);
   assert.match(workflow, /scripts\/migration-version-check\.mjs/u);
   assert.match(
