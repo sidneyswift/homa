@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "d28bb4710ac9aace3ed044dfe293d74a7af481a5162115b31fcffa6231c6d0bd",
+  "ownedInputFingerprint": "1f6b7e164a7107f759b199d366a24ac73b4469efeb0daba630482ac156d7e342",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2839,10 +2839,8 @@
     {
       "surfaceId": "surface:4356fcf7637ae63d",
       "path": "apps/web/app/app/settings/delete-family-data-card.tsx",
-      "sourceHash": "9e42836b127c088016628b12ed8a512148befb90082244bdfd3e8472cba6ac6b",
-      "legacySignatures": [
-        "legacy-rounded-pill"
-      ],
+      "sourceHash": "3045caf1bedbb5c2d6f196b23d1830928cf91a557e61d4fb332ca717b8d08739",
+      "legacySignatures": [],
       "detectedSourceHash": "9e42836b127c088016628b12ed8a512148befb90082244bdfd3e8472cba6ac6b",
       "detectedLegacySignatures": [
         "legacy-rounded-pill"
@@ -2866,7 +2864,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
