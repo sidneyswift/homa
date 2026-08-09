@@ -149,6 +149,10 @@ node scripts/remove-worktree-safely.mjs \
   --review-queue-out /durable/private/removal-review.json
 ```
 
+The removal wrapper consumes only a direct regular evidence file owned by the
+current user with mode exactly `0600`. A symbolic link, path alias, different
+owner, or any group or other permission blocks inspection and execution.
+
 Use `--issue-number` when the branch does not contain its issue number. Use
 `--recovery-bundle`, `--handoff-url`, or `--issue-disposition` when the generated
 queue calls for them. The generator classifies only known build and cache files
@@ -299,6 +303,87 @@ The approver must be exactly `sidneyswift` and the reason exactly
 `legacy-lane-predates-task-tracking`. Do not use that override for a lane with a
 matching task.
 
+A secondary worktree that the active cleanup coordinator created or deliberately
+repurposed by hand may use a third proof mode only when the complete fresh task
+snapshot contains no task matching the target branch or path. Record this exact
+shape under `task.coordinatorOwnedManualLane` in the reviewed evidence:
+
+```json
+{
+  "coordinator": {
+    "taskId": "active-cleanup-coordinator-task-id",
+    "branch": "exact-primary-branch",
+    "worktree": "/absolute/primary/worktree"
+  },
+  "target": {
+    "branch": "exact-target-branch",
+    "worktree": "/absolute/target/worktree",
+    "head": "full-target-head"
+  },
+  "ownershipEvent": {
+    "kind": "created",
+    "occurredAt": "normalized UTC timestamp",
+    "details": "Exact concise description of how the coordinator created this lane."
+  },
+  "approval": {
+    "approvedBy": "sidneyswift",
+    "approvedAt": "fresh normalized UTC timestamp at or after evidence capture",
+    "reason": "coordinator-created-manual-lane",
+    "scanNonce": "exact evidence.scan.nonce",
+    "scanSha256": "exact evidence.scan.sha256"
+  }
+}
+```
+
+Use `ownershipEvent.kind: "repurposed"` and the exact reason
+`coordinator-repurposed-manual-lane` when the coordinator adopted an existing
+manual lane. The target must have a named branch. The coordinator and target must
+be distinct. The attested coordinator branch and worktree must equal the freshly
+inspected primary branch and primary worktree. The snapshot must contain exactly
+one task with the attested coordinator task ID. Its status must be exactly one of
+`active`, `idle`, `in_progress`, `needs_input`, `pending`, `running`, or `waiting`,
+with the exact case shown, and it must remain on the same primary branch and worktree.
+All times are normalized UTC. The ownership event must be at or before evidence
+capture. Approval must be at or after both the ownership event and evidence capture,
+no later than validation, and no more than thirty minutes old.
+
+Inspection and execution also require this exact confirmation, with values copied
+from the same reviewed evidence:
+
+```sh
+--coordinator-manual-lane-confirmation \
+  "ALLOW COORDINATOR MANUAL LANE <taskId> <targetBranch>@<fullHead> <targetPath> <scanNonce>:<scanSha256>"
+```
+
+Never combine this attestation with the legacy taskless override. Never use either
+manual proof when the snapshot contains a task matching the target branch or path.
+An active target task blocks cleanup, and a completed target task must use its own
+normal completed-task handoff. Unused special evidence or confirmations also block.
+At execution, the coordinator task must survive the fresh post-READY snapshot with
+the same branch and worktree and any exact status in the allowlist above. Its status
+may change from one allowed active state to another between inspection and execution.
+
+Coordinator-owned manual-lane execution consumes `scanNonce` exactly once. After
+the final task proof and while holding the repository cleanup lock, the wrapper
+atomically publishes an owner-only mode-0600 record under the owner-only mode-0700
+`.git/homa-coordinator-manual-lane-consumptions/` directory before moving the
+worktree. Any pre-existing record for that nonce blocks execution, even if the same
+branch, path, and HEAD are recreated. Normal completed-task and legacy taskless proof
+modes do not use this one-time record.
+
+The record moves through `move-intent-recorded`, `quarantined`,
+`content-preserved`, and `registration-removed`. A caught failure becomes
+`recovery-required` and records whether the original, quarantine, and preserved
+paths exist. A crash can leave an earlier truthful state, whose recorded paths are
+the recovery map. A consumed nonce is never retried: inspect those paths and the Git
+registration, preserve any moved content, then generate new evidence and a new
+confirmation.
+
+This mode proves internal consistency and records an owner attestation. It cannot
+prove that an operator omitted an unrelated task from the Desktop export. Keep the
+named repository freeze for the complete execution window, exactly as required for
+the other proof modes.
+
 Task metadata cannot prove that an unrelated agent was omitted from a snapshot. The
 named cleanup operator must keep a repository freeze during the execution window.
 Both cleanup executors also acquire the same repository-scoped
@@ -327,11 +412,13 @@ then prints `READY_FOR_FINAL_CODEX_TASK_SNAPSHOT` with the expected scan binding
 `executionNonce`, and `readyAt`. Only then export the complete Desktop task list,
 copy the exact execution boundary into it, send its normalized JSON to the process,
 and close input. The snapshot must be captured at or after READY and less than thirty
-seconds old. No Git or network command runs between that task proof and the atomic move. The moved
-worktree is reinspected and sealed at a separate `preserved-worktree` path before
-normal, non-force `git worktree remove` runs against the now-missing registered
-path. Git can remove the registration, but it cannot recursively delete the sealed
-content. If a file recreates the registered path at the final boundary, Git refuses
+seconds old. No Git or network command runs between that task proof and the atomic
+move. Coordinator nonce consumption in that interval uses only durable local file
+operations. The moved worktree is reinspected and sealed at a separate
+`preserved-worktree` path before normal, non-force `git worktree remove` runs against
+the now-missing registered path. Git can remove the registration, but it cannot
+recursively delete the sealed content. If a file recreates the registered path at
+the final boundary, Git refuses
 removal or the postcondition blocks, and the late file remains present beside the
 sealed copy. If anything arrived at the move boundary or an inspection differs,
 execution also stops and reports the preserved path:
@@ -520,9 +607,9 @@ reviewed.
 
 ## Repository governance verification manifest
 
-The focused Node 24 gate currently contains 120 TAP tests: 23 command-hook tests,
-50 ordinary worktree tests, and 47 damaged-registration tests. The CI command is the
-source of truth and must run all three files together:
+The focused Node 24 gate runs command-hook, ordinary worktree, and
+damaged-registration tests together. The CI command is the source of truth and must
+run all three files:
 
 ```sh
 node --test \

@@ -2,11 +2,16 @@
 
 import { createHash, randomBytes } from "node:crypto";
 import {
+  constants as fsConstants,
   chmodSync,
   closeSync,
   existsSync,
+  fchmodSync,
+  fstatSync,
   fsyncSync,
+  linkSync,
   lstatSync,
+  mkdirSync,
   mkdtempSync,
   openSync,
   readFileSync,
@@ -151,8 +156,10 @@ const TASKLESS_REASON = "legacy-lane-predates-task-tracking";
 const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
 const EVIDENCE_APPROVER = "sidneyswift";
 const PRIVATE_FILE_MODE = 0o600;
+const PRIVATE_DIRECTORY_MODE = 0o700;
 const STREAM_CHUNK_BYTES = 1024 * 1024;
 const CLEANUP_LOCK_FILENAME = "homa-repository-cleanup.lock";
+const COORDINATOR_CONSUMPTION_DIRECTORY = "homa-coordinator-manual-lane-consumptions";
 const SCRIPT_PATH = realpathSync(fileURLToPath(import.meta.url));
 
 export class RemovalBlockedError extends Error {
@@ -450,6 +457,177 @@ function readJson(path, label) {
     block(`${label} must contain one JSON object.`);
   }
   return parsed;
+}
+
+function assertOwnerOnlyRegularFile(stats, label) {
+  if (!stats.isFile() || stats.isSymbolicLink()) {
+    block(`${label} must be an owner-only regular file, not a symbolic link.`);
+  }
+  if ((stats.mode & 0o7777n) !== BigInt(PRIVATE_FILE_MODE)) {
+    block(`${label} must have mode exactly 0600.`);
+  }
+  if (typeof process.getuid !== "function") {
+    block(`${label} ownership cannot be verified on this platform.`);
+  }
+  if (stats.uid !== BigInt(process.getuid())) {
+    block(`${label} must be owned by the current user.`);
+  }
+}
+
+function readOwnerOnlyJson(path, label) {
+  requiredString(path, `${label} path`);
+  if (!isAbsolute(path) || resolve(path) !== path) {
+    block(`${label} path must be absolute and normalized.`);
+  }
+  let canonicalPath;
+  let before;
+  try {
+    canonicalPath = realpathSync(path);
+    before = lstatSync(path, { bigint: true });
+  } catch (error) {
+    block(`${label} does not resolve: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (canonicalPath !== path) block(`${label} path must not contain a symbolic link or path alias.`);
+  assertOwnerOnlyRegularFile(before, label);
+
+  let descriptor;
+  let content;
+  try {
+    descriptor = openSync(path, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+    const opened = fstatSync(descriptor, { bigint: true });
+    assertOwnerOnlyRegularFile(opened, label);
+    if (!sameFileState(before, opened)) block(`${label} changed while it was opened.`);
+    content = readFileSync(descriptor, "utf8");
+    const after = fstatSync(descriptor, { bigint: true });
+    assertOwnerOnlyRegularFile(after, label);
+    if (!sameFileState(opened, after)) block(`${label} changed while it was read.`);
+  } catch (error) {
+    if (error instanceof RemovalBlockedError) throw error;
+    block(`${label} could not be read safely: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    if (descriptor !== undefined) closeSync(descriptor);
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(content);
+  } catch (error) {
+    block(`${label} is not readable JSON: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    block(`${label} must contain one JSON object.`);
+  }
+  return { path: canonicalPath, value: parsed };
+}
+
+function assertOwnerOnlyDirectory(stats, label) {
+  if (!stats.isDirectory() || stats.isSymbolicLink()) {
+    block(`${label} must be an owner-only real directory.`);
+  }
+  if ((stats.mode & 0o7777n) !== BigInt(PRIVATE_DIRECTORY_MODE)) {
+    block(`${label} must have mode exactly 0700.`);
+  }
+  if (typeof process.getuid !== "function") {
+    block(`${label} ownership cannot be verified on this platform.`);
+  }
+  if (stats.uid !== BigInt(process.getuid())) {
+    block(`${label} must be owned by the current user.`);
+  }
+}
+
+function syncDirectory(path, label) {
+  let descriptor;
+  try {
+    descriptor = openSync(path, fsConstants.O_RDONLY);
+    fsyncSync(descriptor);
+  } catch (error) {
+    block(`${label} could not be durably synchronized: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    if (descriptor !== undefined) closeSync(descriptor);
+  }
+}
+
+function ensureCoordinatorConsumptionDirectory(commonGitDir) {
+  const directory = join(commonGitDir, COORDINATOR_CONSUMPTION_DIRECTORY);
+  let created = false;
+  try {
+    mkdirSync(directory, { mode: PRIVATE_DIRECTORY_MODE });
+    chmodSync(directory, PRIVATE_DIRECTORY_MODE);
+    created = true;
+  } catch (error) {
+    if (!error || typeof error !== "object" || error.code !== "EEXIST") {
+      block(
+        `Could not create the coordinator consumption directory: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+  let stats;
+  try {
+    stats = lstatSync(directory, { bigint: true });
+  } catch (error) {
+    block(
+      `Could not inspect the coordinator consumption directory: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  let canonicalDirectory;
+  try {
+    canonicalDirectory = realpathSync(directory);
+  } catch (error) {
+    block(
+      `Could not resolve the coordinator consumption directory: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+  if (canonicalDirectory !== directory) {
+    block("The coordinator consumption directory must not contain a symbolic link or path alias.");
+  }
+  assertOwnerOnlyDirectory(stats, "The coordinator consumption directory");
+  if (created) syncDirectory(commonGitDir, "The common Git directory");
+  return directory;
+}
+
+function publishExclusivePrivateJson(path, value, label, onPublished) {
+  const parent = dirname(path);
+  const temporary = join(parent, `.${randomBytes(16).toString("hex")}.tmp`);
+  const content = Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
+  let descriptor;
+  let stage = "temporary";
+  try {
+    descriptor = openSync(temporary, "wx", PRIVATE_FILE_MODE);
+    fchmodSync(descriptor, PRIVATE_FILE_MODE);
+    writeFileSync(descriptor, content);
+    fsyncSync(descriptor);
+    closeSync(descriptor);
+    descriptor = undefined;
+    stage = "publish";
+    linkSync(temporary, path);
+    onPublished();
+    stage = "cleanup";
+    unlinkSync(temporary);
+    syncDirectory(parent, `${label} directory`);
+  } catch (error) {
+    if (descriptor !== undefined) closeSync(descriptor);
+    try {
+      unlinkSync(temporary);
+    } catch {
+      // A published marker remains authoritative. An unlinked temporary file is inert.
+    }
+    if (stage === "publish" && error && typeof error === "object" && error.code === "EEXIST") {
+      const existing = readOwnerOnlyJson(path, label).value;
+      const state = typeof existing.state === "string" ? existing.state : "unknown";
+      block(`${label} already exists in state ${JSON.stringify(state)}. This scan nonce is already consumed.`);
+    }
+    if (error instanceof RemovalBlockedError) throw error;
+    block(`${label} could not be published atomically: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const stats = lstatSync(path, { bigint: true });
+  assertOwnerOnlyRegularFile(stats, label);
+  if (!readFileSync(path).equals(content)) block(`${label} changed while it was published.`);
 }
 
 function readJsonFromStandardInput(label) {
@@ -1014,6 +1192,7 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
   const repositoryOrigin = normalizeOrigin(git(repositoryRoot, ["config", "--get", "remote.origin.url"]).trim());
   assertEqual(origin, repositoryOrigin, "Origin identity");
   assertEqual(origin, expectedRepository.origin, "Target compared with script repository origin");
+  const primaryBranch = currentBranch(repositoryRoot);
 
   const head = git(target, ["rev-parse", "HEAD"]).trim();
   const tree = git(target, ["rev-parse", "HEAD^{tree}"]).trim();
@@ -1052,6 +1231,7 @@ export function inspectLocalState(targetInput, evidence, expectedRepository = in
     target,
     registeredPath,
     repositoryRoot,
+    primaryBranch,
     gitDir,
     commonGitDir,
     origin,
@@ -1192,11 +1372,212 @@ function validateHandoff(handoff, taskId, current, github, now) {
   }
 }
 
+function matchingTaskWorktree(task) {
+  if (typeof task.worktree !== "string") return null;
+  try {
+    return realpathSync(task.worktree);
+  } catch {
+    return resolve(task.worktree);
+  }
+}
+
+function validateLegacyTasklessProof(evidence, current, now, legacyTasklessConfirmation) {
+  const expectedConfirmation = `ALLOW TASKLESS ${current.target}`;
+  if (legacyTasklessConfirmation !== expectedConfirmation) {
+    block(
+      "Automatic removal requires a matching finished task with a handoff. " +
+        `A legacy taskless lane needs --legacy-taskless-confirmation ${JSON.stringify(expectedConfirmation)}.`,
+    );
+  }
+  const override = evidence.task.legacyTasklessOverride;
+  if (!override || typeof override !== "object" || Array.isArray(override)) {
+    block("A legacy taskless lane needs evidence.task.legacyTasklessOverride.");
+  }
+  assertEqual(
+    requiredString(override.approvedBy, "task.legacyTasklessOverride.approvedBy"),
+    TASKLESS_APPROVER,
+    "task.legacyTasklessOverride.approvedBy",
+  );
+  assertEqual(
+    requiredString(override.reason, "task.legacyTasklessOverride.reason"),
+    TASKLESS_REASON,
+    "task.legacyTasklessOverride.reason",
+  );
+  assertFresh(override.approvedAt, "task.legacyTasklessOverride.approvedAt", EVIDENCE_MAX_AGE_MS, now);
+  assertEqual(
+    requiredString(override.scanNonce, "task.legacyTasklessOverride.scanNonce"),
+    evidence.scan.nonce,
+    "task.legacyTasklessOverride.scanNonce",
+  );
+  return {
+    matchingTasks: [],
+    taskProofMode: "legacy-taskless-override",
+    coordinatorTaskId: null,
+  };
+}
+
+function validateCoordinatorOwnedManualLaneProof(
+  snapshot,
+  current,
+  evidence,
+  now,
+  coordinatorManualLaneConfirmation,
+) {
+  const attestation = evidence.task.coordinatorOwnedManualLane;
+  if (!attestation || typeof attestation !== "object" || Array.isArray(attestation)) {
+    block("A coordinator-owned manual lane needs evidence.task.coordinatorOwnedManualLane.");
+  }
+  const coordinator = attestation.coordinator;
+  const target = attestation.target;
+  const ownershipEvent = attestation.ownershipEvent;
+  const approval = attestation.approval;
+  for (const [value, label] of [
+    [coordinator, "task.coordinatorOwnedManualLane.coordinator"],
+    [target, "task.coordinatorOwnedManualLane.target"],
+    [ownershipEvent, "task.coordinatorOwnedManualLane.ownershipEvent"],
+    [approval, "task.coordinatorOwnedManualLane.approval"],
+  ]) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      block(`${label} must be an object.`);
+    }
+  }
+
+  if (!current.branch) block("A coordinator-owned manual lane cannot attest a detached target.");
+  if (!current.primaryBranch) block("A coordinator-owned manual lane requires a named primary branch.");
+
+  const coordinatorTaskId = requiredString(
+    coordinator.taskId,
+    "task.coordinatorOwnedManualLane.coordinator.taskId",
+  );
+  const coordinatorBranch = requiredString(
+    coordinator.branch,
+    "task.coordinatorOwnedManualLane.coordinator.branch",
+  );
+  const coordinatorWorktree = absoluteRealPath(
+    requiredString(coordinator.worktree, "task.coordinatorOwnedManualLane.coordinator.worktree"),
+    "task.coordinatorOwnedManualLane.coordinator.worktree",
+  );
+  assertEqual(coordinatorBranch, current.primaryBranch, "Coordinator primary branch");
+  assertEqual(coordinatorWorktree, current.repositoryRoot, "Coordinator primary worktree");
+
+  const targetBranch = requiredString(target.branch, "task.coordinatorOwnedManualLane.target.branch");
+  const targetWorktree = absoluteRealPath(
+    requiredString(target.worktree, "task.coordinatorOwnedManualLane.target.worktree"),
+    "task.coordinatorOwnedManualLane.target.worktree",
+  );
+  const targetHead = requiredString(target.head, "task.coordinatorOwnedManualLane.target.head");
+  assertEqual(targetBranch, current.branch, "Coordinator-owned target branch");
+  assertEqual(targetWorktree, current.target, "Coordinator-owned target worktree");
+  assertEqual(targetHead, current.head, "Coordinator-owned target HEAD");
+  if (coordinatorBranch === targetBranch || coordinatorWorktree === targetWorktree) {
+    block("The cleanup coordinator and coordinator-owned target must be distinct lanes.");
+  }
+
+  const kind = requiredString(ownershipEvent.kind, "task.coordinatorOwnedManualLane.ownershipEvent.kind");
+  const expectedReasons = new Map([
+    ["created", "coordinator-created-manual-lane"],
+    ["repurposed", "coordinator-repurposed-manual-lane"],
+  ]);
+  const expectedReason = expectedReasons.get(kind);
+  if (!expectedReason) {
+    block("task.coordinatorOwnedManualLane.ownershipEvent.kind must be created or repurposed.");
+  }
+  const occurredAt = normalizedIsoTime(
+    ownershipEvent.occurredAt,
+    "task.coordinatorOwnedManualLane.ownershipEvent.occurredAt",
+  );
+  if (occurredAt > now) block("task.coordinatorOwnedManualLane.ownershipEvent.occurredAt is in the future.");
+  const evidenceCapturedAt = normalizedIsoTime(evidence.capturedAt, "Evidence capturedAt");
+  if (occurredAt > evidenceCapturedAt) {
+    block("task.coordinatorOwnedManualLane.ownershipEvent.occurredAt is after the evidence capture.");
+  }
+  requiredString(ownershipEvent.details, "task.coordinatorOwnedManualLane.ownershipEvent.details");
+
+  assertEqual(
+    requiredString(approval.approvedBy, "task.coordinatorOwnedManualLane.approval.approvedBy"),
+    EVIDENCE_APPROVER,
+    "task.coordinatorOwnedManualLane.approval.approvedBy",
+  );
+  assertEqual(
+    requiredString(approval.reason, "task.coordinatorOwnedManualLane.approval.reason"),
+    expectedReason,
+    "task.coordinatorOwnedManualLane.approval.reason",
+  );
+  const approvedAt = assertFresh(
+    approval.approvedAt,
+    "task.coordinatorOwnedManualLane.approval.approvedAt",
+    EVIDENCE_MAX_AGE_MS,
+    now,
+  );
+  if (approvedAt < evidenceCapturedAt) {
+    block("task.coordinatorOwnedManualLane.approval.approvedAt predates the generated evidence.");
+  }
+  if (approvedAt < occurredAt) {
+    block("task.coordinatorOwnedManualLane.approval.approvedAt predates the ownership event.");
+  }
+  assertEqual(
+    requiredString(approval.scanNonce, "task.coordinatorOwnedManualLane.approval.scanNonce"),
+    evidence.scan.nonce,
+    "task.coordinatorOwnedManualLane.approval.scanNonce",
+  );
+  assertEqual(
+    requiredString(approval.scanSha256, "task.coordinatorOwnedManualLane.approval.scanSha256"),
+    evidence.scan.sha256,
+    "task.coordinatorOwnedManualLane.approval.scanSha256",
+  );
+
+  const coordinatorTasks = snapshot.tasks.filter((task) => task.id === coordinatorTaskId);
+  if (coordinatorTasks.length !== 1) {
+    block(`Expected exactly one active coordinator task ${coordinatorTaskId}, found ${coordinatorTasks.length}.`);
+  }
+  const coordinatorTask = coordinatorTasks[0];
+  const coordinatorStatus = requiredString(coordinatorTask.status, `Coordinator task ${coordinatorTaskId} status`);
+  if (!ACTIVE_TASK_STATES.has(coordinatorStatus)) {
+    block(`Coordinator task ${coordinatorTaskId} must remain active, found ${coordinatorStatus}.`);
+  }
+  assertEqual(
+    requiredString(coordinatorTask.branch, `Coordinator task ${coordinatorTaskId} branch`),
+    coordinatorBranch,
+    "Coordinator task branch",
+  );
+  assertEqual(
+    absoluteRealPath(
+      requiredString(coordinatorTask.worktree, `Coordinator task ${coordinatorTaskId} worktree`),
+      `Coordinator task ${coordinatorTaskId} worktree`,
+    ),
+    coordinatorWorktree,
+    "Coordinator task worktree",
+  );
+
+  const expectedConfirmation =
+    `ALLOW COORDINATOR MANUAL LANE ${coordinatorTaskId} ${targetBranch}@${targetHead} ` +
+    `${targetWorktree} ${evidence.scan.nonce}:${evidence.scan.sha256}`;
+  if (coordinatorManualLaneConfirmation !== expectedConfirmation) {
+    block(
+      "A coordinator-owned manual lane needs the exact confirmation " +
+        `--coordinator-manual-lane-confirmation ${JSON.stringify(expectedConfirmation)}.`,
+    );
+  }
+
+  return {
+    matchingTasks: [],
+    taskProofMode: "coordinator-owned-manual-lane",
+    coordinatorTaskId,
+  };
+}
+
 export function validateTaskSnapshot(
   snapshot,
   current,
   evidence,
-  { now = Date.now(), maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS, legacyTasklessConfirmation, github, executionBoundary } = {},
+  {
+    now = Date.now(),
+    maxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
+    legacyTasklessConfirmation,
+    coordinatorManualLaneConfirmation,
+    github,
+    executionBoundary,
+  } = {},
 ) {
   if (snapshot.schemaVersion !== 1) block("Task snapshot schemaVersion must be 1.");
   if (snapshot.source !== "codex-list-threads") {
@@ -1237,62 +1618,74 @@ export function validateTaskSnapshot(
   if (!Array.isArray(snapshot.tasks)) block("Task snapshot tasks must be an array.");
   if (!github || typeof github !== "object") block("Verified GitHub state is required for task validation.");
 
-  const matchingTasks = snapshot.tasks.filter((task) => {
-    let taskWorktree = null;
-    if (typeof task.worktree === "string") {
-      try {
-        taskWorktree = realpathSync(task.worktree);
-      } catch {
-        taskWorktree = resolve(task.worktree);
-      }
-    }
-    return task.branch === current.branch || taskWorktree === current.target;
-  });
-  for (const task of matchingTasks) {
-    const taskId = requiredString(task.id, "task.id");
-    const status = requiredString(task.status, `Task ${taskId} status`);
-    if (ACTIVE_TASK_STATES.has(status.toLowerCase())) block(`Task ${taskId} is still ${status} in this lane.`);
-    if (status !== "completed") {
-      block(`Task ${taskId} status must be completed, found ${status}.`);
-    }
-    if (current.branch) assertEqual(task.branch, current.branch, `Task ${taskId} branch`);
-    assertEqual(
-      absoluteRealPath(requiredString(task.worktree, `Task ${taskId} worktree`), `Task ${taskId} worktree`),
-      current.target,
-      `Task ${taskId} worktree`,
-    );
-    validateHandoff(task.handoff, taskId, current, github, now);
+  const taskEvidence = evidence.task ?? {};
+  if (!taskEvidence || typeof taskEvidence !== "object" || Array.isArray(taskEvidence)) {
+    block("Evidence task proof must be an object.");
   }
-  if (matchingTasks.length === 0) {
-    const expectedConfirmation = `ALLOW TASKLESS ${current.target}`;
-    if (legacyTasklessConfirmation !== expectedConfirmation) {
+  const matchingTasks = snapshot.tasks.filter(
+    (task) => task.branch === current.branch || matchingTaskWorktree(task) === current.target,
+  );
+  let taskProof;
+  if (matchingTasks.length > 0) {
+    for (const task of matchingTasks) {
+      const taskId = requiredString(task.id, "task.id");
+      const status = requiredString(task.status, `Task ${taskId} status`);
+      if (ACTIVE_TASK_STATES.has(status.toLowerCase())) block(`Task ${taskId} is still ${status} in this lane.`);
+      if (status !== "completed") {
+        block(`Task ${taskId} status must be completed, found ${status}.`);
+      }
+      if (current.branch) assertEqual(task.branch, current.branch, `Task ${taskId} branch`);
+      assertEqual(
+        absoluteRealPath(requiredString(task.worktree, `Task ${taskId} worktree`), `Task ${taskId} worktree`),
+        current.target,
+        `Task ${taskId} worktree`,
+      );
+      validateHandoff(task.handoff, taskId, current, github, now);
+    }
+    if (
+      taskEvidence.legacyTasklessOverride !== undefined ||
+      taskEvidence.coordinatorOwnedManualLane !== undefined ||
+      legacyTasklessConfirmation !== undefined ||
+      coordinatorManualLaneConfirmation !== undefined
+    ) {
+      block("A completed target task cannot be combined with a manual task proof or special confirmation.");
+    }
+    taskProof = {
+      matchingTasks,
+      taskProofMode: "completed-task-handoff",
+      coordinatorTaskId: null,
+    };
+  } else {
+    const hasLegacyOverride = taskEvidence.legacyTasklessOverride !== undefined;
+    const hasCoordinatorAttestation = taskEvidence.coordinatorOwnedManualLane !== undefined;
+    if (hasLegacyOverride && hasCoordinatorAttestation) {
+      block("A lane cannot combine legacy taskless and coordinator-owned manual task proofs.");
+    }
+    if (hasLegacyOverride) {
+      if (coordinatorManualLaneConfirmation !== undefined) {
+        block("A coordinator manual lane confirmation cannot be used with a legacy taskless proof.");
+      }
+      taskProof = validateLegacyTasklessProof(evidence, current, now, legacyTasklessConfirmation);
+    } else if (hasCoordinatorAttestation) {
+      if (legacyTasklessConfirmation !== undefined) {
+        block("A legacy taskless confirmation cannot be used with a coordinator-owned manual lane proof.");
+      }
+      taskProof = validateCoordinatorOwnedManualLaneProof(
+        snapshot,
+        current,
+        evidence,
+        now,
+        coordinatorManualLaneConfirmation,
+      );
+    } else {
+      if (legacyTasklessConfirmation !== undefined || coordinatorManualLaneConfirmation !== undefined) {
+        block("A special confirmation cannot be used without its exact manual task proof in evidence.");
+      }
       block(
         "Automatic removal requires a matching finished task with a handoff. " +
-          `A legacy taskless lane needs --legacy-taskless-confirmation ${JSON.stringify(expectedConfirmation)}.`,
+          "A manual lane needs either a reviewed legacy taskless override or coordinator-owned attestation.",
       );
     }
-    const override = evidence.task?.legacyTasklessOverride;
-    if (!override || typeof override !== "object") {
-      block("A legacy taskless lane needs evidence.task.legacyTasklessOverride.");
-    }
-    assertEqual(
-      requiredString(override.approvedBy, "task.legacyTasklessOverride.approvedBy"),
-      TASKLESS_APPROVER,
-      "task.legacyTasklessOverride.approvedBy",
-    );
-    assertEqual(
-      requiredString(override.reason, "task.legacyTasklessOverride.reason"),
-      TASKLESS_REASON,
-      "task.legacyTasklessOverride.reason",
-    );
-    assertFresh(override.approvedAt, "task.legacyTasklessOverride.approvedAt", EVIDENCE_MAX_AGE_MS, now);
-    assertEqual(
-      requiredString(override.scanNonce, "task.legacyTasklessOverride.scanNonce"),
-      evidence.scan.nonce,
-      "task.legacyTasklessOverride.scanNonce",
-    );
-  } else if (legacyTasklessConfirmation !== undefined) {
-    block("A legacy taskless confirmation cannot be used when a matching task exists.");
   }
 
   if (evidence.issue?.disposition === "replacement-active") {
@@ -1317,7 +1710,7 @@ export function validateTaskSnapshot(
       "Replacement worktree",
     );
   }
-  return matchingTasks;
+  return taskProof;
 }
 
 function validateIgnoredDispositions(current, evidence, now) {
@@ -1443,6 +1836,7 @@ export function retirementScanSha256(current) {
       target: current.target,
       registeredPath: current.registeredPath,
       repositoryRoot: current.repositoryRoot,
+      primaryBranch: current.primaryBranch,
       commonGitDir: current.commonGitDir,
       origin: current.origin,
       head: current.head,
@@ -1495,6 +1889,7 @@ export function assessRemoval({
   now = Date.now(),
   taskMaxAgeMs = TASK_SNAPSHOT_MAX_AGE_MS,
   legacyTasklessConfirmation,
+  coordinatorManualLaneConfirmation,
   skipTaskValidation = false,
 }) {
   if (evidence.schemaVersion !== 2) block("Evidence schemaVersion must be 2.");
@@ -1572,12 +1967,17 @@ export function assessRemoval({
     block(`GitHub issue has unknown state ${github.issue.state}.`);
   }
 
-  const matchingTasks = skipTaskValidation
-    ? []
+  const taskProof = skipTaskValidation
+    ? {
+        matchingTasks: [],
+        taskProofMode: "deferred-to-ready-snapshot",
+        coordinatorTaskId: null,
+      }
     : validateTaskSnapshot(taskSnapshot, current, evidence, {
         now,
         maxAgeMs: taskMaxAgeMs,
         legacyTasklessConfirmation,
+        coordinatorManualLaneConfirmation,
         github,
       });
   validateRecovery(current, evidence.recovery, now);
@@ -1589,7 +1989,9 @@ export function assessRemoval({
     issue: expectedIssue,
     uniqueCommitCount: current.uniqueCommitCount,
     ignoredPathDecisions: ignoredDecisions.length,
-    matchingTaskIds: matchingTasks.map((task) => task.id),
+    matchingTaskIds: taskProof.matchingTasks.map((task) => task.id),
+    taskProofMode: taskProof.taskProofMode,
+    coordinatorTaskId: taskProof.coordinatorTaskId,
     recovery: evidence.recovery.kind,
     scanNonce: scan.nonce,
     scanSha256: scan.sha256,
@@ -1618,6 +2020,8 @@ function parseArgs(argv) {
     else if (argument === "--remote-branch-action") options.remoteBranchAction = argv[++index];
     else if (argument === "--legacy-taskless-confirmation") {
       options.legacyTasklessConfirmation = argv[++index];
+    } else if (argument === "--coordinator-manual-lane-confirmation") {
+      options.coordinatorManualLaneConfirmation = argv[++index];
     } else block(`Unknown argument ${argument}.`);
   }
   if (options.generate) {
@@ -1625,7 +2029,14 @@ function parseArgs(argv) {
     for (const name of ["target", "evidenceOut", "reviewQueueOut"]) {
       requiredString(options[name], `--${name.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`)}`);
     }
-    for (const forbidden of ["evidence", "taskSnapshot", "confirmation", "remoteBranchAction"]) {
+    for (const forbidden of [
+      "evidence",
+      "taskSnapshot",
+      "confirmation",
+      "remoteBranchAction",
+      "legacyTasklessConfirmation",
+      "coordinatorManualLaneConfirmation",
+    ]) {
       if (options[forbidden] !== undefined) block(`--generate cannot be combined with --${forbidden}.`);
     }
     return options;
@@ -1642,6 +2053,139 @@ function ensureDurableEvidence(path, target) {
   if (isInside(evidencePath, target)) block("The removal evidence file cannot live inside the worktree being removed.");
 }
 
+function coordinatorConsumptionDescriptor(current, evidence, evidencePath, taskProof, preparedQuarantine) {
+  const directory = join(current.commonGitDir, COORDINATOR_CONSUMPTION_DIRECTORY);
+  return {
+    createdByThisAttempt: false,
+    directory,
+    path: join(directory, `${evidence.scan.nonce}.json`),
+    recordToken: randomBytes(32).toString("hex"),
+    current,
+    evidence,
+    evidencePath,
+    taskProof,
+    preparedQuarantine,
+  };
+}
+
+function beginCoordinatorConsumption(consumption, now = Date.now()) {
+  assertEqual(
+    ensureCoordinatorConsumptionDirectory(consumption.current.commonGitDir),
+    consumption.directory,
+    "Coordinator consumption directory",
+  );
+  const consumedAt = new Date(now).toISOString();
+  const record = {
+    schemaVersion: 1,
+    kind: "coordinator-manual-lane-retirement",
+    state: "move-intent-recorded",
+    recordToken: consumption.recordToken,
+    scanNonce: consumption.evidence.scan.nonce,
+    scanSha256: consumption.evidence.scan.sha256,
+    coordinatorTaskId: consumption.taskProof.coordinatorTaskId,
+    evidencePath: consumption.evidencePath,
+    consumedAt,
+    updatedAt: consumedAt,
+    target: {
+      path: consumption.current.target,
+      registeredPath: consumption.current.registeredPath,
+      branch: consumption.current.branch,
+      head: consumption.current.head,
+    },
+    quarantine: {
+      root: consumption.preparedQuarantine.quarantineRoot,
+      path: consumption.preparedQuarantine.quarantinePath,
+      preservedPath: join(consumption.preparedQuarantine.quarantineRoot, "preserved-worktree"),
+    },
+    recovery: {
+      lastConfirmed: {
+        at: consumedAt,
+        phase: "before-move",
+        targetExists: true,
+        quarantineExists: false,
+        preservedExists: false,
+      },
+      nextStep:
+        "If execution stops, inspect every recorded path and the Git registration, then generate new evidence and confirmation before retrying.",
+    },
+    events: [{ state: "move-intent-recorded", at: consumedAt }],
+  };
+  publishExclusivePrivateJson(consumption.path, record, "Coordinator consumption record", () => {
+    consumption.createdByThisAttempt = true;
+  });
+}
+
+function readBoundCoordinatorConsumption(consumption) {
+  assertEqual(
+    ensureCoordinatorConsumptionDirectory(consumption.current.commonGitDir),
+    consumption.directory,
+    "Coordinator consumption directory",
+  );
+  const record = readOwnerOnlyJson(consumption.path, "Coordinator consumption record").value;
+  assertEqual(record.schemaVersion, 1, "Coordinator consumption schemaVersion");
+  assertEqual(record.kind, "coordinator-manual-lane-retirement", "Coordinator consumption kind");
+  assertEqual(record.recordToken, consumption.recordToken, "Coordinator consumption record token");
+  assertEqual(record.scanNonce, consumption.evidence.scan.nonce, "Coordinator consumption scan nonce");
+  assertEqual(record.scanSha256, consumption.evidence.scan.sha256, "Coordinator consumption scan digest");
+  assertEqual(record.target?.path, consumption.current.target, "Coordinator consumption target path");
+  assertEqual(record.target?.branch, consumption.current.branch, "Coordinator consumption target branch");
+  assertEqual(record.target?.head, consumption.current.head, "Coordinator consumption target HEAD");
+  if (!Array.isArray(record.events) || record.events.length === 0) {
+    block("Coordinator consumption record events must be a non-empty array.");
+  }
+  return record;
+}
+
+function updateCoordinatorConsumption(consumption, state, details = {}, now = Date.now()) {
+  const record = readBoundCoordinatorConsumption(consumption);
+  const allowedTransitions = new Map([
+    ["move-intent-recorded", new Set(["quarantined", "recovery-required"])],
+    ["quarantined", new Set(["content-preserved", "recovery-required"])],
+    ["content-preserved", new Set(["registration-removed", "recovery-required"])],
+    ["registration-removed", new Set(["recovery-required"])],
+  ]);
+  if (!allowedTransitions.get(record.state)?.has(state)) {
+    block(`Coordinator consumption state cannot move from ${JSON.stringify(record.state)} to ${JSON.stringify(state)}.`);
+  }
+  const updatedAt = new Date(now).toISOString();
+  const next = {
+    ...record,
+    ...details,
+    state,
+    updatedAt,
+    events: [...record.events, { state, at: updatedAt }],
+  };
+  atomicPrivateJson(consumption.path, next, "coordinator consumption record");
+  syncDirectory(consumption.directory, "The coordinator consumption directory");
+}
+
+function observedPathState(path) {
+  try {
+    lstatSync(path);
+    return true;
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "ENOENT") return false;
+    return null;
+  }
+}
+
+function recordCoordinatorRecoveryRequired(consumption, error) {
+  const preservedPath = join(consumption.preparedQuarantine.quarantineRoot, "preserved-worktree");
+  updateCoordinatorConsumption(consumption, "recovery-required", {
+    failure: {
+      message: error instanceof Error ? error.message : String(error),
+    },
+    recovery: {
+      observedAt: new Date().toISOString(),
+      targetExists: observedPathState(consumption.current.target),
+      quarantineExists: observedPathState(consumption.preparedQuarantine.quarantinePath),
+      preservedExists: observedPathState(preservedPath),
+      nextStep:
+        "Inspect every recorded path and the Git registration, preserve any moved content, then generate new evidence and confirmation before retrying.",
+    },
+  });
+}
+
 function confirmRemovalGone(current) {
   if (pathEntryExists(current.target, "removed worktree path")) {
     block("Git returned success, but the worktree path still exists.");
@@ -1655,6 +2199,7 @@ function confirmRemovalGone(current) {
 function sameQuarantinedState(before, after) {
   for (const field of [
     "repositoryRoot",
+    "primaryBranch",
     "gitDir",
     "commonGitDir",
     "origin",
@@ -1977,7 +2522,6 @@ function main() {
     console.log(JSON.stringify(generateRetirementEvidence(options), null, 2));
     return;
   }
-  const evidencePath = absoluteRealPath(options.evidence, "evidence file");
   if (options.execute && options.taskSnapshot !== "-") {
     block("Execution requires --task-snapshot - so the fresh Codex Desktop snapshot arrives on standard input.");
   }
@@ -1986,7 +2530,9 @@ function main() {
   }
   const taskSnapshotPath =
     options.taskSnapshot === "-" ? null : absoluteRealPath(options.taskSnapshot, "task snapshot");
-  const evidence = readJson(evidencePath, "Evidence file");
+  const evidenceFile = readOwnerOnlyJson(options.evidence, "Evidence file");
+  const evidencePath = evidenceFile.path;
+  const evidence = evidenceFile.value;
   const taskSnapshot = taskSnapshotPath ? readJson(taskSnapshotPath, "Task snapshot") : null;
   const expectedRepository = inspectScriptRepository();
   const current = inspectLocalState(options.target, evidence, expectedRepository);
@@ -2000,6 +2546,7 @@ function main() {
     taskSnapshot,
     github,
     legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+    coordinatorManualLaneConfirmation: options.coordinatorManualLaneConfirmation,
     skipTaskValidation: options.execute,
   });
 
@@ -2021,6 +2568,7 @@ function main() {
       taskSnapshot: null,
       github: finalGithub,
       legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+      coordinatorManualLaneConfirmation: options.coordinatorManualLaneConfirmation,
       skipTaskValidation: true,
     });
     assertEqual(options.confirmation, finalAssessment.confirmation, "Final removal confirmation");
@@ -2039,51 +2587,139 @@ function main() {
         maxAgeSeconds: EXECUTION_TASK_REFRESH_MAX_AGE_MS / 1000,
       })}\n`,
     );
-    const refreshedTaskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
-    validateTaskSnapshot(refreshedTaskSnapshot, finalCurrent, evidence, {
-      maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
-      legacyTasklessConfirmation: options.legacyTasklessConfirmation,
-      github: finalGithub,
-      executionBoundary,
-    });
-
-    // No Git or network call occurs after the task proof and before this move.
-    // Git performs the registered same-filesystem move as the preservation boundary.
-    const quarantine = quarantineWorktree(finalCurrent, evidence, expectedRepository, Date.now(), preparedQuarantine);
-    const sealed = sealQuarantinedWorktree(quarantine);
-    const removal = commandResult("git", [
-      "-C",
-      sealed.quarantined.repositoryRoot,
-      "worktree",
-      "remove",
-      sealed.quarantined.registeredPath,
-    ]);
-    if (removal.status !== 0) {
-      block(
-        `Worktree content is preserved at ${
-          sealed.preservedPath
-        }: Git refused normal registration removal: ${removal.stderr.trim()}`,
-      );
-    }
+    let consumption;
     try {
-      confirmRemovalGone(sealed.quarantined);
-    } catch (error) {
-      block(
-        `Worktree content is preserved at ${sealed.preservedPath}, but registration removal could not be confirmed: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+      const refreshedTaskSnapshot = readJsonFromStandardInput("Final Codex Desktop task snapshot");
+      const taskProof = validateTaskSnapshot(refreshedTaskSnapshot, finalCurrent, evidence, {
+        maxAgeMs: EXECUTION_TASK_REFRESH_MAX_AGE_MS,
+        legacyTasklessConfirmation: options.legacyTasklessConfirmation,
+        coordinatorManualLaneConfirmation: options.coordinatorManualLaneConfirmation,
+        github: finalGithub,
+        executionBoundary,
+      });
+      if (taskProof.taskProofMode === "coordinator-owned-manual-lane") {
+        consumption = coordinatorConsumptionDescriptor(
+          finalCurrent,
+          evidence,
+          evidencePath,
+          taskProof,
+          preparedQuarantine,
+        );
+        beginCoordinatorConsumption(consumption);
+      }
+
+      // No Git or network call occurs after the task proof and before this move.
+      // Coordinator proof consumption uses only durable local filesystem operations.
+      // Git performs the registered same-filesystem move as the preservation boundary.
+      const quarantine = quarantineWorktree(
+        finalCurrent,
+        evidence,
+        expectedRepository,
+        Date.now(),
+        preparedQuarantine,
       );
+      if (consumption) {
+        updateCoordinatorConsumption(consumption, "quarantined", {
+          recovery: {
+            lastConfirmed: {
+              at: new Date().toISOString(),
+              phase: "quarantined",
+              targetExists: false,
+              quarantineExists: true,
+              preservedExists: false,
+            },
+            nextStep:
+              "Preserve the quarantined worktree, inspect the Git registration, then generate new evidence and confirmation before retrying.",
+          },
+        });
+      }
+      const sealed = sealQuarantinedWorktree(quarantine);
+      if (consumption) {
+        updateCoordinatorConsumption(consumption, "content-preserved", {
+          recovery: {
+            lastConfirmed: {
+              at: new Date().toISOString(),
+              phase: "content-preserved",
+              targetExists: false,
+              quarantineExists: false,
+              preservedExists: true,
+            },
+            nextStep:
+              "Keep the preserved worktree, inspect the Git registration, then generate new evidence and confirmation before retrying.",
+          },
+        });
+      }
+      const removal = commandResult("git", [
+        "-C",
+        sealed.quarantined.repositoryRoot,
+        "worktree",
+        "remove",
+        sealed.quarantined.registeredPath,
+      ]);
+      if (removal.status !== 0) {
+        block(
+          `Worktree content is preserved at ${
+            sealed.preservedPath
+          }: Git refused normal registration removal: ${removal.stderr.trim()}`,
+        );
+      }
+      try {
+        confirmRemovalGone(sealed.quarantined);
+      } catch (error) {
+        block(
+          `Worktree content is preserved at ${sealed.preservedPath}, but registration removal could not be confirmed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+      if (pathEntryExists(finalCurrent.target, "original worktree path after removal")) {
+        block("The original worktree path reappeared after quarantine removal.");
+      }
+      if (consumption) {
+        updateCoordinatorConsumption(consumption, "registration-removed", {
+          recovery: {
+            lastConfirmed: {
+              at: new Date().toISOString(),
+              phase: "registration-removed",
+              targetExists: false,
+              quarantineExists: false,
+              preservedExists: true,
+            },
+            nextStep: "Review the preserved worktree before any separate physical disposal action.",
+          },
+        });
+      }
+      return {
+        status: "WORKTREE_REGISTRATION_REMOVED",
+        target: finalCurrent.target,
+        preservedPath: sealed.preservedPath,
+        localBranchAction: "keep",
+        remoteBranchAction: "keep",
+        ...(consumption ? { coordinatorConsumptionRecord: consumption.path } : {}),
+      };
+    } catch (error) {
+      if (consumption?.createdByThisAttempt) {
+        try {
+          recordCoordinatorRecoveryRequired(consumption, error);
+        } catch (recoveryError) {
+          block(
+            `Cleanup stopped after consuming the coordinator scan nonce, and its recovery record could not be updated. ` +
+              `The original consumption record remains at ${consumption.path}. Original error: ${
+                error instanceof Error ? error.message : String(error)
+              }. Recovery record error: ${
+                recoveryError instanceof Error ? recoveryError.message : String(recoveryError)
+              }`,
+          );
+        }
+      } else {
+        try {
+          rmdirSync(preparedQuarantine.quarantineRoot);
+        } catch {
+          // A nonempty or already removed quarantine remains visible for manual inspection.
+        }
+      }
+      throw error;
     }
-    if (pathEntryExists(finalCurrent.target, "original worktree path after removal")) {
-      block("The original worktree path reappeared after quarantine removal.");
-    }
-    return {
-      status: "WORKTREE_REGISTRATION_REMOVED",
-      target: finalCurrent.target,
-      preservedPath: sealed.preservedPath,
-      localBranchAction: "keep",
-      remoteBranchAction: "keep",
-    };
   });
   console.log(JSON.stringify(report, null, 2));
 }

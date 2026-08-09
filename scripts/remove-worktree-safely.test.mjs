@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import {
+  appendFileSync,
   chmodSync,
+  chownSync,
   copyFileSync,
   existsSync,
   lstatSync,
@@ -11,6 +13,7 @@ import {
   readFileSync,
   readdirSync,
   realpathSync,
+  renameSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -23,6 +26,7 @@ import {
   acquireRepositoryCleanupLock as acquireOrdinaryCleanupLock,
   releaseRepositoryCleanupLock as releaseOrdinaryCleanupLock,
   retirementScanSha256,
+  validateTaskSnapshot,
 } from "./remove-worktree-safely.mjs";
 import {
   acquireRepositoryCleanupLock as acquireDamagedCleanupLock,
@@ -76,8 +80,12 @@ function makeFakeGithub(binPath) {
     script,
     `#!/usr/bin/env node
 const { appendFileSync, mkdirSync, readFileSync, writeFileSync } = require("node:fs");
+const { spawnSync } = require("node:child_process");
 const { join } = require("node:path");
 const args = process.argv.slice(2);
+if (process.env.FAKE_COMMAND_ORDER_LOG) {
+  appendFileSync(process.env.FAKE_COMMAND_ORDER_LOG, "gh " + JSON.stringify(args) + "\\n");
+}
 if (process.env.FAKE_ASSERT_GIT_ENV === "1") {
   const allowed = new Set([
     "GIT_CONFIG_GLOBAL",
@@ -110,6 +118,17 @@ if (callCount === Number(process.env.FAKE_GH_LATE_IGNORED_CALL ?? "0")) {
   const target = process.env.FAKE_GH_LATE_IGNORED_TARGET;
   mkdirSync(join(target, ".late"), { recursive: true });
   writeFileSync(join(target, ".late", "arrived-during-github.txt"), "must survive cleanup\\n");
+}
+if (callCount === Number(process.env.FAKE_GH_PRIMARY_BRANCH_DRIFT_CALL ?? "0")) {
+  const result = spawnSync(
+    process.env.FAKE_REAL_GIT,
+    ["-C", process.env.FAKE_GH_PRIMARY_WORKTREE, "switch", "-c", "cleanup-primary-drift"],
+    { encoding: "utf8", env: process.env }
+  );
+  if (result.status !== 0) {
+    process.stderr.write("Could not create primary branch drift: " + result.stderr + "\\n");
+    process.exit(95);
+  }
 }
 if (args[0] === "pr" && args[1] === "list") {
   process.stdout.write("[]");
@@ -175,10 +194,13 @@ function makeFakeGit(binPath, realGitPath) {
   writeFileSync(
     script,
     `#!/usr/bin/env node
-const { mkdirSync, symlinkSync, writeFileSync } = require("node:fs");
+const { appendFileSync, mkdirSync, symlinkSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { spawnSync } = require("node:child_process");
 const args = process.argv.slice(2);
+if (process.env.FAKE_COMMAND_ORDER_LOG) {
+  appendFileSync(process.env.FAKE_COMMAND_ORDER_LOG, "git " + JSON.stringify(args) + "\\n");
+}
 if (process.env.FAKE_ASSERT_GIT_ENV === "1") {
   const allowed = new Set([
     "GIT_CONFIG_GLOBAL",
@@ -205,6 +227,10 @@ if (process.env.FAKE_GIT_REJECT_LS_REMOTE === "1" && args.includes("ls-remote"))
   process.exit(96);
 }
 const moveIndex = args.indexOf("move");
+if (process.env.FAKE_GIT_FAIL_MOVE === "1" && moveIndex > 0 && args[moveIndex - 1] === "worktree") {
+  process.stderr.write("Synthetic worktree move refusal.\\n");
+  process.exit(94);
+}
 if (process.env.FAKE_GIT_LATE_IGNORED_ON_MOVE === "1" && moveIndex > 0 && args[moveIndex - 1] === "worktree") {
   const source = args[moveIndex + 1];
   mkdirSync(join(source, ".late"), { recursive: true });
@@ -249,13 +275,24 @@ function makeFixture({
   ignoredPath,
   ignoredDisposition = "regenerable",
   taskless = false,
+  coordinatorOwnershipKind = null,
   lateIgnoredDuringFinalGithub = false,
+  primaryBranchDriftDuringFinalGithub = false,
   lateIgnoredDuringMove = false,
   lateIgnoredDuringRemove = false,
   recreateOriginalSymlinkDuringMove = false,
+  failMove = false,
   trackedBareRepository = false,
 } = {}) {
   assert.equal(localOnly && remoteBranch, false, "A fixture cannot use two recovery kinds.");
+  assert.equal(
+    taskless && coordinatorOwnershipKind !== null,
+    false,
+    "A fixture cannot use both manual task proof modes.",
+  );
+  if (coordinatorOwnershipKind !== null) {
+    assert.match(coordinatorOwnershipKind, /^(?:created|repurposed)$/u);
+  }
   const root = mkdtempSync(join(homedir(), ".homa-worktree-wrapper-"));
   const remote = join(root, "remote.git");
   const primary = join(root, "primary");
@@ -265,6 +302,7 @@ function makeFixture({
   const taskSnapshotPath = join(root, "task-snapshot.json");
   const fakeGithubCounterPath = join(root, "fake-gh-counter.txt");
   const fakeGithubRefLogPath = join(root, "fake-gh-ref-log.txt");
+  const commandOrderLogPath = join(root, "command-order.log");
   const fixtureIgnoredPath = ignoredPath ?? join(".cache", ignoredFilename);
 
   checked("git", ["init", "--bare", remote]);
@@ -280,6 +318,7 @@ function makeFixture({
     taskSnapshotPath,
     fakeGithubCounterPath,
     fakeGithubRefLogPath,
+    commandOrderLogPath,
     env,
   };
 
@@ -354,17 +393,23 @@ function makeFixture({
     FAKE_GH_COUNTER_PATH: fakeGithubCounterPath,
     FAKE_GH_LATE_IGNORED_CALL: lateIgnoredDuringFinalGithub ? "5" : "0",
     FAKE_GH_LATE_IGNORED_TARGET: target,
+    FAKE_GH_PRIMARY_BRANCH_DRIFT_CALL: primaryBranchDriftDuringFinalGithub ? "5" : "0",
+    FAKE_GH_PRIMARY_WORKTREE: primary,
+    FAKE_REAL_GIT: realGitPath,
+    FAKE_COMMAND_ORDER_LOG: commandOrderLogPath,
     FAKE_GH_REF_LOG: fakeGithubRefLogPath,
     FAKE_GH_ASSOCIATED_PULL: "0",
     FAKE_GIT_LATE_IGNORED_ON_MOVE: lateIgnoredDuringMove ? "1" : "0",
     FAKE_GIT_LATE_IGNORED_ON_REMOVE: lateIgnoredDuringRemove ? "1" : "0",
     FAKE_GIT_RECREATE_ORIGINAL_SYMLINK: recreateOriginalSymlinkDuringMove ? "1" : "0",
+    FAKE_GIT_FAIL_MOVE: failMove ? "1" : "0",
   };
 
   const now = new Date().toISOString();
   const head = git(fixture, target, ["rev-parse", "HEAD"]);
   fixture.env.FAKE_GH_ASSOCIATED_HEAD = head;
   const baseHead = git(fixture, target, ["rev-parse", "origin/main"]);
+  const primaryBranch = git(fixture, primary, ["symbolic-ref", "--quiet", "--short", "HEAD"]);
   fixture.env.FAKE_GH_REF_HEADS = JSON.stringify({
     main: baseHead,
     ...(remoteBranch ? { "codex/gh-872-disposable": head } : {}),
@@ -486,16 +531,45 @@ function makeFixture({
             approvedAt: now,
           },
         }
-      : {},
+      : coordinatorOwnershipKind
+        ? {
+            coordinatorOwnedManualLane: {
+              coordinator: {
+                taskId: "active-cleanup-coordinator",
+                branch: primaryBranch,
+                worktree: realpathSync(primary),
+              },
+              target: {
+                branch: "codex/gh-872-disposable",
+                worktree: realpathSync(target),
+                head,
+              },
+              ownershipEvent: {
+                kind: coordinatorOwnershipKind,
+                occurredAt: now,
+                details:
+                  coordinatorOwnershipKind === "created"
+                    ? "The active cleanup coordinator created this exact manual lane."
+                    : "The active cleanup coordinator repurposed this exact manual lane.",
+              },
+              approval: {
+                approvedBy: "sidneyswift",
+                approvedAt: now,
+                reason: `coordinator-${coordinatorOwnershipKind}-manual-lane`,
+              },
+            },
+          }
+        : {},
     recovery,
   };
   const scan = {
     version: 1,
-    nonce: "a".repeat(64),
+    nonce: randomBytes(32).toString("hex"),
     sha256: retirementScanSha256({
       target: realpathSync(target),
       registeredPath: realpathSync(target),
       repositoryRoot: realpathSync(primary),
+      primaryBranch,
       commonGitDir,
       origin: "https://github.com/sidneyswift/homa",
       head,
@@ -525,6 +599,10 @@ function makeFixture({
   };
   evidence.scan = scan;
   if (taskless) evidence.task.legacyTasklessOverride.scanNonce = scan.nonce;
+  if (coordinatorOwnershipKind) {
+    evidence.task.coordinatorOwnedManualLane.approval.scanNonce = scan.nonce;
+    evidence.task.coordinatorOwnedManualLane.approval.scanSha256 = scan.sha256;
+  }
   evidence.approval = {
     approvedBy: "sidneyswift",
     approvedAt: now,
@@ -544,7 +622,16 @@ function makeFixture({
     },
     tasks: taskless
       ? []
-      : [
+      : coordinatorOwnershipKind
+        ? [
+            {
+              id: "active-cleanup-coordinator",
+              status: "running",
+              branch: primaryBranch,
+              worktree: primary,
+            },
+          ]
+        : [
           {
             id: "completed-cleanup-task",
             status: "completed",
@@ -571,11 +658,38 @@ function makeFixture({
         ],
   };
   writeFileSync(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+  chmodSync(evidencePath, 0o600);
   writeFileSync(taskSnapshotPath, `${JSON.stringify(taskSnapshot, null, 2)}\n`);
+  fixture.primaryBranch = primaryBranch;
+  fixture.taskValidationCurrent = {
+    target: realpathSync(target),
+    repositoryRoot: realpathSync(primary),
+    primaryBranch,
+    origin: "https://github.com/sidneyswift/homa",
+    branch: "codex/gh-872-disposable",
+    head,
+  };
+  fixture.taskValidationGithub = {
+    repository: "sidneyswift/homa",
+    issue: {
+      number: 872,
+      state: "CLOSED",
+      url: "https://github.com/sidneyswift/homa/issues/872",
+    },
+    associatedPullRequests: [],
+  };
+  if (coordinatorOwnershipKind) {
+    fixture.coordinatorManualLaneConfirmation =
+      `ALLOW COORDINATOR MANUAL LANE active-cleanup-coordinator ` +
+      `codex/gh-872-disposable@${head} ${realpathSync(target)} ${scan.nonce}:${scan.sha256}`;
+  }
   return fixture;
 }
 
-function wrapperArgs(fixture, { execute = false, legacyTaskless = false, wrapper = fixture.wrapper } = {}) {
+function wrapperArgs(
+  fixture,
+  { execute = false, legacyTaskless = false, coordinatorManualLane = false, wrapper = fixture.wrapper } = {},
+) {
   const args = [
     realpathSync(wrapper),
     "--target",
@@ -598,6 +712,9 @@ function wrapperArgs(fixture, { execute = false, legacyTaskless = false, wrapper
   if (legacyTaskless) {
     args.push("--legacy-taskless-confirmation", `ALLOW TASKLESS ${realpathSync(fixture.target)}`);
   }
+  if (coordinatorManualLane) {
+    args.push("--coordinator-manual-lane-confirmation", fixture.coordinatorManualLaneConfirmation);
+  }
   return args;
 }
 
@@ -610,6 +727,71 @@ function boundTaskSnapshot(fixture, ready, mutate) {
   };
   if (mutate) mutate(snapshot, ready);
   return snapshot;
+}
+
+function coordinatorConfirmationFromEvidence(evidence, overrides = {}) {
+  const attestation = evidence.task.coordinatorOwnedManualLane;
+  const taskId = overrides.taskId ?? attestation.coordinator.taskId;
+  const targetBranch = overrides.targetBranch ?? attestation.target.branch;
+  const targetHead = overrides.targetHead ?? attestation.target.head;
+  const targetWorktree = overrides.targetWorktree ?? attestation.target.worktree;
+  const scanNonce = overrides.scanNonce ?? evidence.scan.nonce;
+  const scanSha256 = overrides.scanSha256 ?? evidence.scan.sha256;
+  return (
+    `ALLOW COORDINATOR MANUAL LANE ${taskId} ${targetBranch}@${targetHead} ${targetWorktree} ` +
+    `${scanNonce}:${scanSha256}`
+  );
+}
+
+function differentHex(value) {
+  return `${value[0] === "0" ? "1" : "0"}${value.slice(1)}`;
+}
+
+function coordinatorConsumptionRecordPath(fixture, evidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"))) {
+  return join(
+    fixture.commonGitDir,
+    "homa-coordinator-manual-lane-consumptions",
+    `${evidence.scan.nonce}.json`,
+  );
+}
+
+function validateCoordinatorFixture(fixture, { evidence, snapshot, current, confirmation, executionBoundary } = {}) {
+  const validatedEvidence = evidence ?? JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const validatedSnapshot = snapshot ?? JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  return validateTaskSnapshot(validatedSnapshot, current ?? fixture.taskValidationCurrent, validatedEvidence, {
+    github: fixture.taskValidationGithub,
+    coordinatorManualLaneConfirmation:
+      confirmation === undefined ? coordinatorConfirmationFromEvidence(validatedEvidence) : confirmation,
+    ...(executionBoundary ? { executionBoundary } : {}),
+  });
+}
+
+function completedTargetTask(fixture, id = "completed-target-task") {
+  const evidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const current = fixture.taskValidationCurrent;
+  return {
+    id,
+    status: "completed",
+    branch: current.branch,
+    worktree: current.target,
+    handoff: {
+      outcome: "The target lane work is complete.",
+      issue: "#872",
+      branch: current.branch,
+      worktree: current.target,
+      commitOrPr: current.head,
+      checks: {
+        executed: true,
+        status: "passed",
+        commands: ["node --test target-lane.test.mjs"],
+        completedAt: evidence.capturedAt,
+      },
+      productionState: "No production effect.",
+      nextStep: "cleanup-coordinator-remove-worktree",
+      handoffComplete: true,
+      recordedAt: evidence.capturedAt,
+    },
+  };
 }
 
 function runAfterReady(command, args, options, snapshotFactory) {
@@ -655,9 +837,15 @@ function runAfterReady(command, args, options, snapshotFactory) {
   });
 }
 
-function executeWrapper(fixture, { environment = fixture.env, mutateSnapshot } = {}) {
-  return runAfterReady(process.execPath, wrapperArgs(fixture, { execute: true }), { env: environment }, (ready) =>
-    boundTaskSnapshot(fixture, ready, mutateSnapshot),
+function executeWrapper(
+  fixture,
+  { environment = fixture.env, mutateSnapshot, coordinatorManualLane = false } = {},
+) {
+  return runAfterReady(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true, coordinatorManualLane }),
+    { env: environment },
+    (ready) => boundTaskSnapshot(fixture, ready, mutateSnapshot),
   );
 }
 
@@ -682,6 +870,10 @@ test("execution removes the registration and preserves sealed checkout content",
   assert.equal(outcome.preservedPath, join(roots[0], "preserved-worktree"));
   assert.equal(existsSync(outcome.preservedPath), true);
   assert.equal(existsSync(join(outcome.preservedPath, ".git")), true);
+  assert.equal(
+    existsSync(join(fixture.commonGitDir, "homa-coordinator-manual-lane-consumptions")),
+    false,
+  );
   assert.doesNotMatch(git(fixture, fixture.primary, ["worktree", "list", "--porcelain"]), /codex\/gh-872-disposable/u);
 });
 
@@ -902,6 +1094,92 @@ test("the generator writes bound mode-0600 evidence and a review queue", (t) => 
   );
   assert.equal(collision.status, 2);
   assert.match(collision.stderr, /must be different/iu);
+});
+
+test("consumed removal evidence must remain an owner-only regular file", async (t) => {
+  const permissionCases = [
+    ["group-readable", 0o640],
+    ["group-writable", 0o620],
+    ["other-readable", 0o604],
+    ["other-writable", 0o602],
+  ];
+  for (const [label, mode] of permissionCases) {
+    await t.test(label, (t) => {
+      const fixture = makeFixture();
+      t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+      chmodSync(fixture.evidencePath, mode);
+      const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+      assert.equal(result.status, 2, result.stderr);
+      assert.match(result.stderr, /owner-only regular file|mode.*0600/iu);
+      assert.equal(existsSync(fixture.target), true);
+    });
+  }
+
+  await t.test("symbolic link", (t) => {
+    const fixture = makeFixture();
+    t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+    const backingPath = join(fixture.root, "evidence-backing.json");
+    renameSync(fixture.evidencePath, backingPath);
+    symlinkSync(backingPath, fixture.evidencePath);
+    const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /regular file|symbolic link|path alias/iu);
+    assert.equal(existsSync(fixture.target), true);
+  });
+
+  const canChangeOwner =
+    typeof process.getuid === "function" && typeof process.getgid === "function" && process.getuid() === 0;
+  await t.test("wrong owner", { skip: !canChangeOwner }, (t) => {
+    const fixture = makeFixture();
+    t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+    chownSync(fixture.evidencePath, 1, 1);
+    const result = run(process.execPath, wrapperArgs(fixture), { env: fixture.env });
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /owned by the current user/iu);
+    assert.equal(existsSync(fixture.target), true);
+  });
+
+  await t.test("relative path", (t) => {
+    const fixture = makeFixture();
+    t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+    const args = wrapperArgs(fixture);
+    args[args.indexOf(fixture.evidencePath)] = "removal-evidence.json";
+    const result = run(process.execPath, args, { cwd: fixture.root, env: fixture.env });
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /evidence file path.*absolute.*normalized/iu);
+    assert.equal(existsSync(fixture.target), true);
+  });
+
+  await t.test("absolute path containing dot-dot", (t) => {
+    const fixture = makeFixture();
+    t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+    mkdirSync(join(fixture.root, "path-segment"));
+    const aliasedPath = `${fixture.root}/path-segment/../removal-evidence.json`;
+    const args = wrapperArgs(fixture);
+    args[args.indexOf(fixture.evidencePath)] = aliasedPath;
+    const result = run(process.execPath, args, { env: fixture.env });
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /evidence file path.*absolute.*normalized/iu);
+    assert.equal(existsSync(fixture.target), true);
+  });
+
+  await t.test("symbolic-link parent", (t) => {
+    const fixture = makeFixture();
+    t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+    const evidenceDirectory = join(fixture.root, "private-evidence");
+    const evidenceAlias = join(fixture.root, "evidence-alias");
+    mkdirSync(evidenceDirectory);
+    const movedEvidence = join(evidenceDirectory, "removal-evidence.json");
+    renameSync(fixture.evidencePath, movedEvidence);
+    fixture.evidencePath = movedEvidence;
+    symlinkSync(evidenceDirectory, evidenceAlias);
+    const args = wrapperArgs(fixture);
+    args[args.indexOf(movedEvidence)] = join(evidenceAlias, "removal-evidence.json");
+    const result = run(process.execPath, args, { env: fixture.env });
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /symbolic link|path alias/iu);
+    assert.equal(existsSync(fixture.target), true);
+  });
 });
 
 test("the generator streams exactly 101001 ignored files without truncation", (t) => {
@@ -1569,6 +1847,717 @@ test("a handoff can point exactly to its commit URL or an associated pull reques
   });
   assert.equal(wrongHeadResult.status, 2);
   assert.match(wrongHeadResult.stderr, /commitOrPr/iu);
+});
+
+test("coordinator-created and coordinator-repurposed manual lanes pass inspection", async (t) => {
+  for (const kind of ["created", "repurposed"]) {
+    await t.test(kind, (t) => {
+      const fixture = makeFixture({ coordinatorOwnershipKind: kind });
+      t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+      const result = run(
+        process.execPath,
+        wrapperArgs(fixture, { coordinatorManualLane: true }),
+        { env: fixture.env },
+      );
+      assert.equal(result.status, 0, result.stderr);
+      const assessment = JSON.parse(result.stdout);
+      assert.equal(assessment.status, "SAFE_TO_REMOVE");
+      assert.equal(assessment.taskProofMode, "coordinator-owned-manual-lane");
+      assert.equal(assessment.coordinatorTaskId, "active-cleanup-coordinator");
+      assert.deepEqual(assessment.matchingTaskIds, []);
+      assert.equal(existsSync(fixture.target), true);
+    });
+  }
+});
+
+test("a coordinator-owned manual lane needs its exact unique confirmation", (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  const secondFixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  t.after(() => rmSync(secondFixture.root, { recursive: true, force: true }));
+  const evidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const secondEvidence = JSON.parse(readFileSync(secondFixture.evidencePath, "utf8"));
+  assert.notEqual(evidence.scan.nonce, secondEvidence.scan.nonce);
+
+  for (const [label, confirmation] of [
+    ["missing", null],
+    ["task ID", coordinatorConfirmationFromEvidence(evidence, { taskId: "different-coordinator" })],
+    ["target branch", coordinatorConfirmationFromEvidence(evidence, { targetBranch: "codex/gh-872-other" })],
+    ["target HEAD", coordinatorConfirmationFromEvidence(evidence, { targetHead: "0".repeat(40) })],
+    ["target path", coordinatorConfirmationFromEvidence(evidence, { targetWorktree: realpathSync(fixture.root) })],
+    ["scan nonce", coordinatorConfirmationFromEvidence(evidence, { scanNonce: differentHex(evidence.scan.nonce) })],
+    [
+      "scan digest",
+      coordinatorConfirmationFromEvidence(evidence, { scanSha256: differentHex(evidence.scan.sha256) }),
+    ],
+    ["reused from another lane", secondFixture.coordinatorManualLaneConfirmation],
+  ]) {
+    assert.throws(
+      () => validateCoordinatorFixture(fixture, { confirmation }),
+      /coordinator manual lane confirmation|exact confirmation/iu,
+      label,
+    );
+  }
+});
+
+test("inspection rejects coordinator status with the wrong case", (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const snapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  snapshot.tasks[0].status = "RUNNING";
+  writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
+
+  const result = run(
+    process.execPath,
+    wrapperArgs(fixture, { coordinatorManualLane: true }),
+    { env: fixture.env },
+  );
+  assert.equal(result.status, 2, result.stderr);
+  assert.match(result.stderr, /coordinator task.*active/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("coordinator-owned manual lane attestations fail closed across identity and approval changes", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const baselineEvidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+  const baselineSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  const future = new Date(Date.now() + 60_000).toISOString();
+  const stale = new Date(Date.now() - 31 * 60 * 1000).toISOString();
+  const beforeEvidence = new Date(Date.parse(baselineEvidence.capturedAt) - 1).toISOString();
+  const earlierEvidence = new Date(Date.now() - 10_000).toISOString();
+  const afterEarlierEvidence = new Date(Date.now() - 5_000).toISOString();
+  const otherPath = realpathSync(fixture.root);
+  const cases = [
+    [
+      "wrong coordinator ID",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.coordinator.taskId = "different-coordinator";
+      },
+      /coordinator task.*absent|exactly one/iu,
+    ],
+    [
+      "duplicate coordinator task",
+      ({ snapshot }) => {
+        snapshot.tasks.push(structuredClone(snapshot.tasks[0]));
+      },
+      /exactly one.*coordinator task/iu,
+    ],
+    [
+      "absent coordinator task",
+      ({ snapshot }) => {
+        snapshot.tasks = [];
+      },
+      /exactly one.*coordinator task/iu,
+    ],
+    [
+      "completed coordinator task",
+      ({ snapshot }) => {
+        snapshot.tasks[0].status = "completed";
+      },
+      /coordinator task.*active/iu,
+    ],
+    [
+      "cancelled coordinator task",
+      ({ snapshot }) => {
+        snapshot.tasks[0].status = "cancelled";
+      },
+      /coordinator task.*active/iu,
+    ],
+    [
+      "uppercase coordinator status",
+      ({ snapshot }) => {
+        snapshot.tasks[0].status = "RUNNING";
+      },
+      /coordinator task.*active/iu,
+    ],
+    [
+      "coordinator task on another branch",
+      ({ snapshot }) => {
+        snapshot.tasks[0].branch = "codex/not-the-primary-lane";
+      },
+      /coordinator task branch/iu,
+    ],
+    [
+      "coordinator task at another path",
+      ({ snapshot }) => {
+        snapshot.tasks[0].worktree = otherPath;
+      },
+      /coordinator task worktree/iu,
+    ],
+    [
+      "attested coordinator branch differs from the primary branch",
+      ({ evidence, snapshot }) => {
+        evidence.task.coordinatorOwnedManualLane.coordinator.branch = "codex/not-the-primary-lane";
+        snapshot.tasks[0].branch = "codex/not-the-primary-lane";
+      },
+      /primary branch|coordinator branch/iu,
+    ],
+    [
+      "attested coordinator path differs from the primary path",
+      ({ evidence, snapshot }) => {
+        evidence.task.coordinatorOwnedManualLane.coordinator.worktree = otherPath;
+        snapshot.tasks[0].worktree = otherPath;
+      },
+      /primary worktree|coordinator worktree/iu,
+    ],
+    [
+      "wrong target branch",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.target.branch = "codex/gh-872-other";
+      },
+      /target branch/iu,
+    ],
+    [
+      "wrong target path",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.target.worktree = otherPath;
+      },
+      /target worktree/iu,
+    ],
+    [
+      "wrong target head",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.target.head = "0".repeat(40);
+      },
+      /target HEAD/iu,
+    ],
+    [
+      "detached target",
+      ({ current }) => {
+        current.branch = null;
+      },
+      /detached target/iu,
+    ],
+    [
+      "unknown ownership kind",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.ownershipEvent.kind = "adopted";
+      },
+      /ownershipEvent.kind/iu,
+    ],
+    [
+      "blank ownership details",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.ownershipEvent.details = "  ";
+      },
+      /ownershipEvent.details/iu,
+    ],
+    [
+      "future ownership event",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.ownershipEvent.occurredAt = future;
+      },
+      /ownershipEvent.occurredAt.*future/iu,
+    ],
+    [
+      "missing ownership timestamp",
+      ({ evidence }) => {
+        delete evidence.task.coordinatorOwnedManualLane.ownershipEvent.occurredAt;
+      },
+      /ownershipEvent.occurredAt.*non-empty string/iu,
+    ],
+    [
+      "malformed ownership timestamp",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.ownershipEvent.occurredAt = "not-a-time";
+      },
+      /ownershipEvent.occurredAt.*ISO timestamp/iu,
+    ],
+    [
+      "ownership event after evidence capture",
+      ({ evidence }) => {
+        evidence.capturedAt = earlierEvidence;
+        evidence.task.coordinatorOwnedManualLane.ownershipEvent.occurredAt = afterEarlierEvidence;
+      },
+      /ownershipEvent.occurredAt.*after.*evidence|evidence.*predates.*ownership/iu,
+    ],
+    [
+      "non-normalized ownership event",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.ownershipEvent.occurredAt =
+          evidence.task.coordinatorOwnedManualLane.ownershipEvent.occurredAt.replace(/Z$/u, "+00:00");
+      },
+      /ownershipEvent.occurredAt.*normalized/iu,
+    ],
+    [
+      "wrong approver",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.approvedBy = "someone-else";
+      },
+      /approval.approvedBy/iu,
+    ],
+    [
+      "blank approval reason",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.reason = "";
+      },
+      /approval.reason/iu,
+    ],
+    [
+      "ownership kind and approval reason mismatch",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.reason = "coordinator-repurposed-manual-lane";
+      },
+      /approval.reason/iu,
+    ],
+    [
+      "stale approval",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.approvedAt = stale;
+      },
+      /approval.approvedAt.*stale/iu,
+    ],
+    [
+      "future approval",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.approvedAt = future;
+      },
+      /approval.approvedAt.*future/iu,
+    ],
+    [
+      "missing approval timestamp",
+      ({ evidence }) => {
+        delete evidence.task.coordinatorOwnedManualLane.approval.approvedAt;
+      },
+      /approval.approvedAt.*non-empty string/iu,
+    ],
+    [
+      "malformed approval timestamp",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.approvedAt = "not-a-time";
+      },
+      /approval.approvedAt.*ISO timestamp/iu,
+    ],
+    [
+      "non-normalized approval",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.approvedAt =
+          evidence.task.coordinatorOwnedManualLane.approval.approvedAt.replace(/Z$/u, "+00:00");
+      },
+      /approval.approvedAt.*normalized/iu,
+    ],
+    [
+      "approval predates evidence",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.approvedAt = beforeEvidence;
+      },
+      /approval.approvedAt.*predates/iu,
+    ],
+    [
+      "wrong approval scan nonce",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.scanNonce = "f".repeat(64);
+      },
+      /approval.scanNonce/iu,
+    ],
+    [
+      "wrong approval scan digest",
+      ({ evidence }) => {
+        evidence.task.coordinatorOwnedManualLane.approval.scanSha256 = "f".repeat(64);
+      },
+      /approval.scanSha256/iu,
+    ],
+  ];
+
+  for (const [label, mutate, expected] of cases) {
+    await t.test(label, () => {
+      const evidence = structuredClone(baselineEvidence);
+      const snapshot = structuredClone(baselineSnapshot);
+      const current = structuredClone(fixture.taskValidationCurrent);
+      mutate({ evidence, snapshot, current });
+      assert.throws(
+        () => validateCoordinatorFixture(fixture, { evidence, snapshot, current }),
+        expected,
+      );
+    });
+  }
+});
+
+test("manual task proof modes cannot be mixed with each other or a target task", (t) => {
+  const coordinatorFixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  const completedFixture = makeFixture();
+  t.after(() => rmSync(coordinatorFixture.root, { recursive: true, force: true }));
+  t.after(() => rmSync(completedFixture.root, { recursive: true, force: true }));
+
+  const mixedEvidence = JSON.parse(readFileSync(coordinatorFixture.evidencePath, "utf8"));
+  mixedEvidence.task.legacyTasklessOverride = {
+    approvedBy: "sidneyswift",
+    reason: "legacy-lane-predates-task-tracking",
+    approvedAt: mixedEvidence.capturedAt,
+    scanNonce: mixedEvidence.scan.nonce,
+  };
+  assert.throws(
+    () => validateCoordinatorFixture(coordinatorFixture, { evidence: mixedEvidence }),
+    /cannot combine|exactly one manual task proof/iu,
+  );
+
+  const activeTargetSnapshot = JSON.parse(readFileSync(coordinatorFixture.taskSnapshotPath, "utf8"));
+  activeTargetSnapshot.tasks.push({
+    id: "active-target-task",
+    status: "running",
+    branch: coordinatorFixture.taskValidationCurrent.branch,
+    worktree: coordinatorFixture.target,
+  });
+  assert.throws(
+    () => validateCoordinatorFixture(coordinatorFixture, { snapshot: activeTargetSnapshot }),
+    /still running/iu,
+  );
+
+  for (const [label, status, branchMatches, pathMatches, expected] of [
+    ["active branch-only target task", "running", true, false, /still running/iu],
+    ["active path-only target task", "running", false, true, /still running/iu],
+    ["completed branch-only target task", "completed", true, false, /task .* worktree/iu],
+    ["completed path-only target task", "completed", false, true, /task .* branch/iu],
+  ]) {
+    const snapshot = JSON.parse(readFileSync(coordinatorFixture.taskSnapshotPath, "utf8"));
+    const task = completedTargetTask(coordinatorFixture, label);
+    task.status = status;
+    if (!branchMatches) {
+      task.branch = "codex/gh-872-different-branch";
+      task.handoff.branch = task.branch;
+    }
+    if (!pathMatches) {
+      task.worktree = realpathSync(coordinatorFixture.root);
+      task.handoff.worktree = task.worktree;
+    }
+    snapshot.tasks.push(task);
+    assert.throws(
+      () => validateCoordinatorFixture(coordinatorFixture, { snapshot }),
+      expected,
+      label,
+    );
+  }
+
+  const completedTargetSnapshot = JSON.parse(readFileSync(coordinatorFixture.taskSnapshotPath, "utf8"));
+  completedTargetSnapshot.tasks.push(completedTargetTask(coordinatorFixture));
+  assert.throws(
+    () => validateCoordinatorFixture(coordinatorFixture, { snapshot: completedTargetSnapshot }),
+    /completed target task.*manual task proof|manual task proof.*completed target task/iu,
+  );
+
+  const completedEvidence = JSON.parse(readFileSync(completedFixture.evidencePath, "utf8"));
+  completedEvidence.task.coordinatorOwnedManualLane = {};
+  const completedSnapshot = JSON.parse(readFileSync(completedFixture.taskSnapshotPath, "utf8"));
+  assert.throws(
+    () =>
+      validateTaskSnapshot(
+        completedSnapshot,
+        completedFixture.taskValidationCurrent,
+        completedEvidence,
+        {
+          github: completedFixture.taskValidationGithub,
+          coordinatorManualLaneConfirmation: "unused",
+        },
+      ),
+    /manual task proof|coordinator.*cannot be used|completed target task/iu,
+  );
+
+  assert.throws(
+    () =>
+      validateTaskSnapshot(
+        completedSnapshot,
+        completedFixture.taskValidationCurrent,
+        JSON.parse(readFileSync(completedFixture.evidencePath, "utf8")),
+        {
+          github: completedFixture.taskValidationGithub,
+          coordinatorManualLaneConfirmation: coordinatorFixture.coordinatorManualLaneConfirmation,
+        },
+      ),
+    /completed target task.*special confirmation|special confirmation.*completed target task/iu,
+  );
+});
+
+test("manual proof confirmations cannot substitute across modes", (t) => {
+  const coordinatorFixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  const legacyFixture = makeFixture({ taskless: true });
+  t.after(() => rmSync(coordinatorFixture.root, { recursive: true, force: true }));
+  t.after(() => rmSync(legacyFixture.root, { recursive: true, force: true }));
+
+  const coordinatorEvidence = JSON.parse(readFileSync(coordinatorFixture.evidencePath, "utf8"));
+  const coordinatorSnapshot = JSON.parse(readFileSync(coordinatorFixture.taskSnapshotPath, "utf8"));
+  assert.throws(
+    () =>
+      validateTaskSnapshot(
+        coordinatorSnapshot,
+        coordinatorFixture.taskValidationCurrent,
+        coordinatorEvidence,
+        {
+          github: coordinatorFixture.taskValidationGithub,
+          coordinatorManualLaneConfirmation: coordinatorFixture.coordinatorManualLaneConfirmation,
+          legacyTasklessConfirmation: `ALLOW TASKLESS ${coordinatorFixture.taskValidationCurrent.target}`,
+        },
+      ),
+    /legacy taskless confirmation.*coordinator-owned manual lane proof/iu,
+  );
+
+  const legacyEvidence = JSON.parse(readFileSync(legacyFixture.evidencePath, "utf8"));
+  const legacySnapshot = JSON.parse(readFileSync(legacyFixture.taskSnapshotPath, "utf8"));
+  assert.throws(
+    () =>
+      validateTaskSnapshot(
+        legacySnapshot,
+        legacyFixture.taskValidationCurrent,
+        legacyEvidence,
+        {
+          github: legacyFixture.taskValidationGithub,
+          legacyTasklessConfirmation: `ALLOW TASKLESS ${legacyFixture.taskValidationCurrent.target}`,
+          coordinatorManualLaneConfirmation: coordinatorFixture.coordinatorManualLaneConfirmation,
+        },
+      ),
+    /coordinator manual lane confirmation.*legacy taskless proof/iu,
+  );
+});
+
+test("coordinator proof is bound to the exact lane scan", (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  const otherFixture = makeFixture({ coordinatorOwnershipKind: "repurposed" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  t.after(() => rmSync(otherFixture.root, { recursive: true, force: true }));
+
+  const crossLaneSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  const otherEvidence = JSON.parse(readFileSync(otherFixture.evidencePath, "utf8"));
+  crossLaneSnapshot.retirementScan = structuredClone(otherEvidence.scan);
+  assert.throws(
+    () => validateCoordinatorFixture(fixture, { snapshot: crossLaneSnapshot }),
+    /scan nonce changed|scan digest changed/iu,
+  );
+});
+
+test("a fresh active coordinator can satisfy the post-READY proof for a disposable lane", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const proofMarker = "FINAL_TASK_SNAPSHOT_SENT";
+  const result = await executeWrapper(fixture, {
+    coordinatorManualLane: true,
+    mutateSnapshot() {
+      appendFileSync(fixture.commandOrderLogPath, `${proofMarker}\n`);
+    },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(existsSync(fixture.target), false);
+  assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
+
+  const commandLog = readFileSync(fixture.commandOrderLogPath, "utf8").trim().split("\n");
+  const markerIndex = commandLog.lastIndexOf(proofMarker);
+  assert.notEqual(markerIndex, -1);
+  const commandsAfterProofInput = commandLog.slice(markerIndex + 1);
+  assert.equal(commandsAfterProofInput.length > 0, true);
+  const firstCommand = commandsAfterProofInput[0];
+  assert.match(firstCommand, /^git /u);
+  const firstArgs = JSON.parse(firstCommand.slice("git ".length));
+  assert.deepEqual(firstArgs.slice(0, 5), [
+    "-C",
+    realpathSync(fixture.primary),
+    "worktree",
+    "move",
+    fixture.target,
+  ]);
+  assert.match(firstArgs[5], /\.homa-worktree-quarantine-[^/]+\/worktree$/u);
+});
+
+test("a repurposed manual lane can satisfy the post-READY proof", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "repurposed" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const result = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(existsSync(fixture.target), false);
+  assert.match(result.stderr, /READY_FOR_FINAL_CODEX_TASK_SNAPSHOT/u);
+});
+
+test("a coordinator may move between exact allowed active states before execution", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const inspectionSnapshot = JSON.parse(readFileSync(fixture.taskSnapshotPath, "utf8"));
+  inspectionSnapshot.tasks[0].status = "idle";
+  writeFileSync(fixture.taskSnapshotPath, `${JSON.stringify(inspectionSnapshot, null, 2)}\n`);
+
+  const inspection = run(
+    process.execPath,
+    wrapperArgs(fixture, { coordinatorManualLane: true }),
+    { env: fixture.env },
+  );
+  assert.equal(inspection.status, 0, inspection.stderr);
+
+  const execution = await executeWrapper(fixture, {
+    coordinatorManualLane: true,
+    mutateSnapshot(snapshot) {
+      snapshot.tasks[0].status = "waiting";
+    },
+  });
+  assert.equal(execution.status, 0, execution.stderr);
+  assert.equal(existsSync(fixture.target), false);
+});
+
+test("a consumed coordinator scan cannot remove a recreated identical lane", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const evidence = JSON.parse(readFileSync(fixture.evidencePath, "utf8"));
+
+  const first = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(existsSync(fixture.target), false);
+
+  const recordPath = coordinatorConsumptionRecordPath(fixture, evidence);
+  const directoryStats = lstatSync(dirname(recordPath));
+  const recordStats = lstatSync(recordPath);
+  assert.equal(directoryStats.mode & 0o777, 0o700);
+  assert.equal(recordStats.mode & 0o777, 0o600);
+  if (typeof process.getuid === "function") {
+    assert.equal(directoryStats.uid, process.getuid());
+    assert.equal(recordStats.uid, process.getuid());
+  }
+  const completedRecord = JSON.parse(readFileSync(recordPath, "utf8"));
+  assert.equal(completedRecord.state, "registration-removed");
+  assert.deepEqual(
+    completedRecord.events.map((event) => event.state),
+    ["move-intent-recorded", "quarantined", "content-preserved", "registration-removed"],
+  );
+
+  git(fixture, fixture.primary, [
+    "worktree",
+    "add",
+    fixture.target,
+    fixture.taskValidationCurrent.branch,
+  ]);
+  assert.equal(git(fixture, fixture.target, ["rev-parse", "HEAD"]), fixture.taskValidationCurrent.head);
+
+  const replay = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(replay.status, 2, replay.stderr);
+  assert.match(replay.stderr, /scan nonce.*already consumed|consumption record.*already exists/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("a pre-existing coordinator consumption record blocks before any move", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const recordPath = coordinatorConsumptionRecordPath(fixture);
+  mkdirSync(dirname(recordPath), { mode: 0o700 });
+  chmodSync(dirname(recordPath), 0o700);
+  writeFileSync(
+    recordPath,
+    `${JSON.stringify({ schemaVersion: 1, state: "move-intent-recorded" })}\n`,
+    { mode: 0o600 },
+  );
+  chmodSync(recordPath, 0o600);
+
+  const result = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(result.status, 2, result.stderr);
+  assert.match(result.stderr, /scan nonce.*already consumed|consumption record.*already exists/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("a refused coordinator move records a truthful consumed recovery state", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created", failMove: true });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  const recordPath = coordinatorConsumptionRecordPath(fixture);
+
+  const first = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(first.status, 2, first.stderr);
+  assert.match(first.stderr, /synthetic worktree move refusal/iu);
+  assert.equal(existsSync(fixture.target), true);
+
+  const record = JSON.parse(readFileSync(recordPath, "utf8"));
+  assert.equal(record.state, "recovery-required");
+  assert.equal(record.recovery.targetExists, true);
+  assert.equal(record.recovery.quarantineExists, false);
+  assert.equal(record.recovery.preservedExists, false);
+  assert.match(record.recovery.nextStep, /generate new evidence/iu);
+
+  const replay = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(replay.status, 2, replay.stderr);
+  assert.match(replay.stderr, /scan nonce.*already consumed|consumption record.*already exists/iu);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("post-READY coordinator drift preserves the disposable target", async (t) => {
+  const cases = [
+    [
+      "coordinator deleted",
+      (snapshot) => {
+        snapshot.tasks = [];
+      },
+      /exactly one.*coordinator task/iu,
+    ],
+    [
+      "coordinator completed",
+      (snapshot) => {
+        snapshot.tasks[0].status = "completed";
+      },
+      /coordinator task.*active/iu,
+    ],
+    [
+      "coordinator branch changed",
+      (snapshot) => {
+        snapshot.tasks[0].branch = "codex/another-primary-lane";
+      },
+      /coordinator task branch/iu,
+    ],
+    [
+      "coordinator worktree changed",
+      (snapshot, _ready, fixture) => {
+        snapshot.tasks[0].worktree = fixture.root;
+      },
+      /coordinator task worktree/iu,
+    ],
+  ];
+
+  for (const [label, mutate, expected] of cases) {
+    await t.test(label, async (t) => {
+      const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+      t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+      const result = await executeWrapper(fixture, {
+        coordinatorManualLane: true,
+        mutateSnapshot(snapshot, ready) {
+          mutate(snapshot, ready, fixture);
+        },
+      });
+      assert.equal(result.status, 2, result.stderr);
+      assert.match(result.stderr, expected);
+      assert.equal(existsSync(fixture.target), true);
+    });
+  }
+});
+
+test("a primary branch change before final validation invalidates the bound scan", async (t) => {
+  const fixture = makeFixture({
+    coordinatorOwnershipKind: "created",
+    primaryBranchDriftDuringFinalGithub: true,
+  });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+
+  const result = await executeWrapper(fixture, { coordinatorManualLane: true });
+  assert.equal(result.status, 2, result.stderr);
+  assert.match(result.stderr, /evidence scan digest changed/iu);
+  assert.equal(result.readyObserved, false);
+  assert.equal(existsSync(fixture.target), true);
+});
+
+test("a coordinator snapshot from an earlier READY boundary cannot be replayed", async (t) => {
+  const fixture = makeFixture({ coordinatorOwnershipKind: "created" });
+  t.after(() => rmSync(fixture.root, { recursive: true, force: true }));
+  let replayedSnapshot;
+  const first = await executeWrapper(fixture, {
+    coordinatorManualLane: true,
+    mutateSnapshot(snapshot) {
+      replayedSnapshot = structuredClone(snapshot);
+      snapshot.retirementScan.sha256 = "f".repeat(64);
+    },
+  });
+  assert.equal(first.status, 2, first.stderr);
+
+  const second = await runAfterReady(
+    process.execPath,
+    wrapperArgs(fixture, { execute: true, coordinatorManualLane: true }),
+    { env: fixture.env },
+    () => replayedSnapshot,
+  );
+  assert.equal(second.status, 2, second.stderr);
+  assert.match(second.stderr, /execution boundary (?:nonce|readyAt) changed|predates READY/iu);
+  assert.equal(existsSync(fixture.target), true);
 });
 
 test("automatic removal rejects a hand-written empty task snapshot", (t) => {
