@@ -153,7 +153,9 @@ jobs:
             apps/web/app/app/settings/delete-family-data-card.tsx
             apps/web/app/app/settings/page.tsx
             apps/web/lib/account-deletion-containment.test.ts
+            docs/homa-design/evidence/authoring-rails.json
             docs/homa-design/evidence/legacy-removal.json
+            docs/homa-design/evidence/marketing-production.json
             docs/homa-design/evidence/surfaces.json
             package.json
             scripts/migration-version-check.mjs

@@ -79,7 +79,15 @@ test("workflow is production-bound, immutable, and cancellation-recoverable", ()
   assert.ok(reviewedPaths?.groups?.paths);
   assert.match(
     reviewedPaths.groups.paths,
+    /docs\/homa-design\/evidence\/authoring-rails\.json/u
+  );
+  assert.match(
+    reviewedPaths.groups.paths,
     /docs\/homa-design\/evidence\/legacy-removal\.json/u
+  );
+  assert.match(
+    reviewedPaths.groups.paths,
+    /docs\/homa-design\/evidence\/marketing-production\.json/u
   );
   assert.match(reviewedPaths.groups.paths, /scripts\/migration-version-check\.mjs/u);
   assert.match(workflow, /GITHUB_RUN_ATTEMPT/u);
