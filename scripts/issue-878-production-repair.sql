@@ -459,6 +459,28 @@ select
   'issue-878-delete-turn'
 from issue_878_probe_ids;
 
+insert into public.account_deletion_jobs (
+  family_id,
+  requested_by_user_id,
+  status
+)
+select
+  delete_family_id,
+  delete_user_id,
+  'running'
+from issue_878_probe_ids;
+
+select pg_catalog.set_config(
+  'homa.family_delete_mode',
+  'account-deletion-v2',
+  true
+);
+
+update public.families family
+set status = 'deleted', updated_at = pg_catalog.now()
+from issue_878_probe_ids probe
+where family.id = probe.delete_family_id;
+
 delete from public.families family
 using issue_878_probe_ids probe
 where family.id = probe.delete_family_id;
