@@ -278,9 +278,35 @@ async function orderedMigrations(): Promise<string[]> {
 async function main(): Promise<number> {
   const argv = process.argv.slice(2);
   const execIndex = argv.indexOf("--exec");
+  const sandboxArgs = execIndex === -1 ? argv : argv.slice(0, execIndex);
+  const stopBeforeArguments = sandboxArgs.filter((argument) =>
+    argument.startsWith("--stop-before-migration="),
+  );
+  if (stopBeforeArguments.length > 1) {
+    console.error("Pass --stop-before-migration at most once.");
+    return 2;
+  }
+  const stopBeforeMigration = stopBeforeArguments[0]?.slice(
+    "--stop-before-migration=".length,
+  );
+  if (
+    stopBeforeMigration !== undefined &&
+    !/^\d{14}_[a-z0-9][a-z0-9_]*\.sql$/u.test(stopBeforeMigration)
+  ) {
+    console.error(
+      "--stop-before-migration must name one exact Supabase migration file.",
+    );
+    return 2;
+  }
+  const forwardedArgs =
+    execIndex === -1
+      ? argv.filter(
+          (argument) => !argument.startsWith("--stop-before-migration="),
+        )
+      : argv;
   const childCommand =
     execIndex === -1
-      ? { command: "pnpm", args: ["exec", "eve", "eval", ...argv] }
+      ? { command: "pnpm", args: ["exec", "eve", "eval", ...forwardedArgs] }
       : { command: argv[execIndex + 1], args: argv.slice(execIndex + 2) };
   if (execIndex !== -1 && !childCommand.command) {
     console.error("usage: pnpm eval:sandbox [eve-eval-args...] | pnpm eval:sandbox --exec <command...>");
@@ -362,8 +388,21 @@ async function main(): Promise<number> {
     await mustRun("supabase ambient shim", join(bin, "psql"), psqlArgs(["-c", SUPABASE_AMBIENT_SHIM]));
 
     const migrations = await orderedMigrations();
-    console.error(`[eval-sandbox] applying ${migrations.length} migrations`);
-    for (const file of migrations) {
+    const stopIndex =
+      stopBeforeMigration === undefined
+        ? migrations.length
+        : migrations.indexOf(stopBeforeMigration);
+    if (stopIndex < 0) {
+      throw new Error(
+        `stop-before migration is absent from supabase/migrations: ${stopBeforeMigration}`,
+      );
+    }
+    const migrationsToApply = migrations.slice(0, stopIndex);
+    console.error(
+      `[eval-sandbox] applying ${migrationsToApply.length} migrations` +
+        (stopBeforeMigration ? ` before ${stopBeforeMigration}` : ""),
+    );
+    for (const file of migrationsToApply) {
       await mustRun(
         `migration ${file}`,
         join(bin, "psql"),

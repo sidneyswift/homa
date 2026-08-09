@@ -643,6 +643,12 @@ jobs:
           pnpm check:account-deletion-containment
           pnpm test:issue-878-account-deletion-containment:postgres
 
+      - name: Issue 878 account deletion schema release disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: |
+          pnpm check:account-deletion-schema-release
+          pnpm test:issue-878-account-deletion-schema-release:postgres
+
       - name: Issue 888 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:issue-888-production-repair:postgres
