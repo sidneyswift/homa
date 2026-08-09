@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -367,7 +369,62 @@ test("published blog sources are independently discovered and classified as publ
 
 test("web route reachability follows the structural proxy boundary", () => {
   const proxySource = readFileSync(resolve(root, "apps/web/proxy.ts"), "utf8");
-  assert.match(proxySource, /path === "\/app" \|\| path\.startsWith\("\/app\/"\)/);
+  const sessionProxySource = readFileSync(
+    resolve(root, "apps/web/lib/supabase/session-proxy.ts"),
+    "utf8",
+  );
+  const proxyDefinitions = [
+    ...proxySource.matchAll(
+      /^export async function proxy\(request: NextRequest\) \{\n([\s\S]*?)^\}/gmu,
+    ),
+  ];
+  assert.equal(proxyDefinitions.length, 1, "expected one exported proxy function");
+  assert.equal(
+    proxyDefinitions[0]?.[1]?.trim(),
+    "return handleSessionProxy(request);",
+    "the exported proxy must delegate without a bypass",
+  );
+  assert.match(
+    sessionProxySource,
+    /path === "\/app" \|\| path\.startsWith\("\/app\/"\)/,
+  );
+
+  const matcherLiteral = proxySource.match(
+    /matcher:\s*\[\s*("(?:\\.|[^"\\])*")\s*,?\s*\]/u,
+  )?.[1];
+  assert.ok(matcherLiteral, "expected one static proxy matcher");
+  const matcher = JSON.parse(matcherLiteral) as string;
+  Object.assign(globalThis, { AsyncLocalStorage });
+  const webRequire = createRequire(resolve(root, "apps/web/package.json"));
+  const { unstable_doesMiddlewareMatch: unstableDoesProxyMatch } = webRequire(
+    "next/experimental/testing/server",
+  ) as {
+    unstable_doesMiddlewareMatch(input: {
+      config: { matcher: string[] };
+      url: string;
+    }): boolean;
+  };
+  const matcherConfig = { matcher: [matcher] };
+  assert.equal(unstableDoesProxyMatch({ config: matcherConfig, url: "/app" }), true);
+  assert.equal(
+    unstableDoesProxyMatch({ config: matcherConfig, url: "/app/report" }),
+    true,
+  );
+  assert.equal(
+    unstableDoesProxyMatch({ config: matcherConfig, url: "/signin" }),
+    true,
+  );
+  assert.equal(
+    unstableDoesProxyMatch({ config: matcherConfig, url: "/api/map" }),
+    false,
+  );
+  assert.equal(
+    unstableDoesProxyMatch({
+      config: matcherConfig,
+      url: "/_next/static/chunks/app.js",
+    }),
+    false,
+  );
 
   const routeFileNames = new Set([
     "apple-icon.tsx",

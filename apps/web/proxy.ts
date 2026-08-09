@@ -1,7 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
-import { safeSameOriginPath } from "./lib/safe-redirect";
+import { createSessionProxyHandler } from "./lib/supabase/session-proxy";
+
+const handleSessionProxy = createSessionProxyHandler({
+  async hasVerifiedClaims(cookieMethods) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      { cookies: cookieMethods },
+    );
+    const { data } = await supabase.auth.getClaims();
+    return data?.claims != null;
+  },
+});
 
 /**
  * Session-refresh proxy (Next 16's renamed middleware convention). Two jobs:
@@ -14,56 +26,7 @@ import { safeSameOriginPath } from "./lib/safe-redirect";
  * keys, so this gate cannot be spoofed by a hand-rolled cookie.
  */
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-          // Cache headers that prevent CDNs from caching a response that
-          // carries a fresh session cookie (session-leak protection).
-          Object.entries(headers ?? {}).forEach(([key, value]) =>
-            response.headers.set(key, value as string),
-          );
-        },
-      },
-    },
-  );
-
-  const { data } = await supabase.auth.getClaims();
-  const isSignedIn = data?.claims != null;
-
-  const path = request.nextUrl.pathname;
-  // Everything signed-in lives under /app (2026-07-09 rename), so the
-  // gate is structural: new app pages are covered without editing this
-  // list. The exact-or-slash check keeps lookalikes like /apple-icon out.
-  const needsAuth = path === "/app" || path.startsWith("/app/");
-
-  if (needsAuth && !isSignedIn) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/signin";
-    url.search = "";
-    url.searchParams.set("next", `${path}${request.nextUrl.search}`);
-    return NextResponse.redirect(url);
-  }
-  if ((path === "/signin" || path.startsWith("/signin/")) && isSignedIn) {
-    const destination = safeSameOriginPath(request.nextUrl.searchParams.get("next")) ?? "/app";
-    return NextResponse.redirect(new URL(destination, request.nextUrl.origin));
-  }
-
-  return response;
+  return handleSessionProxy(request);
 }
 
 export const config = {
