@@ -6,6 +6,7 @@ import {
   SUBJECT_LESSON_EVAL_CHILD_PHOTO_URL,
   SUBJECT_LESSON_EVAL_PREVIEW_URL,
   SUBJECT_LESSON_EVAL_TARGET,
+  parseSubjectLessonQualityReview,
   subjectLessonWorkflowFindings,
   type SubjectLessonWorkflowEvalResult,
 } from "../../evals/subject-lesson-builder/workflow-harness";
@@ -376,6 +377,25 @@ describe("subject lesson model workflow findings", () => {
 });
 
 describe("subject lesson model workflow eval contract", () => {
+  it("accepts a schema-valid evidence review from plain JSON", () => {
+    const review = parseSubjectLessonQualityReview(
+      JSON.stringify({
+        pass: true,
+        findings: ["Every candidate practices the reviewed target."],
+        assessments: [
+          {
+            candidateId: "step-1",
+            aligned: true,
+            evidenceQuote: "blends and reads map",
+            reason: "It directly practices the reviewed reading action.",
+          },
+        ],
+      })
+    );
+    assert.equal(review.pass, true);
+    assert.equal(review.assessments[0]?.evidenceQuote, "blends and reads map");
+  });
+
   it("uses the real Homa model with production-like local tool stubs", async () => {
     const [source, skillSource] = await Promise.all([
       readFile(
