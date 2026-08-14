@@ -53,6 +53,10 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      short passage and its two details directly into the lesson. Never send the
      parent to a book, story, comic, newspaper, or another family-owned source
      unless the step also supplies an immediate fallback passage.
+   - Source-bearing targets are self-contained in every teaching step and in
+     practice. Write the full passage, set, event list, or other named source
+     directly into the activity each time. Never tell the parent to find a
+     paragraph in a book, comic, story, or other outside material.
    - Use offer or declarative shapes for every parent-facing teaching step.
      For example, `You might invite Maya to say the sounds for m, a, and p`
      is an offer. `Maya places the m, a, and p tiles to build map` is an
