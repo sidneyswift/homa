@@ -78,6 +78,12 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      count 10 objects in every step, and a target to find two details in a
      short passage must use a short passage and find two details in every
      step.
+   - Do not add an extension that changes the target's named action or object.
+     Variety comes from a new example of the same target, not a bonus challenge
+     such as backward counting, composing a passage, or interpreting a comic
+     when those are not the reviewed target. When the target names a source
+     type, provide that exact source material in the lesson instead of asking
+     the child to create it or substitute a neighboring format.
 2. When content is not already saved, call
    `save_subject_lesson_content` exactly once. If it returns `saved: false`,
    stop honestly. Do not load `materials-studio` or call any later tool. Do not
@@ -103,6 +109,10 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      other target material directly on the worksheet. Never ask the parent or
      child to choose, invent, find, or supply an unspecified example. A
      worksheet should work the moment it is printed.
+   - Every worksheet exercise must rehearse only the target's named action and
+     object. Do not add a bonus challenge, extra writing task, alternate
+     sequence, or other enrichment unless that exact action is part of the
+     reviewed target.
 5. Call `create_printable` with:
    - `kind: "worksheet"`;
    - the trusted `childId` and exact `childName`;
@@ -146,6 +156,8 @@ Confirm all of the following:
   stopping at an adjacent skill such as sorting, labeling, or a prerequisite.
 - Every step reaches the target's full named scope, including any quantity,
   number of details, source type, set, sequence, or other bound.
+- No step or worksheet exercise adds a different action, source type, or bonus
+  challenge merely for variety. It uses another exact target example instead.
 - No numbered step is only setup, naming, drawing, sorting, or read-back. A
   useful precursor belongs inside the same step as the exact target rehearsal.
 - Every step supplies exact options instead of asking the parent to choose
