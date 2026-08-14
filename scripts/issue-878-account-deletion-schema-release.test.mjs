@@ -337,7 +337,7 @@ test("disposable harness starts at the production boundary and exercises drift",
   assert.match(harness, /foreignKeyDrift/u);
 });
 
-test("deletion UI, route, schedule, and RPC remain paused", () => {
+test("clients use the authenticated deletion protocol while the legacy direct RPC stays paused", () => {
   const route = readFileSync(
     resolve(repositoryRoot, "apps/web/app/api/account-deletion/route.ts"),
     "utf8",
@@ -359,13 +359,16 @@ test("deletion UI, route, schedule, and RPC remain paused", () => {
   );
   const guardedMigration = migrations[1].toString("utf8");
 
-  assert.match(route, /status: 503/u);
-  assert.doesNotMatch(route, /requestAccountDeletion/u);
-  assert.doesNotMatch(schedule, /retryPendingAccountDeletions/u);
+  assert.doesNotMatch(route, /status: 503/u);
+  assert.match(route, /createAccountDeletionPost/u);
+  assert.match(route, /requireFamilyWithActorFromRequest/u);
+  assert.match(route, /requestAccountDeletion/u);
+  assert.match(route, /mapDb\(\)/u);
+  assert.match(schedule, /retryPendingAccountDeletions/u);
   for (const surface of [webSurface, mobileSurface]) {
-    assert.match(surface, /Account deletion is paused/u);
-    assert.match(surface, /Billing continues unless you cancel/u);
-    assert.doesNotMatch(surface, /Permanently delete/u);
+    assert.doesNotMatch(surface, /Account deletion is paused/u);
+    assert.match(surface, /permanently deletes/u);
+    assert.match(surface, /confirms billing/u);
   }
   assert.match(guardedMigration, /account deletion is temporarily unavailable/u);
   assert.match(
