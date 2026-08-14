@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 
-import { generateObject, generateText, stepCountIs, tool } from "ai";
+import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod";
 
 import { HOMA_MODEL } from "../../agent/model";
@@ -646,6 +646,20 @@ const subjectLessonQualityReviewSchema = z
 
 type SubjectLessonQualityReview = z.infer<typeof subjectLessonQualityReviewSchema>;
 
+function parseSubjectLessonQualityReview(response: string): SubjectLessonQualityReview {
+  const json = response
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "");
+  const parsed = subjectLessonQualityReviewSchema.safeParse(JSON.parse(json));
+  if (!parsed.success) {
+    throw new Error(
+      `Subject lesson quality review did not match the required evidence schema: ${parsed.error.message}`
+    );
+  }
+  return parsed.data;
+}
+
 interface SubjectLessonQualityCandidate {
   id: string;
   text: string;
@@ -709,11 +723,10 @@ export async function judgeSubjectLessonTargetFidelity(
     };
   }
   const reviewOnce = async (): Promise<SubjectLessonQualityReview> => {
-    const review = await generateObject({
+    const review = await generateText({
       model: HOMA_MODEL,
-      schema: subjectLessonQualityReviewSchema,
       system:
-        "You are a strict senior homeschool curriculum reviewer. Judge only whether each candidate genuinely teaches the exact reviewed target. A candidate fails when it stops at a nearby prerequisite, category, or adjacent skill. The target's named scope is binding: quantities, detail counts, source types, named sets, and sequences must all be present. Return evidenceQuote as one uninterrupted, byte-for-byte substring copied from that candidate. Do not use ellipses, paraphrase, repaired grammar, or markdown. Do not reward a candidate merely for repeating target words.",
+        "You are a strict senior homeschool curriculum reviewer. Judge only whether each candidate genuinely teaches the exact reviewed target. A candidate fails when it stops at a nearby prerequisite, category, or adjacent skill. The target's named scope is binding: quantities, detail counts, source types, named sets, and sequences must all be present. Return evidenceQuote as one uninterrupted, byte-for-byte substring copied from that candidate. Do not use ellipses, paraphrase, repaired grammar, or markdown. Do not reward a candidate merely for repeating target words. Respond with one JSON object only, with pass (boolean), findings (string array), and assessments (array of candidateId, aligned, evidenceQuote, and reason).",
       prompt: [
         `Exact reviewed target: ${qualityCase.targetStatement}`,
         `Child age: ${qualityCase.ageMonths} months.`,
@@ -722,7 +735,7 @@ export async function judgeSubjectLessonTargetFidelity(
       ].join("\n"),
       maxRetries: 2,
     });
-    return review.object;
+    return parseSubjectLessonQualityReview(review.text);
   };
   const firstReview = await reviewOnce();
   return reviewQuotesAreVerbatim(firstReview, candidates)
