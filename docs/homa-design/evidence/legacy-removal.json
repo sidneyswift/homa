@@ -3,8 +3,8 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
-  "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "a2daa847121f04829f803271a13e86795d5c0fbcdddaf6ed5c72180dc37b02ab",
+  "manifestBaselineSourceCommit": "687bbdceb3bb0b56a4e8fcf0049bdd0893ee7782",
+  "ownedInputFingerprint": "a10333df6d1f48021043c7279a8e63e3a5e669fb9b48de9ce52cb8f2d5ee5605",
   "ownerIssue": "gh#729",
   "records": [
     {
