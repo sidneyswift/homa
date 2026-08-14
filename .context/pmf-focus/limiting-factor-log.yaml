@@ -5,7 +5,7 @@ pmf_definition: >-
   meaningfully disappointed if it disappeared. Observable proxies: activation
   through the core loop, return usage, and willingness to pay or strongly
   recommend. Replace this paragraph when the founder tightens the definition.
-updated_at: "2026-07-18T14:40:00Z"
+updated_at: "2026-08-14T19:11:53Z"
 
 # Denominator glossary (see also pmf-focus/references/reality-checks.md):
 # - signup-screen abandon = status=open (opened Google/email signup, never finished)
@@ -93,6 +93,8 @@ current:
       reason: 0 trials because value reach is tiny, not because checkout is wrong
     - item: Docs reconciliation, fleet-skills refactor, night-manager, founder dashboard
       reason: Internal, off the user value chain
+    - item: P2 brand redesign, abilities map, caregiver collaboration, Progress expansion, and iOS storefront
+      reason: Fresh production shows the first useful post-report action is the bottleneck, not another surface or capability.
   blocker: null
   started_at: "2026-07-16T16:20:00Z"
   completed_at: null
@@ -101,6 +103,26 @@ current:
 history: []
 
 research_notes:
+  - at: "2026-08-14T19:11:53Z"
+    surface: "activation | report | materials | billing"
+    finding: >-
+      Fresh production read confirms the core-loop activation factor remains
+      unsolved. Of 45 report-reached families, 36 opened a report, 5 opened
+      Planner, 1 changed a plan, 8 closed a learning loop, and 0 completed
+      the activation handoff. In the post-report-lock cohort, 12 families
+      finished setup and 11 reached a report, but only 1 created material
+      within 48 hours and 0 kept one. Commercial state is now nonzero
+      (1 trial and 1 subscription), but it does not remove the activation
+      failure.
+    source: >-
+      2026-08-14 production admin smoke plus direct count-only Postgres
+      query over claimed, non-sandbox families; report lock cohort begins
+      2026-07-18T14:25:44Z.
+    implication_for_pmf: >-
+      Keep lf-2026-07-16-core-loop-activation in progress. Build and test
+      one unmistakable report-to-first-lesson action before new product
+      surfaces. The CTA-cause hypothesis needs five observed report-reached
+      parent sessions before it can be treated as fact.
   - at: "2026-07-18T14:40:00Z"
     surface: "billing | paywall"
     finding: >-
@@ -219,6 +241,9 @@ research_notes:
     implication_for_pmf: "Superseded on language; direction on signed-up cohort kept."
 
 say_no_queue:
+  - at: "2026-08-14T19:11:53Z"
+    proposal: "Advance P2 brand redesign, abilities map, caregiver collaboration, Progress expansion, or iOS storefront"
+    said_no_because: "None removes the current limiting factor (lf-2026-07-16-core-loop-activation): report-reached families are not taking and keeping a first useful action."
   - at: "2026-07-16T11:05:00Z"
     proposal: "Call status=open rows 'real families', 'signups', or 'started onboarding'"
     said_no_because: "They are signup-screen abandons (no email/phone); see reality-checks denominators"
