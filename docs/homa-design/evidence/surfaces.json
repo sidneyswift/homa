@@ -1,9 +1,9 @@
 {
   "schemaVersion": 3,
   "designEra": "quiet-authority-v1",
-  "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "a2daa847121f04829f803271a13e86795d5c0fbcdddaf6ed5c72180dc37b02ab",
+  "baselineSourceCommit": "687bbdceb3bb0b56a4e8fcf0049bdd0893ee7782",
+  "baselineSourceCommitTimestamp": "2026-08-14T15:38:53-04:00",
+  "ownedInputFingerprint": "a10333df6d1f48021043c7279a8e63e3a5e669fb9b48de9ce52cb8f2d5ee5605",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -44473,7 +44473,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "5433b52b8d16afdba49b3ea23344b1f81ebb70af989b90211fe15071a8b7119b",
+        "fixtureChecksum": "b7e6c23254e0c44ba617f9985e7e040832c1e5101c534ed06a2ede76bd866e23",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -44498,7 +44498,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "5433b52b8d16afdba49b3ea23344b1f81ebb70af989b90211fe15071a8b7119b"
+        "b7e6c23254e0c44ba617f9985e7e040832c1e5101c534ed06a2ede76bd866e23"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -44514,9 +44514,9 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "a52d8e7fed3c70a390a50945c78b9cf07c7c0c4c",
-        "sourceCommitTimestamp": "2026-07-20T17:53:25-04:00",
-        "environment": "git-source-commit",
+        "sourceCommitSha": null,
+        "sourceCommitTimestamp": null,
+        "environment": "working-tree-uncommitted",
         "clientRuntimeFingerprint": null,
         "pixels": null,
         "interactions": null,
