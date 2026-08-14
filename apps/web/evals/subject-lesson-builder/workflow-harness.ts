@@ -630,21 +630,19 @@ export function subjectLessonWorkflowFindings(
 const subjectLessonQualityReviewSchema = z
   .object({
     pass: z.boolean(),
-    findings: z.array(z.string().min(1).max(240)).max(8),
+    findings: z.array(z.string().min(1).max(500)).max(12),
     assessments: z
       .array(
         z
           .object({
             candidateId: z.string().min(1).max(40),
             aligned: z.boolean(),
-            evidenceQuote: z.string().min(1).max(240),
-            reason: z.string().min(1).max(240),
+            evidenceQuote: z.string().min(1).max(500),
+            reason: z.string().min(1).max(500),
           })
-          .strict()
       )
-      .max(8),
-  })
-  .strict();
+      .max(12),
+  });
 
 type SubjectLessonQualityReview = z.infer<typeof subjectLessonQualityReviewSchema>;
 
@@ -722,7 +720,7 @@ export async function judgeSubjectLessonTargetFidelity(
         "Rubric: every teaching step, practice suggestion, and worksheet must make the child rehearse the target's named action and object. A prerequisite is allowed only when it immediately becomes practice of that exact target.",
         `Candidates: ${JSON.stringify(candidates)}`,
       ].join("\n"),
-      maxRetries: 1,
+      maxRetries: 2,
     });
     return review.object;
   };
