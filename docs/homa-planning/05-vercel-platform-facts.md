@@ -71,17 +71,16 @@ invocations); instances reused across concurrent requests; 300 s default / up to
 max duration (Pro, beta above 800 s); Node 24 default. Pro plan = $20/user/mo with $20
 usage credit, then pay-as-you-go with Spend Management alerts/auto-pause.
 
-## AI Gateway (models + the per-family cost telemetry)
+## AI Gateway (models + fleet cost telemetry)
 
 - **Zero markup** on tokens (provider list price). BYOK supported at no fee (paid tier),
   with automatic fallback to system credentials if our key fails.
-- **Custom Reporting (beta, Pro+):** attach `user` (= familyId) and `tags` (= feature:
-  chat / scoring / worksheet) per request : eve already routes through Gateway, and the
-  `ai-reporting-user` / `ai-reporting-tags` **headers** let us stamp attribution without
-  touching model-call code. Query spend/tokens by user/tag/model via `GET /v1/report` or
-  `getSpendReport()`. Cost: $0.075/1K metadata writes, $5/1K report queries. **This is
-  the per-family unit-economics dashboard : build the admin console on it instead of
-  hand-rolling token accounting.**
+- **Custom Reporting (beta, Pro+):** attach only `tags` (= feature: chat / scoring /
+  worksheet) per request. Query spend and tokens by tag or model via `GET /v1/report`.
+  Cost: $0.075/1K metadata writes, $5/1K report queries. Per-family unit economics
+  come from Homa's local `public.model_usage` ledger so account deletion can erase the
+  family identifier. Gateway reporting reconciles fleet and feature totals without
+  receiving the raw family UUID.
 - **Budgets/quotas:** spending caps per API key (`limitAmount` USD + daily/weekly/monthly
   refresh). Combined with eve's per-session token limits = two layers of cost guardrails.
 - Optional paid add-ons: provider allowlist, zero-data-retention enforcement (relevant to

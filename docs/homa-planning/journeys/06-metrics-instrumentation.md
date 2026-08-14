@@ -197,11 +197,12 @@ stop spending on the channel, don't celebrate the volume.
 
 ## 3. Cost & margin metrics (the margin law, §08, mechanized)
 
-Source of truth: **AI Gateway Custom Reporting**, every model call is stamped
-`ai-reporting-user: <familyId>` and `ai-reporting-tags: <action_class>` (05 §AI
-Gateway); queried nightly via `getSpendReport()`. Non-LLM COGS (fal.ai images,
-sandbox compute) are snapshotted as `props.cogs_estimate_cents` on
-`material.generated` at generation time (the generator knows what it called).
+Source of truth for per-family use: **`public.model_usage`**, the deletable local
+ledger. Direct model calls send only an action-class tag to AI Gateway Custom
+Reporting, which remains the fleet and action-class reconciliation source. Raw
+family IDs never enter provider reporting. Non-LLM COGS (fal.ai images, sandbox
+compute) are snapshotted as `props.cogs_estimate_cents` on `material.generated`
+at generation time (the generator knows what it called).
 
 **Action classes** (= the `ai-reporting-tags` vocabulary, = `action_costs` rows):
 `chat`, `onboarding_wow`, `worksheet`, `coloring_page`, `picture_book`,
@@ -210,9 +211,9 @@ sandbox compute) are snapshotted as `props.cogs_estimate_cents` on
 
 | Metric | Definition | Threshold / alert |
 |---|---|---|
-| $/family/mo (P50, P90) | Gateway spend by `user` + fal/sandbox snapshots, calendar month | **Law: P50 < $10, and < 20% of plan price.** P90 > $20 = investigate the family (bug or abuse, not billing) |
+| $/family/mo (P50, P90) | Local `model_usage` quantities joined to the current price book + fal/sandbox snapshots, calendar month | **Law: P50 < $10, and < 20% of plan price.** P90 > $20 = investigate the family (bug or abuse, not billing) |
 | $/action class /mo | Gateway spend by `tag` ÷ action count from events | Any class drifting > 20% from its `action_costs` COGS estimate ⇒ reprice (registry rule 3) |
-| Realized margin per action [GA, needs M1-12 ledger] | `(credits_burned × $0.01 − COGS_actual) ÷ (credits_burned × $0.01)` per class, joining `credit_ledger` burns to Gateway/fal actuals, this is the M1-13 admin margin view | **< 50% for 7 consecutive days on any class ⇒ reprice or re-tier the model.** Target ≥ 70% (multiplier 3.3) |
+| Realized margin per action [GA, needs M1-12 ledger] | `(credits_burned × $0.01 − COGS_actual) ÷ (credits_burned × $0.01)` per class, joining `credit_ledger` burns to local model usage plus Gateway/fal aggregates, this is the M1-13 admin margin view | **< 50% for 7 consecutive days on any class ⇒ reprice or re-tier the model.** Target ≥ 70% (multiplier 3.3) |
 | Plan-included loop cost | `weekly_scoring` + `weekly_plan` + amortized `benchmark_research` $/family/mo (costed, never charged) | > $4/family/mo eats the fixed-COGS budget (08 plan table), batch harder or cheapen the first-pass model |
 | Global research job cost | `benchmark_research` tag, nightly | > $5/night = the "global, once" invariant broke (per-family research leaked back in) |
 | Gateway budget caps (backstop) | per-key USD cap + eve per-session token limits | Cap hit = something is broken, not busy, page (§5) |

@@ -2325,25 +2325,13 @@ export async function markReminderSent(familyId: string): Promise<void> {
 }
 
 /**
- * Purges anonymous families that never became anything: no email, no
- * member, no kids, untouched for a week. Every visitor who taps "start"
- * and bounces leaves one of these rows, and nothing else ever deletes
- * them. Deliberately NARROW: an anonymous family WITH kids is never
- * purged, because the family's device cookie can still resume it. Zero
- * data loss by construction.
+ * Anonymous lead cleanup is paused. A family without email, members, or
+ * children can still own an SMS number or conversation history. Unlike
+ * account deletion, this path has no durable receipt or cleanup worker, so
+ * it cannot yet prove that the family is empty across every data store.
  */
 export async function purgeEmptyAnonymousLeads(): Promise<number> {
-  const sql = mapDb();
-  const rows = await sql<{ id: string }[]>`
-    delete from public.families f
-    where f.email is null
-      and f.created_at < now() - interval '7 days'
-      and f.updated_at < now() - interval '7 days'
-      and not exists (select 1 from public.children c where c.family_id = f.id)
-      and not exists (select 1 from public.family_members m where m.family_id = f.id)
-    returning id
-  `;
-  return rows.length;
+  return 0;
 }
 
 /**

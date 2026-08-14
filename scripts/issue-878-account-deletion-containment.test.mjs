@@ -178,24 +178,22 @@ test("migration and repair verify the exact fail-closed database contract", () =
   );
 });
 
-test("current clients and the retry worker expose no destructive action", () => {
-  assert.match(route, /status: 503/u);
-  assert.match(route, /Cache-Control.*no-store/u);
-  assert.doesNotMatch(route, /requestAccountDeletion/u);
-  assert.doesNotMatch(route, /requireFamilyWithActorFromRequest/u);
-  assert.doesNotMatch(route, /mapDb/u);
-  assert.doesNotMatch(route, /request\.json/u);
-  assert.doesNotMatch(schedule, /retryPendingAccountDeletions/u);
+test("current clients expose only the authenticated deletion protocol", () => {
+  assert.doesNotMatch(route, /status: 503/u);
+  assert.match(route, /createAccountDeletionPost/u);
+  assert.match(route, /requireFamilyWithActorFromRequest/u);
+  assert.match(route, /requestAccountDeletion/u);
+  assert.match(route, /mapDb\(\)/u);
+  assert.match(schedule, /retryPendingAccountDeletions/u);
 
   for (const [name, surface] of [
     ["web", webSurface],
     ["mobile", mobileSurface],
   ]) {
-    assert.match(surface, /Account deletion is paused/u, name);
-    assert.match(surface, /Billing continues unless you cancel/u, name);
-    assert.match(surface, /Email Homa/u, name);
-    assert.doesNotMatch(surface, /Permanently delete/u, name);
-    assert.doesNotMatch(surface, /Yes, delete/u, name);
-    assert.doesNotMatch(surface, /handleDelete/u, name);
+    assert.doesNotMatch(surface, /Account deletion is paused/u, name);
+    assert.match(surface, /permanently deletes/u, name);
+    assert.match(surface, /confirms billing/u, name);
   }
+  assert.match(webSurface, /Permanently delete this family/u);
+  assert.match(mobileSurface, /handleDelete/u);
 });

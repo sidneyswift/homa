@@ -19,7 +19,8 @@ import { mapDb } from "./map/db";
  *      (chat turns on every channel, plus compaction).
  *   2. Every direct AI SDK call site records here itself and ALSO tags
  *      the Gateway request via gatewayAttribution() so Vercel's
- *      /v1/report can slice the same spend by family and surface.
+ *      /v1/report can slice spend by surface. Family attribution stays
+ *      only in Homa's deletable local ledger.
  */
 
 export const USAGE_SURFACES = [
@@ -117,19 +118,16 @@ export async function recordModelUsage(row: ModelUsageRow): Promise<void> {
 }
 
 /**
- * Gateway-side attribution for a direct AI SDK call: merge into the
- * call's providerOptions.gateway so Vercel's Custom Reporting
- * (/v1/report, group_by=user|tag) can slice spend by family and
- * surface. familyId may be null for fleet-level work.
+ * Gateway-side attribution for a direct AI SDK call. Only the product
+ * surface leaves Homa. The family identifier stays in model_usage, where
+ * account deletion can remove it instead of copying it into a provider's
+ * reporting system without a per-user erase API.
  */
 export function gatewayAttribution(
-  familyId: string | null,
+  _familyId: string | null,
   surface: UsageSurface,
-): { user?: string; tags: string[] } {
-  return {
-    ...(familyId ? { user: familyId } : {}),
-    tags: [surface],
-  };
+): { tags: string[] } {
+  return { tags: [surface] };
 }
 
 /** Session-auth attributes -> the ledger's channel value. */

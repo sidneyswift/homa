@@ -8,8 +8,15 @@ import {
   familyBillingEntitlement,
   LAPSED_BILLING_STATUSES,
   recordBillingSubscription,
+  recordBillingSubscriptionInTransaction,
   type FamilyBillingEntitlement,
 } from "./entitlements";
+import { mintCheckoutIntent } from "./checkout-intent";
+import { clearApplePurchaseInterlockAfterVerifiedTransactionInTransaction } from "./apple-purchase-interlock";
+import {
+  configuredServerPaymentLinkUrls,
+  configuredStripeSecretKey,
+} from "./stripe-checkout-config";
 import { mapDb } from "../map/db";
 import { familyOnboardingActive } from "../onboarding/state";
 import { isPlanTier } from "./wall-types";
@@ -58,7 +65,7 @@ export function reportLockEnabled(): boolean {
  * report, or any conversation. Every plan starts with the same
  * card-upfront 7-day trial the door wall already sells; this flag only
  * moves WHERE the ask happens. Ships dark; the founder flips it after
- * verifying the Payment Links. It does not require HOMA_WALL_ENABLED:
+ * verifying server-created Stripe Checkout. It does not require HOMA_WALL_ENABLED:
  * the account gate replaces the door wall for new families rather than
  * layering on it.
  *
@@ -72,15 +79,12 @@ export function signupPaywallEnabled(): boolean {
   return value === "1" || value === "true";
 }
 
-/** Live links first (set only in Vercel production), TEST for local dev
- *  and previews. A tier must first be available in the shared catalog,
- *  then its monthly link must exist or the tier doesn't
- *  render at all (regular's absence downs the whole wall; Plus's
- *  absence narrows the offer). Max remains receipt-recognized but is
- *  intentionally unavailable for new purchases. Annual is optional
- *  per tier. Every tier's annual price is 20% off its monthly price
- *  times twelve, rounded to the nearest dollar (founder ruling
- *  2026-07-26); prices live in wall-copy.ts's TIER_PRICES.
+/** Live references first (set only in Vercel production), TEST for local
+ *  development and previews. These legacy Payment Link URLs stay inactive
+ *  and identify exact recurring prices for server-created Checkout Sessions.
+ *  A tier must first be available in the shared catalog, then its monthly
+ *  reference must exist or the tier does not render at all. Max remains
+ *  receipt-recognized but unavailable for new purchases. Annual is optional.
  *
  *  Written as literal per-tier `process.env.NEXT_PUBLIC_...` accesses on
  *  purpose, never a templated key: Next.js only inlines NEXT_PUBLIC_ vars
@@ -88,35 +92,20 @@ export function signupPaywallEnabled(): boolean {
  *  would read as undefined in production. */
 function tierPaymentLinkBases(tier: PlanTier): { monthly: string; annual: string | null } | null {
   if (!planAvailableForPurchase(tier)) return null;
-  let monthly: string | undefined;
-  let annual: string | undefined;
-  if (tier === "regular") {
-    monthly =
-      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_MONTHLY_URL ||
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_MONTHLY_URL;
-    annual =
-      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_ANNUAL_URL ||
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_ANNUAL_URL;
-  } else if (tier === "plus") {
-    monthly =
-      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_PLUS_MONTHLY_URL ||
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_PLUS_MONTHLY_URL;
-    annual =
-      process.env.NEXT_PUBLIC_STRIPE_LIVE_PAYMENT_LINK_PLUS_ANNUAL_URL ||
-      process.env.NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_PLUS_ANNUAL_URL;
-  } else {
-    return null;
-  }
-  if (!monthly) return null;
-  return { monthly, annual: annual || null };
+  const configured = configuredServerPaymentLinkUrls()[tier];
+  if (!configured?.monthly) return null;
+  return {
+    monthly: configured.monthly,
+    annual: configured.annual ?? null,
+  };
 }
 
 /**
  * Which Stripe Product backs each tier, live and test. Used only to read
- * back which tier a completed checkout session bought (billing/confirm),
- * never to build a checkout URL (Payment Links already carry that).
- * Product ids are stable identity, unlike price nicknames, so a future
- * price change for a tier never breaks this mapping.
+ * back which tier a completed Checkout Session bought. Server checkout
+ * resolves the exact recurring Price independently. Product ids are stable
+ * identity, unlike price nicknames, so a future price change does not break
+ * this mapping.
  */
 const TIER_PRODUCT_IDS: Record<PlanTier, readonly string[]> = {
   regular: ["prod_Uq02Zo8DUidRnH", "prod_Uq01TGhJROfVQ5"],
@@ -171,31 +160,50 @@ export function billingPeriodForStripeInterval(
   return null;
 }
 
-function checkoutUrl(base: string, familyId: string, email: string | null): string {
-  const url = new URL(base);
-  // Stripe carries this through to the checkout session; the confirm
-  // route verifies it against the signed-in family before unlocking.
-  url.searchParams.set("client_reference_id", familyId);
-  if (email) url.searchParams.set("prefilled_email", email);
-  return url.toString();
+function checkoutUrl(
+  familyId: string,
+  tier: PlanTier,
+  billingPeriod: BillingPeriod,
+): string | null {
+  const secret = configuredStripeSecretKey();
+  if (!secret) return null;
+  const intent = mintCheckoutIntent(
+    { familyId, tier, billingPeriod },
+    { secret },
+  );
+  const params = new URLSearchParams({
+    intent,
+    tier,
+    period: billingPeriod,
+  });
+  return `/api/billing/checkout?${params.toString()}`;
 }
 
 /** The available checkout bundle for one family, or null when the
  *  regular tier's links are missing (the wall/gate fails open upstream).
  *  Known but unavailable tiers remain null for new purchases. */
 export function buildWallCheckout(familyId: string, email: string | null): WallCheckout | null {
+  // The route re-reads email under the same family lock used for checkout.
+  void email;
   const regularLinks = tierPaymentLinkBases("regular");
   if (!regularLinks) return null;
-  function tierCheckout(links: { monthly: string; annual: string | null } | null): TierCheckout | null {
+  function tierCheckout(
+    tier: PlanTier,
+    links: { monthly: string; annual: string | null } | null,
+  ): TierCheckout | null {
     if (!links) return null;
+    const monthlyUrl = checkoutUrl(familyId, tier, "monthly");
+    if (!monthlyUrl) return null;
     return {
-      monthlyUrl: checkoutUrl(links.monthly, familyId, email),
-      annualUrl: links.annual ? checkoutUrl(links.annual, familyId, email) : null,
+      monthlyUrl,
+      annualUrl: links.annual ? checkoutUrl(familyId, tier, "annual") : null,
     };
   }
+  const regular = tierCheckout("regular", regularLinks);
+  if (!regular) return null;
   return {
-    regular: tierCheckout(regularLinks) as TierCheckout,
-    plus: tierCheckout(tierPaymentLinkBases("plus")),
+    regular,
+    plus: tierCheckout("plus", tierPaymentLinkBases("plus")),
     elite: null,
   };
 }
@@ -256,7 +264,7 @@ export async function familyWallCheckout(familyId: string): Promise<WallCheckout
   if (!regularLinks) {
     // Fail open on purpose: never block a family because an env var is
     // missing. The founder flips the flags only after the links exist.
-    console.error("wall: a wall flag is on but regular Payment Link envs are missing; doors stay open");
+    console.error("wall: a wall flag is on but regular Stripe checkout references are missing; doors stay open");
     return null;
   }
 
@@ -510,7 +518,7 @@ export async function familyAccountGate(familyId: string): Promise<AccountGateSt
 
   if (!tierPaymentLinkBases("regular")) {
     console.error(
-      "wall: HOMA_SIGNUP_PAYWALL_ENABLED is on but regular Payment Link envs are missing; accounts stay open",
+      "wall: HOMA_SIGNUP_PAYWALL_ENABLED is on but regular Stripe checkout references are missing; accounts stay open",
     );
     return ACCOUNT_OPEN;
   }
@@ -601,13 +609,16 @@ export interface FamilyPlanState {
 export async function familyPlanState(familyId: string): Promise<FamilyPlanState> {
   const sql = mapDb();
   try {
-    const rows = await sql<{ plan_tier: string | null; email: string | null; stripe_customer_id: string | null }[]>`
-      select plan_tier, email, stripe_customer_id
+    const rows = await sql<{ plan_tier: string | null; stripe_customer_id: string | null }[]>`
+      select plan_tier, stripe_customer_id
       from public.families
       where id = ${familyId}
     `;
     const row = rows[0];
     const links = tierPaymentLinkBases("plus");
+    const plusMonthlyUrl = links
+      ? checkoutUrl(familyId, "plus", "monthly")
+      : null;
     let tier: PlanTier = isPlanTier(row?.plan_tier) ? row.plan_tier : "regular";
     let billingProvider: BillingProvider | null = null;
     try {
@@ -625,11 +636,11 @@ export async function familyPlanState(familyId: string): Promise<FamilyPlanState
     return {
       tier,
       billingProvider,
-      plusCheckout: links
+      plusCheckout: links && plusMonthlyUrl
         ? {
-            monthlyUrl: checkoutUrl(links.monthly, familyId, row?.email ?? null),
+            monthlyUrl: plusMonthlyUrl,
             annualUrl: links.annual
-              ? checkoutUrl(links.annual, familyId, row?.email ?? null)
+              ? checkoutUrl(familyId, "plus", "annual")
               : null,
           }
         : null,
@@ -655,7 +666,7 @@ export async function familyPlanState(familyId: string): Promise<FamilyPlanState
  * subscription onto the families row BY FAMILY ID. The webhook's
  * customer.subscription.* handler matches by stripe_customer_id, which
  * fails for a re-subscribing lapsed family: Stripe mints a NEW customer
- * for the fresh Payment Link checkout and emits subscription.created
+ * for the fresh Checkout Session and emits subscription.created
  * before checkout.session.completed pins the new id, so the mirror
  * update matched zero rows and the row kept its stale "canceled" status,
  * leaving a family that JUST PAID walled at the gate. Stamping the
@@ -732,6 +743,37 @@ export class AppleTransactionClaimedError extends Error {
   }
 }
 
+export class AppleFamilyUnavailableError extends Error {
+  constructor() {
+    super("The family is unavailable for Apple subscription confirmation");
+    this.name = "AppleFamilyUnavailableError";
+  }
+}
+
+interface AppleSubscriptionObservation {
+  originalTransactionId: string;
+  status: string;
+  productId: string;
+  tier: PlanTier;
+  period: BillingPeriod;
+  expiresAtMs: number | null;
+  purchaseAttemptId?: string | null;
+  purchaseDateMs?: number | null;
+  providerObservedAtMs?: number | null;
+}
+
+function appleProviderObservationDate(
+  sub: AppleSubscriptionObservation,
+): Date {
+  const observedAtMs = sub.providerObservedAtMs
+    ?? sub.purchaseDateMs
+    ?? Date.now();
+  if (!Number.isFinite(observedAtMs)) {
+    throw new Error("Apple provider observation time is invalid");
+  }
+  return new Date(observedAtMs);
+}
+
 /**
  * recordFamilyAppleSubscription(familyId, sub): the Apple twin of
  * recordFamilySubscription, called from the confirm route (the
@@ -748,32 +790,87 @@ export class AppleTransactionClaimedError extends Error {
  * not be granted entitlement on this write. Every other error is
  * still just logged and rethrown so the caller decides the response,
  * rather than silently trusting a write that may not have happened.
+ * A verified purchase racing an account-deletion tombstone still records the
+ * provider truth under the family lock, then throws unavailable. The confirm
+ * route therefore grants no trial or entitlement, while deletion sees the
+ * active native subscription and blocks until a verified terminal webhook.
  */
 export async function recordFamilyAppleSubscription(
   familyId: string,
-  sub: {
-    originalTransactionId: string;
-    status: string;
-    productId: string;
-    tier: PlanTier;
-    period: BillingPeriod;
-    expiresAtMs: number | null;
-  },
+  sub: AppleSubscriptionObservation,
 ): Promise<void> {
   const sql = mapDb();
+  const observedAt = appleProviderObservationDate(sub);
+  let accountClosing: boolean;
   try {
-    await sql`
-      update public.families
-      set apple_original_transaction_id = ${sub.originalTransactionId},
-          apple_subscription_status = ${sub.status},
-          apple_product_id = ${sub.productId},
-          apple_expires_at = ${sub.expiresAtMs ? new Date(sub.expiresAtMs) : null},
-          billing_updated_at = now()
-      where id = ${familyId}
-    `;
+    accountClosing = await sql.begin(async (tx) => {
+      const families = await tx<Array<{
+        id: string;
+        apple_provider_observed_at: string | null;
+      }>>`
+        select family.id,
+               family.apple_provider_observed_at::text
+                 as apple_provider_observed_at
+        from public.families family
+        where family.id = ${familyId}
+          and family.status <> 'deleted'
+        for update
+      `;
+      const family = families[0];
+      if (!family) throw new AppleFamilyUnavailableError();
+
+      const tombstones = await tx<Array<{ account_closing: boolean }>>`
+        select exists (
+          select 1
+          from public.account_deletion_artifact_tombstones tombstone
+          where tombstone.family_id = ${familyId}
+        ) as account_closing
+      `;
+      const currentObservedAt = family.apple_provider_observed_at
+        ? Date.parse(family.apple_provider_observed_at)
+        : Number.NEGATIVE_INFINITY;
+      if (observedAt.getTime() >= currentObservedAt) {
+        await tx`
+          update public.families
+          set apple_original_transaction_id = ${sub.originalTransactionId},
+              apple_subscription_status = ${sub.status},
+              apple_product_id = ${sub.productId},
+              apple_expires_at = ${sub.expiresAtMs ? new Date(sub.expiresAtMs) : null},
+              apple_provider_observed_at = ${observedAt},
+              billing_updated_at = now()
+          where id = ${familyId}
+        `;
+      }
+
+      await recordBillingSubscriptionInTransaction(tx, familyId, {
+        provider: "apple",
+        providerSubscriptionId: sub.originalTransactionId,
+        providerCustomerId: null,
+        providerProductId: sub.productId,
+        tier: sub.tier,
+        period: sub.period,
+        status: sub.status,
+        currentPeriodEnd: sub.expiresAtMs
+          ? new Date(sub.expiresAtMs).toISOString()
+          : null,
+        observedAt: observedAt.toISOString(),
+      });
+      await clearApplePurchaseInterlockAfterVerifiedTransactionInTransaction(
+        tx,
+        familyId,
+        sub.purchaseAttemptId,
+        sub.purchaseDateMs,
+      );
+      return tombstones[0]?.account_closing === true;
+    });
   } catch (error) {
+    if (error instanceof AppleFamilyUnavailableError) throw error;
     const code = (error as { code?: string } | null)?.code;
-    if (code === "23505") {
+    if (
+      code === "23505"
+      || (error instanceof Error
+        && error.message === "billing subscription is already linked to a different family")
+    ) {
       throw new AppleTransactionClaimedError(sub.originalTransactionId);
     }
     console.error(
@@ -782,13 +879,54 @@ export async function recordFamilyAppleSubscription(
     );
     throw error;
   }
+  if (accountClosing) throw new AppleFamilyUnavailableError();
+}
 
-  // The family-row write above owns the cross-family transaction claim and
-  // therefore remains authoritative during rollout. A canonical ledger write
-  // is best-effort until its additive migration has landed; once present, the
-  // webhook will keep retrying it on future lifecycle notifications.
-  try {
-    await recordBillingSubscription(familyId, {
+/**
+ * A verified App Store Server Notification may advance only a subscription
+ * already linked to this family. It cannot claim a new transaction id, but it
+ * must remain able to record active and terminal lifecycle states while an
+ * account-deletion fence exists. Deletion rechecks this mirror under the same
+ * family lock before access closes.
+ */
+export async function recordVerifiedFamilyAppleSubscriptionStatus(
+  familyId: string,
+  sub: AppleSubscriptionObservation,
+): Promise<void> {
+  const sql = mapDb();
+  const observedAt = appleProviderObservationDate(sub);
+  await sql.begin(async (tx) => {
+    const families = await tx<Array<{
+      id: string;
+      apple_provider_observed_at: string | null;
+    }>>`
+      select family.id,
+             family.apple_provider_observed_at::text
+               as apple_provider_observed_at
+      from public.families family
+      where family.id = ${familyId}
+        and family.status <> 'deleted'
+        and family.apple_original_transaction_id = ${sub.originalTransactionId}
+      for update
+    `;
+    const family = families[0];
+    if (!family) throw new AppleFamilyUnavailableError();
+
+    const currentObservedAt = family.apple_provider_observed_at
+      ? Date.parse(family.apple_provider_observed_at)
+      : Number.NEGATIVE_INFINITY;
+    if (observedAt.getTime() >= currentObservedAt) {
+      await tx`
+        update public.families
+        set apple_subscription_status = ${sub.status},
+            apple_product_id = ${sub.productId},
+            apple_expires_at = ${sub.expiresAtMs ? new Date(sub.expiresAtMs) : null},
+            apple_provider_observed_at = ${observedAt},
+            billing_updated_at = now()
+        where id = ${familyId}
+      `;
+    }
+    await recordBillingSubscriptionInTransaction(tx, familyId, {
       provider: "apple",
       providerSubscriptionId: sub.originalTransactionId,
       providerCustomerId: null,
@@ -796,14 +934,18 @@ export async function recordFamilyAppleSubscription(
       tier: sub.tier,
       period: sub.period,
       status: sub.status,
-      currentPeriodEnd: sub.expiresAtMs ? new Date(sub.expiresAtMs).toISOString() : null,
+      currentPeriodEnd: sub.expiresAtMs
+        ? new Date(sub.expiresAtMs).toISOString()
+        : null,
+      observedAt: observedAt.toISOString(),
     });
-  } catch (error) {
-    console.error(
-      "wall: canonical Apple subscription stamp failed:",
-      error instanceof Error ? error.message : "unknown",
+    await clearApplePurchaseInterlockAfterVerifiedTransactionInTransaction(
+      tx,
+      familyId,
+      sub.purchaseAttemptId,
+      sub.purchaseDateMs,
     );
-  }
+  });
 }
 
 export interface StripeCustomerFamily {
@@ -883,8 +1025,8 @@ export async function familyIdForAppleOriginalTransaction(
  * bought. Returns true only on the first stamp so billing.trial_started
  * never double-fires when the confirmation URL is revisited. plan_tier
  * always reflects the CURRENT checkout on every call, first or repeat:
- * a family upgrading tiers reaches this same confirm route on their new
- * Payment Link, and the tier they just bought must win, not the one
+ * a family upgrading tiers reaches this same confirm route from their new
+ * Checkout Session, and the tier they just bought must win, not the one
  * recorded on their original trial. A caller that does NOT know the
  * tier (the webhook's checkout.session.completed handler, which has no
  * expanded line items) passes null and leaves plan_tier untouched:

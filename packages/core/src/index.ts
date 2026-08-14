@@ -58,6 +58,8 @@ export {
 } from "./active-object";
 
 export {
+  APPLE_NEW_PURCHASE_PRODUCT_IDS,
+  APPLE_NEW_PURCHASE_PRODUCTS,
   APPLE_PRODUCT_IDS,
   APPLE_PROVIDER_PRODUCTS,
   BILLING_PERIODS,
@@ -67,6 +69,7 @@ export {
   PLAN_SALES_STATES,
   PLAN_TIERS,
   PURCHASABLE_HOMA_PLANS,
+  appleProductAvailableForNewPurchase,
   isBillingPeriod,
   isBillingProvider,
   isPlanTier,

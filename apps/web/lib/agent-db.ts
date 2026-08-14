@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { mapDb } from "./map/db";
+import { assertFamilyArtifactAccess } from "./account-deletion-artifact-fence";
 
 /**
  * Database access for agent tools, always as the CALLER, never as a service
@@ -181,6 +182,8 @@ export function resolvePinnedFamilyId(attributes: unknown): string | null {
 export interface ResolveAgentAccessDependencies {
   /** Does this authenticated user still belong to this family, right now? */
   verifyFamilyMembership(familyId: string, memberUserId: string): Promise<boolean>;
+  /** Rejects a family whose account deletion has begun. */
+  verifyFamilyArtifactAccess?(familyId: string): Promise<void>;
   nowSeconds(): number;
 }
 
@@ -199,8 +202,16 @@ async function verifyFamilyMembershipPinned(
 
 const DEFAULT_RESOLVE_DEPENDENCIES: ResolveAgentAccessDependencies = {
   verifyFamilyMembership: verifyFamilyMembershipPinned,
+  verifyFamilyArtifactAccess: assertFamilyArtifactAccess,
   nowSeconds: () => Math.floor(Date.now() / 1000),
 };
+
+async function verifyResolvedFamilyAccess(
+  familyId: string,
+  dependencies: ResolveAgentAccessDependencies,
+): Promise<void> {
+  await dependencies.verifyFamilyArtifactAccess?.(familyId);
+}
 
 export async function resolveAgentAccess(
   attributes: unknown,
@@ -209,6 +220,7 @@ export async function resolveAgentAccess(
   const attrs = (attributes ?? {}) as CallerAuthAttributes & { channel?: string };
   if (attrs.supabaseAccessToken && attrs.familyId) {
     if (!callerTokenIsExpired(attrs.supabaseAccessToken, dependencies.nowSeconds())) {
+      await verifyResolvedFamilyAccess(attrs.familyId, dependencies);
       const { db, familyId } = createCallerDbClient(attributes);
       return { mode: "caller", db, familyId };
     }
@@ -219,6 +231,7 @@ export async function resolveAgentAccess(
       attrs.memberUserId &&
       (await dependencies.verifyFamilyMembership(attrs.familyId, attrs.memberUserId))
     ) {
+      await verifyResolvedFamilyAccess(attrs.familyId, dependencies);
       console.warn(
         `agent access: caller token expired mid-session; continuing family-pinned (family ${attrs.familyId})`,
       );
@@ -228,6 +241,7 @@ export async function resolveAgentAccess(
   }
   const pinnedFamilyId = resolvePinnedFamilyId(attrs);
   if (pinnedFamilyId) {
+    await verifyResolvedFamilyAccess(pinnedFamilyId, dependencies);
     return { mode: "pinned", familyId: pinnedFamilyId };
   }
   throw new MissingFamilyContextError();

@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   collectProviderRepositoryPaths,
   loadProviderHandoffInputs,
+  providerSourcePathsByHandoffId,
   reconcileProviderHandoffBindings,
   validateProviderHandoffs,
   type ProviderHandoffFile,
@@ -60,7 +61,17 @@ function artifactCatalogEntry(
 test("committed provider handoffs cover every #732 record and stay pending without external read-back", () => {
   assert.deepEqual(validate(inputs.handoffs), []);
   assert.equal(inputs.handoffs.records.length, 5);
-  assert.ok(inputs.handoffs.records.every((record) => record.status === "pending"));
+  assert.ok(
+    inputs.handoffs.records
+      .filter((record) => record.id !== "apple-subscription-management")
+      .every((record) => record.status === "pending"),
+  );
+  assert.equal(
+    inputs.handoffs.records.find(
+      (record) => record.id === "apple-subscription-management",
+    )?.status,
+    "blocked",
+  );
   assert.ok(inputs.handoffs.records.every((record) => record.readback.status === "pending"));
   assert.ok(inputs.handoffs.records.every((record) => record.readback.externalStateSimulated === false));
   assert.ok(inputs.handoffs.records.every((record) => record.surfaceIds.length > 0));
@@ -79,6 +90,94 @@ test("committed provider handoffs cover every #732 record and stay pending witho
     assert.ok(surface, `${path} lacks an exact manifest surface`);
     assert.equal(inputs.handoffs.records.filter((record) => record.surfaceIds.includes(surface.id)).length, 1, `${path} must have one evidence owner`);
   }
+});
+
+test("Stripe handoff binds and describes server-created Checkout", () => {
+  const record = inputs.handoffs.records.find((candidate) => candidate.id === "stripe-checkout-and-portal");
+  assert.ok(record);
+  assert.deepEqual(record.sourcePaths, [...providerSourcePathsByHandoffId["stripe-checkout-and-portal"]]);
+
+  const serverSources = [
+    "apps/web/app/api/billing/checkout/route.ts",
+    "apps/web/lib/account-deletion-billing.ts",
+    "apps/web/lib/account-deletion.ts",
+    "apps/web/lib/billing/checkout-intent.ts",
+    "apps/web/lib/billing/entitlements.ts",
+    "apps/web/lib/billing/server-checkout.ts",
+    "apps/web/lib/billing/stripe-checkout-config.ts",
+    "apps/web/lib/billing/stripe-server-checkout.ts",
+  ];
+  for (const path of serverSources) assert.ok(record.sourcePaths.includes(path), `${path} is not bound`);
+
+  const serverCheckout = record.configurableFields.find((field) => field.key === "server-checkout-and-price-recovery");
+  assert.ok(serverCheckout);
+  assert.match(serverCheckout.updatePath, /every Stripe Payment Link inactive/i);
+  assert.match(serverCheckout.fallback, /before requesting a Checkout Session/i);
+  assert.match(serverCheckout.rollback, /Never roll back by reactivating a public Payment Link/i);
+
+  const destinations = record.configurableFields.find((field) => field.key === "checkout-success-and-cancel-destinations");
+  assert.ok(destinations);
+  assert.match(destinations.updatePath, /server builds the success URL/i);
+  assert.match(destinations.updatePath, /Stripe Dashboard does not own either destination/i);
+  assert.match(destinations.fallback, /outside checkout\.stripe\.com/i);
+
+  const deletionReconciliation = record.configurableFields.find(
+    (field) => field.key === "account-deletion-billing-reconciliation",
+  );
+  assert.ok(deletionReconciliation);
+  assert.match(deletionReconciliation.fallback, /preserve family access/i);
+  assert.match(
+    deletionReconciliation.rollback,
+    /every Stripe Payment Link inactive/i,
+  );
+
+  const serialized = JSON.stringify(record);
+  assert.doesNotMatch(serialized, /Payment Link completion URL|payment link after-completion URL/i);
+});
+
+test("Apple subscription handoff binds the purchase and deletion interlock", () => {
+  const record = inputs.handoffs.records.find(
+    (candidate) => candidate.id === "apple-subscription-management",
+  );
+  assert.ok(record);
+  assert.deepEqual(
+    record.sourcePaths,
+    [...providerSourcePathsByHandoffId["apple-subscription-management"]],
+  );
+
+  for (const path of [
+    "apps/mobile/src/features/billing/constants.ts",
+    "apps/web/app/api/billing/apple/purchase-interlock/route.ts",
+    "apps/web/lib/account-deletion.ts",
+    "apps/web/lib/billing/apple-purchase-interlock.ts",
+    "apps/web/lib/billing/entitlements.ts",
+    "packages/core/src/billing-catalog.ts",
+    "supabase/migrations/20260808184500_apple_purchase_interlock.sql",
+  ]) {
+    assert.ok(record.sourcePaths.includes(path), `${path} is not bound`);
+  }
+
+  const catalog = record.configurableFields.find(
+    (field) => field.key === "storekit-product-catalog",
+  );
+  assert.ok(catalog);
+  assert.ok(catalog.sourcePaths.includes("packages/core/src/billing-catalog.ts"));
+  assert.match(catalog.cacheBehavior, /durable purchase journal/i);
+
+  const interlock = record.configurableFields.find(
+    (field) => field.key === "purchase-and-deletion-interlock",
+  );
+  assert.ok(interlock);
+  assert.ok(
+    interlock.sourcePaths.includes(
+      "supabase/migrations/20260808184500_apple_purchase_interlock.sql",
+    ),
+  );
+  assert.match(interlock.fallback, /preserves family access/i);
+
+  assert.match(JSON.stringify(record.contracts), /server-minted attempt id/i);
+  assert.match(record.environment.notes, /products remain unavailable/i);
+  assert.match(record.rollback.restoreAction, /Keep App Store products unavailable/i);
 });
 
 test("an aggregate provider record without an exact manifest surface fails closed", () => {
@@ -122,6 +221,22 @@ test("missing source paths and operational details fail closed", () => {
   const codes = validate(invalid).map((issue) => issue.code);
   assert.ok(codes.includes("source-paths-missing"));
   assert.ok(codes.includes("field-detail"));
+});
+
+test("configurable fields cannot escape their record fingerprint", () => {
+  const invalid = structuredClone(inputs.handoffs) as ProviderHandoffFile;
+  const apple = invalid.records.find(
+    (record) => record.id === "apple-subscription-management",
+  );
+  assert.ok(apple);
+  apple.configurableFields[0]!.sourcePaths.push(
+    "apps/web/lib/billing/portal.ts",
+  );
+  assert.ok(
+    validate(invalid).some(
+      (issue) => issue.code === "field-source-outside-record",
+    ),
+  );
 });
 
 test("provider source scope cannot shrink and certify its own smaller fingerprint", () => {
@@ -216,6 +331,12 @@ test("provider reconciliation clears readback and rollback proof after any scope
   claimed.rollback.rehearsalEvidence = reference;
   const driftedChecksums = new Map(sourceChecksums);
   driftedChecksums.set(claimed.sourcePaths[0]!, "f".repeat(64));
+  const blocked = withClaims.records.find(
+    (record) => record.id === "apple-subscription-management",
+  );
+  assert.ok(blocked);
+  blocked.readback.status = "blocked";
+  driftedChecksums.set(blocked.sourcePaths[0]!, "d".repeat(64));
 
   const reconciled = reconcileProviderHandoffBindings(inputs.manifest, withClaims, driftedChecksums);
   const reset = reconciled.records[0]!;
@@ -224,4 +345,9 @@ test("provider reconciliation clears readback and rollback proof after any scope
   assert.equal(reset.readback.evidencePath, null);
   assert.equal(reset.readback.observedAt, null);
   assert.equal(reset.rollback.rehearsalEvidence, null);
+  const stillBlocked = reconciled.records.find(
+    (record) => record.id === "apple-subscription-management",
+  );
+  assert.equal(stillBlocked?.status, "blocked");
+  assert.equal(stillBlocked?.readback.status, "pending");
 });

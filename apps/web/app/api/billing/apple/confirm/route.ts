@@ -1,12 +1,21 @@
-import { providerProduct } from "@homa/core";
+import {
+  appleProductAvailableForNewPurchase,
+  providerProduct,
+} from "@homa/core";
 
 import {
+  AppleFamilyUnavailableError,
   AppleTransactionClaimedError,
+  familyIdForAppleOriginalTransaction,
   recordFamilyAppleSubscription,
   startFamilyTrial,
 } from "../../../../../lib/billing/wall";
+import {
+  pendingApplePurchaseClaimForAttempt,
+  resolveApplePurchaseClaim,
+} from "../../../../../lib/billing/apple-purchase-interlock";
 import { emitMapEvent } from "../../../../../lib/map/events";
-import { requireFamily, requireFamilyFromBearer } from "../../../../../lib/map/session";
+import { requireFamilyFromRequest } from "../../../../../lib/map/session";
 import { verifyAppleTransaction } from "../../../../../lib/billing/apple-verify";
 
 /**
@@ -18,15 +27,15 @@ import { verifyAppleTransaction } from "../../../../../lib/billing/apple-verify"
  *
  * Tenancy check (the same law confirm/route.ts enforces with
  * client_reference_id, adapted to Apple's shape): the purchasing device
- * sets StoreKit's appAccountToken to the signed-in family's id at
- * purchase time (arc F's mobile client, task #21), Apple signs it into
- * the transaction, and this route verifies the signed value against the
- * AUTHENTICATED caller's own family, never trusting a client-supplied
- * field. A transaction whose appAccountToken does not match the caller
- * unlocks nobody.
+ * sets StoreKit's appAccountToken to a server-minted purchase attempt id.
+ * Apple signs it into the transaction, and this route resolves that durable
+ * attempt back to the authenticated caller's own family. A transaction whose
+ * signed attempt belongs elsewhere unlocks nobody. Older family-id tokens may
+ * update a subscription already linked to that family, but can never make a
+ * fresh claim without the deletion interlock.
  */
 export async function POST(request: Request): Promise<Response> {
-  const family = (await requireFamilyFromBearer(request)) ?? (await requireFamily());
+  const family = await requireFamilyFromRequest(request);
   if (!family) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
@@ -56,13 +65,6 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "unverifiable" }, { status: 400 });
   }
 
-  if (decoded.appAccountToken !== family.id) {
-    console.error(
-      `billing/apple/confirm: appAccountToken (${decoded.appAccountToken ?? "unset"}) does not match the signed-in family`,
-    );
-    return Response.json({ ok: false, reason: "family-mismatch" }, { status: 403 });
-  }
-
   const originalTransactionId = decoded.originalTransactionId ?? decoded.transactionId;
   if (!originalTransactionId) {
     console.error("billing/apple/confirm: verified transaction carried no transaction id");
@@ -77,10 +79,40 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "unconfigured-product" }, { status: 400 });
   }
 
-  const tier = product.tier;
-  const fresh = await startFamilyTrial(family.id, null, tier);
-  if (fresh) {
-    await emitMapEvent("billing.trial_started", { family_id: family.id });
+  const [pendingClaim, linkedFamilyId] = await Promise.all([
+    decoded.appAccountToken
+      ? pendingApplePurchaseClaimForAttempt(decoded.appAccountToken)
+      : Promise.resolve(null),
+    familyIdForAppleOriginalTransaction(originalTransactionId),
+  ]);
+  const claim = resolveApplePurchaseClaim({
+    authenticatedFamilyId: family.id,
+    linkedFamilyId,
+    pendingClaim,
+    signedProductId: product.productId,
+  });
+  if (claim.kind === "rejected") {
+    console.error(
+      `billing/apple/confirm: appAccountToken (${decoded.appAccountToken ?? "unset"}) does not match the signed-in family`,
+    );
+    return Response.json(
+      {
+        ok: false,
+        reason: claim.reason === "product-mismatch"
+          ? "product-mismatch"
+          : "family-mismatch",
+      },
+      { status: 403 },
+    );
+  }
+  if (
+    claim.kind === "fresh"
+    && !appleProductAvailableForNewPurchase(product.productId)
+  ) {
+    return Response.json(
+      { ok: false, reason: "product-unavailable" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -97,20 +129,40 @@ export async function POST(request: Request): Promise<Response> {
       tier: product.tier,
       period: product.period,
       expiresAtMs: decoded.expiresDate ?? null,
+      purchaseAttemptId: claim.purchaseAttemptId,
+      purchaseDateMs: decoded.purchaseDate ?? null,
+      providerObservedAtMs: decoded.signedDate ?? decoded.purchaseDate ?? null,
     });
   } catch (error) {
     if (error instanceof AppleTransactionClaimedError) {
-      // The trial/tier stamp above already happened and stays: this
-      // family is entitled either way. Only the transaction-identity
-      // mirror failed to attach, worth surfacing for the founder to
-      // look at (a shared Apple Account across two Homa families is the
-      // most likely real-world cause), never worth walling a family
-      // that just verifiably paid.
       console.error(`billing/apple/confirm: ${error.message}`);
+      return Response.json(
+        { ok: false, reason: "transaction-already-claimed" },
+        { status: 409 },
+      );
+    }
+    if (error instanceof AppleFamilyUnavailableError) {
+      return Response.json(
+        { ok: false, reason: "account-closing" },
+        { status: 409 },
+      );
     } else {
       throw error;
     }
   }
 
-  return Response.json({ ok: true, planTier: tier });
+  // The provider identity is committed first. That family-row write and
+  // deletion share one lock, so deletion either sees active Apple billing and
+  // blocks, or wins first and makes the provider write fail without granting.
+  const tier = product.tier;
+  const fresh = await startFamilyTrial(family.id, null, tier);
+  if (fresh) {
+    await emitMapEvent("billing.trial_started", { family_id: family.id });
+  }
+
+  return Response.json({
+    ok: true,
+    planTier: tier,
+    purchaseAttemptId: claim.purchaseAttemptId,
+  });
 }

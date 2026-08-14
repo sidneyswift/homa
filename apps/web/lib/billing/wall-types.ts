@@ -27,19 +27,17 @@ export function isPlanTier(value: unknown): value is PlanTier {
 export type BillingPeriod = CoreBillingPeriod;
 
 export interface TierCheckout {
-  /** Stripe Payment Link URLs with client_reference_id (the family id)
-   *  and prefilled_email already appended. Annual is null when its link
-   *  is not configured for this environment: a missing annual link
-   *  narrows that tier to monthly-only instead of hiding the tier. */
+  /** Short-lived Homa checkout routes bound to the authenticated family,
+   *  tier, and period. Annual is null when its server-side Stripe price
+   *  reference is not configured for this environment. */
   monthlyUrl: string;
   annualUrl: string | null;
 }
 
 export interface WallCheckout {
   regular: TierCheckout;
-  /** null when Plus's Payment Links aren't configured for this
-   *  environment: the tier just doesn't render, same narrowing rule as
-   *  a tier's missing annual link. */
+  /** null when Plus's server-side checkout references are not configured
+   *  for this environment. The tier then does not render. */
   plus: TierCheckout | null;
   elite: TierCheckout | null;
 }

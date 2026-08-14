@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  APPLE_NEW_PURCHASE_PRODUCT_IDS,
+  APPLE_NEW_PURCHASE_PRODUCTS,
   APPLE_PRODUCT_IDS,
   HOMA_PLANS,
   PURCHASABLE_HOMA_PLANS,
+  appleProductAvailableForNewPurchase,
   planAvailableForPurchase,
   providerProduct,
   weeklyEquivalentUsd,
@@ -26,6 +29,28 @@ describe("Homa billing catalog", () => {
     assert.equal(planAvailableForPurchase("elite"), false);
     assert.ok(providerProduct("apple", "com.thankshoma.homa.plus.monthly"));
     assert.ok(providerProduct("apple", "com.thankshoma.homa.elite.monthly"));
+  });
+
+  it("allows only available monthly Apple products to begin new purchases", () => {
+    assert.deepEqual(
+      APPLE_NEW_PURCHASE_PRODUCTS.map(({ tier, period }) => ({ tier, period })),
+      [{ tier: "regular", period: "monthly" }],
+    );
+    assert.deepEqual(APPLE_NEW_PURCHASE_PRODUCT_IDS, [
+      "com.thankshoma.homa.regular.monthly",
+    ]);
+    assert.equal(
+      appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.monthly")?.tier,
+      "regular",
+    );
+    assert.equal(
+      appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.annual"),
+      null,
+    );
+    assert.equal(
+      appleProductAvailableForNewPurchase("com.thankshoma.homa.plus.monthly"),
+      null,
+    );
   });
 
   it("never mistakes an unknown provider product for a plan", () => {

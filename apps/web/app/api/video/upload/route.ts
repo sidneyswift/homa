@@ -1,6 +1,7 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { assertFamilyArtifactAccess } from "../../../../lib/account-deletion-artifact-fence";
 import { blobConfigured } from "../../../../lib/materials/artifact-store";
 
 /**
@@ -51,6 +52,7 @@ export async function POST(request: Request): Promise<Response> {
       request,
       body,
       onBeforeGenerateToken: async (pathname) => {
+        await assertFamilyArtifactAccess(auth.familyId);
         if (!pathname.startsWith(videoPrefix)) {
           throw new Error("pathname must stay inside this family's videos/ space");
         }

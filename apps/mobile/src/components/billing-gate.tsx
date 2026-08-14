@@ -1,9 +1,21 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { MobileBootstrapFailureReason } from "@homa/core";
-import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import {
+  AppState,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { ErrorCode, useIAP, type Purchase } from "expo-iap";
+import {
+  getPendingTransactionsIOS,
+  useIAP,
+  type Purchase,
+} from "expo-iap";
 
 import {
   APPLE_NATIVE_PRODUCT_IDS,
@@ -16,7 +28,17 @@ import {
 } from "../features/billing/constants";
 import { useBillingGate } from "../features/billing/use-billing-gate";
 import { useSession } from "../features/auth/session-provider";
-import { confirmApplePurchase } from "../lib/billing";
+import {
+  abandonApplePurchase,
+  applePurchaseAttemptForRecovery,
+  beginApplePurchase,
+  completeApplePurchaseFinish,
+  confirmApplePurchase,
+  markApplePurchaseStoreStarted,
+  pendingApplePurchaseFinish,
+  resumeApplePurchaseConfirmation,
+  type BillingGateState,
+} from "../lib/billing";
 import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
 import { Button } from "./ui/button";
@@ -40,27 +62,18 @@ export function BillingGate({
   const { gate, checked, failureReason, refresh } = useBillingGate();
   const { continueSignedOut } = useSession();
 
-  if (!checked) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <LoadingStatus label="Checking your Homa plan" />
-      </View>
-    );
-  }
-
-  if (gate === null) {
-    return (
-      <GateCheckFailed
-        failureReason={failureReason}
-        onRetry={refresh}
-        onContinueSignedOut={continueSignedOut}
-      />
-    );
-  }
-
-  if (gate.open) return <>{children}</>;
-
-  return <Paywall familyId={familyId} everTrialed={gate.lapsed} onUnlocked={refresh} />;
+  return (
+    <StoreKitBillingBoundary
+      familyId={familyId}
+      checked={checked}
+      gate={gate}
+      failureReason={failureReason}
+      onUnlocked={refresh}
+      onContinueSignedOut={continueSignedOut}
+    >
+      {children}
+    </StoreKitBillingBoundary>
+  );
 }
 
 /** checked is true but gate is still null: the check itself failed
@@ -128,14 +141,27 @@ function GateCheckFailed({
 
 type PurchaseStep = "idle" | "purchasing" | "confirming" | "restoring";
 
-function Paywall({
+function storeKitPurchaseAttemptId(purchase: Purchase): string | null {
+  if (!("appAccountToken" in purchase) || !purchase.appAccountToken) return null;
+  return purchase.appAccountToken.toLowerCase();
+}
+
+function StoreKitBillingBoundary({
+  children,
   familyId,
-  everTrialed,
+  checked,
+  gate,
+  failureReason,
   onUnlocked,
+  onContinueSignedOut,
 }: {
+  children: ReactNode;
   familyId: string;
-  everTrialed: boolean;
+  checked: boolean;
+  gate: BillingGateState | null;
+  failureReason: MobileBootstrapFailureReason | null;
   onUnlocked: () => Promise<void>;
+  onContinueSignedOut: () => void;
 }) {
   const [step, setStep] = useState<PurchaseStep>("idle");
   const [unlockFailed, setUnlockFailed] = useState(false);
@@ -143,7 +169,10 @@ function Paywall({
   const [lastCheckedNonce, setLastCheckedNonce] = useState(-1);
   const [retryNonce, setRetryNonce] = useState(0);
   const [tier, setTier] = useState<PlanTier>("regular");
-  const restoredTokens = useRef(new Set<string>());
+  const processingPurchaseTokens = useRef(new Set<string>());
+  const purchaseAttemptRef = useRef<string | null>(null);
+  const purchaseInFlightRef = useRef(false);
+  const recoveringFamiliesRef = useRef(new Set<string>());
   const router = useRouter();
 
   // useIAP needs onPurchaseSuccess before handlePurchase can exist (it
@@ -162,10 +191,14 @@ function Paywall({
     finishTransaction,
   } = useIAP({
     onPurchaseSuccess: (purchase) => handlePurchaseRef.current(purchase),
-    onPurchaseError: (error) => {
-      setStep("idle");
-      if (error.code === ErrorCode.UserCancelled) return;
-      setErrorMessage("That didn't go through. Check your connection and try again.");
+    onPurchaseError: () => {
+      // This global callback carries no appAccountToken, so it can report an
+      // older attempt after a newer one starts. It may close the UI cycle, but
+      // only the exact requestPurchase promise below may release its marker.
+      setStep("confirming");
+      setErrorMessage(
+        "Homa can't confirm whether the App Store finished this purchase. Don't try again yet. Close and reopen Homa so it can check.",
+      );
     },
   });
 
@@ -178,32 +211,137 @@ function Paywall({
         setStep("idle");
         return;
       }
-      const result = await confirmApplePurchase(token);
-      if (!result.ok) {
-        setStep("idle");
-        setUnlockFailed(true);
-        return;
-      }
+      if (processingPurchaseTokens.current.has(token)) return;
+      processingPurchaseTokens.current.add(token);
       try {
-        await finishTransaction({ purchase });
-      } catch {
-        // Already-finished transactions throw harmlessly; entitlement
-        // already landed server-side above, which is the only thing that
-        // matters for unlocking the app.
+        const result = await confirmApplePurchase(
+          familyId,
+          token,
+          storeKitPurchaseAttemptId(purchase),
+          purchase,
+        );
+        if (!result.ok) {
+          setStep("idle");
+          setUnlockFailed(true);
+          return;
+        }
+        try {
+          await finishTransaction({ purchase });
+        } catch {
+          setStep("idle");
+          setUnlockFailed(true);
+          setErrorMessage(
+            "Homa can't confirm whether the App Store finished this purchase. Don't try again yet. Close and reopen Homa so it can check.",
+          );
+          return;
+        }
+        if (
+          result.purchaseAttemptId
+          && !(await completeApplePurchaseFinish(familyId, result.purchaseAttemptId))
+        ) {
+          setStep("idle");
+          setUnlockFailed(true);
+          return;
+        }
+        if (purchaseAttemptRef.current === result.purchaseAttemptId) {
+          purchaseAttemptRef.current = null;
+        }
+        setUnlockFailed(false);
+        if (result.blockedByDifferentAttempt) {
+          setStep("idle");
+          setErrorMessage(
+            "Homa hasn't confirmed this App Store purchase. Don't start another purchase yet. Choose Restore purchases first.",
+          );
+          return;
+        }
+        await onUnlocked();
+        setStep("idle");
+      } finally {
+        processingPurchaseTokens.current.delete(token);
       }
-      setUnlockFailed(false);
-      await onUnlocked();
-      setStep("idle");
     },
-    [finishTransaction, onUnlocked],
+    [familyId, finishTransaction, onUnlocked],
   );
 
   useEffect(() => {
     handlePurchaseRef.current = (purchase) => void handlePurchase(purchase);
   }, [handlePurchase]);
 
+  const runApplePurchaseRecovery = useCallback(async () => {
+    if (!familyId || recoveringFamiliesRef.current.has(familyId)) return;
+    recoveringFamiliesRef.current.add(familyId);
+    try {
+      const recoveryAttempt = await applePurchaseAttemptForRecovery(familyId);
+      if (recoveryAttempt) {
+        const resumed = await resumeApplePurchaseConfirmation(familyId);
+        if (resumed && !resumed.ok) return;
+        const pendingFinish = await pendingApplePurchaseFinish(familyId);
+        if (pendingFinish) {
+          const token = pendingFinish.purchase.purchaseToken;
+          if (!token || processingPurchaseTokens.current.has(token)) return;
+          processingPurchaseTokens.current.add(token);
+          setStep("confirming");
+          setErrorMessage(null);
+          try {
+            await finishTransaction({ purchase: pendingFinish.purchase });
+            const cleared = await completeApplePurchaseFinish(
+              familyId,
+              pendingFinish.attemptId,
+            );
+            if (!cleared) {
+              setStep("idle");
+              setUnlockFailed(true);
+              return;
+            }
+            if (purchaseAttemptRef.current === pendingFinish.attemptId) {
+              purchaseAttemptRef.current = null;
+            }
+            setUnlockFailed(false);
+            await onUnlocked();
+            setStep("idle");
+          } catch {
+            setStep("idle");
+            setUnlockFailed(true);
+            setErrorMessage(
+              "Homa can't confirm whether the App Store finished this purchase. Don't try again yet. Close and reopen Homa so it can check.",
+            );
+          } finally {
+            processingPurchaseTokens.current.delete(token);
+          }
+          return;
+        }
+      }
+
+      if (Platform.OS !== "ios") return;
+      const unfinished = await getPendingTransactionsIOS();
+      const recoverablePurchases = recoveryAttempt
+        ? unfinished.filter(
+            (purchase) => storeKitPurchaseAttemptId(purchase)
+              === recoveryAttempt.attemptId.toLowerCase(),
+          )
+        : unfinished.filter((purchase) => APPLE_PRODUCT_IDS.includes(purchase.productId));
+      for (const purchase of recoverablePurchases) {
+        await handlePurchase(purchase);
+      }
+    } catch {
+      // Keep the exact journal. Mount or the next foreground transition retries
+      // provider and storage failures without guessing that StoreKit is done.
+    } finally {
+      recoveringFamiliesRef.current.delete(familyId);
+    }
+  }, [familyId, finishTransaction, handlePurchase, onUnlocked]);
+
   useEffect(() => {
     if (!connected) return;
+    void Promise.resolve().then(runApplePurchaseRecovery);
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") void runApplePurchaseRecovery();
+    });
+    return () => subscription.remove();
+  }, [connected, runApplePurchaseRecovery]);
+
+  useEffect(() => {
+    if (!connected || !checked || !gate || gate.open) return;
     let cancelled = false;
     void fetchProducts({ skus: APPLE_NATIVE_PRODUCT_IDS, type: "subs" }).finally(() => {
       if (!cancelled) setLastCheckedNonce(retryNonce);
@@ -211,15 +349,13 @@ function Paywall({
     return () => {
       cancelled = true;
     };
-  }, [connected, retryNonce, fetchProducts]);
+  }, [checked, connected, gate, retryNonce, fetchProducts]);
 
   useEffect(() => {
-    const owned = availablePurchases.find((purchase) =>
-      APPLE_PRODUCT_IDS.includes(purchase.productId),
-    );
-    if (!owned?.purchaseToken || restoredTokens.current.has(owned.purchaseToken)) return;
-    restoredTokens.current.add(owned.purchaseToken);
-    void handlePurchase(owned);
+    for (const owned of availablePurchases) {
+      if (!APPLE_PRODUCT_IDS.includes(owned.productId) || !owned.purchaseToken) continue;
+      void Promise.resolve().then(() => handlePurchase(owned));
+    }
   }, [availablePurchases, handlePurchase]);
 
   const selectedProviderProduct = APPLE_NATIVE_PROVIDER_PRODUCTS.find(
@@ -233,16 +369,65 @@ function Paywall({
   async function handleBuy() {
     if (!familyId) return;
     if (!selectedProviderProduct || !product) return;
+    if (purchaseInFlightRef.current) return;
+    purchaseInFlightRef.current = true;
     setStep("purchasing");
     setErrorMessage(null);
+    const interlock = await beginApplePurchase(
+      familyId,
+      selectedProviderProduct.productId,
+    );
+    if (!interlock.ok) {
+      setStep("idle");
+      purchaseInFlightRef.current = false;
+      setErrorMessage(
+        interlock.reason === "account-closing"
+          ? "Account deletion has already started. Homa did not open the App Store, so no new purchase began."
+          : interlock.reason === "purchase-unresolved"
+            ? "Homa hasn't confirmed this App Store purchase. Don't start another purchase yet. Choose Restore purchases first."
+          : "That didn't go through. Check your connection and try again.",
+      );
+      return;
+    }
+    const attemptId = interlock.attemptId;
+    purchaseAttemptRef.current = attemptId;
+    if (!(await markApplePurchaseStoreStarted(familyId, attemptId))) {
+      purchaseInFlightRef.current = false;
+      const safelyCanceled = await abandonApplePurchase(familyId, attemptId);
+      if (safelyCanceled && purchaseAttemptRef.current === attemptId) {
+        purchaseAttemptRef.current = null;
+      }
+      setStep(safelyCanceled ? "idle" : "confirming");
+      setErrorMessage(
+        safelyCanceled
+          ? "The App Store did not start the purchase. Close and reopen Homa to try again."
+          : "Homa can't confirm whether the App Store finished this purchase. Don't try again yet. Close and reopen Homa so it can check.",
+      );
+      return;
+    }
     try {
       await requestPurchase({
-        request: { apple: { sku: selectedProviderProduct.productId, appAccountToken: familyId } },
+        request: {
+          apple: {
+            sku: selectedProviderProduct.productId,
+            appAccountToken: attemptId,
+          },
+        },
         type: "subs",
       });
     } catch {
-      setStep("idle");
-      setErrorMessage("That didn't go through. Check your connection and try again.");
+      const safelyCanceled = await abandonApplePurchase(familyId, attemptId);
+      if (safelyCanceled && purchaseAttemptRef.current === attemptId) {
+        purchaseAttemptRef.current = null;
+      }
+      setStep(safelyCanceled ? "idle" : "confirming");
+      setErrorMessage(
+        safelyCanceled
+          ? "The App Store did not start the purchase. Close and reopen Homa to try again."
+          : "Homa can't confirm whether the App Store finished this purchase. Don't try again yet. Close and reopen Homa so it can check.",
+      );
+    } finally {
+      purchaseInFlightRef.current = false;
     }
   }
 
@@ -255,6 +440,26 @@ function Paywall({
       setStep((current) => (current === "restoring" ? "idle" : current));
     }
   }
+
+  if (!checked) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <LoadingStatus label="Checking your Homa plan" />
+      </View>
+    );
+  }
+
+  if (gate === null) {
+    return (
+      <GateCheckFailed
+        failureReason={failureReason}
+        onRetry={onUnlocked}
+        onContinueSignedOut={onContinueSignedOut}
+      />
+    );
+  }
+
+  if (gate.open) return <>{children}</>;
 
   const productsChecked = lastCheckedNonce === retryNonce;
   const productsUnavailable = connected && productsChecked && subscriptions.length === 0;
@@ -274,7 +479,7 @@ function Paywall({
           <Text
             style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}
           >
-            {everTrialed ? "Continue with Homa" : "Start with Homa"}
+            {gate.lapsed ? "Continue with Homa" : "Start with Homa"}
           </Text>
           <Text
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}

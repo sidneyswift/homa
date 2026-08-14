@@ -67,6 +67,24 @@ export const APPLE_PROVIDER_PRODUCTS: readonly ProviderProduct[] = [
   { provider: "apple", productId: "com.thankshoma.homa.elite.annual", tier: "elite", period: "annual" },
 ];
 
+/**
+ * Apple products Homa may use to begin a new StoreKit purchase today.
+ *
+ * Keep this narrower than APPLE_PROVIDER_PRODUCTS. The full provider catalog
+ * must continue recognizing historical receipts, renewals, and upgrades after
+ * an offer stops accepting new purchases.
+ */
+export const APPLE_NEW_PURCHASE_PRODUCTS: readonly ProviderProduct[] =
+  APPLE_PROVIDER_PRODUCTS.filter(
+    (product) =>
+      product.period === "monthly"
+      && planAvailableForPurchase(product.tier),
+  );
+
+export const APPLE_NEW_PURCHASE_PRODUCT_IDS = APPLE_NEW_PURCHASE_PRODUCTS.map(
+  (product) => product.productId,
+);
+
 /** Google Play product ids are reserved now, before Android implementation. */
 export const GOOGLE_PROVIDER_PRODUCTS: readonly ProviderProduct[] = [
   { provider: "google", productId: "com.thankshoma.homa.regular.monthly", tier: "regular", period: "monthly" },
@@ -111,6 +129,15 @@ export function providerProduct(
         ? GOOGLE_PROVIDER_PRODUCTS
         : [];
   return products.find((product) => product.productId === productId) ?? null;
+}
+
+export function appleProductAvailableForNewPurchase(
+  productId: string | null | undefined,
+): ProviderProduct | null {
+  if (!productId) return null;
+  return APPLE_NEW_PURCHASE_PRODUCTS.find(
+    (product) => product.productId === productId,
+  ) ?? null;
 }
 
 /** The honest weekly equivalent for US-only mobile marketing. */

@@ -1,28 +1,59 @@
 import { NextResponse } from "next/server";
 
-const PAUSED_RESPONSE = {
-  ok: false,
-  state: "rejected",
-  reason: "temporarily-unavailable",
-  message:
-    "Account deletion is temporarily unavailable while Homa repairs the final deletion step. Your account and family data have not changed. Billing continues unless you cancel it separately. Email hello@thankshoma.com to request deletion now.",
-} as const;
+import {
+  deletionConfirmationFor,
+  requestAccountDeletion,
+} from "../../../lib/account-deletion";
+import {
+  createAccountDeletionPost,
+  type AccountDeletionPostDependencies,
+} from "../../../lib/account-deletion-route";
+import { requireFamilyWithActorFromRequest } from "../../../lib/map/session";
+import { mapDb } from "../../../lib/map/db";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
-function pausedResponse(): Response {
-  return NextResponse.json(PAUSED_RESPONSE, {
-    status: 503,
-    headers: { "Cache-Control": "no-store" },
+const accountDeletionPostDependencies = {
+  resolveActor: requireFamilyWithActorFromRequest,
+  requestDeletion: requestAccountDeletion,
+  clearBrowserSession: async () => {
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) {
+        console.error("account deletion browser sign-out failed:", error.message);
+      }
+    } catch (error) {
+      console.error(
+        "account deletion browser sign-out failed:",
+        error instanceof Error ? error.message : "unknown error",
+      );
+    }
+  },
+} satisfies AccountDeletionPostDependencies;
+
+/**
+ * The only family-deletion entry point. Its family and member identity are
+ * derived from the verified browser or mobile bearer session, never from the
+ * body. The typed family name is therefore a deliberate confirmation, not an
+ * identifier a caller can swap for another family's data.
+ */
+export const POST = createAccountDeletionPost(accountDeletionPostDependencies);
+
+/** Mobile uses this to render the same exact confirmation phrase. It is
+ * authenticated rather than accepting an arbitrary family name from a URL. */
+export async function GET(request: Request): Promise<Response> {
+  const actor = await requireFamilyWithActorFromRequest(request);
+  if (!actor?.memberUserId) {
+    return NextResponse.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+  const sql = mapDb();
+  const rows = await sql<Array<{ name: string }>>`
+    select name from public.families where id = ${actor.family.id}
+  `;
+  const family = rows[0];
+  if (!family) return NextResponse.json({ ok: false, reason: "no-family" }, { status: 404 });
+  return NextResponse.json({
+    ok: true,
+    confirmation: deletionConfirmationFor(family.name),
   });
-}
-
-/** Current and installed clients must fail before session, body, provider, or
- * database work. The database migration separately fences legacy RPC calls. */
-export async function POST(): Promise<Response> {
-  return pausedResponse();
-}
-
-/** Mobile uses GET before rendering its confirmation form, so GET is fenced
- * too rather than allowing an old client to present an action that cannot run. */
-export async function GET(): Promise<Response> {
-  return pausedResponse();
 }

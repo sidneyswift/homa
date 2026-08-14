@@ -1,5 +1,6 @@
-import { copy, head } from "@vercel/blob";
+import { copy, del, head } from "@vercel/blob";
 
+import { withFamilyArtifactWriteFence } from "../account-deletion-artifact-fence";
 import { isFamilyChatAttachmentUrl } from "../attachments/markers";
 import { mapDb } from "../map/db";
 import { getFamilyAsset } from "./family-asset-store";
@@ -124,11 +125,15 @@ export async function promoteFamilyAttachment(input: {
   });
   let copied;
   try {
-    copied = await copy(attachment.url, pathname, {
-      access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-      contentType: sourceBlob.contentType,
+    copied = await withFamilyArtifactWriteFence({
+      familyId: input.familyId,
+      write: async () => await copy(attachment.url, pathname, {
+        access: "public",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+        contentType: sourceBlob.contentType,
+      }),
+      cleanup: async (writtenBlob) => await del(writtenBlob.url),
     });
   } catch {
     return { ok: false, reason: "copy-failed" };

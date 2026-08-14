@@ -202,6 +202,16 @@ test("repair verifies metadata, grants, and rollback-only behavior probes", () =
   assert.match(repair, /ordinary Auth email was incorrectly marked/u);
   assert.match(repair, /whole-family deletion did not finish cleanly/u);
   assert.match(repair, /ordinary member removal did not pause/u);
+  const deletionJobInsert = repair.indexOf(
+    "insert into public.account_deletion_jobs",
+  );
+  const deletionMode = repair.indexOf("'account-deletion-v2'");
+  const deletionStatus = repair.indexOf("set status = 'deleted'");
+  const familyHardDelete = repair.indexOf("delete from public.families family");
+  assert.ok(deletionJobInsert >= 0);
+  assert.ok(deletionJobInsert < deletionMode);
+  assert.ok(deletionMode < deletionStatus);
+  assert.ok(deletionStatus < familyHardDelete);
   assert.equal(repair.match(/^savepoint issue_878_/gmu)?.length, 4);
   assert.equal(repair.match(/^rollback to savepoint issue_878_/gmu)?.length, 4);
 });

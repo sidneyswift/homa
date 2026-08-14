@@ -26,7 +26,10 @@ import { ChildProgressService } from "../apps/web/lib/child-progress/progress-se
 import { hashContinuityKey } from "../apps/web/lib/conversation-continuity/continuity-service";
 import { openReplyLoopWithDatabase } from "../apps/web/lib/conversation-continuity/delivery-ledger";
 import { replyContractForProgressCheckIn } from "../apps/web/lib/conversation-continuity/delivery-policy";
-import { foldStubFamilyIntoTx } from "../apps/web/lib/family-fold";
+import {
+  foldFamilyDataIntoTx,
+  foldStubFamilyIntoTx,
+} from "../apps/web/lib/family-fold";
 import {
   attachAuthUser,
   removeChild,
@@ -358,6 +361,199 @@ const prerequisiteSql = `
     family_id uuid not null,
     kind text not null
   );
+  -- Family folds and account deletion share these service-only ownership
+  -- records. The focused harness mirrors the production constraints instead
+  -- of applying unrelated billing and library migrations.
+  create table public.account_deletion_jobs (
+    id uuid primary key default gen_random_uuid(),
+    family_id uuid,
+    status text not null,
+    requested_at timestamptz not null default now()
+  );
+  create table public.account_deletion_artifact_tombstones (
+    family_id uuid primary key,
+    deletion_job_id uuid not null
+      references public.account_deletion_jobs(id) on delete cascade,
+    created_at timestamptz not null default now()
+  );
+  create table public.family_artifact_prefixes (
+    artifact_family_id uuid primary key,
+    owner_family_id uuid not null
+      references public.families(id) on delete cascade,
+    inherited_at timestamptz not null default now(),
+    check (artifact_family_id <> owner_family_id)
+  );
+  create table public.family_artifact_prefix_candidates (
+    owner_family_id uuid not null references public.families(id),
+    artifact_family_id uuid not null,
+    evidence_kind text not null,
+    evidence_count integer not null,
+    observed_at timestamptz not null default now(),
+    primary key (owner_family_id, artifact_family_id, evidence_kind),
+    check (artifact_family_id <> owner_family_id)
+  );
+  -- Mirrors the hard-delete branches of migration 20260808170000 used by this
+  -- harness. The focused schema owns the artifact ledgers above, so it must
+  -- also carry the exact active guard identity that makes that state ready.
+  create function public.guard_family_hard_delete_protocol()
+  returns trigger
+  language plpgsql
+  security definer
+  set search_path = ''
+  as $guard$
+  declare
+    delete_mode text := current_setting('homa.family_delete_mode', true);
+    destination_family_id uuid;
+    active_deletion_job_id uuid;
+  begin
+    if delete_mode = 'family-fold-v2' then
+      select prefix.owner_family_id
+      into destination_family_id
+      from public.family_artifact_prefixes prefix
+      where prefix.artifact_family_id = old.id;
+
+      if destination_family_id is null
+        or not exists (
+          select 1
+          from public.families destination
+          where destination.id = destination_family_id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          where prefix.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.account_deletion_artifact_tombstones tombstone
+          where tombstone.family_id in (old.id, destination_family_id)
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          where prefix.artifact_family_id = destination_family_id
+             or (
+               prefix.artifact_family_id = old.id
+               and prefix.owner_family_id <> destination_family_id
+             )
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.artifact_family_id in (
+            old.id,
+            destination_family_id
+          )
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          join public.family_artifact_prefixes prefix
+            on prefix.artifact_family_id = candidate.artifact_family_id
+          where prefix.owner_family_id = destination_family_id
+            and candidate.owner_family_id <> destination_family_id
+        )
+      then
+        raise exception using
+          errcode = '55000',
+          message = 'family fold did not prove its artifact disposition';
+      end if;
+      return old;
+    end if;
+
+    if delete_mode = 'account-deletion-v2' then
+      select job.id
+      into active_deletion_job_id
+      from public.account_deletion_jobs job
+      where job.family_id = old.id
+        and job.status = 'running';
+
+      if active_deletion_job_id is null
+        or old.status <> 'deleted'
+        or not exists (
+          select 1
+          from public.account_deletion_artifact_tombstones tombstone
+          where tombstone.family_id = old.id
+            and tombstone.deletion_job_id = active_deletion_job_id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          left join public.account_deletion_artifact_tombstones tombstone
+            on tombstone.family_id = prefix.artifact_family_id
+           and tombstone.deletion_job_id = active_deletion_job_id
+          where prefix.owner_family_id = old.id
+            and tombstone.family_id is null
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefixes prefix
+          join public.families live_artifact_family
+            on live_artifact_family.id = prefix.artifact_family_id
+          where prefix.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.owner_family_id = old.id
+        )
+        or exists (
+          select 1
+          from public.family_artifact_prefix_candidates candidate
+          where candidate.owner_family_id <> old.id
+            and (
+              candidate.artifact_family_id = old.id
+              or exists (
+                select 1
+                from public.family_artifact_prefixes prefix
+                where prefix.owner_family_id = old.id
+                  and prefix.artifact_family_id = candidate.artifact_family_id
+              )
+            )
+        )
+      then
+        raise exception using
+          errcode = '55000',
+          message = 'account deletion did not prove its artifact disposition';
+      end if;
+      return old;
+    end if;
+
+    raise exception using
+      errcode = '55000',
+      message = 'family hard delete requires a recognized transaction protocol';
+  end;
+  $guard$;
+  create trigger families_hard_delete_protocol_guard
+  before delete on public.families
+  for each row execute function public.guard_family_hard_delete_protocol();
+  create function public.guard_family_deletion_status_transition()
+  returns trigger
+  language plpgsql
+  security definer
+  set search_path = ''
+  as $status_guard$
+  begin
+    if new.status = 'deleted'
+      and old.status is distinct from 'deleted'
+      and current_setting('homa.family_delete_mode', true)
+        is distinct from 'account-deletion-v2'
+    then
+      raise exception using
+        errcode = '55000',
+        message = 'family deletion acceptance requires the account deletion protocol';
+    end if;
+    return new;
+  end;
+  $status_guard$;
+  create trigger families_deletion_status_protocol_guard
+  before update of status on public.families
+  for each row execute function public.guard_family_deletion_status_transition();
   create table public.conversation_episodes (
     id uuid primary key default gen_random_uuid(),
     family_id uuid not null
@@ -746,6 +942,9 @@ async function runFamilyFoldCompatibilityAssertions(
 ): Promise<void> {
   const stubSourceFamilyId = randomUUID();
   const stubDestinationFamilyId = randomUUID();
+  const finalDestinationFamilyId = randomUUID();
+  const inheritedArtifactFamilyId = randomUUID();
+  const candidateArtifactFamilyId = randomUUID();
   await sql`
     insert into public.families (id, email, context)
     values
@@ -763,6 +962,27 @@ async function runFamilyFoldCompatibilityAssertions(
       label: "stub-family-fold",
     })
   );
+  await sql`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (${stubSourceFamilyId}, ${inheritedArtifactFamilyId})
+  `;
+  await sql`
+    insert into public.family_artifact_prefix_candidates (
+      owner_family_id,
+      artifact_family_id,
+      evidence_kind,
+      evidence_count
+    )
+    values (
+      ${stubSourceFamilyId},
+      ${candidateArtifactFamilyId},
+      'lesson_audio',
+      2
+    )
+  `;
   await sql.begin(async (tx) => {
     await tx`
       delete from public.family_members
@@ -819,6 +1039,213 @@ async function runFamilyFoldCompatibilityAssertions(
       where family_id = ${stubSourceFamilyId}
     `;
     assert.equal(sourceHours.count, 0);
+    const inheritedPrefixes = await tx<Array<{ artifact_family_id: string }>>`
+      select artifact_family_id
+      from public.family_artifact_prefixes
+      where owner_family_id = ${stubDestinationFamilyId}
+      order by artifact_family_id
+    `;
+    assert.deepEqual(
+      new Set(inheritedPrefixes.map((row) => row.artifact_family_id)),
+      new Set([stubSourceFamilyId, inheritedArtifactFamilyId]),
+    );
+  });
+  await sql`
+    insert into public.families (id, email, context)
+    values (
+      ${finalDestinationFamilyId},
+      'final-destination@example.com',
+      '{"into":"final"}'::jsonb
+    )
+  `;
+  await sql.begin(async (tx) => {
+    assert.equal(
+      await foldFamilyDataIntoTx(
+        tx,
+        stubDestinationFamilyId,
+        finalDestinationFamilyId,
+      ),
+      true,
+    );
+    await assertFoldedProgress(tx, {
+      sourceFamilyId: stubDestinationFamilyId,
+      destinationFamilyId: finalDestinationFamilyId,
+      fixture: stubFixture,
+    });
+    const transitivePrefixes = await tx<Array<{ artifact_family_id: string }>>`
+      select artifact_family_id
+      from public.family_artifact_prefixes
+      where owner_family_id = ${finalDestinationFamilyId}
+      order by artifact_family_id
+    `;
+    assert.deepEqual(
+      new Set(transitivePrefixes.map((row) => row.artifact_family_id)),
+      new Set([
+        stubSourceFamilyId,
+        stubDestinationFamilyId,
+        inheritedArtifactFamilyId,
+      ]),
+    );
+    const transitiveCandidates = await tx<Array<{
+      artifact_family_id: string;
+      evidence_count: number;
+    }>>`
+      select artifact_family_id, evidence_count
+      from public.family_artifact_prefix_candidates
+      where owner_family_id = ${finalDestinationFamilyId}
+    `;
+    assert.deepEqual([...transitiveCandidates], [{
+      artifact_family_id: candidateArtifactFamilyId,
+      evidence_count: 2,
+    }]);
+  });
+
+  const deletingSourceFamilyId = randomUUID();
+  const deletingDestinationFamilyId = randomUUID();
+  const deletionJobId = randomUUID();
+  await sql`
+    insert into public.families (id, email)
+    values
+      (${deletingSourceFamilyId}, null),
+      (${deletingDestinationFamilyId}, 'deleting-destination@example.com')
+  `;
+  await sql`
+    insert into public.account_deletion_jobs (
+      id,
+      family_id,
+      status
+    )
+    values (${deletionJobId}, ${deletingDestinationFamilyId}, 'preparing')
+  `;
+  await sql`
+    insert into public.account_deletion_artifact_tombstones (
+      family_id,
+      deletion_job_id
+    )
+    values (${deletingDestinationFamilyId}, ${deletionJobId})
+  `;
+  assert.equal(
+    await sql.begin((tx) => foldStubFamilyIntoTx(
+      tx,
+      deletingSourceFamilyId,
+      deletingDestinationFamilyId,
+    )),
+    false,
+  );
+  const [deletionFirstFamilies] = await sql<{ count: number }[]>`
+    select count(*)::integer as count
+    from public.families
+    where id in (${deletingSourceFamilyId}, ${deletingDestinationFamilyId})
+  `;
+  assert.equal(deletionFirstFamilies.count, 2);
+  await sql`delete from public.account_deletion_jobs where id = ${deletionJobId}`;
+
+  const corruptSourceFamilyId = randomUUID();
+  const corruptDestinationFamilyId = randomUUID();
+  await sql`
+    insert into public.families (id, email)
+    values
+      (${corruptSourceFamilyId}, null),
+      (${corruptDestinationFamilyId}, 'corrupt-destination@example.com')
+  `;
+  await sql`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (${corruptDestinationFamilyId}, ${corruptSourceFamilyId})
+  `;
+  assert.equal(
+    await sql.begin((tx) => foldStubFamilyIntoTx(
+      tx,
+      corruptSourceFamilyId,
+      corruptDestinationFamilyId,
+    )),
+    false,
+  );
+  const [corruptFamilies] = await sql<{ count: number }[]>`
+    select count(*)::integer as count
+    from public.families
+    where id in (${corruptSourceFamilyId}, ${corruptDestinationFamilyId})
+  `;
+  assert.equal(corruptFamilies.count, 2);
+
+  const candidateConflictSourceFamilyId = randomUUID();
+  const candidateConflictDestinationFamilyId = randomUUID();
+  const candidateConflictOwnerFamilyId = randomUUID();
+  const candidateConflictArtifactFamilyId = randomUUID();
+  await sql`
+    insert into public.families (id, email)
+    values
+      (${candidateConflictSourceFamilyId}, null),
+      (
+        ${candidateConflictDestinationFamilyId},
+        'candidate-conflict-destination@example.com'
+      ),
+      (
+        ${candidateConflictOwnerFamilyId},
+        'candidate-conflict-owner@example.com'
+      )
+  `;
+  await sql`
+    insert into public.family_artifact_prefixes (
+      owner_family_id,
+      artifact_family_id
+    )
+    values (
+      ${candidateConflictSourceFamilyId},
+      ${candidateConflictArtifactFamilyId}
+    )
+  `;
+  await sql`
+    insert into public.family_artifact_prefix_candidates (
+      owner_family_id,
+      artifact_family_id,
+      evidence_kind,
+      evidence_count
+    )
+    values (
+      ${candidateConflictOwnerFamilyId},
+      ${candidateConflictArtifactFamilyId},
+      'material_output',
+      1
+    )
+  `;
+  assert.equal(
+    await sql.begin((tx) => foldStubFamilyIntoTx(
+      tx,
+      candidateConflictSourceFamilyId,
+      candidateConflictDestinationFamilyId,
+    )),
+    false,
+  );
+  const [candidateConflictState] = await sql<Array<{
+    families: number;
+    source_aliases: number;
+    destination_aliases: number;
+    candidates: number;
+  }>>`
+    select
+      (select count(*)::integer from public.families
+        where id in (
+          ${candidateConflictSourceFamilyId},
+          ${candidateConflictDestinationFamilyId},
+          ${candidateConflictOwnerFamilyId}
+        )) as families,
+      (select count(*)::integer from public.family_artifact_prefixes
+        where owner_family_id = ${candidateConflictSourceFamilyId}
+          and artifact_family_id = ${candidateConflictArtifactFamilyId}) as source_aliases,
+      (select count(*)::integer from public.family_artifact_prefixes
+        where owner_family_id = ${candidateConflictDestinationFamilyId}) as destination_aliases,
+      (select count(*)::integer from public.family_artifact_prefix_candidates
+        where owner_family_id = ${candidateConflictOwnerFamilyId}
+          and artifact_family_id = ${candidateConflictArtifactFamilyId}) as candidates
+  `;
+  assert.deepEqual(candidateConflictState, {
+    families: 3,
+    source_aliases: 1,
+    destination_aliases: 0,
+    candidates: 1,
   });
 
   const attachSourceFamilyId = randomUUID();
@@ -4525,10 +4952,6 @@ async function runAdapterAssertions(input: {
       promptKey: currentProgressPrompt,
       expectedState: "open",
     });
-    await sql`
-      delete from public.families
-      where id = ${progressLoopDecoyFamilyId}
-    `;
     const activeSmsProgress =
       await resolveActiveSmsProgressContextWithDatabase(sql, {
         familyId,
@@ -6125,10 +6548,36 @@ async function runAdapterAssertions(input: {
         'whole-family-delete-turn'
       )
     `;
+    const wholeFamilyDeleteJobId = randomUUID();
     await sql`
-      delete from public.families
-      where id = ${wholeFamilyDeleteFamilyId}
+      insert into public.account_deletion_jobs (id, family_id, status)
+      values (
+        ${wholeFamilyDeleteJobId},
+        ${wholeFamilyDeleteFamilyId},
+        'running'
+      )
     `;
+    await sql`
+      insert into public.account_deletion_artifact_tombstones (
+        family_id,
+        deletion_job_id
+      )
+      values (${wholeFamilyDeleteFamilyId}, ${wholeFamilyDeleteJobId})
+    `;
+    await sql.begin(async (tx) => {
+      await tx`
+        select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+      `;
+      await tx`
+        update public.families
+        set status = 'deleted'
+        where id = ${wholeFamilyDeleteFamilyId}
+      `;
+      await tx`
+        delete from public.families
+        where id = ${wholeFamilyDeleteFamilyId}
+      `;
+    });
     const [wholeFamilyDeleted] = await sql<
       { families: number; events: number }[]
     >`

@@ -1,8 +1,9 @@
 /**
  * Per-family AI consumption report (MS-6), read from public.model_usage
  * (our ledger) with an optional reconcile pass against the Vercel AI
- * Gateway's Custom Reporting API (the provider-side view of the same
- * spend, grouped by the user/tags we attach per request).
+ * Gateway's Custom Reporting API (the provider-side aggregate grouped
+ * by the feature tags we attach per request). Per-family attribution is
+ * deliberately local so account deletion can erase it.
  *
  * Usage:
  *   pnpm usage:report                     last 7 days, all families
@@ -11,7 +12,7 @@
  *   pnpm usage:report -- --reconcile      also query the Gateway report
  *
  * Env: apps/web/.env.local (SUPABASE_DB_PASSWORD for the ledger;
- * AI_GATEWAY_API_KEY or VERCEL_OIDC_TOKEN for --reconcile).
+ * VERCEL_OIDC_TOKEN for --reconcile).
  */
 
 import { loadEnvFile } from "node:process";
@@ -121,24 +122,24 @@ if (rows.length === 0) {
 }
 
 if (reconcile) {
-  const token = process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_OIDC_TOKEN;
+  const token = process.env.VERCEL_OIDC_TOKEN;
   if (!token) {
     console.log(
-      "\nreconcile: set AI_GATEWAY_API_KEY (or have a fresh VERCEL_OIDC_TOKEN) to query the Gateway report.",
+      "\nreconcile: refresh VERCEL_OIDC_TOKEN to query the Gateway report.",
     );
   } else {
     const end = new Date().toISOString().slice(0, 10);
     const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10);
-    const url = `https://ai-gateway.vercel.sh/v1/report?start_date=${start}&end_date=${end}&group_by=user`;
+    const url = `https://ai-gateway.vercel.sh/v1/report?start_date=${start}&end_date=${end}&group_by=tag`;
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
       console.log(`\nreconcile: Gateway report HTTP ${response.status} (Pro plan + valid key required).`);
     } else {
-      console.log("\nGateway /v1/report grouped by user (provider-side view):");
+      console.log("\nGateway /v1/report grouped by feature tag (provider-side aggregate):");
       console.log(JSON.stringify(await response.json(), null, 2).slice(0, 4000));
     }
   }

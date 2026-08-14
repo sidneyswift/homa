@@ -2,6 +2,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { after } from "next/server";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { assertFamilyArtifactAccess } from "../../../../lib/account-deletion-artifact-fence";
 import { familyAccountCheckout } from "../../../../lib/billing/wall";
 import { finalizeFamilyAssetUpload } from "../../../../lib/library/family-asset-upload-store";
 import { processQueuedFamilyAsset } from "../../../../lib/library/family-asset-processing";
@@ -74,6 +75,7 @@ export async function POST(request: Request): Promise<Response> {
       body,
       onBeforeGenerateToken: async (pathname, clientPayload, multipart) => {
         if (!auth || !multipart) throw new Error("multipart session required");
+        await assertFamilyArtifactAccess(auth.familyId);
         const payload = parseTokenPayload(clientPayload);
         if (!isUuid(payload.reservationId)) {
           throw new Error("valid reservation required");
