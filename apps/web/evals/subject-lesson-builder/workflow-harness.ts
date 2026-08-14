@@ -999,7 +999,7 @@ export async function runSubjectLessonWorkflowEval(
     ].join("\n"),
     tools,
     stopWhen: stepCountIs(20),
-    maxOutputTokens: 4_000,
+    maxOutputTokens: 6_000,
     maxRetries: 0,
   });
 
