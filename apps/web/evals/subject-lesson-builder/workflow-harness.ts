@@ -308,13 +308,12 @@ function usesDirectCommandShape(text: string): boolean {
 
 function assumesExternalItemHasExample(
   text: string,
-  materials: string[]
+  _materials: string[]
 ): boolean {
   const normalized = text.toLowerCase().replaceAll("-", " ");
-  const materialContext = `${materials.join(" ")} ${normalized}`.toLowerCase();
   const usesOpenEndedExternalItem =
     /\b(?:book|box|brochure|catalog|cover|flyer|label|magazine|mail|newspaper|package|page|poster|sign|story)\b/u.test(
-      materialContext
+      normalized
     );
   const expectsExample =
     /\b(?:circle|find|locate|look for|open|point to|read|spot)\b.{0,100}\b(?:example|letter|number|shape|word)s?\b/u.test(
@@ -753,10 +752,12 @@ export async function judgeSubjectLessonTargetFidelity(
     });
     return parseSubjectLessonQualityReview(review.text);
   };
-  const firstReview = await reviewOnce();
-  return reviewQuotesAreVerbatim(firstReview, candidates)
-    ? firstReview
-    : reviewOnce();
+  let review = await reviewOnce();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (reviewQuotesAreVerbatim(review, candidates)) return review;
+    review = await reviewOnce();
+  }
+  return review;
 }
 
 export function subjectLessonQualityMatrixFindings(
