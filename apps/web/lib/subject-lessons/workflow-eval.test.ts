@@ -429,8 +429,8 @@ describe("subject lesson model workflow eval contract", () => {
     }
   });
 
-  it("exposes success and honest-failure Eve eval cases", async () => {
-    const [successSource, failureSource] = await Promise.all([
+  it("exposes success, honest-failure, and quality-matrix Eve eval cases", async () => {
+    const [successSource, failureSource, qualityMatrixSource] = await Promise.all([
       readFile(
         new URL(
           "../../evals/subject-lesson-builder/workflow-success.eval.ts",
@@ -445,6 +445,13 @@ describe("subject lesson model workflow eval contract", () => {
         ),
         "utf8"
       ),
+      readFile(
+        new URL(
+          "../../evals/subject-lesson-builder/workflow-quality-matrix.eval.ts",
+          import.meta.url
+        ),
+        "utf8"
+      ),
     ]);
     assert.match(successSource, /defineEval\(/u);
     assert.match(successSource, /runSubjectLessonWorkflowEval\("success"\)/u);
@@ -453,5 +460,8 @@ describe("subject lesson model workflow eval contract", () => {
       failureSource,
       /runSubjectLessonWorkflowEval\("save_failure"\)/u
     );
+    assert.match(qualityMatrixSource, /defineEval\(/u);
+    assert.match(qualityMatrixSource, /SUBJECT_LESSON_QUALITY_MATRIX/u);
+    assert.match(qualityMatrixSource, /judgeSubjectLessonTargetFidelity/u);
   });
 });
