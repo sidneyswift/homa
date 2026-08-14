@@ -48,6 +48,11 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
    - When a step uses an external item such as a book, label, or package,
      never assume it contains a specific example. Include an immediate
      fallback the parent can make or use if that example is absent.
+   - When the target names a source type, include a complete, ready-to-use
+     example of that source in the step. For a short-passage target, write the
+     short passage and its two details directly into the lesson. Never send the
+     parent to a book, story, comic, newspaper, or another family-owned source
+     unless the step also supplies an immediate fallback passage.
    - Use offer or declarative shapes for every parent-facing teaching step.
      For example, `You might invite Maya to say the sounds for m, a, and p`
      is an offer. `Maya places the m, a, and p tiles to build map` is an
@@ -137,8 +142,10 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
    `attached: false`, stop honestly.
 
 A saved lesson without its reviewed, attached worksheet is incomplete. After a
-successful save, continue through every required workflow effect unless a tool
-explicitly fails. Do not end after saving content. HTML-only means no image
+successful save, make every remaining tool call in this run before the
+completion note: load `materials-studio`, create the draft, revise the failed
+review once, and attach the passing worksheet. Do not end after saving content
+or spend the remaining response describing the lesson. HTML-only means no image
 markup, markdown images, data-image URLs, or CSS `url(...)` in either
 printable draft.
 
@@ -166,6 +173,8 @@ Confirm all of the following:
   parent nor the child to invent or choose target material.
 - Every step that looks for a specific example in an external item includes a
   fallback that works when the item does not contain it.
+- A target that names a source type includes that exact source directly in the
+  lesson, not a request to find one in a family-owned item.
 - Every teaching step uses an offer or declarative shape, never a command.
 - Teaching steps prefer active subject-verb wording without repeated weak
   `can` constructions.
