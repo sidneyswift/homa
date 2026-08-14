@@ -21,6 +21,15 @@ export default defineEval({
     const findings: string[] = [];
     for (const qualityCase of SUBJECT_LESSON_QUALITY_MATRIX) {
       const result = await runSubjectLessonWorkflowEval("success", qualityCase);
+      if (
+        !result.calls.some(
+          (call) => call.name === "save_subject_lesson_content"
+        )
+      ) {
+        t.log(
+          `${qualityCase.id}: workflow failure evidence ${JSON.stringify({ text: result.text, calls: result.calls })}`
+        );
+      }
       const review = await judgeSubjectLessonTargetFidelity(result);
       const caseFindings = subjectLessonQualityMatrixFindings(result, review);
       t.log(`${qualityCase.id}: ${JSON.stringify(review)}`);
