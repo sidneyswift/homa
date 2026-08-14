@@ -21,17 +21,32 @@ export default defineEval({
     const findings: string[] = [];
     for (const qualityCase of SUBJECT_LESSON_QUALITY_MATRIX) {
       const result = await runSubjectLessonWorkflowEval("success", qualityCase);
+      const failureEvidence = () => ({
+        text: result.text,
+        savedContent: result.calls.find(
+          (call) => call.name === "save_subject_lesson_content"
+        )?.input,
+        printableInputs: result.calls
+          .filter((call) => call.name === "create_printable")
+          .map((call) => call.input),
+        calls: result.calls.map(({ name }) => name),
+      });
       if (
         !result.calls.some(
           (call) => call.name === "save_subject_lesson_content"
         )
       ) {
         t.log(
-          `${qualityCase.id}: workflow failure evidence ${JSON.stringify({ text: result.text, calls: result.calls })}`
+          `${qualityCase.id}: workflow failure evidence ${JSON.stringify(failureEvidence())}`
         );
       }
       const review = await judgeSubjectLessonTargetFidelity(result);
       const caseFindings = subjectLessonQualityMatrixFindings(result, review);
+      if (caseFindings.length > 0) {
+        t.log(
+          `${qualityCase.id}: failed-case evidence ${JSON.stringify(failureEvidence())}`
+        );
+      }
       t.log(`${qualityCase.id}: ${JSON.stringify(review)}`);
       for (const finding of caseFindings) {
         t.log(`${qualityCase.id}: ${finding}`);

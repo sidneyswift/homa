@@ -118,6 +118,10 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      object. Do not add a bonus challenge, extra writing task, alternate
      sequence, or other enrichment unless that exact action is part of the
      reviewed target.
+   - When the target asks the child to explain, the worksheet must leave space
+     for the child to state what happens in their own words, in the required
+     order. Do not replace that explanation with pre-written descriptions to
+     match, number, or fill from a word bank.
 5. Call `create_printable` with:
    - `kind: "worksheet"`;
    - the trusted `childId` and exact `childName`;
