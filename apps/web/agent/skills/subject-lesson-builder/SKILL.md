@@ -99,6 +99,10 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      CSS `url(...)`, including background shorthand. Use text, borders,
      spacing, tables, and simple CSS shapes when the worksheet needs visual
      structure.
+   - Put every practice example, word, letter, object set, passage, event, or
+     other target material directly on the worksheet. Never ask the parent or
+     child to choose, invent, find, or supply an unspecified example. A
+     worksheet should work the moment it is printed.
 5. Call `create_printable` with:
    - `kind: "worksheet"`;
    - the trusted `childId` and exact `childName`;
@@ -146,6 +150,8 @@ Confirm all of the following:
   useful precursor belongs inside the same step as the exact target rehearsal.
 - Every step supplies exact options instead of asking the parent to choose
   examples, letters, or words.
+- The worksheet supplies every exact practice option and asks neither the
+  parent nor the child to invent or choose target material.
 - Every step that looks for a specific example in an external item includes a
   fallback that works when the item does not contain it.
 - Every teaching step uses an offer or declarative shape, never a command.
