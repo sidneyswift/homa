@@ -58,6 +58,19 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      `Choose`, or `Try`. Keep the direction concrete by naming the child,
      action, and exact options inside the offer or statement.
    - Write the practice suggestion in the same offer or declarative voice.
+   - Keep every teaching step on the target's named action and object. A
+     nearby skill is not an aligned step: use a precursor only when the child
+     immediately uses it to rehearse the exact target. For example, a target
+     to blend and read short-vowel words may include saying each sound and
+     blending it into a word, but not a separate vowel-sorting activity.
+   - Every numbered step must itself end with the child rehearsing the exact
+     target. Do not make a separate setup, naming, drawing, sorting, or
+     read-back step and rely on a later step to turn it into target practice.
+     Fold useful setup into the same step as the rehearsal. For example, when
+     counting objects, the child counts the objects as they are lined up. When
+     explaining a sequence, the child explains the ordered sequence as each
+     card is made or placed. When blending words, the child blends every word
+     they read in that step.
 2. When content is not already saved, call
    `save_subject_lesson_content` exactly once. If it returns `saved: false`,
    stop honestly. Do not load `materials-studio` or call any later tool. Do not
@@ -112,6 +125,10 @@ Confirm all of the following:
 - The saved content has one title, three to five steps, and one practice
   suggestion.
 - Every step and worksheet exercise teaches the exact reviewed target.
+- Each step makes the child rehearse the target's named action, rather than
+  stopping at an adjacent skill such as sorting, labeling, or a prerequisite.
+- No numbered step is only setup, naming, drawing, sorting, or read-back. A
+  useful precursor belongs inside the same step as the exact target rehearsal.
 - Every step supplies exact options instead of asking the parent to choose
   examples, letters, or words.
 - Every step that looks for a specific example in an external item includes a
