@@ -646,7 +646,9 @@ const subjectLessonQualityReviewSchema = z
 
 type SubjectLessonQualityReview = z.infer<typeof subjectLessonQualityReviewSchema>;
 
-function parseSubjectLessonQualityReview(response: string): SubjectLessonQualityReview {
+export function parseSubjectLessonQualityReview(
+  response: string
+): SubjectLessonQualityReview {
   const json = response
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
