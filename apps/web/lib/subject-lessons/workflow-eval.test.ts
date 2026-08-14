@@ -396,6 +396,24 @@ describe("subject lesson model workflow eval contract", () => {
     assert.equal(review.assessments[0]?.evidenceQuote, "blends and reads map");
   });
 
+  it("normalizes a reviewer candidate id before evidence validation", () => {
+    const review = parseSubjectLessonQualityReview(
+      JSON.stringify({
+        pass: true,
+        findings: ["The candidate practices the reviewed target."],
+        assessments: [
+          {
+            id: "worksheet",
+            aligned: true,
+            evidenceQuote: "blend and read",
+            reason: "It directly practices the reviewed action.",
+          },
+        ],
+      })
+    );
+    assert.equal(review.assessments[0]?.candidateId, "worksheet");
+  });
+
   it("uses the real Homa model with production-like local tool stubs", async () => {
     const [source, skillSource] = await Promise.all([
       readFile(

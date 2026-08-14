@@ -653,7 +653,21 @@ export function parseSubjectLessonQualityReview(
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/, "");
-  const parsed = subjectLessonQualityReviewSchema.safeParse(JSON.parse(json));
+  const value = JSON.parse(json) as unknown;
+  const review = asRecord(value);
+  const assessments = Array.isArray(review.assessments)
+    ? review.assessments.map((assessment) => {
+        const candidate = asRecord(assessment);
+        return typeof candidate.candidateId === "string" ||
+          typeof candidate.id !== "string"
+          ? candidate
+          : { ...candidate, candidateId: candidate.id };
+      })
+    : review.assessments;
+  const parsed = subjectLessonQualityReviewSchema.safeParse({
+    ...review,
+    assessments,
+  });
   if (!parsed.success) {
     throw new Error(
       `Subject lesson quality review did not match the required evidence schema: ${parsed.error.message}`
