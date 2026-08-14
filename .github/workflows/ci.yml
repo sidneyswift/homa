@@ -212,6 +212,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
       # GitHub's Ubuntu image carries several large toolchains this job never
       # invokes. The first blocking Gradle proof exhausted the runner disk
