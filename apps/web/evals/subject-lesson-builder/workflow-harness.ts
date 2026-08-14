@@ -6,9 +6,13 @@ import { z } from "zod";
 
 import { HOMA_MODEL } from "../../agent/model";
 import { attachSubjectLessonMaterialInputSchema } from "../../agent/tools/attach_subject_lesson_material";
-import { createPrintableInputSchema } from "../../agent/tools/create_printable";
+import {
+  createPrintableInputSchema,
+  subjectLessonPrintableRestriction,
+} from "../../agent/tools/create_printable";
 import { saveSubjectLessonContentInputSchema } from "../../agent/tools/save_subject_lesson_content";
 import {
+  buildSubjectLessonAuth,
   buildSubjectLessonMessage,
   type SubjectLessonSessionInput,
 } from "../../lib/subject-lessons/dispatch-input";
@@ -414,12 +418,17 @@ function validateSuccessfulWorkflow(
   targetActivityValidator?: (text: string) => boolean
 ): void {
   const { calls } = result;
+  const acceptedCreateCalls = calls.filter(
+    (call) => call.name === "create_printable" && outputBoolean(call, "created")
+  );
   const saveIndex = callIndex(calls, "save_subject_lesson_content");
   const loadIndex = calls.findIndex(
     (call) => loadedSkillName(call) === "materials-studio"
   );
-  const firstCreateIndex = callIndex(calls, "create_printable");
-  const secondCreateIndex = callIndex(calls, "create_printable", 1);
+  const firstCreate = acceptedCreateCalls[0];
+  const secondCreate = acceptedCreateCalls[1];
+  const firstCreateIndex = firstCreate ? calls.indexOf(firstCreate) : -1;
+  const secondCreateIndex = secondCreate ? calls.indexOf(secondCreate) : -1;
   const attachIndex = callIndex(calls, "attach_subject_lesson_material");
   const ordered = [
     saveIndex,
@@ -464,12 +473,9 @@ function validateSuccessfulWorkflow(
     }
   }
 
-  const createCalls = calls.filter((call) => call.name === "create_printable");
-  if (createCalls.length !== 2) {
+  if (acceptedCreateCalls.length !== 2) {
     findings.push("A failed visual review must cause exactly one revision.");
   }
-  const firstCreate = createCalls[0];
-  const secondCreate = createCalls[1];
   const firstCreateInput = asRecord(firstCreate?.input);
   const secondCreateInput = asRecord(secondCreate?.input);
   for (const input of [firstCreateInput, secondCreateInput]) {
@@ -696,7 +702,7 @@ export async function judgeSubjectLessonTargetFidelity(
       "Rubric: every teaching step, practice suggestion, and worksheet must make the child rehearse the target's named action and object. A prerequisite is allowed only when it immediately becomes practice of that exact target.",
       `Candidates: ${JSON.stringify(candidates)}`,
     ].join("\n"),
-    maxRetries: 0,
+    maxRetries: 1,
   });
   return review.object;
 }
@@ -758,6 +764,9 @@ export async function runSubjectLessonWorkflowEval(
     materialsStudioSkillPromise,
   ]);
   const calls: SubjectLessonWorkflowToolCall[] = [];
+  const trustedAttributes = buildSubjectLessonAuth(
+    sessionInput(qualityCase)
+  ).attributes;
 
   function record(name: string, input: unknown, output: unknown) {
     calls.push({ name, input, output });
@@ -862,6 +871,16 @@ export async function runSubjectLessonWorkflowEval(
         "Create and visually review one draft printable. Revise a failed review by passing revisesId.",
       inputSchema: createPrintableInputSchema,
       execute: async (input) => {
+        const restriction = subjectLessonPrintableRestriction(
+          input,
+          trustedAttributes
+        );
+        if (restriction) {
+          return record("create_printable", input, {
+            created: false,
+            note: restriction,
+          });
+        }
         const revised = input.revisesId !== undefined;
         return record("create_printable", input, {
           created: true,
