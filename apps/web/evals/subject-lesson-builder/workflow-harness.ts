@@ -463,12 +463,14 @@ function validateSuccessfulWorkflow(
         .join(", ")}.`
     );
   }
-  for (const findCall of calls.filter(
-    (call) => call.name === "find_materials",
-  )) {
-    if (asRecord(findCall.input).status !== "final") {
+  for (const findCall of calls.filter((call) => call.name === "find_materials")) {
+    const materials = asRecord(findCall.output).materials;
+    if (
+      !Array.isArray(materials) ||
+      materials.some((material) => asRecord(material).status !== "final")
+    ) {
       findings.push(
-        "Subject lesson material lookup must request final materials only.",
+        "Subject lesson material lookup must return final materials only.",
       );
     }
   }
@@ -651,6 +653,23 @@ interface SubjectLessonQualityCandidate {
   text: string;
 }
 
+function reviewQuotesAreVerbatim(
+  review: SubjectLessonQualityReview,
+  candidates: readonly SubjectLessonQualityCandidate[]
+): boolean {
+  const byId = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+  const reviewed = new Set<string>();
+  return (
+    review.assessments.length === candidates.length &&
+    review.assessments.every((assessment) => {
+      const candidate = byId.get(assessment.candidateId);
+      if (!candidate || reviewed.has(assessment.candidateId)) return false;
+      reviewed.add(assessment.candidateId);
+      return candidate.text.includes(assessment.evidenceQuote);
+    })
+  );
+}
+
 function subjectLessonQualityCandidates(
   calls: SubjectLessonWorkflowToolCall[]
 ): SubjectLessonQualityCandidate[] {
@@ -691,20 +710,26 @@ export async function judgeSubjectLessonTargetFidelity(
       assessments: [],
     };
   }
-  const review = await generateObject({
-    model: HOMA_MODEL,
-    schema: subjectLessonQualityReviewSchema,
-    system:
-      "You are a strict senior homeschool curriculum reviewer. Judge only whether each candidate genuinely teaches the exact reviewed target. A candidate fails when it stops at a nearby prerequisite, category, or adjacent skill. The target's named scope is binding: quantities, detail counts, source types, named sets, and sequences must all be present. Return evidenceQuote as one uninterrupted, byte-for-byte substring copied from that candidate. Do not use ellipses, paraphrase, repaired grammar, or markdown. Do not reward a candidate merely for repeating target words.",
-    prompt: [
-      `Exact reviewed target: ${qualityCase.targetStatement}`,
-      `Child age: ${qualityCase.ageMonths} months.`,
-      "Rubric: every teaching step, practice suggestion, and worksheet must make the child rehearse the target's named action and object. A prerequisite is allowed only when it immediately becomes practice of that exact target.",
-      `Candidates: ${JSON.stringify(candidates)}`,
-    ].join("\n"),
-    maxRetries: 1,
-  });
-  return review.object;
+  const reviewOnce = async (): Promise<SubjectLessonQualityReview> => {
+    const review = await generateObject({
+      model: HOMA_MODEL,
+      schema: subjectLessonQualityReviewSchema,
+      system:
+        "You are a strict senior homeschool curriculum reviewer. Judge only whether each candidate genuinely teaches the exact reviewed target. A candidate fails when it stops at a nearby prerequisite, category, or adjacent skill. The target's named scope is binding: quantities, detail counts, source types, named sets, and sequences must all be present. Return evidenceQuote as one uninterrupted, byte-for-byte substring copied from that candidate. Do not use ellipses, paraphrase, repaired grammar, or markdown. Do not reward a candidate merely for repeating target words.",
+      prompt: [
+        `Exact reviewed target: ${qualityCase.targetStatement}`,
+        `Child age: ${qualityCase.ageMonths} months.`,
+        "Rubric: every teaching step, practice suggestion, and worksheet must make the child rehearse the target's named action and object. A prerequisite is allowed only when it immediately becomes practice of that exact target.",
+        `Candidates: ${JSON.stringify(candidates)}`,
+      ].join("\n"),
+      maxRetries: 1,
+    });
+    return review.object;
+  };
+  const firstReview = await reviewOnce();
+  return reviewQuotesAreVerbatim(firstReview, candidates)
+    ? firstReview
+    : reviewOnce();
 }
 
 export function subjectLessonQualityMatrixFindings(
@@ -842,6 +867,7 @@ export async function runSubjectLessonWorkflowEval(
                 : {}),
             },
           ],
+          finalOnly: true,
           // Adversarial fixture: the preview contains a child likeness and the
           // stored HTML embeds it, while production has no likeness field.
           note: input.materialId
