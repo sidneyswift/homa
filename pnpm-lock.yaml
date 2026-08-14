@@ -16,6 +16,9 @@ importers:
 
   .:
     devDependencies:
+      '@vercel/blob':
+        specifier: ^2.6.1
+        version: 2.6.1
       axe-core:
         specifier: ^4.12.1
         version: 4.12.1

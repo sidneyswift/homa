@@ -4,10 +4,6 @@ import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-import { list } from "@vercel/blob";
-
-import { mapDb } from "../apps/web/lib/map/db";
-
 const FAMILY_ARTIFACT_PATH =
   /^families\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\//iu;
 
@@ -260,6 +256,10 @@ async function listFamilyBlobs(token: string): Promise<ArtifactBlobListing[]> {
 }
 
 async function main(): Promise<void> {
+  const [{ list }, { mapDb }] = await Promise.all([
+    import("@vercel/blob"),
+    import("../apps/web/lib/map/db"),
+  ]);
   const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
   try {
     loadEnvFile(path.join(repoRoot, "apps/web/.env.local"));

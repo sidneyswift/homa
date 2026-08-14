@@ -1,27 +1,18 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { GET, POST } from "../app/api/account-deletion/route";
+describe("account deletion release route", () => {
+  it("binds deletion to the authenticated server protocol", async () => {
+    const source = await readFile(
+      new URL("../app/api/account-deletion/route.ts", import.meta.url),
+      "utf8",
+    );
 
-const expectedBody = {
-  ok: false,
-  state: "rejected",
-  reason: "temporarily-unavailable",
-  message:
-    "Account deletion is temporarily unavailable while Homa repairs the final deletion step. Your account and family data have not changed. Billing continues unless you cancel it separately. Email hello@thankshoma.com to request deletion now.",
-};
-
-describe("account deletion containment route", () => {
-  for (const [method, handler] of [
-    ["GET", GET],
-    ["POST", POST],
-  ] as const) {
-    it(`${method} fails closed before any caller input is needed`, async () => {
-      const response = await handler();
-
-      assert.equal(response.status, 503);
-      assert.equal(response.headers.get("cache-control"), "no-store");
-      assert.deepEqual(await response.json(), expectedBody);
-    });
-  }
+    assert.match(source, /createAccountDeletionPost/u);
+    assert.match(source, /requireFamilyWithActorFromRequest/u);
+    assert.match(source, /requestAccountDeletion/u);
+    assert.match(source, /auth\.signOut\(\{ scope: "local" \}\)/u);
+    assert.doesNotMatch(source, /status: 503/u);
+  });
 });

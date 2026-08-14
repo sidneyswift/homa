@@ -194,6 +194,7 @@
     "seed:family-history": "tsx --tsconfig apps/web/tsconfig.json scripts/seed-family-history.mts"
   },
   "devDependencies": {
+    "@vercel/blob": "^2.6.1",
     "axe-core": "^4.12.1",
     "postgres": "^3.4.9",
     "satori": "^0.26.0",
