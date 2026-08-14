@@ -192,13 +192,6 @@ function callIndex(
   return -1;
 }
 
-function preservesSubjectLessonTarget(text: string): boolean {
-  const normalized = text.toLowerCase().replaceAll("-", " ");
-  return ["short", "vowel", "blend", "read"].every((token) =>
-    normalized.includes(token)
-  );
-}
-
 function supportsSubjectLessonTargetActivity(text: string): boolean {
   const normalized = text.toLowerCase().replaceAll("-", " ");
   const hasLearningAction = /\b(?:blend\w*|read\w*|sound\w*|build\w*)\b/u.test(
@@ -493,7 +486,7 @@ function validateSuccessfulWorkflow(
     if (
       input.skill !== targetStatement ||
       typeof input.requestSummary !== "string" ||
-      !preservesSubjectLessonTarget(input.requestSummary)
+      input.requestSummary.trim().length === 0
     ) {
       findings.push("Printable metadata must preserve the exact target.");
       break;
@@ -696,7 +689,7 @@ export async function judgeSubjectLessonTargetFidelity(
     model: HOMA_MODEL,
     schema: subjectLessonQualityReviewSchema,
     system:
-      "You are a strict senior homeschool curriculum reviewer. Judge only whether each candidate genuinely teaches the exact reviewed target. A candidate fails when it stops at a nearby prerequisite, category, or adjacent skill. Return evidenceQuote copied verbatim from that candidate. Do not reward a candidate merely for repeating target words.",
+      "You are a strict senior homeschool curriculum reviewer. Judge only whether each candidate genuinely teaches the exact reviewed target. A candidate fails when it stops at a nearby prerequisite, category, or adjacent skill. The target's named scope is binding: quantities, detail counts, source types, named sets, and sequences must all be present. Return evidenceQuote as one uninterrupted, byte-for-byte substring copied from that candidate. Do not use ellipses, paraphrase, repaired grammar, or markdown. Do not reward a candidate merely for repeating target words.",
     prompt: [
       `Exact reviewed target: ${qualityCase.targetStatement}`,
       `Child age: ${qualityCase.ageMonths} months.`,

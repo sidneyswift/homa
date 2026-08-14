@@ -24,6 +24,9 @@ export default defineEval({
       const review = await judgeSubjectLessonTargetFidelity(result);
       const caseFindings = subjectLessonQualityMatrixFindings(result, review);
       t.log(`${qualityCase.id}: ${JSON.stringify(review)}`);
+      for (const finding of caseFindings) {
+        t.log(`${qualityCase.id}: ${finding}`);
+      }
       findings.push(
         ...caseFindings.map((finding) => `${qualityCase.id}: ${finding}`)
       );
