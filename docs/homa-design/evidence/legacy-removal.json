@@ -3,8 +3,8 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
-  "manifestBaselineSourceCommit": "687bbdceb3bb0b56a4e8fcf0049bdd0893ee7782",
-  "ownedInputFingerprint": "a10333df6d1f48021043c7279a8e63e3a5e669fb9b48de9ce52cb8f2d5ee5605",
+  "manifestBaselineSourceCommit": "522ce36dbdbb260da0bdc683f8c9b2bf0fa6b141",
+  "ownedInputFingerprint": "ee43d74ea266373f06e31547440a67c39819b42dff25358773d22b32dbdc7011",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -6085,7 +6085,7 @@
     {
       "surfaceId": "surface:4cff420cc23e8e99",
       "path": "apps/web/evals/subject-lesson-builder/workflow-harness.ts",
-      "sourceHash": "23517240ed73fbe5fc280dea2715901b520ab6a703b49552a531ec8be4fb3c66",
+      "sourceHash": "fcb9343782dba8cbc1246e9a279af7ecd724942e4bef74f9b713b56d7eeab286",
       "legacySignatures": [
         "legacy-color-ink"
       ],
