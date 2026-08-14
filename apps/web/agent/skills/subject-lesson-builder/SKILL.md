@@ -71,6 +71,13 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      explaining a sequence, the child explains the ordered sequence as each
      card is made or placed. When blending words, the child blends every word
      they read in that step.
+   - Preserve the target's full scope in every step. When it names a quantity,
+     number of details, named set, source type, sequence, or other bound, each
+     step must reach that full scope. Do not use a smaller version as a
+     standalone warm-up. For example, a target to count up to 10 objects must
+     count 10 objects in every step, and a target to find two details in a
+     short passage must use a short passage and find two details in every
+     step.
 2. When content is not already saved, call
    `save_subject_lesson_content` exactly once. If it returns `saved: false`,
    stop honestly. Do not load `materials-studio` or call any later tool. Do not
@@ -115,6 +122,12 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
    material, or the material whose review was unavailable. If it returns
    `attached: false`, stop honestly.
 
+A saved lesson without its reviewed, attached worksheet is incomplete. After a
+successful save, continue through every required workflow effect unless a tool
+explicitly fails. Do not end after saving content. HTML-only means no image
+markup, markdown images, data-image URLs, or CSS `url(...)` in either
+printable draft.
+
 Never call `mark_material_final`. The worksheet remains a draft until the
 parent uses the existing approval flow.
 
@@ -127,6 +140,8 @@ Confirm all of the following:
 - Every step and worksheet exercise teaches the exact reviewed target.
 - Each step makes the child rehearse the target's named action, rather than
   stopping at an adjacent skill such as sorting, labeling, or a prerequisite.
+- Every step reaches the target's full named scope, including any quantity,
+  number of details, source type, set, sequence, or other bound.
 - No numbered step is only setup, naming, drawing, sorting, or read-back. A
   useful precursor belongs inside the same step as the exact target rehearsal.
 - Every step supplies exact options instead of asking the parent to choose
