@@ -137,6 +137,24 @@ async function createFamily(
   return id;
 }
 
+async function deleteFixtureFamily(id: string): Promise<void> {
+  await sql.begin(async (transaction) => {
+    await transaction`
+      insert into public.account_deletion_jobs (family_id, status)
+      values (${id}, 'running')
+    `;
+    await transaction`
+      select set_config('homa.family_delete_mode', 'account-deletion-v2', true)
+    `;
+    await transaction`
+      update public.families
+      set status = 'deleted', updated_at = now()
+      where id = ${id}
+    `;
+    await transaction`delete from public.families where id = ${id}`;
+  });
+}
+
 const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const sidneyRuntimeSessionId = `sms-sidney-${suffix}`;
 const alessaRuntimeSessionId = `sms-alessa-${suffix}`;
@@ -574,10 +592,10 @@ try {
   if (folded) stubFamilyId = null;
 } finally {
   if (stubFamilyId) {
-    await sql`delete from public.families where id = ${stubFamilyId}`;
+    await deleteFixtureFamily(stubFamilyId);
   }
   if (familyId) {
-    await sql`delete from public.families where id = ${familyId}`;
+    await deleteFixtureFamily(familyId);
   }
   if (userIds.length > 0) {
     await sql`delete from auth.users where id in ${sql(userIds)}`;

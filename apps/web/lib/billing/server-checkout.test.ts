@@ -211,6 +211,23 @@ describe("server checkout", () => {
       ),
       /zero active Payment Links/u,
     );
+
+    const deletionFixture = createFixture({
+      pages: [
+        [recurringLink()],
+        [recurringLink({
+          id: "plink_unrelated_active",
+          active: true,
+          url: "https://buy.stripe.com/unrelated_active",
+        })],
+      ],
+    });
+    const deletionResolved = await assertConfiguredPaymentLinksInactive(
+      deletionFixture.gateway,
+      { plus: { monthly: PAYMENT_LINK_URL } },
+      { requireAccountWideInactivity: false },
+    );
+    assert.equal(deletionResolved.get(PAYMENT_LINK_URL)?.id, "plink_target");
   });
 
   it("rejects a link without exactly one fixed recurring price", async (context) => {

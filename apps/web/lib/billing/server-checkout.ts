@@ -79,6 +79,16 @@ export type ServerPaymentLinkUrls = Readonly<
   Partial<Record<PlanTier, Readonly<Partial<Record<BillingPeriod, string>>>>>
 >;
 
+export interface PaymentLinkInactivityOptions {
+  /**
+   * Checkout creation is deliberately account-wide: an untracked active link
+   * could bypass Homa's server-created checkout path. Account deletion has a
+   * narrower question, whether this family's configured legacy links remain
+   * unable to create a future charge.
+   */
+  requireAccountWideInactivity?: boolean;
+}
+
 export interface CreateServerCheckoutSessionInput {
   gateway: ServerCheckoutGateway;
   intent: string;
@@ -152,7 +162,9 @@ function normalizeTrustedOrigin(value: string): string {
 export async function assertConfiguredPaymentLinksInactive(
   gateway: ServerCheckoutGateway,
   paymentLinkUrls: ServerPaymentLinkUrls,
+  options: PaymentLinkInactivityOptions = {},
 ): Promise<ReadonlyMap<string, ServerPaymentLink>> {
+  const requireAccountWideInactivity = options.requireAccountWideInactivity ?? true;
   const configuredUrls: string[] = [];
   for (const periods of Object.values(paymentLinkUrls)) {
     if (!periods) continue;
@@ -195,7 +207,7 @@ export async function assertConfiguredPaymentLinksInactive(
     }
   }
 
-  if (activeLinkSeen) {
+  if (requireAccountWideInactivity && activeLinkSeen) {
     throw new Error("Stripe account must have zero active Payment Links");
   }
 
