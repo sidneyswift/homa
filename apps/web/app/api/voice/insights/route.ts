@@ -19,13 +19,10 @@ import { hasVoiceWebhookSecret } from "../../../../lib/voice/webhook-auth";
  * posture as /api/voice/context: a long random secret in the query string,
  * stored only in the Insight Group's webhook config on Telnyx. Beyond that,
  * this route believes exactly one thing from the payload, the conversation
- * id, and nothing about whose call it was. Ownership is re-derived
- * server-side from the caller's number via family_phones, inside
- * syncOneCallTranscript, the same path the cron has always used. That
- * matters here more than on the curriculum line, which can correlate
- * against a call row this server placed; the general line has no such row,
- * so an echoed family_id would be the only claim, and BUILD.md law #1 says
- * an id from outside is never the basis for a write.
+ * id, and nothing about whose call it was. Ownership was captured by the
+ * initialization webhook in server-derived conversation metadata. The sync
+ * still verifies that stored owner against family membership, so the
+ * insight payload is never an authorization claim.
  *
  * Fail soft, always 200. Telnyx retries non-2xx, and a retry cannot help
  * any failure here: the cron is already the backstop, and this route is an

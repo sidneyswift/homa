@@ -14,6 +14,7 @@ import { emitMapEvent } from "../../../../lib/map/events";
 import { recordLeadContact } from "../../../../lib/phone-leads";
 import { effectiveTimeZone, zonedDateString } from "../../../../lib/time-zone";
 import { loadRecentActivityDigest } from "../../../../lib/voice/recent-activity";
+import { callOwnerConversationMetadata } from "../../../../lib/voice/transcript-owner";
 import { hasVoiceWebhookSecret } from "../../../../lib/voice/webhook-auth";
 
 /**
@@ -169,6 +170,19 @@ export async function POST(request: Request): Promise<Response> {
         // exactly one child).
         child_id: rows.children.length === 1 ? rows.children[0].id : "",
       },
+      // Telnyx persists this on the conversation it has just initialized.
+      // Importers verify this adult still belongs to this family before they
+      // use it. Legacy and unattributed calls intentionally get no owner.
+      ...(identity.memberUserId
+        ? {
+            conversation: {
+              metadata: callOwnerConversationMetadata({
+                familyId,
+                memberUserId: identity.memberUserId,
+              }),
+            },
+          }
+        : {}),
     });
   } catch (error) {
     // Fail open to the unknown-caller experience; never block the call.
