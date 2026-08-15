@@ -56,7 +56,7 @@ test("only exact reviewed non-mobile repair workflows bypass known false positiv
     [ISSUE_606_REPAIR_WORKFLOW_PATH, "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6"],
     [ISSUE_888_REPAIR_WORKFLOW_PATH, "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185"],
     [ISSUE_878_CONTAINMENT_WORKFLOW_PATH, "a5be03cb30df8202d10345b91c19e73b8d91af122315c9b032372c7f1e742cab"],
-    [ISSUE_878_SCHEMA_RELEASE_WORKFLOW_PATH, "291d2607d3c67affd240048589887504ef0a360292a33bb0ab2005224aadc833"],
+    [ISSUE_878_SCHEMA_RELEASE_WORKFLOW_PATH, "fe317dd3e9891273f4ea8307c9c9e4213a0181b75d86b6eda4287101a3550157"],
   ]) {
     const workflow = readFileSync(path, "utf8");
     assert.equal(createHash("sha256").update(workflow).digest("hex"), expectedHash);

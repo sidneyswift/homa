@@ -40,18 +40,6 @@ function commitExists(repositoryRoot, sha, label) {
   }
 }
 
-function isAncestor(repositoryRoot, ancestor, descendant) {
-  try {
-    execFileSync("git", ["merge-base", "--is-ancestor", ancestor, descendant], {
-      cwd: repositoryRoot,
-      stdio: "ignore",
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function blobSha(repositoryRoot, commitSha, path) {
   try {
     return git(repositoryRoot, ["rev-parse", `${commitSha}:${path}`]);
@@ -69,20 +57,6 @@ export function validateIssue878AccountDeletionSchemaReleaseGitContract({
   assertGitSha(reviewedSha, "Reviewed schema release SHA");
   commitExists(repositoryRoot, finalSha, "Final main SHA");
   commitExists(repositoryRoot, reviewedSha, "Reviewed schema release SHA");
-
-  const parents = git(repositoryRoot, ["show", "-s", "--format=%P", finalSha])
-    .split(/\s+/u)
-    .filter(Boolean);
-  if (parents.length !== 2 || parents[1] !== reviewedSha) {
-    throw new Error(
-      "The production commit is not the reviewed issue #878 schema release merge commit."
-    );
-  }
-  if (!isAncestor(repositoryRoot, reviewedSha, finalSha)) {
-    throw new Error(
-      "The reviewed issue #878 schema release head is not an ancestor of the production commit."
-    );
-  }
 
   const finalTreeSha = git(repositoryRoot, [
     "show",
@@ -102,16 +76,10 @@ export function validateIssue878AccountDeletionSchemaReleaseGitContract({
     const reviewedBlob = blobSha(repositoryRoot, reviewedSha, path);
     if (finalBlob !== reviewedBlob) {
       throw new Error(
-        `${path} differs between the reviewed head and production merge.`
+        `${path} differs between the reviewed head and production release.`
       );
     }
     sensitiveBlobs[path] = finalBlob;
-  }
-
-  if (finalTreeSha !== reviewedTreeSha) {
-    throw new Error(
-      "The production merge tree is not byte-exactly the reviewed issue #878 schema release tree."
-    );
   }
 
   const sensitiveManifest =

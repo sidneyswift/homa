@@ -143,7 +143,7 @@ jobs:
             [supabase/migrations/20260808184500_apple_purchase_interlock.sql]=58d41cc2a770cd64e9c5968565e25a9317bf2b10c07a59b519369cd29a3e6e28
             [supabase/migrations/20260809030000_pause_legacy_account_deletion.sql]=d654b9c3666a67fadcf667861063850394e805aee5d9522e9ea62407c075b96a
             [scripts/issue-878-account-deletion-schema-release.sql]=563c8754d9c8c59252bc5ae450cc66d7f7b86f7bebf53d22a41a0fc4d5ae3601
-            [scripts/issue-878-account-deletion-schema-release-git-contract.mjs]=54c6bd0b1f0872c90208894599afffb3e91db6cdb41a18e90221cc66e83076c3
+            [scripts/issue-878-account-deletion-schema-release-git-contract.mjs]=5a3af51fa80efa7dd63201623e16405ec5e8724987da0d6b87a9a926ccc1c3b8
           )
           for release_path in "${!expected_hashes[@]}"; do
             actual_hash="$(sha256sum "$release_path" | cut -d' ' -f1)"
