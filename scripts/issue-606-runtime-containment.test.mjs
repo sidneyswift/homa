@@ -6,27 +6,38 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const writers = [
-  "apps/web/lib/voice/transcript-sync.ts",
-  "scripts/telnyx-transcripts-sync.mts",
+  {
+    file: "apps/web/lib/voice/transcript-sync.ts",
+    ownerValue: "${owner.memberUserId}",
+    updateValue: "member_user_id = excluded.member_user_id",
+    immutableOwner: true,
+  },
+  {
+    file: "scripts/telnyx-transcripts-sync.mts",
+    ownerValue: "null",
+    updateValue: "member_user_id = null",
+    immutableOwner: false,
+  },
 ];
 
 for (const writer of writers) {
-  test(writer + " keeps mutable phone mappings out of adult ownership", () => {
-    const source = readFileSync(resolve(repositoryRoot, writer), "utf8");
+  test(writer.file + " keeps mutable phone mappings out of adult ownership", () => {
+    const source = readFileSync(resolve(repositoryRoot, writer.file), "utf8");
     assert.match(source, /family_id, child_id,\s*member_user_id, caller_e164/u);
     assert.match(
       source,
-      /\$\{owner\.childId\},\s*null,\s*\$\{owner\.caller\}/u
+      new RegExp(
+        `\\$\\{owner\\.childId\\},\\s*${writer.ownerValue.replace(/[${}]/gu, "\\$&")},\\s*\\$\\{owner\\.caller\\}`,
+        "u",
+      ),
     );
-    assert.match(
-      source,
-      /child_id = excluded\.child_id,\s*member_user_id = null,/u
-    );
-    assert.doesNotMatch(source, /member_user_id = excluded\.member_user_id/u);
-    assert.doesNotMatch(
-      source,
-      /select[^;]*member_user_id[^;]*from public\.family_phones/su
-    );
+    assert.match(source, new RegExp(`child_id = excluded\\.child_id,\\s*${writer.updateValue},`, "u"));
+    if (writer.immutableOwner) {
+      assert.match(source, /readImmutableCallOwner\(metadata\)/u);
+      assert.match(source, /from public\.family_members/u);
+    } else {
+      assert.doesNotMatch(source, /member_user_id = excluded\.member_user_id/u);
+    }
   });
 }
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, EB_Garamond, Fredoka, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Fredoka, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { DevToolbarSlot } from "../components/dev/dev-toolbar-slot";
@@ -13,11 +14,13 @@ const dmSans = DM_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
-const ebGaramond = EB_Garamond({
+// Keep the display face local. A preview must not depend on Google Fonts being
+// reachable while Next generates the font CSS during its production build.
+const ebGaramond = localFont({
+  src: "../assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
   variable: "--font-eb-garamond",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  weight: ["400", "500", "600", "700"],
+  weight: "600",
+  display: "swap",
 });
 
 const fredoka = Fredoka({
