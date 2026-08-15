@@ -21,6 +21,12 @@ function stepIndex(name) {
   return index;
 }
 
+function ciStepIndex(name) {
+  const index = ciWorkflow.indexOf(`- name: ${name}`);
+  assert.notEqual(index, -1, `missing CI step: ${name}`);
+  return index;
+}
+
 test("the OTA workflow classifies a full-history exact-main checkout", () => {
   assert.match(workflow, /fetch-depth: 0/u);
   assert.match(workflow, /GITHUB_REF.*refs\/heads\/main/u);
@@ -50,6 +56,18 @@ test("tests and exact production gates finish before export", () => {
   assert.ok(gates < exportBundle);
   assert.match(workflow, /node apps\/mobile\/scripts\/wait-for-production-gates\.mjs/u);
   assert.doesNotMatch(workflow, /for attempt in \$\(seq|check-ota-fingerprint/u);
+});
+
+test("Android generates managed Gradle inputs before restoring the dependency cache", () => {
+  const generateProject = ciStepIndex("Generate Android project for native compile");
+  const setupJava = ciWorkflow.indexOf("- uses: actions/setup-java@v5");
+  const nativeCompile = ciStepIndex("Android native compile-only assembly");
+
+  assert.notEqual(setupJava, -1, "CI must use the maintained Java setup action");
+  assert.ok(generateProject < setupJava);
+  assert.ok(setupJava < nativeCompile);
+  assert.match(ciWorkflow, /cache: gradle/u);
+  assert.match(ciWorkflow, /expo prebuild --platform android --no-install --clean/u);
 });
 
 test("the verified export is the only bundle EAS publishes", () => {
