@@ -232,6 +232,10 @@ test("workflow is production-bound, exact, recoverable, and sanitized", () => {
   assert.match(workflow, /previous_conclusion/u);
   assert.match(workflow, /cancelled\|failure\|timed_out/u);
   assert.match(workflow, /release-git-contract/u);
+  assert.match(workflow, /commits\/\$REVIEWED_RELEASE_SHA\/pulls/u);
+  assert.match(workflow, /refs\/pull\/\$\{reviewed_pull_numbers\[0\]\}\/head/u);
+  assert.match(workflow, /reviewed pull request head differs/u);
+  assert.match(workflow, /reviewed pull request head moved/u);
   assert.doesNotMatch(workflow, /git rev-list --parents -n 1/u);
   assert.match(workflow, /FINAL_TREE_SHA/u);
   assert.match(workflow, /REVIEWED_TREE_SHA/u);
