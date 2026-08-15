@@ -218,6 +218,9 @@ test("Vercel builds for deleted or moved web files", () => {
 test("the required-status gate accepts exactly the jobs for each scope", () => {
   assert.doesNotThrow(() => validateCiResults("full", success));
   assert.doesNotThrow(() =>
+    validateCiResults("full", { ...success, "mobile-checks": "skipped" }, "pull_request"),
+  );
+  assert.doesNotThrow(() =>
     validateCiResults("mobile-only", {
       ...success,
       build: "skipped",
@@ -240,6 +243,7 @@ test("the required-status gate accepts exactly the jobs for each scope", () => {
 
 test("the required-status gate rejects a missing, failed, or surprising job", () => {
   assert.throws(() => validateCiResults("full", { ...success, checks: "failed" }));
+  assert.throws(() => validateCiResults("full", success, "pull_request"));
   assert.throws(() => validateCiResults("mobile-only", { ...success, "brand-checks": "failed", build: "skipped", checks: "skipped", "db-checks": "skipped", "e2e-checks": "skipped" }));
   assert.throws(() => validateCiResults("docs-only", { ...success, "brand-checks": "skipped", "mobile-checks": "skipped", build: "skipped", checks: "skipped", "db-checks": "skipped", "e2e-checks": "skipped" }));
   assert.throws(() => validateCiResults("docs-only", success));
