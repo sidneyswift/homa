@@ -19,6 +19,7 @@ on:
 permissions:
   actions: read
   contents: read
+  pull-requests: read
 
 concurrency:
   group: production-issue-878-account-deletion-schema-release
