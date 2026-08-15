@@ -208,12 +208,6 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-          cache: gradle
-
       # GitHub's Ubuntu image carries several large toolchains this job never
       # invokes. The first blocking Gradle proof exhausted the runner disk
       # before completion, so reclaim only unrelated SDKs and emulator assets.
@@ -274,10 +268,20 @@ jobs:
       - name: Android JavaScript bundle export
         run: pnpm --filter mobile exec expo export --platform android --output-dir ${{ runner.temp }}/homa-android-compile
 
+      # Expo owns the Android project in this managed app. Generate it before
+      # setup-java computes Gradle's dependency-cache key, otherwise the
+      # action finds no Gradle inputs and fails before native compilation.
+      - name: Generate Android project for native compile
+        run: pnpm --filter mobile exec expo prebuild --platform android --no-install --clean
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
       - name: Android native compile-only assembly
-        run: |
-          pnpm --filter mobile exec expo prebuild --platform android --no-install --clean
-          bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon
+        run: bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon
 
   # The compile chain plus the checks that need real Supabase secrets.
   # Typecheck, lint, and build go through one turbo invocation so turbo
