@@ -182,6 +182,34 @@ export default async function AdminFunnelsPage() {
         title="Trial and billing"
         sub="Kept separate from activation: the aha is the ladder above, so a zero here should never make activation look broken."
       />
+      <div className="mt-3 rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
+        <p className="text-[0.72rem] font-bold text-muted">Account creation is not the customer denominator</p>
+        <p className="mt-1 max-w-2xl text-sm text-body">
+          Of {data.signupAudit.authAccounts} Auth accounts created in this window, {data.signupAudit.newFamilies} became a new live family.
+          The other accounts are shown separately so a sandbox rehearsal, a returning-family link, or an incomplete account cannot look like a paywall loss.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {(
+            [
+              ["New live families", data.signupAudit.newFamilies],
+              ["Reached the trial gate", data.signupAudit.signupGateViewed],
+              ["Started checkout", data.signupAudit.checkoutStarted],
+              ["Started trial", data.signupAudit.trialStarted],
+              ["Existing-family links", data.signupAudit.existingFamilyLinks],
+              ["Sandbox families", data.signupAudit.sandboxFamilies],
+              ["Accounts not linked to a family", data.signupAudit.unlinkedAccounts],
+            ] as const
+          ).map(([label, value]) => (
+            <span
+              key={label}
+              className="rounded-md border border-border-subtle bg-[var(--homa-canvas)] px-3.5 py-2"
+            >
+              <b className="block font-display text-lg leading-tight text-strong">{value}</b>
+              <span className="text-xs font-semibold text-body">{label}</span>
+            </span>
+          ))}
+        </div>
+      </div>
       {data.commercial.everRan ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {(

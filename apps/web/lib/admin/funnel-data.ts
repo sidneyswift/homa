@@ -5,6 +5,7 @@ import {
   PARENT_INITIATED_EVENTS,
 } from "../activation/signals";
 import { adminDb } from "./db";
+import { classifySignupAttribution } from "./signup-attribution";
 
 /**
  * Funnels & flows data (founder console MJ-14, direction 4): the human
@@ -81,12 +82,26 @@ export interface CommercialState {
   everRan: boolean;
 }
 
+/** A windowed audit of Auth accounts. It deliberately does not call each
+ * account a signup until it is linked to a new, non-sandbox family. */
+export interface SignupAttributionAudit {
+  authAccounts: number;
+  newFamilies: number;
+  existingFamilyLinks: number;
+  sandboxFamilies: number;
+  unlinkedAccounts: number;
+  signupGateViewed: number;
+  checkoutStarted: number;
+  trialStarted: number;
+}
+
 export interface FunnelData {
   windowDays: number;
   stages: FunnelStage[];
   stepFunnel: StepStage[];
   activation: ActivationLadder;
   commercial: CommercialState;
+  signupAudit: SignupAttributionAudit;
   stuck: { accountNoSetup: StuckFamily[]; setupNoReport: StuckFamily[] };
   pipeline: PipelineNode[];
   cohorts: CohortRow[];
@@ -438,6 +453,96 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
       trialEvents > 0,
   };
 
+  // Auth users are not a conversion denominator on their own. A user can
+  // belong to a sandbox rehearsal, link to an old family, or leave before
+  // attachAuthUser connects the account to anything. Read one membership per
+  // account, then classify it in deterministic code so the founder can see
+  // those paths instead of mistaking them for paywall abandonment.
+  const signupAuditRows = await sql<
+    {
+      user_created_at: string;
+      family_created_at: string | null;
+      sandbox: boolean | null;
+      signup_gate_viewed: boolean;
+      checkout_started: boolean;
+      trial_started: boolean;
+    }[]
+  >`
+    select
+      u.created_at::text as user_created_at,
+      linked.family_created_at,
+      linked.sandbox,
+      coalesce(linked.signup_gate_viewed, false) as signup_gate_viewed,
+      coalesce(linked.checkout_started, false) as checkout_started,
+      coalesce(linked.trial_started, false) as trial_started
+    from auth.users u
+    left join lateral (
+      select
+        f.created_at::text as family_created_at,
+        coalesce(f.sandbox, false) as sandbox,
+        exists (
+          select 1 from public.events e
+          where e.family_id = f.id
+            and e.name = 'wall.viewed'
+            and e.props->>'door' = 'signup'
+            and e.created_at >= u.created_at
+        ) as signup_gate_viewed,
+        exists (
+          select 1 from public.events e
+          where e.family_id = f.id
+            and e.name = 'wall.checkout_started'
+            and e.created_at >= u.created_at
+        ) as checkout_started,
+        (f.trial_started_at is not null) as trial_started
+      from public.family_members fm
+      join public.families f on f.id = fm.family_id
+      where fm.user_id = u.id
+        and coalesce(f.status, 'open') <> 'deleted'
+      order by fm.created_at asc
+      limit 1
+    ) linked on true
+    where u.created_at >= now() - ${interval}::interval
+      and u.deleted_at is null
+  `;
+  const signupAudit: SignupAttributionAudit = {
+    authAccounts: signupAuditRows.length,
+    newFamilies: 0,
+    existingFamilyLinks: 0,
+    sandboxFamilies: 0,
+    unlinkedAccounts: 0,
+    signupGateViewed: 0,
+    checkoutStarted: 0,
+    trialStarted: 0,
+  };
+  for (const row of signupAuditRows) {
+    const attribution = classifySignupAttribution({
+      userCreatedAt: row.user_created_at,
+      familyCreatedAt: row.family_created_at,
+      sandbox: row.sandbox === true,
+    });
+    switch (attribution) {
+      case "new_family":
+        signupAudit.newFamilies += 1;
+        if (row.signup_gate_viewed) signupAudit.signupGateViewed += 1;
+        if (row.checkout_started) signupAudit.checkoutStarted += 1;
+        if (row.trial_started) signupAudit.trialStarted += 1;
+        break;
+      case "existing_family":
+        signupAudit.existingFamilyLinks += 1;
+        break;
+      case "sandbox_family":
+        signupAudit.sandboxFamilies += 1;
+        break;
+      case "unlinked_account":
+        signupAudit.unlinkedAccounts += 1;
+        break;
+      default: {
+        const exhaustive: never = attribution;
+        throw new Error(`Unhandled signup attribution: ${exhaustive}`);
+      }
+    }
+  }
+
   const stepCountsBy = new Map(stepCounts.map((row) => [row.step, row.n]));
   const stepFunnel: StepStage[] = MAP_FLOW_STEPS.map((step) => ({
     step,
@@ -500,6 +605,7 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     stepFunnel,
     activation,
     commercial,
+    signupAudit,
     stuck: {
       accountNoSetup: accountNoSetup.map((row) => ({
         id: row.id,
