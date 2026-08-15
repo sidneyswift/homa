@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "461810ed5fd73d86e4373a466fbb20e38b62d28e4ed881b4b5264aa1e4758944",
+  "ownedInputFingerprint": "6fa5be4d5aa4b0d16be29043437c6b62f5651951096e83fcc2fb8a3a702a6eec",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -4199,7 +4199,7 @@
     {
       "surfaceId": "surface:ae88754b4ff63a0b",
       "path": "apps/web/components/design/quiet-primitives.css",
-      "sourceHash": "e8d94e1d556d03e5ea5b0b2dc5a437b2342bfda74f0ed58feb2a20f83dd3f378",
+      "sourceHash": "f5ec9f3a63b9241b4e38675682a7d478ad0de646dc533e482c4f0dab8bd55d7d",
       "legacySignatures": [],
       "detectedSourceHash": "4e9182f1662608194f946d04dbaa9c510c1ca7b860f9b61d58e0325acf28460d",
       "detectedLegacySignatures": [
@@ -5920,7 +5920,7 @@
     {
       "surfaceId": "surface:91593b41f57ed79a",
       "path": "apps/web/components/progress/progress-view.tsx",
-      "sourceHash": "8ff9259339264eca65dfc6404ccaa828c2204aa77c3a05bb868f73c1c9789433",
+      "sourceHash": "a9065270d7cc1904411af1aeb13a0ca150ffa50e65dd1856f588f95e702e7567",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
