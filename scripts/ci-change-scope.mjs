@@ -65,7 +65,7 @@ export function shouldSkipVercelPreview(inputFiles) {
   );
 }
 
-export function validateCiResults(scope, results) {
+export function validateCiResults(scope, results, eventName = "push") {
   const expectedByScope = {
     full: {
       "classify-changes": "success",
@@ -101,6 +101,9 @@ export function validateCiResults(scope, results) {
 
   const expected = expectedByScope[scope];
   if (!expected) throw new Error(`Unknown CI change scope: ${scope}`);
+  if (scope === "full" && eventName === "pull_request") {
+    expected["mobile-checks"] = "skipped";
+  }
   for (const [job, expectedResult] of Object.entries(expected)) {
     const actualResult = results[job];
     if (actualResult !== expectedResult) {
@@ -203,6 +206,7 @@ function runVercelMode() {
 
 function runGateMode() {
   const scope = process.env.CI_SCOPE ?? "";
+  const eventName = process.env.CI_EVENT ?? "";
   const results = {
     "classify-changes": process.env.CI_CLASSIFY,
     "light-checks": process.env.CI_LIGHT,
@@ -214,7 +218,7 @@ function runGateMode() {
     "e2e-checks": process.env.CI_E2E,
   };
   try {
-    validateCiResults(scope, results);
+    validateCiResults(scope, results, eventName);
     console.log(`All jobs required by the ${scope} scope are green.`);
   } catch (error) {
     console.error(`::error::${error instanceof Error ? error.message : String(error)}`);
