@@ -3,6 +3,14 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const FAMILY_ID_KEY = "homa_family_id";
 const MEMBER_USER_ID_KEY = "homa_member_user_id";
 
+/**
+ * Stored beside a transcript only when the importer has re-verified the
+ * immutable owner pair recorded when Telnyx created the call. The database
+ * accepts this marker on INSERT only, so a later re-sync cannot invent or
+ * transfer call ownership.
+ */
+export const IMMUTABLE_CALL_OWNER_PROVENANCE = "telnyx_call_start_v1";
+
 export interface ImmutableCallOwner {
   familyId: string;
   memberUserId: string;

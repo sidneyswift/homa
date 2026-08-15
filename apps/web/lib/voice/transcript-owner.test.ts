@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   callOwnerConversationMetadata,
+  IMMUTABLE_CALL_OWNER_PROVENANCE,
   readImmutableCallOwner,
 } from "./transcript-owner";
 
@@ -13,6 +14,10 @@ describe("immutable Telnyx call ownership", () => {
   it("round-trips the server-derived owner pair", () => {
     const metadata = callOwnerConversationMetadata({ familyId, memberUserId });
     assert.deepEqual(readImmutableCallOwner(metadata), { familyId, memberUserId });
+  });
+
+  it("uses one database provenance marker for a verified call-start owner", () => {
+    assert.equal(IMMUTABLE_CALL_OWNER_PROVENANCE, "telnyx_call_start_v1");
   });
 
   it("fails closed for an incomplete or malformed external metadata map", () => {

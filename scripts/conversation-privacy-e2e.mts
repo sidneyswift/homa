@@ -618,14 +618,14 @@ try {
   `;
   await sql`
     insert into public.call_transcripts
-      (conversation_id, family_id, member_user_id, line, transcript_text,
+      (conversation_id, family_id, member_user_id, owner_provenance, line, transcript_text,
        embedding, started_at)
     values
-      ('privacy-call-sidney', ${familyId}, ${sidneyUserId}, 'general',
+      ('privacy-call-sidney', ${familyId}, ${sidneyUserId}, 'telnyx_call_start_v1', 'general',
        ${A_CALL}, ${VECTOR}::extensions.vector(1536), now()),
-      ('privacy-call-alessa', ${familyId}, ${alessaUserId}, 'general',
+      ('privacy-call-alessa', ${familyId}, ${alessaUserId}, 'telnyx_call_start_v1', 'general',
        ${B_CALL}, ${VECTOR}::extensions.vector(1536), now()),
-      ('privacy-call-legacy', ${familyId}, null, 'general',
+      ('privacy-call-legacy', ${familyId}, null, null, 'general',
        ${LEGACY_CALL}, ${VECTOR}::extensions.vector(1536), now())
   `;
   await sql`
@@ -716,9 +716,9 @@ try {
   const alessaCalls = (await visibleCallContents(alessaUserId, familyId)).map(
     (row) => row.transcript_text,
   );
-  assert.deepEqual(sidneyCalls, []);
-  assert.deepEqual(alessaCalls, []);
-  pass("unproven call attribution stays hidden from every adult");
+  assert.deepEqual(sidneyCalls, [A_CALL]);
+  assert.deepEqual(alessaCalls, [B_CALL]);
+  pass("call-start ownership shows each adult only their own proven call");
 
   const sidneyHydration = await loadContinuityContext({
     familyId,
@@ -797,9 +797,9 @@ try {
     scope: "calls",
     limit: 1,
   });
-  assert.deepEqual(sidneyPinnedCall, []);
-  assert.deepEqual(alessaPinnedCall, []);
-  pass("server-pinned lexical recall excludes unproven calls");
+  assert.ok(sidneyPinnedCall[0]?.snippet.includes("sidney"));
+  assert.ok(alessaPinnedCall[0]?.snippet.includes("alessa"));
+  pass("server-pinned lexical recall keeps proven calls with their adult");
 
   const sidneySemantic = await asAdult(
     sidneyUserId,
@@ -819,11 +819,11 @@ try {
   );
   assert.ok(sidneySemantic.some((row) => row.content.includes("sidney")));
   assert.ok(sidneySemantic.some((row) => row.content === DELIVERED));
-  assert.ok(sidneySemantic.every((row) => row.source !== "call"));
+  assert.ok(sidneySemantic.some((row) => row.source === "call" && row.content.includes("sidney")));
   assert.ok(sidneySemantic.every((row) => !row.content.includes("alessa")));
   assert.ok(sidneySemantic.every((row) => !row.content.includes("ambiguous")));
   assert.ok(alessaSemantic.some((row) => row.content.includes("alessa")));
-  assert.ok(alessaSemantic.every((row) => row.source !== "call"));
+  assert.ok(alessaSemantic.some((row) => row.source === "call" && row.content.includes("alessa")));
   assert.ok(alessaSemantic.every((row) => !row.content.includes("sidney")));
   assert.ok(alessaSemantic.every((row) => !row.content.includes("ambiguous")));
   pass("semantic recall applies the same ownership wall");
@@ -846,7 +846,7 @@ try {
     await visibleCallContents(alessaUserId, familyId)
   ).map((row) => row.transcript_text);
   assert.deepEqual(new Set(postDeleteMessages), new Set([B_VOICE, B_REPLY]));
-  assert.deepEqual(postDeleteCalls, []);
+  assert.deepEqual(postDeleteCalls, [B_CALL]);
   const postDeleteHydration = await loadContinuityContext({
     familyId,
     memberUserId: alessaUserId,
@@ -885,7 +885,7 @@ try {
     private_calls: 1,
     private_deliveries: 1,
   });
-  pass("account deletion anonymizes private rows without exposing them");
+  pass("account deletion removes private call ownership without exposing it");
 } finally {
   if (familyId) {
     await sql.begin(async (transaction) => {
