@@ -29,6 +29,13 @@ const fredoka = Fredoka({
   weight: ["500", "600"],
 });
 
+// JetBrains Mono is not an approved Homa product face. Keep the legacy CSS
+// variable defined with the platform monospace fallback while its token
+// migration remains separately owned by #729.
+const monoFontFallback = {
+  "--font-jetbrains": "ui-monospace",
+} as React.CSSProperties;
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://thankshoma.com"),
   title: {
@@ -106,6 +113,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${dmSans.variable} ${ebGaramond.variable} ${fredoka.variable} h-full antialiased`}
+      style={monoFontFallback}
       // The landing page arms its scroll-reveal system pre-paint with an
       // inline script that adds .rv-armed to this element before hydration
       // (app/page.tsx); suppress the one-level attribute check so React

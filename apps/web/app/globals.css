@@ -219,7 +219,7 @@
   --font-serif: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-hand: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @theme inline {
