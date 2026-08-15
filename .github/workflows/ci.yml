@@ -571,9 +571,19 @@ jobs:
       # compensators are exercised against the complete migration graph.
       # That graph includes semantic recall's vector column.
       - name: Ensure PostgreSQL 16 and pgvector for disposable clusters
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-16 postgresql-16-pgvector
+          packages=()
+          if [ ! -x /usr/lib/postgresql/16/bin/initdb ]; then
+            packages+=(postgresql-16)
+          fi
+          if [ ! -f /usr/share/postgresql/16/extension/vector.control ]; then
+            packages+=(postgresql-16-pgvector)
+          fi
+          if [ "${#packages[@]}" -gt 0 ]; then
+            sudo apt-get update
+            sudo apt-get install --yes "${packages[@]}"
+          fi
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
       - name: Trial claim repair survives a reused PostgreSQL session
