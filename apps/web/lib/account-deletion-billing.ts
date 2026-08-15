@@ -1,13 +1,8 @@
 import Stripe from "stripe";
 
 import {
-  assertConfiguredPaymentLinksInactive,
-} from "./billing/server-checkout";
-import {
-  configuredServerPaymentLinkUrls,
   configuredStripeSecretKey,
 } from "./billing/stripe-checkout-config";
-import { createStripeServerCheckoutGateway } from "./billing/stripe-server-checkout";
 
 const STRIPE_LIST_LIMIT = 100;
 const MAX_PAGES_PER_COLLECTION = 100;
@@ -635,11 +630,6 @@ export async function reconcileStripeAccountDeletion(
   }
   try {
     const stripe = new Stripe(secretKey);
-    await assertConfiguredPaymentLinksInactive(
-      createStripeServerCheckoutGateway(stripe),
-      configuredServerPaymentLinkUrls(),
-      { requireAccountWideInactivity: false },
-    );
     return await createStripeAccountDeletionReconciler(
       createStripeAccountDeletionGateway(stripe),
     )(input);
