@@ -5344,7 +5344,6 @@ await expectReadDenied("admin_alert_acknowledgments");
       true,
     );
   } else {
-    applePurchaseInterlocksSchemaAvailable = true;
     await expectReadDenied("apple_purchase_interlocks");
   }
 }
