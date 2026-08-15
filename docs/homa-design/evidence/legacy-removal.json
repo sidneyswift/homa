@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "7dd98b8ab2ec9f7bd1d080ad8c14595c5b5fcdb0a0bad2f5f0a8d7294dac0ad6",
+  "ownedInputFingerprint": "461810ed5fd73d86e4373a466fbb20e38b62d28e4ed881b4b5264aa1e4758944",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -6085,10 +6085,8 @@
     {
       "surfaceId": "surface:4cff420cc23e8e99",
       "path": "apps/web/evals/subject-lesson-builder/workflow-harness.ts",
-      "sourceHash": "23517240ed73fbe5fc280dea2715901b520ab6a703b49552a531ec8be4fb3c66",
-      "legacySignatures": [
-        "legacy-color-ink"
-      ],
+      "sourceHash": "265505d9bca5c2c60ee3f103400851b41f81e93fb14da202b3727a3ac1bc9879",
+      "legacySignatures": [],
       "detectedSourceHash": "23517240ed73fbe5fc280dea2715901b520ab6a703b49552a531ec8be4fb3c66",
       "detectedLegacySignatures": [
         "legacy-color-ink"
@@ -6112,7 +6110,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,

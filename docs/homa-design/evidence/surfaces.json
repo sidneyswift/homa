@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "7dd98b8ab2ec9f7bd1d080ad8c14595c5b5fcdb0a0bad2f5f0a8d7294dac0ad6",
+  "ownedInputFingerprint": "461810ed5fd73d86e4373a466fbb20e38b62d28e4ed881b4b5264aa1e4758944",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -44565,7 +44565,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "5433b52b8d16afdba49b3ea23344b1f81ebb70af989b90211fe15071a8b7119b",
+        "fixtureChecksum": "9d68e602b3dd3801c6be7a0b217e232e0b47e3d128e243a8d0aa956d1ab280e0",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -44590,7 +44590,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "5433b52b8d16afdba49b3ea23344b1f81ebb70af989b90211fe15071a8b7119b"
+        "9d68e602b3dd3801c6be7a0b217e232e0b47e3d128e243a8d0aa956d1ab280e0"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -44606,8 +44606,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "a52d8e7fed3c70a390a50945c78b9cf07c7c0c4c",
-        "sourceCommitTimestamp": "2026-07-20T17:53:25-04:00",
+        "sourceCommitSha": "57ab25510be35fa54b85f139b73b69e327b4a37f",
+        "sourceCommitTimestamp": "2026-08-15T01:07:21-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -119832,6 +119832,7 @@
       "requiredStates": [
         "default",
         "error",
+        "interrupted",
         "success"
       ],
       "viewports": [],
@@ -119840,7 +119841,7 @@
       "assistiveModes": [],
       "appearanceModes": [],
       "baseline": {
-        "fixtureChecksum": "23517240ed73fbe5fc280dea2715901b520ab6a703b49552a531ec8be4fb3c66",
+        "fixtureChecksum": "265505d9bca5c2c60ee3f103400851b41f81e93fb14da202b3727a3ac1bc9879",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -119863,11 +119864,9 @@
           "non-judgmental-child-framing"
         ]
       },
-      "legacySignatures": [
-        "legacy-color-ink"
-      ],
+      "legacySignatures": [],
       "currentAssetHashes": [
-        "23517240ed73fbe5fc280dea2715901b520ab6a703b49552a531ec8be4fb3c66"
+        "265505d9bca5c2c60ee3f103400851b41f81e93fb14da202b3727a3ac1bc9879"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -119883,8 +119882,100 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "a52d8e7fed3c70a390a50945c78b9cf07c7c0c4c",
-        "sourceCommitTimestamp": "2026-07-20T17:53:25-04:00",
+        "sourceCommitSha": "875af73f4fe2c5053e84149ed8eb63ae801d59ff",
+        "sourceCommitTimestamp": "2026-08-15T01:07:14-04:00",
+        "environment": "git-source-commit",
+        "clientRuntimeFingerprint": null,
+        "pixels": null,
+        "interactions": null,
+        "performance": null,
+        "accessibility": null,
+        "artifactGeneration": null,
+        "providerState": null,
+        "publicCacheBehavior": null
+      },
+      "productionReadback": null,
+      "deletionCommit": null,
+      "deliveryState": "controlled-current",
+      "rolloutState": "inventory"
+    },
+    {
+      "id": "surface:f73bd2956826f407",
+      "paths": [
+        "apps/web/evals/subject-lesson-builder/workflow-quality-matrix.eval.ts"
+      ],
+      "type": "evaluator",
+      "reachability": "authenticated",
+      "audiences": [
+        "developer"
+      ],
+      "runtimeBoundary": null,
+      "criticality": "utility",
+      "ownerIssue": "gh#683",
+      "upstreamDomainOwners": [
+        "verification"
+      ],
+      "dependencies": [
+        "@homa/design"
+      ],
+      "consumers": [
+        "authoring-rails-check",
+        "interface-gauntlet"
+      ],
+      "requiredStates": [
+        "default",
+        "error",
+        "success"
+      ],
+      "viewports": [],
+      "devices": [],
+      "clients": [],
+      "assistiveModes": [],
+      "appearanceModes": [],
+      "baseline": {
+        "fixtureChecksum": "96891a4b5c1752d83a8a203b07a566bc009840f06f818703d3792b84c88b83bf",
+        "renderPath": null,
+        "interactionRecordingPath": null
+      },
+      "targetProfiles": [
+        "verification"
+      ],
+      "approvedTarget": "quiet-authority-v1",
+      "requirements": {
+        "atoms": [
+          "semantic-color",
+          "type-role",
+          "spacing",
+          "focus"
+        ],
+        "patterns": [],
+        "assets": [],
+        "fonts": [],
+        "copyRoles": [
+          "true-clear-memorable",
+          "non-judgmental-child-framing"
+        ]
+      },
+      "legacySignatures": [],
+      "currentAssetHashes": [
+        "96891a4b5c1752d83a8a203b07a566bc009840f06f818703d3792b84c88b83bf"
+      ],
+      "disposition": "replace-active",
+      "featureFlags": [],
+      "migrationFlag": null,
+      "rollbackBoundary": "web-deployment",
+      "evidencePath": null,
+      "requiredEvidence": [
+        "source-fingerprint",
+        "legacy-signature-review"
+      ],
+      "productionProbe": "pending:brand-production-probe",
+      "evidenceMetadata": {
+        "contractVersion": "@homa/design:quiet-authority-v1",
+        "harnessVersion": "brand-surfaces-v1",
+        "observedAt": null,
+        "sourceCommitSha": "36685200f195f9e02f1a94e79507b8a35d0aac52",
+        "sourceCommitTimestamp": "2026-08-15T01:07:10-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
