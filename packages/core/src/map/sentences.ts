@@ -17,13 +17,12 @@ import type { SubjectScore, MapScores } from "./scoring";
  */
 
 export interface SubjectLine {
-  /** The chip label: Ahead, On track, Growing right now, Not mapped yet. */
+  /** The chip label describes what Homa can help with, not a verdict about
+   * the child or a numerical comparison. */
   badge: string;
-  /** The right-column number, e.g. "+14 mo". Empty when it would only
-   * restate the badge ("at age" next to an "On track" chip, "growing"
-   * next to "Growing right now" said the same fact in two vocabularies,
-   * UI review 2026-07-06). It speaks only when it ADDS information,
-   * which also makes "+14 mo" rarer and therefore louder. */
+  /** Parent-facing report rows deliberately do not expose a comparative
+   * month score. The deterministic score remains available to planning and
+   * other authorized downstream logic. */
   numberLabel: string;
   /** The sentence under the subject name. */
   sentence: string;
@@ -77,23 +76,23 @@ export function subjectLine(score: SubjectScore, childName: string): SubjectLine
       // honest: the checklist stops here, the child didn't.
       if (score.beyondScale) {
         return {
-          badge: "Ahead",
-          numberLabel: `+${score.monthsAhead} mo`,
+          badge: "A clear strength",
+          numberLabel: "",
           sentence:
-            `${childName} is ahead of what's typical for their age here. ` +
-            `The skills you've confirmed go past what this number can show. ${evidence}`.trim(),
+            `${childName} has a clear strength here. ` +
+            `The skills you've confirmed go beyond what this checklist can show. ${evidence}`.trim(),
         };
       }
       return {
-        badge: "Ahead",
-        numberLabel: `+${score.monthsAhead} mo`,
-        sentence: `${childName} is ahead of what's typical for their age here. ${evidence}`.trim(),
+        badge: "A clear strength",
+        numberLabel: "",
+        sentence: `${childName} has a clear strength here. ${evidence}`.trim(),
       };
     case "on_track":
       return {
-        badge: "On track",
-        numberLabel: score.monthsAhead && score.monthsAhead > 0 ? `+${score.monthsAhead} mo` : "",
-        sentence: `Right where most kids their age are. ${evidence}`.trim(),
+        badge: "Solid footing",
+        numberLabel: "",
+        sentence: `There is solid footing here to build from. ${evidence}`.trim(),
       };
     case "growing": {
       const openers = nextStep
@@ -156,13 +155,13 @@ export function homaNote(scores: MapScores, childName: string): string {
   }
 
   if (ahead > 0 && onTrack > 0) {
-    return `${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}, on track in ${onTrack} more.`;
+    return `${childName} has clear strengths to build from, with solid footing across the rest of the picture.`;
   }
   if (ahead > 0) {
-    return `${childName} is ahead for their age in ${ahead} ${ahead === 1 ? "subject" : "subjects"}.`;
+    return `${childName} has clear strengths to build from.`;
   }
   if (onTrack > 0) {
-    return `${childName} is right where most kids their age are, across ${onTrack} ${onTrack === 1 ? "subject" : "subjects"}.`;
+    return `${childName} has solid footing across this picture.`;
   }
   return `${childName}'s picture is filling in, with a clear place to start in ${growing === 1 ? "one subject" : `${growing} subjects`} below.`;
 }

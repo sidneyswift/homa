@@ -117,9 +117,9 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "parent-pdf",
-        "surfaceCount": 81,
-        "surfaceIdsFingerprint": "3a9bbdd4cc5cdb40d39dba0f4857c29bddb7beb8460cfc0ccd87310ba970305b",
-        "scopedInputFingerprint": "22cab6ce9ea8ccf0e64a3f8786c4bc7bd831af14be14ff1af3cc5bb083152bda"
+        "surfaceCount": 82,
+        "surfaceIdsFingerprint": "3966fd06f670baa3aa9b49a56772021a3c7772e9d77fdf1d485cfa5f3698464c",
+        "scopedInputFingerprint": "8868c4a179972527523248d329778bc01e395b60925a3de3e3a51b1cc92a47e8"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/parent-pdf.json",
       "fixtureChecksum": "ab26dc0e9cdca23930a5502d0512042c870271890f992a87827d3df218153314",
@@ -213,9 +213,9 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "physical-print",
-        "surfaceCount": 81,
-        "surfaceIdsFingerprint": "95578f0a7e30611462b3279095ee91a68b47d37166e7d9a03968f91f1c1b5914",
-        "scopedInputFingerprint": "813fe66e4c105bc25bc6f27e7c437134ff0f5a622d91e5f14b25e08744abc433"
+        "surfaceCount": 82,
+        "surfaceIdsFingerprint": "7a232d9a345116f84b9ff4e0f36138fdb49479596220dd03a69bcb865c54e158",
+        "scopedInputFingerprint": "1c2e449280d02f50dd7a92230d9fa9be274362d3d7a9a67a547ebd9b93c9dae7"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/physical-print.json",
       "fixtureChecksum": "53d9f100310e6668b99ba2b43775e904a7cb2618fff4acc729c0814cd9327795",

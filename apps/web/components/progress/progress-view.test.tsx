@@ -61,13 +61,12 @@ describe("ProgressView", () => {
     // whose legend rows are the subject-by-subject list. No second
     // grid, no meaning box, no separate heading.
     assert.match(html, /Maya(?:&#x27;|')s snapshot/);
-    assert.match(html, /<svg[^>]*months ahead by subject over time/);
-    assert.match(html, /Math climbed from \+7 to \+8 this week\./);
+    assert.match(html, /<svg[^>]*subject pattern over time/);
+    assert.match(html, /Math&#x27;s picture updated this week\./);
     assert.doesNotMatch(html, /Subject by subject/);
 
     // Legend rows are doors: they open the detail panel, strongest
-    // first, values visible at rest, the conflict chip carried over
-    // from the retired tile grid.
+    // first, with the conflict chip carried over from the retired tile grid.
     assert.match(
       html,
       /<button[^>]*aria-haspopup="dialog"[^>]*>/,
@@ -75,8 +74,8 @@ describe("ProgressView", () => {
     assert.doesNotMatch(html, /aria-pressed/);
     assert.ok(html.indexOf(">Math<") !== -1);
     assert.ok(html.indexOf(">Math<") < html.indexOf(">Literacy<"));
-    assert.match(html, />\+8</);
-    assert.match(html, />\+0</);
+    assert.match(html, />A clear strength</);
+    assert.match(html, />Solid footing</);
     assert.match(html, /Please confirm/);
     // The dated movement chip retired from this surface (2026-07-13).
     assert.doesNotMatch(html, /since Jun 10/);
@@ -215,7 +214,7 @@ describe("ProgressView", () => {
     // subject rows put it a full screen down (2026-07-21).
     assert.ok(
       html.indexOf('aria-label="Lessons"') <
-        html.indexOf("Every number here comes from your answers"),
+        html.indexOf("Every subject here comes from your answers"),
       "the recording door must render above the subject content",
     );
 

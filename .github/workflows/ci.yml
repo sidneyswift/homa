@@ -14,8 +14,10 @@ name: CI
 # between them freely), plus scope-independent "brand-checks" and
 # "mobile-checks". Turborepo and Next build caches make
 # unchanged packages replay instantly. Mobile typecheck/lint and the Android
-# JavaScript export run ONLY in mobile-checks; the build job filters mobile
-# out of its turbo run because running them twice per commit bought nothing.
+# JavaScript export run only for mobile-only changes. Scheduled/manual mobile
+# release workflows retain the independent release lane; the build job filters
+# mobile out of its turbo run because running them twice per commit bought
+# nothing.
 # The slower Android native assembly is a scheduled/manual P2 check in
 # android-native-compile.yml, not a release gate for Homa's web product.
 
@@ -35,7 +37,8 @@ jobs:
   # Pull requests that only change documentation or the mobile app do not
   # need five web runners. The classifier recognizes a deliberately tiny
   # safe set; empty, mixed, unknown, workflow, dependency, database, and
-  # runtime changes all fall back to the full suite. Main always runs full.
+  # runtime changes all fall back to the full suite. Pushes use the same
+  # first-parent diff, so a mobile-only merge retains its focused lane.
   classify-changes:
     runs-on: ubuntu-24.04
     outputs:
@@ -47,14 +50,9 @@ jobs:
           # base parent, so HEAD^..HEAD is the complete pull-request diff.
           fetch-depth: 2
 
-      - name: Classify pull-request changes
+      - name: Classify changed files
         id: scope
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            node scripts/ci-change-scope.mjs github >> "$GITHUB_OUTPUT"
-          else
-            echo "scope=full" >> "$GITHUB_OUTPUT"
-          fi
+        run: node scripts/ci-change-scope.mjs github >> "$GITHUB_OUTPUT"
 
   # Fast paths still enforce the repository-wide style law and test the
   # classifier that decides which expensive web and database jobs may skip.
@@ -190,13 +188,13 @@ jobs:
           CI_DB: ${{ needs.db-checks.result }}
           CI_E2E: ${{ needs.e2e-checks.result }}
 
-  # Runs independently of the web jobs (no Supabase secrets needed) so
-  # mobile regressions surface fast. Until 2026-07-28 these tests existed
-  # (check:mobile-chat) but ran in no pipeline that ships to phones; the
-  # mobile-ota-update.yml workflow now runs the same suite before publish.
+  # Runs independently of web jobs (no Supabase secrets needed). A mobile
+  # pull request or mobile-only main merge proves its own surface, while web
+  # changes do not wait for Android. mobile-ota-update.yml runs this suite
+  # again before a phone ship.
   mobile-checks:
     needs: classify-changes
-    if: needs.classify-changes.outputs.scope == 'full' || needs.classify-changes.outputs.scope == 'mobile-only'
+    if: needs.classify-changes.outputs.scope == 'mobile-only'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

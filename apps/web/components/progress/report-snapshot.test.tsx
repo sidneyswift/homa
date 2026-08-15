@@ -60,7 +60,6 @@ describe("ReportSnapshot scale boundaries", () => {
     const html = renderToStaticMarkup(
       <ReportSnapshot
         childName="Story"
-        birthMonth="2022-11-01"
         generatedDate="July 11, 2026"
         eras={eraPair("2026.07.2|unknown|unknown", "current")}
       />,
@@ -73,16 +72,17 @@ describe("ReportSnapshot scale boundaries", () => {
     // celebration either (the anti-guilt law: a drop is never a mover).
     assert.doesNotMatch(html, /behind/i);
     assert.doesNotMatch(html, /climbed/);
-    // The legend card names the subject with its value visible at rest.
+    // The legend is interactive without turning the raw score into a child verdict.
     assert.match(html, /aria-pressed="false"/);
-    assert.match(html, /\+15/);
+    assert.match(html, /A clear strength/);
+    assert.doesNotMatch(html, /\+15/);
+    assert.doesNotMatch(html, /months ahead by subject/u);
   });
 
   it("stays quiet when every check-in shares one measuring stick", () => {
     const html = renderToStaticMarkup(
       <ReportSnapshot
         childName="Story"
-        birthMonth="2022-11-01"
         generatedDate="July 11, 2026"
         eras={eraPair("current", "current")}
       />,

@@ -71,7 +71,7 @@ export function validateCiResults(scope, results) {
       "classify-changes": "success",
       "light-checks": "success",
       "brand-checks": "success",
-      "mobile-checks": "success",
+      "mobile-checks": "skipped",
       build: "success",
       checks: "success",
       "db-checks": "success",

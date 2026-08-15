@@ -172,9 +172,9 @@ function buildCaption(input: {
   if (subjects.length === 0) return "";
 
   const belowClause = belowAge.length
-    ? belowAge
-        .map((subject) => `${midSentence(subject.name)} reads ${subject.display}`)
-        .join(" and ")
+    ? `${joinNames(belowAge.map((subject, index) =>
+        index === 0 ? subject.name : midSentence(subject.name),
+      ))} ${belowAge.length === 1 ? "is" : "are"} growing right now`
     : null;
 
   // First week: everything just appeared, so there is no movement story
@@ -195,8 +195,8 @@ function buildCaption(input: {
   );
   const climbed =
     movers.length === 1
-      ? `${moverNames[0]} climbed from ${displayMonths(movers[0].mover?.from ?? 0, false)} to ${movers[0].display} this week.`
-      : `${joinNames(moverNames)} climbed this week.`;
+      ? `${moverNames[0]}'s picture updated this week.`
+      : `${joinNames(moverNames)} changed in this week's picture.`;
 
   // Movers and below-age subjects are named already; the rest held.
   const steadyCount =
