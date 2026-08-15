@@ -638,6 +638,7 @@ export async function reconcileStripeAccountDeletion(
     await assertConfiguredPaymentLinksInactive(
       createStripeServerCheckoutGateway(stripe),
       configuredServerPaymentLinkUrls(),
+      { requireAccountWideInactivity: false },
     );
     return await createStripeAccountDeletionReconciler(
       createStripeAccountDeletionGateway(stripe),
