@@ -391,9 +391,11 @@ async function loadVoiceInstructions(): Promise<string> {
  * line, the one real parents call, never got one, which is why a call's
  * content reached web chat only when the hourly cron next ran. The webhook
  * this group posts to does NOT trust the summary for anything load-bearing:
- * /api/voice/insights reads the conversation id and re-derives ownership
- * from the caller's number. The summary fields exist so the payload is
- * legible in Telnyx's own console, not because anything writes them.
+ * /api/voice/insights reads the conversation id. The call-start webhook
+ * writes server-derived owner metadata to the conversation, and the
+ * transcript importer verifies it before making the transcript visible.
+ * The summary fields exist so the payload is legible in Telnyx's own
+ * console, not because anything writes them.
  */
 async function ensureGeneralInsight(): Promise<InsightTemplateRow | undefined> {
   const existing = await findInsightTemplate(GENERAL_INSIGHT_NAME);

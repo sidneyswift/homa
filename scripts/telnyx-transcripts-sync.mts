@@ -113,7 +113,11 @@ interface Owner {
   agent: string | null;
 }
 
-/** Family from the caller's phone; child only if it belongs to that family. */
+/**
+ * Historical backfill never guesses an adult owner from a current phone
+ * mapping. It may retain a family link for operations, but leaves the owner
+ * null so these transcripts remain unreadable to every adult.
+ */
 async function resolveOwner(
   sql: ReturnType<typeof postgres>,
   metadata: Record<string, string> | undefined,

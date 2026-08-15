@@ -5,6 +5,7 @@ import { embedText } from "../learning/embeddings";
 import { mapDb, type DbJson } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import { telnyxConfigured, telnyxGet, telnyxListOf } from "./telnyx-api";
+import { readImmutableCallOwner } from "./transcript-owner";
 
 /**
  * Pulls Telnyx voice-call transcripts into public.call_transcripts, the
@@ -18,9 +19,10 @@ import { telnyxConfigured, telnyxGet, telnyxListOf } from "./telnyx-api";
  * saves durable facts through the same scanned, budgeted path the chat
  * remember tool uses. Extraction is capped per sync pass to bound cost.
  *
- * Ownership is re-derived server-side (family from the caller's phone via
- * family_phones; child only if a metadata child_id belongs to that
- * family). Nothing is trusted blindly from Telnyx (BUILD.md law #1).
+ * Ownership is captured server-side at call initialization in Telnyx
+ * conversation metadata, then re-verified against family_members here.
+ * Older or malformed calls remain unreadable. Nothing external is trusted
+ * blindly (BUILD.md law #1).
  */
 
 interface ConversationMeta {
@@ -104,6 +106,7 @@ export function flattenTranscriptText(messages: TranscriptMessage[]): string {
 
 interface Owner {
   familyId: string | null;
+  memberUserId: string | null;
   childId: string | null;
   caller: string | null;
   agent: string | null;
@@ -115,16 +118,21 @@ async function resolveOwner(
   const sql = mapDb();
   const endUser = normalizeUsPhoneE164(metadata?.telnyx_end_user_target ?? "");
   const agent = normalizeUsPhoneE164(metadata?.telnyx_agent_target ?? "");
-  const candidates = [endUser, agent].filter((phone): phone is string => phone !== null);
-
   let familyId: string | null = null;
-  if (candidates.length > 0) {
-    const rows = await sql<{ family_id: string }[]>`
-      select family_id from public.family_phones
-      where phone_e164 in ${sql(candidates)}
+  let memberUserId: string | null = null;
+  const claimedOwner = readImmutableCallOwner(metadata);
+  if (claimedOwner) {
+    const rows = await sql<{ one: number }[]>`
+      select 1 as one
+      from public.family_members
+      where family_id = ${claimedOwner.familyId}
+        and user_id = ${claimedOwner.memberUserId}
       limit 1
     `;
-    familyId = rows[0]?.family_id ?? null;
+    if (rows.length > 0) {
+      familyId = claimedOwner.familyId;
+      memberUserId = claimedOwner.memberUserId;
+    }
   }
 
   let childId: string | null = null;
@@ -138,6 +146,7 @@ async function resolveOwner(
 
   return {
     familyId,
+    memberUserId,
     childId,
     caller: endUser ?? metadata?.telnyx_end_user_target ?? null,
     agent: agent ?? metadata?.telnyx_agent_target ?? null,
@@ -170,7 +179,7 @@ async function upsertTranscript(
       ${conversation.metadata?.telnyx_conversation_channel ?? null},
       ${owner.familyId},
       ${owner.childId},
-      null,
+      ${owner.memberUserId},
       ${owner.caller},
       ${owner.agent},
       ${sql.json(messages as unknown as DbJson)},
@@ -186,7 +195,7 @@ async function upsertTranscript(
       channel = excluded.channel,
       family_id = excluded.family_id,
       child_id = excluded.child_id,
-      member_user_id = null,
+      member_user_id = excluded.member_user_id,
       caller_e164 = excluded.caller_e164,
       agent_e164 = excluded.agent_e164,
       messages = excluded.messages,
@@ -239,12 +248,10 @@ export interface SingleCallSyncResult {
  * had never heard of it). The general line now has an Insight Group, so
  * Telnyx tells us the moment a call ends and this closes the gap to seconds.
  *
- * Deliberately NOT a new trust path. Ownership is re-derived exactly as the
- * cron does it, from the caller's number via `family_phones`
- * (`resolveOwner`), so the webhook body tells us only WHICH conversation
- * ended. Nothing it echoes about whose call it was is believed, which
- * matters because the general line has no server-placed call row to
- * correlate against the way the curriculum line does.
+ * Deliberately NOT a new trust path. The webhook tells us only WHICH
+ * conversation ended. `resolveOwner` reads the immutable call-start owner
+ * metadata placed there by /api/voice/context, then verifies that adult's
+ * membership before any transcript row becomes visible.
  *
  * Memory extraction is left to the cron on purpose: it wants a call that has
  * settled, and "the webhook fired" is not the same as "no more messages are
