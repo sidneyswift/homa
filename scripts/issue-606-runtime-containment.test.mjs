@@ -8,7 +8,7 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const writers = [
   {
     file: "apps/web/lib/voice/transcript-sync.ts",
-    ownerValue: "${owner.memberUserId}",
+    ownerValue: "${owner.memberUserId}, ${owner.provenance}",
     immutableOwner: true,
   },
   {
