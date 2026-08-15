@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "6fa5be4d5aa4b0d16be29043437c6b62f5651951096e83fcc2fb8a3a702a6eec",
+  "ownedInputFingerprint": "6abe401dccd654a136bbaab0146edac8e749da77b0e97820d6be2d46078837b3",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -5920,11 +5920,8 @@
     {
       "surfaceId": "surface:91593b41f57ed79a",
       "path": "apps/web/components/progress/progress-view.tsx",
-      "sourceHash": "a9065270d7cc1904411af1aeb13a0ca150ffa50e65dd1856f588f95e702e7567",
-      "legacySignatures": [
-        "legacy-rounded-pill",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": "f13edcfd1109e3528a0a652b47e7884591a2f4498278e8e108726391eff6fe96",
+      "legacySignatures": [],
       "detectedSourceHash": "8ff9259339264eca65dfc6404ccaa828c2204aa77c3a05bb868f73c1c9789433",
       "detectedLegacySignatures": [
         "legacy-rounded-pill",
@@ -5950,7 +5947,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,

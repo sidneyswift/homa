@@ -55,7 +55,7 @@ function ProgressEmptyState({
   return (
     <section
       aria-labelledby="progress-empty-heading"
-      className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-6 shadow-sm"
+      className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
     >
       <h2
         id="progress-empty-heading"
@@ -94,7 +94,7 @@ function AssessmentCta({
   return (
     <section
       aria-labelledby="progress-assessment-heading"
-      className="rounded-lg border border-sage/30 bg-[var(--accent-sage-soft)] p-6 shadow-sm"
+      className="rounded-[var(--homa-radius-card)] border border-[var(--homa-soft-boundary)] bg-[var(--homa-paper)] p-6 shadow-sm"
     >
       <h2
         id="progress-assessment-heading"
@@ -106,7 +106,7 @@ function AssessmentCta({
       <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
         <Link
           href={`/onboarding?start=${childId}`}
-          className="inline-flex min-h-11 items-center rounded-pill bg-[var(--brand-active)] px-5 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-[var(--clay-600)]"
+          className="inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] bg-[var(--homa-midnight-action)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-paper)] transition-colors hover:bg-[var(--homa-ink)]"
         >
           {copy.cta}
         </Link>
@@ -141,8 +141,8 @@ function KidSwitcher({
             aria-current={current ? "page" : undefined}
             className={
               current
-                ? "inline-flex items-center gap-2 rounded-pill bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-[var(--clay-700)]"
-                : "inline-flex items-center gap-2 rounded-pill border border-border-subtle bg-card px-3.5 py-1.5 text-sm font-medium text-muted transition-colors hover:border-brand hover:text-body"
+                ? "inline-flex items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-midnight-action)] bg-[var(--homa-midnight-action)] px-3.5 py-1.5 text-sm font-bold text-[var(--homa-paper)]"
+                : "inline-flex items-center gap-2 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3.5 py-1.5 text-sm font-medium text-[var(--homa-muted-ink)] transition-colors hover:border-[var(--homa-midnight-action)] hover:text-[var(--homa-ink)]"
             }
           >
             <KidAvatar name={kid.name} index={index} avatarUrl={kid.avatarUrl} size={20} />
@@ -238,7 +238,7 @@ export function ProgressView({
                 <p
                   className={
                     updatedLine.today
-                      ? "font-mono text-[0.68rem] font-bold uppercase tracking-widest text-[var(--sage-700)]"
+                      ? "font-mono text-[0.68rem] font-bold uppercase tracking-widest text-[var(--homa-info-ink)]"
                       : "font-mono text-[0.68rem] font-bold uppercase tracking-widest text-subtle"
                   }
                 >
@@ -252,7 +252,7 @@ export function ProgressView({
             {reportHref ? (
               <Link
                 href={reportHref}
-                className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-5 py-2.5 text-sm font-semibold text-strong transition-colors hover:border-brand"
+                className="inline-flex min-h-11 items-center rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-5 py-2.5 text-sm font-semibold text-[var(--homa-ink)] transition-colors hover:border-[var(--homa-visual-coral)]"
               >
                 Open the full report
               </Link>
@@ -348,7 +348,7 @@ export function ProgressView({
           <div className="mt-6">
             <Link
               href={`/app/${view.childId}/firsts`}
-              className="text-sm font-medium text-[var(--sage-700)] underline underline-offset-4 transition-colors hover:text-[var(--sage-800)]"
+              className="text-sm font-medium text-[var(--homa-brand-text)] underline underline-offset-4 transition-colors hover:text-[var(--homa-ink)]"
             >
               {FIRSTS_DOOR}
             </Link>

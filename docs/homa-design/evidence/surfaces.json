@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "6fa5be4d5aa4b0d16be29043437c6b62f5651951096e83fcc2fb8a3a702a6eec",
+  "ownedInputFingerprint": "6abe401dccd654a136bbaab0146edac8e749da77b0e97820d6be2d46078837b3",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -110686,7 +110686,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "a9065270d7cc1904411af1aeb13a0ca150ffa50e65dd1856f588f95e702e7567",
+        "fixtureChecksum": "f13edcfd1109e3528a0a652b47e7884591a2f4498278e8e108726391eff6fe96",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -110719,12 +110719,9 @@
           "non-judgmental-child-framing"
         ]
       },
-      "legacySignatures": [
-        "legacy-rounded-pill",
-        "legacy-token-namespace"
-      ],
+      "legacySignatures": [],
       "currentAssetHashes": [
-        "a9065270d7cc1904411af1aeb13a0ca150ffa50e65dd1856f588f95e702e7567"
+        "f13edcfd1109e3528a0a652b47e7884591a2f4498278e8e108726391eff6fe96"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -110743,9 +110740,9 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "c59da87d4186d8ef3d005c7c1b3d96d4a13daebc",
-        "sourceCommitTimestamp": "2026-08-15T01:50:03-04:00",
-        "environment": "git-source-commit",
+        "sourceCommitSha": null,
+        "sourceCommitTimestamp": null,
+        "environment": "working-tree-uncommitted",
         "clientRuntimeFingerprint": null,
         "pixels": null,
         "interactions": null,

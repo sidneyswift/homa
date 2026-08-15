@@ -119,7 +119,7 @@
         "selector": "parent-pdf",
         "surfaceCount": 81,
         "surfaceIdsFingerprint": "3a9bbdd4cc5cdb40d39dba0f4857c29bddb7beb8460cfc0ccd87310ba970305b",
-        "scopedInputFingerprint": "22cab6ce9ea8ccf0e64a3f8786c4bc7bd831af14be14ff1af3cc5bb083152bda"
+        "scopedInputFingerprint": "1c5811ed83884bf459cc9911aa781d7475f35b542838f4665aa6f0bc8cb64047"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/parent-pdf.json",
       "fixtureChecksum": "ab26dc0e9cdca23930a5502d0512042c870271890f992a87827d3df218153314",
@@ -215,7 +215,7 @@
         "selector": "physical-print",
         "surfaceCount": 81,
         "surfaceIdsFingerprint": "95578f0a7e30611462b3279095ee91a68b47d37166e7d9a03968f91f1c1b5914",
-        "scopedInputFingerprint": "813fe66e4c105bc25bc6f27e7c437134ff0f5a622d91e5f14b25e08744abc433"
+        "scopedInputFingerprint": "465174252b6f1c4903ee8d245d8dc9187a1fc8cee6a6f3e51b7d17463de5b7d7"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/physical-print.json",
       "fixtureChecksum": "53d9f100310e6668b99ba2b43775e904a7cb2618fff4acc729c0814cd9327795",
