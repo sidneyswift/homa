@@ -233,6 +233,7 @@ export {
   buildFourWeekPlan,
   buildMonthPlan,
   MONTH_PLAN_SUBJECT,
+  skillPhrase,
   typicalAnswersForAge,
   type FourWeekPlan,
   type PlanContext,
@@ -307,6 +308,7 @@ export {
   NARRATIVE_LENGTH_CAPS,
   validateNarrative,
   validatePlanNarrative,
+  reportNarrativePieceProblem,
   type NarrativeGateContext,
   type NarrativeVerdicts,
 } from "./map/narrative-gate";

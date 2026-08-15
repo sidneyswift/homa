@@ -12,6 +12,7 @@ import {
   cdcChecklistUrl,
   noteGreeting,
   notePlanSentence,
+  reportNarrativePieceProblem,
   reportStaleness,
   US_STATES,
   type SubjectScore,
@@ -210,7 +211,9 @@ export function ReportView({
   const rejectedPieces = new Set(narrativeView?.rejectedPieces ?? []);
   /** The generated text for a piece, or null when the template must render. */
   const generatedPiece = (key: string, text: string | undefined): string | null =>
-    narrativeView && text && !rejectedPieces.has(key) ? text : null;
+    narrativeView && text && !rejectedPieces.has(key) && !reportNarrativePieceProblem(text)
+      ? text
+      : null;
   const noteText = generatedPiece("note", narrativeView?.narrative.note);
   const months = ageInMonths(report.birthMonth);
   const editable = !sample && !mirror;
@@ -319,7 +322,7 @@ export function ReportView({
         {report.childName}&apos;s <span style={{ color: "var(--homa-brand-text)" }}>progress report</span>
       </h1>
       {/* No subtitle (round 2, founder ask 2026-07-09): the heading
-          flowing straight into age, subjects, and benchmarks below
+          flowing straight into age, subjects, and sources below
           is enough. */}
       <div className="quiet-report__metrics mt-5">
         <span>
@@ -332,7 +335,7 @@ export function ReportView({
           your answers <b className="quiet-report__metric-value">{report.scores.observationCount}</b>
         </span>
         <span>
-          <b className="quiet-report__metric-value">national</b> benchmarks
+          <b className="quiet-report__metric-value">sources</b> we used
         </span>
       </div>
     </>
@@ -417,7 +420,7 @@ export function ReportView({
         Subject by subject
       </h2>
       <p className="quiet-report__section-copy mt-1">
-        Open any subject to see what I asked, what you answered, and the benchmarks used.
+        Open any subject to see what I asked, what you answered, and the sources used.
       </p>
     </>
   );
@@ -573,9 +576,9 @@ export function ReportView({
                 </>
               ) : null}
 
-              {/* 4. The benchmarks, as plain links. */}
+              {/* 4. The sources, as plain links. */}
               <p className="quiet-report__detail-label mt-5">
-                Benchmarks
+                Sources we used
               </p>
               <ul className="mt-1.5 flex flex-col gap-1">
                 {domainSources.map((key) => {
@@ -749,7 +752,7 @@ export function ReportView({
               leading space of a multi-line text node right after an
               expression, which rendered "Mayadoes". */}
           Your answers describe what {report.childName}
-          {" "}does day to day. Each one is checked against published national benchmarks
+          {" "}does day to day. Each one is checked against sources
           for their age, the same sources schools and pediatricians use. Where you said
           &ldquo;not sure&rdquo;, the report says so instead of guessing. This is not a
           test and not medical advice, and the picture sharpens as you answer more.

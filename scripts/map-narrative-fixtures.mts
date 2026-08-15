@@ -9,8 +9,8 @@
  *
  * Writes apps/web/app/onboarding/sample/narrative.fixture.ts and
  * scripts/fixtures/red-team-narrative.json, and prints both narratives to
- * stdout for the read-aloud. Run locally with gateway credentials
- * (AI_GATEWAY_API_KEY or a live VERCEL_OIDC_TOKEN in apps/web/.env.local):
+ * stdout for the read-aloud. Run locally with a live VERCEL_OIDC_TOKEN in
+ * apps/web/.env.local:
  *   pnpm tsx scripts/map-narrative-fixtures.mts
  */
 
@@ -57,9 +57,6 @@ async function generateFixture(label: string, input: Parameters<typeof buildRepo
     childName: input.childName,
     genderedPronounsAllowed: genderedPronounsAllowedFrom(facts),
     expectedSubjects: facts.subjects.map((subject) => subject.subjectId),
-    expectedDrawers: facts.subjects
-      .filter((subject) => subject.position !== "not_mapped")
-      .map((subject) => subject.subjectId),
   };
 
   console.log(`\nGenerating ${label}...`);
