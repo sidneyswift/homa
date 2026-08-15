@@ -5,7 +5,10 @@ import { embedText } from "../learning/embeddings";
 import { mapDb, type DbJson } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import { telnyxConfigured, telnyxGet, telnyxListOf } from "./telnyx-api";
-import { readImmutableCallOwner } from "./transcript-owner";
+import {
+  IMMUTABLE_CALL_OWNER_PROVENANCE,
+  readImmutableCallOwner,
+} from "./transcript-owner";
 
 /**
  * Pulls Telnyx voice-call transcripts into public.call_transcripts, the
@@ -107,6 +110,7 @@ export function flattenTranscriptText(messages: TranscriptMessage[]): string {
 interface Owner {
   familyId: string | null;
   memberUserId: string | null;
+  provenance: typeof IMMUTABLE_CALL_OWNER_PROVENANCE | null;
   childId: string | null;
   caller: string | null;
   agent: string | null;
@@ -120,6 +124,7 @@ async function resolveOwner(
   const agent = normalizeUsPhoneE164(metadata?.telnyx_agent_target ?? "");
   let familyId: string | null = null;
   let memberUserId: string | null = null;
+  let provenance: typeof IMMUTABLE_CALL_OWNER_PROVENANCE | null = null;
   const claimedOwner = readImmutableCallOwner(metadata);
   if (claimedOwner) {
     const rows = await sql<{ one: number }[]>`
@@ -132,6 +137,7 @@ async function resolveOwner(
     if (rows.length > 0) {
       familyId = claimedOwner.familyId;
       memberUserId = claimedOwner.memberUserId;
+      provenance = IMMUTABLE_CALL_OWNER_PROVENANCE;
     }
   }
 
@@ -147,6 +153,7 @@ async function resolveOwner(
   return {
     familyId,
     memberUserId,
+    provenance,
     childId,
     caller: endUser ?? metadata?.telnyx_end_user_target ?? null,
     agent: agent ?? metadata?.telnyx_agent_target ?? null,
@@ -170,7 +177,7 @@ async function upsertTranscript(
   const rows = await sql<{ id: string; inserted: boolean }[]>`
     insert into public.call_transcripts
       (conversation_id, line, assistant_id, channel, family_id, child_id,
-       member_user_id, caller_e164, agent_e164, messages, message_count,
+       member_user_id, owner_provenance, caller_e164, agent_e164, messages, message_count,
        transcript_text, embedding, started_at, ended_at)
     values (
       ${conversation.id},
@@ -180,6 +187,7 @@ async function upsertTranscript(
       ${owner.familyId},
       ${owner.childId},
       ${owner.memberUserId},
+      ${owner.provenance},
       ${owner.caller},
       ${owner.agent},
       ${sql.json(messages as unknown as DbJson)},
@@ -195,7 +203,6 @@ async function upsertTranscript(
       channel = excluded.channel,
       family_id = excluded.family_id,
       child_id = excluded.child_id,
-      member_user_id = excluded.member_user_id,
       caller_e164 = excluded.caller_e164,
       agent_e164 = excluded.agent_e164,
       messages = excluded.messages,
