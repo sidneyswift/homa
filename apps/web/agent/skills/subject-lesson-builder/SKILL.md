@@ -48,6 +48,15 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
    - When a step uses an external item such as a book, label, or package,
      never assume it contains a specific example. Include an immediate
      fallback the parent can make or use if that example is absent.
+   - When the target names a source type, include a complete, ready-to-use
+     example of that source in the step. For a short-passage target, write the
+     short passage and its two details directly into the lesson. Never send the
+     parent to a book, story, comic, newspaper, or another family-owned source
+     unless the step also supplies an immediate fallback passage.
+   - Source-bearing targets are self-contained in every teaching step and in
+     practice. Write the full passage, set, event list, or other named source
+     directly into the activity each time. Never tell the parent to find a
+     paragraph in a book, comic, story, or other outside material.
    - Use offer or declarative shapes for every parent-facing teaching step.
      For example, `You might invite Maya to say the sounds for m, a, and p`
      is an offer. `Maya places the m, a, and p tiles to build map` is an
@@ -71,6 +80,19 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      explaining a sequence, the child explains the ordered sequence as each
      card is made or placed. When blending words, the child blends every word
      they read in that step.
+   - Preserve the target's full scope in every step. When it names a quantity,
+     number of details, named set, source type, sequence, or other bound, each
+     step must reach that full scope. Do not use a smaller version as a
+     standalone warm-up. For example, a target to count up to 10 objects must
+     count 10 objects in every step, and a target to find two details in a
+     short passage must use a short passage and find two details in every
+     step.
+   - Do not add an extension that changes the target's named action or object.
+     Variety comes from a new example of the same target, not a bonus challenge
+     such as backward counting, composing a passage, or interpreting a comic
+     when those are not the reviewed target. When the target names a source
+     type, provide that exact source material in the lesson instead of asking
+     the child to create it or substitute a neighboring format.
 2. When content is not already saved, call
    `save_subject_lesson_content` exactly once. If it returns `saved: false`,
    stop honestly. Do not load `materials-studio` or call any later tool. Do not
@@ -92,6 +114,18 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      CSS `url(...)`, including background shorthand. Use text, borders,
      spacing, tables, and simple CSS shapes when the worksheet needs visual
      structure.
+   - Put every practice example, word, letter, object set, passage, event, or
+     other target material directly on the worksheet. Never ask the parent or
+     child to choose, invent, find, or supply an unspecified example. A
+     worksheet should work the moment it is printed.
+   - Every worksheet exercise must rehearse only the target's named action and
+     object. Do not add a bonus challenge, extra writing task, alternate
+     sequence, or other enrichment unless that exact action is part of the
+     reviewed target.
+   - When the target asks the child to explain, the worksheet must leave space
+     for the child to state what happens in their own words, in the required
+     order. Do not replace that explanation with pre-written descriptions to
+     match, number, or fill from a word bank.
 5. Call `create_printable` with:
    - `kind: "worksheet"`;
    - the trusted `childId` and exact `childName`;
@@ -115,6 +149,14 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
    material, or the material whose review was unavailable. If it returns
    `attached: false`, stop honestly.
 
+A saved lesson without its reviewed, attached worksheet is incomplete. After a
+successful save, make every remaining tool call in this run before the
+completion note: load `materials-studio`, create the draft, revise the failed
+review once, and attach the passing worksheet. Do not end after saving content
+or spend the remaining response describing the lesson. HTML-only means no image
+markup, markdown images, data-image URLs, or CSS `url(...)` in either
+printable draft.
+
 Never call `mark_material_final`. The worksheet remains a draft until the
 parent uses the existing approval flow.
 
@@ -127,12 +169,20 @@ Confirm all of the following:
 - Every step and worksheet exercise teaches the exact reviewed target.
 - Each step makes the child rehearse the target's named action, rather than
   stopping at an adjacent skill such as sorting, labeling, or a prerequisite.
+- Every step reaches the target's full named scope, including any quantity,
+  number of details, source type, set, sequence, or other bound.
+- No step or worksheet exercise adds a different action, source type, or bonus
+  challenge merely for variety. It uses another exact target example instead.
 - No numbered step is only setup, naming, drawing, sorting, or read-back. A
   useful precursor belongs inside the same step as the exact target rehearsal.
 - Every step supplies exact options instead of asking the parent to choose
   examples, letters, or words.
+- The worksheet supplies every exact practice option and asks neither the
+  parent nor the child to invent or choose target material.
 - Every step that looks for a specific example in an external item includes a
   fallback that works when the item does not contain it.
+- A target that names a source type includes that exact source directly in the
+  lesson, not a request to find one in a family-owned item.
 - Every teaching step uses an offer or declarative shape, never a command.
 - Teaching steps prefer active subject-verb wording without repeated weak
   `can` constructions.

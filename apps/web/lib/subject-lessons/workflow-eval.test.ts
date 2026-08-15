@@ -6,6 +6,7 @@ import {
   SUBJECT_LESSON_EVAL_CHILD_PHOTO_URL,
   SUBJECT_LESSON_EVAL_PREVIEW_URL,
   SUBJECT_LESSON_EVAL_TARGET,
+  parseSubjectLessonQualityReview,
   subjectLessonWorkflowFindings,
   type SubjectLessonWorkflowEvalResult,
 } from "../../evals/subject-lesson-builder/workflow-harness";
@@ -376,6 +377,43 @@ describe("subject lesson model workflow findings", () => {
 });
 
 describe("subject lesson model workflow eval contract", () => {
+  it("accepts a schema-valid evidence review from plain JSON", () => {
+    const review = parseSubjectLessonQualityReview(
+      JSON.stringify({
+        pass: true,
+        findings: ["Every candidate practices the reviewed target."],
+        assessments: [
+          {
+            candidateId: "step-1",
+            aligned: true,
+            evidenceQuote: "blends and reads map",
+            reason: "It directly practices the reviewed reading action.",
+          },
+        ],
+      })
+    );
+    assert.equal(review.pass, true);
+    assert.equal(review.assessments[0]?.evidenceQuote, "blends and reads map");
+  });
+
+  it("normalizes a reviewer candidate id before evidence validation", () => {
+    const review = parseSubjectLessonQualityReview(
+      JSON.stringify({
+        pass: true,
+        findings: ["The candidate practices the reviewed target."],
+        assessments: [
+          {
+            id: "worksheet",
+            aligned: true,
+            evidenceQuote: "blend and read",
+            reason: "It directly practices the reviewed action.",
+          },
+        ],
+      })
+    );
+    assert.equal(review.assessments[0]?.candidateId, "worksheet");
+  });
+
   it("uses the real Homa model with production-like local tool stubs", async () => {
     const [source, skillSource] = await Promise.all([
       readFile(
@@ -429,8 +467,8 @@ describe("subject lesson model workflow eval contract", () => {
     }
   });
 
-  it("exposes success and honest-failure Eve eval cases", async () => {
-    const [successSource, failureSource] = await Promise.all([
+  it("exposes success, honest-failure, and quality-matrix Eve eval cases", async () => {
+    const [successSource, failureSource, qualityMatrixSource] = await Promise.all([
       readFile(
         new URL(
           "../../evals/subject-lesson-builder/workflow-success.eval.ts",
@@ -445,6 +483,13 @@ describe("subject lesson model workflow eval contract", () => {
         ),
         "utf8"
       ),
+      readFile(
+        new URL(
+          "../../evals/subject-lesson-builder/workflow-quality-matrix.eval.ts",
+          import.meta.url
+        ),
+        "utf8"
+      ),
     ]);
     assert.match(successSource, /defineEval\(/u);
     assert.match(successSource, /runSubjectLessonWorkflowEval\("success"\)/u);
@@ -453,5 +498,8 @@ describe("subject lesson model workflow eval contract", () => {
       failureSource,
       /runSubjectLessonWorkflowEval\("save_failure"\)/u
     );
+    assert.match(qualityMatrixSource, /defineEval\(/u);
+    assert.match(qualityMatrixSource, /SUBJECT_LESSON_QUALITY_MATRIX/u);
+    assert.match(qualityMatrixSource, /judgeSubjectLessonTargetFidelity/u);
   });
 });
