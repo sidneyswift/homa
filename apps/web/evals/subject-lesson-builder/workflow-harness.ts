@@ -890,7 +890,7 @@ export async function runSubjectLessonWorkflowEval(
               createdAt: "2026-07-15T12:00:00.000Z",
               ...(input.materialId
                 ? {
-                    html: `<style>.tile{border:2px solid #221e1a;padding:12px}</style><img src="${SUBJECT_LESSON_EVAL_PREVIEW_URL}" alt="Maya as a dinosaur reader"><div class="tile">m a p</div>`,
+                    html: `<style>.tile{border:2px solid var(--homa-ink);padding:12px}</style><img src="${SUBJECT_LESSON_EVAL_PREVIEW_URL}" alt="Maya as a dinosaur reader"><div class="tile">m a p</div>`,
                   }
                 : {}),
             },
