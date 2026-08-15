@@ -58,10 +58,10 @@ export function ReportSnapshot({
       <p className="quiet-report__caption">{story.caption}</p>
       {nextSubject ? (
         <div className="quiet-report__next-step mt-3">
-          <p className="quiet-report__next-step-label">A clear place to start</p>
+          <p className="quiet-report__next-step-label">Next skill</p>
           <p className="quiet-report__next-step-copy">
             {nextSubject.name} is growing right now.
-            {nextSubject.frontierStatement ? ` Start with ${nextSubject.frontierStatement.toLowerCase()}` : " Homa can make the next practice simple."}
+            {nextSubject.frontierStatement ? ` Try: ${nextSubject.frontierStatement}` : " Homa can make the next practice simple."}
           </p>
         </div>
       ) : null}

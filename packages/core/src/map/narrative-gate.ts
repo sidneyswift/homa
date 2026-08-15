@@ -58,13 +58,33 @@ const DIAGNOSIS_SUBSTRINGS = ["on the spectrum", "adhd", "dyslexi", "autis"];
 
 const DIGIT_RUN = /\d+/g;
 const NEGATIVE_NUMBER = /(?:-|\u2212)\s?\d/;
+/**
+ * Score names belong to the deterministic presentation layer, never the
+ * model-written explanation. The report shows warm, concrete labels such as
+ * "A clear strength" and "Growing right now" while the model explains what
+ * the parent actually saw and what to try next. Keeping this as a validator
+ * protects both new narratives and older stored ones at render time.
+ */
+const REPORT_VERDICT_LANGUAGE = /\b(?:ahead|on[ -]track|benchmark(?:s)?|below\s+(?:age|typical|average)|above\s+(?:age|typical|average)|average\s+for\s+(?:their|this)\s+age|normal|typical|expected|(?:hasn't|has\s+not)\s+(?:happened|shown|started|reached)|not\s+(?:ready|there)\s+yet|catch(?:ing)?\s+up|for\s+(?:their|this)\s+age|for\s+a\s+\w+(?:-\w+)?-year-old)|without\s+(?:getting\s+stuck|falling\s+apart)\b/i;
+
+/** True when a stored generated report sentence is safe to show as-is. */
+export function reportNarrativePieceProblem(text: string | undefined): string | null {
+  if (!text || text.trim().length === 0) return "empty";
+  if (REPORT_VERDICT_LANGUAGE.test(text)) return "score or benchmark verdict";
+  return null;
+}
 
 function pieceProblem(
   text: string | undefined,
   cap: number,
   context: NarrativeGateContext,
+  rejectReportVerdicts = true,
 ): string | null {
   if (!text || text.trim().length === 0) return "empty";
+  if (rejectReportVerdicts) {
+    const presentationProblem = reportNarrativePieceProblem(text);
+    if (presentationProblem) return presentationProblem;
+  }
   if (text.length > cap) return `over ${cap} chars`;
   if (BANNED_WORDS.test(text)) return "banned word";
   if (EM_DASH.test(text)) return "em dash";
@@ -138,20 +158,25 @@ export function validatePlanNarrative(
 ): NarrativeVerdicts {
   const rejected: Record<string, string> = {};
 
-  const intro = pieceProblem(narrative.intro, NARRATIVE_LENGTH_CAPS.planIntro, context);
+  const intro = pieceProblem(
+    narrative.intro,
+    NARRATIVE_LENGTH_CAPS.planIntro,
+    context,
+    false,
+  );
   if (intro) rejected.intro = intro;
 
   const weeks = Array.isArray(narrative.weeks) ? narrative.weeks : [];
   let weekRejections = 0;
   for (let index = 0; index < 4; index += 1) {
-    const problem = pieceProblem(weeks[index], NARRATIVE_LENGTH_CAPS.planWeek, context);
+    const problem = pieceProblem(weeks[index], NARRATIVE_LENGTH_CAPS.planWeek, context, false);
     if (problem) {
       rejected[`week.${index}`] = problem;
       weekRejections += 1;
     }
   }
 
-  const closing = pieceProblem(narrative.closing, NARRATIVE_LENGTH_CAPS.planClosing, context);
+  const closing = pieceProblem(narrative.closing, NARRATIVE_LENGTH_CAPS.planClosing, context, false);
   if (closing) rejected.closing = closing;
 
   const failed = Boolean(rejected.intro) || Boolean(rejected.closing) || weekRejections >= 2;
