@@ -82,7 +82,7 @@ function writeRepositoryFile(repository, path, contents) {
   writeFileSync(absolutePath, `${contents}\n`, "utf8");
 }
 
-function syntheticExactReleaseRepository(alteredPath = null) {
+function syntheticSquashReleaseRepository(alteredPath = null) {
   const repository = mkdtempSync(
     join(tmpdir(), "homa-issue-878-schema-git-contract-"),
   );
@@ -111,12 +111,9 @@ function syntheticExactReleaseRepository(alteredPath = null) {
   git(repository, ["add", "main-state.txt"]);
   git(repository, ["commit", "--quiet", "-m", "main advanced"]);
 
-  git(repository, ["checkout", "--quiet", "reviewed"]);
-  git(repository, ["merge", "--quiet", "main", "-m", "review main"]);
-  const reviewedSha = git(repository, ["rev-parse", "HEAD"]);
-
-  git(repository, ["checkout", "--quiet", "main"]);
-  git(repository, ["merge", "--quiet", "--no-ff", "reviewed", "-m", "merge"]);
+  const reviewedSha = git(repository, ["rev-parse", "reviewed"]);
+  git(repository, ["merge", "--quiet", "--squash", "reviewed"]);
+  git(repository, ["commit", "--quiet", "-m", "squash reviewed"]);
 
   if (alteredPath) {
     writeRepositoryFile(repository, alteredPath, `altered:${alteredPath}`);
@@ -139,7 +136,7 @@ test("reviewed migrations stay byte-exact", () => {
   }
 });
 
-test("release Git contract requires a normal merge with the reviewed exact tree", () => {
+test("release Git contract accepts a squash release with reviewed sensitive files", () => {
   assert.deepEqual(
     ISSUE_878_ACCOUNT_DELETION_SCHEMA_RELEASE_SENSITIVE_PATHS,
     [
@@ -151,39 +148,51 @@ test("release Git contract requires a normal merge with the reviewed exact tree"
     ],
   );
 
-  const fixture = syntheticExactReleaseRepository();
+  const fixture = syntheticSquashReleaseRepository();
   try {
     const result = validateIssue878AccountDeletionSchemaReleaseGitContract({
       repositoryRoot: fixture.repository,
       finalSha: fixture.finalSha,
       reviewedSha: fixture.reviewedSha,
     });
-    assert.equal(result.finalTreeSha, result.reviewedTreeSha);
+    assert.notEqual(result.finalTreeSha, result.reviewedTreeSha);
     assert.match(result.sensitiveManifestSha256, /^[0-9a-f]{64}$/u);
   } finally {
     rmSync(fixture.repository, { recursive: true, force: true });
   }
 });
 
-test("release Git contract rejects any post-review tree change", () => {
-  for (const alteredPath of [
+test("release Git contract rejects a sensitive post-review change", () => {
+  const fixture = syntheticSquashReleaseRepository(
     ISSUE_878_ACCOUNT_DELETION_SCHEMA_RELEASE_SENSITIVE_PATHS[0],
-    "main-state.txt",
-  ]) {
-    const fixture = syntheticExactReleaseRepository(alteredPath);
-    try {
-      assert.throws(
-        () =>
-          validateIssue878AccountDeletionSchemaReleaseGitContract({
-            repositoryRoot: fixture.repository,
-            finalSha: fixture.finalSha,
-            reviewedSha: fixture.reviewedSha,
-          }),
-        /differs between the reviewed head|not byte-exactly/u,
-      );
-    } finally {
-      rmSync(fixture.repository, { recursive: true, force: true });
-    }
+  );
+  try {
+    assert.throws(
+      () =>
+        validateIssue878AccountDeletionSchemaReleaseGitContract({
+          repositoryRoot: fixture.repository,
+          finalSha: fixture.finalSha,
+          reviewedSha: fixture.reviewedSha,
+        }),
+      /differs between the reviewed head/u,
+    );
+  } finally {
+    rmSync(fixture.repository, { recursive: true, force: true });
+  }
+});
+
+test("release Git contract permits an unrelated post-review change", () => {
+  const fixture = syntheticSquashReleaseRepository("main-state.txt");
+  try {
+    assert.doesNotThrow(() =>
+      validateIssue878AccountDeletionSchemaReleaseGitContract({
+        repositoryRoot: fixture.repository,
+        finalSha: fixture.finalSha,
+        reviewedSha: fixture.reviewedSha,
+      }),
+    );
+  } finally {
+    rmSync(fixture.repository, { recursive: true, force: true });
   }
 });
 
@@ -222,7 +231,8 @@ test("workflow is production-bound, exact, recoverable, and sanitized", () => {
   assert.match(workflow, /GITHUB_RUN_ATTEMPT/u);
   assert.match(workflow, /previous_conclusion/u);
   assert.match(workflow, /cancelled\|failure\|timed_out/u);
-  assert.match(workflow, /git rev-list|release-git-contract/u);
+  assert.match(workflow, /release-git-contract/u);
+  assert.doesNotMatch(workflow, /git rev-list --parents -n 1/u);
   assert.match(workflow, /FINAL_TREE_SHA/u);
   assert.match(workflow, /REVIEWED_TREE_SHA/u);
   assert.match(workflow, /SENSITIVE_MANIFEST_SHA256/u);
