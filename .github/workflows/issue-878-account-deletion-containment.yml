@@ -134,42 +134,6 @@ jobs:
             echo "ISSUE_878_CONTAINMENT_RECOVERY=true" >> "$GITHUB_ENV"
           fi
 
-          read -r -a merge_line <<< "$(git rev-list --parents -n 1 "$GITHUB_SHA")"
-          if [ "${#merge_line[@]}" -ne 3 ]; then
-            echo "The deployed main commit must be a normal two-parent merge."
-            exit 1
-          fi
-          if [ "${merge_line[2]}" != "$REVIEWED_REPAIR_SHA" ]; then
-            echo "The reviewed repair is not the deployed merge's second parent."
-            exit 1
-          fi
-
-          reviewed_paths=(
-            .github/workflows/ci.yml
-            .github/workflows/issue-878-account-deletion-containment.yml
-            apps/mobile/scripts/android-release-guard.mjs
-            apps/mobile/scripts/android-release-guard.test.mjs
-            apps/mobile/src/app/settings/delete-account.tsx
-            apps/web/agent/schedules/account-deletions.ts
-            apps/web/app/api/account-deletion/route.ts
-            apps/web/app/app/settings/delete-family-data-card.tsx
-            apps/web/app/app/settings/page.tsx
-            apps/web/lib/account-deletion-containment.test.ts
-            docs/homa-design/evidence/authoring-rails.json
-            docs/homa-design/evidence/legacy-removal.json
-            docs/homa-design/evidence/marketing-production.json
-            docs/homa-design/evidence/surfaces.json
-            package.json
-            scripts/migration-version-check.mjs
-            scripts/issue-878-account-deletion-containment-postgres.mjs
-            scripts/issue-878-account-deletion-containment.test.mjs
-            scripts/issue-878-account-deletion-containment.sql
-            supabase/migrations/20260809030000_pause_legacy_account_deletion.sql
-          )
-          if ! git diff --quiet "$REVIEWED_REPAIR_SHA" "$GITHUB_SHA" -- "${reviewed_paths[@]}"; then
-            echo "A reviewed containment input changed while merging to main."
-            exit 1
-          fi
           node scripts/migration-version-check.mjs
 
           migration="supabase/migrations/20260809030000_pause_legacy_account_deletion.sql"
@@ -187,6 +151,42 @@ jobs:
             echo "The account-deletion containment repair hash changed."
             exit 1
           fi
+
+          contract="scripts/issue-878-account-deletion-containment-git-contract.mjs"
+          expected_contract="34cf3885b0b4e94a774cf744953343fe49eab42520018de671afbab8feedc991"
+          actual_contract="$(sha256sum "$contract" | cut -d' ' -f1)"
+          if [ "$actual_contract" != "$expected_contract" ]; then
+            echo "The account-deletion containment Git contract hash changed."
+            exit 1
+          fi
+
+          containment_binding="$(node "$contract" \
+            --final-sha="$GITHUB_SHA" \
+            --reviewed-sha="$REVIEWED_REPAIR_SHA")"
+          mapfile -t final_trees < <(
+            printf '%s\n' "$containment_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_CONTAINMENT_FINAL_TREE_SHA=//p'
+          )
+          mapfile -t reviewed_trees < <(
+            printf '%s\n' "$containment_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_CONTAINMENT_REVIEWED_TREE_SHA=//p'
+          )
+          mapfile -t sensitive_hashes < <(
+            printf '%s\n' "$containment_binding" \
+              | sed -n 's/^ISSUE_878_ACCOUNT_DELETION_CONTAINMENT_SENSITIVE_MANIFEST_SHA256=//p'
+          )
+          if [ "${#final_trees[@]}" -ne 1 ] \
+            || [ "${#reviewed_trees[@]}" -ne 1 ] \
+            || [ "${#sensitive_hashes[@]}" -ne 1 ] \
+            || ! [[ "${final_trees[0]}" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "${reviewed_trees[0]}" =~ ^[0-9a-f]{40}$ ]] \
+            || ! [[ "${sensitive_hashes[0]}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "The containment Git contract did not emit exact sanitized bindings."
+            exit 1
+          fi
+          echo "ISSUE_878_CONTAINMENT_FINAL_TREE_SHA=${final_trees[0]}" >> "$GITHUB_ENV"
+          echo "ISSUE_878_CONTAINMENT_REVIEWED_TREE_SHA=${reviewed_trees[0]}" >> "$GITHUB_ENV"
+          echo "ISSUE_878_CONTAINMENT_SENSITIVE_MANIFEST_SHA256=${sensitive_hashes[0]}" >> "$GITHUB_ENV"
 
       - name: Prove the reviewed deployment is still main
         run: |

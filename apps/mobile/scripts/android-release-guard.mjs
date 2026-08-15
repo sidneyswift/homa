@@ -21,7 +21,7 @@ const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until
 const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
   "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6",
   "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185",
-  "a5be03cb30df8202d10345b91c19e73b8d91af122315c9b032372c7f1e742cab",
+  "df1c2954b93068385ec6953288f53b4739546f6924b32893ae8415e30af206b3",
   "fe317dd3e9891273f4ea8307c9c9e4213a0181b75d86b6eda4287101a3550157",
 ]);
 const require = createRequire(import.meta.url);
