@@ -9,6 +9,7 @@ import type { WallCheckout } from "../../../../lib/billing/wall-types";
 import type { SubjectLessonSummary } from "../../../../lib/subject-lessons/types";
 import { reportButtonClass } from "../../../onboarding/r/[token]/report-button";
 import { SubjectLessonButton } from "../../../onboarding/r/[token]/subject-lesson-button";
+import { pickWelcomeSubject } from "./welcome-subject";
 
 /**
  * The unlock's landing moment (plans/2026-07-18-report-lock.md): the
@@ -57,6 +58,15 @@ export function WelcomeChooser({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const recommendedSubject = pickWelcomeSubject({
+    subjects,
+    subjectLessonsEnabled,
+    subjectLessons,
+    viewerCanBuildLesson,
+  });
+  const recommendedLesson = recommendedSubject
+    ? subjectLessons.find((lesson) => lesson.subjectId === recommendedSubject.id) ?? null
+    : null;
 
   function dismiss() {
     router.replace(pathname, { scroll: false });
@@ -98,53 +108,42 @@ export function WelcomeChooser({
         </h2>
         <p className="mt-3 text-body">
           {subjectLessonsEnabled
-            ? `Every subject is yours now. If you like, choose where ${childName}'s first lesson starts. You can switch anytime.`
-            : `Every subject is yours now. If you like, choose where ${childName}'s first week starts and Homa builds the four-week plan. You can switch anytime.`}
+            ? `Every subject is yours now. Start with one lesson, then build from there. You can switch anytime.`
+            : `Every subject is yours now. Start with one week, then build from there. You can switch anytime.`}
         </p>
-        {subjectLessonsEnabled ? (
-          <div className="mt-5 flex flex-wrap gap-3">
-            {subjects
-              .map((subject) => ({
-                subject,
-                lesson: subjectLessons.find(
-                  (candidate) => candidate.subjectId === subject.id,
-                ),
-              }))
-              .filter(({ lesson }) => lesson || viewerCanBuildLesson)
-              .map(({ subject, lesson }) => (
-                <div key={subject.id} className="flex flex-col items-start gap-1.5">
-                  <span className="font-semibold text-strong text-sm">
-                    {subject.name}
-                  </span>
-                  <SubjectLessonButton
-                    childId={childId}
-                    subjectId={subject.id}
-                    lessonUrl={
-                      lesson ? `/onboarding/r/${token}/lesson/${subject.id}` : null
-                    }
-                    wall={wall}
-                    emphasis="secondary"
-                  />
-                </div>
-              ))}
-          </div>
-        ) : (
-          <div className="mt-5 flex flex-wrap gap-2">
-            {subjects.map((subject) => (
+        {recommendedSubject ? (
+          <div className="mt-5">
+            <p className="text-sm font-semibold text-strong">
+              Start with {recommendedSubject.name}
+            </p>
+            {subjectLessonsEnabled ? (
+              <div className="mt-2">
+                <SubjectLessonButton
+                  childId={childId}
+                  subjectId={recommendedSubject.id}
+                  lessonUrl={
+                    recommendedLesson
+                      ? `/onboarding/r/${token}/lesson/${recommendedSubject.id}`
+                      : null
+                  }
+                  wall={wall}
+                  emphasis="primary"
+                />
+              </div>
+            ) : (
               <Link
-                key={subject.id}
-                href={`/onboarding/r/${token}/plan/${subject.id}`}
+                href={`/onboarding/r/${token}/plan/${recommendedSubject.id}`}
                 onClick={() => sendWallBeacon({ kind: "door_tap", door: "plan", childId })}
                 className={reportButtonClass(
-                  "secondary",
-                  "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",
+                  "primary-strong",
+                  "mt-2 inline-flex min-h-11 items-center px-4 py-2 text-sm font-semibold",
                 )}
               >
-                {subject.name}
+                Build the first week
               </Link>
-            ))}
+            )}
           </div>
-        )}
+        ) : null}
         <button
           type="button"
           onClick={dismiss}

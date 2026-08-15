@@ -118,9 +118,9 @@ describe("buildProgressTiles", () => {
     );
 
     const byId = new Map(tiles.map((tile) => [tile.subjectId, tile]));
-    assert.equal(byId.get("math")?.badge?.label, "Ahead \u00b7 +8 mo");
-    assert.equal(byId.get("math")?.badge?.background, "var(--gold-100)");
-    assert.equal(byId.get("literacy")?.badge?.label, "On track");
+    assert.equal(byId.get("math")?.badge?.label, "A clear strength");
+    assert.equal(byId.get("math")?.badge?.background, "var(--stone-100)");
+    assert.equal(byId.get("literacy")?.badge?.label, "Solid footing");
     assert.equal(
       byId.get("science")?.badge?.label,
       "Growing right now",

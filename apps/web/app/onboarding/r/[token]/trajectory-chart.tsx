@@ -8,7 +8,6 @@ import {
 } from "../../../../components/progress/subject-door-context";
 import { QuietAction } from "../../../../components/design/QuietAction";
 import { progressSubjectHeadline } from "../../../../lib/child-progress/view-copy";
-import { ageAboutLabel } from "../../../../lib/map/trajectory-format";
 import type {
   TrajectoryStory,
   TrajectoryStorySubject,
@@ -109,6 +108,19 @@ interface EndLabel {
   y: number;
 }
 
+function parentFacingStatus(subject: TrajectoryStorySubject): string {
+  switch (subject.position) {
+    case "ahead": return "A clear strength";
+    case "on_track": return "Solid footing";
+    case "growing": return "Growing right now";
+    case "not_mapped": return "Still getting to know";
+    default: {
+      const exhaustive: never = subject.position;
+      throw new Error(`Unhandled map position: ${exhaustive}`);
+    }
+  }
+}
+
 /** Spreads end labels vertically so none overlap. */
 function dodgeLabels(labels: EndLabel[]): EndLabel[] {
   const sorted = [...labels].sort((a, b) => a.y - b.y);
@@ -127,25 +139,22 @@ function dodgeLabels(labels: EndLabel[]): EndLabel[] {
   return sorted;
 }
 
-/** The meaning box: the focused subject's number translated into the
- * skill behind it and the age that skill is typical. */
+/** The meaning box translates a focused line into a useful next step. */
 function MeaningBox({
   subject,
   childName,
-  childAgeYears,
 }: {
   subject: TrajectoryStorySubject;
   childName: string;
-  childAgeYears: number;
 }) {
   const belowAge = subject.latestMonths < 0;
   const statement = belowAge
-    ? subject.strongestStatement ?? subject.frontierStatement
-    : subject.strongestStatement;
+    ? subject.frontierStatement ?? subject.strongestStatement
+    : subject.strongestStatement ?? subject.frontierStatement;
   return (
     <div className="quiet-trajectory__meaning mt-2">
       <p className="quiet-trajectory__meaning-title">
-        {subject.name} {subject.display} mo
+        {subject.name}: {parentFacingStatus(subject)}
         <span className="quiet-trajectory__meaning-meta">
           from {subject.observations}{" "}
           {subject.observations === 1 ? "answer" : "answers"}
@@ -153,19 +162,13 @@ function MeaningBox({
       </p>
       {statement ? (
         <p className="quiet-trajectory__meaning-copy mt-0.5">
-          {belowAge ? "Working on: " : ""}
+          {belowAge ? "A useful next step: " : "You mentioned: "}
           {statement}
-          {subject.strongestMonths !== null ? (
-            <span className="quiet-trajectory__meaning-muted">
-              {" \u00b7 "}typical around age {ageAboutLabel(subject.strongestMonths)}
-              {" \u00b7 "}{childName} is {childAgeYears}
-            </span>
-          ) : null}
         </p>
       ) : null}
       {subject.beyondScale ? (
         <p className="quiet-trajectory__cap mt-1.5 inline-block">
-          The checklist stops here, not {childName}
+          Homa has more to explore with {childName} here.
         </p>
       ) : null}
     </div>
@@ -175,13 +178,11 @@ function MeaningBox({
 export function TrajectoryChart({
   story,
   childName,
-  childAgeYears,
   now,
   doorRows = [],
 }: {
   story: TrajectoryStory;
   childName: string;
-  childAgeYears: number;
   /** The render instant (epoch ms), passed from the server so this
    * component stays pure and server and client draw the same axis. */
   now: number;
@@ -275,8 +276,7 @@ export function TrajectoryChart({
       .filter(({ subject }) => labeledIds.includes(subject.subjectId))
       .map(({ subject, points, seriesIndex }) => {
         const last = points[points.length - 1];
-        const value = ` ${subject.display}`;
-        const room = labelBudget - value.length;
+        const room = labelBudget;
         const name =
           subject.name.length > room
             ? `${subject.name.slice(0, Math.max(1, room - 1))}\u2026`
@@ -284,7 +284,7 @@ export function TrajectoryChart({
         return {
           subjectId: subject.subjectId,
           color: colorFor(subject.subjectId),
-          text: `${name}${value}`,
+          text: name,
           lineX: x(last.t),
           lineY: laneY(last.months, seriesIndex),
           y: laneY(last.months, seriesIndex),
@@ -320,11 +320,14 @@ export function TrajectoryChart({
   return (
     <div>
       <div className="quiet-trajectory__chart-frame">
+        <p className="quiet-trajectory__guide">
+          A picture of what feels well supported and what is ready for practice. The middle line is an age reference, not a grade.
+        </p>
         <svg
           className="quiet-trajectory__chart"
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           role="img"
-          aria-label={`${childName}'s months ahead by subject over time. Tap a subject below the chart to focus its line.`}
+          aria-label={`${childName}'s subject pattern over time. Tap a subject below the chart to see the answers that shaped it.`}
           style={{ width: "100%", height: "auto", display: "block" }}
           onPointerLeave={hoverOut}
           onClick={() => setPinned(null)}
@@ -367,9 +370,13 @@ export function TrajectoryChart({
                 y={y(months) + 3}
                 textAnchor="end"
               >
-                {months === 0
-                  ? "at age"
-                  : `${months > 0 ? "+" : ""}${months}${months === yMax ? " mo" : ""}`}
+                {months === yMax
+                  ? "well supported"
+                  : months === 0
+                    ? "age reference"
+                    : months === yMin
+                      ? "ready to grow"
+                      : ""}
               </text>
             </g>
           ))}
@@ -412,7 +419,7 @@ export function TrajectoryChart({
                 }}
                 onPointerEnter={hoverIn(subject.subjectId)}
               >
-                <title>{`${subject.name} ${subject.display} months`}</title>
+                <title>{`${subject.name}: ${parentFacingStatus(subject)}`}</title>
                 {points.slice(1).map((point, index) => {
                   const from = points[index];
                   const crossesScales = from.basisKey !== point.basisKey;
@@ -496,17 +503,14 @@ export function TrajectoryChart({
         <MeaningBox
           subject={pinnedSubject}
           childName={childName}
-          childAgeYears={childAgeYears}
         />
       ) : null}
 
-      {/* The legend card: every subject, ranked strongest first, values
-          visible at rest, movers badged. Rows are the focus controls; in
-          door mode they are the subject-by-subject list and each row
-          opens that subject's detail panel. */}
+      {/* The legend is ordered by the score, but uses parent-facing
+          language rather than exposing a comparative number. */}
       {door ? (
         <p className="quiet-trajectory__hint mt-2.5">
-          Every number here comes from your answers. Tap a subject to see them.
+          Every subject here comes from your answers. Tap one to see them.
         </p>
       ) : null}
       <div className="quiet-trajectory__legend mt-2">
@@ -545,10 +549,10 @@ export function TrajectoryChart({
                 ) : null}
                 {subject.mover ? (
                   <span className="quiet-trajectory__badge quiet-trajectory__badge--constructive">
-                    +{subject.mover.to - subject.mover.from} this week
+                    Updated this week
                   </span>
                 ) : null}
-                <span className="quiet-trajectory__value">{subject.display}</span>
+                <span className="quiet-trajectory__status">{parentFacingStatus(subject)}</span>
                 {opensPanel ? <span aria-hidden="true" className="quiet-trajectory__chevron">{"\u203A"}</span> : null}
               </>
             </QuietAction>

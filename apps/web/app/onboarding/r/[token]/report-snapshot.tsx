@@ -1,5 +1,3 @@
-import { ageInMonths } from "@homa/core";
-
 import { QuietFrame } from "../../../../components/design";
 import type { SubjectDoorRow } from "../../../../components/progress/subject-door-context";
 import {
@@ -23,15 +21,12 @@ import { TrajectoryChart } from "./trajectory-chart";
  */
 export function ReportSnapshot({
   childName,
-  birthMonth,
   generatedDate,
   eras,
   className = "mt-4",
   doorRows,
 }: {
   childName: string;
-  /** "YYYY-MM-DD" (or "YYYY-MM"), for the meaning box's age sentence. */
-  birthMonth: string;
   /** Already formatted, e.g. "July 8, 2026" (matches the header band). */
   generatedDate: string;
   /** Oldest first, the live report last (lib/map/trajectory-eras). */
@@ -46,7 +41,7 @@ export function ReportSnapshot({
 }) {
   const story = buildTrajectoryStory(eras);
   const showsScaleChange = trajectoryHasScaleChange(eras);
-  const childAgeYears = Math.floor(ageInMonths(birthMonth) / 12);
+  const nextSubject = story.subjects.find((subject) => subject.position === "growing") ?? null;
 
   if (story.subjects.length === 0) return null;
 
@@ -61,11 +56,19 @@ export function ReportSnapshot({
         {childName}&apos;s snapshot {"\u00b7"} {generatedDate}
       </p>
       <p className="quiet-report__caption">{story.caption}</p>
+      {nextSubject ? (
+        <div className="quiet-report__next-step mt-3">
+          <p className="quiet-report__next-step-label">A clear place to start</p>
+          <p className="quiet-report__next-step-copy">
+            {nextSubject.name} is growing right now.
+            {nextSubject.frontierStatement ? ` Start with ${nextSubject.frontierStatement.toLowerCase()}` : " Homa can make the next practice simple."}
+          </p>
+        </div>
+      ) : null}
       <div className="mt-3">
         <TrajectoryChart
           story={story}
           childName={childName}
-          childAgeYears={childAgeYears}
           now={new Date().getTime()}
           doorRows={doorRows}
         />

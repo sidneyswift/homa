@@ -93,7 +93,6 @@ export default async function AdminFamilyProgressPage({
                     >
                       <ReportSnapshot
                         childName={kid.childName}
-                        birthMonth={kid.birthDate}
                         generatedDate={generatedDate}
                         eras={kid.eras}
                         className="mt-3"
@@ -103,7 +102,6 @@ export default async function AdminFamilyProgressPage({
                   ) : (
                     <ReportSnapshot
                       childName={kid.childName}
-                      birthMonth={kid.birthDate}
                       generatedDate={generatedDate}
                       eras={kid.eras}
                       className="mt-3"
