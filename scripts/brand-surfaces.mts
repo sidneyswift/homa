@@ -99,7 +99,7 @@ interface Classification {
 }
 
 const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
-  { match: (path) => path === ".github/workflows/ci.yml" || path === "package.json" || [
+  { match: (path) => [".github/workflows/ci.yml", ".github/workflows/android-native-compile.yml", "package.json"].includes(path) || [
     "scripts/channel-evidence-check.mts",
     "scripts/channel-evidence-contract.mts",
     "scripts/ci-change-scope.mjs",

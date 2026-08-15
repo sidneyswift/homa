@@ -1,0 +1,69 @@
+name: Android native compile
+
+# Android public distribution remains blocked. This is a compile-only P2
+# regression check, kept off the normal PR and main release path because the
+# product is not currently shipping an Android app.
+on:
+  schedule:
+    - cron: "23 9 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-native-compile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-native-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # The compile needs Android tooling but not CodeQL, .NET, Haskell,
+      # Swift, emulator images, or the emulator itself.
+      - name: Reclaim runner disk for Android compilation
+        run: |
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/lib/android/sdk/system-images
+          sudo rm -rf /usr/local/lib/android/sdk/emulator
+          sudo apt-get clean
+          df -h /
+
+      - name: Restore Gradle dependency cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('pnpm-lock.yaml', 'apps/mobile/app.json', 'apps/mobile/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Android native compile-only assembly
+        run: |
+          pnpm --filter mobile exec expo prebuild --platform android --no-install --clean
+          bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon

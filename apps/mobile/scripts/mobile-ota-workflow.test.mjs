@@ -10,6 +10,10 @@ const ciWorkflow = readFileSync(
   new URL("../../../.github/workflows/ci.yml", import.meta.url),
   "utf8",
 );
+const androidNativeWorkflow = readFileSync(
+  new URL("../../../.github/workflows/android-native-compile.yml", import.meta.url),
+  "utf8",
+);
 const rollbackRunbook = readFileSync(
   new URL("../release/ROLLBACK.md", import.meta.url),
   "utf8",
@@ -35,6 +39,20 @@ test("the OTA workflow classifies a full-history exact-main checkout", () => {
     false,
     "the superseded one-build fingerprint rail must stay deleted",
   );
+});
+
+test("Android native compilation is a scheduled/manual P2 check, not a merge gate", () => {
+  assert.match(ciWorkflow, /Android JavaScript bundle export/u);
+  assert.doesNotMatch(ciWorkflow, /Android native compile-only assembly/u);
+  assert.match(androidNativeWorkflow, /schedule:[\s\S]*cron:/u);
+  assert.match(androidNativeWorkflow, /workflow_dispatch:/u);
+  assert.match(androidNativeWorkflow, /Android native compile-only assembly/u);
+  assert.match(androidNativeWorkflow, /Restore Gradle dependency cache/u);
+  assert.match(
+    androidNativeWorkflow,
+    /Android native compile-only assembly[\s\S]*expo prebuild[\s\S]*:app:assembleDebug/u,
+  );
+  assert.doesNotMatch(androidNativeWorkflow, /eas\s+(?:build|submit|update)/iu);
 });
 
 test("tests and exact production gates finish before export", () => {
