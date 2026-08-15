@@ -70,7 +70,7 @@ end;
 $$;
 
 revoke all on function public.guard_family_apple_purchase_interlock()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger families_apple_purchase_interlock_guard
 before delete on public.families

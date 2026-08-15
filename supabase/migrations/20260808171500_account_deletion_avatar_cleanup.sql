@@ -117,7 +117,7 @@ end;
 $$;
 
 revoke all on function public.capture_legacy_deletion_storage_users()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger account_deletion_jobs_capture_legacy_users
 before insert or update of
@@ -167,7 +167,7 @@ end;
 $$;
 
 revoke all on function public.ensure_account_deletion_job_tombstones()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger account_deletion_jobs_ensure_tombstones
 after insert or update of family_id, status
@@ -197,7 +197,8 @@ as $$
     );
 $$;
 
-revoke all on function public.current_auth_user_exists() from public, anon;
+revoke all on function public.current_auth_user_exists()
+  from public, anon, service_role;
 grant execute on function public.current_auth_user_exists() to authenticated;
 
 -- An Auth identity awaiting provider cleanup cannot be attached to a new
@@ -232,7 +233,7 @@ end;
 $$;
 
 revoke all on function public.reject_deleting_user_membership()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger family_members_reject_deleting_user
 before insert or update of user_id on public.family_members

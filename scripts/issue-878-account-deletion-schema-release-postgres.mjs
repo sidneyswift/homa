@@ -31,13 +31,13 @@ const migrations = [
     version: "20260808170000",
     name: "family_hard_delete_protocol",
     filename: "20260808170000_family_hard_delete_protocol.sql",
-    hash: "2f7c819b27e77195aef1db8a4068aea03fd10dd578cf07d3d8c86f9bafda12a6",
+    hash: "20fc44aac37a6af7230e766b943bd99f6cda949c9ef63f50c1b74f6f76087631",
   },
   {
     version: "20260808171500",
     name: "account_deletion_avatar_cleanup",
     filename: "20260808171500_account_deletion_avatar_cleanup.sql",
-    hash: "915b6bc4bd5e644718f7364f886a331b8a20bcb674610e42ee71091c50471a25",
+    hash: "ab826bbf3d8d4ec33bc1cf72ebdc46707dce381a4b3dfae4e6002b0a212c4914",
   },
   {
     version: "20260808183000",
@@ -49,7 +49,7 @@ const migrations = [
     version: "20260808184500",
     name: "apple_purchase_interlock",
     filename: "20260808184500_apple_purchase_interlock.sql",
-    hash: "58d41cc2a770cd64e9c5968565e25a9317bf2b10c07a59b519369cd29a3e6e28",
+    hash: "11725c2e3ca872947d5a83a597caff752a4ed265bdea2f865034cc770a9c5e51",
   },
 ];
 
@@ -228,6 +228,8 @@ runPsql(
       alter function public.delete_own_account() owner to postgres;
       alter default privileges for role postgres in schema public
         grant all privileges on tables to service_role;
+      alter default privileges for role postgres in schema public
+        grant execute on functions to service_role;
     `,
   ],
   { releaseRole: false },
