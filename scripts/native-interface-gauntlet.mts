@@ -527,8 +527,24 @@ function mobileJobScopeIsEnabled(jobBlock: string): boolean {
     && propertyIsAbsentOrLiteralFalse(jobBlock, "continue-on-error", 4);
 }
 
-export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
-  if (containsEscapedDoubleQuotedMappingKey(ciWorkflow)) {
+function nativeAndroidJobIsEnabled(jobBlock: string): boolean {
+  return workflowPropertyValues(jobBlock, "if", 4).length === 0
+    && workflowPropertyValues(jobBlock, "needs", 4).length === 0
+    && workflowPropertyValues(jobBlock, "runs-on", 4).length === 1
+    && workflowPropertyValues(jobBlock, "runs-on", 4)[0] === "ubuntu-24.04"
+    && workflowPropertyValues(jobBlock, "timeout-minutes", 4)[0] === "75"
+    && workflowPropertyValues(jobBlock, "steps", 4).length === 1
+    && workflowPropertyValues(jobBlock, "steps", 4)[0] === ""
+    && workflowPropertyValues(jobBlock, "container", 4).length === 0
+    && workflowPropertyValues(jobBlock, "env", 4).length === 0
+    && propertyIsAbsentOrLiteralFalse(jobBlock, "continue-on-error", 4);
+}
+
+export function checkAndroidCiCommands(
+  ciWorkflow: string,
+  nativeWorkflow: string = ciWorkflow,
+): GauntletCheck[] {
+  if (containsEscapedDoubleQuotedMappingKey(ciWorkflow) || containsEscapedDoubleQuotedMappingKey(nativeWorkflow)) {
     return [
       check(
         "android-js-bundle-export-guard",
@@ -548,29 +564,45 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
     ];
   }
   const rootHeader = workflowHeader(ciWorkflow);
+  const nativeRootHeader = workflowHeader(nativeWorkflow);
   const mobileJob = workflowJobBlock(ciWorkflow, "mobile-checks");
-  const steps = mobileJob ? workflowSteps(mobileJob) : [];
-  const jsSteps = steps.filter((step) => step.name === ANDROID_JS_STEP_NAME);
-  const nativeSteps = steps.filter((step) => step.name === ANDROID_NATIVE_STEP_NAME);
-  const capacitySteps = steps.filter((step) => step.name === ANDROID_CAPACITY_STEP_NAME);
+  const splitWorkflows = nativeWorkflow !== ciWorkflow;
+  const nativeJob = workflowJobBlock(
+    nativeWorkflow,
+    splitWorkflows ? "android-native-compile" : "mobile-checks",
+  );
+  const jsSteps = (mobileJob ? workflowSteps(mobileJob) : [])
+    .filter((step) => step.name === ANDROID_JS_STEP_NAME);
+  const nativeSteps = (nativeJob ? workflowSteps(nativeJob) : [])
+    .filter((step) => step.name === ANDROID_NATIVE_STEP_NAME);
+  const capacitySteps = (nativeJob ? workflowSteps(nativeJob) : [])
+    .filter((step) => step.name === ANDROID_CAPACITY_STEP_NAME);
   const executionOverridesAreAbsent = rootHeader !== null
+    && nativeRootHeader !== null
     && mobileJob !== null
+    && nativeJob !== null
     && executionScopeHasNoDefaultsOrMerge(ciWorkflow, 0)
     && executionScopeHasNoDefaultsOrMerge(mobileJob, 4)
-    && workflowPropertyValues(ciWorkflow, "env", 0).length === 0;
-  const enabledJob = mobileJob !== null
+    && executionScopeHasNoDefaultsOrMerge(nativeWorkflow, 0)
+    && executionScopeHasNoDefaultsOrMerge(nativeJob, 4)
+    && workflowPropertyValues(ciWorkflow, "env", 0).length === 0
+    && workflowPropertyValues(nativeWorkflow, "env", 0).length === 0;
+  const mobileJobEnabled = mobileJob !== null
     && mobileJobScopeIsEnabled(mobileJob)
     && executionOverridesAreAbsent;
-  const ordered = jsSteps.length === 1
+  const nativeJobEnabled = nativeJob !== null
+    && (splitWorkflows ? nativeAndroidJobIsEnabled(nativeJob) : mobileJobScopeIsEnabled(nativeJob))
+    && executionOverridesAreAbsent;
+  const ordered = splitWorkflows || (jsSteps.length === 1
     && nativeSteps.length === 1
-    && jsSteps[0]!.order < nativeSteps[0]!.order;
-  const hasJsBundleExport = enabledJob
+    && jsSteps[0]!.order < nativeSteps[0]!.order);
+  const hasJsBundleExport = mobileJobEnabled
     && ordered
     && jsSteps.length === 1
     && jsSteps[0]!.runLines.length === 1
     && jsSteps[0]!.runLines[0] === ANDROID_JS_COMMAND
     && workflowStepEnabledAndBlocking(jsSteps[0]!);
-  const hasNativeAssembly = enabledJob
+  const hasNativeAssembly = nativeJobEnabled
     && ordered
     && nativeSteps.length === 1
     && nativeSteps[0]!.runLines.length === 2
@@ -578,11 +610,11 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
     && nativeSteps[0]!.runLines[0] === ANDROID_PREBUILD_COMMAND
     && nativeSteps[0]!.runLines[1] === ANDROID_GRADLE_COMMAND
     && workflowStepEnabledAndBlocking(nativeSteps[0]!);
-  const hasRunnerCapacity = enabledJob
+  const hasRunnerCapacity = nativeJobEnabled
     && ordered
     && capacitySteps.length === 1
-    && jsSteps.length === 1
-    && capacitySteps[0]!.order < jsSteps[0]!.order
+    && (splitWorkflows || (jsSteps.length === 1 && capacitySteps[0]!.order < jsSteps[0]!.order))
+    && capacitySteps[0]!.order < nativeSteps[0]!.order
     && capacitySteps[0]!.runForm === "|"
     && capacitySteps[0]!.runLines.length === ANDROID_CAPACITY_COMMANDS.length
     && capacitySteps[0]!.runLines.every((line, index) => line === ANDROID_CAPACITY_COMMANDS[index])
@@ -601,7 +633,7 @@ export function checkAndroidCiCommands(ciWorkflow: string): GauntletCheck[] {
     check(
       "android-runner-capacity-guard",
       hasRunnerCapacity ? "pass" : "fail",
-      "Android CI must reclaim only unused hosted toolchains and emulator assets before the blocking export and native compilation proofs.",
+      "Android CI must reclaim only unused hosted toolchains and emulator assets before the blocking native compilation proof.",
     ),
   ];
 }
@@ -611,6 +643,7 @@ function checkAppConfig(): GauntletCheck[] {
   const eas = readJson<EASConfig>(EAS_CONFIG_PATH);
   const mobilePackage = readJson<MobilePackageConfig>(MOBILE_PACKAGE_PATH);
   const ciWorkflow = readFileSync(resolve(ROOT, ".github/workflows/ci.yml"), "utf8");
+  const androidNativeWorkflow = readFileSync(resolve(ROOT, ".github/workflows/android-native-compile.yml"), "utf8");
   const workflowTexts = git("ls-files", ".github/workflows")
     .split("\n")
     .filter(Boolean)
@@ -658,7 +691,7 @@ function checkAppConfig(): GauntletCheck[] {
       "Production iOS must have a named EAS channel, build image, and App Store submission target.",
     ),
   );
-  checks.push(...checkAndroidCiCommands(ciWorkflow));
+  checks.push(...checkAndroidCiCommands(ciWorkflow, androidNativeWorkflow));
   const hasAndroidDistributionCommand = workflowTexts.some((workflow) => containsAndroidPublicReleaseCommand(workflow));
   const platformDisposition = readPlatformDisposition();
   const mobileScripts = (mobilePackage.scripts ?? {}) as Record<string, unknown>;

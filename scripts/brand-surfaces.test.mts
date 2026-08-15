@@ -295,6 +295,7 @@ test("inventory discovery covers exact design sources that broad keyword selecto
     "apps/web/assets/fonts/quiet-authority/dm-sans-700-latin.ttf",
     "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf",
     "apps/mobile/eas.json",
+    ".github/workflows/android-native-compile.yml",
     ".github/workflows/ci.yml",
     "package.json",
     "scripts/channel-evidence-contract.mts",

@@ -13,9 +13,11 @@ name: CI
 # measured step time; all export HOMA_POSTGRES_BIN so a suite can move
 # between them freely), plus scope-independent "brand-checks" and
 # "mobile-checks". Turborepo and Next build caches make
-# unchanged packages replay instantly. Mobile typecheck/lint run ONLY in
-# mobile-checks; the build job filters mobile out of its turbo run
-# because running them twice per commit bought nothing.
+# unchanged packages replay instantly. Mobile typecheck/lint and the Android
+# JavaScript export run ONLY in mobile-checks; the build job filters mobile
+# out of its turbo run because running them twice per commit bought nothing.
+# The slower Android native assembly is a scheduled/manual P2 check in
+# android-native-compile.yml, not a release gate for Homa's web product.
 
 on:
   push:
@@ -208,26 +210,6 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      # GitHub's Ubuntu image carries several large toolchains this job never
-      # invokes. The first blocking Gradle proof exhausted the runner disk
-      # before completion, so reclaim only unrelated SDKs and emulator assets.
-      - name: Reclaim runner disk for Android compilation
-        run: |
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /usr/local/lib/android/sdk/system-images
-          sudo rm -rf /usr/local/lib/android/sdk/emulator
-          sudo apt-get clean
-          df -h /
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -272,11 +254,6 @@ jobs:
 
       - name: Android JavaScript bundle export
         run: pnpm --filter mobile exec expo export --platform android --output-dir ${{ runner.temp }}/homa-android-compile
-
-      - name: Android native compile-only assembly
-        run: |
-          pnpm --filter mobile exec expo prebuild --platform android --no-install --clean
-          bash apps/mobile/android/gradlew --project-dir apps/mobile/android :app:assembleDebug --no-daemon
 
   # The compile chain plus the checks that need real Supabase secrets.
   # Typecheck, lint, and build go through one turbo invocation so turbo
