@@ -297,7 +297,6 @@ export function ProgressView({
             >
               <ReportSnapshot
                 childName={view.childName}
-                birthMonth={view.birthDate}
                 generatedDate={generatedDate}
                 eras={eras}
                 className=""

@@ -405,7 +405,6 @@ export function ReportView({
   const snapshotCard = (
     <ReportSnapshot
       childName={report.childName}
-      birthMonth={report.birthMonth}
       generatedDate={generatedDate}
       eras={eras}
       className={inApp ? "lg:col-span-2" : "mt-4"}
