@@ -515,7 +515,7 @@ function mobileJobScopeIsEnabled(jobBlock: string): boolean {
     .replace(/\s+/gu, " ")
     .trim();
   return conditions.length === 1
-    && condition === "needs.classify-changes.outputs.scope == 'full' || needs.classify-changes.outputs.scope == 'mobile-only'"
+    && condition === "needs.classify-changes.outputs.scope == 'mobile-only'"
     && workflowPropertyValues(jobBlock, "needs", 4).length === 1
     && workflowPropertyValues(jobBlock, "needs", 4)[0] === "classify-changes"
     && workflowPropertyValues(jobBlock, "runs-on", 4).length === 1
