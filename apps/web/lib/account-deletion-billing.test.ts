@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import type Stripe from "stripe";
 
@@ -49,6 +50,19 @@ function unusedGateway(): StripeAccountDeletionGateway {
     cancelSubscription: async (id) => subscription(id, "canceled"),
   };
 }
+
+test("production deletion does not depend on global Payment Link state", async () => {
+  const source = await readFile(
+    new URL("./account-deletion-billing.ts", import.meta.url),
+    "utf8",
+  );
+  const productionEntry = source.slice(
+    source.indexOf("export async function reconcileStripeAccountDeletion"),
+  );
+
+  assert.match(productionEntry, /createStripeAccountDeletionReconciler/u);
+  assert.doesNotMatch(productionEntry, /assertConfiguredPaymentLinksInactive/u);
+});
 
 test("the production gateway asks Stripe for exhaustive provider-owned records", async () => {
   const requests: Array<{ operation: string; value: unknown }> = [];

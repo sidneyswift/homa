@@ -181,7 +181,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "35c02b985429d73e0d1000c6df50fa2cde2f3d6470dc9b1f4b1f5bee0189a134"
+      "scopedInputFingerprint": "10b1da9560bb20579657bf93bdf3134d6834602b927b33a065b882e99e963dd9"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -704,7 +704,7 @@
       },
       {
         "path": "apps/web/lib/account-deletion-billing.ts",
-        "sha256": "6baa2320e5aad4f9ed34dff5d3681d953d6033175642cc0cf3d021d7a0aa227f"
+        "sha256": "8eb8a8015dbd63bb5d83cde5656b1f534539382246f5e5acf0b449ca14256ac4"
       },
       {
         "path": "apps/web/lib/account-deletion.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "4b0242cd616219bfd28aa4b37d5d9b1ea38cbccd0e072731200597d509bca196"
+    "sourceFingerprint": "39fa79fa294dfa56db85f720998e15504f4b86f29b16adb3b1336be37926b59b"
   }
 }
