@@ -41,6 +41,7 @@ jobs:
   # first-parent diff, so a mobile-only merge retains its focused lane.
   classify-changes:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     outputs:
       scope: ${{ steps.scope.outputs.scope }}
     steps:
@@ -59,11 +60,12 @@ jobs:
   light-checks:
     needs: classify-changes
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - name: Change classifier tests
-        run: node --test scripts/ci-change-scope.test.mjs
+        run: node --test scripts/ci-change-scope.test.mjs scripts/ci-job-timeouts.test.mjs
 
       - name: Supabase migration versions are unique
         run: node scripts/migration-version-check.mjs && node --test scripts/migration-version-check.test.mjs
@@ -87,6 +89,7 @@ jobs:
   brand-checks:
     needs: classify-changes
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -172,6 +175,7 @@ jobs:
     needs: [classify-changes, light-checks, brand-checks, mobile-checks, build, checks, db-checks, e2e-checks]
     if: always()
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -196,6 +200,7 @@ jobs:
     needs: classify-changes
     if: needs.classify-changes.outputs.scope == 'mobile-only'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -261,6 +266,7 @@ jobs:
     needs: classify-changes
     if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -397,6 +403,7 @@ jobs:
     needs: classify-changes
     if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       # The residue ratchet compares the PR head with its base SHA. A shallow
       # checkout hides that object and forces the checker into its historical
@@ -544,6 +551,7 @@ jobs:
     needs: classify-changes
     if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -705,6 +713,7 @@ jobs:
     needs: classify-changes
     if: needs.classify-changes.outputs.scope == 'full'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
