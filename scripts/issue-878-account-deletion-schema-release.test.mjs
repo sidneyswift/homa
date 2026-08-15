@@ -206,6 +206,7 @@ test("workflow is production-bound, exact, recoverable, and sanitized", () => {
   assert.equal(apply["timeout-minutes"], 10);
   assert.equal(workflowDocument.permissions.actions, "read");
   assert.equal(workflowDocument.permissions.contents, "read");
+  assert.equal(workflowDocument.permissions["pull-requests"], "read");
   assert.equal(
     workflowDocument.concurrency.group,
     "production-issue-878-account-deletion-schema-release",
