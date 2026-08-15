@@ -87,6 +87,14 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      count 10 objects in every step, and a target to find two details in a
      short passage must use a short passage and find two details in every
      step.
+   - A numeric upper bound is a hard maximum, not a prompt for a bigger
+     challenge. For a target to count up to 10 objects, each counted group has
+     at most 10 objects. Never combine two ten-object groups, ask the child to
+     count them all, or add a 20-object extension. Use a different group of at
+     most 10 objects when the lesson needs variety.
+   - The practice suggestion is a complete final rehearsal, not a label or
+     placeholder. Name the child, the exact objects or examples, and the same
+     target action and scope that the teaching steps use.
    - Do not add an extension that changes the target's named action or object.
      Variety comes from a new example of the same target, not a bonus challenge
      such as backward counting, composing a passage, or interpreting a comic
@@ -122,6 +130,9 @@ Follow this order. Do not begin a later effect until the prior effect succeeds.
      object. Do not add a bonus challenge, extra writing task, alternate
      sequence, or other enrichment unless that exact action is part of the
      reviewed target.
+   - Apply numeric bounds to every worksheet group and challenge. A worksheet
+     for counting up to 10 may offer several separate groups of at most 10,
+     but never a combined-total question that exceeds 10.
    - When the target asks the child to explain, the worksheet must leave space
      for the child to state what happens in their own words, in the required
      order. Do not replace that explanation with pre-written descriptions to
@@ -171,6 +182,10 @@ Confirm all of the following:
   stopping at an adjacent skill such as sorting, labeling, or a prerequisite.
 - Every step reaches the target's full named scope, including any quantity,
   number of details, source type, set, sequence, or other bound.
+- Every numeric upper bound is respected in every group, challenge, and final
+  practice. A target capped at 10 never asks for a combined total above 10.
+- The practice suggestion is a complete, target-faithful activity with exact
+  examples or objects, never a placeholder or a label for an activity.
 - No step or worksheet exercise adds a different action, source type, or bonus
   challenge merely for variety. It uses another exact target example instead.
 - No numbered step is only setup, naming, drawing, sorting, or read-back. A
