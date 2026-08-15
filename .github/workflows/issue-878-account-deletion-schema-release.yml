@@ -153,6 +153,31 @@ jobs:
             fi
           done
 
+          reviewed_pull_response="$(curl --fail --silent --show-error \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$REVIEWED_RELEASE_SHA/pulls")"
+          mapfile -t reviewed_pull_numbers < <(
+            printf '%s' "$reviewed_pull_response" \
+              | jq -r --arg reviewed_sha "$REVIEWED_RELEASE_SHA" \
+                '[.[] | select(.head.sha == $reviewed_sha) | .number] | unique | .[]'
+          )
+          if [ "${#reviewed_pull_numbers[@]}" -ne 1 ] \
+            || ! [[ "${reviewed_pull_numbers[0]}" =~ ^[1-9][0-9]*$ ]]; then
+            echo "The reviewed schema release SHA must name one current pull request head."
+            exit 1
+          fi
+          echo "ISSUE_878_SCHEMA_REVIEWED_PULL_NUMBER=${reviewed_pull_numbers[0]}" >> "$GITHUB_ENV"
+
+          reviewed_ref="refs/remotes/origin/issue-878-schema-reviewed-release"
+          git fetch --force origin \
+            "+refs/pull/${reviewed_pull_numbers[0]}/head:${reviewed_ref}"
+          if [ "$(git rev-parse "$reviewed_ref")" != "$REVIEWED_RELEASE_SHA" ]; then
+            echo "The reviewed pull request head differs from the reviewed schema release SHA."
+            exit 1
+          fi
+
           release_binding="$(node scripts/issue-878-account-deletion-schema-release-git-contract.mjs \
             --final-sha="$GITHUB_SHA" \
             --reviewed-sha="$REVIEWED_RELEASE_SHA")"
@@ -326,6 +351,13 @@ jobs:
             || [ "$fetched_main_sha" != "$GITHUB_SHA" ] \
             || [ "$remote_main_sha" != "$GITHUB_SHA" ]; then
             echo "Main moved before schema-release evidence was finalized."
+            exit 1
+          fi
+          reviewed_ref="refs/remotes/origin/issue-878-schema-reviewed-release"
+          git fetch --force origin \
+            "+refs/pull/${ISSUE_878_SCHEMA_REVIEWED_PULL_NUMBER}/head:${reviewed_ref}"
+          if [ "$(git rev-parse "$reviewed_ref")" != "$REVIEWED_RELEASE_SHA" ]; then
+            echo "The reviewed pull request head moved before schema-release evidence was finalized."
             exit 1
           fi
           release_binding="$(node scripts/issue-878-account-deletion-schema-release-git-contract.mjs \
