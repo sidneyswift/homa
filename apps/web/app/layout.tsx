@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Fredoka, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Fredoka } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -27,12 +27,6 @@ const fredoka = Fredoka({
   variable: "--font-fredoka",
   subsets: ["latin"],
   weight: ["500", "600"],
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -111,7 +105,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${ebGaramond.variable} ${fredoka.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${ebGaramond.variable} ${fredoka.variable} h-full antialiased`}
       // The landing page arms its scroll-reveal system pre-paint with an
       // inline script that adds .rv-armed to this element before hydration
       // (app/page.tsx); suppress the one-level attribute check so React
