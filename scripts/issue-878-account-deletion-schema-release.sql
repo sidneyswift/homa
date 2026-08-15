@@ -232,7 +232,7 @@ language sql
 immutable
 as $ledger$
   select array[
-    $issue_878_1700$/* Homa issue 878 schema release. source_sha256=2f7c819b27e77195aef1db8a4068aea03fd10dd578cf07d3d8c86f9bafda12a6 */
+    $issue_878_1700$/* Homa issue 878 schema release. source_sha256=20fc44aac37a6af7230e766b943bd99f6cda949c9ef63f50c1b74f6f76087631 */
 -- A family hard delete is the irreversible boundary for account deletion,
 -- phone-family folding, and anonymous-lead cleanup. Install this guard before
 -- the new ledgers and application code. CREATE TRIGGER drains in-flight table
@@ -380,7 +380,7 @@ end;
 $$;
 
 revoke all on function public.guard_family_hard_delete_protocol()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger families_hard_delete_protocol_guard
 before delete on public.families
@@ -411,7 +411,7 @@ end;
 $$;
 
 revoke all on function public.guard_family_deletion_status_transition()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger families_deletion_status_protocol_guard
 before update of status on public.families
@@ -426,7 +426,7 @@ language sql
 immutable
 as $ledger$
   select array[
-    $issue_878_1715$/* Homa issue 878 schema release. source_sha256=915b6bc4bd5e644718f7364f886a331b8a20bcb674610e42ee71091c50471a25 */
+    $issue_878_1715$/* Homa issue 878 schema release. source_sha256=ab826bbf3d8d4ec33bc1cf72ebdc46707dce381a4b3dfae4e6002b0a212c4914 */
 -- Account deletion must remove adult avatars from Supabase Storage and stop
 -- already-issued JWTs from writing new objects after auth.users is erased.
 -- The deletion job retains only the exact user folders needed by the Storage
@@ -546,7 +546,7 @@ end;
 $$;
 
 revoke all on function public.capture_legacy_deletion_storage_users()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger account_deletion_jobs_capture_legacy_users
 before insert or update of
@@ -596,7 +596,7 @@ end;
 $$;
 
 revoke all on function public.ensure_account_deletion_job_tombstones()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger account_deletion_jobs_ensure_tombstones
 after insert or update of family_id, status
@@ -626,7 +626,8 @@ as $$
     );
 $$;
 
-revoke all on function public.current_auth_user_exists() from public, anon;
+revoke all on function public.current_auth_user_exists()
+  from public, anon, service_role;
 grant execute on function public.current_auth_user_exists() to authenticated;
 
 -- An Auth identity awaiting provider cleanup cannot be attached to a new
@@ -661,7 +662,7 @@ end;
 $$;
 
 revoke all on function public.reject_deleting_user_membership()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger family_members_reject_deleting_user
 before insert or update of user_id on public.family_members
@@ -915,7 +916,7 @@ language sql
 immutable
 as $ledger$
   select array[
-    $issue_878_1845$/* Homa issue 878 schema release. source_sha256=58d41cc2a770cd64e9c5968565e25a9317bf2b10c07a59b519369cd29a3e6e28 */
+    $issue_878_1845$/* Homa issue 878 schema release. source_sha256=11725c2e3ca872947d5a83a597caff752a4ed265bdea2f865034cc770a9c5e51 */
 -- StoreKit charges before the mobile client can submit Apple's signed
 -- transaction to Homa. This family-locked marker closes that gap: account
 -- deletion blocks while a purchase may be in flight, then verified provider
@@ -988,7 +989,7 @@ end;
 $$;
 
 revoke all on function public.guard_family_apple_purchase_interlock()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger families_apple_purchase_interlock_guard
 before delete on public.families

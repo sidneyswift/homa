@@ -145,7 +145,7 @@ end;
 $$;
 
 revoke all on function public.guard_family_hard_delete_protocol()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger families_hard_delete_protocol_guard
 before delete on public.families
@@ -176,7 +176,7 @@ end;
 $$;
 
 revoke all on function public.guard_family_deletion_status_transition()
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 create trigger families_deletion_status_protocol_guard
 before update of status on public.families

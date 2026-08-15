@@ -138,12 +138,12 @@ jobs:
           node scripts/migration-version-check.mjs
 
           declare -A expected_hashes=(
-            [supabase/migrations/20260808170000_family_hard_delete_protocol.sql]=2f7c819b27e77195aef1db8a4068aea03fd10dd578cf07d3d8c86f9bafda12a6
-            [supabase/migrations/20260808171500_account_deletion_avatar_cleanup.sql]=915b6bc4bd5e644718f7364f886a331b8a20bcb674610e42ee71091c50471a25
+            [supabase/migrations/20260808170000_family_hard_delete_protocol.sql]=20fc44aac37a6af7230e766b943bd99f6cda949c9ef63f50c1b74f6f76087631
+            [supabase/migrations/20260808171500_account_deletion_avatar_cleanup.sql]=ab826bbf3d8d4ec33bc1cf72ebdc46707dce381a4b3dfae4e6002b0a212c4914
             [supabase/migrations/20260808183000_folded_family_artifact_prefixes.sql]=6eb9de43748106f4e6af46e9b188ece91ce5adab5b57ccc1c52e8da0821c35aa
-            [supabase/migrations/20260808184500_apple_purchase_interlock.sql]=58d41cc2a770cd64e9c5968565e25a9317bf2b10c07a59b519369cd29a3e6e28
+            [supabase/migrations/20260808184500_apple_purchase_interlock.sql]=11725c2e3ca872947d5a83a597caff752a4ed265bdea2f865034cc770a9c5e51
             [supabase/migrations/20260809030000_pause_legacy_account_deletion.sql]=d654b9c3666a67fadcf667861063850394e805aee5d9522e9ea62407c075b96a
-            [scripts/issue-878-account-deletion-schema-release.sql]=563c8754d9c8c59252bc5ae450cc66d7f7b86f7bebf53d22a41a0fc4d5ae3601
+            [scripts/issue-878-account-deletion-schema-release.sql]=f842fa58aefc20f0debd460ddf22d3f010a9168cb5b1b18bb10f848c2978bc0c
             [scripts/issue-878-account-deletion-schema-release-git-contract.mjs]=5a3af51fa80efa7dd63201623e16405ec5e8724987da0d6b87a9a926ccc1c3b8
           )
           for release_path in "${!expected_hashes[@]}"; do
