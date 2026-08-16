@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { collectLegacySignatures } from "../packages/design/src/legacy-signatures.ts";
-import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
+import { collectBrandResidueFindings, collectLegacyFontPathResidue, introducedBrandResidue } from "./brand-residue-check.mts";
 
 test("shared vocabulary distinguishes design residue from ordinary prose and sentinels", () => {
   assert.deepEqual(collectLegacySignatures("docs/research.md", "Caveat: this sample is intentionally small."), []);
@@ -20,6 +20,18 @@ test("shared vocabulary distinguishes design residue from ordinary prose and sen
 test("brand residue guard has no active findings", () => {
   assert.deepEqual(collectLegacyFontPathResidue(), []);
   assert.deepEqual(collectBrandResidueFindings(), []);
+});
+
+test("delivery delta reports only legacy language introduced by the change", () => {
+  const before = '<div className="rounded-pill">Plan</div>';
+  const unchangedLegacy = '<div className="rounded-pill">Choose an event or activity</div>';
+  const introducedLegacy = '<div className="rounded-pill bg-[var(--sage-500)]">Choose an event or activity</div>';
+
+  assert.deepEqual(introducedBrandResidue("planner.tsx", before, unchangedLegacy), []);
+  assert.deepEqual(
+    introducedBrandResidue("planner.tsx", before, introducedLegacy).map(({ signature }) => signature),
+    ["legacy-token-namespace"],
+  );
 });
 
 test("full-tree audit keeps quarantined evidence out of the active scan", () => {

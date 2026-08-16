@@ -193,8 +193,8 @@ describe("UnifiedPlannerView", () => {
     assert.match(html, />Day<\/a>/);
     assert.match(html, />Week<\/a>/);
     assert.match(html, />Month<\/a>/);
-    assert.match(html, />Hours<\/a>/);
-    assert.equal((html.match(/ Add to planner<\/button>/g) ?? []).length, 1);
+    assert.match(html, />School hours<\/a>/);
+    assert.equal((html.match(/ Choose an event or activity<\/button>/g) ?? []).length, 1);
     assert.match(html, /Monday, August 3/);
   });
 
