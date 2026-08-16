@@ -314,7 +314,7 @@ function makeFixture({
   }
   writeFileSync(
     join(primary, ".gitignore"),
-    ".cache/\n.late/\n.next/\n.output/\nbuild/\ncoverage/\ndist/\ngenerated/\n*.scratch\n",
+    ".cache/\n.eve/\n.late/\n.next/\n.output/\n.vercel/\nbuild/\ncoverage/\ndist/\ngenerated/\napps/web/next-env.d.ts\n*.scratch\n",
   );
   mkdirSync(join(primary, "scripts"));
   copyFileSync(wrapperSource, join(primary, "scripts", "remove-worktree-safely.mjs"));
@@ -1202,6 +1202,7 @@ test("changed ignored content invalidates the recorded fingerprint", (t) => {
 test("sensitive files nested under ignored directories cannot be called regenerable", () => {
   for (const ignoredPath of [
     ".cache/.env.local",
+    ".vercel/.env.local",
     ".cache/.env",
     ".cache/.envrc",
     ".cache/.envrc.local",
@@ -1230,6 +1231,7 @@ test("sensitive files nested under ignored directories cannot be called regenera
     ".cache/certificate.cer",
     ".cache/server.crt.old",
     ".cache/private.key",
+    ".vercel/private.key",
     ".cache/private.key.bak",
     ".cache/id_rsa",
     ".cache/id_ed25519",
@@ -1282,6 +1284,32 @@ test("ordinary tokenizer caches and build artifacts can be recorded as regenerab
     "coverage/lcov.info",
     "dist/assets/site.css",
     "generated/schema-types.ts",
+  ]) {
+    const fixture = makeFixture({ ignored: true, ignoredPath });
+    try {
+      const result = run(process.execPath, wrapperArgs(fixture), {
+        env: fixture.env,
+      });
+      assert.equal(result.status, 0, `${ignoredPath}: ${result.stderr}`);
+      assert.equal(JSON.parse(result.stdout).ignoredPathDecisions, 1, ignoredPath);
+    } finally {
+      rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("generated route and OIDC module names do not masquerade as stored credentials", () => {
+  for (const ignoredPath of [
+    ".next/server/app/onboarding/r/[token]/page.js",
+    ".next/server/app/api/voice/realtime/token/route.js",
+    ".next/server/app/reset-password/page.js",
+    ".next/server/chunks/@vercel_oidc_dist_token_abc.js",
+    ".eve/compile/module-map.mjs",
+    ".eve/nitro-output/environment.js",
+    ".vercel/output/functions/eve/v1/callback/[token].func",
+    ".vercel/output/functions/eve/environment.js",
+    ".vercel/project.json",
+    "apps/web/next-env.d.ts",
   ]) {
     const fixture = makeFixture({ ignored: true, ignoredPath });
     try {
