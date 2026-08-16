@@ -397,7 +397,7 @@ export function ReportView({
             }
             plannerUrl={
               viewerActions.planner
-                ? `/app/planner?view=week&child=${encodeURIComponent(report.childId)}`
+                ? `/app/planner?view=week&child=${encodeURIComponent(report.childId)}&handoff=report`
                 : null
             }
             wall={wall}

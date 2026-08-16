@@ -367,7 +367,7 @@ describe("retained report subject lesson actions", () => {
 
     assert.match(
       html,
-      new RegExp(`href="/app/planner\\?view=week&amp;child=${CHILD_ID}"`, "u"),
+      new RegExp(`href="/app/planner\\?view=week&amp;child=${CHILD_ID}&amp;handoff=report"`, "u"),
     );
     assert.match(html, />Open this week <span/u);
     assert.doesNotMatch(html, /Open Maya(?:&apos;|&#x27;)s month/u);

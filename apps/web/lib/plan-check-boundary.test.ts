@@ -7,11 +7,14 @@ import { describe, it } from "node:test";
 import { mapPlanProgressSchema } from "@homa/core";
 
 const WEB_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const GENERATED_SOURCE_DIRECTORIES = new Set([".eve", ".next", "node_modules"]);
 
 function sourceFiles(root: string): string[] {
   return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) return sourceFiles(path);
+    if (entry.isDirectory()) {
+      return GENERATED_SOURCE_DIRECTORIES.has(entry.name) ? [] : sourceFiles(path);
+    }
     return /\.(?:ts|tsx)$/u.test(entry.name) ? [path] : [];
   });
 }
