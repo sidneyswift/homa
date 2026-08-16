@@ -120,7 +120,7 @@ function androidWorkflow(options: {
     "jobs:",
     `  ${options.jobId ?? "mobile-checks"}:`,
     "    needs: classify-changes",
-    `    if: ${options.jobIf ?? "needs.classify-changes.outputs.scope == 'full' || needs.classify-changes.outputs.scope == 'mobile-only'"}`,
+    `    if: ${options.jobIf ?? "needs.classify-changes.outputs.scope == 'mobile-only'"}`,
     "    runs-on: ubuntu-24.04",
     ...(options.jobExtra ? [`    ${options.jobExtra}`] : []),
     "    steps:",

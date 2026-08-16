@@ -19,6 +19,7 @@ const SHELL_DYNAMIC_WORD = /[$*?]/u;
 const SHELL_ASSIGNMENT = /^[a-z_][a-z0-9_]*=/iu;
 const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until|sudo|nohup|time)$/u;
 const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
+  "7b671bf43899443968a2f1afcacbb45fa57e4eaf4c20ddac6c33154e6f7446b1",
   "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6",
   "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185",
   "df1c2954b93068385ec6953288f53b4739546f6924b32893ae8415e30af206b3",
