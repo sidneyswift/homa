@@ -338,13 +338,9 @@ export function reportLockReadyLine(childName: string | null, mappedCount: numbe
 
 export function reportLockHeldLine(
   childName: string | null,
-  openCount: number,
-  lockedCount: number,
 ): string {
   const kid = childName ?? "your child";
-  const open = openCount === 1 ? "The subject above is" : `The ${NUMBER_WORDS[openCount] ?? openCount} above are`;
-  const held = NUMBER_WORDS[lockedCount] ?? String(lockedCount);
-  return `${open} open in full. Your 7 free days open the other ${held}, plus weekly plans, practice pages made for ${kid}, teaching-hour records, and web chat.`;
+  return `Your 7 free days include the full report, weekly plans, practice pages made for ${kid}, teaching-hour records, and web chat.`;
 }
 
 /** A held subject's whole row: her own answer count (the one honest
@@ -672,8 +668,3 @@ export const TRIAL_GATE_LAPSED_REASSURANCE =
  *  exists: the self-serve door for fixing a card or restarting the old
  *  plan, so the gate never traps a former member. */
 export const TRIAL_GATE_MANAGE_BILLING = "Manage billing";
-
-const NUMBER_WORDS: Record<number, string> = {
-  1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
-  7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve",
-};

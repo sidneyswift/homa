@@ -4,7 +4,7 @@ import type { WallDoor } from "@homa/core";
 
 import type { WallCheckout } from "../../lib/billing/wall-types";
 import { TierOptions } from "./tier-options";
-import { WALL_EYEBROW, WALL_MECHANICS_LINE, wallHeadline, wallIncludedLine, wallReportLine } from "./wall-copy";
+import { WALL_EYEBROW, WALL_MECHANICS_LINE, wallHeadline, wallIncludedLine } from "./wall-copy";
 
 /**
  * The wall's offer card: the words, the two Payment Link buttons, and
@@ -39,13 +39,13 @@ export function WallOffer({
       <h2 className="quiet-paywall__heading">
         {wallHeadline(door)}
       </h2>
-      {/* Reassure before inform (and the reader gate's bridge): the
-          report she already has is hers for good, then the thing she
-          just tapped, named, inside what the 7 free days include. */}
-      <p className="quiet-paywall__copy quiet-paywall__copy--lead">{wallReportLine(childName)}</p>
-      <p className="quiet-paywall__copy">{wallIncludedLine(door, childName)}</p>
-      <p className="quiet-paywall__copy">{WALL_MECHANICS_LINE}</p>
+      {/* Name the thing she just tapped first. Leading an action-door
+          offer with report reassurance made the destination look wrong. */}
+      <p className="quiet-paywall__copy quiet-paywall__copy--lead">{wallIncludedLine(door, childName)}</p>
       <TierOptions door={door} checkout={checkout} />
+      {/* Keep the full renewal terms next to the consent control, where
+          they answer risk without delaying the parent's first price. */}
+      <p className="quiet-paywall__gate-charge-note">{WALL_MECHANICS_LINE}</p>
     </div>
   );
 }
