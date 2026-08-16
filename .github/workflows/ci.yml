@@ -70,6 +70,9 @@ jobs:
       - name: Supabase migration versions are unique
         run: node scripts/migration-version-check.mjs && node --test scripts/migration-version-check.test.mjs
 
+      - name: Production schema reconciliation contract
+        run: node --test scripts/production-schema-reconcile.test.mjs
+
       - name: Repository cleanup guardrails (113 focused tests)
         run: node --test scripts/git-safety-hook.test.mjs scripts/remove-worktree-safely.test.mjs scripts/retire-damaged-worktree-registrations.test.mjs
 
@@ -650,6 +653,10 @@ jobs:
       - name: Issue 888 production repair disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:issue-888-production-repair:postgres
+
+      - name: Production schema reconciliation disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:production-schema-reconcile:postgres
 
       - name: Issue 887 production repair disposable PostgreSQL E2E
         timeout-minutes: 10

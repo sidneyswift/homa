@@ -87,10 +87,20 @@ export function sameContentWithOnlySourceProvenanceDrift(
         ...surface.evidenceMetadata,
         sourceCommitSha: null,
         sourceCommitTimestamp: null,
+        environment: null,
       },
     })),
   });
   return JSON.stringify(withoutSourceProvenance(committed)) === JSON.stringify(withoutSourceProvenance(expected));
+}
+
+export function isGitHubPullRequestMergeCheckout(
+  eventName = process.env.GITHUB_EVENT_NAME,
+  ref = process.env.GITHUB_REF,
+  parentLine = git("rev-list", "--parents", "-n", "1", "HEAD"),
+): boolean {
+  if (eventName !== "pull_request" || !/^refs\/pull\/\d+\/merge$/u.test(ref ?? "")) return false;
+  return parentLine.trim().split(/\s+/u).filter(Boolean).length === 3;
 }
 
 function isGitHubMainSquashRelease(): boolean {
@@ -574,11 +584,12 @@ if (CHECK) {
   const current = readFileSync(OUTPUT, "utf8");
   const currentLegacy = readFileSync(LEGACY_OUTPUT, "utf8");
   const committed = JSON.parse(current) as BrandSurfaceManifest;
+  const provenanceRewrite = isGitHubMainSquashRelease() || isGitHubPullRequestMergeCheckout();
   const manifestMatches = current === serialized
-    || (isGitHubMainSquashRelease() && sameContentWithOnlySourceProvenanceDrift(committed, manifest));
+    || (provenanceRewrite && sameContentWithOnlySourceProvenanceDrift(committed, manifest));
   if (!manifestMatches) throw new Error(`Brand surface manifest is stale. Run: pnpm build:brand-surfaces\nExpected fingerprint ${ownedInputFingerprint}`);
   if (currentLegacy !== serializedLegacy) throw new Error("Legacy baseline is stale. Run: pnpm build:brand-surfaces");
-  console.log(`Brand surface manifest current: ${surfaces.length} surfaces, ${ownedInputFingerprint}${current === serialized ? "" : " (squash-release provenance verified)"}`);
+  console.log(`Brand surface manifest current: ${surfaces.length} surfaces, ${ownedInputFingerprint}${current === serialized ? "" : " (GitHub provenance rewrite verified)"}`);
 } else {
   writeFileSync(OUTPUT, serialized);
   writeFileSync(LEGACY_OUTPUT, serializedLegacy);

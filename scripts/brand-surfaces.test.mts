@@ -31,7 +31,7 @@ import {
 } from "./brand-inventory-completeness-check.mts";
 import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
 import { collectLatestCommittedSources, type GitTextCommand } from "./brand-source-provenance.mts";
-import { sameContentWithOnlySourceProvenanceDrift } from "./brand-surfaces.mts";
+import { isGitHubPullRequestMergeCheckout, sameContentWithOnlySourceProvenanceDrift } from "./brand-surfaces.mts";
 
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/surfaces.json"), "utf8")) as BrandSurfaceManifest;
@@ -130,8 +130,18 @@ test("a squash release accepts only content-bound review provenance", () => {
   surface.evidenceMetadata.sourceCommitTimestamp = "2026-08-16T00:00:00Z";
   assert.equal(sameContentWithOnlySourceProvenanceDrift(committed, expected), true);
 
+  surface.evidenceMetadata.environment = "working-tree-uncommitted";
+  assert.equal(sameContentWithOnlySourceProvenanceDrift(committed, expected), true);
+
   surface.currentAssetHashes[0] = "b".repeat(64);
   assert.equal(sameContentWithOnlySourceProvenanceDrift(committed, expected), false);
+});
+
+test("only GitHub's two-parent pull request checkout may rewrite source provenance", () => {
+  assert.equal(isGitHubPullRequestMergeCheckout("pull_request", "refs/pull/961/merge", "merge base head"), true);
+  assert.equal(isGitHubPullRequestMergeCheckout("pull_request", "refs/pull/961/head", "head"), false);
+  assert.equal(isGitHubPullRequestMergeCheckout("push", "refs/heads/main", "merge base head"), false);
+  assert.equal(isGitHubPullRequestMergeCheckout("pull_request", "refs/pull/961/merge", "head base feature extra"), false);
 });
 
 test("source provenance keeps a three-parent checkout on the octopus merge", () => {
