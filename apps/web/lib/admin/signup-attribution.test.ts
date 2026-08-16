@@ -12,6 +12,30 @@ test("classifies Auth accounts without a linked family separately", () => {
   );
 });
 
+test("excludes deleted-family history from incomplete signup accounts", () => {
+  assert.equal(
+    classifySignupAttribution({
+      userCreatedAt,
+      familyCreatedAt: null,
+      sandbox: false,
+      deletedFamilyOnly: true,
+    }),
+    "deleted_family",
+  );
+});
+
+test("excludes reserved fixture accounts before any family attribution", () => {
+  assert.equal(
+    classifySignupAttribution({
+      userCreatedAt,
+      familyCreatedAt: null,
+      sandbox: false,
+      internalFixture: true,
+    }),
+    "internal_fixture",
+  );
+});
+
 test("keeps sandbox accounts out of the new-family denominator", () => {
   assert.equal(
     classifySignupAttribution({

@@ -89,6 +89,10 @@ export interface SignupAttributionAudit {
   newFamilies: number;
   existingFamilyLinks: number;
   sandboxFamilies: number;
+  /** Auth accounts attached only to a deleted family. Excluded from conversion. */
+  deletedFamilyAccounts: number;
+  /** Reserved non-deliverable fixture accounts. Excluded from conversion. */
+  internalFixtureAccounts: number;
   unlinkedAccounts: number;
   signupGateViewed: number;
   checkoutStarted: number;
@@ -463,6 +467,8 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
       user_created_at: string;
       family_created_at: string | null;
       sandbox: boolean | null;
+      deleted_family_only: boolean;
+      internal_fixture: boolean;
       signup_gate_viewed: boolean;
       checkout_started: boolean;
       trial_started: boolean;
@@ -472,6 +478,11 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
       u.created_at::text as user_created_at,
       linked.family_created_at,
       linked.sandbox,
+      deleted_history.deleted_family_only,
+      (
+        lower(coalesce(u.email, '')) like '%@example.com'
+        or lower(coalesce(u.email, '')) like '%@example.invalid'
+      ) as internal_fixture,
       coalesce(linked.signup_gate_viewed, false) as signup_gate_viewed,
       coalesce(linked.checkout_started, false) as checkout_started,
       coalesce(linked.trial_started, false) as trial_started
@@ -501,6 +512,15 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
       order by fm.created_at asc
       limit 1
     ) linked on true
+    cross join lateral (
+      select exists (
+        select 1
+        from public.family_members fm
+        join public.families f on f.id = fm.family_id
+        where fm.user_id = u.id
+          and coalesce(f.status, 'open') = 'deleted'
+      ) as deleted_family_only
+    ) deleted_history
     where u.created_at >= now() - ${interval}::interval
       and u.deleted_at is null
   `;
@@ -509,6 +529,8 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
     newFamilies: 0,
     existingFamilyLinks: 0,
     sandboxFamilies: 0,
+    deletedFamilyAccounts: 0,
+    internalFixtureAccounts: 0,
     unlinkedAccounts: 0,
     signupGateViewed: 0,
     checkoutStarted: 0,
@@ -519,6 +541,8 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
       userCreatedAt: row.user_created_at,
       familyCreatedAt: row.family_created_at,
       sandbox: row.sandbox === true,
+      deletedFamilyOnly: row.deleted_family_only,
+      internalFixture: row.internal_fixture,
     });
     switch (attribution) {
       case "new_family":
@@ -532,6 +556,12 @@ export async function getFunnelData(windowDays = 28): Promise<FunnelData> {
         break;
       case "sandbox_family":
         signupAudit.sandboxFamilies += 1;
+        break;
+      case "deleted_family":
+        signupAudit.deletedFamilyAccounts += 1;
+        break;
+      case "internal_fixture":
+        signupAudit.internalFixtureAccounts += 1;
         break;
       case "unlinked_account":
         signupAudit.unlinkedAccounts += 1;
