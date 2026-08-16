@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "6c0bf8adc36600ff648adcbee9b953926c7c394f045bbe01e72908ce8e10a078",
+  "ownedInputFingerprint": "219fde647a12ea6186b1358b43ed2d03b250515c59da5ace52b7686f6e2696fe",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -56398,8 +56398,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "08452bfd4b9a56ac8434cd0e22c760d056c98bca",
-        "sourceCommitTimestamp": "2026-08-16T15:22:26-04:00",
+        "sourceCommitSha": "25934230faa792bf5cffb61e508d5c95715f1a55",
+        "sourceCommitTimestamp": "2026-08-16T16:28:28-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -85069,7 +85069,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "16c0255c9e124bf3426f662f8b958cbc6643647f66b823ad128746a40f958bbb",
+        "fixtureChecksum": "fe904eade891f1474e5a24d1ed38e136130e34b93d7b3f76e07f9f1ea276f3e1",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -85101,7 +85101,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "16c0255c9e124bf3426f662f8b958cbc6643647f66b823ad128746a40f958bbb"
+        "fe904eade891f1474e5a24d1ed38e136130e34b93d7b3f76e07f9f1ea276f3e1"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -85120,8 +85120,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "1a9b13e375798893c10459941c24ae63231f4dad",
-        "sourceCommitTimestamp": "2026-07-11T09:38:58-04:00",
+        "sourceCommitSha": "93a247b1b661db50c3722cc90099fe23a5c3911d",
+        "sourceCommitTimestamp": "2026-08-16T18:04:50-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
