@@ -1,0 +1,101 @@
+name: Reconcile the production schema before or after a release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type RECONCILE PRODUCTION SCHEMA
+        required: true
+        type: string
+      release_phase:
+        description: Is this the pre-release or post-release check?
+        required: true
+        type: choice
+        options:
+          - before_release
+          - after_release
+      production_deployed_sha:
+        description: Paste the exact READY production deployment commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-schema-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    if: >-
+      github.repository == 'sidneyswift/homa' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor == 'sidneyswift' &&
+      github.triggering_actor == 'sidneyswift'
+    name: Read-only ${{ inputs.release_phase }} production schema reconciliation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Bind the reconciliation to the exact production release
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          PRODUCTION_DEPLOYED_SHA: ${{ inputs.production_deployed_sha }}
+        run: |
+          if [ "$CONFIRMATION" != "RECONCILE PRODUCTION SCHEMA" ]; then
+            echo "Confirmation must exactly match the production schema phrase."
+            exit 1
+          fi
+          if ! [[ "$PRODUCTION_DEPLOYED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "The production deployment SHA must be an exact lowercase Git SHA."
+            exit 1
+          fi
+          if [ "$PRODUCTION_DEPLOYED_SHA" != "$GITHUB_SHA" ]; then
+            echo "The READY production deployment must match this main commit."
+            exit 1
+          fi
+          git fetch --force origin +refs/heads/main:refs/remotes/origin/main
+          if [ "$(git rev-parse refs/remotes/origin/main)" != "$GITHUB_SHA" ]; then
+            echo "Main moved after the reconciliation was dispatched."
+            exit 1
+          fi
+
+      - name: Build a masked production database URL
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require("node:fs");
+          const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const password = process.env.SUPABASE_DB_PASSWORD;
+          if (!publicUrl || !password) {
+            throw new Error("Production Supabase URL or database password is missing");
+          }
+          const ref = new URL(publicUrl).hostname.split(".")[0];
+          if (ref !== "kzplntcdtsvdowntvlza") {
+            throw new Error("The production Supabase project does not match Homa");
+          }
+          const databaseUrl = new URL("postgresql://aws-0-us-east-1.pooler.supabase.com:6543/postgres");
+          databaseUrl.username = `postgres.${ref}`;
+          databaseUrl.password = password;
+          databaseUrl.searchParams.set("sslmode", "require");
+          process.stdout.write(`::add-mask::${databaseUrl.toString()}\n`);
+          appendFileSync(process.env.GITHUB_ENV, `HOMA_SCHEMA_DATABASE_URL=${databaseUrl.toString()}\n`);
+          NODE
+
+      - name: Ensure PostgreSQL client availability
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes postgresql-client-16
+          fi
+          psql --version
+
+      - name: Reconcile the production catalog and migration ledger
+        run: node scripts/production-schema-reconcile.mjs
