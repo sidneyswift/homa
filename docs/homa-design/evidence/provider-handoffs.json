@@ -373,7 +373,7 @@
         "A missing or failed code never silently reports a signed-in state.",
         "The authenticated Supabase session remains the only authority for family identity."
       ],
-      "scopedInputFingerprint": "37d3f7225a44b353ffcf0decd75bbf832d8739d0bccce3d0fdd86cd6a7d543d9"
+      "scopedInputFingerprint": "2b78a61fe9b4326c9955491a3f1129abf61ac27bbec33ca1367b6af87eadb8f9"
     },
     {
       "id": "apple-identity",
@@ -692,7 +692,7 @@
       },
       {
         "path": "apps/web/app/onboarding/parent-step.tsx",
-        "sha256": "6e0f65355172e7592a908b20e1ab1d2d4a08d7d4e2bcd7e0065208030c675297"
+        "sha256": "f897ac0cbffceae24406ac4f94fe14f92ce533389283d5fe5a0119aa4d854049"
       },
       {
         "path": "apps/web/app/signin/signin-form.tsx",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "39fa79fa294dfa56db85f720998e15504f4b86f29b16adb3b1336be37926b59b"
+    "sourceFingerprint": "6eb6db3f0b0cb2abbf435d381d1a380bcf99c23726ff7485d9b4d0b131ad62ec"
   }
 }
