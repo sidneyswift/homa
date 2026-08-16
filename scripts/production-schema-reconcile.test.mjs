@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildReadOnlyProbe,
+  validateProductionMigrationLedger,
   validateProductionSchema,
 } from "./production-schema-reconcile.mjs";
 import { productionSchemaContract } from "./production-schema-contract.mjs";
@@ -67,13 +68,13 @@ test("healthy release-critical schema passes", () => {
   assert.deepEqual(validateProductionSchema(contract, healthySnapshot()), []);
 });
 
-test("reports missing billing table, missing month-plan migration, and a partial ledger entry", () => {
+test("reports a missing release-critical relation independently of ledger history", () => {
   const snapshot = healthySnapshot();
   snapshot.relations = [];
   snapshot.migrations = [{ name: "family_billing_subscriptions", statementCount: 0, version: "20260801110000" }];
-  assert.deepEqual(validateProductionSchema(contract, snapshot), [
+  assert.deepEqual(validateProductionSchema(contract, snapshot), ["missing relation public.family_billing_subscriptions"]);
+  assert.deepEqual(validateProductionMigrationLedger(contract, snapshot), [
     "missing production migration 20260801201500",
-    "missing relation public.family_billing_subscriptions",
     "partial production migration 20260801110000",
   ]);
 });
@@ -85,7 +86,8 @@ test("reports a colliding migration version and altered production ledger name",
     { name: "family_billing_subscriptions", statementCount: 1, version: "20260801110000" },
     { name: "month_plan_approvals", statementCount: 1, version: "20260801201500" },
   ];
-  assert.deepEqual(validateProductionSchema(contract, snapshot), [
+  assert.deepEqual(validateProductionSchema(contract, snapshot), []);
+  assert.deepEqual(validateProductionMigrationLedger(contract, snapshot), [
     "altered production migration 20260801110000",
     "duplicate production migration version 20260801110000",
   ]);
@@ -103,7 +105,8 @@ test("reports an altered production migration statement list", () => {
     statementMd5: "tampered",
     version: "20260801110000",
   }];
-  assert.deepEqual(validateProductionSchema(strictContract, snapshot), [
+  assert.deepEqual(validateProductionSchema(strictContract, snapshot), []);
+  assert.deepEqual(validateProductionMigrationLedger(strictContract, snapshot), [
     "altered production migration 20260801110000",
   ]);
 });

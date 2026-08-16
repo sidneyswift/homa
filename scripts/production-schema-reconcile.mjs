@@ -163,40 +163,45 @@ export function validateProductionSchema(contract, snapshot) {
     if (!functions.has(expected.identity)) errors.push(`missing function ${expected.identity}`);
   }
 
+  return errors.sort();
+}
+
+export function validateProductionMigrationLedger(contract, snapshot) {
+  const findings = [];
   const requiredMigrations = entriesBy(contract.migrations, "version");
   const seenVersions = new Set();
   for (const migration of snapshot.migrations) {
     if (seenVersions.has(migration.version)) {
-      errors.push(`duplicate production migration version ${migration.version}`);
+      findings.push(`duplicate production migration version ${migration.version}`);
       continue;
     }
     seenVersions.add(migration.version);
     const expected = requiredMigrations.get(migration.version);
     if (!expected) {
-      errors.push(`unexpected production migration ${migration.version}`);
+      findings.push(`unexpected production migration ${migration.version}`);
     } else if (expected.name !== migration.name) {
-      errors.push(`altered production migration ${migration.version}`);
+      findings.push(`altered production migration ${migration.version}`);
     } else if (
       !Number.isInteger(migration.statementCount) ||
       (expected.statementCount === undefined
         ? migration.statementCount < 1
         : migration.statementCount !== expected.statementCount)
     ) {
-      errors.push(`partial production migration ${migration.version}`);
+      findings.push(`partial production migration ${migration.version}`);
     } else if (
       expected.statementMd5 &&
       expected.statementMd5 !== migration.statementMd5
     ) {
-      errors.push(`altered production migration ${migration.version}`);
+      findings.push(`altered production migration ${migration.version}`);
     }
   }
   for (const expected of contract.migrations) {
     if (!seenVersions.has(expected.version)) {
-      errors.push(`missing production migration ${expected.version}`);
+      findings.push(`missing production migration ${expected.version}`);
     }
   }
 
-  return errors.sort();
+  return findings.sort();
 }
 
 export function probeProductionSchema({ databaseUrl, psql = "psql", contract = productionSchemaContract() }) {
@@ -242,16 +247,29 @@ function run() {
   }
   const contract = productionSchemaContract();
   const snapshot = probeProductionSchema({ databaseUrl, contract });
-  const errors = validateProductionSchema(contract, snapshot);
-  if (errors.length > 0) {
+  const schemaErrors = validateProductionSchema(contract, snapshot);
+  if (schemaErrors.length > 0) {
     console.error("Production schema reconciliation failed:");
-    for (const error of errors) console.error(`- ${error}`);
+    for (const error of schemaErrors) console.error(`- ${error}`);
     process.exitCode = 1;
     return;
   }
+  const migrationLedgerFindings = validateProductionMigrationLedger(contract, snapshot);
   console.log(
     `Production schema reconciliation passed for ${contract.migrations.length} migrations and ${contract.relations.length} release-critical relations.`,
   );
+  if (migrationLedgerFindings.length > 0) {
+    console.warn(
+      `Production migration ledger differs from this checkout in ${migrationLedgerFindings.length} entries. ` +
+      "This is tracked provenance cleanup, not permission to apply or rewrite migrations automatically.",
+    );
+    for (const finding of migrationLedgerFindings.slice(0, 12)) {
+      console.warn(`- ${finding}`);
+    }
+    if (migrationLedgerFindings.length > 12) {
+      console.warn(`- ${migrationLedgerFindings.length - 12} additional migration-ledger differences`);
+    }
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) run();
