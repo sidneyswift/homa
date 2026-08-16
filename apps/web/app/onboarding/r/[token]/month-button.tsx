@@ -34,12 +34,16 @@ export function MonthButton({
   childId,
   childName,
   planUrl,
+  plannerUrl = null,
   wall = null,
 }: {
   childId: string;
   childName: string;
   /** The built month's URL when one exists; null builds on tap. */
   planUrl: string | null;
+  /** The signed-in current-week destination. Null keeps the shareable
+   * month page path for a token-link viewer. */
+  plannerUrl?: string | null;
   /** Checkout URLs when this family is walled; null means the door is open. */
   wall?: WallCheckout | null;
 }) {
@@ -72,7 +76,7 @@ export function MonthButton({
       }
       const data = (await response.json()) as { ok: boolean; url?: string };
       if (data.ok && data.url) {
-        router.push(data.url);
+        router.push(plannerUrl ?? data.url);
         return;
       }
       setState("idle");
@@ -81,10 +85,13 @@ export function MonthButton({
     }
   }
 
-  if (planUrl) {
+  const destination = plannerUrl ?? planUrl;
+  const opensCurrentWeek = plannerUrl !== null;
+
+  if (destination) {
     return (
       <Link
-        href={planUrl}
+        href={destination}
         className={reportButtonClass(
           "primary",
           "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold print:hidden",
@@ -93,7 +100,7 @@ export function MonthButton({
         {/* ml-1, not a space: the button is inline-flex, which swallows
             whitespace-only text nodes between flex items. aria-hidden
             keeps the glyph out of the accessible name. */}
-        Open {childName}&apos;s month{" "}
+        {opensCurrentWeek ? "Open this week" : `Open ${childName}'s month`}{" "}
         <span aria-hidden="true" className="ml-1">
           {"\u2192"}
         </span>
@@ -140,14 +147,15 @@ export function MonthButton({
         )}
       >
         {state === "busy" ? (
-          // "Opening", not "Building": the letter above already says the
-          // month is made, and the reader gate (2026-07-11) caught the
-          // contradiction. The lazy first-tap build stays; it is an
-          // implementation detail she never asked about.
-          `Opening ${childName}'s month\u2026`
+          // The destination, rather than the lazy build, is the useful
+          // parent-facing state. The consent endpoint still creates the
+          // month first when needed.
+          opensCurrentWeek
+            ? "Opening this week's plan\u2026"
+            : `Opening ${childName}'s month\u2026`
         ) : (
           <>
-            Open {childName}&apos;s month{" "}
+            {opensCurrentWeek ? "Open this week" : `Open ${childName}'s month`}{" "}
             <span aria-hidden="true" className="ml-1">
               {"\u2192"}
             </span>

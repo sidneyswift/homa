@@ -41,6 +41,7 @@ export default async function PlannerPage({
   searchParams: Promise<{
     view?: string | string[];
     date?: string | string[];
+    child?: string | string[];
   }>;
 }) {
   const data = await getAppData();
@@ -52,9 +53,16 @@ export default async function PlannerPage({
     cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
     children.map((child) => child.id),
   );
-  const focusChildId = viewContext.kind === "child" ? viewContext.childId : null;
-
   const query = await searchParams;
+  // A report can take a signed-in parent straight to this child's week.
+  // The query is only a focus preference, never authority: it is accepted
+  // only after checking against the authenticated family's loaded children.
+  const queryChildId = typeof query.child === "string" ? query.child : null;
+  const focusChildId = children.some((child) => child.id === queryChildId)
+    ? queryChildId
+    : viewContext.kind === "child"
+      ? viewContext.childId
+      : null;
   const timeZone = effectiveTimeZone(family.time_zone);
   const now = new Date();
   const today = todayDateOnly(now, timeZone);
