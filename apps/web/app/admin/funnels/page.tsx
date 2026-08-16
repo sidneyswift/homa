@@ -186,7 +186,7 @@ export default async function AdminFunnelsPage() {
         <p className="text-[0.72rem] font-bold text-muted">Account creation is not the customer denominator</p>
         <p className="mt-1 max-w-2xl text-sm text-body">
           Of {data.signupAudit.authAccounts} Auth accounts created in this window, {data.signupAudit.newFamilies} became a new live family.
-          The other accounts are shown separately so a sandbox rehearsal, a returning-family link, or an incomplete account cannot look like a paywall loss.
+          The other accounts are shown separately so a sandbox rehearsal, a reserved test account, a returning-family link, a deleted account, or an incomplete account cannot look like a paywall loss.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {(
@@ -197,6 +197,8 @@ export default async function AdminFunnelsPage() {
               ["Started trial", data.signupAudit.trialStarted],
               ["Existing-family links", data.signupAudit.existingFamilyLinks],
               ["Sandbox families", data.signupAudit.sandboxFamilies],
+              ["Internal test accounts", data.signupAudit.internalFixtureAccounts],
+              ["Deleted-account records", data.signupAudit.deletedFamilyAccounts],
               ["Accounts not linked to a family", data.signupAudit.unlinkedAccounts],
             ] as const
           ).map(([label, value]) => (
