@@ -280,7 +280,7 @@
         "Expired recovery tokens never create a session and return to the recovery screen.",
         "Tenant identity is derived from the authenticated Supabase session, never provider callback text."
       ],
-      "scopedInputFingerprint": "2198c84fa585a11e8d89a6bd88cc312a516537ff6453174952840315979c5577"
+      "scopedInputFingerprint": "073dc0ebb380dba81e75a9ec2c15293abb5f0829d744a852ebe26f3b45d0b989"
     },
     {
       "id": "google-identity",
@@ -373,7 +373,7 @@
         "A missing or failed code never silently reports a signed-in state.",
         "The authenticated Supabase session remains the only authority for family identity."
       ],
-      "scopedInputFingerprint": "2b78a61fe9b4326c9955491a3f1129abf61ac27bbec33ca1367b6af87eadb8f9"
+      "scopedInputFingerprint": "619a5b4c66b15422570f956f20ad4109d0e210594f8d12a0a5adb773f0df893d"
     },
     {
       "id": "apple-identity",
@@ -680,7 +680,7 @@
       },
       {
         "path": "apps/web/app/auth/callback/route.ts",
-        "sha256": "16c0255c9e124bf3426f662f8b958cbc6643647f66b823ad128746a40f958bbb"
+        "sha256": "fe904eade891f1474e5a24d1ed38e136130e34b93d7b3f76e07f9f1ea276f3e1"
       },
       {
         "path": "apps/web/app/auth/confirm/route.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "6eb6db3f0b0cb2abbf435d381d1a380bcf99c23726ff7485d9b4d0b131ad62ec"
+    "sourceFingerprint": "722ba83a243f31343b66da7f14c12dbf33413eb8daf742a817992f3b8cb6a106"
   }
 }

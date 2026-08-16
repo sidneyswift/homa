@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { authCallbackDestination } from "../../../lib/auth/callback-destination";
+import { getFamilyByAuthUser } from "../../../lib/map/store";
 import { safeSameOriginPath } from "../../../lib/safe-redirect";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
@@ -21,15 +23,22 @@ export async function GET(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const linkedFamily = user ? await getFamilyByAuthUser(user.id) : null;
+      const destination = user
+        ? authCallbackDestination({ next, hasLinkedFamily: linkedFamily !== null })
+        : next;
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${destination}`);
       }
       if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`https://${forwardedHost}${destination}`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${origin}${destination}`);
     }
   }
 
