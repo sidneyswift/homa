@@ -118,6 +118,8 @@ interface ReportRenderOptions {
   canBuild: boolean;
   mirror?: boolean;
   sample?: boolean;
+  planner?: boolean;
+  plans?: ReportViewData["plans"];
   hasLesson?: boolean;
   lessonStatus?: "queued" | "running" | "ready" | "failed";
   lessonSubjectIds?: string[];
@@ -135,7 +137,7 @@ function renderReport(options: ReportRenderOptions): string {
   return renderToStaticMarkup(
     <AppRouterContext.Provider value={ROUTER}>
       <ReportView
-        data={REPORT_DATA}
+        data={{ ...REPORT_DATA, plans: options.plans ?? REPORT_DATA.plans }}
         mirror={options.mirror}
         sample={options.sample}
         subjectLessonsEnabled={options.enabled}
@@ -144,6 +146,7 @@ function renderReport(options: ReportRenderOptions): string {
           call: false,
           month: false,
           lesson: options.canBuild,
+          planner: options.planner,
         }}
       />
     </AppRouterContext.Provider>,
@@ -350,6 +353,38 @@ describe("retained report subject lesson actions", () => {
     assert.match(REPORT_VIEW_SOURCE, /MONTH_PLAN_SUBJECT/u);
     assert.match(REPORT_VIEW_SOURCE, /<MonthButton/u);
     assert.match(REPORT_VIEW_SOURCE, /monthOffered/u);
+  });
+
+  it("opens this child's current Planner week for a signed-in report reader", () => {
+    const html = renderReport({
+      enabled: false,
+      canBuild: true,
+      planner: true,
+      plans: [
+        { subjectId: "month", done: 0, total: 12, retestAt: "2026-08-20T00:00:00.000Z" },
+      ],
+    });
+
+    assert.match(
+      html,
+      new RegExp(`href="/app/planner\\?view=week&amp;child=${CHILD_ID}"`, "u"),
+    );
+    assert.match(html, />Open this week <span/u);
+    assert.doesNotMatch(html, /Open Maya(?:&apos;|&#x27;)s month/u);
+  });
+
+  it("keeps the shareable month link for a report reader without Planner access", () => {
+    const html = renderReport({
+      enabled: false,
+      canBuild: true,
+      plans: [
+        { subjectId: "month", done: 0, total: 12, retestAt: "2026-08-20T00:00:00.000Z" },
+      ],
+    });
+
+    assert.match(html, /href="\/onboarding\/r\/report-token\/plan\/month"/u);
+    assert.match(html, />Open Maya(?:&apos;|&#x27;)s month <span/u);
+    assert.doesNotMatch(html, /\/app\/planner\?view=week/u);
   });
 });
 

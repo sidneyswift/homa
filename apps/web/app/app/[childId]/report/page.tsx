@@ -163,6 +163,7 @@ export default async function AppReportPage({
           call: true,
           month: true,
           lesson: viewerIsAccountOwner,
+          planner: true,
         }}
       />
       {welcomeSubjects.length > 0 ? (

@@ -195,16 +195,16 @@ export function ReportView({
    * HOMA_REPORT_LOCK_ENABLED is off. Never passed by the sample or the
    * founder mirror. */
   reportLock?: ReportLock | null;
-  /** Call, month, and owner-only lesson build permissions. Which of the
+  /** Call, month, planner, and owner-only lesson build permissions. Which of the
    * letter's actions THIS viewer's session can actually complete
    * (founder ruling 2026-07-14, report-page dead ends, option b): the
    * call needs a signed-in family member, the month BUILD needs a
    * resume cookie or membership, lesson build needs account ownership.
    * Suppressed buttons beat dead ones: a text-born family has neither
    * and used to get a circular device hint. Defaults keep the
-   * signed-in /app route unchanged; an already-built month renders as
-   * a plain tokenized link for every viewer regardless. */
-  viewerActions?: { call: boolean; month: boolean; lesson: boolean };
+   * signed-in viewers receive the current-week Planner handoff; a
+   * token-link viewer keeps the plain tokenized month link. */
+  viewerActions?: { call: boolean; month: boolean; lesson: boolean; planner?: boolean };
 }) {
   const report = data;
   const inApp = context === "app";
@@ -393,6 +393,11 @@ export function ReportView({
             planUrl={
               monthBuilt
                 ? `/onboarding/r/${report.token}/plan/${MONTH_PLAN_SUBJECT}`
+                : null
+            }
+            plannerUrl={
+              viewerActions.planner
+                ? `/app/planner?view=week&child=${encodeURIComponent(report.childId)}`
                 : null
             }
             wall={wall}

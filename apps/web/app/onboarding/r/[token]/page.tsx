@@ -151,6 +151,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
         call: viewerIsSignedInMember,
         month: viewerIsReportFamily,
         lesson: viewerIsAccountOwner,
+        planner: viewerIsSignedInMember,
       }}
     />
   );

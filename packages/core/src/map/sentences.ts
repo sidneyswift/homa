@@ -181,7 +181,7 @@ export function noteGreeting(parentFirstName: string | null): string {
  * "${monthName} 4-week plan" shape, which read as "July 4" for a beat
  * (and could line-break right after it). */
 export function notePlanSentence(childName: string, monthName: string): string {
-  return `I took everything you told me and turned it into ${childName}'s month: a 4-week plan for ${monthName}.`;
+  return `I made ${childName}'s ${monthName} plan from the answers you shared. Open this week to see the first few things to do.`;
 }
 
 /** Subject line and preview for the report email. */
