@@ -31,6 +31,7 @@ import {
 } from "./brand-inventory-completeness-check.mts";
 import { collectBrandResidueFindings, collectLegacyFontPathResidue } from "./brand-residue-check.mts";
 import { collectLatestCommittedSources, type GitTextCommand } from "./brand-source-provenance.mts";
+import { sameContentWithOnlySourceProvenanceDrift } from "./brand-surfaces.mts";
 
 const root = resolve(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/homa-design/evidence/surfaces.json"), "utf8")) as BrandSurfaceManifest;
@@ -118,6 +119,19 @@ test("source provenance keeps an ordinary one-parent squash on the squash", () =
     const squash = repoGit("commit-tree", featureTree, "-p", base, "-m", "squash");
     assert.equal(collectLatestCommittedSources(repoGit, squash).get("surface.txt")?.sha, squash);
   });
+});
+
+test("a squash release accepts only content-bound review provenance", () => {
+  const committed = structuredClone(manifest);
+  const expected = structuredClone(manifest);
+  const surface = expected.surfaces.find((entry) => entry.evidenceMetadata.sourceCommitSha !== null);
+  assert.ok(surface, "expected one committed surface provenance row");
+  surface.evidenceMetadata.sourceCommitSha = "a".repeat(40);
+  surface.evidenceMetadata.sourceCommitTimestamp = "2026-08-16T00:00:00Z";
+  assert.equal(sameContentWithOnlySourceProvenanceDrift(committed, expected), true);
+
+  surface.currentAssetHashes[0] = "b".repeat(64);
+  assert.equal(sameContentWithOnlySourceProvenanceDrift(committed, expected), false);
 });
 
 test("source provenance keeps a three-parent checkout on the octopus merge", () => {

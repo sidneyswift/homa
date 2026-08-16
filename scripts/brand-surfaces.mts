@@ -68,6 +68,36 @@ const existing = existsSync(OUTPUT)
   ? JSON.parse(readFileSync(OUTPUT, "utf8")) as Partial<BrandSurfaceManifest>
   : null;
 
+/**
+ * GitHub creates a new one-parent commit for a squash merge. PR CI has already
+ * reviewed the exact source bytes, but the production checkout correctly sees
+ * the new release commit as their latest provenance. Accept that one rewrite
+ * only when every non-provenance field, including each source-content hash,
+ * remains identical.
+ */
+export function sameContentWithOnlySourceProvenanceDrift(
+  committed: BrandSurfaceManifest,
+  expected: BrandSurfaceManifest,
+): boolean {
+  const withoutSourceProvenance = (manifest: BrandSurfaceManifest) => ({
+    ...manifest,
+    surfaces: manifest.surfaces.map((surface) => ({
+      ...surface,
+      evidenceMetadata: {
+        ...surface.evidenceMetadata,
+        sourceCommitSha: null,
+        sourceCommitTimestamp: null,
+      },
+    })),
+  });
+  return JSON.stringify(withoutSourceProvenance(committed)) === JSON.stringify(withoutSourceProvenance(expected));
+}
+
+function isGitHubMainSquashRelease(): boolean {
+  if (process.env.GITHUB_EVENT_NAME !== "push" || process.env.GITHUB_REF !== "refs/heads/main") return false;
+  return /\s\(#\d+\)$/u.test(git("log", "-1", "--format=%s"));
+}
+
 function sourceProvenance(path: string): Pick<BrandSurfaceRecord["evidenceMetadata"], "observedAt" | "sourceCommitSha" | "sourceCommitTimestamp" | "environment"> {
   const source = latestCommittedSource.get(path) ?? null;
   if (workingTreePaths.has(path) || source === null) {
@@ -543,9 +573,12 @@ const serializedLegacy = `${JSON.stringify(legacyBaseline, null, 2)}\n`;
 if (CHECK) {
   const current = readFileSync(OUTPUT, "utf8");
   const currentLegacy = readFileSync(LEGACY_OUTPUT, "utf8");
-  if (current !== serialized) throw new Error(`Brand surface manifest is stale. Run: pnpm build:brand-surfaces\nExpected fingerprint ${ownedInputFingerprint}`);
+  const committed = JSON.parse(current) as BrandSurfaceManifest;
+  const manifestMatches = current === serialized
+    || (isGitHubMainSquashRelease() && sameContentWithOnlySourceProvenanceDrift(committed, manifest));
+  if (!manifestMatches) throw new Error(`Brand surface manifest is stale. Run: pnpm build:brand-surfaces\nExpected fingerprint ${ownedInputFingerprint}`);
   if (currentLegacy !== serializedLegacy) throw new Error("Legacy baseline is stale. Run: pnpm build:brand-surfaces");
-  console.log(`Brand surface manifest current: ${surfaces.length} surfaces, ${ownedInputFingerprint}`);
+  console.log(`Brand surface manifest current: ${surfaces.length} surfaces, ${ownedInputFingerprint}${current === serialized ? "" : " (squash-release provenance verified)"}`);
 } else {
   writeFileSync(OUTPUT, serialized);
   writeFileSync(LEGACY_OUTPUT, serializedLegacy);
