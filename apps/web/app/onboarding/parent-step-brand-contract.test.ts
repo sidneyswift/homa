@@ -28,11 +28,19 @@ test("onboarding preserves account and offline recovery contracts", () => {
   assert.doesNotMatch(parentStep, /setGoogleError\(oauthError\.message\)/u);
 });
 
+test("the password helper remains a separate phone-safe control", () => {
+  assert.match(parentStep, /quiet-onboarding__password-control/u);
+  assert.match(parentStep, /quiet-onboarding__password-visibility/u);
+  assert.match(primitives, /\.quiet-onboarding__password-control\s*\{[^}]*display: grid;[^}]*gap: 4px;/u);
+  assert.match(primitives, /\.quiet-onboarding__password-visibility\s*\{[^}]*justify-self: start;/u);
+});
+
 test("the landing signup path explains the product and trial without legacy assessment framing", () => {
   assert.match(parentStep, /Start with what you already know about your child/u);
   assert.match(parentStep, /plain-language questions/u);
   assert.match(parentStep, /WALL_MECHANICS_LINE/u);
   assert.match(parentStep, /tierPriceAmount\("regular", "monthly"\)/u);
+  assert.match(parentStep, /Your answers come first\. Homa uses national learning research as a reference/u);
   assert.doesNotMatch(parentStep, /questionnaire|where your child shines|where they need a hand/iu);
 });
 

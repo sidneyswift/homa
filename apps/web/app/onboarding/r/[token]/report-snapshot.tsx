@@ -78,9 +78,7 @@ export function ReportSnapshot({
           budget, and the dots this explains are right above it. */}
       {showsScaleChange ? (
         <p className="quiet-report__fine-print">
-          A dotted stretch means we improved how we measure, not that
-          {" "}{childName} changed. Every number you see now is measured the
-          new way.
+          The dotted part uses a newer check-in approach. It does not mean {childName} changed.
         </p>
       ) : null}
     </QuietFrame>
