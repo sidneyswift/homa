@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { getAppData } from "../../lib/app-data";
+import { firstWeekAdjustmentDraft } from "../../lib/activation/first-week-handoff";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
 import { plannerActivityHelpDraft } from "../../lib/planner-activity-help";
@@ -60,6 +61,10 @@ export default async function ChatPage({
     checkId: query.check,
     children: app?.children ?? [],
     plans: app?.plans ?? [],
+  }) ?? firstWeekAdjustmentDraft({
+    draft,
+    childId: query.child,
+    children: app?.children ?? [],
   }) ?? DRAFT_PREFILLS[draft ?? ""];
 
   // The context switcher's selection: when one kid is selected, the

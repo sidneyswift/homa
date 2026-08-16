@@ -42,6 +42,7 @@ export default async function PlannerPage({
     view?: string | string[];
     date?: string | string[];
     child?: string | string[];
+    handoff?: string | string[];
   }>;
 }) {
   const data = await getAppData();
@@ -63,6 +64,9 @@ export default async function PlannerPage({
     : viewContext.kind === "child"
       ? viewContext.childId
       : null;
+  // A report can start this focused handoff, but the query cannot turn on a
+  // child experience unless the child itself was authenticated above.
+  const activationHandoff = query.handoff === "report" && focusChildId !== null;
   const timeZone = effectiveTimeZone(family.time_zone);
   const now = new Date();
   const today = todayDateOnly(now, timeZone);
@@ -148,6 +152,7 @@ export default async function PlannerPage({
         activeDate={activeDate}
         view={view}
         focusChildId={focusChildId}
+        activationHandoff={activationHandoff}
       />
     </PageColumn>
   );

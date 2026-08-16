@@ -31,6 +31,7 @@ import {
   type HoursEntry,
 } from "../../../lib/hours-view";
 import { plannerActivityHelpHref } from "../../../lib/planner-activity-help";
+import { firstWeekAdjustmentHref } from "../../../lib/activation/first-week-handoff";
 import type {
   PlannerLearningActivity,
   PlannerLearningStatus,
@@ -110,8 +111,15 @@ const VIEW_LABELS: ReadonlyArray<{ mode: PlannerViewMode; label: string }> = [
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
-function plannerHref(view: PlannerViewMode, date: string): string {
-  return `/app/planner?view=${view}&date=${date}`;
+function plannerHref(
+  view: PlannerViewMode,
+  date: string,
+  context: { childId: string | null; activationHandoff: boolean },
+): string {
+  const params = new URLSearchParams({ view, date });
+  if (context.childId) params.set("child", context.childId);
+  if (context.activationHandoff) params.set("handoff", "report");
+  return `/app/planner?${params.toString()}`;
 }
 
 function dateObject(value: string): Date {
@@ -1333,6 +1341,7 @@ export function UnifiedPlannerView({
   activeDate,
   view,
   focusChildId,
+  activationHandoff = false,
 }: {
   kids: UnifiedPlannerKid[];
   plans: DashboardPlan[];
@@ -1346,6 +1355,8 @@ export function UnifiedPlannerView({
   activeDate: string;
   view: PlannerViewMode;
   focusChildId: string | null;
+  /** True only for the signed-in report to current-week route. */
+  activationHandoff?: boolean;
 }) {
   const router = useRouter();
   const refreshPlanChecks = useCallback(() => router.refresh(), [router]);
@@ -1380,6 +1391,10 @@ export function UnifiedPlannerView({
   const setDayFilterChildId = (selectedChildId: string | null) => {
     setDayFilter({ routeChildId: focusChildId, selectedChildId });
   };
+  const routeContext = { childId: focusChildId, activationHandoff };
+  const handoffChild = activationHandoff && focusChildId
+    ? kids.find((kid) => kid.id === focusChildId) ?? null
+    : null;
 
   const visibleFocusChildId = view === "day" ? dayFilterChildId : focusChildId;
 
@@ -1758,7 +1773,7 @@ export function UnifiedPlannerView({
         {VIEW_LABELS.map(({ mode, label }) => (
           <Link
             key={mode}
-            href={plannerHref(mode, activeDate)}
+            href={plannerHref(mode, activeDate, routeContext)}
             aria-current={view === mode ? "page" : undefined}
             className={
               view === mode
@@ -1770,6 +1785,23 @@ export function UnifiedPlannerView({
           </Link>
         ))}
       </ToolShelf>
+
+      {handoffChild && view === "week" ? (
+        <QuietStatus tone="constructive" className="mt-5 p-5">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[var(--homa-constructive-ink)]">
+            Start here
+          </p>
+          <h2 className="mt-1 font-display text-2xl font-semibold text-strong">
+            {handoffChild.name}&apos;s first week is ready
+          </h2>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-body">
+            It came from the answers you shared. If an activity, your schedule, or the supplies do not work, tell Homa which one to change before you begin.
+          </p>
+          <QuietAction href={firstWeekAdjustmentHref(handoffChild.id)} className="mt-4">
+            Change one thing
+          </QuietAction>
+        </QuietStatus>
+      ) : null}
 
       {view === "hours" ? (
         <div className="pt-7">
@@ -1792,7 +1824,7 @@ export function UnifiedPlannerView({
         <>
           <div className="mt-7 flex items-center justify-between gap-3">
             <Link
-              href={plannerHref(view, dayNavigationDate(view, activeDate, -1))}
+              href={plannerHref(view, dayNavigationDate(view, activeDate, -1), routeContext)}
               aria-label={`Previous ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
@@ -1816,7 +1848,7 @@ export function UnifiedPlannerView({
               </p>
             </div>
             <Link
-              href={plannerHref(view, dayNavigationDate(view, activeDate, 1))}
+              href={plannerHref(view, dayNavigationDate(view, activeDate, 1), routeContext)}
               aria-label={`Next ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
@@ -2002,7 +2034,7 @@ export function UnifiedPlannerView({
                 return (
                   <Link
                     key={day.date}
-                    href={plannerHref("day", day.date)}
+                    href={plannerHref("day", day.date, routeContext)}
                     className={
                       day.date === today
                         ? "grid min-h-[78px] grid-cols-[7rem_minmax(0,1fr)_1.25rem] items-center gap-3 border-b border-border-subtle bg-[var(--clay-50)] px-4 py-3 last:border-b-0 hover:bg-[var(--clay-100)]"
@@ -2048,7 +2080,7 @@ export function UnifiedPlannerView({
                   return (
                     <Link
                       key={cell.date}
-                      href={plannerHref("day", cell.date)}
+                      href={plannerHref("day", cell.date, routeContext)}
                       aria-label={label}
                       className={
                         cell.isToday
