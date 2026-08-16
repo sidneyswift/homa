@@ -105,7 +105,7 @@ const VIEW_LABELS: ReadonlyArray<{ mode: PlannerViewMode; label: string }> = [
   { mode: "day", label: "Day" },
   { mode: "week", label: "Week" },
   { mode: "month", label: "Month" },
-  { mode: "hours", label: "Hours" },
+  { mode: "hours", label: "School hours" },
 ];
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -1724,7 +1724,7 @@ export function UnifiedPlannerView({
             onClick={() => setAddOpen((open) => !open)}
             className="quiet-action quiet-action--primary quiet-action--default relative z-30"
           >
-            <Icon name="add" size={20} /> Add to planner
+            <Icon name="add" size={20} /> Choose an event or activity
           </button>
           {addOpen ? (
             <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-64 overflow-hidden rounded-lg border border-border-subtle bg-card p-1.5 shadow-lg">
@@ -1917,7 +1917,7 @@ export function UnifiedPlannerView({
                     onClick={() => setAddOpen(true)}
                     className="mt-4 inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page"
                   >
-                    Add to planner
+                    Choose an event or activity
                   </button>
                 </div>
               ) : null}
