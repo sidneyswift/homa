@@ -203,29 +203,31 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
                   aria-describedby={error ? "parent-form-error" : undefined}
                 />
               </QuietField>
-              <QuietField id="parent-password" label="Password" hint="At least 8 characters." required disabled={busy} className="mt-4">
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  minLength={8}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Create a password"
-                  aria-describedby={error ? "parent-form-error" : undefined}
-                />
-              </QuietField>
-              <QuietAction
-                kind="quiet"
-                type="button"
-                className="mt-1 self-end"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}
-                disabled={busy}
-                onClick={() => setShowPassword((current) => !current)}
-              >
-                {showPassword ? "Hide password" : "Show password"}
-              </QuietAction>
+              <div className="quiet-onboarding__password-control mt-4">
+                <QuietField id="parent-password" label="Password" hint="At least 8 characters." required disabled={busy}>
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    minLength={8}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Create a password"
+                    aria-describedby={error ? "parent-form-error" : undefined}
+                  />
+                </QuietField>
+                <QuietAction
+                  kind="quiet"
+                  type="button"
+                  className="quiet-onboarding__password-visibility"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  disabled={busy}
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? "Hide password" : "Show password"}
+                </QuietAction>
+              </div>
               {error ? (
                 <QuietFeedback id="parent-form-error" tone="error" className="mt-3">
                   {error}
@@ -278,7 +280,7 @@ export function ParentStep({ onDone }: { onDone: () => void }) {
 
           <div className="quiet-onboarding__parent-trust">
             <p>
-              Checked against national standards and research
+              Your answers come first. Homa uses national learning research as a reference, not as a test or grade.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-4">
               {/* Plain <img>, not next/image: these are already-optimized static

@@ -66,8 +66,8 @@ describe("ReportSnapshot scale boundaries", () => {
     );
 
     assert.match(html, /stroke-dasharray="1 5"/);
-    assert.match(html, /A dotted stretch means we improved how we measure/);
-    assert.match(html, /Every number you see now is measured the new way\./);
+    assert.match(html, /The dotted part uses a newer check-in approach\./);
+    assert.match(html, /It does not mean Story changed\./);
     // The drop itself still renders: no red, no warning treatment, no
     // celebration either (the anti-guilt law: a drop is never a mover).
     assert.doesNotMatch(html, /behind/i);

@@ -32,6 +32,20 @@ describe("Quiet trajectory chart contract", () => {
     assert.match(PRIMITIVES, /\.quiet-trajectory__legend-row--selected/u);
   });
 
+  it("replaces the unreadable phone chart with its readable takeaway", () => {
+    assert.match(
+      CHART,
+      /This shows which subjects feel solid right now and which could use a little more practice\. It is not a grade for your child\./u,
+    );
+    assert.match(CHART, /quiet-trajectory__mobile-summary/u);
+    assert.match(
+      PRIMITIVES,
+      /\.quiet-trajectory__guide\s*\{[^}]*font: 500 0\.875rem\/1\.5/u,
+    );
+    assert.match(PRIMITIVES, /@media \(max-width: 39\.99rem\) \{[\s\S]*\.quiet-trajectory__chart \{ display: none; \}/u);
+    assert.match(PRIMITIVES, /@media \(max-width: 39\.99rem\) \{[\s\S]*\.quiet-trajectory__mobile-summary \{[\s\S]*display: block;/u);
+  });
+
   it("lets the atom carry pointer emphasis without changing keyboard behavior", () => {
     assert.match(ACTION, /onPointerEnter\?/u);
     assert.match(ACTION, /onPointerLeave\?/u);

@@ -321,7 +321,10 @@ export function TrajectoryChart({
     <div>
       <div className="quiet-trajectory__chart-frame">
         <p className="quiet-trajectory__guide">
-          A picture of what feels well supported and what is ready for practice. The middle line is an age reference, not a grade.
+          This shows which subjects feel solid right now and which could use a little more practice. It is not a grade for your child.
+        </p>
+        <p className="quiet-trajectory__mobile-summary">
+          Tap a subject below to see more detail.
         </p>
         <svg
           className="quiet-trajectory__chart"
