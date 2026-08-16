@@ -198,22 +198,6 @@ describe("UnifiedPlannerView", () => {
     assert.match(html, /Monday, August 3/);
   });
 
-  it("keeps the report handoff focused on one child and offers one next move", () => {
-    const html = renderView({
-      view: "week",
-      focusChildId: KID.id,
-      activationHandoff: true,
-    });
-
-    assert.match(html, /Ari&apos;s first week is ready|Ari&#x27;s first week is ready/u);
-    assert.match(html, /It came from the answers you shared/u);
-    assert.match(
-      html,
-      /href="\/app\?draft=first-week-adjustment&amp;child=kid-1"[^>]*>[^<]*<span>Change one thing<\/span>/u,
-    );
-    assert.match(html, /href="\/app\/planner\?view=day&amp;date=2026-08-03&amp;child=kid-1&amp;handoff=report"/u);
-  });
-
   it("shows fixed appointments and unfinished work, then collapses finished work", () => {
     const html = renderView();
     assert.match(html, /Dentist/);

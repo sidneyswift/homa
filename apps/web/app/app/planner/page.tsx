@@ -22,6 +22,7 @@ import {
   weekRangeForDate,
 } from "../../../lib/unified-planner";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
+import { FirstWeekHandoff } from "./first-week-handoff";
 import { UnifiedPlannerView } from "./unified-planner-view";
 
 /**
@@ -66,7 +67,9 @@ export default async function PlannerPage({
       : null;
   // A report can start this focused handoff, but the query cannot turn on a
   // child experience unless the child itself was authenticated above.
-  const activationHandoff = query.handoff === "report" && focusChildId !== null;
+  const handoffChild = query.handoff === "report" && focusChildId !== null
+    ? children.find((child) => child.id === focusChildId) ?? null
+    : null;
   const timeZone = effectiveTimeZone(family.time_zone);
   const now = new Date();
   const today = todayDateOnly(now, timeZone);
@@ -135,6 +138,7 @@ export default async function PlannerPage({
 
   return (
     <PageColumn>
+      {handoffChild && view === "week" ? <FirstWeekHandoff child={handoffChild} /> : null}
       <UnifiedPlannerView
         kids={children.map((child) => ({
           id: child.id,
@@ -152,7 +156,6 @@ export default async function PlannerPage({
         activeDate={activeDate}
         view={view}
         focusChildId={focusChildId}
-        activationHandoff={activationHandoff}
       />
     </PageColumn>
   );
