@@ -11,6 +11,19 @@ import { emitMapEvent } from "../../lib/map/events";
 import { createReport, getOrBuildPlan } from "../../lib/map/store";
 import { loadChecklistState } from "../../lib/onboarding/checklist-state";
 
+export function reportHandoffNote(input: {
+  mappedSubjects: number;
+  growingEdgeCount: number;
+}): string {
+  if (input.mappedSubjects === 0) {
+    return "SPEAK AFTER THIS ONE: the report is drawing on her screen and it shows no subject evidence yet. Say that plainly and warmly: her careful answers saved a starting point, but they are not enough to label a strength or next step. Offer one honest next step, either answer a few questions she does know or record a real lesson when it happens. Do not call this a full read, do not say nothing is a guess, and do not invent a concern, lesson, strength, or plan.";
+  }
+
+  return input.growingEdgeCount > 0
+    ? "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Then name ONE growingEdge above, in her own question's words, as the thing this child is working on next: that is the answer she was most afraid to give and a reveal that skips it reads as flattery. Frame it as where they are growing, never as behind. Do not list subjects, do not read numbers back, do not name more than one edge, and never tell her to check her email."
+    : "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. She answered \"not yet\" to nothing, so there is no growing edge to name and you must not invent one. Do not list subjects, do not read numbers back, and never tell her to check her email.";
+}
+
 /**
  * Score one child's answers into their progress report, and put it on
  * screen here in the conversation.
@@ -93,9 +106,11 @@ export default defineBoundedTool({
       });
     }
 
-    const strengths = report.scores.strengthOrder
-      .slice(0, 3)
-      .map((subjectId) => getMapSubject(subjectId)?.displayName ?? subjectId);
+    const strengths = report.scores.mappedCount === 0
+      ? []
+      : report.scores.strengthOrder
+        .slice(0, 3)
+        .map((subjectId) => getMapSubject(subjectId)?.displayName ?? subjectId);
 
     // Build her month here, so the planner has something on it.
     //
@@ -145,10 +160,10 @@ export default defineBoundedTool({
       // not tell her a plan is waiting.
       monthReady,
       alreadyScored: report.duplicate,
-      note:
-        state.growingEdges.length > 0
-          ? `SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. Then name ONE growingEdge above, in her own question's words, as the thing this child is working on next: that is the answer she was most afraid to give and a reveal that skips it reads as flattery. Frame it as where they are growing, never as behind. Do not list subjects, do not read numbers back, do not name more than one edge, and never tell her to check her email.`
-          : "SPEAK AFTER THIS ONE: the report is drawing on her screen and it wants your voice over it. Say one true thing about what it shows for this child, in your own words. She answered \"not yet\" to nothing, so there is no growing edge to name and you must not invent one. Do not list subjects, do not read numbers back, and never tell her to check her email.",
+      note: reportHandoffNote({
+        mappedSubjects: report.scores.mappedCount,
+        growingEdgeCount: state.growingEdges.length,
+      }),
     };
   },
 });

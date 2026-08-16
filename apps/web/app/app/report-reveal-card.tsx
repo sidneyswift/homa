@@ -86,6 +86,29 @@ export function narrativeSettled(status: string): boolean {
   return status !== "writing";
 }
 
+export function reportRevealCopy(card: Pick<ReportCardData, "childName" | "mappedSubjects" | "answered" | "skipped">): {
+  coverage: string;
+  heading: string;
+  summary: string;
+} {
+  if (card.mappedSubjects === 0) {
+    return {
+      coverage: "No subjects mapped yet",
+      heading: `${card.childName}'s starting point is saved.`,
+      summary: "These answers did not give Homa enough subject evidence to label a strength or next step yet. Add what you do know after a real lesson, and this report will grow from there.",
+    };
+  }
+
+  const skippedLine = card.skipped > 0
+    ? ` ${card.skipped} ${card.skipped === 1 ? "answer is" : "answers are"} still blank. You can fill them in any time.`
+    : "";
+  return {
+    coverage: `${card.mappedSubjects} subjects covered`,
+    heading: `${card.childName}'s progress report is ready.`,
+    summary: `Built from your ${card.answered} ${card.answered === 1 ? "answer" : "answers"}.${skippedLine}`,
+  };
+}
+
 export function ReportRevealCard({
   card,
   active,
@@ -215,10 +238,7 @@ export function ReportRevealCard({
     );
   }
 
-  const skippedLine =
-    card.skipped > 0
-      ? `${card.skipped} ${card.skipped === 1 ? "answer is" : "answers are"} still blank. You can fill them in any time.`
-      : null;
+  const copy = reportRevealCopy(card);
 
   return (
     <section
@@ -231,25 +251,20 @@ export function ReportRevealCard({
           {card.childName}
         </span>
         <p className="shrink-0 font-mono text-xs text-subtle">
-          {card.mappedSubjects} subjects covered
+          {copy.coverage}
         </p>
       </div>
       <p className="mt-3 font-display text-lg font-semibold leading-snug text-strong">
-        {narrativeReady
-          ? `${card.childName}'s progress report is ready.`
-          : `${card.childName}'s progress report is ready.`}
+        {copy.heading}
       </p>
       <p className="mt-1.5 text-sm text-muted">
-        {narrativeReady ? (
-          <>
-            Built from your {card.answered} {card.answered === 1 ? "answer" : "answers"}.
-            {skippedLine ? ` ${skippedLine}` : ""}
-          </>
-        ) : (
-          // The report page owns a deterministic template fallback. The
-          // sentence layer may improve after she opens it, never before.
-          "Built from your answers. I'm still polishing the written note, and the full report is ready now."
-        )}
+        {narrativeReady || card.mappedSubjects === 0
+          ? copy.summary
+          : (
+            // The report page owns a deterministic template fallback. The
+            // sentence layer may improve after she opens it, never before.
+            "Built from your answers. I'm still polishing the written note, and the full report is ready now."
+          )}
       </p>
       {/* "Strongest" is a comparison, so it only renders when there is
           something to compare against: with two subjects covered and
