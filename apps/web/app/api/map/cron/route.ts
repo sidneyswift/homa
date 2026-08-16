@@ -3,6 +3,10 @@ import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 import { maybeSendAdminDigest, type DigestOutcome } from "../../../../lib/admin/digest";
 import { recordCronRun } from "../../../../lib/admin/heartbeat";
 import {
+  reconcileStaleStripeSubscriptions,
+  type StripeReconciliationResult,
+} from "../../../../lib/billing/stripe-reconciliation";
+import {
   sweepThankYouCards,
   type ThankYouCardSweepResult,
 } from "../../../../lib/cards/thank-you";
@@ -92,6 +96,10 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      per draft: on 2026-07-30 one family had nine stranded drafts, and
  *      nine emails is exactly the nagging the ruling forbids. DARK
  *      unless HOMA_STRANDED_FOLLOWUP_ENABLED is exactly "true".
+ *  13. Stripe subscription reconciliation repairs a stale compatibility
+ *      mirror from provider truth. It only calls Stripe after the recorded
+ *      paid-through date is two days stale, and a failed read changes no
+ *      entitlement. Issue #274.
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -182,6 +190,13 @@ export async function GET(request: Request): Promise<Response> {
       not_due_yet: 0,
     },
     sendingEnabled: false,
+  };
+  let billingReconciliation: StripeReconciliationResult = {
+    considered: 0,
+    reconciled: 0,
+    lapsed: 0,
+    unresolved: 0,
+    failed: 0,
   };
 
   try {
@@ -289,6 +304,12 @@ export async function GET(request: Request): Promise<Response> {
         day: "2-digit",
       }).format(new Date()),
     );
+    billingReconciliation = await reconcileStaleStripeSubscriptions();
+    if (billingReconciliation.failed > 0 || billingReconciliation.unresolved > 0) {
+      throw new Error(
+        `billing reconciliation incomplete: ${billingReconciliation.failed} failed, ${billingReconciliation.unresolved} unresolved`,
+      );
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
     console.error("map/cron failed:", message);
@@ -307,6 +328,7 @@ export async function GET(request: Request): Promise<Response> {
         staleSubjectLessons,
         stuckToolCalls,
         drip,
+        billingReconciliation,
       },
       message,
     );
@@ -324,6 +346,7 @@ export async function GET(request: Request): Promise<Response> {
         staleSubjectLessons,
         stuckToolCalls,
         drip,
+        billingReconciliation,
         filings,
         filingDetails,
         stranded,
@@ -347,6 +370,7 @@ export async function GET(request: Request): Promise<Response> {
     staleSubjectLessons,
     stuckToolCalls,
     drip,
+    billingReconciliation,
   });
   return Response.json({
     ok: true,
@@ -361,6 +385,7 @@ export async function GET(request: Request): Promise<Response> {
     staleSubjectLessons,
     stuckToolCalls,
     drip,
+    billingReconciliation,
     filings,
     filingDetails,
     stranded,
