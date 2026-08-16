@@ -126,6 +126,7 @@ const SENSITIVE_WORD_SEQUENCES = [
 ];
 const REGENERABLE_DIRECTORY_NAMES = new Set([
   ".cache",
+  ".eve",
   ".expo",
   ".gradle",
   ".next",
@@ -133,6 +134,7 @@ const REGENERABLE_DIRECTORY_NAMES = new Set([
   ".output",
   ".parcel-cache",
   ".turbo",
+  ".vercel",
   ".vite",
   "build",
   "cache",
@@ -146,6 +148,7 @@ const REGENERABLE_DIRECTORY_NAMES = new Set([
   "target",
   "tmp",
 ]);
+const REGENERABLE_EXACT_PATHS = new Set(["apps/web/next-env.d.ts"]);
 const TASKLESS_APPROVER = "sidneyswift";
 const TASKLESS_REASON = "legacy-lane-predates-task-tracking";
 const CLEANUP_NEXT_STEP = "cleanup-coordinator-remove-worktree";
@@ -701,6 +704,7 @@ function hasKnownSensitiveFilename(leaf) {
 }
 
 function isSensitiveIgnoredPath(path) {
+  if (REGENERABLE_EXACT_PATHS.has(path.replaceAll("\\", "/"))) return false;
   const segments = pathSegments(path);
   const lowerSegments = segments.map((segment) => segment.toLowerCase());
   const leaf = lowerSegments.at(-1) ?? "";
@@ -710,16 +714,29 @@ function isSensitiveIgnoredPath(path) {
     return true;
   }
   if (parent === ".docker" && leaf === "config.json") return true;
-  if (isEnvironmentFileName(leaf)) return true;
+  if (isEnvironmentFileName(leaf) && !isGeneratedRuntimeModulePath(segments, leaf)) return true;
   if (hasSensitiveCredentialExtension(leaf)) return true;
   if (hasKnownSensitiveFilename(leaf)) return true;
   if (/^id_(?:dsa|ecdsa|ed25519|rsa)(?:\.pub)?$/u.test(leaf)) return true;
+  if (isGeneratedRuntimeOutputPath(segments)) return false;
   return segments.some((segment) => hasSensitiveName(normalizedNameWords(segment)));
 }
 
 function isApprovedRegenerablePath(path) {
-  const parentSegments = pathSegments(path).slice(0, -1);
+  if (REGENERABLE_EXACT_PATHS.has(path.replaceAll("\\", "/"))) return true;
+  const segments = pathSegments(path);
+  const leaf = segments.at(-1)?.toLowerCase() ?? "";
+  if (REGENERABLE_DIRECTORY_NAMES.has(leaf)) return true;
+  const parentSegments = segments.slice(0, -1);
   return parentSegments.some((segment) => REGENERABLE_DIRECTORY_NAMES.has(segment.toLowerCase()));
+}
+
+function isGeneratedRuntimeOutputPath(segments) {
+  return segments.some((segment) => [".eve", ".next", ".vercel"].includes(segment.toLowerCase()));
+}
+
+function isGeneratedRuntimeModulePath(segments, leaf) {
+  return isGeneratedRuntimeOutputPath(segments) && /\.(?:c|m)?js$/iu.test(leaf);
 }
 
 function sameFileState(left, right) {
