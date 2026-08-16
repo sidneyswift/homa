@@ -370,7 +370,7 @@ describe("retained report subject lesson actions", () => {
       new RegExp(`href="/app/planner\\?view=week&amp;child=${CHILD_ID}"`, "u"),
     );
     assert.match(html, />Open this week <span/u);
-    assert.doesNotMatch(html, /Open Maya&apos;s month/u);
+    assert.doesNotMatch(html, /Open Maya(?:&apos;|&#x27;)s month/u);
   });
 
   it("keeps the shareable month link for a report reader without Planner access", () => {
@@ -383,7 +383,7 @@ describe("retained report subject lesson actions", () => {
     });
 
     assert.match(html, /href="\/onboarding\/r\/report-token\/plan\/month"/u);
-    assert.match(html, />Open Maya&apos;s month <span/u);
+    assert.match(html, />Open Maya(?:&apos;|&#x27;)s month <span/u);
     assert.doesNotMatch(html, /\/app\/planner\?view=week/u);
   });
 });
