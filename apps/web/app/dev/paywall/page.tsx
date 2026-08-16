@@ -84,8 +84,6 @@ export default async function PaywallBenchPage({
             childId="00000000-0000-0000-0000-000000000000"
             childName="Maya"
             mappedCount={9}
-            openCount={4}
-            lockedCount={5}
             checkout={checkout}
             signinNext="/onboarding"
           />

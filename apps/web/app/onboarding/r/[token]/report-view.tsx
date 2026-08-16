@@ -710,8 +710,6 @@ export function ReportView({
             childId={report.childId}
             childName={report.childName}
             mappedCount={report.scores.mappedCount}
-            openCount={openMapped.length}
-            lockedCount={lockedScores.length}
             checkout={reportLock.checkout}
             signinNext={
               inApp ? `/app/${report.childId}/report` : `/onboarding/r/${report.token}`

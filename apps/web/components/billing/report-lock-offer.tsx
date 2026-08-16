@@ -37,16 +37,12 @@ export function ReportLockOffer({
   childId,
   childName,
   mappedCount,
-  openCount,
-  lockedCount,
   checkout,
   signinNext,
 }: {
   childId: string;
   childName: string;
   mappedCount: number;
-  openCount: number;
-  lockedCount: number;
   /** null: this viewer cannot pay here (a shared token link without
    *  the family's session); the card offers sign-in instead. */
   checkout: WallCheckout | null;
@@ -108,9 +104,11 @@ export function ReportLockOffer({
       {/* Reassure before inform: the whole report exists and is hers,
           then what the free days open, the held subjects named first. */}
       <p className="quiet-paywall__copy quiet-paywall__copy--lead">{reportLockReadyLine(childName, mappedCount)}</p>
-      <p className="quiet-paywall__copy">{reportLockHeldLine(childName, openCount, lockedCount)}</p>
-      <p className="quiet-paywall__copy">{WALL_MECHANICS_LINE}</p>
+      <p className="quiet-paywall__copy">{reportLockHeldLine(childName)}</p>
       <TierOptions door="report" checkout={checkout} onBeforeCheckout={rememberChild} />
+      {/* Keep the full renewal terms next to the consent control, where
+          they answer risk without delaying the parent's first price. */}
+      <p className="quiet-paywall__gate-charge-note">{WALL_MECHANICS_LINE}</p>
     </div>
   );
 }

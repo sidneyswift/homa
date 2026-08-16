@@ -65,7 +65,7 @@ test("regular-only offers do not promise paused Plus channels", () => {
   const callLine = doorLines.find(({ door }) => door === "call")?.line ?? "";
   const regularOfferCopy = [
     ...doorLines.filter(({ door }) => door !== "call").map(({ line }) => line),
-    wallCopy.reportLockHeldLine("Maya", 4, 5),
+    wallCopy.reportLockHeldLine("Maya"),
   ].join(" ");
 
   assert.doesNotMatch(regularOfferCopy, /\bphone\b|\bcall(?:s|ing)?\b|\btext(?:ing)?\b|\bemail(?:ing)?\b/iu);
@@ -76,10 +76,14 @@ test("regular-only offers do not promise paused Plus channels", () => {
 
 test("the report lock separates saved work from what is open", () => {
   const ready = wallCopy.reportLockReadyLine("Maya", 9);
-  const held = wallCopy.reportLockHeldLine("Maya", 4, 5);
+  const held = wallCopy.reportLockHeldLine("Maya");
 
   assert.equal(ready, "Maya's progress report is saved. It covers 9 subjects.");
-  assert.match(held, /^The four above are open in full\./u);
+  assert.equal(
+    held,
+    "Your 7 free days include the full report, weekly plans, practice pages made for Maya, teaching-hour records, and web chat.",
+  );
+  assert.doesNotMatch(held, /\babove\b|\bother\b/iu);
   assert.doesNotMatch(`${ready} ${held}`, /\bscored\b/iu);
 });
 
@@ -190,6 +194,30 @@ test("the trial gate states the card ask, the reminder day, and the way out", ()
 
 test("every card ask shares the same reminder and cancellation promise", () => {
   assert.equal(WALL_MECHANICS_LINE, TRIAL_GATE_CHARGE_NOTE);
+});
+
+test("door offers put renewal mechanics after the tier picker", () => {
+  for (const file of ["./wall-offer.tsx", "./report-lock-offer.tsx"]) {
+    const source = readFileSync(new URL(file, import.meta.url), "utf8");
+    const picker = source.indexOf("<TierOptions");
+    const mechanics = source.indexOf("{WALL_MECHANICS_LINE}");
+    assert.ok(picker >= 0, `${file} must render the tier picker`);
+    assert.ok(mechanics > picker, `${file} must keep renewal mechanics below the picker`);
+    assert.match(
+      source.slice(picker, mechanics),
+      /quiet-paywall__gate-charge-note/u,
+      `${file} must keep the terms at body weight beside consent`,
+    );
+  }
+});
+
+test("the action-door offer leads with the exact thing the parent tapped", () => {
+  const source = readFileSync(new URL("./wall-offer.tsx", import.meta.url), "utf8");
+  assert.match(
+    source,
+    /quiet-paywall__copy quiet-paywall__copy--lead[^>]*>\{wallIncludedLine/u,
+  );
+  assert.doesNotMatch(source, /\{wallReportLine\(/u);
 });
 
 test("the Day 4 promise matches the reminder the webhook actually sends", () => {
