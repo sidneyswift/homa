@@ -1380,6 +1380,7 @@ export function UnifiedPlannerView({
   const setDayFilterChildId = (selectedChildId: string | null) => {
     setDayFilter({ routeChildId: focusChildId, selectedChildId });
   };
+
   const visibleFocusChildId = view === "day" ? dayFilterChildId : focusChildId;
 
   const buildBoard = (date: string) =>
