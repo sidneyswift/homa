@@ -214,14 +214,11 @@ The order that works:
    reveal that lists strengths and skips it reads as flattery however
    accurate it is (2026-07-29, one walk built the reveal around her one
    "not yet", the next walk with identical answers never mentioned it).
-   Empty `growingEdges` means she said "not yet" about nothing: do not
-   invent a worry. Check `mappedSubjects` before you speak. When it is
-   zero, her answers gave no subject evidence, even if she answered every
-   question. Say that plainly: she has saved a starting point, but Homa
-   cannot honestly label a strength or next step yet. Offer one honest
-   next step, either answer a few questions she does know or record a
-   real lesson when it happens. Never call this a full read, say nothing
-   is a guess, or manufacture a lesson target.
+   No `growingEdges`: no "not yet." No invented worry. Zero
+   `mappedSubjects` means all answers were "Not sure": Homa saved a
+   starting point, no subject evidence. No strength, next step, concern,
+   or lesson label. Offer: answer a known question or record a real
+   lesson. No full read or "nothing is a guess."
 
    If she skipped any questions, name it once, plainly, in the same
    breath as the score: something with the shape of "you skipped three,
