@@ -5,6 +5,7 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { signedFamilyBlobReadUrl } from "../../lib/family-blob";
 import { mapDb } from "../../lib/map/db";
 
 /**
@@ -14,9 +15,9 @@ import { mapDb } from "../../lib/map/db";
  * read tool the studio would ask her to re-upload something she
  * already sent. familyId always comes from session auth, never from
  * the model; the childId filter only narrows within that family. The
- * blob URLs live under families/{familyId}/chat/, so they pass
- * isFamilyArtifactUrl and work directly as generate_image references
- * and in create_printable html.
+ * durable blob URLs live under families/{familyId}/chat/. This tool
+ * exchanges them for short-lived readable URLs before returning them
+ * as generate_image references or create_printable html sources.
  *
  * Results are metadata plus URL only. eve tool results reach the model
  * as text or json exclusively (ToolModelOutput in eve's
@@ -55,10 +56,11 @@ export interface ChatAttachmentSummary {
 
 export function toAttachmentSummary(
   row: ChatAttachmentDbRow,
+  readableUrl = row.url,
 ): ChatAttachmentSummary {
   return {
     id: row.id,
-    url: row.url,
+    url: readableUrl,
     caption: row.caption,
     kind: row.kind,
     mediaType: row.media_type,
@@ -169,11 +171,28 @@ export default defineBoundedTool({
       rows = (data ?? []) as unknown as ChatAttachmentDbRow[];
     }
 
+    const attachments = (
+      await Promise.all(
+        rows.map(async (row) => {
+          try {
+            const readableUrl = await signedFamilyBlobReadUrl(
+              row.url,
+              access.familyId,
+              "chat",
+            );
+            return toAttachmentSummary(row, readableUrl);
+          } catch {
+            return null;
+          }
+        }),
+      )
+    ).filter((row): row is ChatAttachmentSummary => row !== null);
+
     return {
-      attachments: rows.map(toAttachmentSummary),
+      attachments,
       note:
-        rows.length > 0
-          ? "Pick by caption and date. An image url here is from this family's own space: pass it to generate_image as a referenceImageUrls entry, or embed it with <img src=\"...\"> in create_printable html. Never ask the parent to re-send a file listed here."
+        attachments.length > 0
+          ? "Pick by caption and date. Each url is a short-lived link to this family's private file: pass it to generate_image as a referenceImageUrls entry, or embed it with <img src=\"...\"> in create_printable html. Never ask the parent to re-send a file listed here."
           : "No chat attachments recorded for this family (or none match these filters). It is fine to ask the parent to share the file in chat.",
     };
   },

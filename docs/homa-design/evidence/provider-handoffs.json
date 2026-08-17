@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "a6e846d10270f346b5c5b84657d961a8f0784f6db6927252043af46950f11a62"
+    "scopedInputFingerprint": "c1c1790e3bcd541b0cc8d7f87ad5c7290f156965d91ac8ec23e677daeae283d7"
   },
   "records": [
     {
@@ -181,7 +181,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "0745cb83bfb15131c1fe133ec56040fd7cc4442ca43a0ae791e89497b7e4a9c5"
+      "scopedInputFingerprint": "99612adcd4cc547ce3a611c8b06765a00059027fe1ed3396b5aa7738b2ec264f"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -280,7 +280,7 @@
         "Expired recovery tokens never create a session and return to the recovery screen.",
         "Tenant identity is derived from the authenticated Supabase session, never provider callback text."
       ],
-      "scopedInputFingerprint": "073dc0ebb380dba81e75a9ec2c15293abb5f0829d744a852ebe26f3b45d0b989"
+      "scopedInputFingerprint": "7aded5d23b39383421a68f68978a501359caf65840f22e0c484aac264b7d2274"
     },
     {
       "id": "google-identity",
@@ -595,7 +595,7 @@
         "Provider outages never become a guessed paid state and never cross family boundaries.",
         "App Store products stay unavailable until old builds cannot start a legacy-token purchase and the signed auto-renew plus immediate-deletion activation requirements are certified."
       ],
-      "scopedInputFingerprint": "97ca2d4b3a130f6fcee1ffcaed7b9540d8391de40356e8bc96297919fde9f581"
+      "scopedInputFingerprint": "8a9585cfd15178d9749cbc0ff0451da07041eb894b771fbefc2b64ec6f16d1f2"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -644,7 +644,7 @@
       },
       {
         "path": "apps/web/.env.example",
-        "sha256": "42b26b3b81fa4e552e06d17bce02d93deadd6d562e5522f468a27cde7b0b2ba3"
+        "sha256": "7472a6099efe147baf4b421cbdfb7394055b8cda02cee763030f99394c9b6a1d"
       },
       {
         "path": "apps/web/app/api/billing/apple/confirm/route.ts",
@@ -708,7 +708,7 @@
       },
       {
         "path": "apps/web/lib/account-deletion.ts",
-        "sha256": "534b157d601290fa5c4ff1c904590d0e695e3d977ac4e076ba74b349981d737d"
+        "sha256": "2d23c78bd10ec6f2a0b0e0b47cdaebf4aeb4bd0f82db23340f7a8931d86b875e"
       },
       {
         "path": "apps/web/lib/billing/apple-purchase-interlock.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "2deed5109a5edfb54d1f360144cc1b86996baa917eaa52371a532f9b77c27b20"
+    "sourceFingerprint": "ae4957323d9f36b4b2a4a34a08c98c1796601cf73b74e7c57e8d2aac3cb80f3b"
   }
 }

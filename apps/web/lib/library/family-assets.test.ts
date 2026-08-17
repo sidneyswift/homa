@@ -40,9 +40,11 @@ describe("family asset exact metadata helpers", () => {
 
   it("accepts only this family's exact Library Blob prefix", () => {
     const valid = `https://assets.public.blob.vercel-storage.com/families/${FAMILY_ID}/library/math.pdf`;
+    const privateValid = `https://assets.private.blob.vercel-storage.com/families/${FAMILY_ID}/library/math.pdf`;
     const chat = `https://assets.public.blob.vercel-storage.com/families/${FAMILY_ID}/chat/math.pdf`;
     const foreign = "https://assets.public.blob.vercel-storage.com/families/22222222-2222-4222-8222-222222222222/library/math.pdf";
     assert.equal(isFamilyLibraryUrl(valid, FAMILY_ID), true);
+    assert.equal(isFamilyLibraryUrl(privateValid, FAMILY_ID), true);
     assert.equal(isFamilyLibraryUrl(chat, FAMILY_ID), false);
     assert.equal(isFamilyLibraryUrl(foreign, FAMILY_ID), false);
     assert.equal(isFamilyLibraryUrl("https://example.com/math.pdf", FAMILY_ID), false);

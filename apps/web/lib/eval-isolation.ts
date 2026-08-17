@@ -62,6 +62,9 @@ export const DURABLE_WRITE_ENV_VARS = [
   "SUPABASE_SECRET_KEY",
   // Vercel Blob: PDFs, page previews, generated images.
   "BLOB_READ_WRITE_TOKEN",
+  // Private family originals and lesson recordings.
+  "HOMA_FAMILY_READ_WRITE_TOKEN",
+  "HOMA_LESSON_READ_WRITE_TOKEN",
   // Outbound email.
   "RESEND_API_KEY",
   // SMS and voice.

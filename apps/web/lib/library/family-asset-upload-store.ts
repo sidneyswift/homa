@@ -1,5 +1,6 @@
-import { del, head, type HeadBlobResult } from "@vercel/blob";
+import type { HeadBlobResult } from "@vercel/blob";
 
+import { deleteFamilyBlob, headFamilyBlob } from "../family-blob";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import {
@@ -77,14 +78,16 @@ export type FinalizeFamilyAssetUploadResult =
     };
 
 export interface FamilyAssetBlobDependencies {
-  head(url: string): Promise<HeadBlobResult>;
-  delete(url: string): Promise<void>;
+  head(url: string, familyId: string): Promise<HeadBlobResult>;
+  delete(url: string, familyId: string): Promise<void>;
 }
 
 const DEFAULT_BLOB_DEPENDENCIES: FamilyAssetBlobDependencies = {
-  head,
-  async delete(url) {
-    await del(url);
+  async head(url, familyId) {
+    return await headFamilyBlob(url, familyId, "library");
+  },
+  async delete(url, familyId) {
+    await deleteFamilyBlob(url, familyId, "library");
   },
 };
 
@@ -264,7 +267,7 @@ export async function finalizeFamilyAssetUpload(
 
   if (upload.status === "abandoned" || upload.error_code === "blob_delete_failed") {
     try {
-      await dependencies.delete(input.blobUrl);
+      await dependencies.delete(input.blobUrl, upload.family_id);
     } catch {
       console.error("abandoned family Library blob cleanup failed");
     }
@@ -273,7 +276,7 @@ export async function finalizeFamilyAssetUpload(
 
   let blob: HeadBlobResult;
   try {
-    blob = await dependencies.head(input.blobUrl);
+    blob = await dependencies.head(input.blobUrl, upload.family_id);
   } catch {
     await markUploadNeedsAttention(
       upload,
@@ -371,7 +374,7 @@ export async function finalizeFamilyAssetUpload(
     };
   }
   try {
-    await dependencies.delete(blob.url);
+    await dependencies.delete(blob.url, upload.family_id);
   } catch {
     console.error("abandoned family Library blob cleanup failed after finalization race");
   }
