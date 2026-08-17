@@ -231,6 +231,14 @@ export function MaterialDetailOverlay({
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="print" size={20} /></span>
         </a>
 
+        <a
+          href={`/app?draft=revise-material&material=${encodeURIComponent(material.id)}`}
+          className="quiet-action quiet-action--secondary mt-2"
+        >
+          <span>Change this with Homa</span>
+          <span className="quiet-action__icon" aria-hidden="true"><Icon name="chat" size={20} /></span>
+        </a>
+
         <VersionRail materialId={material.id} />
       </QuietFrame>
     </div>
