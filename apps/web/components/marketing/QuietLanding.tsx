@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { QuietAction } from "../design/QuietAction";
 import { QuietFrame } from "../design/QuietFrame";
-import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { Logo } from "../brand/Logo";
@@ -40,8 +39,8 @@ const QUIET_LANDING_CSS = `
 .qa-opening { padding: clamp(18px, 3vw, 34px) clamp(16px, 4vw, 48px) clamp(46px, 7vw, 88px); }
 .qa-opening__shell { max-width: 1240px; margin: 0 auto; overflow: hidden; border: 1px solid color-mix(in srgb, var(--homa-ink) 14%, transparent); border-radius: clamp(18px, 2.5vw, 30px); box-shadow: 0 30px 80px color-mix(in srgb, var(--homa-ink) 12%, transparent); }
 .qa-opening__world { position: relative; min-height: clamp(520px, 59vw, 720px); overflow: hidden; isolation: isolate; }
-.qa-opening__world::after { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--homa-midnight-action) 96%, transparent) 0%, color-mix(in srgb, var(--homa-midnight-action) 86%, transparent) 34%, color-mix(in srgb, var(--homa-midnight-action) 42%, transparent) 70%, color-mix(in srgb, var(--homa-midnight-action) 8%, transparent) 100%), linear-gradient(0deg, color-mix(in srgb, var(--homa-midnight-action) 32%, transparent), transparent 58%); }
-.qa-opening__photo { position: absolute !important; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 64% 56%; filter: saturate(.78) contrast(.96); }
+.qa-opening__world::after { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--homa-midnight-action) 96%, transparent) 0%, color-mix(in srgb, var(--homa-midnight-action) 92%, transparent) 42%, color-mix(in srgb, var(--homa-midnight-action) 56%, transparent) 72%, color-mix(in srgb, var(--homa-midnight-action) 10%, transparent) 100%), linear-gradient(0deg, color-mix(in srgb, var(--homa-midnight-action) 32%, transparent), transparent 58%); }
+.qa-opening__photo { position: absolute !important; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 42% 56%; filter: saturate(.78) contrast(.96); }
 .qa-opening__copy { position: absolute; z-index: 2; left: clamp(24px, 6vw, 82px); top: 50%; width: min(650px, calc(100% - 48px)); transform: translateY(-50%); animation: qa-opening-enter 480ms var(--homa-motion-ease-out) both; }
 .qa-opening__kicker { color: color-mix(in srgb, var(--homa-paper) 82%, var(--homa-visual-coral)); font: 800 .72rem/1.2 var(--font-sans); letter-spacing: .1em; text-transform: uppercase; }
 .qa-opening__copy h1 { max-width: 660px; margin: 15px 0 0; color: var(--homa-paper); font: 400 clamp(3.6rem, 7.7vw, 6.8rem)/.88 var(--font-display); letter-spacing: -.045em; text-wrap: balance; }
@@ -49,15 +48,6 @@ const QUIET_LANDING_CSS = `
 .qa-opening__copy p { max-width: 540px; margin: 20px 0 0; color: color-mix(in srgb, var(--homa-paper) 88%, transparent); font-size: clamp(1.02rem, 1.4vw, 1.24rem); line-height: 1.55; }
 .qa-opening__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
 .qa-opening__actions .quiet-action--primary { background: var(--homa-paper); color: var(--homa-midnight-action); }
-.qa-opening__copy > .qa-opening__note { max-width: 560px; margin-top: 10px; color: color-mix(in srgb, var(--homa-paper) 84%, transparent); font-size: .82rem; line-height: 1.48; }
-.qa-opening__next { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 11px; align-items: center; width: fit-content; max-width: 100%; margin-top: 25px; border: 1px solid color-mix(in srgb, var(--homa-paper) 35%, transparent); border-radius: 18px; background: color-mix(in srgb, var(--homa-midnight-action) 72%, transparent); box-shadow: 0 16px 34px color-mix(in srgb, var(--homa-ink) 26%, transparent); padding: 10px 14px 10px 10px; backdrop-filter: blur(12px); }
-.qa-opening__next-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--homa-visual-coral); color: var(--homa-ink); font: 800 18px/1 var(--font-sans); }
-.qa-opening__next small { display: block; color: color-mix(in srgb, var(--homa-visual-coral) 66%, var(--homa-paper)); font: 800 .68rem/1.2 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; }
-.qa-opening__next strong { display: block; margin-top: 3px; color: var(--homa-paper); font: 700 .92rem/1.3 var(--font-sans); }
-.qa-opening__thread { position: absolute; z-index: 1; left: clamp(22px, 5.7vw, 78px); bottom: clamp(24px, 6vw, 72px); width: min(520px, 60vw); height: auto; opacity: .92; }
-.qa-opening__thread path { stroke: var(--homa-visual-coral); stroke-dasharray: 760; stroke-dashoffset: 760; animation: qa-thread-draw 760ms 180ms var(--homa-motion-ease-out) forwards; }
-.qa-opening__character { position: absolute; z-index: 3; right: clamp(18px, 4vw, 58px); bottom: clamp(16px, 3vw, 38px); padding: 12px; border-radius: 22px; background: color-mix(in srgb, var(--homa-visual-coral) 92%, transparent); box-shadow: 0 14px 24px color-mix(in srgb, var(--homa-ink) 28%, transparent); animation: qa-character-peek 520ms 260ms var(--homa-motion-ease-out) both; }
-.qa-opening__character svg { display: block; width: clamp(48px, 6vw, 74px); height: auto; }
 .qa-authority { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr); gap: clamp(28px, 5vw, 78px); align-items: center; min-height: 580px; overflow: hidden; background: var(--homa-contained-band); padding: clamp(42px, 6vw, 84px); isolation: isolate; }
 .qa-authority::before { content: ""; position: absolute; z-index: -1; width: min(55vw, 700px); aspect-ratio: 1; right: -17%; top: -36%; border-radius: 42% 58% 47% 53% / 56% 41% 59% 44%; background: color-mix(in srgb, var(--homa-info-ink) 16%, transparent); transform: rotate(-9deg); }
 .qa-authority__copy { position: relative; z-index: 2; }
@@ -66,7 +56,6 @@ const QUIET_LANDING_CSS = `
 .qa-authority h2 { max-width: 720px; margin: 18px 0 0; color: var(--homa-paper); font: 400 clamp(3.1rem, 6.4vw, 5.6rem)/.93 var(--font-display); letter-spacing: -.04em; }
 .qa-authority h2 span { color: var(--homa-visual-coral); }
 .qa-authority__copy > p { max-width: 640px; margin: 22px 0 0; color: color-mix(in srgb, var(--homa-paper) 86%, transparent); font-size: clamp(1.02rem, 1.4vw, 1.24rem); line-height: 1.6; }
-.qa-authority__copy > .qa-opening__note { margin-top: 12px; color: color-mix(in srgb, var(--homa-paper) 68%, transparent); font-size: .78rem; line-height: 1.45; }
 .qa-authority__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 .qa-authority > .qa-authority__copy .qa-authority__actions .quiet-action--secondary { border-color: color-mix(in srgb, var(--homa-paper) 42%, transparent); color: var(--homa-paper); }
 .qa-product { position: relative; z-index: 2; border: 1px solid color-mix(in srgb, var(--homa-paper) 42%, transparent); border-radius: 28px; background: var(--homa-paper); box-shadow: 0 30px 70px color-mix(in srgb, var(--homa-ink) 32%, transparent); color: var(--homa-ink); padding: 18px; transform: rotate(1deg); animation: qa-product-enter 480ms var(--homa-motion-ease-out) both; }
@@ -98,8 +87,6 @@ const QUIET_LANDING_CSS = `
 .qa-product__artifact p { margin: 4px 0 0; color: var(--homa-muted-ink); font-size: .66rem; line-height: 1.35; }
 @keyframes qa-opening-enter { from { opacity: 0; transform: translateY(calc(-50% + 12px)); } to { opacity: 1; transform: translateY(-50%); } }
 @keyframes qa-product-enter { from { opacity: 0; transform: translateY(18px) rotate(1deg); } to { opacity: 1; transform: translateY(0) rotate(1deg); } }
-@keyframes qa-thread-draw { to { stroke-dashoffset: 0; } }
-@keyframes qa-character-peek { from { opacity: 0; transform: translateY(12px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
 .qa-band { border-top: 1px solid var(--homa-soft-boundary); }
 .qa-section { max-width: 1180px; margin: 0 auto; padding: clamp(58px, 8vw, 100px) 20px; }
@@ -172,7 +159,6 @@ const QUIET_LANDING_CSS = `
   .qa-opening__shell { border-right: 0; border-left: 0; border-radius: 0; }
   .qa-opening__world { min-height: 650px; }
   .qa-opening__copy h1 { font-size: clamp(3.4rem, 15vw, 5.5rem); }
-  .qa-opening__thread { width: min(520px, 82vw); }
   .qa-authority { padding: 42px 24px 48px; }
   .qa-capability-grid, .qa-membership-grid, .qa-story, .qa-faq { grid-template-columns: 1fr; }
   .qa-memberships__footer { align-items: flex-start; flex-direction: column; }
@@ -186,9 +172,6 @@ const QUIET_LANDING_CSS = `
   .qa-opening__copy { left: 20px; width: calc(100% - 40px); }
   .qa-opening__copy h1 { font-size: clamp(3.2rem, 15vw, 4.7rem); }
   .qa-opening__copy p { font-size: 1rem; }
-  .qa-opening__next { width: 100%; }
-  .qa-opening__thread { bottom: 38px; left: 20px; width: 88vw; }
-  .qa-opening__character { display: none; }
   .qa-authority h2 { font-size: clamp(2.9rem, 14vw, 4.2rem); }
   .qa-product { padding: 14px; }
   .qa-product__controls { grid-template-columns: 1fr; }
@@ -196,8 +179,7 @@ const QUIET_LANDING_CSS = `
 @media (prefers-reduced-motion: reduce) {
   .qa-faq__question svg { transition: none; }
   .qa-story__photo { transform: none; }
-  .qa-opening__copy, .qa-product, .qa-opening__character { animation: none; }
-  .qa-opening__thread path { animation: none; stroke-dashoffset: 0; }
+  .qa-opening__copy, .qa-product { animation: none; }
 }
 `;
 
@@ -301,11 +283,7 @@ export function QuietLanding() {
                   <h1 id="quiet-hero-title">{HERO_COPY.headline.slice(0, -1)}<span>{HERO_COPY.headline.slice(-1)}</span></h1>
                   <p>{HERO_COPY.body}</p>
                   <div className="qa-opening__actions"><TrialAction /></div>
-                  <p className="qa-opening__note">{HERO_COPY.primaryActionNote}</p>
-                  <div className="qa-opening__next"><span className="qa-opening__next-mark" aria-hidden="true">→</span><div><small>{HERO_COPY.proofLabel}</small><strong>{HERO_COPY.proof}</strong></div></div>
                 </div>
-                <QuietThread className="qa-opening__thread" label="A coral line connecting today's work to what comes next" />
-                <div className="qa-opening__character" aria-hidden="true"><Logo size={74} variant="mark" tone="dark" /></div>
               </div>
               <div id="how" className="qa-authority">
                 <div className="qa-authority__copy">
