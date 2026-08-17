@@ -5,6 +5,7 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { signedFamilyBlobReadUrl } from "../../lib/family-blob";
 import { emitFamilyAssetUsed } from "../../lib/library/family-asset-events";
 import { getFamilyAssetSource } from "../../lib/library/family-asset-retrieval";
 
@@ -36,6 +37,19 @@ export default defineBoundedTool({
         note: "No active Family Library resource with that id belongs to this family.",
       };
     }
+    let readableOriginalUrl: string;
+    try {
+      readableOriginalUrl = await signedFamilyBlobReadUrl(
+        asset.originalUrl,
+        access.familyId,
+        "library",
+      );
+    } catch {
+      return {
+        found: false,
+        note: "This family resource is saved, but its private original could not be opened right now.",
+      };
+    }
     let useRecorded = false;
     try {
       useRecorded = await emitFamilyAssetUsed({
@@ -51,10 +65,10 @@ export default defineBoundedTool({
     }
     return {
       found: true,
-      asset,
+      asset: { ...asset, originalUrl: readableOriginalUrl },
       useRecorded,
       note:
-        "Use only what this record and its quoted evidence support. Cite the title with citationUrl and include a source locator when one is present. The original URL is usable as a family reference, but it is public to anyone who has that hard-to-guess URL until private storage ships.",
+        "Use only what this record and its quoted evidence support. Cite the title with citationUrl and include a source locator when one is present. The originalUrl is a short-lived link to this family's private file.",
     };
   },
 });

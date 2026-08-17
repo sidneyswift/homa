@@ -2,6 +2,7 @@ import type { FilePart } from "ai";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
+import { signedFamilyBlobReadUrl } from "../family-blob";
 import { composeFileMarker, composePhotoMarker } from "./markers";
 import { describeVideoAtUrl, twelveLabsConfigured } from "../video/twelvelabs";
 import { captionSmsImage } from "../voice/caption-image";
@@ -12,10 +13,10 @@ import { transcribeAudio } from "../voice/transcribe";
  * lib/voice/sms-attachments.ts; founder ruling 2026-07-10 carried over:
  * never deny input). Files arrive ALREADY uploaded to the family's own
  * chat blob space (/api/chat/upload), so unlike SMS there is no
- * carrier download step and URLs never expire: images and PDFs ride to
- * the model BY URL (plain https strings, which survive the JSON trip
- * through eve's session storage), while speech, video, and office
- * formats convert to text blocks through the exact lanes SMS uses
+ * carrier download step. The durable private URL stays in the marker,
+ * while images and PDFs ride to the model on short-lived signed URLs.
+ * Speech, video, and office formats convert to text blocks through the
+ * exact lanes SMS uses
  * (Telnyx STT, Twelve Labs, mammoth, SheetJS).
  *
  * Every attachment also gets a MARKER line (markers.ts) carrying its
@@ -169,10 +170,11 @@ async function processImage(
   input: ChatAttachmentInput,
   mediaType: string,
   familyId: string,
+  readableUrl: string,
 ): Promise<NormalizedChatAttachment> {
   if (!MODEL_IMAGE_TYPES.has(mediaType)) return failed(input, "image");
   const caption = await captionSmsImage({
-    image: new URL(input.url),
+    image: new URL(readableUrl),
     mediaType,
     familyId,
   });
@@ -189,7 +191,7 @@ async function processImage(
     // lane above.
     part: {
       type: "file",
-      data: input.url,
+      data: readableUrl,
       mediaType,
       ...(input.name ? { filename: input.name } : {}),
     },
@@ -199,6 +201,7 @@ async function processImage(
 function processPdf(
   input: ChatAttachmentInput,
   mediaType: string,
+  readableUrl: string,
 ): NormalizedChatAttachment {
   return {
     input,
@@ -209,7 +212,7 @@ function processPdf(
     marker: composeFileMarker({ name: input.name, url: input.url }),
     part: {
       type: "file",
-      data: input.url,
+      data: readableUrl,
       mediaType,
       ...(input.name ? { filename: input.name } : {}),
     },
@@ -219,8 +222,9 @@ function processPdf(
 async function processAudio(
   input: ChatAttachmentInput,
   mediaType: string,
+  readableUrl: string,
 ): Promise<NormalizedChatAttachment> {
-  const bytes = await fetchBlobBytes(input.url, AUDIO_MAX_BYTES);
+  const bytes = await fetchBlobBytes(readableUrl, AUDIO_MAX_BYTES);
   const transcript = bytes ? await transcribeAudio(bytes, mediaType) : null;
   if (!transcript) return failed(input, "audio");
   return {
@@ -237,10 +241,11 @@ async function processAudio(
 async function processVideo(
   input: ChatAttachmentInput,
   mediaType: string,
+  readableUrl: string,
 ): Promise<NormalizedChatAttachment> {
   const marker = composeFileMarker({ name: input.name, url: input.url });
   if (twelveLabsConfigured()) {
-    const description = await describeVideoAtUrl(input.url, {
+    const description = await describeVideoAtUrl(readableUrl, {
       timeoutMs: VIDEO_DESCRIBE_TIMEOUT_MS,
     });
     if (description) {
@@ -257,7 +262,7 @@ async function processVideo(
   }
   // The audio-track fallback, so a clip never gets LESS understanding
   // than a voice note would.
-  const bytes = await fetchBlobBytes(input.url, AUDIO_MAX_BYTES);
+  const bytes = await fetchBlobBytes(readableUrl, AUDIO_MAX_BYTES);
   const transcript = bytes ? await transcribeAudio(bytes, mediaType) : null;
   if (!transcript) return failed(input, "video");
   return {
@@ -273,8 +278,9 @@ async function processVideo(
 
 async function processWordDocument(
   input: ChatAttachmentInput,
+  readableUrl: string,
 ): Promise<NormalizedChatAttachment> {
-  const bytes = await fetchBlobBytes(input.url, EXTRACT_MAX_BYTES);
+  const bytes = await fetchBlobBytes(readableUrl, EXTRACT_MAX_BYTES);
   if (!bytes) return failed(input, "document");
   try {
     const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
@@ -296,8 +302,9 @@ async function processWordDocument(
 
 async function processSpreadsheet(
   input: ChatAttachmentInput,
+  readableUrl: string,
 ): Promise<NormalizedChatAttachment> {
-  const bytes = await fetchBlobBytes(input.url, EXTRACT_MAX_BYTES);
+  const bytes = await fetchBlobBytes(readableUrl, EXTRACT_MAX_BYTES);
   if (!bytes) return failed(input, "document");
   try {
     const workbook = XLSX.read(Buffer.from(bytes), { type: "buffer" });
@@ -323,8 +330,9 @@ async function processSpreadsheet(
 
 async function processTextFile(
   input: ChatAttachmentInput,
+  readableUrl: string,
 ): Promise<NormalizedChatAttachment> {
-  const bytes = await fetchBlobBytes(input.url, EXTRACT_MAX_BYTES);
+  const bytes = await fetchBlobBytes(readableUrl, EXTRACT_MAX_BYTES);
   if (!bytes) return failed(input, "text");
   const raw = new TextDecoder("utf-8", { fatal: false }).decode(bytes).trim();
   if (raw.length === 0) return failed(input, "text");
@@ -345,19 +353,29 @@ export async function normalizeOneChatAttachment(
 ): Promise<NormalizedChatAttachment> {
   const mediaType = bareMediaType(input.mediaType);
   const kind = chatAttachmentKind(mediaType);
+  let readableUrl: string;
+  try {
+    readableUrl = await signedFamilyBlobReadUrl(input.url, familyId, "chat");
+  } catch {
+    return failed(input, kind);
+  }
   switch (kind) {
     case "image":
-      return await processImage(input, mediaType, familyId);
+      return await processImage(input, mediaType, familyId, readableUrl);
     case "audio":
-      return await processAudio(input, mediaType);
+      return await processAudio(input, mediaType, readableUrl);
     case "video":
-      return await processVideo(input, mediaType);
+      return await processVideo(input, mediaType, readableUrl);
     case "document":
-      if (mediaType === "application/pdf") return processPdf(input, mediaType);
-      if (mediaType === WORD_DOCUMENT_TYPE) return await processWordDocument(input);
-      return await processSpreadsheet(input);
+      if (mediaType === "application/pdf") {
+        return processPdf(input, mediaType, readableUrl);
+      }
+      if (mediaType === WORD_DOCUMENT_TYPE) {
+        return await processWordDocument(input, readableUrl);
+      }
+      return await processSpreadsheet(input, readableUrl);
     case "text":
-      return await processTextFile(input);
+      return await processTextFile(input, readableUrl);
     case "other":
       return failed(input, "other");
     default: {

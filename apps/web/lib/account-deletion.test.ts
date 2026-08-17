@@ -112,6 +112,10 @@ test("atomically erases family access before artifact cleanup", async () => {
   assert.match(source, /acknowledgment\.source = 'email_send'/u);
   assert.match(source, /from public\.family_phones phone[\s\S]*phone\.phone_e164 = lead\.phone_e164/u);
   assert.match(source, /final_cleanup_after = now\(\) \+ interval '6 hours 30 minutes'/u);
+  assert.match(
+    source,
+    /HOMA_LESSON_READ_WRITE_TOKEN[\s\S]*familyBlobToken\(\)[\s\S]*for \(const token of tokens\)/u,
+  );
 });
 
 test("commits the recovery fence before invoking the provider worker", async () => {

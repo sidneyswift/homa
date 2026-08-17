@@ -130,6 +130,7 @@ export const validatedWebRouteHandlerBoundaries = {
   "apps/web/app/api/dev/test-session/route.ts": "developer",
   "apps/web/app/api/email/unsubscribe/route.ts": "public",
   "apps/web/app/api/email/webhook/route.ts": "provider",
+  "apps/web/app/api/family-files/route.ts": "family",
   "apps/web/app/api/hours/export/route.ts": "family",
   "apps/web/app/api/learning/review/route.ts": "family",
   "apps/web/app/api/lessons/[lessonId]/audio/route.ts": "family",

@@ -12,6 +12,7 @@ import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
 import { QuietStatus } from "../../../components/design/QuietStatus";
 import { ShelfCover } from "../../../components/library/shelf-cover";
+import { familyBlobBrowserUrl } from "../../../lib/family-blob-url";
 import {
   familyAssetUploadFingerprint,
   familyAssetUploadPartByteSize,
@@ -424,7 +425,7 @@ export function LibraryView({
       const token = await clientUploadToken(reservation);
       if (!active.blobUploadId || !active.blobKey) {
         const multipart = await createMultipartUpload(active.pathname, {
-          access: "public",
+          access: "private",
           contentType: active.mediaType,
           token,
         });
@@ -495,7 +496,7 @@ export function LibraryView({
             pathname,
             chunk,
             {
-              access: "public",
+              access: "private",
               contentType: mediaType,
               token,
               uploadId: blobUploadId,
@@ -548,7 +549,7 @@ export function LibraryView({
           (first, second) => first.partNumber - second.partNumber,
         ),
         {
-          access: "public",
+          access: "private",
           contentType: active.mediaType,
           token,
           uploadId: active.blobUploadId,
@@ -1113,7 +1114,11 @@ export function LibraryView({
                               ? FAMILY_ASSET_RESOURCE_KIND_LABELS[asset.resourceKind]
                               : FILE_KIND_COVER_LABELS[asset.fileKind]
                           }
-                          imageUrl={asset.fileKind === "image" ? asset.url : null}
+                          imageUrl={
+                            asset.fileKind === "image"
+                              ? familyBlobBrowserUrl(asset.url)
+                              : null
+                          }
                           imageAlt={asset.title}
                         />
                       </div>

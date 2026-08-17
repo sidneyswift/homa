@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { resolveApiFamily } from "../../../../../../lib/api-auth";
+import { getFamilyBlobResponse } from "../../../../../../lib/family-blob";
 import { isFamilyLibraryUrl } from "../../../../../../lib/library/family-assets";
 import { mapDb } from "../../../../../../lib/map/db";
 import { emitMapEvent } from "../../../../../../lib/map/events";
@@ -21,8 +22,8 @@ export async function GET(
   }
 
   const sql = mapDb();
-  const rows = await sql<{ download_url: string }[]>`
-    select download_url
+  const rows = await sql<{ download_url: string; original_name: string }[]>`
+    select download_url, original_name
     from public.family_assets
     where id = ${id}
       and family_id = ${auth.familyId}
@@ -45,5 +46,19 @@ export async function GET(
     asset_id: id,
     surface,
   });
-  return Response.redirect(row.download_url, 302);
+  const blob = await getFamilyBlobResponse(
+    row.download_url,
+    auth.familyId,
+    "library",
+  );
+  if (!blob?.body) {
+    return Response.json({ ok: false, reason: "not-found" }, { status: 404 });
+  }
+  const headers = new Headers(blob.headers);
+  headers.set(
+    "Content-Disposition",
+    `attachment; filename*=UTF-8''${encodeURIComponent(row.original_name)}`,
+  );
+  headers.set("Cache-Control", "private, no-cache");
+  return new Response(blob.body, { status: blob.status, headers });
 }

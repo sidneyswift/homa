@@ -1,7 +1,10 @@
-import { copy, del, head } from "@vercel/blob";
-
 import { withFamilyArtifactWriteFence } from "../account-deletion-artifact-fence";
 import { isFamilyChatAttachmentUrl } from "../attachments/markers";
+import {
+  copyFamilyBlobToPrivate,
+  deleteFamilyBlob,
+  headFamilyBlob,
+} from "../family-blob";
 import { mapDb } from "../map/db";
 import { getFamilyAsset } from "./family-asset-store";
 import { processQueuedFamilyAsset } from "./family-asset-processing";
@@ -109,7 +112,7 @@ export async function promoteFamilyAttachment(input: {
 
   let sourceBlob;
   try {
-    sourceBlob = await head(attachment.url);
+    sourceBlob = await headFamilyBlob(attachment.url, input.familyId, "chat");
   } catch {
     return { ok: false, reason: "blob-not-found" };
   }
@@ -127,13 +130,17 @@ export async function promoteFamilyAttachment(input: {
   try {
     copied = await withFamilyArtifactWriteFence({
       familyId: input.familyId,
-      write: async () => await copy(attachment.url, pathname, {
-        access: "public",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        contentType: sourceBlob.contentType,
-      }),
-      cleanup: async (writtenBlob) => await del(writtenBlob.url),
+      write: async () =>
+        await copyFamilyBlobToPrivate({
+          sourceUrl: attachment.url,
+          familyId: input.familyId,
+          sourceSpace: "chat",
+          destinationPathname: pathname,
+          destinationSpace: "library",
+          contentType: sourceBlob.contentType,
+        }),
+      cleanup: async (writtenBlob) =>
+        await deleteFamilyBlob(writtenBlob.url, input.familyId, "library"),
     });
   } catch {
     return { ok: false, reason: "copy-failed" };

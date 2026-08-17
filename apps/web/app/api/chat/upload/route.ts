@@ -2,20 +2,22 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { assertFamilyArtifactAccess } from "../../../../lib/account-deletion-artifact-fence";
-import { blobConfigured } from "../../../../lib/materials/artifact-store";
+import {
+  familyBlobConfigured,
+  familyBlobToken,
+} from "../../../../lib/family-blob";
 
 /**
  * POST /api/chat/upload: the chat attach flow's front door (step 1 of 2,
  * the /api/video/upload pattern). The composer asks here for a scoped
  * Blob client-upload token, uploads the file straight to the
- * homa-artifacts store, then trades the blob URLs for model parts and
+ * private family store, then trades the blob URLs for model parts and
  * binder records at /api/chat/attachments (step 2).
  *
  * Tenancy: the session (cookie or bearer) resolves the family, and the
  * token is only granted for that family's own chat/ prefix, so no
- * client can mint a token into another family's space. Uploads keep the
- * house blob posture: public store, random-suffix URLs, nobody can
- * enumerate.
+ * client can mint a token into another family's space. The private store
+ * rejects unsigned reads even when somebody learns an object URL.
  *
  * Types mirror what the SMS lanes already digest (approved chat
  * redesign: "everything SMS takes"): photos, PDFs, voice notes, video
@@ -39,7 +41,7 @@ const CHAT_UPLOAD_CONTENT_TYPES = [
 ];
 
 export async function POST(request: Request): Promise<Response> {
-  if (!blobConfigured()) {
+  if (!familyBlobConfigured()) {
     return Response.json({ ok: false, reason: "not-configured" }, { status: 503 });
   }
 
@@ -58,6 +60,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const result = await handleUpload({
+      token: familyBlobToken() ?? undefined,
       request,
       body,
       onBeforeGenerateToken: async (pathname, clientPayload) => {

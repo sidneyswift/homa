@@ -1,6 +1,6 @@
-import { del } from "@vercel/blob";
 import { MAP_SUBJECTS } from "@homa/core";
 
+import { deleteFamilyBlob } from "../family-blob";
 import {
   FAMILY_ASSET_ROW_SELECT,
   type FamilyAssetRow,
@@ -280,7 +280,7 @@ export async function deleteFamilyAsset(input: {
   }
 
   try {
-    await del(row.url);
+    await deleteFamilyBlob(row.url, input.familyId, "library");
   } catch (error) {
     await sql`
       update public.family_assets

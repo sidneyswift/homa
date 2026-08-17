@@ -84,6 +84,13 @@ test("non-https marker urls do not parse", () => {
 
 test("the render wall only accepts this family's own chat space", () => {
   assert.equal(isFamilyChatAttachmentUrl(BLOB_URL, "fam-1"), true);
+  assert.equal(
+    isFamilyChatAttachmentUrl(
+      "https://x1y2.private.blob.vercel-storage.com/families/fam-1/chat/a.jpg",
+      "fam-1",
+    ),
+    true,
+  );
   assert.equal(isFamilyChatAttachmentUrl(BLOB_URL, "fam-2"), false);
   assert.equal(isFamilyChatAttachmentUrl(BLOB_URL, null), false);
   assert.equal(

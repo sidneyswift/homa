@@ -5,7 +5,7 @@
  * an attachment's durable trace is a bracketed line in the message
  * content, the SMS convention, EXTENDED with the blob URL so web
  * scrollback can re-render the photo itself (SMS markers stay URL-less;
- * Telnyx URLs expire, blob URLs do not).
+ * Telnyx URLs expire, while Homa can reopen its own private blob URLs).
  *
  *   [Photo attached · <caption> · <url>]
  *   [File attached · <name> · <url>]
@@ -20,6 +20,7 @@
  * Pure parser, unit-tested without a browser.
  */
 
+import { isFamilyBlobUrl } from "../family-blob-url";
 import { stripVoiceTranscriptionMarker } from "../voice/transcription-marker";
 
 export interface PhotoMarker {
@@ -120,14 +121,5 @@ export function isFamilyChatAttachmentUrl(
   familyId: string | null,
 ): boolean {
   if (!familyId) return false;
-  try {
-    const parsed = new URL(url);
-    return (
-      parsed.protocol === "https:" &&
-      parsed.hostname.endsWith(".public.blob.vercel-storage.com") &&
-      parsed.pathname.startsWith(`/families/${familyId}/chat/`)
-    );
-  } catch {
-    return false;
-  }
+  return isFamilyBlobUrl(url, familyId, "chat");
 }

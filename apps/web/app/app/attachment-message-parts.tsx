@@ -9,6 +9,7 @@ import type {
   PhotoMarker,
 } from "../../lib/attachments/markers";
 import { isFamilyChatAttachmentUrl } from "../../lib/attachments/markers";
+import { familyBlobBrowserUrl } from "../../lib/family-blob-url";
 import {
   undoChatAttachment,
   type ChatAttachmentReceipt,
@@ -45,7 +46,7 @@ export function UserAttachmentDisplay({
       {photos.map((photo) => (
         <a
           key={photo.url}
-          href={photo.url}
+          href={familyBlobBrowserUrl(photo.url)}
           target="_blank"
           rel="noopener noreferrer"
           className="block w-[82%] max-w-sm -rotate-1 rounded-md bg-white p-2.5 pb-2 shadow-md transition-transform hover:rotate-0"
@@ -54,7 +55,7 @@ export function UserAttachmentDisplay({
               (remote bytes, sized by their own aspect). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={photo.url}
+            src={familyBlobBrowserUrl(photo.url)}
             alt={photo.caption}
             className="block w-full rounded-sm"
             loading="lazy"
@@ -69,7 +70,7 @@ export function UserAttachmentDisplay({
       {files.map((file) => (
         <a
           key={file.url}
-          href={file.url}
+          href={familyBlobBrowserUrl(file.url)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex max-w-[76%] items-center gap-2.5 rounded-md border border-border-subtle bg-card px-3 py-2.5 transition-colors hover:border-brand"
