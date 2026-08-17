@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "10e7db73299d5e265f7705a5816b2024281ce3a160417e369a44743d20688b40",
+  "ownedInputFingerprint": "2150f43efa8cba51412c3250523f0738ddf0d6650ed0343defd4c8ab07b11fb4",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -116,7 +116,7 @@
     {
       "surfaceId": "surface:0181a9657036c0f8",
       "path": "apps/web/agent/skills/materials-studio/SKILL.md",
-      "sourceHash": "88586fd0bf3913659939b0a9219ad28adc93c981081aea8b75342ec982033a5c",
+      "sourceHash": "27db50fb2b5373a011f963ef0469d0ccde3ccfbf9395332f761df8b1a3c5d327",
       "legacySignatures": [
         "legacy-shape-language"
       ],
