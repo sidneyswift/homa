@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "c078d800bcbbc947fbb0777e14e32f92f5b56c81a72c94ffca5b549ad17e9bb0",
+  "ownedInputFingerprint": "ad1c26c59929eeb3e886975a73792ed225691105dc0dca015b0a23023e59b8bb",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -4781,97 +4781,6 @@
         "observedAt": null,
         "sourceCommitSha": "9e88beb03b856451119e879029cefab4800552db",
         "sourceCommitTimestamp": "2026-07-11T18:02:21-04:00",
-        "environment": "git-source-commit",
-        "clientRuntimeFingerprint": null,
-        "pixels": null,
-        "interactions": null,
-        "performance": null,
-        "accessibility": null,
-        "artifactGeneration": null,
-        "providerState": null,
-        "publicCacheBehavior": null
-      },
-      "productionReadback": null,
-      "deletionCommit": null,
-      "deliveryState": "controlled-current",
-      "rolloutState": "inventory"
-    },
-    {
-      "id": "surface:7c338ea12f21dfc2",
-      "paths": [
-        ".agents/skills/quiz-before-merge/SKILL.md"
-      ],
-      "type": "agent-skill",
-      "reachability": "authenticated",
-      "audiences": [
-        "developer"
-      ],
-      "runtimeBoundary": null,
-      "criticality": "utility",
-      "ownerIssue": "gh#739",
-      "upstreamDomainOwners": [
-        "authoring"
-      ],
-      "dependencies": [
-        "@homa/design"
-      ],
-      "consumers": [
-        "fleet-skill-loader",
-        "design-authoring"
-      ],
-      "requiredStates": [
-        "default",
-        "success"
-      ],
-      "viewports": [],
-      "devices": [],
-      "clients": [],
-      "assistiveModes": [],
-      "appearanceModes": [],
-      "baseline": {
-        "fixtureChecksum": "af4e17bc5b2c07a83fbb188a642947104959c89e8cf2af590b5f6187ef5f7b23",
-        "renderPath": null,
-        "interactionRecordingPath": null
-      },
-      "targetProfiles": [
-        "authoring"
-      ],
-      "approvedTarget": "quiet-authority-v1",
-      "requirements": {
-        "atoms": [
-          "semantic-color",
-          "type-role",
-          "spacing",
-          "focus"
-        ],
-        "patterns": [],
-        "assets": [],
-        "fonts": [],
-        "copyRoles": [
-          "true-clear-memorable",
-          "non-judgmental-child-framing"
-        ]
-      },
-      "legacySignatures": [],
-      "currentAssetHashes": [
-        "af4e17bc5b2c07a83fbb188a642947104959c89e8cf2af590b5f6187ef5f7b23"
-      ],
-      "disposition": "replace-active",
-      "featureFlags": [],
-      "migrationFlag": null,
-      "rollbackBoundary": "web-deployment",
-      "evidencePath": null,
-      "requiredEvidence": [
-        "source-fingerprint",
-        "legacy-signature-review"
-      ],
-      "productionProbe": "not-production-reachable",
-      "evidenceMetadata": {
-        "contractVersion": "@homa/design:quiet-authority-v1",
-        "harnessVersion": "brand-surfaces-v1",
-        "observedAt": null,
-        "sourceCommitSha": "8b948c0186ea9bdb1688531523a35aadea8e6915",
-        "sourceCommitTimestamp": "2026-07-04T17:00:00-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -93759,9 +93668,9 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": null,
-        "sourceCommitTimestamp": null,
-        "environment": "working-tree-uncommitted",
+        "sourceCommitSha": "131623cb708d9728195302675dee9e944ea58868",
+        "sourceCommitTimestamp": "2026-08-17T11:22:44-04:00",
+        "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
         "interactions": null,
