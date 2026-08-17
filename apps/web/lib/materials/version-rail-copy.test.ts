@@ -56,8 +56,13 @@ describe("version rail copy", () => {
     assert.match(copy, /You and Homa made \$\{versions\.length\} versions/u);
   });
 
-  it("admits plainly when an older picture is gone rather than hiding the gap", () => {
-    assert.match(copy, /no longer saved/u);
+  it("says exactly what restore does before the parent taps", () => {
+    assert.match(copy, /Bring back/u);
+    assert.match(copy, /without deleting the versions you made after it/u);
+  });
+
+  it("admits plainly when an older preview is gone rather than hiding the gap", () => {
+    assert.match(copy, /older versions no longer have/u);
   });
 
   it("stays hidden for a material with only one version", () => {
