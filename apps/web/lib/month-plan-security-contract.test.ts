@@ -58,5 +58,9 @@ describe("month plan deterministic security contract", () => {
       source,
       /effect_receipts = effect_receipts \|\| \$\{sql\.json/u,
     );
+    assert.match(
+      source,
+      /owner_user_id = coalesce\(existing\.owner_user_id, excluded\.owner_user_id\)[\s\S]*source_entries = existing\.source_entries \|\| excluded\.source_entries[\s\S]*current_revision = excluded\.current_revision/u,
+    );
   });
 });
