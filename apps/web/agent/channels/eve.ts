@@ -7,6 +7,10 @@ import {
   messageSourceContext,
   messageSourceFromRequest,
 } from "../../lib/chat-message-source";
+import {
+  ACTIVE_MATERIAL_HEADER,
+  materialIdFromHeader,
+} from "../../lib/material-revision-handoff";
 import { resolveProgressNextMoveChatContext } from "../../lib/child-progress/next-move-chat-context";
 import {
   canonicalInboundAuthAttributes,
@@ -36,6 +40,11 @@ import {
   voiceTranscriptionContext,
 } from "../../lib/web-message-modality";
 import { workingPlanIdFromHeader } from "../../lib/working-plan-resume";
+import {
+  activeMaterialContext,
+  INVALID_ACTIVE_MATERIAL_CONTEXT,
+  resolveActiveMaterialPinned,
+} from "../../lib/voice/active-material";
 import {
   trustedVoiceBridgeRequest,
   voiceBridgeMessageMatches,
@@ -150,6 +159,10 @@ function supabaseAuth(): AuthFn<Request> {
       request.headers.get("x-homa-working-plan-id"),
     );
     if (workingPlanId) attributes.workingPlanId = workingPlanId;
+    const activeMaterialId = materialIdFromHeader(
+      request.headers.get(ACTIVE_MATERIAL_HEADER),
+    );
+    if (activeMaterialId) attributes.activeMaterialId = activeMaterialId;
     const voiceBridge = trustedVoiceBridgeRequest(request, {
       accessToken: token,
     });
@@ -323,6 +336,22 @@ const channel = eveChannel({
           ].join("\n"),
         ],
       };
+    }
+
+    const activeMaterialId = auth.attributes.activeMaterialId;
+    if (typeof activeMaterialId === "string") {
+      try {
+        const material = await resolveActiveMaterialPinned(familyId, activeMaterialId);
+        turnContext.push(
+          material ? activeMaterialContext(material) : INVALID_ACTIVE_MATERIAL_CONTEXT,
+        );
+      } catch (error) {
+        console.error(
+          "eve channel: active material lookup failed:",
+          error instanceof Error ? error.message : "unknown",
+        );
+        turnContext.push(INVALID_ACTIVE_MATERIAL_CONTEXT);
+      }
     }
 
     // The native realtime transcript already owns canonical persistence and

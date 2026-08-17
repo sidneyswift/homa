@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
+import { ACTIVE_MATERIAL_HEADER } from "../material-revision-handoff";
 import { selectParentVisibleMaterialRevisions } from "../materials/parent-visible";
 import { mapDb } from "../map/db";
 
@@ -8,7 +9,7 @@ import { mapDb } from "../map/db";
  * object resolver. An id is usable only while it is the exact parent-visible
  * node of its revision chain inside the authenticated family. */
 
-export const VOICE_ACTIVE_MATERIAL_HEADER = "x-homa-active-material-id";
+export const VOICE_ACTIVE_MATERIAL_HEADER = ACTIVE_MATERIAL_HEADER;
 
 export const MATERIAL_PAGE_ROLES = [
   "child",

@@ -5,11 +5,13 @@ import { getAppData } from "../../lib/app-data";
 import { firstWeekAdjustmentDraft } from "../../lib/activation/first-week-handoff";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
+import { materialRevisionDraft } from "../../lib/material-revision-handoff";
 import { plannerActivityHelpDraft } from "../../lib/planner-activity-help";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { effectiveTimeZone } from "../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
+import { resolveActiveMaterialCaller } from "../../lib/voice/active-material";
 import { workingPlanResumeDraft } from "../../lib/working-plan-resume";
 import { ChatClient } from "./chat-client";
 
@@ -48,6 +50,7 @@ export default async function ChatPage({
     subject?: string;
     check?: string;
     plan?: string;
+    material?: string;
   }>;
 }) {
   const supabase = await createSupabaseServerClient();
@@ -60,6 +63,19 @@ export default async function ChatPage({
     draft,
     workingPlanId: query.plan,
   });
+  const materialRevisionCandidate = materialRevisionDraft({
+    draft,
+    materialId: query.material,
+  });
+  const materialRevision = materialRevisionCandidate && app
+    ? await resolveActiveMaterialCaller(
+        supabase,
+        app.family.id,
+        materialRevisionCandidate.materialId,
+      ).then((material) => material
+        ? { ...materialRevisionCandidate, materialId: material.id }
+        : undefined)
+    : undefined;
   const initialDraft = plannerActivityHelpDraft({
     draft,
     childId: query.child,
@@ -71,7 +87,8 @@ export default async function ChatPage({
     draft,
     childId: query.child,
     children: app?.children ?? [],
-  }) ?? workingPlanResume?.message ?? DRAFT_PREFILLS[draft ?? ""];
+  }) ?? workingPlanResume?.message ?? materialRevision?.message
+    ?? DRAFT_PREFILLS[draft ?? ""];
 
   // The context switcher's selection: when one kid is selected, the
   // composer says so and the agent hears it (the eve channel reads the
@@ -129,6 +146,7 @@ export default async function ChatPage({
       // preview_month_plan performs the authenticated family lookup.
       initialDraft={initialDraft}
       initialWorkingPlanId={workingPlanResume?.workingPlanId}
+      initialMaterialId={materialRevision?.materialId}
     />
   );
 }

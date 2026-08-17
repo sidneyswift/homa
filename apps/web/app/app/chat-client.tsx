@@ -49,6 +49,7 @@ import {
 } from "../../lib/chat-history-model";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
+import { withActiveMaterialHeader } from "../../lib/material-revision-handoff";
 import { withWorkingPlanResumeHeader } from "../../lib/working-plan-resume";
 import {
   AttachMenuButton,
@@ -296,6 +297,7 @@ export function ChatClient({
   focusChildId = null,
   initialDraft,
   initialWorkingPlanId,
+  initialMaterialId,
   kids,
   slashSkills,
   serverHistory = null,
@@ -330,6 +332,8 @@ export function ChatClient({
   /** The family-checked Binder object selected by a closed deep link. It
    * rides only with the matching prepared message, never in visible copy. */
   initialWorkingPlanId?: string;
+  /** The family-checked Binder material selected by a closed deep link. */
+  initialMaterialId?: string;
   /** The composer's "/" menu: kids to mention + the advertised skills. */
   kids?: { id: string; name: string; avatarUrl: string | null }[];
   slashSkills?: SlashSkillItem[];
@@ -762,12 +766,20 @@ export function ChatClient({
     message: string | UserContent,
     modality: ChatTurnModality,
     lane: ChatSendLane,
-  ) => withWorkingPlanResumeHeader({
-    headers: chatSendHeaders(modality, lane),
-    visibleMessage: visibleBoundSendSummary(message),
-    initialMessage: initialDraft,
-    workingPlanId: initialWorkingPlanId,
-  }), [initialDraft, initialWorkingPlanId]);
+  ) => {
+    const visibleMessage = visibleBoundSendSummary(message);
+    return withActiveMaterialHeader({
+      headers: withWorkingPlanResumeHeader({
+        headers: chatSendHeaders(modality, lane),
+        visibleMessage,
+        initialMessage: initialDraft,
+        workingPlanId: initialWorkingPlanId,
+      }),
+      visibleMessage,
+      initialMessage: initialDraft,
+      materialId: initialMaterialId,
+    });
+  }, [initialDraft, initialMaterialId, initialWorkingPlanId]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
   const firstScrollDoneRef = useRef(false);
