@@ -146,6 +146,13 @@ worth more than a fresh idea:
   new material, not a revision of the old final).
 - Nothing found: design fresh; today's final feeds next month's request.
 
+When the parent asks to go back to an earlier version, do not rebuild it
+by hand and do not change any old row. Call restore_material_version with
+the current material id. Omit versionOrdinal for "the previous one", or
+pass the number she names from the Binder's Earlier tries rail. The tool
+rebuilds the print file from the saved page source and adds the chosen
+version back as a new final copy, so the whole history remains visible.
+
 ## Choosing the creation path (per page, never by habit)
 
 Three ways to make a page, all ending in create_printable:

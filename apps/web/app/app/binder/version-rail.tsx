@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 
 import type { MaterialVersion } from "../../../lib/materials/history";
-import { materialVersionsAction } from "./version-history-action";
+import {
+  materialVersionsAction,
+  restoreMaterialVersionAction,
+} from "./version-history-action";
 
 /**
  * Every version of this material, oldest first (gh#350).
@@ -18,6 +22,10 @@ import { materialVersionsAction } from "./version-history-action";
  * in order; that is all this says.
  */
 export function VersionRail({ materialId }: { materialId: string }) {
+  const router = useRouter();
+  const [isRestoring, startRestore] = useTransition();
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [restoreNote, setRestoreNote] = useState<string | null>(null);
   // Keyed by the material it loaded for, rather than reset synchronously
   // inside the effect: clearing state during an effect cascades a render,
   // and stale history flashing under a newly opened material is exactly
@@ -50,6 +58,23 @@ export function VersionRail({ materialId }: { materialId: string }) {
   const earlier = versions.filter((version) => !version.isCurrent);
   const withImages = earlier.filter((version) => version.previewUrl !== null);
   const reclaimed = earlier.length - withImages.length;
+  const current = versions.find((version) => version.isCurrent) ?? null;
+
+  function restore(version: MaterialVersion) {
+    setRestoreNote(null);
+    setRestoringId(version.id);
+    startRestore(async () => {
+      try {
+        const result = await restoreMaterialVersionAction(materialId, version.id);
+        setRestoreNote(result.note);
+        if (result.restored) router.refresh();
+      } catch {
+        setRestoreNote("I could not bring that version back. Nothing changed. Try again in a moment.");
+      } finally {
+        setRestoringId(null);
+      }
+    });
+  }
 
   return (
     <section className="mt-4" aria-labelledby="version-rail-heading">
@@ -57,40 +82,58 @@ export function VersionRail({ materialId }: { materialId: string }) {
         id="version-rail-heading"
         className="font-mono text-[0.6rem] uppercase tracking-widest text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
       >
-        Earlier tries
+        Earlier versions
       </h3>
+      <p className="mt-1 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_64%,var(--homa-canvas))]">
+        Bring one back without deleting the versions you made after it.
+      </p>
       {withImages.length > 0 ? (
         <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
           {withImages.map((version) => (
-            <li key={version.id} className="shrink-0">
+            <li key={version.id} className="w-28 shrink-0">
               <a
                 href={version.previewUrl ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block"
-                aria-label={`Version ${version.ordinal}, open the full picture`}
+                aria-label={`Version ${version.ordinal}, open the full-size preview`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={version.previewUrl ?? ""}
                   alt={`Version ${version.ordinal}`}
-                  className="block h-24 w-[74px] rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] object-cover"
+                  className="block h-24 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] object-cover"
                   loading="lazy"
                 />
               </a>
               <span className="mt-1 block text-center text-[0.65rem] text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
-                {version.ordinal}
+                {`Version ${version.ordinal}`}
               </span>
+              <button
+                type="button"
+                onClick={() => restore(version)}
+                disabled={isRestoring}
+                className="quiet-action mt-1 w-full justify-center px-2 py-1 text-[0.65rem]"
+              >
+                {restoringId === version.id ? "Bringing it back…" : "Bring back"}
+              </button>
             </li>
           ))}
         </ul>
       ) : null}
       <p className="mt-1.5 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
-        {`You and Homa made ${versions.length} versions of this together.`}
+        {current
+          ? `Version ${current.ordinal} is the one you are using now. You and Homa made ${versions.length} versions together.`
+          : `You and Homa made ${versions.length} versions together.`}
         {reclaimed > 0
-          ? ` ${reclaimed === 1 ? "One older picture is" : `${reclaimed} older pictures are`} no longer saved.`
+          ? ` ${reclaimed === 1 ? "One older version no longer has" : `${reclaimed} older versions no longer have`} a preview.`
           : null}
       </p>
+      {restoreNote ? (
+        <p className="mt-2 text-xs text-[color:var(--homa-ink)]" role="status">
+          {restoreNote}
+        </p>
+      ) : null}
     </section>
   );
 }

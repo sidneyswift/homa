@@ -12,7 +12,10 @@ import {
   SUBJECT_LESSON_MATERIAL_VALIDITY_SQL,
 } from "../subject-lessons/material-validity";
 import type { MaterialKind, MaterialSource } from "./artifact-store";
-import { selectInProgressMaterialRevisions } from "./parent-visible";
+import {
+  selectInProgressMaterialRevisions,
+  selectParentVisibleMaterialRevisions,
+} from "./parent-visible";
 
 /**
  * The family materials library (MS-3/MS-4): retrieval over finals and
@@ -85,6 +88,11 @@ interface MaterialDbRow {
   subject_lesson_id?: string | null;
 }
 
+interface MaterialSearchRow extends MaterialDbRow {
+  revises: string | null;
+  review_pass: string | null;
+}
+
 const SUMMARY_COLUMNS =
   "id, title, kind, status, source, skill, subject, curriculum, theme, characters, child_id, preview_url, pdf_url, created_at, " +
   "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls, " +
@@ -154,6 +162,23 @@ function toSummary(row: MaterialDbRow): MaterialSummary {
     sources: parseFamilyAssetReferenceSnapshots(row.family_sources),
     ...(row.html !== undefined ? { html: row.html } : {}),
   };
+}
+
+function selectSearchRows(
+  rows: readonly MaterialSearchRow[],
+  status: MaterialFilters["status"],
+): MaterialSearchRow[] {
+  if ((status ?? "final") !== "final") return [...rows];
+  return selectParentVisibleMaterialRevisions(
+    rows.map((row) => ({
+      ...row,
+      revisesId: row.revises,
+      reviewPass: row.review_pass === null ? null : row.review_pass !== "false",
+      order: Date.parse(row.created_at),
+    })),
+  )
+    .filter((row) => row.status === "final")
+    .sort((left, right) => right.order - left.order);
 }
 
 /**
@@ -316,10 +341,11 @@ async function getMaterialPinnedLegacy(
   materialId: string,
 ): Promise<MaterialSummary | null> {
   const sql = mapDb();
-  const rows = await sql<MaterialDbRow[]>`
+  const rows = await sql<MaterialSearchRow[]>`
     select id, title, kind, status, source, skill, subject, curriculum,
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at,
+           revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
            generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources, html
@@ -404,16 +430,17 @@ async function findMaterialsPinnedLegacy(
 ): Promise<MaterialSummary[]> {
   const sql = mapDb();
   const status = filters.status ?? "final";
-  const rows = await sql<MaterialDbRow[]>`
+  const rows = await sql<MaterialSearchRow[]>`
     select id, title, kind, status, source, skill, subject, curriculum,
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at,
+           revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
            generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
-      and (${status === "any"} or status = ${status === "any" ? "final" : status})
+      and (${status === "any" || status === "final"} or status = ${status === "any" ? "final" : status})
       and (${!filters.childId} or child_id = ${filters.childId ?? null})
       and (${!filters.kind} or kind = ${filters.kind ?? null})
       and (${!filters.subject} or subject ilike ${"%" + (filters.subject ?? "") + "%"})
@@ -423,9 +450,9 @@ async function findMaterialsPinnedLegacy(
         where c ilike ${"%" + (filters.character ?? "") + "%"}
       ))
     order by created_at desc
-    limit ${filters.limit}
+    limit ${status === "final" ? 3000 : filters.limit}
   `;
-  return rows.map(toSummary);
+  return selectSearchRows(rows, status).slice(0, filters.limit).map(toSummary);
 }
 
 async function findMaterialsPinnedProtected(
@@ -434,16 +461,17 @@ async function findMaterialsPinnedProtected(
 ): Promise<MaterialSummary[]> {
   const sql = mapDb();
   const status = filters.status ?? "final";
-  const rows = await sql<MaterialDbRow[]>`
+  const rows = await sql<MaterialSearchRow[]>`
     select id, title, kind, status, source, skill, subject, curriculum,
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at, subject_lesson_id,
+           revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
            generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
-      and (${status === "any"} or status = ${status === "any" ? "final" : status})
+      and (${status === "any" || status === "final"} or status = ${status === "any" ? "final" : status})
       and (
         subject_lesson_id is null
         or status = 'final'
@@ -457,15 +485,16 @@ async function findMaterialsPinnedProtected(
         where c ilike ${"%" + (filters.character ?? "") + "%"}
       ))
     order by created_at desc
-    limit ${filters.limit}
+    limit ${status === "final" ? 3000 : filters.limit}
   `;
-  return rows
+  return selectSearchRows(rows, status)
     .filter((row) =>
       pinnedMaterialVisible({
         status: row.status,
         subjectLessonId: row.subject_lesson_id ?? null,
       }),
     )
+    .slice(0, filters.limit)
     .map(toSummary);
 }
 
@@ -490,14 +519,14 @@ export async function findMaterialsCaller(
   familyId: string,
   filters: MaterialFilters,
 ): Promise<MaterialSummary[]> {
+  const status = filters.status ?? "final";
   let query = db
     .from("materials")
-    .select(SUMMARY_COLUMNS)
+    .select(`${SUMMARY_COLUMNS}, revises, review_pass:generation->review->>pass`)
     .eq("family_id", familyId)
     .order("created_at", { ascending: false })
-    .limit(filters.limit);
-  const status = filters.status ?? "final";
-  if (status !== "any") query = query.eq("status", status);
+    .limit(status === "final" ? 3000 : filters.limit);
+  if (status !== "any" && status !== "final") query = query.eq("status", status);
   if (filters.childId) query = query.eq("child_id", filters.childId);
   if (filters.kind) query = query.eq("kind", filters.kind);
   if (filters.subject) query = query.ilike("subject", `%${filters.subject}%`);
@@ -511,7 +540,10 @@ export async function findMaterialsCaller(
     console.error("materials search failed:", error.message);
     throw new Error("Could not search saved materials.");
   }
-  return ((data ?? []) as unknown as MaterialDbRow[]).map(toSummary);
+  return selectSearchRows(
+    (data ?? []) as unknown as MaterialSearchRow[],
+    status,
+  ).slice(0, filters.limit).map(toSummary);
 }
 
 /**

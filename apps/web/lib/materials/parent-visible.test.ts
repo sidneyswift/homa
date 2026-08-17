@@ -43,6 +43,16 @@ describe("selectParentVisibleMaterialRevisions", () => {
     );
   });
 
+  it("shows only the newest final after an append-only restore", () => {
+    const selected = selectParentVisibleMaterialRevisions([
+      revision("v1", null, "final", true, 1),
+      revision("v2", "v1", "superseded", true, 2),
+      revision("restored-v1", "v1", "final", true, 3),
+    ]);
+
+    assert.deepEqual(selected.map((row) => row.id), ["restored-v1"]);
+  });
+
   it("keeps independent chains ordered by their selected rows", () => {
     const selected = selectParentVisibleMaterialRevisions([
       revision("math-v1", null, "draft", true, 4),
