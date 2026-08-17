@@ -29,10 +29,10 @@ test("the permanent report sends a parent to the authenticated state-pack entry"
     />
   );
 
-  assert.match(html, /Your Virginia pack is one printable PDF/u);
+  assert.match(html, /Homa can make one printable Virginia pack/u);
   assert.match(html, /Nothing is filed with the state/u);
   assert.match(html, /href="\/app\/binder\?source=report"/u);
-  assert.match(html, />Go to my Virginia pack<\/a>/u);
+  assert.match(html, />Open the Virginia pack page<\/a>/u);
 });
 
 test("read-only report mirrors do not offer a family action", () => {
@@ -40,6 +40,6 @@ test("read-only report mirrors do not offer a family action", () => {
     <StateCard summary={SUMMARY} childName="Maya" />
   );
 
-  assert.doesNotMatch(html, /Go to my Virginia pack/u);
+  assert.doesNotMatch(html, /Open the Virginia pack page/u);
   assert.match(html, /When your invite opens/u);
 });

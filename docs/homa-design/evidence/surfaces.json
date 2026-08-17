@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "748d1c40ede7e28a9b43269182edf70fe4cf7cfa2dde43a5551ef0c3fc3ddfea",
+  "ownedInputFingerprint": "c078d800bcbbc947fbb0777e14e32f92f5b56c81a72c94ffca5b549ad17e9bb0",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -75330,9 +75330,9 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": null,
-        "sourceCommitTimestamp": null,
-        "environment": "working-tree-uncommitted",
+        "sourceCommitSha": "8f1b5d58508816961721d80c80a1a1ac3280981c",
+        "sourceCommitTimestamp": "2026-08-17T11:09:47-04:00",
+        "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
         "interactions": null,
@@ -93507,9 +93507,9 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": null,
-        "sourceCommitTimestamp": null,
-        "environment": "working-tree-uncommitted",
+        "sourceCommitSha": "8f1b5d58508816961721d80c80a1a1ac3280981c",
+        "sourceCommitTimestamp": "2026-08-17T11:09:47-04:00",
+        "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
         "interactions": null,
@@ -93705,7 +93705,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "c179d05742045ced270c1789781a73e67aa07cdcbbd794efae73a10caf03e8ac",
+        "fixtureChecksum": "c6cc5b6972729af5f2e86b0a6ce99018e2bf7b5bb268576bbfc848e2132ef089",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -93740,7 +93740,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "c179d05742045ced270c1789781a73e67aa07cdcbbd794efae73a10caf03e8ac"
+        "c6cc5b6972729af5f2e86b0a6ce99018e2bf7b5bb268576bbfc848e2132ef089"
       ],
       "disposition": "replace-active",
       "featureFlags": [],

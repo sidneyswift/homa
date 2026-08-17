@@ -111,8 +111,8 @@ export function StateCard({
             className="quiet-report__fine-print--spaced print:hidden"
           >
             <p className="quiet-report__body-copy">
-              Your {summary.stateName} pack is one printable PDF with current requirements,
-              deadlines, and your saved attendance and subject records. Nothing is filed with
+              Homa can make one printable {summary.stateName} pack with current requirements,
+              deadlines, and the attendance and subject records you save. Nothing is filed with
               the state.
             </p>
             <Link
@@ -122,7 +122,7 @@ export function StateCard({
                 "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold",
               )}
             >
-              Go to my {summary.stateName} pack
+              Open the {summary.stateName} pack page
             </Link>
           </div>
         ) : (
