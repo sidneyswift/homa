@@ -50,5 +50,13 @@ describe("month plan deterministic security contract", () => {
       source,
       /where id = \$\{input\.workingPlanId\}[\s\S]*and family_id = \$\{input\.familyId\}/u,
     );
+    assert.match(
+      source,
+      /snapshot\.plan\.children\.flatMap[\s\S]*activity\.reusedMaterialId[\s\S]*artifact_links = excluded\.artifact_links/u,
+    );
+    assert.match(
+      source,
+      /effect_receipts = effect_receipts \|\| \$\{sql\.json/u,
+    );
   });
 });
