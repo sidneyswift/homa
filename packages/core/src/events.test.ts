@@ -93,6 +93,19 @@ test("Library events reject malformed ids and content-shaped properties", () => 
   }
 });
 
+test("state requirement views distinguish Binder visits from report handoffs", () => {
+  const schema = EVENT_SCHEMAS["compliance.ruleset_viewed"];
+  const base = {
+    family_id: FAMILY_ID,
+    state: "VA",
+    has_verified_date: true,
+  };
+
+  assert.equal(schema.safeParse({ ...base, entry: "binder" }).success, true);
+  assert.equal(schema.safeParse({ ...base, entry: "report" }).success, true);
+  assert.equal(schema.safeParse({ ...base, entry: "chat" }).success, false);
+});
+
 const validSubjectLessonEvents = {
   "map.subject_lesson_requested": {
     family_id: FAMILY_ID,

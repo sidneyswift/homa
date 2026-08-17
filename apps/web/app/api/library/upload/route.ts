@@ -4,10 +4,13 @@ import { after } from "next/server";
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { assertFamilyArtifactAccess } from "../../../../lib/account-deletion-artifact-fence";
 import { familyAccountCheckout } from "../../../../lib/billing/wall";
+import {
+  familyBlobConfigured,
+  familyBlobToken,
+} from "../../../../lib/family-blob";
 import { finalizeFamilyAssetUpload } from "../../../../lib/library/family-asset-upload-store";
 import { processQueuedFamilyAsset } from "../../../../lib/library/family-asset-processing";
 import { mapDb } from "../../../../lib/map/db";
-import { blobConfigured } from "../../../../lib/materials/artifact-store";
 
 interface UploadTokenPayload {
   reservationId?: unknown;
@@ -43,7 +46,7 @@ function isUuid(value: unknown): value is string {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (!blobConfigured()) {
+  if (!familyBlobConfigured()) {
     return Response.json({ ok: false, reason: "not-configured" }, { status: 503 });
   }
 
@@ -71,6 +74,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const result = await handleUpload({
+      token: familyBlobToken() ?? undefined,
       request,
       body,
       onBeforeGenerateToken: async (pathname, clientPayload, multipart) => {

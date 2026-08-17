@@ -109,7 +109,7 @@ export function useChatAttachments(familyId: string | null) {
               `families/${familyId}/chat/${pathName}`,
               payload,
               {
-                access: "public",
+                access: "private",
                 handleUploadUrl: "/api/chat/upload",
                 clientPayload: mediaType,
                 contentType: mediaType,

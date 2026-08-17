@@ -19,6 +19,8 @@ function prodLikeEnvironment(): Record<string, string | undefined> {
     SUPABASE_DB_PASSWORD: "prod-password",
     SUPABASE_SECRET_KEY: "sb_secret_x",
     BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_x",
+    HOMA_FAMILY_READ_WRITE_TOKEN: "vercel_blob_family_rw_x",
+    HOMA_LESSON_READ_WRITE_TOKEN: "vercel_blob_lesson_rw_x",
     RESEND_API_KEY: "re_x",
     TELNYX_API_KEY: "KEY_x",
     STRIPE_TEST_SECRET_KEY: "sk_test_x",

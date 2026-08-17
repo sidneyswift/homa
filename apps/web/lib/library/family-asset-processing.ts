@@ -3,6 +3,7 @@ import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
+import { signedFamilyBlobReadUrl } from "../family-blob";
 import { embedText } from "../learning/embeddings";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
@@ -288,6 +289,24 @@ async function fetchBoundedBytes(
   return { ok: true, bytes };
 }
 
+async function fetchBoundedFamilyAssetBytes(
+  asset: Pick<ClaimedFamilyAsset, "url" | "familyId">,
+): Promise<
+  | { ok: true; bytes: Uint8Array }
+  | { ok: false; reason: "too_large" | "transient" }
+> {
+  try {
+    const readableUrl = await signedFamilyBlobReadUrl(
+      asset.url,
+      asset.familyId,
+      "library",
+    );
+    return await fetchBoundedBytes(readableUrl);
+  } catch {
+    return { ok: false, reason: "transient" };
+  }
+}
+
 function clipExtractedText(text: string): string {
   const normalized = text.trim();
   return normalized.length > FAMILY_ASSET_PROCESSING_MAX_CHARS
@@ -374,7 +393,7 @@ export async function extractFamilyAssetText(
   const capability = familyAssetProcessingCapability(asset.mediaType);
   if (!capability) return { ok: false, reason: "unsupported" };
 
-  const downloaded = await fetchBoundedBytes(asset.url);
+  const downloaded = await fetchBoundedFamilyAssetBytes(asset);
   if (!downloaded.ok) return downloaded;
   const { bytes } = downloaded;
 
@@ -446,7 +465,7 @@ export async function extractFamilyAssetSourceDocument(
   }
   const capability = familyAssetProcessingCapability(asset.mediaType);
   if (!capability) return { ok: false, reason: "unsupported" };
-  const downloaded = await fetchBoundedBytes(asset.url);
+  const downloaded = await fetchBoundedFamilyAssetBytes(asset);
   if (!downloaded.ok) return downloaded;
   const { bytes } = downloaded;
 

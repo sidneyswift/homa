@@ -12,6 +12,7 @@ import {
   type StripeAccountDeletionReconciliationResult,
 } from "./account-deletion-billing";
 import { blobConfigured, deleteFamilyBlobs } from "./materials/artifact-store";
+import { familyBlobToken } from "./family-blob";
 import { lessonBlobConfigured } from "./lessons/blobs";
 import { mapDb } from "./map/db";
 import {
@@ -689,17 +690,24 @@ async function deletePrivateLessonBlobs(familyId: string): Promise<number> {
   if (!lessonBlobConfigured()) {
     throw new Error("The private lesson artifact store is not configured, so Homa cannot verify permanent deletion.");
   }
-  const token = process.env.HOMA_LESSON_READ_WRITE_TOKEN?.trim();
-  let cursor: string | undefined;
+  const tokens = [
+    process.env.HOMA_LESSON_READ_WRITE_TOKEN?.trim(),
+    familyBlobToken(),
+  ].filter((token, index, all): token is string =>
+    Boolean(token) && all.indexOf(token) === index,
+  );
   let deleted = 0;
-  do {
-    const page = await list({ prefix: `families/${familyId}/`, cursor, token });
-    if (page.blobs.length > 0) {
-      await del(page.blobs.map((blob) => blob.url), { token });
-      deleted += page.blobs.length;
-    }
-    cursor = page.cursor;
-  } while (cursor);
+  for (const token of tokens) {
+    let cursor: string | undefined;
+    do {
+      const page = await list({ prefix: `families/${familyId}/`, cursor, token });
+      if (page.blobs.length > 0) {
+        await del(page.blobs.map((blob) => blob.url), { token });
+        deleted += page.blobs.length;
+      }
+      cursor = page.cursor;
+    } while (cursor);
+  }
   return deleted;
 }
 

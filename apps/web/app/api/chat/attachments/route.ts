@@ -1,11 +1,10 @@
-import { del } from "@vercel/blob";
-
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { isFamilyChatAttachmentUrl } from "../../../../lib/attachments/markers";
 import {
   normalizeChatAttachments,
   type ChatAttachmentInput,
 } from "../../../../lib/attachments/normalize-chat-attachments";
+import { deleteFamilyBlob } from "../../../../lib/family-blob";
 import { mapDb } from "../../../../lib/map/db";
 import { emitMapEvent } from "../../../../lib/map/events";
 
@@ -163,7 +162,7 @@ export async function DELETE(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "not-found" }, { status: 404 });
   }
   try {
-    await del(url);
+    await deleteFamilyBlob(url, auth.familyId, "chat");
   } catch (error) {
     // The record is gone either way; a stray blob is unreachable
     // (random suffix) and harmless.

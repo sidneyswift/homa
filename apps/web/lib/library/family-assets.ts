@@ -1,3 +1,5 @@
+import { isFamilyBlobUrl } from "../family-blob-url";
+
 export const FAMILY_ASSET_FILE_KINDS = [
   "document",
   "image",
@@ -280,16 +282,7 @@ export function stripFamilyChatBlobSuffix(name: string): string {
 /** A client-supplied URL is only a candidate when it is in this exact
  * family's Library prefix on Homa's configured artifact store. */
 export function isFamilyLibraryUrl(url: string, familyId: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return (
-      parsed.protocol === "https:" &&
-      parsed.hostname.endsWith(".public.blob.vercel-storage.com") &&
-      parsed.pathname.startsWith(`/families/${familyId}/library/`)
-    );
-  } catch {
-    return false;
-  }
+  return isFamilyBlobUrl(url, familyId, "library");
 }
 
 export function formatFamilyAssetBytes(bytes: number): string {

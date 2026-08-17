@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { familyAccountCheckout } from "../../../../lib/billing/wall";
+import { familyBlobToken } from "../../../../lib/family-blob";
 import {
   type FamilyAssetUploadRow,
   toFamilyAssetUploadView,
@@ -297,7 +298,7 @@ export async function PATCH(request: Request): Promise<Response> {
     `;
   } else {
     try {
-      await del(upload.pathname);
+      await del(upload.pathname, { token: familyBlobToken() ?? undefined });
     } catch {
       console.error("family Library upload restart could not clear its Blob path");
       return Response.json(
@@ -355,7 +356,7 @@ export async function DELETE(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "not-found" }, { status: 404 });
   }
   try {
-    await del(row.pathname);
+    await del(row.pathname, { token: familyBlobToken() ?? undefined });
   } catch {
     await sql`
       update public.family_asset_uploads

@@ -730,6 +730,7 @@ export function ReportView({
     <StateCard
       summary={stateRequirements}
       childName={report.childName}
+      statePackHref={!sample && !mirror ? "/app/binder?source=report" : null}
       className={inApp ? "" : "mt-9"}
     />
   ) : null;

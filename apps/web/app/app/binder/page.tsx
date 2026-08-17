@@ -46,7 +46,12 @@ export const metadata: Metadata = {
 // a server-side search once a family's library outgrows one page).
 const MAX_FINAL_MATERIALS = 300;
 
-export default async function BinderPage() {
+export default async function BinderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string | string[] }>;
+}) {
+  const { source } = await searchParams;
   const data = await getAppData();
   if (!data) redirect("/onboarding");
   const { family, children } = data;
@@ -115,6 +120,7 @@ export default async function BinderPage() {
       family_id: family.id,
       state: stateDetail.stateCode,
       has_verified_date: Boolean(stateDetail.sourceLastVerified),
+      entry: source === "report" ? "report" : "binder",
     });
   }
 

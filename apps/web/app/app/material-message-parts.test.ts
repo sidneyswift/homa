@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
+import {
+  materialMessagePartNeedsFallback,
+  selectParentVisibleMaterialMessageParts,
+} from "./material-message-parts";
 
 function printablePart(material: Record<string, unknown>) {
   return {
@@ -191,5 +194,42 @@ describe("selectParentVisibleMaterialMessageParts", () => {
     ]);
     assert.equal(selected.id, "legacy-part:0");
     assert.equal(selected.material.id, undefined);
+  });
+
+  it("requests a Binder fallback only for a successful result with an incomplete card", () => {
+    assert.equal(
+      materialMessagePartNeedsFallback({
+        type: "dynamic-tool",
+        state: "output-available",
+        toolName: "create_printable",
+        output: {
+          created: true,
+          material: {
+            title: "Math facts",
+            pdfUrl: "https://blob.example/math.pdf",
+          },
+        },
+      }),
+      true,
+    );
+    assert.equal(
+      materialMessagePartNeedsFallback({
+        type: "dynamic-tool",
+        state: "output-available",
+        toolName: "create_printable",
+        output: { created: false, note: "Rendering failed" },
+      }),
+      false,
+    );
+    assert.equal(
+      materialMessagePartNeedsFallback(
+        printablePart({
+          title: "Math facts",
+          previewUrl: "https://blob.example/math.jpg",
+          pdfUrl: "https://blob.example/math.pdf",
+        }),
+      ),
+      false,
+    );
   });
 });
