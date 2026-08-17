@@ -108,6 +108,35 @@ function parseMaterialMessagePart(
 }
 
 /**
+ * A successful material effect must never disappear just because its chat
+ * card payload is incomplete. The durable page still belongs to Binder, so
+ * the renderer can offer that truthful recovery path. Ordinary tool failures
+ * stay ordinary failures and do not claim that a page exists.
+ */
+export function materialMessagePartNeedsFallback(part: unknown): boolean {
+  if (typeof part !== "object" || part === null) return false;
+  const candidate = part as Record<string, unknown>;
+  if (
+    candidate.type !== "dynamic-tool" ||
+    candidate.state !== "output-available" ||
+    typeof candidate.output !== "object" ||
+    candidate.output === null
+  ) {
+    return false;
+  }
+
+  const output = candidate.output as Record<string, unknown>;
+  const succeeded =
+    (candidate.toolName === "create_printable" && output.created === true) ||
+    (candidate.toolName === "show_material" && output.shown === true) ||
+    (candidate.toolName === "create_worksheet" &&
+      typeof output.worksheet === "object" &&
+      output.worksheet !== null);
+
+  return succeeded && parseMaterialMessagePart(part, 0) === null;
+}
+
+/**
  * Parses material tool outputs and returns one current card per revision chain.
  * The selected entries retain their original message-part positions.
  */

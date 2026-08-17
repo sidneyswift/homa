@@ -212,6 +212,35 @@ describe("re-shown material", () => {
     assert.doesNotMatch(html, /Print it/u);
     assert.match(html, /Let me look again\./u);
   });
+
+  it("keeps a successful page reachable when its preview payload is incomplete", () => {
+    const html = renderToStaticMarkup(
+      <MessageView
+        timeZone="America/Chicago"
+        message={assistantMessage([
+          {
+            type: "dynamic-tool",
+            state: "output-available",
+            toolName: "create_printable",
+            output: {
+              created: true,
+              material: {
+                title: "Mateo's Letter M Tracing",
+                pdfUrl: "https://blob.example/page.pdf",
+              },
+            },
+          },
+        ])}
+      />,
+    );
+    assert.match(
+      html,
+      /Your page is ready, but its preview didn(&#x27;|')t load/u,
+    );
+    assert.match(html, /Your page is saved in your Homa Binder/u);
+    assert.match(html, /href="\/app\/binder"/u);
+    assert.match(html, />Open Binder</u);
+  });
 });
 
 describe("snap card", () => {
