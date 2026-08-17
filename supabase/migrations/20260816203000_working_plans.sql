@@ -50,4 +50,4 @@ create policy "members read their working plans"
 
 -- Deliberately no browser write policy. Agent tools re-derive family_id from
 -- authenticated context and write through the server connection.
-
+revoke insert, update, delete on public.working_plans from authenticated;

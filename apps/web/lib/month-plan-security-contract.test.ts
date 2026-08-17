@@ -44,6 +44,10 @@ describe("month plan deterministic security contract", () => {
     assert.match(migration, /alter table public\.working_plans enable row level security/u);
     assert.match(migration, /using \(public\.is_family_member\(family_id\)\)/u);
     assert.doesNotMatch(migration, /for (?:insert|update|delete)|for all/iu);
+    assert.match(
+      migration,
+      /revoke insert, update, delete on public\.working_plans from authenticated/u,
+    );
 
     const source = await readFile(workingPlansUrl, "utf8");
     assert.match(
