@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { PageColumn } from "../../../components/dashboard/page-column";
-import { getAppData } from "../../../lib/app-data";
+import { getAppData, getAppShellData } from "../../../lib/app-data";
+import { familyAccountGate } from "../../../lib/billing/wall";
 import { getFamilyEventsForFamily } from "../../../lib/family-events-read";
 import {
   getHoursLogForFamily,
@@ -46,16 +47,19 @@ export default async function PlannerPage({
     handoff?: string | string[];
   }>;
 }) {
-  const data = await getAppData();
+  const query = await searchParams;
+  const view = parsePlannerView(query.view);
+  const paidData = view === "hours" ? null : await getAppData();
+  const data = paidData ?? (view === "hours" ? await getAppShellData() : null);
   if (!data) redirect("/onboarding");
-  const { family, children, plans } = data;
+  const { family, children } = data;
+  const plans = paidData?.plans ?? [];
 
   const cookieStore = await cookies();
   const viewContext = parseViewContext(
     cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
     children.map((child) => child.id),
   );
-  const query = await searchParams;
   // A report can take a signed-in parent straight to this child's week.
   // The query is only a focus preference, never authority: it is accepted
   // only after checking against the authenticated family's loaded children.
@@ -74,7 +78,6 @@ export default async function PlannerPage({
   const now = new Date();
   const today = todayDateOnly(now, timeZone);
   const activeDate = parsePlannerDate(query.date, today);
-  const view = parsePlannerView(query.view);
   const range = view === "month"
     ? monthGridRangeForDate(activeDate, today)
     : weekRangeForDate(activeDate);
@@ -129,6 +132,13 @@ export default async function PlannerPage({
   const hoursEntries = view === "hours"
     ? scopedToViewContext(allHoursEntries, viewContext)
     : allHoursEntries;
+
+  if (view === "hours") {
+    const gate = await familyAccountGate(family.id);
+    if (gate.checkout !== null && allHoursEntries.length === 0) {
+      redirect("/onboarding/trial");
+    }
+  }
 
   await emitMapEvent("planner.viewed", {
     family_id: family.id,
