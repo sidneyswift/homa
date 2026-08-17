@@ -1773,11 +1773,22 @@ export function UnifiedPlannerView({
 
       {view === "hours" ? (
         <div className="pt-7">
-          <div className="mb-1">
-            <h2 className="font-display text-2xl font-semibold text-strong">Recorded time</h2>
-            <p className="mt-1 text-sm text-muted">
-              Homa records the school time you tell her about. Review or correct it here.
-            </p>
+          <div className="mb-1 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="font-display text-2xl font-semibold text-strong">Recorded time</h2>
+              <p className="mt-1 text-sm text-muted">
+                Homa records the school time you tell her about. Review or correct it here.
+              </p>
+              <p className="mt-1 text-xs font-semibold text-muted">
+                Your Hours stay available and downloadable if you cancel.
+              </p>
+            </div>
+            <a
+              href="/api/hours/export"
+              className="quiet-action quiet-action--secondary quiet-action--default"
+            >
+              <span>Download CSV</span>
+            </a>
           </div>
           <HoursView
             kids={kids}

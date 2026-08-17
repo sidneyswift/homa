@@ -264,6 +264,9 @@ describe("UnifiedPlannerView", () => {
     const html = renderView({ view: "hours", familyEvents: [], scheduledActivities: [], hoursEntries: [HOURS] });
     assert.equal((html.match(/<h1/g) ?? []).length, 1);
     assert.match(html, />Recorded time<\/h2>/);
+    assert.match(html, /Your Hours stay available and downloadable if you cancel\./u);
+    assert.match(html, /href="\/api\/hours\/export"/u);
+    assert.match(html, />Download CSV<\/span>/u);
     assert.match(html, /30m/);
     assert.match(html, /Homa records the school time you tell her about\. Review or correct it here\./);
     assert.doesNotMatch(html, /The compliance record/);
