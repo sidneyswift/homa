@@ -1,4 +1,8 @@
+import Link from "next/link";
+
 import type { StateRequirementsSummary } from "../../../../lib/map/state-requirements";
+
+import { reportButtonClass } from "./report-button";
 
 /**
  * The state requirements card: the compliance data layer (migration #21)
@@ -13,10 +17,15 @@ import type { StateRequirementsSummary } from "../../../../lib/map/state-require
 export function StateCard({
   summary,
   childName,
+  statePackHref = null,
   className = "mt-9",
 }: {
   summary: StateRequirementsSummary;
   childName: string;
+  /** The report is shareable, while state-pack creation is family-scoped.
+   * This door therefore opens the authenticated Binder instead of trying
+   * to create a pack from the report token. */
+  statePackHref?: string | null;
   /** Outer spacing, owned by the layout: the letter-style page flows
    * this after the subjects (mt-9, the default); the in-app dashboard
    * grid spaces cards itself and passes "". */
@@ -96,10 +105,32 @@ export function StateCard({
             </>
           ) : null}
         </p>
-        <p className="quiet-report__fine-print quiet-report__fine-print--spaced">
-          When your invite opens, Homa tracks {summary.stateName}&apos;s requirements and deadlines
-          for you.
-        </p>
+        {statePackHref ? (
+          <div
+            data-brand-layer="report-state-pack-entry"
+            className="quiet-report__fine-print--spaced print:hidden"
+          >
+            <p className="quiet-report__body-copy">
+              Your {summary.stateName} pack is one printable PDF with current requirements,
+              deadlines, and your saved attendance and subject records. Nothing is filed with
+              the state.
+            </p>
+            <Link
+              href={statePackHref}
+              className={reportButtonClass(
+                "secondary",
+                "mt-3 inline-flex min-h-11 items-center px-5 py-2.5 text-sm font-semibold",
+              )}
+            >
+              Go to my {summary.stateName} pack
+            </Link>
+          </div>
+        ) : (
+          <p className="quiet-report__fine-print quiet-report__fine-print--spaced">
+            When your invite opens, Homa tracks {summary.stateName}&apos;s requirements and
+            deadlines for you.
+          </p>
+        )}
       </div>
     </details>
   );
