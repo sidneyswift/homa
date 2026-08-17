@@ -1,6 +1,7 @@
 "use client";
 
 import type { EveMessage, EveMessagePart } from "eve/react";
+import Link from "next/link";
 
 import { Logo } from "../../components/brand/Logo";
 import type { ThinkMood } from "../../components/brand/ThinkingMark";
@@ -29,7 +30,10 @@ import {
   parseCurriculumMappingCardPart,
   type CurriculumMappingCardData,
 } from "./curriculum-mapping-card";
-import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
+import {
+  materialMessagePartNeedsFallback,
+  selectParentVisibleMaterialMessageParts,
+} from "./material-message-parts";
 import {
   approvedOutboundChildFramingTexts,
   visibleWebChildFramingText,
@@ -263,6 +267,7 @@ type AssistantItem =
   | { kind: "text"; text: string }
   | { kind: "authorization"; part: AuthorizationPart }
   | { kind: "material"; material: MaterialArtifact }
+  | { kind: "material_fallback" }
   | { kind: "library_source"; source: FamilyAssetSourceCardData }
   | { kind: "curriculum_mapping"; card: CurriculumMappingCardData }
   | { kind: "chip"; chip: MemoryChipContent }
@@ -440,6 +445,8 @@ function assistantItems(message: EveMessage): AssistantItem[] {
       const material = materialByPartIndex.get(partIndex);
       if (material) {
         items.push({ kind: "material", material });
+      } else if (materialMessagePartNeedsFallback(part)) {
+        items.push({ kind: "material_fallback" });
       }
       continue;
     }
@@ -503,6 +510,28 @@ function AuthorizationCard({ part }: { part: AuthorizationPart }) {
           Sign in with {part.displayName}
         </a>
       ) : null}
+    </div>
+  );
+}
+
+function MaterialCardFallback() {
+  return (
+    <div
+      data-brand-layer="material-card-fallback"
+      className="quiet-artifact-card quiet-artifact-card--material"
+    >
+      <p className="quiet-artifact-card__title">
+        Your page is ready, but its preview didn&apos;t load in this reply.
+      </p>
+      <p className="quiet-artifact-card__meta">
+        Your page is saved in your Homa Binder.
+      </p>
+      <Link
+        href="/app/binder"
+        className="quiet-action quiet-action--primary quiet-artifact-card__print-action"
+      >
+        Open Binder
+      </Link>
     </div>
   );
 }
@@ -678,6 +707,8 @@ function AssistantItemView({
       return <AuthorizationCard part={item.part} />;
     case "material":
       return <MaterialCard material={item.material} />;
+    case "material_fallback":
+      return <MaterialCardFallback />;
     case "library_source":
       return <FamilyAssetSourceCard source={item.source} />;
     case "curriculum_mapping":
