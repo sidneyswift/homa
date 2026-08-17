@@ -30,5 +30,25 @@ describe("preview_month_plan provider schema", () => {
       }).success,
       false,
     );
+    assert.equal(
+      previewMonthPlanInputSchema.safeParse({
+        action: "resume",
+      }).success,
+      true,
+    );
+    assert.equal(
+      previewMonthPlanInputSchema.safeParse({
+        action: "resume",
+        workingPlanId: "00000000-0000-4000-8000-000000000003",
+      }).success,
+      false,
+    );
+    assert.equal(
+      previewMonthPlanInputSchema.safeParse({
+        action: "resume",
+        draftToken: token,
+      }).success,
+      false,
+    );
   });
 });

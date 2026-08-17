@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   approveMonthPlanDraft,
   proposedMonthPlanSchema,
+  resumeMonthPlanDraft,
   restoreMonthPlanDraft,
   signMonthPlanDraft,
   type ProposedMonthPlan,
@@ -180,7 +181,10 @@ describe("month plan draft tokens", () => {
   });
 
   it("blocks approval before database access while a choice remains", async () => {
-    const unresolved = structuredClone(payload);
+    const unresolved = {
+      ...structuredClone(payload),
+      createdAt: new Date().toISOString(),
+    };
     unresolved.history[0].plan.children[0].unresolvedChoices = [
       "Choose whether art belongs on Tuesday or Wednesday.",
     ];
@@ -231,6 +235,7 @@ describe("month plan draft tokens", () => {
     const token = signMonthPlanDraft(
       {
         ...payload,
+        createdAt: new Date().toISOString(),
         history: [
           payload.history[0],
           {
@@ -257,9 +262,49 @@ describe("month plan draft tokens", () => {
     assert.equal(restored.preview.restoredFrom, 1);
     const verified = verifyMonthPlanDraft(restored.draftToken, SESSION_ID, FAMILY_ID, {
       secret: SECRET,
-      now: NOW,
     });
     assert.equal(verified?.history.length, 3);
+  });
+
+  it("rebinds one stored draft to a fresh session without changing its lineage", () => {
+    const reopenedAt = new Date("2026-08-04T14:00:00.000Z");
+    const resumed = resumeMonthPlanDraft({
+      familyId: FAMILY_ID,
+      sessionId: "fresh-eve-session",
+      secret: SECRET,
+      payload,
+      now: reopenedAt,
+    });
+    assert.ok(resumed);
+    assert.equal(resumed.preview.draftId, DRAFT_ID);
+    assert.equal(resumed.preview.revision, 1);
+    const verified = verifyMonthPlanDraft(
+      resumed.draftToken,
+      "fresh-eve-session",
+      FAMILY_ID,
+      { secret: SECRET, now: reopenedAt },
+    );
+    assert.equal(verified?.createdAt, reopenedAt.toISOString());
+    assert.deepEqual(verified?.history, payload.history);
+    assert.equal(
+      verifyMonthPlanDraft(resumed.draftToken, SESSION_ID, FAMILY_ID, {
+        secret: SECRET,
+        now: reopenedAt,
+      }),
+      null,
+    );
+  });
+
+  it("refuses to rebind a stored draft for another family", () => {
+    assert.equal(
+      resumeMonthPlanDraft({
+        familyId: "00000000-0000-4000-8000-000000000099",
+        sessionId: "fresh-eve-session",
+        secret: SECRET,
+        payload,
+      }),
+      null,
+    );
   });
 });
 

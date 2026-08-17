@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 const sourceUrl = new URL("./month-plan-draft.ts", import.meta.url);
+const workingPlansUrl = new URL("./working-plans.ts", import.meta.url);
 
 describe("month plan deterministic security contract", () => {
   it("accepts reused materials only when the family-owned row is final", async () => {
@@ -32,6 +33,22 @@ describe("month plan deterministic security contract", () => {
     assert.match(
       migration,
       /revoke insert, update, delete on public\.month_plan_approvals from authenticated/u,
+    );
+  });
+
+  it("keeps recoverable working plans family scoped and browser read-only", async () => {
+    const migration = await readFile(
+      new URL("../../../supabase/migrations/20260816203000_working_plans.sql", import.meta.url),
+      "utf8",
+    );
+    assert.match(migration, /alter table public\.working_plans enable row level security/u);
+    assert.match(migration, /using \(public\.is_family_member\(family_id\)\)/u);
+    assert.doesNotMatch(migration, /for (?:insert|update|delete)|for all/iu);
+
+    const source = await readFile(workingPlansUrl, "utf8");
+    assert.match(
+      source,
+      /where id = \$\{input\.workingPlanId\}[\s\S]*and family_id = \$\{input\.familyId\}/u,
     );
   });
 });

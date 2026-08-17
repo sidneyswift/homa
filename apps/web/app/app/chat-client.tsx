@@ -49,6 +49,7 @@ import {
 } from "../../lib/chat-history-model";
 import type { SlashSkillItem } from "../../lib/slash-skills";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
+import { withWorkingPlanResumeHeader } from "../../lib/working-plan-resume";
 import {
   AttachMenuButton,
   CameraButton,
@@ -89,6 +90,7 @@ import {
   prepareChatSend,
   prepareAttachmentChatTurn,
   type ChatSendAcceptance,
+  type ChatSendLane,
   type ChatSendSource,
   type ChatTurnModality,
   type QueuedChatMessage,
@@ -293,6 +295,7 @@ export function ChatClient({
   focusChildName,
   focusChildId = null,
   initialDraft,
+  initialWorkingPlanId,
   kids,
   slashSkills,
   serverHistory = null,
@@ -324,6 +327,9 @@ export function ChatClient({
   /** Pre-fills the composer (the journal email's deep link); the parent
    * still edits and sends herself, nothing auto-sends. */
   initialDraft?: string;
+  /** The family-checked Binder object selected by a closed deep link. It
+   * rides only with the matching prepared message, never in visible copy. */
+  initialWorkingPlanId?: string;
   /** The composer's "/" menu: kids to mention + the advertised skills. */
   kids?: { id: string; name: string; avatarUrl: string | null }[];
   slashSkills?: SlashSkillItem[];
@@ -752,6 +758,16 @@ export function ChatClient({
   });
 
   const [draft, setDraft] = useState(initialDraft ?? "");
+  const headersForMessage = useCallback((
+    message: string | UserContent,
+    modality: ChatTurnModality,
+    lane: ChatSendLane,
+  ) => withWorkingPlanResumeHeader({
+    headers: chatSendHeaders(modality, lane),
+    visibleMessage: visibleBoundSendSummary(message),
+    initialMessage: initialDraft,
+    workingPlanId: initialWorkingPlanId,
+  }), [initialDraft, initialWorkingPlanId]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
   const firstScrollDoneRef = useRef(false);
@@ -884,10 +900,14 @@ export function ChatClient({
       markTurnStarted();
       void sendRef.current?.({
         message,
-        headers: chatSendHeaders(turnModalityRef.current, flush.lane),
+        headers: headersForMessage(
+          message,
+          turnModalityRef.current,
+          flush.lane,
+        ),
       });
     }, 0);
-  }, [clearReplyCutoffRecovery]);
+  }, [clearReplyCutoffRecovery, headersForMessage]);
 
   const adoptFreshEveSession = useCallback((options?: {
     stageLocalForServerReconciliation?: boolean;
@@ -2001,7 +2021,11 @@ export function ChatClient({
     markTurnStarted();
     void sendRef.current?.({
       message: outgoing,
-      headers: chatSendHeaders(turnModalityRef.current, flush.lane),
+      headers: headersForMessage(
+        outgoing,
+        turnModalityRef.current,
+        flush.lane,
+      ),
     });
     return "sent";
   }
@@ -2091,7 +2115,7 @@ export function ChatClient({
       markTurnStarted();
       void sendRef.current?.({
         message: parts,
-        headers: chatSendHeaders(turn.modality, "parent"),
+        headers: headersForMessage(parts, turn.modality, "parent"),
       });
     } catch {
       // Files stay staged; her words stay in the composer. One quiet

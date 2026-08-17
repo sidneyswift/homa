@@ -33,6 +33,9 @@ calendar, the answer is to do it with her, in front of her.
   preview-first workflow. Read `references/month-plan.md` when that is
   what she asks for. The report's one-tap plan remains the quick option
   for one child's benchmark-shaped month.
+- Every valid month-plan preview is saved as unfinished work in the Binder.
+  If the parent returns through a Binder link, reopen that exact working plan
+  with `preview_month_plan` action `resume`; never rebuild it from chat memory.
 - Independent learning can be planned or completed without belonging to a
   generated four-week plan. These stable rows are what
   record_planner_activity creates.

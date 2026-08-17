@@ -35,6 +35,7 @@ import {
   messageModalityFromRequest,
   voiceTranscriptionContext,
 } from "../../lib/web-message-modality";
+import { workingPlanIdFromHeader } from "../../lib/working-plan-resume";
 import {
   trustedVoiceBridgeRequest,
   voiceBridgeMessageMatches,
@@ -145,6 +146,10 @@ function supabaseAuth(): AuthFn<Request> {
       messageSource: messageSourceFromRequest(request),
       supabaseAccessToken: token,
     };
+    const workingPlanId = workingPlanIdFromHeader(
+      request.headers.get("x-homa-working-plan-id"),
+    );
+    if (workingPlanId) attributes.workingPlanId = workingPlanId;
     const voiceBridge = trustedVoiceBridgeRequest(request, {
       accessToken: token,
     });

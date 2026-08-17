@@ -583,6 +583,13 @@ async function monthPlanApprovalsSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function workingPlansSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.working_plans') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
 async function familyAssetTrainingSchemaIsIsolated() {
   const [presence] = await sql`
     select to_regnamespace('training') is not null as schema_exists
@@ -2864,6 +2871,19 @@ async function expectAuthenticatedIsolation() {
           `
         )[0]?.draft_id
       : null;
+    const workingPlansSchemaAvailable = await workingPlansSchemaExists();
+    const workingPlanBId = workingPlansSchemaAvailable
+      ? (
+          await sql`
+            insert into public.working_plans
+              (id, family_id, kind, title, current_revision, payload)
+            values
+              (gen_random_uuid(), ${familyBId}, 'month_plan',
+               'Isolation working plan', 1, '{}'::jsonb)
+            returning id
+          `
+        )[0]?.id
+      : null;
     const materialBId = await insertFixtureRow(
       familyBUser,
       "materials",
@@ -4511,6 +4531,66 @@ async function expectAuthenticatedIsolation() {
           label,
           true,
           "not yet enforced: the month_plan_approvals migration is pending on this target",
+        );
+      }
+    }
+
+    if (workingPlansSchemaAvailable) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "working_plans",
+        workingPlanBId,
+        1,
+        "auth member can read own working plan",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "working_plans",
+        workingPlanBId,
+        0,
+        "auth member cannot read another family's working plan",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyBUser.accessToken,
+        "working_plans",
+        {
+          id: "00000000-0000-4000-8000-000000000098",
+          family_id: familyBId,
+          kind: "month_plan",
+          title: "Client-forged working plan",
+          current_revision: 1,
+          payload: {},
+        },
+        "auth member cannot forge a working plan",
+      );
+      await expectAuthenticatedUpdateDenied(
+        familyBUser.accessToken,
+        "working_plans",
+        "id",
+        workingPlanBId,
+        { title: "Client-forged title" },
+        "auth member cannot update a working plan",
+      );
+      await expectAuthenticatedDeleteDenied(
+        familyBUser.accessToken,
+        "working_plans",
+        "id",
+        workingPlanBId,
+        "auth member cannot delete a working plan",
+      );
+    } else {
+      coveredTables.add("working_plans");
+      for (const label of [
+        "auth member can read own working plan",
+        "auth member cannot read another family's working plan",
+        "auth member cannot forge a working plan",
+        "auth member cannot update a working plan",
+        "auth member cannot delete a working plan",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the working_plans migration is pending on this target",
         );
       }
     }

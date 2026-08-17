@@ -15,6 +15,7 @@ import {
   verifyMonthPlanDraft,
 } from "../../lib/month-plan-draft";
 import { plannerEventClient } from "../../lib/planner-events";
+import { finalizeWorkingPlan } from "../../lib/working-plans";
 import {
   approveMonthPlanDraftState,
   canUseMonthPlanDraft,
@@ -96,6 +97,14 @@ export default defineBoundedTool({
     monthPlanSessionState.update((state) =>
       approveMonthPlanDraftState(state, outcome.draftId),
     );
+    // Planner approval is the primary effect. The Binder list also excludes
+    // approval receipts, so a cleanup failure cannot make a saved plan look
+    // unapproved or turn a successful save into a false error.
+    await finalizeWorkingPlan({
+      familyId: access.familyId,
+      workingPlanId: outcome.draftId,
+      revision: outcome.revision,
+    }).catch(() => undefined);
     return {
       approved: true,
       alreadyApproved: outcome.status === "already_approved",

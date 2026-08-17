@@ -10,6 +10,7 @@ import { getSlashMenuSkills } from "../../lib/slash-skills";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { effectiveTimeZone } from "../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
+import { workingPlanResumeDraft } from "../../lib/working-plan-resume";
 import { ChatClient } from "./chat-client";
 
 /**
@@ -46,6 +47,7 @@ export default async function ChatPage({
     child?: string;
     subject?: string;
     check?: string;
+    plan?: string;
   }>;
 }) {
   const supabase = await createSupabaseServerClient();
@@ -54,6 +56,10 @@ export default async function ChatPage({
   const app = await getAppData();
   const query = await searchParams;
   const { draft } = query;
+  const workingPlanResume = workingPlanResumeDraft({
+    draft,
+    workingPlanId: query.plan,
+  });
   const initialDraft = plannerActivityHelpDraft({
     draft,
     childId: query.child,
@@ -65,7 +71,7 @@ export default async function ChatPage({
     draft,
     childId: query.child,
     children: app?.children ?? [],
-  }) ?? DRAFT_PREFILLS[draft ?? ""];
+  }) ?? workingPlanResume?.message ?? DRAFT_PREFILLS[draft ?? ""];
 
   // The context switcher's selection: when one kid is selected, the
   // composer says so and the agent hears it (the eve channel reads the
@@ -119,7 +125,10 @@ export default async function ChatPage({
       // put existing schoolwork on real dates before a reshuffle. An
       // activity-help link carries plan coordinates only; the server
       // resolves its words from this authenticated family's own plan.
+      // A Binder resume link carries only a validated working-plan id;
+      // preview_month_plan performs the authenticated family lookup.
       initialDraft={initialDraft}
+      initialWorkingPlanId={workingPlanResume?.workingPlanId}
     />
   );
 }
