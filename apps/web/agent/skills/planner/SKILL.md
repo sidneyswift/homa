@@ -42,6 +42,15 @@ calendar, the answer is to do it with her, in front of her.
 - Day, Week, and Month are views of the same persisted calendar facts. They
   differ only in how much time they reveal at once.
 
+## Before planning: use the child's evidence (binding)
+
+Read the authenticated family context before you draft or reshape work. For
+each child, consult the map snapshot, interests, recent progress, and every
+saved `[what works · Child]` memory. Use what works to choose the rhythm,
+activity shape, load, and placement that fit this child. Current parent
+instructions and fixed calendar commitments still win. Never copy one child's
+strategy onto a sibling, and never ask for a fact the context already gives.
+
 ## Log what the family did
 
 Logging is first class. A family may plan every page on Sunday, follow a

@@ -10,7 +10,7 @@ the quality-check verdict, and iterate with the parent until she
 approves. A great material feels like it was made for exactly this child
 on exactly this day, because it was.
 
-## Before designing: set the difficulty from evidence (binding)
+## Before designing: use the child's evidence (binding)
 
 The skill level a page asks for comes from evidence about THIS child,
 never from age alone. Evidence, in order of strength:
@@ -19,7 +19,11 @@ never from age alone. Evidence, in order of strength:
 2. The child's map snapshot in your family context ("What the map
    knows"): the working edge is the page's target; anything listed as
    "does easily" is below the child and reads as babyish.
-3. Saved memories about the skill.
+3. Saved `[what works · Child]` memories in family context. Use these to
+   choose the page's framing, pacing, directions, response mode, and amount
+   of work. A note about what works shapes HOW you teach; it never substitutes
+   for level evidence or overrides what the parent asked for today.
+4. Other saved memories about the skill.
 
 No evidence for the skill you are targeting? Ask the parent ONE short
 calibrating question before you generate anything ("about how high does

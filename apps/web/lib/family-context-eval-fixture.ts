@@ -69,6 +69,7 @@ export function isEvalFamilyFixtureEnabled(
 const FIXTURE_CHILD_FINN = "00000000-0000-4000-8000-000000000001";
 const FIXTURE_CHILD_MAYA = "00000000-0000-4000-8000-000000000002";
 const FIXTURE_CHILD_STORY = "00000000-0000-4000-8000-000000000003";
+const FIXTURE_MEMORY_FINN = "00000000-0000-4000-8000-000000000010";
 const EVAL_FIXTURE_MAYA_REPORT_TOKEN = "eval-fixture-maya-report";
 
 /** The Walker family and Rachel's membership user, same synthetic scheme. */
@@ -131,7 +132,17 @@ export function evalFamilyFixtureRows(): FamilyContextRows {
         avatar_url: null,
       },
     ],
-    memories: [],
+    memories: [
+      {
+        id: FIXTURE_MEMORY_FINN,
+        child_id: FIXTURE_CHILD_FINN,
+        kind: "what_works",
+        content:
+          "Finn works longer when directions are a short train-conductor mission, with one task at each stop.",
+        source: "onboarding",
+        created_at: "2026-07-01T12:10:00.000Z",
+      },
+    ],
     answers: [],
     members: [{ display_name: EVAL_FIXTURE_PARENT_NAME }],
   };
@@ -295,6 +306,20 @@ export function evalFamilyFixtureSeedSql(): string {
     )
     .map((values) => `  (${values})`)
     .join(",\n");
+  const memoryValues = rows.memories
+    .map((memory) =>
+      [
+        sqlString(memory.id),
+        sqlString(EVAL_FIXTURE_FAMILY_ID),
+        memory.child_id ? sqlString(memory.child_id) : "null",
+        sqlString(memory.kind),
+        sqlString(memory.content),
+        sqlString(memory.source),
+        sqlString(memory.created_at),
+      ].join(", "),
+    )
+    .map((values) => `  (${values})`)
+    .join(",\n");
   return `
 insert into auth.users (id, email)
 values (${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'walker-fixture@homatest.invalid');
@@ -316,6 +341,11 @@ values (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PARENT_US
 insert into public.children (id, family_id, name, birth_month, profile, created_at)
 values
 ${childValues};
+
+insert into public.family_memories
+  (id, family_id, child_id, kind, content, source, created_at)
+values
+${memoryValues};
 
 -- The activation-handoff recovery eval needs a real, family-owned report
 -- token. The report tool checks this row through the same tenant-scoped store
