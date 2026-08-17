@@ -1022,6 +1022,7 @@ export const EVENT_SCHEMAS = {
     family_id: z.uuid(),
     state: z.string().length(2),
     has_verified_date: z.boolean(),
+    entry: z.enum(["binder", "report"]),
   }),
   // The parent pressed the one button (spec row 48; the period enum the
   // spec once carried belonged to the retired evidence-report concept).
