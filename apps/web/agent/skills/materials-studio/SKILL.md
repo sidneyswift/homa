@@ -1,5 +1,5 @@
 ---
-description: Use when a parent wants to create, write, draft, review, revise, approve, finalize, combine, or print a child material, including a lesson plan for a named day or week and natural reactions to the material currently visible. Covers worksheets, lesson plans, cards, posters, scaffolds, and multi-page packets. Not for scheduling an existing lesson or curriculum; planner owns placement. Not for designing a whole curriculum; curriculum-studio owns that.
+description: Use when a parent asks Homa to write, make, design, or revise one standalone lesson plan or another child material, including worksheets, cards, posters, scaffolds, and multi-page packets. Also use to review, approve, finalize, combine, or print that material and for natural reactions to the material currently visible. Not for scheduling an existing lesson or curriculum; planner owns placement. Not for designing a whole curriculum; curriculum-studio owns that.
 ---
 
 # The materials studio
