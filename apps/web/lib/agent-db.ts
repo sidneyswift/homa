@@ -16,6 +16,7 @@ export interface CallerAuthAttributes {
   familyId?: string;
   supabaseAccessToken?: string;
   memberUserId?: string;
+  workingPlanId?: string;
 }
 
 export class MissingFamilyContextError extends Error {

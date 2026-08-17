@@ -18,12 +18,14 @@ import {
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import { effectiveTimeZone } from "../../../lib/time-zone";
 import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
+import { listWorkingPlansForBinder } from "../../../lib/working-plans";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { QuietFrame } from "../../../components/design/QuietFrame";
 import { BinderView } from "./binder-view";
 import { InProgressShelf } from "./in-progress-shelf";
 import { StateFilingCard } from "./state-filing-card";
 import { StatePackCard } from "./state-pack-card";
+import { WorkingPlanShelf } from "./working-plan-shelf";
 
 /**
  * /app/binder (binder design directions, 2026-07-11): the family's
@@ -77,6 +79,8 @@ export default async function BinderPage() {
     toBinderMaterials(inProgress, children),
     viewContext,
   );
+  const workingPlans = await listWorkingPlansForBinder(family.id).catch(() => []);
+  const timeZone = effectiveTimeZone(family.time_zone);
 
   const focusChild =
     viewContext.kind === "child"
@@ -122,7 +126,7 @@ export default async function BinderPage() {
     ? FILING_METHODS_BY_STATE[stateDetail.stateCode]
     : undefined;
   const filingTodayIso = new Intl.DateTimeFormat("en-CA", {
-    timeZone: effectiveTimeZone(family.time_zone),
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -198,11 +202,12 @@ export default async function BinderPage() {
           </QuietFrame>
         )}
       </div>
+      <WorkingPlanShelf plans={workingPlans} timeZone={timeZone} />
       <InProgressShelf materials={inProgressMaterials} />
       <BinderView
         materials={binderMaterials}
         scopeChildName={focusChild?.name ?? null}
-        timeZone={effectiveTimeZone(family.time_zone)}
+        timeZone={timeZone}
         now={new Date()}
       />
     </PageColumn>

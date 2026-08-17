@@ -3,6 +3,23 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-16 · Founder ruling: unfinished working plans live in Binder
+
+Founder ruling, not an agent decision. Registered as
+`working-plans-live-in-binder` in the canonical reconciliation index and
+tracked by gh#175.
+
+The founder chose Binder as the parent-facing home for unfinished plans born
+in chat. A valid month-plan preview is saved there automatically, without
+changing Planner. The parent can return after a chat session rotates, continue
+the exact latest revision with Homa, revise or restore it, and explicitly
+approve it before anything is written to Planner. Abandoning archives the
+working plan, and approval removes it from unfinished work.
+
+This extends Binder's existing recovery role for unfinished materials. It does
+not turn Planner into a draft list, make chat history load-bearing, or weaken
+the preview-first approval boundary.
+
 ## 2026-08-02 · Founder ruling: Planner opens on one day
 
 **Ruling ID:** `planner-day-first-unification`

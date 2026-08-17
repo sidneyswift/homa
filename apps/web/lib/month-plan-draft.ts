@@ -12,9 +12,10 @@ import { z } from "zod";
 import { mapDb, type DbJson } from "./map/db";
 
 /**
- * A month-plan preview is session-bound working state. It is carried in a
- * signed token, not a database row, so a family can revise, restore, or walk
- * away without changing the Planner. Only approveMonthPlanDraft writes.
+ * A month-plan preview is carried through the active session in a signed token.
+ * The verified payload is also persisted as a working plan so a parent can
+ * reopen the exact revision from the Binder after session rotation. Neither
+ * representation changes the Planner. Only approveMonthPlanDraft writes.
  *
  * The model proposes the educational shape. This module verifies the closed
  * structure, dates, family-owned children and materials, stale bases,
@@ -95,7 +96,7 @@ export interface MonthPlanRevisionSnapshot {
   restoredFrom: number | null;
 }
 
-interface MonthPlanDraftPayload {
+export interface MonthPlanDraftPayload {
   v: 1;
   draftId: string;
   familyId: string;
@@ -234,7 +235,7 @@ const monthPlanRevisionSnapshotSchema = z.object({
   restoredFrom: z.number().int().min(1).max(100).nullable(),
 });
 
-const monthPlanDraftPayloadSchema = z.object({
+export const monthPlanDraftPayloadSchema = z.object({
   v: z.literal(1),
   draftId: z.uuid(),
   familyId: z.uuid(),
@@ -278,6 +279,29 @@ export function previewFromDraft(payload: MonthPlanDraftPayload): MonthPlanDraft
       child.unresolvedChoices.map((choice) => `${child.childName}: ${choice}`),
     ),
     restoredFrom: current.restoredFrom,
+  };
+}
+
+/** Rebind a trusted stored draft to a fresh Eve session. The durable row is
+ * tenant-scoped before this function is called; parsing here protects the
+ * token boundary and refreshing createdAt gives the reopened preview a new
+ * 24-hour review window without changing its draft id or revision lineage. */
+export function resumeMonthPlanDraft(input: {
+  familyId: string;
+  sessionId: string;
+  secret?: string;
+  payload: unknown;
+  now?: Date;
+}): { draftToken: string; preview: MonthPlanDraftPreview } | null {
+  const parsed = monthPlanDraftPayloadSchema.safeParse(input.payload);
+  if (!parsed.success || parsed.data.familyId !== input.familyId) return null;
+  const payload: MonthPlanDraftPayload = {
+    ...parsed.data,
+    createdAt: (input.now ?? new Date()).toISOString(),
+  };
+  return {
+    draftToken: signMonthPlanDraft(payload, input.sessionId, input.secret),
+    preview: previewFromDraft(payload),
   };
 }
 

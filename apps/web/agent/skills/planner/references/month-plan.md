@@ -25,6 +25,17 @@ verify identities, dates, conflicts, revision lineage, and the final write.
    lighter default is safe, put it under unresolved choices in the preview
    instead of blocking the whole draft.
 
+## Returning from the Binder
+
+When the parent sends the prepared Binder message, call `preview_month_plan`
+with `action:"resume"` and no other fields. The selected draft is carried in
+request context, not parent-visible copy or model input. The tool rechecks that
+it belongs to this authenticated family, binds it to the current session, and
+opens the latest saved revision. Do not ask her to repeat the month, rebuild it
+from transcript memory, or call `open_planner` before showing the recovered
+preview. After it is visible, continue with the normal revise, restore,
+approve, or abandon workflow below.
+
 ## Drafting rules
 
 - Build four dated weeks for every child in the family. Keep each week
@@ -54,8 +65,9 @@ verify identities, dates, conflicts, revision lineage, and the final write.
    If a conflict is intentional, say why in one sentence. If it is not, fix
    it before asking for approval. Conflicts and unscheduled activities may
    remain when the parent knowingly accepts them. Unresolved choices may not.
-3. Say: "I drafted the month. Nothing is on the Planner yet. Want to use this, or
-   change anything?" Then stop and keep listening.
+3. Say: "I drafted the month. It is saved in your Binder, but nothing is on the
+   Planner yet. Want to use this, or change anything?" Then stop and keep
+   listening.
 4. A requested change such as "move science earlier" or "make Friday
    lighter" is `action:"revise"` with the latest draft token and the whole
    updated plan. Change the smallest possible part.
@@ -76,6 +88,7 @@ verify identities, dates, conflicts, revision lineage, and the final write.
 - If a child or reused material no longer belongs to the family, drop the
   proposal and ask one short question if needed. Never substitute another.
 - If she leaves or says no, call `preview_month_plan` with
-  `action:"abandon"`. Nothing was saved, so do not offer an undo.
+  `action:"abandon"`. The Binder draft is archived and the Planner stays
+  unchanged, so do not offer an undo.
 - If more than three unresolved choices remain, the month is not ready.
   Ask the highest-impact question instead of presenting a wall of maybes.
