@@ -236,6 +236,16 @@ describe("evalFamilyFixtureSeedSql", () => {
     assert.ok(sql.includes("profile_completed_at"));
   });
 
+  it("gives the Walker family a real what-works memory for personalization evals", () => {
+    const memories = evalFamilyFixtureRows().memories;
+    assert.equal(memories.length, 1);
+    assert.equal(memories[0]?.kind, "what_works");
+    assert.match(memories[0]?.content ?? "", /train-conductor mission/u);
+    assert.ok(sql.includes("public.family_memories"));
+    assert.ok(sql.includes(memories[0]?.id ?? "missing-memory-id"));
+    assert.ok(sql.includes(memories[0]?.content ?? "missing-memory-content"));
+  });
+
   it("seeds a separate active, childless family for onboarding evals", () => {
     assert.ok(sql.includes(EVAL_ONBOARDING_FIXTURE_FAMILY_ID));
     assert.ok(sql.includes("'Onboarding fixture'"));

@@ -95,6 +95,24 @@ describe("studioFeedbackProblem", () => {
 });
 
 describe("the real materials-studio package", () => {
+  it("makes saved what-works evidence binding at every planning layer", async () => {
+    const [materials, planner, curriculum] = await Promise.all([
+      readFile(new URL("../../agent/skills/materials-studio/SKILL.md", import.meta.url), "utf8"),
+      readFile(new URL("../../agent/skills/planner/SKILL.md", import.meta.url), "utf8"),
+      readFile(new URL("../../agent/skills/curriculum-studio/SKILL.md", import.meta.url), "utf8"),
+    ]);
+
+    for (const [name, skill] of [
+      ["materials-studio", materials],
+      ["planner", planner],
+      ["curriculum-studio", curriculum],
+    ] as const) {
+      assert.match(skill, /\[what works · Child\]/u, `${name} must name the rendered memory label`);
+      assert.match(skill, /map snapshot/u, `${name} must consult the map beside what works`);
+    }
+    assert.match(materials, /what works shapes HOW you teach/u);
+  });
+
   it("has no reference gap the console would flag", async () => {
     const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
     const raw = await readFile(new URL("SKILL.md", dir), "utf8");
