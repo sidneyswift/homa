@@ -34,10 +34,16 @@ import { openWebOnboarding } from "../../lib/web-links";
 import { colors, space } from "../../theme/tokens";
 
 /**
- * Google and email + password sign-in, matching the web /signin flow and
- * its ordering. Account creation stays behind the web onboarding entry,
- * so every door gathers the same setup context before a family reaches
- * the app.
+ * Apple, Google, and email + password sign-in. Account creation stays
+ * behind the web onboarding entry, so every door gathers the same setup
+ * context before a family reaches the app.
+ *
+ * Web is the reference for ordering and weight, not a mirror. Two things
+ * differ on purpose: Apple sits first because guideline 4.8 wants it no
+ * less prominent than Google, and web has no Apple door at all. Password
+ * recovery is inline here rather than web's separate /forgot-password
+ * page, so it carries web's visual weight instead: a quiet, content
+ * width action, never a second full width button above Sign in.
  */
 
 export default function SignInScreen() {
@@ -215,9 +221,18 @@ export default function SignInScreen() {
               secureTextEntry
               autoComplete="current-password"
             />
+            {/* Content width and right aligned, the shape web gives the
+                same action (apps/web/app/signin/signin-form.tsx, a small
+                "Forgot password?" link under the password field). Full
+                width here stacked two same-weight actions and the quiet
+                one sat on top, so recovery read as loud as signing in.
+                size="sm" is the smallest tier that still clears the 44pt
+                tap target, so the weight drops without the target. */}
             <Button
               label={recoveryPending ? "Sending link\u2026" : "Send reset link"}
               variant="ghost"
+              size="sm"
+              style={{ alignSelf: "flex-end" }}
               onPress={() => void sendPasswordReset()}
               disabled={pending || oauthPending !== null || recoveryPending}
               busy={recoveryPending}
