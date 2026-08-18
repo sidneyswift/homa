@@ -26,6 +26,7 @@ import { signInWithApple } from "../../features/auth/apple-sign-in";
 import { signInWithGoogle } from "../../features/auth/google-sign-in";
 import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
+import { signInFailureMessage } from "../../features/auth/sign-in-voice";
 import { env } from "../../lib/env";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
@@ -38,22 +39,6 @@ import { colors, space } from "../../theme/tokens";
  * so every door gathers the same setup context before a family reaches
  * the app.
  */
-
-/**
- * Turns a non-success Google or Apple result into what the parent
- * reads, or null to stay quiet. Two cases arrive here and they are not
- * the same: a parent who closed the sheet already knows why they are
- * back, while a parent whose sign-in failed is looking at a screen that
- * did nothing.
- *
- * TODO(founder): decide the copy and which cases speak. Voice laws in
- * AGENTS.md apply: reassure before inform, offers never commands, no
- * red or "failed" framing, no em dash.
- */
-function describeSignInFailure(result: SignInFlowResult): string | null {
-  if (result.status === "dismissed") return null;
-  return "That didn't go through. You can try again when you're ready.";
-}
 
 export default function SignInScreen() {
   const { session } = useSession();
@@ -85,10 +70,12 @@ export default function SignInScreen() {
     setOauthPending(null);
     // Success: SessionProvider picks up the session and this screen redirects.
     if (result.status === "signed-in") return;
-    if (result.status === "failed") {
-      console.error(`mobile ${provider} signin failed:`, result.reason);
+    // Quiet for the parent is never quiet in the logs. A declined result
+    // shows them nothing, so this line is the only trace it happened.
+    if (result.status === "failed" || result.status === "provider-declined") {
+      console.error(`mobile ${provider} signin ${result.status}:`, result.reason);
     }
-    setError(describeSignInFailure(result));
+    setError(signInFailureMessage(result));
   }
 
   async function submit() {
