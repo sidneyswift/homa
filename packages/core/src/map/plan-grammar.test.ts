@@ -109,24 +109,12 @@ describe("plan activity grammar", () => {
     assert.ok(skillPhrase("Skips rope").startsWith("skipping"));
   });
 
-  it("has exactly one known gap left, and no new ones", () => {
-    // A ratchet, not a pass. Where the two verbs are separated by an
-    // object ("runs without falling and climbs onto furniture"), telling
-    // a coordinated VERB from a coordinated NOUN ("uses loops and
-    // events on purpose") is a judgment call, and AGENTS.md forbids
-    // deciding what a sentence means with hand-written patterns. So the
-    // remaining fragment is left rather than guessed at, and the real
-    // repair is rewording the statement in the bank.
-    //
-    // If this list grows, a new statement was written in a shape the
-    // conjugator cannot read. Reword the statement; do not widen the
-    // regex.
-    const KNOWN_GAPS = ["running without falling and climbs onto furniture"];
+  it("has no object-separated coordinated verb gaps", () => {
+    // Where two verbs are separated by an object, telling a coordinated
+    // verb from a coordinated noun is a judgment call. Reword the source
+    // statement instead of widening the conjugator's pattern matching.
     const offenders = activities.filter((activity) => /\b[a-z]+ing and [a-z]+s\b/.test(activity));
-    const unexplained = offenders.filter(
-      (activity) => !KNOWN_GAPS.some((gap) => activity.includes(gap)),
-    );
-    assert.deepEqual(unexplained, [], "a new statement broke the conjugator");
+    assert.deepEqual(offenders, [], "a statement broke the conjugator");
   });
 
   it("conjugates a comma-separated verb series", () => {
