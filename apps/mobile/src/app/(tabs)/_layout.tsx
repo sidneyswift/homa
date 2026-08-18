@@ -8,6 +8,7 @@ import { BillingGate } from "../../components/billing-gate";
 import { FamilyReadinessGate } from "../../components/family-readiness-gate";
 import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { OnboardingGate } from "../../features/onboarding/onboarding-gate";
 import { VoiceDock } from "../../features/voice/voice-dock";
 import { colors } from "../../theme/tokens";
 
@@ -29,6 +30,14 @@ export default function AppShellLayout() {
   const { session } = useSession();
   if (!session) return <Redirect href="/signin" />;
 
+  return (
+    <OnboardingGate>
+      <TabsWithFamily />
+    </OnboardingGate>
+  );
+}
+
+function TabsWithFamily() {
   return (
     <FamilyReadinessGate>
       {(family) => (
