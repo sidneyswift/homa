@@ -1,4 +1,4 @@
-import { del, get, head, put, type HeadBlobResult } from "@vercel/blob";
+import { del, get, head, list, put, type HeadBlobResult } from "@vercel/blob";
 
 import { FAMILY_BLOB_ACCESS, familyBlobToken } from "../lib/family-blob";
 import { familyBlobPathname } from "../lib/family-blob-url";
@@ -39,9 +39,25 @@ function sameBlob(source: HeadBlobResult, target: HeadBlobResult): boolean {
   );
 }
 
+async function listPublicFamilyOriginals(token: string): Promise<string[]> {
+  const urls: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix: "families/", token, limit: 1000, cursor });
+    for (const blob of page.blobs) {
+      const pathname = familyBlobPathname(blob.url);
+      if (pathname && /^families\/[^/]+\/(?:chat|library)\//u.test(pathname)) {
+        urls.push(blob.url);
+      }
+    }
+    cursor = page.hasMore ? page.cursor : undefined;
+  } while (cursor);
+  return urls;
+}
+
 export async function migrateFamilyBlobsPrivate(write: boolean): Promise<void> {
   const sql = mapDb();
-  const rows = await sql<PublicFamilyBlobRow[]>`
+  const referencedRows = await sql<PublicFamilyBlobRow[]>`
     select distinct url
     from (
       select url
@@ -54,19 +70,25 @@ export async function migrateFamilyBlobsPrivate(write: boolean): Promise<void> {
     ) public_family_blobs
     order by url
   `;
+  const sourceToken = publicBlobToken();
+  const publicUrls = new Set(referencedRows.map((row) => row.url));
+  for (const url of await listPublicFamilyOriginals(sourceToken)) {
+    publicUrls.add(url);
+  }
+  const rows = [...publicUrls].sort().map((url) => ({ url }));
 
   console.log(
-    `${write ? "write" : "dry-run"}: ${rows.length} public family objects`
+    `${write ? "write" : "dry-run"}: ${rows.length} public family objects or references`
   );
   if (!write) {
     await sql.end();
     return;
   }
 
-  const sourceToken = publicBlobToken();
   const targetToken = privateBlobToken();
 
   let migrated = 0;
+  let prunedMissingSandboxObjects = 0;
   for (const row of rows) {
     const pathname = familyBlobPathname(row.url);
     if (!pathname || !/^families\/[^/]+\/(?:chat|library)\//u.test(pathname)) {
@@ -77,9 +99,60 @@ export async function migrateFamilyBlobsPrivate(write: boolean): Promise<void> {
     let target = await optionalHead(pathname, targetToken);
     if (!target) {
       if (!source) {
-        throw new Error(
-          `source and private copy are both missing for ${pathname}`
-        );
+        const [scope] = await sql<Array<{ real_families: number | string }>>`
+          select count(distinct family_id) filter (where not sandbox) as real_families
+          from (
+            select fa.family_id, f.sandbox
+            from public.family_assets fa
+            join public.families f on f.id = fa.family_id
+            where fa.url = ${row.url}
+            union all
+            select ca.family_id, f.sandbox
+            from public.chat_attachments ca
+            join public.families f on f.id = ca.family_id
+            where ca.url = ${row.url}
+          ) family_references
+        `;
+        if (Number(scope?.real_families ?? -1) !== 0) {
+          throw new Error(
+            "missing family file is still referenced by a real family"
+          );
+        }
+        await sql.begin(async (transaction) => {
+          await transaction`
+            update public.conversation_messages cm
+            set content = replace(content, ${row.url}, '[missing sandbox attachment]')
+            where content like ${`%${row.url}%`}
+              and exists (
+                select 1
+                from public.families f
+                where f.id = cm.family_id
+                  and f.sandbox
+              )
+          `;
+          await transaction`
+            delete from public.family_assets fa
+            where fa.url = ${row.url}
+              and exists (
+                select 1
+                from public.families f
+                where f.id = fa.family_id
+                  and f.sandbox
+              )
+          `;
+          await transaction`
+            delete from public.chat_attachments ca
+            where ca.url = ${row.url}
+              and exists (
+                select 1
+                from public.families f
+                where f.id = ca.family_id
+                  and f.sandbox
+              )
+          `;
+        });
+        prunedMissingSandboxObjects += 1;
+        continue;
       }
       const sourceBytes = await get(row.url, {
         access: "public",
@@ -144,6 +217,12 @@ export async function migrateFamilyBlobsPrivate(write: boolean): Promise<void> {
   `;
   console.log(
     `remaining public family rows: ${Number(remaining?.count ?? -1)}`
+  );
+  console.log(
+    `pruned missing sandbox objects: ${prunedMissingSandboxObjects}`
+  );
+  console.log(
+    `remaining public family objects: ${(await listPublicFamilyOriginals(sourceToken)).length}`
   );
   await sql.end();
 }
