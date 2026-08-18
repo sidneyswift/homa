@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { QuietAction } from "../design/QuietAction";
 import { QuietFrame } from "../design/QuietFrame";
+import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { Logo } from "../brand/Logo";
@@ -48,6 +49,7 @@ const QUIET_LANDING_CSS = `
 .qa-opening__copy p { max-width: 540px; margin: 20px 0 0; color: color-mix(in srgb, var(--homa-paper) 88%, transparent); font-size: clamp(1.02rem, 1.4vw, 1.24rem); line-height: 1.55; }
 .qa-opening__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
 .qa-opening__actions .quiet-action--primary { background: var(--homa-paper); color: var(--homa-midnight-action); }
+.qa-opening__thread { position: absolute; z-index: 1; left: clamp(250px, 24vw, 300px); top: calc(50% + 104px); width: min(400px, 42vw); opacity: .78; pointer-events: none; }
 .qa-authority { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr); gap: clamp(28px, 5vw, 78px); align-items: center; min-height: 580px; overflow: hidden; background: var(--homa-contained-band); padding: clamp(42px, 6vw, 84px); isolation: isolate; }
 .qa-authority::before { content: ""; position: absolute; z-index: -1; width: min(55vw, 700px); aspect-ratio: 1; right: -17%; top: -36%; border-radius: 42% 58% 47% 53% / 56% 41% 59% 44%; background: color-mix(in srgb, var(--homa-info-ink) 16%, transparent); transform: rotate(-9deg); }
 .qa-authority__copy { position: relative; z-index: 2; }
@@ -284,6 +286,7 @@ export function QuietLanding() {
                   <p>{HERO_COPY.body}</p>
                   <div className="qa-opening__actions"><TrialAction /></div>
                 </div>
+                <QuietThread className="qa-opening__thread" label="Connects the primary action to the family learning moment" />
               </div>
               <div id="how" className="qa-authority">
                 <div className="qa-authority__copy">

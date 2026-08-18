@@ -259,9 +259,12 @@ test("the landing hero keeps one action without secondary callouts", () => {
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-character-peek/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__note/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__next/u);
-  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__thread/u);
   assert.doesNotMatch(openingMarkup, /<Logo\b/u);
   assert.doesNotMatch(openingMarkup, /HERO_COPY\.primaryActionNote/u);
+  assert.match(
+    openingMarkup,
+    /<QuietThread className="qa-opening__thread" label="Connects the primary action to the family learning moment" \/>/u,
+  );
   assert.equal("proofLabel" in HERO_COPY, false);
   assert.equal("proof" in HERO_COPY, false);
 });
