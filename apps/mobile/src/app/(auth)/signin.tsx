@@ -1,68 +1,55 @@
-import {
-  normalizePasswordRecoveryEmail,
-  passwordRecoveryRedirectUrl,
-} from "@homa/core";
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 
 import { GoogleGlyph } from "../../components/brand/google-glyph";
-import { Logo } from "../../components/brand/logo";
 import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
 import { InlineError } from "../../components/ui/inline-error";
-import { NativeText } from "../../components/ui/semantic";
-import { TextField } from "../../components/ui/text-field";
+import {
+  NativeHeading,
+  NativeIdentity,
+  NativeText,
+} from "../../components/ui/semantic";
 import { signInWithApple } from "../../features/auth/apple-sign-in";
 import { signInWithGoogle } from "../../features/auth/google-sign-in";
 import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
 import { signInFailureMessage } from "../../features/auth/sign-in-voice";
-import { env } from "../../lib/env";
-import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { supabase } from "../../lib/supabase";
-import { openWebOnboarding } from "../../lib/web-links";
-import { colors, space } from "../../theme/tokens";
+import { LegalLine } from "../../features/auth/legal-line";
+import { quietColors, quietRadii } from "../../theme/native-projection";
 
 /**
- * Apple, Google, and email + password sign-in. Account creation stays
- * behind the web onboarding entry, so every door gathers the same setup
- * context before a family reaches the app.
+ * The front door. Three ways in, one screen, no distinction between a
+ * parent arriving for the first time and one coming back: Apple and
+ * Google already decide that themselves, and the email code resolves it
+ * server side. Founder ruling 2026-08-18.
  *
- * Web is the reference for ordering and weight, not a mirror. Two things
- * differ on purpose: Apple sits first because guideline 4.8 wants it no
- * less prominent than Google, and web has no Apple door at all. Password
- * recovery is inline here rather than web's separate /forgot-password
- * page, so it carries web's visual weight instead: a quiet, content
- * width action, never a second full width button above Sign in.
+ * There is no password anywhere in this app, so there is nothing to
+ * recover and no reset action competing with the way in. There is also
+ * no route out to the web: setup finishes here.
+ *
+ * Shape comes from a survey of 28 real iOS entry screens. Two findings
+ * drive it. Eight of ten comparable screens are a short list of doors
+ * rather than a credential form, and every one of them says somewhere
+ * that the single screen serves new and returning people both. The
+ * caption above the doors is that sentence and it is dry on purpose:
+ * the screen's charm is spent on the line above the fold, and a second
+ * memorable sentence would only compete with the first.
+ *
+ * Values come from the contract via native-projection. Not tokens.ts,
+ * which apps/mobile/CLAUDE.md freezes as a compatibility export.
  */
-
 export default function SignInScreen() {
   const { session } = useSession();
-  const { fontScale } = useWindowDimensions();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [pending, setPending] = useState(false);
-  const [recoveryPending, setRecoveryPending] = useState(false);
-  const [recoverySent, setRecoverySent] = useState(false);
+  const router = useRouter();
   const [oauthPending, setOauthPending] = useState<"google" | "apple" | null>(
     null,
   );
   const [error, setError] = useState<string | null>(null);
-  const recoveryMessage = recoverySent
-    ? "If that email is connected to Homa, a reset link is on its way. It may take a minute."
-    : null;
-  useAccessibilityAnnouncement(recoveryMessage);
-  const signInBusy = oauthPending !== null || pending;
+  const signInBusy = oauthPending !== null;
 
   if (session) return <Redirect href="/" />;
 
@@ -84,189 +71,123 @@ export default function SignInScreen() {
     setError(signInFailureMessage(result));
   }
 
-  async function submit() {
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) {
-      setError("Email and password are both needed.");
-      return;
-    }
-    setPending(true);
-    setError(null);
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: trimmedEmail,
-      password,
-    });
-    setPending(false);
-    if (signInError) {
-      console.error("mobile signin failed:", signInError.message);
-      setError("That email and password didn't match. You can try again when you're ready.");
-    }
-    // Success: SessionProvider picks up the session and this screen redirects.
-  }
-
-  async function sendPasswordReset() {
-    const normalizedEmail = normalizePasswordRecoveryEmail(email);
-    if (!normalizedEmail) {
-      setError("Enter your email above, then tap Send reset link.");
-      return;
-    }
-    const redirectTo = passwordRecoveryRedirectUrl(env.apiUrl);
-    if (!redirectTo) {
-      setError("We couldn't send the reset link. Try again in a minute.");
-      return;
-    }
-
-    setRecoveryPending(true);
-    setRecoverySent(false);
-    setError(null);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      normalizedEmail,
-      { redirectTo },
-    );
-    setRecoveryPending(false);
-
-    if (resetError) {
-      console.error("mobile password recovery request failed:", resetError.message);
-      setError("We couldn't send the reset link. Try again in a minute.");
-      return;
-    }
-
-    setRecoverySent(true);
-  }
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <SafeAreaView
+      edges={["top", "bottom"]}
+      style={{ flex: 1, backgroundColor: quietColors.page }}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 20,
+          paddingTop: 24,
+          paddingBottom: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: fontScale >= 2 ? "flex-start" : "center",
-            padding: space.lg,
-            gap: space.lg,
+        {/* Top air. May shrink so the voice block never leaves the screen. */}
+        <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 24 }} />
+
+        <View style={{ gap: 16 }}>
+          <NativeIdentity variant="mark" size={48} />
+          {/* Founder line, 2026-08-18. Two words carry the whole screen,
+              so it takes level 1 rather than level 2: at 28pt a line this
+              short stops holding the composition and the canvas above it
+              reads as a page that failed to load.
+
+              The glyph rather than the lockup, because this line does not
+              spell Homa and the mark is the only place the name appears
+              before a parent taps. */}
+          <NativeHeading level={1}>Homeschool, handled.</NativeHeading>
+        </View>
+
+        {/* The largest gap on the screen, and where the error lives. An
+            error must eat empty space, never shove the doors down under
+            a thumb that was already reaching for them. */}
+        <View
+          style={{
+            flexGrow: 1.6,
+            flexShrink: 0,
+            flexBasis: 0,
+            minHeight: 40,
+            justifyContent: "flex-end",
           }}
-          keyboardShouldPersistTaps="handled"
         >
-          <View style={{ alignItems: "center", gap: space.md }}>
-            <Logo size={44} />
-            <NativeText role="body" tone="body" style={{ textAlign: "center" }}>
-              {"You've got this. Homa's got the rest."}
-            </NativeText>
-          </View>
-
-          <Card style={{ gap: space.md }}>
-            {Platform.OS === "ios" ? (
-              // Apple's own button component, required look per their
-              // branding rules; height and width must be explicit or it
-              // does not render. Sits first: guideline 4.8 wants it no
-              // less prominent than Google.
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={
-                  AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-                }
-                buttonStyle={
-                  AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-                }
-                cornerRadius={26}
-                accessibilityLabel="Continue with Apple"
-                accessibilityState={{
-                  disabled: signInBusy,
-                  busy: oauthPending === "apple",
-                }}
-                pointerEvents={signInBusy ? "none" : "auto"}
-                style={{ width: "100%", height: 52, opacity: signInBusy ? 0.55 : 1 }}
-                onPress={() => {
-                  if (oauthPending || pending) return;
-                  void continueWith("apple", signInWithApple);
-                }}
-              />
-            ) : null}
-            <Button
-              label={
-                oauthPending === "google"
-                  ? "Opening Google\u2026"
-                  : "Continue with Google"
-              }
-              variant="secondary"
-              size="lg"
-              icon={<GoogleGlyph />}
-              onPress={() => void continueWith("google", signInWithGoogle)}
-              disabled={signInBusy}
-              busy={oauthPending === "google"}
-            />
-
-            <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
-              <NativeText role="caption" tone="muted">
-                or
-              </NativeText>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.borderSubtle }} />
+          {error ? (
+            <View style={{ marginBottom: 16 }}>
+              <InlineError message={error} />
             </View>
+          ) : null}
+        </View>
 
-            <TextField
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              autoComplete="email"
-              keyboardType="email-address"
-              placeholder="you@example.com"
-            />
-            <TextField
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="current-password"
-            />
-            {/* Content width and right aligned, the shape web gives the
-                same action (apps/web/app/signin/signin-form.tsx, a small
-                "Forgot password?" link under the password field). Full
-                width here stacked two same-weight actions and the quiet
-                one sat on top, so recovery read as loud as signing in.
-                size="sm" is the smallest tier that still clears the 44pt
-                tap target, so the weight drops without the target. */}
-            <Button
-              label={recoveryPending ? "Sending link\u2026" : "Send reset link"}
-              variant="ghost"
-              size="sm"
-              style={{ alignSelf: "flex-end" }}
-              onPress={() => void sendPasswordReset()}
-              disabled={pending || oauthPending !== null || recoveryPending}
-              busy={recoveryPending}
-            />
+        <View style={{ gap: 12 }}>
+          {/* "any of these" rather than "all three": the Apple door is
+              iOS only, and the sentence has to stay true on Android. */}
+          <NativeText role="caption" tone="muted">
+            New here or coming back, any of these gets you in.
+          </NativeText>
 
-            {recoverySent ? (
-              <NativeText role="bodySmall" tone="body">
-                {recoveryMessage}
-              </NativeText>
-            ) : null}
-
-            {error ? <InlineError message={error} /> : null}
-
-            <Button
-              label={pending ? "One moment\u2026" : "Sign in"}
-              onPress={() => void submit()}
-              disabled={pending || oauthPending !== null || recoveryPending}
-              busy={pending}
-              size="lg"
+          {Platform.OS === "ios" ? (
+            // Apple's own component, look untouched, first per guideline
+            // 4.8. CONTINUE rather than SIGN_IN: this screen makes no
+            // distinction, so "sign in" would be untrue for a new parent,
+            // and it gives all three doors the same verb. Radius is the
+            // contract's control radius; the old 26 made a pill sitting
+            // on two 12-radius neighbours.
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={
+                AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+              }
+              buttonStyle={
+                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+              }
+              cornerRadius={quietRadii.control}
+              accessibilityLabel="Continue with Apple"
+              accessibilityState={{
+                disabled: signInBusy,
+                busy: oauthPending === "apple",
+              }}
+              pointerEvents={signInBusy ? "none" : "auto"}
+              style={{ width: "100%", height: 52, opacity: signInBusy ? 0.55 : 1 }}
+              onPress={() => {
+                if (signInBusy) return;
+                void continueWith("apple", signInWithApple);
+              }}
             />
-          </Card>
+          ) : null}
 
-          <View style={{ gap: space.sm }}>
-            <NativeText role="bodySmall" tone="muted" style={{ textAlign: "center" }}>
-              New to Homa? Start with the web onboarding, then sign in here.
-            </NativeText>
-            <Button
-              label="Open onboarding"
-              variant="ghost"
-              onPress={() => void openWebOnboarding()}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          <Button
+            label={
+              oauthPending === "google"
+                ? "Opening Google…"
+                : "Continue with Google"
+            }
+            variant="secondary"
+            size="lg"
+            icon={<GoogleGlyph />}
+            onPress={() => void continueWith("google", signInWithGoogle)}
+            disabled={signInBusy}
+            busy={oauthPending === "google"}
+          />
+
+          {/* Same weight as Google, and no mail glyph. The only thing
+              separating the two is Google's own mandated mark, which is
+              Google's requirement rather than a demotion Homa applied.
+              Email is the one route for a parent with neither account,
+              which skews least technical, so it never becomes a control
+              that does not look like a control. */}
+          <Button
+            label="Continue with email"
+            variant="secondary"
+            size="lg"
+            accessibilityHint="Opens a step to enter your email, then a six digit code."
+            onPress={() => router.push("/email")}
+            disabled={signInBusy}
+          />
+
+          <LegalLine />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
