@@ -4,7 +4,11 @@ import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
+  clearDictationInProgress,
+  consumeInterruptedDictation,
   DICTATION_CUTOFF_MESSAGE,
+  DICTATION_INTERRUPTED_MESSAGE,
+  markDictationInProgress,
   MAX_RECORDING_SECONDS,
   recordingLimitNotice,
 } from "./dictation";
@@ -80,5 +84,83 @@ describe("dictation cutoff notice", () => {
     const hintAt = chatClient.indexOf("RECORDING_HINT_MESSAGE}");
     const cutoffAt = chatClient.indexOf("DICTATION_CUTOFF_MESSAGE}");
     assert.ok(hintAt > 0 && cutoffAt > hintAt);
+  });
+});
+
+describe("interrupted dictation notice", () => {
+  function memoryStorage() {
+    const values = new Map<string, string>();
+    return {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+    };
+  }
+
+  it("names an armed take once after chat remounts", () => {
+    const storage = memoryStorage();
+
+    markDictationInProgress(storage);
+    assert.equal(consumeInterruptedDictation(storage), DICTATION_INTERRUPTED_MESSAGE);
+    assert.equal(consumeInterruptedDictation(storage), null);
+  });
+
+  it("does not report a take that the parent explicitly cancelled", () => {
+    const storage = memoryStorage();
+    markDictationInProgress(storage);
+    clearDictationInProgress(storage);
+
+    assert.equal(consumeInterruptedDictation(storage), null);
+  });
+
+  it("fails soft when session storage is unavailable", () => {
+    const unavailable = {
+      getItem() {
+        throw new Error("unavailable");
+      },
+      setItem() {
+        throw new Error("unavailable");
+      },
+      removeItem() {
+        throw new Error("unavailable");
+      },
+    };
+
+    assert.doesNotThrow(() => markDictationInProgress(unavailable));
+    assert.doesNotThrow(() => clearDictationInProgress(unavailable));
+    assert.equal(consumeInterruptedDictation(unavailable), null);
+  });
+
+  it("releases a late permission grant before recorder setup", () => {
+    const permissionAt = dictation.indexOf(
+      "stream = await navigator.mediaDevices.getUserMedia",
+    );
+    const mountedGuardAt = dictation.indexOf(
+      "if (!mountedRef.current)",
+      permissionAt,
+    );
+    const recorderSetupAt = dictation.indexOf(
+      "const recorder = new MediaRecorder",
+      permissionAt,
+    );
+
+    assert.ok(permissionAt > 0);
+    assert.ok(mountedGuardAt > permissionAt);
+    assert.ok(recorderSetupAt > mountedGuardAt);
+    assert.match(
+      dictation.slice(mountedGuardAt, recorderSetupAt),
+      /stream\.getTracks\(\)\.forEach\(\(track\) => track\.stop\(\)\)/u,
+    );
+  });
+
+  it("arms the interruption marker only after recording starts", () => {
+    const recorderStartedAt = dictation.indexOf("recorder.start();");
+    const markerAt = dictation.indexOf(
+      "markDictationInProgress(storage)",
+      recorderStartedAt,
+    );
+
+    assert.ok(recorderStartedAt > 0);
+    assert.ok(markerAt > recorderStartedAt);
   });
 });
