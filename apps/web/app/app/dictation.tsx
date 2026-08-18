@@ -35,6 +35,50 @@ const MIC_FAILED_MESSAGE =
 const TRANSCRIBE_FAILED_MESSAGE =
   "Homa couldn't make that out. Try somewhere quieter, or speak closer to the microphone. Typing works too.";
 
+export const DICTATION_INTERRUPTED_MESSAGE =
+  "Your recording wasn't sent, and Homa can't recover it. Tap the microphone to record it again, or type instead.";
+
+const DICTATION_IN_PROGRESS_KEY = "homa:dictation-in-progress";
+
+type DictationStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+export function markDictationInProgress(storage: DictationStorage): void {
+  try {
+    storage.setItem(DICTATION_IN_PROGRESS_KEY, "1");
+  } catch {
+    // Recording still works when browser storage is unavailable.
+  }
+}
+
+export function clearDictationInProgress(storage: DictationStorage): void {
+  try {
+    storage.removeItem(DICTATION_IN_PROGRESS_KEY);
+  } catch {
+    // Recording still works when browser storage is unavailable.
+  }
+}
+
+export function consumeInterruptedDictation(
+  storage: DictationStorage,
+): string | null {
+  try {
+    if (storage.getItem(DICTATION_IN_PROGRESS_KEY) !== "1") return null;
+    storage.removeItem(DICTATION_IN_PROGRESS_KEY);
+    return DICTATION_INTERRUPTED_MESSAGE;
+  } catch {
+    return null;
+  }
+}
+
+function dictationSessionStorage(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
 /** Shown under the composer while the mic is live: answers the two
  *  fears the reader gate caught (how does this end, and does the check
  *  send my raw words). */
@@ -113,6 +157,7 @@ export function useDictation(onTranscript: (transcript: string) => void) {
   // two concurrent getUserMedia calls would leak a live mic stream.
   const startingRef = useRef(false);
   const autoStoppedRef = useRef(false);
+  const mountedRef = useRef(false);
   // Recorder callbacks outlive renders; the ref keeps them on the
   // freshest insert-into-draft closure.
   const onTranscriptRef = useRef(onTranscript);
@@ -122,9 +167,21 @@ export function useDictation(onTranscript: (transcript: string) => void) {
   });
 
   // Unmount mid-recording: drop the take and release the hardware so
-  // the browser's recording indicator never outlives the page.
+  // the browser's recording indicator never outlives the page. The
+  // session marker remains armed, so returning to chat names the loss.
   useEffect(() => {
+    mountedRef.current = true;
+    const storage = dictationSessionStorage();
+    if (storage) {
+      const interrupted = consumeInterruptedDictation(storage);
+      if (interrupted) {
+        queueMicrotask(() => {
+          if (mountedRef.current) setError(interrupted);
+        });
+      }
+    }
     return () => {
+      mountedRef.current = false;
       discardRef.current = true;
       if (timerRef.current) clearInterval(timerRef.current);
       if (recorderRef.current && recorderRef.current.state !== "inactive") {
@@ -168,9 +225,12 @@ export function useDictation(onTranscript: (transcript: string) => void) {
         ? ((await response.json()) as { transcript?: string | null })
         : null;
       const transcript = payload?.transcript?.trim() ?? "";
+      if (!mountedRef.current) return;
       const hasTranscript = transcript.length > 0;
       if (hasTranscript) onTranscriptRef.current(transcript);
       else setError(TRANSCRIBE_FAILED_MESSAGE);
+      const storage = dictationSessionStorage();
+      if (storage) clearDictationInProgress(storage);
       setAutoStopped(
         recordingLimitNotice({
           autoStopped: autoStoppedRef.current,
@@ -178,6 +238,9 @@ export function useDictation(onTranscript: (transcript: string) => void) {
         }) !== null,
       );
     } catch {
+      if (!mountedRef.current) return;
+      const storage = dictationSessionStorage();
+      if (storage) clearDictationInProgress(storage);
       setError(TRANSCRIBE_FAILED_MESSAGE);
       setAutoStopped(false);
     }
@@ -198,6 +261,11 @@ export function useDictation(onTranscript: (transcript: string) => void) {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
       setError(MIC_FAILED_MESSAGE);
+      startingRef.current = false;
+      return;
+    }
+    if (!mountedRef.current) {
+      stream.getTracks().forEach((track) => track.stop());
       startingRef.current = false;
       return;
     }
@@ -224,6 +292,8 @@ export function useDictation(onTranscript: (transcript: string) => void) {
     };
 
     recorder.start();
+    const storage = dictationSessionStorage();
+    if (storage) markDictationInProgress(storage);
     setSeconds(0);
     setPhase("recording");
     startingRef.current = false;
@@ -249,6 +319,8 @@ export function useDictation(onTranscript: (transcript: string) => void) {
     const recorder = recorderRef.current;
     stopTimer();
     discardRef.current = true;
+    const storage = dictationSessionStorage();
+    if (storage) clearDictationInProgress(storage);
     autoStoppedRef.current = false;
     setAutoStopped(false);
     if (recorder && recorder.state !== "inactive") recorder.stop();
