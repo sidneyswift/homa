@@ -96,7 +96,7 @@ export const GAUNTLET_FIXTURE_PRIMITIVE_STATES = [
 export const GAUNTLET_REAL_PRIMITIVE_CONSUMERS = [
   [
     "apps/web/components/marketing/QuietLanding.tsx",
-    ["QuietAction", "QuietFrame", "QuietThread", "QuietFooter"],
+    ["QuietAction", "QuietFrame", "QuietFooter"],
   ],
   ["apps/web/components/dashboard/sidebar.tsx", ["QuietFrame"]],
   ["apps/web/components/dashboard/account-menu.tsx", ["QuietAction"]],

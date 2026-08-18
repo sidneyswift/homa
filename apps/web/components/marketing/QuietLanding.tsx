@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { QuietAction } from "../design/QuietAction";
 import { QuietFrame } from "../design/QuietFrame";
-import { QuietThread } from "../design/QuietThread";
 import { Icon } from "../design/Icon";
 import { QuietFooter } from "../design/QuietFooter";
 import { Logo } from "../brand/Logo";
@@ -41,7 +40,7 @@ const QUIET_LANDING_CSS = `
 .qa-opening__shell { max-width: 1240px; margin: 0 auto; overflow: hidden; border: 1px solid color-mix(in srgb, var(--homa-ink) 14%, transparent); border-radius: clamp(18px, 2.5vw, 30px); box-shadow: 0 30px 80px color-mix(in srgb, var(--homa-ink) 12%, transparent); }
 .qa-opening__world { position: relative; min-height: clamp(520px, 59vw, 720px); overflow: hidden; isolation: isolate; }
 .qa-opening__world::after { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--homa-midnight-action) 96%, transparent) 0%, color-mix(in srgb, var(--homa-midnight-action) 92%, transparent) 42%, color-mix(in srgb, var(--homa-midnight-action) 56%, transparent) 72%, color-mix(in srgb, var(--homa-midnight-action) 10%, transparent) 100%), linear-gradient(0deg, color-mix(in srgb, var(--homa-midnight-action) 32%, transparent), transparent 58%); }
-.qa-opening__photo { position: absolute !important; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 42% 56%; filter: saturate(.78) contrast(.96); }
+.qa-opening__photo { position: absolute !important; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 28% 56%; transform: scale(1.18); transform-origin: left center; filter: saturate(.78) contrast(.96); }
 .qa-opening__copy { position: absolute; z-index: 2; left: clamp(24px, 6vw, 82px); top: 50%; width: min(650px, calc(100% - 48px)); transform: translateY(-50%); animation: qa-opening-enter 480ms var(--homa-motion-ease-out) both; }
 .qa-opening__kicker { color: color-mix(in srgb, var(--homa-paper) 82%, var(--homa-visual-coral)); font: 800 .72rem/1.2 var(--font-sans); letter-spacing: .1em; text-transform: uppercase; }
 .qa-opening__copy h1 { max-width: 660px; margin: 15px 0 0; color: var(--homa-paper); font: 400 clamp(3.6rem, 7.7vw, 6.8rem)/.88 var(--font-display); letter-spacing: -.045em; text-wrap: balance; }
@@ -49,7 +48,7 @@ const QUIET_LANDING_CSS = `
 .qa-opening__copy p { max-width: 540px; margin: 20px 0 0; color: color-mix(in srgb, var(--homa-paper) 88%, transparent); font-size: clamp(1.02rem, 1.4vw, 1.24rem); line-height: 1.55; }
 .qa-opening__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
 .qa-opening__actions .quiet-action--primary { background: var(--homa-paper); color: var(--homa-midnight-action); }
-.qa-opening__thread { position: absolute; z-index: 1; left: clamp(250px, 24vw, 300px); top: calc(50% + 104px); width: min(400px, 42vw); opacity: .78; pointer-events: none; }
+.qa-opening__actions .quiet-action--primary:hover:not(:disabled) { background: color-mix(in srgb, var(--homa-paper) 92%, var(--homa-visual-coral)); color: var(--homa-midnight-action); }
 .qa-authority { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr); gap: clamp(28px, 5vw, 78px); align-items: center; min-height: 580px; overflow: hidden; background: var(--homa-contained-band); padding: clamp(42px, 6vw, 84px); isolation: isolate; }
 .qa-authority::before { content: ""; position: absolute; z-index: -1; width: min(55vw, 700px); aspect-ratio: 1; right: -17%; top: -36%; border-radius: 42% 58% 47% 53% / 56% 41% 59% 44%; background: color-mix(in srgb, var(--homa-info-ink) 16%, transparent); transform: rotate(-9deg); }
 .qa-authority__copy { position: relative; z-index: 2; }
@@ -286,7 +285,6 @@ export function QuietLanding() {
                   <p>{HERO_COPY.body}</p>
                   <div className="qa-opening__actions"><TrialAction /></div>
                 </div>
-                <QuietThread className="qa-opening__thread" label="Connects the primary action to the family learning moment" />
               </div>
               <div id="how" className="qa-authority">
                 <div className="qa-authority__copy">

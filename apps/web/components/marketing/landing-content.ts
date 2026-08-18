@@ -21,7 +21,7 @@ export const HERO_COPY = {
   eyebrow: "Your homeschool assistant",
   headline: "Homeschool, handled.",
   body:
-    "Homa is your AI homeschool assistant. She plans the week, makes practice pages for ages 2 to 7, and keeps your records together. Your child never has to use Homa. You see every update.",
+    "Homa is your AI homeschool assistant. She plans the week, makes practice pages, and keeps your records together. Your child never has to use Homa.",
   primaryAction: "Start your 7 free days",
   /** Under the primary CTA, everywhere it appears: the card ask must be
    *  visible BEFORE the click (trial-transparency research 2026-07-26:
