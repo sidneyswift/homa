@@ -249,10 +249,30 @@ test("the primary action appears in the first visual viewport", () => {
   assert.ok(firstTrialAction < authorityStart);
 });
 
-test("the decorative Homa mark yields to hero proof on narrow phones", () => {
+test("the landing hero keeps one action without secondary callouts", () => {
+  const openingMarkup = QUIET_LANDING_SOURCE.slice(
+    QUIET_LANDING_SOURCE.indexOf('<section className="qa-opening"'),
+    QUIET_LANDING_SOURCE.indexOf('<div id="how" className="qa-authority">'),
+  );
+
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__character/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-character-peek/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__note/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__next/u);
+  assert.doesNotMatch(openingMarkup, /<Logo\b/u);
+  assert.doesNotMatch(openingMarkup, /HERO_COPY\.primaryActionNote/u);
+  assert.match(
+    openingMarkup,
+    /<QuietThread className="qa-opening__thread" label="Connects the primary action to the family learning moment" \/>/u,
+  );
+  assert.equal("proofLabel" in HERO_COPY, false);
+  assert.equal("proof" in HERO_COPY, false);
+});
+
+test("the landing hero favors the photo's left-side negative space", () => {
   assert.match(
     QUIET_LANDING_SOURCE,
-    /@media \(max-width: 480px\)[\s\S]*?\.qa-opening__character \{ display: none; \}/u,
+    /\.qa-opening__photo \{[^}]*object-position: 42% 56%;/u,
   );
 });
 
@@ -268,7 +288,7 @@ test("the product moment exposes a keyboard-safe, reduced-motion state demo", ()
   assert.match(QUIET_LANDING_SOURCE, /aria-pressed=\{state === nextState\}/u);
   assert.match(QUIET_LANDING_SOURCE, /prefers-reduced-motion: reduce/u);
   assert.match(QUIET_LANDING_SOURCE, /qa-product__control:focus-visible/u);
-  assert.match(QUIET_LANDING_SOURCE, /@keyframes qa-thread-draw/u);
+  assert.match(QUIET_LANDING_SOURCE, /@keyframes qa-product-enter/u);
   assert.deepEqual(Object.keys(PRODUCT_PREVIEW_COPY.states), ["tell", "ready"]);
   assert.doesNotMatch(JSON.stringify(PRODUCT_PREVIEW_COPY.states), /\bIdle\b|\bListening\b|\bWorking\b/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /data-state="updating"|qa-mark-orient|qa-wave/u);

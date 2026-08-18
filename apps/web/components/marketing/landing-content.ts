@@ -30,8 +30,6 @@ export const HERO_COPY = {
    *  case). One price, the trial length, and the way out. */
   primaryActionNote:
     `7 free days, then $${regularMonthlyPrice} a month. Credit card required. Cancel before the first charge to pay nothing.`,
-  proofLabel: "Your whole family",
-  proof: "Add every child at no extra cost.",
 } as const;
 
 export type PlatformKind = "message" | "web" | "phone";
