@@ -28,7 +28,8 @@ test("the landing hero names Homa's category and primary action", () => {
   assert.match(HERO_COPY.body, /makes practice pages/i);
   assert.match(HERO_COPY.body, /keeps your records together/i);
   assert.match(HERO_COPY.body, /Your child never has to use Homa/i);
-  assert.match(HERO_COPY.body, /You see every update/i);
+  assert.doesNotMatch(HERO_COPY.body, /for ages 2 to 7/i);
+  assert.doesNotMatch(HERO_COPY.body, /You see every update/i);
 });
 
 test("the trial CTA states the card terms before the click", () => {
@@ -64,12 +65,11 @@ test("the capability section exposes four shipped product nouns in parent-day or
   );
 });
 
-test("the landing states the current practice-page age boundary before signup", () => {
+test("the landing retains the practice-page age boundary in capability details", () => {
   const practice = CAPABILITY_ITEMS.find(({ id }) => id === "practice");
 
   assert.ok(practice);
   assert.match(practice.body, /ages 2 to 7/i);
-  assert.match(HERO_COPY.body, /ages 2 to 7/i);
 });
 
 test("the landing shows every purchasable membership before the final signup ask", () => {
@@ -259,12 +259,10 @@ test("the landing hero keeps one action without secondary callouts", () => {
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-character-peek/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__note/u);
   assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__next/u);
+  assert.doesNotMatch(QUIET_LANDING_SOURCE, /qa-opening__thread/u);
   assert.doesNotMatch(openingMarkup, /<Logo\b/u);
+  assert.doesNotMatch(openingMarkup, /<QuietThread\b/u);
   assert.doesNotMatch(openingMarkup, /HERO_COPY\.primaryActionNote/u);
-  assert.match(
-    openingMarkup,
-    /<QuietThread className="qa-opening__thread" label="Connects the primary action to the family learning moment" \/>/u,
-  );
   assert.equal("proofLabel" in HERO_COPY, false);
   assert.equal("proof" in HERO_COPY, false);
 });
@@ -272,7 +270,7 @@ test("the landing hero keeps one action without secondary callouts", () => {
 test("the landing hero favors the photo's left-side negative space", () => {
   assert.match(
     QUIET_LANDING_SOURCE,
-    /\.qa-opening__photo \{[^}]*object-position: 42% 56%;/u,
+    /\.qa-opening__photo \{[^}]*object-position: 28% 56%;[^}]*transform: scale\(1\.18\);[^}]*transform-origin: left center;/u,
   );
 });
 
@@ -280,6 +278,13 @@ test("the landing keeps functional actions on the approved midnight role", () =>
   assert.doesNotMatch(
     QUIET_LANDING_SOURCE,
     /quiet-action--primary\s*\{[^}]*var\(--homa-visual-coral\)/u,
+  );
+});
+
+test("the landing hero CTA keeps its contrast on hover", () => {
+  assert.match(
+    QUIET_LANDING_SOURCE,
+    /\.qa-opening__actions \.quiet-action--primary:hover:not\(:disabled\) \{[^}]*background: color-mix\(in srgb, var\(--homa-paper\) 92%, var\(--homa-visual-coral\)\);[^}]*color: var\(--homa-midnight-action\);/u,
   );
 });
 
