@@ -315,9 +315,6 @@ export default function KidsScreen() {
                 </NativeText>
               </Card>
               <KidCard kid={kid} pendingLabel="working on: …" />
-              <NativeText role="caption" tone="muted">
-                {`${kid.name.trim()}'s card builds as you answer. It's theirs now.`}
-              </NativeText>
               <Button label="Next" size="lg" onPress={() => goTo("working")} />
             </View>
           ) : null}
@@ -335,16 +332,27 @@ export default function KidsScreen() {
                 selected={kid.workingOn}
                 onPick={(workingOn) => updateKid({ workingOn })}
               />
-              <View style={{ flexDirection: "row", gap: space.sm }}>
-                {LEVELS.map((level) => (
-                  <Chip
-                    key={level.key}
-                    label={level.label}
-                    selected={kid.level === level.key}
-                    onPress={() => updateKid({ level: level.key })}
-                  />
-                ))}
-              </View>
+
+              {kid.workingOn ? (
+                // The second question appears only once the first is
+                // answered; two chip sets in one flat list read as one
+                // confusing choice (founder feedback 2026-08-18).
+                <View style={{ gap: space.sm, marginTop: space.sm }}>
+                  <NativeText role="label" tone="strong">
+                    {`How's ${kid.name.trim()} doing with ${kid.workingOn.toLowerCase()}?`}
+                  </NativeText>
+                  <View style={{ flexDirection: "row", gap: space.sm }}>
+                    {LEVELS.map((level) => (
+                      <Chip
+                        key={level.key}
+                        label={level.label}
+                        selected={kid.level === level.key}
+                        onPress={() => updateKid({ level: level.key })}
+                      />
+                    ))}
+                  </View>
+                </View>
+              ) : null}
 
               <KidCard kid={kid} />
 

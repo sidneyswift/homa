@@ -86,11 +86,20 @@ export default function MakingScreen() {
       const poll = async () => {
         const job = await getMakingStatus(startResult.jobId);
         if (cancelled) return;
-        if (job?.progressNote) {
+        // Something true on screen from the very first beat: the job's
+        // own note once it has one, its honest queue state until then.
+        const note =
+          job?.progressNote ??
+          (job?.status === "queued"
+            ? "In line at the drawing table"
+            : job?.status === "running"
+              ? "Pencils are moving"
+              : null);
+        if (note) {
           setNotes((current) =>
-            current[current.length - 1] === job.progressNote
+            current[current.length - 1] === note
               ? current
-              : [...current.slice(-3), job.progressNote as string],
+              : [...current.slice(-3), note],
           );
         }
         if (job?.status === "completed") {
@@ -104,7 +113,7 @@ export default function MakingScreen() {
         }
         timer = setTimeout(() => void poll(), POLL_MS);
       };
-      timer = setTimeout(() => void poll(), POLL_MS);
+      void poll();
     })();
 
     return () => {
@@ -150,15 +159,16 @@ export default function MakingScreen() {
                 ))
               )}
             </Card>
-            <NativeText role="caption" tone="muted">
-              This usually takes a few minutes. It finishes on its own,
-              even if you step away; the page also lands in your Binder.
-            </NativeText>
             <Button
-              label="I'll look around while it builds"
-              variant="ghost"
+              label="Keep exploring while it draws"
+              variant="secondary"
+              size="lg"
               onPress={() => void keepGoing()}
             />
+            <NativeText role="caption" tone="muted">
+              It takes a few minutes and finishes on its own. The page
+              lands in your Binder either way.
+            </NativeText>
           </>
         ) : (
           <>
