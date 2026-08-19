@@ -57,7 +57,22 @@ function dangerousGitReason(tokens) {
     if (!command) continue;
     const { name, args } = command;
 
-    if (name === "push") return "Git push requires an explicit reviewed action outside this advisory hook.";
+    // Plain push is deliberately NOT blocked. Every other rule in this hook
+    // stops something that destroys work: removing a worktree, pruning, hard
+    // reset, forced clean, deleting a branch, discarding a whole tree.
+    // Publishing a branch loses nothing and is reversible, and it was only
+    // here because it rode along with the cleanup-safety work in 46e07344.
+    //
+    // Force push is a different animal and stays blocked: it can overwrite
+    // commits on the remote that exist nowhere else. --force-with-lease is
+    // allowed because it refuses to clobber anything the pusher has not seen,
+    // which is the whole point of the safer flag.
+    if (
+      name === "push" &&
+      (args.includes("--force") || hasShortFlag(args, "f"))
+    ) {
+      return "Force push can overwrite remote commits that exist nowhere else. Use --force-with-lease, or push without forcing.";
+    }
     if (name === "worktree" && args.includes("remove")) {
       return "Direct worktree removal is disabled. Use scripts/remove-worktree-safely.mjs.";
     }
