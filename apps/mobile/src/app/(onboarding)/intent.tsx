@@ -7,7 +7,6 @@ import { NativeText } from "../../components/ui/semantic";
 import { Button } from "../../components/ui/button";
 import { useFamilyData } from "../../features/family/use-family-data";
 import {
-  markOnboardingComplete,
   reportOnboardingStep,
   saveOnboardingState,
   type OnboardingIntent,
@@ -16,15 +15,8 @@ import { colors, radius, space } from "../../theme/tokens";
 
 /**
  * The one-tap intent ask (wireframe v4 step 3). "All of it" is the
- * expected winner; the react line that metabolizes the pick arrives
- * with wave 2's kid screens.
- *
- * INTERIM COMPLETION POINT: until the kid screens land (wave 2), this
- * is the walk's last built beat, so continuing marks the walk complete
- * and lands in the app. Without this, an unfinished-walk redirect would
- * bounce every open back here forever. Wave 2 replaces the completion
- * call with navigation to the kid intro; the completed funnel EVENT
- * stays unfired until the full walk exists.
+ * expected winner and routes to worksheets first (the opinionated
+ * default); the react + frame beat right after metabolizes the pick.
  */
 const OPTIONS: { intent: OnboardingIntent; label: string }[] = [
   { intent: "worksheets", label: "Worksheets my kids will actually love" },
@@ -52,10 +44,8 @@ export default function IntentScreen() {
     setSaving(true);
     await saveOnboardingState(family.id, "kids", { intent: picked });
     reportOnboardingStep(family.id, "kids", picked);
-    // Interim: the kid screens are wave 2; see the header comment.
-    await markOnboardingComplete(family.id);
     setSaving(false);
-    router.replace("/");
+    router.replace({ pathname: "/frame", params: { intent: picked } } as never);
   }
 
   return (

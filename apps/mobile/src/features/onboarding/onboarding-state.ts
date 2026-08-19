@@ -93,6 +93,22 @@ export async function bootstrapOnboarding(): Promise<OnboardingWorld> {
 }
 
 /**
+ * Reads the saved draft answers so a resumed screen shows her words
+ * exactly as she left them. RLS scopes the read to the caller's family.
+ */
+export async function loadOnboardingAnswers(
+  familyId: string,
+): Promise<OnboardingAnswers | null> {
+  const { data, error } = await supabase
+    .from("mobile_onboarding_state")
+    .select("answers")
+    .eq("family_id", familyId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return (data.answers as OnboardingAnswers) ?? null;
+}
+
+/**
  * Persists the walk position and draft answers. RLS scopes the write to
  * the caller's own family; a wrong familyId simply fails. Errors are
  * surfaced so screens can retry, but saving never blocks navigation.
