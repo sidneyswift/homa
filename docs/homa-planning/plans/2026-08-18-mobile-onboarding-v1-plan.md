@@ -157,6 +157,23 @@ sessions of work total. OTA-updatable except any native module changes
   actual answer, schema-checked, with a pre-written warm fallback on
   timeout or refusal. No curated line bank.
 
+## v1.1, from the first live walk (founder, 2026-08-18)
+
+Shipped same-session: beats arrive whole (no placeholder-then-swap),
+"Deal" retired, meta-commentary captions cut, the making screen polls
+immediately and always shows a true state, the keep-exploring path is
+a visible button, and the working-on step reveals its level question
+only after a subject is picked. A dev-only restart lever exists for
+iteration.
+
+Next structural item, founder-directed: the making wait should not
+park the parent at all. Run the deepen capture (homeschool style,
+curriculum, rhythm) DURING the build, Cleo-style, so the wait
+disappears into conversation and the reveal interrupts it as a gift.
+This replaces the current making screen as the primary path; the
+alive progress screen remains for parents who have nothing left to
+answer.
+
 ## Score
 
 Primary: signed-in → reveal_shown rate, and median minutes to

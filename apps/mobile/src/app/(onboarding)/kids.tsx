@@ -354,8 +354,6 @@ export default function KidsScreen() {
                 </View>
               ) : null}
 
-              <KidCard kid={kid} />
-
               {error ? <InlineError message={error} /> : null}
 
               <Button
