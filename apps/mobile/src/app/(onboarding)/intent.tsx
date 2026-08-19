@@ -11,6 +11,7 @@ import {
   saveOnboardingState,
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
+import { fetchReactLine } from "../../features/onboarding/react-lines";
 import { colors, radius, space } from "../../theme/tokens";
 
 /**
@@ -42,10 +43,20 @@ export default function IntentScreen() {
   async function continueWalk() {
     if (!family || !picked || saving) return;
     setSaving(true);
-    await saveOnboardingState(family.id, "kids", { intent: picked });
+    // Fetch Homa's line BEFORE navigating so the next screen arrives
+    // whole, once: no placeholder swapped for generated text mid-read
+    // (founder feedback 2026-08-18). The endpoint bounds itself and
+    // always answers with a usable line.
+    const [line] = await Promise.all([
+      fetchReactLine({ kind: "intent", intent: picked }),
+      saveOnboardingState(family.id, "kids", { intent: picked }),
+    ]);
     reportOnboardingStep(family.id, "kids", picked);
     setSaving(false);
-    router.replace({ pathname: "/frame", params: { intent: picked } } as never);
+    router.replace({
+      pathname: "/frame",
+      params: { intent: picked, line },
+    } as never);
   }
 
   return (

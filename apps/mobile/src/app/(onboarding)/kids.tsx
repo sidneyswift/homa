@@ -79,6 +79,7 @@ export default function KidsScreen() {
   const [subStep, setSubStep] = useState<SubStep>("name");
   const [loveText, setLoveText] = useState("");
   const [reactLine, setReactLine] = useState<string | null>(null);
+  const [fetchingLine, setFetchingLine] = useState(false);
   const [priorLines, setPriorLines] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,9 +126,11 @@ export default function KidsScreen() {
   }
 
   async function loveChosen(love: string) {
+    if (fetchingLine) return;
     updateKid({ love });
-    setSubStep("react");
-    setReactLine(null);
+    // The react screen arrives whole, once: fetch before switching
+    // (founder feedback 2026-08-18, no placeholder-then-swap).
+    setFetchingLine(true);
     const line = await fetchReactLine({
       kind: "love",
       childName: kid.name,
@@ -136,6 +139,8 @@ export default function KidsScreen() {
     });
     setPriorLines((lines) => [...lines, line]);
     setReactLine(line);
+    setFetchingLine(false);
+    setSubStep("react");
   }
 
   async function finishKid(): Promise<boolean> {
@@ -285,9 +290,10 @@ export default function KidsScreen() {
                 autoCapitalize="none"
               />
               <Button
-                label="Next"
+                label={fetchingLine ? "One moment…" : "Next"}
                 size="lg"
-                disabled={!loveText.trim() && !kid.love}
+                disabled={(!loveText.trim() && !kid.love) || fetchingLine}
+                busy={fetchingLine}
                 onPress={() => {
                   const typed = loveText.trim();
                   if (typed) {
