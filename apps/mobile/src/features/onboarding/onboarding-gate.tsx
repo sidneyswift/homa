@@ -106,17 +106,13 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-/**
- * v1 walk routes. Steps whose screens land in later waves (making,
- * reveal, next) re-enter at the kid screens until they exist, so a
- * mid-walk family is never stranded on a route that is not built yet.
- */
+/** The full v1 walk: every step re-enters on its own screen. */
 const STEP_ROUTES: Record<OnboardingStep, string> = {
   door: "/hello",
   hello: "/hello",
   intent: "/intent",
   kids: "/kids",
-  making: "/kids",
-  reveal: "/kids",
-  next: "/kids",
+  making: "/making",
+  reveal: "/reveal",
+  next: "/next",
 };

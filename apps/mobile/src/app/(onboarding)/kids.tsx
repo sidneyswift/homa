@@ -11,13 +11,12 @@ import { TextField } from "../../components/ui/text-field";
 import { useFamilyData } from "../../features/family/use-family-data";
 import {
   loadOnboardingAnswers,
-  markOnboardingComplete,
   reportOnboardingStep,
   saveOnboardingState,
   type DraftKid,
 } from "../../features/onboarding/onboarding-state";
 import { fetchReactLine } from "../../features/onboarding/react-lines";
-import { addChild } from "../../lib/family";
+import { addChild, getMyChildren } from "../../lib/family";
 import { colors, radius, space } from "../../theme/tokens";
 
 /**
@@ -164,6 +163,14 @@ export default function KidsScreen() {
       setError("That didn't save. You can try again when you're ready.");
       return false;
     }
+    // Capture the new row's id so the making knows which child the
+    // first page is for. Newest matching name wins; RLS scopes the read.
+    const childName = kid.name.trim();
+    const children = await getMyChildren(family.id).catch(() => []);
+    const match = [...children]
+      .reverse()
+      .find((child) => child.name.trim().toLowerCase() === childName.toLowerCase());
+    if (match) updateKid({ childId: match.id });
     return true;
   }
 
@@ -184,10 +191,9 @@ export default function KidsScreen() {
       setSaving(false);
       return;
     }
-    // Interim: the making is wave 3; see the header comment.
-    await markOnboardingComplete(family.id);
+    reportOnboardingStep(family.id, "making");
     setSaving(false);
-    router.replace("/");
+    router.replace("/making" as never);
   }
 
   const kidNumber = kids.length;
