@@ -10,17 +10,9 @@ import { colors, space } from "../../theme/tokens";
 import {
   bootstrapOnboarding,
   reportOnboardingResumed,
+  THROUGH_CACHE_PREFIX,
   type OnboardingStep,
 } from "./onboarding-state";
-
-/**
- * Once a session is known to be past onboarding (web-born family, or a
- * finished walk), that fact is permanent for the account, so it is
- * cached per user and the gate stops costing a network round-trip on
- * every cold open. Keyed by user id: a sign-out to a different account
- * must not inherit the decision.
- */
-const THROUGH_CACHE_PREFIX = "homa.onboarding.through.v1:";
 
 /**
  * Decides, once per signed-in session, whether the caller belongs in the

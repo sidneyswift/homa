@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
   MobileOnboardingIntent,
   MobileOnboardingStep,
@@ -6,6 +7,14 @@ import type {
 import { emitFamilyEvent } from "../../lib/events";
 import { EVE_CHANNEL_HEADER, env } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
+
+/**
+ * Once a session is known to be past onboarding (web-born family, or a
+ * finished walk), that fact is permanent for the account and cached per
+ * user so the gate stops costing a round-trip on every open. Keyed by
+ * user id: a sign-out to a different account must not inherit it.
+ */
+export const THROUGH_CACHE_PREFIX = "homa.onboarding.through.v1:";
 
 /**
  * Durable native-onboarding state (mobile onboarding v1, plan
@@ -146,6 +155,41 @@ export async function markOnboardingComplete(
     .eq("family_id", familyId);
   if (error) {
     console.error("markOnboardingComplete failed:", error.message);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * DEV-ONLY iteration lever (2026-08-18): rewinds the walk to the top so
+ * the flow can be replayed without a fresh account. Resets the state
+ * row, clears the gate's cached through-decision, and reports honestly
+ * that previously added children stay (the children table has no
+ * client delete policy; a truly fresh family needs a new +homatest
+ * account). Never wire this into a production surface.
+ */
+export async function resetOnboardingWalk(
+  familyId: string,
+): Promise<boolean> {
+  const { data } = await supabase.auth.getSession();
+  const userId = data.session?.user.id;
+  if (userId) {
+    await AsyncStorage.removeItem(`${THROUGH_CACHE_PREFIX}${userId}`).catch(
+      () => {},
+    );
+  }
+  const { error } = await supabase.from("mobile_onboarding_state").upsert(
+    {
+      family_id: familyId,
+      step: "hello",
+      answers: {},
+      completed_at: null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "family_id" },
+  );
+  if (error) {
+    console.error("resetOnboardingWalk failed:", error.message);
     return false;
   }
   return true;
