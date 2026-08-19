@@ -134,6 +134,26 @@ export default function KidsScreen() {
     setSubStep(step);
   }
 
+  /**
+   * Every ask can be walked back (R4). From the first kid's name the
+   * walk returns to the intent screen; from a later kid's empty name
+   * card it returns to the previous kid's summary.
+   */
+  function goBack() {
+    setError(null);
+    if (subStep === "age") return setSubStep("name");
+    if (subStep === "love") return setSubStep("age");
+    if (subStep === "react") return setSubStep("love");
+    if (subStep === "working") return setSubStep("love");
+    // name step:
+    if (kids.length > 1 && !kid.name.trim()) {
+      setKids((current) => current.slice(0, -1));
+      setSubStep("working");
+      return;
+    }
+    router.replace("/intent" as never);
+  }
+
   async function loveChosen(love: string) {
     if (fetchingLine) return;
     updateKid({ love });
@@ -154,6 +174,9 @@ export default function KidsScreen() {
 
   async function finishKid(): Promise<boolean> {
     if (!family || !kid.name.trim() || kid.age === null) return false;
+    // Already written as a real row (a back-and-forward revisit, or a
+    // double tap): never insert the same child twice.
+    if (kid.childId) return true;
     // Age is what the flow asks (the wireframe's ruling: birthday can
     // come later); the stored birthday is the age's midpoint estimate,
     // flagged approximate in the profile so a later screen can refine
@@ -252,6 +275,7 @@ export default function KidsScreen() {
                 disabled={!kid.name.trim()}
                 onPress={() => goTo("age")}
               />
+              <Button label="Back" variant="ghost" onPress={goBack} />
             </View>
           ) : null}
 
@@ -276,6 +300,7 @@ export default function KidsScreen() {
                 disabled={kid.age === null}
                 onPress={() => goTo("love")}
               />
+              <Button label="Back" variant="ghost" onPress={goBack} />
             </View>
           ) : null}
 
@@ -313,6 +338,7 @@ export default function KidsScreen() {
                   }
                 }}
               />
+              <Button label="Back" variant="ghost" onPress={goBack} />
             </View>
           ) : null}
 
@@ -325,6 +351,7 @@ export default function KidsScreen() {
               </Card>
               <KidCard kid={kid} pendingLabel="working on: …" />
               <Button label="Next" size="lg" onPress={() => goTo("working")} />
+              <Button label="Back" variant="ghost" onPress={goBack} />
             </View>
           ) : null}
 
@@ -378,6 +405,12 @@ export default function KidsScreen() {
                 disabled={!kid.workingOn || saving}
                 busy={saving}
                 onPress={() => void thatIsEveryone()}
+              />
+              <Button
+                label="Back"
+                variant="ghost"
+                onPress={goBack}
+                disabled={saving}
               />
             </View>
           ) : null}

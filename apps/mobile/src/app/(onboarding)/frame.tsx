@@ -49,6 +49,11 @@ export default function FrameScreen() {
           size="lg"
           onPress={() => router.replace("/kids" as never)}
         />
+        <Button
+          label="Back"
+          variant="ghost"
+          onPress={() => router.replace("/intent" as never)}
+        />
       </View>
     </SafeAreaView>
   );
