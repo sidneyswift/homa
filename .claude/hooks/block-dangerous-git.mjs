@@ -63,15 +63,16 @@ function dangerousGitReason(tokens) {
     // Publishing a branch loses nothing and is reversible, and it was only
     // here because it rode along with the cleanup-safety work in 46e07344.
     //
-    // Force push is a different animal and stays blocked: it can overwrite
-    // commits on the remote that exist nowhere else. --force-with-lease is
-    // allowed because it refuses to clobber anything the pusher has not seen,
-    // which is the whole point of the safer flag.
+    // Every force variant stays blocked, including --force-with-lease, which
+    // this hook already refused before. Only the plain publish is restored.
+    // Lease is safer than bare force but still rewrites published history, and
+    // widening that is a separate decision from fixing the push regression.
     if (
       name === "push" &&
-      (args.includes("--force") || hasShortFlag(args, "f"))
+      (args.some((argument) => argument.startsWith("--force")) ||
+        hasShortFlag(args, "f"))
     ) {
-      return "Force push can overwrite remote commits that exist nowhere else. Use --force-with-lease, or push without forcing.";
+      return "Force push rewrites published history and stays disabled by the project Git safety policy.";
     }
     if (name === "worktree" && args.includes("remove")) {
       return "Direct worktree removal is disabled. Use scripts/remove-worktree-safely.mjs.";
