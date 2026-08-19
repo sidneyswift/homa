@@ -14,7 +14,7 @@ import {
 import {
   loadOnboardingAnswers,
   reportOnboardingStep,
-  saveOnboardingState,
+  saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
 import { emitFamilyEvent } from "../../lib/events";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
@@ -46,7 +46,7 @@ export default function RevealScreen() {
     if (!family || loaded.current) return;
     loaded.current = true;
     reportOnboardingStep(family.id, "reveal");
-    void saveOnboardingState(family.id, "reveal", {}).catch(() => {});
+    void saveOnboardingStep(family.id, "reveal").catch(() => {});
     void (async () => {
       const answers = await loadOnboardingAnswers(family.id);
       const first = answers?.kids?.[0];

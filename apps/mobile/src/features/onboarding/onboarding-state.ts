@@ -143,6 +143,27 @@ export async function saveOnboardingState(
   return true;
 }
 
+/**
+ * Advances the walk position WITHOUT touching the saved answers. Every
+ * screen past the capture steps uses this; passing {} to
+ * saveOnboardingState from the making screen silently wiped the kid
+ * drafts and killed the build (live bug, 2026-08-19).
+ */
+export async function saveOnboardingStep(
+  familyId: string,
+  step: OnboardingStep,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("mobile_onboarding_state")
+    .update({ step, updated_at: new Date().toISOString() })
+    .eq("family_id", familyId);
+  if (error) {
+    console.error("saveOnboardingStep failed:", error.message);
+    return false;
+  }
+  return true;
+}
+
 export async function markOnboardingComplete(
   familyId: string,
 ): Promise<boolean> {

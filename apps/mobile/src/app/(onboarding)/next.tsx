@@ -11,7 +11,7 @@ import {
   markOnboardingComplete,
   reportOnboardingCompleted,
   reportOnboardingStep,
-  saveOnboardingState,
+  saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
 import { colors, radius, space } from "../../theme/tokens";
 
@@ -50,7 +50,7 @@ export default function NextScreen() {
     if (!family || reported.current) return;
     reported.current = true;
     reportOnboardingStep(family.id, "next");
-    void saveOnboardingState(family.id, "next", {}).catch(() => {});
+    void saveOnboardingStep(family.id, "next").catch(() => {});
   }, [family]);
 
   async function choose(door: Door) {

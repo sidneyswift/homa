@@ -13,7 +13,7 @@ import {
   loadOnboardingAnswers,
   markOnboardingComplete,
   reportOnboardingStep,
-  saveOnboardingState,
+  saveOnboardingStep,
   type DraftKid,
 } from "../../features/onboarding/onboarding-state";
 import { getMyChildren } from "../../lib/family";
@@ -43,7 +43,7 @@ export default function MakingScreen() {
     if (!family || started.current) return;
     started.current = true;
     reportOnboardingStep(family.id, "making");
-    void saveOnboardingState(family.id, "making", {}).catch(() => {});
+    void saveOnboardingStep(family.id, "making").catch(() => {});
 
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -103,7 +103,7 @@ export default function MakingScreen() {
           );
         }
         if (job?.status === "completed") {
-          await saveOnboardingState(family.id, "reveal", {}).catch(() => {});
+          await saveOnboardingStep(family.id, "reveal").catch(() => {});
           router.replace("/reveal" as never);
           return;
         }

@@ -14,6 +14,7 @@ import {
   reportOnboardingStep,
   saveOnboardingState,
   type DraftKid,
+  type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
 import { fetchReactLine } from "../../features/onboarding/react-lines";
 import { addChild, getMyChildren } from "../../lib/family";
@@ -84,6 +85,10 @@ export default function KidsScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const reported = useRef(false);
+  // The intent picked before this screen; carried through every save so
+  // a kids write never wipes it (answers are stored whole, live bug
+  // 2026-08-19).
+  const intentRef = useRef<OnboardingIntent | undefined>(undefined);
 
   const kid = kids[kids.length - 1];
 
@@ -94,6 +99,7 @@ export default function KidsScreen() {
     // Resume with her words still there: hydrate drafts saved by a
     // previous sitting and land on the first unanswered field.
     void loadOnboardingAnswers(family.id).then((answers) => {
+      intentRef.current = answers?.intent;
       const saved = answers?.kids;
       if (!saved || saved.length === 0) return;
       setKids(saved);
@@ -108,7 +114,10 @@ export default function KidsScreen() {
   // Every answer is durable the moment it lands (pause-anywhere law).
   useEffect(() => {
     if (!family) return;
-    void saveOnboardingState(family.id, "kids", { kids });
+    void saveOnboardingState(family.id, "kids", {
+      ...(intentRef.current ? { intent: intentRef.current } : {}),
+      kids,
+    });
   }, [family, kids]);
 
   function updateKid(patch: Partial<DraftKid>) {
