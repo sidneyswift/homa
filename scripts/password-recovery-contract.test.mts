@@ -7,7 +7,9 @@ const files = {
   confirmRoute: "apps/web/app/auth/confirm/route.ts",
   forgotForm: "apps/web/app/forgot-password/forgot-password-form.tsx",
   forgotPage: "apps/web/app/forgot-password/page.tsx",
+  mobileEmailDoor: "apps/mobile/src/app/(auth)/email.tsx",
   mobileSignIn: "apps/mobile/src/app/(auth)/signin.tsx",
+  mobileSignInCode: "apps/mobile/src/features/auth/sign-in-code.ts",
   recoveryTemplate: "supabase/templates/recovery.html",
   recoveryTemplateScript: "scripts/supabase-password-recovery-template.mts",
   resetForm: "apps/web/app/reset-password/reset-password-form.tsx",
@@ -73,10 +75,36 @@ test("the web reset form validates and writes the new password", async () => {
   assert.match(form, /updateUser\(\{ password \}\)/u);
 });
 
-test("mobile requests the same browser-hosted recovery flow", async () => {
-  const signIn = await source(files.mobileSignIn);
+/**
+ * Mobile left this contract on purpose. Founder ruling 2026-08-18: the app
+ * has no password, so there is nothing to recover and no reset flow to keep
+ * in step with web. This used to assert the opposite, and the assertion is
+ * inverted rather than deleted so the absence stays guarded: a password field
+ * reappearing on the phone would quietly reintroduce a recovery path that no
+ * longer exists anywhere in the app.
+ *
+ * Web is unchanged and every test above still holds it to the full flow.
+ */
+test("mobile has no password to recover", async () => {
+  const [signIn, emailDoor] = await Promise.all([
+    source(files.mobileSignIn),
+    source(files.mobileEmailDoor),
+  ]);
 
-  assert.match(signIn, /resetPasswordForEmail/u);
-  assert.match(signIn, /passwordRecoveryRedirectUrl/u);
-  assert.match(signIn, /Send reset link/u);
+  for (const screen of [signIn, emailDoor]) {
+    assert.doesNotMatch(screen, /resetPasswordForEmail/u);
+    assert.doesNotMatch(screen, /passwordRecoveryRedirectUrl/u);
+    assert.doesNotMatch(screen, /Send reset link/u);
+    assert.doesNotMatch(screen, /secureTextEntry/u);
+  }
+});
+
+test("mobile signs in with a one time code instead", async () => {
+  const code = await source(files.mobileSignInCode);
+
+  assert.match(code, /signInWithOtp/u);
+  assert.match(code, /verifyOtp/u);
+  // type "email" is the one Supabase accepts for an email OTP, verified
+  // against production 2026-08-18. A wrong type fails only at runtime.
+  assert.match(code, /type: "email"/u);
 });

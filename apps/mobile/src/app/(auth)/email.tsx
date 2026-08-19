@@ -14,7 +14,7 @@ import {
   checkEmailCode,
   normalizeEmail,
   sendEmailCode,
-} from "../../features/auth/email-code";
+} from "../../features/auth/sign-in-code";
 import { LegalLine } from "../../features/auth/legal-line";
 import { useSession } from "../../features/auth/session-provider";
 import { quietColors } from "../../theme/native-projection";
