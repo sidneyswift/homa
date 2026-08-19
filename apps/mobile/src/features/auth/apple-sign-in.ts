@@ -34,8 +34,14 @@ export async function signInWithApple(): Promise<SignInFlowResult> {
     ) {
       return { status: "dismissed" };
     }
+    // Anything else out of the sheet is Apple's refusal, and Apple has
+    // already put its own dialog in front of the parent naming the cause
+    // and offering Settings. A parent with no Apple Account signed in
+    // lands here with ERR_REQUEST_UNKNOWN, which is not a cancel: before
+    // this split Homa answered that correct dialog with "try again when
+    // you're ready", advice that could never work.
     return {
-      status: "failed",
+      status: "provider-declined",
       reason: error instanceof Error ? error.message : "apple sheet failed",
     };
   }

@@ -373,7 +373,7 @@
         "A missing or failed code never silently reports a signed-in state.",
         "The authenticated Supabase session remains the only authority for family identity."
       ],
-      "scopedInputFingerprint": "619a5b4c66b15422570f956f20ad4109d0e210594f8d12a0a5adb773f0df893d"
+      "scopedInputFingerprint": "798b2bbbe2f79a5c1e7abc1a441185677f7c2f6bd4a9ef571da5b3a5807744da"
     },
     {
       "id": "apple-identity",
@@ -449,7 +449,7 @@
         "Email and Google remain available as truthful alternatives.",
         "Native identity is tied to the configured bundle identifier, not a client-supplied family ID."
       ],
-      "scopedInputFingerprint": "97270a572eb032f4411ea806539917e32d2001ab153282b9034ef0391b1fc9ef"
+      "scopedInputFingerprint": "da8b803ad1310386af9f288f426fd31396a02db0ed77ffdfd7f962c1a64de452"
     },
     {
       "id": "apple-subscription-management",
@@ -608,7 +608,7 @@
       },
       {
         "path": "apps/mobile/src/app/(auth)/signin.tsx",
-        "sha256": "de905be38d74e79b5d7e7f3402ee77a878f64fbd7c4cd159435ea4ad94418f39"
+        "sha256": "492f5e8879b096f43a686bd10d392261a572d75a4329263ae944ceea862cc677"
       },
       {
         "path": "apps/mobile/src/app/settings.tsx",
@@ -620,11 +620,11 @@
       },
       {
         "path": "apps/mobile/src/features/auth/apple-sign-in.ts",
-        "sha256": "82d48fbe179390613e9d019e84453f1c7bc9fe4809225c8b9dbdf266a6e6cf9f"
+        "sha256": "ce675053be44bdaf40b97028185eb255940af13eac268b291a8589c0984edbb2"
       },
       {
         "path": "apps/mobile/src/features/auth/google-sign-in.ts",
-        "sha256": "715e31b07b74760c1e467fbc3fd40123774916dd1d045d0e09efb26f66981037"
+        "sha256": "25b264da2726988f6d803ccef474fb8e4ed905924788fa30b204955d31d53f3a"
       },
       {
         "path": "apps/mobile/src/features/billing/constants.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "ae4957323d9f36b4b2a4a34a08c98c1796601cf73b74e7c57e8d2aac3cb80f3b"
+    "sourceFingerprint": "ebd049700921fb1d348505735708821298a098295b7753e33e30b4299b3808f0"
   }
 }
