@@ -349,7 +349,6 @@ export default function KidsScreen() {
                   {reactLine ?? "…"}
                 </NativeText>
               </Card>
-              <KidCard kid={kid} pendingLabel="working on: …" />
               <Button label="Next" size="lg" onPress={() => goTo("working")} />
               <Button label="Back" variant="ghost" onPress={goBack} />
             </View>
