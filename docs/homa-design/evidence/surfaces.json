@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "195aefdd54625aa624df6dcc4fb2699abffc22d329fb4582b8ab536ceecf95cf",
+  "ownedInputFingerprint": "aa33ceb391d8e3b03adf4e3a695717784e4ba8b3e03059bba5d54e4c2553bb2e",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -6406,7 +6406,8 @@
       ],
       "requiredStates": [
         "default",
-        "permission"
+        "permission",
+        "success"
       ],
       "viewports": [
         "compact-native",
@@ -6429,7 +6430,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "65f70bcd2ba1938bebf14ddc6643d7ffe6408ea86f5f477a57fcec6839fbe5c5",
+        "fixtureChecksum": "209cbc4a65a0015b389d0c595ed1dd2bf3fec9741d9615b653339ccef9ea3b53",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -6461,7 +6462,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "65f70bcd2ba1938bebf14ddc6643d7ffe6408ea86f5f477a57fcec6839fbe5c5"
+        "209cbc4a65a0015b389d0c595ed1dd2bf3fec9741d9615b653339ccef9ea3b53"
       ],
       "disposition": "regenerate-derived",
       "featureFlags": [],
@@ -6480,8 +6481,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "8d308558c40134587cac3ed774bf6a57f83dae0c",
-        "sourceCommitTimestamp": "2026-08-03T03:36:44-04:00",
+        "sourceCommitSha": "caf50e79fa207e2d2065386efce1c57ba5d2d5d3",
+        "sourceCommitTimestamp": "2026-08-20T16:42:54-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,

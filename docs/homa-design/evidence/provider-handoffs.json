@@ -373,7 +373,7 @@
         "A missing or failed code never silently reports a signed-in state.",
         "The authenticated Supabase session remains the only authority for family identity."
       ],
-      "scopedInputFingerprint": "798b2bbbe2f79a5c1e7abc1a441185677f7c2f6bd4a9ef571da5b3a5807744da"
+      "scopedInputFingerprint": "7a261493c1a1af588d02d305b153735f03252fae65c38117684d012a86c58d4e"
     },
     {
       "id": "apple-identity",
@@ -449,7 +449,7 @@
         "Email and Google remain available as truthful alternatives.",
         "Native identity is tied to the configured bundle identifier, not a client-supplied family ID."
       ],
-      "scopedInputFingerprint": "da8b803ad1310386af9f288f426fd31396a02db0ed77ffdfd7f962c1a64de452"
+      "scopedInputFingerprint": "8bd319071f56390ce129d4e601e61d786eeaf2725f23f311479777a869c56622"
     },
     {
       "id": "apple-subscription-management",
@@ -604,7 +604,7 @@
     "bindings": [
       {
         "path": "apps/mobile/app.json",
-        "sha256": "65f70bcd2ba1938bebf14ddc6643d7ffe6408ea86f5f477a57fcec6839fbe5c5"
+        "sha256": "209cbc4a65a0015b389d0c595ed1dd2bf3fec9741d9615b653339ccef9ea3b53"
       },
       {
         "path": "apps/mobile/src/app/(auth)/signin.tsx",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "6888de67ed19b740599cb7108532aeac2645d47e0ca0c4b982f993b8db4465a4"
+    "sourceFingerprint": "cbe846d95d9eccbd36f30025842256c5e32930a452a1c84bfa35932817b911fd"
   }
 }
