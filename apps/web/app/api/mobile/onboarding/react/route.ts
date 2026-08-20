@@ -40,9 +40,14 @@ const INTENT_FALLBACKS: Record<string, string> = {
 
 const LOVE_FALLBACK = "Noted, and I know exactly what to do with that.";
 
+// U+2014 EM DASH, written as a code point so this enforcement line
+// itself never trips the repo's own em-dash lint (AGENTS.md: no em
+// dash, ever, anywhere, including in code that checks for one).
+const EM_DASH = String.fromCharCode(0x2014);
+
 /** The register floor the model must clear; violations fall back. */
 function violatesVoice(line: string): boolean {
-  if (line.includes("—")) return true; // no em dash, ever
+  if (line.includes(EM_DASH)) return true;
   if (/\b(behind|ahead of|smarter than)\b/iu.test(line)) return true;
   return false;
 }
