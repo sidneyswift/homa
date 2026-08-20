@@ -21,7 +21,8 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "Homa uses your microphone when you choose to talk or record a lesson.",
         "NSCameraUsageDescription": "Homa may use your camera during a live conversation when you choose to share what you are seeing.",
-        "NSCalendarsWriteOnlyAccessUsageDescription": "Homa adds only the planner items you choose. It cannot read your calendar."
+        "NSCalendarsWriteOnlyAccessUsageDescription": "Homa adds only the planner items you choose. It cannot read your calendar.",
+        "NSCalendarsUsageDescription": "Homa only adds the planner items you choose to your calendar. It never reads what is already there."
       }
     },
     "android": {
