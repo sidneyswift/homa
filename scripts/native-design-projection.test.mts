@@ -108,8 +108,21 @@ test("the legacy TextField API delegates to NativeField without its own visual s
 });
 
 test("the sign-in journey keeps oversized Dynamic Type content inside its scroll origin", () => {
-  assert.match(signInSource, /useWindowDimensions\(\)/u);
-  assert.match(signInSource, /justifyContent:\s*fontScale\s*>=\s*2\s*\?\s*"flex-start"\s*:\s*"center"/u);
+  // Rebuilt in #985 (2026-08-18): the old mechanism measured fontScale
+  // via useWindowDimensions() and flipped justifyContent between
+  // "center" and "flex-start" past a threshold, so tall content would
+  // not center itself above the scroll origin. The new mechanism is
+  // structural rather than threshold-based: a ScrollView whose content
+  // container grows to fit, with a shrinkable top spacer that yields
+  // space to oversized content instead of centering the whole block.
+  // Content stays anchored at the top by ordinary flow at every text
+  // size, so there is no fontScale check left to assert on; the
+  // guarantee is that the layout can never depend on the fragile
+  // measure-then-flip pattern the old screen used.
+  assert.match(signInSource, /<ScrollView/u);
+  assert.match(signInSource, /contentContainerStyle=\{\{[\s\S]*?flexGrow:\s*1/u);
+  assert.match(signInSource, /flexShrink:\s*1/u);
+  assert.doesNotMatch(signInSource, /useWindowDimensions\(\)/u);
   assert.doesNotMatch(signInSource, /maxFontSizeMultiplier|allowFontScaling|adjustsFontSizeToFit/u);
 });
 

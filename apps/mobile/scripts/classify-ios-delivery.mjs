@@ -139,14 +139,34 @@ function run(command, args, cwd = MOBILE_ROOT) {
   });
 }
 
-function gitIsAncestor(ancestor, sourceSha) {
+/**
+ * `git merge-base --is-ancestor` exits 0 (yes), 1 (no), or something else
+ * (commonly 128, "fatal: Not a valid object name") when the build's commit
+ * is not reachable from any ref this checkout fetched. That last case is
+ * expected and recurring, not exceptional: squash-merging a PR rewrites
+ * away the original commit, so the FIRST push after every squash merge
+ * following a production store build finds that build's recorded commit
+ * orphaned (issue #988). An unresolvable commit cannot be an ancestor of
+ * anything, so classification treats it as a clean "no" (fail closed:
+ * the build is excluded, never wrongly trusted) instead of crashing the
+ * whole run. A spawn failure (git itself did not run) still throws, since
+ * that is a real environment problem, not an expected history gap.
+ */
+export function gitIsAncestor(ancestor, sourceSha) {
   const result = spawnSync("git", ["merge-base", "--is-ancestor", ancestor, sourceSha], {
     cwd: REPO_ROOT,
-    stdio: "ignore",
+    stdio: ["ignore", "ignore", "pipe"],
   });
+  if (result.error) {
+    throw new Error(`git did not run to compare build commit ${ancestor} with ${sourceSha}: ${result.error.message}`);
+  }
   if (result.status === 0) return true;
   if (result.status === 1) return false;
-  throw new Error(`git could not compare build commit ${ancestor} with ${sourceSha}`);
+  const stderr = result.stderr?.toString("utf8").trim();
+  console.error(
+    `iOS delivery classifier: build commit ${ancestor} is not in this checkout's history (commonly a squash merge orphaning the last production build's commit; see issue #988).${stderr ? ` git said: ${stderr}` : ""}`,
+  );
+  return false;
 }
 
 function changedPathsForCommit(sourceSha) {

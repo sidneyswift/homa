@@ -24,6 +24,15 @@ const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
   "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185",
   "df1c2954b93068385ec6953288f53b4739546f6924b32893ae8415e30af206b3",
   "fe317dd3e9891273f4ea8307c9c9e4213a0181b75d86b6eda4287101a3550157",
+  // .github/workflows/production-schema-reconciliation.yml, re-pinned
+  // 2026-08-20 after the file's bytes drifted from whatever hash was
+  // previously audited. Read end to end: a founder-only, main-only,
+  // actor-gated, read-only Supabase pooler reconciliation job. Its
+  // shell steps use $VAR interpolation and a `node <<'NODE'` heredoc,
+  // which the conservative scanner treats as dynamic-command risk on
+  // any non-mobile workflow; there is no eas/build/submit invocation
+  // anywhere in the file.
+  "d067bc652d507ab3d7a2c765daba2aacc6465ad45c4d4c6e0d9df0c540af327b",
 ]);
 const require = createRequire(import.meta.url);
 

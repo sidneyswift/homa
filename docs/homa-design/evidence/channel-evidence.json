@@ -372,7 +372,7 @@
         "selector": "distribution-asset",
         "surfaceCount": 72,
         "surfaceIdsFingerprint": "27ef92cc05818d1d9caebc2898d5e9161ea47a6082f149064d8531f9c6f3ed9e",
-        "scopedInputFingerprint": "acac1ba7410ee6237530abb35718cea402ad5d93fcae3c39f5416d2b3310a7df"
+        "scopedInputFingerprint": "5a03099a7fdb82880ed8720a057f3d90bb25b72efcef0bab52270ce411ea8542"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/distribution-asset.json",
       "fixtureChecksum": "1b7669dcaca9728eca86d8c7be1e1f68a599f7cabb813286611a981e9cdccf18",

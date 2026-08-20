@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import test from "node:test";
 
 import {
   classifyChangedPath,
   classifyIosDelivery,
+  gitIsAncestor,
   normalizeIosBuild,
 } from "./classify-ios-delivery.mjs";
 
@@ -122,6 +124,24 @@ test("malformed fingerprints fail before release classification", () => {
     () => normalizeIosBuild(build({ fingerprint: { hash: "not-an-expo-fingerprint" } })),
     /missing required release provenance/u,
   );
+});
+
+test("gitIsAncestor degrades an unresolvable commit to false instead of throwing (issue #988)", () => {
+  // A well-formed but nonexistent object: the exact failure mode a
+  // squash-merged-away production build commit produces. This must
+  // resolve to false (excluded from OTA eligibility), never throw and
+  // crash the whole classification run.
+  const orphaned = "9".repeat(40);
+  const here = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  assert.equal(gitIsAncestor(orphaned, here), false);
+});
+
+test("gitIsAncestor still finds a real, reachable ancestor", () => {
+  const root = execFileSync("git", ["rev-list", "--max-parents=0", "HEAD"], { encoding: "utf8" })
+    .trim()
+    .split("\n")[0];
+  const here = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  assert.equal(gitIsAncestor(root, here), true);
 });
 
 test("changed-path categories explain the input without overriding fingerprint authority", () => {
