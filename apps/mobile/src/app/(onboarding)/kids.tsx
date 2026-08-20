@@ -493,35 +493,3 @@ function Chip({
     </Pressable>
   );
 }
-
-/** The possession: the child's card, assembling as answers land. */
-function KidCard({
-  kid,
-  pendingLabel,
-}: {
-  kid: DraftKid;
-  pendingLabel?: string;
-}) {
-  const workingLine = kid.workingOn
-    ? `working on ${kid.workingOn.toLowerCase()}${
-        kid.level ? ` · ${kid.level.replace("_", " ")}` : ""
-      }`
-    : pendingLabel ?? null;
-  return (
-    <Card style={{ gap: space.xs, borderColor: colors.textStrong, borderWidth: 1.5 }}>
-      <NativeText role="bodyLarge" tone="strong">
-        {`${kid.name.trim()}${kid.age !== null ? `, ${kid.age}` : ""}`}
-      </NativeText>
-      {kid.love ? (
-        <NativeText role="body" tone="body">
-          {`loves ${kid.love}`}
-        </NativeText>
-      ) : null}
-      {workingLine ? (
-        <NativeText role="body" tone="muted">
-          {workingLine}
-        </NativeText>
-      ) : null}
-    </Card>
-  );
-}
