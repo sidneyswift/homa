@@ -52,13 +52,18 @@ export async function signInWithGoogle(): Promise<SignInFlowResult> {
   const { queryParams } = Linking.parse(outcome.url);
   const code = typeof queryParams?.code === "string" ? queryParams.code : null;
   if (!code) {
-    const returned =
+    // Google naming its own refusal in the callback means the parent
+    // already read it on Google's page, so Homa stays quiet. A callback
+    // carrying neither a code nor a reason explained nothing to anyone,
+    // so that one speaks.
+    const declined =
       typeof queryParams?.error_description === "string"
         ? queryParams.error_description
         : typeof queryParams?.error === "string"
           ? queryParams.error
-          : "callback carried no code";
-    return { status: "failed", reason: returned };
+          : null;
+    if (declined) return { status: "provider-declined", reason: declined };
+    return { status: "failed", reason: "callback carried no code" };
   }
 
   const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);

@@ -28,8 +28,18 @@ jest.mock("expo-router", () => {
         accessible: true,
         accessibilityLabel: `Redirect to ${href}`,
       }),
+    // The entry screen routes to the email door, so the mock has to carry
+    // useRouter or the whole screen throws before a single assertion runs.
+    // push is hoisted so a test can assert where the door leads.
+    useRouter: () => ({
+      push: mockRouterPush,
+      back: jest.fn(),
+      replace: jest.fn(),
+    }),
   };
 });
+
+const mockRouterPush = jest.fn();
 
 jest.mock("expo-apple-authentication", () => {
   const React = jest.requireActual("react");
@@ -103,7 +113,7 @@ const shareRequest: PreparedMaterialShareRequest = {
   suggestedMessage: "Here are Mia's reading cards.",
 };
 
-describe("native entry and recovery accessibility", () => {
+describe("native entry accessibility", () => {
   beforeEach(() => {
     process.env.EXPO_PUBLIC_API_URL = "https://thankshoma.com";
     mockUseSession.mockReturnValue({
@@ -123,6 +133,7 @@ describe("native entry and recovery accessibility", () => {
     mockSignInWithApple.mockResolvedValue({ status: "dismissed" });
     mockOpenWebOnboarding.mockReset();
     mockOpenWebOnboarding.mockResolvedValue(undefined);
+    mockRouterPush.mockReset();
     jest
       .spyOn(AccessibilityInfo, "isScreenReaderEnabled")
       .mockResolvedValue(true);
@@ -131,91 +142,86 @@ describe("native entry and recovery accessibility", () => {
       .mockImplementation(() => undefined);
   });
 
-  it("keeps every entry action named and recovers from an empty submit", async () => {
+  it("names three doors and offers nothing else to get wrong", async () => {
     const view = await render(<SignInScreen />);
 
     const entryActions = view.getAllByRole("button");
     expect(entryActions[0]).toHaveAccessibleName("Continue with Apple");
     expect(entryActions[1]).toHaveAccessibleName("Continue with Google");
+    expect(entryActions[2]).toHaveAccessibleName("Continue with email");
 
-    expect(view.getByLabelText("Email")).toHaveStyle({ minHeight: 48 });
-    expect(view.getByLabelText("Password")).toHaveProp(
-      "secureTextEntry",
-      true,
-    );
+    // One silhouette. Apple's component takes an exact height, ours a floor.
     expect(
       view.getByRole("button", { name: "Continue with Apple" }),
     ).toHaveStyle({ height: 52 });
-    expect(
-      view.getByRole("button", { name: "Continue with Google" }),
-    ).toHaveStyle({ minHeight: 52 });
+    for (const name of ["Continue with Google", "Continue with email"]) {
+      expect(view.getByRole("button", { name })).toHaveStyle({ minHeight: 52 });
+    }
 
-    await fireEvent.press(view.getByRole("button", { name: "Sign in" }));
-    expect(
-      await view.findByLabelText(
-        "Error. Email and password are both needed.",
-      ),
-    ).toBeVisible();
+    // Founder ruling 2026-08-18: no password anywhere in this app, so no
+    // credential fields and no recovery action for a parent to find.
+    expect(view.queryByLabelText("Email")).toBeNull();
+    expect(view.queryByLabelText("Password")).toBeNull();
+    expect(view.queryByRole("button", { name: "Sign in" })).toBeNull();
+    expect(view.queryByRole("button", { name: "Send reset link" })).toBeNull();
     expect(mockSignInWithPassword).not.toHaveBeenCalled();
+    expect(mockResetPasswordForEmail).not.toHaveBeenCalled();
 
-    await fireEvent.press(
-      view.getByRole("button", { name: "Open onboarding" }),
-    );
-    expect(mockOpenWebOnboarding).toHaveBeenCalledTimes(1);
+    // No route out to the web. Setup finishes in the app.
+    expect(view.queryByRole("button", { name: "Open onboarding" })).toBeNull();
+    expect(mockOpenWebOnboarding).not.toHaveBeenCalled();
   });
 
-  it("normalizes recovery email and announces the privacy-safe receipt", async () => {
+  it("tells a stranger this screen is for them too, and links both documents", async () => {
     const view = await render(<SignInScreen />);
-    await fireEvent.changeText(
-      view.getByLabelText("Email"),
-      "  MOM@EXAMPLE.COM  ",
-    );
-    await fireEvent.press(
-      view.getByRole("button", { name: "Send reset link" }),
-    );
 
-    await waitFor(() => {
-      expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
-        "mom@example.com",
-        { redirectTo: "https://thankshoma.com/reset-password/confirm" },
-      );
-    });
-    const receipt =
-      "If that email is connected to Homa, a reset link is on its way. It may take a minute.";
-    expect(await view.findByText(receipt)).toBeVisible();
-    await waitFor(() => {
-      expect(
-        jest
-          .mocked(AccessibilityInfo.announceForAccessibility)
-          .mock.calls.filter(([message]) => message === receipt),
-      ).toHaveLength(1);
-    });
+    // Every critic in the design loop asked for this line independently: a
+    // door list says nothing about whether a new parent belongs here.
+    expect(
+      view.getByText("New here or coming back, any of these gets you in."),
+    ).toBeVisible();
+
+    for (const name of ["Terms of use", "Privacy policy"]) {
+      expect(view.getByRole("link", { name })).toBeVisible();
+    }
   });
 
-  it("exposes sign-in work as busy while preventing duplicate actions", async () => {
-    let settleSignIn: ((value: { error: null }) => void) | undefined;
-    mockSignInWithPassword.mockReturnValue(
+  it("routes the email door to its own step", async () => {
+    const view = await render(<SignInScreen />);
+    await fireEvent.press(
+      view.getByRole("button", { name: "Continue with email" }),
+    );
+    expect(mockRouterPush).toHaveBeenCalledWith("/email");
+  });
+
+  it("exposes provider work as busy while preventing duplicate actions", async () => {
+    let settleGoogle: ((value: { status: string }) => void) | undefined;
+    mockSignInWithGoogle.mockReturnValue(
       new Promise((resolve) => {
-        settleSignIn = resolve;
+        settleGoogle = resolve;
       }),
     );
     const view = await render(<SignInScreen />);
-    await fireEvent.changeText(view.getByLabelText("Email"), "mom@example.com");
-    await fireEvent.changeText(view.getByLabelText("Password"), "correct horse");
-    await fireEvent.press(view.getByRole("button", { name: "Sign in" }));
+    await fireEvent.press(
+      view.getByRole("button", { name: "Continue with Google" }),
+    );
 
-    const pending = view.getByRole("button", { name: "One moment…" });
+    const pending = view.getByRole("button", { name: "Opening Google…" });
     expect(pending).toBeDisabled();
     expect(pending).toBeBusy();
+    // One door open at a time, including the email door, which navigates
+    // rather than authenticates and would otherwise leave a live attempt behind.
     expect(
-      view.getByRole("button", { name: "Continue with Google" }),
+      view.getByRole("button", { name: "Continue with email" }),
     ).toBeDisabled();
 
     await act(async () => {
-      settleSignIn?.({ error: null });
+      settleGoogle?.({ status: "dismissed" });
     });
     await waitFor(() =>
-      expect(view.getByRole("button", { name: "Sign in" })).toBeEnabled(),
+      expect(
+        view.getByRole("button", { name: "Continue with Google" }),
+      ).toBeEnabled(),
     );
   });
 });

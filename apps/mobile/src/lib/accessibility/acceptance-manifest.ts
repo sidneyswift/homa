@@ -78,6 +78,7 @@ export const nativeAccessibilityJourneys: readonly NativeAccessibilityJourney[] 
     status: "blocked",
     surfaces: [
       "apps/mobile/src/app/(auth)/signin.tsx",
+      "apps/mobile/src/app/(auth)/email.tsx",
       "apps/mobile/src/app/_layout.tsx",
       "apps/mobile/src/components/family-readiness-gate.tsx",
       "apps/mobile/src/components/ai-consent-gate.tsx",
@@ -146,7 +147,8 @@ export const nativeAccessibilityJourneys: readonly NativeAccessibilityJourney[] 
 /** Every Expo surface is classified. New files must declare an owner here. */
 export const nativeAccessibilitySurfaces: readonly NativeAccessibilitySurface[] = [
   { file: "apps/mobile/src/app/_layout.tsx", kind: "layout", owner: "gh#299", reason: "Root bootstrap and navigation shell." },
-  { file: "apps/mobile/src/app/(auth)/signin.tsx", kind: "priority", owner: "gh#304", reason: "Entry and account recovery." },
+  { file: "apps/mobile/src/app/(auth)/signin.tsx", kind: "priority", owner: "gh#304", reason: "Entry. Three doors, no password, no account recovery to reach." },
+  { file: "apps/mobile/src/app/(auth)/email.tsx", kind: "priority", owner: "gh#304", reason: "Email door: address, then a six digit code." },
   { file: "apps/mobile/src/app/(tabs)/_layout.tsx", kind: "layout", owner: "gh#299", reason: "Signed-in shell and drawer." },
   { file: "apps/mobile/src/app/(tabs)/index.tsx", kind: "priority", owner: "gh#303", reason: "Current front-door redirect and future Today owner." },
   { file: "apps/mobile/src/app/(tabs)/voice.tsx", kind: "priority", owner: "gh#534", reason: "Default capture surface." },

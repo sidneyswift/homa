@@ -15,7 +15,6 @@ function run(command) {
 }
 
 for (const command of [
-  "git push origin main",
   "git -C /tmp/example worktree remove /tmp/example/old",
   "bash -c 'git -C /tmp/example worktree remove --force /tmp/example/old'",
   "zsh -lc \"git reset --hard HEAD~1\"",
@@ -33,7 +32,12 @@ for (const command of [
   "git branch --delet --forc stale-branch",
   "git worktree prune --expire now",
   "git restore .",
+  // Every force variant, including the lease. Publishing plainly is allowed
+  // below; rewriting published history is not, and the lease is safer but
+  // still a rewrite.
   "git push --force-with-lease origin main",
+  "git push --force origin main",
+  "git push -f origin main",
 ]) {
   test(`blocks ${command}`, () => {
     const result = run(command);
@@ -46,6 +50,12 @@ for (const command of [
   "git status --short",
   "git -C /tmp/example worktree list --porcelain",
   "node scripts/remove-worktree-safely.mjs --help",
+  // Publishing a branch destroys nothing and is reversible. It was blocked
+  // only because it rode along with the cleanup-safety work in 46e07344,
+  // and the cost was every agent session stopping mid-task to hand the push
+  // to a person. Force variants above are the ones that can lose work.
+  "git push",
+  "git push -u origin feature-branch",
 ]) {
   test(`allows ${command}`, () => {
     const result = run(command);
