@@ -12,6 +12,7 @@ import { useBillingGate } from "../features/billing/use-billing-gate";
 import { useSession } from "../features/auth/session-provider";
 import { AddChildForm } from "../features/family/add-child-form";
 import { useFamilyData } from "../features/family/use-family-data";
+import { resetOnboardingWalk } from "../features/onboarding/onboarding-state";
 import { supabase } from "../lib/supabase";
 import { useAccessibilityAnnouncement } from "../lib/accessibility";
 import {
@@ -184,6 +185,19 @@ export default function SettingsScreen() {
             variant="ghost"
             onPress={() => router.push("/settings/delete-account")}
           />
+          {__DEV__ && family ? (
+            // Dev-only iteration lever (2026-08-18): rewinds the native
+            // onboarding walk so it can be replayed. Not in release builds.
+            <Button
+              label="↺ dev: restart onboarding walk"
+              variant="ghost"
+              onPress={() =>
+                void resetOnboardingWalk(family.id).then(() =>
+                  router.replace("/"),
+                )
+              }
+            />
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

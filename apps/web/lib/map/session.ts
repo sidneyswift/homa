@@ -55,6 +55,35 @@ export async function requireFamilyFromBearer(
   return (await requireFamilyWithActorFromBearer(request))?.family ?? null;
 }
 
+/**
+ * Verifies a mobile bearer token down to the auth USER, without requiring
+ * a family yet. Exists for exactly one moment in the product: the native
+ * onboarding bootstrap, where a mobile-born account arrives signed in but
+ * family-less and the server must create its family (v1 plan 2026-08-18).
+ * Every other mobile route wants requireFamilyFromBearer; a route that
+ * uses this and then touches family data by id from the body is a
+ * tenancy bug.
+ */
+export async function requireAuthUserFromBearer(
+  request: Request,
+): Promise<{ userId: string; email: string | null } | null> {
+  const token = extractBearerToken(request.headers.get("authorization"));
+  if (!token) return null;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return null;
+
+  const supabase = createClient(url, key, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return null;
+  return { userId: data.user.id, email: data.user.email ?? null };
+}
+
 export async function requireFamilyWithAiConsentFromBearer(
   request: Request,
 ): Promise<{

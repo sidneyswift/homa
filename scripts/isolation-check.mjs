@@ -590,6 +590,13 @@ async function workingPlansSchemaExists() {
   return rows[0]?.present === true;
 }
 
+async function mobileOnboardingStateSchemaExists() {
+  const rows = await sql`
+    select to_regclass('public.mobile_onboarding_state') is not null as present
+  `;
+  return rows[0]?.present === true;
+}
+
 async function familyAssetTrainingSchemaIsIsolated() {
   const [presence] = await sql`
     select to_regnamespace('training') is not null as schema_exists
@@ -2884,6 +2891,13 @@ async function expectAuthenticatedIsolation() {
           `
         )[0]?.id
       : null;
+    const mobileOnboardingStateSchemaAvailable = await mobileOnboardingStateSchemaExists();
+    if (mobileOnboardingStateSchemaAvailable) {
+      await sql`
+        insert into public.mobile_onboarding_state (family_id, step, answers)
+        values (${familyBId}, 'kids', '{}'::jsonb)
+      `;
+    }
     const materialBId = await insertFixtureRow(
       familyBUser,
       "materials",
@@ -4591,6 +4605,61 @@ async function expectAuthenticatedIsolation() {
           label,
           true,
           "not yet enforced: the working_plans migration is pending on this target",
+        );
+      }
+    }
+
+    if (mobileOnboardingStateSchemaAvailable) {
+      await expectAuthenticatedRead(
+        familyBUser.accessToken,
+        "mobile_onboarding_state",
+        familyBId,
+        1,
+        "auth member can read own onboarding state",
+        "family_id",
+      );
+      await expectAuthenticatedRead(
+        familyAUser.accessToken,
+        "mobile_onboarding_state",
+        familyBId,
+        0,
+        "auth member cannot read another family's onboarding state",
+        "family_id",
+      );
+      await expectAuthenticatedInsertDenied(
+        familyAUser.accessToken,
+        "mobile_onboarding_state",
+        {
+          family_id: familyBId,
+          step: "kids",
+          answers: {},
+        },
+        "auth member cannot forge another family's onboarding state",
+      );
+      // Real member-scoped USING/WITH CHECK, not a hard deny: RLS filters
+      // the row out of the update set, so this is a filtered-count check
+      // rather than expectAuthenticatedUpdateDenied's 401/403 check.
+      await expectAuthenticatedUpdateFiltered(
+        familyAUser.accessToken,
+        "mobile_onboarding_state",
+        "family_id",
+        familyBId,
+        { step: "next" },
+        0,
+        "auth member cannot update another family's onboarding state",
+      );
+    } else {
+      coveredTables.add("mobile_onboarding_state");
+      for (const label of [
+        "auth member can read own onboarding state",
+        "auth member cannot read another family's onboarding state",
+        "auth member cannot forge another family's onboarding state",
+        "auth member cannot update another family's onboarding state",
+      ]) {
+        report(
+          label,
+          true,
+          "not yet enforced: the mobile_onboarding_state migration is pending on this target",
         );
       }
     }

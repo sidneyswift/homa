@@ -138,6 +138,34 @@ export type MobileBootstrapFailureReason =
   (typeof MOBILE_BOOTSTRAP_FAILURE_REASONS)[number];
 
 /**
+ * Native onboarding flow steps, in walk order (wireframe v4 and the plan
+ * doc 2026-08-18-mobile-onboarding-v1-plan.md). "making" and "reveal" are
+ * the worksheet aha's two halves; print outcomes ride the existing
+ * materials.print_result event rather than a duplicate name here.
+ */
+export const MOBILE_ONBOARDING_STEPS = [
+  "door",
+  "hello",
+  "intent",
+  "kids",
+  "making",
+  "reveal",
+  "next",
+] as const;
+export type MobileOnboardingStep = (typeof MOBILE_ONBOARDING_STEPS)[number];
+
+/** What the parent said would help most this week (the routing tap). */
+export const MOBILE_ONBOARDING_INTENTS = [
+  "worksheets",
+  "plan",
+  "hours",
+  "research",
+  "all",
+] as const;
+export type MobileOnboardingIntent =
+  (typeof MOBILE_ONBOARDING_INTENTS)[number];
+
+/**
  * The only family-scoped analytics names a native client may submit through
  * the authenticated mobile event relay. Keeping this allowlist beside the
  * canonical schemas prevents the app and server from drifting into two
@@ -147,6 +175,9 @@ export const MOBILE_FAMILY_EVENT_NAMES = [
   "chat.turn_completed",
   "materials.print_result",
   "materials.share_result",
+  "mobile_onboarding.step_reached",
+  "mobile_onboarding.resumed",
+  "mobile_onboarding.completed",
   "planner.device_calendar_previewed",
   "planner.device_calendar_export_finished",
   CAPTURE_LOOP_EVENT_NAME,
@@ -923,6 +954,35 @@ export const EVENT_SCHEMAS = {
       answer_key_excluded: z.boolean(),
     })
     .strict(),
+  // Native onboarding funnel (v1 plan 2026-08-18). Steps are the closed
+  // walk-order enum; no answer content, no child data, ever. One
+  // step_reached per step per family is the per-screen drop-off measure;
+  // resumed distinguishes a comeback from a first arrival; completed
+  // carries only the shape of the family captured (a count) and where
+  // the parent went next. The paywall trigger instrumentation (D4: dark
+  // wall, flag-flip later) is the second_create_tapped flag.
+  "mobile_onboarding.step_reached": z
+    .object({
+      family_id: z.uuid(),
+      step: z.enum(MOBILE_ONBOARDING_STEPS),
+      intent: z.enum(MOBILE_ONBOARDING_INTENTS).optional(),
+    })
+    .strict(),
+  "mobile_onboarding.resumed": z
+    .object({
+      family_id: z.uuid(),
+      step: z.enum(MOBILE_ONBOARDING_STEPS),
+    })
+    .strict(),
+  "mobile_onboarding.completed": z
+    .object({
+      family_id: z.uuid(),
+      kids_added: z.number().int().min(0).max(20),
+      intent: z.enum(MOBILE_ONBOARDING_INTENTS),
+      next_door: z.enum(["another_worksheet", "plan_week", "look_around"]),
+      second_create_tapped: z.boolean(),
+    })
+    .strict(),
   // The native share sheet is a parent-controlled handoff, never a
   // delivery receipt. No destination app, account, message, or child
   // detail enters analytics.
@@ -1550,6 +1610,30 @@ export const mobileFamilyEventRequestSchema = z.discriminatedUnion("name", [
     .object({
       name: z.literal("materials.share_result"),
       props: EVENT_SCHEMAS["materials.share_result"].omit({ family_id: true }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("mobile_onboarding.step_reached"),
+      props: EVENT_SCHEMAS["mobile_onboarding.step_reached"].omit({
+        family_id: true,
+      }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("mobile_onboarding.resumed"),
+      props: EVENT_SCHEMAS["mobile_onboarding.resumed"].omit({
+        family_id: true,
+      }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("mobile_onboarding.completed"),
+      props: EVENT_SCHEMAS["mobile_onboarding.completed"].omit({
+        family_id: true,
+      }),
     })
     .strict(),
   z
