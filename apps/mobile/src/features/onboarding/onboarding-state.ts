@@ -32,8 +32,8 @@ export type OnboardingIntent = MobileOnboardingIntent;
 export interface DraftKid {
   name: string;
   age: number | null;
-  love: string | null;
-  workingOn: string | null;
+  love: string[];
+  workingOn: string[];
   level: "starting" | "getting_it" | "flying" | null;
   /** Set once the kid is written as a real children row. */
   childId: string | null;

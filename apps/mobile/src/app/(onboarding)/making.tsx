@@ -1,12 +1,25 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  FadeInDown,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
-import { LoadingStatus } from "../../components/ui/loading-status";
 import { NativeText } from "../../components/ui/semantic";
+import { HomaCharacter } from "../../features/voice/homa-character";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
 import {
@@ -128,6 +141,11 @@ export default function MakingScreen() {
     router.replace("/");
   }
 
+  const reduced = useReducedMotion();
+  const doneNotes = notes.slice(0, -1);
+  const currentNote = notes[notes.length - 1] ?? "Warming up the drawing table";
+  useAccessibilityAnnouncement(phase !== "failed" ? currentNote : null);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
       <View
@@ -138,6 +156,13 @@ export default function MakingScreen() {
           gap: space.md,
         }}
       >
+        {/* She is visibly at work the whole wait: the living mark from
+            the voice screen in its thinking posture, built so a silent
+            long job reads as patient drawing, never a freeze. */}
+        <View style={{ alignItems: "center", marginBottom: space.md }}>
+          <HomaCharacter state={phase === "failed" ? "idle" : "thinking"} size={120} />
+        </View>
+
         {phase !== "failed" ? (
           <>
             <NativeText role="display" tone="strong">
@@ -149,15 +174,31 @@ export default function MakingScreen() {
               Give me a minute. This part is fun.
             </NativeText>
             <Card style={{ gap: space.sm }}>
-              {notes.length === 0 ? (
-                <LoadingStatus label="Warming up the drawing table" />
-              ) : (
-                notes.map((note) => (
-                  <NativeText key={note} role="body" tone="body">
+              {/* Finished steps keep their checkmark and settle into the
+                  card; the current step carries moving ink dots instead,
+                  so live work never reads as done (founder feedback
+                  2026-08-21). */}
+              {doneNotes.map((note) => (
+                <Animated.View
+                  key={note}
+                  entering={reduced ? undefined : FadeInDown.duration(280)}
+                >
+                  <NativeText role="body" tone="muted">
                     {`✓ ${note}`}
                   </NativeText>
-                ))
-              )}
+                </Animated.View>
+              ))}
+              <View
+                accessible
+                accessibilityRole="progressbar"
+                accessibilityLabel={currentNote}
+                style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}
+              >
+                <InkDots color={colors.brand} />
+                <NativeText role="body" tone="strong">
+                  {currentNote}
+                </NativeText>
+              </View>
             </Card>
             <Button
               label="Keep exploring while it draws"
@@ -183,5 +224,62 @@ export default function MakingScreen() {
         )}
       </View>
     </SafeAreaView>
+  );
+}
+
+/**
+ * Three ink dots rising and settling in turn, the "she is drawing right
+ * now" cue on the current step. Deliberately not the OS spinner: dots
+ * in the brand ink, timed like a relaxed pen tap. Under reduced motion
+ * they hold still; the row's progressbar role still says it is live.
+ */
+function InkDots({ color }: { color: string }) {
+  const reduced = useReducedMotion();
+  const first = useSharedValue(0);
+  const second = useSharedValue(0);
+  const third = useSharedValue(0);
+
+  useEffect(() => {
+    if (reduced) return;
+    const hop = () =>
+      withRepeat(
+        withSequence(
+          withTiming(-4, { duration: 260, easing: Easing.out(Easing.quad) }),
+          withTiming(0, { duration: 300, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 520 }),
+        ),
+        -1,
+      );
+    first.value = hop();
+    second.value = withDelay(160, hop());
+    third.value = withDelay(320, hop());
+    return () => {
+      cancelAnimation(first);
+      cancelAnimation(second);
+      cancelAnimation(third);
+    };
+  }, [reduced, first, second, third]);
+
+  const firstStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: first.value }],
+  }));
+  const secondStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: second.value }],
+  }));
+  const thirdStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: third.value }],
+  }));
+
+  const dot = { width: 6, height: 6, borderRadius: 3, backgroundColor: color };
+  return (
+    <View
+      style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      <Animated.View style={[dot, firstStyle]} />
+      <Animated.View style={[dot, secondStyle]} />
+      <Animated.View style={[dot, thirdStyle]} />
+    </View>
   );
 }
