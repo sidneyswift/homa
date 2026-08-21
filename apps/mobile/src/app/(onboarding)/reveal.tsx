@@ -154,8 +154,7 @@ export default function RevealScreen() {
           />
         ) : stillWaiting ? (
           <NativeText role="body" tone="body">
-            Still finishing up. It's landing in your Binder now, so you can
-            find it there the moment it's ready.
+            {"Still finishing up. It's landing in your Binder now, so you can find it there the moment it's ready."}
           </NativeText>
         ) : (
           <LoadingStatus label="Fetching the page" />
