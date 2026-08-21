@@ -32,6 +32,13 @@ import { colors, radius, space } from "../../theme/tokens";
  * the same warmth (no-printer fork). The material is read through the
  * existing RLS paths; newest page for the first child wins.
  */
+/** The making screen hands off the instant its job flips to
+ * "completed", which can race the materials row becoming readable.
+ * Keep asking for a few seconds instead of taking one look and
+ * leaving the parent staring at a spinner forever. */
+const FETCH_RETRY_MS = 3_000;
+const FETCH_MAX_ATTEMPTS = 12;
+
 export default function RevealScreen() {
   const router = useRouter();
   const { family } = useFamilyData();
@@ -39,6 +46,7 @@ export default function RevealScreen() {
   const [childName, setChildName] = useState<string>("");
   const [printing, setPrinting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [stillWaiting, setStillWaiting] = useState(false);
   const loaded = useRef(false);
   useAccessibilityAnnouncement(notice);
 
@@ -47,19 +55,52 @@ export default function RevealScreen() {
     loaded.current = true;
     reportOnboardingStep(family.id, "reveal");
     void saveOnboardingStep(family.id, "reveal").catch(() => {});
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
     void (async () => {
       const answers = await loadOnboardingAnswers(family.id);
+      if (cancelled) return;
       const first = answers?.kids?.[0];
       if (first) setChildName(first.name.trim());
-      const [finals, drafts] = await Promise.all([
-        getFinalMaterials(family.id).catch(() => []),
-        getInProgressMaterials(family.id).catch(() => []),
-      ]);
-      const candidates = [...finals, ...drafts]
-        .filter((item) => !first?.childId || item.childId === first.childId)
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      setMaterial(candidates[0] ?? null);
+
+      const attempt = async (tries: number) => {
+        const [finals, drafts] = await Promise.all([
+          getFinalMaterials(family.id).catch(() => []),
+          getInProgressMaterials(family.id).catch(() => []),
+        ]);
+        if (cancelled) return;
+        // Unattributed pages count too: some job runs landed materials
+        // with no child id before the runner started stamping them
+        // (2026-08-21), and during onboarding the newest family page is
+        // the first making. Never claim a SIBLING's page, only unowned.
+        const candidates = [...finals, ...drafts]
+          .filter(
+            (item) =>
+              !first?.childId ||
+              item.childId === first.childId ||
+              item.childId === null,
+          )
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        const found = candidates[0] ?? null;
+        if (found) {
+          setMaterial(found);
+          return;
+        }
+        if (tries + 1 >= FETCH_MAX_ATTEMPTS) {
+          setStillWaiting(true);
+          return;
+        }
+        timer = setTimeout(() => void attempt(tries + 1), FETCH_RETRY_MS);
+      };
+      void attempt(0);
     })();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   }, [family]);
 
   async function printMaterial() {
@@ -111,6 +152,10 @@ export default function RevealScreen() {
             resizeMode="contain"
             accessibilityLabel={material?.title ?? "The finished page"}
           />
+        ) : stillWaiting ? (
+          <NativeText role="body" tone="body">
+            {"Still finishing up. It's landing in your Binder now, so you can find it there the moment it's ready."}
+          </NativeText>
         ) : (
           <LoadingStatus label="Fetching the page" />
         )}

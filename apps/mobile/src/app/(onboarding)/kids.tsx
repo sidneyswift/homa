@@ -16,6 +16,7 @@ import {
   type DraftKid,
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
+import { startFirstMaking } from "../../features/onboarding/making";
 import { fetchReactLine } from "../../features/onboarding/react-lines";
 import { addChild, getMyChildren } from "../../lib/family";
 import { colors, radius, space } from "../../theme/tokens";
@@ -67,11 +68,18 @@ const LEVELS: { key: DraftKid["level"] & string; label: string }[] = [
 const emptyKid = (): DraftKid => ({
   name: "",
   age: null,
-  love: null,
-  workingOn: null,
+  love: [],
+  workingOn: [],
   level: null,
   childId: null,
 });
+
+/** "letters", "letters and counting", "letters, counting and reading". */
+function joinNatural(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
 
 export default function KidsScreen() {
   const router = useRouter();
@@ -100,13 +108,23 @@ export default function KidsScreen() {
     // previous sitting and land on the first unanswered field.
     void loadOnboardingAnswers(family.id).then((answers) => {
       intentRef.current = answers?.intent;
-      const saved = answers?.kids;
-      if (!saved || saved.length === 0) return;
+      const rawSaved = answers?.kids;
+      if (!rawSaved || rawSaved.length === 0) return;
+      // A draft saved before love/workingOn became multi-select stored
+      // them as a plain string; coerce so an old in-progress walk never
+      // crashes joinNatural on resume.
+      const toArray = (value: unknown): string[] =>
+        Array.isArray(value) ? value : typeof value === "string" && value ? [value] : [];
+      const saved = rawSaved.map((draft) => ({
+        ...draft,
+        love: toArray(draft.love),
+        workingOn: toArray(draft.workingOn),
+      }));
       setKids(saved);
       const current = saved[saved.length - 1];
       if (!current.name.trim()) setSubStep("name");
       else if (current.age === null) setSubStep("age");
-      else if (!current.love) setSubStep("love");
+      else if (current.love.length === 0) setSubStep("love");
       else setSubStep("working");
     });
   }, [family]);
@@ -154,16 +172,38 @@ export default function KidsScreen() {
     router.replace("/intent" as never);
   }
 
-  async function loveChosen(love: string) {
+  function toggleLove(option: string) {
+    const current = kid.love;
+    const next = current.includes(option)
+      ? current.filter((item) => item !== option)
+      : [...current, option];
+    updateKid({ love: next });
+  }
+
+  function toggleWorkingOn(option: string) {
+    const current = kid.workingOn;
+    const next = current.includes(option)
+      ? current.filter((item) => item !== option)
+      : [...current, option];
+    updateKid({ workingOn: next });
+  }
+
+  async function confirmLoves() {
     if (fetchingLine) return;
-    updateKid({ love });
+    const typed = loveText.trim();
+    const loves = typed ? [...kid.love, typed] : kid.love;
+    if (loves.length === 0) return;
+    if (typed) {
+      setLoveText("");
+      updateKid({ love: loves });
+    }
     // The react screen arrives whole, once: fetch before switching
     // (founder feedback 2026-08-18, no placeholder-then-swap).
     setFetchingLine(true);
     const line = await fetchReactLine({
       kind: "love",
       childName: kid.name,
-      love,
+      love: loves.join(", "),
       priorLines,
     });
     setPriorLines((lines) => [...lines, line]);
@@ -191,9 +231,9 @@ export default function KidsScreen() {
       birthYear: approxDate.getUTCFullYear(),
       birthMonth: approxDate.getUTCMonth() + 1,
       birthDay: 15,
-      interests: kid.love ? [kid.love] : [],
-      focus: kid.workingOn
-        ? `${kid.workingOn}${kid.level ? ` (${kid.level.replace("_", " ")})` : ""}`
+      interests: kid.love,
+      focus: kid.workingOn.length
+        ? `${joinNatural(kid.workingOn)}${kid.level ? ` (${kid.level.replace("_", " ")})` : ""}`
         : "",
     });
     if (result.error) {
@@ -208,6 +248,16 @@ export default function KidsScreen() {
       .reverse()
       .find((child) => child.name.trim().toLowerCase() === childName.toLowerCase());
     if (match) updateKid({ childId: match.id });
+    // The first kid's page starts building the moment her card is
+    // complete, not when the walk ends: the bench (2026-08-21) measured
+    // 72 to 211 seconds of build time that can run underneath the
+    // remaining screens instead of after them. Idempotent server-side
+    // (one first making per child, ever), so the making screen's own
+    // start lands on this same job. Fire and forget: a lost kick costs
+    // nothing, the making screen starts it for real.
+    if (match && kids.length === 1) {
+      void startFirstMaking(match.id).catch(() => {});
+    }
     return true;
   }
 
@@ -312,11 +362,7 @@ export default function KidsScreen() {
               <NativeText role="caption" tone="muted">
                 This is my secret ingredient.
               </NativeText>
-              <ChipGrid
-                options={LOVE_CHIPS}
-                selected={kid.love}
-                onPick={(love) => void loveChosen(love)}
-              />
+              <ChipGrid options={LOVE_CHIPS} selected={kid.love} onPick={toggleLove} />
               <TextField
                 label="Or type anything"
                 value={loveText}
@@ -326,17 +372,9 @@ export default function KidsScreen() {
               <Button
                 label={fetchingLine ? "One moment…" : "Next"}
                 size="lg"
-                disabled={(!loveText.trim() && !kid.love) || fetchingLine}
+                disabled={(!loveText.trim() && kid.love.length === 0) || fetchingLine}
                 busy={fetchingLine}
-                onPress={() => {
-                  const typed = loveText.trim();
-                  if (typed) {
-                    setLoveText("");
-                    void loveChosen(typed);
-                  } else if (kid.love) {
-                    setSubStep("react");
-                  }
-                }}
+                onPress={() => void confirmLoves()}
               />
               <Button label="Back" variant="ghost" onPress={goBack} />
             </View>
@@ -365,16 +403,16 @@ export default function KidsScreen() {
               <ChipGrid
                 options={WORKING_CHIPS}
                 selected={kid.workingOn}
-                onPick={(workingOn) => updateKid({ workingOn })}
+                onPick={toggleWorkingOn}
               />
 
-              {kid.workingOn ? (
+              {kid.workingOn.length > 0 ? (
                 // The second question appears only once the first is
                 // answered; two chip sets in one flat list read as one
                 // confusing choice (founder feedback 2026-08-18).
                 <View style={{ gap: space.sm, marginTop: space.sm }}>
                   <NativeText role="label" tone="strong">
-                    {`How's ${kid.name.trim()} doing with ${kid.workingOn.toLowerCase()}?`}
+                    {`How's ${kid.name.trim()} doing with ${joinNatural(kid.workingOn).toLowerCase()}?`}
                   </NativeText>
                   <View style={{ flexDirection: "row", gap: space.sm }}>
                     {LEVELS.map((level) => (
@@ -394,14 +432,14 @@ export default function KidsScreen() {
               <Button
                 label={saving ? "One moment…" : "Add another kid"}
                 variant="secondary"
-                disabled={!kid.workingOn || saving}
+                disabled={kid.workingOn.length === 0 || saving}
                 busy={saving}
                 onPress={() => void anotherKid()}
               />
               <Button
                 label={saving ? "One moment…" : "That's everyone"}
                 size="lg"
-                disabled={!kid.workingOn || saving}
+                disabled={kid.workingOn.length === 0 || saving}
                 busy={saving}
                 onPress={() => void thatIsEveryone()}
               />
@@ -446,16 +484,18 @@ function ChipGrid({
   onPick,
 }: {
   options: string[];
-  selected: string | null;
+  selected: string | string[] | null;
   onPick: (value: string) => void;
 }) {
+  const isSelected = (option: string) =>
+    Array.isArray(selected) ? selected.includes(option) : selected === option;
   return (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
       {options.map((option) => (
         <Chip
           key={option}
           label={option}
-          selected={selected === option}
+          selected={isSelected(option)}
           onPress={() => onPick(option)}
         />
       ))}
