@@ -92,10 +92,15 @@ export async function POST(request: Request): Promise<Response> {
       theme ? `${child.name} loves ${theme}; let that carry the whole page.` : null,
       focus ? `They are working on ${focus}; land the practice right at that edge.` : null,
       "This is the family's very first making from mobile onboarding: one page, print-ready, pitched exactly to this child.",
+      // Two kids can share a name (it happened live, 2026-08-21: a
+      // 10-year-old's brief lost to a same-named 3-year-old from family
+      // context and got a preschool letters page). The facts above are
+      // the child; family context never overrides them.
+      `If your family context lists another child named ${child.name}, ignore that child entirely: the age and focus in THIS brief are the child this page is for, and create_printable's childId must be ${child.id}.`,
     ]
       .filter(Boolean)
       .join(" ")
-      .slice(0, 600);
+      .slice(0, 900);
 
     const result = await startJob({
       familyId: family.id,

@@ -71,17 +71,14 @@ export default function RevealScreen() {
           getInProgressMaterials(family.id).catch(() => []),
         ]);
         if (cancelled) return;
-        // Unattributed pages count too: some job runs landed materials
-        // with no child id before the runner started stamping them
-        // (2026-08-21), and during onboarding the newest family page is
-        // the first making. Never claim a SIBLING's page, only unowned.
+        // STRICT child match only. An earlier fallback also accepted
+        // unattributed (null-child) pages; it served a stale stranded
+        // page as this kid's reveal while the real one was still
+        // building (live 2026-08-21). The runner stamps every
+        // child-pinned job's material now, so the honest behavior is to
+        // keep retrying for the real page, never to grab a lookalike.
         const candidates = [...finals, ...drafts]
-          .filter(
-            (item) =>
-              !first?.childId ||
-              item.childId === first.childId ||
-              item.childId === null,
-          )
+          .filter((item) => !first?.childId || item.childId === first.childId)
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         const found = candidates[0] ?? null;
         if (found) {
