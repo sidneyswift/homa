@@ -157,7 +157,10 @@ const reviewSchema = z.object({
     .boolean()
     .describe("true unless a parent would notice a real problem on paper"),
   issues: z
-    .array(z.string().max(200))
+    // 600, not 200: the old cap cut verdicts mid-sentence (Story's
+    // failed letter page, 2026-08-21), losing the reasoning an audit
+    // of QC decisions needs. Still bounded; six issues stay plenty.
+    .array(z.string().max(600))
     .max(6)
     .describe("Concrete, fixable problems, empty when pass is true"),
 });

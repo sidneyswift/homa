@@ -457,6 +457,24 @@ export async function completeStageFromWorker(
     `;
   }
 
+  // A child-pinned job's deliverables belong to that child, and the job
+  // row knows which one deterministically; create_printable's childId is
+  // model-supplied and gets omitted in practice (2026-08-21: two of the
+  // first three mobile first-makings landed child_id null, and the
+  // reveal screen, which matches on the child, could never find them).
+  // Adopt only the materials this stage just named, only in this family,
+  // and only where attribution is missing: an explicit different child
+  // on a material stays the model's call.
+  if (row.child_id) {
+    await sql`
+      update public.materials
+      set child_id = ${row.child_id}
+      where family_id = ${familyId}
+        and id = any(${sql.array(materialIds)}::uuid[])
+        and child_id is null
+    `;
+  }
+
   const job: ClaimedJob = {
     jobId,
     familyId,
