@@ -426,11 +426,12 @@ export async function completeStageFromWorker(
       plan_revision: number;
       total_stages: number;
       current_stage: number;
+      start_idempotency_key: string | null;
       status: string;
     }[]
   >`
     select j.skill, j.child_id, j.title, j.plan_revision, j.total_stages,
-           j.current_stage, s.status
+           j.current_stage, j.start_idempotency_key, s.status
     from public.agent_jobs j
     join public.agent_job_stages s
       on s.job_id = j.id and s.family_id = j.family_id
@@ -465,14 +466,32 @@ export async function completeStageFromWorker(
   // Adopt only the materials this stage just named, only in this family,
   // and only where attribution is missing: an explicit different child
   // on a material stays the model's call.
+  //
+  // EXCEPT a first making: that job is definitionally for exactly one
+  // child, so the job row outranks even an explicit model attribution.
+  // Live cause (2026-08-21, second bug of the day): a family had two
+  // kids named Joe, the model keyed on the wrong one from family
+  // context, and the 10-year-old's page was stamped to the 3-year-old,
+  // making it invisible to the reveal screen forever.
   if (row.child_id) {
-    await sql`
-      update public.materials
-      set child_id = ${row.child_id}
-      where family_id = ${familyId}
-        and id = any(${sql.array(materialIds)}::uuid[])
-        and child_id is null
-    `;
+    const firstMaking = row.start_idempotency_key?.startsWith("first-making:") ?? false;
+    if (firstMaking) {
+      await sql`
+        update public.materials
+        set child_id = ${row.child_id}
+        where family_id = ${familyId}
+          and id = any(${sql.array(materialIds)}::uuid[])
+          and (child_id is null or child_id <> ${row.child_id})
+      `;
+    } else {
+      await sql`
+        update public.materials
+        set child_id = ${row.child_id}
+        where family_id = ${familyId}
+          and id = any(${sql.array(materialIds)}::uuid[])
+          and child_id is null
+      `;
+    }
   }
 
   const job: ClaimedJob = {
