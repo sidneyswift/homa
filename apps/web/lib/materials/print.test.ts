@@ -28,4 +28,11 @@ describe("material print page selection", () => {
       null,
     );
   });
+
+  it("prints the single page of an unlabeled one-page worksheet", () => {
+    assert.deepEqual(
+      selectedPrintPages({ pageCount: 1, pageRoles: null, includeAnswerKey: false }),
+      [0],
+    );
+  });
 });
