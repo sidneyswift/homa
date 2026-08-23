@@ -1,9 +1,7 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Card } from "../../components/ui/card";
 import { NativeText } from "../../components/ui/semantic";
 import { useFamilyData } from "../../features/family/use-family-data";
 import {
@@ -13,6 +11,7 @@ import {
   reportOnboardingStep,
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
+import { WalkScene, WalkSpeech } from "../../features/onboarding/walk-scene";
 import { colors, radius, space } from "../../theme/tokens";
 
 /**
@@ -36,7 +35,10 @@ const DOORS: { door: Door; label: string; detail: string }[] = [
 
 const DOOR_ROUTES: Record<Door, string> = {
   another_worksheet: "/binder",
-  plan_week: "/planner",
+  // The planner screen is only calendar views; building the plan itself
+  // is a chat conversation (open_planner/edit_plan). Land her in chat
+  // with the ask already in the box, not a blank grid with no way in.
+  plan_week: "/chat?planIntent=week",
   look_around: "/",
 };
 
@@ -68,45 +70,53 @@ export default function NextScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
-      <View style={{ flex: 1, padding: space.lg, gap: space.md, justifyContent: "center" }}>
-        <Card>
-          <NativeText role="bodyLarge" tone="strong">
-            {"That's going to get grabbed. And here's the thing: the more I know your kids, the better these get."}
+    <WalkScene>
+      <View style={{ flex: 1, padding: space.lg, gap: space.md, paddingTop: space.xs }}>
+        <WalkSpeech>
+          <NativeText role="body" tone="strong">
+            {"That one's getting grabbed. And the more I know your kids, the better every page gets."}
           </NativeText>
-        </Card>
-        <NativeText role="display" tone="strong">
+        </WalkSpeech>
+        <NativeText role="display" tone="strong" style={{ marginTop: space.lg }}>
           {"What's next?"}
         </NativeText>
         <View style={{ gap: space.sm }}>
-          {DOORS.map((item) => (
+          {/* One confident door leads; the rest are quiet rows. Three
+              identical ghost cards gave the final beat no momentum
+              (gauntlet round 1, 2026-08-21). */}
+          {DOORS.map((item, index) => (
             <Pressable
               key={item.door}
               accessibilityRole="button"
               disabled={choosing}
               onPress={() => void choose(item.door)}
               style={{
-                minHeight: 60,
-                justifyContent: "center",
+                minHeight: index === 0 ? 64 : 56,
+                paddingTop: space.xs,
                 paddingHorizontal: space.md,
                 paddingVertical: space.sm,
                 borderRadius: radius.lg,
                 borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: colors.card,
+                borderColor: index === 0 ? colors.action : colors.border,
+                backgroundColor: index === 0 ? colors.action : colors.card,
                 opacity: choosing ? 0.6 : 1,
               }}
             >
-              <NativeText role="body" tone="strong">
+              <NativeText role="body" tone={index === 0 ? "inverse" : "strong"}>
                 {item.label}
               </NativeText>
-              <NativeText role="caption" tone="muted">
+              <NativeText
+                role="caption"
+                tone={index === 0 ? "inverse" : "muted"}
+                style={index === 0 ? { opacity: 0.92 } : undefined}
+              >
                 {item.detail}
               </NativeText>
             </Pressable>
           ))}
         </View>
+        <View style={{ height: space.xl }} />
       </View>
-    </SafeAreaView>
+    </WalkScene>
   );
 }

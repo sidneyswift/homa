@@ -52,9 +52,14 @@ function exitFor(child: MapStateChild): ChecklistExit {
 export function ChecklistTakeover({
   childId,
   onClose,
+  closeLabel = "Back to the chat",
 }: {
   childId: string;
   onClose: (exit: ChecklistExit | null) => void;
+  /** Chat is this component's original and still-default home; a
+   *  non-chat mount (e.g. the onboarding making screen) names its own
+   *  exit instead of promising a chat that is not there. */
+  closeLabel?: string;
 }) {
   const [child, setChild] = useState<MapStateChild | null>(null);
   const [pending, setPending] = useState(false);
@@ -84,7 +89,7 @@ export function ChecklistTakeover({
     return (
       <Card style={{ gap: space.md }}>
         <InlineError message={`${error} Nothing you answered is lost.`} />
-        <Button label="Back to the chat" variant="secondary" onPress={() => onClose(null)} />
+        <Button label={closeLabel} variant="secondary" onPress={() => onClose(null)} />
       </Card>
     );
   }
@@ -131,7 +136,7 @@ export function ChecklistTakeover({
             {subject?.displayName ?? "Questions"}
           </Text>
         </View>
-        <IconButton label="Back to the chat" onPress={() => onClose(exitFor(child))}>
+        <IconButton label={closeLabel} onPress={() => onClose(exitFor(child))}>
           <Icon name="close" size={20} color={colors.textSubtle} />
         </IconButton>
       </View>
@@ -195,7 +200,7 @@ export function ChecklistTakeover({
               Questions complete
             </Text>
           </View>
-          <Button label="Back to chat" onPress={() => onClose(exitFor(child))} />
+          <Button label={closeLabel} onPress={() => onClose(exitFor(child))} />
         </View>
       )}
       {pending ? <LoadingStatus label="Saving answer" showLabel={false} /> : null}

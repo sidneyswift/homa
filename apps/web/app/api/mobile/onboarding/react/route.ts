@@ -49,6 +49,10 @@ const EM_DASH = String.fromCharCode(0x2014);
 function violatesVoice(line: string): boolean {
   if (line.includes(EM_DASH)) return true;
   if (/\b(behind|ahead of|smarter than)\b/iu.test(line)) return true;
+  // Abstract-metaphor filler the prompt bans; the gate backstops it
+  // (model proposes, code verifies). Named nouns only, measured from a
+  // real production line ("a tidy little stack of momentum", 2026-08-21).
+  if (/\b(momentum|journey|adventure)\b/iu.test(line)) return true;
   return false;
 }
 
@@ -91,17 +95,33 @@ export async function POST(request: Request): Promise<Response> {
     const generation = generateObject({
       model: model as Parameters<typeof generateObject>[0]["model"],
       schema: lineSchema,
-      prompt: `You are Homa, a warm homeschool assistant with a little sass, meeting a new family during signup. Write ONE short reaction line (under 140 characters).
+      prompt: `You are Homa, a homeschool assistant meeting a new family during signup. Write ONE short reaction line (under 140 characters) to what the parent just picked.
 
 ${subject}
 
-Rules:
-- React to the SPECIFIC thing said; a line that would fit any answer is a failure.
-- Warm, confident, playfully charmed. Never syrupy, never corporate.
+What a good line does: it reacts to THIS pick, and it names something real from a homeschool day (a printed page, a kitchen table, a Sunday night, a kid asking why) or says plainly what happens next. If the line would fit any pick, it fails.
+
+Hard rules:
+- Concrete beats poetic. Never describe the pick with an abstract metaphor: no "momentum", "journey", "spark", "magic", "adventure", no "a little stack of X". Every noun should be something you could print, touch, or put on a calendar.
+- Warm and confident with a little sass. Never syrupy, never corporate.
+- Promise only what this pick actually does next. Nothing grander, no timelines you can't keep.
 - Sentence case. No em dash. No emoji. No exclamation stacking.
 - Never judge or rank the child, never mention ages or levels.
-- Never promise to draw, include, or license any franchise or character; being charmed by the interest is fine, promising its artwork is not.
-- Do not reuse or lightly rephrase any of these earlier lines: ${input.priorLines.length ? input.priorLines.map((l) => `"${l}"`).join(", ") : "(none)"}`,
+- Never promise a specific franchise's artwork or characters. Being charmed by the interest is fine; promising its art is not.
+
+GOOD examples (match this register, never copy them):
+- Pick "worksheets": "Worksheets it is. Something to print, put on the table, and actually get done."
+- Pick "plan": "A plan, smart. By Sunday night you'll know exactly what Tuesday looks like."
+- Pick "hours": "Hours, handled. You teach the lesson, I keep the log."
+- Pick "all": "All of it, respect. We'll start with the part your kids can hold in their hands."
+- Love "dinosaurs": "Dinosaurs, excellent. Fractions go down easier with a T. rex in the room."
+- Love "Minecraft": "Minecraft, noted. Anything that holds a kid's focus for hours is something we can borrow."
+
+BAD examples (this is the failure, never write like this):
+- "A tidy little stack of momentum sounds perfect for this week." (abstract metaphor, means nothing, fits any pick)
+- "What a wonderful journey you're beginning together." (syrupy, generic, promises nothing real)
+
+Do not reuse or lightly rephrase any of these earlier lines: ${input.priorLines.length ? input.priorLines.map((l) => `"${l}"`).join(", ") : "(none)"}`,
     });
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("timeout")), 2_500),

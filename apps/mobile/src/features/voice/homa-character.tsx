@@ -31,9 +31,9 @@ import {
   HOUSE_PATH,
   PUPIL_FILL,
 } from "../../components/brand/logo";
-import { colors } from "../../theme/tokens";
+import { colors, palette } from "../../theme/tokens";
 import { Aura } from "./aura";
-import type { CharacterState } from "./character-state";
+import type { CharacterAct, CharacterState } from "./character-state";
 
 /**
  * The little home, alive on the voice screen. The same art as `Logo`
@@ -224,14 +224,85 @@ function CharacterEye({
   );
 }
 
+
+/**
+ * The crayon act, ported from the web ThinkingMark (thinking-acts.tsx
+ * "crayon": she produces a crayon and draws a little house. It is her).
+ * Motion follows this file's law: the crayon wiggles via an RN view
+ * transform; the drawn art is static SVG. Under reduced motion the
+ * crayon holds still, the drawing simply exists.
+ */
+function DrawingAct({ size }: { size: number }) {
+  const reduced = useReducedMotion();
+  const wiggle = useSharedValue(0);
+  useEffect(() => {
+    if (reduced) return;
+    wiggle.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 260, easing: BREATHE }),
+        withTiming(-1, { duration: 260, easing: BREATHE }),
+      ),
+      -1,
+    );
+    return () => cancelAnimation(wiggle);
+  }, [reduced, wiggle]);
+  const crayonStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: wiggle.value * size * 0.02 },
+      { translateY: wiggle.value * size * 0.015 },
+      { rotate: `${wiggle.value * 6}deg` },
+    ],
+  }));
+  const unit = size / 48;
+  return (
+    <>
+      {/* Her drawing, on the sky to her left: scribble resolving into a
+          tiny house with eyes, then the proud signature dot. */}
+      <View
+        pointerEvents="none"
+        style={{ position: "absolute", left: -size * 0.52, top: size * 0.3 }}
+      >
+        <Svg width={size * 0.62} height={size * 0.42} viewBox="0 0 30 20">
+          <Path
+            d="M2 16 C5 10 8 16 11 12 C14 8 17 14 21 9"
+            stroke={palette.clay600}
+            strokeWidth={1.4}
+            strokeLinecap="round"
+            fill="none"
+          />
+          <Path d="M5 13 L10 7 L15 13 Z" fill={colors.brand} />
+          <Circle cx={8.4} cy={12} r={1.2} fill="#FFFFFF" />
+          <Circle cx={11.6} cy={12} r={1.2} fill="#FFFFFF" />
+          <Circle cx={24} cy={14} r={1.4} fill={palette.clay600} />
+        </Svg>
+      </View>
+      {/* The crayon in her hand, right side, wiggling as she works. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          { position: "absolute", left: size * 0.82, top: size * 0.46 },
+          crayonStyle,
+        ]}
+      >
+        <Svg width={10 * unit} height={20 * unit} viewBox="0 0 10 20">
+          <Rect x={2.5} y={6} width={5} height={13} rx={1.8} fill={palette.gold400} />
+          <Path d="M2.5 6 L5 1 L7.5 6 Z" fill={palette.clay600} />
+        </Svg>
+      </Animated.View>
+    </>
+  );
+}
+
 export function HomaCharacter({
   state,
   size,
   audioLevel = null,
+  act = null,
 }: {
   state: CharacterState;
   size: number;
   audioLevel?: number | null;
+  act?: CharacterAct | null;
 }) {
   const reduced = useReducedMotion();
   /** One viewBox unit in on-screen px; every body distance scales by it. */
@@ -435,6 +506,7 @@ export function HomaCharacter({
                   />
                 ))}
               </Svg>
+              {act === "drawing" ? <DrawingAct size={size} /> : null}
             </Animated.View>
           </Animated.View>
         </Animated.View>

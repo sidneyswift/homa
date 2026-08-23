@@ -6,6 +6,8 @@ import { NativeText } from "../../components/ui/semantic";
 import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { resetOnboardingWalk } from "../../features/onboarding/onboarding-state";
+import { WalkCharacterProvider } from "../../features/onboarding/walk-character";
+import { WalkStage } from "../../features/onboarding/walk-scene";
 import { colors, radius, space } from "../../theme/tokens";
 
 /**
@@ -21,13 +23,20 @@ export default function OnboardingLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.page },
-        }}
-      />
-      {__DEV__ ? <DevRestartWalk /> : null}
+      <WalkCharacterProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+            contentStyle: { backgroundColor: colors.page },
+          }}
+        />
+        {/* The stage is mounted once, floated over the navigator:
+            Homa and her sky persist while screens fade beneath her
+            (founder ruling 2026-08-21: she stays). Pointer-transparent. */}
+        <WalkStage />
+        {__DEV__ ? <DevRestartWalk /> : null}
+      </WalkCharacterProvider>
     </View>
   );
 }

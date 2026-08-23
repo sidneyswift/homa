@@ -30,3 +30,11 @@ export function deriveCharacterState(inputs: CharacterInputs): CharacterState {
   if (inputs.composerFocused) return "listening";
   return "idle";
 }
+
+/**
+ * A prop she holds while in a state. "drawing" is the mobile port of
+ * the web ThinkingMark's crayon act (thinking-acts.tsx): the one act
+ * in the library about what the product actually does. Used by the
+ * onboarding making screen while a page builds.
+ */
+export type CharacterAct = "drawing";

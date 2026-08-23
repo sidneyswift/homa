@@ -269,6 +269,15 @@ export function NativeAction({
         ? { backgroundColor: "transparent", borderColor: "transparent", text: theme.brandText }
         : { backgroundColor: theme.card, borderColor: theme.border, text: theme.textStrong };
   const unavailable = disabled || busy;
+  // A waiting (disabled) control stays inside the palette: page fill,
+  // quiet border, muted label. Dimming the action ink over cream
+  // produced an off-palette gray slab that read as broken, and it was
+  // the largest element on several onboarding screens (gauntlet round
+  // 1, 2026-08-21). Busy keeps its live look; work is happening.
+  const resting =
+    disabled && !busy
+      ? { backgroundColor: theme.page, borderColor: theme.textMuted, text: theme.textMuted }
+      : look;
   const sizeStyle = NATIVE_ACTION_SIZE_STYLES[size];
   const stacksIconAboveLabel = Boolean(icon) && fontScale >= 2;
   return (
@@ -284,13 +293,13 @@ export function NativeAction({
           minHeight: sizeStyle.minHeight,
           borderRadius: radius.control,
           borderWidth: 1,
-          borderColor: look.borderColor,
-          backgroundColor: look.backgroundColor,
+          borderColor: resting.borderColor,
+          backgroundColor: resting.backgroundColor,
           paddingHorizontal: sizeStyle.paddingHorizontal,
           paddingVertical: sizeStyle.paddingVertical,
           alignItems: "center",
           justifyContent: "center",
-          opacity: unavailable ? 0.55 : 1,
+          opacity: busy ? 0.55 : 1,
           transform: reducedMotion ? undefined : [{ scale: pressed ? pressScale : 1 }],
         },
         style,
@@ -312,7 +321,7 @@ export function NativeAction({
           role="control"
           tone="inverse"
           style={{
-            color: look.text,
+            color: resting.text,
             textAlign: "center",
             flexShrink: 1,
             width: stacksIconAboveLabel ? "100%" : undefined,

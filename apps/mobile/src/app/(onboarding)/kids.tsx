@@ -1,10 +1,8 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
 import { InlineError } from "../../components/ui/inline-error";
 import { NativeText } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
@@ -17,9 +15,10 @@ import {
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
 import { startFirstMaking } from "../../features/onboarding/making";
-import { fetchReactLine } from "../../features/onboarding/react-lines";
+import { useWalkCharacterState } from "../../features/onboarding/walk-character";
+import { WalkScene } from "../../features/onboarding/walk-scene";
 import { addChild, getMyChildren } from "../../lib/family";
-import { colors, radius, space } from "../../theme/tokens";
+import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
  * Meet the kids (wireframe v4 step 4). One question per sub-step, a
@@ -34,30 +33,34 @@ import { colors, radius, space } from "../../theme/tokens";
  * completed funnel EVENT stays unfired until the full walk exists.
  */
 
-type SubStep = "name" | "age" | "love" | "react" | "working";
+type SubStep = "name" | "age" | "love" | "working";
 
-const LOVE_CHIPS = [
-  "dinosaurs",
-  "animals",
-  "space",
-  "trucks",
-  "princesses",
-  "sports",
-  "music",
-  "baking",
-  "drawing",
-  "video games",
-];
+/**
+ * Chips follow the age the parent just gave (founder question
+ * 2026-08-21: a 13-year-old should not be offered trucks and
+ * princesses, and "Letters" is wrong for a kid writing essays).
+ * Three bands, tuned to what parents actually say at each age; the
+ * free-text field remains the escape hatch on every band.
+ */
+function loveChipsForAge(age: number | null): string[] {
+  if (age !== null && age <= 5) {
+    return ["dinosaurs", "animals", "trucks", "princesses", "bugs", "drawing", "music", "blocks", "playing outside"];
+  }
+  if (age !== null && age >= 10) {
+    return ["video games", "sports", "music", "anime", "art", "coding", "baking", "animals", "fantasy books"];
+  }
+  return ["dinosaurs", "animals", "space", "sports", "video games", "drawing", "baking", "music", "princesses"];
+}
 
-const WORKING_CHIPS = [
-  "Letters",
-  "Counting",
-  "Reading",
-  "Writing",
-  "Math facts",
-  "Handwriting",
-  "Science",
-];
+function workingChipsForAge(age: number | null): string[] {
+  if (age !== null && age <= 5) {
+    return ["Letters", "Counting", "Shapes and colors", "First reading", "Handwriting"];
+  }
+  if (age !== null && age >= 10) {
+    return ["Writing", "Math", "Reading", "Science", "History", "Grammar"];
+  }
+  return ["Reading", "Writing", "Math", "Handwriting", "Spelling", "Science"];
+}
 
 const LEVELS: { key: DraftKid["level"] & string; label: string }[] = [
   { key: "starting", label: "Just starting" },
@@ -87,18 +90,26 @@ export default function KidsScreen() {
   const [kids, setKids] = useState<DraftKid[]>([emptyKid()]);
   const [subStep, setSubStep] = useState<SubStep>("name");
   const [loveText, setLoveText] = useState("");
-  const [reactLine, setReactLine] = useState<string | null>(null);
-  const [fetchingLine, setFetchingLine] = useState(false);
-  const [priorLines, setPriorLines] = useState<string[]>([]);
+  const [workingText, setWorkingText] = useState("");
+  const [workingOther, setWorkingOther] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const reported = useRef(false);
+  // Saves must wait for hydration: the save effect fires on mount with
+  // the default empty draft, and if that write lands before the load
+  // returns, a resumed walk's saved answers are wiped (found by the
+  // gauntlet capture rig, 2026-08-21, and just as real on any resume).
+  const hydrated = useRef(false);
   // The intent picked before this screen; carried through every save so
   // a kids write never wipes it (answers are stored whole, live bug
   // 2026-08-19).
   const intentRef = useRef<OnboardingIntent | undefined>(undefined);
 
   const kid = kids[kids.length - 1];
+
+  // She visibly composes while the give-back line or a save is in
+  // flight, and leans in (listening) while a question is on screen.
+  useWalkCharacterState(saving ? "thinking" : "listening");
 
   useEffect(() => {
     if (!family || reported.current) return;
@@ -109,6 +120,7 @@ export default function KidsScreen() {
     void loadOnboardingAnswers(family.id).then((answers) => {
       intentRef.current = answers?.intent;
       const rawSaved = answers?.kids;
+      hydrated.current = true;
       if (!rawSaved || rawSaved.length === 0) return;
       // A draft saved before love/workingOn became multi-select stored
       // them as a plain string; coerce so an old in-progress walk never
@@ -131,7 +143,7 @@ export default function KidsScreen() {
 
   // Every answer is durable the moment it lands (pause-anywhere law).
   useEffect(() => {
-    if (!family) return;
+    if (!family || !hydrated.current) return;
     void saveOnboardingState(family.id, "kids", {
       ...(intentRef.current ? { intent: intentRef.current } : {}),
       kids,
@@ -161,7 +173,6 @@ export default function KidsScreen() {
     setError(null);
     if (subStep === "age") return setSubStep("name");
     if (subStep === "love") return setSubStep("age");
-    if (subStep === "react") return setSubStep("love");
     if (subStep === "working") return setSubStep("love");
     // name step:
     if (kids.length > 1 && !kid.name.trim()) {
@@ -188,8 +199,7 @@ export default function KidsScreen() {
     updateKid({ workingOn: next });
   }
 
-  async function confirmLoves() {
-    if (fetchingLine) return;
+  function confirmLoves() {
     const typed = loveText.trim();
     const loves = typed ? [...kid.love, typed] : kid.love;
     if (loves.length === 0) return;
@@ -197,19 +207,7 @@ export default function KidsScreen() {
       setLoveText("");
       updateKid({ love: loves });
     }
-    // The react screen arrives whole, once: fetch before switching
-    // (founder feedback 2026-08-18, no placeholder-then-swap).
-    setFetchingLine(true);
-    const line = await fetchReactLine({
-      kind: "love",
-      childName: kid.name,
-      love: loves.join(", "),
-      priorLines,
-    });
-    setPriorLines((lines) => [...lines, line]);
-    setReactLine(line);
-    setFetchingLine(false);
-    setSubStep("react");
+    setSubStep("working");
   }
 
   async function finishKid(): Promise<boolean> {
@@ -288,7 +286,7 @@ export default function KidsScreen() {
     kidNumber === 1 ? "Who are we teaching?" : "Who else are we teaching?";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
+    <WalkScene>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -296,8 +294,8 @@ export default function KidsScreen() {
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
             padding: space.lg,
+            paddingTop: space.xl,
             gap: space.md,
           }}
           keyboardShouldPersistTaps="handled"
@@ -305,7 +303,7 @@ export default function KidsScreen() {
           <Progress subStep={subStep} />
 
           {subStep === "name" ? (
-            <View style={{ gap: space.md }}>
+            <View style={{ flex: 1, gap: space.md }}>
               <NativeText role="display" tone="strong">
                 {heading}
               </NativeText>
@@ -318,19 +316,24 @@ export default function KidsScreen() {
                 onChangeText={(name) => updateKid({ name })}
                 autoCapitalize="words"
                 autoComplete="off"
+                placeholder="e.g. Maya"
+                autoFocus
               />
-              <Button
-                label={kid.name.trim() ? `Meet ${kid.name.trim()}` : "Next"}
-                size="lg"
-                disabled={!kid.name.trim()}
-                onPress={() => goTo("age")}
-              />
-              <Button label="Back" variant="ghost" onPress={goBack} />
+              <View style={{ marginTop: "auto", gap: space.sm }}>
+                <Button
+                  label={kid.name.trim() ? `Meet ${kid.name.trim()}` : "Next"}
+                  size="lg"
+                  disabled={!kid.name.trim()}
+                  onPress={() => goTo("age")}
+                />
+                <BackLink onPress={goBack} />
+              </View>
             </View>
           ) : null}
 
           {subStep === "age" ? (
-            <View style={{ gap: space.md }}>
+            <View style={{ flex: 1, gap: space.md }}>
+              <View style={{ flex: 1 }} />
               <NativeText role="display" tone="strong">
                 {`How old is ${kid.name.trim()}?`}
               </NativeText>
@@ -343,57 +346,51 @@ export default function KidsScreen() {
                 onPick={(value) =>
                   updateKid({ age: value === "13+" ? 13 : Number(value) })
                 }
+                fixedWidth
               />
-              <Button
-                label="Next"
-                size="lg"
-                disabled={kid.age === null}
-                onPress={() => goTo("love")}
-              />
-              <Button label="Back" variant="ghost" onPress={goBack} />
+              <View style={{ flex: 1 }} />
+              <View style={{ gap: space.sm }}>
+                <Button
+                  label="Next"
+                  size="lg"
+                  disabled={kid.age === null}
+                  onPress={() => goTo("love")}
+                />
+                <BackLink onPress={goBack} />
+              </View>
             </View>
           ) : null}
 
           {subStep === "love" ? (
-            <View style={{ gap: space.md }}>
+            <View style={{ flex: 1, gap: space.md }}>
               <NativeText role="display" tone="strong">
                 {`What does ${kid.name.trim()} love right now?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
                 This is my secret ingredient.
               </NativeText>
-              <ChipGrid options={LOVE_CHIPS} selected={kid.love} onPick={toggleLove} />
+              <ChipGrid options={loveChipsForAge(kid.age)} selected={kid.love} onPick={toggleLove} />
               <TextField
                 label="Or type anything"
                 value={loveText}
                 onChangeText={setLoveText}
                 autoCapitalize="none"
+                placeholder="Bugs, volcanoes, ocean animals…"
               />
-              <Button
-                label={fetchingLine ? "One moment…" : "Next"}
-                size="lg"
-                disabled={(!loveText.trim() && kid.love.length === 0) || fetchingLine}
-                busy={fetchingLine}
-                onPress={() => void confirmLoves()}
-              />
-              <Button label="Back" variant="ghost" onPress={goBack} />
-            </View>
-          ) : null}
-
-          {subStep === "react" ? (
-            <View style={{ gap: space.md }}>
-              <Card style={{ gap: space.sm }}>
-                <NativeText role="bodyLarge" tone="strong">
-                  {reactLine ?? "…"}
-                </NativeText>
-              </Card>
-              <Button label="Next" size="lg" onPress={() => goTo("working")} />
-              <Button label="Back" variant="ghost" onPress={goBack} />
+              <View style={{ marginTop: "auto", gap: space.sm }}>
+                <Button
+                  label="Next"
+                  size="lg"
+                  disabled={!loveText.trim() && kid.love.length === 0}
+                  onPress={confirmLoves}
+                />
+                <BackLink onPress={goBack} />
+              </View>
             </View>
           ) : null}
 
           {subStep === "working" ? (
-            <View style={{ gap: space.md }}>
+            <View style={{ flex: 1, gap: space.md }}>
               <NativeText role="display" tone="strong">
                 {`What's ${kid.name.trim()} working on?`}
               </NativeText>
@@ -401,16 +398,58 @@ export default function KidsScreen() {
                 So the worksheet lands right at their edge.
               </NativeText>
               <ChipGrid
-                options={WORKING_CHIPS}
+                options={workingChipsForAge(kid.age)}
                 selected={kid.workingOn}
                 onPick={toggleWorkingOn}
               />
+              {workingOther ? (
+                <TextField
+                  label="Something else"
+                  value={workingText}
+                  onChangeText={setWorkingText}
+                  autoFocus
+                  placeholder="Cursive, Spanish, multiplication…"
+                  onSubmitEditing={() => {
+                    const typed = workingText.trim();
+                    if (typed) toggleWorkingOn(typed);
+                    setWorkingText("");
+                    setWorkingOther(false);
+                  }}
+                />
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setWorkingOther(true)}
+                  style={{
+                    alignSelf: "flex-start",
+                    paddingHorizontal: space.md,
+                    minHeight: 44,
+                    justifyContent: "center",
+                    borderRadius: radius.pill,
+                    borderWidth: 1,
+                    borderStyle: "dashed",
+                    borderColor: colors.border,
+                  }}
+                >
+                  <NativeText role="body" tone="muted">
+                    {"Something else…"}
+                  </NativeText>
+                </Pressable>
+              )}
 
               {kid.workingOn.length > 0 ? (
                 // The second question appears only once the first is
                 // answered; two chip sets in one flat list read as one
                 // confusing choice (founder feedback 2026-08-18).
-                <View style={{ gap: space.sm, marginTop: space.sm }}>
+                <View
+                  style={{
+                    gap: space.sm,
+                    marginTop: space.sm,
+                    backgroundColor: palette.clay50,
+                    borderRadius: radius.lg,
+                    padding: space.md,
+                  }}
+                >
                   <NativeText role="label" tone="strong">
                     {`How's ${kid.name.trim()} doing with ${joinNatural(kid.workingOn).toLowerCase()}?`}
                   </NativeText>
@@ -429,36 +468,36 @@ export default function KidsScreen() {
 
               {error ? <InlineError message={error} /> : null}
 
-              <Button
-                label={saving ? "One moment…" : "Add another kid"}
-                variant="secondary"
-                disabled={kid.workingOn.length === 0 || saving}
-                busy={saving}
-                onPress={() => void anotherKid()}
-              />
-              <Button
-                label={saving ? "One moment…" : "That's everyone"}
-                size="lg"
-                disabled={kid.workingOn.length === 0 || saving}
-                busy={saving}
-                onPress={() => void thatIsEveryone()}
-              />
-              <Button
-                label="Back"
-                variant="ghost"
-                onPress={goBack}
-                disabled={saving}
-              />
+              <View style={{ marginTop: "auto", gap: space.sm, paddingBottom: space.sm }}>
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={kid.workingOn.length === 0 || saving}
+                  onPress={() => void anotherKid()}
+                  style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+                >
+                  <NativeText role="control" tone={kid.workingOn.length === 0 || saving ? "muted" : "strong"}>
+                    {saving ? "One moment…" : "+ Add another kid"}
+                  </NativeText>
+                </Pressable>
+                <Button
+                  label={saving ? "One moment…" : "That's everyone"}
+                  size="lg"
+                  disabled={kid.workingOn.length === 0 || saving}
+                  busy={saving}
+                  onPress={() => void thatIsEveryone()}
+                />
+                <BackLink onPress={goBack} disabled={saving} />
+              </View>
             </View>
           ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </WalkScene>
   );
 }
 
 function Progress({ subStep }: { subStep: SubStep }) {
-  const order: SubStep[] = ["name", "age", "love", "react", "working"];
+  const order: SubStep[] = ["name", "age", "love", "working"];
   const position = order.indexOf(subStep);
   return (
     <View style={{ flexDirection: "row", gap: space.xs }}>
@@ -469,8 +508,14 @@ function Progress({ subStep }: { subStep: SubStep }) {
             flex: 1,
             height: 4,
             borderRadius: 2,
+            // Done recedes, doing leads (gauntlet round 2: near-black
+            // finished segments outweighed the live one).
             backgroundColor:
-              index <= position ? colors.textStrong : colors.borderSubtle,
+              index < position
+                ? palette.clay300
+                : index === position
+                  ? colors.brand
+                  : colors.borderSubtle,
           }}
         />
       ))}
@@ -482,10 +527,12 @@ function ChipGrid({
   options,
   selected,
   onPick,
+  fixedWidth = false,
 }: {
   options: string[];
   selected: string | string[] | null;
   onPick: (value: string) => void;
+  fixedWidth?: boolean;
 }) {
   const isSelected = (option: string) =>
     Array.isArray(selected) ? selected.includes(option) : selected === option;
@@ -497,9 +544,29 @@ function ChipGrid({
           label={option}
           selected={isSelected(option)}
           onPress={() => onPick(option)}
+          fixedWidth={fixedWidth}
         />
       ))}
     </View>
+  );
+}
+
+function BackLink({ onPress, disabled }: { onPress: () => void; disabled?: boolean }) {
+  // Back is the least important action on every ask; it speaks in
+  // muted stone, never in clay (clay is for forward motion and the
+  // mark; gauntlet round 1 found Back was the loudest color on screen).
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Back"
+      onPress={onPress}
+      disabled={disabled}
+      style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+    >
+      <NativeText role="control" tone="muted">
+        Back
+      </NativeText>
+    </Pressable>
   );
 }
 
@@ -507,27 +574,36 @@ function Chip({
   label,
   selected,
   onPress,
+  fixedWidth = false,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  fixedWidth?: boolean;
 }) {
+  // Selected fills with the brand clay and speaks in cream; unselected
+  // sits warm (clay wash) instead of form-outline white. The old
+  // hairline-only selected state failed the glance test (gauntlet
+  // round 1, 2026-08-21).
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}
       style={{
-        paddingHorizontal: space.md,
-        minHeight: 44,
+        paddingHorizontal: fixedWidth ? 0 : space.md,
+        width: fixedWidth ? 52 : undefined,
+        height: fixedWidth ? 52 : undefined,
+        minHeight: fixedWidth ? 52 : 44,
+        alignItems: "center",
         justifyContent: "center",
-        borderRadius: radius.pill,
-        borderWidth: selected ? 2 : 1,
-        borderColor: selected ? colors.textStrong : colors.border,
-        backgroundColor: colors.card,
+        borderRadius: fixedWidth ? 26 : radius.pill,
+        borderWidth: 1,
+        borderColor: selected ? palette.clay600 : colors.border,
+        backgroundColor: selected ? palette.clay600 : palette.clay50,
       }}
     >
-      <NativeText role="body" tone={selected ? "strong" : "body"}>
+      <NativeText role="body" tone={selected ? "inverse" : "strong"}>
         {label}
       </NativeText>
     </Pressable>
