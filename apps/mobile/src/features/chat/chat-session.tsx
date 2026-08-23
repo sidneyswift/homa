@@ -180,6 +180,8 @@ export function ChatSession({
   initialProgressIntent,
   initialProgressFingerprint,
   onDraftRequestHandled,
+  planWeekDraft,
+  onPlanWeekDraftHandled,
 }: {
   storageKey: string;
   prepared: PreparedChat;
@@ -191,6 +193,8 @@ export function ChatSession({
   initialProgressIntent: ProgressDraftIntent | null;
   initialProgressFingerprint: string | null;
   onDraftRequestHandled: (requestId: string) => void;
+  planWeekDraft?: ComposerDraftRequest | null;
+  onPlanWeekDraftHandled?: () => void;
 }) {
   const { fontScale } = useWindowDimensions();
   const reducedMotion = useReducedMotion();
@@ -251,6 +255,7 @@ export function ChatSession({
     binding: ProgressDraftBinding | null;
   } | null>(null);
   const handledDraftRequestRef = useRef<string | null>(null);
+  const handledPlanWeekDraftRef = useRef<string | null>(null);
   const progressDraftBindingRef = useRef<ProgressDraftBinding | null>(null);
   const [progressDraftBinding, setProgressDraftBindingState] =
     useState<ProgressDraftBinding | null>(null);
@@ -315,6 +320,28 @@ export function ChatSession({
     parkedComposer,
     setProgressDraftBinding,
   ]);
+
+  // Plain composer prefill, no progress binding: this carries no child
+  // or evidence for the server to verify, it is just her own opening
+  // line waiting for her to send or edit. Skips silently if she is
+  // already mid-draft rather than clobbering what she typed.
+  useEffect(() => {
+    if (
+      !planWeekDraft ||
+      handledPlanWeekDraftRef.current === planWeekDraft.id
+    ) {
+      return;
+    }
+    handledPlanWeekDraftRef.current = planWeekDraft.id;
+    const timer = setTimeout(() => {
+      if (draft.trim().length === 0 && !parkedComposer) {
+        setDraft(planWeekDraft.text);
+        setTimeout(() => composerRef.current?.focus(), 0);
+      }
+      onPlanWeekDraftHandled?.();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [draft, onPlanWeekDraftHandled, parkedComposer, planWeekDraft]);
 
   useEffect(() => {
     queuedRef.current = queued;

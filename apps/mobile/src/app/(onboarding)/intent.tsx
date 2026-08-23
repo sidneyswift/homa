@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { NativeText } from "../../components/ui/semantic";
 import { Button } from "../../components/ui/button";
@@ -11,8 +10,9 @@ import {
   saveOnboardingState,
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
+import { WalkScene } from "../../features/onboarding/walk-scene";
 import { fetchReactLine } from "../../features/onboarding/react-lines";
-import { colors, radius, space } from "../../theme/tokens";
+import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
  * The one-tap intent ask (wireframe v4 step 3). "All of it" is the
@@ -20,10 +20,9 @@ import { colors, radius, space } from "../../theme/tokens";
  * default); the react + frame beat right after metabolizes the pick.
  */
 const OPTIONS: { intent: OnboardingIntent; label: string }[] = [
-  { intent: "worksheets", label: "Worksheets my kids will actually love" },
-  { intent: "plan", label: "Plan our week" },
-  { intent: "hours", label: "Keep track of our hours" },
-  { intent: "research", label: "Research, answers, pep talks" },
+  { intent: "worksheets", label: "Worksheets for my kids" },
+  { intent: "plan", label: "Planning our week" },
+  { intent: "hours", label: "Keeping our hours" },
   { intent: "all", label: "Honestly, all of it" },
 ];
 
@@ -60,10 +59,10 @@ export default function IntentScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
-      <View style={{ flex: 1, padding: space.lg, gap: space.md, justifyContent: "center" }}>
+    <WalkScene>
+      <View style={{ flex: 1, padding: space.lg, gap: space.md, justifyContent: "flex-start", paddingTop: space.xl }}>
         <NativeText role="display" tone="strong">
-          What would help most this week?
+          What should we do first?
         </NativeText>
         <View style={{ gap: space.sm }}>
           {OPTIONS.map((option) => {
@@ -79,26 +78,38 @@ export default function IntentScreen() {
                   justifyContent: "center",
                   paddingHorizontal: space.md,
                   borderRadius: radius.lg,
-                  borderWidth: selected ? 2 : 1,
-                  borderColor: selected ? colors.textStrong : colors.border,
-                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: selected ? palette.clay600 : colors.border,
+                  backgroundColor: selected ? palette.clay600 : palette.clay50,
                 }}
               >
-                <NativeText role="body" tone={selected ? "strong" : "body"}>
+                <NativeText role="body" tone={selected ? "inverse" : "strong"}>
                   {option.label}
                 </NativeText>
               </Pressable>
             );
           })}
         </View>
-        <Button
-          label={saving ? "One moment…" : "Continue"}
-          size="lg"
-          onPress={() => void continueWalk()}
-          disabled={!picked || saving || !family}
-          busy={saving}
-        />
+        <View style={{ marginTop: "auto", gap: space.sm }}>
+          <Button
+            label={saving ? "One moment…" : "Continue"}
+            size="lg"
+            onPress={() => void continueWalk()}
+            disabled={!picked || saving || !family}
+            busy={saving}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={() => router.replace("/hello" as never)}
+            style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+          >
+            <NativeText role="control" tone="muted">
+              Back
+            </NativeText>
+          </Pressable>
+        </View>
       </View>
-    </SafeAreaView>
+    </WalkScene>
   );
 }

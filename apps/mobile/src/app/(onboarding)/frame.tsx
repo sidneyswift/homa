@@ -1,11 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
 import { NativeText } from "../../components/ui/semantic";
-import { colors, space } from "../../theme/tokens";
+import { space } from "../../theme/tokens";
+import { WalkSheet, WalkSpeech } from "../../features/onboarding/walk-scene";
 
 /**
  * The react + frame beat after the intent tap (cadence laws 3 and 4):
@@ -26,35 +25,45 @@ export default function FrameScreen() {
       : FALLBACK_LINE;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
+    <WalkSheet>
       <View
         style={{
           flex: 1,
-          justifyContent: "center",
           padding: space.lg,
+          paddingTop: space.xs,
           gap: space.md,
         }}
       >
-        <Card style={{ gap: space.md }}>
+        {/* Her words, attached to her: tail kissing the horizon she
+            stands on, tight under the crest (the floating mid-void card
+            read as an intercom; same fix as the next beat). */}
+        <WalkSpeech>
           <NativeText role="bodyLarge" tone="strong">
             {line}
           </NativeText>
           <NativeText role="body" tone="body">
-            Three little questions about your kid, then I make something
-            just for them.
+            Three quick questions about your kid. Then I build their
+            first page.
           </NativeText>
-        </Card>
-        <Button
-          label="Let's go"
-          size="lg"
-          onPress={() => router.replace("/kids" as never)}
-        />
-        <Button
-          label="Back"
-          variant="ghost"
-          onPress={() => router.replace("/intent" as never)}
-        />
+        </WalkSpeech>
+        <View style={{ marginTop: "auto", gap: space.sm }}>
+          <Button
+            label="Let's go"
+            size="lg"
+            onPress={() => router.replace("/kids" as never)}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={() => router.replace("/intent" as never)}
+            style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+          >
+            <NativeText role="control" tone="muted">
+              Back
+            </NativeText>
+          </Pressable>
+        </View>
       </View>
-    </SafeAreaView>
+    </WalkSheet>
   );
 }

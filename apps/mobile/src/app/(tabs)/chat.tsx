@@ -36,9 +36,12 @@ import {
 import { env } from "../../lib/env";
 import { restoreServerBoundMobileSession } from "../../lib/session-binding";
 import { supabase } from "../../lib/supabase";
-import { openWebOnboarding } from "../../lib/web-links";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, space } from "../../theme/tokens";
+
+/** Stable identity: a new object every render would refire the composer
+ *  effect that watches for it. */
+const PLAN_WEEK_DRAFT = { id: "plan-week-intent", text: "Let's plan our week." };
 
 /**
  * Chat is the app's front door (founder call 2026-07-29, matching web:
@@ -56,6 +59,7 @@ export default function ChatScreen() {
     progressChildId?: string | string[];
     progressIntent?: string | string[];
     progressNextMoveFingerprint?: string | string[];
+    planIntent?: string | string[];
   }>();
   const { session } = useSession();
   const { family, children, memberDisplayName, loading } = useFamilyData();
@@ -72,7 +76,13 @@ export default function ChatScreen() {
     preparedState?.userId === userId
       ? !preparedState.sessionReady || !preparedState.historySettled
       : true;
-  const readyFamily = family?.profile_completed_at && children.length > 0 ? family : null;
+  // OnboardingGate (the tabs layout's outer wrapper) has already proven
+  // onboarding is done, web or native, before this screen ever mounts.
+  // A native walk sets mobile_onboarding_state.completed_at, never
+  // profile_completed_at, so re-checking that web-only stamp here read a
+  // finished native family as unready and sent her to web onboarding to
+  // "finish" something already done (live bug, 2026-08-23).
+  const readyFamily = family && children.length > 0 ? family : null;
   const draftRequest = parseComposerDraftRequest(params.progressDraftId, params.progressDraft);
   const requestedProgressChildId = progressChildIdFromRoute(
     params.progressChildId,
@@ -107,6 +117,17 @@ export default function ChatScreen() {
     },
     [router, validatedDraftRequest?.id],
   );
+  // The "Plan our week" onboarding door (next.tsx): unlike a progress
+  // draft, this carries no child or evidence to verify, so it skips
+  // that binding entirely and is just her own opening line, waiting in
+  // the box for her to send or edit.
+  const planIntentParam = Array.isArray(params.planIntent)
+    ? params.planIntent[0]
+    : params.planIntent;
+  const planWeekDraft = planIntentParam === "week" ? PLAN_WEEK_DRAFT : null;
+  const handlePlanWeekDraftHandled = useCallback(() => {
+    router.setParams({ planIntent: "" });
+  }, [router]);
 
   useEffect(() => {
     if (!userId || loading) return;
@@ -221,12 +242,11 @@ export default function ChatScreen() {
                   color: colors.textBody,
                 }}
               >
-                Open the web onboarding so Homa has your family basics and your kids
-                before chat starts here.
+                Add your kid so Homa knows who every page is for before chat starts here.
               </Text>
               <Button
-                label="Open onboarding"
-                onPress={() => void openWebOnboarding()}
+                label="Add a kid"
+                onPress={() => router.replace("/kids" as never)}
               />
             </Card>
           </View>
@@ -247,6 +267,8 @@ export default function ChatScreen() {
               familyId={readyFamily.id}
               parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
               draftRequest={validatedDraftRequest}
+              planWeekDraft={planWeekDraft}
+              onPlanWeekDraftHandled={handlePlanWeekDraftHandled}
               initialProgressChildId={initialProgressChildId}
               initialProgressIntent={initialProgressIntent}
               initialProgressFingerprint={initialProgressFingerprint}

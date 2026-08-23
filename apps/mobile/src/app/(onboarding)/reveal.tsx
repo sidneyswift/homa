@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Image, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Image, Pressable, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { LoadingStatus } from "../../components/ui/loading-status";
@@ -16,6 +15,8 @@ import {
   reportOnboardingStep,
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
+import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
+import { WalkScene } from "../../features/onboarding/walk-scene";
 import { emitFamilyEvent } from "../../lib/events";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import {
@@ -23,7 +24,7 @@ import {
   getInProgressMaterials,
   type MaterialSummary,
 } from "../../lib/materials";
-import { colors, radius, space } from "../../theme/tokens";
+import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
  * The reveal (wireframe v4 step 5, the payoff GIVE): the first kid's
@@ -44,11 +45,15 @@ export default function RevealScreen() {
   const { family } = useFamilyData();
   const [material, setMaterial] = useState<MaterialSummary | null>(null);
   const [childName, setChildName] = useState<string>("");
+  const [receipts, setReceipts] = useState<string>("");
   const [printing, setPrinting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [stillWaiting, setStillWaiting] = useState(false);
   const loaded = useRef(false);
   useAccessibilityAnnouncement(notice);
+  // She keeps working until the page is on screen, then settles.
+  useWalkCharacterState(material || stillWaiting ? "idle" : "thinking");
+  useWalkSky("gold");
 
   useEffect(() => {
     if (!family || loaded.current) return;
@@ -64,6 +69,29 @@ export default function RevealScreen() {
       if (cancelled) return;
       const first = answers?.kids?.[0];
       if (first) setChildName(first.name.trim());
+      // Receipts: the claim "nobody else" needs evidence. Echo back
+      // exactly what she told us this page was built from (gauntlet
+      // round 1: a name-merge headline without receipts is mail merge).
+      if (first) {
+        const rawLoves = Array.isArray(first.love) ? first.love : [];
+        // "animals + ocean animals" reads redundant; keep the most
+        // specific of any containing pair (gauntlet round 6).
+        const distinct = rawLoves.filter(
+          (item, index) =>
+            !rawLoves.some(
+              (other, otherIndex) =>
+                otherIndex !== index &&
+                other.toLowerCase().includes(item.toLowerCase()) &&
+                other.length > item.length,
+            ),
+        );
+        const loves = distinct.slice(0, 2).join(" + ");
+        const working = Array.isArray(first.workingOn) ? (first.workingOn[0] ?? "").toLowerCase() : "";
+        const parts = [loves, working ? `${working} practice` : ""].filter(Boolean);
+        if (parts.length > 0) {
+          setReceipts(`Built from what you told me: ${parts.join(" + ")}.`);
+        }
+      }
 
       const attempt = async (tries: number) => {
         const [finals, drafts] = await Promise.all([
@@ -131,24 +159,55 @@ export default function RevealScreen() {
     material?.pagePreviewUrls?.[0] ?? material?.previewUrl ?? null;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
-      <View style={{ flex: 1, padding: space.lg, gap: space.md, justifyContent: "center" }}>
+    <WalkScene>
+      <View
+        style={{
+          flex: 1,
+          padding: space.lg,
+          paddingTop: space.xl,
+          gap: space.md,
+          justifyContent: "center",
+        }}
+      >
         <NativeText role="display" tone="strong">
           {childName ? `Made for ${childName}. Nobody else.` : "Made for your kid. Nobody else."}
         </NativeText>
 
+        {receipts ? (
+          <NativeText role="caption" tone="muted" style={{ color: palette.clay600 }}>
+            {receipts}
+          </NativeText>
+        ) : null}
+
         {previewUrl ? (
-          <Image
-            source={{ uri: previewUrl }}
+          <View
             style={{
-              width: "100%",
-              aspectRatio: 0.77,
-              borderRadius: radius.lg,
-              backgroundColor: colors.card,
+              backgroundColor: palette.gold100,
+              borderRadius: radius.xl,
+              padding: space.sm,
             }}
-            resizeMode="contain"
-            accessibilityLabel={material?.title ?? "The finished page"}
-          />
+          >
+            {/* The trophy, not the document: the page's top third at
+                readable scale, cropped (gauntlet round 2: a full page at
+                phone scale is an eye test, not a payoff). Print or the
+                Binder shows the whole thing. */}
+            <View
+              style={{
+                width: "100%",
+                height: 300,
+                borderRadius: radius.lg,
+                backgroundColor: colors.card,
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                source={{ uri: previewUrl }}
+                style={{ width: "100%", aspectRatio: 0.77 }}
+                resizeMode="cover"
+                accessibilityLabel={material?.title ?? "The finished page"}
+              />
+            </View>
+          </View>
         ) : stillWaiting ? (
           <NativeText role="body" tone="body">
             {"Still finishing up. It's landing in your Binder now, so you can find it there the moment it's ready."}
@@ -163,19 +222,25 @@ export default function RevealScreen() {
           </NativeText>
         ) : null}
 
-        <Button
-          label={printing ? "Sending to the printer…" : "Print it"}
-          size="lg"
-          onPress={() => void printMaterial()}
-          disabled={!material || printing}
-          busy={printing}
-        />
-        <Button
-          label="It's saved in the Binder, keep going"
-          variant="ghost"
+        {material ? (
+          <Button
+            label={printing ? "Sending to the printer…" : "Print it"}
+            size="lg"
+            onPress={() => void printMaterial()}
+            disabled={printing}
+            busy={printing}
+          />
+        ) : null}
+        <Pressable
+          accessibilityRole="button"
           onPress={() => router.replace("/next" as never)}
-        />
+          style={{ minHeight: 44, alignItems: "center", justifyContent: "center", marginBottom: space.lg }}
+        >
+          <NativeText role="caption" tone="muted">
+            {"The full page is saved in your Binder. Keep going"}
+          </NativeText>
+        </Pressable>
       </View>
-    </SafeAreaView>
+    </WalkScene>
   );
 }
