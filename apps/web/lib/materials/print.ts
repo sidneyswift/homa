@@ -47,6 +47,10 @@ export function selectedPrintPages(input: {
 }): number[] | null {
   const all = Array.from({ length: input.pageCount }, (_value, index) => index);
   if (input.includeAnswerKey) return all;
+  // One page has nothing to exclude it from: unlabeled single pages (the
+  // common case for a plain worksheet or coloring page) are not the
+  // unlabeled-legacy-packet case below, and must not fail closed.
+  if (input.pageCount <= 1) return all;
   if (!input.pageRoles) return null;
   const selected = all.filter((index) => input.pageRoles?.[index] !== "answer_key");
   return selected.length > 0 && selected.length < all.length ? selected : null;
