@@ -266,8 +266,8 @@ export default function MakingScreen() {
                 {checklistAvailable === "checking" ? null : checklistExited ? (
                   <NativeText role="bodySmall" tone="body">
                     {childName
-                      ? `Got it — that helps me know ${childName} better.`
-                      : "Got it — that helps me know your kid better."}
+                      ? `Got it. That helps me know ${childName} better.`
+                      : "Got it. That helps me know your kid better."}
                   </NativeText>
                 ) : null}
 
