@@ -581,6 +581,70 @@ export async function familyAccountCheckout(familyId: string): Promise<WallCheck
   return (await familyAccountGate(familyId)).checkout;
 }
 
+/**
+ * The mobile-onboarding account exemption, pure half (founder ruling
+ * gh#305, 2026-07-28, "phone app only"): a walled family still
+ * mid-onboarding on the iOS app keeps her first sitting, so the paywall
+ * arrives after she has met Homa, never before. The eve channel has
+ * carried this since 2026-07-28 (agent/channels/eve.ts); the native
+ * walk's progress questionnaire (2026-08-23) is the first REST surface
+ * to need the same door, with the same trust model: the channel comes
+ * from the header only the mobile client sends, and onboarding-active
+ * comes from database truth, never from anything the client asserts.
+ *
+ * Web is structurally untouched: without the mobile header this returns
+ * false before any row is read, so the signup paywall's web behavior
+ * stays byte-identical.
+ */
+export function mobileOnboardingAccountBypass(
+  channelHeader: string | null,
+  row: { profileCompletedAt: string | null; context: unknown } | null,
+): boolean {
+  if (channelHeader !== "mobile") return false;
+  if (!row) return false;
+  return familyOnboardingActive({
+    profileCompletedAt: row.profileCompletedAt,
+    context: row.context,
+  });
+}
+
+/**
+ * mobileOnboardingAccountExempt(request, familyId): the I/O half.
+ * Fail posture is the OPPOSITE of the gate's on purpose: the gate fails
+ * open (the founder loses a gate, never a family), but a bypass read
+ * failing must fail CLOSED, because an error that opens a paywall
+ * exemption is a bypass nobody chose. The caller's wall then holds and
+ * the client's retry copy carries her through a transient error.
+ */
+export async function mobileOnboardingAccountExempt(
+  request: Request,
+  familyId: string,
+): Promise<boolean> {
+  const channel = request.headers.get("x-homa-channel");
+  if (channel !== "mobile") return false;
+  try {
+    const sql = mapDb();
+    const rows = await sql<{ profile_completed_at: string | null; context: unknown }[]>`
+      select profile_completed_at::text as profile_completed_at, context
+      from public.families
+      where id = ${familyId}
+    `;
+    const row = rows[0];
+    return mobileOnboardingAccountBypass(
+      channel,
+      row
+        ? { profileCompletedAt: row.profile_completed_at, context: row.context }
+        : null,
+    );
+  } catch (error) {
+    console.error(
+      "wall: mobile onboarding exemption read failed, wall holds:",
+      error instanceof Error ? error.message : "unknown",
+    );
+    return false;
+  }
+}
+
 /** What the settings plan card needs to tell the truth (gh#412). */
 export interface FamilyPlanState {
   tier: PlanTier;

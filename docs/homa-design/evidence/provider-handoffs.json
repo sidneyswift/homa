@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "c1c1790e3bcd541b0cc8d7f87ad5c7290f156965d91ac8ec23e677daeae283d7"
+    "scopedInputFingerprint": "e608bb0a1273e544f3b2c979228f3cb4e3a3aa903171fe005017e700e270124d"
   },
   "records": [
     {
@@ -181,7 +181,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "99612adcd4cc547ce3a611c8b06765a00059027fe1ed3396b5aa7738b2ec264f"
+      "scopedInputFingerprint": "fc0fbcb8f4b7b77d70593b184e96c9621ffee0ae929859770d4ba8377259ee0f"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -595,7 +595,7 @@
         "Provider outages never become a guessed paid state and never cross family boundaries.",
         "App Store products stay unavailable until old builds cannot start a legacy-token purchase and the signed auto-renew plus immediate-deletion activation requirements are certified."
       ],
-      "scopedInputFingerprint": "5a7145254fb2c21b45453cf304682ae203c62d83ebbf31e1a37af764ceac01a1"
+      "scopedInputFingerprint": "bf58edc1f5a0be27271d8210917a7b0e000d8a8536812ca269e2bac80da80f0f"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -744,7 +744,7 @@
       },
       {
         "path": "apps/web/lib/billing/wall.ts",
-        "sha256": "f614817cac9cb75c24652759598e41c78997294cbaf1440c28ac87ec736d05d2"
+        "sha256": "a6d0f2508b8bd65bdd9af3f9872987e1b9f7bf65a56ee297b39288986c863082"
       },
       {
         "path": "apps/web/lib/supabase/client.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "cbe846d95d9eccbd36f30025842256c5e32930a452a1c84bfa35932817b911fd"
+    "sourceFingerprint": "d8f31695ed3601b6245acdb47ad725dd053a01d439ad93ca0ab6004239660042"
   }
 }
