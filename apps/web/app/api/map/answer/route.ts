@@ -4,7 +4,10 @@ import { z } from "zod";
 import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { familyAccountCheckout } from "../../../../lib/billing/wall";
+import {
+  familyAccountCheckout,
+  mobileOnboardingAccountExempt,
+} from "../../../../lib/billing/wall";
 import { requireFamilyWithActorFromRequest } from "../../../../lib/map/session";
 import {
   deleteAnswerWithProgressStatus,
@@ -51,8 +54,13 @@ export async function POST(request: Request): Promise<Response> {
   }
   // The signup paywall gates the pipeline, not only the pages: a walled
   // account must not keep answering toward the report the gate exists
-  // to sell (the dc4ab64b bypass class).
-  if ((await familyAccountCheckout(access.family.id)) !== null) {
+  // to sell (the dc4ab64b bypass class). One exemption, phone app only
+  // (gh#305): the native walk's questionnaire runs before the paywall,
+  // so a mobile family still mid-onboarding answers through the wall.
+  if (
+    (await familyAccountCheckout(access.family.id)) !== null &&
+    !(await mobileOnboardingAccountExempt(request, access.family.id))
+  ) {
     return Response.json({ ok: false, reason: "walled" }, { status: 403 });
   }
 

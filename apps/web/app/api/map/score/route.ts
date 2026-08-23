@@ -2,7 +2,10 @@ import { after } from "next/server";
 
 import { MAP_BANK_VERSION, mapScoreRequestSchema } from "@homa/core";
 
-import { familyAccountCheckout } from "../../../../lib/billing/wall";
+import {
+  familyAccountCheckout,
+  mobileOnboardingAccountExempt,
+} from "../../../../lib/billing/wall";
 import { emitMapEvent } from "../../../../lib/map/events";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { runReportNarrative } from "../../../../lib/map/narrative-runner";
@@ -47,7 +50,12 @@ export async function POST(request: Request): Promise<Response> {
   // The signup paywall gates the pipeline, not only the pages: this is
   // the route that generates AND emails the report, the exact value the
   // gate holds (the dc4ab64b bypass class). /onboarding/trial first.
-  if ((await familyAccountCheckout(family.id)) !== null) {
+  // One exemption, phone app only (gh#305): the native walk's
+  // questionnaire scores through the wall, same as it answers.
+  if (
+    (await familyAccountCheckout(family.id)) !== null &&
+    !(await mobileOnboardingAccountExempt(request, family.id))
+  ) {
     return Response.json({ ok: false, reason: "walled" }, { status: 403 });
   }
 
