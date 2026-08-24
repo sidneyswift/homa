@@ -250,3 +250,20 @@ export function reportOnboardingCompleted(
 ): void {
   void emitFamilyEvent(familyId, "mobile_onboarding.completed", props);
 }
+
+/**
+ * A parent who leaves the walk before the doors screen never picked a
+ * next_door, so she cannot honestly be folded into "completed". This is
+ * the funnel's real signal for that population; without it, an early
+ * exit and a crash both look identical (silence after step_reached).
+ */
+export function reportOnboardingExitedEarly(
+  familyId: string,
+  step: OnboardingStep,
+  kidsAdded: number,
+): void {
+  void emitFamilyEvent(familyId, "mobile_onboarding.exited_early", {
+    step,
+    kids_added: kidsAdded,
+  });
+}

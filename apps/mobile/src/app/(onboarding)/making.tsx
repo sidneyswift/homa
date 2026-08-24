@@ -35,6 +35,7 @@ import { getMakingStatus, startFirstMaking } from "../../features/onboarding/mak
 import {
   loadOnboardingAnswers,
   markOnboardingComplete,
+  reportOnboardingExitedEarly,
   reportOnboardingStep,
   saveOnboardingStep,
   type DraftKid,
@@ -196,6 +197,8 @@ export default function MakingScreen() {
 
   async function keepGoing() {
     if (!family) return;
+    const children = await getMyChildren(family.id).catch(() => []);
+    reportOnboardingExitedEarly(family.id, "making", children.length);
     await markOnboardingComplete(family.id);
     router.replace("/");
   }
