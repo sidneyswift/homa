@@ -229,6 +229,12 @@ export default function MakingScreen() {
 
             {showingChecklist && checklistChildId ? (
               <>
+                {/* The frame before the first question (founder call
+                    2026-08-23): the heading says what Homa is doing, so
+                    this line says what SHE is about to do and why, or a
+                    bare question lands out of nowhere. Once the page is
+                    ready, "While Homa draws" stops being true, so the
+                    ready banner takes this slot instead. */}
                 {pageReady ? (
                   <View
                     style={{
@@ -251,8 +257,10 @@ export default function MakingScreen() {
                     />
                   </View>
                 ) : (
-                  <NativeText role="caption" tone="muted">
-                    {childName ? `Still drawing ${childName}'s page…` : "Still drawing…"}
+                  <NativeText role="body" tone="body">
+                    {childName
+                      ? `While Homa draws, answer a few quick questions about ${childName}. Each answer builds ${childName}'s progress report and shapes the lesson plans to come.`
+                      : "While Homa draws, answer a few quick questions about your kid. Each answer builds their progress report and shapes the lesson plans to come."}
                   </NativeText>
                 )}
                 <ChecklistTakeover
