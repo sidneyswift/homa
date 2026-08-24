@@ -146,6 +146,9 @@ jobs:
       - name: Design authoring rails check (coverage, contract, residue, fingerprints)
         run: pnpm check:design-authoring
 
+      - name: Product Design Playbook skill and scorer contract
+        run: pnpm check:product-design-playbook
+
       - name: Licensed font system contract and residue check
         run: pnpm check:font-system
 
