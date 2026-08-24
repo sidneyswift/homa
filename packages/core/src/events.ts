@@ -178,6 +178,7 @@ export const MOBILE_FAMILY_EVENT_NAMES = [
   "mobile_onboarding.step_reached",
   "mobile_onboarding.resumed",
   "mobile_onboarding.completed",
+  "mobile_onboarding.exited_early",
   "planner.device_calendar_previewed",
   "planner.device_calendar_export_finished",
   CAPTURE_LOOP_EVENT_NAME,
@@ -983,6 +984,18 @@ export const EVENT_SCHEMAS = {
       second_create_tapped: z.boolean(),
     })
     .strict(),
+  // A parent who leaves the walk before the doors screen (today, only the
+  // making screen's "keep exploring while it draws" shortcut) never picked
+  // a next_door and never saw the second-create prompt, so she cannot honestly
+  // be folded into "completed" without inventing a door she never opened.
+  // This is the funnel's abandonment signal for that population.
+  "mobile_onboarding.exited_early": z
+    .object({
+      family_id: z.uuid(),
+      step: z.enum(MOBILE_ONBOARDING_STEPS),
+      kids_added: z.number().int().min(0).max(20),
+    })
+    .strict(),
   // The native share sheet is a parent-controlled handoff, never a
   // delivery receipt. No destination app, account, message, or child
   // detail enters analytics.
@@ -1632,6 +1645,14 @@ export const mobileFamilyEventRequestSchema = z.discriminatedUnion("name", [
     .object({
       name: z.literal("mobile_onboarding.completed"),
       props: EVENT_SCHEMAS["mobile_onboarding.completed"].omit({
+        family_id: true,
+      }),
+    })
+    .strict(),
+  z
+    .object({
+      name: z.literal("mobile_onboarding.exited_early"),
+      props: EVENT_SCHEMAS["mobile_onboarding.exited_early"].omit({
         family_id: true,
       }),
     })

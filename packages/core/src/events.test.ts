@@ -461,6 +461,10 @@ test("mobile family event allowlist matches every strict wire variant", () => {
       next_door: "look_around",
       second_create_tapped: false,
     },
+    "mobile_onboarding.exited_early": {
+      step: "making",
+      kids_added: 1,
+    },
     "planner.device_calendar_previewed": {
       selected_count: 2,
       duplicate_count: 0,
