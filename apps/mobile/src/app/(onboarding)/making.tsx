@@ -267,6 +267,13 @@ export default function MakingScreen() {
                   childId={checklistChildId}
                   onClose={handleChecklistClose}
                   closeLabel="Keep exploring"
+                  doneLabel={
+                    pageReady
+                      ? childName
+                        ? `See ${childName}'s page`
+                        : "See the page"
+                      : "Done for now"
+                  }
                 />
               </>
             ) : (

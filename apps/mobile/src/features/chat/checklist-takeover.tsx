@@ -53,6 +53,7 @@ export function ChecklistTakeover({
   childId,
   onClose,
   closeLabel = "Back to the chat",
+  doneLabel,
 }: {
   childId: string;
   onClose: (exit: ChecklistExit | null) => void;
@@ -60,6 +61,10 @@ export function ChecklistTakeover({
    *  non-chat mount (e.g. the onboarding making screen) names its own
    *  exit instead of promising a chat that is not there. */
   closeLabel?: string;
+  /** The completion button when finishing means something different
+   *  from stopping early (the making screen's finish goes to the
+   *  reveal). Defaults to closeLabel. */
+  doneLabel?: string;
 }) {
   const [child, setChild] = useState<MapStateChild | null>(null);
   const [pending, setPending] = useState(false);
@@ -200,14 +205,22 @@ export function ChecklistTakeover({
               Questions complete
             </Text>
           </View>
-          <Button label={closeLabel} onPress={() => onClose(exitFor(child))} />
+          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}>
+            {`Every answer is saved. They become ${child.name}'s progress report.`}
+          </Text>
+          <Button label={doneLabel ?? closeLabel} onPress={() => onClose(exitFor(child))} />
         </View>
       )}
       {pending ? <LoadingStatus label="Saving answer" showLabel={false} /> : null}
       {error ? <InlineError message={error} /> : null}
-      <Text style={{ textAlign: "center", fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
-        {position.remaining <= 1 ? "Almost done" : `About ${position.minutesLeft} min left. You can stop whenever you like.`}
-      </Text>
+      {/* Time-left only makes sense while a question is on screen; a
+          finished card saying "Almost done" reads as a broken counter
+          (founder confusion, 2026-08-23). */}
+      {item ? (
+        <Text style={{ textAlign: "center", fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
+          {position.remaining <= 1 ? "Almost done" : `About ${position.minutesLeft} min left. You can stop whenever you like.`}
+        </Text>
+      ) : null}
     </Card>
   );
 }
