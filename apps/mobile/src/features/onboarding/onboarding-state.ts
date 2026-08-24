@@ -28,13 +28,17 @@ export const THROUGH_CACHE_PREFIX = "homa.onboarding.through.v1:";
 export type OnboardingStep = MobileOnboardingStep;
 export type OnboardingIntent = MobileOnboardingIntent;
 
-/** A child mid-introduction: the assembling card's fields. */
+/** A child mid-introduction: the assembling card's fields. The level
+ * ask ("Just starting / Getting it / Flying") was cut 2026-08-24: it
+ * only ever survived as a suffix on the focus string, and the progress
+ * questionnaire collects the same fact properly minutes later. Old
+ * drafts carrying a level key hydrate fine; the extra property is
+ * simply ignored. */
 export interface DraftKid {
   name: string;
   age: number | null;
   love: string[];
   workingOn: string[];
-  level: "starting" | "getting_it" | "flying" | null;
   /** Set once the kid is written as a real children row. */
   childId: string | null;
 }
@@ -245,4 +249,21 @@ export function reportOnboardingCompleted(
   },
 ): void {
   void emitFamilyEvent(familyId, "mobile_onboarding.completed", props);
+}
+
+/**
+ * A parent who leaves the walk before the doors screen never picked a
+ * next_door, so she cannot honestly be folded into "completed". This is
+ * the funnel's real signal for that population; without it, an early
+ * exit and a crash both look identical (silence after step_reached).
+ */
+export function reportOnboardingExitedEarly(
+  familyId: string,
+  step: OnboardingStep,
+  kidsAdded: number,
+): void {
+  void emitFamilyEvent(familyId, "mobile_onboarding.exited_early", {
+    step,
+    kids_added: kidsAdded,
+  });
 }

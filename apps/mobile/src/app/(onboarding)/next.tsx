@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 
@@ -44,9 +44,14 @@ const DOOR_ROUTES: Record<Door, string> = {
 
 export default function NextScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ printed?: string | string[] }>();
   const { family } = useFamilyData();
   const [choosing, setChoosing] = useState(false);
   const reported = useRef(false);
+  // The reveal passes printed=1 when the page actually went to the
+  // printer, so the bubble can speak to what just happened instead of
+  // quipping past it (founder call 2026-08-24).
+  const printed = (Array.isArray(params.printed) ? params.printed[0] : params.printed) === "1";
 
   useEffect(() => {
     if (!family || reported.current) return;
@@ -74,7 +79,9 @@ export default function NextScreen() {
       <View style={{ flex: 1, padding: space.lg, gap: space.md, paddingTop: space.xs }}>
         <WalkSpeech>
           <NativeText role="body" tone="strong">
-            {"That one's getting grabbed. And the more I know your kids, the better every page gets."}
+            {printed
+              ? "That page is printing right now. And the more I know your kids, the better every page gets."
+              : "That one's getting grabbed. And the more I know your kids, the better every page gets."}
           </NativeText>
         </WalkSpeech>
         <NativeText role="display" tone="strong" style={{ marginTop: space.lg }}>

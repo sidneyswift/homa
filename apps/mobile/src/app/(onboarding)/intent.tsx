@@ -44,10 +44,13 @@ export default function IntentScreen() {
   async function continueWalk() {
     if (!family || !picked || saving) return;
     setSaving(true);
+    // Step stays "kids": the you screen between here and there has no
+    // step value of its own (the step column's check constraint
+    // predates it), so a resume lands on the kid questions.
     await saveOnboardingState(family.id, "kids", { intent: picked });
     reportOnboardingStep(family.id, "kids", picked);
     setSaving(false);
-    router.replace("/kids" as never);
+    router.replace("/you" as never);
   }
 
   return (

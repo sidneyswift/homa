@@ -62,18 +62,11 @@ function workingChipsForAge(age: number | null): string[] {
   return ["Reading", "Writing", "Math", "Handwriting", "Spelling", "Science"];
 }
 
-const LEVELS: { key: DraftKid["level"] & string; label: string }[] = [
-  { key: "starting", label: "Just starting" },
-  { key: "getting_it", label: "Getting it" },
-  { key: "flying", label: "Flying" },
-];
-
 const emptyKid = (): DraftKid => ({
   name: "",
   age: null,
   love: [],
   workingOn: [],
-  level: null,
   childId: null,
 });
 
@@ -180,7 +173,7 @@ export default function KidsScreen() {
       setSubStep("working");
       return;
     }
-    router.replace("/intent" as never);
+    router.replace("/you" as never);
   }
 
   function toggleLove(option: string) {
@@ -229,10 +222,12 @@ export default function KidsScreen() {
       birthYear: approxDate.getUTCFullYear(),
       birthMonth: approxDate.getUTCMonth() + 1,
       birthDay: 15,
+      // The flag is what lets a later surface (settings today) offer
+      // the real birthday honestly instead of presenting the midpoint
+      // estimate as a fact.
+      birthdayApproximate: true,
       interests: kid.love,
-      focus: kid.workingOn.length
-        ? `${joinNatural(kid.workingOn)}${kid.level ? ` (${kid.level.replace("_", " ")})` : ""}`
-        : "",
+      focus: kid.workingOn.length ? joinNatural(kid.workingOn) : "",
     });
     if (result.error) {
       setError("That didn't save. You can try again when you're ready.");
@@ -246,14 +241,16 @@ export default function KidsScreen() {
       .reverse()
       .find((child) => child.name.trim().toLowerCase() === childName.toLowerCase());
     if (match) updateKid({ childId: match.id });
-    // The first kid's page starts building the moment her card is
+    // EVERY kid's page starts building the moment their card is
     // complete, not when the walk ends: the bench (2026-08-21) measured
     // 72 to 211 seconds of build time that can run underneath the
-    // remaining screens instead of after them. Idempotent server-side
-    // (one first making per child, ever), so the making screen's own
-    // start lands on this same job. Fire and forget: a lost kick costs
-    // nothing, the making screen starts it for real.
-    if (match && kids.length === 1) {
+    // remaining screens instead of after them, and siblings deserve the
+    // same head start as kid one (founder call 2026-08-24). Idempotent
+    // server-side (one first making per child, ever), so the making
+    // screen's and the reveal's own starts land on these same jobs.
+    // Fire and forget: a lost kick costs nothing, later screens start
+    // it for real.
+    if (match) {
       void startFirstMaking(match.id).catch(() => {});
     }
     return true;
@@ -436,35 +433,6 @@ export default function KidsScreen() {
                   </NativeText>
                 </Pressable>
               )}
-
-              {kid.workingOn.length > 0 ? (
-                // The second question appears only once the first is
-                // answered; two chip sets in one flat list read as one
-                // confusing choice (founder feedback 2026-08-18).
-                <View
-                  style={{
-                    gap: space.sm,
-                    marginTop: space.sm,
-                    backgroundColor: palette.clay50,
-                    borderRadius: radius.lg,
-                    padding: space.md,
-                  }}
-                >
-                  <NativeText role="label" tone="strong">
-                    {`How's ${kid.name.trim()} doing with ${joinNatural(kid.workingOn).toLowerCase()}?`}
-                  </NativeText>
-                  <View style={{ flexDirection: "row", gap: space.sm }}>
-                    {LEVELS.map((level) => (
-                      <Chip
-                        key={level.key}
-                        label={level.label}
-                        selected={kid.level === level.key}
-                        onPress={() => updateKid({ level: level.key })}
-                      />
-                    ))}
-                  </View>
-                </View>
-              ) : null}
 
               {error ? <InlineError message={error} /> : null}
 

@@ -66,6 +66,8 @@ An AI homeschool assistant that keeps a family's context, helps create learning 
 | `marketing/` | Demand-gen engine state: signal reservoir, staged/published bundles, personas, voice, routines (spec: `docs/homa-planning/14-marketing-demand-engine.md`) |
 | `docs/homa-planning/` | Product contract, founder registry, ticket backlog, dated plans, runbooks, and preserved history |
 | `docs/homa-design/` | Quiet authority human guide, workflow, and quarantined legacy evidence |
+| `.agents/skills/product-design-playbook/` | Repository skill for strategy, flow design, evidence-bounded audits, deterministic maturity scoring, improvement estimates, and portfolio eligibility |
+| `docs/product-design-playbook/` | Canonical Product Design Playbook archive: page-complete Markdown and screenshots, normalized framework and play catalog, and the human-readable scoring contract |
 | `docs/homa-benchmarks/` | Internal national-benchmark corpus (ages 2 to 16, all subjects): sourced anchor base for the map bank and progress reports |
 | `docs/homa-curriculum-atlas/` | Curriculum atlas: dated competitive/reference profiles of the homeschool curriculum market (87 profiles with parseable front matter, category comparisons, market overview, product implications) |
 | `docs/notes/` | Running implementation notes that record discoveries and plan deviations |
