@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ageInMonths, ageLabel } from "@homa/core";
@@ -7,10 +8,13 @@ import { ageInMonths, ageLabel } from "@homa/core";
 import { Button } from "../components/ui/button";
 import { Icon } from "../components/design/icon";
 import { Card } from "../components/ui/card";
+import { InlineError } from "../components/ui/inline-error";
 import { LoadingStatus } from "../components/ui/loading-status";
 import { useBillingGate } from "../features/billing/use-billing-gate";
 import { useSession } from "../features/auth/session-provider";
 import { AddChildForm } from "../features/family/add-child-form";
+import { setChildBirthday, type ChildRecord } from "../lib/family";
+import { TextField } from "../components/ui/text-field";
 import { useFamilyData } from "../features/family/use-family-data";
 import { resetOnboardingWalk } from "../features/onboarding/onboarding-state";
 import { supabase } from "../lib/supabase";
@@ -155,10 +159,11 @@ export default function SettingsScreen() {
             {children.length > 0 ? (
               <Card style={{ gap: space.sm }}>
                 {children.map((child) => (
-                  <SettingsRow
+                  <ChildRow
                     key={child.id}
-                    label={child.name}
-                    value={ageLabel(ageInMonths(child.birth_month))}
+                    child={child}
+                    familyId={family.id}
+                    onSaved={() => void reload()}
                   />
                 ))}
               </Card>
@@ -226,6 +231,127 @@ function SettingsSection({
         {title}
       </Text>
       <Card style={{ gap: space.sm }}>{children}</Card>
+    </View>
+  );
+}
+
+/**
+ * One child in the family list. Onboarding stores an age-estimate
+ * birthday (flagged birthdayApproximate); this row is the honest
+ * refinement moment: the age reads "about" until the real birthday is
+ * saved, and saving clears the flag (founder call 2026-08-24).
+ */
+function ChildRow({
+  child,
+  familyId,
+  onSaved,
+}: {
+  child: ChildRecord;
+  familyId: string;
+  onSaved: () => void;
+}) {
+  const approximate = child.profile?.birthdayApproximate === true;
+  const [editing, setEditing] = useState(false);
+  const [month, setMonth] = useState("");
+  const [day, setDay] = useState("");
+  const [year, setYear] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save() {
+    if (saving) return;
+    setError(null);
+    setSaving(true);
+    const result = await setChildBirthday({
+      childId: child.id,
+      familyId,
+      profile: child.profile ?? {},
+      birthYear: Number.parseInt(year, 10),
+      birthMonth: Number.parseInt(month, 10),
+      birthDay: Number.parseInt(day, 10),
+    });
+    setSaving(false);
+    if (result.error) {
+      setError("Pick a valid birthday: month, day, and year.");
+      return;
+    }
+    setEditing(false);
+    onSaved();
+  }
+
+  return (
+    <View style={{ gap: space.xs }}>
+      <SettingsRow
+        label={child.name}
+        value={`${ageLabel(ageInMonths(child.birth_month))}${approximate ? " (about)" : ""}`}
+      />
+      {approximate && !editing ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Set ${child.name}'s birthday`}
+          onPress={() => setEditing(true)}
+          style={{ minHeight: 32, justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              fontFamily: fontFamilies.bodyMedium,
+              fontSize: fontSize.sm,
+              color: colors.action,
+            }}
+          >
+            Set the real birthday
+          </Text>
+        </Pressable>
+      ) : null}
+      {editing ? (
+        <View style={{ gap: space.sm }}>
+          <View style={{ flexDirection: "row", gap: space.sm }}>
+            <View style={{ flex: 1 }}>
+              <TextField
+                label="Month"
+                value={month}
+                onChangeText={setMonth}
+                placeholder="MM"
+                keyboardType="number-pad"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <TextField
+                label="Day"
+                value={day}
+                onChangeText={setDay}
+                placeholder="DD"
+                keyboardType="number-pad"
+              />
+            </View>
+            <View style={{ flex: 1.4 }}>
+              <TextField
+                label="Year"
+                value={year}
+                onChangeText={setYear}
+                placeholder="YYYY"
+                keyboardType="number-pad"
+              />
+            </View>
+          </View>
+          {error ? <InlineError message={error} /> : null}
+          <View style={{ flexDirection: "row", gap: space.sm }}>
+            <Button
+              label={saving ? "Saving…" : "Save birthday"}
+              size="sm"
+              onPress={() => void save()}
+              disabled={saving}
+              busy={saving}
+            />
+            <Button
+              label="Cancel"
+              size="sm"
+              variant="ghost"
+              onPress={() => setEditing(false)}
+            />
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }

@@ -1,5 +1,6 @@
 import { getFamilyByAuthUser, startAnonymousFamily, attachAuthUser } from "../../../../lib/map/store";
 import { mapDb } from "../../../../lib/map/db";
+import { writeOnboardingRecord } from "../../../../lib/onboarding/store";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { requireAuthUserFromBearer } from "../../../../lib/map/session";
 
@@ -79,6 +80,18 @@ export async function POST(request: Request): Promise<Response> {
       where family_id = ${family.id}
     `;
     const state = rows[0] ?? null;
+
+    // While the native walk is live, the family carries an ACTIVE
+    // onboarding record. The record outranks profile_completed_at in
+    // onboardingActiveForRow, and that matters here: the walk's "about
+    // you" screen saves through /api/onboarding/basics, which stamps
+    // profile_completed_at, and without this record that stamp would
+    // flip the family to onboarding-done mid-walk and drop the
+    // phone-only paywall exemption (gh#305) out from under her.
+    // Idempotent merge; one small UPDATE per app open during the walk.
+    if (!state?.completed_at) {
+      await writeOnboardingRecord(family.id, {});
+    }
 
     return Response.json({
       ok: true,
