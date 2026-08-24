@@ -24,6 +24,10 @@ export interface ChildProfile {
   interests?: string[];
   focus?: string;
   notes?: string;
+  /** True while the stored birthday is the onboarding age estimate
+   *  (age midpoint minus six months, day 15), cleared the moment a
+   *  real birthday is saved. */
+  birthdayApproximate?: boolean;
 }
 
 export interface ChildRecord {
@@ -113,6 +117,7 @@ export interface AddChildInput {
   birthDay: number;
   interests: string[];
   focus: string;
+  birthdayApproximate?: boolean;
 }
 
 export async function addChild(
@@ -138,7 +143,46 @@ export async function addChild(
     name: input.name.trim(),
     // Historical column name; the stored value is the child's full birthday.
     birth_month: birthDate,
-    profile: { interests: input.interests, focus: input.focus },
+    profile: {
+      interests: input.interests,
+      focus: input.focus,
+      ...(input.birthdayApproximate ? { birthdayApproximate: true } : {}),
+    },
   });
+  return { error: error ? error.message : null };
+}
+
+/**
+ * Replace an approximate onboarding birthday with the real one and
+ * clear the flag, in one write. RLS ("members update their children")
+ * scopes the row; the family_id filter is the belt on top of it.
+ */
+export async function setChildBirthday(input: {
+  childId: string;
+  familyId: string;
+  profile: ChildProfile;
+  birthYear: number;
+  birthMonth: number;
+  birthDay: number;
+}): Promise<{ error: string | null }> {
+  const birthDate = [
+    String(input.birthYear),
+    String(input.birthMonth).padStart(2, "0"),
+    String(input.birthDay).padStart(2, "0"),
+  ].join("-");
+  if (
+    !Number.isInteger(input.birthYear) ||
+    !Number.isInteger(input.birthMonth) ||
+    !Number.isInteger(input.birthDay) ||
+    !isValidBirthDate(birthDate)
+  ) {
+    return { error: "Pick a valid birthday: month, day, and year." };
+  }
+  const { birthdayApproximate: _cleared, ...profile } = input.profile;
+  const { error } = await supabase
+    .from("children")
+    .update({ birth_month: birthDate, profile })
+    .eq("id", input.childId)
+    .eq("family_id", input.familyId);
   return { error: error ? error.message : null };
 }

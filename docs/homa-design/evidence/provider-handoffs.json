@@ -595,7 +595,7 @@
         "Provider outages never become a guessed paid state and never cross family boundaries.",
         "App Store products stay unavailable until old builds cannot start a legacy-token purchase and the signed auto-renew plus immediate-deletion activation requirements are certified."
       ],
-      "scopedInputFingerprint": "bf58edc1f5a0be27271d8210917a7b0e000d8a8536812ca269e2bac80da80f0f"
+      "scopedInputFingerprint": "c5783f633db43c844223bd4aed6d481a4042b9d52b4138b781fbc8cb14ae2da9"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -612,7 +612,7 @@
       },
       {
         "path": "apps/mobile/src/app/settings.tsx",
-        "sha256": "d892cb06b0df649b58aab3024b59d1f23c7bd6a31e9866cf4afca842d0f5a2d4"
+        "sha256": "6dec50869407d7220a1d2f15239e54a2f19f908faf78f972ca5afa7388d851cc"
       },
       {
         "path": "apps/mobile/src/components/billing-gate.tsx",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "d8f31695ed3601b6245acdb47ad725dd053a01d439ad93ca0ab6004239660042"
+    "sourceFingerprint": "ead7e18c390540818a8a135d84e4e2591ccf4dccacd6d343f656fd66b4347c7f"
   }
 }

@@ -10,6 +10,7 @@ import {
   prepareMaterialPrintFromApp,
   runPreparedMaterialPrint,
 } from "../../features/materials/material-print";
+import { startFirstMaking } from "../../features/onboarding/making";
 import {
   loadOnboardingAnswers,
   reportOnboardingStep,
@@ -50,6 +51,7 @@ export default function RevealScreen() {
   const [printed, setPrinted] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [stillWaiting, setStillWaiting] = useState(false);
+  const [siblingLine, setSiblingLine] = useState<string | null>(null);
   const loaded = useRef(false);
   useAccessibilityAnnouncement(notice);
   // She keeps working until the page is on screen, then settles.
@@ -92,6 +94,26 @@ export default function RevealScreen() {
         if (parts.length > 0) {
           setReceipts(`Built from what you told me: ${parts.join(" + ")}.`);
         }
+      }
+
+      // Siblings get pages too (founder call 2026-08-24): their jobs
+      // were kicked as each card finished in the walk, and this start
+      // is the idempotent confirmation. Only kids whose job actually
+      // confirms are named, so the line below never claims a drawing
+      // that is not happening (honest theater law).
+      const siblings = (answers?.kids ?? []).slice(1);
+      const confirmed: string[] = [];
+      for (const sibling of siblings) {
+        if (!sibling.childId || !sibling.name.trim()) continue;
+        const started = await startFirstMaking(sibling.childId).catch(() => null);
+        if (started) confirmed.push(sibling.name.trim());
+      }
+      if (!cancelled && confirmed.length > 0) {
+        setSiblingLine(
+          confirmed.length === 1
+            ? `${confirmed[0]}'s page is drawing too. It lands in your Binder.`
+            : `${confirmed.join(" and ")}'s pages are drawing too. They land in your Binder.`,
+        );
       }
 
       const attempt = async (tries: number) => {
@@ -181,6 +203,12 @@ export default function RevealScreen() {
         {receipts ? (
           <NativeText role="caption" tone="muted" style={{ color: palette.clay600 }}>
             {receipts}
+          </NativeText>
+        ) : null}
+
+        {siblingLine ? (
+          <NativeText role="bodySmall" tone="body">
+            {siblingLine}
           </NativeText>
         ) : null}
 
