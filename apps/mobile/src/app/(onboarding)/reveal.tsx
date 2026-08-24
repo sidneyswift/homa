@@ -47,6 +47,7 @@ export default function RevealScreen() {
   const [childName, setChildName] = useState<string>("");
   const [receipts, setReceipts] = useState<string>("");
   const [printing, setPrinting] = useState(false);
+  const [printed, setPrinted] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [stillWaiting, setStillWaiting] = useState(false);
   const loaded = useRef(false);
@@ -150,8 +151,12 @@ export default function RevealScreen() {
       answer_key_excluded: prepared.answerKeyExcluded,
     });
     setPrinting(false);
+    // No auto-navigation: the OS print sheet closing and the screen
+    // underneath having silently become a menu read as a hard cut with
+    // no receipt (founder call 2026-08-24). The moment lands here, and
+    // she advances when she is ready.
     if (result.status === "completed") {
-      router.replace("/next" as never);
+      setPrinted(true);
     }
   }
 
@@ -222,7 +227,13 @@ export default function RevealScreen() {
           </NativeText>
         ) : null}
 
-        {material ? (
+        {material && printed ? (
+          <Button
+            label="What's next"
+            size="lg"
+            onPress={() => router.replace("/next?printed=1" as never)}
+          />
+        ) : material ? (
           <Button
             label={printing ? "Sending to the printer…" : "Print it"}
             size="lg"
@@ -233,11 +244,15 @@ export default function RevealScreen() {
         ) : null}
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.replace("/next" as never)}
+          onPress={() =>
+            router.replace((printed ? "/next?printed=1" : "/next") as never)
+          }
           style={{ minHeight: 44, alignItems: "center", justifyContent: "center", marginBottom: space.lg }}
         >
           <NativeText role="caption" tone="muted">
-            {"The full page is saved in your Binder. Keep going"}
+            {printed
+              ? "The full page is saved in your Binder too."
+              : "The full page is saved in your Binder. Keep going"}
           </NativeText>
         </Pressable>
       </View>

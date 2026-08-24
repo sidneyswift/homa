@@ -29,7 +29,12 @@ export async function emitFamilyEvent<N extends MobileFamilyEventName>(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3_000);
+  // 10s, not 3s: a cold serverless start regularly outlived the old
+  // cap, aborting requests that were mid-flight. Most still persisted
+  // server-side (logging a false "failed"), but some died before the
+  // body landed and the event was really lost (materials.print_result,
+  // 2026-08-24). Fire-and-forget can afford the patience.
+  const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
     const response = await fetch(
       `${env.apiUrl.replace(/\/$/u, "")}/api/mobile/event`,
