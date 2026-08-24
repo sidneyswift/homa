@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "62c6451cae16762b52002e59d75b601e9629b8f48475ee7492f9b64e13be808f",
+  "ownedInputFingerprint": "734501f396f18b767ced65323e5ba930e84da0897c5ef9f4ceb6ea9fd7f81953",
   "ownerIssue": "gh#729",
   "records": [
     {

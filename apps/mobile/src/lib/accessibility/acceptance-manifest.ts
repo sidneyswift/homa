@@ -163,7 +163,6 @@ export const nativeAccessibilitySurfaces: readonly NativeAccessibilitySurface[] 
   { file: "apps/mobile/src/app/(onboarding)/_layout.tsx", kind: "layout", owner: "gh#304", reason: "Native onboarding walk shell, signed-in only." },
   { file: "apps/mobile/src/app/(onboarding)/hello.tsx", kind: "priority", owner: "gh#304", reason: "Post-account celebration beat, auto-advances." },
   { file: "apps/mobile/src/app/(onboarding)/intent.tsx", kind: "priority", owner: "gh#304", reason: "One-tap intent ask that routes the walk." },
-  { file: "apps/mobile/src/app/(onboarding)/frame.tsx", kind: "priority", owner: "gh#304", reason: "React-and-frame beat before the kid questions." },
   { file: "apps/mobile/src/app/(onboarding)/kids.tsx", kind: "priority", owner: "gh#304", reason: "Kid intro stepper: name, age, loves, working-on." },
   { file: "apps/mobile/src/app/(onboarding)/making.tsx", kind: "priority", owner: "gh#304", reason: "Live worksheet build with real job progress." },
   { file: "apps/mobile/src/app/(onboarding)/reveal.tsx", kind: "priority", owner: "gh#304", reason: "Finished worksheet preview and print." },
