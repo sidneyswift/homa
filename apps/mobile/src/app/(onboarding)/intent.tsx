@@ -11,13 +11,15 @@ import {
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
 import { WalkScene } from "../../features/onboarding/walk-scene";
-import { fetchReactLine } from "../../features/onboarding/react-lines";
 import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
  * The one-tap intent ask (wireframe v4 step 3). "All of it" is the
  * expected winner and routes to worksheets first (the opinionated
- * default); the react + frame beat right after metabolizes the pick.
+ * default). Her pick goes straight to the kid questions: the react +
+ * frame interstitial that used to sit here was cut as filler (founder
+ * call 2026-08-23), which also retired the reaction-line fetch and the
+ * "One moment" wait it caused on Continue.
  */
 const OPTIONS: { intent: OnboardingIntent; label: string }[] = [
   { intent: "worksheets", label: "Worksheets for my kids" },
@@ -42,20 +44,10 @@ export default function IntentScreen() {
   async function continueWalk() {
     if (!family || !picked || saving) return;
     setSaving(true);
-    // Fetch Homa's line BEFORE navigating so the next screen arrives
-    // whole, once: no placeholder swapped for generated text mid-read
-    // (founder feedback 2026-08-18). The endpoint bounds itself and
-    // always answers with a usable line.
-    const [line] = await Promise.all([
-      fetchReactLine({ kind: "intent", intent: picked }),
-      saveOnboardingState(family.id, "kids", { intent: picked }),
-    ]);
+    await saveOnboardingState(family.id, "kids", { intent: picked });
     reportOnboardingStep(family.id, "kids", picked);
     setSaving(false);
-    router.replace({
-      pathname: "/frame",
-      params: { intent: picked, line },
-    } as never);
+    router.replace("/kids" as never);
   }
 
   return (
