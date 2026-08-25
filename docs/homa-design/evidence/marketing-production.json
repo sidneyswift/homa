@@ -3,8 +3,8 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4",
-  "surfaceManifestFingerprint": "e98f61263ccc60d64432025b9169e8986d3f90da98e4db3540ba2ee53e98f239",
-  "authoringManifestFingerprint": "e98f61263ccc60d64432025b9169e8986d3f90da98e4db3540ba2ee53e98f239",
+  "surfaceManifestFingerprint": "8451b19b5eac62240f07ae8d739f40fa675d6e4dd0da6715f40f0e1f46248bd0",
+  "authoringManifestFingerprint": "8451b19b5eac62240f07ae8d739f40fa675d6e4dd0da6715f40f0e1f46248bd0",
   "ownedInputFingerprint": "5b64cb9d1867bb3b10fdcc137a1c6d21459c9fa2c9d4b9ac5a991c8a91422b6c",
   "sourceOfTruth": [
     "marketing/AGENTS.md",
