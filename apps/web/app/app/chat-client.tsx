@@ -1610,7 +1610,7 @@ export function ChatClient({
     // First paint lands at the bottom instantly (yesterday above the
     // fold, today in view); later updates glide. Once she's scrolled
     // away to reread something, a streaming reply must not drag her
-    // back down (Carolyng feedback, 2026-08-24) — it waits for "Back
+    // back down (Carolyng feedback, 2026-08-24): it waits for "Back
     // to now" instead.
     if (!firstScrollDoneRef.current || isNearBottomRef.current) {
       bottomRef.current?.scrollIntoView({
