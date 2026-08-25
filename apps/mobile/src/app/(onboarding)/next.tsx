@@ -30,7 +30,12 @@ const DOORS: { door: Door; label: string; detail: string }[] = [
     detail: "For a sibling, or tomorrow's page",
   },
   { door: "plan_week", label: "Plan our week", detail: "Homa builds it with you" },
-  { door: "look_around", label: "Just look around", detail: "The whole app is yours" },
+  // Not "the whole app is yours": onboarding-completion-milestones
+  // (2026-07-31, apps/web/lib/onboarding/state.ts) already ends the
+  // free window the moment the questionnaire scores its first report,
+  // often before she ever reaches this screen. This door's copy must
+  // never promise an access state the wall isn't actually granting.
+  { door: "look_around", label: "Just look around", detail: "Peek in, no pressure" },
 ];
 
 const DOOR_ROUTES: Record<Door, string> = {
