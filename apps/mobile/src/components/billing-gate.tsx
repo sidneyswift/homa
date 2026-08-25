@@ -562,12 +562,19 @@ function StoreKitBillingBoundary({
             </View>
           ) : !product ? (
             <View style={{ gap: space.md }}>
-              <PlanPicker tier={tier} onChange={setTier} />
+              {/* A picker with one option reads as a fake choice
+                  (found by the copy-reviewer gate, 2026-08-25); only
+                  show it once there is a real second plan to pick. */}
+              {PURCHASABLE_HOMA_PLANS.length > 1 ? (
+                <PlanPicker tier={tier} onChange={setTier} />
+              ) : null}
               <LoadingStatus label="Loading App Store plans" style={{ marginVertical: space.sm }} />
             </View>
           ) : (
             <View style={{ gap: space.sm }}>
-              <PlanPicker tier={tier} onChange={setTier} />
+              {PURCHASABLE_HOMA_PLANS.length > 1 ? (
+                <PlanPicker tier={tier} onChange={setTier} />
+              ) : null}
               <View
                 style={{
                   gap: space.xs,
@@ -616,8 +623,13 @@ function StoreKitBillingBoundary({
             onPress={() => void handleRestore()}
             disabled={busy}
           />
+          {/* "Open Homa settings" read as a stray door out of the
+              subscribe decision (copy-reviewer gate, 2026-08-25): a
+              walled family reaches this screen to sign out or delete
+              their account (settings.tsx's own comment), never to
+              browse settings, so the label says which. */}
           <Button
-            label="Open Homa settings"
+            label="Sign out or delete account"
             variant="ghost"
             onPress={() => router.push("/settings")}
           />
