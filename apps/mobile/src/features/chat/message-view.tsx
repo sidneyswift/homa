@@ -434,3 +434,35 @@ export function BusyBubble({ label }: { label: string }) {
     </View>
   );
 }
+
+/** Floats above the composer when a reply lands while she's scrolled away
+ *  rereading (Carolyng feedback, 2026-08-24): a tap returns her to it,
+ *  instead of the turn yanking her there itself. */
+export function NewReplyPill({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        alignSelf: "center",
+        backgroundColor: colors.textStrong,
+        borderRadius: radius.lg,
+        paddingHorizontal: space.md,
+        paddingVertical: 10,
+        opacity: pressed ? 0.85 : 1,
+        ...shadows.sm,
+      })}
+    >
+      <Text
+        style={{
+          fontFamily: fontFamilies.body,
+          fontSize: fontSize.sm,
+          color: colors.card,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}

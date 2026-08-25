@@ -792,11 +792,19 @@ export function ChatClient({
   // redesign, the founder's dim rule); it lifts at the very top, where
   // there is nothing left to fade into.
   const [topFaded, setTopFaded] = useState(false);
+  // A reply landing while she's scrolled away must not yank her back
+  // (Carolyng feedback, 2026-08-24): the auto-scroll effect below reads
+  // this ref instead of forcing scrollIntoView on every stream tick.
+  const isNearBottomRef = useRef(true);
+  const [hasNewActivity, setHasNewActivity] = useState(false);
   const handleTranscriptScroll = useCallback(() => {
     const el = transcriptRef.current;
     if (!el) return;
-    setShowBackToNow(el.scrollHeight - el.clientHeight - el.scrollTop > 600);
+    const nearBottom = el.scrollHeight - el.clientHeight - el.scrollTop <= 600;
+    isNearBottomRef.current = nearBottom;
+    setShowBackToNow(!nearBottom);
     setTopFaded(el.scrollTop > 8);
+    if (nearBottom) setHasNewActivity(false);
   }, []);
   const busy = agent.status === "submitted" || agent.status === "streaming";
   // The wall (plans/2026-07-11-the-wall.md): the chat door. One
@@ -1600,10 +1608,17 @@ export function ChatClient({
 
   useEffect(() => {
     // First paint lands at the bottom instantly (yesterday above the
-    // fold, today in view); later updates glide.
-    bottomRef.current?.scrollIntoView({
-      behavior: firstScrollDoneRef.current ? "smooth" : "auto",
-    });
+    // fold, today in view); later updates glide. Once she's scrolled
+    // away to reread something, a streaming reply must not drag her
+    // back down (Carolyng feedback, 2026-08-24) — it waits for "Back
+    // to now" instead.
+    if (!firstScrollDoneRef.current || isNearBottomRef.current) {
+      bottomRef.current?.scrollIntoView({
+        behavior: firstScrollDoneRef.current ? "smooth" : "auto",
+      });
+    } else {
+      setHasNewActivity(true);
+    }
     firstScrollDoneRef.current = true;
   }, [agent.data.messages, archived, queued]);
 
@@ -2654,17 +2669,23 @@ export function ChatClient({
 
       {showBackToNow ? (
         // Floats over the transcript's bottom edge, centered: the way
-        // back to now after reading old days, no words needed.
+        // back to now after reading old days, no words needed. A reply
+        // landing while she's away adds one quiet dot, still no words
+        // (Carolyng feedback, 2026-08-24).
         <div className="relative">
           <button
             type="button"
-            aria-label="Back to now"
-            onClick={() =>
-              bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-            }
+            aria-label={hasNewActivity ? "Homa replied. Back to now" : "Back to now"}
+            onClick={() => {
+              setHasNewActivity(false);
+              bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="quiet-chat__back-to-now absolute -top-14 left-1/2 z-10"
           >
             <Icon name="next" size={20} className="rotate-90" />
+            {hasNewActivity ? (
+              <span className="quiet-chat__back-to-now-dot" aria-hidden="true" />
+            ) : null}
           </button>
         </div>
       ) : null}
