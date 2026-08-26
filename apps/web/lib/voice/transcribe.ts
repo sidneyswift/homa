@@ -72,12 +72,49 @@ function extensionForContentType(contentType: string): string {
   return EXTENSION_BY_CONTENT_TYPE[bare] ?? "mp3";
 }
 
+async function postToTelnyxStt(
+  audio: ArrayBuffer,
+  contentType: string,
+  apiKey: string,
+): Promise<{ status: number; text?: string }> {
+  const form = new FormData();
+  form.append("model", TELNYX_STT_MODEL);
+  form.append(
+    "file",
+    new Blob([audio], { type: contentType }),
+    `voice-note.${extensionForContentType(contentType)}`,
+  );
+
+  const response = await fetch(TELNYX_STT_URL, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
+  if (!response.ok) return { status: response.status };
+
+  const payload = (await response.json()) as { text?: string };
+  return { status: response.status, text: payload.text };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * transcribeAudio(audio, contentType): Promise<string | null>
  * Sends audio (or video) bytes to Telnyx STT and returns the speech
  * transcript, or null on any failure (missing key, API error, silent
  * clip). Never throws. The shared core under transcribeSmsMedia and
  * the chat dictation route.
+ *
+ * Retries once on a transient failure (HTTP 5xx, or a network-level
+ * throw) before giving up: three consecutive 500s hit one family within
+ * six minutes on 2026-08-26, with zero other occurrence fleet-wide in
+ * the surrounding 48h, and nothing retried, so a vendor blip surfaced
+ * to her as "Homa couldn't make that out" even though nothing about her
+ * voice was the problem (gh#1012). A 4xx (bad request) or a clean empty
+ * transcript is not retried, since sending the identical bytes again
+ * would not change either outcome.
  */
 export async function transcribeAudio(
   audio: ArrayBuffer,
@@ -86,37 +123,36 @@ export async function transcribeAudio(
   const apiKey = process.env.TELNYX_API_KEY;
   if (!apiKey || audio.byteLength === 0) return null;
 
-  try {
-    const form = new FormData();
-    form.append("model", TELNYX_STT_MODEL);
-    form.append(
-      "file",
-      new Blob([audio], { type: contentType }),
-      `voice-note.${extensionForContentType(contentType)}`,
-    );
-
-    const response = await fetch(TELNYX_STT_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` },
-      body: form,
-    });
-    if (!response.ok) {
-      console.error(
-        `audio transcription failed: HTTP ${response.status} (${contentType})`,
-      );
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const { status, text } = await postToTelnyxStt(audio, contentType, apiKey);
+      if (status >= 500 && attempt === 1) {
+        console.error(
+          `audio transcription failed: HTTP ${status} (${contentType}), retrying once`,
+        );
+        await delay(400);
+        continue;
+      }
+      if (status >= 400) {
+        console.error(
+          `audio transcription failed: HTTP ${status} (${contentType})`,
+        );
+        return null;
+      }
+      const transcript = text?.trim() ?? "";
+      return transcript.length > 0 ? transcript : null;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown";
+      if (attempt === 1) {
+        console.error(`audio transcription failed: ${message}, retrying once`);
+        await delay(400);
+        continue;
+      }
+      console.error("audio transcription failed:", message);
       return null;
     }
-
-    const payload = (await response.json()) as { text?: string };
-    const transcript = payload.text?.trim() ?? "";
-    return transcript.length > 0 ? transcript : null;
-  } catch (error) {
-    console.error(
-      "audio transcription failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-    return null;
   }
+  return null;
 }
 
 /**
