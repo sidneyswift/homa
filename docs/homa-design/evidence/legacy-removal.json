@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "a448d4952f1d32748b6965cf56045643561661f7ee7c4e6aead027bf6cd5454f",
+  "ownedInputFingerprint": "42bdcdcb4273bb730f32d882b0681c3147d98e3e955e3995a04b6467fe173c2d",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2503,7 +2503,7 @@
     {
       "surfaceId": "surface:0251c96a3bf92d13",
       "path": "apps/web/app/app/planner/unified-planner-view.tsx",
-      "sourceHash": "958f237f6c16adceb2509e2655b965181801a300f2678b48d65eee153af01cff",
+      "sourceHash": "8be3c455883362acef8186a61eb43b674c46a2b24f967c75e6376d62531978f5",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
