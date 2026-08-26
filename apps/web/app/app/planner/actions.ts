@@ -41,3 +41,35 @@ export async function setPlannerLearningActivityStatusAction(input: {
   }
   return { ok: true, status: receipt.activity_status, changed: receipt.changed };
 }
+
+interface DetailsReceipt {
+  result: "applied";
+  activity_id: string;
+  family_id: string;
+  title: string;
+  note: string | null;
+  updated_at: string;
+}
+
+export async function updatePlannerLearningActivityDetailsAction(input: {
+  activityId: string;
+  title: string;
+  note: string;
+}): Promise<
+  | { ok: true; title: string; note: string | null }
+  | { ok: false; reason: string }
+> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc(
+    "update_planner_learning_activity_details",
+    {
+      target_activity_id: input.activityId,
+      target_title: input.title,
+      target_note: input.note,
+    },
+  );
+  if (error) return { ok: false, reason: error.message };
+  const receipt = (data as DetailsReceipt[] | null)?.[0];
+  if (!receipt) return { ok: false, reason: "Planner did not return a save receipt." };
+  return { ok: true, title: receipt.title, note: receipt.note };
+}

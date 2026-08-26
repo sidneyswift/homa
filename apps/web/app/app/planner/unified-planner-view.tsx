@@ -55,7 +55,10 @@ import {
   updateFamilyEventAction,
 } from "../calendar/actions";
 import { HoursView } from "../hours/hours-view";
-import { setPlannerLearningActivityStatusAction } from "./actions";
+import {
+  setPlannerLearningActivityStatusAction,
+  updatePlannerLearningActivityDetailsAction,
+} from "./actions";
 
 export interface UnifiedPlannerKid {
   id: string;
@@ -663,26 +666,67 @@ function LearningActivityDetails({
   activity,
   status,
   kids,
+  saving,
+  error,
+  onSave,
   onClose,
 }: {
   activity: PlannerLearningActivity;
   status: PlannerLearningStatus;
   kids: readonly UnifiedPlannerKid[];
+  saving: boolean;
+  error: string | null;
+  onSave: (title: string, note: string) => Promise<boolean>;
   onClose: () => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(activity.title);
+  const [draftNote, setDraftNote] = useState(activity.note ?? "");
+  const titleRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (editing) titleRef.current?.focus();
+  }, [editing]);
+
+  function startEditing() {
+    setDraftTitle(activity.title);
+    setDraftNote(activity.note ?? "");
+    setEditing(true);
+  }
+
+  async function save() {
+    const ok = await onSave(draftTitle, draftNote);
+    if (ok) setEditing(false);
+  }
+
   return (
-    <ModalShell titleId="planner-learning-activity-title" onClose={onClose}>
+    <ModalShell
+      titleId="planner-learning-activity-title"
+      onClose={saving ? () => undefined : onClose}
+    >
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2
-            id="planner-learning-activity-title"
-            className="font-display text-2xl font-semibold text-strong"
-          >
-            {activity.title}
-          </h2>
+        <div className="min-w-0 flex-1">
+          {editing ? (
+            <label className="block text-sm font-semibold text-body">
+              Title
+              <input
+                ref={titleRef}
+                value={draftTitle}
+                onChange={(event) => setDraftTitle(event.target.value)}
+                autoComplete="off"
+                className="mt-1.5 min-h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
+              />
+            </label>
+          ) : (
+            <h2
+              id="planner-learning-activity-title"
+              className="font-display text-2xl font-semibold text-strong"
+            >
+              {activity.title}
+            </h2>
+          )}
           <p className="mt-1 text-sm text-muted">{formatFullDate(activity.activityDate)}</p>
         </div>
-        <DialogClose onClose={onClose} />
+        <DialogClose onClose={onClose} disabled={saving} />
       </div>
       <dl className="mt-5 divide-y divide-border-subtle border-y border-border-subtle text-sm">
         <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
@@ -709,20 +753,62 @@ function LearningActivityDetails({
             </dd>
           </div>
         ) : null}
-        {activity.note ? (
-          <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
-            <dt className="text-muted">Note</dt>
-            <dd className="whitespace-pre-wrap text-body">{activity.note}</dd>
-          </div>
-        ) : null}
       </dl>
-      <div className="mt-5">
-        <Link
-          href={`/app?draft=${encodeURIComponent(`Change this Planner item: ${activity.title}`)}`}
-          className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
-        >
-          Ask Homa to change it
-        </Link>
+      {editing ? (
+        <label className="mt-4 block text-sm font-semibold text-body">
+          Notes
+          <textarea
+            value={draftNote}
+            onChange={(event) => setDraftNote(event.target.value)}
+            rows={3}
+            placeholder="What she actually did in this section"
+            className="mt-1.5 w-full rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
+          />
+        </label>
+      ) : activity.note ? (
+        <div className="mt-4 text-sm">
+          <p className="font-semibold text-muted">Notes</p>
+          <p className="mt-1 whitespace-pre-wrap text-body">{activity.note}</p>
+        </div>
+      ) : null}
+      {error ? (
+        <p role="alert" className="mt-4 rounded-md bg-[var(--clay-50)] px-3 py-2 text-sm font-semibold text-[var(--clay-700)]">
+          {error}
+        </p>
+      ) : null}
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        {editing ? (
+          <>
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving || draftTitle.trim() === ""}
+              className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              disabled={saving}
+              className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <QuietAction kind="secondary" onClick={startEditing}>
+              Edit
+            </QuietAction>
+            <Link
+              href={`/app?draft=${encodeURIComponent(`Change this Planner item: ${activity.title}`)}`}
+              className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
+            >
+              Ask Homa to change it
+            </Link>
+          </>
+        )}
       </div>
     </ModalShell>
   );
@@ -1369,6 +1455,8 @@ export function UnifiedPlannerView({
   const [saving, setSaving] = useState(false);
   const [savingLearningActivityId, setSavingLearningActivityId] = useState<string | null>(null);
   const [learningActivityError, setLearningActivityError] = useState<string | null>(null);
+  const [savingLearningActivityDetail, setSavingLearningActivityDetail] = useState(false);
+  const [learningActivityDetailError, setLearningActivityDetailError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [dayFilter, setDayFilter] = useState({
     routeChildId: focusChildId,
@@ -1540,6 +1628,32 @@ export function UnifiedPlannerView({
       [activity.id]: result.status,
     }));
     router.refresh();
+  }
+
+  async function saveLearningActivityDetails(
+    activityId: string,
+    title: string,
+    note: string,
+  ): Promise<boolean> {
+    setSavingLearningActivityDetail(true);
+    setLearningActivityDetailError(null);
+    const result = await updatePlannerLearningActivityDetailsAction({
+      activityId,
+      title,
+      note,
+    });
+    setSavingLearningActivityDetail(false);
+    if (!result.ok) {
+      setLearningActivityDetailError(result.reason);
+      return false;
+    }
+    setSelectedLearningActivity((current) =>
+      current && current.id === activityId
+        ? { ...current, title: result.title, note: result.note }
+        : current,
+    );
+    router.refresh();
+    return true;
   }
 
   function openNewAppointment() {
@@ -2096,7 +2210,15 @@ export function UnifiedPlannerView({
           activity={selectedLearningActivity}
           status={resolvedLearningStatus(selectedLearningActivity)}
           kids={kids}
-          onClose={() => setSelectedLearningActivity(null)}
+          saving={savingLearningActivityDetail}
+          error={learningActivityDetailError}
+          onSave={(title, note) =>
+            saveLearningActivityDetails(selectedLearningActivity.id, title, note)
+          }
+          onClose={() => {
+            setLearningActivityDetailError(null);
+            setSelectedLearningActivity(null);
+          }}
         />
       ) : null}
       {selectedEvent ? (

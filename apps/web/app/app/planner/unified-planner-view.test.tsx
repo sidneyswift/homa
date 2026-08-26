@@ -245,6 +245,13 @@ describe("UnifiedPlannerView", () => {
     assert.doesNotMatch(plannerSource, /Correct it in Hours/u);
   });
 
+  it("lets a chat-logged item's title and notes be edited in the window, not only through chat", () => {
+    assert.match(plannerSource, /updatePlannerLearningActivityDetailsAction/u);
+    assert.match(plannerSource, /saveLearningActivityDetails/u);
+    assert.match(plannerSource, /Save changes/u);
+    assert.match(plannerSource, /placeholder="What she actually did in this section"/u);
+  });
+
   it("summarizes seven days in Week instead of rendering seven agenda cards", () => {
     const html = renderView({ view: "week" });
     assert.match(html, /Week summary/);
