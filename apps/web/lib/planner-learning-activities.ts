@@ -846,6 +846,74 @@ export async function completeGeneratedPlanActivity(
   });
 }
 
+export interface PlannerLearningActivityCandidate {
+  id: string;
+  title: string;
+  subject: HoursSubject;
+  status: PlannerLearningStatus;
+  childIds: string[];
+}
+
+/**
+ * Same-day, same-subject rows already logged for any of these children (or
+ * covering the whole family), so record_planner_activity's duplicate guard
+ * can surface them instead of silently writing a second row for work that
+ * is already there (gh#1015). excludeActivityId keeps a retried idempotent
+ * call from flagging its own prior write: the caller already computed the
+ * deterministic id this exact call would produce before checking.
+ */
+export async function findLoggedActivityCandidates(input: {
+  familyId: string;
+  childIds: readonly string[];
+  subject: HoursSubject;
+  activityDate: string;
+  excludeActivityId: string;
+}): Promise<PlannerLearningActivityCandidate[]> {
+  if (input.childIds.length === 0) return [];
+  const sql = mapDb();
+  const rows = await sql<{
+    id: string;
+    title: string;
+    subject: HoursSubject;
+    status: PlannerLearningStatus;
+    child_ids: string[] | null;
+  }[]>`
+    select activity.id, activity.title, activity.subject, activity.status,
+           coalesce(array_agg(distinct child.child_id)
+             filter (where child.child_id is not null), '{}') as child_ids
+    from public.planner_learning_activities activity
+    left join public.planner_learning_activity_children child
+      on child.activity_id = activity.id and child.family_id = activity.family_id
+    where activity.family_id = ${input.familyId}
+      and activity.subject = ${input.subject}
+      and activity.activity_date = ${input.activityDate}
+      and activity.id != ${input.excludeActivityId}
+      and (
+        not exists (
+          select 1 from public.planner_learning_activity_children any_child
+          where any_child.activity_id = activity.id
+            and any_child.family_id = activity.family_id
+        )
+        or exists (
+          select 1 from public.planner_learning_activity_children selected_child
+          where selected_child.activity_id = activity.id
+            and selected_child.family_id = activity.family_id
+            and selected_child.child_id = any(${sql.array([...input.childIds])}::uuid[])
+        )
+      )
+    group by activity.id
+    order by activity.created_at
+    limit 5
+  `;
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    subject: row.subject,
+    status: row.status,
+    childIds: [...new Set(row.child_ids ?? [])],
+  }));
+}
+
 /** Bounded read for open_planner and server-originated Planner context. */
 export async function listPlannerLearningActivitiesPinned(input: {
   familyId: string;

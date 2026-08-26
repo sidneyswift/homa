@@ -5,6 +5,7 @@ import type { FourWeekPlan } from "@homa/core";
 
 import {
   activityTextAt,
+  findScheduledActivityCandidates,
   scheduleKey,
   scheduledDatesByActivity,
   validateScheduleInput,
@@ -120,5 +121,21 @@ describe("scheduledDatesByActivity", () => {
   it("keeps neighboring weeks and indices apart in the key", () => {
     assert.notEqual(scheduleKey("c", "math", 1, 21), scheduleKey("c", "math", 12, 1));
     assert.notEqual(scheduleKey("c", "math", 1, 2), scheduleKey("c", "math1", 1, 2));
+  });
+});
+
+describe("findScheduledActivityCandidates", () => {
+  it("short-circuits on an empty child list without touching the database", async () => {
+    // No familyId/mapDb credentials are configured in this unit test
+    // process; reaching the query at all would throw. childIds.length
+    // === 0 is record_planner_activity's own skip condition (a
+    // whole-family log), so the guard must return before that query.
+    const candidates = await findScheduledActivityCandidates({
+      familyId: "11111111-1111-4111-8111-111111111111",
+      childIds: [],
+      subjectId: "math",
+      activityDate: "2026-08-26",
+    });
+    assert.deepEqual(candidates, []);
   });
 });

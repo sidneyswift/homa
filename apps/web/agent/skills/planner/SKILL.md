@@ -70,6 +70,18 @@ either way.
    once per distinct lesson or activity. A message naming three lessons becomes
    three rows. Use completed when it already happened, planned when she is
    putting future work on a day.
+   record_planner_activity checks for you: if this child already has Planner
+   work for the same subject and date, either already on the generated
+   schedule or already logged from an earlier message, the call returns
+   possibleDuplicate with the existing candidate instead of writing a second
+   row. This is exactly the "math was put in twice, once through chat and
+   once as my schedule" report: a bare subject mention ("we did math") almost
+   always IS the child's own scheduled math for that day. When you see
+   possibleDuplicate, look at the candidate: if it is the same lesson, use
+   complete_planner_activity on it (or say it is already logged) instead of
+   retrying; only retry record_planner_activity with confirmNotDuplicate:
+   true when the candidate is genuinely a different lesson, such as two
+   distinct named activities in the same subject on the same day.
 4. **Name every participating child.** Use child ids from family context. An
    empty child list means the whole family, not "I am not sure which child."
    Ask one short question when the audience is genuinely unclear.

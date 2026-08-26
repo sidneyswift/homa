@@ -476,10 +476,15 @@ values
  *   - Scheduled dates and events sit within a few days of today, one
  *     event deliberately in the past so look-back windows have
  *     something real to find.
+ *   - Week 2, activity index 2 is scheduled for TODAY (current_date),
+ *     not just the +1/+2 neighbors, so the gh#1015 duplicate-guard evals
+ *     have a real same-day generated-plan candidate to find (planner
+ *     evals/duplicate-*.eval.ts) without needing their own seed.
  */
 export const EVAL_FIXTURE_PLAN_CHILD_ID = FIXTURE_CHILD_FINN;
 export const EVAL_FIXTURE_PLAN_SUBJECT = "math";
 export const EVAL_FIXTURE_SCHEDULED_WEEK = 2;
+export const EVAL_FIXTURE_SCHEDULED_TODAY_ACTIVITY_INDEX = 2;
 export const EVAL_FIXTURE_PAST_EVENT_TITLE = "Library story time";
 
 function evalFixturePlanJson(): unknown {
@@ -517,7 +522,10 @@ values
   (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PLAN_CHILD_ID)},
    ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)}, ${EVAL_FIXTURE_SCHEDULED_WEEK}, 0, current_date + 1),
   (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PLAN_CHILD_ID)},
-   ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)}, ${EVAL_FIXTURE_SCHEDULED_WEEK}, 1, current_date + 2);
+   ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)}, ${EVAL_FIXTURE_SCHEDULED_WEEK}, 1, current_date + 2),
+  (${sqlString(EVAL_FIXTURE_FAMILY_ID)}, ${sqlString(EVAL_FIXTURE_PLAN_CHILD_ID)},
+   ${sqlString(EVAL_FIXTURE_PLAN_SUBJECT)}, ${EVAL_FIXTURE_SCHEDULED_WEEK},
+   ${EVAL_FIXTURE_SCHEDULED_TODAY_ACTIVITY_INDEX}, current_date);
 
 insert into public.family_events
   (family_id, child_id, title, starts_on, ends_on, start_time, end_time, note)

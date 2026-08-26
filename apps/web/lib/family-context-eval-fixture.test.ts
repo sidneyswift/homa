@@ -13,6 +13,7 @@ import {
   EVAL_FIXTURE_PAST_EVENT_TITLE,
   EVAL_FIXTURE_PLAN_CHILD_ID,
   EVAL_FIXTURE_PLAN_SUBJECT,
+  EVAL_FIXTURE_SCHEDULED_TODAY_ACTIVITY_INDEX,
   EVAL_FIXTURE_SCHEDULED_WEEK,
   EVAL_FIXTURE_SESSION_ATTRIBUTE,
   EVAL_ONBOARDING_FIXTURE_FAMILY_ID,
@@ -293,6 +294,12 @@ describe("evalFamilyFixtureSeedSql", () => {
     assert.ok(sql.includes("public.plan_activity_schedule"));
     assert.ok(sql.includes(`${EVAL_FIXTURE_SCHEDULED_WEEK}, 0, current_date + 1`));
     assert.ok(sql.includes(`${EVAL_FIXTURE_SCHEDULED_WEEK}, 1, current_date + 2`));
+    // gh#1015: a same-day (not offset) candidate so the duplicate-guard
+    // evals have a real generated-plan row to find without a seed of
+    // their own. `current_date +` would also match a bare `current_date`
+    // prefix check, so assert the exact unoffset close instead.
+    assert.ok(sql.includes(`${EVAL_FIXTURE_SCHEDULED_TODAY_ACTIVITY_INDEX}, current_date);`));
+    assert.ok(!sql.includes("current_date + 0"));
   });
 
   it("seeds family events including one in the past for look-back windows", () => {

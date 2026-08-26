@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  findLoggedActivityCandidates,
   plannerLearningIdempotencyKey,
   plannerLearningMutationUuid,
   verifyPlannerSourceQuote,
@@ -81,5 +82,22 @@ describe("Planner learning provenance", () => {
       plannerLearningToolContext({ canonicalInboundText: "Unidentified" }),
       null,
     );
+  });
+});
+
+describe("findLoggedActivityCandidates", () => {
+  it("short-circuits on an empty child list without touching the database", async () => {
+    // No familyId/mapDb credentials are configured in this unit test
+    // process; reaching the query at all would throw. childIds.length
+    // === 0 is record_planner_activity's own skip condition (a
+    // whole-family log), so the guard must return before that query.
+    const candidates = await findLoggedActivityCandidates({
+      familyId: "11111111-1111-4111-8111-111111111111",
+      childIds: [],
+      subject: "math",
+      activityDate: "2026-08-26",
+      excludeActivityId: "22222222-2222-4222-8222-222222222222",
+    });
+    assert.deepEqual(candidates, []);
   });
 });
