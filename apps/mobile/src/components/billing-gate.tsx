@@ -39,11 +39,36 @@ import {
   resumeApplePurchaseConfirmation,
   type BillingGateState,
 } from "../lib/billing";
+import { getMyChildren, type ChildRecord } from "../lib/family";
 import { fontFamilies } from "../theme/fonts";
 import { colors, fontSize, space } from "../theme/tokens";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { LoadingStatus } from "./ui/loading-status";
+
+function joinNatural(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
+/**
+ * The paywall's own line, not the door's: a family who just finished
+ * onboarding already has a real page and real answers on file when she
+ * hits this screen (gh#1009's fix stopped the door from promising free
+ * access; this is the other half, the effort-moat gap the same session
+ * found: the paywall itself never mentioned what she just made). Only
+ * fires for a genuinely new, unwalled-by-lapse family with a child on
+ * file; a lapsed return or a childless account keeps the plain line.
+ */
+function firstPageLine(kids: ChildRecord[] | null, lapsed: boolean): string | null {
+  if (lapsed || !kids || kids.length === 0) return null;
+  // "their", never "her": no pronoun is stored on a child record, and
+  // the house law is the parent's own words or singular "they", never a
+  // guess from the name.
+  const names = joinNatural(kids.map((kid) => kid.name));
+  return `${names}'s first page is already in their Binder. Subscribing keeps Homa making their pages, planning their weeks, and tracking their progress.`;
+}
 
 /**
  * The mobile twin of familyAccountGate() on the web: blocks every tab
@@ -166,6 +191,7 @@ function StoreKitBillingBoundary({
   const [step, setStep] = useState<PurchaseStep>("idle");
   const [unlockFailed, setUnlockFailed] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [myChildren, setMyChildren] = useState<ChildRecord[] | null>(null);
   const [lastCheckedNonce, setLastCheckedNonce] = useState(-1);
   const [retryNonce, setRetryNonce] = useState(0);
   const [tier, setTier] = useState<PlanTier>("regular");
@@ -352,6 +378,21 @@ function StoreKitBillingBoundary({
   }, [checked, connected, gate, retryNonce, fetchProducts]);
 
   useEffect(() => {
+    if (!checked || !gate || gate.open || gate.lapsed) return;
+    let cancelled = false;
+    void getMyChildren(familyId)
+      .then((kids) => {
+        if (!cancelled) setMyChildren(kids);
+      })
+      .catch(() => {
+        if (!cancelled) setMyChildren([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [checked, familyId, gate]);
+
+  useEffect(() => {
     for (const owned of availablePurchases) {
       if (!APPLE_PRODUCT_IDS.includes(owned.productId) || !owned.purchaseToken) continue;
       void Promise.resolve().then(() => handlePurchase(owned));
@@ -484,7 +525,8 @@ function StoreKitBillingBoundary({
           <Text
             style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
           >
-            Weekly plans, practice pages, progress reports, and teaching-hour records.
+            {firstPageLine(myChildren, gate.lapsed) ??
+              "Weekly plans, practice pages, progress reports, and teaching-hour records."}
           </Text>
 
           {unlockFailed ? (
@@ -520,12 +562,19 @@ function StoreKitBillingBoundary({
             </View>
           ) : !product ? (
             <View style={{ gap: space.md }}>
-              <PlanPicker tier={tier} onChange={setTier} />
+              {/* A picker with one option reads as a fake choice
+                  (found by the copy-reviewer gate, 2026-08-25); only
+                  show it once there is a real second plan to pick. */}
+              {PURCHASABLE_HOMA_PLANS.length > 1 ? (
+                <PlanPicker tier={tier} onChange={setTier} />
+              ) : null}
               <LoadingStatus label="Loading App Store plans" style={{ marginVertical: space.sm }} />
             </View>
           ) : (
             <View style={{ gap: space.sm }}>
-              <PlanPicker tier={tier} onChange={setTier} />
+              {PURCHASABLE_HOMA_PLANS.length > 1 ? (
+                <PlanPicker tier={tier} onChange={setTier} />
+              ) : null}
               <View
                 style={{
                   gap: space.xs,
@@ -574,8 +623,13 @@ function StoreKitBillingBoundary({
             onPress={() => void handleRestore()}
             disabled={busy}
           />
+          {/* "Open Homa settings" read as a stray door out of the
+              subscribe decision (copy-reviewer gate, 2026-08-25): a
+              walled family reaches this screen to sign out or delete
+              their account (settings.tsx's own comment), never to
+              browse settings, so the label says which. */}
           <Button
-            label="Open Homa settings"
+            label="Sign out or delete account"
             variant="ghost"
             onPress={() => router.push("/settings")}
           />
