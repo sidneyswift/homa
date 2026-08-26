@@ -38,6 +38,26 @@ const TELNYX_STT_URL = "https://api.telnyx.com/v2/ai/audio/transcriptions";
 /** Telnyx STT default engine: Whisper large v3 turbo, 80+ languages. */
 const TELNYX_STT_MODEL = "openai/whisper-large-v3-turbo";
 
+/**
+ * Last-resort fallback, tried once only after the primary model is
+ * confirmed exhausted (gh#1012, 2026-08-26): direct probes against the
+ * live endpoint that day showed openai/whisper-large-v3-turbo returning
+ * HTTP 500 on every input regardless of audio content, duration, or
+ * container (silence, a clear tone, ffmpeg- and real MediaRecorder-
+ * produced clips, 0.1s to 10s, webm and wav all failed identically),
+ * while the exact same bytes transcribed cleanly on this model. So the
+ * defect is Telnyx's primary model, not our audio pipeline.
+ *
+ * English-only (Hugging Face confirms distil-whisper checkpoints have no
+ * multilingual release), unlike the 80-language primary, so this is
+ * deliberately a fallback, not a replacement: Homa's families dictate in
+ * Spanish and other languages, and a wrong-language guess here is
+ * recoverable, never silent, because the parent always reviews the
+ * transcript before it sends (M1-05's law, top of file). Revisit once
+ * Telnyx confirms the primary model is fixed; see gh#1012.
+ */
+const TELNYX_STT_FALLBACK_MODEL = "distil-whisper/distil-large-v2";
+
 /** The STT endpoint validates uploads by filename extension only (the
  *  bytes themselves are content-probed by ffmpeg; verified live, see
  *  header). Known types keep their honest extension; AMR-family audio
@@ -72,13 +92,88 @@ function extensionForContentType(contentType: string): string {
   return EXTENSION_BY_CONTENT_TYPE[bare] ?? "mp3";
 }
 
-async function postToTelnyxStt(
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type SttAttempt = { status: number; text?: string };
+type SttPost = (model: string) => Promise<SttAttempt>;
+
+/**
+ * Runs one model against the STT endpoint, retrying transient failures
+ * (HTTP 5xx, or a thrown/network error) up to maxAttempts times before
+ * giving up on that model. A 4xx or a clean empty transcript is never
+ * retried, since resending identical bytes would not change either
+ * outcome. `exhausted: true` means every attempt on this model failed
+ * transiently, the caller's cue to try the fallback model.
+ */
+async function attemptModel(
+  post: SttPost,
+  model: string,
+  label: string,
+  maxAttempts: number,
+): Promise<{ transcript: string | null; exhausted: boolean }> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const { status, text } = await post(model);
+      if (status >= 500 && attempt < maxAttempts) {
+        console.error(
+          `audio transcription failed: HTTP ${status} (${label}, ${model}), retrying`,
+        );
+        await delay(400);
+        continue;
+      }
+      if (status >= 500) {
+        console.error(
+          `audio transcription failed: HTTP ${status} (${label}, ${model})`,
+        );
+        return { transcript: null, exhausted: true };
+      }
+      if (status >= 400) {
+        console.error(
+          `audio transcription failed: HTTP ${status} (${label}, ${model})`,
+        );
+        return { transcript: null, exhausted: false };
+      }
+      const transcript = text?.trim() ?? "";
+      return { transcript: transcript.length > 0 ? transcript : null, exhausted: false };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown";
+      if (attempt < maxAttempts) {
+        console.error(
+          `audio transcription failed: ${message} (${label}, ${model}), retrying`,
+        );
+        await delay(400);
+        continue;
+      }
+      console.error(`audio transcription failed: ${message} (${label}, ${model})`);
+      return { transcript: null, exhausted: true };
+    }
+  }
+  return { transcript: null, exhausted: true };
+}
+
+/**
+ * Tries the primary model (one retry on a transient failure), and only
+ * when that is fully exhausted falls back once to the secondary model.
+ * See TELNYX_STT_FALLBACK_MODEL's comment for why this is a fallback,
+ * not a default.
+ */
+async function transcribeWithFallback(post: SttPost, label: string): Promise<string | null> {
+  const primary = await attemptModel(post, TELNYX_STT_MODEL, label, 2);
+  if (!primary.exhausted) return primary.transcript;
+  const fallback = await attemptModel(post, TELNYX_STT_FALLBACK_MODEL, label, 1);
+  return fallback.transcript;
+}
+
+async function postFileToTelnyxStt(
   audio: ArrayBuffer,
   contentType: string,
   apiKey: string,
-): Promise<{ status: number; text?: string }> {
+  model: string,
+): Promise<SttAttempt> {
   const form = new FormData();
-  form.append("model", TELNYX_STT_MODEL);
+  form.append("model", model);
   form.append(
     "file",
     new Blob([audio], { type: contentType }),
@@ -96,25 +191,12 @@ async function postToTelnyxStt(
   return { status: response.status, text: payload.text };
 }
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 /**
  * transcribeAudio(audio, contentType): Promise<string | null>
  * Sends audio (or video) bytes to Telnyx STT and returns the speech
  * transcript, or null on any failure (missing key, API error, silent
  * clip). Never throws. The shared core under transcribeSmsMedia and
  * the chat dictation route.
- *
- * Retries once on a transient failure (HTTP 5xx, or a network-level
- * throw) before giving up: three consecutive 500s hit one family within
- * six minutes on 2026-08-26, with zero other occurrence fleet-wide in
- * the surrounding 48h, and nothing retried, so a vendor blip surfaced
- * to her as "Homa couldn't make that out" even though nothing about her
- * voice was the problem (gh#1012). A 4xx (bad request) or a clean empty
- * transcript is not retried, since sending the identical bytes again
- * would not change either outcome.
  */
 export async function transcribeAudio(
   audio: ArrayBuffer,
@@ -123,36 +205,10 @@ export async function transcribeAudio(
   const apiKey = process.env.TELNYX_API_KEY;
   if (!apiKey || audio.byteLength === 0) return null;
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const { status, text } = await postToTelnyxStt(audio, contentType, apiKey);
-      if (status >= 500 && attempt === 1) {
-        console.error(
-          `audio transcription failed: HTTP ${status} (${contentType}), retrying once`,
-        );
-        await delay(400);
-        continue;
-      }
-      if (status >= 400) {
-        console.error(
-          `audio transcription failed: HTTP ${status} (${contentType})`,
-        );
-        return null;
-      }
-      const transcript = text?.trim() ?? "";
-      return transcript.length > 0 ? transcript : null;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "unknown";
-      if (attempt === 1) {
-        console.error(`audio transcription failed: ${message}, retrying once`);
-        await delay(400);
-        continue;
-      }
-      console.error("audio transcription failed:", message);
-      return null;
-    }
-  }
-  return null;
+  return transcribeWithFallback(
+    (model) => postFileToTelnyxStt(audio, contentType, apiKey, model),
+    contentType,
+  );
 }
 
 /**
@@ -167,6 +223,26 @@ export async function transcribeSmsMedia(
   const media = await downloadTelnyxMedia(mediaUrl);
   if (!media) return null;
   return transcribeAudio(media, contentType);
+}
+
+async function postUrlToTelnyxStt(
+  fileUrl: string,
+  apiKey: string,
+  model: string,
+): Promise<SttAttempt> {
+  const form = new FormData();
+  form.append("model", model);
+  form.append("file_url", fileUrl);
+
+  const response = await fetch(TELNYX_STT_URL, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
+  if (!response.ok) return { status: response.status };
+
+  const payload = (await response.json()) as { text?: string };
+  return { status: response.status, text: payload.text };
 }
 
 /**
@@ -185,31 +261,8 @@ export async function transcribeAudioUrl(
   const apiKey = process.env.TELNYX_API_KEY;
   if (!apiKey || fileUrl.length === 0) return null;
 
-  try {
-    const form = new FormData();
-    form.append("model", TELNYX_STT_MODEL);
-    form.append("file_url", fileUrl);
-
-    const response = await fetch(TELNYX_STT_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` },
-      body: form,
-    });
-    if (!response.ok) {
-      console.error(
-        `audio url transcription failed: HTTP ${response.status}`,
-      );
-      return null;
-    }
-
-    const payload = (await response.json()) as { text?: string };
-    const transcript = payload.text?.trim() ?? "";
-    return transcript.length > 0 ? transcript : null;
-  } catch (error) {
-    console.error(
-      "audio url transcription failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-    return null;
-  }
+  return transcribeWithFallback(
+    (model) => postUrlToTelnyxStt(fileUrl, apiKey, model),
+    "file_url",
+  );
 }
