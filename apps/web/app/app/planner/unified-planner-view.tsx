@@ -772,29 +772,27 @@ function LearningActivityDetails({
         </div>
       ) : null}
       {error ? (
-        <p role="alert" className="mt-4 rounded-md bg-[var(--clay-50)] px-3 py-2 text-sm font-semibold text-[var(--clay-700)]">
+        <p role="alert" className="mt-4 text-sm font-semibold text-danger">
           {error}
         </p>
       ) : null}
       <div className="mt-5 flex flex-wrap items-center gap-2">
         {editing ? (
           <>
-            <button
-              type="button"
+            <QuietAction
+              kind="primary"
               onClick={save}
               disabled={saving || draftTitle.trim() === ""}
-              className="inline-flex min-h-11 items-center rounded-pill bg-brand px-5 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save changes"}
-            </button>
-            <button
-              type="button"
+            </QuietAction>
+            <QuietAction
+              kind="secondary"
               onClick={() => setEditing(false)}
               disabled={saving}
-              className="inline-flex min-h-11 items-center rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold text-body hover:bg-page disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
-            </button>
+            </QuietAction>
           </>
         ) : (
           <>
