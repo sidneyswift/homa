@@ -1271,8 +1271,6 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   height: min(56dvh, 560px);
   max-height: min(56dvh, 560px);
   flex-direction: column;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   border-top: 1px solid var(--homa-control-boundary);
   border-radius: var(--homa-radius-frame) var(--homa-radius-frame) 0 0;
   background: var(--homa-paper);
@@ -1339,6 +1337,10 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 .quiet-context-selection__body {
   display: grid;
   gap: 8px;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 16px 0 8px;
 }
 .quiet-context-selection__option {
@@ -1746,6 +1748,16 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
   transition: border-color var(--homa-motion-fast) var(--homa-motion-ease-out), color var(--homa-motion-fast) var(--homa-motion-ease-out), transform var(--homa-motion-fast) var(--homa-motion-ease-out);
 }
 .quiet-chat__back-to-now:hover { border-color: var(--homa-brand-text); color: var(--homa-brand-text); transform: translateY(-1px); }
+.quiet-chat__back-to-now-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--homa-visual-coral);
+  box-shadow: 0 0 0 2px var(--homa-paper);
+}
 .quiet-chat__dictation-pulse {
   width: 10px;
   height: 10px;

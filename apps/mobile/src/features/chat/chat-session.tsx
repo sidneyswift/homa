@@ -7,6 +7,8 @@ import {
   TextInput,
   useWindowDimensions,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
 import { useEveAgent, type EveMessage } from "eve/react";
 import { useReducedMotion } from "react-native-reanimated";
@@ -45,7 +47,7 @@ import {
   chatCompletionAnnouncement,
   countLastTurnToolCalls,
 } from "./message-utils";
-import { BusyBubble, MessageView } from "./message-view";
+import { BusyBubble, MessageView, NewReplyPill } from "./message-view";
 import {
   bindProgressDraftContext,
   progressTransportForDraft,
@@ -209,6 +211,22 @@ export function ChatSession({
   }));
   const reportedErrorRef = useRef<Error | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  // A reply landing while she's scrolled away rereading must not yank
+  // her back (Carolyng feedback, 2026-08-24): onContentSizeChange below
+  // checks this ref instead of always calling scrollToEnd.
+  const isNearBottomRef = useRef(true);
+  const [hasNewReply, setHasNewReply] = useState(false);
+  const handleTranscriptScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+      const distanceFromBottom =
+        contentSize.height - layoutMeasurement.height - contentOffset.y;
+      const nearBottom = distanceFromBottom <= 120;
+      isNearBottomRef.current = nearBottom;
+      if (nearBottom) setHasNewReply(false);
+    },
+    [],
+  );
   const composerRef = useRef<TextInput>(null);
   const userStopReasonRef = useRef<"stop" | "send-now" | null>(null);
   const turnAnnouncementSequenceRef = useRef(0);
@@ -443,6 +461,7 @@ export function ChatSession({
           message: announcement,
           occurrenceId: turnAnnouncementSequenceRef.current,
         });
+        if (!isNearBottomRef.current) setHasNewReply(true);
       }
       void saveChat(storageKey, {
         archived: archivedRef.current,
@@ -810,7 +829,13 @@ export function ChatSession({
           gap: space.md,
           flexGrow: 1,
         }}
-        onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: !reducedMotion })}
+        onContentSizeChange={() => {
+          if (isNearBottomRef.current) {
+            scrollRef.current?.scrollToEnd({ animated: !reducedMotion });
+          }
+        }}
+        onScroll={handleTranscriptScroll}
+        scrollEventThrottle={100}
         keyboardShouldPersistTaps="handled"
       >
         {!hasAnyMessages ? (
@@ -1020,6 +1045,18 @@ export function ChatSession({
           <InlineError message="Your conversation is safe; that last message didn't go through. Try sending it again." />
         ) : null}
       </ScrollView>
+
+      {hasNewReply && turnAnnouncement ? (
+        <View style={{ paddingHorizontal: space.md, paddingBottom: space.sm, alignItems: "center" }}>
+          <NewReplyPill
+            label={turnAnnouncement.message}
+            onPress={() => {
+              setHasNewReply(false);
+              scrollRef.current?.scrollToEnd({ animated: !reducedMotion });
+            }}
+          />
+        </View>
+      ) : null}
 
       {checklistTakeover ? (
         <View style={{ padding: space.md, borderTopWidth: 1, borderTopColor: colors.borderSubtle, backgroundColor: colors.page }}>
