@@ -172,11 +172,6 @@
       "role": "web-thread-adapter"
     },
     {
-      "path": "apps/web/app/world-v3/homa-character.tsx",
-      "authority": "components/brand/Logo.tsx",
-      "role": "web-character-adapter"
-    },
-    {
       "path": "apps/web/app/opengraph-image.tsx",
       "authority": "@homa/design/contract#logoGeometry",
       "role": "open-graph-renderer"
@@ -217,7 +212,7 @@
       "role": "vcard-derived-embed"
     }
   ],
-  "sourceFingerprint": "7bb7722293e8c4a1ee613b60ed182bd218994a396e6b6b9ea2b4ead963ff20a1",
+  "sourceFingerprint": "c128a491f0dd49a98730ec5b0e30190be2c7aaae62fbb8f362d4d840ee1fde5a",
   "assets": [
     {
       "id": "web-lockup-light-svg",

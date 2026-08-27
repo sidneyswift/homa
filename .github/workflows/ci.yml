@@ -3,8 +3,7 @@ name: CI
 # Enforces BUILD.md law #1 ("isolation tests green in CI always") and the
 # M1-07 requirement that the adversarial suite runs in CI from the FIRST
 # schema migration. Also runs the MJ-08 events-registry parity check, the
-# map content + scorer checks, the fleet-skill package checks, the
-# (now-retired-system) skills-targeting checks, and lint.
+# map content + scorer checks, the fleet-skill package checks, and lint.
 #
 # Layout (2026-07-31 restructure, no coverage removed): the old single
 # build-and-check job ran ~45 steps serially and took ~9.5 minutes. The
@@ -119,41 +118,11 @@ jobs:
       - name: Design-token check (colour utilities name a declared token)
         run: pnpm check:design-tokens
 
-      - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
-        run: pnpm check:brand-surfaces
-
-      - name: Legacy removal ledger check (exact bindings and invalidation)
-        run: pnpm check:legacy-removal
-
-      - name: Marketing production contract check (bundles, queues, generators, publishers)
-        run: pnpm check:marketing-production
-
-      - name: Channel evidence contract check (fresh fingerprints and hard gates)
-        run: pnpm check:channel-evidence
-
-      - name: Provider handoff contract check (owned fields and external read-back gates)
-        run: pnpm check:provider-handoffs
-
-      - name: Handwrytten stationery contract check (source inventory and irreversible-delivery gates)
-        run: pnpm check:handwrytten-stationery
-
-      - name: Brand asset generation and fingerprint check
-        run: pnpm check:brand-assets
-
-      - name: Canonical identity asset manifest and residue check
+      - name: Canonical identity asset manifest and residue check (covers brand-assets)
         run: pnpm check:identity-assets
-
-      - name: Design authoring rails check (coverage, contract, residue, fingerprints)
-        run: pnpm check:design-authoring
 
       - name: Product Design Playbook skill and scorer contract
         run: pnpm check:product-design-playbook
-
-      - name: Licensed font system contract and residue check
-        run: pnpm check:font-system
-
-      - name: Durable artifact design-era check (classification and Quiet print markers)
-        run: pnpm check:artifact-brand-era
 
       - name: Active brand residue check (changed files cannot revive legacy identity)
         run: pnpm check:brand-residue
@@ -161,17 +130,22 @@ jobs:
       - name: Design contract parity check (byte-stable projections)
         run: pnpm check:design-parity
 
-      - name: Design fixture gallery check (stable IDs, profiles, and checksums)
-        run: pnpm check:design-fixtures
-
       - name: Web interface gauntlet contract check
         run: pnpm check:interface-gauntlet
 
       - name: Design contract type and semantic tests
         run: pnpm check:design-contract
 
-      - name: Semantic icon direct-import residue check
-        run: pnpm check:icon-residue
+      # Retired 2026-08-27 (audit + founder direction): check:brand-surfaces,
+      # check:legacy-removal, check:marketing-production, check:channel-evidence,
+      # check:provider-handoffs, check:handwrytten-stationery,
+      # check:design-authoring, check:font-system, check:artifact-brand-era,
+      # check:design-fixtures, and check:icon-residue regenerated-and-compared
+      # evidence for migrations that never advanced past "inventory" (surfaces.json:
+      # 1,875/1,875 rows still rolloutState "inventory"; legacy-removal.json:
+      # 191/191 records still "open") and taxed every PR, including docs-only
+      # ones, to prove it. The scripts and evidence files are still in the repo;
+      # nothing here deletes them, this just stops paying for them on every push.
 
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
@@ -479,17 +453,8 @@ jobs:
       - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
         run: pnpm check:dynamic-tool-events
 
-      - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
-        run: pnpm check:em-dash
-
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
-
-      - name: Fleet-skill dormant-window guard (retired files, no live queries)
-        run: pnpm check:fleet-skills-dormant
-
-      - name: Skills-bank targeting checks (retired-system regression guard)
-        run: pnpm check:skills-targeting
 
       - name: Taxonomy checks (skill graph integrity, id law, DAG)
         run: pnpm check:taxonomy
@@ -536,6 +501,9 @@ jobs:
 
       - name: Account deletion artifact inventory contract
         run: pnpm check:account-deletion-artifact-audit
+
+      - name: Account deletion route stays bound to the authenticated protocol
+        run: pnpm check:account-deletion-containment
 
       # Fixture hygiene only, no model call. The paid routing eval is
       # pnpm eval:ask-user-questions, run by hand.
@@ -592,9 +560,6 @@ jobs:
           fi
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
-      - name: Trial claim repair survives a reused PostgreSQL session
-        run: pnpm test:trial-claim-repair:postgres
-
       - name: Morning research brief format
         run: pnpm check:research-brief
 
@@ -627,45 +592,17 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:live-fixture-sandbox:postgres
 
-      - name: Issue 606 privacy containment disposable PostgreSQL E2E
+      - name: Conversation privacy per-adult attribution disposable PostgreSQL E2E
         timeout-minutes: 10
-        run: |
-          pnpm check:issue-606-containment
-          pnpm test:issue-606-containment:postgres
-          pnpm conversation-privacy:e2e
-          pnpm test:issue-606-production-repair:postgres
+        run: pnpm conversation-privacy:e2e
 
-      - name: Issue 878 production repair disposable PostgreSQL E2E
+      - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10
-        run: |
-          pnpm test:issue-878-production-repair:postgres
-          pnpm test:account-deletion:postgres
-
-      - name: Issue 878 account deletion containment disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: |
-          pnpm check:account-deletion-containment
-          pnpm test:issue-878-account-deletion-containment:postgres
-
-      - name: Issue 878 account deletion schema release disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: |
-          pnpm check:account-deletion-schema-release
-          pnpm test:issue-878-account-deletion-schema-release:postgres
-
-      - name: Issue 888 production repair disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: pnpm test:issue-888-production-repair:postgres
+        run: pnpm test:account-deletion:postgres
 
       - name: Production schema reconciliation disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:production-schema-reconcile:postgres
-
-      - name: Issue 887 production repair disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: |
-          pnpm check:migration-versions
-          pnpm test:issue-887-production-repair:postgres
 
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).

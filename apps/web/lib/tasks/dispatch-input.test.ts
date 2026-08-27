@@ -7,6 +7,7 @@ import {
   buildDispatchAuth,
   buildDispatchTarget,
   buildTaskMessage,
+  DORMANT_FAMILY_SKIP_REASON,
   preflightTaskDispatch,
 } from "./dispatch-input";
 import type { DueFamilyTask } from "./store";
@@ -353,6 +354,50 @@ describe("buildTaskMessage", () => {
 });
 
 describe("preflightTaskDispatch", () => {
+  it("skips a scheduled brief for a dormant family without loading any context", async () => {
+    const result = await preflightTaskDispatch(
+      task({ kind: "morning_brief" }),
+      "scheduled",
+      async () => assert.fail("dormant family must not load brief context"),
+      {
+        isDormant: async () => true,
+        loadV2Context: async () =>
+          assert.fail("dormant family must not load v2 context"),
+      },
+    );
+
+    assert.deepEqual(result, {
+      outcome: "skip",
+      deliveryVersion: "legacy",
+      reason: DORMANT_FAMILY_SKIP_REASON,
+    });
+  });
+
+  it("never gates a manual Run now on dormancy", async () => {
+    let dormancyChecked = false;
+    const result = await preflightTaskDispatch(
+      task({ kind: "morning_brief", familySandbox: true }),
+      "manual",
+      async () => assert.fail("selected v2 must not load legacy context"),
+      {
+        environment: { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" },
+        isDormant: async () => {
+          dormancyChecked = true;
+          return true;
+        },
+        loadV2Context: async () => ({
+          styleKeys: [],
+          children: [FAKE_ELIGIBLE_V2_CHILD],
+          observations: [],
+          recentTraces: [],
+        }),
+      },
+    );
+
+    assert.equal(dormancyChecked, false);
+    assert.equal(result.outcome, "ready");
+  });
+
   it("returns an explicit skip without a model message when v2 has no candidate", async () => {
     const result = await preflightTaskDispatch(
       task({
@@ -363,6 +408,7 @@ describe("preflightTaskDispatch", () => {
       async () => FAKE_BRIEF_CONTEXT,
       {
         environment: { HOMA_RESEARCH_BRIEF_V2_SANDBOX_ONLY: "true" },
+        isDormant: async () => false,
         loadV2Context: async () => ({
           styleKeys: [],
           children: [],

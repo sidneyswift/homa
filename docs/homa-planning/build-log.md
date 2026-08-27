@@ -3,6 +3,65 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-27 · Repository-wide cleanup audit, executed per founder approval
+
+The founder asked for a complete audit of the repo, database, and CI/CD
+pipeline (files, docs, skills, design-system checks, one-off incident
+workflows, dead code) given the codebase had accumulated a month of
+process armor from July's incident streak and the design migration while
+the product itself is pre-PMF with a handful of real users. Five parallel
+audits plus a six-agent adversarial verification pass produced a 90-row
+CSV and a report; the founder approved executing the full order of
+operations in one session rather than ruling item by item.
+
+Landed in this session, in order: (1) deleted the `classify-conversation`
+eve hook, which made a real model call per family message and wrote to
+`conversation_signals`, a table whose access was revoked 2026-07-17, so
+the write had been failing silently since; deleted the abandoned
+self-improving/night-manager code around it (`lib/policy`, `lib/eval`,
+`lib/evolution`, `lib/admin/night-context.ts`, root `POLICY.md`). (2)
+Added a 14-day dormancy preflight to the morning-brief dispatcher: 44
+live schedules were firing daily regardless of whether the family was
+still around; only 6-11 real families were humanly active in the
+trailing 7-30 day windows. A parent's own Run now always bypasses it. (3)
+Merged PR #991 (the pending ITMS-90683 App Store fix, green and
+unmerged for a week). (4) Stopped running 11 of `brand-checks`' 21 CI
+steps on every PR: they regenerate-and-compare evidence for migrations
+that have never advanced (surfaces.json's 1,875 rows are all still
+`rolloutState: "inventory"`; legacy-removal.json's 191 records are all
+still `"open"`). Also lifted the BUILD.md merge-commit-only constraint
+that existed only to protect that evidence's provenance. Nothing was
+deleted, only un-wired from CI; `pnpm check:legacy-removal` and friends
+still run by hand. (5) Deleted 7 one-off `workflow_dispatch` production
+repair workflows (issue-606, issue-878 ×3, issue-887, issue-888,
+trial-claim-migration-repair) that had already run successfully between
+2026-08-06 and 2026-08-15 on now-closed issues, their 32 backing scripts,
+and the CI/package.json wiring that ran them on every full-scope PR;
+kept the two real ongoing tests that were bundled inside that wiring
+(`conversation-privacy:e2e`, `test:account-deletion:postgres`, and the
+account-deletion route's protocol-binding test, moved to the job it
+actually belongs in). (6) Retired `check:fleet-skills-dormant` and
+`check:skills-targeting`, the two CI guards AGENTS.md itself called
+temporary "through the fleet-skills dormant window," whose stated
+retirement trigger (Phase C closing, 2026-07-15 plan, earliest close
+2026-07-22) had been sitting unactioned for 43 days with no assigned
+owner. Deleted `apps/web/lib/agent-skills.ts`, which existed solely to
+be exercised by `check:skills-targeting`. See the 2026-08-27 addendum in
+`docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md`
+for exactly what evidence this retirement does and does not satisfy
+against that plan's formal Phase C checklist; Phase D (dropping
+`family_skills`/`skill_bank`) remains separately unauthorized.
+
+Every deletion was typechecked, and every retained/moved test was run
+locally and confirmed green before committing, in a git worktree with no
+other in-flight work. Not yet pushed to `main`; still to come in this
+session: retire the remaining brand-checks scripts and evidence files,
+the file/docs purge (the 92MB PDF, `.tmp-retention-bridge-review`,
+`.superpowers`, superseded landing components, the `world*` routes),
+and a production migration-ledger reconciliation. The database-drop and
+mobile-scope items from the audit remain founder decisions, not agent
+actions, and were not executed.
+
 ## 2026-08-16 · Founder ruling: unfinished working plans live in Binder
 
 Founder ruling, not an agent decision. Registered as

@@ -243,10 +243,13 @@ for (const field of ["id", "query", "owner"] as const) {
 }
 
 const validStatuses = ["live", "staged", "brief", "research-required"];
-const draftDirectories = fs
-  .readdirSync(path.join(ROOT, "marketing/content/drafts"), { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name);
+const draftsRoot = path.join(ROOT, "marketing/content/drafts");
+const draftDirectories = fs.existsSync(draftsRoot)
+  ? fs
+      .readdirSync(draftsRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+  : [];
 
 for (const topic of topicGraph.topics) {
   if (!clusterSlugs.includes(topic.cluster)) fail(`topic graph ${topic.id}: unknown cluster ${topic.cluster}`);

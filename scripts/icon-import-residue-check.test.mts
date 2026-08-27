@@ -28,9 +28,6 @@ const MIGRATED_SURFACES = [
   "apps/web/app/app/prompt-suggestion-rail.tsx",
   "apps/web/app/app/question-card.tsx",
   "apps/web/app/features/[slug]/page.tsx",
-  "apps/web/components/marketing/CtaBand.tsx",
-  "apps/web/components/marketing/Hero.tsx",
-  "apps/web/components/marketing/SampleReportProof.tsx",
   "apps/web/components/marketing/SignupPopupModal.tsx",
   "apps/mobile/src/features/lessons/native-lesson-recorder.tsx",
   "apps/mobile/src/features/tasks/task-card.tsx",
@@ -52,9 +49,6 @@ const MIGRATED_SURFACES = [
   "apps/web/app/app/worked-for.tsx",
   "apps/web/components/dashboard/context-switcher.tsx",
   "apps/web/components/dev/dev-toolbar.tsx",
-  "apps/web/components/marketing/CapabilityProof.tsx",
-  "apps/web/components/marketing/HeroProductDemo.tsx",
-  "apps/web/components/marketing/PlatformStrip.tsx",
   "apps/web/components/marketing/QuietLanding.tsx",
 ] as const;
 

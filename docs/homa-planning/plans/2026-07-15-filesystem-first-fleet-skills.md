@@ -571,6 +571,27 @@ with the runtime cutover or the table drop.
 
 Phase D has no acceptance criteria here because it is not authorized.
 
+### 2026-08-27 addendum: CI guard retirement, not full Phase C closure
+
+AGENTS.md called `check:fleet-skills-dormant` and `check:skills-targeting`
+temporary, due for retirement "once Phase C closes and a founder reviews
+the evidence." The window opened 2026-07-15 and nobody had assigned an
+owner or closed it 43 days later; the guards were still running on every
+full-scope PR testing an invariant nothing was actively threatening.
+
+This addendum retires the two CI guards and the code that existed only to
+be exercised by them (`apps/web/lib/agent-skills.ts`,
+`apps/web/scripts/fleet-skills-dormant-snapshot.mts`), based on a narrow
+check, not the full ceremony above: `public.family_skills` is at 0 rows
+and `public.skill_bank` is at 2 rows (both dormant, per direct query), and
+no product runtime module imports either skill store. It does **not**
+satisfy the ten-synthetic-probe, cross-channel-parity, or
+personalization-still-works bullets in "Phase C complete" above, and it
+does not authorize Phase D (dropping `family_skills`/`skill_bank`), which
+still needs its own plan and migration. Treat Phase C as informally wound
+down for the purpose of "stop running temporary CI checks forever," not
+as the formally evidenced closure this plan originally specified.
+
 ## 12. Triggers for reconsidering dynamic distribution
 
 Reopen the Blob/registry architecture only when evidence shows at least one:

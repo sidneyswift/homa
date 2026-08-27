@@ -384,7 +384,11 @@ export function validateManifest(manifest: MarketingProductionManifest): Marketi
   const paths = manifest.rows.map((row) => row.path);
   if (new Set(paths).size !== paths.length) findings.push({ code: "duplicate-row", path: OUTPUT_PATH, detail: "Marketing production rows must be unique." });
   if (paths.some((path, index) => path !== [...paths].sort(stableCompare)[index])) findings.push({ code: "row-order", path: OUTPUT_PATH, detail: "Marketing production rows must be sorted by path." });
-  const requiredRoles: MarketingRole[] = ["voice", "asset", "campaign", "social-template", "draft-bundle", "published-bundle", "queue", "evaluator"];
+  // draft-bundle is intentionally excluded: a draft is transient work in
+  // progress, and zero drafts in flight is a normal, correct state (it
+  // does not mean the drafting pipeline is broken the way zero rows of
+  // any other role here would).
+  const requiredRoles: MarketingRole[] = ["voice", "asset", "campaign", "social-template", "published-bundle", "queue", "evaluator"];
   const roleCounts: Record<string, number> = {};
   for (const row of manifest.rows) {
     for (const role of row.roles) roleCounts[role] = (roleCounts[role] ?? 0) + 1;

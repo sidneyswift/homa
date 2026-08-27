@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -8,23 +6,6 @@ import {
   containsAndroidPublicReleaseCommand,
   readPlatformDisposition,
 } from "./android-release-guard.mjs";
-
-const ISSUE_606_REPAIR_WORKFLOW_PATH = new URL(
-  "../../../.github/workflows/issue-606-production-repair.yml",
-  import.meta.url,
-);
-const ISSUE_888_REPAIR_WORKFLOW_PATH = new URL(
-  "../../../.github/workflows/issue-888-production-repair.yml",
-  import.meta.url,
-);
-const ISSUE_878_CONTAINMENT_WORKFLOW_PATH = new URL(
-  "../../../.github/workflows/issue-878-account-deletion-containment.yml",
-  import.meta.url,
-);
-const ISSUE_878_SCHEMA_RELEASE_WORKFLOW_PATH = new URL(
-  "../../../.github/workflows/issue-878-account-deletion-schema-release.yml",
-  import.meta.url,
-);
 
 test("the founder-owned disposition permits only iOS public builds", () => {
   const disposition = readPlatformDisposition();
@@ -49,20 +30,6 @@ test("the EAS hook fails closed on an unknown build platform but ignores ordinar
     () => assertEasBuildPlatform({ EAS_BUILD: "true", EAS_BUILD_PLATFORM: "windows" }, disposition),
     /must be ios or android/u,
   );
-});
-
-test("only exact reviewed non-mobile repair workflows bypass known false positives", () => {
-  for (const [path, expectedHash] of [
-    [ISSUE_606_REPAIR_WORKFLOW_PATH, "bbc328bf15848cb6a9936653879ead957378f1f88002763826e8342395a7b3a6"],
-    [ISSUE_888_REPAIR_WORKFLOW_PATH, "8de4f1ac311ee9e96036cf70f10d2c30c513a2faa88732fcbaf546295b0af185"],
-    [ISSUE_878_CONTAINMENT_WORKFLOW_PATH, "df1c2954b93068385ec6953288f53b4739546f6924b32893ae8415e30af206b3"],
-    [ISSUE_878_SCHEMA_RELEASE_WORKFLOW_PATH, "7b671bf43899443968a2f1afcacbb45fa57e4eaf4c20ddac6c33154e6f7446b1"],
-  ]) {
-    const workflow = readFileSync(path, "utf8");
-    assert.equal(createHash("sha256").update(workflow).digest("hex"), expectedHash);
-    assert.equal(containsAndroidPublicReleaseCommand(workflow), false);
-    assert.equal(containsAndroidPublicReleaseCommand(`${workflow}\n`), true);
-  }
 });
 
 test("all Android, ambiguous, and folded EAS public-release commands fail closed", () => {

@@ -39,12 +39,12 @@ rollback rehearsal, commit, production readback, or stop-generation receipt
 required by the typed contract.
 
 Run `pnpm build:legacy-removal` after the surface manifest changes. `pnpm
-audit:legacy-removal` validates the ledger and reports the remaining queue
-without failing solely because work remains. Final gh#729 certification uses
-`pnpm audit:legacy-removal:strict`, which fails until the queue is empty.
-`pnpm audit:brand-eradication` combines that ledger with a full active-tree
-residue scan and reports the honest migration queue without claiming release
-readiness. Final certification uses `pnpm audit:brand-eradication:strict`.
+check:legacy-removal` (retired from CI 2026-08-27, still runnable by hand)
+validates the ledger and reports the remaining queue with `--check`, or fails
+until it is empty with `--check --strict`, via `node --experimental-strip-types
+scripts/brand-legacy-removal-ledger.mts`. Combine that with a full active-tree
+residue scan (`pnpm audit:brand-residue`) for the honest migration queue
+without claiming release readiness.
 
 `pnpm check:brand-residue` is the pull-request ratchet. It scans the delivery
 delta and rejects newly introduced legacy identity. `pnpm audit:brand-residue`
