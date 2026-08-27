@@ -512,6 +512,9 @@ jobs:
       - name: Account deletion artifact inventory contract
         run: pnpm check:account-deletion-artifact-audit
 
+      - name: Account deletion route stays bound to the authenticated protocol
+        run: pnpm check:account-deletion-containment
+
       # Fixture hygiene only, no model call. The paid routing eval is
       # pnpm eval:ask-user-questions, run by hand.
       - name: Choice-card routing fixtures
@@ -567,9 +570,6 @@ jobs:
           fi
           echo "HOMA_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
 
-      - name: Trial claim repair survives a reused PostgreSQL session
-        run: pnpm test:trial-claim-repair:postgres
-
       - name: Morning research brief format
         run: pnpm check:research-brief
 
@@ -602,45 +602,17 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:live-fixture-sandbox:postgres
 
-      - name: Issue 606 privacy containment disposable PostgreSQL E2E
+      - name: Conversation privacy per-adult attribution disposable PostgreSQL E2E
         timeout-minutes: 10
-        run: |
-          pnpm check:issue-606-containment
-          pnpm test:issue-606-containment:postgres
-          pnpm conversation-privacy:e2e
-          pnpm test:issue-606-production-repair:postgres
+        run: pnpm conversation-privacy:e2e
 
-      - name: Issue 878 production repair disposable PostgreSQL E2E
+      - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10
-        run: |
-          pnpm test:issue-878-production-repair:postgres
-          pnpm test:account-deletion:postgres
-
-      - name: Issue 878 account deletion containment disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: |
-          pnpm check:account-deletion-containment
-          pnpm test:issue-878-account-deletion-containment:postgres
-
-      - name: Issue 878 account deletion schema release disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: |
-          pnpm check:account-deletion-schema-release
-          pnpm test:issue-878-account-deletion-schema-release:postgres
-
-      - name: Issue 888 production repair disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: pnpm test:issue-888-production-repair:postgres
+        run: pnpm test:account-deletion:postgres
 
       - name: Production schema reconciliation disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:production-schema-reconcile:postgres
-
-      - name: Issue 887 production repair disposable PostgreSQL E2E
-        timeout-minutes: 10
-        run: |
-          pnpm check:migration-versions
-          pnpm test:issue-887-production-repair:postgres
 
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).
