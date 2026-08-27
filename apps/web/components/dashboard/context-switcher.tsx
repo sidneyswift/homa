@@ -11,6 +11,7 @@ import {
   useTransition,
 } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { ageLabel } from "@homa/core";
 
 import { setViewContextAction } from "../../app/app/view-context-actions";
@@ -410,7 +411,14 @@ function SwitcherMenu({
         </>
       ) : null}
 
-      {open && isPhone ? (
+      {/* Portaled to document.body: quiet-shell__mobile-bar (this
+          component's DOM ancestor) is position: sticky, which Chromium
+          treats as a containing block for position: fixed descendants.
+          Left inline, the scrim and sheet below resolved their fixed
+          offsets against the ~55px sticky header instead of the
+          viewport, rendering the sheet almost entirely above it
+          (gh#1015 live-verification session, 2026-08-27). */}
+      {open && isPhone ? createPortal(
         <>
           <div
             className="quiet-context-selection__scrim"
@@ -491,7 +499,8 @@ function SwitcherMenu({
               ))}
             </div>
           </div>
-        </>
+        </>,
+        document.body,
       ) : null}
     </div>
   );

@@ -53,4 +53,21 @@ describe("Quiet context selector contract", () => {
     assert.match(fixture, /<Workspace layout="stage-context"/u);
     assert.match(fixture, /<VoiceSafeSlot/u);
   });
+
+  it("portals the phone sheet out of the sticky mobile bar", () => {
+    // quiet-shell__mobile-bar (the sheet's DOM ancestor) is position:
+    // sticky, which Chromium treats as a containing block for position:
+    // fixed descendants: left inline, the sheet resolved its fixed
+    // offsets against the ~55px header instead of the viewport and
+    // rendered almost entirely off-screen above it (gh#1015
+    // live-verification session, 2026-08-27). document.body is the only
+    // safe portal target since quiet-context-selection's CSS assumes a
+    // true-viewport containing block.
+    assert.match(SOURCE, /import \{ createPortal \} from "react-dom"/u);
+    assert.match(
+      SOURCE,
+      /open && isPhone \? createPortal\(\s*<>\s*<div\s*\n\s*className="quiet-context-selection__scrim"/u,
+    );
+    assert.match(SOURCE, /<\/>,\s*\n\s*document\.body,\s*\n\s*\) : null\}/u);
+  });
 });
