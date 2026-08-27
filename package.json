@@ -108,8 +108,6 @@
     "materials:render-preview": "tsx --tsconfig apps/web/tsconfig.json scripts/materials-render-preview.mts",
     "check:agent-context": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/agent-db.test.ts apps/web/lib/chat-message-source.test.ts apps/web/lib/family-context-eval-fixture.test.ts apps/web/lib/family-context-map-snapshot.test.ts apps/web/lib/family-context-security.test.ts apps/web/lib/tasks/brief-context.test.ts",
     "check:fleet-skills": "node --experimental-strip-types scripts/fleet-skills-check.mts",
-    "check:fleet-skills-dormant": "node --experimental-strip-types scripts/fleet-skills-dormant-guard.mts",
-    "check:skills-targeting": "node scripts/skills-targeting-check.mjs",
     "check:instructions-split": "tsx scripts/instructions-split-check.mts && tsx --tsconfig apps/web/tsconfig.json --test scripts/instructions-split-check.test.ts",
     "check:agent-budget": "tsx scripts/agent-context-budget-check.mts && tsx --tsconfig apps/web/tsconfig.json --test scripts/agent-context-budget-check.test.ts",
     "check:tool-deadlines": "node --experimental-strip-types scripts/tool-deadline-check.mts && tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/agent-tool-deadline.test.ts apps/web/lib/observability/agent-trace.test.ts",

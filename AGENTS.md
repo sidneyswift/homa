@@ -159,10 +159,7 @@ building or reviewing any language-to-structured-data capability.
   library. Run `pnpm check:fleet-skills` (package hygiene: frontmatter,
   size limits, path safety, slash-menu parity) and add positive and
   adversarial-negative routing fixtures plus an eve behavioral eval when
-  correctness depends on model judgment. `pnpm check:skills-targeting`
-  still runs in CI as a regression guard on the retired
-  targeting/merge logic through the dormant window; it is not a live
-  product check.
+  correctness depends on model judgment.
 
 ### Tool authoring rules
 
@@ -238,8 +235,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
   focused route and card tests; and `pnpm child-progress:e2e` for the
   disposable local PostgreSQL harness. The E2E command creates and removes its
   own cluster and needs no remote credentials.
-- Required guards, named here because they run BEFORE a change (CI is too late for them): `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:migration-versions` (unique Supabase migration versions, run before any migration change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene, reference integrity, and slash-menu parity), `pnpm check:skills-targeting`, and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG). For the full check roster, enumerate `.github/workflows/ci.yml` rather than any hand-copied list
-- Temporary through the fleet-skills dormant window only (docs/homa-planning/plans/2026-07-15-filesystem-first-fleet-skills.md Phase C, opens 2026-07-15, earliest close 2026-07-22): `pnpm check:fleet-skills-dormant` proves the retired dynamic-skill files stay deleted and nothing outside an explicit allowlist queries `family_skills`/`skill_bank`. Retire this check together with `check:skills-targeting` once Phase C closes and a founder reviews the evidence; do not treat either as a permanent fixture of "how skills work here."
+- Required guards, named here because they run BEFORE a change (CI is too late for them): `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:migration-versions` (unique Supabase migration versions, run before any migration change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene, reference integrity, and slash-menu parity), and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG). For the full check roster, enumerate `.github/workflows/ci.yml` rather than any hand-copied list
 - Local eval runs (`eve eval` in apps/web) are isolated by default:
   evals.config.ts strips durable-write credentials from the eval process
   (apps/web/lib/eval-isolation.ts), so passing evals no longer write

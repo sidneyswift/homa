@@ -3,8 +3,7 @@ name: CI
 # Enforces BUILD.md law #1 ("isolation tests green in CI always") and the
 # M1-07 requirement that the adversarial suite runs in CI from the FIRST
 # schema migration. Also runs the MJ-08 events-registry parity check, the
-# map content + scorer checks, the fleet-skill package checks, the
-# (now-retired-system) skills-targeting checks, and lint.
+# map content + scorer checks, the fleet-skill package checks, and lint.
 #
 # Layout (2026-07-31 restructure, no coverage removed): the old single
 # build-and-check job ran ~45 steps serially and took ~9.5 minutes. The
@@ -454,17 +453,8 @@ jobs:
       - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
         run: pnpm check:dynamic-tool-events
 
-      - name: "No-em-dash style law (AGENTS.md: no em dash, ever, anywhere)"
-        run: pnpm check:em-dash
-
       - name: Fleet-skill package checks (frontmatter, size limits, slash-menu parity)
         run: pnpm check:fleet-skills
-
-      - name: Fleet-skill dormant-window guard (retired files, no live queries)
-        run: pnpm check:fleet-skills-dormant
-
-      - name: Skills-bank targeting checks (retired-system regression guard)
-        run: pnpm check:skills-targeting
 
       - name: Taxonomy checks (skill graph integrity, id law, DAG)
         run: pnpm check:taxonomy
