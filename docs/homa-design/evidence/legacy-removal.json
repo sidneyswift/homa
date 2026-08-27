@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "1f017dfba861dc5ce221e1e08417b0859c9595377eee37518c0ad09c183316aa",
+  "ownedInputFingerprint": "1e1fc6234c38962d35a01ec7633ce62bceddfb9bafc5d255d6905884ddda03fe",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -3592,11 +3592,8 @@
     {
       "surfaceId": "surface:696b669cac99ebf7",
       "path": "apps/web/app/world-v3/page.tsx",
-      "sourceHash": "6c1e71487482f7aa971d09ff698b3d2733799831aa3994d36ec463873ed5026d",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "6c1e71487482f7aa971d09ff698b3d2733799831aa3994d36ec463873ed5026d",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -3622,7 +3619,7 @@
         "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -3648,13 +3645,8 @@
     {
       "surfaceId": "surface:d278208137e49c18",
       "path": "apps/web/app/world-v4/page.tsx",
-      "sourceHash": "e391a078f73f9513515303b723094d23da076e25bd907637ed86fc61bc786f85",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "e391a078f73f9513515303b723094d23da076e25bd907637ed86fc61bc786f85",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -3684,7 +3676,7 @@
         "deliveryState": "revocable-public",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4303,10 +4295,8 @@
     {
       "surfaceId": "surface:90e42e1c10cfb1db",
       "path": "apps/web/components/dev/test-mode-bar.tsx",
-      "sourceHash": "3157cd0c62dd035816c517cfd34c4fb100fbda87f604c65a822fe5a64108647f",
-      "legacySignatures": [
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "3157cd0c62dd035816c517cfd34c4fb100fbda87f604c65a822fe5a64108647f",
       "detectedLegacySignatures": [
         "legacy-token-namespace"
@@ -4330,7 +4320,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4356,11 +4346,8 @@
     {
       "surfaceId": "surface:261a7b7e0a7602eb",
       "path": "apps/web/components/marketing/CapabilityProof.tsx",
-      "sourceHash": "cdc7e7dd141cba4711c6aa95f8ebf147b6388ffcd971c585344c477d56680a5e",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "cdc7e7dd141cba4711c6aa95f8ebf147b6388ffcd971c585344c477d56680a5e",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -4386,7 +4373,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4412,11 +4399,8 @@
     {
       "surfaceId": "surface:5e558ff2621c4c80",
       "path": "apps/web/components/marketing/CtaBand.tsx",
-      "sourceHash": "7c21fa680e2fe87d7863498125c2e4c4c3aef94582809d6b7e03a58a91198e41",
-      "legacySignatures": [
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "7c21fa680e2fe87d7863498125c2e4c4c3aef94582809d6b7e03a58a91198e41",
       "detectedLegacySignatures": [
         "legacy-shape-language",
@@ -4442,7 +4426,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4521,12 +4505,8 @@
     {
       "surfaceId": "surface:7a8a0495815778ff",
       "path": "apps/web/components/marketing/Faq.tsx",
-      "sourceHash": "f0e9a79511d27bd4e85a2ad10ea64f969d1b9da2c6ddf03dbdbf643e6ed9606b",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "f0e9a79511d27bd4e85a2ad10ea64f969d1b9da2c6ddf03dbdbf643e6ed9606b",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -4554,7 +4534,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4580,10 +4560,8 @@
     {
       "surfaceId": "surface:fa0b39411e08e108",
       "path": "apps/web/components/marketing/Features.tsx",
-      "sourceHash": "90a6a7e612b69957e337b9ba4a742915e39121384854f7e4aea2a85ae0095feb",
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "90a6a7e612b69957e337b9ba4a742915e39121384854f7e4aea2a85ae0095feb",
       "detectedLegacySignatures": [
         "legacy-shape-language"
@@ -4607,7 +4585,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4633,12 +4611,8 @@
     {
       "surfaceId": "surface:4455bebc5175edad",
       "path": "apps/web/components/marketing/Hero.tsx",
-      "sourceHash": "09cb4e62b0f96a0d569ed408127e1caa3c17190b815f528ed4492b723fa89c91",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "09cb4e62b0f96a0d569ed408127e1caa3c17190b815f528ed4492b723fa89c91",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -4666,7 +4640,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4692,11 +4666,8 @@
     {
       "surfaceId": "surface:61c079ee4470fc23",
       "path": "apps/web/components/marketing/HeroProductDemo.tsx",
-      "sourceHash": "838040ed3758759a26339f67260a4855ec7b8d990e8b550c42d1ad580c63c381",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "838040ed3758759a26339f67260a4855ec7b8d990e8b550c42d1ad580c63c381",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -4722,7 +4693,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4748,11 +4719,8 @@
     {
       "surfaceId": "surface:2b9b076dada14f97",
       "path": "apps/web/components/marketing/PlatformStrip.tsx",
-      "sourceHash": "d1d87794239f8c6cf3909bf78f658e70294f4213d959e42970b753575050dab8",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "d1d87794239f8c6cf3909bf78f658e70294f4213d959e42970b753575050dab8",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -4778,7 +4746,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4804,12 +4772,8 @@
     {
       "surfaceId": "surface:85eb7ec5f33104fd",
       "path": "apps/web/components/marketing/SampleReportProof.tsx",
-      "sourceHash": "be9629ddf4865feb2b32ab5b3878c8788899ff27c328f48f1235377e2792c3e1",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "be9629ddf4865feb2b32ab5b3878c8788899ff27c328f48f1235377e2792c3e1",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -4837,7 +4801,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4863,12 +4827,8 @@
     {
       "surfaceId": "surface:5ebc5711e393a818",
       "path": "apps/web/components/marketing/Stories.tsx",
-      "sourceHash": "f251d0de7d494d8459165838544830bcb26850acd70bf6df63273ae3e662e5a9",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "f251d0de7d494d8459165838544830bcb26850acd70bf6df63273ae3e662e5a9",
       "detectedLegacySignatures": [
         "legacy-font-caveat",
@@ -4898,7 +4858,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4924,11 +4884,8 @@
     {
       "surfaceId": "surface:79c05ce8a73a515f",
       "path": "apps/web/components/marketing/dividers.tsx",
-      "sourceHash": "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e",
-      "legacySignatures": [
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "0a1228b6f6c94bbd34c7b14c577f7639eef41ba18ca57d2509683975b172df0e",
       "detectedLegacySignatures": [
         "legacy-shape-language",
@@ -4954,7 +4911,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -4980,11 +4937,8 @@
     {
       "surfaceId": "surface:1285fffa9450e181",
       "path": "apps/web/components/marketing/ds/Avatar.tsx",
-      "sourceHash": "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "d6171e90d23382c4e4ee6e76e428a7ddec3752f31e43203a8a2ff0bd9f979b34",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -5010,7 +4964,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -5036,11 +4990,8 @@
     {
       "surfaceId": "surface:720cf45d78f93c9b",
       "path": "apps/web/components/marketing/ds/Badge.tsx",
-      "sourceHash": "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "22961659a11e24f97ad06dfb5e18ff5ff91a6cf50330dc2680fe47d128f71532",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -5066,7 +5017,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -5201,10 +5152,8 @@
     {
       "surfaceId": "surface:f900cfb882411649",
       "path": "apps/web/components/marketing/ds/Squiggle.tsx",
-      "sourceHash": "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b",
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "c853ee7800f0ad74d86a2fc4c8ac9dab7c48316b44fd6d55e45e7b62791ca90b",
       "detectedLegacySignatures": [
         "legacy-shape-language"
@@ -5228,7 +5177,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -5254,12 +5203,8 @@
     {
       "surfaceId": "surface:c05c78115163db52",
       "path": "apps/web/components/marketing/thread/HowThread.tsx",
-      "sourceHash": "b4d8fda8cd7eca81724cd2d93e2548eec71b66e3fc978053c89488dcc9ddc412",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "b4d8fda8cd7eca81724cd2d93e2548eec71b66e3fc978053c89488dcc9ddc412",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -5287,7 +5232,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -5313,12 +5258,8 @@
     {
       "surfaceId": "surface:011182011c676930",
       "path": "apps/web/components/marketing/thread/vignettes.tsx",
-      "sourceHash": "22f61600223a3a8835d4972df26ad05138b998a71ce5f3035cf105e626c77c8f",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-shape-language",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "22f61600223a3a8835d4972df26ad05138b998a71ce5f3035cf105e626c77c8f",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -5346,7 +5287,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -6448,7 +6389,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "28d864486955df37f0efdda75ff105005cb3ab063b0ccbe9a438733e6f8c82ee",
+      "sourceHash": "2d319b85bc245f594fb6880500808b75c1649da0eaf3017bd57310a4ac397a91",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
@@ -7249,23 +7190,8 @@
     {
       "surfaceId": "surface:f15015b5d9918231",
       "path": "docs/homa-planning/plans/2026-07-06-llm-report-depth-mock.html",
-      "sourceHash": "ed523307cbe8b69b611ba3461577f6d2a68004a4a12b24c0619e4c1f58ebf660",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "ed523307cbe8b69b611ba3461577f6d2a68004a4a12b24c0619e4c1f58ebf660",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7315,7 +7241,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -7397,20 +7323,8 @@
     {
       "surfaceId": "surface:b7a08b89aa048106",
       "path": "docs/homa-planning/plans/2026-07-11-agent-led-live-progress.html",
-      "sourceHash": "f5abca83830c324efbe02a9c0db6036264cd459e090d41841cb2bcf81f70d921",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "f5abca83830c324efbe02a9c0db6036264cd459e090d41841cb2bcf81f70d921",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7454,7 +7368,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -7480,20 +7394,8 @@
     {
       "surfaceId": "surface:a953fcec6b5ba02d",
       "path": "docs/homa-planning/plans/2026-07-11-anytime-progress-check-ins.html",
-      "sourceHash": "f27a140734d2168912f790f7acd6c728b7b256cfb93d94f0fa893b772145d916",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "f27a140734d2168912f790f7acd6c728b7b256cfb93d94f0fa893b772145d916",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7537,7 +7439,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -7563,24 +7465,8 @@
     {
       "surfaceId": "surface:5bb1e6be60b1fea2",
       "path": "docs/homa-planning/plans/2026-07-11-binder-design-directions.html",
-      "sourceHash": "fe147bd55eaf98a10700d28ed53d6818365d8038404864000dc507f843e44972",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "fe147bd55eaf98a10700d28ed53d6818365d8038404864000dc507f843e44972",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7632,7 +7518,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -7658,23 +7544,8 @@
     {
       "surfaceId": "surface:eb85943536a3e2c4",
       "path": "docs/homa-planning/plans/2026-07-11-progress-report-wait-directions.html",
-      "sourceHash": "6882be92b0818635d5eced503f31d3f671e8a2a0dfb04536b0c6e19c01e59003",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "6882be92b0818635d5eced503f31d3f671e8a2a0dfb04536b0c6e19c01e59003",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7724,7 +7595,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -7803,26 +7674,8 @@
     {
       "surfaceId": "surface:37f841c7230ee72a",
       "path": "docs/homa-planning/plans/2026-07-12-chat-history-directions.html",
-      "sourceHash": "76247d965d65021fd3656c7396a07cb3f7644a01286510a25118ac703e949d4a",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-design-doc-path",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "76247d965d65021fd3656c7396a07cb3f7644a01286510a25118ac703e949d4a",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7878,7 +7731,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -7904,25 +7757,8 @@
     {
       "surfaceId": "surface:02aad0dcfbb6d0b1",
       "path": "docs/homa-planning/plans/2026-07-12-founder-dashboard-directions.html",
-      "sourceHash": "b6d05c4573611056e5154d763b1b8167938dcf3bdf1a09d43c065c151c43f441",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "b6d05c4573611056e5154d763b1b8167938dcf3bdf1a09d43c065c151c43f441",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -7976,7 +7812,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8002,24 +7838,8 @@
     {
       "surfaceId": "surface:2eff872239e8a851",
       "path": "docs/homa-planning/plans/2026-07-12-night-manager-directions.html",
-      "sourceHash": "ee5067548147b09e38f855a7daa9f522059ef8dc89a77d29eb3aacc1143c8cbe",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "ee5067548147b09e38f855a7daa9f522059ef8dc89a77d29eb3aacc1143c8cbe",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8071,7 +7891,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8097,26 +7917,8 @@
     {
       "surfaceId": "surface:e1e8efde0d8fa099",
       "path": "docs/homa-planning/plans/2026-07-12-one-thread-navigation-directions.html",
-      "sourceHash": "857de6fec4aa7c3ccb59897414b3e9685c56da9dd378194fe943f050f85ed4fd",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-design-doc-path",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "857de6fec4aa7c3ccb59897414b3e9685c56da9dd378194fe943f050f85ed4fd",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8172,7 +7974,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8198,26 +8000,8 @@
     {
       "surfaceId": "surface:3611617c458594e7",
       "path": "docs/homa-planning/plans/2026-07-12-one-thread-refined.html",
-      "sourceHash": "dc1371ed6050fcb2a2f22f75b4576e076c9cf3ecea2927b3dd37a6879fea4095",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-design-doc-path",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "dc1371ed6050fcb2a2f22f75b4576e076c9cf3ecea2927b3dd37a6879fea4095",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8273,7 +8057,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8299,26 +8083,8 @@
     {
       "surfaceId": "surface:c9d0ba488abb7df7",
       "path": "docs/homa-planning/plans/2026-07-12-progress-tab-directions.html",
-      "sourceHash": "230576a12cbfe3d7a354ea71368eaca70a4ee5410f3a8106b42a459f0b721f1e",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-design-doc-path",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "230576a12cbfe3d7a354ea71368eaca70a4ee5410f3a8106b42a459f0b721f1e",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8374,7 +8140,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8400,26 +8166,8 @@
     {
       "surfaceId": "surface:947dfab59b907ff2",
       "path": "docs/homa-planning/plans/2026-07-12-progress-tab-refined.html",
-      "sourceHash": "e629102bcc6ba12cb9bd6e3c4901d26de90eb646c6f0b292e53262918da8d0a1",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-design-doc-path",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "e629102bcc6ba12cb9bd6e3c4901d26de90eb646c6f0b292e53262918da8d0a1",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8475,7 +8223,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8501,22 +8249,8 @@
     {
       "surfaceId": "surface:38a3ce372fa19721",
       "path": "docs/homa-planning/plans/2026-07-12-settings-directions.html",
-      "sourceHash": "9705c9d0fb4623628d394b9e1674e121a794b0a2ff16672d9417e299096ff6c9",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "9705c9d0fb4623628d394b9e1674e121a794b0a2ff16672d9417e299096ff6c9",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8564,7 +8298,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8590,22 +8324,8 @@
     {
       "surfaceId": "surface:0d81e1464435fe2f",
       "path": "docs/homa-planning/plans/2026-07-13-background-work-directions.html",
-      "sourceHash": "c44a213babe4dafd13e39f8ff86c47da45ab091a219ebd8594add5a687684a9e",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "c44a213babe4dafd13e39f8ff86c47da45ab091a219ebd8594add5a687684a9e",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8653,7 +8373,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8679,24 +8399,8 @@
     {
       "surfaceId": "surface:5b2e3ea3035fe802",
       "path": "docs/homa-planning/plans/2026-07-13-chat-directions.html",
-      "sourceHash": "bb7f044ba4fe8445dfe9c30d79646d577c2445fe5216248f167702b230619e1d",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "bb7f044ba4fe8445dfe9c30d79646d577c2445fe5216248f167702b230619e1d",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8748,7 +8452,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8774,24 +8478,8 @@
     {
       "surfaceId": "surface:0764c33c2c627599",
       "path": "docs/homa-planning/plans/2026-07-13-chat-refined.html",
-      "sourceHash": "a962469613144fb8f4873e917001ab49593ff5cbedc47e8e243b8e03ff4a27d3",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "a962469613144fb8f4873e917001ab49593ff5cbedc47e8e243b8e03ff4a27d3",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8843,7 +8531,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8869,25 +8557,8 @@
     {
       "surfaceId": "surface:31bac47daeee8fbd",
       "path": "docs/homa-planning/plans/2026-07-13-founder-deep-view-directions.html",
-      "sourceHash": "d2a48306a011f31d5a68eddcc0eed3cdadfd6158d052aaf9c10ec643911f23fc",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "d2a48306a011f31d5a68eddcc0eed3cdadfd6158d052aaf9c10ec643911f23fc",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -8941,7 +8612,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -8967,22 +8638,8 @@
     {
       "surfaceId": "surface:18f44162e1424ce8",
       "path": "docs/homa-planning/plans/2026-07-13-lesson-listen-unknowns.html",
-      "sourceHash": "fbfc6579ac12652fc4f61fb414a5abaec06e601380f5b65d5f00816177b4776f",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "fbfc6579ac12652fc4f61fb414a5abaec06e601380f5b65d5f00816177b4776f",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9030,7 +8687,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9056,21 +8713,8 @@
     {
       "surfaceId": "surface:a098f1711bee2bd2",
       "path": "docs/homa-planning/plans/2026-07-13-serpapi-web-photos.html",
-      "sourceHash": "ba70cbcc5f8cdc4deb65eb10206c50cd662f5572a4b910480a9c0c936ca98f5f",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "ba70cbcc5f8cdc4deb65eb10206c50cd662f5572a4b910480a9c0c936ca98f5f",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9116,7 +8760,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9142,22 +8786,8 @@
     {
       "surfaceId": "surface:06a77792b921eb7b",
       "path": "docs/homa-planning/plans/2026-07-13-trajectory-chart-directions.html",
-      "sourceHash": "c4323a44ab276e7346b1edc895b81c19d28154f21cbcba38acaa0e7403232b18",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "c4323a44ab276e7346b1edc895b81c19d28154f21cbcba38acaa0e7403232b18",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9205,7 +8835,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9231,24 +8861,8 @@
     {
       "surfaceId": "surface:31c8e7525c0bc545",
       "path": "docs/homa-planning/plans/2026-07-14-channel-introduction-directions.html",
-      "sourceHash": "5ede061a7b7c909ed93e20f2ab68cb9add2fd70bc5046d572f1c808c91fed2cd",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "5ede061a7b7c909ed93e20f2ab68cb9add2fd70bc5046d572f1c808c91fed2cd",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9300,7 +8914,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9326,22 +8940,8 @@
     {
       "surfaceId": "surface:fc090fe8d591db36",
       "path": "docs/homa-planning/plans/2026-07-14-founder-rehearsal-directions.html",
-      "sourceHash": "81b7857347cb8b8e68c06430927b2b28d55cc4f863286e08aacbfe7d7cb03311",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "81b7857347cb8b8e68c06430927b2b28d55cc4f863286e08aacbfe7d7cb03311",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9389,7 +8989,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9415,24 +9015,8 @@
     {
       "surfaceId": "surface:dd6066945f72f056",
       "path": "docs/homa-planning/plans/2026-07-15-dynamic-prompt-suggestions-directions.html",
-      "sourceHash": "54cbba90a364e6f922bf9a7c47c318ca91fc63f01879d42bec820545fd27a685",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "54cbba90a364e6f922bf9a7c47c318ca91fc63f01879d42bec820545fd27a685",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9484,7 +9068,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9510,20 +9094,8 @@
     {
       "surfaceId": "surface:bbb0e7c539bb6610",
       "path": "docs/homa-planning/plans/2026-07-17-packet-experience-directions.html",
-      "sourceHash": "09a65852b4f0059592a3274548ec94af07c94165c7fc67aa51234a6b484a9ead",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "09a65852b4f0059592a3274548ec94af07c94165c7fc67aa51234a6b484a9ead",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -9567,7 +9139,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9646,17 +9218,8 @@
     {
       "surfaceId": "surface:293ff883107b125c",
       "path": "docs/homa-planning/plans/2026-07-18-curriculum-job-ui-directions.html",
-      "sourceHash": "4699f49a8e162f02687e764942f97c2a1c84bbb428c0262a7d4c9e7da659262d",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-color-muted",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "4699f49a8e162f02687e764942f97c2a1c84bbb428c0262a7d4c9e7da659262d",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -9694,7 +9257,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9720,18 +9283,8 @@
     {
       "surfaceId": "surface:71add3bc1f31cfd5",
       "path": "docs/homa-planning/plans/2026-07-18-curriculum-studio-tweakable-plan.html",
-      "sourceHash": "8a6a00d6e0a487cf76d9525f6b407a855e7a16269317736d49f6f3d7171d8174",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-clay-muted",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-color-muted",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-shadow-radius-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "8a6a00d6e0a487cf76d9525f6b407a855e7a16269317736d49f6f3d7171d8174",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -9771,7 +9324,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9797,20 +9350,8 @@
     {
       "surfaceId": "surface:fd0cb6015bd0dfa7",
       "path": "docs/homa-planning/plans/2026-07-18-material-studio-admin-directions.html",
-      "sourceHash": "241c3305bcf9de14a90dec43fb5676711c68193317c9442c586666a21302f354",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-canvas",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "241c3305bcf9de14a90dec43fb5676711c68193317c9442c586666a21302f354",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9854,7 +9395,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -9880,23 +9421,8 @@
     {
       "surfaceId": "surface:666dce52ffe8f682",
       "path": "docs/homa-planning/plans/2026-07-18-paywall-directions.html",
-      "sourceHash": "49d1ac83ced03cfa07707de7c092e40b51bad19b5cffa7b9dab7ef5ff1221328",
-      "legacySignatures": [
-        "legacy-color-border",
-        "legacy-color-border-dark",
-        "legacy-color-canvas",
-        "legacy-color-coral-bright",
-        "legacy-color-coral-dark",
-        "legacy-color-coral-deep",
-        "legacy-color-ink",
-        "legacy-color-ink-soft",
-        "legacy-color-muted",
-        "legacy-color-muted-warm",
-        "legacy-font-caveat",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "49d1ac83ced03cfa07707de7c092e40b51bad19b5cffa7b9dab7ef5ff1221328",
       "detectedLegacySignatures": [
         "legacy-color-border",
@@ -9946,7 +9472,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -10081,15 +9607,8 @@
     {
       "surfaceId": "surface:d62cdafae2e2c9a2",
       "path": "docs/homa-planning/plans/2026-07-27-realtime-voice-decisions.html",
-      "sourceHash": "9c1e67c03ce9e6b6553ea3f91b19c91ee4ae4fd7bd1a25330a0fd258431e6ea1",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "9c1e67c03ce9e6b6553ea3f91b19c91ee4ae4fd7bd1a25330a0fd258431e6ea1",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -10123,7 +9642,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -10149,15 +9668,8 @@
     {
       "surfaceId": "surface:6f91804784852dbe",
       "path": "docs/homa-planning/plans/2026-07-27-realtime-voice-simpler.html",
-      "sourceHash": "40ec6e6accc52cce08d5d406be4967f87ac8cf7025d471134e6882fa6d913dea",
-      "legacySignatures": [
-        "legacy-color-canvas",
-        "legacy-color-coral-dark",
-        "legacy-color-ink",
-        "legacy-font-hanken",
-        "legacy-font-schibsted",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "40ec6e6accc52cce08d5d406be4967f87ac8cf7025d471134e6882fa6d913dea",
       "detectedLegacySignatures": [
         "legacy-color-canvas",
@@ -10191,7 +9703,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -10604,11 +10116,8 @@
     {
       "surfaceId": "surface:21af51d1e76586f8",
       "path": "docs/homa-planning/plans/2026-08-04-seo-ocean-merge-readiness.html",
-      "sourceHash": "38e7ad1f98ba2a096ac87c200aea051ab3a3291cc4c0ceec5eb95e1c25381a65",
-      "legacySignatures": [
-        "legacy-shadow-radius-namespace",
-        "legacy-token-namespace"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "38e7ad1f98ba2a096ac87c200aea051ab3a3291cc4c0ceec5eb95e1c25381a65",
       "detectedLegacySignatures": [
         "legacy-shadow-radius-namespace",
@@ -10634,7 +10143,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,

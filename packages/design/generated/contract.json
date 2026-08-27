@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4",
+  "sourceChecksum": "4cb70938cd3b6866e72ecc67905dd69552ce186615d76af2597151443b56f618",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -1875,11 +1875,6 @@
           "path": "apps/web/components/design/QuietThread.tsx",
           "authority": "@homa/design/contract#roofThread",
           "role": "web-thread-adapter"
-        },
-        {
-          "path": "apps/web/app/world-v3/homa-character.tsx",
-          "authority": "components/brand/Logo.tsx",
-          "role": "web-character-adapter"
         },
         {
           "path": "apps/web/app/opengraph-image.tsx",

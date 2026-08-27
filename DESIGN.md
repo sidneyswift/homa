@@ -1,6 +1,6 @@
 ---
 version: quiet-authority-v1
-contractChecksum: a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4
+contractChecksum: 4cb70938cd3b6866e72ecc67905dd69552ce186615d76af2597151443b56f618
 name: "Homa, quiet authority"
 description: "A calm, capable, artifact-first design system for homeschooling families. Real work leads, Homa keeps the thread, and every meaningful moment ends with one useful next move."
 colors:

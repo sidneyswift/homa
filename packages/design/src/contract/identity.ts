@@ -126,7 +126,6 @@ export const identityConsumers = [
   { path: "apps/web/components/brand/ThinkingMark.tsx", authority: "components/brand/Logo.tsx", role: "web-character-animation" },
   { path: "apps/web/components/brand/thinking-acts.tsx", authority: "components/brand/Logo.tsx", role: "web-character-animation" },
   { path: "apps/web/components/design/QuietThread.tsx", authority: "@homa/design/contract#roofThread", role: "web-thread-adapter" },
-  { path: "apps/web/app/world-v3/homa-character.tsx", authority: "components/brand/Logo.tsx", role: "web-character-adapter" },
   { path: "apps/web/app/opengraph-image.tsx", authority: "@homa/design/contract#logoGeometry", role: "open-graph-renderer" },
   { path: "apps/web/app/apple-icon.tsx", authority: "@homa/design/contract#logoGeometry", role: "apple-icon-renderer" },
   { path: "apps/web/lib/materials/page-shell.ts", authority: "components/brand/Logo.tsx", role: "print-renderer" },

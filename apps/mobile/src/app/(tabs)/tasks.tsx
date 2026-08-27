@@ -17,7 +17,7 @@ import { colors, fontSize, space } from "../../theme/tokens";
 /**
  * Tasks: Homa's own schedule, ported from apps/web/app/app/tasks/
  * {page.tsx,tasks-view.tsx,task-history.tsx}. Full read/write (founder
- * direction, see docs/handoffs/HANDOFF-mobile-nav-parity.md): create,
+ * direction, shipped in the mobile nav parity arc): create,
  * edit, delete, pause, run now, and brief feedback all write through
  * apps/web/app/api/tasks/* (agent_schedules and homa_task_runs have no
  * client write policies, so this cannot go straight through RLS the
