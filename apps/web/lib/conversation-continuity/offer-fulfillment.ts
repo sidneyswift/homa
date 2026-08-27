@@ -191,6 +191,38 @@ export async function acceptedOfferDestinationStillCurrent(input: {
   );
 }
 
+/**
+ * A thread binding's pending_offer_delivery_id is carried forward to
+ * every future turn until an offer is actually fulfilled (see the
+ * `cleared` step in completeAcceptedOfferFulfillmentWithDatabase). A
+ * link that fails validation (expired past its window, or a reassigned
+ * phone's recipient no longer matches) never reaches that success path,
+ * so without this it stays attached forever and every later request in
+ * the thread, on any topic, keeps re-failing the same recipient check
+ * (gh#1024: a family stuck rejecting unrelated worksheets for days on
+ * a 3-day-old accepted offer). Call this wherever a link is found dead
+ * so the thread stops carrying it and the next request is unlinked, not
+ * poisoned.
+ */
+export async function clearStaleAcceptedOfferBindingWithDatabase(
+  database: Sql,
+  input: { familyId: string; sourceDeliveryId: string },
+): Promise<void> {
+  await database`
+    update public.conversation_thread_bindings
+    set pending_offer_delivery_id = null
+    where family_id = ${input.familyId}
+      and pending_offer_delivery_id = ${input.sourceDeliveryId}
+  `;
+}
+
+export async function clearStaleAcceptedOfferBinding(input: {
+  familyId: string;
+  sourceDeliveryId: string;
+}): Promise<void> {
+  await clearStaleAcceptedOfferBindingWithDatabase(mapDb(), input);
+}
+
 export async function reserveAcceptedOfferFulfillmentWithDatabase(
   database: Sql,
   input: {

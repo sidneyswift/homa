@@ -11,6 +11,7 @@ import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-d
 import {
   acceptedOfferDestinationStillCurrent,
   acceptedOfferDeliveryIdFromAttributes,
+  clearStaleAcceptedOfferBinding,
   completeAcceptedOfferFulfillment,
   reserveAcceptedOfferFulfillment,
   validateAcceptedOfferFulfillmentRecipient,
@@ -366,7 +367,7 @@ const createPrintable = defineBoundedTool({
           acceptedOfferDeliveryId?: string;
         }
       | undefined;
-    const sourceOfferDeliveryId =
+    let sourceOfferDeliveryId =
       acceptedOfferDeliveryIdFromAttributes(attributes);
     const expectedRecipientMemberUserId =
       typeof attributes?.memberUserId === "string"
@@ -383,10 +384,16 @@ const createPrintable = defineBoundedTool({
         !expectedRecipientMemberUserId ||
         recipientMemberUserId !== expectedRecipientMemberUserId
       ) {
-        return {
-          created: false,
-          note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
-        };
+        // The link is dead (past its fulfillment window, or the recipient
+        // no longer matches, e.g. a reassigned phone) rather than the
+        // parent's fresh request being invalid. Drop the link and clear
+        // the thread's binding so it stops re-attaching to every future
+        // turn, but still build what she is actually asking for now.
+        await clearStaleAcceptedOfferBinding({
+          familyId,
+          sourceDeliveryId: sourceOfferDeliveryId,
+        });
+        sourceOfferDeliveryId = null;
       }
     }
     const trustedLesson = readSubjectLessonTrustedContext(attributes);
@@ -747,10 +754,15 @@ const createPrintable = defineBoundedTool({
             !expectedRecipientMemberUserId ||
             recipientMemberUserId !== expectedRecipientMemberUserId
           ) {
-            return {
-              created: false,
-              note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
-            };
+            // Dead link, not a bad request: stop attributing this to the
+            // stale offer, but let the (failed-review) material result
+            // report normally below instead of masking it with an
+            // unrelated offer note.
+            await clearStaleAcceptedOfferBinding({
+              familyId,
+              sourceDeliveryId: sourceOfferDeliveryId,
+            });
+            sourceOfferDeliveryId = null;
           }
         } else {
           const reservation = await reserveAcceptedOfferFulfillment({
@@ -761,10 +773,11 @@ const createPrintable = defineBoundedTool({
             referenceId: materialId,
           });
           if (!reservation.eligible || !reservation.recipientMemberUserId) {
-            return {
-              created: false,
-              note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the material.",
-            };
+            await clearStaleAcceptedOfferBinding({
+              familyId,
+              sourceDeliveryId: sourceOfferDeliveryId,
+            });
+            sourceOfferDeliveryId = null;
           }
           // `wrote` only when THIS call created the reservation. On any
           // later call for the same accepted offer the insert above is a
@@ -777,7 +790,7 @@ const createPrintable = defineBoundedTool({
           // "worksheets_pkey"` and she simply got nothing. Four in a row
           // for one family on 2026-07-28, surfaced by the tool-failure
           // alert the same day it was built (gh#372).
-          if (reservation.wrote && reservation.referenceId) {
+          else if (reservation.wrote && reservation.referenceId) {
             materialId = reservation.referenceId;
             reservedSourceDeliveryId = sourceOfferDeliveryId;
           }
@@ -787,10 +800,10 @@ const createPrintable = defineBoundedTool({
           "create_printable fulfillment reservation failed:",
           error instanceof Error ? error.message : "unknown",
         );
-        return {
-          created: false,
-          note: "Homa could not verify the accepted offer's exact recipient, so the material was not created.",
-        };
+        // An infra error checking the link, not evidence the link is
+        // actually bad: leave the binding alone (it may still be valid)
+        // and just skip stamping this one material to it.
+        sourceOfferDeliveryId = null;
       }
     }
 
