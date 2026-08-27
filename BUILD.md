@@ -22,15 +22,6 @@ Current evidence lives in `docs/homa-planning/reconciliation/`:
 
 The latest recorded production baseline is a snapshot, not a standing guarantee. Refresh it whenever a completion claim depends on current production state.
 
-### Brand evidence merge mode
-
-Pull requests that change generated brand evidence must land with a merge
-commit, never squash or rebase merge. Source rows bind the exact authored
-commit lineage, which cannot name a future squash commit. A two-parent checkout
-may use its second parent only when the complete Git tree is byte-identical;
-any tree difference stays stale and requires rebase plus regeneration. Main CI
-therefore fails closed if the wrong merge mode rewrites that provenance.
-
 ## Read before changing product code
 
 1. `AGENTS.md` for commands, boundaries, copy rules, and deployment discipline.

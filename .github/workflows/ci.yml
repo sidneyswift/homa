@@ -119,41 +119,11 @@ jobs:
       - name: Design-token check (colour utilities name a declared token)
         run: pnpm check:design-tokens
 
-      - name: Brand-surface manifest check (coverage, provenance, legacy baseline)
-        run: pnpm check:brand-surfaces
-
-      - name: Legacy removal ledger check (exact bindings and invalidation)
-        run: pnpm check:legacy-removal
-
-      - name: Marketing production contract check (bundles, queues, generators, publishers)
-        run: pnpm check:marketing-production
-
-      - name: Channel evidence contract check (fresh fingerprints and hard gates)
-        run: pnpm check:channel-evidence
-
-      - name: Provider handoff contract check (owned fields and external read-back gates)
-        run: pnpm check:provider-handoffs
-
-      - name: Handwrytten stationery contract check (source inventory and irreversible-delivery gates)
-        run: pnpm check:handwrytten-stationery
-
-      - name: Brand asset generation and fingerprint check
-        run: pnpm check:brand-assets
-
-      - name: Canonical identity asset manifest and residue check
+      - name: Canonical identity asset manifest and residue check (covers brand-assets)
         run: pnpm check:identity-assets
-
-      - name: Design authoring rails check (coverage, contract, residue, fingerprints)
-        run: pnpm check:design-authoring
 
       - name: Product Design Playbook skill and scorer contract
         run: pnpm check:product-design-playbook
-
-      - name: Licensed font system contract and residue check
-        run: pnpm check:font-system
-
-      - name: Durable artifact design-era check (classification and Quiet print markers)
-        run: pnpm check:artifact-brand-era
 
       - name: Active brand residue check (changed files cannot revive legacy identity)
         run: pnpm check:brand-residue
@@ -161,17 +131,22 @@ jobs:
       - name: Design contract parity check (byte-stable projections)
         run: pnpm check:design-parity
 
-      - name: Design fixture gallery check (stable IDs, profiles, and checksums)
-        run: pnpm check:design-fixtures
-
       - name: Web interface gauntlet contract check
         run: pnpm check:interface-gauntlet
 
       - name: Design contract type and semantic tests
         run: pnpm check:design-contract
 
-      - name: Semantic icon direct-import residue check
-        run: pnpm check:icon-residue
+      # Retired 2026-08-27 (audit + founder direction): check:brand-surfaces,
+      # check:legacy-removal, check:marketing-production, check:channel-evidence,
+      # check:provider-handoffs, check:handwrytten-stationery,
+      # check:design-authoring, check:font-system, check:artifact-brand-era,
+      # check:design-fixtures, and check:icon-residue regenerated-and-compared
+      # evidence for migrations that never advanced past "inventory" (surfaces.json:
+      # 1,875/1,875 rows still rolloutState "inventory"; legacy-removal.json:
+      # 191/191 records still "open") and taxed every PR, including docs-only
+      # ones, to prove it. The scripts and evidence files are still in the repo;
+      # nothing here deletes them, this just stops paying for them on every push.
 
   # Branch protection on main requires a status context named exactly
   # "build-and-check" (the old single job's name). This gate carries that
