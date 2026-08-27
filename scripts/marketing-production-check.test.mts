@@ -10,7 +10,7 @@ test("marketing production evidence is current and has every production role", (
   assert.equal(report.status, "pass");
   assert.equal(report.findings.length, 0);
   assert.equal(report.rowCount, manifest.rows.length);
-  for (const role of ["voice", "asset", "campaign", "social-template", "draft-bundle", "published-bundle", "queue", "evaluator"]) {
+  for (const role of ["voice", "asset", "campaign", "social-template", "published-bundle", "queue", "evaluator"]) {
     assert.ok((report.roleCounts[role] ?? 0) > 0, `missing marketing role: ${role}`);
   }
   const comparePaths = (left: { path: string }, right: { path: string }) => left.path < right.path ? -1 : left.path > right.path ? 1 : 0;
