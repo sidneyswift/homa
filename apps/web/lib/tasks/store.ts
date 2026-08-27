@@ -509,7 +509,9 @@ export interface RecordSkippedScheduledTaskRunInput {
   task: DueFamilyTask;
   now: Date;
   deliveryVersion: TaskDeliveryVersion;
-  reason: "no eligible morning brief candidate";
+  reason:
+    | "no eligible morning brief candidate"
+    | "family has not messaged Homa in over two weeks";
 }
 
 export type RecordSkippedScheduledTaskRunResult =

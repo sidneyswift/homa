@@ -10,6 +10,7 @@ import {
   usesResearchBriefV2Delivery,
   type TaskDeliveryVersion,
 } from "./delivery-version";
+import { familyIsDormant } from "./dormancy";
 import type { DueFamilyTask } from "./store";
 
 /**
@@ -30,6 +31,9 @@ export type TaskRunTrigger = "scheduled" | "manual";
 
 export const NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR =
   "no eligible morning brief candidate";
+
+export const DORMANT_FAMILY_SKIP_REASON =
+  "family has not messaged Homa in over two weeks";
 
 /** The v2 selection query found no family-eligible research to send. */
 export class NoEligibleResearchBriefCandidateError extends Error {
@@ -192,12 +196,17 @@ export type TaskDispatchPreflightResult =
   | {
       outcome: "skip";
       deliveryVersion: TaskDeliveryVersion;
-      reason: typeof NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR;
+      reason:
+        | typeof NO_ELIGIBLE_RESEARCH_BRIEF_CANDIDATE_ERROR
+        | typeof DORMANT_FAMILY_SKIP_REASON;
     };
 
 /**
  * Selects one delivery version, then builds or classifies the task before any
  * run row exists. Callers persist and dispatch only this returned version.
+ *
+ * The dormancy check only applies to a "scheduled" morning brief: a parent
+ * who taps Run now on the tasks page always gets her brief, dormant or not.
  */
 export async function preflightTaskDispatch(
   task: DueFamilyTask,
@@ -206,6 +215,7 @@ export async function preflightTaskDispatch(
   dependencies: {
     environment?: Record<string, string | undefined>;
     loadV2Context?: typeof loadBriefV2Context;
+    isDormant?: typeof familyIsDormant;
   } = {},
 ): Promise<TaskDispatchPreflightResult> {
   const deliveryVersion = deliveryVersionForNewTaskRun(
@@ -213,6 +223,18 @@ export async function preflightTaskDispatch(
     dependencies.environment,
     task.familySandbox,
   );
+
+  if (task.kind === "morning_brief" && trigger === "scheduled") {
+    const isDormant = dependencies.isDormant ?? familyIsDormant;
+    if (await isDormant(task.familyId)) {
+      return {
+        outcome: "skip",
+        deliveryVersion,
+        reason: DORMANT_FAMILY_SKIP_REASON,
+      };
+    }
+  }
+
   try {
     return {
       outcome: "ready",

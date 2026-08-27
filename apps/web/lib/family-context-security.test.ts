@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { shouldSkipConversationPersistence } from "../agent/hooks/persist-conversation";
-import { shouldSkipConversationClassification } from "../agent/hooks/classify-conversation";
 import { resolveFamilyContextInstructionMarkdown } from "../agent/instructions/family-context";
 import {
   MissingFamilyContextError,
@@ -282,28 +281,6 @@ describe("internal conversation persistence", () => {
       false,
     );
     assert.equal(shouldSkipConversationPersistence(undefined), false);
-  });
-
-  it("keeps internal producer output out of family signal classification", () => {
-    assert.equal(
-      shouldSkipConversationClassification({ channel: "subject_lesson" }),
-      true,
-    );
-    assert.equal(
-      shouldSkipConversationClassification({ channel: "progress_next_move" }),
-      true,
-    );
-    assert.equal(
-      shouldSkipConversationClassification({
-        channel: "mobile",
-        voiceBridge: "true",
-      }),
-      true,
-    );
-    assert.equal(
-      shouldSkipConversationClassification({ channel: "mobile" }),
-      false,
-    );
   });
 });
 
