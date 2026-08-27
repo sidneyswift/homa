@@ -8,6 +8,7 @@ import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-d
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
 import { emitMapEvent } from "../../lib/map/events";
 import {
+  findLoggedActivityCandidates,
   getPlannerLearningActivityPinned,
   plannerHoursNote,
   plannerHoursSourceForChannel,
@@ -16,6 +17,7 @@ import {
   recordPlannerLearningActivity,
   verifyPlannerSourceQuote,
 } from "../../lib/planner-learning-activities";
+import { findScheduledActivityCandidates } from "../../lib/plan-schedule";
 import { plannerLearningToolContext } from "../../lib/planner-learning-tool-context";
 import { plannerEventClient } from "../../lib/planner-events";
 import {
@@ -66,6 +68,12 @@ const inputSchema = z
       .min(1)
       .max(1000)
       .describe("An exact verbatim span from the current parent message that supports this activity."),
+    confirmNotDuplicate: z
+      .boolean()
+      .optional()
+      .describe(
+        "Leave unset on the first attempt. Set true only after a possibleDuplicate response showed you the existing candidate(s) and you confirmed this is genuinely separate work, not the same lesson.",
+      ),
   })
   .strict()
   .superRefine((input, context) => {
@@ -80,7 +88,7 @@ const inputSchema = z
 
 export default defineBoundedTool({
   description:
-    "Load the planner skill before calling. Record one independent learning activity in the family's Planner as planned or completed. Use the moment a parent says what schoolwork, enrichment, PE, music, co-op, or life skills they did, or asks Homa to put future work on a date. One call records one visible Planner row; call again for each distinct lesson in the same message. This is the log-first path when the activity is not already an exact generated-plan item. Optional real minutes also go to Hours. Never infer mastery or update ChildProgress. Requires an exact quote from the current parent message.",
+    "Load the planner skill before calling. Record one independent learning activity in the family's Planner as planned or completed. Use the moment a parent says what schoolwork, enrichment, PE, music, co-op, or life skills they did, or asks Homa to put future work on a date. One call records one visible Planner row; call again for each distinct lesson in the same message. This is the log-first path when the activity is not already an exact generated-plan item. Optional real minutes also go to Hours. Never infer mastery or update ChildProgress. Requires an exact quote from the current parent message. When this child already has Planner work for the same subject and date, the call returns possibleDuplicate with the existing candidate(s) instead of writing a second row; check whether it is the same lesson (use complete_planner_activity or edit_plan on the existing item) before ever retrying with confirmNotDuplicate.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema,
@@ -115,6 +123,42 @@ export default defineBoundedTool({
         ],
       });
       const activityId = plannerLearningMutationUuid(idempotencyKey, "activity");
+      if (childIds.length > 0 && !input.confirmNotDuplicate) {
+        const [logged, scheduled] = await Promise.all([
+          findLoggedActivityCandidates({
+            familyId: access.familyId,
+            childIds,
+            subject: input.subject,
+            activityDate: input.activityDate,
+            excludeActivityId: activityId,
+          }),
+          findScheduledActivityCandidates({
+            familyId: access.familyId,
+            childIds,
+            subjectId: input.subject,
+            activityDate: input.activityDate,
+          }),
+        ]);
+        if (logged.length > 0 || scheduled.length > 0) {
+          return {
+            recorded: false,
+            possibleDuplicate: true,
+            candidates: [
+              ...logged.map((candidate) => ({
+                source: "already_logged" as const,
+                title: candidate.title,
+                status: candidate.status,
+              })),
+              ...scheduled.map((candidate) => ({
+                source: "already_scheduled" as const,
+                title: candidate.activityText,
+                status: "planned" as const,
+              })),
+            ],
+            note: "Homa already has Planner work for this child, this subject, on this date. If this is the same lesson, use complete_planner_activity (for an already-scheduled plan item) or leave the existing log entry alone; do not add a second row for it. If this is genuinely separate additional work, call record_planner_activity again with confirmNotDuplicate: true.",
+          };
+        }
+      }
       const hoursChildren = input.durationMinutes === undefined
         ? []
         : childIds.length === 0 ? [null] : childIds;

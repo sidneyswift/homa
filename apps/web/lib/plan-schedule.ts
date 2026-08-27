@@ -382,6 +382,66 @@ export async function listScheduledDatesPinned(
   }));
 }
 
+export interface ScheduledActivityCandidate {
+  childId: string;
+  subjectId: string;
+  week: number;
+  activityIndex: number;
+  scheduledDate: string;
+  /** null when the plan changed since the date was saved and the slot no
+   * longer holds text; still worth surfacing as "something is scheduled". */
+  activityText: string | null;
+}
+
+/**
+ * Same-day generated-plan activities already scheduled for any of these
+ * children under this exact subjectId, so record_planner_activity's
+ * duplicate guard can surface them (gh#1015) instead of silently logging a
+ * second, independent row for work that is already on the calendar.
+ * subjectId is matched literally against the caller's HoursSubject string:
+ * real but coincidental overlap (both call it "math"), never a maintained
+ * cross-taxonomy mapping, so this only catches subjects spelled the same
+ * way in both places, never a false cross-subject match.
+ */
+export async function findScheduledActivityCandidates(input: {
+  familyId: string;
+  childIds: readonly string[];
+  subjectId: string;
+  activityDate: string;
+}): Promise<ScheduledActivityCandidate[]> {
+  if (input.childIds.length === 0) return [];
+  const sql = mapDb();
+  const rows = await sql<{
+    child_id: string;
+    subject_id: string;
+    week: number;
+    activity_index: number;
+    scheduled_date: string;
+    plan: FourWeekPlan | null;
+  }[]>`
+    select schedule.child_id, schedule.subject_id, schedule.week,
+           schedule.activity_index,
+           to_char(schedule.scheduled_date, 'YYYY-MM-DD') as scheduled_date,
+           plan.plan
+    from public.plan_activity_schedule schedule
+    left join public.child_plans plan
+      on plan.child_id = schedule.child_id and plan.subject_id = schedule.subject_id
+    where schedule.family_id = ${input.familyId}
+      and schedule.subject_id = ${input.subjectId}
+      and schedule.scheduled_date = ${input.activityDate}
+      and schedule.child_id = any(${sql.array([...input.childIds])}::uuid[])
+    limit 5
+  `;
+  return rows.map((row) => ({
+    childId: row.child_id,
+    subjectId: row.subject_id,
+    week: row.week,
+    activityIndex: row.activity_index,
+    scheduledDate: row.scheduled_date,
+    activityText: row.plan ? activityTextAt(row.plan, row.week, row.activity_index) : null,
+  }));
+}
+
 /** Exported so plan-schedule-read.ts (the caller-page read) can shape
  * its own Data API rows without duplicating this mapping. */
 export interface RawScheduleRow {
