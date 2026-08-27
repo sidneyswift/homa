@@ -10,6 +10,7 @@ import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-d
 import {
   acceptedOfferDeliveryIdFromAttributes,
   acceptedOfferRecoveryDeliveryIdFromAttributes,
+  clearStaleAcceptedOfferBinding,
   completeAcceptedOfferFulfillment,
   reserveAcceptedOfferFulfillment,
 } from "../../lib/conversation-continuity/offer-fulfillment";
@@ -90,7 +91,7 @@ export default defineBoundedTool({
       ?.memberUserId;
     const authenticatedMemberUserId =
       typeof memberUserId === "string" ? memberUserId : null;
-    const sourceOfferDeliveryId =
+    let sourceOfferDeliveryId =
       acceptedOfferDeliveryIdFromAttributes(attributes);
     let taskId: string = randomUUID();
     let reservedSourceDeliveryId: string | null = null;
@@ -109,24 +110,30 @@ export default defineBoundedTool({
           !reservation.referenceId ||
           !reservation.recipientMemberUserId
         ) {
-          return {
-            created: false,
-            note: "This accepted offer no longer has the same current adult recipient, so Homa did not create the task.",
-          };
+          // Dead link (past its window, or a reassigned phone's recipient
+          // no longer matches): drop it and clear the thread's binding so
+          // it stops re-attaching to every future turn, but still create
+          // the task she is actually asking for now.
+          await clearStaleAcceptedOfferBinding({
+            familyId,
+            sourceDeliveryId: sourceOfferDeliveryId,
+          });
+          sourceOfferDeliveryId = null;
+        } else {
+          taskId = reservation.referenceId;
+          reservedSourceDeliveryId = sourceOfferDeliveryId;
+          recoveryRecipientMemberUserId =
+            reservation.recipientMemberUserId;
         }
-        taskId = reservation.referenceId;
-        reservedSourceDeliveryId = sourceOfferDeliveryId;
-        recoveryRecipientMemberUserId =
-          reservation.recipientMemberUserId;
       } catch (error) {
         console.error(
           "create_task fulfillment reservation failed:",
           error instanceof Error ? error.message : "unknown",
         );
-        return {
-          created: false,
-          note: "Homa could not verify the accepted offer's exact recipient, so the task was not created.",
-        };
+        // An infra error checking the link, not evidence the link is
+        // actually bad: leave the binding alone and just skip stamping
+        // this one task to it.
+        sourceOfferDeliveryId = null;
       }
     }
     const receiptContext = voiceToolReceiptContext({
