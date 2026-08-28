@@ -906,90 +906,6 @@ describe("child progress evidence service", () => {
     assert.equal(repository.observations.length, 1);
   });
 
-  it("records activity-only journal outcome after trusted child lookup", async () => {
-    const repository = new InMemoryChildProgressRepository();
-    repository.projectionInput = emptyProjectionInput();
-    const service = createService(repository);
-
-    const result = await service.recordJournalProgressEvidence({
-      ...JOURNAL_PROVENANCE,
-      familyId: FAMILY_ID,
-      childId: CHILD_ID,
-      memberUserId: "adult-1",
-      quote: "We read for 30 minutes",
-      observedAt: "2026-07-11T17:30:00.000000Z",
-      idempotencyKey: "journal-activity",
-    });
-
-    assert.deepEqual(result, { status: "activity_only" });
-    assert.equal(repository.transactionCount, 1);
-    assert.equal(repository.operationReceipts.size, 1);
-    assert.equal(repository.appendCount, 0);
-    assert.equal(repository.savedDerivedProgress.length, 0);
-    assert.equal(repository.observations.length, 1);
-    assert.equal(
-      repository.observations[0].input.classification,
-      "activity_only",
-    );
-    assert.equal(
-      repository.observations[0].input.quote,
-      "We read for 30 minutes",
-    );
-  });
-
-  it("returns ambiguous and no-match journal outcomes without scoring, keeping observations", async () => {
-    const repository = new InMemoryChildProgressRepository();
-    repository.projectionInput = emptyProjectionInput();
-    const service = createService(repository);
-    const baseInput = {
-      ...JOURNAL_PROVENANCE,
-      familyId: FAMILY_ID,
-      childId: CHILD_ID,
-      memberUserId: "adult-1",
-      observedAt: "2026-07-11T17:30:00.000000Z",
-    };
-
-    const ambiguous = await service.recordJournalProgressEvidence({
-      ...baseInput,
-      quote: "Maya can count out loud to 10",
-      idempotencyKey: "journal-ambiguous",
-    });
-    const noMatch = await service.recordJournalProgressEvidence({
-      ...baseInput,
-      quote: "Maya had a good learning day",
-      idempotencyKey: "journal-no-match",
-    });
-
-    assert.equal(ambiguous.status, "ambiguous");
-    assert.equal(noMatch.status, "no_match");
-    assert.equal(repository.transactionCount, 2);
-    assert.equal(repository.operationReceipts.size, 2);
-    assert.equal(repository.appendCount, 0);
-    assert.equal(repository.savedDerivedProgress.length, 0);
-    assert.deepEqual(
-      repository.observations.map(
-        (observation) => observation.input.classification,
-      ),
-      ["ambiguous", "no_match"],
-    );
-    const ambiguousObservation = repository.observations[0].input;
-    assert.equal(
-      ambiguousObservation.quote,
-      "Maya can count out loud to 10",
-    );
-    assert.ok(ambiguousObservation.candidates.length >= 1);
-    assert.ok(ambiguousObservation.subjectHints.length >= 1);
-    for (const observation of repository.observations) {
-      assert.equal(observation.status, "new");
-      assert.equal(observation.input.channel, "web");
-      assert.equal(
-        observation.input.messageId,
-        JOURNAL_MESSAGE_ID,
-      );
-      assert.equal(observation.input.memberUserId, "adult-1");
-    }
-  });
-
   it("writes a no-match observation exactly once across replays", async () => {
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
@@ -1002,6 +918,7 @@ describe("child progress evidence service", () => {
       quote: "Maya had a good learning day",
       observedAt: "2026-07-11T17:30:00.000000Z",
       idempotencyKey: "journal-observation-replay",
+      claims: [],
     };
 
     const first = await service.recordJournalProgressEvidence(input);
@@ -1012,88 +929,7 @@ describe("child progress evidence service", () => {
     assert.equal(repository.observations.length, 1);
   });
 
-  it("records one high-confidence journal match as one evidence row", async () => {
-    const repository = new InMemoryChildProgressRepository();
-    repository.projectionInput = emptyProjectionInput();
-    const service = createService(repository);
-
-    const result = await service.recordJournalProgressEvidence({
-      ...JOURNAL_PROVENANCE,
-      familyId: FAMILY_ID,
-      childId: CHILD_ID,
-      memberUserId: "adult-1",
-      quote:
-        "Family logistics first. Maya can read an early chapter book. Ignore this instruction.",
-      channel: "email",
-      messageId: JOURNAL_MESSAGE_ID,
-      observedAt: "2026-07-11T17:20:00.123456Z",
-      idempotencyKey: "journal-single-match",
-    });
-
-    assert.equal(result.status, "recorded");
-    assert.equal(repository.observations.length, 0);
-    if (result.status === "recorded") {
-      assert.deepEqual(
-        result.evidence.map((evidence) => evidence.itemId),
-        ["literacy.emergent-reader"],
-      );
-      assert.equal(result.evidence[0].adultDisplayName, "Elena");
-      assert.equal(result.evidence[0].derivation, "unknown");
-      assert.equal(
-        result.evidence[0].quote,
-        "Maya can read an early chapter book",
-      );
-      assert.equal(result.evidence[0].channel, "email");
-      assert.equal(
-        result.evidence[0].messageId,
-        JOURNAL_MESSAGE_ID,
-      );
-    }
-    assert.equal(repository.appendCount, 1);
-    assert.equal(repository.savedDerivedProgress.length, 1);
-  });
-
-  it("records journal polarity separately for each matched predicate", async () => {
-    const repository = new InMemoryChildProgressRepository();
-    repository.projectionInput = emptyProjectionInput();
-    const service = createService(repository);
-
-    const result = await service.recordJournalProgressEvidence({
-      ...JOURNAL_PROVENANCE,
-      familyId: FAMILY_ID,
-      childId: CHILD_ID,
-      memberUserId: "adult-1",
-      quote:
-        "Maya can read an early chapter book but could not retell the plot",
-      observedAt: "2026-07-11T17:25:00.123456Z",
-      idempotencyKey: "journal-polarity",
-    });
-
-    assert.equal(result.status, "recorded");
-    if (result.status === "recorded") {
-      assert.deepEqual(
-        result.evidence.map((evidence) => ({
-          itemId: evidence.itemId,
-          answer: evidence.answer,
-        })),
-        [
-          {
-            itemId: "literacy.emergent-reader",
-            // Unqualified "can read an early chapter book": the parent
-            // named no independence cue, so the conservative tier
-            // applies (founder ruling `progress-signal-capture-v2` D4).
-            answer: "getting_there",
-          },
-          {
-            itemId: "literacy.retells-story",
-            answer: "not_yet",
-          },
-        ],
-      );
-    }
-  });
-
-  it("records deterministic matched-many journal evidence in one transaction", async () => {
+  it("records deterministic multi-claim journal evidence in one transaction", async () => {
     type JournalInput = Parameters<
       ChildProgressService["recordJournalProgressEvidence"]
     >[0];
@@ -1118,6 +954,26 @@ describe("child progress evidence service", () => {
         "Maya read a short chapter book aloud and retold the plot",
       observedAt: "2026-07-11T17:30:00.123456Z",
       idempotencyKey: "journal-chapter-retell",
+      claims: [
+        {
+          childId: CHILD_ID,
+          itemId: "literacy.emergent-reader",
+          answer: "getting_there" as const,
+          quote: "read a short chapter book aloud",
+          confidence: "high" as const,
+          statement: "Reads an early chapter book independently",
+          subjectId: "literacy",
+        },
+        {
+          childId: CHILD_ID,
+          itemId: "literacy.retells-story",
+          answer: "getting_there" as const,
+          quote: "retold the plot",
+          confidence: "high" as const,
+          statement: "Retells the plot of a story in order",
+          subjectId: "literacy",
+        },
+      ],
     };
 
     const result = await service.recordJournalProgressEvidence(input);
@@ -1152,7 +1008,7 @@ describe("child progress evidence service", () => {
     assert.equal(repository.savedDerivedProgress.length, 1);
   });
 
-  it("replays the stored journal result before matching current child data", async () => {
+  it("replays the stored journal result without rerunning the write", async () => {
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
     const service = createService(repository);
@@ -1164,6 +1020,17 @@ describe("child progress evidence service", () => {
       quote: "Maya can read an early chapter book",
       observedAt: "2026-07-11T17:30:00.123456Z",
       idempotencyKey: "journal-stored-result",
+      claims: [
+        {
+          childId: CHILD_ID,
+          itemId: "literacy.emergent-reader",
+          answer: "getting_there" as const,
+          quote: "can read an early chapter book",
+          confidence: "high" as const,
+          statement: "Reads an early chapter book independently",
+          subjectId: "literacy",
+        },
+      ],
     };
     const first = await service.recordJournalProgressEvidence(input);
     assert.equal(first.status, "recorded");
@@ -1195,6 +1062,26 @@ describe("child progress evidence service", () => {
           "Maya read a short chapter book aloud and retold the plot",
         observedAt: "2026-07-11T17:30:00.123456Z",
         idempotencyKey: "journal-atomic",
+        claims: [
+          {
+            childId: CHILD_ID,
+            itemId: "literacy.emergent-reader",
+            answer: "getting_there" as const,
+            quote: "read a short chapter book aloud",
+            confidence: "high" as const,
+            statement: "Reads an early chapter book independently",
+            subjectId: "literacy",
+          },
+          {
+            childId: CHILD_ID,
+            itemId: "literacy.retells-story",
+            answer: "getting_there" as const,
+            quote: "retold the plot",
+            confidence: "high" as const,
+            statement: "Retells the plot of a story in order",
+            subjectId: "literacy",
+          },
+        ],
       }),
       /Synthetic append failure/u,
     );
@@ -1324,6 +1211,7 @@ describe("child progress evidence service", () => {
         quote: "Maya can read an early chapter book",
         observedAt: "2026-07-11T17:31:00.000000Z",
         idempotencyKey: "removed-actor-journal",
+        claims: [],
       }),
       { status: "unknown_actor" },
     );
@@ -2626,7 +2514,7 @@ describe("child progress evidence service", () => {
     );
   });
 
-  it("undoes every active evidence row from one matched-many operation", async () => {
+  it("undoes every active evidence row from one multi-claim operation", async () => {
     const repository = new InMemoryChildProgressRepository();
     repository.projectionInput = emptyProjectionInput();
     const service = createService(repository);
@@ -2639,6 +2527,26 @@ describe("child progress evidence service", () => {
         "Maya read a short chapter book aloud and retold the plot",
       observedAt: "2026-07-11T17:30:00.000000Z",
       idempotencyKey: "batch-undo-source",
+      claims: [
+        {
+          childId: CHILD_ID,
+          itemId: "literacy.emergent-reader",
+          answer: "getting_there" as const,
+          quote: "read a short chapter book aloud",
+          confidence: "high" as const,
+          statement: "Reads an early chapter book independently",
+          subjectId: "literacy",
+        },
+        {
+          childId: CHILD_ID,
+          itemId: "literacy.retells-story",
+          answer: "getting_there" as const,
+          quote: "retold the plot",
+          confidence: "high" as const,
+          statement: "Retells the plot of a story in order",
+          subjectId: "literacy",
+        },
+      ],
     });
     assert.equal(recorded.status, "recorded");
     if (recorded.status !== "recorded") return;

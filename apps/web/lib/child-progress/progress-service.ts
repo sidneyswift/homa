@@ -10,18 +10,13 @@ import {
   resolveEffectiveProgressEvidence,
 } from "./effective-evidence";
 import { isProgressEvidenceAnswer } from "./evidence-policy";
-import {
-  matchJournalEvidence,
-  type JournalEvidenceMatch,
-  type JournalEvidenceMatchResult,
-} from "./journal-matcher";
+import type { JournalEvidenceMatch } from "./journal-matcher";
 import {
   hashChildProgressOperationPayload,
   storedChildProgressOperationResultSchema,
   type StoredChildProgressOperationResult,
 } from "./operation-receipt";
 import type {
-  ChildObservationClassification,
   ChildProgressProjectionInput,
   ChildProgressRepository,
   ChildProgressTransaction,
@@ -96,18 +91,17 @@ export interface RecordJournalProgressEvidenceInput {
   source?: "journal" | "lesson_listen";
   /**
    * Claims the caller's judgment step proposed and the deterministic
-   * gate accepted (AGENTS.md "Models judge, code verifies"). Present
-   * means the lexical matcher is skipped; an empty array means the
-   * message was read and reports no ability, which still keeps the
-   * parent's words as an observation. Absent means the legacy matcher
-   * path, kept until the rollout is verified.
+   * gate accepted (AGENTS.md "Models judge, code verifies"). An empty
+   * array means the message was read and reports no ability, which
+   * still keeps the parent's words as an observation rather than a
+   * guessed score. There is no lexical-matcher fallback.
    *
    * Deliberately excluded from the operation payload hash: a retry
    * re-runs the model and may word its claims slightly differently,
    * and a replayed operation must still replay rather than fail as an
    * idempotency mismatch.
    */
-  claims?: readonly ValidatedClaim[];
+  claims: readonly ValidatedClaim[];
 }
 
 export type RecordProgressEvidenceResult =
@@ -520,132 +514,42 @@ export class ChildProgressService {
       );
       if (replay !== null) return replay;
 
-      // Claims present means the caller already ran the judgment step
-      // and the deterministic gate (AGENTS.md "Models judge, code
-      // verifies"), so the lexical matcher is skipped entirely. Absent
-      // means the legacy path, kept until the extraction rollout is
-      // verified in production.
-      if (input.claims !== undefined) {
-        const writes = this.claimWrites(input, input.claims);
-        if (writes.length === 0) {
-          await this.appendJournalObservation(
-            transaction,
-            input,
-            "no_match",
-            [],
-          );
-          return this.completeOperation(transaction, input, payloadHash, {
-            status: "no_match",
-          });
-        }
-        writes.forEach(validateProgressEvidenceWrite);
-        const pending = this.findPendingConflict(projectionInput, writes);
-        if (pending !== null) {
-          return this.completeOperation(
-            transaction,
-            input,
-            payloadHash,
-            pending,
-          );
-        }
-        const result = await this.recordKnownChildEvidence(
-          transaction,
-          projectionInput,
-          writes,
-        );
+      // The caller already ran the judgment step and the deterministic
+      // gate (AGENTS.md "Models judge, code verifies"). There is no
+      // lexical-matcher fallback: an empty claims array means the
+      // message was read and reports no ability, which still keeps the
+      // parent's words as an observation rather than a guessed score.
+      const writes = this.claimWrites(input, input.claims);
+      if (writes.length === 0) {
+        // Still writes a child_observations row in this same transaction
+        // (plan 2026-07-13-observation-ledger.md): the parent's report
+        // survives even though no score moves.
+        await this.appendJournalObservation(transaction, input);
+        return this.completeOperation(transaction, input, payloadHash, {
+          status: "no_match",
+        });
+      }
+      writes.forEach(validateProgressEvidenceWrite);
+      const pending = this.findPendingConflict(projectionInput, writes);
+      if (pending !== null) {
         return this.completeOperation(
           transaction,
           input,
           payloadHash,
-          result,
+          pending,
         );
       }
-
-      const match = matchJournalEvidence({
-        quote: input.quote,
-        childName: projectionInput.child.name,
-        subjectId: input.subjectId,
-      });
-      switch (match.classification) {
-        // Non-scoring outcomes still write a child_observations row in
-        // this same transaction (plan 2026-07-13-observation-ledger.md):
-        // the parent's report survives even though no score moves, and
-        // durability never depends on the model calling another tool.
-        case "activity_only":
-          await this.appendJournalObservation(
-            transaction,
-            input,
-            "activity_only",
-            [],
-          );
-          return this.completeOperation(
-            transaction,
-            input,
-            payloadHash,
-            { status: "activity_only" },
-          );
-        case "no_match":
-          await this.appendJournalObservation(
-            transaction,
-            input,
-            "no_match",
-            match.candidates,
-          );
-          return this.completeOperation(
-            transaction,
-            input,
-            payloadHash,
-            { status: "no_match" },
-          );
-        case "ambiguous":
-          await this.appendJournalObservation(
-            transaction,
-            input,
-            "ambiguous",
-            match.matches,
-          );
-          return this.completeOperation(
-            transaction,
-            input,
-            payloadHash,
-            {
-              status: "ambiguous",
-              candidates: match.matches,
-            },
-          );
-        case "matched":
-        case "matched_many": {
-          const writes = this.journalWrites(input, match);
-          writes.forEach(validateProgressEvidenceWrite);
-          const pending = this.findPendingConflict(
-            projectionInput,
-            writes,
-          );
-          if (pending !== null) {
-            return this.completeOperation(
-              transaction,
-              input,
-              payloadHash,
-              pending,
-            );
-          }
-          const result = await this.recordKnownChildEvidence(
-            transaction,
-            projectionInput,
-            writes,
-          );
-          return this.completeOperation(
-            transaction,
-            input,
-            payloadHash,
-            result,
-          );
-        }
-        default: {
-          const exhaustiveMatch: never = match;
-          return exhaustiveMatch;
-        }
-      }
+      const result = await this.recordKnownChildEvidence(
+        transaction,
+        projectionInput,
+        writes,
+      );
+      return this.completeOperation(
+        transaction,
+        input,
+        payloadHash,
+        result,
+      );
     });
   }
 
@@ -1522,36 +1426,14 @@ export class ChildProgressService {
   }
 
   /**
-   * Rounds candidate scores for storage; four decimals is plenty for
-   * "which bank items were closest" and keeps the jsonb stable.
+   * Records a journal message that produced no claims. There is no
+   * lexical matcher left to propose near-miss candidates, so the row
+   * carries only the parent's own words and, if named, the subject the
+   * caller already scoped the message to.
    */
-  private observationCandidates(
-    candidates: readonly JournalEvidenceMatch[],
-  ): Array<{ itemId: string; score: number }> {
-    return candidates.map((candidate) => ({
-      itemId: candidate.itemId,
-      score: Math.round(candidate.score * 10_000) / 10_000,
-    }));
-  }
-
-  private observationSubjectHints(
-    input: RecordJournalProgressEvidenceInput,
-    candidates: readonly JournalEvidenceMatch[],
-  ): string[] {
-    const hints = new Set<string>();
-    if (input.subjectId !== undefined) hints.add(input.subjectId);
-    for (const candidate of candidates) {
-      const located = getMapItem(candidate.itemId);
-      if (located !== undefined) hints.add(located.subject.id);
-    }
-    return [...hints].sort();
-  }
-
   private async appendJournalObservation(
     transaction: ChildProgressTransaction,
     input: RecordJournalProgressEvidenceInput,
-    classification: ChildObservationClassification,
-    candidates: readonly JournalEvidenceMatch[],
   ): Promise<void> {
     await transaction.appendObservation({
       childId: input.childId,
@@ -1560,9 +1442,9 @@ export class ChildProgressService {
       quote: input.quote,
       channel: input.channel,
       messageId: input.messageId,
-      classification,
-      candidates: this.observationCandidates(candidates),
-      subjectHints: this.observationSubjectHints(input, candidates),
+      classification: "no_match",
+      candidates: [],
+      subjectHints: input.subjectId !== undefined ? [input.subjectId] : [],
       observedAt: input.observedAt,
     });
   }
@@ -1620,34 +1502,6 @@ export class ChildProgressService {
       }));
   }
 
-  private journalWrites(
-    input: RecordJournalProgressEvidenceInput,
-    match: Extract<
-      JournalEvidenceMatchResult,
-      { classification: "matched" | "matched_many" }
-    >,
-  ): ProgressEvidenceWrite[] {
-    return match.matches.map((candidate, index) => ({
-      familyId: input.familyId,
-      childId: input.childId,
-      memberUserId: input.memberUserId,
-      source: input.source ?? "journal",
-      derivation: "unknown",
-      itemId: candidate.itemId,
-      answer: candidate.answer,
-      quote: Array.from(candidate.clause).slice(0, 500).join(""),
-      channel: input.channel,
-      messageId: input.messageId,
-      providerMessageId: null,
-      observedAt: input.observedAt,
-      idempotencyKey: journalMatchIdempotencyKey(
-        input.idempotencyKey,
-        candidate.itemId,
-        index,
-      ),
-      checkInId: null,
-    }));
-  }
 
   private findPendingConflict(
     projectionInput: ChildProgressProjectionInput,
