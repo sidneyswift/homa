@@ -1,4 +1,5 @@
 import { isHoursSubject, type HoursSubject } from "./hours-model";
+import { minutesBySubjectForChild, periodStart } from "./hours-summary";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
@@ -95,4 +96,24 @@ export async function getHoursLogForFamilyBetween(
     .limit(MAX_HOURS_ROWS);
   if (error) throw new Error(`hours_log bounded read failed: ${error.message}`);
   return (data ?? []).map((row) => toHoursLogRow(row as RawHoursLogRow));
+}
+
+/**
+ * This child's own school-year minutes, one subject at a time (founder
+ * ruling 2026-08-28): a display-only companion figure for the Progress
+ * page, never an input to any score. Bounded to the current school
+ * year, the same window the compliance report itself uses, so a
+ * subject's "time logged" line can't surface a stale figure from a
+ * year the child has since moved past.
+ */
+export async function getHoursMinutesBySubjectForChild(
+  familyId: string,
+  childId: string,
+  todayIso: string,
+): Promise<Partial<Record<HoursSubject, number>>> {
+  // periodStart only returns null for period "all"; "school_year" always
+  // returns a real date.
+  const schoolYearStart = periodStart("school_year", todayIso) as string;
+  const rows = await getHoursLogForFamilyBetween(familyId, schoolYearStart, todayIso);
+  return minutesBySubjectForChild(rows, childId, null);
 }

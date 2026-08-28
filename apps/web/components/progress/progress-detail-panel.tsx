@@ -11,6 +11,7 @@ import type {
   ProgressSubjectView,
 } from "../../lib/child-progress/types";
 import { progressSubjectSummary } from "../../lib/child-progress/view-copy";
+import { formatMinutesAsHours } from "../../lib/hours-view";
 import { ProgressChatDoor } from "./progress-chat-door";
 import { ProgressDomain } from "./progress-domain";
 import type { ProgressConflictActions } from "./progress-topic-row";
@@ -42,6 +43,7 @@ export function ProgressDetailPanel({
   conflicts,
   timeZone,
   allowDeeperCheck,
+  hoursMinutes = null,
   onClose,
 }: {
   childId: string;
@@ -53,6 +55,12 @@ export function ProgressDetailPanel({
    * shows, but the button goes inert, because the deep dive walks the
    * FAMILY's flow and only her own session may start it. */
   allowDeeperCheck: boolean;
+  /** This subject's Hours minutes this school year (founder ruling
+   * 2026-08-28), or null when nothing has been logged under it, or the
+   * subject has no Hours equivalent. Shown next to, never blended
+   * into, the evidence below: Hours time is not verified skill
+   * evidence, so it must never look like a score. */
+  hoursMinutes?: number | null;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -119,6 +127,11 @@ export function ProgressDetailPanel({
             {summary ? (
               <p className="mt-1.5 text-sm leading-relaxed text-body">
                 {summary}
+              </p>
+            ) : null}
+            {hoursMinutes ? (
+              <p className="mt-1 text-xs font-semibold text-subtle">
+                {formatMinutesAsHours(hoursMinutes)} logged in Hours this school year
               </p>
             ) : null}
           </div>

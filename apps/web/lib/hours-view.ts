@@ -33,6 +33,7 @@ export const SUBJECT_LABELS: Record<HoursSubject, string> = {
   "co-op": "Co-op",
   "life skills": "Life skills",
   other: "Other",
+  spanish: "Second language",
 };
 
 export const SOURCE_LABELS: Record<HoursSource, string> = {

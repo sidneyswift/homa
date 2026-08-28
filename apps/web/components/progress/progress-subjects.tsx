@@ -25,6 +25,7 @@ export function ProgressSubjects({
   conflicts,
   timeZone,
   deeperChecks,
+  hoursMinutesBySubject,
   children,
 }: {
   childId: string;
@@ -35,6 +36,8 @@ export function ProgressSubjects({
   timeZone: string;
   /** False on read-only mirrors: hides the panel's deep-dive door. */
   deeperChecks: boolean;
+  /** This school year's Hours minutes, keyed by subject id. Display-only. */
+  hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
   children: ReactNode;
 }) {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
@@ -91,6 +94,7 @@ export function ProgressSubjects({
           conflicts={conflicts}
           timeZone={timeZone}
           allowDeeperCheck={deeperChecks}
+          hoursMinutes={hoursMinutesBySubject?.[openSubject.subjectId] ?? null}
           onClose={closePanel}
         />
       ) : null}

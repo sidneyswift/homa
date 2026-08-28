@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   filterHours,
+  minutesBySubjectForChild,
   periodStart,
   summarizeHours,
   type HoursRow,
@@ -128,5 +129,47 @@ describe("filterHours", () => {
   it("keeps everything when no window and no filters are given", () => {
     const rows = [row(), row({ childId: "kid-a" })];
     assert.equal(filterHours(rows, { from: null }).length, 2);
+  });
+});
+
+describe("minutesBySubjectForChild", () => {
+  it("sums this child's own blocks plus family-wide time, one subject at a time", () => {
+    const totals = minutesBySubjectForChild(
+      [
+        row({ childId: "kid-a", subject: "spanish", minutes: 45 }),
+        row({ childId: "kid-a", subject: "spanish", minutes: 15 }),
+        row({ childId: null, subject: "spanish", minutes: 20 }),
+        row({ childId: "kid-b", subject: "spanish", minutes: 999 }),
+      ],
+      "kid-a",
+      null,
+    );
+    assert.deepEqual(totals, { spanish: 80 });
+  });
+
+  it("excludes a sibling's own block entirely", () => {
+    const totals = minutesBySubjectForChild(
+      [row({ childId: "kid-b", subject: "spanish", minutes: 60 })],
+      "kid-a",
+      null,
+    );
+    assert.deepEqual(totals, {});
+  });
+
+  it("excludes anything before the window start", () => {
+    const totals = minutesBySubjectForChild(
+      [
+        row({ childId: "kid-a", subject: "spanish", happenedOn: "2026-07-10", minutes: 60 }),
+        row({ childId: "kid-a", subject: "spanish", happenedOn: "2026-08-05", minutes: 30 }),
+      ],
+      "kid-a",
+      "2026-08-01",
+    );
+    assert.deepEqual(totals, { spanish: 30 });
+  });
+
+  it("never invents a zero entry for a subject with no logged time", () => {
+    const totals = minutesBySubjectForChild([row({ subject: "math" })], "kid-a", null);
+    assert.equal(Object.hasOwn(totals, "spanish"), false);
   });
 });

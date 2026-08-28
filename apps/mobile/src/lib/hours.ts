@@ -23,6 +23,11 @@ export const HOURS_SUBJECTS = [
   "co-op",
   "life skills",
   "other",
+  // Mirrors apps/web/lib/hours-model.ts (2026-08-28): the one subject
+  // that maps 1:1 onto the real progress-report taxonomy's "spanish"
+  // ("Second language"). Kept in sync by hand, same as the rest of this
+  // file's port from web.
+  "spanish",
 ] as const;
 
 export type HoursSubject = (typeof HOURS_SUBJECTS)[number];

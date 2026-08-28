@@ -35,6 +35,7 @@ export function ProgressMap({
   conflicts,
   timeZone,
   deeperChecks,
+  hoursMinutesBySubject,
 }: {
   childId: string;
   tiles: ProgressTileModel[];
@@ -43,6 +44,8 @@ export function ProgressMap({
   timeZone: string;
   /** False on read-only mirrors: hides the panel's deep-dive door. */
   deeperChecks: boolean;
+  /** This school year's Hours minutes, keyed by subject id. Display-only. */
+  hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
 }) {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -134,6 +137,7 @@ export function ProgressMap({
           conflicts={conflicts}
           timeZone={timeZone}
           allowDeeperCheck={deeperChecks}
+          hoursMinutes={hoursMinutesBySubject?.[openSubject.subjectId] ?? null}
           onClose={closePanel}
         />
       ) : null}
