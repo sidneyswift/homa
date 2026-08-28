@@ -35,6 +35,7 @@ function entry(overrides: Partial<HoursEntry> = {}): HoursEntry {
     childId: "child-maya",
     childName: "Maya",
     subject: "math",
+    customLabel: null,
     minutes: 45,
     happenedOn: "2026-07-11",
     source: "chat",

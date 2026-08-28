@@ -1,11 +1,12 @@
 import { isHoursSubject, type HoursSubject } from "./hours-model";
-import { SUBJECT_LABELS } from "./hours-view";
+import { subjectDisplayLabel } from "./hours-view";
 import { mapDb } from "./map/db";
 
 export interface HoursExportRow {
   happenedOn: string;
   childName: string | null;
   subject: HoursSubject;
+  customLabel: string | null;
   minutes: number;
   source: "chat" | "sms" | "call";
   note: string | null;
@@ -15,6 +16,7 @@ interface RawHoursExportRow {
   happened_on: string;
   child_name: string | null;
   subject: string;
+  custom_label: string | null;
   minutes: string;
   source: string;
   note: string | null;
@@ -32,6 +34,7 @@ export async function getHoursExportForFamily(familyId: string): Promise<HoursEx
     select h.happened_on::text as happened_on,
            c.name as child_name,
            h.subject,
+           h.custom_label,
            h.minutes::text as minutes,
            h.source,
            h.note
@@ -47,10 +50,12 @@ export async function getHoursExportForFamily(familyId: string): Promise<HoursEx
     if (!Number.isInteger(minutes) || minutes < 1) {
       throw new Error("hours export found an invalid duration");
     }
+    const subject = isHoursSubject(row.subject) ? row.subject : "other";
     return {
       happenedOn: row.happened_on,
       childName: row.child_name,
-      subject: isHoursSubject(row.subject) ? row.subject : "other",
+      subject,
+      customLabel: subject === "other" ? row.custom_label : null,
       minutes,
       source: exportSource(row.source),
       note: row.note,
@@ -76,7 +81,7 @@ export function renderHoursCsv(rows: readonly HoursExportRow[]): string {
   const lines = rows.map((row) => [
     row.happenedOn,
     row.childName ?? "Whole family",
-    SUBJECT_LABELS[row.subject],
+    subjectDisplayLabel(row),
     row.minutes,
     decimalHours(row.minutes),
     row.source,

@@ -64,10 +64,27 @@ export interface HoursEntry {
    * RLS-scoped read. */
   childName: string | null;
   subject: HoursSubject;
+  /** Her own word for an "other" block ("Portuguese"); null for every
+   * other subject. Use subjectDisplayLabel to render, never this field
+   * or SUBJECT_LABELS alone. */
+  customLabel: string | null;
   minutes: number;
   happenedOn: string;
   source: HoursSource;
   note: string | null;
+}
+
+/**
+ * subjectDisplayLabel(entry): string
+ * What a parent should actually see for one entry: her own custom label
+ * when she has set one on an "other" block, otherwise the fixed
+ * vocabulary's label. The subject filter chips and "nothing logged for
+ * X yet" copy stay on SUBJECT_LABELS directly on purpose: those describe
+ * the fixed bucket, not one entry.
+ */
+export function subjectDisplayLabel(entry: Pick<HoursEntry, "subject" | "customLabel">): string {
+  if (entry.subject === "other" && entry.customLabel) return entry.customLabel;
+  return SUBJECT_LABELS[entry.subject];
 }
 
 /**
@@ -84,6 +101,7 @@ export function toHoursEntries(
     childId: row.childId,
     childName: row.childId ? nameById.get(row.childId) ?? null : null,
     subject: row.subject,
+    customLabel: row.customLabel,
     minutes: row.minutes,
     happenedOn: row.happenedOn,
     source: row.source,

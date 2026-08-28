@@ -12,6 +12,7 @@ import {
   isDefaultFilter,
   periodStart,
   scopedToViewContext,
+  subjectDisplayLabel,
   subjectOptions,
   toHoursEntries,
   type HoursEntry,
@@ -22,6 +23,7 @@ function row(overrides: Partial<HoursLogRow> = {}): HoursLogRow {
     id: "row-1",
     childId: "child-maya",
     subject: "math",
+    customLabel: null,
     minutes: 45,
     happenedOn: "2026-07-10",
     source: "chat",
@@ -98,6 +100,23 @@ describe("subjectOptions", () => {
 
   it("returns nothing for an empty log", () => {
     assert.deepEqual(subjectOptions([]), []);
+  });
+});
+
+describe("subjectDisplayLabel", () => {
+  it("shows her own word for an other entry once she has set one", () => {
+    assert.equal(
+      subjectDisplayLabel({ subject: "other", customLabel: "Portuguese" }),
+      "Portuguese",
+    );
+  });
+
+  it("falls back to the fixed label when other has no custom label yet", () => {
+    assert.equal(subjectDisplayLabel({ subject: "other", customLabel: null }), "Other");
+  });
+
+  it("ignores a stray custom label on a real subject", () => {
+    assert.equal(subjectDisplayLabel({ subject: "math", customLabel: "Portuguese" }), "Math");
   });
 });
 

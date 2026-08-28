@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
 import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder";
+import { deleteMaterialAction } from "./delete-material-action";
 import { keepMaterialAction } from "./keep-material-action";
 
 /**
@@ -22,10 +23,12 @@ import { keepMaterialAction } from "./keep-material-action";
  */
 export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) {
   const [kept, setKept] = useState<Record<string, string>>({});
+  const [removed, setRemoved] = useState<Record<string, true>>({});
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const remaining = materials.filter((material) => !kept[material.id]);
+  const remaining = materials.filter((material) => !kept[material.id] && !removed[material.id]);
   if (remaining.length === 0) return null;
 
   function keep(material: BinderMaterial) {
@@ -35,6 +38,20 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
       setPendingId(null);
       if (result.kept) {
         setKept((current) => ({ ...current, [material.id]: result.note }));
+      } else {
+        window.alert(result.note);
+      }
+    });
+  }
+
+  function remove(material: BinderMaterial) {
+    setPendingId(material.id);
+    startTransition(async () => {
+      const result = await deleteMaterialAction(material.id);
+      setPendingId(null);
+      setConfirmingDeleteId(null);
+      if (result.deleted) {
+        setRemoved((current) => ({ ...current, [material.id]: true }));
       } else {
         window.alert(result.note);
       }
@@ -74,24 +91,54 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
               {KIND_LABELS[material.kind] ?? material.kind}
               {material.childName ? ` for ${material.childName}` : null}
             </span>
-            <div className="mt-2 flex items-center gap-2">
-              <QuietAction
-                kind="secondary"
-                onClick={() => keep(material)}
-                disabled={isPending && pendingId === material.id}
-                className="text-xs"
-              >
-                {isPending && pendingId === material.id ? "Keeping..." : "Keep this one"}
-              </QuietAction>
-              <a
-                href={material.pdfUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="quiet-action quiet-action--quiet text-xs underline underline-offset-2"
-              >
-                Open
-              </a>
-            </div>
+            {confirmingDeleteId === material.id ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
+                  Delete this? Can&apos;t be undone.
+                </span>
+                <QuietAction
+                  kind="secondary"
+                  onClick={() => remove(material)}
+                  disabled={isPending && pendingId === material.id}
+                  className="text-xs text-[color:var(--homa-error-ink)]"
+                >
+                  {isPending && pendingId === material.id ? "Deleting…" : "Delete"}
+                </QuietAction>
+                <QuietAction
+                  kind="quiet"
+                  onClick={() => setConfirmingDeleteId(null)}
+                  className="text-xs"
+                >
+                  Keep
+                </QuietAction>
+              </div>
+            ) : (
+              <div className="mt-2 flex items-center gap-2">
+                <QuietAction
+                  kind="secondary"
+                  onClick={() => keep(material)}
+                  disabled={isPending && pendingId === material.id}
+                  className="text-xs"
+                >
+                  {isPending && pendingId === material.id ? "Keeping..." : "Keep this one"}
+                </QuietAction>
+                <a
+                  href={material.pdfUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="quiet-action quiet-action--quiet text-xs underline underline-offset-2"
+                >
+                  Open
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDeleteId(material.id)}
+                  className="quiet-action quiet-action--quiet ml-auto text-xs text-[color:var(--homa-error-ink)]"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </li>
         ))}
       </ul>
