@@ -9,6 +9,7 @@ import {
   groupEntriesByDay,
   hoursSubjectTone,
   SUBJECT_LABELS,
+  subjectDisplayLabel,
   subjectOptions,
   type ChildHoursTotals,
   type HoursEntry,
@@ -100,7 +101,7 @@ function EntryRow({
         className="rounded-[var(--homa-radius-control)] px-2.5 py-1 text-[0.68rem] font-bold"
         style={{ background: bg, color: ink }}
       >
-        {SUBJECT_LABELS[entry.subject]}
+        {subjectDisplayLabel(entry)}
       </span>
       <span className={`font-display text-sm font-semibold ${INK}`}>
         {formatMinutesAsHours(entry.minutes)}

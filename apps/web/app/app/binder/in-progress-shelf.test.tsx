@@ -49,6 +49,13 @@ describe("InProgressShelf", () => {
     assert.doesNotMatch(html, /clay|bg-brand|text-brand/u);
   });
 
+  it("also offers a delete action (Carolyng feedback, 2026-08-27)", () => {
+    const html = renderToStaticMarkup(
+      <InProgressShelf materials={[material()]} />,
+    );
+    assert.match(html, />Delete</u);
+  });
+
   it("counts in the singular for one item and the plural for several", () => {
     const one = renderToStaticMarkup(
       <InProgressShelf materials={[material()]} />,

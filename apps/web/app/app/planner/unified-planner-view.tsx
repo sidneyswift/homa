@@ -28,6 +28,7 @@ import {
   formatMinutesAsHours,
   hoursSubjectTone,
   SUBJECT_LABELS,
+  subjectDisplayLabel,
   type HoursEntry,
 } from "../../../lib/hours-view";
 import { plannerActivityHelpHref } from "../../../lib/planner-activity-help";
@@ -56,6 +57,8 @@ import {
 } from "../calendar/actions";
 import { HoursView } from "../hours/hours-view";
 import {
+  deletePlannerLearningActivityAction,
+  deleteScheduledPlanActivityAction,
   setPlannerLearningActivityStatusAction,
   updatePlannerLearningActivityDetailsAction,
 } from "./actions";
@@ -581,7 +584,7 @@ function RecordedHours({
                 className="rounded-pill px-2.5 py-1 text-[0.68rem] font-bold"
                 style={{ background, color }}
               >
-                {SUBJECT_LABELS[entry.subject]}
+                {subjectDisplayLabel(entry)}
               </span>
               <span className="font-display text-sm font-semibold text-strong">
                 {formatMinutesAsHours(entry.minutes)}
@@ -606,13 +609,76 @@ function RecordedHours({
   );
 }
 
+/**
+ * Two-step delete confirm shared by ActivityDetails and
+ * LearningActivityDetails (Carolyng feedback, 2026-08-27: a delete
+ * button for planner entries, matching the one already on Hours).
+ * Same "reveal a confirm row, then Delete or Keep" shape as Hours'
+ * DeleteEntryButton, in this file's own QuietAction/text-* vocabulary
+ * rather than that module's raw --homa-* vars.
+ */
+function PlannerEntryDeleteControl({
+  label,
+  confirmMessage,
+  onDelete,
+}: {
+  label: string;
+  confirmMessage: string;
+  onDelete: () => Promise<{ ok: boolean; reason?: string }>;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="ml-auto inline-flex min-h-11 items-center px-2 py-2 text-sm font-bold text-danger hover:underline"
+      >
+        {label}
+      </button>
+    );
+  }
+
+  return (
+    <div className="ml-auto flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+      <span className="text-xs font-semibold text-muted">{confirmMessage}</span>
+      <QuietAction
+        kind="secondary"
+        disabled={pending}
+        className="px-3.5 text-xs text-danger"
+        onClick={() => {
+          setError(null);
+          setPending(true);
+          void onDelete().then((result) => {
+            setPending(false);
+            if (!result.ok) {
+              setError(result.reason ?? "That didn't delete. Try again in a minute.");
+            }
+          });
+        }}
+      >
+        {pending ? "Deleting…" : "Delete"}
+      </QuietAction>
+      <QuietAction kind="quiet" onClick={() => setConfirming(false)} className="px-3.5 text-xs">
+        Keep
+      </QuietAction>
+      {error ? <p role="alert" className="w-full text-right text-xs font-semibold text-danger">{error}</p> : null}
+    </div>
+  );
+}
+
 function ActivityDetails({
   activity,
   done,
+  onDelete,
   onClose,
 }: {
   activity: PlannerActivity;
   done: boolean;
+  onDelete: () => Promise<{ ok: boolean; reason?: string }>;
   onClose: () => void;
 }) {
   return (
@@ -657,6 +723,11 @@ function ActivityDetails({
         >
           Change the day
         </QuietAction>
+        <PlannerEntryDeleteControl
+          label="Remove from this day"
+          confirmMessage="Remove this from today's schedule? It stays in the week plan."
+          onDelete={onDelete}
+        />
       </div>
     </ModalShell>
   );
@@ -669,6 +740,7 @@ function LearningActivityDetails({
   saving,
   error,
   onSave,
+  onDelete,
   onClose,
 }: {
   activity: PlannerLearningActivity;
@@ -677,6 +749,7 @@ function LearningActivityDetails({
   saving: boolean;
   error: string | null;
   onSave: (title: string, note: string) => Promise<boolean>;
+  onDelete: () => Promise<{ ok: boolean; reason?: string }>;
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -805,6 +878,11 @@ function LearningActivityDetails({
             >
               Ask Homa to change it
             </Link>
+            <PlannerEntryDeleteControl
+              label="Delete"
+              confirmMessage={`Delete "${activity.title}"? This can't be undone.`}
+              onDelete={onDelete}
+            />
           </>
         )}
       </div>
@@ -1654,6 +1732,32 @@ export function UnifiedPlannerView({
     return true;
   }
 
+  async function deleteLearningActivity(
+    activityId: string,
+  ): Promise<{ ok: boolean; reason?: string }> {
+    const result = await deletePlannerLearningActivityAction(activityId);
+    if (!result.ok) return { ok: false, reason: result.reason };
+    setSelectedLearningActivity(null);
+    router.refresh();
+    return { ok: true };
+  }
+
+  async function deleteScheduledActivity(
+    activity: PlannerActivity,
+  ): Promise<{ ok: boolean; reason?: string }> {
+    const [weekPart, indexPart] = activity.checkId.split(".");
+    const result = await deleteScheduledPlanActivityAction({
+      childId: activity.childId,
+      subjectId: activity.subjectId,
+      week: Number(weekPart),
+      activityIndex: Number(indexPart),
+    });
+    if (!result.ok) return { ok: false, reason: result.reason };
+    setSelectedActivity(null);
+    router.refresh();
+    return { ok: true };
+  }
+
   function openNewAppointment() {
     setAddOpen(false);
     setComposerError(null);
@@ -2200,6 +2304,7 @@ export function UnifiedPlannerView({
         <ActivityDetails
           activity={selectedActivity}
           done={resolvedDone(selectedActivity)}
+          onDelete={() => deleteScheduledActivity(selectedActivity)}
           onClose={() => setSelectedActivity(null)}
         />
       ) : null}
@@ -2213,6 +2318,7 @@ export function UnifiedPlannerView({
           onSave={(title, note) =>
             saveLearningActivityDetails(selectedLearningActivity.id, title, note)
           }
+          onDelete={() => deleteLearningActivity(selectedLearningActivity.id)}
           onClose={() => {
             setLearningActivityDetailError(null);
             setSelectedLearningActivity(null);

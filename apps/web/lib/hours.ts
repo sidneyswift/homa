@@ -21,6 +21,9 @@ export interface HoursLogRow {
   id: string;
   childId: string | null;
   subject: HoursSubject;
+  /** The parent's own name for an "other" block ("Portuguese"), never
+   * set for any other subject (DB constraint). Null until she edits it. */
+  customLabel: string | null;
   minutes: number;
   /** YYYY-MM-DD, the calendar day the parent (or model) said the block
    * happened on, not a timestamp. */
@@ -37,6 +40,7 @@ interface RawHoursLogRow {
   id: string;
   child_id: string | null;
   subject: string;
+  custom_label: string | null;
   minutes: number;
   happened_on: string;
   source: string;
@@ -44,10 +48,12 @@ interface RawHoursLogRow {
 }
 
 function toHoursLogRow(row: RawHoursLogRow): HoursLogRow {
+  const subject = isHoursSubject(row.subject) ? row.subject : "other";
   return {
     id: row.id,
     childId: row.child_id ?? null,
-    subject: isHoursSubject(row.subject) ? row.subject : "other",
+    subject,
+    customLabel: subject === "other" ? row.custom_label ?? null : null,
     minutes: row.minutes,
     happenedOn: row.happened_on,
     source: normalizeSource(row.source),
@@ -55,11 +61,13 @@ function toHoursLogRow(row: RawHoursLogRow): HoursLogRow {
   };
 }
 
+const HOURS_LOG_COLUMNS = "id, child_id, subject, custom_label, minutes, happened_on, source, note";
+
 export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRow[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("hours_log")
-    .select("id, child_id, subject, minutes, happened_on, source, note")
+    .select(HOURS_LOG_COLUMNS)
     .eq("family_id", familyId)
     .order("happened_on", { ascending: false })
     .order("created_at", { ascending: false })
@@ -78,7 +86,7 @@ export async function getHoursLogForFamilyBetween(
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("hours_log")
-    .select("id, child_id, subject, minutes, happened_on, source, note")
+    .select(HOURS_LOG_COLUMNS)
     .eq("family_id", familyId)
     .gte("happened_on", fromDate)
     .lte("happened_on", toDate)

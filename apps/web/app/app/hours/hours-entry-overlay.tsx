@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useRouter } from "next/navigation";
 
 import { HOURS_SUBJECTS } from "../../../lib/hours-model";
-import { SUBJECT_LABELS, type HoursEntry } from "../../../lib/hours-view";
+import { SUBJECT_LABELS, subjectDisplayLabel, type HoursEntry } from "../../../lib/hours-view";
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
 import {
@@ -52,7 +52,7 @@ function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () =>
     <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-          {`Delete this ${entry.minutes}-minute ${SUBJECT_LABELS[entry.subject].toLowerCase()} entry? This can't be undone.`}
+          {`Delete this ${entry.minutes}-minute ${subjectDisplayLabel(entry).toLowerCase()} entry? This can't be undone.`}
         </p>
         <div className="flex shrink-0 gap-2">
           <QuietAction
@@ -100,6 +100,7 @@ export function HoursEntryOverlay({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
+  const [subject, setSubject] = useState(entry.subject);
 
   const [state, formAction, pending] = useActionState(
     async (prev: HoursActionState, formData: FormData) => {
@@ -202,16 +203,30 @@ export function HoursEntryOverlay({
             Subject
             <select
               name="subject"
-              defaultValue={entry.subject}
+              value={subject}
+              onChange={(event) => setSubject(event.target.value as typeof subject)}
               className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
             >
-              {HOURS_SUBJECTS.map((subject) => (
-                <option key={subject} value={subject}>
-                  {SUBJECT_LABELS[subject]}
+              {HOURS_SUBJECTS.map((option) => (
+                <option key={option} value={option}>
+                  {SUBJECT_LABELS[option]}
                 </option>
               ))}
             </select>
           </label>
+          {subject === "other" ? (
+            <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
+              What is it?
+              <input
+                type="text"
+                name="customLabel"
+                maxLength={40}
+                defaultValue={entry.customLabel ?? ""}
+                placeholder="Portuguese, foreign language, whatever you call it"
+                className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
+              />
+            </label>
+          ) : null}
           <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
             Minutes
             <input

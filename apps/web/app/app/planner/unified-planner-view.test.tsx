@@ -103,6 +103,7 @@ const HOURS: HoursEntry = {
   childId: KID.id,
   childName: KID.name,
   subject: "math",
+  customLabel: null,
   minutes: 30,
   happenedOn: "2026-08-03",
   source: "chat",
@@ -250,6 +251,17 @@ describe("UnifiedPlannerView", () => {
     assert.match(plannerSource, /saveLearningActivityDetails/u);
     assert.match(plannerSource, /Save changes/u);
     assert.match(plannerSource, /placeholder="What she actually did in this section"/u);
+  });
+
+  it("lets a parent delete a duplicate planner entry from either source (Carolyng, 2026-08-27)", () => {
+    // Chat-logged duplicate: a real delete through the revoked-direct-write RPC.
+    assert.match(plannerSource, /deletePlannerLearningActivityAction/u);
+    assert.match(plannerSource, /deleteLearningActivity/u);
+    // Generated-plan duplicate: unscheduling, not touching the plan text itself.
+    assert.match(plannerSource, /deleteScheduledPlanActivityAction/u);
+    assert.match(plannerSource, /deleteScheduledActivity/u);
+    assert.match(plannerSource, /Remove from this day/u);
+    assert.match(plannerSource, /It stays in the week plan\./u);
   });
 
   it("summarizes seven days in Week instead of rendering seven agenda cards", () => {

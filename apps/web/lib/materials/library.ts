@@ -440,6 +440,7 @@ async function findMaterialsPinnedLegacy(
            generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
+      and deleted_at is null
       and (${status === "any" || status === "final"} or status = ${status === "any" ? "final" : status})
       and (${!filters.childId} or child_id = ${filters.childId ?? null})
       and (${!filters.kind} or kind = ${filters.kind ?? null})
@@ -471,6 +472,7 @@ async function findMaterialsPinnedProtected(
            generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
+      and deleted_at is null
       and (${status === "any" || status === "final"} or status = ${status === "any" ? "final" : status})
       and (
         subject_lesson_id is null
@@ -524,6 +526,7 @@ export async function findMaterialsCaller(
     .from("materials")
     .select(`${SUMMARY_COLUMNS}, revises, review_pass:generation->review->>pass`)
     .eq("family_id", familyId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(status === "final" ? 3000 : filters.limit);
   if (status !== "any" && status !== "final") query = query.eq("status", status);
@@ -570,6 +573,7 @@ export async function findInProgressMaterialsCaller(
       `${SUMMARY_COLUMNS}, revises, subject_lesson_id, review_pass:generation->review->>pass`,
     )
     .eq("family_id", familyId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) {
@@ -593,6 +597,48 @@ export async function findInProgressMaterialsCaller(
   return selectInProgressMaterialRevisions(candidates)
     .sort((left, right) => right.order - left.order)
     .map((candidate) => toSummary(candidate.row));
+}
+
+export interface SoftDeleteMaterialResult {
+  deleted: boolean;
+  note: string;
+}
+
+/**
+ * Delete a material from the Binder (Carolyng feedback, 2026-08-27),
+ * either a kept final or something still in progress. A plain
+ * caller-session update, not an RPC: "members update their materials"
+ * already grants authenticated UPDATE re-scoped by is_family_member, the
+ * same posture keepMaterialAction's finalize call relies on for its own
+ * RLS wall. Soft delete only (deleted_at, never a row removal): every
+ * find/search read this module exposes now filters it out, but the
+ * lineage (version rail, revisesId chain, restore_material_version)
+ * stays exactly as it is, matching the house rule that removing a
+ * material from a collection never deletes it or its history (gh#530).
+ * .select("id") back for the same honest-zero-rows reason as every
+ * other /app write: a forged id from another family, or an id that was
+ * already deleted, matches nothing and must not read back as success.
+ */
+export async function softDeleteMaterialCaller(
+  db: SupabaseClient,
+  familyId: string,
+  materialId: string,
+): Promise<SoftDeleteMaterialResult> {
+  const { data, error } = await db
+    .from("materials")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", materialId)
+    .eq("family_id", familyId)
+    .is("deleted_at", null)
+    .select("id");
+  if (error) {
+    console.error("material soft delete failed:", error.message);
+    return { deleted: false, note: "That did not delete. Try again in a moment." };
+  }
+  if (!data || data.length === 0) {
+    return { deleted: false, note: "That's already gone. Refresh the page and try again." };
+  }
+  return { deleted: true, note: "Deleted." };
 }
 
 interface ChainRow {

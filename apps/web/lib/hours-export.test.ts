@@ -7,6 +7,7 @@ const ROW: HoursExportRow = {
   happenedOn: "2026-08-14",
   childName: "Maya",
   subject: "math",
+  customLabel: null,
   minutes: 45,
   source: "chat",
   note: 'Fractions, cups, and "quarters"',
@@ -20,6 +21,11 @@ describe("renderHoursCsv", () => {
     assert.match(csv, /"Maya","Math","45","0\.75","chat"/u);
     assert.match(csv, /"Whole family","Math","60","1","chat",""/u);
     assert.match(csv, /"Fractions, cups, and ""quarters"""/u);
+  });
+
+  it("exports her own word for an other block instead of the generic bucket", () => {
+    const csv = renderHoursCsv([{ ...ROW, subject: "other", customLabel: "Portuguese" }]);
+    assert.match(csv, /"Maya","Portuguese","45"/u);
   });
 
   it("neutralizes spreadsheet formulas in parent-written fields", () => {

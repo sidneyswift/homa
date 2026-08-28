@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { Icon } from "../../../components/design/Icon";
+import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
 import { KIND_LABELS, subjectLabel, type BinderMaterial } from "../../../lib/materials/binder";
+import { deleteMaterialAction } from "./delete-material-action";
 import { VersionRail } from "./version-rail";
 
 /**
@@ -19,6 +22,64 @@ import { VersionRail } from "./version-rail";
  * Packets page through their per-page previews here, same pattern as
  * the chat card.
  */
+
+/**
+ * Two-step delete confirm (Carolyng feedback, 2026-08-27): "We should be
+ * able to delete in progress and saved items from binder." Same
+ * reveal-a-confirm-row shape as the Hours page's own DeleteEntryButton,
+ * so the pattern reads the same wherever an /app surface offers it.
+ */
+function DeleteMaterialControl({ material, onDeleted }: { material: BinderMaterial; onDeleted: () => void }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="quiet-action quiet-action--quiet mt-2 min-h-9 px-0 text-xs text-[color:var(--homa-error-ink)]"
+      >
+        Delete this
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-3 border-t border-[var(--homa-control-boundary)] pt-3">
+      <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
+        {`Delete "${material.title}"? This can't be undone.`}
+      </p>
+      <div className="mt-2 flex gap-2">
+        <QuietAction
+          kind="secondary"
+          disabled={pending}
+          className="px-3.5 text-xs text-[color:var(--homa-error-ink)]"
+          onClick={() => {
+            setError(null);
+            startTransition(async () => {
+              const result = await deleteMaterialAction(material.id);
+              if (result.deleted) {
+                onDeleted();
+                router.refresh();
+              } else {
+                setError(result.note);
+              }
+            });
+          }}
+        >
+          {pending ? "Deleting…" : "Delete"}
+        </QuietAction>
+        <QuietAction kind="quiet" onClick={() => setConfirming(false)} className="px-3.5 text-xs">
+          Keep
+        </QuietAction>
+      </div>
+      {error ? <p className="mt-2 text-xs text-[color:var(--homa-error-ink)]">{error}</p> : null}
+    </div>
+  );
+}
 
 function formattedDate(iso: string, timeZone: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -240,6 +301,8 @@ export function MaterialDetailOverlay({
         </a>
 
         <VersionRail materialId={material.id} />
+
+        <DeleteMaterialControl material={material} onDeleted={onClose} />
       </QuietFrame>
     </div>
   );
