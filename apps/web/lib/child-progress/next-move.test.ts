@@ -412,4 +412,18 @@ describe("Progress next-move clarification journeys", () => {
     assert.equal(result?.reason, "unknown_provenance");
     assert.match(result?.question ?? "", /small group/u);
   });
+
+  it("names the real skill, not the placeholder, when unknown evidence is also stale", () => {
+    const current = ledger([
+      evidence("math.small-groups", {
+        derivation: "unknown",
+        observedAt: "2026-05-01T16:00:00.000Z",
+      }),
+    ]);
+    const result = progressNextMoveClarification(state(current));
+
+    assert.equal(result?.reason, "unknown_provenance");
+    assert.match(result?.question ?? "", /small group/u);
+    assert.doesNotMatch(result?.question ?? "", /this skill/u);
+  });
 });

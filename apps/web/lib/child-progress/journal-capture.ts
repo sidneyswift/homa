@@ -35,11 +35,11 @@ export interface JournalCaptureContext {
 
 export interface JournalCaptureResult {
   /**
-   * Undefined when extraction did not run (flag off, or no roster), so
-   * the caller falls back to the legacy matcher. An array, possibly
-   * empty, means the judgment step ran and its verdict is final.
+   * Always the judgment step's final verdict, possibly empty (flag off,
+   * no roster, or a failed extraction call all mean "nothing to score,"
+   * never "guess with the legacy matcher instead").
    */
-  claims: ValidatedClaim[] | undefined;
+  claims: ValidatedClaim[];
   /** Every child the message produced accepted claims for, so a caller
    *  can record for siblings too (the family-activity fan-out). */
   childIds: string[];
@@ -82,12 +82,12 @@ export async function captureJournalClaims(
   context: JournalCaptureContext,
 ): Promise<JournalCaptureResult> {
   if (!claimExtractionEnabled()) {
-    return { claims: undefined, childIds: [] };
+    return { claims: [], childIds: [] };
   }
   try {
     const children = await loadFamilyChildren(context.familyId);
     if (children.length === 0) {
-      return { claims: undefined, childIds: [] };
+      return { claims: [], childIds: [] };
     }
     // The whole roster goes to the model even though the caller named
     // one child: a family recap ("we all did the states hunt") has to
@@ -110,9 +110,9 @@ export async function captureJournalClaims(
     };
   } catch (error) {
     console.error(
-      "journal claim capture failed (falling back to the matcher):",
+      "journal claim capture failed (recording the message, scoring nothing):",
       error instanceof Error ? error.message : "unknown",
     );
-    return { claims: undefined, childIds: [] };
+    return { claims: [], childIds: [] };
   }
 }

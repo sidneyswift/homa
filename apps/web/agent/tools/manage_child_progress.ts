@@ -92,7 +92,7 @@ const childProgressOperations: ChildProgressToolOperations = {
       await recordJournalProgressEvidence({
         ...base,
         childId: siblingId,
-        ...(capture.claims ? { claims: capture.claims } : {}),
+        claims: capture.claims,
       });
     }
 
@@ -101,7 +101,7 @@ const childProgressOperations: ChildProgressToolOperations = {
     return recordJournalProgressEvidence({
       ...base,
       childId: input.childId,
-      ...(capture.claims ? { claims: capture.claims } : {}),
+      claims: capture.claims,
     });
   },
   resolveConflict: resolveProgressConflict,

@@ -28,9 +28,9 @@ import { normalizeMeaningfulTokens } from "../child-progress/journal-matcher";
  * pairs (ratios 0.00 to 0.20); against their own segment the same
  * clauses land 0.29 to 0.75 while invented claims still land at 0.
  *
- * Only pairs that survive both checks reach
- * recordJournalProgressEvidence, where the 0.85 matcher still decides
- * whether anything scores.
+ * Only pairs that survive both checks reach recordJournalProgressEvidence,
+ * where model-judged claim extraction (AGENTS.md "Models judge, code
+ * verifies") decides whether anything scores.
  */
 
 export interface LessonClausePair {

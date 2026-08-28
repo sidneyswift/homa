@@ -377,7 +377,7 @@ async function recordVerifiedClauses(input: {
     message,
     surface: "lesson",
   });
-  const claims = capture.claims?.filter(
+  const claims = capture.claims.filter(
     (claim) => claim.childId === input.lesson.childId,
   );
 
@@ -386,7 +386,7 @@ async function recordVerifiedClauses(input: {
     childId: input.lesson.childId,
     memberUserId: input.lesson.createdBy,
     quote: message,
-    ...(claims ? { claims } : {}),
+    claims,
     channel: "lesson",
     messageId: null,
     observedAt,
@@ -401,7 +401,7 @@ async function recordVerifiedClauses(input: {
   // The parent-facing list still reads clause by clause, so map each
   // accepted claim back to the clause its quote came from.
   const scoredClauses = new Set<string>();
-  for (const claim of claims ?? []) {
+  for (const claim of claims) {
     const origin = verified.find((pair) =>
       pair.clause.toLocaleLowerCase("en-US").includes(
         claim.quote.toLocaleLowerCase("en-US"),
