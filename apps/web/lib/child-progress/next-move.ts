@@ -394,8 +394,19 @@ export function progressNextMoveClarification(input: {
       evidence.derivation === "unknown" &&
       ageDays(evidence.observedAt, input.now) !== null,
   );
+  // freshUnknown and knownEvidence can both be empty at once: every row
+  // in catalogEvidence is derivation "unknown" AND stale (legacy-matcher
+  // evidence with nothing newer to supersede it). catalogEvidence itself
+  // is never empty here (the sparse check above already returned), so
+  // falling back to it keeps `newest` defined and its itemId resolvable
+  // in SKILL_CATALOG_BY_ID, instead of leaking the "this skill" default
+  // to a parent.
   const clarificationEvidence =
-    freshUnknown.length > 0 ? freshUnknown : knownEvidence;
+    freshUnknown.length > 0
+      ? freshUnknown
+      : knownEvidence.length > 0
+        ? knownEvidence
+        : catalogEvidence;
   const newest = clarificationEvidence
     .slice()
     .sort(
