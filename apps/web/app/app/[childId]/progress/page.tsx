@@ -15,6 +15,7 @@ import { abilitiesExplorerEnabled } from "../../../../lib/child-progress/abiliti
 import { buildAbilitiesExplorerPayload } from "../../../../lib/child-progress/abilities-explorer";
 import { loadChildProgressPageState } from "../../../../lib/child-progress/page-state";
 import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
+import { getHoursMinutesBySubjectForChild } from "../../../../lib/hours";
 import { lessonListenEnabled } from "../../../../lib/lessons/flag";
 import { listLessonsForChild } from "../../../../lib/lessons/store";
 import { getTrajectoryEvidence } from "../../../../lib/map/store";
@@ -22,7 +23,7 @@ import {
   buildTrajectoryEras,
   type TrajectoryEra,
 } from "../../../../lib/map/trajectory-eras";
-import { effectiveTimeZone } from "../../../../lib/time-zone";
+import { effectiveTimeZone, zonedDateString } from "../../../../lib/time-zone";
 
 export const metadata: Metadata = {
   title: "Progress",
@@ -62,11 +63,16 @@ export default async function ChildProgressPage({
     redirect(policy.href);
   }
 
-  // Lessons and the firsts ledger load alongside the view: all three
-  // need only the family and the child already re-scoped above, so none
-  // waits on the others. The ledger read is degraded to null on failure
-  // so it can only ever cost the firsts door, never the Progress page.
-  const [pageState, lessons, ledger] = await Promise.all([
+  const timeZone = effectiveTimeZone(data.family.time_zone);
+
+  // Lessons, the firsts ledger, and this school year's Hours minutes
+  // load alongside the view: all four need only the family and the
+  // child already re-scoped above, so none waits on the others. The
+  // ledger read is degraded to null on failure so it can only ever cost
+  // the firsts door, never the Progress page; Hours degrades to an
+  // empty map for the same reason (it is a display-only companion
+  // figure, never load-bearing for the page itself).
+  const [pageState, lessons, ledger, hoursMinutesBySubject] = await Promise.all([
     loadChildProgressPageState(
       {
         familyId: data.family.id,
@@ -75,7 +81,7 @@ export default async function ChildProgressPage({
           name: child.name,
           birthDate: child.birth_month,
         },
-        timeZone: effectiveTimeZone(data.family.time_zone),
+        timeZone,
       },
       { loadView: getChildProgressView },
     ),
@@ -83,6 +89,11 @@ export default async function ChildProgressPage({
       ? listLessonsForChild(data.family.id, child.id, 5)
       : Promise.resolve([]),
     getChildProgressLedger(data.family.id, child.id).catch(() => null),
+    getHoursMinutesBySubjectForChild(
+      data.family.id,
+      child.id,
+      zonedDateString(new Date(), timeZone),
+    ).catch(() => ({})),
   ]);
   if (pageState.status === "unavailable") {
     console.error(
@@ -159,6 +170,7 @@ export default async function ChildProgressPage({
           : null
       }
       abilitiesExplorer={abilitiesExplorer}
+      hoursMinutesBySubject={hoursMinutesBySubject}
     />
   );
 }

@@ -88,6 +88,37 @@ export function summarizeHours(rows: readonly HoursRow[]): HoursTotals {
   };
 }
 
+/**
+ * minutesBySubjectForChild(rows, childId, from): time logged for one
+ * child this school year, one subject at a time (founder ruling
+ * 2026-08-28: Hours time should be visible next to a subject's real
+ * progress evidence, never blended into the score itself). Same
+ * null-means-family-wide inclusion rule as scopedToViewContext
+ * (apps/web/lib/hours-view.ts): a family-wide block (co-op, say) counts
+ * for every child, exactly as it does on the Hours page itself.
+ *
+ * Display-only by design: the progress page looks this up by subjectId
+ * and only "spanish" (Second language) has a matching value today,
+ * since that is the one Hours subject chosen to line up 1:1 with the
+ * real progress taxonomy (hours-model.ts). No other Hours subject is
+ * assumed to map onto a taxonomy subject; this function does not
+ * hardcode which subjects "count", it just sums whatever it is given.
+ */
+export function minutesBySubjectForChild(
+  rows: readonly HoursRow[],
+  childId: string,
+  from: string | null,
+): Partial<Record<HoursSubject, number>> {
+  const bySubject = new Map<HoursSubject, number>();
+  for (const row of rows) {
+    if (from !== null && row.happenedOn < from) continue;
+    if (row.childId !== null && row.childId !== childId) continue;
+    const subject: HoursSubject = isHoursSubject(row.subject) ? row.subject : "other";
+    bySubject.set(subject, (bySubject.get(subject) ?? 0) + row.minutes);
+  }
+  return Object.fromEntries(bySubject);
+}
+
 /** Filters in code, never in the model's head. */
 export function filterHours(
   rows: readonly HoursRow[],

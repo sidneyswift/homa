@@ -164,6 +164,7 @@ export function ProgressView({
   hasFirsts = false,
   deeperChecks = true,
   abilitiesExplorer = null,
+  hoursMinutesBySubject,
 }: {
   view: ChildProgressView;
   /**
@@ -196,6 +197,12 @@ export function ProgressView({
   deeperChecks?: boolean;
   /** The dense taxonomy map, dark until its independent presentation flag. */
   abilitiesExplorer?: AbilitiesExplorerPayload | null;
+  /** This school year's Hours minutes, keyed by hours-model.ts subject
+   * id (founder ruling 2026-08-28). Display-only, threaded down to
+   * whichever subject-detail panel is open; only "spanish" (Second
+   * language) has a real value today, since that is the one Hours
+   * subject chosen to line up with a real progress-taxonomy subject. */
+  hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
 }) {
   const now = new Date();
   const updatedLine = progressUpdatedLine(view, now);
@@ -294,6 +301,7 @@ export function ProgressView({
               conflicts={view.conflicts}
               timeZone={view.timeZone}
               deeperChecks={deeperChecks}
+              hoursMinutesBySubject={hoursMinutesBySubject}
             >
               <ReportSnapshot
                 childName={view.childName}
@@ -317,6 +325,7 @@ export function ProgressView({
                 conflicts={view.conflicts}
                 timeZone={view.timeZone}
                 deeperChecks={deeperChecks}
+                hoursMinutesBySubject={hoursMinutesBySubject}
               />
             </div>
           </div>

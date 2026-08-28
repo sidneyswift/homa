@@ -16,6 +16,15 @@ export const HOURS_SUBJECTS = [
   "co-op",
   "life skills",
   "other",
+  // Added 2026-08-28: the one Hours subject that maps 1:1 onto the real
+  // progress-report taxonomy (packages/core/src/map/content.ts's
+  // "spanish", displayed there as "Second language" too), so a family's
+  // logged time can appear next to that subject's actual skill evidence.
+  // The other nine subjects above are deliberately left as Hours' own
+  // coarser vocabulary: several of them (reading in particular) span
+  // multiple real taxonomy subjects and don't have one honest home, and
+  // reconciling those is separately scoped, not assumed here.
+  "spanish",
 ] as const;
 
 export type HoursSubject = (typeof HOURS_SUBJECTS)[number];

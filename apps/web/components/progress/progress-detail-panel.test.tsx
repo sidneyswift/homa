@@ -138,6 +138,41 @@ describe("ProgressDetailPanel", () => {
     assert.match(html, /Tell Homa something looks wrong/);
   });
 
+  it("shows Hours minutes next to the evidence, never blended into it (founder ruling 2026-08-28)", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressDetailPanel
+          childId="child-1"
+          subject={MATH}
+          tile={TILE}
+          conflicts={PROGRESS_FIXTURE_VIEW.conflicts}
+          timeZone={PROGRESS_FIXTURE_VIEW.timeZone}
+          allowDeeperCheck
+          hoursMinutes={130}
+          onClose={() => {}}
+        />
+      </AppRouterContext.Provider>,
+    );
+    assert.match(html, /2h 10m logged in Hours this school year/);
+  });
+
+  it("shows no Hours line at all when nothing has been logged under this subject", () => {
+    const html = renderToStaticMarkup(
+      <AppRouterContext.Provider value={ROUTER}>
+        <ProgressDetailPanel
+          childId="child-1"
+          subject={MATH}
+          tile={TILE}
+          conflicts={PROGRESS_FIXTURE_VIEW.conflicts}
+          timeZone={PROGRESS_FIXTURE_VIEW.timeZone}
+          allowDeeperCheck
+          onClose={() => {}}
+        />
+      </AppRouterContext.Provider>,
+    );
+    assert.doesNotMatch(html, /logged in Hours/);
+  });
+
   it("mirrors show the deeper-check card with the button inert", () => {
     const html = renderToStaticMarkup(
       <AppRouterContext.Provider value={ROUTER}>
