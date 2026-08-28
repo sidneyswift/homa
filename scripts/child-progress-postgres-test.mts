@@ -3722,6 +3722,17 @@ async function runAdapterAssertions(input: {
       messageId: progressEvidenceMessageId,
       observedAt: "2026-07-11T17:30:00.123456Z",
       idempotencyKey: "postgres-journal",
+      claims: [
+        {
+          childId,
+          itemId: "literacy.emergent-reader",
+          answer: "getting_there" as const,
+          quote: "Maya can read a simple book",
+          confidence: "high" as const,
+          statement: "Reads an early chapter book independently",
+          subjectId: "literacy",
+        },
+      ],
     };
     assert.equal(
       (await service.recordJournalProgressEvidence(journalInput)).status,
@@ -3759,6 +3770,7 @@ async function runAdapterAssertions(input: {
         ...journalInput,
         quote: "Maya had a wonderful curious afternoon",
         idempotencyKey: "postgres-journal-observation",
+        claims: [],
       });
     assert.equal(observationResult.status, "no_match");
     const [persistedObservation] = await sql<
@@ -3802,6 +3814,7 @@ async function runAdapterAssertions(input: {
         ...journalInput,
         quote: "Maya had a wonderful curious afternoon",
         idempotencyKey: "postgres-journal-observation",
+        claims: [],
       });
     assert.equal(observationReplay.status, "duplicate");
     const [observationCount] = await sql<{ count: number }[]>`
