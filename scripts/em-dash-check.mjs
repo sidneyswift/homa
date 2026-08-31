@@ -53,6 +53,11 @@ const EXCLUDED_DIR_PREFIXES = [
   // authority cutover. These generated/reference artifacts are retained for
   // provenance only and never load into product context or authored guidance.
   "docs/homa-design/evidence/legacy/warm-playful/",
+  // Verbatim copy decks transcribed from 50 third-party apps' onboarding
+  // and paywall screens (Mobbin/Appllama captures, 2026-08-31) for the
+  // mobile onboarding + paywall v2 plan. Third-party UI punctuation is
+  // preserved exactly; not Homa's authored prose.
+  "work/onboardingandpaywall8-30/research/copy-decks/",
 ];
 
 const EXCLUDED_FILES = new Set([
@@ -61,6 +66,10 @@ const EXCLUDED_FILES = new Set([
   "docs/homa-design/_ds_bundle.js",
   // A verbatim, dated simulation transcript: frozen record, not guidance.
   "docs/homa-planning/plans/2026-07-25-overnight-icp-paywall-simulation-transcript.md",
+  // Two third-party articles pasted verbatim as onboarding/paywall research
+  // references (2026-08-30): captured source material, not Homa's prose.
+  "work/onboardingandpaywall8-30/article-2-onboarding-10x-better.md",
+  "work/onboardingandpaywall8-30/article-94-percent-paywall-view-rate.md",
   // Deliberately bad fixture content the copy scorer's tests assert against.
   "marketing/evals/fixtures/failing-bundle/article.mdx",
   // Defines and strips the EM_DASH constant: this file IS the runtime
