@@ -223,36 +223,58 @@ export interface OnboardingCompletionFacts {
 }
 
 /**
- * onboardingCompletionReached(facts): has this family finished the
- * onboarding arc?
+ * onboardingCompletionCause(facts): has this family finished the
+ * onboarding arc, and by which door?
  *
- * The counterweight to onboardingActiveForRow. Answering true ends the
- * free period: the door wall applies again, onboarding-mode stops
- * loading, and the in-turn generation tools come back. Answering false
- * keeps her inside it. Both directions cost real money in opposite
- * ways, which is why this is one named predicate with tests rather than
- * a condition inlined at a call site.
+ * The counterweight to onboardingActiveForRow. A non-null answer ends
+ * the free period: the door wall applies again, onboarding-mode stops
+ * loading, and the in-turn generation tools come back. Null keeps her
+ * inside it. Both directions cost real money in opposite ways, which is
+ * why this is one named predicate with tests rather than a condition
+ * inlined at a call site.
+ *
+ * The cause is the narration the transition event carries (2026-08-30
+ * spec, Outcome 5). When both doors are open at once (a scored report
+ * exists AND the record sat untouched past the backstop), the keystone
+ * wins the telling: she really did finish the arc, and "backstop" must
+ * stay reserved for the family the arc never reached, because that is
+ * the population the funnel needs to see.
  *
  * Only ever consulted for a family whose record says "active"; a done
  * family is never reopened.
  */
-export function onboardingCompletionReached(
+export function onboardingCompletionCause(
   facts: OnboardingCompletionFacts,
-): boolean {
-  // The backstop, always. See ONBOARDING_BACKSTOP_DAYS.
-  if (facts.recordUpdatedAt !== null) {
-    const ageMs = facts.now.getTime() - new Date(facts.recordUpdatedAt).getTime();
-    if (ageMs >= ONBOARDING_BACKSTOP_DAYS * 24 * 60 * 60 * 1000) return true;
-  }
-
+): "keystone" | "backstop" | null {
   // Founder ruling 2026-07-31, onboarding-completion-milestones: the
   // first scored report is the end of onboarding once family setup and
   // at least one child are real. These are durable product facts, unlike
   // checklist status strings, and they match the moment the parent has
   // received the core promise she came through onboarding to reach.
-  return (
+  if (
     facts.profileCompletedAt !== null &&
     facts.childCount > 0 &&
     facts.scoredReportCount > 0
-  );
+  ) {
+    return "keystone";
+  }
+
+  // The backstop. See ONBOARDING_BACKSTOP_DAYS. Its clock anchors to the
+  // record's last write, which the mobile bootstrap refreshes on every
+  // open of an unfinished walk, so this means 14 days of silence, not
+  // 14 days since onboarding began.
+  if (facts.recordUpdatedAt !== null) {
+    const ageMs = facts.now.getTime() - new Date(facts.recordUpdatedAt).getTime();
+    if (ageMs >= ONBOARDING_BACKSTOP_DAYS * 24 * 60 * 60 * 1000) return "backstop";
+  }
+
+  return null;
+}
+
+/** The boolean shape of onboardingCompletionCause, kept for callers that
+ *  only need the answer and not the telling. */
+export function onboardingCompletionReached(
+  facts: OnboardingCompletionFacts,
+): boolean {
+  return onboardingCompletionCause(facts) !== null;
 }
