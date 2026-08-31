@@ -36,7 +36,7 @@ Historical phase narratives and shipped-work notes live in `docs/homa-planning/b
 ## Repository shape
 
 - `apps/web`: the one deployable Next.js application, including marketing, onboarding, authenticated product routes, and the eve agent.
-- `apps/mobile`: an Expo client using the same Supabase and web-agent backend. It is not part of the root `pnpm dev` task.
+- `apps/mobile`: an Expo client using the same Supabase and web-agent backend. It is not part of the root `pnpm dev` task. System doctrine, seams, and verification ladder: `docs/homa-planning/16-mobile-native-architecture.md`.
 - `packages/core`: shared events, map content and scoring, schemas, and other domain code.
 - `packages/taxonomy`: the skill graph and its validation tooling.
 - `packages/design`: the typed Quiet authority contract and deterministic projections. Web and mobile still keep synchronized runtime copies while #720 and #724 migrate them to shared primitives.

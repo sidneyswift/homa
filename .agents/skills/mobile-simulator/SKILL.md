@@ -127,3 +127,12 @@ restart Claude Code Desktop. Metro and the booted simulator's installed
 apps do not survive that restart either, so afterward: reboot the
 device, `launch` the existing `.app` again (no rebuild needed), and
 restart Metro.
+
+## What a simulator run proves
+
+A driven simulator journey is rung L1 of the mobile verification ladder:
+it proves the journey end to end against the real backend, and it never
+proves audio routes, print or share destinations, StoreKit sheets, or
+release-build behavior. The ladder, the seam registry, and the lane laws
+live in `docs/homa-planning/16-mobile-native-architecture.md` and
+`apps/mobile/AGENTS.md`; shipping is the ios-release skill's job.

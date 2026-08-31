@@ -1,5 +1,13 @@
 # Mobile: stop the drift, then pass the web (PROPOSAL, 2026-07-20)
 
+> Status (2026-08-31): superseded. D1 to D6 were absorbed into the
+> 2026-07-28 launch plan's FD-3 and FD-4 and ruled there (gh#196, closed).
+> The render contract shipped kind-based in voice with a guaranteed
+> receipt, and as a parser table with a message-level fallback in chat
+> (gh#302, gh#376, both closed). The durable system model now lives in
+> [`../16-mobile-native-architecture.md`](../16-mobile-native-architecture.md).
+> Everything below is preserved evidence, not current direction.
+
 Status: proposed, awaiting founder review. Nothing here is implemented.
 Founder decisions are marked D1 to D6. General mobile parity has no owning
 ticket today: M1-17 is design-system integration and the mobile README

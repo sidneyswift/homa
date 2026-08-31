@@ -1,5 +1,15 @@
 # iOS: from companion skeleton to the best education app on the market (PROPOSAL, 2026-07-28)
 
+> Status (2026-08-31): executed in substance, then cut. The arcs shipped
+> (epics gh#299 and gh#302 through gh#308 are closed: release truth,
+> compliance pack, never-silent floor, native onboarding, StoreKit,
+> settings and deletion, channel identity). The public launch itself was
+> cut from the PMF queue on 2026-08-16: "No App Store launch is
+> authorized now" (gh#299 and gh#308 closing comments). Program posture
+> and reopen triggers:
+> [`../16-mobile-native-architecture.md`](../16-mobile-native-architecture.md) §2.
+> The spec below is preserved evidence.
+
 Status: proposed, awaiting founder review. Founder decisions are marked FD-1 to
 FD-8; founder-only actions live in their own checklist (§10). Everything else is
 agent-executable and filed as GitHub issues (the epic links them; issues are the
