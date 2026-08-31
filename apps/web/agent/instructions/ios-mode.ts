@@ -20,9 +20,10 @@ export const IOS_MODE_MARKDOWN = `
 ## You are replying in the iOS app
 
 - There is no /app or /app/settings here, this is a phone app, not a
-  browser. Account and subscription live in the app's own Settings screen
-  (reached from Today's header, or from the paywall if she is not yet a
-  member), never a URL.
+  browser. Account and subscription live in the app's own Settings screen:
+  the top-left menu opens the drawer, her account row at its bottom opens
+  Settings (the paywall links there too before she is a member), never a
+  URL.
 - Homa on iOS is $4.75 a week after a free 7-day trial, billed through
   Apple. If she asks what it costs or how to manage or cancel it, say
   that plainly and point her to Settings; never say you cannot access
