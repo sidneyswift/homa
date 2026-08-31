@@ -32,6 +32,7 @@ import { WalkScene } from "../../features/onboarding/walk-scene";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
+import { MakingShow } from "../../features/onboarding/making-show";
 import {
   loadOnboardingAnswers,
   markOnboardingComplete,
@@ -71,6 +72,7 @@ export default function MakingScreen() {
     "checking" | "yes" | "no"
   >("checking");
   const [checklistExited, setChecklistExited] = useState(false);
+  const [chipLabels, setChipLabels] = useState<string[]>([]);
   const scoredRef = useRef(false);
   // The checklist's live position, kept so the ready banner's "See it"
   // can close the session through the SAME path as the checklist's own
@@ -120,6 +122,17 @@ export default function MakingScreen() {
       }
       setChildName(target.name.trim());
       setChecklistChildId(target.childId);
+      {
+        // The easel's fact chips: her verbatim answers, capped at three
+        // (MakingShow's copy law: nothing on stage but her words).
+        const answers2 = await loadOnboardingAnswers(family.id).catch(() => null);
+        const first = answers2?.kids?.[0];
+        if (!cancelled && first) {
+          const loves = Array.isArray(first.love) ? first.love.slice(0, 2) : [];
+          const working = Array.isArray(first.workingOn) ? first.workingOn.slice(0, 1) : [];
+          setChipLabels([...loves, ...working].filter(Boolean).slice(0, 3));
+        }
+      }
       // Same position math the questionnaire itself uses: skip it
       // silently when there is nothing to ask (age out of range, or she
       // already answered everything for this child) rather than mount
@@ -182,16 +195,13 @@ export default function MakingScreen() {
     };
   }, [family, router]);
 
-  // Nothing left to interrupt once the page is ready and she is not
-  // mid-questionnaire: take her straight to the reveal, same as before
-  // this feature existed. While she is actively answering, this waits
-  // for her; the ready banner below is the only nudge.
+  // While she is actively answering, the page being ready only shows
+  // the banner (the checklist waits for her). Once no checklist is on
+  // screen, the easel show (MakingShow, wired per D9) owns the handoff:
+  // its completing prop plays the ease-out exit and onExitDone routes
+  // to the reveal, with reduced motion collapsing to an immediate call.
   const showingChecklist =
     checklistAvailable === "yes" && checklistChildId !== null && !checklistExited;
-  useEffect(() => {
-    if (!pageReady || showingChecklist) return;
-    router.replace("/reveal" as never);
-  }, [pageReady, router, showingChecklist]);
 
   function handleChecklistClose(exit: ChecklistExit | null) {
     setChecklistExited(true);
@@ -303,6 +313,16 @@ export default function MakingScreen() {
                       : "Got it. That helps me know your kid better."}
                   </NativeText>
                 ) : null}
+
+                {/* The easel show (D9, wired 2026-08-31): real work
+                    depicted, preview structurally impossible, her own
+                    answers as the set dressing. Its exit is the route
+                    to the reveal. */}
+                <MakingShow
+                  chipLabels={chipLabels}
+                  completing={pageReady}
+                  onExitDone={() => router.replace("/reveal" as never)}
+                />
 
                 {/* The honesty ribbon: the job's real notes are the only
                     claimed progress. Done notes recede; the live one

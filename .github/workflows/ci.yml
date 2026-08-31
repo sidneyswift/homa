@@ -450,6 +450,9 @@ jobs:
       - name: Tool deadline guard (no unbounded tool can freeze a turn)
         run: pnpm check:tool-deadlines
 
+      - name: Journey machine guard (onboarding flip narrated, gate honest, walk addressable)
+        run: pnpm check:journey
+
       - name: Dynamic tool event guard (no tool vanishes on a cold isolate)
         run: pnpm check:dynamic-tool-events
 
