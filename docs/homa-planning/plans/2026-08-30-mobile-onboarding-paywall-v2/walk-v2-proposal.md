@@ -1,7 +1,7 @@
 # Walk v2 proposal: the persuasive walk, screen by screen
 
-Status: **v2.2, skeleton RULED by Sidney 2026-08-31 (D1); remaining
-decisions D2-D16 open, taken one at a time. Nothing is built.**
+Status: **v2.2, ALL decisions D1-D16 RULED by Sidney 2026-08-31 (see
+the table at the bottom); execution underway on gh#1045 / PR #1046.**
 Companion to [spec.md](spec.md). The D1 design-space analysis (twenty
 sequences, three-judge panel) that produced this skeleton:
 [sequence-options.md](sequence-options.md).

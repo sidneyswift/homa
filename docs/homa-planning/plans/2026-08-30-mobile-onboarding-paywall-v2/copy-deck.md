@@ -1,11 +1,11 @@
 # Copy deck: every string in the walk, consolidated for D10 review
 
-Status: **awaiting Sidney's line-by-line markup (D10).** Until D10
-closes, this deck supersedes the inline strings in
-[walk-v2-proposal.md](walk-v2-proposal.md); on approval the proposal is
-updated to match and this deck becomes the string source for
-implementation. After Sidney's edits land, `homa-copy-reviewer` then
-`homa-copy-editor` run on the result, in that order.
+Status: **D10 CLOSED 2026-08-31: Sidney reviewed every line, both copy
+gates ran, and their accepted fixes are folded in below.** This deck is
+the string source of truth for implementation and supersedes the inline
+strings in [walk-v2-proposal.md](walk-v2-proposal.md). Strings ship
+verbatim; an implementation-forced change stops and gets flagged on
+gh#1045, never improvised.
 
 Conventions: `{kid}` = child's name; `{subject}`, `{interest}`, `{age}`,
 `{n}` = real per-family values; `{today_date}`, `{reminder_date}`,
