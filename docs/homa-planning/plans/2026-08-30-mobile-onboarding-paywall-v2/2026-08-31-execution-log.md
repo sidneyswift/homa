@@ -57,12 +57,48 @@ post-auth at S1, which keeps every beat above real.
   expo-haptics + expo-notifications (cdf98238 -> aeafade8). Everything
   on this branch OTA-publishes but reaches no phone until a store
   binary ships (ios-release skill owns that).
-- **Simulator walkthrough**: recorded below as it happens.
+- **Simulator walkthrough (completed same session, new binary with the
+  D13/D16 pods, live against prod on the sandbox +homatest831 family)**:
+  the recording is `walk-v2-recording-2026-08-31.mp4` (delivered to
+  Sidney; raw 590MB original in the session scratchpad). Verified live,
+  in walk order: the wall renders through the extracted purchase engine
+  with the documented simulator StoreKit-unreachable state; the D5
+  read-only Binder exception admits a walled family's pages while every
+  other route walls on the next tap; deck strings verbatim on
+  S1/S2/S6/S7/S8/S9/S12; the kids-before-you order; D15's chapter tag
+  ("Finn · Math · 1 of 16"), segmented bar, cover stop-affordance, and
+  the deterministic receipt beat ("That's Math done. 2 answers so
+  far."); D8's one close path scored Finn's report on the way out and
+  prod's own resolver re-flipped the record; MakingShow rendered for
+  the first time ever with the kid's verbatim chips and real job notes,
+  and its exit carried the walk to a reveal holding a REAL personalized
+  page (dinosaur multiplication split exactly at the edge the checklist
+  answers named); S10 presented at the climax with the real page as
+  hero and invented no price claims in the unreachable state; S11 chose
+  its armed branch by READING the gate (spec Outcome 2/6 end to end);
+  the walk completed into the Binder; force-quit + relaunch resumed on
+  the exact saved step.
+- **Two wall-mechanics proofs came free**: prod's answer route refused
+  the checklist for the walled family (the gh#305 exemption correctly
+  scoped to mid-onboarding families), and reopening the record via SQL
+  flipped it back to grace, after which saves succeeded.
+- **Pre-deploy expectations confirmed, not defects**: the prod event
+  relay rejected the new step names (you/paywall/decline, and the
+  binder door) until this branch's registry deploys, and prod's old
+  step CHECK constraint refused the new resume positions until the
+  migration applies (saves are non-blocking by design, so the walk
+  never stalled). Both light up at deploy; the migration-apply law
+  applies.
+- **One copy nit found live**: the checklist save-error line renders
+  the API layer's thrown message ("That did not save. Nothing is lost,
+  so try again."), not the deck's revised S8 string; the deck fix
+  belongs in onboarding-card-api where the message originates. Filed
+  into the deck-parity follow-up on gh#1045.
 
 ## Next best experiment
 
-Drive the full walk on the simulator against the new binary: resume
-check (force-quit mid-walk), the S10 presentation in the simulator's
-no-StoreKit state (the documented "can't reach the App Store" screen),
-S11's free-window branch, and the D12 surface-by-surface motion
-judgment from a real recording. Then the gh#1049 gallery assets.
+The gh#1049 gallery assets (one 9-12 page, one 13+ page via the real
+pipeline), then the guest head. After this branch deploys and its
+migration applies, re-run the S8-to-S11 arc once on a fresh +homatest
+family to watch onboarding.completed land in public.events with cause
+"keystone" (the sandbox harness in gh#1047 makes that a command).
