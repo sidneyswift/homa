@@ -1,0 +1,36 @@
+# Facetune: onboarding + paywall
+
+Source: Appllama MCP, app_id `1149994032`. Revenue $11M/mo, 500K downloads, 4.62★ (374,572 ratings). Category: Photo & Video / Lifestyle. Publisher: Lightricks.
+
+Facetune runs on only 9 onboarding screens against the reference article's 17-step prescribed sequence (welcome through paywall), so by construction it can only hit a handful of the article's beats: it keeps a compressed identity/desire pass (gender, birth year, "I want to use Facetune to…" goals) and a single fake-personalization loading screen, then cuts straight to account creation and the offer. It skips usage-frequency, referral-source, favorites/investment, social-proof-as-its-own-beat, notifications permission, all four pain-point screens, and both stats/proof screens: the entire "pain amplification" engine the article credits for its 94% paywall view rate. Worse, Facetune puts full account creation (email + OTP) *before* the paywall, which is the exact inversion of the article's "account last, signup only after purchase" rule. This reads as a genuinely different model, not a shrunk version of the article's model: skip persuasion, get to a hard, time-boxed monetization ask fast. At $11M/mo on a photo-editing impulse-use app, it clearly works for Facetune's audience and category, but that's a different buying psychology than a parent deciding whether to trust a homeschool subscription with her family's routine.
+
+## Onboarding (9 screens, journey order)
+
+| # | Screen | What it does |
+| - | --- | --- |
+| 1 | Onboarding Splash (video) | Auto-playing brand video that also seeds later UI patterns (toggle, pill selects, scroll picker, OTP inputs): pure motion/brand moment, no user input. |
+| 2 | Consent Terms | Scrollable ToS/consent text with an "Agree" toggle; CTA stays disabled until toggled. Legal gate before anything else, not in the article's sequence. |
+| 3 | Gender Question | Step counter + skip. Single-select outlined pills. Matches the article's step 2 (gender): quick, low-effort, keeps momentum. |
+| 4 | Birth Year Picker | Step counter + skip, back chevron. Wheel picker for birth year. Extra demographic step the article's sequence doesn't call for. |
+| 5 | Editing Goals ("I want to use Facetune to…") | Multi-select icon chips (smooth skin, whiten teeth, reshape features, apply makeup, create with AI, etc.), "choose as many as you want." This is the article's "desire before features" step (step 5): asking what job they want done before showing the product. |
+| 6 | Loading | Pastel line-art illustration + loading message on a blank screen. Matches the article's step 13 "personalizing…" fake-progress beat, but compressed to one screen with no checklist of "things being customized." |
+| 7 | Sign Up Landing | "Join 200 million people already using Facetune!" over a photo collage: this is the article's social-proof beat (step 7), but it's fused directly into the account-creation screen (Apple/Google/phone/email/Facebook buttons, pre-checked marketing opt-in). Account creation starts here, before any paywall, which directly contradicts the article's "account last" rule. |
+| 8 | Email Entry | Centered header, focused email field, "Send code" CTA, progress dots (2-step flow visible). |
+| 9 | Email Code Verify | 6-box OTP entry, disabled CTA until filled, inline "resend/didn't get it" help links. |
+
+## Paywall (2 screens)
+
+| # | Screen | Notes |
+| - | --- | --- |
+| 1 | Free Trial Explainer | "How your free trial works" vertical timeline: Today (full VIP access + unlimited saves) → In 5 days (reminder trial is ending) → In 7 days (VIP subscription begins, charged, cancel anytime before). Price shown once, small, below the timeline: "7-day free trial, then $77.99/year ($6.49/month)." CTA is a high-contrast black pill reading "Try for $0.00": trial-framing language, not price language. "Show all plans" link underneath for anyone who wants to see alternatives. |
+| 2 | VIP Subscription Offer | Hero close-up beauty image with a "Pick a color" makeup-tool overlay (feature bait), headline "Ready to go VIP?", 3-line benefit checklist (VIP tools, unlimited saves, higher AI usage limits). Two plan cards: **Yearly $77.99/year (as $1.49/week)** pre-selected with an "87% OFF" badge, vs **Weekly $11.99/week** shown unselected as the anchor. CTA "Continue," with "7 days free, then $77.99/year" in small gray text below. |
+
+Pricing framing is a classic decoy-anchor pattern: the weekly price ($9.99–11.99/week, i.e. roughly $520–620/year if someone actually stayed on it) exists mainly to make the discounted annual ($77.99, badged 87% off) look like the obvious rational choice. The trial is genuinely free-to-start ("Try for $0.00") but auto-converts to a full annual charge at day 7 unless canceled, and the "then $X/year" disclosure is present but small and secondary to the trial CTA: mild but real urgency/soft-dark-pattern territory, not outright deceptive.
+
+## Verdict for our spec
+
+- **This is a different model, not a compressed version of the article's model.** Facetune's 9 screens skip essentially all of the article's pain-amplification and proof-before-offer machinery (four pain-point screens, two stats screens) and instead spend its short screen budget on demographic collection and mandatory account creation. It optimizes for *speed to a monetizable account*, not for *emotional readiness to buy*. Those are different goals, and the article's 94% number was earned by the latter approach, not this one.
+- **Account-before-paywall is the article's named anti-pattern, and Facetune does it anyway.** For an impulse photo-editing app with a huge existing user base ("200 million people already using Facetune"), forcing signup first is low-cost: the brand recognition itself does the trust work the article's pain/proof screens would otherwise provide. Homa has no such brand recognition with a first-time parent, so borrowing this shortcut would remove the trust-building the article's sequence exists to provide, with nothing to replace it.
+- **The weekly-price decoy against a discounted annual plan is a pattern to avoid outright**, not adapt. It already conflicts with the paywall-claims laws this project has ruled on for its own product (charge-terms clarity, no manufactured urgency). Homa's audience is a parent budgeting for her child's education, not an impulse buyer comparing $9.99/week against 87%-off annual anchoring.
+- **The one piece worth borrowing is the "desire before features" goals screen** (step 5 in the article, screen 5 here): a fast multi-select on what the user wants the product to do for them, asked before any feature pitch. That's cheap, keeps momentum, and matches the article's own logic. It's the compressed flow's one screen that is doing real persuasion work rather than just data collection or paywall setup.
+- **Net read: Facetune's model fits Facetune**: high-volume, impulse-use, already-trusted brand, weekly-cadence habitual spend. It is almost certainly the wrong model for Homa, where the buying decision is slower, higher-trust, and family-oriented; the article's longer pain-first, account-last sequence is the closer fit for our spec, even if we don't need all 17 of its steps.

@@ -56,3 +56,9 @@ __pycache__/
 # The ingestion spreadsheet is generated from ingestion-ledger.json on demand
 # (.cosmo/scripts/ingestion-spreadsheet.py). The ledger is the tracked truth.
 .cosmo/ingestion-ledger.xlsx
+
+# Raw competitor onboarding screen recordings pulled during the mobile
+# onboarding + paywall v2 research (2026-08). The analysis docs cite the
+# extracted frame images (tracked); the source videos are bulky third-party
+# media that stays local only.
+work/onboardingandpaywall8-30/**/*.mp4
