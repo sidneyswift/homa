@@ -15,7 +15,7 @@ Source: Appllama MCP, app_id 1470373330 (Remini - AI Photo Enhancer, photo/video
 - H: Welcome to Remini! 👋
 - Terms line: By continuing, you accept our Terms of Service and acknowledge receipt of our Privacy Policy (Terms of Service and Privacy Policy underlined links)
 - CTA: Get Started (white pill, trailing chevron)
-- Visual: hand holding a blurry pink-tinted portrait photo on black, doodle marks.
+- Visual: hand holding a blurry pink-tinted portrait photo on black, hand-drawn marks.
 - Layout economy: ~23 visible words, 4 elements (hero image, headline, terms line, CTA). No skip, no page dots.
 
 ## S2 Privacy Consent (onb_o0s5h)
@@ -46,7 +46,7 @@ Source: Appllama MCP, app_id 1470373330 (Remini - AI Photo Enhancer, photo/video
 - H: Get the most out of Remini! 🚀
 - Body: To continue, Remini needs access to your photos. You can change this later in the Settings app. (Settings in italics)
 - CTA: Continue (white pill, trailing chevron)
-- Visual: taped polaroid collage of portraits with coral blob shapes.
+- Visual: taped polaroid collage of portraits with coral rounded shapes.
 - Layout economy: ~24 words, 3 elements. Pre-permission primer before the OS photo dialog.
 
 ## S5 Gender Selection (onb_4mbwp)

@@ -97,7 +97,7 @@ For each flow below: screen position in the flow → asset type → style → on
 
 ### [bless.](https://mobbin.com/flows/aa956b58-fb2c-40b5-a9af-ca313fb252ba): 2-screen subscription flow, both previewed
 51. Empty/text-only: plain dark settings list, no illustration.
-52. Flat vector illustration: abstract organic blob shapes in saturated colors behind a small line-drawn mascot/paw icon, benefit checklist below, paywall.
+52. Flat vector illustration: abstract rounded shapes in saturated colors behind a small line-drawn mascot/paw icon, benefit checklist below, paywall.
 
 ### [adidas](https://mobbin.com/flows/6ce01096-1ad9-4809-84ad-a8708e2365ee): browse-review flow, 3 previewed
 53. Photo-real image (UGC): real customer photo embedded in a "share how you wear it" product section.

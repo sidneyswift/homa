@@ -50,7 +50,7 @@ Note: 4 words, 2 elements; the only loading moment, placed right after account c
 ## S5 Personal Welcome (Onboarding, position 8)
 
 - Header: back arrow / NOOM / progress bar (near zero)
-- Mascot: green smiling blob illustration with red sparkles
+- Mascot: green smiling rounded character with red sparkles
 - H: Welcome to Noom, *Morris* (first name in italic serif)
 - Body: We'll help you build healthy habits that stick! Start setting up your profile with just **a few quick questions.** (bold as rendered)
 - CTA: Continue

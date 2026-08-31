@@ -63,7 +63,7 @@ capturing the whole arc start to finish.
 7. **Weekly goal radios**: "Lose 1 kilogram per week" selected (filled
    checkmark), progress bar 5/7.
 8. **Account creation**: email field filled with a realistic fake
-   address (autocorrect red squiggle visible under it), password field
+   address (autocorrect red spellcheck underline visible under it), password field
    focused with an empty clear-icon.
 9. **Submission loading state**: the very next sampled frame shows the
    same Create Account screen dimmed/grayed out with a white rounded
