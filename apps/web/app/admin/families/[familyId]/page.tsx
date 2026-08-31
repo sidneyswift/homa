@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { getFamilyDetail, type FamilyDetailKid } from "../../../../lib/admin/family-detail-data";
+import { getFamilyDetail, type FamilyDetail, type FamilyDetailKid } from "../../../../lib/admin/family-detail-data";
 import { requireFounder } from "../../../../lib/admin/gate";
 import { dripLabel } from "../../../../lib/drip/labels";
 import { ageYears, familyDisplayName, formatTokens, timeAgo, timeLabel, adminTimeZone } from "../../../../lib/admin/format";
@@ -65,6 +65,67 @@ function kidChecklistState(kid: FamilyDetailKid): { tone: PillTone; pill: string
     pill: `${kid.answered} answered · ${kid.questionsLeft} left`,
     line: `mid checklist · last answer ${timeAgo(kid.lastAnswerAt)}`,
   };
+}
+
+/**
+ * The economic machine, read whole (spec 2026-08-30 Outcomes 4-6): the
+ * onboarding record, the gate's answer as the phone hears it, and the
+ * narrated flip with its cause. This panel renders the same reads the
+ * product runs; nothing here derives its own version of the state.
+ */
+function JourneyMachineSection({
+  machine,
+  timeZone,
+}: {
+  machine: FamilyDetail["journeyMachine"];
+  timeZone: string;
+}) {
+  const record = machine.record;
+  const recordPill: { tone: PillTone; label: string } = record
+    ? record.state === "done"
+      ? { tone: "sage", label: "free window ended" }
+      : { tone: "gold", label: "free window open" }
+    : { tone: "stone", label: "never entered the flow" };
+  const gateCopy: Record<typeof machine.gate.reason, string> = {
+    entitled: "open · entitled",
+    onboarding_grace: "open · onboarding grace",
+    walled: "walled",
+  };
+  return (
+    <div className="mt-3 border-t border-border-subtle pt-3">
+      <p className="text-[0.72rem] font-bold text-muted">Free window and wall</p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Pill tone={recordPill.tone} title={record?.updatedAt ? `record written ${timeLabel(record.updatedAt, timeZone)}` : "no onboarding record"}>
+          {recordPill.label}
+        </Pill>
+        <Pill
+          tone={machine.gate.reason === "walled" ? "clay" : "sage"}
+          title="The gate's answer for the phone, from the same functions the app calls"
+        >
+          gate: {gateCopy[machine.gate.reason]}
+        </Pill>
+        {machine.gate.lapsed ? <Pill tone="stone">lapsed</Pill> : null}
+      </div>
+      <ul className="mt-2 flex flex-col gap-1 text-xs text-subtle">
+        {machine.completedEvent ? (
+          <li>
+            Flipped {timeAgo(machine.completedEvent.createdAt)} · cause:{" "}
+            <span className="font-semibold text-body">{machine.completedEvent.cause}</span>
+            {machine.completedEvent.cause === "backstop" && machine.completedEvent.anchorUpdatedAt
+              ? ` (clock anchored ${timeLabel(machine.completedEvent.anchorUpdatedAt, timeZone)})`
+              : machine.completedEvent.scoredReportCount !== null
+                ? ` (${machine.completedEvent.scoredReportCount} scored report${machine.completedEvent.scoredReportCount === 1 ? "" : "s"}, ${machine.completedEvent.childCount ?? "?"} kid${machine.completedEvent.childCount === 1 ? "" : "s"})`
+                : ""}
+          </li>
+        ) : record?.state === "done" ? (
+          <li>Record is done but no transition event exists: the flip predates narration (before 2026-08-31).</li>
+        ) : null}
+        {record?.paywallShownAt ? (
+          <li>Paywall first shown {timeAgo(record.paywallShownAt)}.</li>
+        ) : null}
+      </ul>
+    </div>
+  );
 }
 
 export default async function AdminFamilyDetailPage({
@@ -146,6 +207,7 @@ export default async function AdminFamilyDetailPage({
               <span className="text-body">Last heard from</span>
             </li>
           </ul>
+          <JourneyMachineSection machine={detail.journeyMachine} timeZone={timeZone} />
         </div>
         <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm">
           <p className="text-[0.72rem] font-bold text-muted">Kids</p>

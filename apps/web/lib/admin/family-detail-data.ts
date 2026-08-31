@@ -9,8 +9,19 @@ import {
 
 import { adminDb } from "./db";
 import { deriveFamilyStage, type FamilyStage } from "./stage";
+import {
+  gateOpenForReason,
+  gateReason,
+  type GateReason,
+} from "../billing/gate-reason";
+import { familyAccountGate } from "../billing/wall";
 import { summarizeUsageCost } from "../model-pricing";
 import { getModelPriceBook } from "../model-pricing-live";
+import {
+  familyOnboardingActive,
+  readOnboardingRecord,
+  type OnboardingRecord,
+} from "../onboarding/state";
 
 /**
  * One family's whole story for /admin/families/[familyId] (MJ-14,
@@ -92,6 +103,31 @@ export interface FamilyDetail {
   /** Price-book estimate of the family's 28 day AI spend. */
   cost28dUsd: number;
   recentEvents: { name: string; createdAt: string }[];
+  /**
+   * The economic machine, read whole (2026-08-30 spec, Outcomes 4-6;
+   * system-model.md move 4): the durable onboarding record, the gate's
+   * answer as the phone would hear it, and the narrated flip. Before
+   * this section existed, "why is this family walled" took a five-file
+   * trace and a relaunch of the app; now it is this one read, and its
+   * answer comes from the same functions the product itself runs, never
+   * a parallel derivation that can drift.
+   */
+  journeyMachine: {
+    /** families.context.onboarding as stored; null = never entered the flow. */
+    record: OnboardingRecord | null;
+    /** The flag-gated predicate the mobile exemption reads. */
+    onboardingActiveMobile: boolean;
+    /** The gate's decision for the mobile channel: open, and why. */
+    gate: { open: boolean; reason: GateReason; lapsed: boolean };
+    /** The one onboarding.completed transition event, when it exists. */
+    completedEvent: {
+      cause: string;
+      anchorUpdatedAt: string | null;
+      childCount: number | null;
+      scoredReportCount: number | null;
+      createdAt: string;
+    } | null;
+  };
 }
 
 export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | null> {
@@ -247,6 +283,37 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
     order by created_at desc limit 12
   `;
 
+  // The economic machine, read whole. The record comes from the same
+  // context blob every product read uses; the gate decision runs the
+  // SAME functions the /api/billing/gate route runs (familyAccountGate,
+  // familyOnboardingActive, gateReason), so this panel can never tell a
+  // different story than the phone hears. The transition event is the
+  // move-1 narration; at most one exists because the resolver only
+  // emits on the real active -> done flip.
+  const contextRows = await sql<{ context: unknown }[]>`
+    select context from public.families where id = ${familyId}
+  `;
+  const onboardingRecord = readOnboardingRecord(contextRows[0]?.context ?? null);
+  const onboardingActiveMobile = familyOnboardingActive({
+    profileCompletedAt: family.profile_completed_at,
+    context: contextRows[0]?.context ?? null,
+  });
+  const accountGate = await familyAccountGate(familyId);
+  const mobileGateReason = gateReason({
+    checkoutRequired: accountGate.checkout !== null,
+    onboardingExempt: onboardingActiveMobile,
+  });
+  const completedEventRows = await sql<
+    { props: Record<string, unknown> | null; created_at: string }[]
+  >`
+    select props, created_at::text as created_at
+    from public.events
+    where family_id = ${familyId} and name = 'onboarding.completed'
+    order by created_at desc limit 1
+  `;
+  const completedRow = completedEventRows[0] ?? null;
+  const completedProps = completedRow?.props ?? null;
+
   const answersByKid = new Map<
     string,
     { record: Record<string, MapAnswer>; lastAnswerAt: string }
@@ -365,5 +432,30 @@ export async function getFamilyDetail(familyId: string): Promise<FamilyDetail | 
       { rates: priceBook.rates },
     ).estimatedUsd,
     recentEvents: events.map((event) => ({ name: event.name, createdAt: event.created_at })),
+    journeyMachine: {
+      record: onboardingRecord,
+      onboardingActiveMobile,
+      gate: {
+        open: gateOpenForReason(mobileGateReason),
+        reason: mobileGateReason,
+        lapsed: accountGate.lapsed,
+      },
+      completedEvent: completedRow
+        ? {
+            cause: typeof completedProps?.cause === "string" ? completedProps.cause : "unknown",
+            anchorUpdatedAt:
+              typeof completedProps?.anchor_updated_at === "string"
+                ? completedProps.anchor_updated_at
+                : null,
+            childCount:
+              typeof completedProps?.child_count === "number" ? completedProps.child_count : null,
+            scoredReportCount:
+              typeof completedProps?.scored_report_count === "number"
+                ? completedProps.scored_report_count
+                : null,
+            createdAt: completedRow.created_at,
+          }
+        : null,
+    },
   };
 }
