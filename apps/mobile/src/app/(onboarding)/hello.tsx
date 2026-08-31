@@ -73,13 +73,19 @@ export default function HelloScreen() {
             <NativeText role="display" tone="strong" style={{ fontSize: 40, lineHeight: 46 }}>
               {firstName ? `Nice to meet you, ${firstName}.` : "Nice to meet you."}
             </NativeText>
+            {/* Deck S1 (D10 approved 2026-08-31, DELTA change 5): one
+                claim, per the corpus's 8-25 word welcome norm. The old
+                four-job list duplicated S2's options and is cut. */}
             <NativeText role="bodyLarge" tone="body" style={{ maxWidth: "92%" }}>
-              {"I'm Homa. I make worksheets for your kids, plan your weeks, keep your hours, and take the questions you'd usually google at 10pm. First, tell me a little about your family, so everything I make is customized for your kids."}
+              {"I'm Homa. I make worksheets for your kids."}
+            </NativeText>
+            <NativeText role="body" tone="body" style={{ maxWidth: "92%" }}>
+              {"Tell me a little about your family, and the first worksheet I make will have your kid's name on it."}
             </NativeText>
           </>
         ) : null}
         <View style={{ marginTop: "auto", gap: space.sm }}>
-          <Button label="Let's go" size="lg" onPress={advance} />
+          <Button label="Let's go" size="lg" onPress={advance} testID="hello.letsGo" />
           {/* No Back on the first beat, but the primary sits at the
               same height as on every screen that has one: a silent
               44pt placeholder keeps the walk's button rhythm steady. */}

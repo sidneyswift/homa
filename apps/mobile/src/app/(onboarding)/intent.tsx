@@ -21,10 +21,12 @@ import { colors, palette, radius, space } from "../../theme/tokens";
  * call 2026-08-23), which also retired the reaction-line fetch and the
  * "One moment" wait it caused on Continue.
  */
+// Deck S2 (D10 approved 2026-08-31): parallel verb set, "for my kid"
+// cut per Sidney.
 const OPTIONS: { intent: OnboardingIntent; label: string }[] = [
-  { intent: "worksheets", label: "Worksheets for my kids" },
-  { intent: "plan", label: "Planning our week" },
-  { intent: "hours", label: "Keeping our hours" },
+  { intent: "worksheets", label: "Make a worksheet" },
+  { intent: "plan", label: "Plan our week" },
+  { intent: "hours", label: "Keep our hours" },
   { intent: "all", label: "Honestly, all of it" },
 ];
 
@@ -44,13 +46,12 @@ export default function IntentScreen() {
   async function continueWalk() {
     if (!family || !picked || saving) return;
     setSaving(true);
-    // Step stays "kids": the you screen between here and there has no
-    // step value of its own (the step column's check constraint
-    // predates it), so a resume lands on the kid questions.
     await saveOnboardingState(family.id, "kids", { intent: picked });
     reportOnboardingStep(family.id, "kids", picked);
     setSaving(false);
-    router.replace("/you" as never);
+    // Walk v2 order: the kids come right after the pick; the parent
+    // screen (S7) follows them so the making screen can use her name.
+    router.replace("/kids" as never);
   }
 
   return (
@@ -67,6 +68,7 @@ export default function IntentScreen() {
                 key={option.intent}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
+                testID={`intent.option.${option.intent}`}
                 onPress={() => setPicked(option.intent)}
                 style={{
                   minHeight: 52,
@@ -92,12 +94,14 @@ export default function IntentScreen() {
             onPress={() => void continueWalk()}
             disabled={!picked || saving || !family}
             busy={saving}
+            testID="intent.continue"
           />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Back"
             onPress={() => router.replace("/hello" as never)}
             style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+            testID="intent.back"
           >
             <NativeText role="control" tone="muted">
               Back

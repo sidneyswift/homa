@@ -151,6 +151,7 @@ export const MOBILE_ONBOARDING_STEPS = [
   "hello",
   "intent",
   "kids",
+  "you",
   "making",
   "reveal",
   "paywall",

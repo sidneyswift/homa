@@ -105,6 +105,7 @@ const STEP_ROUTES: Record<OnboardingStep, string> = {
   hello: "/hello",
   intent: "/intent",
   kids: "/kids",
+  you: "/you",
   making: "/making",
   reveal: "/reveal",
   paywall: "/paywall",
