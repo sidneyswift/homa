@@ -57,7 +57,8 @@ const POLL_MS = 4_000;
 
 export default function MakingScreen() {
   const router = useRouter();
-  const { family } = useFamilyData();
+  const { family, memberDisplayName } = useFamilyData();
+  const parentFirstName = memberDisplayName?.trim().split(/\s+/u)[0] ?? null;
   const [childName, setChildName] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [phase, setPhase] = useState<"starting" | "building" | "failed">(
@@ -248,12 +249,12 @@ export default function MakingScreen() {
 
             {showingChecklist && checklistChildId ? (
               <>
-                {/* The frame before the first question (founder call
-                    2026-08-23): the heading says what Homa is doing, so
-                    this line says what SHE is about to do and why, or a
-                    bare question lands out of nowhere. Once the page is
-                    ready, "While Homa draws" stops being true, so the
-                    ready banner takes this slot instead. */}
+                {/* The chapter cover (deck S8, D15): the heading says
+                    what Homa is doing, so this line says what SHE is
+                    about to do and why, by name (DELTA change 4: her
+                    name lands the screen right after she gives it).
+                    Once the page is ready, "While I draw" stops being
+                    true, so the ready banner takes this slot instead. */}
                 {pageReady ? (
                   <View
                     style={{
@@ -284,8 +285,10 @@ export default function MakingScreen() {
                 ) : (
                   <NativeText role="body" tone="body">
                     {childName
-                      ? `While Homa draws, answer a few quick questions about ${childName}. Each answer builds ${childName}'s progress report and shapes the lesson plans to come.`
-                      : "While Homa draws, answer a few quick questions about your kid. Each answer builds their progress report and shapes the lesson plans to come."}
+                      ? parentFirstName
+                        ? `While I draw, ${parentFirstName}, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
+                        : `While I draw, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
+                      : "While I draw, tell me about your kid. Every answer builds their progress report."}
                   </NativeText>
                 )}
                 <ChecklistTakeover

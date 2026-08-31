@@ -1,5 +1,6 @@
 import {
   buildMapQuestionQueue,
+  getMapItem,
   planQuestions,
   type MapAnswer,
   type MapItem,
@@ -188,6 +189,70 @@ export function checklistPositionFor(child: MapStateChild): ChecklistPosition {
     minutesLeft: Math.max(1, Math.ceil((queue.length * SECONDS_PER_QUESTION) / 60)),
     complete: child.answered > 0 && queue.length === 0,
     currentItem: queue[0]?.item ?? null,
+  };
+}
+
+/**
+ * The rechaptered checklist (D15, ruled 2026-08-31): the adaptive queue
+ * is already subject-contiguous (buildMapQuestionQueue walks the age
+ * plan in domain order, one askable question per subject at a time), so
+ * a chapter IS a subject, and the counter counts chapters, the only
+ * total the adaptive ladder makes deterministic. Every derived number
+ * here is computable from the child's saved answers alone, so walk and
+ * chat render identical structure.
+ */
+export interface ChecklistChapter {
+  subjectId: string;
+  subjectName: string;
+  /** Saved answers inside this subject. */
+  answered: number;
+  /** Whether the subject still has an askable question right now. */
+  open: boolean;
+  state: "done" | "current" | "upcoming";
+}
+
+export interface ChecklistChapterPosition {
+  chapters: ChecklistChapter[];
+  /** 1-based chapter index of the current question, null when complete. */
+  currentIndex: number | null;
+  totalChapters: number;
+}
+
+export function checklistChaptersFor(child: MapStateChild): ChecklistChapterPosition {
+  const answers = Object.fromEntries(
+    child.answers.map((entry) => [entry.itemId, entry.answer]),
+  );
+  const plans = planQuestions(child.ageMonths);
+  const queue = buildMapQuestionQueue(plans, answers);
+  const openSubjects = new Set(queue.map((entry) => entry.subjectId));
+  const currentSubjectId = queue[0]?.subjectId ?? null;
+  const answeredBySubject = new Map<string, number>();
+  for (const entry of child.answers) {
+    const subjectId = getMapItem(entry.itemId)?.subject.id;
+    if (!subjectId) continue;
+    answeredBySubject.set(subjectId, (answeredBySubject.get(subjectId) ?? 0) + 1);
+  }
+  const chapters: ChecklistChapter[] = plans.map((plan) => {
+    const open = openSubjects.has(plan.subjectId);
+    const answered = answeredBySubject.get(plan.subjectId) ?? 0;
+    return {
+      subjectId: plan.subjectId,
+      subjectName: getMapItem(plan.base.id)?.subject.displayName ?? plan.subjectId,
+      answered,
+      open,
+      state:
+        plan.subjectId === currentSubjectId
+          ? "current"
+          : open
+            ? "upcoming"
+            : "done",
+    };
+  });
+  const currentIndex = chapters.findIndex((chapter) => chapter.state === "current");
+  return {
+    chapters,
+    currentIndex: currentIndex === -1 ? null : currentIndex + 1,
+    totalChapters: chapters.length,
   };
 }
 

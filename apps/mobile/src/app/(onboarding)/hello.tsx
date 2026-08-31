@@ -11,6 +11,7 @@ import {
 } from "../../features/onboarding/onboarding-state";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { getMyMemberDisplayName } from "../../lib/family";
+import { hapticAdvance } from "../../lib/haptics";
 import { space } from "../../theme/tokens";
 
 /**
@@ -55,6 +56,7 @@ export default function HelloScreen() {
   function advance() {
     if (advanced.current) return;
     advanced.current = true;
+    hapticAdvance();
     router.replace("/intent" as never);
   }
 

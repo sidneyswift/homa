@@ -10,6 +10,10 @@ import { NativeText } from "../../components/ui/semantic";
 import {
   APPLE_NATIVE_PROVIDER_PRODUCTS,
 } from "../../features/billing/constants";
+import {
+  canScheduleReminders,
+  scheduleTrialEndReminder,
+} from "../../features/billing/trial-reminder";
 import { useApplePurchase } from "../../features/billing/use-apple-purchase";
 import { useBillingGate } from "../../features/billing/use-billing-gate";
 import { useFamilyData } from "../../features/family/use-family-data";
@@ -18,6 +22,7 @@ import {
   reportOnboardingStep,
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
+import { hapticAdvance, hapticSuccess } from "../../lib/haptics";
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import {
@@ -108,8 +113,14 @@ export default function PaywallScreen() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const reported = useRef(false);
   const firstPlanRef = useRef<View>(null);
+  const [reminderReady, setReminderReady] = useState(false);
+  const trialDaysRef = useRef<number | null>(null);
   useWalkCharacterState("idle");
   useWalkSky("gold");
+
+  useEffect(() => {
+    void canScheduleReminders().then(setReminderReady).catch(() => {});
+  }, []);
 
   const {
     connected,
@@ -124,7 +135,20 @@ export default function PaywallScreen() {
   } = useApplePurchase({
     familyId: family?.id ?? "",
     fetchWhen: Boolean(family),
-    onEntitled: refresh,
+    onEntitled: async () => {
+      // D16: purchase confirmed is one of the walk's three success
+      // moments. D13: the automatic trial-end reminder schedules the
+      // moment the trial really starts (permission asked here, never
+      // mid-walk); a denial is a normal outcome and stays silent.
+      hapticSuccess();
+      const days = trialDaysRef.current;
+      if (days) {
+        await scheduleTrialEndReminder(
+          new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+        ).catch(() => false);
+      }
+      await refresh();
+    },
   });
 
   useEffect(() => {
@@ -172,6 +196,26 @@ export default function PaywallScreen() {
   const trialDays = introFreeTrialDays(selectedProduct);
   const annualEquivalent = usdMonthlyEquivalent(annualStoreProduct);
   const save = savePercent(annualStoreProduct, monthlyStoreProduct);
+  // Deck S10 reminder line: renders only when the reminder can really
+  // fire (permission already granted; the Stripe email fallback does
+  // not cover Apple trials yet, gh#1045). The date is the trial's own
+  // math, never a hardcoded day; computed in an effect because render
+  // must stay pure (clock reads included).
+  const [chargeDateLabel, setChargeDateLabel] = useState<string | null>(null);
+  useEffect(() => {
+    trialDaysRef.current = trialDays;
+    const frame = requestAnimationFrame(() => {
+      setChargeDateLabel(
+        trialDays
+          ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toLocaleDateString(
+              "en-US",
+              { month: "short", day: "numeric" },
+            )
+          : null,
+      );
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [trialDays]);
 
   const priceSentence = useMemo(() => {
     if (!selectedProduct) return null;
@@ -290,6 +334,11 @@ export default function PaywallScreen() {
                 Nothing due today.
               </NativeText>
             ) : null}
+            {trialDays && reminderReady && chargeDateLabel ? (
+              <NativeText role="caption" tone="muted" style={{ textAlign: "center" }} testID="paywall.reminderLine">
+                {`Free until ${chargeDateLabel}. I'll remind you 2 days before.`}
+              </NativeText>
+            ) : null}
           </View>
         )}
 
@@ -315,11 +364,12 @@ export default function PaywallScreen() {
           ) : null}
           <Pressable
             accessibilityRole="button"
-            onPress={() =>
+            onPress={() => {
+              hapticAdvance();
               router.replace(
                 (trialDays ? "/decline?trial=1" : "/decline") as never,
-              )
-            }
+              );
+            }}
             disabled={busy}
             style={{ minHeight: 44, justifyContent: "center" }}
             testID="paywall.noThanks"

@@ -19,6 +19,7 @@ import {
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { emitFamilyEvent } from "../../lib/events";
+import { hapticSuccess } from "../../lib/haptics";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import {
   getFinalMaterials,
@@ -136,6 +137,9 @@ export default function RevealScreen() {
         const found = candidates[0] ?? null;
         if (found) {
           setMaterial(found);
+          // D16: the reveal is one of the walk's three success moments,
+          // and it lands when the page actually appears, never before.
+          hapticSuccess();
           return;
         }
         if (tries + 1 >= FETCH_MAX_ATTEMPTS) {

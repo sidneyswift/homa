@@ -12,6 +12,7 @@ import {
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
 import { WalkScene, WalkSpeech } from "../../features/onboarding/walk-scene";
+import { hapticAdvance } from "../../lib/haptics";
 import { colors, radius, space } from "../../theme/tokens";
 
 /**
@@ -77,6 +78,7 @@ export default function NextScreen() {
       second_create_tapped: door === "another_worksheet",
     });
     await markOnboardingComplete(family.id);
+    hapticAdvance();
     router.replace(DOOR_ROUTES[door] as never);
   }
 

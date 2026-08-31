@@ -15,6 +15,7 @@ import {
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
+import { hapticAdvance } from "../../lib/haptics";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { space } from "../../theme/tokens";
 
@@ -83,6 +84,7 @@ export default function DeclineScreen() {
       second_create_tapped: false,
     });
     await markOnboardingComplete(family.id);
+    hapticAdvance();
     router.replace("/binder" as never);
   }
 

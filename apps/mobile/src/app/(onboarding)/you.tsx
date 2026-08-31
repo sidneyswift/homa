@@ -26,6 +26,7 @@ import {
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
 import { useFamilyData } from "../../features/family/use-family-data";
+import { hapticAdvance } from "../../lib/haptics";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -68,6 +69,7 @@ export default function YouScreen() {
   }, [family]);
 
   async function advanceToMaking() {
+    hapticAdvance();
     if (family) {
       await saveOnboardingStep(family.id, "making").catch(() => {});
       reportOnboardingStep(family.id, "making");

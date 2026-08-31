@@ -19,6 +19,7 @@ import { startFirstMaking } from "../../features/onboarding/making";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { addChild, getMyChildren } from "../../lib/family";
+import { hapticAdvance, hapticTick } from "../../lib/haptics";
 import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
@@ -157,6 +158,7 @@ export default function KidsScreen() {
   }
 
   function goTo(step: SubStep, patch?: Partial<DraftKid>) {
+    hapticAdvance();
     if (patch) updateKid(patch);
     setError(null);
     setSubStep(step);
@@ -182,6 +184,7 @@ export default function KidsScreen() {
   }
 
   function toggleLove(option: string) {
+    hapticTick();
     const current = kid.love;
     const next = current.includes(option)
       ? current.filter((item) => item !== option)
@@ -190,6 +193,7 @@ export default function KidsScreen() {
   }
 
   function toggleWorkingOn(option: string) {
+    hapticTick();
     const current = kid.workingOn;
     const next = current.includes(option)
       ? current.filter((item) => item !== option)
@@ -349,9 +353,10 @@ export default function KidsScreen() {
               <ChipGrid
                 options={["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13+"]}
                 selected={kid.age === null ? null : kid.age >= 13 ? "13+" : String(kid.age)}
-                onPick={(value) =>
-                  updateKid({ age: value === "13+" ? 13 : Number(value) })
-                }
+                onPick={(value) => {
+                  hapticTick();
+                  updateKid({ age: value === "13+" ? 13 : Number(value) });
+                }}
                 fixedWidth
               />
               <View style={{ flex: 1 }} />

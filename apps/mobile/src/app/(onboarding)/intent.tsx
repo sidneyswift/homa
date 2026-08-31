@@ -11,6 +11,7 @@ import {
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
 import { WalkScene } from "../../features/onboarding/walk-scene";
+import { hapticAdvance, hapticTick } from "../../lib/haptics";
 import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
@@ -49,6 +50,7 @@ export default function IntentScreen() {
     await saveOnboardingState(family.id, "kids", { intent: picked });
     reportOnboardingStep(family.id, "kids", picked);
     setSaving(false);
+    hapticAdvance();
     // Walk v2 order: the kids come right after the pick; the parent
     // screen (S7) follows them so the making screen can use her name.
     router.replace("/kids" as never);
@@ -69,7 +71,10 @@ export default function IntentScreen() {
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 testID={`intent.option.${option.intent}`}
-                onPress={() => setPicked(option.intent)}
+                onPress={() => {
+                  hapticTick();
+                  setPicked(option.intent);
+                }}
                 style={{
                   minHeight: 52,
                   justifyContent: "center",
