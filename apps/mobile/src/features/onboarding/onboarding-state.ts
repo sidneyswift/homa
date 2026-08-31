@@ -244,7 +244,9 @@ export function reportOnboardingCompleted(
   props: {
     kids_added: number;
     intent: OnboardingIntent;
-    next_door: "another_worksheet" | "plan_week" | "look_around";
+    /** "binder" is the decline path's armed exit (S11, D5): the walk
+     *  completed through the paywall into her kept pages. */
+    next_door: "another_worksheet" | "plan_week" | "look_around" | "binder";
     second_create_tapped: boolean;
   },
 ): void {

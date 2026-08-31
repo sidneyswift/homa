@@ -72,6 +72,12 @@ export default function MakingScreen() {
   >("checking");
   const [checklistExited, setChecklistExited] = useState(false);
   const scoredRef = useRef(false);
+  // The checklist's live position, kept so the ready banner's "See it"
+  // can close the session through the SAME path as the checklist's own
+  // close button (D8, ruled 2026-08-31: the old bypass skipped
+  // finalize, so "See it" could carry an answered session past the
+  // reveal unscored; one close path, spec Outcome 6).
+  const checklistPositionRef = useRef<ChecklistExit | null>(null);
   // The persistent walk character does the working posture; a silent
   // multi-minute build must read as patient drawing, never a freeze.
   useWalkCharacterState(phase === "failed" ? "idle" : "thinking", phase === "failed" ? null : "drawing");
@@ -253,10 +259,16 @@ export default function MakingScreen() {
                     <NativeText role="bodySmall" tone="strong" style={{ flex: 1 }}>
                       {childName ? `${childName}'s page is ready.` : "The page is ready."}
                     </NativeText>
+                    {/* Through the one close path, never around it: an
+                        answered session scores on the way out, and the
+                        navigate effect below carries her to the reveal. */}
                     <Button
                       label="See it"
                       size="sm"
-                      onPress={() => router.replace("/reveal" as never)}
+                      testID="making.seeIt"
+                      onPress={() =>
+                        handleChecklistClose(checklistPositionRef.current)
+                      }
                     />
                   </View>
                 ) : (
@@ -269,6 +281,9 @@ export default function MakingScreen() {
                 <ChecklistTakeover
                   childId={checklistChildId}
                   onClose={handleChecklistClose}
+                  onPosition={(exit) => {
+                    checklistPositionRef.current = exit;
+                  }}
                   closeLabel="Keep exploring"
                   doneLabel={
                     pageReady
@@ -321,11 +336,13 @@ export default function MakingScreen() {
                     label="Keep exploring while it draws"
                     variant="secondary"
                     size="lg"
+                    testID="making.keepExploring"
                     onPress={() => void keepGoing()}
                   />
+                  {/* Deck S8 (approved 2026-08-31): the time claim and
+                      the unexplained "Binder" are both gone. */}
                   <NativeText role="caption" tone="muted">
-                    It takes a few minutes and finishes on its own. The page
-                    lands in your Binder either way.
+                    The page is saved for you either way.
                   </NativeText>
                 </View>
               </>
@@ -337,9 +354,14 @@ export default function MakingScreen() {
               The drawing table hiccupped
             </NativeText>
             <NativeText role="body" tone="body">
-              {"Nothing is lost. The page keeps trying on its own and lands in your Binder when it's ready."}
+              {"Nothing's lost. The page keeps trying on its own and is saved for you when it's ready."}
             </NativeText>
-            <Button label="Take me in" size="lg" onPress={() => void keepGoing()} />
+            <Button
+              label="Take me in"
+              size="lg"
+              testID="making.takeMeIn"
+              onPress={() => void keepGoing()}
+            />
           </>
         )}
       </View>

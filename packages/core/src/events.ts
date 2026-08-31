@@ -138,10 +138,13 @@ export type MobileBootstrapFailureReason =
   (typeof MOBILE_BOOTSTRAP_FAILURE_REASONS)[number];
 
 /**
- * Native onboarding flow steps, in walk order (wireframe v4 and the plan
- * doc 2026-08-18-mobile-onboarding-v1-plan.md). "making" and "reveal" are
+ * Native onboarding flow steps, in walk order (walk v2,
+ * plans/2026-08-30-mobile-onboarding-paywall-v2/walk-v2-proposal.md;
+ * "door"…"next" predate it, wireframe v4). "making" and "reveal" are
  * the worksheet aha's two halves; print outcomes ride the existing
  * materials.print_result event rather than a duplicate name here.
+ * "paywall" is S10, the walk's named climax (presents for everyone,
+ * never arms, D8); "decline" is S11, reached only from "No thanks".
  */
 export const MOBILE_ONBOARDING_STEPS = [
   "door",
@@ -150,6 +153,8 @@ export const MOBILE_ONBOARDING_STEPS = [
   "kids",
   "making",
   "reveal",
+  "paywall",
+  "decline",
   "next",
 ] as const;
 export type MobileOnboardingStep = (typeof MOBILE_ONBOARDING_STEPS)[number];
@@ -992,7 +997,10 @@ export const EVENT_SCHEMAS = {
       family_id: z.uuid(),
       kids_added: z.number().int().min(0).max(20),
       intent: z.enum(MOBILE_ONBOARDING_INTENTS),
-      next_door: z.enum(["another_worksheet", "plan_week", "look_around"]),
+      // "binder" is the walk-v2 decline exit (S11 armed branch, D5):
+      // she finished the walk through the paywall and left to her kept
+      // pages, which is a completion with a door, never exited_early.
+      next_door: z.enum(["another_worksheet", "plan_week", "look_around", "binder"]),
       second_create_tapped: z.boolean(),
     })
     .strict(),

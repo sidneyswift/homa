@@ -98,7 +98,8 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-/** The full v1 walk: every step re-enters on its own screen. */
+/** The full walk: every step re-enters on its own screen, the paywall
+ *  and decline beats included (walk v2; resumability is the law). */
 const STEP_ROUTES: Record<OnboardingStep, string> = {
   door: "/hello",
   hello: "/hello",
@@ -106,5 +107,7 @@ const STEP_ROUTES: Record<OnboardingStep, string> = {
   kids: "/kids",
   making: "/making",
   reveal: "/reveal",
+  paywall: "/paywall",
+  decline: "/decline",
   next: "/next",
 };

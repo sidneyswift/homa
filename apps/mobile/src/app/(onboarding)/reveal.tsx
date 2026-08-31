@@ -100,7 +100,9 @@ export default function RevealScreen() {
       // were kicked as each card finished in the walk, and this start
       // is the idempotent confirmation. Only kids whose job actually
       // confirms are named, so the line below never claims a drawing
-      // that is not happening (honest theater law).
+      // that is not happening (honest theater law). The old "lands in
+      // your Binder" clause is scrubbed per the 2026-08-31 ruling: the
+      // word "Binder" never appears in walk copy.
       const siblings = (answers?.kids ?? []).slice(1);
       const confirmed: string[] = [];
       for (const sibling of siblings) {
@@ -111,8 +113,8 @@ export default function RevealScreen() {
       if (!cancelled && confirmed.length > 0) {
         setSiblingLine(
           confirmed.length === 1
-            ? `${confirmed[0]}'s page is drawing too. It lands in your Binder.`
-            : `${confirmed.join(" and ")}'s pages are drawing too. They land in your Binder.`,
+            ? `${confirmed[0]}'s page is drawing too.`
+            : `${confirmed.join(" and ")}'s pages are drawing too.`,
         );
       }
 
@@ -159,7 +161,7 @@ export default function RevealScreen() {
       includeAnswerKey: false,
     });
     if (!prepared) {
-      setNotice("That could not be prepared for printing. It's saved in your Binder; you can print from there any time.");
+      setNotice("That could not be prepared for printing. It's saved; you can print it any time.");
       setPrinting(false);
       return;
     }
@@ -196,8 +198,10 @@ export default function RevealScreen() {
           justifyContent: "center",
         }}
       >
-        <NativeText role="display" tone="strong">
-          {childName ? `Made for ${childName}. Nobody else.` : "Made for your kid. Nobody else."}
+        {/* "Nobody else." CUT per Sidney (copy-deck S9, 2026-08-31):
+            emphasis, not information. */}
+        <NativeText role="display" tone="strong" testID="reveal.heading">
+          {childName ? `Made for ${childName}.` : "Made for your kid."}
         </NativeText>
 
         {receipts ? (
@@ -243,7 +247,7 @@ export default function RevealScreen() {
           </View>
         ) : stillWaiting ? (
           <NativeText role="body" tone="body">
-            {"Still finishing up. It's landing in your Binder now, so you can find it there the moment it's ready."}
+            {"Still finishing up. It's saved for you the moment it's ready."}
           </NativeText>
         ) : (
           <LoadingStatus label="Fetching the page" />
@@ -255,11 +259,16 @@ export default function RevealScreen() {
           </NativeText>
         ) : null}
 
+        {/* The paywall (S10) is the walk's next beat after the reveal
+            (walk v2, D1/D8): the walk presents the ask at the peak for
+            everyone. The screen itself skips ahead when the family is
+            already entitled. */}
         {material && printed ? (
           <Button
-            label="What's next"
+            label="Keep going"
             size="lg"
-            onPress={() => router.replace("/next?printed=1" as never)}
+            onPress={() => router.replace("/paywall" as never)}
+            testID="reveal.keepGoing"
           />
         ) : material ? (
           <Button
@@ -268,19 +277,17 @@ export default function RevealScreen() {
             onPress={() => void printMaterial()}
             disabled={printing}
             busy={printing}
+            testID="reveal.print"
           />
         ) : null}
         <Pressable
           accessibilityRole="button"
-          onPress={() =>
-            router.replace((printed ? "/next?printed=1" : "/next") as never)
-          }
+          onPress={() => router.replace("/paywall" as never)}
           style={{ minHeight: 44, alignItems: "center", justifyContent: "center", marginBottom: space.lg }}
+          testID="reveal.footnoteContinue"
         >
           <NativeText role="caption" tone="muted">
-            {printed
-              ? "The full page is saved in your Binder too."
-              : "The full page is saved in your Binder. Keep going"}
+            {printed ? "Saved. Print it anytime." : "Saved. Print it anytime. Keep going"}
           </NativeText>
         </Pressable>
       </View>

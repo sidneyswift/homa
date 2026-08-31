@@ -52,11 +52,18 @@ function exitFor(child: MapStateChild): ChecklistExit {
 export function ChecklistTakeover({
   childId,
   onClose,
+  onPosition,
   closeLabel = "Back to the chat",
   doneLabel,
 }: {
   childId: string;
   onClose: (exit: ChecklistExit | null) => void;
+  /** Fired with the current exit shape when the questions load and
+   *  after every saved answer, so a host screen can close this session
+   *  from OUTSIDE through the same one close path (the making screen's
+   *  ready banner; D8 collapsed its old finalize-skipping bypass, spec
+   *  Outcome 6). Never fired for a session that failed to load. */
+  onPosition?: (exit: ChecklistExit) => void;
   /** Chat is this component's original and still-default home; a
    *  non-chat mount (e.g. the onboarding making screen) names its own
    *  exit instead of promising a chat that is not there. */
@@ -71,6 +78,10 @@ export function ChecklistTakeover({
   const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const questionHeadingRef = useRef<View>(null);
+  const onPositionRef = useRef(onPosition);
+  useEffect(() => {
+    onPositionRef.current = onPosition;
+  }, [onPosition]);
   const focusKey = child
     ? (checklistPositionFor(child).currentItem?.id ?? "complete")
     : null;
@@ -80,7 +91,10 @@ export function ChecklistTakeover({
     let current = true;
     void fetchMapChild(childId)
       .then((next) => {
-        if (current) setChild(next);
+        if (current) {
+          setChild(next);
+          onPositionRef.current?.(exitFor(next));
+        }
       })
       .catch((cause) => {
         if (current) setError(cause instanceof Error ? cause.message : "The questions did not open.");
@@ -123,6 +137,7 @@ export function ChecklistTakeover({
       const next = withChecklistAnswer(activeChild, item.id, value);
       setTransitioning(true);
       setChild(next);
+      onPositionRef.current?.(exitFor(next));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "That answer did not save. Try it again.");
     } finally {
@@ -141,7 +156,11 @@ export function ChecklistTakeover({
             {subject?.displayName ?? "Questions"}
           </Text>
         </View>
-        <IconButton label={closeLabel} onPress={() => onClose(exitFor(child))}>
+        <IconButton
+          label={closeLabel}
+          onPress={() => onClose(exitFor(child))}
+          testID="checklist.close"
+        >
           <Icon name="close" size={20} color={colors.textSubtle} />
         </IconButton>
       </View>
@@ -174,6 +193,7 @@ export function ChecklistTakeover({
                 accessibilityLabel={label}
                 accessibilityState={{ disabled: pending || transitioning }}
                 disabled={pending || transitioning}
+                testID={`checklist.answer.${value}`}
                 onPress={() => void answer(value)}
                 style={({ pressed }) => ({
                   minHeight: 44,
@@ -208,7 +228,11 @@ export function ChecklistTakeover({
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}>
             {`Every answer is saved. They become ${child.name}'s progress report.`}
           </Text>
-          <Button label={doneLabel ?? closeLabel} onPress={() => onClose(exitFor(child))} />
+          <Button
+            label={doneLabel ?? closeLabel}
+            onPress={() => onClose(exitFor(child))}
+            testID="checklist.done"
+          />
         </View>
       )}
       {pending ? <LoadingStatus label="Saving answer" showLabel={false} /> : null}

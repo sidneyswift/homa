@@ -167,6 +167,8 @@ export const nativeAccessibilitySurfaces: readonly NativeAccessibilitySurface[] 
   { file: "apps/mobile/src/app/(onboarding)/kids.tsx", kind: "priority", owner: "gh#304", reason: "Kid intro stepper: name, age, loves, working-on." },
   { file: "apps/mobile/src/app/(onboarding)/making.tsx", kind: "priority", owner: "gh#304", reason: "Live worksheet build with real job progress." },
   { file: "apps/mobile/src/app/(onboarding)/reveal.tsx", kind: "priority", owner: "gh#304", reason: "Finished worksheet preview and print." },
+  { file: "apps/mobile/src/app/(onboarding)/paywall.tsx", kind: "priority", owner: "gh#1045", reason: "S10, the walk's named climax: presents for everyone, never arms." },
+  { file: "apps/mobile/src/app/(onboarding)/decline.tsx", kind: "priority", owner: "gh#1045", reason: "S11 decline path, branching on real journey state." },
   { file: "apps/mobile/src/app/(onboarding)/next.tsx", kind: "priority", owner: "gh#304", reason: "Completes the walk and routes to what's next." },
 ];
 
@@ -183,8 +185,8 @@ export const nativeAccessibilityHandoffs: readonly NativeAccessibilityHandoff[] 
   { file: "apps/mobile/src/features/chat/onboarding-cards.tsx", callee: "WebBrowser.openBrowserAsync", outcome: "Full progress report opens.", owner: "gh#617" },
   { file: "apps/mobile/src/features/auth/google-sign-in.ts", callee: "WebBrowser.openAuthSessionAsync", outcome: "Google authentication session opens.", owner: "gh#304" },
   { file: "apps/mobile/src/features/auth/apple-sign-in.ts", callee: "AppleAuthentication.signInAsync", outcome: "Apple authentication sheet opens.", owner: "gh#304" },
-  { file: "apps/mobile/src/components/billing-gate.tsx", callee: "requestPurchase", outcome: "StoreKit purchase begins.", owner: "gh#299" },
-  { file: "apps/mobile/src/components/billing-gate.tsx", callee: "restorePurchases", outcome: "StoreKit restoration begins.", owner: "gh#299" },
+  { file: "apps/mobile/src/features/billing/use-apple-purchase.ts", callee: "requestPurchase", outcome: "StoreKit purchase begins.", owner: "gh#299" },
+  { file: "apps/mobile/src/features/billing/use-apple-purchase.ts", callee: "restorePurchases", outcome: "StoreKit restoration begins.", owner: "gh#299" },
   { file: "apps/mobile/src/features/materials/material-print.ts", callee: "printWithSystemSheet", outcome: "Native print destination sheet opens.", owner: "gh#534" },
   { file: "apps/mobile/src/features/materials/material-share.ts", callee: "Share.share", outcome: "Native share destination sheet opens.", owner: "gh#534" },
   { file: "apps/mobile/src/features/planner/device-calendar-native.ts", callee: "Calendar.requestCalendarPermissions", outcome: "Write-only calendar permission is requested.", owner: "gh#303" },

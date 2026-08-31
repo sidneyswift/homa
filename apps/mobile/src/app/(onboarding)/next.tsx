@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 
@@ -15,19 +15,21 @@ import { WalkScene, WalkSpeech } from "../../features/onboarding/walk-scene";
 import { colors, radius, space } from "../../theme/tokens";
 
 /**
- * What's next (wireframe v4 step 6, GIVE then ASK): the honest line
- * lands right after the wow, then three doors. Every door completes the
- * walk; the completed funnel event carries the shape of the family and
- * which door she chose. The second-create tap is the paywall trigger's
- * instrumentation (D4: the wall itself stays dark until ruled).
+ * S12, the doors (walk v2): reached after the paywall says yes, or
+ * through the decline path's still-free branch. One honest line, then
+ * three doors; every door completes the walk, and the completed funnel
+ * event carries the shape of the family and which door she chose.
+ * Copy is the founder-approved deck (copy-deck.md §S12): the D7
+ * vocabulary law makes this screen say "page", never "worksheet",
+ * because her page exists by now.
  */
 type Door = "another_worksheet" | "plan_week" | "look_around";
 
 const DOORS: { door: Door; label: string; detail: string }[] = [
   {
     door: "another_worksheet",
-    label: "Another worksheet",
-    detail: "For a sibling, or tomorrow's page",
+    label: "Make another page",
+    detail: "For a sibling, or tomorrow morning",
   },
   { door: "plan_week", label: "Plan our week", detail: "Homa builds it with you" },
   // Not "the whole app is yours": onboarding-completion-milestones
@@ -49,14 +51,13 @@ const DOOR_ROUTES: Record<Door, string> = {
 
 export default function NextScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ printed?: string | string[] }>();
-  const { family } = useFamilyData();
+  const { family, memberDisplayName } = useFamilyData();
   const [choosing, setChoosing] = useState(false);
   const reported = useRef(false);
-  // The reveal passes printed=1 when the page actually went to the
-  // printer, so the bubble can speak to what just happened instead of
-  // quipping past it (founder call 2026-08-24).
-  const printed = (Array.isArray(params.printed) ? params.printed[0] : params.printed) === "1";
+  // DELTA change 4 (ruled 2026-08-31): the parent's name lands at a
+  // peak. First name only; a family with no stored name simply gets the
+  // sentence without the address, never a guessed one.
+  const parentFirstName = memberDisplayName?.trim().split(/\s+/u)[0] ?? null;
 
   useEffect(() => {
     if (!family || reported.current) return;
@@ -84,9 +85,9 @@ export default function NextScreen() {
       <View style={{ flex: 1, padding: space.lg, gap: space.md, paddingTop: space.xs }}>
         <WalkSpeech>
           <NativeText role="body" tone="strong">
-            {printed
-              ? "That page is printing right now. And the more I know your kids, the better every page gets."
-              : "That one's getting grabbed. And the more I know your kids, the better every page gets."}
+            {parentFirstName
+              ? `The more I know your kids, ${parentFirstName}, the better every page gets.`
+              : "The more I know your kids, the better every page gets."}
           </NativeText>
         </WalkSpeech>
         <NativeText role="display" tone="strong" style={{ marginTop: space.lg }}>
@@ -101,6 +102,7 @@ export default function NextScreen() {
               key={item.door}
               accessibilityRole="button"
               disabled={choosing}
+              testID={`next.door.${item.door}`}
               onPress={() => void choose(item.door)}
               style={{
                 minHeight: index === 0 ? 64 : 56,
