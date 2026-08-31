@@ -75,7 +75,7 @@ test("the landing retains the practice-page age boundary in capability details",
 test("the landing shows every purchasable membership before the final signup ask", () => {
   assert.deepEqual(
     MEMBERSHIP_ITEMS.map(({ name, monthlyPrice, annualPrice }) => ({ name, monthlyPrice, annualPrice })),
-    [{ name: "Homa", monthlyPrice: 19, annualPrice: 182 }],
+    [{ name: "Homa", monthlyPrice: 19, annualPrice: 119 }],
   );
   assert.match(LANDING_SECTION_COPY.memberships.headline, /whole family/i);
   assert.match(LANDING_SECTION_COPY.memberships.body, /no extra cost/i);

@@ -14,23 +14,22 @@ const stateRecordsSource = readFileSync(
 );
 
 describe("native Apple offer catalog", () => {
-  it("offers one monthly product per currently purchasable Homa tier", () => {
+  it("offers monthly and annual regular products, and no paused tiers", () => {
+    // D3 (2026-08-31): the annual plan ships at $119/year. The screen
+    // still renders only what App Store Connect returns, so listing the
+    // annual SKU here is safe before the founder creates it there.
     assert.deepEqual(
       APPLE_NATIVE_PROVIDER_PRODUCTS.map(({ tier, period }) => ({ tier, period })),
-      [{ tier: "regular", period: "monthly" }],
+      [
+        { tier: "regular", period: "monthly" },
+        { tier: "regular", period: "annual" },
+      ],
     );
-    assert.equal(APPLE_NATIVE_PRODUCT_IDS.length, 1);
+    assert.equal(APPLE_NATIVE_PRODUCT_IDS.length, 2);
     assert.equal(
       APPLE_NATIVE_PRODUCT_IDS.some(
         (productId) => productId.includes(".plus.") || productId.includes(".elite."),
       ),
-      false,
-    );
-  });
-
-  it("does not merchandise annual products", () => {
-    assert.equal(
-      APPLE_NATIVE_PRODUCT_IDS.some((productId) => productId.endsWith(".annual")),
       false,
     );
   });

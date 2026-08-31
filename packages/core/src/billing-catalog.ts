@@ -28,11 +28,14 @@ export interface PlanDefinition {
 }
 
 /**
- * The public Homa plans. Annual pricing is twenty percent below twelve
- * monthly payments, rounded to the current web sticker prices.
+ * The public Homa plans. Regular's annual price is the founder-ruled
+ * $119/year ($9.92 a month, save 48%; D3, 2026-08-31, mobile onboarding
+ * + paywall v2 spec), the same on every platform (D11). The coming_soon
+ * tiers keep the older twenty-percent-below-monthly convention until
+ * they are actually priced for sale.
  */
 export const HOMA_PLANS: readonly PlanDefinition[] = [
-  { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182, salesState: "available" },
+  { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 119, salesState: "available" },
   { tier: "plus", name: "Homa Plus", monthlyUsd: 49, annualUsd: 470, salesState: "coming_soon" },
   { tier: "elite", name: "Homa Max", monthlyUsd: 199, annualUsd: 1910, salesState: "coming_soon" },
 ];
@@ -73,12 +76,15 @@ export const APPLE_PROVIDER_PRODUCTS: readonly ProviderProduct[] = [
  * Keep this narrower than APPLE_PROVIDER_PRODUCTS. The full provider catalog
  * must continue recognizing historical receipts, renewals, and upgrades after
  * an offer stops accepting new purchases.
+ *
+ * Both periods of every available tier (D3, 2026-08-31: annual ships now,
+ * default-selected on the native paywall). The client still renders only
+ * the products App Store Connect actually returns, so the annual card
+ * stays dark until the founder creates the annual SKU there.
  */
 export const APPLE_NEW_PURCHASE_PRODUCTS: readonly ProviderProduct[] =
   APPLE_PROVIDER_PRODUCTS.filter(
-    (product) =>
-      product.period === "monthly"
-      && planAvailableForPurchase(product.tier),
+    (product) => planAvailableForPurchase(product.tier),
   );
 
 export const APPLE_NEW_PURCHASE_PRODUCT_IDS = APPLE_NEW_PURCHASE_PRODUCTS.map(

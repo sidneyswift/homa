@@ -159,8 +159,10 @@ export const MEMBERSHIP_ITEMS: ReadonlyArray<{
   body: LANDING_MEMBERSHIP_BODIES[tier],
 }));
 
+// 48% is the D3-ruled annual math ($119 vs 12 x $19 = $228), the only
+// discount claim the claims laws permit because it is arithmetic.
 export const MEMBERSHIP_NOTE =
-  "Annual plans cost 20% less and are paid once a year. Stop renewal anytime in settings.";
+  "Annual plans cost 48% less and are paid once a year. Stop renewal anytime in settings.";
 
 export const SAMPLE_REPORT_COPY = {
   eyebrow: "Progress report",
