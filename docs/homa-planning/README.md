@@ -31,6 +31,7 @@ A later founder ruling keeps its original dated source and is added to the found
 | Marketing demand engine operations | `/marketing/AGENTS.md` and `/marketing/workflows/demand-engine.md` | Current workflow, with external services verified separately |
 | Marketing demand engine decisions | `14-marketing-demand-engine.md` | Approved dated DM1 through DM7 source; DM7 remains open |
 | Agentic architecture placement | `15-agentic-architecture.md` | Current founder ruling with time-bounded repository status |
+| Mobile native architecture, seams, and verification ladder | `16-mobile-native-architecture.md` | Current engineering doctrine with time-bounded repository status |
 
 ## Document classes
 

@@ -1,5 +1,14 @@
 # Mobile onboarding v1: implementation plan
 
+> Status (2026-08-31): shipped and iterated. Waves 0 to 4 landed (the
+> walk under `apps/mobile/src/app/(onboarding)/`, durable
+> `mobile_onboarding_state`, the making job, reveal and print, resume),
+> then evolved in place: the questionnaire moved into the making wait
+> (PR #998), the collection gaps closed (PR #1003), and the StoreKit gate
+> later landed (gh#305), superseding v1's no-paywall posture. The code is
+> the current truth; system model in
+> [`../16-mobile-native-architecture.md`](../16-mobile-native-architecture.md).
+
 Date: 2026-08-18. Spec: the v4 wireframe flow
 (https://claude.ai/code/artifact/7781a5f9-0b49-4e19-967e-d69dfa7f6a88),
 the research doc (2026-08-18-mobile-onboarding-research.md, §8 settled

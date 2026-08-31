@@ -6,6 +6,15 @@
 **Parent issue:** [gh#299](https://github.com/sidneyswift/homa/issues/299)
 **Related program spec:** [2026-08-02 Homa interface modernization](./2026-08-02-homa-interface-modernization.md)
 
+> Status (2026-08-31): program closed. The award program's epics were cut
+> from the PMF queue on 2026-08-16 (gh#299, gh#534, gh#617, gh#618
+> closing comments); gh#606, the privacy P0, shipped with production
+> evidence before the cut. Shipped children remain shipped; open mobile
+> work lives in the tracker. The universal mobile state contract below
+> remains binding craft for any new surface and is referenced as such by
+> [`../16-mobile-native-architecture.md`](../16-mobile-native-architecture.md) §4.
+> The rest is preserved evidence.
+
 ## Executive verdict
 
 Homa has the ingredients of an award-caliber product: a distinctive Voice-first entry, a calm family-safe visual language, real planner and progress state, generated materials that can leave the screen, and a backend that can keep durable family truth separate from conversation. The native app is not yet an award-caliber product because those capabilities do not yet feel like one closed loop.

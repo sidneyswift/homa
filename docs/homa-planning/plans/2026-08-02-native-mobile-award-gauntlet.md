@@ -2,6 +2,10 @@
 
 **Date:** 2026-08-02  
 **Status:** Evidence-backed product and UX audit, first production correction, issue architecture, and ship gates
+
+> Status (2026-08-31): superseded the next day by
+> [2026-08-03-native-app-award-gauntlet.md](2026-08-03-native-app-award-gauntlet.md),
+> which reconciles this audit against the live tracker. Preserved evidence.
 **Primary lens:** A homeschooling mom using one hand, often while teaching, running the day, carrying a child, or solving an interruption  
 **Product boundary:** Homa is the parent's command center. The best result usually leaves the screen and becomes a conversation, lesson, printable, outing, observation, or calmer plan.
 

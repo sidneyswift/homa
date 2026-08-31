@@ -3,6 +3,11 @@
 Date: 2026-08-18. Status: research complete, awaiting founder direction on
 archetype (D1 below) before design work begins.
 
+> Status (2026-08-31): direction executed. §8's settled direction became
+> [2026-08-18-mobile-onboarding-v1-plan.md](2026-08-18-mobile-onboarding-v1-plan.md),
+> which shipped. Preserved evidence; §1's "the app has no onboarding" is
+> historical.
+
 Source: Mobbin MCP sweep across education, health and wellness, AI
 assistants, productivity, and family apps, plus a read of the current
 mobile auth code. Every referenced flow links to its Mobbin page.

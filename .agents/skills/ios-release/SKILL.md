@@ -5,6 +5,17 @@ description: Ship the Homa iOS app (apps/mobile) safely. Use when building, subm
 
 # iOS release
 
+## Program posture first (PMF cut, 2026-08-16)
+
+Public App Store distribution is not authorized: the launch program was
+cut from the PMF queue ("No App Store launch is authorized now", gh#299
+and gh#308 closing comments). Store builds and TestFlight distribution
+remain legitimate maintenance whenever a fingerprint change would
+otherwise orphan the installed fleet; a public release, submission for
+public sale, or listing work needs an explicit founder reopen. Posture
+detail and reopen triggers:
+`docs/homa-planning/16-mobile-native-architecture.md` §2.
+
 ## The one law: the fingerprint decides everything
 
 expo-updates matches OTA JavaScript to installed binaries by native
