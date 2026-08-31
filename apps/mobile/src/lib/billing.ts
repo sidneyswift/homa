@@ -19,13 +19,37 @@ import { supabase } from "./supabase";
  * Supabase access token IS the session.
  */
 
+/** Why the gate answered `open` the way it did (the server's
+ *  lib/billing/gate-reason.ts shape): real entitlement, the mobile
+ *  onboarding free window, or a wall with purchase UI as the next step.
+ *  The walk's late screens branch on this instead of guessing (spec
+ *  2026-08-30 Outcome 6). */
+export type BillingGateReason = "entitled" | "onboarding_grace" | "walled";
+
+/** The durable onboarding record's state as stored: "done" is a free
+ *  window that ENDED, "none" a family that never had one. */
+export type BillingGateOnboarding = "active" | "done" | "none";
+
 export interface BillingGateState {
   open: boolean;
+  reason: BillingGateReason;
+  onboarding: BillingGateOnboarding;
   lapsed: boolean;
   planTier: string;
   billingProvider: "stripe" | "apple" | "google" | null;
   billingPeriod: "monthly" | "annual" | null;
 }
+
+const GATE_REASONS: readonly BillingGateReason[] = [
+  "entitled",
+  "onboarding_grace",
+  "walled",
+];
+const GATE_ONBOARDING_STATES: readonly BillingGateOnboarding[] = [
+  "active",
+  "done",
+  "none",
+];
 
 async function bearerToken(): Promise<string> {
   const { data } = await supabase.auth.getSession();
@@ -59,14 +83,25 @@ export async function fetchBillingGate(): Promise<
     const body = (await response.json()) as {
       ok?: boolean;
       open?: boolean;
+      reason?: string;
+      onboarding?: string;
       lapsed?: boolean;
       planTier?: string;
       billingProvider?: "stripe" | "apple" | "google" | null;
       billingPeriod?: "monthly" | "annual" | null;
     };
     if (!body.ok) throw new BootstrapFailure("billing", "unknown");
+    const open = body.open === true;
     return {
-      open: body.open === true,
+      open,
+      // A server predating the reason shape only says open; derive the
+      // never-over-promising name for it (open with no name cannot be
+      // told apart from entitlement, and "walled" is exact either way).
+      reason: GATE_REASONS.find((reason) => reason === body.reason)
+        ?? (open ? "entitled" : "walled"),
+      onboarding:
+        GATE_ONBOARDING_STATES.find((state) => state === body.onboarding)
+          ?? "none",
       lapsed: body.lapsed === true,
       planTier: body.planTier ?? "regular",
       billingProvider: body.billingProvider ?? null,
