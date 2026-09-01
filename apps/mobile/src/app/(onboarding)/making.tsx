@@ -32,6 +32,7 @@ import { WalkScene } from "../../features/onboarding/walk-scene";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
+import { MakingShow } from "../../features/onboarding/making-show";
 import {
   loadOnboardingAnswers,
   markOnboardingComplete,
@@ -56,7 +57,8 @@ const POLL_MS = 4_000;
 
 export default function MakingScreen() {
   const router = useRouter();
-  const { family } = useFamilyData();
+  const { family, memberDisplayName } = useFamilyData();
+  const parentFirstName = memberDisplayName?.trim().split(/\s+/u)[0] ?? null;
   const [childName, setChildName] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [phase, setPhase] = useState<"starting" | "building" | "failed">(
@@ -71,7 +73,14 @@ export default function MakingScreen() {
     "checking" | "yes" | "no"
   >("checking");
   const [checklistExited, setChecklistExited] = useState(false);
+  const [chipLabels, setChipLabels] = useState<string[]>([]);
   const scoredRef = useRef(false);
+  // The checklist's live position, kept so the ready banner's "See it"
+  // can close the session through the SAME path as the checklist's own
+  // close button (D8, ruled 2026-08-31: the old bypass skipped
+  // finalize, so "See it" could carry an answered session past the
+  // reveal unscored; one close path, spec Outcome 6).
+  const checklistPositionRef = useRef<ChecklistExit | null>(null);
   // The persistent walk character does the working posture; a silent
   // multi-minute build must read as patient drawing, never a freeze.
   useWalkCharacterState(phase === "failed" ? "idle" : "thinking", phase === "failed" ? null : "drawing");
@@ -114,6 +123,17 @@ export default function MakingScreen() {
       }
       setChildName(target.name.trim());
       setChecklistChildId(target.childId);
+      {
+        // The easel's fact chips: her verbatim answers, capped at three
+        // (MakingShow's copy law: nothing on stage but her words).
+        const answers2 = await loadOnboardingAnswers(family.id).catch(() => null);
+        const first = answers2?.kids?.[0];
+        if (!cancelled && first) {
+          const loves = Array.isArray(first.love) ? first.love.slice(0, 2) : [];
+          const working = Array.isArray(first.workingOn) ? first.workingOn.slice(0, 1) : [];
+          setChipLabels([...loves, ...working].filter(Boolean).slice(0, 3));
+        }
+      }
       // Same position math the questionnaire itself uses: skip it
       // silently when there is nothing to ask (age out of range, or she
       // already answered everything for this child) rather than mount
@@ -176,16 +196,13 @@ export default function MakingScreen() {
     };
   }, [family, router]);
 
-  // Nothing left to interrupt once the page is ready and she is not
-  // mid-questionnaire: take her straight to the reveal, same as before
-  // this feature existed. While she is actively answering, this waits
-  // for her; the ready banner below is the only nudge.
+  // While she is actively answering, the page being ready only shows
+  // the banner (the checklist waits for her). Once no checklist is on
+  // screen, the easel show (MakingShow, wired per D9) owns the handoff:
+  // its completing prop plays the ease-out exit and onExitDone routes
+  // to the reveal, with reduced motion collapsing to an immediate call.
   const showingChecklist =
     checklistAvailable === "yes" && checklistChildId !== null && !checklistExited;
-  useEffect(() => {
-    if (!pageReady || showingChecklist) return;
-    router.replace("/reveal" as never);
-  }, [pageReady, router, showingChecklist]);
 
   function handleChecklistClose(exit: ChecklistExit | null) {
     setChecklistExited(true);
@@ -232,12 +249,12 @@ export default function MakingScreen() {
 
             {showingChecklist && checklistChildId ? (
               <>
-                {/* The frame before the first question (founder call
-                    2026-08-23): the heading says what Homa is doing, so
-                    this line says what SHE is about to do and why, or a
-                    bare question lands out of nowhere. Once the page is
-                    ready, "While Homa draws" stops being true, so the
-                    ready banner takes this slot instead. */}
+                {/* The chapter cover (deck S8, D15): the heading says
+                    what Homa is doing, so this line says what SHE is
+                    about to do and why, by name (DELTA change 4: her
+                    name lands the screen right after she gives it).
+                    Once the page is ready, "While I draw" stops being
+                    true, so the ready banner takes this slot instead. */}
                 {pageReady ? (
                   <View
                     style={{
@@ -253,22 +270,33 @@ export default function MakingScreen() {
                     <NativeText role="bodySmall" tone="strong" style={{ flex: 1 }}>
                       {childName ? `${childName}'s page is ready.` : "The page is ready."}
                     </NativeText>
+                    {/* Through the one close path, never around it: an
+                        answered session scores on the way out, and the
+                        navigate effect below carries her to the reveal. */}
                     <Button
                       label="See it"
                       size="sm"
-                      onPress={() => router.replace("/reveal" as never)}
+                      testID="making.seeIt"
+                      onPress={() =>
+                        handleChecklistClose(checklistPositionRef.current)
+                      }
                     />
                   </View>
                 ) : (
                   <NativeText role="body" tone="body">
                     {childName
-                      ? `While Homa draws, answer a few quick questions about ${childName}. Each answer builds ${childName}'s progress report and shapes the lesson plans to come.`
-                      : "While Homa draws, answer a few quick questions about your kid. Each answer builds their progress report and shapes the lesson plans to come."}
+                      ? parentFirstName
+                        ? `While I draw, ${parentFirstName}, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
+                        : `While I draw, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
+                      : "While I draw, tell me about your kid. Every answer builds their progress report."}
                   </NativeText>
                 )}
                 <ChecklistTakeover
                   childId={checklistChildId}
                   onClose={handleChecklistClose}
+                  onPosition={(exit) => {
+                    checklistPositionRef.current = exit;
+                  }}
                   closeLabel="Keep exploring"
                   doneLabel={
                     pageReady
@@ -288,6 +316,16 @@ export default function MakingScreen() {
                       : "Got it. That helps me know your kid better."}
                   </NativeText>
                 ) : null}
+
+                {/* The easel show (D9, wired 2026-08-31): real work
+                    depicted, preview structurally impossible, her own
+                    answers as the set dressing. Its exit is the route
+                    to the reveal. */}
+                <MakingShow
+                  chipLabels={chipLabels}
+                  completing={pageReady}
+                  onExitDone={() => router.replace("/reveal" as never)}
+                />
 
                 {/* The honesty ribbon: the job's real notes are the only
                     claimed progress. Done notes recede; the live one
@@ -321,11 +359,13 @@ export default function MakingScreen() {
                     label="Keep exploring while it draws"
                     variant="secondary"
                     size="lg"
+                    testID="making.keepExploring"
                     onPress={() => void keepGoing()}
                   />
+                  {/* Deck S8 (approved 2026-08-31): the time claim and
+                      the unexplained "Binder" are both gone. */}
                   <NativeText role="caption" tone="muted">
-                    It takes a few minutes and finishes on its own. The page
-                    lands in your Binder either way.
+                    The page is saved for you either way.
                   </NativeText>
                 </View>
               </>
@@ -337,9 +377,14 @@ export default function MakingScreen() {
               The drawing table hiccupped
             </NativeText>
             <NativeText role="body" tone="body">
-              {"Nothing is lost. The page keeps trying on its own and lands in your Binder when it's ready."}
+              {"Nothing's lost. The page keeps trying on its own and is saved for you when it's ready."}
             </NativeText>
-            <Button label="Take me in" size="lg" onPress={() => void keepGoing()} />
+            <Button
+              label="Take me in"
+              size="lg"
+              testID="making.takeMeIn"
+              onPress={() => void keepGoing()}
+            />
           </>
         )}
       </View>

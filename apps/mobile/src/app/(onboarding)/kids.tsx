@@ -11,6 +11,7 @@ import {
   loadOnboardingAnswers,
   reportOnboardingStep,
   saveOnboardingState,
+  saveOnboardingStep,
   type DraftKid,
   type OnboardingIntent,
 } from "../../features/onboarding/onboarding-state";
@@ -18,6 +19,7 @@ import { startFirstMaking } from "../../features/onboarding/making";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { addChild, getMyChildren } from "../../lib/family";
+import { hapticAdvance, hapticTick } from "../../lib/haptics";
 import { colors, palette, radius, space } from "../../theme/tokens";
 
 /**
@@ -53,13 +55,17 @@ function loveChipsForAge(age: number | null): string[] {
 }
 
 function workingChipsForAge(age: number | null): string[] {
+  // "I'm not sure yet" is the deck's S6 escape chip (approved
+  // 2026-08-31): a parent who does not know the working edge yet still
+  // gets through, and the phrase reads fine downstream as an honest
+  // focus hint.
   if (age !== null && age <= 5) {
-    return ["Letters", "Counting", "Shapes and colors", "First reading", "Handwriting"];
+    return ["Letters", "Counting", "Shapes and colors", "First reading", "Handwriting", "I'm not sure yet"];
   }
   if (age !== null && age >= 10) {
-    return ["Writing", "Math", "Reading", "Science", "History", "Grammar"];
+    return ["Writing", "Math", "Reading", "Science", "History", "Grammar", "I'm not sure yet"];
   }
-  return ["Reading", "Writing", "Math", "Handwriting", "Spelling", "Science"];
+  return ["Reading", "Writing", "Math", "Handwriting", "Spelling", "Science", "I'm not sure yet"];
 }
 
 const emptyKid = (): DraftKid => ({
@@ -152,6 +158,7 @@ export default function KidsScreen() {
   }
 
   function goTo(step: SubStep, patch?: Partial<DraftKid>) {
+    hapticAdvance();
     if (patch) updateKid(patch);
     setError(null);
     setSubStep(step);
@@ -173,10 +180,11 @@ export default function KidsScreen() {
       setSubStep("working");
       return;
     }
-    router.replace("/you" as never);
+    router.replace("/intent" as never);
   }
 
   function toggleLove(option: string) {
+    hapticTick();
     const current = kid.love;
     const next = current.includes(option)
       ? current.filter((item) => item !== option)
@@ -185,6 +193,7 @@ export default function KidsScreen() {
   }
 
   function toggleWorkingOn(option: string) {
+    hapticTick();
     const current = kid.workingOn;
     const next = current.includes(option)
       ? current.filter((item) => item !== option)
@@ -273,14 +282,17 @@ export default function KidsScreen() {
       setSaving(false);
       return;
     }
-    reportOnboardingStep(family.id, "making");
+    // Walk v2 order (S6 -> S7): the parent screen follows the kids, so
+    // the S8 chapter cover can greet her by the name she just gave.
+    await saveOnboardingStep(family.id, "you").catch(() => {});
+    reportOnboardingStep(family.id, "you");
     setSaving(false);
-    router.replace("/making" as never);
+    router.replace("/you" as never);
   }
 
   const kidNumber = kids.length;
   const heading =
-    kidNumber === 1 ? "Who are we teaching?" : "Who else are we teaching?";
+    kidNumber === 1 ? "Who are we making this for?" : "Who else are we making this for?";
 
   return (
     <WalkScene>
@@ -322,6 +334,7 @@ export default function KidsScreen() {
                   size="lg"
                   disabled={!kid.name.trim()}
                   onPress={() => goTo("age")}
+                  testID="kids.name.next"
                 />
                 <BackLink onPress={goBack} />
               </View>
@@ -335,14 +348,15 @@ export default function KidsScreen() {
                 {`How old is ${kid.name.trim()}?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                Everything I make gets pitched to their age.
+                This sets the difficulty.
               </NativeText>
               <ChipGrid
                 options={["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13+"]}
                 selected={kid.age === null ? null : kid.age >= 13 ? "13+" : String(kid.age)}
-                onPick={(value) =>
-                  updateKid({ age: value === "13+" ? 13 : Number(value) })
-                }
+                onPick={(value) => {
+                  hapticTick();
+                  updateKid({ age: value === "13+" ? 13 : Number(value) });
+                }}
                 fixedWidth
               />
               <View style={{ flex: 1 }} />
@@ -352,6 +366,7 @@ export default function KidsScreen() {
                   size="lg"
                   disabled={kid.age === null}
                   onPress={() => goTo("love")}
+                  testID="kids.age.next"
                 />
                 <BackLink onPress={goBack} />
               </View>
@@ -361,10 +376,10 @@ export default function KidsScreen() {
           {subStep === "love" ? (
             <View style={{ flex: 1, gap: space.md }}>
               <NativeText role="display" tone="strong">
-                {`What does ${kid.name.trim()} love right now?`}
+                {`What's ${kid.name.trim()} into right now?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                This is my secret ingredient.
+                Whatever you put here ends up on the worksheet.
               </NativeText>
               <ChipGrid options={loveChipsForAge(kid.age)} selected={kid.love} onPick={toggleLove} />
               <TextField
@@ -380,6 +395,7 @@ export default function KidsScreen() {
                   size="lg"
                   disabled={!loveText.trim() && kid.love.length === 0}
                   onPress={confirmLoves}
+                  testID="kids.love.next"
                 />
                 <BackLink onPress={goBack} />
               </View>
@@ -392,7 +408,7 @@ export default function KidsScreen() {
                 {`What's ${kid.name.trim()} working on?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                So the worksheet lands right at their edge.
+                This picks what the worksheet practices.
               </NativeText>
               <ChipGrid
                 options={workingChipsForAge(kid.age)}
@@ -440,6 +456,7 @@ export default function KidsScreen() {
                 <Pressable
                   accessibilityRole="button"
                   disabled={kid.workingOn.length === 0 || saving}
+                  testID="kids.addAnotherKid"
                   onPress={() => void anotherKid()}
                   style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
                 >
@@ -453,6 +470,7 @@ export default function KidsScreen() {
                   disabled={kid.workingOn.length === 0 || saving}
                   busy={saving}
                   onPress={() => void thatIsEveryone()}
+                  testID="kids.thatsEveryone"
                 />
                 <BackLink onPress={goBack} disabled={saving} />
               </View>

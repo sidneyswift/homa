@@ -14,10 +14,12 @@ import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
+import { hapticSuccess, hapticTick } from "../../lib/haptics";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
 import { fetchMapChild, saveChecklistAnswer } from "./onboarding-card-api";
 import {
+  checklistChaptersFor,
   checklistPositionFor,
   withChecklistAnswer,
   type MapStateChild,
@@ -52,11 +54,18 @@ function exitFor(child: MapStateChild): ChecklistExit {
 export function ChecklistTakeover({
   childId,
   onClose,
+  onPosition,
   closeLabel = "Back to the chat",
   doneLabel,
 }: {
   childId: string;
   onClose: (exit: ChecklistExit | null) => void;
+  /** Fired with the current exit shape when the questions load and
+   *  after every saved answer, so a host screen can close this session
+   *  from OUTSIDE through the same one close path (the making screen's
+   *  ready banner; D8 collapsed its old finalize-skipping bypass, spec
+   *  Outcome 6). Never fired for a session that failed to load. */
+  onPosition?: (exit: ChecklistExit) => void;
   /** Chat is this component's original and still-default home; a
    *  non-chat mount (e.g. the onboarding making screen) names its own
    *  exit instead of promising a chat that is not there. */
@@ -70,7 +79,16 @@ export function ChecklistTakeover({
   const [pending, setPending] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // D15 receipt beat: set when the last saved answer closed its subject
+  // chapter; rendered once above the next question, then cleared by the
+  // next answer. Deterministic template, never a model call.
+  const [receipt, setReceipt] = useState<string | null>(null);
+  const [sessionAnswers, setSessionAnswers] = useState(0);
   const questionHeadingRef = useRef<View>(null);
+  const onPositionRef = useRef(onPosition);
+  useEffect(() => {
+    onPositionRef.current = onPosition;
+  }, [onPosition]);
   const focusKey = child
     ? (checklistPositionFor(child).currentItem?.id ?? "complete")
     : null;
@@ -80,7 +98,10 @@ export function ChecklistTakeover({
     let current = true;
     void fetchMapChild(childId)
       .then((next) => {
-        if (current) setChild(next);
+        if (current) {
+          setChild(next);
+          onPositionRef.current?.(exitFor(next));
+        }
       })
       .catch((cause) => {
         if (current) setError(cause instanceof Error ? cause.message : "The questions did not open.");
@@ -110,19 +131,33 @@ export function ChecklistTakeover({
   const position = checklistPositionFor(child);
   const item = position.currentItem;
   const subject = item ? getMapItem(item.id)?.subject : null;
-  const total = child.answered + position.remaining;
-  const progress = total > 0 ? `${Math.round((child.answered / total) * 100)}%` as const : "0%";
+  const chapterPosition = checklistChaptersFor(child);
 
   async function answer(value: MapAnswer) {
     if (!child || !item || pending || transitioning) return;
+    hapticTick();
     const activeChild = child;
     setPending(true);
     setError(null);
     try {
       await saveChecklistAnswer({ childId: activeChild.id, itemId: item.id, answer: value });
       const next = withChecklistAnswer(activeChild, item.id, value);
+      // The receipt beat (D15): if that answer closed its subject's
+      // chapter, say so, with the running answer count.
+      const answeredSubjectId = getMapItem(item.id)?.subject.id ?? null;
+      const nextChapters = checklistChaptersFor(next);
+      const closed = nextChapters.chapters.find(
+        (chapter) => chapter.subjectId === answeredSubjectId && chapter.state === "done",
+      );
+      setReceipt(
+        closed ? `That's ${closed.subjectName} done. ${next.answered} answers so far.` : null,
+      );
+      // D16: chapter complete is one of the three success moments.
+      if (closed) hapticSuccess();
+      setSessionAnswers((count) => count + 1);
       setTransitioning(true);
       setChild(next);
+      onPositionRef.current?.(exitFor(next));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "That answer did not save. Try it again.");
     } finally {
@@ -138,29 +173,81 @@ export function ChecklistTakeover({
             {child.name}
           </Text>
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
-            {subject?.displayName ?? "Questions"}
+            {subject && chapterPosition.currentIndex
+              ? `${subject.displayName} · ${chapterPosition.currentIndex} of ${chapterPosition.totalChapters}`
+              : (subject?.displayName ?? "Questions")}
           </Text>
         </View>
-        <IconButton label={closeLabel} onPress={() => onClose(exitFor(child))}>
+        <IconButton
+          label={closeLabel}
+          onPress={() => onClose(exitFor(child))}
+          testID="checklist.close"
+        >
           <Icon name="close" size={20} color={colors.textSubtle} />
         </IconButton>
       </View>
+      {/* D15: chapters are the progress grammar. One segment per subject
+          chapter (the Noom pattern), the only total the adaptive ladder
+          makes deterministic; a time estimate never renders here. */}
       <View
         accessible
         accessibilityRole="progressbar"
-        accessibilityLabel="Question progress"
-        accessibilityValue={{ min: 0, max: total, now: child.answered, text: `${child.answered} of ${total} answered` }}
-        style={{ height: 4, overflow: "hidden", borderRadius: radius.pill, backgroundColor: colors.borderSubtle }}
+        accessibilityLabel="Chapter progress"
+        accessibilityValue={{
+          min: 0,
+          max: chapterPosition.totalChapters,
+          now: chapterPosition.chapters.filter((chapter) => chapter.state === "done").length,
+          text: chapterPosition.currentIndex
+            ? `Chapter ${chapterPosition.currentIndex} of ${chapterPosition.totalChapters}`
+            : "Chapters complete",
+        }}
+        style={{ flexDirection: "row", gap: 3 }}
       >
-        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: progress, height: 4, backgroundColor: colors.brand }} />
+        {chapterPosition.chapters.map((chapter) => (
+          <View
+            key={chapter.subjectId}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={{
+              flex: 1,
+              height: 4,
+              borderRadius: radius.pill,
+              overflow: "hidden",
+              backgroundColor: colors.borderSubtle,
+            }}
+          >
+            <View
+              style={{
+                width:
+                  chapter.state === "done"
+                    ? "100%"
+                    : chapter.state === "current" && chapter.answered > 0
+                      ? "50%"
+                      : "0%",
+                height: 4,
+                backgroundColor: colors.brand,
+              }}
+            />
+          </View>
+        ))}
       </View>
+      {receipt ? (
+        <Text style={{ fontFamily: fontFamilies.bodyMedium, fontSize: fontSize.sm, color: colors.textBody }}>
+          {receipt}
+        </Text>
+      ) : null}
+      {sessionAnswers === 0 && item ? (
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
+          You can stop whenever you like.
+        </Text>
+      ) : null}
       {item ? (
         <>
           <View
             ref={questionHeadingRef}
             accessible
             accessibilityRole="header"
-            accessibilityLabel={`Question ${child.answered + 1} of ${total}. ${personalizeStatement(child.name, item)}?`}
+            accessibilityLabel={`${subject?.displayName ?? "Questions"}, chapter ${chapterPosition.currentIndex ?? chapterPosition.totalChapters} of ${chapterPosition.totalChapters}. ${personalizeStatement(child.name, item)}?`}
           >
             <Text style={{ minHeight: 58, fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.lg, lineHeight: 25, color: colors.textStrong }}>
               {personalizeStatement(child.name, item)}?
@@ -174,6 +261,7 @@ export function ChecklistTakeover({
                 accessibilityLabel={label}
                 accessibilityState={{ disabled: pending || transitioning }}
                 disabled={pending || transitioning}
+                testID={`checklist.answer.${value}`}
                 onPress={() => void answer(value)}
                 style={({ pressed }) => ({
                   minHeight: 44,
@@ -208,19 +296,15 @@ export function ChecklistTakeover({
           <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}>
             {`Every answer is saved. They become ${child.name}'s progress report.`}
           </Text>
-          <Button label={doneLabel ?? closeLabel} onPress={() => onClose(exitFor(child))} />
+          <Button
+            label={doneLabel ?? closeLabel}
+            onPress={() => onClose(exitFor(child))}
+            testID="checklist.done"
+          />
         </View>
       )}
       {pending ? <LoadingStatus label="Saving answer" showLabel={false} /> : null}
       {error ? <InlineError message={error} /> : null}
-      {/* Time-left only makes sense while a question is on screen; a
-          finished card saying "Almost done" reads as a broken counter
-          (founder confusion, 2026-08-23). */}
-      {item ? (
-        <Text style={{ textAlign: "center", fontFamily: fontFamilies.body, fontSize: fontSize.xs, color: colors.textMuted }}>
-          {position.remaining <= 1 ? "Almost done" : `About ${position.minutesLeft} min left. You can stop whenever you like.`}
-        </Text>
-      ) : null}
     </Card>
   );
 }

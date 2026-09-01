@@ -29,7 +29,11 @@ export interface PlanDefinition {
 
 /**
  * The public Homa plans. Annual pricing is twenty percent below twelve
- * monthly payments, rounded to the current web sticker prices.
+ * monthly payments (unified-cross-platform-billing ruling, 2026-08-01),
+ * rounded to the current web sticker prices. The walk-v2 D3 experiment
+ * with a $119 annual was overruled by the founder on 2026-08-31 before
+ * it ever went on sale; see ios-monthly-only-launch in the ruling
+ * register.
  */
 export const HOMA_PLANS: readonly PlanDefinition[] = [
   { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182, salesState: "available" },
@@ -73,6 +77,12 @@ export const APPLE_PROVIDER_PRODUCTS: readonly ProviderProduct[] = [
  * Keep this narrower than APPLE_PROVIDER_PRODUCTS. The full provider catalog
  * must continue recognizing historical receipts, renewals, and upgrades after
  * an offer stops accepting new purchases.
+ *
+ * Monthly only, twice ruled: ios-monthly-only-launch (2026-08-01), and
+ * the founder's 2026-08-31 overruling of walk-v2 D3 ("remove the $119
+ * option; I don't want to make it in Apple"). Annual ids stay in the
+ * receipt catalog above and are never merchandised; do not widen this
+ * filter without a new ruling.
  */
 export const APPLE_NEW_PURCHASE_PRODUCTS: readonly ProviderProduct[] =
   APPLE_PROVIDER_PRODUCTS.filter(

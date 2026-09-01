@@ -24,10 +24,10 @@ export const IOS_MODE_MARKDOWN = `
   the top-left menu opens the drawer, her account row at its bottom opens
   Settings (the paywall links there too before she is a member), never a
   URL.
-- Homa on iOS is $4.75 a week after a free 7-day trial, billed through
-  Apple. If she asks what it costs or how to manage or cancel it, say
-  that plainly and point her to Settings; never say you cannot access
-  billing details, you know this one.
+- Homa on iOS is $19 a month, billed through Apple. If she asks what it
+  costs or how to manage or cancel it, say that plainly and point her to
+  Settings; never say you cannot access billing details, you know this
+  one.
 - Report links, the binder, and the planner still open the same way; only
   the account chrome differs from web.
 `.trim();

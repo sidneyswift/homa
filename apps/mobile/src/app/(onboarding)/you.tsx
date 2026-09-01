@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -21,6 +21,12 @@ import { NativeText } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { saveWalkBasics } from "../../features/onboarding/basics";
+import {
+  reportOnboardingStep,
+  saveOnboardingStep,
+} from "../../features/onboarding/onboarding-state";
+import { useFamilyData } from "../../features/family/use-family-data";
+import { hapticAdvance } from "../../lib/haptics";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { fontFamilies } from "../../theme/fonts";
 import { colors, fontSize, radius, space } from "../../theme/tokens";
@@ -36,13 +42,15 @@ import { colors, fontSize, radius, space } from "../../theme/tokens";
  * call, same day: fifty-one chips on the screen read as a wall, not a
  * question). The sheet follows the planner's bottom-sheet grammar.
  *
- * No step of its own in mobile_onboarding_state (the step column's
- * check constraint predates this screen): intent already saved step
- * "kids", so a walk resumed from here lands on the kid questions and
- * simply skips this ask. A rare, accepted loss over a schema change.
+ * Walk v2 (S7): this screen follows the kids, so the making screen's
+ * chapter cover can greet her by the name she just gave (DELTA change
+ * 4). It carries its own resume step now that the step constraint
+ * includes "you".
  */
 export default function YouScreen() {
   const router = useRouter();
+  const { family } = useFamilyData();
+  const reported = useRef(false);
   const [name, setName] = useState("");
   const [stateCode, setStateCode] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -54,11 +62,26 @@ export default function YouScreen() {
   const stateName =
     US_STATES.find((state) => state.code === stateCode)?.name ?? null;
 
+  useEffect(() => {
+    if (!family || reported.current) return;
+    reported.current = true;
+    reportOnboardingStep(family.id, "you");
+  }, [family]);
+
+  async function advanceToMaking() {
+    hapticAdvance();
+    if (family) {
+      await saveOnboardingStep(family.id, "making").catch(() => {});
+      reportOnboardingStep(family.id, "making");
+    }
+    router.replace("/making" as never);
+  }
+
   async function continueWalk() {
     if (saving) return;
     setError(null);
     if (!name.trim() && !stateCode) {
-      router.replace("/kids" as never);
+      await advanceToMaking();
       return;
     }
     setSaving(true);
@@ -71,7 +94,7 @@ export default function YouScreen() {
       setError("That didn't save. Try again, or skip for now.");
       return;
     }
-    router.replace("/kids" as never);
+    await advanceToMaking();
   }
 
   return (
@@ -89,7 +112,12 @@ export default function YouScreen() {
           }}
         >
           <NativeText role="display" tone="strong">
-            {"Now, about you."}
+            {"And you?"}
+          </NativeText>
+          {/* Deck S7 (approved 2026-08-31): one body carries both
+              justifications; the per-field captions are folded in. */}
+          <NativeText role="body" tone="body">
+            {"Your name, so I stop calling you \"hey\". Your state, because homeschool rules are local and I've done the reading."}
           </NativeText>
 
           <View style={{ gap: space.xs }}>
@@ -100,9 +128,6 @@ export default function YouScreen() {
               placeholder="e.g. Sarah"
               autoCapitalize="words"
             />
-            <NativeText role="caption" tone="muted">
-              {"You'll hear it in every hello."}
-            </NativeText>
           </View>
 
           <View style={{ gap: space.xs }}>
@@ -114,6 +139,7 @@ export default function YouScreen() {
               accessibilityLabel={
                 stateName ? `State: ${stateName}. Change it` : "Choose your state"
               }
+              testID="you.stateRow"
               onPress={() => setPickerOpen(true)}
               style={{
                 minHeight: 52,
@@ -138,9 +164,6 @@ export default function YouScreen() {
               </Text>
               <Icon name="next" size={20} color={colors.textMuted} />
             </Pressable>
-            <NativeText role="caption" tone="muted">
-              {"Homeschool rules are state by state. I keep yours in mind."}
-            </NativeText>
           </View>
 
           {error ? (
@@ -148,8 +171,9 @@ export default function YouScreen() {
               <InlineError message={error} />
               <Pressable
                 accessibilityRole="button"
-                onPress={() => router.replace("/kids" as never)}
+                onPress={() => void advanceToMaking()}
                 style={{ minHeight: 44, justifyContent: "center" }}
+                testID="you.skip"
               >
                 <NativeText role="bodySmall" tone="muted">
                   {"Skip for now"}
@@ -165,12 +189,14 @@ export default function YouScreen() {
               onPress={() => void continueWalk()}
               disabled={saving}
               busy={saving}
+              testID="you.continue"
             />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Back"
-              onPress={() => router.replace("/intent" as never)}
+              onPress={() => router.replace("/kids" as never)}
               style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+              testID="you.back"
             >
               <NativeText role="control" tone="muted">
                 Back

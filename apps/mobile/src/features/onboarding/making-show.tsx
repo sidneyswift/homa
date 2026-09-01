@@ -123,6 +123,8 @@ function Spark({
   return (
     <Animated.View
       pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       style={[
         {
           position: "absolute",
@@ -173,7 +175,9 @@ export function MakingShow({
 
   // Completion: the drawing stops and the sheet leaves for the reveal.
   // Edge-on turn + fade (the judge cut the cross-route flip); capped so
-  // the exit can never hold the navigation hostage.
+  // the exit can never hold the navigation hostage. Ease-out per the D9
+  // ruling (2026-08-31): a departure decelerates into its landing; the
+  // old ease-in read as the sheet being yanked.
   useEffect(() => {
     if (!completing || exitFired.current) return;
     exitFired.current = true;
@@ -183,7 +187,7 @@ export function MakingShow({
     }
     exit.value = withTiming(
       1,
-      { duration: 450, easing: Easing.in(Easing.cubic) },
+      { duration: 450, easing: Easing.out(Easing.cubic) },
       (finished) => {
         if (finished) runOnJS(onExitDone)();
       },
@@ -223,15 +227,24 @@ export function MakingShow({
 
   return (
     <Pressable
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
+      // Narrowed wrapper (D9 ruling): only the decorative pieces (the
+      // easel drawing and the tap sparks) hide from the screen reader;
+      // the fact chips below are the parent's own words and stay
+      // readable. The tap target itself claims no role: the spark is a
+      // toy, not an action.
+      accessible={false}
+      importantForAccessibility="no"
       onPress={(event) =>
         fireSpark(event.nativeEvent.locationX, event.nativeEvent.locationY)
       }
       style={{ alignItems: "center", gap: space.sm }}
     >
       {/* The easel, sheet facing away: her work, our wait. */}
-      <Animated.View style={sheetStyle}>
+      <Animated.View
+        style={sheetStyle}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
         <Svg width={easelWidth} height={easelHeight} viewBox="0 0 100 125">
           {/* board legs */}
           <Rect x={14} y={70} width={5} height={52} rx={2.5} fill={palette.clay600} transform="rotate(8 16 70)" />

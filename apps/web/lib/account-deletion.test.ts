@@ -302,6 +302,14 @@ test("Apple purchase and deletion share a durable race fence", async () => {
     new URL("../../mobile/src/components/billing-gate.tsx", import.meta.url),
     "utf8",
   );
+  // The purchase machine (interlock ordering, recovery, finish journal)
+  // was lifted verbatim into the shared engine on gh#1045 so the wall
+  // and the walk's paywall run one money path; the race-fence
+  // assertions follow the code to its one home.
+  const purchaseEngine = await readFile(
+    new URL("../../mobile/src/features/billing/use-apple-purchase.ts", import.meta.url),
+    "utf8",
+  );
 
   const lockHelper = deletion.slice(
     deletion.indexOf("async function lockDeletionFamily"),
@@ -398,65 +406,69 @@ test("Apple purchase and deletion share a durable race fence", async () => {
     /pendingApplePurchaseFinish[\s\S]*current\?\.phase !== "finish_pending"[\s\S]*completeApplePurchaseFinish[\s\S]*current\.phase !== "finish_pending"[\s\S]*clearApplePurchaseAttempt/u,
   );
   assert.ok(
-    mobileGate.indexOf("await beginApplePurchase")
-      < mobileGate.indexOf("await requestPurchase"),
+    purchaseEngine.indexOf("await beginApplePurchase")
+      < purchaseEngine.indexOf("await requestPurchase"),
   );
   assert.ok(
-    mobileGate.indexOf("purchaseInFlightRef.current = true")
-      < mobileGate.indexOf("await beginApplePurchase"),
+    purchaseEngine.indexOf("purchaseInFlightRef.current = true")
+      < purchaseEngine.indexOf("await beginApplePurchase"),
   );
   assert.ok(
-    mobileGate.indexOf("await markApplePurchaseStoreStarted")
-      < mobileGate.indexOf("await requestPurchase"),
+    purchaseEngine.indexOf("await markApplePurchaseStoreStarted")
+      < purchaseEngine.indexOf("await requestPurchase"),
   );
-  const purchaseErrorCallback = mobileGate.slice(
-    mobileGate.indexOf("onPurchaseError:"),
-    mobileGate.indexOf("const handlePurchase ="),
+  const purchaseErrorCallback = purchaseEngine.slice(
+    purchaseEngine.indexOf("onPurchaseError:"),
+    purchaseEngine.indexOf("const handlePurchase ="),
   );
-  const exactPurchaseRequest = mobileGate.slice(
-    mobileGate.indexOf("async function handleBuy"),
-    mobileGate.indexOf("async function handleRestore"),
+  const exactPurchaseRequest = purchaseEngine.slice(
+    purchaseEngine.indexOf("const buy = useCallback"),
+    purchaseEngine.indexOf("const restore = useCallback"),
   );
   assert.doesNotMatch(purchaseErrorCallback, /abandonApplePurchase/u);
+  assert.doesNotMatch(purchaseEngine, /purchaseSucceeded(?:Attempt)?Ref/u);
   assert.doesNotMatch(mobileGate, /purchaseSucceeded(?:Attempt)?Ref/u);
   assert.match(
     exactPurchaseRequest,
     /const attemptId = interlock\.attemptId[\s\S]*markApplePurchaseStoreStarted[\s\S]*abandonApplePurchase\(familyId, attemptId\)[\s\S]*requestPurchase[\s\S]*catch \{[\s\S]*abandonApplePurchase\(familyId, attemptId\)/u,
   );
   assert.doesNotMatch(exactPurchaseRequest, /abandonApplePurchase\(.*purchaseAttemptRef\.current/u);
-  assert.match(mobileGate, /appAccountToken: attemptId/u);
-  assert.equal(mobileGate.match(/useIAP\(/gu)?.length, 1);
+  assert.match(purchaseEngine, /appAccountToken: attemptId/u);
+  // Exactly one StoreKit listener exists, and it lives in the engine;
+  // the wall and the walk both consume it, neither mounts its own.
+  assert.equal(purchaseEngine.match(/useIAP\(/gu)?.length, 1);
+  assert.equal(mobileGate.match(/useIAP\(/gu)?.length ?? 0, 0);
   const storeKitBoundary = mobileGate.slice(
     mobileGate.indexOf("function StoreKitBillingBoundary"),
     mobileGate.indexOf("function PlanPicker"),
   );
   assert.ok(
-    storeKitBoundary.indexOf("useIAP({")
+    storeKitBoundary.indexOf("useApplePurchase({")
       < storeKitBoundary.indexOf("if (gate.open)"),
   );
   assert.match(
-    mobileGate,
+    purchaseEngine,
     /storeKitPurchaseAttemptId[\s\S]*"appAccountToken" in purchase[\s\S]*purchase\.appAccountToken\.toLowerCase\(\)/u,
   );
   assert.match(
-    storeKitBoundary,
-    /confirmApplePurchase\([\s\S]*purchase,[\s\S]*await finishTransaction\(\{ purchase \}\)[\s\S]*completeApplePurchaseFinish\(familyId, result\.purchaseAttemptId\)[\s\S]*await onUnlocked\(\)/u,
+    purchaseEngine,
+    /confirmApplePurchase\([\s\S]*purchase,[\s\S]*await finishTransaction\(\{ purchase \}\)[\s\S]*completeApplePurchaseFinish\(familyId, result\.purchaseAttemptId\)[\s\S]*await onEntitled\(\)/u,
   );
   assert.match(
-    storeKitBoundary,
-    /resumeApplePurchaseConfirmation\(familyId\)[\s\S]*pendingApplePurchaseFinish\(familyId\)[\s\S]*finishTransaction\(\{ purchase: pendingFinish\.purchase \}\)[\s\S]*completeApplePurchaseFinish\([\s\S]*pendingFinish\.attemptId[\s\S]*await onUnlocked\(\)/u,
+    purchaseEngine,
+    /resumeApplePurchaseConfirmation\(familyId\)[\s\S]*pendingApplePurchaseFinish\(familyId\)[\s\S]*finishTransaction\(\{ purchase: pendingFinish\.purchase \}\)[\s\S]*completeApplePurchaseFinish\([\s\S]*pendingFinish\.attemptId[\s\S]*await onEntitled\(\)/u,
   );
   assert.match(
-    storeKitBoundary,
+    purchaseEngine,
     /getPendingTransactionsIOS\(\)[\s\S]*recoverablePurchases = recoveryAttempt[\s\S]*storeKitPurchaseAttemptId\(purchase\)[\s\S]*recoveryAttempt\.attemptId\.toLowerCase\(\)[\s\S]*APPLE_PRODUCT_IDS\.includes\(purchase\.productId\)[\s\S]*handlePurchase\(purchase\)[\s\S]*catch \{[\s\S]*recoveringFamiliesRef\.current\.delete\(familyId\)/u,
   );
-  const storeKitRecovery = storeKitBoundary.slice(
-    storeKitBoundary.indexOf("const runApplePurchaseRecovery"),
-    storeKitBoundary.indexOf("void Promise.resolve().then(runApplePurchaseRecovery)"),
+  const storeKitRecovery = purchaseEngine.slice(
+    purchaseEngine.indexOf("const runApplePurchaseRecovery"),
+    purchaseEngine.indexOf("void Promise.resolve().then(runApplePurchaseRecovery)"),
   );
   assert.doesNotMatch(storeKitRecovery, /if \(!recoveryAttempt\) return/u);
   assert.match(
-    storeKitBoundary,
+    purchaseEngine,
     /Promise\.resolve\(\)\.then\(runApplePurchaseRecovery\)[\s\S]*AppState\.addEventListener\("change"[\s\S]*nextState === "active"[\s\S]*runApplePurchaseRecovery\(\)/u,
   );
   assert.match(

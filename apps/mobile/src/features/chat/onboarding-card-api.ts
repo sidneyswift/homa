@@ -27,13 +27,16 @@ async function authenticatedRequest(
   });
 }
 
-async function expectOk(response: Response): Promise<Record<string, unknown>> {
+async function expectOk(
+  response: Response,
+  failureMessage = "That did not save. Nothing is lost, so try again.",
+): Promise<Record<string, unknown>> {
   const data = await response.json().catch(() => ({})) as Record<string, unknown>;
   if (!response.ok || data.ok !== true) {
     throw new Error(
       response.status === 401
         ? "Your session expired. Sign in again to continue."
-        : "That did not save. Nothing is lost, so try again.",
+        : failureMessage,
     );
   }
   return data;
@@ -52,14 +55,21 @@ export async function saveChecklistAnswer(input: {
   itemId: string;
   answer: MapAnswer;
 }): Promise<void> {
-  await expectOk(await authenticatedRequest("/api/map/answer", {
-    method: "POST",
-    body: JSON.stringify({
-      ...input,
-      source: "checklist",
-      idempotencyKey: createIdempotencyKey(),
+  // Deck S8 save-error string (approved 2026-08-31, editor-gate
+  // contraction fix): thrown here because this message is exactly what
+  // the checklist renders. The default expectOk message keeps serving
+  // the loads and detail saves, which are not answers.
+  await expectOk(
+    await authenticatedRequest("/api/map/answer", {
+      method: "POST",
+      body: JSON.stringify({
+        ...input,
+        source: "checklist",
+        idempotencyKey: createIdempotencyKey(),
+      }),
     }),
-  }));
+    "That answer didn't save. Try it again.",
+  );
 }
 
 export type DetailValues = Record<string, string>;

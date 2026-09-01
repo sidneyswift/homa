@@ -40,6 +40,29 @@ Also: `eve build` in apps/web deletes the `.eve` snapshot a live
 and fresh worktrees need `corepack pnpm install` or the eve patch is
 silently dropped.
 
+Two more traps, paid for 2026-08-31 (gh#1045 execution):
+
+- **`npx expo install <pkg>` fails in this repo**: it shells to the
+  bare `pnpm` (Homebrew v10 vs the corepack-pinned version) and dies on
+  the store-dir mismatch. It DOES print the SDK-matched versions before
+  dying; take those and run
+  `corepack pnpm add "<pkg>@<version>"` inside `apps/mobile`.
+- **A fresh worktree has no `ios/`** (prebuild output is gitignored):
+  run `npx expo prebuild --platform ios` in `apps/mobile`, and know
+  that its pod-install step dies on this Mac's missing LANG (the same
+  root cause the `expo run:ios` trap documents) with a Unicode
+  CompatibilityError buried in a Ruby traceback. Run
+  `cd ios && LANG=en_US.UTF-8 pod install` yourself, then the usual
+  UDID-targeted xcodebuild.
+- **The fingerprint command in older docs is wrong for this tree**:
+  `npx expo fingerprint --platform ios` errors (`unknown or unexpected
+  option`), and because the error text is identical on both trees, a
+  piped before/after "diff" of it reads as UNCHANGED, a false green
+  this session briefly believed. The working invocation:
+  `cd apps/mobile && ./node_modules/.bin/fingerprint . | jq -r .hash`.
+  Never compare fingerprints through a pipeline that can swallow the
+  command failing.
+
 ## Simulator traps (each cost real time once)
 
 - **Text renders enormous / layout broken**: a stuck accessibility text
@@ -72,17 +95,18 @@ Screen order: `hello → intent → kids → you → making → reveal → next`
 then the AI-disclosure consent card, then chat. `you`'s state field is
 optional; `kids` requires name, age, and at least one subject.
 
-The checklist (`ChecklistTakeover`) has **four** close/score-shaped call
-sites with different side effects. This table is the one home of that
-inventory (spec Outcome 6 and system-model principle 1 point here; update
-it here, nowhere else):
+The checklist (`ChecklistTakeover`) close/score-shaped call sites and
+their side effects. This table is the one home of that inventory (spec
+Outcome 6 and system-model principle 1 point here; update it here,
+nowhere else). **Updated 2026-08-31 (D8, gh#1045 execution): the "See
+it" bypass is collapsed**; the walk now has ONE close path.
 
 | Path | What it fires | Deterministic? |
 |---|---|---|
-| Checklist's own close/done (in `making`), with at least one answer (`making.tsx:190-195`) | `finalizeReport()` → `POST /api/map/score` → report scored → onboarding record flips | yes |
-| The ready banner's "See it" button (in `making`, `making.tsx:259`) | nothing; straight to `/reveal`, no finalize | yes (deterministically nothing) |
-| Checklist close in chat (`chat-session.tsx:787-799`) | a hidden `checklist_complete` directive; eve judges what to do with it | no; model-mediated |
-| Report-reveal card mount in chat (`onboarding-cards.tsx:486`) | `finalizeReport()` if `!card.alreadyScored`; this is what actually scored the 2026-08-31 verification after eve chose to render the card | only once eve renders it |
+| Checklist's own close/done (in `making`), with at least one answer (`handleChecklistClose`) | `finalizeReport()` → `POST /api/map/score` → report scored → onboarding record flips (and, since move 1, emits `onboarding.completed` with its cause) | yes |
+| The ready banner's "See it" button (in `making`) | the SAME `handleChecklistClose`, fed the checklist's live position via its `onPosition` callback, so an answered session finalizes on the way out; the navigate effect then routes to `/reveal` | yes |
+| Checklist close in chat (`chat-session.tsx`) | a hidden `checklist_complete` directive; eve judges what to do with it | no; model-mediated |
+| Report-reveal card mount in chat (`onboarding-cards.tsx`, `if (!card.alreadyScored)`) | `finalizeReport()` if unscored; this is what actually scored the 2026-08-31 verification after eve chose to render the card | only once eve renders it |
 
 ## Arming the wall organically (the verified sequence, 2026-08-31)
 

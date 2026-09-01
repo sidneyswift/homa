@@ -33,6 +33,7 @@ export function Button({
   busy = false,
   icon,
   style,
+  testID,
 }: {
   label: string;
   onPress: () => void;
@@ -45,6 +46,9 @@ export function Button({
   /** Optional mark shown before the label, e.g. the Google glyph. */
   icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
+  /** Stable, screen-scoped driver name, e.g. "paywall.subscribe"
+   *  (spec Outcome 7). Additive to accessibility, never a replacement. */
+  testID?: string;
 }) {
   return (
     <NativeAction
@@ -57,6 +61,7 @@ export function Button({
       onPress={onPress}
       size={size}
       style={style}
+      testID={testID}
       variant={BUTTON_VARIANT_TO_NATIVE_ACTION[variant]}
     />
   );

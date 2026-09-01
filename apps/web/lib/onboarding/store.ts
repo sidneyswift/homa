@@ -1,8 +1,9 @@
 import { mapDb } from "../map/db";
+import { emitMapEvent } from "../map/events";
 import {
   EMPTY_ONBOARDING_RECORD,
   familyOnboardingActive,
-  onboardingCompletionReached,
+  onboardingCompletionCause,
   readOnboardingRecord,
   type OnboardingFamilyRow,
   type OnboardingRecord,
@@ -202,15 +203,33 @@ export async function resolveOnboardingCompletion(familyId: string): Promise<boo
   const row = rows[0];
   if (!row) return false;
 
-  const reached = onboardingCompletionReached({
+  const cause = onboardingCompletionCause({
     profileCompletedAt: row.profile_completed_at,
     childCount: row.children,
     scoredReportCount: row.scored,
     recordUpdatedAt: state.record.updatedAt,
     now: new Date(),
   });
-  if (!reached) return false;
+  if (!cause) return false;
   await completeOnboarding(familyId);
+  // The transition narrates itself (2026-08-30 spec, Outcome 5): this is
+  // the free window's one decisive flip, and until this event existed the
+  // cause was discarded inside the boolean above, so "why is this family
+  // walled" took archaeology. Emitted only here, on the real
+  // active -> done transition (the state === "done" early return above
+  // keeps idempotent re-calls silent), after the write succeeds so the
+  // trail never claims a flip the record does not show. Best-effort by
+  // the analytics law: a failed emit never un-completes a family.
+  // anchor_updated_at is the record write the backstop clock counted
+  // from; see the registry comment on onboarding.completed.
+  await emitMapEvent("onboarding.completed", {
+    family_id: familyId,
+    cause,
+    anchor_updated_at: state.record.updatedAt,
+    profile_completed: row.profile_completed_at !== null,
+    child_count: row.children,
+    scored_report_count: row.scored,
+  });
   return true;
 }
 

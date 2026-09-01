@@ -18,6 +18,9 @@ interface IconButtonProps {
   label: string;
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
+  /** Stable, screen-scoped driver name (spec Outcome 7). Additive to
+   *  the accessibility label, never a replacement. */
+  testID?: string;
 }
 
 export const IconButton = forwardRef<View, IconButtonProps>(function IconButton({
@@ -28,10 +31,12 @@ export const IconButton = forwardRef<View, IconButtonProps>(function IconButton(
   label,
   onPress,
   style,
+  testID,
 }, ref) {
   return (
     <Pressable
       ref={ref}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}

@@ -245,6 +245,7 @@ export function NativeAction({
   size = "md",
   style,
   variant = "primary",
+  ...rest
 }: Omit<PressableProps, "children" | "style" | "onPress" | "disabled"> & {
   accessibilityHint?: string;
   accessibilityState?: AccessibilityState;
@@ -282,6 +283,7 @@ export function NativeAction({
   const stacksIconAboveLabel = Boolean(icon) && fontScale >= 2;
   return (
     <Pressable
+      {...rest}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}

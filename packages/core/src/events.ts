@@ -138,18 +138,24 @@ export type MobileBootstrapFailureReason =
   (typeof MOBILE_BOOTSTRAP_FAILURE_REASONS)[number];
 
 /**
- * Native onboarding flow steps, in walk order (wireframe v4 and the plan
- * doc 2026-08-18-mobile-onboarding-v1-plan.md). "making" and "reveal" are
+ * Native onboarding flow steps, in walk order (walk v2,
+ * plans/2026-08-30-mobile-onboarding-paywall-v2/walk-v2-proposal.md;
+ * "door"…"next" predate it, wireframe v4). "making" and "reveal" are
  * the worksheet aha's two halves; print outcomes ride the existing
  * materials.print_result event rather than a duplicate name here.
+ * "paywall" is S10, the walk's named climax (presents for everyone,
+ * never arms, D8); "decline" is S11, reached only from "No thanks".
  */
 export const MOBILE_ONBOARDING_STEPS = [
   "door",
   "hello",
   "intent",
   "kids",
+  "you",
   "making",
   "reveal",
+  "paywall",
+  "decline",
   "next",
 ] as const;
 export type MobileOnboardingStep = (typeof MOBILE_ONBOARDING_STEPS)[number];
@@ -164,6 +170,18 @@ export const MOBILE_ONBOARDING_INTENTS = [
 ] as const;
 export type MobileOnboardingIntent =
   (typeof MOBILE_ONBOARDING_INTENTS)[number];
+
+/**
+ * Why a family's onboarding record flipped to "done" (founder ruling
+ * onboarding-completion-milestones, 2026-07-31): "keystone" is the real
+ * arc, profile complete + a child + a scored report; "backstop" is the
+ * 14-days-since-last-record-write escape hatch that exists so a family
+ * can never latch onboarding-active forever. The onboarding.completed
+ * event carries this so "why is this family walled" is a data read.
+ */
+export const ONBOARDING_COMPLETION_CAUSES = ["keystone", "backstop"] as const;
+export type OnboardingCompletionCause =
+  (typeof ONBOARDING_COMPLETION_CAUSES)[number];
 
 /**
  * The only family-scoped analytics names a native client may submit through
@@ -980,7 +998,10 @@ export const EVENT_SCHEMAS = {
       family_id: z.uuid(),
       kids_added: z.number().int().min(0).max(20),
       intent: z.enum(MOBILE_ONBOARDING_INTENTS),
-      next_door: z.enum(["another_worksheet", "plan_week", "look_around"]),
+      // "binder" is the walk-v2 decline exit (S11 armed branch, D5):
+      // she finished the walk through the paywall and left to her kept
+      // pages, which is a completion with a door, never exited_early.
+      next_door: z.enum(["another_worksheet", "plan_week", "look_around", "binder"]),
       second_create_tapped: z.boolean(),
     })
     .strict(),
@@ -994,6 +1015,29 @@ export const EVENT_SCHEMAS = {
       family_id: z.uuid(),
       step: z.enum(MOBILE_ONBOARDING_STEPS),
       kids_added: z.number().int().min(0).max(20),
+    })
+    .strict(),
+  // The economic machine's one decisive transition: the family's durable
+  // onboarding record flipping "active" -> "done" (the end of the free
+  // window; the billing wall applies from here). Distinct from
+  // mobile_onboarding.completed, which is the native WALK's doors-screen
+  // funnel event: a family can flip mid-walk (a checklist close scoring a
+  // report) or days after abandoning it (the backstop). Server-emitted
+  // only, at the single resolver that performs the write
+  // (apps/web/lib/onboarding/store.ts resolveOnboardingCompletion);
+  // never in the mobile relay allowlist. anchor_updated_at is the record
+  // write the backstop clock counted from, carried because the mobile
+  // bootstrap refreshes it on every open of an unfinished walk, so
+  // "backstop" means 14 days since the LAST record write, not since
+  // onboarding began (2026-08-30 spec, system-model.md move 1).
+  "onboarding.completed": z
+    .object({
+      family_id: z.uuid(),
+      cause: z.enum(ONBOARDING_COMPLETION_CAUSES),
+      anchor_updated_at: z.string().nullable(),
+      profile_completed: z.boolean(),
+      child_count: z.number().int().min(0),
+      scored_report_count: z.number().int().min(0),
     })
     .strict(),
   // The native share sheet is a parent-controlled handoff, never a

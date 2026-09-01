@@ -1067,3 +1067,40 @@ test("planner.viewed child narrowing is optional, family id is not", () => {
   const { family_id: _familyId, ...withoutFamily } = validPlannerEvents["planner.viewed"];
   assert.equal(EVENT_SCHEMAS["planner.viewed"].safeParse(withoutFamily).success, false);
 });
+
+test("onboarding.completed narrates the flip with a closed cause and no content", () => {
+  const valid = {
+    family_id: FAMILY_ID,
+    cause: "keystone",
+    anchor_updated_at: "2026-08-30T12:00:00.000Z",
+    profile_completed: true,
+    child_count: 2,
+    scored_report_count: 1,
+  };
+  assert.equal(EVENT_SCHEMAS["onboarding.completed"].safeParse(valid).success, true);
+  assert.equal(
+    EVENT_SCHEMAS["onboarding.completed"].safeParse({
+      ...valid,
+      cause: "backstop",
+      anchor_updated_at: null,
+    }).success,
+    true,
+  );
+  // The cause is a closed set: an emitter cannot invent a third door.
+  assert.equal(
+    EVENT_SCHEMAS["onboarding.completed"].safeParse({ ...valid, cause: "manual" })
+      .success,
+    false,
+  );
+  // Strict shape: no child names, no emails, no free-text reasons.
+  assert.equal(
+    EVENT_SCHEMAS["onboarding.completed"].safeParse({ ...valid, child_name: "Nora" })
+      .success,
+    false,
+  );
+  assert.equal(
+    EVENT_SCHEMAS["onboarding.completed"].safeParse({ ...valid, family_id: "nope" })
+      .success,
+    false,
+  );
+});

@@ -5,6 +5,7 @@ import type { EveMessage, EveMessagePart } from "eve/react";
 
 import {
   birthDateFromParts,
+  checklistChaptersFor,
   checklistPositionFor,
   latestDetailRequest,
   parseChecklistCardPart,
@@ -89,6 +90,69 @@ describe("mobile checklist state", () => {
     const twice = withChecklistAnswer(once, itemId, "easily");
     assert.equal(twice.answered, 1);
     assert.equal(twice.answers[0]?.answer, "easily");
+  });
+});
+
+describe("checklistChaptersFor (D15 rechaptering)", () => {
+  const child = {
+    id: "child-1",
+    name: "Mia",
+    ageMonths: 72,
+    inRange: true,
+    reportToken: null,
+    answered: 0,
+    interests: [],
+    helpWith: null,
+    answers: [],
+  };
+
+  it("makes a chapter of every planned subject, first one current", () => {
+    const position = checklistChaptersFor(child);
+    assert.ok(position.totalChapters > 1);
+    assert.equal(position.chapters.length, position.totalChapters);
+    assert.equal(position.currentIndex, 1);
+    assert.equal(position.chapters[0]?.state, "current");
+    assert.ok(position.chapters.slice(1).every((chapter) => chapter.state === "upcoming"));
+    assert.ok(position.chapters[0]?.subjectName.length > 0);
+  });
+
+  it("advances the current chapter when a subject closes", () => {
+    // A non-easily answer ends the subject's ladder, so its chapter is
+    // done and the next subject becomes current.
+    const first = checklistPositionFor(child).currentItem;
+    assert.ok(first);
+    const after = withChecklistAnswer(child, first.id, "not_yet");
+    const position = checklistChaptersFor(after);
+    assert.equal(position.chapters[0]?.state, "done");
+    assert.equal(position.chapters[0]?.answered, 1);
+    assert.equal(position.currentIndex, 2);
+  });
+
+  it("keeps a chapter open while easily climbs its ladder", () => {
+    const first = checklistPositionFor(child).currentItem;
+    assert.ok(first);
+    const after = withChecklistAnswer(child, first.id, "easily");
+    const position = checklistChaptersFor(after);
+    // The same subject either offers its next rung (still current) or,
+    // with no rung to climb, closes; both are honest states, never a
+    // fake fixed total.
+    const firstChapter = position.chapters[0];
+    assert.ok(firstChapter?.state === "current" || firstChapter?.state === "done");
+    assert.equal(firstChapter?.answered, 1);
+  });
+
+  it("reports completion as a null current index", () => {
+    // Answer every question the adaptive queue ever offers, non-easily,
+    // so each subject closes at its base.
+    let state = child;
+    for (let guard = 0; guard < 200; guard += 1) {
+      const item = checklistPositionFor(state).currentItem;
+      if (!item) break;
+      state = withChecklistAnswer(state, item.id, "getting_there");
+    }
+    const position = checklistChaptersFor(state);
+    assert.equal(position.currentIndex, null);
+    assert.ok(position.chapters.every((chapter) => chapter.state === "done"));
   });
 });
 

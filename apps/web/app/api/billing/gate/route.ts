@@ -1,9 +1,17 @@
 import { familyAccountGate } from "../../../../lib/billing/wall";
 import { familyBillingEntitlement } from "../../../../lib/billing/entitlements";
+import {
+  gateOpenForReason,
+  gateReason,
+  type GateOnboardingState,
+} from "../../../../lib/billing/gate-reason";
 import { isPlanTier } from "../../../../lib/billing/wall-types";
 import { mapDb } from "../../../../lib/map/db";
 import { requireFamily, requireFamilyFromBearer } from "../../../../lib/map/session";
-import { familyOnboardingActive } from "../../../../lib/onboarding/state";
+import {
+  familyOnboardingActive,
+  readOnboardingRecord,
+} from "../../../../lib/onboarding/state";
 
 /**
  * GET /api/billing/gate
@@ -44,6 +52,7 @@ export async function GET(request: Request): Promise<Response> {
   let billingProvider: string | null = null;
   let billingPeriod: string | null = null;
   let onboardingActive = false;
+  let onboarding: GateOnboardingState = "none";
   try {
     const sql = mapDb();
     const rows = await sql<
@@ -54,6 +63,12 @@ export async function GET(request: Request): Promise<Response> {
     `;
     const row = rows[0];
     if (isPlanTier(row?.plan_tier)) planTier = row.plan_tier;
+    if (row) {
+      // The raw record state, channel-independent: the walk's late
+      // screens branch on "free window ended" (done) vs "never had one"
+      // (none), which the flag-gated exemption below cannot express.
+      onboarding = readOnboardingRecord(row.context)?.state ?? "none";
+    }
     if (isMobile && row) {
       onboardingActive = familyOnboardingActive({
         profileCompletedAt: row.profile_completed_at,
@@ -89,9 +104,19 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
 
+  // One derivation: `open` comes from the reason, so the boolean and its
+  // explanation cannot disagree (spec Outcome 6; the pre-2026-08 shape
+  // was `open: gate.checkout === null || onboardingActive`, which is the
+  // same decision with the name thrown away).
+  const reason = gateReason({
+    checkoutRequired: gate.checkout !== null,
+    onboardingExempt: onboardingActive,
+  });
   return Response.json({
     ok: true,
-    open: gate.checkout === null || onboardingActive,
+    open: gateOpenForReason(reason),
+    reason,
+    onboarding,
     lapsed: gate.lapsed,
     planTier,
     billingProvider,

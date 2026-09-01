@@ -29,6 +29,8 @@ describe("native Apple offer catalog", () => {
   });
 
   it("does not merchandise annual products", () => {
+    // Twice ruled: ios-monthly-only-launch (2026-08-01) and the founder
+    // overruling of walk-v2 D3 (2026-08-31).
     assert.equal(
       APPLE_NATIVE_PRODUCT_IDS.some((productId) => productId.endsWith(".annual")),
       false,

@@ -32,6 +32,9 @@ describe("Homa billing catalog", () => {
   });
 
   it("allows only available monthly Apple products to begin new purchases", () => {
+    // Monthly only, twice ruled (ios-monthly-only-launch 2026-08-01;
+    // founder overruling of walk-v2 D3, 2026-08-31): annual ids stay in
+    // the receipt catalog and are never merchandised.
     assert.deepEqual(
       APPLE_NEW_PURCHASE_PRODUCTS.map(({ tier, period }) => ({ tier, period })),
       [{ tier: "regular", period: "monthly" }],

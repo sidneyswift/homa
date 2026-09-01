@@ -7,6 +7,7 @@ import {
   appWouldAdmit,
   ONBOARDING_BACKSTOP_DAYS,
   onboardingActiveForRow,
+  onboardingCompletionCause,
   onboardingCompletionReached,
   onboardingRowFromMembership,
   readOnboardingRecord,
@@ -241,5 +242,56 @@ describe("onboardingCompletionReached", () => {
       scoredReportCount: 0,
       recordUpdatedAt: null,
     }), false);
+  });
+});
+
+describe("onboardingCompletionCause", () => {
+  const day = 24 * 60 * 60 * 1000;
+  const now = new Date("2026-08-01T00:00:00.000Z");
+  const base = {
+    profileCompletedAt: "2026-07-24T00:00:00.000Z",
+    childCount: 2,
+    scoredReportCount: 1,
+    recordUpdatedAt: "2026-07-24T00:00:00.000Z",
+    now,
+  };
+
+  it("names the real arc keystone", () => {
+    assert.equal(onboardingCompletionCause(base), "keystone");
+  });
+
+  it("names the stranded release backstop", () => {
+    assert.equal(
+      onboardingCompletionCause({
+        ...base,
+        scoredReportCount: 0,
+        recordUpdatedAt: new Date(
+          now.getTime() - ONBOARDING_BACKSTOP_DAYS * day,
+        ).toISOString(),
+      }),
+      "backstop",
+    );
+  });
+
+  it("lets the keystone win the telling when both doors are open", () => {
+    // A family who scored a report and then sat past the backstop really
+    // finished the arc; folding her into "backstop" would pollute the
+    // abandonment population the funnel reads that cause for.
+    assert.equal(
+      onboardingCompletionCause({
+        ...base,
+        recordUpdatedAt: new Date(
+          now.getTime() - (ONBOARDING_BACKSTOP_DAYS + 5) * day,
+        ).toISOString(),
+      }),
+      "keystone",
+    );
+  });
+
+  it("stays null while neither door is open", () => {
+    assert.equal(
+      onboardingCompletionCause({ ...base, scoredReportCount: 0 }),
+      null,
+    );
   });
 });
