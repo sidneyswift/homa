@@ -3,6 +3,24 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-08-31 · Founder ruling: no annual plan; iOS stays monthly-only (walk-v2 D3 overruled)
+
+During the gh#1045 execution, the founder overruled walk-v2's D3 the
+same day it was ruled, before anything went on sale or was created in
+App Store Connect: "remove the $119 option. i dont want to make it in
+apple. remove the option from the app." Consequences, all landed on PR
+#1046: APPLE_NEW_PURCHASE_PRODUCTS returns to monthly-only (the
+ios-monthly-only-launch ruling of 2026-08-01 stands; annual product ids
+remain in the immutable receipt catalog, never merchandised), the
+catalog's display annual returns to the unified-cross-platform-billing
+20%-below math ($182), the landing note returns to "20% less", and the
+native S10 paywall sells the single monthly plan (its "View other
+plans" sheet and save badge are deleted, not dark). The 7-day trial
+intro offer (D2) remains a live founder action; the paywall's trial
+strings stay gated on the offer actually existing in StoreKit.
+Registered as `ios-annual-overruled` in journeys/10-reconciliation.md
+§5.
+
 ## 2026-08-27 · Repository-wide cleanup audit, executed per founder approval
 
 The founder asked for a complete audit of the repo, database, and CI/CD

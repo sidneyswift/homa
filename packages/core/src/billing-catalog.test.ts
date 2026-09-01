@@ -31,27 +31,24 @@ describe("Homa billing catalog", () => {
     assert.ok(providerProduct("apple", "com.thankshoma.homa.elite.monthly"));
   });
 
-  it("allows both periods of available tiers to begin new purchases", () => {
-    // D3 (2026-08-31): the annual plan ships at the ruled $119/year and
-    // may begin new purchases; coming_soon tiers still may not.
+  it("allows only available monthly Apple products to begin new purchases", () => {
+    // Monthly only, twice ruled (ios-monthly-only-launch 2026-08-01;
+    // founder overruling of walk-v2 D3, 2026-08-31): annual ids stay in
+    // the receipt catalog and are never merchandised.
     assert.deepEqual(
       APPLE_NEW_PURCHASE_PRODUCTS.map(({ tier, period }) => ({ tier, period })),
-      [
-        { tier: "regular", period: "monthly" },
-        { tier: "regular", period: "annual" },
-      ],
+      [{ tier: "regular", period: "monthly" }],
     );
     assert.deepEqual(APPLE_NEW_PURCHASE_PRODUCT_IDS, [
       "com.thankshoma.homa.regular.monthly",
-      "com.thankshoma.homa.regular.annual",
     ]);
     assert.equal(
       appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.monthly")?.tier,
       "regular",
     );
     assert.equal(
-      appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.annual")?.period,
-      "annual",
+      appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.annual"),
+      null,
     );
     assert.equal(
       appleProductAvailableForNewPurchase("com.thankshoma.homa.plus.monthly"),
@@ -67,7 +64,6 @@ describe("Homa billing catalog", () => {
 
   it("uses weekly math only as a truthful display equivalent", () => {
     assert.equal(weeklyEquivalentUsd("regular", "monthly"), 4.38);
-    // $119/year (D3): 119 / 52, rounded to cents.
-    assert.equal(weeklyEquivalentUsd("regular", "annual"), 2.29);
+    assert.equal(weeklyEquivalentUsd("regular", "annual"), 3.5);
   });
 });

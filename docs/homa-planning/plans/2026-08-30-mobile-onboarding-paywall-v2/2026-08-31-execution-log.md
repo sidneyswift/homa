@@ -102,3 +102,16 @@ pipeline), then the guest head. After this branch deploys and its
 migration applies, re-run the S8-to-S11 arc once on a fresh +homatest
 family to watch onboarding.completed land in public.events with cause
 "keystone" (the sandbox harness in gh#1047 makes that a command).
+
+## Addendum, later the same day: D3 overruled
+
+The founder overruled D3 before merge: no annual plan ("remove the $119
+option; I don't want to make it in Apple"). The branch now carries zero
+pricing changes: the catalog returns to the unified-billing math
+($19/mo, $182 display annual on web), APPLE_NEW_PURCHASE_PRODUCTS is
+monthly-only again (ios-monthly-only-launch, 2026-08-01, stands), the
+landing note returns to "20% less", and the paywall screen sells the
+one monthly plan with trial strings still gated on the D2 intro offer.
+The ruling is registered in journeys/10-reconciliation.md §5 and the
+build-log. D2 (the 7-day intro offer in App Store Connect) remains the
+one open founder action for the trial presentation.

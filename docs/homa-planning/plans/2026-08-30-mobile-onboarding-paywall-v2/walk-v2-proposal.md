@@ -364,7 +364,7 @@ schema + legal question, spec §8).
 |---|---|---|
 | D1 | The skeleton | **RULED 2026-08-31: v2.2 composite** (guest head, deferred gate; see sequence-options.md) |
 | D2 | 7-day free trial (StoreKit intro offer) | **RULED 2026-08-31: yes, 7 days.** The S10 trial stack is the shipping variant; the no-trial variant text stays only as provenance. Founder action: configure the intro offer in App Store Connect |
-| D3 | Annual SKU | **RULED 2026-08-31: ship annual now at $119/year** ($9.92/mo, save 48%), default-selected, trial on both plans. Founder action: create the annual product in App Store Connect |
+| D3 | Annual SKU | **OVERRULED by the founder 2026-08-31, same day, before anything went on sale: no annual plan.** "Remove the $119 option; I don't want to make it in Apple." The earlier ios-monthly-only-launch ruling (2026-08-01) stands: annual ids stay in the receipt catalog, never merchandised. The paywall sells monthly only |
 | D4 | Price | **RULED 2026-08-31: $19/month confirmed.** All S10 strings keep the literal price |
 | D5 | Decline state | **RULED 2026-08-31: all four pieces.** Read-only Binder + started-report peek + one free-page credit + "Remind me Friday" snooze (see S11) |
 | D6 | Gallery assets | **RULED 2026-08-31: full set approved.** Produce one 9-12 + one 13+ page (completing dinosaurs at three levels), planner-week card, hours-log card, all via the real pipeline; hero = Maya's paintbrush adventure pending final-gallery eye. Band coverage stays a ship gate |

@@ -162,10 +162,11 @@ elements, after the simplicity research pass)
 - Hero: {kid}'s real page, big, most of the screen. No caption.
 - H: Keep {kid}'s pages coming.
 - Price sentence (doubles as the charge terms, sits directly above the
-  CTA): 7 days free, then $119 a year ($9.92 a month). Cancel anytime
-  in the App Store. (reader-gate parenthetical fix; DELTA change 1,
-  ruled 2026-08-31, restores the cancel/auto-renew mechanic to the
-  paywall itself, where every corpus winner carries it)
+  CTA): 7 days free, then $19 a month. Cancel anytime in the App Store.
+  (DELTA change 1 keeps the cancel/auto-renew mechanic on the paywall
+  itself. REVISED 2026-08-31: the founder overruled D3 the same day, so
+  the annual figure is gone and the monthly restatement below became
+  THE price sentence)
 - Reminder line (replaces the toggle; the reminder is automatic):
   Free until {charge_date}. I'll remind you 2 days before. (DELTA
   change 2, ruled 2026-08-31: the literal date, per Noom and YNAB, is
@@ -174,12 +175,12 @@ elements, after the simplicity research pass)
   permission beat, was DECLINED by Sidney 2026-08-31)
 - CTA: Try it for $0.00
 - Caption: Nothing due today.
-- Links row: View other plans · No thanks
+- Links row: No thanks (the "View other plans" link died with D3's
+  overruling; one plan is not a menu)
 - Footer: Restore purchases · Terms · Privacy
-- "View other plans" sheet: Annual · $119/year ($9.92/month, Best
-  value · save 48%, selected) / Monthly · $19/month. Price sentence and CTA
-  restate the selection when monthly is chosen: "7 days free, then $19
-  a month."
+- "View other plans" sheet: CUT (D3 OVERRULED 2026-08-31: no annual
+  plan, in App Store Connect or in the app; ios-monthly-only-launch
+  stands)
 - Build requirements bound to promises (reader gate): the reminder line
   renders only when the notification can actually fire (or falls back
   to email); the free-page credit must be wired before S11's "on me"

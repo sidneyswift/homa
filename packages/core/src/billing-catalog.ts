@@ -28,14 +28,15 @@ export interface PlanDefinition {
 }
 
 /**
- * The public Homa plans. Regular's annual price is the founder-ruled
- * $119/year ($9.92 a month, save 48%; D3, 2026-08-31, mobile onboarding
- * + paywall v2 spec), the same on every platform (D11). The coming_soon
- * tiers keep the older twenty-percent-below-monthly convention until
- * they are actually priced for sale.
+ * The public Homa plans. Annual pricing is twenty percent below twelve
+ * monthly payments (unified-cross-platform-billing ruling, 2026-08-01),
+ * rounded to the current web sticker prices. The walk-v2 D3 experiment
+ * with a $119 annual was overruled by the founder on 2026-08-31 before
+ * it ever went on sale; see ios-monthly-only-launch in the ruling
+ * register.
  */
 export const HOMA_PLANS: readonly PlanDefinition[] = [
-  { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 119, salesState: "available" },
+  { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182, salesState: "available" },
   { tier: "plus", name: "Homa Plus", monthlyUsd: 49, annualUsd: 470, salesState: "coming_soon" },
   { tier: "elite", name: "Homa Max", monthlyUsd: 199, annualUsd: 1910, salesState: "coming_soon" },
 ];
@@ -77,14 +78,17 @@ export const APPLE_PROVIDER_PRODUCTS: readonly ProviderProduct[] = [
  * must continue recognizing historical receipts, renewals, and upgrades after
  * an offer stops accepting new purchases.
  *
- * Both periods of every available tier (D3, 2026-08-31: annual ships now,
- * default-selected on the native paywall). The client still renders only
- * the products App Store Connect actually returns, so the annual card
- * stays dark until the founder creates the annual SKU there.
+ * Monthly only, twice ruled: ios-monthly-only-launch (2026-08-01), and
+ * the founder's 2026-08-31 overruling of walk-v2 D3 ("remove the $119
+ * option; I don't want to make it in Apple"). Annual ids stay in the
+ * receipt catalog above and are never merchandised; do not widen this
+ * filter without a new ruling.
  */
 export const APPLE_NEW_PURCHASE_PRODUCTS: readonly ProviderProduct[] =
   APPLE_PROVIDER_PRODUCTS.filter(
-    (product) => planAvailableForPurchase(product.tier),
+    (product) =>
+      product.period === "monthly"
+      && planAvailableForPurchase(product.tier),
   );
 
 export const APPLE_NEW_PURCHASE_PRODUCT_IDS = APPLE_NEW_PURCHASE_PRODUCTS.map(
