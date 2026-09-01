@@ -3,6 +3,37 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-09-01 · Founder ruling: iOS reprices to $9.99/$99.99 on the Headspace recipe (annual returns)
+
+One day after killing the $119 annual, the founder repriced the whole
+iOS offer while working the App Store Connect submission: "I'm thinking
+maybe we do $9.99 per month for a standard monthly membership and
+$99.99 per year for a yearly annual standard membership. Those are the
+two options ... let's follow the exact same recipe as Headspace." The
+reasoning, in his words: pre-PMF, the goal is learning what families
+will pay and whether they will pay up front; annual buyers are a
+commitment lock-in whose usage can be studied, so the annual discount
+stays shallow (about 17%, roughly two months free) rather than
+Headspace-deep; Plus/Max testing was explicitly rejected for now
+because no usage metering exists to back the tiers, and usage-based
+pricing is a post-PMF lane. Consequences, landing on gh#1051:
+APPLE_NEW_PURCHASE_PRODUCTS widens to regular monthly + annual
+(supersedes `ios-annual-overruled` and `ios-monthly-only-launch`); ASC
+was reconfigured the same day in the founder's signed-in session
+(Monthly $9.99 with the existing 7-day free trial, Annual $99.99 with a
+new 14-day free trial replacing its 7-day one, all 175 territories
+recalculated, and the four Plus/Max products deleted outright, their
+ids burned); S10 rebuilds on the Headspace recipe (annual-default plan
+toggle, per-plan StoreKit-sourced trial strings, trial timeline with
+the reminder beat still permission-gated, "Try it for $0.00" kept); and
+the version 1.0 submission (which was carrying pre-walk build 45 with
+no subscriptions attached and auto-release on) was removed from review
+to be resubmitted with the rebuilt paywall and both products. Web
+Stripe pricing deliberately stays $19/month; HOMA_PLANS keeps web
+sticker dollars, and the cross-platform reprice decision is parked
+until before public launch. Registered as `ios-headspace-pricing` in
+journeys/10-reconciliation.md §5.
+
 ## 2026-08-31 · Founder ruling: no annual plan; iOS stays monthly-only (walk-v2 D3 overruled)
 
 During the gh#1045 execution, the founder overruled walk-v2's D3 the

@@ -31,27 +31,36 @@ describe("Homa billing catalog", () => {
     assert.ok(providerProduct("apple", "com.thankshoma.homa.elite.monthly"));
   });
 
-  it("allows only available monthly Apple products to begin new purchases", () => {
-    // Monthly only, twice ruled (ios-monthly-only-launch 2026-08-01;
-    // founder overruling of walk-v2 D3, 2026-08-31): annual ids stay in
-    // the receipt catalog and are never merchandised.
+  it("allows regular monthly and annual Apple products to begin new purchases", () => {
+    // ios-headspace-pricing (2026-09-01): the founder reopened annual
+    // ($99.99, 14-day trial) alongside monthly ($9.99, 7-day trial),
+    // superseding ios-monthly-only-launch and ios-annual-overruled.
+    // Plus/Max stay receipt-only; their ASC products were deleted.
     assert.deepEqual(
       APPLE_NEW_PURCHASE_PRODUCTS.map(({ tier, period }) => ({ tier, period })),
-      [{ tier: "regular", period: "monthly" }],
+      [
+        { tier: "regular", period: "monthly" },
+        { tier: "regular", period: "annual" },
+      ],
     );
     assert.deepEqual(APPLE_NEW_PURCHASE_PRODUCT_IDS, [
       "com.thankshoma.homa.regular.monthly",
+      "com.thankshoma.homa.regular.annual",
     ]);
     assert.equal(
       appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.monthly")?.tier,
       "regular",
     );
     assert.equal(
-      appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.annual"),
-      null,
+      appleProductAvailableForNewPurchase("com.thankshoma.homa.regular.annual")?.period,
+      "annual",
     );
     assert.equal(
       appleProductAvailableForNewPurchase("com.thankshoma.homa.plus.monthly"),
+      null,
+    );
+    assert.equal(
+      appleProductAvailableForNewPurchase("com.thankshoma.homa.elite.annual"),
       null,
     );
   });

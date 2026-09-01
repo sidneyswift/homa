@@ -14,25 +14,21 @@ const stateRecordsSource = readFileSync(
 );
 
 describe("native Apple offer catalog", () => {
-  it("offers one monthly product per currently purchasable Homa tier", () => {
+  it("offers monthly and annual for the one purchasable Homa tier", () => {
+    // ios-headspace-pricing (2026-09-01): monthly $9.99 (7-day trial)
+    // plus annual $99.99 (14-day trial), annual default on the paywall.
     assert.deepEqual(
       APPLE_NATIVE_PROVIDER_PRODUCTS.map(({ tier, period }) => ({ tier, period })),
-      [{ tier: "regular", period: "monthly" }],
+      [
+        { tier: "regular", period: "monthly" },
+        { tier: "regular", period: "annual" },
+      ],
     );
-    assert.equal(APPLE_NATIVE_PRODUCT_IDS.length, 1);
+    assert.equal(APPLE_NATIVE_PRODUCT_IDS.length, 2);
     assert.equal(
       APPLE_NATIVE_PRODUCT_IDS.some(
         (productId) => productId.includes(".plus.") || productId.includes(".elite."),
       ),
-      false,
-    );
-  });
-
-  it("does not merchandise annual products", () => {
-    // Twice ruled: ios-monthly-only-launch (2026-08-01) and the founder
-    // overruling of walk-v2 D3 (2026-08-31).
-    assert.equal(
-      APPLE_NATIVE_PRODUCT_IDS.some((productId) => productId.endsWith(".annual")),
       false,
     );
   });

@@ -21,7 +21,7 @@ import {
   reportOnboardingStep,
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
-import { hapticAdvance, hapticSuccess } from "../../lib/haptics";
+import { hapticAdvance, hapticSuccess, hapticTick } from "../../lib/haptics";
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import {
@@ -36,26 +36,30 @@ import { colors, palette, radius, space } from "../../theme/tokens";
  * S10, the walk's named climax (walk v2, D8 ruled 2026-08-31): the
  * paywall PRESENTS for everyone after the reveal and never arms the
  * wall itself; arming stays report-scored in the one server-side
- * machine. Copy is the founder-approved deck
- * (plans/2026-08-30-mobile-onboarding-paywall-v2/copy-deck.md §S10).
- * Monthly only, twice ruled: ios-monthly-only-launch (2026-08-01) and
- * the founder's 2026-08-31 overruling of walk-v2 D3 (no annual plan, in
- * Apple or in this screen). The trial strings are bound to a build
- * requirement: they render only when the App Store actually returns the
- * 7-day intro offer (D2, founder action, gh#1045); until then the
- * screen presents the shipped wall's approved monthly strings, so it
- * never promises a trial the store cannot start. The reminder line
- * renders only when the reminder can really fire.
+ * machine.
+ *
+ * Two plans, Headspace recipe (ios-headspace-pricing, founder ruling
+ * 2026-09-01, superseding ios-monthly-only-launch and the 2026-08-31
+ * ios-annual-overruled ruling): annual selected by default beside
+ * monthly, each plan's trial and price rendered only from what StoreKit
+ * actually returns for that product, so the screen cannot promise a
+ * trial or a price the store will not honor. The trial timeline beats
+ * are the same honesty-gated claims as before: the reminder beat
+ * renders only when the reminder can really fire (D13), and the charge
+ * beat is the trial's own date math.
  */
 
 const MONTHLY_PRODUCT = APPLE_NATIVE_PROVIDER_PRODUCTS.find(
   (product) => product.period === "monthly",
 );
+const ANNUAL_PRODUCT = APPLE_NATIVE_PROVIDER_PRODUCTS.find(
+  (product) => product.period === "annual",
+);
 
 /** Days of free trial the store's introductory offer actually grants,
- *  or null when there is no free-trial intro offer (pre-D2, or a
- *  family ineligible for it). The claim source is StoreKit, never a
- *  constant, so the screen cannot promise a trial that will not apply. */
+ *  or null when there is no free-trial intro offer for that product.
+ *  The claim source is StoreKit, never a constant, so the screen cannot
+ *  promise a trial that will not apply. */
 function introFreeTrialDays(product: ProductSubscription | undefined): number | null {
   if (!product || product.platform !== "ios") return null;
   const offer = product.subscriptionInfoIOS?.introductoryOffer;
@@ -74,6 +78,20 @@ function introFreeTrialDays(product: ProductSubscription | undefined): number | 
   return days > 0 ? days : null;
 }
 
+/** The annual plan's honest per-month restatement, in the product's own
+ *  currency (Headspace's "($5.83/month)" move). Division, not a claim. */
+function monthlyEquivalent(product: ProductSubscription | undefined): string | null {
+  if (!product || typeof product.price !== "number" || product.price <= 0) return null;
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: product.currency ?? "USD",
+    }).format(product.price / 12);
+  } catch {
+    return null;
+  }
+}
+
 export default function PaywallScreen() {
   const router = useRouter();
   const { family } = useFamilyData();
@@ -82,6 +100,9 @@ export default function PaywallScreen() {
   const [material, setMaterial] = useState<MaterialSummary | null>(null);
   const reported = useRef(false);
   const [reminderReady, setReminderReady] = useState(false);
+  // Annual leads (Headspace recipe): the default selection is the plan
+  // the founder wants families to weigh first.
+  const [period, setPeriod] = useState<"annual" | "monthly">("annual");
   const trialDaysRef = useRef<number | null>(null);
   useWalkCharacterState("idle");
   useWalkSky("gold");
@@ -148,15 +169,26 @@ export default function PaywallScreen() {
     }
   }, [checked, gate, router]);
 
-  const selectedProduct = subscriptions.find(
+  const monthlyLive = subscriptions.find(
     (item) => item.id === MONTHLY_PRODUCT?.productId,
   ) as ProductSubscription | undefined;
+  const annualLive = subscriptions.find(
+    (item) => item.id === ANNUAL_PRODUCT?.productId,
+  ) as ProductSubscription | undefined;
+
+  // Selection only ever lands on a plan the store actually returned; if
+  // annual is missing the toggle simply is not a menu.
+  const selectedProduct =
+    period === "annual" ? (annualLive ?? monthlyLive) : (monthlyLive ?? annualLive);
+  const selectedPeriod: "annual" | "monthly" =
+    selectedProduct && selectedProduct.id === annualLive?.id ? "annual" : "monthly";
   const trialDays = introFreeTrialDays(selectedProduct);
-  // Deck S10 reminder line: renders only when the reminder can really
-  // fire (permission already granted; the Stripe email fallback does
-  // not cover Apple trials yet, gh#1045). The date is the trial's own
-  // math, never a hardcoded day; computed in an effect because render
-  // must stay pure (clock reads included).
+  const periodNoun = selectedPeriod === "annual" ? "year" : "month";
+  const annualEquivalent = monthlyEquivalent(annualLive);
+
+  // The charge date is the trial's own math, never a hardcoded day;
+  // computed in an effect because render must stay pure (clock reads
+  // included).
   const [chargeDateLabel, setChargeDateLabel] = useState<string | null>(null);
   useEffect(() => {
     trialDaysRef.current = trialDays;
@@ -175,20 +207,24 @@ export default function PaywallScreen() {
 
   const priceSentence = useMemo(() => {
     if (!selectedProduct) return null;
+    const equivalentClause =
+      selectedPeriod === "annual" && annualEquivalent
+        ? ` That's ${annualEquivalent} a month.`
+        : "";
     return trialDays
-      ? `${trialDays} days free, then ${selectedProduct.displayPrice} a month. Cancel anytime in the App Store.`
-      : `${selectedProduct.displayPrice} a month. Cancel anytime in the App Store.`;
-  }, [selectedProduct, trialDays]);
+      ? `${trialDays} days free, then ${selectedProduct.displayPrice} a ${periodNoun}.${equivalentClause} Cancel anytime in the App Store.`
+      : `${selectedProduct.displayPrice} a ${periodNoun}.${equivalentClause} Cancel anytime in the App Store.`;
+  }, [selectedProduct, selectedPeriod, annualEquivalent, trialDays, periodNoun]);
 
   const ctaLabel = trialDays
     ? "Try it for $0.00"
     : selectedProduct
-      ? `Subscribe for ${selectedProduct.displayPrice} a month`
+      ? `Subscribe for ${selectedProduct.displayPrice} a ${periodNoun}`
       : "";
 
   async function handleSubscribe() {
-    if (!MONTHLY_PRODUCT) return;
-    await buy(MONTHLY_PRODUCT.productId);
+    if (!selectedProduct) return;
+    await buy(selectedProduct.id);
   }
 
   // The purchase engine refreshes the gate after a confirmed purchase;
@@ -217,7 +253,7 @@ export default function PaywallScreen() {
             <View
               style={{
                 width: "100%",
-                height: 260,
+                height: 220,
                 borderRadius: radius.lg,
                 backgroundColor: colors.card,
                 overflow: "hidden",
@@ -265,6 +301,60 @@ export default function PaywallScreen() {
           <LoadingStatus label="Loading App Store plans" style={{ marginVertical: space.sm }} />
         ) : (
           <View style={{ gap: space.sm }}>
+            {annualLive && monthlyLive ? (
+              <View style={{ flexDirection: "row", gap: space.sm }}>
+                <PlanCard
+                  label="Annual"
+                  price={`${annualLive.displayPrice} a year`}
+                  caption={annualEquivalent ? `${annualEquivalent} a month` : null}
+                  badge="Best value"
+                  selected={selectedPeriod === "annual"}
+                  disabled={busy}
+                  onPress={() => {
+                    hapticTick();
+                    setPeriod("annual");
+                  }}
+                  testID="paywall.plan.annual"
+                />
+                <PlanCard
+                  label="Monthly"
+                  price={`${monthlyLive.displayPrice} a month`}
+                  caption={null}
+                  badge={null}
+                  selected={selectedPeriod === "monthly"}
+                  disabled={busy}
+                  onPress={() => {
+                    hapticTick();
+                    setPeriod("monthly");
+                  }}
+                  testID="paywall.plan.monthly"
+                />
+              </View>
+            ) : null}
+
+            {trialDays ? (
+              <View style={{ gap: space.xs, paddingVertical: space.xs }}>
+                <NativeText role="label" tone="strong">
+                  How your free trial works
+                </NativeText>
+                <NativeText role="bodySmall" tone="body">
+                  {childName
+                    ? `Today: everything unlocks for ${childName}.`
+                    : "Today: everything unlocks."}
+                </NativeText>
+                {reminderReady ? (
+                  <NativeText role="bodySmall" tone="body" testID="paywall.reminderLine">
+                    {"I'll remind you 2 days before your trial ends."}
+                  </NativeText>
+                ) : null}
+                {chargeDateLabel && selectedProduct ? (
+                  <NativeText role="bodySmall" tone="body" testID="paywall.chargeLine">
+                    {`${chargeDateLabel}: first charge of ${selectedProduct.displayPrice}. Cancel anytime before.`}
+                  </NativeText>
+                ) : null}
+              </View>
+            ) : null}
+
             <NativeText role="bodySmall" tone="body" testID="paywall.priceSentence">
               {priceSentence}
             </NativeText>
@@ -278,11 +368,6 @@ export default function PaywallScreen() {
             {trialDays ? (
               <NativeText role="caption" tone="muted" style={{ textAlign: "center" }}>
                 Nothing due today.
-              </NativeText>
-            ) : null}
-            {trialDays && reminderReady && chargeDateLabel ? (
-              <NativeText role="caption" tone="muted" style={{ textAlign: "center" }} testID="paywall.reminderLine">
-                {`Free until ${chargeDateLabel}. I'll remind you 2 days before.`}
               </NativeText>
             ) : null}
           </View>
@@ -358,5 +443,71 @@ export default function PaywallScreen() {
       </ScrollView>
 
     </WalkScene>
+  );
+}
+
+/**
+ * One plan in the toggle. Selected fills with the brand clay and speaks
+ * in cream, unselected sits warm, the walk's established chip grammar
+ * (kids.tsx chips; hairline-only selection failed the glance test,
+ * gauntlet round 1, 2026-08-21).
+ */
+function PlanCard({
+  label,
+  price,
+  caption,
+  badge,
+  selected,
+  disabled,
+  onPress,
+  testID,
+}: {
+  label: string;
+  price: string;
+  caption: string | null;
+  badge: string | null;
+  selected: boolean;
+  disabled: boolean;
+  onPress: () => void;
+  testID: string;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      disabled={disabled}
+      testID={testID}
+      style={{
+        flex: 1,
+        minHeight: 76,
+        paddingHorizontal: space.md,
+        paddingVertical: space.sm,
+        borderRadius: radius.lg,
+        borderWidth: 1,
+        borderColor: selected ? palette.clay600 : colors.border,
+        backgroundColor: selected ? palette.clay600 : palette.clay50,
+        gap: 2,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: space.xs }}>
+        <NativeText role="label" tone={selected ? "inverse" : "strong"}>
+          {label}
+        </NativeText>
+        {badge ? (
+          <NativeText role="caption" tone={selected ? "inverse" : "muted"}>
+            {badge}
+          </NativeText>
+        ) : null}
+      </View>
+      <NativeText role="bodySmall" tone={selected ? "inverse" : "strong"}>
+        {price}
+      </NativeText>
+      {caption ? (
+        <NativeText role="caption" tone={selected ? "inverse" : "muted"}>
+          {caption}
+        </NativeText>
+      ) : null}
+    </Pressable>
   );
 }
