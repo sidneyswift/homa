@@ -18,10 +18,11 @@ export {
  * Products currently merchandised on the native iOS paywall.
  *
  * Keep this separate from APPLE_PRODUCT_IDS. The full catalog remains the
- * permanent receipt-verification allowlist, while the iOS offer is
- * deliberately monthly-only (ios-monthly-only-launch 2026-08-01,
- * reaffirmed by the founder 2026-08-31 when overruling walk-v2 D3) and
- * can change without invalidating old receipts.
+ * permanent receipt-verification allowlist, while the iOS offer is regular
+ * monthly plus annual (ios-headspace-pricing 2026-09-01: $9.99/mo with a
+ * 7-day trial, $99.99/yr with a 14-day trial, annual default) and can
+ * change without invalidating old receipts. Prices render from StoreKit,
+ * never from constants.
  */
 export const APPLE_NATIVE_PROVIDER_PRODUCTS = APPLE_NEW_PURCHASE_PRODUCTS;
 

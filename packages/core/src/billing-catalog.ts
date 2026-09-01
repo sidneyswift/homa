@@ -28,12 +28,17 @@ export interface PlanDefinition {
 }
 
 /**
- * The public Homa plans. Annual pricing is twenty percent below twelve
- * monthly payments (unified-cross-platform-billing ruling, 2026-08-01),
- * rounded to the current web sticker prices. The walk-v2 D3 experiment
- * with a $119 annual was overruled by the founder on 2026-08-31 before
- * it ever went on sale; see ios-monthly-only-launch in the ruling
- * register.
+ * The public Homa plans, in WEB (Stripe) sticker dollars.
+ *
+ * These numbers are deliberately NOT the iOS prices. The founder's
+ * 2026-09-01 pricing ruling (ios-headspace-pricing, superseding
+ * ios-monthly-only-launch and ios-annual-overruled) set the App Store
+ * rail to Monthly $9.99 / Annual $99.99, configured directly in App
+ * Store Connect; the native paywall renders StoreKit's own displayPrice
+ * and never these constants. The web Stripe wall still charges the
+ * dollars below, and the cross-platform reprice decision is parked
+ * until before public launch (gh#1051). Do not "fix" one rail to match
+ * the other here without that decision.
  */
 export const HOMA_PLANS: readonly PlanDefinition[] = [
   { tier: "regular", name: "Homa", monthlyUsd: 19, annualUsd: 182, salesState: "available" },
@@ -78,17 +83,16 @@ export const APPLE_PROVIDER_PRODUCTS: readonly ProviderProduct[] = [
  * must continue recognizing historical receipts, renewals, and upgrades after
  * an offer stops accepting new purchases.
  *
- * Monthly only, twice ruled: ios-monthly-only-launch (2026-08-01), and
- * the founder's 2026-08-31 overruling of walk-v2 D3 ("remove the $119
- * option; I don't want to make it in Apple"). Annual ids stay in the
- * receipt catalog above and are never merchandised; do not widen this
- * filter without a new ruling.
+ * Regular monthly AND annual, ruled 2026-09-01 (ios-headspace-pricing):
+ * the founder reopened annual at $99.99 with a 14-day trial alongside
+ * monthly at $9.99 with a 7-day trial, Headspace-recipe paywall,
+ * superseding ios-monthly-only-launch (2026-08-01) and the 2026-08-31
+ * ios-annual-overruled ruling. Plus/Max stay out via salesState; their
+ * ASC products were deleted the same day (ids burned, never reusable).
  */
 export const APPLE_NEW_PURCHASE_PRODUCTS: readonly ProviderProduct[] =
   APPLE_PROVIDER_PRODUCTS.filter(
-    (product) =>
-      product.period === "monthly"
-      && planAvailableForPurchase(product.tier),
+    (product) => planAvailableForPurchase(product.tier),
   );
 
 export const APPLE_NEW_PURCHASE_PRODUCT_IDS = APPLE_NEW_PURCHASE_PRODUCTS.map(

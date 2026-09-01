@@ -156,42 +156,49 @@ RULE (Sidney, 2026-08-31): the word "Binder" never appears in walk copy;
 the product introduces it later. Scrubbed from S10/S11/notifications
 below.
 
-## S10 paywall (APPROVED 2026-08-31, rebuilt spare: 41 words, 8
-elements, after the simplicity research pass)
+## S10 paywall (REVISED 2026-09-01 per `ios-headspace-pricing`: two
+plans on the Headspace recipe, annual default; supersedes the
+2026-08-31 monthly-only revision below)
 
-- Hero: {kid}'s real page, big, most of the screen. No caption.
+- Hero: {kid}'s real page, big. No caption. (Backdrop exploration for a
+  richer hero is a separate open track, gh#1045 assets.)
 - H: Keep {kid}'s pages coming.
-- Price sentence (doubles as the charge terms, sits directly above the
-  CTA): 7 days free, then $19 a month. Cancel anytime in the App Store.
-  (DELTA change 1 keeps the cancel/auto-renew mechanic on the paywall
-  itself. REVISED 2026-08-31: the founder overruled D3 the same day, so
-  the annual figure is gone and the monthly restatement below became
-  THE price sentence)
-- Reminder line (replaces the toggle; the reminder is automatic):
-  Free until {charge_date}. I'll remind you 2 days before. (DELTA
-  change 2, ruled 2026-08-31: the literal date, per Noom and YNAB, is
-  the strongest answer to forgot-to-cancel anxiety. Still
-  permission-gated with email fallback: DELTA change 3, the in-walk
-  permission beat, was DECLINED by Sidney 2026-08-31)
-- CTA: Try it for $0.00
+- Plan toggle (annual selected by default): Annual, {annual
+  displayPrice} a year, caption {annual/12 formatted} a month, badge
+  Best value (arithmetic, therefore supportable). Monthly, {monthly
+  displayPrice} a month. Both prices and both trials render from
+  StoreKit for that exact product, never constants.
+- Trial timeline, label: How your free trial works. Beats: Today:
+  everything unlocks for {kid}. / I'll remind you 2 days before your
+  trial ends. (permission-gated, unchanged law) / {charge_date}: first
+  charge of {displayPrice}. Cancel anytime before. (the charge beat is
+  pure date math and always renders with a trial)
+- Price sentence (still doubles as the charge terms, directly above the
+  CTA): {trial} days free, then {displayPrice} a {year|month}. [Annual
+  adds: That's {equiv} a month.] Cancel anytime in the App Store.
+- CTA: Try it for $0.00 (kept per Sidney: "keep the whole Start now for
+  $0")
 - Caption: Nothing due today.
-- Links row: No thanks (the "View other plans" link died with D3's
-  overruling; one plan is not a menu)
+- Links row: No thanks
 - Footer: Restore purchases · Terms · Privacy
-- "View other plans" sheet: CUT (D3 OVERRULED 2026-08-31: no annual
-  plan, in App Store Connect or in the app; ios-monthly-only-launch
-  stands)
-- Build requirements bound to promises (reader gate): the reminder line
-  renders only when the notification can actually fire (or falls back
-  to email); the free-page credit must be wired before S11's "on me"
-  ships; the gallery's every-age claim stays gated on D6 band coverage.
-- CUT in the simplicity pass: value bullets, recap lines, the 3-row
-  timeline (absorbed into the price + reminder sentences), the reminder
-  toggle (now automatic behavior), the mini report card (the D5 decline
-  state still shows the report peek, so that proof moves there).
+- Build requirements bound to promises (reader gate): the reminder beat
+  renders only when the notification can actually fire; the free-page
+  credit must be wired before S11's "on me" ships; the gallery's
+  every-age claim stays gated on D6 band coverage.
 - StoreKit unreachable: We can't reach the App Store right now. Check
   your connection and try again in a moment. (EXISTING) CTA: Try again
   (EXISTING)
+
+### Superseded S10 (APPROVED 2026-08-31, monthly-only, kept for provenance)
+
+- Price sentence: 7 days free, then $19 a month. Cancel anytime in the
+  App Store. (This revision died 2026-09-01 with `ios-headspace-pricing`:
+  monthly repriced to $9.99, annual returned at $99.99 with a 14-day
+  trial.)
+- Reminder line: Free until {charge_date}. I'll remind you 2 days
+  before. (absorbed into the new trial timeline's gated beat)
+- "View other plans" sheet: CUT 2026-08-31 with D3's overruling; the new
+  plan toggle is not that sheet revived, it is two flat cards, no modal.
 
 ## S11 decline (APPROVED 2026-08-31)
 
