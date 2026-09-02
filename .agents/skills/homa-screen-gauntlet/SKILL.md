@@ -25,7 +25,7 @@ This is Homa's screen-specific instantiation of the generic
 [sidneyswift/skills](https://github.com/sidneyswift/skills/tree/main/gauntlet-loop)).
 **Read that file first.** It explains why a real reference plus a blind,
 separate critic plus looping past round one beats a single reviewer or a
-single pass — the "why." This file is the "how" for one Homa screen: where
+single pass, the "why." This file is the "how" for one Homa screen: where
 the bar comes from, who the critics are, what "implement" means in this
 codebase, and the laws implementation must respect.
 
@@ -42,12 +42,12 @@ example if one is still easy to find in git history.
 - A screen is about to be seen by real users (an ads launch, a demo, a
   store listing screenshot) and needs to clear a real quality bar, fast
 - **Not** for exploring structure, navigation, or information architecture
-  with nothing concrete to compare against yet — use `exploring-ui-directions`
+  with nothing concrete to compare against yet. Use `exploring-ui-directions`
   first, then run this once one screen's shape is settled.
 - **Not** a substitute for `homa-uxui-reviewer`'s single homeschool-mom
   reaction check. That skill deliberately reasons with full Homa context
   (voice, existing patterns, the parent's real situation). This skill's
-  critics must know none of that — see Step 3.
+  critics must know none of that: see Step 3.
 
 ## Process
 
@@ -57,14 +57,14 @@ Name the exact screen (file path and route) and the exact reference: a
 real competitor app and its equivalent screen in the same journey
 position (welcome-to-welcome, paywall-to-paywall, not welcome-to-paywall).
 If the user names the competitor, use it. If not, ask, or propose the
-strongest real comparable for this category and say why — never invent a
+strongest real comparable for this category and say why. Never invent a
 vague bar like "make it look professional" (gauntlet-loop's #1
 anti-pattern).
 
 Source the reference as real pixels, not a memory of what the app
 "probably" looks like:
 - Prefer the `appllama-usage` skill (already vendored in this repo,
-  `.agents/skills/appllama-usage/`) — `search_apps` to find the named app,
+  `.agents/skills/appllama-usage/`): `search_apps` to find the named app,
   `list_app_screens` filtered to its onboarding/paywall flow to get the
   exact equivalent screen in journey order, and download the real image.
   Pair it with `appllama-app-design-skill` for build-side guidance.
@@ -74,17 +74,17 @@ Source the reference as real pixels, not a memory of what the app
 
 Capture Homa's own current screen the same way: use the `mobile-simulator`
 skill (or the web dev server for a web screen) to render the real, live
-screen and screenshot it. Never review from source code alone — measure
+screen and screenshot it. Never review from source code alone, measure
 the rendered pixels, the way the hello.tsx round measured actual sky
 lightness span and hero-zone height proportion rather than eyeballing.
 
 ### 2. Decompose the screen
 
 Default split for one screen (adjust per gauntlet-loop's "let the agent
-split the work" — this is a starting point, not a fixed list):
+split the work": this is a starting point, not a fixed list):
 
 - Visual design & layout (composition, whitespace, hierarchy)
-- Color & contrast (measure — WCAG ratios, HSV saturation, don't eyeball)
+- Color & contrast (measure: WCAG ratios, HSV saturation, don't eyeball)
 - Typography (scale steps, weight, line-height)
 - Copy (words, tone, what's said vs. left unsaid)
 - First-impression UX (what a new user actually does/feels in 3 seconds)
@@ -93,7 +93,7 @@ split the work" — this is a starting point, not a fixed list):
 
 Spawn one `Agent` per dimension, in parallel, each a genuinely generic
 expert persona (a visual designer, a color/contrast specialist, a
-typographer, a copywriter, a UX researcher — or whatever the decomposition
+typographer, a copywriter, a UX researcher, or whatever the decomposition
 above calls for). This step has hard rules, each learned from a real
 founder correction on the hello.tsx round:
 
@@ -107,17 +107,17 @@ founder correction on the hello.tsx round:
 - Give each critic only: the two screenshot file paths (to `Read`
   directly, not a description of their contents), the one dimension it
   owns, and an instruction to list **every** concrete, specific change it
-  would make and why — not a top-N shortlist. Capping at "top 5" on the
+  would make and why, not a top-N shortlist. Capping at "top 5" on the
   first run silently dropped real suggestions; ask for the full list.
 - Ask each critic to render a verdict first, blind-A/B style per
   gauntlet-loop principle #5 (which screen wins on its dimension, and
-  why) before it lists changes — the verdict is what tells you, over
+  why), before it lists changes. The verdict is what tells you, over
   successive rounds, whether the loop has actually closed the gap.
 
 ### 4. Compile everything, rank it, do not curate into options
 
 Read every critic's report in full. Build one list combining every
-suggestion from every report — not just the ones that converged across
+suggestion from every report, not just the ones that converged across
 critics, not just the ones you find most interesting. Rank the full list
 most-to-least impactful. Then implement the ranked list directly into the
 real screen. Do **not** produce a small set of alternative variations for
@@ -155,7 +155,7 @@ the cheapest thing that technically addresses the note: a real generated
 illustration over an icon placeholder, an actual tap-to-advance
 interaction over a passive auto-timer, a real multi-stop gradient over a
 flat color band. This project's founder has corrected the cheaper default
-more than once for exactly this kind of work — when in doubt, build the
+more than once for exactly this kind of work. When in doubt, build the
 version you'd be proud to ship an ad against, not the version that merely
 closes the ticket.
 
@@ -167,7 +167,7 @@ concretely, not just "it looks right":
 - The change rendered as intended.
 - Nothing leaked into sibling screens. Homa's mobile onboarding shares
   persistent context across screens (for example `WalkCharacterProvider`
-  in `apps/mobile/src/features/onboarding/walk-character.tsx`) — a
+  in `apps/mobile/src/features/onboarding/walk-character.tsx`): a
   screen-scoped tweak must use the `useWalkX(value)` pattern (set on
   mount, revert to the default on unmount) so it cannot bleed into the
   next screen. Confirm by navigating away and checking the next screen is
@@ -175,19 +175,19 @@ concretely, not just "it looks right":
 - No new console or dev-server error was introduced.
 
 If you find a real, live-blocking bug along the way that isn't what you
-went looking for, fix and verify it in this same session and track it —
-do not just note it for later (root `AGENTS.md` § Production bugs,
+went looking for, fix and verify it in this same session and track it.
+Do not just note it for later (root `AGENTS.md` § Production bugs,
 "prod-bugs-fixed-not-stored"). The `apps/mobile/lib/supabase.ts` cold-start
 crash found and fixed during the hello.tsx round (gh#1054) is the worked
 example: found while verifying an unrelated screen change, root-caused,
 fixed, and filed in the same pass rather than deferred.
 
-### 7. Loop — this is the step a single review round skips
+### 7. Loop: this is the step a single review round skips
 
 Re-run Step 3 with **fresh** critics: new agent calls with zero memory of
 round 1's reports or your implementation reasoning, looking at the
-newly-implemented screen against the same reference. Keep going —
-implement, verify, fresh blind critics again — until one of:
+newly-implemented screen against the same reference. Keep going, implement,
+verify, fresh blind critics again, until one of:
 
 - A round's critics call the screen a win, or a real tie, against the
   reference on every dimension, with no new high-impact gap, or
@@ -195,7 +195,7 @@ implement, verify, fresh blind critics again — until one of:
 - You've spent the compute the user asked for.
 
 Do not stop after exactly one round by default. One pass is a review, not
-a gauntlet — the whole reason to borrow this pattern instead of a plain
+a gauntlet: the whole reason to borrow this pattern instead of a plain
 "get some feedback and act on it" pass is the loop. When a remaining item
 is a flagged law conflict rather than an unaddressed suggestion (Step 5's
 second outcome), say so plainly in the wrap-up so a real, permanent
@@ -221,9 +221,9 @@ constraint is never confused with a gap the loop simply hasn't closed yet.
 2. Compile every suggestion, rank it, implement it directly. Curated
    alternative options are not the deliverable unless explicitly asked
    for.
-3. Never silently skip or silently violate a real project law — flag it
+3. Never silently skip or silently violate a real project law. Flag it
    in code, at the point of the change.
 4. Loop past round one, with genuinely fresh critics each time.
 5. Read `.agents/skills/gauntlet-loop/SKILL.md` in full before the first
-   run in a session — its anti-patterns section catches mistakes this
+   run in a session: its anti-patterns section catches mistakes this
    file can't re-derive every time.
