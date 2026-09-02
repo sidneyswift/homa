@@ -324,12 +324,12 @@ export default function KidsScreen() {
                 First name is enough. It goes on their worksheet.
               </NativeText>
               <TextField
-                label="First name"
+                label="Your child's first name"
                 value={kid.name}
                 onChangeText={(name) => updateKid({ name })}
                 autoCapitalize="words"
                 autoComplete="off"
-                placeholder="e.g. Maya"
+                placeholder="Your child's name, e.g. Maya"
                 autoFocus
               />
               <View style={{ marginTop: "auto", gap: space.sm }}>
