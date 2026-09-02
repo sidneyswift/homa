@@ -61,6 +61,7 @@ import {
   renderPrintableHtml,
   SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
+import { RECIPE_SLUGS } from "../../lib/materials/recipes.generated";
 import { buildRenderProvenance } from "../../lib/materials/render-provenance";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
@@ -145,6 +146,12 @@ export const createPrintableInputSchema = z.object({
     .enum(MATERIAL_KINDS)
     .optional()
     .describe("What this is. Defaults to 'worksheet' for one page and 'packet' for a multi-page pages build."),
+  recipe: z
+    .enum(RECIPE_SLUGS)
+    .optional()
+    .describe(
+      "The materials-studio recipe this material follows, by its file slug (references/recipes/<slug>.md). Pass it on the first draft AND every revision of the same material whenever you read a recipe for the build: it selects the closed reviewer checklist and the format's anchor image, and it is how the studio measures each format. Omit only when no recipe fit and you designed from the skill's design rules alone; never pass a near-miss.",
+    ),
   skill: z
     .string()
     .trim()
@@ -240,6 +247,9 @@ export type CreatePrintableInput = z.infer<
 export interface PrintableGenerationInput {
   title: string;
   kind: MaterialKind;
+  /** The recipe slug the model built from, or null when none fit. The
+   * provenance column for measuring each format (generation->'input'->>'recipe'). */
+  recipe: string | null;
   skill: string | null;
   subject: string | null;
   curriculum: string | null;
@@ -304,6 +314,7 @@ export function buildPrintableGenerationInput(
   return {
     title: input.title,
     kind: input.kind ?? "worksheet",
+    recipe: input.recipe ?? null,
     skill: input.skill ?? null,
     subject: input.subject ?? null,
     curriculum: input.curriculum ?? null,
@@ -713,6 +724,7 @@ const createPrintable = defineBoundedTool({
     const brief = [
       `Title: ${input.title}`,
       `Kind: ${kind}`,
+      input.recipe ? `Format: ${input.recipe}` : null,
       input.skill ? `Practices: ${input.skill}` : null,
       input.theme ? `Theme: ${input.theme}` : null,
       input.characters?.length ? `Characters: ${input.characters.join(", ")}` : null,

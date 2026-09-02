@@ -469,6 +469,7 @@ describe("trusted printable lesson provenance", () => {
       {
         title: "Short-vowel practice",
         kind: "worksheet",
+        recipe: null,
         skill: "Reads short-vowel words",
         subject: "literacy",
         curriculum: null,
@@ -489,6 +490,25 @@ describe("trusted printable lesson provenance", () => {
           channel: "web",
         }),
       false
+    );
+  });
+
+  it("carries the recipe slug into the receipt as provenance", () => {
+    // generation->'input'->>'recipe' is how the studio measures each
+    // format; it must survive from the model's input to the stored row.
+    const modelInput = createPrintableInputSchema.parse({
+      title: "Sight word cards",
+      kind: "flashcards",
+      recipe: "flash-cards",
+      html: "<main><p>the and said was you they of to look come</p></main>",
+    });
+    const receipt = buildPrintableGenerationInput(modelInput, "html", {
+      channel: "web",
+    });
+    assert.equal(receipt.recipe, "flash-cards");
+    assert.throws(
+      () => createPrintableInputSchema.parse({ title: "x", recipe: "not-a-recipe", html: "<p>enough html to pass the minimum length</p>" }),
+      "a slug outside the generated registry never parses",
     );
   });
 });

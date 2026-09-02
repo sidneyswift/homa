@@ -494,6 +494,11 @@ subject rules and the child's evidence break the tie. When nothing here
 fits, design from the creation-path and design rules directly; a missing
 recipe is not a reason to force the wrong format.
 
+Pass the recipe's slug as `create_printable`'s `recipe` on every call for
+that material, first draft and every revision. It is how the studio
+measures each format, so omit it only when no recipe fit; never pass a
+near-miss.
+
 **Routine and chore charts are visual schedules, even when the parent calls
 one a worksheet, checklist, morning plan, or evening plan.** Use `read_file`
 on `/workspace/skills/materials-studio/references/recipes/visual-schedule-cards.md`
@@ -627,11 +632,12 @@ at.
 
 ## Metadata discipline (what makes reuse possible)
 
-Fill create_printable's metadata every time: kind, subject, skill,
-curriculum (when the family follows one, e.g. "Handwriting Without
-Tears"), theme, characters (spelled the family's way), childId. Sloppy
-metadata means find_materials cannot find it next month, and the
-"same page for the sibling" move stops working.
+Fill create_printable's metadata every time: kind, recipe (the slug you
+built from, when one fit), subject, skill, curriculum (when the family
+follows one, e.g. "Handwriting Without Tears"), theme, characters
+(spelled the family's way), childId. Sloppy metadata means
+find_materials cannot find it next month, and the "same page for the
+sibling" move stops working.
 
 `sourceFamilyAssetIds` is provenance, not discovery metadata. Supply it only
 from exact Family Library retrieval as described above. A source-grounded
