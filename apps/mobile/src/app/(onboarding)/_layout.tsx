@@ -28,6 +28,22 @@ export default function OnboardingLayout() {
           screenOptions={{
             headerShown: false,
             animation: "fade",
+            // animationTypeForReplace defaults to "pop" (confirmed in
+            // expo-router's own installed types), which ignores
+            // animation/animationDuration entirely. Every walk screen
+            // navigates with router.replace (never push), so without
+            // this the configured fade never actually ran, caught
+            // 2026-09-02 only by testing an absurd animationDuration
+            // and seeing zero visual difference.
+            animationTypeForReplace: "push",
+            // React Navigation's native-stack default is 350ms (iOS
+            // only; unsupported params are no-ops elsewhere). A plain
+            // opacity crossfade on text/buttons reads as sluggish at
+            // that length even though the persistent mascot/sky (see
+            // walk-scene.tsx) eases over the same 350ms and looks fine,
+            // a combined scale+color motion just carries a slower pace
+            // better than a flat fade does. Founder catch 2026-09-02.
+            animationDuration: 200,
             contentStyle: { backgroundColor: colors.page },
           }}
         />
