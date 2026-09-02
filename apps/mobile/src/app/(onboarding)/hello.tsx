@@ -150,14 +150,29 @@ export default function HelloScreen() {
           style={{
             paddingHorizontal: space.lg,
             paddingTop: space.sm,
-            paddingBottom: space.md,
+            paddingBottom: space.xxl,
             gap: space.sm,
           }}
         >
-          {/* One real sentence tying the legal links to the action
-              being taken, per the copy review, instead of two bare
-              words with nothing connecting them to what "Let's talk"
-              does. */}
+          {/* Button first, legal line below it: matches every other walk
+              screen's footer (intent/kids/you/making all put their
+              secondary line under the primary button), so "Let's talk"
+              lands close to every later screen's CTA instead of drifting
+              with whatever sits below it. Caught 2026-09-02: measuring
+              Headspace's own onboarding found its primary button pinned
+              to an identical band (89-95% of screen height) across 4 of
+              5 varied screen types; this screen was the one outlier in
+              Homa's own walk. Bottom padding is xxl, not the sibling
+              screens' lg: their secondary line is a short "Back" control
+              (role="control", button-sized text), ours is a full legal
+              disclosure sentence (role="caption", correctly smaller, same
+              role paywall.tsx uses for its own Terms/Privacy line), so it
+              takes less vertical space and needs the extra padding below
+              to land the button at the same measured height regardless. */}
+          <Button label="Let's talk" size="lg" onPress={advance} testID="hello.letsGo" />
+          {/* Confirms what tapping just did, tying the legal links to the
+              action already taken rather than two bare words with
+              nothing connecting them to it. */}
           <NativeText
             role="caption"
             tone="muted"
@@ -187,10 +202,6 @@ export default function HelloScreen() {
             </NativeText>
             {"."}
           </NativeText>
-          {/* Confirms what tapping actually does, matching the sentence
-              directly above it, instead of a generic "Let's go" that
-              could belong to any app's onboarding. */}
-          <Button label="Let's talk" size="lg" onPress={advance} testID="hello.letsGo" />
         </View>
       </ScrollView>
     </WalkScene>

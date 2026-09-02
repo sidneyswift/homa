@@ -58,6 +58,17 @@ const EXCLUDED_DIR_PREFIXES = [
   // mobile onboarding + paywall v2 plan. Third-party UI punctuation is
   // preserved exactly; not Homa's authored prose.
   "work/onboardingandpaywall8-30/research/copy-decks/",
+  // GitHub-sourced skills vendored verbatim (source/skillPath recorded in
+  // skills-lock.json), not Homa's authored prose. homa-screen-gauntlet,
+  // the sibling Homa-authored skill in the same .agents/skills/ directory,
+  // is intentionally NOT on this list: it must stay held to the law.
+  ".agents/skills/appllama-app-design-skill/",
+  ".agents/skills/appllama-usage/",
+  ".agents/skills/expo-animation/",
+  ".agents/skills/find-animation-opportunities/",
+  ".agents/skills/gauntlet-loop/",
+  ".agents/skills/improve-animations/",
+  ".agents/skills/mobile-touch/",
 ];
 
 const EXCLUDED_FILES = new Set([
