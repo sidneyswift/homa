@@ -88,6 +88,23 @@ a hope.
   the family spells it ("Traza tu nombre, Amalia"). Nothing else
   competes with the rows.
 
+## The reviewer's checklist
+
+create_printable reads this block when you pass
+`recipe: "name-tracing-page"` and asks the quality check to answer every
+item against the rendered page; a blocking no holds the page back as
+`Checklist (<id>)`. Each item is one of the corrections above, asked as
+a question the picture can settle.
+
+```homa-checklist
+- blocking guide-lines: Every writing row has three guide lines: a solid top line, a dashed midline centered between them, and a solid baseline.
+- blocking letters-on-guides: On every traced row the name sits on its guides: round letters fill midline to baseline and tall letters reach the top line.
+- blocking name-fills-row: The traced name spans most of each row's width at full guide height, never bunched small at the left with a dead right half.
+- blocking fade-to-empty: Trace rows come first and at least one empty guide row for writing alone comes last.
+- advisory trace-style: Trace letters are a dotted outline or a pale fill the child writes over, never solid dark ink.
+- advisory row-spacing: Rows are clearly separated by visible space, never stacked so tight they read as one ruled block.
+```
+
 ## What not to do (each one a sent correction)
 
 - HTML text near CSS-border guides: decoupled, unpinnable, the

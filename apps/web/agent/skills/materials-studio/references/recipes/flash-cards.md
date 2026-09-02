@@ -105,3 +105,16 @@ set is missing, ask for the target rather than making a broad alphabet deck.
 - Every card has a complete cut border and trim-safe content.
 - The deck is original and carries no source-specific list, order, script,
   category system, artwork, or back design.
+
+The countable part of that gate is also the reviewer's checklist.
+create_printable reads it from this block when you pass
+`recipe: "flash-cards"` and asks the quality check to answer every item
+against the rendered pages; a blocking no holds the page back as
+`Checklist (<id>)`.
+
+```homa-checklist
+- blocking card-count: Four cards per page in a 2 by 2 grid, each about 2.5in wide by 3.5in tall; only the deck's last page may hold fewer.
+- blocking one-prompt: Each card front carries one prompt filling its center, with no answer, direction, or picture cue beside it (backs and parent key pages may carry answers).
+- blocking cut-border: Every card has a complete dashed cut border with quiet space inside it.
+- advisory no-shading: No card carries a filled background.
+```

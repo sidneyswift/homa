@@ -61,7 +61,10 @@ import {
   renderPrintableHtml,
   SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
-import { RECIPE_SLUGS } from "../../lib/materials/recipes.generated";
+import {
+  RECIPE_REGISTRY,
+  RECIPE_SLUGS,
+} from "../../lib/materials/recipes.generated";
 import { buildRenderProvenance } from "../../lib/materials/render-provenance";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
@@ -656,6 +659,9 @@ const createPrintable = defineBoundedTool({
     const kind =
       input.kind ?? (resolvedPages.length > 1 ? "packet" : "worksheet");
     const source = aggregateSource(resolvedPages);
+    // The recipe's reviewer checklist comes from the generated registry,
+    // never from the model: it passed only the slug (2026-09-02).
+    const recipeEntry = input.recipe ? RECIPE_REGISTRY[input.recipe] : null;
     const document = wrapPrintableDocument(
       resolvedPages.map((page) => page.body),
       input.childName ?? "",
@@ -750,6 +756,8 @@ const createPrintable = defineBoundedTool({
       brief,
       pageGeometry: rendered.pageGeometry,
       underfillNotes: underfillNotesApplyTo(kind),
+      checklist: recipeEntry?.checklist,
+      recipe: input.recipe ?? null,
     });
     let materialId: string = randomUUID();
     let reservedSourceDeliveryId: string | null = null;

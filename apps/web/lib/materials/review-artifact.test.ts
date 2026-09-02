@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { z } from "zod";
+
+import type { RecipeChecklistItem } from "./recipe-checklist";
 import {
+  buildChunkSchema,
   planReviewChunks,
   REVIEW_MAX_PAGES,
   REVIEW_PAGE_CAP,
@@ -189,5 +193,63 @@ describe("planReviewChunks", () => {
       if (previous === undefined) delete process.env.HOMA_MATERIALS_REVIEW_FULL;
       else process.env.HOMA_MATERIALS_REVIEW_FULL = previous;
     }
+  });
+});
+
+describe("buildChunkSchema", () => {
+  // The reviewer's output contract for a recipe checklist (2026-09-02):
+  // the model chooses among closed answers over ids drawn from the
+  // recipe, never free text, so code can decide what each answer means.
+  const items: readonly RecipeChecklistItem[] = [
+    { id: "trace-box-count", severity: "blocking", check: "Exactly four trace boxes sit in one row." },
+    { id: "fade-order", severity: "advisory", check: "Support fades left to right across the row." },
+  ];
+
+  it("keeps the plain verdict schema for an empty checklist, dropping any checklist key", () => {
+    const parsed = buildChunkSchema([]).parse({
+      pass: true,
+      issues: [],
+      checklist: [{ id: "anything", answer: "no", note: "" }],
+    });
+    assert.deepEqual(parsed, { pass: true, issues: [] });
+  });
+
+  it("enumerates exactly the recipe's item ids and the three closed answers", () => {
+    const json = z.toJSONSchema(buildChunkSchema(items)) as unknown as {
+      properties: {
+        checklist: {
+          items: { properties: { id: { enum: string[] }; answer: { enum: string[] } } };
+          minItems: number;
+          maxItems: number;
+        };
+      };
+    };
+    const checklist = json.properties.checklist;
+    assert.deepEqual(checklist.items.properties.id.enum, ["trace-box-count", "fade-order"]);
+    assert.deepEqual(checklist.items.properties.answer.enum, ["yes", "no", "cannot_tell"]);
+    assert.equal(checklist.minItems, 1);
+    assert.equal(checklist.maxItems, items.length);
+  });
+
+  it("rejects an answer for an id the recipe never declared", () => {
+    const result = buildChunkSchema(items).safeParse({
+      pass: true,
+      issues: [],
+      checklist: [{ id: "made-up", answer: "yes", note: "" }],
+    });
+    assert.equal(result.success, false);
+  });
+
+  it("accepts a complete, well-formed answer set", () => {
+    const parsed = buildChunkSchema(items).parse({
+      pass: false,
+      issues: ["Page 1: three boxes, not four."],
+      checklist: [
+        { id: "trace-box-count", answer: "no", note: "Page 1 shows three boxes." },
+        { id: "fade-order", answer: "yes", note: "" },
+      ],
+    });
+    assert.equal(parsed.checklist?.length, 2);
+    assert.equal(parsed.checklist?.[0].answer, "no");
   });
 });

@@ -495,9 +495,14 @@ fits, design from the creation-path and design rules directly; a missing
 recipe is not a reason to force the wrong format.
 
 Pass the recipe's slug as `create_printable`'s `recipe` on every call for
-that material, first draft and every revision. It is how the studio
-measures each format, so omit it only when no recipe fit; never pass a
-near-miss.
+that material, first draft and every revision. The tool reads the
+recipe's reviewer checklist itself and shows the reviewer the format's
+anchor when there is one; you never retype either. A checklist item the
+reviewer answered no comes back in the issues list as
+`Checklist (<id>)`: fix that item, do not argue with it. The one
+exception is an item flagging something the parent explicitly asked for
+(a different card size, say): keep her choice and tell her the check
+noticed. Omit `recipe` only when no recipe fit; never pass a near-miss.
 
 **Routine and chore charts are visual schedules, even when the parent calls
 one a worksheet, checklist, morning plan, or evening plan.** Use `read_file`
@@ -649,8 +654,10 @@ in Library.
 1. Every create_printable result is a DRAFT, and the tool runs an
    automatic quality check on the rendered pixels. Issues reported?
    Fix exactly those and call again with revisesId set to the draft's
-   id. On text, a flagged page is deliberately not sent until a version
-   passes.
+   id. An issue prefixed `Checklist (<id>)` is the recipe's own
+   structural spec answered no: a countable fact about the page, so fix
+   that exact thing rather than restyling around it. On text, a flagged
+   page is deliberately not sent until a version passes.
 2. The parent's critique is the real review. Change only what she
    named, keep everything she liked, same image URL unless the image is
    the complaint, revisesId chaining each version.

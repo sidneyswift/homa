@@ -103,6 +103,19 @@ nothing here is inferred by the model on its own):
   straight line, a curve, a cross, an X) in place of a letter. Describe the
   same box geometry and the same fading trace rows in the prompt.
 
+The reviewer's checklist for this format. create_printable reads it from
+this block when you pass `recipe: "letter-number-formation-practice"`
+and asks the quality check to answer every item against the rendered
+page; a blocking no holds the page back as `Checklist (<id>)`.
+
+```homa-checklist
+- blocking trace-box-count: Each model box has exactly four trace boxes in one row beneath it.
+- blocking trace-box-size: Every trace box is the same size as the model box, and the letter inside each is as large as the model letter, never smaller.
+- blocking model-size: The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more.
+- blocking one-target: A single letter or digit is practiced on this page, its capital and lowercase forms counting as one; any review target appears only in the independent write box.
+- advisory fade-order: Support fades left to right across the trace row: solid, solid, dotted, blank with a starting dot.
+```
+
 Prompt template (adapt the bracketed parts; keep every structural
 instruction explicit, the way the tested prompt did):
 
