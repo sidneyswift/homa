@@ -214,19 +214,17 @@ export function HoursEntryOverlay({
               ))}
             </select>
           </label>
-          {subject === "other" ? (
-            <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
-              What is it?
-              <input
-                type="text"
-                name="customLabel"
-                maxLength={40}
-                defaultValue={entry.customLabel ?? ""}
-                placeholder="Portuguese, foreign language, whatever you call it"
-                className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
-              />
-            </label>
-          ) : null}
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
+            Your own category (optional)
+            <input
+              type="text"
+              name="customLabel"
+              maxLength={40}
+              defaultValue={entry.customLabel ?? ""}
+              placeholder="Literature journal, karate, whatever you call it"
+              className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
+            />
+          </label>
           <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
             Minutes
             <input

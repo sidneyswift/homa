@@ -148,6 +148,7 @@ export async function recordHoursPinned(input: {
   childName?: string | null;
   happenedOn?: string | null;
   note?: string | null;
+  customLabel?: string | null;
 }): Promise<{
   logged: boolean;
   note: string;
@@ -203,12 +204,14 @@ export async function recordHoursPinned(input: {
     `;
     happenedOn = zonedDateString(new Date(), effectiveTimeZone(rows[0]?.time_zone));
   }
+  const customLabel = input.customLabel?.trim().slice(0, 40) || null;
   const dupe = await sql<{ id: string }[]>`
     select id from public.hours_log
     where family_id = ${input.familyId}
       and subject = ${input.subject} and minutes = ${Math.round(input.minutes)}
       and happened_on = ${happenedOn}
       and child_id is not distinct from ${childId}
+      and custom_label is not distinct from ${customLabel}
     limit 1
   `;
   if (dupe[0]) {
@@ -221,9 +224,9 @@ export async function recordHoursPinned(input: {
   }
 
   const inserted = await sql<{ id: string }[]>`
-    insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note)
+    insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note, custom_label)
     values (${input.familyId}, ${childId}, ${input.subject}, ${Math.round(input.minutes)},
-            ${happenedOn}, ${input.source}, ${input.note?.trim().slice(0, 200) || null})
+            ${happenedOn}, ${input.source}, ${input.note?.trim().slice(0, 200) || null}, ${customLabel})
     on conflict do nothing
     returning id
   `;

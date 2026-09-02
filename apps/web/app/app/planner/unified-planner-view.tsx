@@ -60,6 +60,7 @@ import {
   deletePlannerLearningActivityAction,
   deleteScheduledPlanActivityAction,
   setPlannerLearningActivityStatusAction,
+  setPlannerLearningActivityTimeAction,
   updatePlannerLearningActivityDetailsAction,
 } from "./actions";
 
@@ -748,13 +749,16 @@ function LearningActivityDetails({
   kids: readonly UnifiedPlannerKid[];
   saving: boolean;
   error: string | null;
-  onSave: (title: string, note: string) => Promise<boolean>;
+  onSave: (title: string, note: string, minutes: string) => Promise<boolean>;
   onDelete: () => Promise<{ ok: boolean; reason?: string }>;
   onClose: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState(activity.title);
   const [draftNote, setDraftNote] = useState(activity.note ?? "");
+  const [draftMinutes, setDraftMinutes] = useState(
+    activity.durationMinutes ? String(activity.durationMinutes) : "",
+  );
   const titleRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
     if (editing) titleRef.current?.focus();
@@ -763,11 +767,12 @@ function LearningActivityDetails({
   function startEditing() {
     setDraftTitle(activity.title);
     setDraftNote(activity.note ?? "");
+    setDraftMinutes(activity.durationMinutes ? String(activity.durationMinutes) : "");
     setEditing(true);
   }
 
   async function save() {
-    const ok = await onSave(draftTitle, draftNote);
+    const ok = await onSave(draftTitle, draftNote, draftMinutes);
     if (ok) setEditing(false);
   }
 
@@ -818,7 +823,29 @@ function LearningActivityDetails({
             {status === "completed" ? "Finished" : "To do"}
           </dd>
         </div>
-        {activity.durationMinutes ? (
+        {editing ? (
+          <div className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-3 py-3">
+            <dt className="text-muted">Reported time</dt>
+            <dd className="flex items-center gap-2">
+              <label className="sr-only" htmlFor="planner-learning-activity-minutes">
+                Reported time in minutes
+              </label>
+              <input
+                id="planner-learning-activity-minutes"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={600}
+                step={1}
+                value={draftMinutes}
+                onChange={(event) => setDraftMinutes(event.target.value)}
+                placeholder="e.g. 30"
+                className="min-h-11 w-24 rounded-md border border-border bg-card px-3 py-2 text-strong outline-none focus:border-brand"
+              />
+              <span className="text-xs text-muted">minutes, or leave blank</span>
+            </dd>
+          </div>
+        ) : activity.durationMinutes ? (
           <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
             <dt className="text-muted">Reported time</dt>
             <dd className="font-semibold text-strong">
@@ -1710,22 +1737,51 @@ export function UnifiedPlannerView({
     activityId: string,
     title: string,
     note: string,
+    minutesInput: string,
   ): Promise<boolean> {
+    const trimmedMinutes = minutesInput.trim();
+    let minutes: number | null = null;
+    if (trimmedMinutes !== "") {
+      const parsed = Number(trimmedMinutes);
+      if (!Number.isInteger(parsed) || parsed < 1 || parsed > 600) {
+        setLearningActivityDetailError(
+          "Reported time needs to be a whole number of minutes between 1 and 600, or left blank.",
+        );
+        return false;
+      }
+      minutes = parsed;
+    }
+
     setSavingLearningActivityDetail(true);
     setLearningActivityDetailError(null);
-    const result = await updatePlannerLearningActivityDetailsAction({
+    const detailsResult = await updatePlannerLearningActivityDetailsAction({
       activityId,
       title,
       note,
     });
+    if (!detailsResult.ok) {
+      setSavingLearningActivityDetail(false);
+      setLearningActivityDetailError(detailsResult.reason);
+      return false;
+    }
+    const timeResult = await setPlannerLearningActivityTimeAction({
+      activityId,
+      durationMinutes: minutes,
+    });
     setSavingLearningActivityDetail(false);
-    if (!result.ok) {
-      setLearningActivityDetailError(result.reason);
+    if (!timeResult.ok) {
+      setLearningActivityDetailError(timeResult.reason);
       return false;
     }
     setSelectedLearningActivity((current) =>
       current && current.id === activityId
-        ? { ...current, title: result.title, note: result.note }
+        ? {
+            ...current,
+            title: detailsResult.title,
+            note: detailsResult.note,
+            durationMinutes: timeResult.durationMinutes,
+            status: timeResult.status,
+          }
         : current,
     );
     router.refresh();
@@ -2315,8 +2371,8 @@ export function UnifiedPlannerView({
           kids={kids}
           saving={savingLearningActivityDetail}
           error={learningActivityDetailError}
-          onSave={(title, note) =>
-            saveLearningActivityDetails(selectedLearningActivity.id, title, note)
+          onSave={(title, note, minutes) =>
+            saveLearningActivityDetails(selectedLearningActivity.id, title, note, minutes)
           }
           onDelete={() => deleteLearningActivity(selectedLearningActivity.id)}
           onClose={() => {

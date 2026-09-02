@@ -22,8 +22,8 @@ export interface HoursLogRow {
   id: string;
   childId: string | null;
   subject: HoursSubject;
-  /** The parent's own name for an "other" block ("Portuguese"), never
-   * set for any other subject (DB constraint). Null until she edits it. */
+  /** The parent's own name for this block ("Literature journal"), under
+   * any subject. Null until she sets one. */
   customLabel: string | null;
   minutes: number;
   /** YYYY-MM-DD, the calendar day the parent (or model) said the block
@@ -54,7 +54,7 @@ function toHoursLogRow(row: RawHoursLogRow): HoursLogRow {
     id: row.id,
     childId: row.child_id ?? null,
     subject,
-    customLabel: subject === "other" ? row.custom_label ?? null : null,
+    customLabel: row.custom_label ?? null,
     minutes: row.minutes,
     happenedOn: row.happened_on,
     source: normalizeSource(row.source),

@@ -426,6 +426,156 @@ try {
   assert.equal(generatedAfterUndo.checked, false);
   assert.equal(generatedAfterUndo.hours_count, 0);
 
+  // set_planner_learning_activity_time (2026-09-02, Carolyng feedback:
+  // "add the reported time manually"). Reuses the same authenticated-RPC
+  // shape as set_planner_learning_activity_status above.
+  async function callSetTime(activityId: string, durationMinutes: number | null) {
+    const [row] = await sql.begin(async (transaction) => {
+      await transaction`
+        select set_config('request.jwt.claim.sub', ${EVAL_FIXTURE_PARENT_USER_ID}, true)
+      `;
+      await transaction`set local role authenticated`;
+      return transaction<{
+        result: string;
+        reason: string | null;
+        activity_status: string;
+        duration_minutes: number | null;
+        hours_entry_ids: string[];
+      }[]>`
+        select result, reason, activity_status, duration_minutes, hours_entry_ids
+        from public.set_planner_learning_activity_time(${activityId}, ${durationMinutes})
+      `;
+    });
+    return row;
+  }
+
+  const natureWalkMessageId = randomUUID();
+  const natureWalkKey = plannerLearningIdempotencyKey({
+    action: "record",
+    sourceMessageId: natureWalkMessageId,
+    identity: ["Nature walk", "science", "2026-08-03", "planned", null, childIds[0]],
+  });
+  const natureWalkActivityId = plannerLearningMutationUuid(natureWalkKey, "activity");
+  const natureWalk = await recordPlannerLearningActivity({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    title: "Nature walk",
+    subject: "science",
+    activityDate: "2026-08-03",
+    status: "planned",
+    childIds: [childIds[0]],
+    sourceChannel,
+    sourceQuote: "We are doing a nature walk.",
+    sourceMessageId: natureWalkMessageId,
+    idempotencyKey: natureWalkKey,
+    activityId: natureWalkActivityId,
+    hoursEntryIds: [],
+  });
+  assert.equal(natureWalk.status, "recorded");
+
+  // Setting a duration on a still-planned item marks it completed and
+  // creates its Hours row (the web checkbox never did either).
+  const firstTime = await callSetTime(natureWalkActivityId, 35);
+  assert.equal(firstTime.result, "applied");
+  assert.equal(firstTime.activity_status, "completed");
+  assert.equal(firstTime.duration_minutes, 35);
+  assert.equal(firstTime.hours_entry_ids.length, 1);
+  const natureWalkHoursId = firstTime.hours_entry_ids[0];
+  const [firstHoursRow] = await sql<{
+    subject: string;
+    minutes: number;
+    happened_on: string;
+    child_id: string | null;
+  }[]>`
+    select subject, minutes, happened_on::text as happened_on, child_id
+    from public.hours_log where id = ${natureWalkHoursId}
+  `;
+  assert.equal(firstHoursRow.subject, "science");
+  assert.equal(firstHoursRow.minutes, 35);
+  assert.equal(firstHoursRow.happened_on, "2026-08-03");
+  assert.equal(firstHoursRow.child_id, childIds[0]);
+
+  // Editing an existing reported time updates that row in place; it does
+  // not orphan the old one or mint a second Hours entry.
+  const secondTime = await callSetTime(natureWalkActivityId, 50);
+  assert.equal(secondTime.result, "applied");
+  assert.equal(secondTime.duration_minutes, 50);
+  assert.deepEqual(secondTime.hours_entry_ids, [natureWalkHoursId]);
+  const [updatedHoursRow] = await sql<{ minutes: number }[]>`
+    select minutes from public.hours_log where id = ${natureWalkHoursId}
+  `;
+  assert.equal(updatedHoursRow.minutes, 50);
+  const [{ count: hoursRowCountAfterEdit }] = await sql<{ count: number }[]>`
+    select count(*)::integer as count
+    from public.planner_learning_activity_hours
+    where activity_id = ${natureWalkActivityId}
+  `;
+  assert.equal(hoursRowCountAfterEdit, 1);
+
+  // Clearing the reported time removes the Hours row but leaves the
+  // activity finished: taking the number back out doesn't unfinish it.
+  const clearedTime = await callSetTime(natureWalkActivityId, null);
+  assert.equal(clearedTime.result, "applied");
+  assert.equal(clearedTime.activity_status, "completed");
+  assert.equal(clearedTime.duration_minutes, null);
+  assert.deepEqual(clearedTime.hours_entry_ids, []);
+  const [{ count: hoursRowCountAfterClear }] = await sql<{ count: number }[]>`
+    select count(*)::integer as count from public.hours_log where id = ${natureWalkHoursId}
+  `;
+  assert.equal(hoursRowCountAfterClear, 0);
+
+  // A genuine collision with an unrelated Hours entry (same family,
+  // subject, minutes, day, child, and no custom label on either side) is
+  // reported as a conflict instead of a raw constraint error, and
+  // changes nothing.
+  const [unrelatedBlock] = await sql<{ id: string }[]>`
+    insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note)
+    values (${EVAL_FIXTURE_FAMILY_ID}, ${childIds[0]}, 'science', 20, '2026-08-03', 'chat', 'Unrelated block')
+    returning id
+  `;
+  const secondScienceMessageId = randomUUID();
+  const secondScienceKey = plannerLearningIdempotencyKey({
+    action: "record",
+    sourceMessageId: secondScienceMessageId,
+    identity: ["Second science block", "science", "2026-08-03", "planned", null, childIds[0]],
+  });
+  const secondScienceActivityId = plannerLearningMutationUuid(secondScienceKey, "activity");
+  const secondScience = await recordPlannerLearningActivity({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    title: "Second science block",
+    subject: "science",
+    activityDate: "2026-08-03",
+    status: "planned",
+    childIds: [childIds[0]],
+    sourceChannel,
+    sourceQuote: "We are doing another science thing.",
+    sourceMessageId: secondScienceMessageId,
+    idempotencyKey: secondScienceKey,
+    activityId: secondScienceActivityId,
+    hoursEntryIds: [],
+  });
+  assert.equal(secondScience.status, "recorded");
+  const conflictTime = await callSetTime(secondScienceActivityId, 20);
+  assert.equal(conflictTime.result, "conflict");
+  assert.equal(conflictTime.reason, "duplicate");
+  const [secondScienceState] = await sql<{
+    status: string;
+    duration_minutes: number | null;
+  }[]>`
+    select status, duration_minutes from public.planner_learning_activities
+    where id = ${secondScienceActivityId}
+  `;
+  assert.equal(secondScienceState.status, "planned");
+  assert.equal(secondScienceState.duration_minutes, null);
+  const [{ count: unrelatedStillAlone }] = await sql<{ count: number }[]>`
+    select count(*)::integer as count from public.hours_log
+    where family_id = ${EVAL_FIXTURE_FAMILY_ID} and subject = 'science' and minutes = 20
+      and happened_on = '2026-08-03' and child_id = ${childIds[0]}
+  `;
+  assert.equal(unrelatedStillAlone, 1, "the conflict must not have inserted a second row");
+  assert.ok(unrelatedBlock.id);
+
+  console.log("set_planner_learning_activity_time PostgreSQL contract passed.");
+
   console.log("Planner learning log PostgreSQL contract passed.");
 } finally {
   await sql.end({ timeout: 1 });
