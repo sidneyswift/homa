@@ -85,3 +85,22 @@ Items 1-4 are the must-haves and should be produced first. Confirm with
 Sidney whether the "hero" (item 2) gets built before or after the
 must-have spread (item 1), since it likely wants the single best output
 from that spread rather than a separate production pass.
+
+## Update 2026-09-01: paywall hero backdrop/setting exploration
+
+A separate track from items 1-8 above: not "an example of what Homa
+makes," but the *backdrop* behind the real, code-driven `HomaCharacter`
+on the S10 paywall hero (and potentially other onboarding screens). 29
+concepts generated with Higgsfield across six rounds, saved at
+`assets/paywall-hero-settings/` with a full manifest (prompts, verdicts,
+which ones are ready) in that folder's `MANIFEST.md`.
+
+The key finding: the character should never be redrawn into a generated
+scene (an image model given the mark as reference drifts, e.g. adding a
+mouth, which `homa-character.tsx` explicitly forbids). The working pattern
+is a pure-environment background asset with no house or character in it,
+composited under the real animated component instead, the same
+sky/aura/character layering `homa-character.tsx` and `aura.tsx` already
+use. `assets/paywall-hero-settings/21-hill-no-circle.png` is the current
+best example of this pattern; `23-pinboard.png`, `26-achievement-fan.png`,
+and `29-globe-book.png` are the strongest concrete-object alternatives.

@@ -32,6 +32,7 @@ import { WalkScene } from "../../features/onboarding/walk-scene";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
+import { MakingFeatureCards } from "../../features/onboarding/making-feature-cards";
 import { MakingShow } from "../../features/onboarding/making-show";
 import {
   loadOnboardingAnswers,
@@ -65,6 +66,13 @@ export default function MakingScreen() {
     "starting",
   );
   const [pageReady, setPageReady] = useState(false);
+  // The feature-card intro (2026-09-01 direction: the wait teaches, it
+  // never just waits) plays once per session, for every family, before
+  // the checklist or the easel takes over. Derived, not synced: the real
+  // job always wins, so a page that finishes early skips the cards
+  // without needing an effect to reconcile two sources of truth.
+  const [introFinished, setIntroFinished] = useState(false);
+  const showIntro = !introFinished && !pageReady;
   // Whether the checklist has anything to ask this child at all (fetched
   // once, same position math checklist-takeover.tsx itself uses), and
   // whether she has since closed it or finished it.
@@ -247,7 +255,9 @@ export default function MakingScreen() {
                 : "Homa is getting her pencils"}
             </NativeText>
 
-            {showingChecklist && checklistChildId ? (
+            {showIntro ? (
+              <MakingFeatureCards onDone={() => setIntroFinished(true)} />
+            ) : showingChecklist && checklistChildId ? (
               <>
                 {/* The chapter cover (deck S8, D15): the heading says
                     what Homa is doing, so this line says what SHE is

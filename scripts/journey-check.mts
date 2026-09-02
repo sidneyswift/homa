@@ -185,9 +185,14 @@ function walkFiles(relativeDir: string, extensions: readonly string[]): string[]
   const sources = new Map(mobileFiles.map((file) => [file, read(file)]));
   for (const file of walkFiles(componentDir, [".tsx"])) {
     const source = sources.get(file) ?? read(file);
-    const names = [...source.matchAll(/^export (?:function|const) ([A-Z][A-Za-z0-9]*)/gmu)].map(
-      (match) => match[1],
-    );
+    const names = [...source.matchAll(/^export (?:function|const) ([A-Z][A-Za-z0-9_]*)/gmu)]
+      .map((match) => match[1])
+      // A SCREAMING_SNAKE_CASE export is a constant, not a component; only
+      // a name with a lowercase letter is a live-component candidate here
+      // (caught 2026-09-01: the old regex stopped at the first underscore,
+      // truncating DEFAULT_CHARACTER_SIZE to "DEFAULT" and reporting a
+      // genuinely-wired constant as a dead component).
+      .filter((name) => /[a-z]/u.test(name));
     for (const name of names) {
       const usedElsewhere = mobileFiles.some(
         (other) => other !== file && new RegExp(`\\b${name}\\b`, "u").test(sources.get(other) ?? ""),
