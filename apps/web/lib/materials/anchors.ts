@@ -169,6 +169,14 @@ const REGISTRY: readonly MaterialAnchor[] = [
     register: "playful",
     mediaType: JPEG,
   },
+  {
+    id: "letter-number-formation-practice",
+    title: "Letter / number formation practice page",
+    useWhen:
+      "building a letter or number formation practice page: a model letter or digit with a stroke cue, and a row of trace repetitions",
+    register: "playful",
+    mediaType: JPEG,
+  },
 ];
 
 const BY_ID: ReadonlyMap<string, MaterialAnchor> = new Map(
