@@ -1,5 +1,13 @@
 # Picture bingo board
 
+Golden anchor: pass `anchorIds: ["picture-bingo-board"]` to
+generate_image so the output matches the Homa picture bingo bar (one
+thick colored frame around an even 3x3 charcoal grid, eight big
+illustrated items with margin, one yellow centered FREE cell, a large
+BINGO title band, a caller-list box directly under the board). Write
+your own prompt with your own content; the anchor sets the visual bar,
+not the specifics.
+
 A set of bingo-style game boards built from one shared pool of items, either
 illustrated vocabulary or exact text such as math facts, sight words, or a
 taught phonics set. Each board is a grid, usually 3x3, holding a different

@@ -1,5 +1,14 @@
 # Classification sorting mat
 
+Golden anchor: pass `anchorIds: ["classification-sorting-mat"]` to
+generate_image so the output matches the Homa sorting mat bar
+(solid-bordered two-column T-chart with a bold header band on the upper
+half, empty sorting zones, a dashed scissors cut line labeled "cut
+apart", a 2x5 grid of dashed-border outline-only cut-out pieces with
+lowercase name labels filling the lower half, cream paper with brown and
+charcoal ink). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 A T-chart or multi-column sorting activity where the child places
 cut-out pieces into labeled category zones. Designed for lamination
 and reuse with cut-out manipulatives.

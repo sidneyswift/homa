@@ -1,5 +1,11 @@
 # Narration page
 
+Golden anchor: pass `anchorIds: ["narration-page"]` to generate_image so
+the output matches the Homa narration page bar (title/prompt header, one
+large empty illustration box, wide-ruled dictation lines below). Write
+your own prompt with your own content; the anchor sets the visual bar,
+not the specifics.
+
 A Charlotte Mason staple: a title/prompt header, a large open box for the
 child's own illustration, and wide-ruled lines below where a parent
 transcribes the child's spoken words. No answer key, no grading; the page

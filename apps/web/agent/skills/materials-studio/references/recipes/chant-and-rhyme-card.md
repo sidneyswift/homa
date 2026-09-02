@@ -1,5 +1,14 @@
 # Chant and rhyme card
 
+Golden anchor: pass `anchorIds: ["chant-and-rhyme-card"]` to
+generate_image so the output matches the Homa chant card bar (small
+uppercase skill tag over a large bold title, one spoken line per printed
+line in big type, thin-bordered LEADER and EVERYONE cue chips leading
+each line, italic parenthetical action hints at line ends, one bordered
+parent how-to box at the bottom, no name line or worksheet furniture).
+Write your own prompt with your own content; the anchor sets the visual
+bar, not the specifics.
+
 A one-page performance card for a traditional chant, nursery rhyme, or
 fingerplay the family says aloud together: the full text in large read-aloud
 type, one spoken line per printed line, with optional performance cues

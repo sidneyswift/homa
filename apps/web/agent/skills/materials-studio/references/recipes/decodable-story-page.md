@@ -1,5 +1,13 @@
 # Decodable story page
 
+Golden anchor: pass `anchorIds: ["decodable-story-page"]` to
+generate_image so the output matches the Homa decodable story bar (Name
+line and two reread circles in the header, one big bold title, six to
+ten short sentences in large Andika-style type grouped in tiny
+paragraphs, one small mood illustration beside the text, a thin rule
+with a single talk prompt closing the page). Write your own prompt with
+your own content; the anchor sets the visual bar, not the specifics.
+
 A short original connected-text page constrained to phonics patterns the
 child has already been taught. It gives those patterns a reason to be read,
 then supports one or two rereads without turning the story into a test.

@@ -1,5 +1,15 @@
 # Circle diagram two-set sort
 
+Golden anchor: pass `anchorIds: ["circle-diagram-two-set-sort"]` to
+generate_image so the output matches the Homa two-circle Venn sort bar
+(two large equal circles in blue and brick-red with a wide lens overlap,
+bold category labels outside and above each rim in the circle's color,
+empty circle interiors, a light gray "neither" cue outside both circles,
+a dashed item bank of ten bold number chips in two close rows, one
+reasoning prompt with writing lines that carry to the bottom margin).
+Write your own prompt with your own content; the anchor sets the visual
+bar, not the specifics.
+
 Two large overlapping circles (a two-circle Venn diagram), each labeled
 outside its rim with one category, where the child places items, numbers,
 or words into one circle only, the other circle only, the overlapping

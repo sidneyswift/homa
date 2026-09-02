@@ -1,5 +1,15 @@
 # Notes-and-practice bundle
 
+Golden anchor: pass `anchorIds: ["notes-and-practice-bundle"]` to
+generate_image so the output matches the Homa notes-and-practice packet
+bar (two matching pages with Name and Date header lines, page 1 a
+four-section two-column notes grid with a narrow bold term column and
+fill-in blanks plus two ruled notes lines per section, page 2 eight
+bold-numbered problems each with a short answer underline and a rounded
+work box, warm brown rules on cream paper, a pencil and a star only in
+the corners). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 A two-page format: page 1 is guided notes (Cornell-style two-column
 layout with terms and fill-in-the-blank explanations), page 2 is a
 practice activity (drill problems, fill-in-the-blank, or matching).

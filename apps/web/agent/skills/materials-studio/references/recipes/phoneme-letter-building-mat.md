@@ -1,5 +1,12 @@
 # Phoneme-letter building mat
 
+Golden anchor: pass `anchorIds: ["phoneme-letter-building-mat"]` to
+generate_image so the output matches the Homa phoneme-letter building
+mat bar (child mat, page 1 of the phoneme-letter building packet) for
+segmenting and blending a taught word pattern). Write your own prompt
+with your own content; the anchor sets the visual bar, not the
+specifics.
+
 A reusable sound-position mat plus cut-apart grapheme tiles. The child says
 the sounds in order, places one tile or tile group in each sound position,
 then blends the completed word.

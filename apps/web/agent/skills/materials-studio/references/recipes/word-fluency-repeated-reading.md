@@ -1,5 +1,14 @@
 # Word fluency repeated reading
 
+Golden anchor: pass `anchorIds: ["word-fluency-repeated-reading"]` to
+generate_image so the output matches the Homa read-it-again word grid
+bar (a warm brown title with a Name line and three empty round circles,
+two short labeled bands of same-size rounded word boxes in a 3-column
+grid, one large lowercase word centered per box, one short child
+instruction above and one below, cream paper with corner-only pencil and
+star motifs). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 A calm repeated-reading sheet for building automatic recognition of one
 already-taught word set. The child reads the same closed list more than once
 while the parent notices accuracy, smoothness, and self-correction. It is

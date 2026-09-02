@@ -1,5 +1,13 @@
 # 3-part nomenclature cards
 
+Golden anchor: pass `anchorIds: ["nomenclature-cards"]` to
+generate_image so the output matches the Homa nomenclature-card bar (a
+3x3 grid of same-size dashed-cut cards, red-bordered control row with
+picture plus lowercase label, blue-bordered picture-only and label-only
+rows, naturalistic line-art imagery, small header with a Name line).
+Write your own prompt with your own content; the anchor sets the visual
+bar, not the specifics.
+
 Montessori three-part (or four-part) nomenclature card set:
 (1) labeled image cards (control), (2) unlabeled image cards,
 (3) name-only label cards, (4) optional definition cards.

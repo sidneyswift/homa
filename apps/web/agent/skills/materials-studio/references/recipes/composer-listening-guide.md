@@ -1,5 +1,11 @@
 # Composer listening guide
 
+Golden anchor: pass `anchorIds: ["composer-listening-guide"]` to
+generate_image so the output matches the Homa composer listening guide
+bar (title block, one listen-for hook, 3 to 5 checkbox moment boxes with
+sketch areas, feeling-response line). Write your own prompt with your
+own content; the anchor sets the visual bar, not the specifics.
+
 A one-page active-listening companion for a single piece of music. The
 parent plays a recording; the child follows the page. It gives the child
 one concrete thing to listen for before the music starts, a short ordered

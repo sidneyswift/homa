@@ -1,5 +1,14 @@
 # Nature identification poster
 
+Golden anchor: pass `anchorIds: ["nature-identification-poster"]` to
+generate_image so the output matches the Homa
+nature-identification-poster bar (one elegant serif title with a thin
+rule, a 3x4 grid of hairline-bordered cells, one large naturalistic
+watercolor species per cell, a centered common-name label with a smaller
+italic scientific name beneath, cream paper, grid running to the bottom
+margin). Write your own prompt with your own content; the anchor sets
+the visual bar, not the specifics.
+
 A watercolor-style grid of 12+ species with labels. Reference-style
 poster for nature study, designed to hang on a wall or slip into a
 nature notebook.

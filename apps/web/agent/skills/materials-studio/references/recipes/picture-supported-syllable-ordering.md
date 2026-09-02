@@ -1,5 +1,14 @@
 # Picture-supported syllable ordering
 
+Golden anchor: pass `anchorIds: ["picture-supported-syllable-ordering"]`
+to generate_image so the output matches the Homa syllable ordering bar
+(a 2 by 3 grid of big rounded brown-outlined cards, one simple line-art
+picture per card, bold lowercase syllable chips in separate teal-tinted
+bordered boxes, one wide empty writing box per card, a title plus one
+child instruction line and a Nombre line, corner pencil and star only).
+Write your own prompt with your own content; the anchor sets the visual
+bar, not the specifics.
+
 A precise word-building page where the child identifies a pictured Spanish
 word, puts a supplied set of syllable chunks in order, then writes the whole
 word in one bounded response area.

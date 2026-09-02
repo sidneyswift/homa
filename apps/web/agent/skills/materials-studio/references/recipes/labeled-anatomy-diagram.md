@@ -1,5 +1,14 @@
 # Labeled anatomy diagram
 
+Golden anchor: pass `anchorIds: ["labeled-anatomy-diagram"]` to
+generate_image so the output matches the Homa labeled diagram bar (one
+big B&W line-art subject filling the middle of the page, thin straight
+leader lines ending in cream-filled numbered circles at the margins, no
+words on the illustration, a rounded bordered word bank with blanks and
+bullet dots at the bottom, Name and Date header with one instruction
+line). Write your own prompt with your own content; the anchor sets the
+visual bar, not the specifics.
+
 A scientific illustration with numbered leader lines pointing to parts,
 word bank at bottom. Scaffolded versions: fully labeled → numbered with
 word bank → completely blank for testing.

@@ -1,5 +1,10 @@
 # Social narrative
 
+Golden anchor: pass `anchorIds: ["social-narrative"]` to generate_image
+so the output matches the Homa social narrative bar (illustration on
+top, 2-3 big sentences below) for ages 3-8). Write your own prompt with
+your own content; the anchor sets the visual bar, not the specifics.
+
 First-person story format with illustration + text per page. Pattern:
 normalize the emotion → describe body signals → state the goal → list
 coping strategies → end with positive affirmation + open-ended question.

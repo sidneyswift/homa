@@ -1,5 +1,15 @@
 # Reader theater script
 
+Golden anchor: pass `anchorIds: ["reader-theater-script"]` to
+generate_image so the output matches the Homa reader theater script bar
+(hand-lettered title over a boxed cast list with a small icon per role,
+big numbered dialogue lines with bold capital speaker labels and colons,
+italic bracketed stage directions, ALL choral lines on a soft yellow
+highlight band, a slim 'For the grown-up' practice note at the bottom,
+corner-only sock and star motifs on cream paper). Write your own prompt
+with your own content; the anchor sets the visual bar, not the
+specifics.
+
 A multi-character performance script where children read assigned roles aloud, building reading fluency through dramatic rehearsal and repeated reading. Not a worksheet: nothing to fill in, cut, or paste. The child reads, re-reads across multiple sessions, and performs.
 
 Great for: ages 5-10, oral reading fluency, reading with expression, high-frequency word practice, comprehension through performance, collaborative learning, reluctant readers who respond to drama, choral participation for emergent readers, families who want a literacy activity that feels like play.

@@ -1,5 +1,15 @@
 # Chart and graph skill practice
 
+Golden anchor: pass `anchorIds: ["chart-and-graph-skill-practice"]` to
+generate_image so the output matches the Homa chart-skill practice page
+bar (a small boxed worked example with a 3-bar mini graph and two
+modeling sentences, one large practice bar graph with solid dark axes,
+light grid lines, and 5 equal-width tan bars labeled beneath, 3
+dotted-line questions filling the sheet to the bottom, cream paper with
+brown ink and no decoration inside the display). Write your own prompt
+with your own content; the anchor sets the visual bar, not the
+specifics.
+
 Teaches ONE concrete data-reading skill per page: read a calendar, read a
 timeline, read a labeled diagram, or read a bar graph. A small worked
 example models how to read the display, then the child answers 2-4

@@ -1,5 +1,15 @@
 # Phonics and spelling diagnostic assessment
 
+Golden anchor: pass `anchorIds:
+["phonics-spelling-diagnostic-assessment"]` to generate_image so the
+output matches the Homa quick skill check bar (one bold skill-name title
+with Name, Date, and Form A at right, one child-directed direction line
+with the stop permission, exactly six numbered rows of one very large
+lowercase word each on thin warm-brown rules, no answers or pictures
+beside the words, no score box or grading marks, only a tiny pencil and
+star in the corners). Write your own prompt with your own content; the
+anchor sets the visual bar, not the specifics.
+
 A parent-use packet for checking already-taught phonics or spelling skills at
 home. Its default mode checks one skill with two equivalent forms. With a
 code-issued progression policy, the same exact-answer surface may also render

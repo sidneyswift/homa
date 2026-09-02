@@ -1,5 +1,14 @@
 # Pattern extension practice
 
+Golden anchor: pass `anchorIds: ["pattern-extension-practice"]` to
+generate_image so the output matches the Homa pattern rows bar (one
+instruction line per row, big uniform rounded cells in one close
+horizontal line, solid-outlined shown cells and dashed empty response
+cells, two-element AB patterns in high-contrast solid colors,
+copy/continue/choose/create rows stacked to fill the sheet, no numbers).
+Write your own prompt with your own content; the anchor sets the visual
+bar, not the specifics.
+
 A page built around one repeating sequence (an AB pattern like
 red-blue-red-blue, or an AAB/ABB variant once AB is solid) using colors,
 shapes, or small themed icons. The child copies a shown pattern, identifies

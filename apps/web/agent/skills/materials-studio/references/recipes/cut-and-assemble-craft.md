@@ -1,5 +1,12 @@
 # Cut-and-assemble craft
 
+Golden anchor: pass `anchorIds: ["cut-and-assemble-craft"]` to
+generate_image so the output matches the Homa cut-and-assemble craft bar
+(labeled flat cutout pieces with dashed cut borders, dotted fold lines,
+gray glue tabs, and a numbered assembly-step panel). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 A page of labeled cutout pieces that the child colors, cuts, and
 assembles into a 3D model or layered diagram. Combines art + motor
 skills + spatial reasoning + content knowledge.

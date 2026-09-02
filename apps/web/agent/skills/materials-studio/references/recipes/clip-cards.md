@@ -1,5 +1,13 @@
 # Clip cards
 
+Golden anchor: pass `anchorIds: ["clip-cards"]` to generate_image so the
+output matches the Homa clip-card bar (six big rounded-rectangle cards
+in a 2 by 3 grid, target objects filling the top two-thirds of each
+card, three large numerals flush along the bottom edge with clip-width
+gaps, dashed cut lines with a scissors mark in the gutters, corner-only
+clothespin and star motifs). Write your own prompt with your own
+content; the anchor sets the visual bar, not the specifics.
+
 A set of cards, each with a target item on top and 3 answer choices along
 the bottom edge. The child clips a clothespin (or drops a coin, or marks
 with a dot marker) on the correct answer. Self-checking when the back of

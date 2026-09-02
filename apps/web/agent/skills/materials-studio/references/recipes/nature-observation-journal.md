@@ -1,5 +1,13 @@
 # Nature observation journal
 
+Golden anchor: pass `anchorIds: ["nature-observation-journal"]` to
+generate_image so the output matches the Homa nature-journal bar (leaf
+icon plus Week, Date, and Name header row, a big topic title, four sense
+prompts with two empty solid lines each, one large solid-bordered empty
+drawing box, a dashed specimen circle near the bottom, corner-only
+pencil and star). Write your own prompt with your own content; the
+anchor sets the visual bar, not the specifics.
+
 A recurring nature-notebook entry that records the child's OWN outdoor
 discovery, never Homa-supplied reference art. Distinct from
 `nature-identification-poster` (a Homa-illustrated wall reference showing

@@ -1,5 +1,10 @@
 # Cloze story
 
+Golden anchor: pass `anchorIds: ["cloze-story"]` to generate_image so
+the output matches the Homa cloze story bar (cloze story), ages 5-10,
+vocabulary or sight words in context). Write your own prompt with your
+own content; the anchor sets the visual bar, not the specifics.
+
 A short story or paragraph with key words blanked out and a word bank to
 choose from. The child reads the context, picks the word that fits, and
 writes it in the blank. The illustrated variant (picture-label cloze)
