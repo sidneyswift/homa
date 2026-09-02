@@ -48,13 +48,16 @@ const VIVID_SKY_EXTRA_HEIGHT = 130;
  * The state-change settle: same bezier feel as HomaCharacter's own
  * SETTLE curve (homa-character.tsx), duplicated locally since that file
  * doesn't export it and this is a different rig (the stage's size and
- * sky, not the character's internal posture). 350ms: close enough to
- * the screen's own ~350ms default fade (_layout.tsx's animation:"fade")
- * that the two read as one continuous motion, not a race.
+ * sky, not the character's internal posture). Its own pace is deliberate
+ * (see _layout.tsx's animationDuration for the screen content's, tuned
+ * separately: a combined scale+color motion carries a slower pace better
+ * than a flat crossfade does, matching them exactly read as sluggish).
  *
- * Founder catch 2026-09-02: hello -> intent used to pop the character
- * from 176px/vivid to 96px/clay the instant the new screen mounted,
- * underneath a fade that only touched the text. This eases both instead.
+ * Founder catch 2026-09-02: a screen that changed the mascot's size or
+ * sky (hello's one-time vivid entrance, at the time still followed by
+ * an intent-ask screen since cut, gh#304) used to pop the character
+ * instantly the moment the next screen mounted, underneath a fade that
+ * only touched the text. This eases both instead.
  */
 const SETTLE = Easing.bezier(0.22, 0.8, 0.28, 1);
 const SETTLE_MS = 350;

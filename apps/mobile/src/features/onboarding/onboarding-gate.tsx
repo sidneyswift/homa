@@ -103,7 +103,14 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
 const STEP_ROUTES: Record<OnboardingStep, string> = {
   door: "/hello",
   hello: "/hello",
-  intent: "/intent",
+  // The intent screen was cut 2026-09-02 (gh#304): every pick led to
+  // the same next step regardless, so the ask was never real. Nothing
+  // in the live walk writes step:"intent" anymore (hello.tsx only ever
+  // wrote "hello" on its own mount; the old intent.tsx screen reported
+  // its arrival but never advanced the saved step past "hello" either),
+  // but a stale row from before this change should still resume
+  // somewhere real rather than a route that no longer exists.
+  intent: "/hello",
   kids: "/kids",
   you: "/you",
   making: "/making",

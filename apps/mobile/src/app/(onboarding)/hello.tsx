@@ -88,7 +88,7 @@ export default function HelloScreen() {
     if (advanced.current) return;
     advanced.current = true;
     hapticAdvance();
-    router.replace("/intent" as never);
+    router.replace("/kids" as never);
   }
 
   return (
