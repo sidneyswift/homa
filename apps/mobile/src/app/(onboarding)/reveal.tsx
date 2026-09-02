@@ -228,14 +228,19 @@ export default function RevealScreen() {
               padding: space.sm,
             }}
           >
-            {/* The trophy, not the document: the page's top third at
-                readable scale, cropped (gauntlet round 2: a full page at
-                phone scale is an eye test, not a payoff). Print or the
-                Binder shows the whole thing. */}
+            {/* The trophy, not the document: a portrait crop at readable
+                scale (gauntlet round 2: a full page at phone scale is an
+                eye test, not a payoff). Print or the Binder shows the
+                whole thing. The crop window's own aspect ratio must stay
+                portrait, a fixed pixel height here previously fought the
+                image's real aspect ratio and clipped it into a
+                square/landscape-looking window regardless of the page's
+                actual shape (bug, not a design choice, caught 2026-09-01:
+                "I hate how this is a square instead of a portrait"). */}
             <View
               style={{
                 width: "100%",
-                height: 300,
+                aspectRatio: 0.75,
                 borderRadius: radius.lg,
                 backgroundColor: colors.card,
                 overflow: "hidden",
