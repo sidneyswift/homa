@@ -8,6 +8,11 @@ import {
 } from "../model-usage";
 import { geometryReviewBlock, type PageGeometry } from "./page-geometry";
 import type { RecipeChecklistItem } from "./recipe-checklist";
+import type {
+  ReviewAnchor,
+  ReviewAnchorLoad,
+  ReviewAnchorSkip,
+} from "./review-anchor";
 import {
   CHECKLIST_ANSWERS,
   verifyChecklistAnswers,
@@ -102,6 +107,13 @@ export interface ArtifactReview {
     answers: ChecklistVerdict["answers"];
     blockingFailures: string[];
   } | null;
+  /**
+   * Whether the reviewer was shown the format's fleet anchor beside the
+   * pages (review-anchor.ts). False never blocks anything; anchorSkipped
+   * says why, so a review made without its size reference is auditable.
+   */
+  anchorShown: boolean;
+  anchorSkipped?: ReviewAnchorSkip;
 }
 
 /** One rendered page offered to the reviewer. */
@@ -306,6 +318,9 @@ async function reviewChunk(input: {
   checklist?: readonly RecipeChecklistItem[];
   /** The recipe slug, for the checklist heading in the prompt. */
   recipe?: string | null;
+  /** The format's fleet anchor, shown after the pages as a size and
+   * structure reference that is explicitly not under review. */
+  anchor?: ReviewAnchor | null;
 }): Promise<ChunkVerdict | null> {
   if (input.pages.length === 0) return null;
 
@@ -316,14 +331,21 @@ async function reviewChunk(input: {
 
   const shownPages = input.pages;
   const shownNumbers = shownPages.map((page) => page.pageNumber);
+  const anchor = input.anchor ?? null;
+  const shownList =
+    shownNumbers.length === 1
+      ? `page ${shownNumbers[0]}`
+      : `pages ${shownNumbers.join(", ")}`;
+  const thenAnchor = anchor ? ", then one reference image" : "";
   const pageContext =
     input.pageCount > 1
-      ? `The document has ${input.pageCount} pages; you are shown ${
-          shownNumbers.length === 1
-            ? `page ${shownNumbers[0]}`
-            : `pages ${shownNumbers.join(", ")}`
-        }, in that order. Number every issue by the page number given here, not by its position among the images.\n`
-      : "";
+      ? `The document has ${input.pageCount} pages; you are shown ${shownList}${thenAnchor}, in that order. Number every issue by the page number given here, not by its position among the images.\n`
+      : anchor
+        ? `You are shown ${shownList}${thenAnchor}.\n`
+        : "";
+  const anchorContext = anchor
+    ? `The last image is Homa's reference page for this format (${anchor.title}). It is not under review. It sets the bar for structure and size: the pages under review should be at least this generous in size and at least this clear. Different letters, words, theme, or child name are expected and are not issues.\n`
+    : "";
   const geometryBlock = geometryReviewBlock(input.pageGeometry ?? [], {
     underfillNotes: input.underfillNotes,
   });
@@ -350,9 +372,20 @@ async function reviewChunk(input: {
               mediaType: "image/jpeg" as const,
               data: page.data,
             })),
+            // The anchor rides AFTER the pages so page numbering in the
+            // reviewer's issues stays aligned with the images it counts.
+            ...(anchor
+              ? [
+                  {
+                    type: "file" as const,
+                    mediaType: anchor.mediaType,
+                    data: anchor.data,
+                  },
+                ]
+              : []),
             {
               type: "text",
-              text: `${pageContext}${geometryContext}The brief:\n${input.brief}${checklistContext}`,
+              text: `${pageContext}${anchorContext}${geometryContext}The brief:\n${input.brief}${checklistContext}`,
             },
           ],
         },
@@ -444,6 +477,9 @@ export async function reviewArtifact(input: {
   checklist?: readonly RecipeChecklistItem[];
   /** The recipe slug the checklist belongs to. */
   recipe?: string | null;
+  /** The format's anchor load (review-anchor.ts), or the reason there is
+   * none. Absent means no anchor was even sought. */
+  anchor?: ReviewAnchorLoad | null;
 }): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
   if (input.pages.length === 0) return null;
@@ -454,11 +490,13 @@ export async function reviewArtifact(input: {
     return input.pageGeometry.filter((entry) => shown.has(entry.page));
   };
 
+  const anchor = input.anchor?.anchor ?? null;
+  const chunkInput = { ...input, anchor };
   const { blocking, advisory } = planReviewChunks(input.pages);
   const [blockingVerdict, ...advisoryVerdicts] = await Promise.all([
-    reviewChunk({ ...input, pages: blocking, pageGeometry: geometryFor(blocking) }),
+    reviewChunk({ ...chunkInput, pages: blocking, pageGeometry: geometryFor(blocking) }),
     ...advisory.map((pages) =>
-      reviewChunk({ ...input, pages, pageGeometry: geometryFor(pages) }),
+      reviewChunk({ ...chunkInput, pages, pageGeometry: geometryFor(pages) }),
     ),
   ]);
 
@@ -494,5 +532,9 @@ export async function reviewArtifact(input: {
               .map((answer) => answer.id),
           }
         : null,
+    anchorShown: anchor !== null,
+    ...(anchor === null
+      ? { anchorSkipped: input.anchor?.skipped ?? "no-anchor" }
+      : {}),
   };
 }

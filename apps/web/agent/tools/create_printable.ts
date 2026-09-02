@@ -44,6 +44,10 @@ import {
   provenCutoffPages,
   underfillNotesApplyTo,
 } from "../../lib/materials/page-geometry";
+import {
+  loadReviewAnchor,
+  type ReviewAnchorLoad,
+} from "../../lib/materials/review-anchor";
 import { reviewArtifact } from "../../lib/materials/review-artifact";
 import {
   hasPageBreakMarkup,
@@ -662,6 +666,18 @@ const createPrintable = defineBoundedTool({
     // The recipe's reviewer checklist comes from the generated registry,
     // never from the model: it passed only the slug (2026-09-02).
     const recipeEntry = input.recipe ? RECIPE_REGISTRY[input.recipe] : null;
+    // The format's anchor for the reviewer, started now so the load
+    // overlaps the render. Pure image-direct pages skip it: the image
+    // model already had the anchor, and html and hybrid pages are the
+    // ones whose reviewer never saw it. loadReviewAnchor never rejects,
+    // so an early return below leaves no unhandled promise behind.
+    const anchorPromise: Promise<ReviewAnchorLoad> =
+      recipeEntry?.anchorId && source !== "image"
+        ? loadReviewAnchor(recipeEntry.anchorId)
+        : Promise.resolve({
+            anchor: null,
+            skipped: recipeEntry?.anchorId ? "not-html" : "no-anchor",
+          });
     const document = wrapPrintableDocument(
       resolvedPages.map((page) => page.body),
       input.childName ?? "",
@@ -758,6 +774,7 @@ const createPrintable = defineBoundedTool({
       underfillNotes: underfillNotesApplyTo(kind),
       checklist: recipeEntry?.checklist,
       recipe: input.recipe ?? null,
+      anchor: await anchorPromise,
     });
     let materialId: string = randomUUID();
     let reservedSourceDeliveryId: string | null = null;
