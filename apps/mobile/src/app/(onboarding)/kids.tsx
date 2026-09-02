@@ -99,9 +99,11 @@ export default function KidsScreen() {
   // returns, a resumed walk's saved answers are wiped (found by the
   // gauntlet capture rig, 2026-08-21, and just as real on any resume).
   const hydrated = useRef(false);
-  // The intent picked before this screen; carried through every save so
-  // a kids write never wipes it (answers are stored whole, live bug
-  // 2026-08-19).
+  // Legacy: the intent ask that used to sit before this screen wrote
+  // this field (cut 2026-09-02, gh#304); nothing sets it fresh anymore,
+  // but a family who saved one under the old flow keeps it, carried
+  // through every save so a kids write never wipes it (answers are
+  // stored whole, live bug 2026-08-19).
   const intentRef = useRef<OnboardingIntent | undefined>(undefined);
 
   const kid = kids[kids.length - 1];
@@ -166,8 +168,10 @@ export default function KidsScreen() {
 
   /**
    * Every ask can be walked back (R4). From the first kid's name the
-   * walk returns to the intent screen; from a later kid's empty name
-   * card it returns to the previous kid's summary.
+   * walk returns to hello (the intent ask that used to sit between them
+   * was cut 2026-09-02: every pick led to the same next step regardless,
+   * gh#304); from a later kid's empty name card it returns to the
+   * previous kid's summary.
    */
   function goBack() {
     setError(null);
@@ -180,7 +184,7 @@ export default function KidsScreen() {
       setSubStep("working");
       return;
     }
-    router.replace("/intent" as never);
+    router.replace("/hello" as never);
   }
 
   function toggleLove(option: string) {
