@@ -48,6 +48,13 @@ const logInput = z.object({
     .max(200)
     .optional()
     .describe("The parent's own words for the audit trail, e.g. 'about 45 min of math after breakfast'."),
+  customLabel: z
+    .string()
+    .max(40)
+    .optional()
+    .describe(
+      "Her own name for this block when the fixed subject list is too coarse to tell two blocks apart, e.g. subject 'reading' with customLabel 'Literature journal' alongside a separate independent-reading block. Only set this when the parent actually names the activity; never invent one.",
+    ),
 });
 
 export default defineBoundedTool({
@@ -98,6 +105,7 @@ export default defineBoundedTool({
         childId: input.childId ?? null,
         happenedOn: input.happenedOn ?? null,
         note: input.note ?? null,
+        customLabel: input.customLabel ?? null,
       });
       if (!result.logged) return result;
       return {
@@ -121,8 +129,12 @@ export default defineBoundedTool({
       happenedOn = zonedDateString(new Date(), effectiveTimeZone(family?.time_zone));
     }
 
+    const customLabel = input.customLabel?.trim() || null;
+
     // Double-log guard: the same block mentioned twice in one chat must
-    // not become two compliance rows.
+    // not become two compliance rows. A distinct customLabel (her own
+    // name for the block) makes two same-subject/duration/day blocks
+    // distinguishable, so it is part of the match key too.
     const { data: existing } = await db
       .from("hours_log")
       .select("id")
@@ -131,6 +143,7 @@ export default defineBoundedTool({
       .eq("minutes", input.minutes)
       .eq("happened_on", happenedOn)
       .filter("child_id", input.childId ? "eq" : "is", input.childId ?? null)
+      .filter("custom_label", customLabel ? "eq" : "is", customLabel)
       .limit(1);
     if (existing && existing.length > 0) {
       return {
@@ -152,6 +165,7 @@ export default defineBoundedTool({
         happened_on: happenedOn,
         source: "chat",
         note: input.note ?? null,
+        custom_label: customLabel,
       })
       .select("id")
       .single();

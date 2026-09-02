@@ -55,7 +55,7 @@ export async function getHoursExportForFamily(familyId: string): Promise<HoursEx
       happenedOn: row.happened_on,
       childName: row.child_name,
       subject,
-      customLabel: subject === "other" ? row.custom_label : null,
+      customLabel: row.custom_label,
       minutes,
       source: exportSource(row.source),
       note: row.note,

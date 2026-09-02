@@ -48,15 +48,11 @@ export async function updateHoursEntryAction(
   if (noteRaw.length > 200) {
     return { error: "Keep the note under 200 characters." };
   }
-  // The DB constraint requires custom_label null unless subject is
-  // "other", so a label typed while "other" was selected is dropped
-  // here if she switched to a real subject before saving, rather than
-  // failing the whole save on a constraint violation.
   const customLabelRaw = String(formData.get("customLabel") ?? "").trim();
   if (customLabelRaw.length > 40) {
-    return { error: "Keep the subject name under 40 characters." };
+    return { error: "Keep the category name under 40 characters." };
   }
-  const customLabel = subjectRaw === "other" && customLabelRaw ? customLabelRaw : null;
+  const customLabel = customLabelRaw || null;
 
   const supabase = await createSupabaseServerClient();
   // familyId scopes the update on top of RLS: a forged entryId from

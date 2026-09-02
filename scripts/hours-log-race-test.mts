@@ -336,6 +336,45 @@ async function runConcurrentWriterAssertions(sql: postgres.Sql): Promise<void> {
   `;
   assert.equal(readingRows.count, 2);
   console.log("PASS  hours-log per-child concurrent calls both land");
+
+  // The bug this migration fixes (Carolyng, 2026-09-02): two genuinely
+  // different blocks that happen to share subject/minutes/day/child used
+  // to collide and silently drop the second one. A distinct customLabel
+  // now tells them apart; an identical (or absent) label still dedups.
+  const literatureJournal = await recordHoursPinned({
+    familyId,
+    minutes: 20,
+    subject: "reading",
+    source: "sms" as const,
+    childId: childA,
+    customLabel: "Literature journal",
+  });
+  const littleWomen = await recordHoursPinned({
+    familyId,
+    minutes: 20,
+    subject: "reading",
+    source: "sms" as const,
+    childId: childA,
+    customLabel: "Little Women",
+  });
+  const littleWomenAgain = await recordHoursPinned({
+    familyId,
+    minutes: 20,
+    subject: "reading",
+    source: "sms" as const,
+    childId: childA,
+    customLabel: "Little Women",
+  });
+  assert.equal(literatureJournal.inserted, true);
+  assert.equal(littleWomen.inserted, true);
+  assert.equal(littleWomenAgain.inserted, false);
+  const [subDomainRows] = await sql<{ count: number }[]>`
+    select count(*)::integer as count from public.hours_log
+    where family_id = ${familyId} and subject = 'reading' and minutes = 20
+      and child_id = ${childA} and custom_label is not null
+  `;
+  assert.equal(subDomainRows.count, 2);
+  console.log("PASS  hours-log distinct custom labels stop a false collision");
 }
 
 async function main(): Promise<void> {
@@ -415,6 +454,22 @@ async function main(): Promise<void> {
       max: 4,
     });
     await runCleanupMigrationAssertions(sql, postgresBin, { socketDir, port }, env);
+    // recordHoursPinned reads/writes custom_label (20260827130000, then
+    // widened to every subject and folded into the dedup key by
+    // 20260902120000): apply both before the concurrency assertions
+    // touch that column.
+    await applyMigration(
+      postgresBin,
+      { socketDir, port },
+      "20260827130000_hours_log_custom_label.sql",
+      env,
+    );
+    await applyMigration(
+      postgresBin,
+      { socketDir, port },
+      "20260902120000_hours_log_custom_label_any_subject.sql",
+      env,
+    );
 
     // Route the pinned writer's mapDb() at this cluster; the import in
     // runConcurrentWriterAssertions happens after this is set.

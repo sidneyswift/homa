@@ -115,8 +115,15 @@ describe("subjectDisplayLabel", () => {
     assert.equal(subjectDisplayLabel({ subject: "other", customLabel: null }), "Other");
   });
 
-  it("ignores a stray custom label on a real subject", () => {
-    assert.equal(subjectDisplayLabel({ subject: "math", customLabel: "Portuguese" }), "Math");
+  it("shows her own word for a custom category under a real subject too", () => {
+    assert.equal(
+      subjectDisplayLabel({ subject: "reading", customLabel: "Literature journal" }),
+      "Literature journal",
+    );
+  });
+
+  it("falls back to the fixed label when a real subject has no custom label", () => {
+    assert.equal(subjectDisplayLabel({ subject: "math", customLabel: null }), "Math");
   });
 });
 

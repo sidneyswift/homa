@@ -77,6 +77,53 @@ export async function updatePlannerLearningActivityDetailsAction(input: {
   return { ok: true, title: receipt.title, note: receipt.note };
 }
 
+interface TimeReceipt {
+  result: "applied" | "conflict";
+  reason: string | null;
+  activity_id: string;
+  family_id: string;
+  activity_status: "planned" | "completed";
+  duration_minutes: number | null;
+  hours_entry_ids: string[];
+  updated_at: string;
+}
+
+/**
+ * Planner: let a parent add or edit an activity's reported time herself
+ * (Carolyng feedback, 2026-09-02): "I would like there to be the option
+ * for me to add the reported time manually." The web checkbox only ever
+ * flips planned/completed and never asks for a duration, so a
+ * web-completed item otherwise logs zero Hours. Setting a duration here
+ * also marks a still-planned activity completed, in the RPC; passing
+ * null clears the reported time (and its linked Hours rows) without
+ * touching status.
+ */
+export async function setPlannerLearningActivityTimeAction(input: {
+  activityId: string;
+  durationMinutes: number | null;
+}): Promise<
+  | { ok: true; status: "planned" | "completed"; durationMinutes: number | null }
+  | { ok: false; reason: string }
+> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("set_planner_learning_activity_time", {
+    target_activity_id: input.activityId,
+    target_duration_minutes: input.durationMinutes,
+  });
+  if (error) return { ok: false, reason: error.message };
+  const receipt = (data as TimeReceipt[] | null)?.[0];
+  if (!receipt) return { ok: false, reason: "Planner did not return a save receipt." };
+  if (receipt.result === "conflict") {
+    return {
+      ok: false,
+      reason: "That time couldn't be saved: a block just like it is already on the record for that day.",
+    };
+  }
+  revalidatePath("/app/planner");
+  revalidatePath("/app/hours");
+  return { ok: true, status: receipt.activity_status, durationMinutes: receipt.duration_minutes };
+}
+
 interface DeleteReceipt {
   result: "applied";
   activity_id: string;
