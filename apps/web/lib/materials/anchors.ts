@@ -233,9 +233,10 @@ export function studioAnchorUrl(id: string): string | null {
 }
 
 /**
- * Well inside TOOL_DEADLINE.generate (240s): four anchors at the cap add
- * 40s to a call whose generation budget is 200s. A healthy fetch of a
- * roughly 100 KB JPEG from Blob is well under a second.
+ * Well inside TOOL_DEADLINE.generate (240s): generate_image loads its
+ * anchors in parallel, so the worst case adds one 10s timeout to a call
+ * whose generation budget is 200s. A healthy fetch of a roughly 100 KB
+ * JPEG from Blob is well under a second.
  */
 const ANCHOR_FETCH_TIMEOUT_MS = 10_000;
 
@@ -245,12 +246,18 @@ const loadedAnchors = new Map<string, Uint8Array>();
 /**
  * Resolves one anchor id to its verified JPEG bytes: registry lookup,
  * manifest lookup, isFleetAnchorUrl, a bounded fetch, the reference byte
- * cap, and a sha256 check against the manifest. Any failure returns null
- * (with one runtime log line, the per-turn diagnostics surface) so the
- * caller can turn it into a model-readable note instead of a thrown turn;
- * nothing here throws. Successes are memoized for the life of the isolate.
+ * cap (checked against Content-Length before the body is read, and again
+ * on the bytes), and a sha256 check against the manifest. Any failure
+ * returns null (with one runtime log line, the per-turn diagnostics
+ * surface) so the caller can turn it into a model-readable note instead
+ * of a thrown turn; nothing here throws. Only successes are memoized, for
+ * the life of the isolate. `options.timeoutMs` exists for tests that need
+ * a deterministic timeout; production callers take the default.
  */
-export async function loadStudioAnchorBytes(id: string): Promise<Uint8Array | null> {
+export async function loadStudioAnchorBytes(
+  id: string,
+  options: { timeoutMs?: number } = {},
+): Promise<Uint8Array | null> {
   const cached = loadedAnchors.get(id);
   if (cached) return cached;
   const entry = trustedManifestEntry(id);
@@ -265,9 +272,13 @@ export async function loadStudioAnchorBytes(id: string): Promise<Uint8Array | nu
   }
   try {
     const response = await fetch(entry.url, {
-      signal: AbortSignal.timeout(ANCHOR_FETCH_TIMEOUT_MS),
+      signal: AbortSignal.timeout(options.timeoutMs ?? ANCHOR_FETCH_TIMEOUT_MS),
     });
     if (!response.ok) return reject(`fetch returned HTTP ${response.status}`);
+    const declaredLength = Number(response.headers.get("content-length"));
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_REFERENCE_BYTES) {
+      return reject(`declares Content-Length ${declaredLength}, over the reference cap`);
+    }
     const bytes = new Uint8Array(await response.arrayBuffer());
     if (bytes.byteLength === 0) return reject("fetch returned no bytes");
     if (bytes.byteLength > MAX_REFERENCE_BYTES) {

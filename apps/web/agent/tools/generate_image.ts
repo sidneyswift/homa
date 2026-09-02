@@ -167,10 +167,13 @@ const generateImage = defineBoundedTool({
     for (const [index, bytes] of loadedAnchors.entries()) {
       const anchorId = anchorIds[index];
       if (!bytes) {
+        // The unknown-id branch is unreachable once the schema enum has
+        // rejected anything outside the registry; it stays as defense in
+        // depth in case the enum and the registry ever drift apart.
         return {
           generated: false,
           note: getStudioAnchor(anchorId)
-            ? `The shared anchor "${anchorId}" could not be loaded just now, so no image was generated. Call generate_image again with the same anchorIds; if it fails a second time, generate without anchorIds and say the anchor was unavailable.${anchorRetryReminder}`
+            ? `The shared anchor "${anchorId}" could not be loaded just now, so no image was generated. Call generate_image again with the same anchorIds; if it fails a second time, generate without anchorIds and say the anchor was unavailable.`
             : `Unknown material anchor "${anchorId}". Use one of: ${studioAnchorIds().join(", ")}, or omit anchorIds.`,
         };
       }
