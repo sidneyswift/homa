@@ -14,10 +14,9 @@
  * eve 0.19's build cannot inline the markdown for us. Its resolver reads
  * `SKILL.md?raw` as a literal filename (UNLOADABLE_DEPENDENCY), and
  * `with { type: "text" }` resolves the file and then hands it to the JS
- * parser (PARSE_ERROR). So the text travels as source, the same answer
- * scripts/build-material-anchors.mts reached for anchor image bytes:
- * pure, works in Next and eve build and tsx alike, no runtime filesystem
- * and no network fetch.
+ * parser (PARSE_ERROR). So the text travels as source: pure, works in
+ * Next and eve build and tsx alike, no runtime filesystem and no network
+ * fetch.
  *
  * SKILL.md stays the only place anyone edits the onboarding skill
  * (filesystem-first fleet skills, founder ruling 2026-07-15). This

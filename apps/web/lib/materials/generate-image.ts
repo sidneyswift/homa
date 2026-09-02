@@ -6,6 +6,7 @@ import {
   type UsageChannel,
 } from "../model-usage";
 import { isFamilyArtifactUrl, uploadStudioImageBytes } from "./artifact-store";
+import { MAX_REFERENCE_BYTES, MAX_REFERENCE_IMAGES } from "./reference-limits";
 
 /**
  * Image generation for the materials studio, through the Vercel AI
@@ -39,8 +40,6 @@ const GENERATION_TIMEOUT_MS = 150_000;
 const TOTAL_GENERATION_BUDGET_MS = 200_000;
 /** Do not start a fallback that cannot plausibly finish. */
 const MIN_FALLBACK_BUDGET_MS = 20_000;
-const MAX_REFERENCE_IMAGES = 4;
-const MAX_REFERENCE_BYTES = 8 * 1024 * 1024;
 
 /** GPT Image 2's five supported output sizes, named for what a page
  * designer actually reaches for. */

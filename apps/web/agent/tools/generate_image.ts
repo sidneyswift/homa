@@ -12,9 +12,9 @@ import {
   type GenerationGateAttributes,
 } from "../../lib/onboarding/generation-gate";
 import {
-  decodeStudioAnchorBytes,
   getStudioAnchor,
   listStudioAnchors,
+  loadStudioAnchorBytes,
   studioAnchorIds,
 } from "../../lib/materials/anchors";
 import { blobConfigured } from "../../lib/materials/artifact-store";
@@ -25,12 +25,19 @@ import {
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import { sendSmsProgressTextOnce } from "../../lib/sms-progress";
 
-// The fixed anchor menu, rendered once for the tool schema. The model may
-// only name an id from this list; it can never pass a URL through the
-// anchor path, so no tenant boundary is crossed (see lib/materials/anchors).
+// The fixed anchor menu, rendered once for the tool schema. The ids are
+// the enum itself, so the model can only name a registered anchor and can
+// never pass a URL through the anchor path (no tenant boundary is crossed,
+// see lib/materials/anchors); the menu adds the one line of routing each
+// id needs.
+const ANCHOR_IDS = studioAnchorIds();
+if (ANCHOR_IDS.length === 0) {
+  throw new Error("generate_image: the material anchor registry is empty");
+}
+const ANCHOR_ID_ENUM = z.enum(ANCHOR_IDS as readonly [string, ...string[]]);
 const ANCHOR_MENU = listStudioAnchors()
-  .map((anchor) => `"${anchor.id}" (${anchor.useWhen})`)
-  .join("; ");
+  .map((anchor) => `- ${anchor.id}: ${anchor.useWhen}`)
+  .join("\n");
 
 export function subjectLessonImageGenerationRestriction(
   _input: { referenceImageUrls?: readonly string[] },
@@ -81,11 +88,11 @@ const generateImage = defineBoundedTool({
         "Up to 4 URLs from THIS family's own space (find_materials previewUrl, an earlier generate_image URL, or a child's photoUrl from the family context) whose style, layout, characters, or likeness should guide the result.",
       ),
     anchorIds: z
-      .array(z.string())
+      .array(ANCHOR_ID_ENUM)
       .max(4)
       .optional()
       .describe(
-        `Fleet anchor ids: shared Homa reference images that hold the visual quality bar for a FORMAT of material. Match the MATERIAL you are building against the menu, never this one image: when the material is a menu format, pass its anchor id on every generate_image call for that material, small spot art as much as a full page. The anchor leads the reference set; still write your own prompt (your own example content and wording). Menu: ${ANCHOR_MENU}. No menu entry names the material? Omit anchorIds; never pass a near-miss.`,
+        `Fleet anchor ids: shared Homa reference images that hold the visual quality bar for a FORMAT of material. Match the MATERIAL you are building against the menu, never this one image: when the material is a menu format, pass its anchor id on every generate_image call for that material, small spot art as much as a full page. The anchor leads the reference set; still write your own prompt (your own example content and wording). No menu entry names the material? Omit anchorIds; never pass a near-miss.\nMenu (id: use when):\n${ANCHOR_MENU}`,
       ),
   }),
   async execute(input, ctx) {
@@ -144,19 +151,30 @@ const generateImage = defineBoundedTool({
       });
     }
 
-    // Resolve fleet anchor ids to trusted bytes. The model may only name an
-    // id from the fixed registry; an unknown id is a model-readable error,
-    // never a URL fetch. Family references still flow through
-    // isFamilyArtifactUrl inside generateStudioImage.
+    // Resolve fleet anchor ids to trusted bytes. The schema already limits
+    // the model to registry ids; the loader fetches each anchor's Blob URL
+    // (isFleetAnchorUrl plus a sha256 check, lib/materials/anchors) and
+    // memoizes it, so a warm isolate pays the fetch once. A load failure is
+    // a model-readable note, never a silent drop: an anchor that quietly
+    // went missing would lower the material's quality bar with no trace.
+    // Family references still flow through isFamilyArtifactUrl inside
+    // generateStudioImage.
+    const anchorIds = [...new Set(input.anchorIds ?? [])];
+    const loadedAnchors = await Promise.all(
+      anchorIds.map((anchorId) => loadStudioAnchorBytes(anchorId)),
+    );
     const anchorBytes: Uint8Array[] = [];
-    for (const anchorId of input.anchorIds ?? []) {
-      const bytes = getStudioAnchor(anchorId)
-        ? decodeStudioAnchorBytes(anchorId)
-        : null;
+    for (const [index, bytes] of loadedAnchors.entries()) {
+      const anchorId = anchorIds[index];
       if (!bytes) {
+        // The unknown-id branch is unreachable once the schema enum has
+        // rejected anything outside the registry; it stays as defense in
+        // depth in case the enum and the registry ever drift apart.
         return {
           generated: false,
-          note: `Unknown material anchor "${anchorId}". Use one of: ${studioAnchorIds().join(", ")}, or omit anchorIds.`,
+          note: getStudioAnchor(anchorId)
+            ? `The shared anchor "${anchorId}" could not be loaded just now, so no image was generated. Call generate_image again with the same anchorIds; if it fails a second time, generate without anchorIds and say the anchor was unavailable.`
+            : `Unknown material anchor "${anchorId}". Use one of: ${studioAnchorIds().join(", ")}, or omit anchorIds.`,
         };
       }
       anchorBytes.push(bytes);

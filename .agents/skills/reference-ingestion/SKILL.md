@@ -215,7 +215,7 @@ plus name, what it is, best for, subjects, ages, creation path, example activity
 
 #### 6e. Anchors are founder-gated; you propose, never ship
 
-The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` regenerates `anchor-bytes.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, and the `anchorIds` paragraph in the matching recipe file. There is no SKILL.md anchor table anymore (deleted 2026-07-25): generate_image's `anchorIds` schema menu renders from the registry and is the canonical when-to-use list, so a registry entry advertises itself. `anchors.test.ts` enforces registry/bytes parity and that the library never shrinks.
+The golden anchor pipeline is: Homa-authored JPEG at `apps/web/lib/materials/anchor-sources/<id>.jpg` (compressed, roughly 1024px longest side, 60-150KB), then `pnpm build:material-anchors` uploads it to Vercel Blob (content-addressed under `fleet/material-anchors/`, idempotent, needs `BLOB_READ_WRITE_TOKEN` from `apps/web/.env.local`) and regenerates `anchor-manifest.generated.ts` (never hand-edit it), a registry entry in `apps/web/lib/materials/anchors.ts`, and the `anchorIds` paragraph in the matching recipe file. There is no SKILL.md anchor table anymore (deleted 2026-07-25): generate_image's `anchorIds` schema menu renders from the registry and is the canonical when-to-use list, so a registry entry advertises itself. `anchors.test.ts` enforces registry/manifest/source parity (a stale manifest fails CI) and that the library never shrinks.
 
 Your ceiling: when a reference deserves a visual exemplar, write a **bench brief** into the ref JSON (`graduation.benchBrief`: what to build, which recipe, what the anchor must demonstrate). The founder produces and approves the page on `/admin/studio`; a coding session performs the four writes. The recipe file's `anchorIds` paragraph is guarded by `pnpm check:fleet-skills`, which resolves every anchorIds mention in skill markdown against the registry. Anchors also lead and share the 4-slot `generate_image` reference budget; family reference images get whatever slots anchors leave.
 
@@ -295,7 +295,7 @@ The finalizer inventories every covered Slack message, reads back the exact thre
 | Skill router (index tables only) | `apps/web/agent/skills/materials-studio/SKILL.md` |
 | Anchor images | `apps/web/lib/materials/anchor-sources/<id>.jpg` |
 | Anchor registry | `apps/web/lib/materials/anchors.ts` |
-| Anchor bytes (generated) | `apps/web/lib/materials/anchor-bytes.generated.ts` |
+| Anchor manifest (generated; the bytes live in Blob) | `apps/web/lib/materials/anchor-manifest.generated.ts` |
 | Anchor build script | `scripts/build-material-anchors.mts` |
 | Gap aliases and funnel | `apps/web/lib/materials/cosmo-funnel.ts` |
 | Activity format registry | `apps/web/agent/activity-formats.md` |

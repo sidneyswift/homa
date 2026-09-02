@@ -41,6 +41,39 @@ export function blobConfigured(): boolean {
 const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
 
 /**
+ * Where the fleet's material anchors live in the public store. Product
+ * assets, not family data: the prefix sits outside families/, so nothing
+ * that sweeps a family's artifacts (deleteFamilyBlobs, the account-deletion
+ * prefix audit) can reach it. scripts/build-material-anchors.mts is the
+ * only writer.
+ */
+export const FLEET_ANCHOR_BLOB_PATH_PREFIX = "/fleet/material-anchors/";
+
+/**
+ * True when a URL points at a fleet material anchor in our own public
+ * store. The manifest that carries these URLs is generated code, so this
+ * is defense in depth for lib/materials/anchors.ts: a hand-edited or
+ * corrupted manifest still cannot make the studio fetch an arbitrary
+ * internet URL. Same shape as isFamilyArtifactUrl, minus the tenant
+ * prefix, because anchors belong to no family.
+ */
+export function isFleetAnchorUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === "https:" &&
+      parsed.username === "" &&
+      parsed.password === "" &&
+      parsed.port === "" &&
+      parsed.hostname.endsWith(BLOB_HOST_SUFFIX) &&
+      parsed.pathname.startsWith(FLEET_ANCHOR_BLOB_PATH_PREFIX)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * True when a model-supplied URL points at THIS family's own artifact
  * space. The real tenancy risk is referencing another family's files;
  * the path prefix check closes it, and the host check keeps the studio

@@ -1,4 +1,8 @@
-import { ANCHOR_BYTES_B64 } from "./anchor-bytes.generated";
+import { createHash } from "node:crypto";
+
+import { ANCHOR_MANIFEST } from "./anchor-manifest.generated";
+import { isFleetAnchorUrl } from "./artifact-store";
+import { MAX_REFERENCE_BYTES } from "./reference-limits";
 
 /**
  * Fleet material anchors: shared, read-only reference images that the
@@ -9,9 +13,19 @@ import { ANCHOR_BYTES_B64 } from "./anchor-bytes.generated";
  *
  * The model may only choose an anchor by id from this fixed registry; it
  * can never pass a URL through this path. The tool resolves the id to
- * trusted bytes (embedded in anchor-bytes.generated.ts, regenerated from
- * the skill package by scripts/build-material-anchors.mts). Family
- * reference images keep going through isFamilyArtifactUrl untouched.
+ * trusted bytes: the JPEGs live in Vercel Blob under
+ * fleet/material-anchors/<id>-<sha12>.jpg (public, content-addressed),
+ * and anchor-manifest.generated.ts records each anchor's URL and sha256.
+ * scripts/build-material-anchors.mts uploads anchor-sources/*.jpg and
+ * writes the manifest; loadStudioAnchorBytes fetches a manifest URL only
+ * after isFleetAnchorUrl accepts it and verifies the sha256 before handing
+ * bytes on. Family reference images keep going through isFamilyArtifactUrl
+ * untouched.
+ *
+ * Isolated eval runs (lib/eval-isolation.ts) scrub write credentials but
+ * do not block network egress, and the anchor store is public, so evals
+ * read anchors from the same Blob URLs production does; no sandbox
+ * seeding is needed.
  *
  * Register mirrors the style directive's age/seriousness dial: `playful`
  * anchors carry full handmade warmth; `restrained` anchors stay clean and
@@ -195,20 +209,96 @@ export function getStudioAnchor(id: string): MaterialAnchor | undefined {
   return BY_ID.get(id);
 }
 
+type ManifestEntry = (typeof ANCHOR_MANIFEST)[string];
+
 /**
- * Decodes one anchor's embedded JPEG bytes. Returns null when the id is
- * not a registered anchor or its bytes are missing, so a caller can turn
- * an unknown id into a model-readable error instead of a thrown turn.
+ * One anchor's manifest entry, only when the id is registered AND the
+ * recorded URL passes isFleetAnchorUrl. The manifest is generated code,
+ * but the URL check stays: a hand edit or a corrupted build must never
+ * turn this path into an arbitrary fetch.
  */
-export function decodeStudioAnchorBytes(id: string): Uint8Array | null {
+function trustedManifestEntry(id: string): ManifestEntry | null {
   if (!BY_ID.has(id)) return null;
-  const b64 = ANCHOR_BYTES_B64[id];
-  if (b64 === undefined) return null;
-  const buffer = Buffer.from(b64, "base64");
-  return buffer.byteLength > 0 ? new Uint8Array(buffer) : null;
+  if (!Object.hasOwn(ANCHOR_MANIFEST, id)) return null;
+  const entry = ANCHOR_MANIFEST[id];
+  return isFleetAnchorUrl(entry.url) ? entry : null;
 }
 
-/** Every anchor id that has embedded bytes (for parity checks/tests). */
-export function embeddedAnchorIds(): readonly string[] {
-  return Object.keys(ANCHOR_BYTES_B64);
+/**
+ * The public Blob URL for one registered anchor (the founder console links
+ * to it), or null for anything that is not a registered, trusted anchor.
+ */
+export function studioAnchorUrl(id: string): string | null {
+  return trustedManifestEntry(id)?.url ?? null;
+}
+
+/**
+ * Well inside TOOL_DEADLINE.generate (240s): generate_image loads its
+ * anchors in parallel, so the worst case adds one 10s timeout to a call
+ * whose generation budget is 200s. A healthy fetch of a roughly 100 KB
+ * JPEG from Blob is well under a second.
+ */
+const ANCHOR_FETCH_TIMEOUT_MS = 10_000;
+
+/** Verified bytes per anchor id, so a warm instance fetches each once. */
+const loadedAnchors = new Map<string, Uint8Array>();
+
+/**
+ * Resolves one anchor id to its verified JPEG bytes: registry lookup,
+ * manifest lookup, isFleetAnchorUrl, a bounded fetch, the reference byte
+ * cap (checked against Content-Length before the body is read, and again
+ * on the bytes), and a sha256 check against the manifest. Any failure
+ * returns null (with one runtime log line, the per-turn diagnostics
+ * surface) so the caller can turn it into a model-readable note instead
+ * of a thrown turn; nothing here throws. Only successes are memoized, for
+ * the life of the isolate. `options.timeoutMs` exists for tests that need
+ * a deterministic timeout; production callers take the default.
+ */
+export async function loadStudioAnchorBytes(
+  id: string,
+  options: { timeoutMs?: number } = {},
+): Promise<Uint8Array | null> {
+  const cached = loadedAnchors.get(id);
+  if (cached) return cached;
+  const entry = trustedManifestEntry(id);
+  if (!entry) return null;
+
+  const reject = (reason: string): null => {
+    console.warn(`loadStudioAnchorBytes: anchor "${id}" ${reason}`);
+    return null;
+  };
+  if (entry.bytes > MAX_REFERENCE_BYTES) {
+    return reject(`is over the reference byte cap in the manifest (${entry.bytes} bytes)`);
+  }
+  try {
+    const response = await fetch(entry.url, {
+      signal: AbortSignal.timeout(options.timeoutMs ?? ANCHOR_FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return reject(`fetch returned HTTP ${response.status}`);
+    const declaredLength = Number(response.headers.get("content-length"));
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_REFERENCE_BYTES) {
+      return reject(`declares Content-Length ${declaredLength}, over the reference cap`);
+    }
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength === 0) return reject("fetch returned no bytes");
+    if (bytes.byteLength > MAX_REFERENCE_BYTES) {
+      return reject(`fetch returned ${bytes.byteLength} bytes, over the reference cap`);
+    }
+    if (bytes.byteLength !== entry.bytes) {
+      return reject(`fetch returned ${bytes.byteLength} bytes, manifest says ${entry.bytes}`);
+    }
+    const digest = createHash("sha256").update(bytes).digest("hex");
+    if (digest !== entry.sha256) return reject("sha256 does not match the manifest");
+    loadedAnchors.set(id, bytes);
+    return bytes;
+  } catch (error) {
+    return reject(
+      `fetch failed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+/** Every anchor id the manifest carries (for parity checks/tests). */
+export function manifestAnchorIds(): readonly string[] {
+  return Object.keys(ANCHOR_MANIFEST);
 }
