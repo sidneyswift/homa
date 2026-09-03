@@ -143,7 +143,7 @@ export default function HelloScreen() {
                   is cut: this sentence alone now carries the whole
                   first impression. */}
               <NativeText role="bodyLarge" tone="strong" style={{ marginTop: space.xs }}>
-                {"I help you make custom printable lesson worksheets for your kids, track their progress across national benchmarks, and save hours for your state."}
+                {"I make custom printable lessons for your kids, track their progress across national benchmarks, and help save and submit hours to your state."}
               </NativeText>
             </>
           ) : null}
@@ -172,10 +172,11 @@ export default function HelloScreen() {
               role paywall.tsx uses for its own Terms/Privacy line), so it
               takes less vertical space and needs the extra padding below
               to land the button at the same measured height regardless.
-              Label is "Continue" (founder direction 2026-09-03), not
-              "Let's talk"; testID keeps its old name, an internal hook
-              with no user-visible effect. */}
-          <Button label="Continue" size="lg" onPress={advance} testID="hello.letsGo" />
+              Label is "Let's begin!" (founder direction 2026-09-03,
+              iterated from an earlier "Continue"), not "Let's talk";
+              testID keeps its old name, an internal hook with no
+              user-visible effect. */}
+          <Button label="Let's begin!" size="lg" onPress={advance} testID="hello.letsGo" />
           {/* Confirms what tapping just did, tying the legal links to the
               action already taken rather than two bare words with
               nothing connecting them to it. */}
