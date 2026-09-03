@@ -6,6 +6,8 @@ import { z } from "zod";
 import type { RecipeChecklistItem } from "./recipe-checklist";
 import {
   buildChunkSchema,
+  buildReviewMessages,
+  type ReviewModelCall,
   planReviewChunks,
   reviewArtifact,
   REVIEW_MAX_PAGES,
@@ -420,5 +422,72 @@ describe("reviewArtifact assembly", () => {
     // null review, and both items surface as unconfirmed in plain words.
     assert.equal(review.checklistUnconfirmed.length, 2);
     assert.doesNotMatch(JSON.stringify(review.checklistUnconfirmed), /Checklist \(/);
+  });
+});
+
+describe("buildReviewMessages", () => {
+  // The anchor is a reference, never a page (2026-09-02): in one content
+  // array the reviewer merged the trailing anchor with a near-identical
+  // page and failed correct capital-D pages for the reference's lowercase
+  // section. Its own earlier message, labeled, is the boundary.
+  const base = {
+    model: "m",
+    schema: buildChunkSchema([]),
+    system: "s",
+    text: "the brief",
+    maxOutputTokens: 100,
+    abortSignal: new AbortController().signal,
+    familyId: "f",
+  };
+  const page = { mediaType: "image/jpeg", data: Buffer.from("page") };
+
+  it("puts the reference in its own message before the pages, labeled not under review", () => {
+    const messages = buildReviewMessages({
+      ...base,
+      images: [page, page],
+      reference: { title: "Anchor T", mediaType: "image/jpeg", data: Buffer.from("anchor") },
+    });
+    assert.equal(messages.length, 2);
+    const [reference, pages] = messages;
+    assert.equal(reference.content.filter((part) => part.type === "file").length, 1);
+    const note = reference.content.find((part) => part.type === "text");
+    assert.ok(note && note.type === "text");
+    assert.match(note.text, /NOT under review/);
+    assert.ok(note.text.includes("Anchor T"));
+    assert.equal(pages.content.filter((part) => part.type === "file").length, 2);
+    assert.deepEqual(pages.content[pages.content.length - 1], { type: "text", text: "the brief" });
+  });
+
+  it("sends one message of pages and brief when there is no reference", () => {
+    const messages = buildReviewMessages({ ...base, images: [page], reference: null });
+    assert.equal(messages.length, 1);
+    assert.equal(messages[0].content.length, 2);
+  });
+
+  it("hands the anchor to the runner as the reference and never among the page images", async () => {
+    const calls: ReviewModelCall[] = [];
+    await reviewArtifact(
+      {
+        familyId: "f",
+        channel: "web",
+        pages: [{ data: Buffer.from("p1"), pageNumber: 1, fresh: true }],
+        pageCount: 1,
+        brief: "b",
+        anchor: {
+          anchor: { id: "x", title: "Anchor T", data: new Uint8Array([1]), mediaType: "image/jpeg" },
+        },
+      },
+      {
+        run: async (call) => {
+          calls.push(call);
+          return { object: { pass: true, issues: [] }, usage: {} };
+        },
+        recordUsage: async () => {},
+      },
+    );
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].images.length, 1);
+    assert.equal(calls[0].reference?.title, "Anchor T");
+    assert.match(calls[0].text, /previous message/);
   });
 });
