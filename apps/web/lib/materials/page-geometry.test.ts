@@ -55,6 +55,49 @@ describe("summarizePageGeometry", () => {
     ]);
     assert.ok(Number.isFinite(page.fillPercent));
   });
+
+  it("maps the size-floor signals to inches and a rounded font size", () => {
+    // The 2026-09-02 too-small-to-trace scar: these are the numbers the
+    // size floor compares across revisions (size-floor.ts).
+    const [page] = summarizePageGeometry([
+      {
+        contentPx: 800,
+        usablePx: 912,
+        overflowPx: 0,
+        largestImagePx: { width: 5 * PX_PER_IN, height: 3.4 * PX_PER_IN },
+        largestTextPx: 47.96,
+        largestBoxPx: { width: 1.2 * PX_PER_IN, height: 1.2 * PX_PER_IN },
+      },
+    ]);
+    assert.deepEqual(page.largestImageIn, { widthIn: 5, heightIn: 3.4 });
+    assert.equal(page.largestTextPx, 48);
+    assert.deepEqual(page.largestBoxIn, { widthIn: 1.2, heightIn: 1.2 });
+  });
+
+  it("emits null signals for a measurement taken before the signals existed", () => {
+    const [page] = summarizePageGeometry([
+      { contentPx: 800, usablePx: 912, overflowPx: 0 },
+    ]);
+    assert.equal(page.largestImageIn, null);
+    assert.equal(page.largestTextPx, null);
+    assert.equal(page.largestBoxIn, null);
+  });
+
+  it("emits null for a page with nothing of a kind, never a zero box", () => {
+    const [page] = summarizePageGeometry([
+      {
+        contentPx: 800,
+        usablePx: 912,
+        overflowPx: 0,
+        largestImagePx: null,
+        largestTextPx: 0,
+        largestBoxPx: { width: 0, height: 40 },
+      },
+    ]);
+    assert.equal(page.largestImageIn, null);
+    assert.equal(page.largestTextPx, null);
+    assert.equal(page.largestBoxIn, null);
+  });
 });
 
 describe("geometryToolNotes", () => {

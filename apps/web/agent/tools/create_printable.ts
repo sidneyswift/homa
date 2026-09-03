@@ -71,6 +71,12 @@ import {
 } from "../../lib/materials/recipes.generated";
 import { buildRenderProvenance } from "../../lib/materials/render-provenance";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
+import {
+  compareSizeFloor,
+  loadRevisedPageGeometry,
+  sizeFloorAllowedNote,
+  sizeFloorRefusalNote,
+} from "../../lib/materials/size-floor";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import {
   suppressInTurnGeneration,
@@ -232,6 +238,12 @@ export const createPrintableInputSchema = z.object({
     .uuid()
     .optional()
     .describe("When this is a revision, the id of the version it replaces (from the earlier create result). Keeps the version chain intact."),
+  allowSizeReduction: z
+    .boolean()
+    .optional()
+    .describe(
+      "Only with revisesId, and only when the parent asked for smaller items on this page, or agreed after you asked her. The tool refuses a revision whose largest picture, text, or practice box came out more than a tenth smaller than the version it revises. This flag records her consent; it is never a way to clear that refusal on your own judgment. Quote her words in requestSummary.",
+    ),
   sourceFamilyAssetIds: z
     .array(z.uuid())
     .max(MAX_FAMILY_ASSET_REFERENCES)
@@ -423,6 +435,13 @@ const createPrintable = defineBoundedTool({
       return { created: false, note: subjectLessonRestriction };
     }
 
+    // The revised version's stored geometry, for the size floor below.
+    // Started here so it overlaps the source read and the render; it is
+    // family-predicated inside and never rejects, so any early return
+    // between here and the comparison leaves nothing dangling.
+    const revisedGeometryPromise = input.revisesId
+      ? loadRevisedPageGeometry({ familyId, materialId: input.revisesId })
+      : Promise.resolve(null);
     const sourceResolution = await resolveMaterialFamilySources({
       familyId,
       requestedAssetIds: input.sourceFamilyAssetIds,
@@ -733,6 +752,27 @@ const createPrintable = defineBoundedTool({
       };
     }
 
+    // The size floor (2026-09-02): a revision may not quietly shrink what
+    // a fresh page already rendered at. A letter-formation page shipped
+    // too small to trace after an overflow fix scaled its letters down;
+    // the recipe said size is a floor, and nothing enforced it. Same
+    // class as the cutoff block above: a renderer proof, never delivered,
+    // and refusing here costs one render and leaves no blob or row.
+    // allowSizeReduction is the parent's recorded consent, the only way
+    // past, and generation.sizeFloor below keeps the comparison on the
+    // record either way.
+    const freshPageNumbers = new Set(freshGeometry.map((page) => page.page));
+    const revisedGeometry = await revisedGeometryPromise;
+    const sizeFindings = revisedGeometry
+      ? compareSizeFloor(revisedGeometry, rendered.pageGeometry, freshPageNumbers)
+      : [];
+    if (sizeFindings.length > 0 && !input.allowSizeReduction) {
+      return {
+        created: false,
+        note: sizeFloorRefusalNote(sizeFindings, input.recipe ?? null),
+      };
+    }
+
     // The studio's own eyes: the reviewer sees the actual pixels of
     // every page against the brief; the agent decides what to do with
     // the verdict. A null review (disabled or unavailable) never blocks
@@ -893,6 +933,17 @@ const createPrintable = defineBoundedTool({
       // small array of numbers per page, cheap to keep, and the durable
       // counterpart to the QC verdict for later history and analysis.
       pageGeometry: rendered.pageGeometry,
+      // The size-floor comparison against the revised version, when one
+      // was possible: what shrank, and whether the parent's recorded
+      // consent let it through. A consent flag set by a model that never
+      // asked is auditable here rather than invisible.
+      sizeFloor: revisedGeometry
+        ? {
+            comparedTo: input.revisesId,
+            findings: sizeFindings,
+            allowedByParent: Boolean(input.allowSizeReduction),
+          }
+        : null,
     };
 
     // The durable record (Postgres is truth; html is what a future
@@ -1134,6 +1185,10 @@ const createPrintable = defineBoundedTool({
     });
     const geometryNoteText =
       geometryNotes.length > 0 ? ` ${geometryNotes.join(" ")}` : "";
+    // A smaller revision that the parent's consent let through is said
+    // out loud, so the record and the reply agree about what changed.
+    const sizeFloorNoteText =
+      sizeFindings.length > 0 ? ` ${sizeFloorAllowedNote(sizeFindings)}` : "";
 
     return {
       created: true,
@@ -1160,8 +1215,8 @@ const createPrintable = defineBoundedTool({
       review,
       sentByText,
       note: trustedLesson
-        ? `${deliveryNote}${reviewNote}${geometryNoteText}`
-        : `${deliveryNote}${reviewNote}${geometryNoteText} When the parent approves a version, call mark_material_final with this id.`,
+        ? `${deliveryNote}${reviewNote}${geometryNoteText}${sizeFloorNoteText}`
+        : `${deliveryNote}${reviewNote}${geometryNoteText}${sizeFloorNoteText} When the parent approves a version, call mark_material_final with this id.`,
     };
   },
 });

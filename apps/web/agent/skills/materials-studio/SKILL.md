@@ -741,6 +741,20 @@ table above governs only whether to add MORE items, so a 4-year-old's
 page still fills the sheet, with two or three giant items rather than
 eight small ones. Never pad with filler to raise the number.
 
+A revision may not shrink what a page already rendered at. When a
+revision's largest picture, text, or practice box comes out more than a
+tenth smaller than the version it revises, create_printable refuses it
+("Not sent: this revision made page 1's largest picture about 2.1in tall
+where the version it revises had it at 3.4in"). That is a measurement,
+not a verdict: a letter-formation page once shipped too small to trace
+because an overflow fix scaled the letters down and nobody asked the
+parent. Fix the problem you were solving without shrinking (another
+aspect ratio, drop something else, move content to its own page). If she
+asked for smaller, or you asked her one plain question and she agreed,
+call again with `allowSizeReduction: true` and quote her words in
+requestSummary. Never shrink silently, and never call the refusal a
+technical problem.
+
 Two rules, both from the 2026-07-27 failure
 (`plans/2026-07-27-packet-page-revision-failure.md`):
 

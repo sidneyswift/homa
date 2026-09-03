@@ -266,6 +266,14 @@ async function screenshotPagesPrintEmulated(
  * Runs under whatever media type the page is currently painting (screen,
  * same as setContent left it): a known limit shared with the rest of
  * this module's screen-vs-print divergence, named rather than hidden.
+ *
+ * The same two walks also take the size-floor signals (size-floor.ts,
+ * 2026-09-02): the largest drawn picture, the largest font size, and the
+ * largest bordered box on the page, so a later revision that quietly
+ * shrinks what the child traces can be caught by a number instead of by
+ * a parent. An IMG is measured at its DRAWN box, not its layout box:
+ * imagePageBody (page-shell.ts) uses object-fit: contain, so a
+ * letterboxed page image's layout rect overstates what is on the paper.
  */
 async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]> {
   return page.evaluate(
@@ -298,15 +306,27 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
         const usablePx = bodyRect.height - paddingTop - paddingBottom;
         const contentTop = bodyRect.top + paddingTop;
         let maxBottom = contentTop;
+        let largestTextPx = 0;
+        let largestImageArea = 0;
+        let largestImagePx: { width: number; height: number } | null = null;
+        let largestBoxArea = 0;
+        let largestBoxPx: { width: number; height: number } | null = null;
         const textWalker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
         for (let node = textWalker.nextNode(); node; node = textWalker.nextNode()) {
           if (!node.nodeValue || node.nodeValue.trim() === "") continue;
           const range = document.createRange();
           range.selectNodeContents(node);
+          let inked = false;
           for (const rect of Array.from(range.getClientRects())) {
             if (rect.width > 0 || rect.height > 0) {
               maxBottom = Math.max(maxBottom, rect.bottom);
+              inked = true;
             }
+          }
+          if (inked && node.parentElement) {
+            const fontSize =
+              Number.parseFloat(getComputedStyle(node.parentElement).fontSize) || 0;
+            if (fontSize > largestTextPx) largestTextPx = fontSize;
           }
         }
         const walker = document.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
@@ -314,7 +334,35 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
           const element = node as Element;
           const rect = element.getBoundingClientRect();
           if (rect.width <= 0 && rect.height <= 0) continue;
+          // Inline svg keeps its lowercase tag name (SVG namespace), so the
+          // picture check compares case-insensitively.
+          const tag = element.tagName.toUpperCase();
+          if (tag === "IMG") {
+            const image = element as HTMLImageElement;
+            const naturalWidth = image.naturalWidth;
+            const naturalHeight = image.naturalHeight;
+            const drawnWidth =
+              naturalHeight > 0
+                ? Math.min(rect.width, (rect.height * naturalWidth) / naturalHeight)
+                : rect.width;
+            const drawnHeight =
+              naturalWidth > 0
+                ? Math.min(rect.height, (rect.width * naturalHeight) / naturalWidth)
+                : rect.height;
+            const area = drawnWidth * drawnHeight;
+            if (area > largestImageArea) {
+              largestImageArea = area;
+              largestImagePx = { width: drawnWidth, height: drawnHeight };
+            }
+          } else if (tag === "SVG" || tag === "CANVAS") {
+            const area = rect.width * rect.height;
+            if (area > largestImageArea) {
+              largestImageArea = area;
+              largestImagePx = { width: rect.width, height: rect.height };
+            }
+          }
           let paints = REPLACED_TAGS.indexOf(element.tagName) !== -1;
+          let bordered = false;
           if (!paints) {
             const elementStyle = getComputedStyle(element);
             if (elementStyle.visibility !== "hidden") {
@@ -325,7 +373,10 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
                 (background !== "" &&
                   background !== "transparent" &&
                   !TRANSPARENT.test(background));
-              for (let index = 0; !paints && index < SIDES.length; index += 1) {
+              // The border walk runs even when the background already
+              // paints: a white card with a dashed cut line is still a
+              // bordered box for the size floor.
+              for (let index = 0; !bordered && index < SIDES.length; index += 1) {
                 const side = SIDES[index];
                 const width =
                   Number.parseFloat(
@@ -337,13 +388,21 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
                 const color = elementStyle.getPropertyValue(
                   `border-${side}-color`,
                 );
-                paints =
+                bordered =
                   width > 0 &&
                   lineStyle !== "none" &&
                   lineStyle !== "hidden" &&
                   color !== "transparent" &&
                   !TRANSPARENT.test(color);
               }
+              paints = paints || bordered;
+            }
+          }
+          if (bordered) {
+            const area = rect.width * rect.height;
+            if (area > largestBoxArea) {
+              largestBoxArea = area;
+              largestBoxPx = { width: rect.width, height: rect.height };
             }
           }
           if (!paints) continue;
@@ -362,6 +421,9 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
           contentPx: maxBottom - contentTop,
           usablePx,
           overflowPx: Math.max(0, maxBottom - pageBottom),
+          largestImagePx,
+          largestTextPx: largestTextPx > 0 ? largestTextPx : null,
+          largestBoxPx,
         };
       });
     },

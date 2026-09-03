@@ -85,7 +85,10 @@ nothing here is inferred by the model on its own):
   font-size cut would have. Solve overflow by regenerating at a different
   aspect ratio, dropping content elsewhere on the page, or splitting onto
   another page; if nothing else closes the gap, ask the parent before
-  trading size away, never trade it away silently.
+  trading size away, never trade it away silently. create_printable
+  enforces this: a revision whose largest picture, text, or box measures
+  more than a tenth smaller than the version it revises is refused until
+  `allowSizeReduction: true` records that she asked for or agreed to it.
 - **Group letters and numbers by shared strokes, not alphabet or count
   order**, when the family's curriculum specifies a teaching order (ask or
   infer it from their materials); default to straight-line letters and
