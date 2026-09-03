@@ -7,6 +7,18 @@ import {
   type UsageChannel,
 } from "../model-usage";
 import { geometryReviewBlock, type PageGeometry } from "./page-geometry";
+import type { RecipeChecklistItem } from "./recipe-checklist";
+import type {
+  ReviewAnchor,
+  ReviewAnchorLoad,
+  ReviewAnchorSkip,
+} from "./review-anchor";
+import {
+  CHECKLIST_ANSWERS,
+  verifyChecklistAnswers,
+  type ChecklistAnswer,
+  type ChecklistVerdict,
+} from "./review-checklist";
 
 /**
  * The studio's own eyes (MS-5): before a rendered page reaches the
@@ -82,6 +94,40 @@ export interface ArtifactReview {
    * checked (gh#346).
    */
   reviewedPages: number[];
+  /**
+   * The recipe checklist as the blocking chunk answered it (2026-09-02):
+   * every item with the reviewer's closed answer, joined to the item's
+   * check text so the record survives a recipe rewording, and the ids of
+   * blocking items answered no. Null when the material named no recipe
+   * or its recipe declares no checklist. Stored in generation.review, so
+   * a format's per-item pass rate is measurable per recipe.
+   */
+  checklist: {
+    recipe: string | null;
+    answers: ChecklistVerdict["answers"];
+    blockingFailures: string[];
+    /** Ids the reviewer answered more than once on the blocking chunk. */
+    duplicateIds: string[];
+  } | null;
+  /**
+   * Advisory checklist items answered no on the pages the blocking chunk
+   * judged, in plain words with no internal label: Homa relays these in
+   * one sentence, so they stay apart from the later-pages advisories.
+   */
+  checklistAdvisory: string[];
+  /**
+   * Checklist items no reviewer could settle (cannot_tell or never
+   * answered), across every chunk, deduplicated: the plain check text for
+   * a "could not confirm" sentence. Never a failure.
+   */
+  checklistUnconfirmed: string[];
+  /**
+   * Whether the reviewer was shown the format's fleet anchor beside the
+   * pages (review-anchor.ts). False never blocks anything; anchorSkipped
+   * says why, so a review made without its size reference is auditable.
+   */
+  anchorShown: boolean;
+  anchorSkipped?: ReviewAnchorSkip;
 }
 
 /** One rendered page offered to the reviewer. */
@@ -152,18 +198,118 @@ export function planReviewChunks(
   return { blocking, advisory };
 }
 
-const reviewSchema = z.object({
-  pass: z
-    .boolean()
-    .describe("true unless a parent would notice a real problem on paper"),
-  issues: z
-    // 600, not 200: the old cap cut verdicts mid-sentence (Story's
-    // failed letter page, 2026-08-21), losing the reasoning an audit
-    // of QC decisions needs. Still bounded; six issues stay plenty.
-    .array(z.string().max(600))
-    .max(6)
-    .describe("Concrete, fixable problems, empty when pass is true"),
-});
+/** What one reviewer call returns, before code verifies it. */
+export interface ChunkModelOutput {
+  pass: boolean;
+  issues: string[];
+  checklist?: ChecklistAnswer[];
+}
+
+/** One reviewer call as handed to the model: the images in order, the
+ * text that follows them, and the closed output schema. */
+export interface ReviewModelCall {
+  model: string;
+  schema: z.ZodType<ChunkModelOutput>;
+  system: string;
+  images: Array<{ mediaType: string; data: Buffer | Uint8Array }>;
+  text: string;
+  maxOutputTokens: number;
+  abortSignal: AbortSignal;
+  familyId: string;
+}
+
+export type ReviewModelRunner = (call: ReviewModelCall) => Promise<{
+  object: ChunkModelOutput;
+  usage: { inputTokens?: number; outputTokens?: number };
+}>;
+
+/** Injectable seams so the review's assembly (which chunk's findings land
+ * where, and in what words) is testable without a model or a database. */
+export interface ReviewDependencies {
+  run?: ReviewModelRunner;
+  recordUsage?: typeof recordModelUsage;
+}
+
+const defaultRunner: ReviewModelRunner = (call) =>
+  generateObject({
+    model: call.model,
+    schema: call.schema,
+    system: call.system,
+    messages: [
+      {
+        role: "user",
+        content: [
+          ...call.images.map((image) => ({
+            type: "file" as const,
+            mediaType: image.mediaType,
+            data: image.data,
+          })),
+          { type: "text" as const, text: call.text },
+        ],
+      },
+    ],
+    maxOutputTokens: call.maxOutputTokens,
+    maxRetries: 1,
+    abortSignal: call.abortSignal,
+    providerOptions: {
+      gateway: {
+        ...gatewayAttribution(call.familyId, "materials_review"),
+        disallowPromptTraining: true,
+      },
+    },
+  });
+
+/**
+ * buildChunkSchema(checklist): the reviewer's output contract for one
+ * call. The base verdict is unchanged; when the material's recipe
+ * declares a checklist, the schema adds one closed answer per item, ids
+ * drawn from the recipe (never free text), so the model chooses among
+ * yes, no, and cannot_tell and code decides what each means
+ * (review-checklist.ts). Exported for the contract test.
+ */
+export function buildChunkSchema(
+  checklist: readonly RecipeChecklistItem[],
+): z.ZodType<ChunkModelOutput> {
+  const base = {
+    pass: z
+      .boolean()
+      .describe("true unless a parent would notice a real problem on paper"),
+    issues: z
+      // 600, not 200: the old cap cut verdicts mid-sentence (Story's
+      // failed letter page, 2026-08-21), losing the reasoning an audit
+      // of QC decisions needs. Still bounded; six issues stay plenty.
+      .array(z.string().max(600))
+      .max(6)
+      .describe("Concrete, fixable problems, empty when pass is true"),
+  };
+  if (checklist.length === 0) return z.object(base);
+  const ids = checklist.map((item) => item.id) as [string, ...string[]];
+  // Permissive on purpose: no length bound on the answers array and no
+  // cap on the note. A schema failure here nulls the whole review and the
+  // page ships unchecked, so the shape only closes what must be closed
+  // (the ids and the answer enum) and review-checklist.ts absorbs the
+  // rest: duplicates recorded, missing items stored as unanswered, long
+  // notes truncated.
+  return z.object({
+    ...base,
+    checklist: z
+      .array(
+        z.object({
+          id: z.enum(ids),
+          answer: z.enum(CHECKLIST_ANSWERS),
+          note: z
+            .string()
+            .describe(
+              "For no or cannot_tell only: what you saw, one sentence, naming the page when more than one is shown. Empty for yes.",
+            ),
+        }),
+      )
+      .describe("One entry per checklist item, every id answered once.")
+      // Optional, not required: a model that drops the key must yield
+      // "unanswered" items, never a null review.
+      .optional(),
+  });
+}
 
 const REVIEW_SYSTEM = `You quality-check printable pages for homeschooling
 families before a parent sees them. Each image is an 8.5x11in printed
@@ -197,12 +343,33 @@ design air, and it is a defect at every age (founder ruling
 \`worksheet-scale-to-fill\`, 2026-07-29): the page should have been
 scaled up to reach the bottom. Say so when you see one. The fix is
 bigger type, taller answer blanks and larger pictures, never more
-exercises crammed in, so do not ask for extra content.`;
+exercises crammed in, so do not ask for extra content.
+
+When the brief carries a format checklist, it is the format's structural
+spec: answer every item by its id, counting the things it counts and
+comparing sizes against the model item on the same page rather than
+guessing, and a no names the page number when more than one page is
+shown. Answer cannot_tell only when the image genuinely cannot settle
+the question.`;
 
 interface ChunkVerdict {
   pass: boolean;
+  /** The model's own free-form issues. */
   issues: string[];
+  /** Blocking checklist items answered no, with the Checklist (<id>) label.
+   * Only the blocking chunk's copy may enter a tool result's issues list. */
+  checklistIssues: string[];
+  /** The same blocking-no items in plain words, for a chunk whose findings
+   * are relayed to the parent rather than fixed (later pages). */
+  checklistBlockingPlain: string[];
+  /** Advisory checklist items answered no, plain text, never blocking. */
+  advisory: string[];
+  /** Checklist items the reviewer could not settle or never answered:
+   * plain check text for a "could not confirm" sentence. */
+  unconfirmed: string[];
   reviewedPages: number[];
+  checklistAnswers: ChecklistVerdict["answers"];
+  duplicateIds: string[];
 }
 
 /**
@@ -230,9 +397,21 @@ async function reviewChunk(input: {
    * band is the correct remainder of a real-world card size rather than
    * a page that failed to scale up. */
   underfillNotes?: boolean;
+  /** The recipe's closed checklist (recipes.generated.ts), when the
+   * material named a recipe that declares one. Never model-supplied. */
+  checklist?: readonly RecipeChecklistItem[];
+  /** The recipe slug, for the checklist heading in the prompt. */
+  recipe?: string | null;
+  /** The format's fleet anchor, shown after the pages as a size and
+   * structure reference that is explicitly not under review. */
+  anchor?: ReviewAnchor | null;
+  run?: ReviewModelRunner;
+  recordUsage?: typeof recordModelUsage;
 }): Promise<ChunkVerdict | null> {
   if (input.pages.length === 0) return null;
 
+  const run = input.run ?? defaultRunner;
+  const recordUsage = input.recordUsage ?? recordModelUsage;
   const model = reviewModelId();
   const startedAt = Date.now();
   const controller = new AbortController();
@@ -240,52 +419,55 @@ async function reviewChunk(input: {
 
   const shownPages = input.pages;
   const shownNumbers = shownPages.map((page) => page.pageNumber);
+  const anchor = input.anchor ?? null;
+  const shownList =
+    shownNumbers.length === 1
+      ? `page ${shownNumbers[0]}`
+      : `pages ${shownNumbers.join(", ")}`;
+  const thenAnchor = anchor ? ", then one reference image" : "";
   const pageContext =
     input.pageCount > 1
-      ? `The document has ${input.pageCount} pages; you are shown ${
-          shownNumbers.length === 1
-            ? `page ${shownNumbers[0]}`
-            : `pages ${shownNumbers.join(", ")}`
-        }, in that order. Number every issue by the page number given here, not by its position among the images.\n`
-      : "";
+      ? `The document has ${input.pageCount} pages; you are shown ${shownList}${thenAnchor}, in that order. Number every issue by the page number given here, not by its position among the images.\n`
+      : anchor
+        ? `You are shown ${shownList}${thenAnchor}.\n`
+        : "";
+  const anchorContext = anchor
+    ? `The last image is Homa's reference page for this format (${anchor.title}). It is not under review. It sets the bar for structure and size: the pages under review should be at least this generous in size and at least this clear. Different letters, words, theme, or child name are expected and are not issues.\n`
+    : "";
   const geometryBlock = geometryReviewBlock(input.pageGeometry ?? [], {
     underfillNotes: input.underfillNotes,
   });
   const geometryContext = geometryBlock ? `${geometryBlock}\n` : "";
+  const checklist = input.checklist ?? [];
+  const checklistContext =
+    checklist.length > 0
+      ? `\n\nFormat checklist for "${input.recipe ?? "this format"}" (answer every item by id; yes means every page you see meets it; no means at least one shown page fails it; cannot_tell only when the image genuinely cannot settle it):\n${checklist
+          .map((item) => `- ${item.id}: ${item.check}`)
+          .join("\n")}`
+      : "";
 
   try {
-    const result = await generateObject({
+    const result = await run({
       model,
-      schema: reviewSchema,
+      schema: buildChunkSchema(checklist),
       system: REVIEW_SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: [
-            ...shownPages.map((page) => ({
-              type: "file" as const,
-              mediaType: "image/jpeg" as const,
-              data: page.data,
-            })),
-            {
-              type: "text",
-              text: `${pageContext}${geometryContext}The brief:\n${input.brief}`,
-            },
-          ],
-        },
+      images: [
+        ...shownPages.map((page) => ({ mediaType: "image/jpeg", data: page.data })),
+        // The anchor rides AFTER the pages so page numbering in the
+        // reviewer's issues stays aligned with the images it counts.
+        ...(anchor ? [{ mediaType: anchor.mediaType, data: anchor.data }] : []),
       ],
-      maxOutputTokens: 600,
-      maxRetries: 1,
+      text: `${pageContext}${anchorContext}${geometryContext}The brief:\n${input.brief}${checklistContext}`,
+      // Each checklist answer costs a few dozen tokens plus its note; the
+      // cap leaves a full eight-item answer with real notes inside the
+      // budget, because a truncated JSON object fails the schema and nulls
+      // the whole review, which ships the page unchecked.
+      maxOutputTokens: Math.min(1_800, 900 + 80 * checklist.length),
       abortSignal: controller.signal,
-      providerOptions: {
-        gateway: {
-          ...gatewayAttribution(input.familyId, "materials_review"),
-          disallowPromptTraining: true,
-        },
-      },
+      familyId: input.familyId,
     });
 
-    await recordModelUsage({
+    await recordUsage({
       familyId: input.familyId,
       surface: "materials_review",
       channel: input.channel,
@@ -296,15 +478,37 @@ async function reviewChunk(input: {
       durationMs: Date.now() - startedAt,
     });
 
+    // The model judged; code decides what its checklist answers mean.
+    // A blocking item answered no fails the chunk even when the model's
+    // own pass was true: the checklist is the format's spec, and the
+    // free-form verdict has already missed exactly these defects once.
+    const checklistVerdict = verifyChecklistAnswers(
+      checklist,
+      result.object.checklist,
+    );
     return {
-      pass: result.object.pass,
+      pass: result.object.pass && checklistVerdict.pass,
       issues: result.object.issues,
+      checklistIssues: checklistVerdict.issues,
+      checklistBlockingPlain: checklistVerdict.blockingPlain,
+      advisory: checklistVerdict.advisory,
+      unconfirmed: checklistVerdict.unconfirmed,
       reviewedPages: shownNumbers,
+      checklistAnswers: checklistVerdict.answers,
+      duplicateIds: checklistVerdict.duplicateIds,
     };
   } catch (error) {
-    if (controller.signal.aborted) return null;
+    // Both exits are logged: a silent null here reads downstream as
+    // "nothing looked at these pages", and the runtime log is the only
+    // place that says whether that was a timeout or a broken answer.
+    if (controller.signal.aborted) {
+      console.warn(
+        `reviewArtifact chunk timed out after ${REVIEW_TIMEOUT_MS}ms (pages ${shownNumbers.join(", ")} go unreviewed)`,
+      );
+      return null;
+    }
     console.error(
-      "reviewArtifact chunk failed (those pages go unreviewed):",
+      `reviewArtifact chunk failed (pages ${shownNumbers.join(", ")} go unreviewed):`,
       error instanceof Error ? error.message : "unknown",
     );
     return null;
@@ -343,7 +547,15 @@ export async function reviewArtifact(input: {
   /** False for fixed-dimension formats (flash cards); spread into every
    * chunk call below. */
   underfillNotes?: boolean;
-}): Promise<ArtifactReview | null> {
+  /** The recipe's closed checklist, resolved by the caller from
+   * recipes.generated.ts; spread into every chunk call. */
+  checklist?: readonly RecipeChecklistItem[];
+  /** The recipe slug the checklist belongs to. */
+  recipe?: string | null;
+  /** The format's anchor load (review-anchor.ts), or the reason there is
+   * none. Absent means no anchor was even sought. */
+  anchor?: ReviewAnchorLoad | null;
+}, deps: ReviewDependencies = {}): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
   if (input.pages.length === 0) return null;
 
@@ -353,11 +565,13 @@ export async function reviewArtifact(input: {
     return input.pageGeometry.filter((entry) => shown.has(entry.page));
   };
 
+  const anchor = input.anchor?.anchor ?? null;
+  const chunkInput = { ...input, anchor, run: deps.run, recordUsage: deps.recordUsage };
   const { blocking, advisory } = planReviewChunks(input.pages);
   const [blockingVerdict, ...advisoryVerdicts] = await Promise.all([
-    reviewChunk({ ...input, pages: blocking, pageGeometry: geometryFor(blocking) }),
+    reviewChunk({ ...chunkInput, pages: blocking, pageGeometry: geometryFor(blocking) }),
     ...advisory.map((pages) =>
-      reviewChunk({ ...input, pages, pageGeometry: geometryFor(pages) }),
+      reviewChunk({ ...chunkInput, pages, pageGeometry: geometryFor(pages) }),
     ),
   ]);
 
@@ -366,9 +580,18 @@ export async function reviewArtifact(input: {
   const landed = advisoryVerdicts.filter(
     (verdict): verdict is ChunkVerdict => verdict !== null,
   );
+  const checklist = input.checklist ?? [];
   return {
     pass: blockingVerdict.pass,
-    issues: blockingVerdict.issues,
+    // The only place the Checklist (<id>) label may appear: the blocking
+    // chunk's issues, which Homa fixes rather than relays.
+    issues: [...blockingVerdict.issues, ...blockingVerdict.checklistIssues],
+    // Later pages' free-form findings only, the sentence the caller
+    // prefixes "On later pages the check also found". Every checklist
+    // finding, from any chunk, goes through checklistAdvisory and
+    // checklistUnconfirmed in plain words instead, because those
+    // sentences are relayed to a parent and must carry no internal label
+    // (review of PR #1069: a six-page recipe material leaked the label).
     advisoryIssues: landed.flatMap((verdict) => verdict.issues),
     // Only pages a reviewer actually returned on. A chunk that timed
     // out leaves its pages out, so the coverage sentence stays true.
@@ -376,5 +599,33 @@ export async function reviewArtifact(input: {
       ...blockingVerdict.reviewedPages,
       ...landed.flatMap((verdict) => verdict.reviewedPages),
     ].sort((left, right) => left - right),
+    checklist:
+      checklist.length > 0
+        ? {
+            recipe: input.recipe ?? null,
+            answers: blockingVerdict.checklistAnswers,
+            blockingFailures: blockingVerdict.checklistAnswers
+              .filter((answer) => answer.severity === "blocking" && answer.answer === "no")
+              .map((answer) => answer.id),
+            duplicateIds: blockingVerdict.duplicateIds,
+          }
+        : null,
+    checklistAdvisory: [
+      ...blockingVerdict.advisory,
+      ...landed.flatMap((verdict) => [
+        ...verdict.checklistBlockingPlain,
+        ...verdict.advisory,
+      ]),
+    ],
+    checklistUnconfirmed: [
+      ...new Set([
+        ...blockingVerdict.unconfirmed,
+        ...landed.flatMap((verdict) => verdict.unconfirmed),
+      ]),
+    ],
+    anchorShown: anchor !== null,
+    ...(anchor === null
+      ? { anchorSkipped: input.anchor?.skipped ?? "no-anchor" }
+      : {}),
   };
 }

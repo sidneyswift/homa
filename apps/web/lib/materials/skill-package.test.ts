@@ -263,7 +263,13 @@ describe("the real materials-studio package", () => {
     assert.match(bingo, /no image, emoji, rebus, or color-family cue/u);
     const flashCards = recipes.find(({ slug }) => slug === "flash-cards")?.body ?? "";
     assert.match(flashCards, /use 2 by 2 cards on letter paper by default/u);
-    assert.match(flashCards, /grid-template-rows: repeat\(2, 1fr\)/u);
+    // The worked HTML must produce the binding 2.5in by 3.5in card, not
+    // `1fr` cells that stretch to the page (about 3.6in by 4.7in inside the
+    // 7.3in by 9.5in interior), so the size text and the HTML agree
+    // (review of PR #1069, 2026-09-02).
+    assert.match(flashCards, /grid-template-columns: repeat\(2, 2\.5in\)/u);
+    assert.match(flashCards, /grid-auto-rows: 3\.5in/u);
+    assert.doesNotMatch(flashCards, /repeat\(2, 1fr\)/u);
     assert.doesNotMatch(flashCards, /use 2 by 3 cards on letter paper by default/u);
   });
 

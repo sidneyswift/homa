@@ -494,6 +494,17 @@ subject rules and the child's evidence break the tie. When nothing here
 fits, design from the creation-path and design rules directly; a missing
 recipe is not a reason to force the wrong format.
 
+Pass the recipe's slug as `create_printable`'s `recipe` on every call for
+that material, first draft and every revision. The tool reads the
+recipe's reviewer checklist itself and shows the reviewer the format's
+anchor when there is one; you never retype either. A checklist item the
+reviewer answered no comes back in the issues list as
+`Checklist (<id>)`: fix that item, do not argue with it. A blocking item
+that misreads a page the recipe itself allows is a checklist bug: fix the
+page if it is wrong, otherwise say so in one plain sentence to the founder
+channel and never drop `recipe` from the call to dodge the check. Omit
+`recipe` only when no recipe fit; never pass a near-miss.
+
 **Routine and chore charts are visual schedules, even when the parent calls
 one a worksheet, checklist, morning plan, or evening plan.** Use `read_file`
 on `/workspace/skills/materials-studio/references/recipes/visual-schedule-cards.md`
@@ -627,11 +638,12 @@ at.
 
 ## Metadata discipline (what makes reuse possible)
 
-Fill create_printable's metadata every time: kind, subject, skill,
-curriculum (when the family follows one, e.g. "Handwriting Without
-Tears"), theme, characters (spelled the family's way), childId. Sloppy
-metadata means find_materials cannot find it next month, and the
-"same page for the sibling" move stops working.
+Fill create_printable's metadata every time: kind, recipe (the slug you
+built from, when one fit), subject, skill, curriculum (when the family
+follows one, e.g. "Handwriting Without Tears"), theme, characters
+(spelled the family's way), childId. Sloppy metadata means
+find_materials cannot find it next month, and the "same page for the
+sibling" move stops working.
 
 `sourceFamilyAssetIds` is provenance, not discovery metadata. Supply it only
 from exact Family Library retrieval as described above. A source-grounded
@@ -643,8 +655,10 @@ in Library.
 1. Every create_printable result is a DRAFT, and the tool runs an
    automatic quality check on the rendered pixels. Issues reported?
    Fix exactly those and call again with revisesId set to the draft's
-   id. On text, a flagged page is deliberately not sent until a version
-   passes.
+   id. An issue prefixed `Checklist (<id>)` is the recipe's own
+   structural spec answered no: a countable fact about the page, so fix
+   that exact thing rather than restyling around it. On text, a flagged
+   page is deliberately not sent until a version passes.
 2. The parent's critique is the real review. Change only what she
    named, keep everything she liked, same image URL unless the image is
    the complaint, revisesId chaining each version.
@@ -727,6 +741,22 @@ the age band, and it is the fix nearly every time. The page-density
 table above governs only whether to add MORE items, so a 4-year-old's
 page still fills the sheet, with two or three giant items rather than
 eight small ones. Never pad with filler to raise the number.
+
+A revision may not shrink what a page already rendered at. When a
+revision's largest picture, text, or practice box comes out more than a
+tenth smaller than the version it revises, create_printable refuses it
+("Not sent (size floor): in this revision, page 1's largest picture went
+from 3in x 3in to 1.5in x 4in"). That is a measurement,
+not a verdict: a letter-formation page once shipped too small to trace
+because an overflow fix scaled the letters down and nobody asked the
+parent. Fix the problem you were solving without shrinking: drop
+something else on the page, or move content to its own page. Do not
+regenerate the art at another aspect ratio to make room; that shrinks
+the drawn area and trips the same floor. If she
+asked for smaller, or you asked her one plain question and she agreed,
+call again with `allowSizeReduction: true` and quote her words in
+requestSummary. Never shrink silently, and never call the refusal a
+technical problem.
 
 Two rules, both from the 2026-07-27 failure
 (`plans/2026-07-27-packet-page-revision-failure.md`):

@@ -82,10 +82,14 @@ nothing here is inferred by the model on its own):
   unrelated problem (page overflow, an added activity, fitting a second
   letter) must never shrink the display size of the embedded image to make
   room, since that scales every letter and box down with it exactly like a
-  font-size cut would have. Solve overflow by regenerating at a different
-  aspect ratio, dropping content elsewhere on the page, or splitting onto
-  another page; if nothing else closes the gap, ask the parent before
-  trading size away, never trade it away silently.
+  font-size cut would have. Solve overflow by dropping content elsewhere on
+  the page or splitting onto another page, never by regenerating at a
+  different aspect ratio: that shrinks the drawn area and trips the size
+  floor just the same. If nothing else closes the gap, ask the parent before
+  trading size away, never trade it away silently. create_printable
+  enforces this: a revision whose largest picture, text, or box measures
+  more than a tenth smaller than the version it revises is refused until
+  `allowSizeReduction: true` records that she asked for or agreed to it.
 - **Group letters and numbers by shared strokes, not alphabet or count
   order**, when the family's curriculum specifies a teaching order (ask or
   infer it from their materials); default to straight-line letters and
@@ -102,6 +106,19 @@ nothing here is inferred by the model on its own):
   same box-and-fade-trace pattern works with a plain stroke shape (a
   straight line, a curve, a cross, an X) in place of a letter. Describe the
   same box geometry and the same fading trace rows in the prompt.
+
+The reviewer's checklist for this format. create_printable reads it from
+this block when you pass `recipe: "letter-number-formation-practice"`
+and asks the quality check to answer every item against the rendered
+page; a blocking no holds the page back as `Checklist (<id>)`.
+
+```homa-checklist
+- blocking trace-box-count: Each model box has exactly four trace boxes in one row beneath it; a separate independent write box does not count.
+- blocking trace-box-size: Every trace box is the same size as the model box, and where a letter is shown, it is as large as the model letter, never smaller.
+- blocking one-target: The page practices one target (a capital and its lowercase count as one), two targets in the recipe's two-up half-page layout, or one plain pre-writing stroke shape in place of a letter; a review target appears only in the independent write box, and a find-it row of other letters or numbers to circle is not a target.
+- advisory model-size: The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more.
+- advisory fade-order: Support fades left to right across the trace row: solid, solid, dotted, blank with a starting dot.
+```
 
 Prompt template (adapt the bracketed parts; keep every structural
 instruction explicit, the way the tested prompt did):

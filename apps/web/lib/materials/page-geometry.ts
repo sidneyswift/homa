@@ -59,6 +59,18 @@ const UNDERFILL_NOTE_MIN_BLANK_IN = 2;
  */
 const EXERCISE_ROW_IN = 1.5;
 
+/** A drawn box in CSS pixels at the render viewport. */
+export interface MeasuredBoxPx {
+  width: number;
+  height: number;
+}
+
+/** The same box in inches, the way a parent would measure the paper. */
+export interface MeasuredBoxIn {
+  widthIn: number;
+  heightIn: number;
+}
+
 /** Raw per-page pixel measurements from the browser (render-page.ts). */
 export interface SheetBodyMeasurement {
   /** Bottom edge of the lowest rendered descendant, measured from the
@@ -68,6 +80,21 @@ export interface SheetBodyMeasurement {
   usablePx: number;
   /** How far layout runs past the exact page box; cut in print. */
   overflowPx: number;
+  /**
+   * Size-floor signals (size-floor.ts, 2026-09-02): the largest picture
+   * (an IMG at its drawn object-fit box, an inline SVG, a CANVAS), the
+   * largest computed font size among the page's text runs, and the
+   * largest bordered box (a trace box, a card, a practice frame), each
+   * null when the page has none of that kind. Absent on measurements
+   * taken before the signals existed.
+   */
+  largestImagePx?: MeasuredBoxPx | null;
+  largestTextPx?: number | null;
+  largestBoxPx?: MeasuredBoxPx | null;
+  /** True when the signal computation threw in the browser; the three
+   * signals are then null and the size floor records measurement-error
+   * instead of comparing nothing in silence. */
+  measurementError?: boolean;
 }
 
 export interface PageGeometry {
@@ -79,10 +106,26 @@ export interface PageGeometry {
   overflowIn: number;
   /** contentHeightIn over the printable height; past 100 means cut off. */
   fillPercent: number;
+  /**
+   * Size-floor signals, see SheetBodyMeasurement. Null when the page has
+   * none of that kind; absent on rows stored before 2026-09-02, which the
+   * floor reads as "nothing to compare against" rather than as zero.
+   */
+  largestImageIn?: MeasuredBoxIn | null;
+  largestTextPx?: number | null;
+  largestBoxIn?: MeasuredBoxIn | null;
+  /** Present and true only when the renderer could not take the signals
+   * on this page; absent otherwise. */
+  measurementError?: boolean;
 }
 
 function roundIn(px: number): number {
   return Math.round((px / PX_PER_IN) * 100) / 100;
+}
+
+function boxIn(box: MeasuredBoxPx | null | undefined): MeasuredBoxIn | null {
+  if (!box || !(box.width > 0) || !(box.height > 0)) return null;
+  return { widthIn: roundIn(box.width), heightIn: roundIn(box.height) };
 }
 
 /** "0.4", "5.1", "3" (never "3.0"): inches the way a person says them. */
@@ -101,11 +144,17 @@ export function summarizePageGeometry(
   return measurements.map((measurement, index) => {
     const usablePx = measurement.usablePx > 0 ? measurement.usablePx : 1;
     const contentPx = Math.max(0, measurement.contentPx);
+    const textPx = measurement.largestTextPx;
     return {
       page: index + 1,
       contentHeightIn: roundIn(contentPx),
       overflowIn: roundIn(Math.max(0, measurement.overflowPx)),
       fillPercent: Math.round((contentPx / usablePx) * 100),
+      largestImageIn: boxIn(measurement.largestImagePx),
+      largestTextPx:
+        typeof textPx === "number" && textPx > 0 ? Math.round(textPx * 10) / 10 : null,
+      largestBoxIn: boxIn(measurement.largestBoxPx),
+      ...(measurement.measurementError ? { measurementError: true } : {}),
     };
   });
 }

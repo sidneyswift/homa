@@ -469,6 +469,7 @@ describe("trusted printable lesson provenance", () => {
       {
         title: "Short-vowel practice",
         kind: "worksheet",
+        recipe: null,
         skill: "Reads short-vowel words",
         subject: "literacy",
         curriculum: null,
@@ -490,5 +491,58 @@ describe("trusted printable lesson provenance", () => {
         }),
       false
     );
+  });
+
+  it("carries the recipe slug into the receipt as provenance", () => {
+    // generation->'input'->>'recipe' is how the studio measures each
+    // format; it must survive from the model's input to the stored row.
+    const modelInput = createPrintableInputSchema.parse({
+      title: "Sight word cards",
+      kind: "flashcards",
+      recipe: "flash-cards",
+      html: "<main><p>the and said was you they of to look come</p></main>",
+    });
+    const receipt = buildPrintableGenerationInput(modelInput, "html", {
+      channel: "web",
+    });
+    assert.equal(receipt.recipe, "flash-cards");
+    assert.throws(
+      () => createPrintableInputSchema.parse({ title: "x", recipe: "not-a-recipe", html: "<p>enough html to pass the minimum length</p>" }),
+      "a slug outside the generated registry never parses",
+    );
+  });
+
+  it("refuses allowSizeReduction without a revision and the parent's words on the record", () => {
+    // Code cannot verify consent, but it can refuse the flag with nothing
+    // behind it: the size floor only applies to a revision, and the
+    // parent's ask has to be quoted beside the flag.
+    const base = {
+      title: "Letter B, smaller",
+      html: "<main><p>trace the letter B four times in a row</p></main>",
+      allowSizeReduction: true,
+    };
+    assert.equal(createPrintableInputSchema.safeParse(base).success, false, "no revisesId");
+    assert.equal(
+      createPrintableInputSchema.safeParse({ ...base, revisesId: MATERIAL_ID }).success,
+      false,
+      "no requestSummary",
+    );
+    assert.equal(
+      createPrintableInputSchema.safeParse({
+        ...base,
+        revisesId: MATERIAL_ID,
+        requestSummary: "smaller",
+      }).success,
+      false,
+      "requestSummary too short to be her words",
+    );
+    const accepted = createPrintableInputSchema.safeParse({
+      ...base,
+      revisesId: MATERIAL_ID,
+      requestSummary: "She asked: can the letters be a bit smaller so two fit per row?",
+    });
+    assert.equal(accepted.success, true);
+    const message = JSON.stringify(createPrintableInputSchema.safeParse(base).error?.issues ?? []);
+    assert.match(message, /allowSizeReduction needs revisesId/);
   });
 });

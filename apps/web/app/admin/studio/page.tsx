@@ -6,12 +6,14 @@ import { requireFounder } from "../../../lib/admin/gate";
 import { familyDisplayName, timeAgo } from "../../../lib/admin/format";
 import { readCosmoFunnel, type CosmoFunnelView } from "../../../lib/admin/cosmo-data";
 import {
+  getRecipeUsageRollup,
   getStudioLedger,
   getStudioOutputStats,
   listSandboxFamilies,
   listSkillRecipeSlugs,
   readSkillPackage,
   type FleetMaterialRow,
+  type RecipeUsageRollup,
   type StudioOutputStats,
   type StudioRunRow,
 } from "../../../lib/admin/studio-data";
@@ -402,6 +404,87 @@ function CosmoFunnel({
   );
 }
 
+/**
+ * Which recipe each recent material recorded (create_printable's recipe
+ * input, stored as generation.input.recipe) and how many passed the
+ * quality check. Every shipped recipe rows in, zero included: a format
+ * nobody builds from is a fact about the library, not a missing row.
+ */
+function RecipeUsageTable({ usage }: { usage: RecipeUsageRollup }) {
+  const used = usage.rows.filter((row) => row.made > 0);
+  const unused = usage.rows.length - used.length;
+  return (
+    <div className="rounded-[var(--homa-radius-control)] border border-border-subtle bg-card p-4">
+      <p className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-subtle">
+        Recipe use · last {usage.windowDays} days
+      </p>
+      <p className="mt-1 text-[0.76rem] text-muted">
+        The recipe each material recorded at creation, how many of those
+        versions passed the quality check, and how many no check reached at
+        all (a timed-out review is not a failure). Could-not-tell and
+        unanswered count checklist items the reviewer did not settle.
+      </p>
+      {used.length === 0 ? (
+        <p className="mt-2 text-[0.8rem] text-muted">
+          No material in this window recorded a recipe yet.
+        </p>
+      ) : (
+        <div className="mt-2 overflow-x-auto">
+          <table className="w-full text-[0.78rem]">
+            <thead>
+              <tr className="border-b border-border-subtle text-left">
+                <th className="py-1.5 pr-3 font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Recipe
+                </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Made
+                </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Passed
+                </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Unchecked
+                </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Could not tell
+                </th>
+                <th className="py-1.5 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Unanswered
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...used, ...usage.unknown].map((row) => (
+                <tr key={row.recipe} className="border-b border-border-subtle">
+                  <td className="py-1.5 pr-3 font-mono text-[0.74rem] text-body">
+                    {row.recipe}
+                    {usage.unknown.includes(row) ? (
+                      <span className="ml-2 font-sans text-[0.7rem] text-subtle">
+                        (no shipped recipe by this name)
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.made}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.passed}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.unchecked}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.cannotTell}</td>
+                  <td className="py-1.5 text-right tabular-nums text-body">{row.unanswered}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className="mt-2 text-[0.74rem] text-subtle">
+        {unused} of {usage.rows.length} shipped recipes unused in this window
+        {" · "}
+        {usage.unattributed} material{usage.unattributed === 1 ? "" : "s"} recorded
+        no recipe
+      </p>
+    </div>
+  );
+}
+
 export default async function AdminStudioPage({
   searchParams,
 }: {
@@ -420,6 +503,9 @@ export default async function AdminStudioPage({
   // Recipes ship as sibling files now, not SKILL.md sections, so gap
   // coverage matches against both the section headings and the recipe slugs.
   const recipeSlugs = await listSkillRecipeSlugs();
+  // Which recipe each recent material recorded, zero-filled against the
+  // shipped slugs (one pooler read, still sequential).
+  const recipeUsage = await getRecipeUsageRollup(recipeSlugs);
   // Filesystem, not the pooler: safe after the db reads.
   const cosmo = await readCosmoFunnel([
     ...(skillPackage?.sections ?? []),
@@ -657,6 +743,8 @@ export default async function AdminStudioPage({
                 {skillPackage.approaches.join(", ")}
               </p>
             </div>
+
+            <RecipeUsageTable usage={recipeUsage} />
           </div>
         )}
       </div>

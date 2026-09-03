@@ -472,6 +472,112 @@ export async function getStudioOutputStats(): Promise<StudioOutputStats> {
   };
 }
 
+export const RECIPE_USAGE_WINDOW_DAYS = 30;
+
+export interface RecipeUsageRow {
+  recipe: string;
+  /** Materials in the window whose create_printable call recorded this
+   * recipe (generation->'input'->>'recipe'). */
+  made: number;
+  /** Of those, how many the blocking quality check passed. */
+  passed: number;
+  /** Of those, how many no review reached at all (off, timed out, or a
+   * schema failure). Kept apart from failures on purpose: a timed-out
+   * review is not a verdict against the format. */
+  unchecked: number;
+  /** Checklist items across those materials the reviewer answered
+   * cannot_tell, and items it never returned (unanswered). */
+  cannotTell: number;
+  unanswered: number;
+}
+
+export interface RecipeUsageRollup {
+  windowDays: number;
+  /** One row per shipped recipe slug, zero-filled so an unused recipe
+   * shows as zero instead of vanishing; busiest first, then by slug. */
+  rows: RecipeUsageRow[];
+  /** Recipes materials recorded that no shipped file matches (renamed or
+   * deleted since), kept visible rather than folded into the zeros. */
+  unknown: RecipeUsageRow[];
+  /** Materials in the window that recorded no recipe at all. */
+  unattributed: number;
+}
+
+/**
+ * Per-recipe output in the last 30 days, joined against the shipped slugs.
+ * The measurement the recipe provenance field exists for (2026-09-02): a
+ * format whose pages keep failing review is invisible without a column
+ * naming which recipe produced each material. Founder-console aggregate
+ * across families on purpose (adminDb, never a family-facing path).
+ */
+export async function getRecipeUsageRollup(
+  shippedSlugs: readonly string[],
+): Promise<RecipeUsageRollup> {
+  const sql = adminDb();
+  const rows = await sql<
+    {
+      recipe: string | null;
+      made: number;
+      passed: number;
+      unchecked: number;
+      cannot_tell: number;
+      unanswered: number;
+    }[]
+  >`
+    select m.generation->'input'->>'recipe' as recipe,
+           count(*)::int as made,
+           count(*) filter (where m.generation->'review'->>'pass' = 'true')::int as passed,
+           count(*) filter (where m.generation->'review'->>'pass' is null)::int as unchecked,
+           coalesce(sum((select count(*)
+                         from jsonb_array_elements(coalesce(m.generation->'review'->'checklist'->'answers', '[]'::jsonb)) a
+                         where a->>'answer' = 'cannot_tell')), 0)::int as cannot_tell,
+           coalesce(sum((select count(*)
+                         from jsonb_array_elements(coalesce(m.generation->'review'->'checklist'->'answers', '[]'::jsonb)) a
+                         where a->>'answer' = 'unanswered')), 0)::int as unanswered
+    from public.materials m
+    where m.created_at >= now() - make_interval(days => ${RECIPE_USAGE_WINDOW_DAYS}::int)
+      and m.deleted_at is null
+    group by 1
+  `;
+  const byRecipe = new Map<string, RecipeUsageRow>();
+  let unattributed = 0;
+  for (const row of rows) {
+    if (row.recipe === null) {
+      unattributed += row.made;
+      continue;
+    }
+    byRecipe.set(row.recipe, {
+      recipe: row.recipe,
+      made: row.made,
+      passed: row.passed,
+      unchecked: row.unchecked,
+      cannotTell: row.cannot_tell,
+      unanswered: row.unanswered,
+    });
+  }
+  const shipped = new Set(shippedSlugs);
+  const byBusiest = (left: RecipeUsageRow, right: RecipeUsageRow) =>
+    right.made - left.made || left.recipe.localeCompare(right.recipe);
+  const empty = (slug: string): RecipeUsageRow => ({
+    recipe: slug,
+    made: 0,
+    passed: 0,
+    unchecked: 0,
+    cannotTell: 0,
+    unanswered: 0,
+  });
+  return {
+    windowDays: RECIPE_USAGE_WINDOW_DAYS,
+    rows: [...shipped]
+      .map((slug) => byRecipe.get(slug) ?? empty(slug))
+      .sort(byBusiest),
+    unknown: [...byRecipe.values()]
+      .filter((row) => !shipped.has(row.recipe))
+      .sort(byBusiest),
+    unattributed,
+  };
+}
+
 export interface SkillPackageView {
   /** The frontmatter description, the skill's routing contract. */
   description: string;
