@@ -526,6 +526,7 @@ sheet, never a fan-out of replacement icons.
 | Notes-and-practice bundle | pair a guided-notes page with a practice page (teach, then do) | notes-and-practice-bundle |
 | Matching / visual discrimination | build early visual matching and sorting on one preschool page | matching-visual-discrimination |
 | Number practice page | focus one numeral with trace, ten-frame, count, and color activities | number-practice-page |
+| Counting and manipulative mat | be a laminate-and-reuse surface where the child places real one-inch counters on numbered spots, a five- or ten-frame, or part-part-whole zones, with nothing written; not a page that ends in a number sentence or answer box (singapore-workbook-page), not dough pressed into a numeral's shape (playdough-mat); variant rules in counting-and-manipulative-mat.variants | counting-and-manipulative-mat |
 | Name tracing page | put the child's name on real three-line writing guides, dotted trace fading to empty lines | name-tracing-page |
 | One-page mini book | fold one sheet into an 8-page book (needs exact panel order) | one-page-mini-book |
 | Unit study packet | bundle 8 to 12 activities on one theme into a multi-page packet | unit-study-packet |
@@ -561,6 +562,7 @@ sheet, never a fan-out of replacement icons.
 | Fraction maze escape | compare and order fractions by tracing a path through a grid | fraction-maze-escape |
 | Decimal path puzzle | order decimals by tracing the correct path through nodes | decimal-path-puzzle |
 | Daily rhythm cards | make cut-apart cards to build a visual daily schedule | daily-rhythm-cards |
+| Daily calendar and weather board | let the child circle today's day, month, date, season, and weather in place on one reusable board with no questions and no right answer; not a routine or chore sequence (visual-schedule-cards owns that) and not calendar-reading questions (chart-and-graph-skill-practice owns that); variant rules in daily-calendar-weather-board.variants | daily-calendar-weather-board |
 | Child-assisted recipe card | separate adult-only preparation from a child's picture-supported cooking jobs | child-assisted-recipe-card |
 | Activity pack | put four different mini-activities on one theme in quadrants | activity-pack |
 | Singapore math workbook page | teach number sense through the concrete-pictorial-abstract progression | singapore-workbook-page |
@@ -571,7 +573,8 @@ sheet, never a fan-out of replacement icons.
 | Chant and rhyme card | print a traditional chant, nursery rhyme, or fingerplay as a large-type say-aloud card with leader/everyone and clap cues | chant-and-rhyme-card |
 | Nature observation journal | record the child's own outdoor discovery, not Homa-supplied reference art | nature-observation-journal |
 | Letter & number formation practice | drill one letter or digit through its own strokes with a labeled model, fading trace boxes, and an independent write box | letter-number-formation-practice |
-| Art project instructions | pair a materials list with numbered steps for one hands-on art or craft project, a bare technique-reference card, or a published science textbook's "Investigate" activity | art-project-instructions |
+| Giant letter art page | give one page-filling thick-outline letter or digit as a craft canvas to decorate, cut out, and keep in an alphabet portfolio; not a stroke drill, not stamp circles, not a laminated dough mat, not a coloring scene (letter-number-formation-practice, dot-marker-activity, playdough-mat, coloring-page own those); variant geometry and the image-direct template in giant-letter-art-page.variants | giant-letter-art-page |
+| Art project instructions | pair a materials list with numbered steps for one hands-on art or craft project, a bare technique-reference card, or a published science textbook's "Investigate" activity; or hand a parent the setup, the words to say, and the learning connection for an open-play activity she runs (a sensory bin, a gross-motor game, a learning-center station); variant rules in art-project-instructions.variants | art-project-instructions |
 | Then and now comparison | compare something from the past against today in two labeled panels with a reflection question | then-and-now-comparison |
 | Size attribute comparison page | compare two or three items along one physical attribute and circle, color, or draw the answer | size-attribute-comparison-page |
 | Pattern extension practice | copy, continue, choose, or create a simple repeating AB pattern | pattern-extension-practice |
@@ -581,6 +584,7 @@ sheet, never a fan-out of replacement icons.
 | Biography timeline page | show 5-8 chronological events in a real person's life, or an invention's progression, as connected labeled boxes | biography-timeline-page |
 | Chart and graph skill practice | teach one concrete data-reading skill (calendar, timeline, bar graph, diagram) with a worked example plus practice questions | chart-and-graph-skill-practice |
 | Lesson comprehension check | close a taught lesson with 2 recall questions plus 1 open think-and-share question | lesson-comprehension-check |
+| Illustrated teaching page | teach one thing the child asked about: a question headline, one illustration, three or four sentences in Homa's words, one check; the page she reads first; not the closer for a lesson already taught (lesson-comprehension-check owns that) and not a diagram to label (labeled-anatomy-diagram owns that); variant rules in illustrated-teaching-page.variants | illustrated-teaching-page |
 | Magic square puzzle | drill addition fluency in a self-checking grid where every row, column, and diagonal sums to the same target | magic-square-puzzle |
 | Reader theater script | build oral reading fluency through a multi-character performance script with assigned roles, choral refrains, and repeated reading across sessions | reader-theater-script |
 

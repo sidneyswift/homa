@@ -35,7 +35,13 @@ setup, the child does the hands-on part), using the toddler stat-and-icon
 variant below instead of the reflection prompt. And it covers a family
 science-experiment book's recurring numbered-experiment page (ages 4-12,
 household materials, numbered steps, observe what happens), using the
-experiment fact-box variant below.
+experiment fact-box variant below. And it covers a play-based or
+story-as-hub program's parent-run activity (ages 2-8: a sensory bin, a
+gross-motor game, a building challenge, a learning-center station the
+parent sets up and talks through while the child plays with real
+objects), using the parent activity card variant in this recipe's
+variants file, which is written to the parent and carries no child
+sequence.
 
 Hybrid path by default: generate_image for a small inspiration thumbnail
 showing the finished example, the technique in progress, or the art
@@ -134,6 +140,11 @@ Design patterns (all binding for art-project-instructions):
   end the final step on an observation question ("Which one lands first?"
   "What do you notice after a week?") instead of announcing the result,
   so the child observes before being told.
+- **Parent activity card variant**: read
+  `/workspace/skills/materials-studio/references/recipes/art-project-instructions.variants.md`
+  before building a parent-run open-play card; it drops the name line,
+  adds a badge row, setup steps, quoted play prompts, and a
+  learning-connection box, and ships every page as `parent_guide`.
 
 ```html
 <style>
