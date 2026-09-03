@@ -1,5 +1,13 @@
 # Flash cards
 
+Golden anchor: pass `anchorIds: ["flash-cards"]` to generate_image so
+the output matches the Homa flash card bar (2 by 2 grid of tall rounded
+cards with dashed cut borders, one huge charcoal prompt centered per
+card, tiny gray deck id at each card's bottom-left, a Name line header
+with one child instruction, a parent note box filling the bottom). Write
+your own prompt with your own content; the anchor sets the visual bar,
+not the specifics.
+
 A cut-apart deck for quick retrieval practice. Each card carries one exact
 prompt, with any cue or answer kept on the reverse or in a parent key. The
 same physical format works for vocabulary, math facts, symbols, and phonics.

@@ -1,5 +1,11 @@
 # Phonics sound card game
 
+Golden anchor: pass `anchorIds: ["phonics-sound-card-game"]` to
+generate_image so the output matches the Homa phonics sound card game
+bar (a cut-apart page of word cards forming closed pairs or families by
+one taught sound-spelling relationship). Write your own prompt with your
+own content; the anchor sets the visual bar, not the specifics.
+
 A cut-apart matching game where cards form closed pairs or families by one
 taught sound-spelling relationship. The child reads each card, then uses the
 game's exact match rule to keep a pair or set.

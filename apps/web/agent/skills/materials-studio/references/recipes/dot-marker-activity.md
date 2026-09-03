@@ -1,5 +1,12 @@
 # Dot-marker activity
 
+Golden anchor: pass `anchorIds: ["dot-marker-activity"]` to
+generate_image so the output matches the Homa dot-marker activity bar
+(building a dot-marker / bingo-dauber stamping page where large empty
+circles form a letter, number, or shape for ages 2-4). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 Pages with large circles (1"+ diameter) for dot marker / bingo dauber
 stamping. Letters, numbers, or shapes formed by circle arrangements
 that toddlers fill in.

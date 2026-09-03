@@ -1,5 +1,12 @@
 # Magic square puzzle
 
+Golden anchor: pass `anchorIds: ["magic-square-puzzle"]` to
+generate_image so the output matches the Homa magic square puzzle bar
+(3x3 grid, some givens, one target sum stated once, faint diagonal
+hints, optional historical aside, no decoration). Write your own prompt
+with your own content; the anchor sets the visual bar, not the
+specifics.
+
 An n-by-n grid (commonly 3x3 or 4x4) where the child fills in missing
 numbers so every row, every column, AND both diagonals sum to the same
 target. Some cells are given, some blank.

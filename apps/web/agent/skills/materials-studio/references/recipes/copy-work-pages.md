@@ -1,5 +1,14 @@
 # Copy-work pages
 
+Golden anchor: pass `anchorIds: ["copy-work-pages"]` to generate_image
+so the output matches the Homa copy-work bar (model passage in a
+thin-bordered rounded box at the top with an italic attribution, exactly
+four tall empty three-line guide rows with solid top and baseline and a
+dashed midline, cream paper with brown and charcoal ink, a Name line in
+the header, one pencil and one star in the corners only). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 Handwriting practice using curated quotes, poems, or literature passages.
 Model text at top, practice lines below. Print and cursive versions.
 

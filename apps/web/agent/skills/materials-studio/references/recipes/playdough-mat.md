@@ -1,5 +1,14 @@
 # Playdough mat
 
+Golden anchor: pass `anchorIds: ["playdough-mat"]` to generate_image so
+the output matches the Homa playdough mat bar (two to four huge hollow
+letters or shapes with one uniform quarter-inch charcoal outline, a
+white rounded play panel on cream paper, a large "Playdough Mat" plus
+concept header with a Name line, one child-facing instruction line, a
+small finished-playdough model in one corner). Write your own prompt
+with your own content; the anchor sets the visual bar, not the
+specifics.
+
 Large outline shapes or letters designed as a surface for playdough.
 Child places playdough on shapes to form them. Designed for
 lamination and repeated use.

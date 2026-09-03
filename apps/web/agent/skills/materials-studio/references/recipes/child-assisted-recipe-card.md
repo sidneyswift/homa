@@ -1,5 +1,14 @@
 # Child-assisted recipe card
 
+Golden anchor: pass `anchorIds: ["child-assisted-recipe-card"]` to
+generate_image so the output matches the Homa recipe card bar (plain
+title with makes/time facts and one outcome line, an ingredients box
+beside a single warm-gray ADULT FIRST box with ADULT-labeled lines, a
+2x2 grid of four large numbered CHILD step cards each with one one-color
+icon and a bold verb, two tiny talk chips, then a Serve and Clean box
+over the grown-up footer). Write your own prompt with your own content;
+the anchor sets the visual bar, not the specifics.
+
 A one-page cooking guide that gives the adult the whole recipe while making
 the child's real jobs unmistakable. Adult-only preparation and safety checks
 stay separate from the picture-supported child sequence, so a preschooler can

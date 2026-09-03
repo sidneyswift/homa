@@ -1,5 +1,14 @@
 # Artist / composer study card
 
+Golden anchor: pass `anchorIds: ["artist-composer-study-card"]` to
+generate_image so the output matches the Homa artist study card bar
+(small palette-icon header tag with a Name line, one huge bold name
+banner with an accent swash, a single scalloped empty artwork frame
+beside an empty 'Where they were from' circle and small favorite-work
+box, one wide dotted-line reflection box with a stem sentence filling
+the bottom). Write your own prompt with your own content; the anchor
+sets the visual bar, not the specifics.
+
 A Charlotte Mason picture-study and composer-study portfolio card. One
 card per artist or composer, reused week after week across a study
 rotation: name banner, a frame for the artwork or a listening icon, a

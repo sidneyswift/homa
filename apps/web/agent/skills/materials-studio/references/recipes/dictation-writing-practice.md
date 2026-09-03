@@ -1,5 +1,14 @@
 # Dictation writing practice
 
+Golden anchor: pass `anchorIds: ["dictation-writing-practice"]` to
+generate_image so the output matches the Homa dictation child-page bar
+(a title-plus-Name/Date header row, one direction line, five big
+numbered solid writing lines, a taller two-line sentence area, a rounded
+open-response box with faint ruled lines filling the sheet to the
+bottom, pencil and star motifs only in the corners). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 A short packet where a parent reads exact words and one original sentence,
 the child writes what they hear, and both compare the work with a closed key.
 An optional final prompt turns talk about a just-read text into a brief

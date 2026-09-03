@@ -1,5 +1,12 @@
 # Grapheme marking practice
 
+Golden anchor: pass `anchorIds: ["grapheme-marking-practice"]` to
+generate_image so the output matches the Homa grapheme marking practice
+bar (read a word, underline the letters for each sound, one modeled
+example, six to ten practice rows on generous baselines). Write your own
+prompt with your own content; the anchor sets the visual bar, not the
+specifics.
+
 A precise word-marking page where the child reads a word and marks the letter
 or letter group representing each sound. It makes grapheme boundaries visible
 without turning the page into a broad spelling test.

@@ -1,5 +1,14 @@
 # Biography timeline page
 
+Golden anchor: pass `anchorIds: ["biography-timeline-page"]` to
+generate_image so the output matches the Homa biography timeline bar
+(one solid horizontal timeline arrow running through six identical tall
+rounded event boxes, a charcoal year pill at the top of each box, a
+square line-art illustration frame with one light color accent below it,
+a one-sentence caption beneath, a bold full-name title banner with a
+Name line, cream paper with warm brown ink). Write your own prompt with
+your own content; the anchor sets the visual bar, not the specifics.
+
 A chronological strip of 5-8 labeled event boxes, each pairing a year or
 age with a one-line event and a small illustration, so a child can see a
 real person's life, or a real invention's development, unfold in order

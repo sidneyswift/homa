@@ -1,5 +1,13 @@
 # Comic narrative math page
 
+Golden anchor: pass `anchorIds: ["comic-narrative-math-page"]` to
+generate_image so the output matches the Homa comic narrative math page
+bar (a 2x2 comic strip where two original characters talk a concept
+through in speech bubbles, closing in a visually distinct STOP AND TRY
+IT box whose question reuses the same characters and scenario). Write
+your own prompt with your own content; the anchor sets the visual bar,
+not the specifics.
+
 A page formatted as a short comic strip: 2-4 sequential panels where one or
 two simple illustrated characters trade short speech-bubble dialogue that
 walks through a concept conversationally, ending in a visually separated

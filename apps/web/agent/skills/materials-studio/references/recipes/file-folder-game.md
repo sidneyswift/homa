@@ -1,5 +1,11 @@
 # File-folder game
 
+Golden anchor: pass `anchorIds: ["file-folder-game"]` to generate_image
+so the output matches the Homa file-folder game bar (a board page with
+labeled dashed drop zones plus a matching page of same-size cut-out
+pieces, glued inside a manila folder). Write your own prompt with your
+own content; the anchor sets the visual bar, not the specifics.
+
 Two pages designed to be glued inside a manila file folder: the left page
 is a themed board with labeled zones, the right page holds moveable
 pieces the child places on the board (or a second board). Matching money

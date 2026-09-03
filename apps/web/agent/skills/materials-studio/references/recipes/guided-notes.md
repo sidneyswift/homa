@@ -1,5 +1,13 @@
 # Guided notes
 
+Golden anchor: pass `anchorIds: ["guided-notes"]` to generate_image so
+the output matches the Homa guided-notes bar (narrow bold key-term
+column beside a wide notes column with inline fill-in blanks, brown
+section labels for review, new idea, and stretch, thin rules between
+rows, a Name/Date/Topic header, and a full-width summary box with
+writing lines at the bottom). Write your own prompt with your own
+content; the anchor sets the visual bar, not the specifics.
+
 Two-column Cornell-style notes page: main-ideas/questions column on
 left, notes/examples column on right. Progressive scaffolding from
 review to new concept. Standalone version of the notes page from the

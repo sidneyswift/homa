@@ -1,5 +1,14 @@
 # Name tracing page
 
+Golden anchor: pass `anchorIds: ["name-tracing-page"]` to generate_image
+so the output matches the Homa name tracing bar (seven evenly spaced
+three-line guide rows with a centered dashed midline, three
+dotted-outline name rows fading to two pale-fill rows then two empty
+rows, letters pinned to the baseline with descenders dropping below it,
+one green starting dot on the first row only, one short warm header and
+corner-only motifs). Write your own prompt with your own content; the
+anchor sets the visual bar, not the specifics.
+
 The child's own name (or a loved word) repeated down the page on real
 three-line writing guides, traced letters fading to empty lines. The
 single most requested first handwriting page, and the format a

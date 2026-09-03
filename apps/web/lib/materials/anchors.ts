@@ -191,6 +191,374 @@ const REGISTRY: readonly MaterialAnchor[] = [
     register: "playful",
     mediaType: JPEG,
   },
+  {
+    id: "art-project-instructions",
+    title: "Art project instructions page",
+    useWhen:
+      "building an art, craft, or hands-on science project page with a materials list, numbered steps, and an optional inspiration thumbnail or reflection box",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "artist-composer-study-card",
+    title: "Artist study portfolio card",
+    useWhen:
+      "building an artist, composer, or inventor study portfolio card with a name banner, blank artwork frame, 'where they were from' circle, favorite-work box, and stem-sentence reflection box",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "biography-timeline-page",
+    title: "Biography timeline page",
+    useWhen:
+      "building a biography or invention-progression timeline page with 5-8 connected event boxes",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "chant-and-rhyme-card",
+    title: "Chant and rhyme card",
+    useWhen:
+      "building a read-aloud chant, rhyme, or fingerplay performance card with cue chips and a parent footer",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "chart-and-graph-skill-practice",
+    title: "Reading a bar graph practice page",
+    useWhen:
+      "building a one-skill chart or graph reading page (bar graph, calendar, timeline, or plain labeled diagram) with a small worked example, a larger practice display, and 2-4 questions answered from the display",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "checklist-assessment",
+    title: "Readiness checklist page",
+    useWhen:
+      "building a parent-facing whole-child readiness or observation checklist with domain headers and Not Yet / Sometimes / Consistently columns",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "child-assisted-recipe-card",
+    title: "Child-assisted recipe card",
+    useWhen:
+      "building a one-page cooking guide with an ADULT FIRST safety strip and picture-supported numbered CHILD steps",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "circle-diagram-two-set-sort",
+    title: "Two-circle Venn sort page",
+    useWhen:
+      "building a two-circle Venn diagram sorting page with category labels outside each rim and an item bank",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "classification-sorting-mat",
+    title: "Insect sorting mat",
+    useWhen:
+      "building a classification sorting mat: a laminate-and-reuse T-chart or multi-column mat on top with a dashed-border grid of cut-out pieces below",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "clip-cards",
+    title: "Counting clip cards page",
+    useWhen:
+      "building a clip-card page: a 2-column grid of cards with a target on top and three answer choices along the bottom edge for a clothespin",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "cloze-story",
+    title: "Cloze story page",
+    useWhen:
+      "building a fill-in-the-blank story page with a word bank (cloze story), ages 5-10, vocabulary or sight words in context",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "comic-narrative-math-page",
+    title: "Comic narrative math page",
+    useWhen:
+      "building a comic-narrative-math-page: a 2x2 comic strip where two original characters talk a concept through in speech bubbles, closing in a visually distinct STOP AND TRY IT box whose question reuses the same characters and scenario",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "composer-listening-guide",
+    title: "Composer listening guide",
+    useWhen:
+      "building a one-page active-listening companion for a single piece of music (title block, one listen-for hook, 3 to 5 checkbox moment boxes with sketch areas, feeling-response line)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "copy-work-pages",
+    title: "Copy-work print page",
+    useWhen:
+      "building a handwriting copy-work page with a model passage in a bordered box and empty three-line guide rows below",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "curiosity-led-notebook-page",
+    title: "Curiosity-led notebook page",
+    useWhen:
+      "building a curiosity-led notebook page: a mostly blank weekly reading-response sheet with one broad theme title, one invitation line, a dominant open unruled canvas box, and a few optional writing lines plus a Book blank underneath",
+    register: "restrained",
+    mediaType: JPEG,
+  },
+  {
+    id: "cut-and-assemble-craft",
+    title: "Stand-up Earth craft sheet",
+    useWhen:
+      "building a cut-and-assemble craft page: labeled flat cutout pieces with dashed cut borders, dotted fold lines, gray glue tabs, and a numbered assembly-step panel",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "decodable-story-page",
+    title: "Decodable story page",
+    useWhen:
+      "building a decodable phonics story page (the child page of a two-page decodable-story packet) with big Andika-style text, reread circles, and a talk prompt",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "dictation-writing-practice",
+    title: "Dictation child writing page",
+    useWhen:
+      "building a dictation writing practice packet whose child page is numbered blank writing lines, a sentence line, and an open response box",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "dot-marker-activity",
+    title: "Dot-marker letter A page",
+    useWhen:
+      "building a dot-marker / bingo-dauber stamping page where large empty circles form a letter, number, or shape for ages 2-4",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "file-folder-game",
+    title: "Animal homes file-folder game",
+    useWhen:
+      "building a file-folder game: a board page with labeled dashed drop zones plus a matching page of same-size cut-out pieces, glued inside a manila folder",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "flash-cards",
+    title: "Phonics flash card sheet",
+    useWhen:
+      "building a cut-apart flash card deck page (2 by 2 cards with dashed cut lines, one big prompt per card, tiny deck id, parent note)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "grapheme-marking-practice",
+    title: "Grapheme marking practice page",
+    useWhen:
+      "building a grapheme marking practice child page (read a word, underline the letters for each sound, one modeled example, six to ten practice rows on generous baselines)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "guided-notes",
+    title: "Guided notes page",
+    useWhen:
+      "building a two-column Cornell-style guided notes page with key terms on the left, fill-in-the-blank notes on the right, and a summary box",
+    register: "restrained",
+    mediaType: JPEG,
+  },
+  {
+    id: "labeled-anatomy-diagram",
+    title: "Labeled anatomy diagram",
+    useWhen:
+      "building a labeled anatomy or parts diagram with numbered leader lines and a word bank (body systems, animal or plant anatomy, map labeling)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "lesson-comprehension-check",
+    title: "Lesson comprehension check box",
+    useWhen:
+      "building a boxed 'What Did You Learn?' lesson closer with two recall questions and one Think and Share question",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "magic-square-puzzle",
+    title: "Magic square puzzle page",
+    useWhen:
+      "building a magic-square puzzle worksheet (3x3 grid, some givens, one target sum stated once, faint diagonal hints, optional historical aside, no decoration)",
+    register: "restrained",
+    mediaType: JPEG,
+  },
+  {
+    id: "name-tracing-page",
+    title: "Name tracing page",
+    useWhen:
+      "building a name tracing page: the child's name repeated on three-line writing guides, fading from dotted outline to pale fill to empty rows",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "narration-page",
+    title: "Narration page",
+    useWhen:
+      "building a Charlotte Mason narration, journal, or discovery-log page: title/prompt header, one large empty illustration box, wide-ruled dictation lines below",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "nature-identification-poster",
+    title: "Nature identification poster",
+    useWhen:
+      "building a field-guide wall poster with a labeled grid of watercolor species illustrations",
+    register: "restrained",
+    mediaType: JPEG,
+  },
+  {
+    id: "nature-observation-journal",
+    title: "Nature observation journal page",
+    useWhen:
+      "building a mostly-blank weekly nature-notebook page the child fills with their own drawing and observation notes after time outdoors",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "nomenclature-cards",
+    title: "Nomenclature card sheet",
+    useWhen:
+      "building a Montessori three-part nomenclature card set (control cards, picture-only cards, label-only cards)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "notes-and-practice-bundle",
+    title: "Notes-and-practice packet spread",
+    useWhen:
+      "building a two-page notes-and-practice packet: Cornell-style two-column guided notes with fill-in blanks on page 1 and a numbered drill practice page on page 2",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "pattern-extension-practice",
+    title: "AB pattern rows page",
+    useWhen:
+      "building a repeating-pattern page (AB or AAB/ABB/ABC) where the child copies, continues, circles what comes next, or creates a sequence in a row of shape cells",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "phoneme-letter-building-mat",
+    title: "Phoneme-letter building mat",
+    useWhen:
+      "building a reusable sound-position mat page (child mat, page 1 of the phoneme-letter building packet) for segmenting and blending a taught word pattern",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "phonics-pattern-reference-chart",
+    title: "Phonics pattern reference chart",
+    useWhen:
+      "building a one-pattern phonics reference chart with grouped example words and the target letters highlighted",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "phonics-sound-card-game",
+    title: "Sound match card fronts",
+    useWhen:
+      "building a phonics sound card game: a cut-apart page of word cards forming closed pairs or families by one taught sound-spelling relationship",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "phonics-spelling-diagnostic-assessment",
+    title: "Quick skill check child page",
+    useWhen:
+      "building a phonics or spelling skill-check child page (Form A/B word list, one big word per ruled row, no answers)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "picture-bingo-board",
+    title: "Picture bingo board",
+    useWhen:
+      "building a picture or word bingo board set with a shared item pool, a labeled free space, and a caller list",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "picture-supported-syllable-ordering",
+    title: "Syllable ordering cards",
+    useWhen:
+      "building a picture-supported Spanish syllable ordering page with scrambled syllable chips and a whole-word writing box",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "playdough-mat",
+    title: "Playdough mat page",
+    useWhen:
+      "building a playdough mat with 2 to 4 very large thick-outlined letters, numbers, or shapes for a child to form with playdough",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "reader-theater-script",
+    title: "Reader theater script page",
+    useWhen:
+      "building a reader theater script page with a cast list, bold speaker labels, italic bracketed stage directions, highlighted ALL choral lines, and a parent practice note",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "reading-comprehension-mini-unit",
+    title: "Reading mini-unit passage page",
+    useWhen:
+      "building a magazine-style reading comprehension passage page with an illustration, a vocabulary sidebar, and a short question block (the reading-comprehension-mini-unit packet)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "size-attribute-comparison-page",
+    title: "Size attribute comparison page",
+    useWhen:
+      "building a size attribute comparison page where a child circles, colors, or draws the longer, taller, bigger, or heavier of two or three illustrated items",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "social-narrative",
+    title: "Social story page",
+    useWhen:
+      "building a first-person social narrative page (illustration on top, 2-3 big sentences below) for ages 3-8",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "then-and-now-comparison",
+    title: "Then and now comparison page",
+    useWhen:
+      "building a two-panel then-and-now (long ago and today) comparison page with one illustration and caption per panel and a reflection question",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "word-fluency-repeated-reading",
+    title: "Read-it-again word grid",
+    useWhen:
+      "building a repeated-reading word practice page (child page of a word-fluency packet) with one closed word set in large boxed cells and untimed round markers",
+    register: "playful",
+    mediaType: JPEG,
+  },
 ];
 
 const BY_ID: ReadonlyMap<string, MaterialAnchor> = new Map(

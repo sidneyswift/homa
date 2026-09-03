@@ -1,5 +1,14 @@
 # Then and now comparison
 
+Golden anchor: pass `anchorIds: ["then-and-now-comparison"]` to
+generate_image so the output matches the Homa then-and-now comparison
+bar (two equal bordered panels split by one dashed vertical divider,
+bold uppercase THEN and NOW labels, one same-subject line-art
+illustration and one plain caption per panel, a rounded reflection box
+with writing lines filling the bottom, cream paper with warm brown ink).
+Write your own prompt with your own content; the anchor sets the visual
+bar, not the specifics.
+
 A two-panel page that compares something from the past against the same
 thing today: a "Then" (or "Long Ago" / "First") panel and a "Now" (or
 "Today") panel, each with a small illustration and a one- or two-sentence

@@ -1,5 +1,13 @@
 # Curiosity-led notebook page
 
+Golden anchor: pass `anchorIds: ["curiosity-led-notebook-page"]` to
+generate_image so the output matches the Homa curiosity-led notebook
+page bar (a mostly blank weekly reading-response sheet with one broad
+theme title, one invitation line, a dominant open unruled canvas box,
+and a few optional writing lines plus a Book blank underneath). Write
+your own prompt with your own content; the anchor sets the visual bar,
+not the specifics.
+
 A spacious weekly notebook surface that helps a child preserve the part of a
 shared reading theme that caught their own attention. The parent or Homa chooses
 the page format and the broad theme, while the child chooses the book, page,

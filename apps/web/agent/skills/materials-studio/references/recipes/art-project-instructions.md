@@ -1,5 +1,15 @@
 # Art project instructions
 
+Golden anchor: pass `anchorIds: ["art-project-instructions"]` to
+generate_image so the output matches the Homa art project page bar
+(uppercase focus tag over a bold plain-language title, one bordered
+square inspiration thumbnail beside the title, a tinted rounded
+materials box with a short bulleted household list, a straight column of
+outlined numbered step circles with one short action each, a wide
+bordered reflection box with writing lines reaching the bottom margin,
+small motifs only in the corners). Write your own prompt with your own
+content; the anchor sets the visual bar, not the specifics.
+
 A step-by-step hands-on art or craft page: a short materials list, then
 3-6 numbered steps for making one concrete thing (a drawing, a painting,
 a clay piece, a print, a woven mat, a folded-paper form, a mobile, a

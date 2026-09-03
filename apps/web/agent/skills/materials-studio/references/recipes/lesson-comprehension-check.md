@@ -1,5 +1,14 @@
 # Lesson comprehension check
 
+Golden anchor: pass `anchorIds: ["lesson-comprehension-check"]` to
+generate_image so the output matches the Homa lesson-closer box bar (one
+thick-outlined rounded box filling the bottom two thirds of the page,
+bold "What Did You Learn?" banner over a thin rule, two numbered recall
+questions each with a single solid answer line, a small uppercase Think
+and Share label, a large ruled answer box reaching the bottom,
+corner-only motifs). Write your own prompt with your own content; the
+anchor sets the visual bar, not the specifics.
+
 The fixed basal-textbook lesson closer: a boxed "What Did You Learn?"
 (or "What Did We Learn?") that ends a taught lesson with 2 literal recall
 questions plus 1 open "Think and Share" or "Write and Share" question

@@ -1,5 +1,14 @@
 # Size attribute comparison page
 
+Golden anchor: pass `anchorIds: ["size-attribute-comparison-page"]` to
+generate_image so the output matches the Homa size comparison bar (three
+stacked two-item rows of one object kind each, items left-aligned on a
+shared faint baseline so only length differs, dotted dividers between
+rows, one instruction line at top, an empty rounded draw-your-own box
+beside a small fixed model, no numbers or units anywhere). Write your
+own prompt with your own content; the anchor sets the visual bar, not
+the specifics.
+
 A page where the child compares two or three illustrated items along one
 physical attribute (length, height, weight, or overall size) and marks the
 answer: circle the longer/taller/bigger/heavier one, color the

@@ -1,5 +1,14 @@
 # Phonics pattern reference chart
 
+Golden anchor: pass `anchorIds: ["phonics-pattern-reference-chart"]` to
+generate_image so the output matches the Homa phonics reference chart
+bar (plain pattern title with one verified reminder line, two tall
+rounded white boxes side by side with neutral group headings, five very
+large lowercase words per box, only the target letters bold with a teal
+underline, one short usage footer above a thin rule, star and pencil
+motifs in the corners only). Write your own prompt with your own
+content; the anchor sets the visual bar, not the specifics.
+
 A one-page instructional reference for one already-taught sound-spelling,
 syllable, or morphology pattern. It names the target plainly, groups a small
 validated example set, and stays beside the child during real reading and

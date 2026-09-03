@@ -1,5 +1,14 @@
 # Reading comprehension mini-unit
 
+Golden anchor: pass `anchorIds: ["reading-comprehension-mini-unit"]` to
+generate_image so the output matches the Homa reading mini-unit passage
+page bar (magazine headline with an italic deck, full-width bordered
+flat-color illustration, passage in a wide column beside a tinted 'Words
+to know' sidebar holding four defined words, a 'Do this' block of two
+bubble questions plus one written response on lines, sage and gold
+accents on cream). Write your own prompt with your own content; the
+anchor sets the visual bar, not the specifics.
+
 A magazine-style multi-page unit: an engaging illustrated passage, an
 explicit skill lesson, a second shorter passage to transfer the skill to,
 and vocabulary work. The spiral structure (read, learn the skill, apply
