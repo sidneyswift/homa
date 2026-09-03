@@ -113,7 +113,7 @@ export const RECIPE_REGISTRY: Readonly<Record<RecipeSlug, RecipeRegistryEntry>> 
   "flash-cards": {
     anchorId: "flash-cards",
     checklist: [
-      { id: "card-count", severity: "blocking", check: "Four cards per page in a 2 by 2 grid, each about 2.5in wide by 3.5in tall; only the deck's last page may hold fewer." },
+      { id: "card-count", severity: "blocking", check: "Cards fill a whole grid of equal cells (2 by 2 unless the brief names another card size or count); only the deck's last page may hold fewer." },
       { id: "one-prompt", severity: "blocking", check: "Each card front carries one prompt filling its center, with no answer, direction, or picture cue beside it (backs and parent key pages may carry answers)." },
       { id: "cut-border", severity: "blocking", check: "Every card has a complete dashed cut border with quiet space inside it." },
       { id: "no-shading", severity: "advisory", check: "No card carries a filled background." },
@@ -131,9 +131,9 @@ export const RECIPE_REGISTRY: Readonly<Record<RecipeSlug, RecipeRegistryEntry>> 
     anchorId: "letter-number-formation-practice",
     checklist: [
       { id: "trace-box-count", severity: "blocking", check: "Each model box has exactly four trace boxes in one row beneath it." },
-      { id: "trace-box-size", severity: "blocking", check: "Every trace box is the same size as the model box, and the letter inside each is as large as the model letter, never smaller." },
-      { id: "model-size", severity: "blocking", check: "The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more." },
-      { id: "one-target", severity: "blocking", check: "A single letter or digit is practiced on this page, its capital and lowercase forms counting as one; any review target appears only in the independent write box." },
+      { id: "trace-box-size", severity: "blocking", check: "Every trace box is the same size as the model box, and where a letter is shown, it is as large as the model letter, never smaller." },
+      { id: "one-target", severity: "blocking", check: "The page practices one target (a capital and its lowercase count as one), or two targets in the recipe's two-up half-page layout, or one plain pre-writing stroke shape in place of a letter; a review target appears only in the independent write box." },
+      { id: "model-size", severity: "advisory", check: "The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more." },
       { id: "fade-order", severity: "advisory", check: "Support fades left to right across the trace row: solid, solid, dotted, blank with a starting dot." },
     ],
   },
@@ -144,10 +144,10 @@ export const RECIPE_REGISTRY: Readonly<Record<RecipeSlug, RecipeRegistryEntry>> 
     anchorId: "name-tracing-page",
     checklist: [
       { id: "guide-lines", severity: "blocking", check: "Every writing row has three guide lines: a solid top line, a dashed midline centered between them, and a solid baseline." },
-      { id: "letters-on-guides", severity: "blocking", check: "On every traced row the name sits on its guides: round letters fill midline to baseline and tall letters reach the top line." },
-      { id: "name-fills-row", severity: "blocking", check: "The traced name spans most of each row's width at full guide height, never bunched small at the left with a dead right half." },
-      { id: "fade-to-empty", severity: "blocking", check: "Trace rows come first and at least one empty guide row for writing alone comes last." },
-      { id: "trace-style", severity: "advisory", check: "Trace letters are a dotted outline or a pale fill the child writes over, never solid dark ink." },
+      { id: "letters-on-guides", severity: "blocking", check: "On every row that shows the name (model or trace), the letters sit on the guides: small letters fill midline to baseline, tall letters reach the top line, and descenders drop below the baseline." },
+      { id: "name-fills-row", severity: "blocking", check: "The name, or its repeat on a short-name row, spans most of each row's width at full guide height, never bunched small at the left with a dead right half." },
+      { id: "fade-to-empty", severity: "blocking", check: "After any model row, trace rows come first and at least one empty guide row for writing alone comes last, unless the brief says otherwise." },
+      { id: "trace-style", severity: "advisory", check: "Trace letters are a dotted outline or a pale fill the child writes over; solid dark ink appears only on a model row." },
       { id: "row-spacing", severity: "advisory", check: "Rows are clearly separated by visible space, never stacked so tight they read as one ruled block." },
     ],
   },

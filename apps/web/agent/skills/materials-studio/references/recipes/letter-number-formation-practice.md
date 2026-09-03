@@ -113,9 +113,9 @@ page; a blocking no holds the page back as `Checklist (<id>)`.
 
 ```homa-checklist
 - blocking trace-box-count: Each model box has exactly four trace boxes in one row beneath it.
-- blocking trace-box-size: Every trace box is the same size as the model box, and the letter inside each is as large as the model letter, never smaller.
-- blocking model-size: The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more.
-- blocking one-target: A single letter or digit is practiced on this page, its capital and lowercase forms counting as one; any review target appears only in the independent write box.
+- blocking trace-box-size: Every trace box is the same size as the model box, and where a letter is shown, it is as large as the model letter, never smaller.
+- blocking one-target: The page practices one target (a capital and its lowercase count as one), or two targets in the recipe's two-up half-page layout, or one plain pre-writing stroke shape in place of a letter; a review target appears only in the independent write box.
+- advisory model-size: The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more.
 - advisory fade-order: Support fades left to right across the trace row: solid, solid, dotted, blank with a starting dot.
 ```
 

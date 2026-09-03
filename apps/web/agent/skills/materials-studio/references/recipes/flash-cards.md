@@ -53,10 +53,13 @@ set is missing, ask for the target rather than making a broad alphabet deck.
   answer, skill label, or decorative sentence competes with it.
 - **Large early-reader type**: at least 42px for a single letter or grapheme
   and 30px for one short word. Use Andika for child-facing phonics text.
-- **Stable grid**: use 2 by 2 cards on letter paper by default. Each card is
-  the binding 2.5in by 3.5in size; a larger deck continues four cards at a
-  time on additional pages. A family naming another card size still gets the
-  largest whole row and column count that exact size fits.
+- **Stable grid**: use 2 by 2 cards on letter paper by default, each card
+  the binding 2.5in by 3.5in. The worked HTML below sets exactly that:
+  fixed 2.5in columns and 3.5in rows, centered on the page, never `1fr`
+  cells that stretch to fill it. A larger deck continues four cards at a time on
+  additional pages, and only the deck's last page may hold fewer. A family
+  naming another card size still gets the largest whole row and column
+  count that exact size fits, every cell equal.
 - **Cut-safe border**: a dashed outer cut line and at least 0.2in of quiet
   space inside it. Nothing important sits on a trim edge.
 - **Deck identity stays small**: put the deck id and card number in 9px type
@@ -74,11 +77,11 @@ set is missing, ask for the target rather than making a broad alphabet deck.
 
 ```html
 <style>
-  .deck { display: grid; grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr); gap: 12px; height: 9.5in; }
-  .card { border: 2px dashed #8c8175; border-radius: 10px;
-    padding: 18px; display: grid; place-items: center; position: relative;
-    background: #fff; }
+  .deck { display: grid; grid-template-columns: repeat(2, 2.5in);
+    grid-auto-rows: 3.5in; gap: 0.3in; justify-content: center; }
+  .card { box-sizing: border-box; border: 2px dashed #8c8175;
+    border-radius: 10px; padding: 18px; display: grid; place-items: center;
+    position: relative; background: #fff; }
   .prompt { font: 700 52px Andika, sans-serif; color: var(--homa-ink);
     text-align: center; line-height: 1.1; }
   .card-id { position: absolute; left: 10px; bottom: 8px;
@@ -113,7 +116,7 @@ against the rendered pages; a blocking no holds the page back as
 `Checklist (<id>)`.
 
 ```homa-checklist
-- blocking card-count: Four cards per page in a 2 by 2 grid, each about 2.5in wide by 3.5in tall; only the deck's last page may hold fewer.
+- blocking card-count: Cards fill a whole grid of equal cells (2 by 2 unless the brief names another card size or count); only the deck's last page may hold fewer.
 - blocking one-prompt: Each card front carries one prompt filling its center, with no answer, direction, or picture cue beside it (backs and parent key pages may carry answers).
 - blocking cut-border: Every card has a complete dashed cut border with quiet space inside it.
 - advisory no-shading: No card carries a filled background.

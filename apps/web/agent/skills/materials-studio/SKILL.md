@@ -499,10 +499,11 @@ that material, first draft and every revision. The tool reads the
 recipe's reviewer checklist itself and shows the reviewer the format's
 anchor when there is one; you never retype either. A checklist item the
 reviewer answered no comes back in the issues list as
-`Checklist (<id>)`: fix that item, do not argue with it. The one
-exception is an item flagging something the parent explicitly asked for
-(a different card size, say): keep her choice and tell her the check
-noticed. Omit `recipe` only when no recipe fit; never pass a near-miss.
+`Checklist (<id>)`: fix that item, do not argue with it. A blocking item
+that misreads a page the recipe itself allows is a checklist bug: fix the
+page if it is wrong, otherwise say so in one plain sentence to the founder
+channel and never drop `recipe` from the call to dodge the check. Omit
+`recipe` only when no recipe fit; never pass a near-miss.
 
 **Routine and chore charts are visual schedules, even when the parent calls
 one a worksheet, checklist, morning plan, or evening plan.** Use `read_file`
