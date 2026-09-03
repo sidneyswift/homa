@@ -1,4 +1,4 @@
-import { decodeStudioAnchorBytes, getStudioAnchor } from "./anchors";
+import { getStudioAnchor, loadStudioAnchorBytes } from "./anchors";
 
 /**
  * The format's fleet anchor, loaded for the QC reviewer (2026-09-02).
@@ -14,10 +14,9 @@ import { decodeStudioAnchorBytes, getStudioAnchor } from "./anchors";
  * Fail open, always: a missing, oversize, slow, or throwing anchor load
  * is recorded as a skip reason on the review and the pages are reviewed
  * without it. A reference image is never allowed to hold a family's page
- * back. The loader is a seam so this module compiles against either
- * anchor storage: on main the bytes are embedded and decoded in-process;
- * the Blob-migration branch (materials-studio/anchor-blob-migration)
- * swaps defaultAnchorLoader for its async loadStudioAnchorBytes.
+ * back. The loader is injectable so every failure shape is testable
+ * without the network; production uses loadStudioAnchorBytes (anchors.ts),
+ * the manifest-verified Blob fetch generate_image already relies on.
  */
 
 export const REVIEW_ANCHOR_MAX_BYTES = 1_500_000;
@@ -44,11 +43,10 @@ export type ReviewAnchorLoad =
 
 export type ReviewAnchorLoader = (id: string) => Promise<Uint8Array | null>;
 
-// The storage seam. On main the anchor bytes are embedded (anchors.ts,
-// anchor-bytes.generated.ts) and decode synchronously; the Blob-migration
-// branch swaps this one line for loadStudioAnchorBytes.
-const defaultAnchorLoader: ReviewAnchorLoader = async (id) =>
-  decodeStudioAnchorBytes(id);
+// loadStudioAnchorBytes never throws and bounds its own fetch at 10s; the
+// 5s race below is the reviewer's tighter budget on top of it, so a slow
+// Blob read costs this review its reference image, never its deadline.
+const defaultAnchorLoader: ReviewAnchorLoader = (id) => loadStudioAnchorBytes(id);
 
 /**
  * loadReviewAnchor(anchorId, loader?, timeoutMs?): the anchor as a

@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { studioAnchorIds } from "./anchors";
+import { ANCHOR_MANIFEST } from "./anchor-manifest.generated";
+import { getStudioAnchor, manifestAnchorIds, studioAnchorIds } from "./anchors";
 import { loadReviewAnchor, REVIEW_ANCHOR_MAX_BYTES } from "./review-anchor";
 
 /**
@@ -9,19 +10,22 @@ import { loadReviewAnchor, REVIEW_ANCHOR_MAX_BYTES } from "./review-anchor";
  * exists to make the reviewer's size comparison honest; it must never be
  * the reason a family's page is not reviewed or not delivered. Every
  * test here is one way a load can go wrong, and the assertion is the
- * same each time: a skip reason comes back, nothing throws.
+ * same each time: a skip reason comes back, nothing throws. Anchors live
+ * in Blob now, so every case injects its loader; nothing here touches
+ * the network.
  */
 
 const REAL_ANCHOR_ID = "letter-number-formation-practice";
+const FAKE_JPEG = new Uint8Array(2048).fill(0x42);
 
 describe("loadReviewAnchor", () => {
-  it("returns the registered anchor's bytes, title, and media type on success", async () => {
-    const result = await loadReviewAnchor(REAL_ANCHOR_ID);
-    assert.ok(result.anchor, "the embedded anchor loads");
+  it("returns the loader's bytes with the registry's title and media type on success", async () => {
+    const result = await loadReviewAnchor(REAL_ANCHOR_ID, async () => FAKE_JPEG);
+    assert.ok(result.anchor, "a registered anchor with bytes loads");
     assert.equal(result.anchor.id, REAL_ANCHOR_ID);
     assert.equal(result.anchor.mediaType, "image/jpeg");
-    assert.ok(result.anchor.title.length > 0);
-    assert.ok(result.anchor.data.byteLength > 1024);
+    assert.equal(result.anchor.title, getStudioAnchor(REAL_ANCHOR_ID)?.title);
+    assert.equal(result.anchor.data, FAKE_JPEG);
     assert.equal(result.skipped, undefined);
   });
 
@@ -80,10 +84,19 @@ describe("loadReviewAnchor", () => {
     }
   });
 
-  it("loads every registered anchor under the byte cap, so the cap never silently hides one", async () => {
+  it("has a manifest entry under the reviewer's byte cap for every registered anchor", () => {
+    // Manifest parity instead of a live fetch: the registry says which
+    // anchors exist, the manifest says what Blob holds and how big each
+    // is. A registered anchor with no manifest entry, or one past the
+    // reviewer's cap, would be skipped as missing or too-large on every
+    // review of that format without anything failing loudly.
+    const manifest = new Set(manifestAnchorIds());
     for (const id of studioAnchorIds()) {
-      const result = await loadReviewAnchor(id);
-      assert.ok(result.anchor, `anchor ${id} loads for the reviewer (${result.skipped ?? "ok"})`);
+      assert.ok(manifest.has(id), `anchor ${id} has no manifest entry`);
+      assert.ok(
+        ANCHOR_MANIFEST[id].bytes <= REVIEW_ANCHOR_MAX_BYTES,
+        `anchor ${id} is ${ANCHOR_MANIFEST[id].bytes} bytes, past the reviewer's cap`,
+      );
     }
   });
 });
