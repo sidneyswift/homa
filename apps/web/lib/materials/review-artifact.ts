@@ -202,7 +202,9 @@ export function planReviewChunks(
 export interface ChunkModelOutput {
   pass: boolean;
   issues: string[];
-  checklist?: ChecklistAnswer[];
+  /** Null when the model answered nothing; code records every item as
+   * unanswered. Never optional: see buildChunkSchema. */
+  checklist?: ChecklistAnswer[] | null;
 }
 
 /** One reviewer call as handed to the model: the images in order, the
@@ -305,9 +307,16 @@ export function buildChunkSchema(
         }),
       )
       .describe("One entry per checklist item, every id answered once.")
-      // Optional, not required: a model that drops the key must yield
-      // "unanswered" items, never a null review.
-      .optional(),
+      // Nullable, never optional. OpenAI structured outputs run strict:
+      // every property must appear in the schema's `required` list, and
+      // an optional key is left out of it, so the provider rejected the
+      // whole request ("'required' is required ... Missing 'checklist'")
+      // and the review came back null for every recipe with a checklist
+      // (found by the formation-page-provenance eval, 2026-09-02, the day
+      // the checklist shipped). Null keeps the escape hatch the optional
+      // key was for: a model with nothing to say returns null and every
+      // item is recorded as unanswered, never a null review.
+      .nullable(),
   });
 }
 
@@ -484,7 +493,7 @@ async function reviewChunk(input: {
     // free-form verdict has already missed exactly these defects once.
     const checklistVerdict = verifyChecklistAnswers(
       checklist,
-      result.object.checklist,
+      result.object.checklist ?? undefined,
     );
     return {
       pass: result.object.pass && checklistVerdict.pass,
