@@ -220,22 +220,24 @@ describe("buildChunkSchema", () => {
     // Bounds on the answers array or the note would fail the whole review
     // on a model quirk and ship the page unchecked; the verifier absorbs
     // duplicates, omissions, and long notes instead.
-    const json = z.toJSONSchema(buildChunkSchema(items)) as unknown as {
-      properties: {
-        checklist: {
-          items: {
-            properties: {
-              id: { enum: string[] };
-              answer: { enum: string[] };
-              note: { maxLength?: number };
-            };
-          };
-          minItems?: number;
-          maxItems?: number;
+    interface ChecklistArraySchema {
+      type?: string;
+      items: {
+        properties: {
+          id: { enum: string[] };
+          answer: { enum: string[] };
+          note: { maxLength?: number };
         };
       };
+      minItems?: number;
+      maxItems?: number;
+    }
+    const json = z.toJSONSchema(buildChunkSchema(items)) as unknown as {
+      properties: { checklist: { anyOf: ChecklistArraySchema[] } };
     };
-    const checklist = json.properties.checklist;
+    // Nullable renders as anyOf [array, null]; the array branch is the contract.
+    const checklist = json.properties.checklist.anyOf.find((branch) => branch.type === "array");
+    assert.ok(checklist, "the checklist schema has an array branch");
     assert.deepEqual(checklist.items.properties.id.enum, ["trace-box-count", "fade-order"]);
     assert.deepEqual(checklist.items.properties.answer.enum, ["yes", "no", "cannot_tell"]);
     assert.equal(checklist.minItems, undefined);
@@ -243,10 +245,32 @@ describe("buildChunkSchema", () => {
     assert.equal(checklist.items.properties.note.maxLength, undefined);
   });
 
-  it("parses an object with no checklist key at all, leaving the items to be recorded as unanswered", () => {
-    const parsed = buildChunkSchema(items).safeParse({ pass: true, issues: [] });
+  it("parses a null checklist, leaving the items to be recorded as unanswered", () => {
+    const parsed = buildChunkSchema(items).safeParse({ pass: true, issues: [], checklist: null });
     assert.equal(parsed.success, true);
-    assert.equal(parsed.success ? parsed.data.checklist : "present", undefined);
+    assert.equal(parsed.success ? parsed.data.checklist : "present", null);
+  });
+
+  it("lists every property as required, with and without a checklist (OpenAI strict schemas)", () => {
+    // The provider rejects a json_schema whose `required` omits any key in
+    // `properties`. The first checklist schema made the key optional and
+    // every recipe with a checklist shipped unreviewed (2026-09-02). The
+    // escape hatch is a nullable value, which stays required.
+    for (const checklist of [[], items]) {
+      const json = z.toJSONSchema(buildChunkSchema(checklist)) as unknown as {
+        properties: Record<string, unknown>;
+        required?: string[];
+      };
+      assert.deepEqual(
+        [...(json.required ?? [])].sort(),
+        Object.keys(json.properties).sort(),
+        `every property is required (checklist items: ${checklist.length})`,
+      );
+    }
+    const withChecklist = z.toJSONSchema(buildChunkSchema(items)) as unknown as {
+      properties: { checklist: unknown };
+    };
+    assert.match(JSON.stringify(withChecklist.properties.checklist), /"null"/);
   });
 
   it("parses an empty answer set, a repeated id, and a long note instead of failing", () => {
