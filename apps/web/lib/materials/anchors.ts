@@ -559,6 +559,38 @@ const REGISTRY: readonly MaterialAnchor[] = [
     register: "playful",
     mediaType: JPEG,
   },
+  {
+    id: "counting-and-manipulative-mat",
+    title: "Counting mat theme object",
+    useWhen:
+      "building a counting-and-manipulative-mat's single generated theme object for the hybrid path (one small line-art object on white, no text, sized for a label band or corner)",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "daily-calendar-weather-board",
+    title: "Daily calendar and weather board",
+    useWhen:
+      "building a reusable circle-time calendar and weather board where the child circles today's day, date, season, and weather in place on one page",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "giant-letter-art-page",
+    title: "Giant letter art page",
+    useWhen:
+      "building a giant letter art page: one page-filling capital and lowercase pair (or a single capital) drawn as a single thick uniform outline with an empty interior for a child to decorate, cut out, and keep in an alphabet portfolio",
+    register: "playful",
+    mediaType: JPEG,
+  },
+  {
+    id: "illustrated-teaching-page",
+    title: "Illustrated teaching page",
+    useWhen:
+      "building an illustrated teaching page: the text-free landscape illustration band under a child's question headline, one line-art subject that shows the sentences' exact claim on plain cream paper",
+    register: "playful",
+    mediaType: JPEG,
+  },
 ];
 
 const BY_ID: ReadonlyMap<string, MaterialAnchor> = new Map(
