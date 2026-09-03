@@ -73,7 +73,7 @@ export function MakingFeatureCards({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <View style={{ gap: space.md }}>
+    <View style={{ flex: 1, gap: space.md }}>
       <Animated.View
         key={card.key}
         entering={reduced ? undefined : FadeIn.duration(220)}
@@ -124,12 +124,18 @@ export function MakingFeatureCards({ onDone }: { onDone: () => void }) {
         ))}
       </View>
 
-      <Button
-        label={isLast ? "Continue" : "Next"}
-        size="lg"
-        testID="making.featureCards.continue"
-        onPress={advance}
-      />
+      {/* marginTop:"auto" pins the button to the same bottom band as
+          every other onboarding screen (hello/intent/kids/you), instead
+          of it sitting wherever the card content's natural height
+          happened to end (founder catch 2026-09-02, gh#304). */}
+      <View style={{ marginTop: "auto" }}>
+        <Button
+          label={isLast ? "Continue" : "Next"}
+          size="lg"
+          testID="making.featureCards.continue"
+          onPress={advance}
+        />
+      </View>
     </View>
   );
 }
