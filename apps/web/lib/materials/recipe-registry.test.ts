@@ -28,8 +28,10 @@ const skillMd = readFileSync(
 
 describe("recipe registry", () => {
   it("lists exactly the recipe files on disk, sorted", () => {
+    // Same rule as the builder: plain kebab-case slugs only; `.variants.md`
+    // siblings are a recipe's worked material, not a selectable format.
     const onDisk = readdirSync(recipesDir)
-      .filter((name) => name.endsWith(".md"))
+      .filter((name) => /^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name))
       .map((name) => name.slice(0, -3))
       .sort();
     assert.deepEqual([...RECIPE_SLUGS], onDisk);
