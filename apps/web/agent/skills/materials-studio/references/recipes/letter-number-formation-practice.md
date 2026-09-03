@@ -45,9 +45,13 @@ every one of these into the generate_image prompt explicitly, since
 nothing here is inferred by the model on its own):
 
 - **One target per page (or one target per half-page for a two-up
-  layout)**: a single capital letter, lowercase letter, or digit. Never mix
-  more than one new target on a page; a review target from an earlier page
-  may repeat inside the independent-write box only.
+  layout)**: a single letter or digit. A letter's capital and lowercase
+  forms on the same page are still that one target, but add the lowercase
+  pass only when the parent asked for lowercase or for both forms; "just
+  the capital" or "just the one letter" means the capital alone. Never mix
+  two different letters or digits as new targets on a page; a review
+  target from an earlier page may repeat inside the independent-write box
+  only.
 - **Model at the top**: the letter or number large and bold, inside its
   own bordered formation box, with numbered stroke-order arrows (one arrow
   per stroke) and a small green starting dot at the exact stroke-start
@@ -115,7 +119,7 @@ page; a blocking no holds the page back as `Checklist (<id>)`.
 ```homa-checklist
 - blocking trace-box-count: Each model box has exactly four trace boxes in one row beneath it; a separate independent write box does not count.
 - blocking trace-box-size: Every trace box is the same size as the model box, and where a letter is shown, it is as large as the model letter, never smaller.
-- blocking one-target: The page practices one target (a capital and its lowercase count as one), two targets in the recipe's two-up half-page layout, or one plain pre-writing stroke shape in place of a letter; a review target appears only in the independent write box, and a find-it row of other letters or numbers to circle is not a target.
+- blocking one-target: Exactly one letter or digit is practiced; its capital and lowercase forms together still count as that one letter, a two-up half-page layout may carry two, and a pre-writing stroke shape may stand in for a letter. A review letter belongs only in the independent write box; a find-it row to circle is not a target.
 - advisory model-size: The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more.
 - advisory fade-order: Support fades left to right across the trace row: solid, solid, dotted, blank with a starting dot.
 ```
@@ -137,7 +141,7 @@ FOUR bordered square boxes, all the SAME size as the model box and as each
 other, each containing [X] at the SAME large size as the model (never
 smaller), each with its own green starting dot: boxes 1-2 solid pale
 tan/gray [X], box 3 a faint dotted outline [X] only, box 4 blank except the
-starting dot. [If a lowercase pass is needed:] a dashed divider, then a
+starting dot. [Only if the parent asked for lowercase or both forms:] a dashed divider, then a
 'lowercase [x]' section with a three-band ruled box (solid top, dotted
 middle, solid bottom) containing a bold lowercase [x], followed by a row of
 four more three-band boxes at the same size showing the same

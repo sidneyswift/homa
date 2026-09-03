@@ -140,7 +140,7 @@ export const RECIPE_REGISTRY: Readonly<Record<RecipeSlug, RecipeRegistryEntry>> 
     checklist: [
       { id: "trace-box-count", severity: "blocking", check: "Each model box has exactly four trace boxes in one row beneath it; a separate independent write box does not count." },
       { id: "trace-box-size", severity: "blocking", check: "Every trace box is the same size as the model box, and where a letter is shown, it is as large as the model letter, never smaller." },
-      { id: "one-target", severity: "blocking", check: "The page practices one target (a capital and its lowercase count as one), two targets in the recipe's two-up half-page layout, or one plain pre-writing stroke shape in place of a letter; a review target appears only in the independent write box, and a find-it row of other letters or numbers to circle is not a target." },
+      { id: "one-target", severity: "blocking", check: "Exactly one letter or digit is practiced; its capital and lowercase forms together still count as that one letter, a two-up half-page layout may carry two, and a pre-writing stroke shape may stand in for a letter. A review letter belongs only in the independent write box; a find-it row to circle is not a target." },
       { id: "model-size", severity: "advisory", check: "The model letter or digit is big enough for a 3 to 6 year old to trace, about a quarter of the page width tall or more." },
       { id: "fade-order", severity: "advisory", check: "Support fades left to right across the trace row: solid, solid, dotted, blank with a starting dot." },
     ],
