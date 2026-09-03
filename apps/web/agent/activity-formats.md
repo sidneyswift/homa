@@ -35,6 +35,16 @@ The curriculum writer loads this to recommend buildable activities.
 - **Creation path:** html (repeat one generated image) or image-direct for simple layouts
 - **Example activity:** `[counting-mat] Count groups of dinosaurs (1-10) and write the number`
 
+### counting-and-manipulative-mat
+- **Slug:** `[counting-and-manipulative-mat]`
+- **Name:** Counting and manipulative mat
+- **What it is:** A laminate-and-reuse mat the child works ON with real counters from the house (buttons, beans, cereal, coins, dough balls): numbered spots with a numeral-plus-dots label band, a five- or ten-frame, part-part-whole zones, stacking columns, or two compare spots. One mechanic per mat, every zone sized to a one-inch counter, nothing written.
+- **Best for:** One-to-one counting, cardinality, subitizing, composing and decomposing to 5 and 10, more/fewer comparison; any family that teaches concrete before pictorial (Montessori, Singapore CPA, play-based, daily-life grounding).
+- **Subjects:** Math (counting, early number)
+- **Ages:** 2-7. Two or three spots at 2-3, four spots at 4-5; at 6-7 the density comes from frames or columns, never a fifth spot. The count range comes from the child's evidence, not the age.
+- **Creation path:** html by default (exact spot, cell, and column geometry); hybrid for one generated theme object that HTML repeats inside the label bands; never image-direct.
+- **Example activity:** `[counting-and-manipulative-mat] Numbered-spots mat for 1 to 4 with a dot cluster beside each numeral: "Put that many on each spot."`
+
 ### tracing-guide
 - **Slug:** `[tracing-guide]`
 - **Name:** Tracing guide
@@ -174,6 +184,16 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 3-7. Larger cells with picture stickers for younger; writing-size cells for older.
 - **Creation path:** html (precise grid layout; header illustration can be image-direct)
 - **Example activity:** `[monthly-calendar] October calendar with pumpkin header: track daily weather with stickers`
+
+### daily-calendar-weather-board
+- **Slug:** `[daily-calendar-weather-board]`
+- **Name:** Daily calendar and weather board
+- **What it is:** One reusable morning board the child fills in every day: circle the day, circle the month, mark the date, circle the season, circle the weather. Every answer is a choice from a complete closed set of outline chips, with a line-art symbol on each weather and season chip. Laminated or in a sheet protector, a dry-erase marker resets it each morning. A ritual, not a worksheet: nothing is finished, checked, or scored.
+- **Best for:** Circle time and morning meeting, calendar and weather vocabulary, daily living skills, early name writing, play-based openings that start the same way every day.
+- **Subjects:** Math (calendar, days, dates), science (weather, seasons), life skills (daily routine)
+- **Ages:** 3-7. The starter board (name, day, weather; 13 giant chips) at 3-4; the full board (six bands, a 1 to 31 date grid, a year line) at 5-7. A home-language or bilingual board keeps the same complete sets.
+- **Creation path:** html, always (every set must be exactly complete and exactly spelled; the weather and season symbols are inline SVG, never a generate_image call)
+- **Example activity:** `[daily-calendar-weather-board] Starter board with seven day chips and six weather chips: "Circle today." and "Circle the weather."`
 
 ### sorting-worksheet
 - **Slug:** `[sorting-worksheet]`
@@ -575,14 +595,24 @@ The curriculum writer loads this to recommend buildable activities.
 - **Creation path:** html (exact box geometry and baseline placement are critical)
 - **Example activity:** `[letter-number-formation-practice] Capital letter T: "Big line down, little line across the top," four trace boxes fading to one blank box`
 
+### giant-letter-art-page
+- **Slug:** `[giant-letter-art-page]`
+- **Name:** Giant letter art page
+- **What it is:** One page-filling thick-outline letter (a capital with its own lowercase, or a single capital or digit) with an empty interior the child decorates with paint, dot stickers, torn tissue, cereal, or glued buttons, then cuts out and keeps in an alphabet portfolio. No tracing cues and no scene; optional one to three unlabeled spot objects in a bottom band.
+- **Best for:** Letter recognition and letter sounds before pencil work, fine motor through gluing and sticking, letter-of-the-week and play-based preschool programs, Spanish capital-lowercase pairs, the pre-K page of a family unit study.
+- **Subjects:** ELA (letter recognition, letter sounds), math (digits 0-9), Spanish (letters and the ch, ll, rr digraphs)
+- **Ages:** 2.5-6. The pair is the default at every age; a single capital when the parent wants one giant shape to fill.
+- **Creation path:** html by default (an SVG letter whose outline is derived from the filled glyph: identical letterforms across a portfolio, exact accented glyphs, a 2-3 second letter swap); image-direct for one themed craft canvas; hybrid for a themed portfolio set (HTML letter plus one generated spot-object strip)
+- **Example activity:** `[giant-letter-art-page] A giant B and b on one baseline, "Fill your B with anything blue.", cut out and kept as the next page of the alphabet book`
+
 ### art-project-instructions
 - **Slug:** `[art-project-instructions]`
 - **Name:** Art project instructions
-- **What it is:** A materials list followed by 3-6 numbered steps for making one concrete art or craft piece, with an optional small inspiration thumbnail and an optional closing reflection question. A bare technique-reference variant drops the thumbnail and reflection box for a plain how-to card. An optional skill-tip callout box names and defines one inquiry skill for a hands-on science investigation instead of the reflection question.
-- **Best for:** Formal skills-based art curricula built around the Elements of Art and Principles of Design, a published science textbook's recurring hands-on "Investigate" activity, or any curriculum with a recurring "make something" or "try this" activity that rotates through different media or materials using the same page shell each time.
-- **Subjects:** Art (making, technique, elements and principles), Science (hands-on investigations and experiments)
-- **Ages:** 5-10. Fewer, larger steps for younger; more steps and a reflection prompt (or skill-tip callout, for science) tied to the family's own comprehension-skill or process-skills vocabulary for older.
-- **Creation path:** hybrid (generate_image for the inspiration thumbnail, HTML for the materials list and steps) or html-only for the bare technique-reference variant
+- **What it is:** A materials list followed by 3-6 numbered steps for making one concrete art or craft piece, with an optional small inspiration thumbnail and an optional closing reflection question. A bare technique-reference variant drops the thumbnail and reflection box for a plain how-to card. An optional skill-tip callout box names and defines one inquiry skill for a hands-on science investigation instead of the reflection question. The parent activity card variant is written to the parent instead of the child: a time and mess badge row, 2-4 setup steps, 4-6 quoted play prompts, and a learning-connection box, one card per page as a parent_guide, with no child sequence and nothing for the child to write.
+- **Best for:** Formal skills-based art curricula built around the Elements of Art and Principles of Design, a published science textbook's recurring hands-on "Investigate" activity, or any curriculum with a recurring "make something" or "try this" activity that rotates through different media or materials using the same page shell each time. The parent activity card covers a play-based or story-as-hub program's parent-run open play: a sensory bin, a gross-motor game, a building challenge, a learning-center station.
+- **Subjects:** Art (making, technique, elements and principles), Science (hands-on investigations and experiments), any subject a play-based program extends into real-object play
+- **Ages:** 5-10 for the project and investigation forms (fewer, larger steps for younger; more steps and a reflection prompt, or skill-tip callout for science, tied to the family's own comprehension-skill or process-skills vocabulary for older); 2-8 for the parent activity card.
+- **Creation path:** hybrid (generate_image for the inspiration thumbnail, HTML for the materials list and steps) or html-only for the bare technique-reference variant; html for the parent activity card, hybrid only when the setup is hard to picture from words
 - **Example activity:** `[art-project-instructions] Paper-plate weaving: materials list, five numbered steps, and a reflection question about the pattern the child made`
 
 ### then-and-now-comparison
@@ -684,6 +714,16 @@ The curriculum writer loads this to recommend buildable activities.
 - **Ages:** 6-11.
 - **Creation path:** html (a short, precise box; no illustration budget needed).
 - **Example activity:** `[lesson-comprehension-check] Closes a lesson on river crossings: "What did the pioneers use to cross the river?", "Why did the town build a bridge there?", and "How would your family cross a river if there were no bridge nearby?"`
+
+### illustrated-teaching-page
+- **Slug:** `[illustrated-teaching-page]`
+- **Name:** Illustrated teaching page
+- **What it is:** A one-question teaching page the child reads first: the question as the headline ("Why do leaves change color in fall?"), one landscape illustration that shows the exact claim with no words in it, three or four short sentences in Homa's own words with one bold new word, and one check box at the foot (a written line, a why question over two lines, a draw box, or a point-to directive, chosen by age). A topic with several questions is a packet, one page per question.
+- **Best for:** Investigate-then-explain science programs, primary health and human-body lessons, nature study, weather and seasons, simple social studies; any parent who says "explain it to her" rather than "give her practice."
+- **Subjects:** Science, health, nature study, social studies
+- **Ages:** 4-9. Read-aloud at 4-5 (four bold-lead-in sentences, a point-to or draw check), early reader at 6-7 (three sentences, one written line), fluent reader at 8-9 (four sentences, a why question, an optional caption line).
+- **Creation path:** hybrid, always (one generate_image call for the text-free illustration, HTML for the headline, sentences, and check); the photo variant swaps the illustration for one kept web photo
+- **Example activity:** `[illustrated-teaching-page] "Why do leaves change color in fall?": one maple leaf half green and half orange, three sentences with "chlorophyll" in bold, and one written check line`
 
 ### magic-square-puzzle
 - **Slug:** `[magic-square-puzzle]`

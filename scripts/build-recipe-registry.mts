@@ -52,8 +52,12 @@ export interface RecipeSourceEntry {
  * Throws on the first recipe with a grammar problem, naming every line. */
 export function readRecipeSources(root: string = repoRoot): RecipeSourceEntry[] {
   const dir = path.join(root, RECIPES_DIR);
+  // A recipe is `<slug>.md` with a plain kebab-case slug. Sibling files such
+  // as `<slug>.variants.md` hold a recipe's long worked material and are
+  // loaded by the recipe itself; they are not formats Homa can pick, so they
+  // never become RECIPE_SLUGS (which feeds create_printable's `recipe` enum).
   const files = readdirSync(dir)
-    .filter((name) => name.endsWith(".md"))
+    .filter((name) => /^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name))
     .sort();
   if (files.length === 0) {
     throw new Error(`No recipe .md files found in ${RECIPES_DIR}`);
