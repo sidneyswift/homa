@@ -209,11 +209,23 @@ export interface ChunkModelOutput {
 
 /** One reviewer call as handed to the model: the images in order, the
  * text that follows them, and the closed output schema. */
+/** The format's anchor as the reviewer sees it: a reference, never a page. */
+export interface ReviewReferenceImage {
+  title: string;
+  mediaType: string;
+  data: Buffer | Uint8Array;
+}
+
 export interface ReviewModelCall {
   model: string;
   schema: z.ZodType<ChunkModelOutput>;
   system: string;
+  /** The pages under review, in reading order. Only pages: the anchor
+   * has its own field so it can never be counted as one of them. */
   images: Array<{ mediaType: string; data: Buffer | Uint8Array }>;
+  /** The format's anchor, or null. Delivered in its own message before
+   * the pages (buildReviewMessages), never mixed into `images`. */
+  reference: ReviewReferenceImage | null;
   text: string;
   maxOutputTokens: number;
   abortSignal: AbortSignal;
@@ -232,24 +244,62 @@ export interface ReviewDependencies {
   recordUsage?: typeof recordModelUsage;
 }
 
+type ReviewMessagePart =
+  | { type: "file"; mediaType: string; data: Buffer | Uint8Array }
+  | { type: "text"; text: string };
+
+export interface ReviewMessage {
+  role: "user";
+  content: ReviewMessagePart[];
+}
+
+/**
+ * buildReviewMessages(call): the reference image, when there is one, goes
+ * in its OWN user message ahead of the pages, labeled as not under
+ * review; the pages and the brief follow in a second message.
+ *
+ * Why not one message with the anchor as the last image (the first
+ * shipped shape, 2026-09-02): the reviewer merged the two. The letter
+ * formation anchor carries a lowercase section, and on correct capital-D
+ * pages the reviewer reported "the page includes a lowercase d section"
+ * as a blocking defect: 5 of 5 live and sandbox reviews that day, and
+ * 2 of 6 repeat calls on the exact production pages. Two near-identical
+ * images in one content array with a sentence saying which is which is
+ * not a boundary a vision model reliably keeps; a separate message with
+ * its own label is a structural one. Exported for the contract test.
+ */
+export function buildReviewMessages(call: ReviewModelCall): ReviewMessage[] {
+  const pages: ReviewMessage = {
+    role: "user",
+    content: [
+      ...call.images.map((image) => ({
+        type: "file" as const,
+        mediaType: image.mediaType,
+        data: image.data,
+      })),
+      { type: "text" as const, text: call.text },
+    ],
+  };
+  if (!call.reference) return [pages];
+  const reference: ReviewMessage = {
+    role: "user",
+    content: [
+      { type: "file", mediaType: call.reference.mediaType, data: call.reference.data },
+      {
+        type: "text",
+        text: `Reference only. This image is Homa's reference page for the format "${call.reference.title}". It is NOT under review: do not judge it, do not describe it, and do not attribute anything on it to the pages that follow. Use it only as the bar for how large and how clear those pages should be. The pages under review arrive in the next message.`,
+      },
+    ],
+  };
+  return [reference, pages];
+}
+
 const defaultRunner: ReviewModelRunner = (call) =>
   generateObject({
     model: call.model,
     schema: call.schema,
     system: call.system,
-    messages: [
-      {
-        role: "user",
-        content: [
-          ...call.images.map((image) => ({
-            type: "file" as const,
-            mediaType: image.mediaType,
-            data: image.data,
-          })),
-          { type: "text" as const, text: call.text },
-        ],
-      },
-    ],
+    messages: buildReviewMessages(call),
     maxOutputTokens: call.maxOutputTokens,
     maxRetries: 1,
     abortSignal: call.abortSignal,
@@ -433,15 +483,14 @@ async function reviewChunk(input: {
     shownNumbers.length === 1
       ? `page ${shownNumbers[0]}`
       : `pages ${shownNumbers.join(", ")}`;
-  const thenAnchor = anchor ? ", then one reference image" : "";
   const pageContext =
     input.pageCount > 1
-      ? `The document has ${input.pageCount} pages; you are shown ${shownList}${thenAnchor}, in that order. Number every issue by the page number given here, not by its position among the images.\n`
+      ? `The document has ${input.pageCount} pages; this message shows ${shownList}, in that order. Number every issue by the page number given here, not by its position among the images.\n`
       : anchor
-        ? `You are shown ${shownList}${thenAnchor}.\n`
+        ? `This message shows ${shownList}, the only page under review.\n`
         : "";
   const anchorContext = anchor
-    ? `The last image is Homa's reference page for this format (${anchor.title}). It is not under review. It sets the bar for structure and size: the pages under review should be at least this generous in size and at least this clear. Different letters, words, theme, or child name are expected and are not issues.\n`
+    ? `The image in the previous message is Homa's reference page for this format (${anchor.title}). It is not under review and it is not one of these pages: never report what the reference shows as if it were on ${shownList}. It sets the bar for size and clarity only: the pages under review should be at least as generous in size and at least as clear. Their letters, words, sections, theme, and child name are expected to differ from the reference; those differences are never issues.\n`
     : "";
   const geometryBlock = geometryReviewBlock(input.pageGeometry ?? [], {
     underfillNotes: input.underfillNotes,
@@ -460,12 +509,12 @@ async function reviewChunk(input: {
       model,
       schema: buildChunkSchema(checklist),
       system: REVIEW_SYSTEM,
-      images: [
-        ...shownPages.map((page) => ({ mediaType: "image/jpeg", data: page.data })),
-        // The anchor rides AFTER the pages so page numbering in the
-        // reviewer's issues stays aligned with the images it counts.
-        ...(anchor ? [{ mediaType: anchor.mediaType, data: anchor.data }] : []),
-      ],
+      images: shownPages.map((page) => ({ mediaType: "image/jpeg", data: page.data })),
+      // The anchor travels in its own message ahead of the pages
+      // (buildReviewMessages), never among them.
+      reference: anchor
+        ? { title: anchor.title, mediaType: anchor.mediaType, data: anchor.data }
+        : null,
       text: `${pageContext}${anchorContext}${geometryContext}The brief:\n${input.brief}${checklistContext}`,
       // Each checklist answer costs a few dozen tokens plus its note; the
       // cap leaves a full eight-item answer with real notes inside the
