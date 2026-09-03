@@ -39,11 +39,14 @@ describe("loadReviewAnchor", () => {
     assert.equal(called, false, "an unregistered id never reaches storage");
   });
 
-  it("skips as missing when the loader has no bytes", async () => {
+  it("skips as load-failed, not missing, when a registered anchor's loader has no bytes", async () => {
+    // loadStudioAnchorBytes never throws; a fetch, size, or digest
+    // failure comes back as null. Reading that as "missing" would make
+    // every Blob outage look like an unregistered id in the record.
     const result = await loadReviewAnchor(REAL_ANCHOR_ID, async () => null);
-    assert.deepEqual(result, { anchor: null, skipped: "missing" });
+    assert.deepEqual(result, { anchor: null, skipped: "load-failed" });
     const empty = await loadReviewAnchor(REAL_ANCHOR_ID, async () => new Uint8Array(0));
-    assert.deepEqual(empty, { anchor: null, skipped: "missing" });
+    assert.deepEqual(empty, { anchor: null, skipped: "load-failed" });
   });
 
   it("skips as load-failed when the loader throws, instead of rejecting", async () => {

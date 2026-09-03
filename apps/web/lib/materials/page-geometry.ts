@@ -91,6 +91,10 @@ export interface SheetBodyMeasurement {
   largestImagePx?: MeasuredBoxPx | null;
   largestTextPx?: number | null;
   largestBoxPx?: MeasuredBoxPx | null;
+  /** True when the signal computation threw in the browser; the three
+   * signals are then null and the size floor records measurement-error
+   * instead of comparing nothing in silence. */
+  measurementError?: boolean;
 }
 
 export interface PageGeometry {
@@ -110,6 +114,9 @@ export interface PageGeometry {
   largestImageIn?: MeasuredBoxIn | null;
   largestTextPx?: number | null;
   largestBoxIn?: MeasuredBoxIn | null;
+  /** Present and true only when the renderer could not take the signals
+   * on this page; absent otherwise. */
+  measurementError?: boolean;
 }
 
 function roundIn(px: number): number {
@@ -147,6 +154,7 @@ export function summarizePageGeometry(
       largestTextPx:
         typeof textPx === "number" && textPx > 0 ? Math.round(textPx * 10) / 10 : null,
       largestBoxIn: boxIn(measurement.largestBoxPx),
+      ...(measurement.measurementError ? { measurementError: true } : {}),
     };
   });
 }

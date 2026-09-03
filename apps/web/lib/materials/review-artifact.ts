@@ -106,7 +106,21 @@ export interface ArtifactReview {
     recipe: string | null;
     answers: ChecklistVerdict["answers"];
     blockingFailures: string[];
+    /** Ids the reviewer answered more than once on the blocking chunk. */
+    duplicateIds: string[];
   } | null;
+  /**
+   * Advisory checklist items answered no on the pages the blocking chunk
+   * judged, in plain words with no internal label: Homa relays these in
+   * one sentence, so they stay apart from the later-pages advisories.
+   */
+  checklistAdvisory: string[];
+  /**
+   * Checklist items no reviewer could settle (cannot_tell or never
+   * answered), across every chunk, deduplicated: the plain check text for
+   * a "could not confirm" sentence. Never a failure.
+   */
+  checklistUnconfirmed: string[];
   /**
    * Whether the reviewer was shown the format's fleet anchor beside the
    * pages (review-anchor.ts). False never blocks anything; anchorSkipped
@@ -216,6 +230,12 @@ export function buildChunkSchema(
   };
   if (checklist.length === 0) return z.object(base);
   const ids = checklist.map((item) => item.id) as [string, ...string[]];
+  // Permissive on purpose: no length bound on the answers array and no
+  // cap on the note. A schema failure here nulls the whole review and the
+  // page ships unchecked, so the shape only closes what must be closed
+  // (the ids and the answer enum) and review-checklist.ts absorbs the
+  // rest: duplicates recorded, missing items stored as unanswered, long
+  // notes truncated.
   return z.object({
     ...base,
     checklist: z
@@ -225,15 +245,12 @@ export function buildChunkSchema(
           answer: z.enum(CHECKLIST_ANSWERS),
           note: z
             .string()
-            .max(200)
             .describe(
               "For no or cannot_tell only: what you saw, one sentence, naming the page when more than one is shown. Empty for yes.",
             ),
         }),
       )
-      .min(1)
-      .max(checklist.length)
-      .describe("One entry per checklist item, every id answered."),
+      .describe("One entry per checklist item, every id answered once."),
   });
 }
 
@@ -281,11 +298,14 @@ the question.`;
 interface ChunkVerdict {
   pass: boolean;
   issues: string[];
-  /** Checklist notes that never hold a page back: advisory items answered
-   * no, and items the reviewer could not settle. */
+  /** Advisory checklist items answered no, plain text, never blocking. */
   advisory: string[];
+  /** Checklist items the reviewer could not settle or never answered:
+   * plain check text for a "could not confirm" sentence. */
+  unconfirmed: string[];
   reviewedPages: number[];
   checklistAnswers: ChecklistVerdict["answers"];
+  duplicateIds: string[];
 }
 
 /**
@@ -390,10 +410,11 @@ async function reviewChunk(input: {
           ],
         },
       ],
-      // Each checklist answer costs a few dozen tokens; the cap keeps a
-      // full eight-item answer inside the budget without opening the
-      // door to an essay.
-      maxOutputTokens: Math.min(1_100, 600 + 60 * checklist.length),
+      // Each checklist answer costs a few dozen tokens plus its note; the
+      // cap leaves a full eight-item answer with real notes inside the
+      // budget, because a truncated JSON object fails the schema and nulls
+      // the whole review, which ships the page unchecked.
+      maxOutputTokens: Math.min(1_800, 900 + 80 * checklist.length),
       maxRetries: 1,
       abortSignal: controller.signal,
       providerOptions: {
@@ -427,8 +448,10 @@ async function reviewChunk(input: {
       pass: result.object.pass && checklistVerdict.pass,
       issues: [...result.object.issues, ...checklistVerdict.issues],
       advisory: checklistVerdict.advisory,
+      unconfirmed: checklistVerdict.unconfirmed,
       reviewedPages: shownNumbers,
       checklistAnswers: checklistVerdict.answers,
+      duplicateIds: checklistVerdict.duplicateIds,
     };
   } catch (error) {
     if (controller.signal.aborted) return null;
@@ -509,13 +532,11 @@ export async function reviewArtifact(input: {
   return {
     pass: blockingVerdict.pass,
     issues: blockingVerdict.issues,
-    // The blocking chunk's own advisory checklist notes ride here too:
-    // an advisory no or a cannot_tell on the pages she asked about is
-    // still worth a sentence to her, it just never withholds the page.
-    advisoryIssues: [
-      ...blockingVerdict.advisory,
-      ...landed.flatMap((verdict) => [...verdict.issues, ...verdict.advisory]),
-    ],
+    // Later pages only, the sentence the caller prefixes "On later pages
+    // the check also found". The blocking chunk's own checklist notes go
+    // through checklistAdvisory and checklistUnconfirmed instead, so a
+    // note about the page she asked about is never filed under "later".
+    advisoryIssues: landed.flatMap((verdict) => [...verdict.issues, ...verdict.advisory]),
     // Only pages a reviewer actually returned on. A chunk that timed
     // out leaves its pages out, so the coverage sentence stays true.
     reviewedPages: [
@@ -530,8 +551,16 @@ export async function reviewArtifact(input: {
             blockingFailures: blockingVerdict.checklistAnswers
               .filter((answer) => answer.severity === "blocking" && answer.answer === "no")
               .map((answer) => answer.id),
+            duplicateIds: blockingVerdict.duplicateIds,
           }
         : null,
+    checklistAdvisory: blockingVerdict.advisory,
+    checklistUnconfirmed: [
+      ...new Set([
+        ...blockingVerdict.unconfirmed,
+        ...landed.flatMap((verdict) => verdict.unconfirmed),
+      ]),
+    ],
     anchorShown: anchor !== null,
     ...(anchor === null
       ? { anchorSkipped: input.anchor?.skipped ?? "no-anchor" }

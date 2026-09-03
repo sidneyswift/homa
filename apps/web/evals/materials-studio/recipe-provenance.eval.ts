@@ -6,26 +6,32 @@ import { defineEval } from "eve/evals";
  * reviewer gets the format's checklist and anchor, so a build that read
  * the flash-cards recipe and then omitted the slug would leave the
  * material unmeasurable and the reviewer without its spec. The skill's
- * Format library section asks for the slug on every call for a material;
- * this eval checks the ask is honored on the first draft.
+ * Format library section asks for the slug on every call for a material.
  *
- * Conditional on purpose, like anchor-usage.eval.ts: the invariant is
- * "when a flash-card build reaches create_printable, it carries the
- * flash-cards slug", not "the build always happens". The partial-deep
- * matcher on input ignores every other field.
+ * Conditional on purpose, the way anchor-usage.eval.ts is: the invariant
+ * is "every create_printable call in a flash-card build carries the
+ * flash-cards slug", vacuously true when no build happened, because eval
+ * sessions sometimes honestly abort before create_printable and that is
+ * not a provenance failure.
  *
  * Needs the sandbox for family-scoped tools:
  * `pnpm eval:sandbox materials-studio/recipe-provenance`.
  */
 export default defineEval({
   description:
-    "A flash-card build passes the flash-cards recipe slug to create_printable.",
+    "Every create_printable call in a flash-card build carries the flash-cards recipe slug.",
   timeoutMs: 600_000,
   async test(t) {
-    await t.send(
+    const turn = await t.send(
       "Can you make Maya a set of flashcards for her eight sight words this week: the, and, said, was, you, they, of, to?",
     );
     t.loadedSkill("materials-studio");
-    t.calledTool("create_printable", { input: { recipe: "flash-cards" } });
+    t.eventsSatisfy(
+      "every create_printable call carried recipe flash-cards",
+      () =>
+        turn.toolCalls
+          .filter((call) => call.name === "create_printable")
+          .every((call) => call.input.recipe === "flash-cards"),
+    );
   },
 });

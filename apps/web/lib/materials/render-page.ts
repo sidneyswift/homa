@@ -311,6 +311,11 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
         let largestImagePx: { width: number; height: number } | null = null;
         let largestBoxArea = 0;
         let largestBoxPx: { width: number; height: number } | null = null;
+        // The size-floor signals are guarded separately from the fill
+        // measurement they ride inside: an exception in them must never
+        // turn into "Rendering hiccuped" for the whole page. It nulls the
+        // signals and marks the page instead (measurementError).
+        let signalError = false;
         const textWalker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
         for (let node = textWalker.nextNode(); node; node = textWalker.nextNode()) {
           if (!node.nodeValue || node.nodeValue.trim() === "") continue;
@@ -324,9 +329,13 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
             }
           }
           if (inked && node.parentElement) {
-            const fontSize =
-              Number.parseFloat(getComputedStyle(node.parentElement).fontSize) || 0;
-            if (fontSize > largestTextPx) largestTextPx = fontSize;
+            try {
+              const fontSize =
+                Number.parseFloat(getComputedStyle(node.parentElement).fontSize) || 0;
+              if (fontSize > largestTextPx) largestTextPx = fontSize;
+            } catch {
+              signalError = true;
+            }
           }
         }
         const walker = document.createTreeWalker(body, NodeFilter.SHOW_ELEMENT);
@@ -334,32 +343,36 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
           const element = node as Element;
           const rect = element.getBoundingClientRect();
           if (rect.width <= 0 && rect.height <= 0) continue;
-          // Inline svg keeps its lowercase tag name (SVG namespace), so the
-          // picture check compares case-insensitively.
-          const tag = element.tagName.toUpperCase();
-          if (tag === "IMG") {
-            const image = element as HTMLImageElement;
-            const naturalWidth = image.naturalWidth;
-            const naturalHeight = image.naturalHeight;
-            const drawnWidth =
-              naturalHeight > 0
-                ? Math.min(rect.width, (rect.height * naturalWidth) / naturalHeight)
-                : rect.width;
-            const drawnHeight =
-              naturalWidth > 0
-                ? Math.min(rect.height, (rect.width * naturalHeight) / naturalWidth)
-                : rect.height;
-            const area = drawnWidth * drawnHeight;
-            if (area > largestImageArea) {
-              largestImageArea = area;
-              largestImagePx = { width: drawnWidth, height: drawnHeight };
+          try {
+            // Inline svg keeps its lowercase tag name (SVG namespace), so
+            // the picture check compares case-insensitively.
+            const tag = element.tagName.toUpperCase();
+            if (tag === "IMG") {
+              const image = element as HTMLImageElement;
+              const naturalWidth = image.naturalWidth;
+              const naturalHeight = image.naturalHeight;
+              const drawnWidth =
+                naturalHeight > 0
+                  ? Math.min(rect.width, (rect.height * naturalWidth) / naturalHeight)
+                  : rect.width;
+              const drawnHeight =
+                naturalWidth > 0
+                  ? Math.min(rect.height, (rect.width * naturalHeight) / naturalWidth)
+                  : rect.height;
+              const area = drawnWidth * drawnHeight;
+              if (area > largestImageArea) {
+                largestImageArea = area;
+                largestImagePx = { width: drawnWidth, height: drawnHeight };
+              }
+            } else if (tag === "SVG" || tag === "CANVAS") {
+              const area = rect.width * rect.height;
+              if (area > largestImageArea) {
+                largestImageArea = area;
+                largestImagePx = { width: rect.width, height: rect.height };
+              }
             }
-          } else if (tag === "SVG" || tag === "CANVAS") {
-            const area = rect.width * rect.height;
-            if (area > largestImageArea) {
-              largestImageArea = area;
-              largestImagePx = { width: rect.width, height: rect.height };
-            }
+          } catch {
+            signalError = true;
           }
           let paints = REPLACED_TAGS.indexOf(element.tagName) !== -1;
           let bordered = false;
@@ -399,10 +412,14 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
             }
           }
           if (bordered) {
-            const area = rect.width * rect.height;
-            if (area > largestBoxArea) {
-              largestBoxArea = area;
-              largestBoxPx = { width: rect.width, height: rect.height };
+            try {
+              const area = rect.width * rect.height;
+              if (area > largestBoxArea) {
+                largestBoxArea = area;
+                largestBoxPx = { width: rect.width, height: rect.height };
+              }
+            } catch {
+              signalError = true;
             }
           }
           if (!paints) continue;
@@ -421,9 +438,10 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
           contentPx: maxBottom - contentTop,
           usablePx,
           overflowPx: Math.max(0, maxBottom - pageBottom),
-          largestImagePx,
-          largestTextPx: largestTextPx > 0 ? largestTextPx : null,
-          largestBoxPx,
+          largestImagePx: signalError ? null : largestImagePx,
+          largestTextPx: !signalError && largestTextPx > 0 ? largestTextPx : null,
+          largestBoxPx: signalError ? null : largestBoxPx,
+          ...(signalError ? { measurementError: true } : {}),
         };
       });
     },

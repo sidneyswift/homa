@@ -419,9 +419,10 @@ function RecipeUsageTable({ usage }: { usage: RecipeUsageRollup }) {
         Recipe use · last {usage.windowDays} days
       </p>
       <p className="mt-1 text-[0.76rem] text-muted">
-        The recipe each material recorded at creation, and how many of those
-        versions passed the quality check. The column the reviewer checklist
-        is measured by.
+        The recipe each material recorded at creation, how many of those
+        versions passed the quality check, and how many no check reached at
+        all (a timed-out review is not a failure). Could-not-tell and
+        unanswered count checklist items the reviewer did not settle.
       </p>
       {used.length === 0 ? (
         <p className="mt-2 text-[0.8rem] text-muted">
@@ -438,8 +439,17 @@ function RecipeUsageTable({ usage }: { usage: RecipeUsageRollup }) {
                 <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
                   Made
                 </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Passed
+                </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Unchecked
+                </th>
+                <th className="py-1.5 pr-3 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
+                  Could not tell
+                </th>
                 <th className="py-1.5 text-right font-mono text-[0.62rem] font-bold uppercase tracking-[0.11em] text-subtle">
-                  Passed check
+                  Unanswered
                 </th>
               </tr>
             </thead>
@@ -455,7 +465,10 @@ function RecipeUsageTable({ usage }: { usage: RecipeUsageRollup }) {
                     ) : null}
                   </td>
                   <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.made}</td>
-                  <td className="py-1.5 text-right tabular-nums text-body">{row.passed}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.passed}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.unchecked}</td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-body">{row.cannotTell}</td>
+                  <td className="py-1.5 text-right tabular-nums text-body">{row.unanswered}</td>
                 </tr>
               ))}
             </tbody>

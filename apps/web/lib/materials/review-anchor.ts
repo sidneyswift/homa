@@ -29,13 +29,15 @@ export interface ReviewAnchor {
   mediaType: string;
 }
 
-/** Why the loader produced no anchor. */
+/** Why the loader produced no anchor: `missing` is an id the registry does
+ * not know; `load-failed` is a registered anchor whose bytes did not come
+ * back (the loader returned nothing or threw); `too-large` and `timeout`
+ * are the reviewer's own caps. */
 export type ReviewAnchorLoadSkip = "missing" | "too-large" | "load-failed" | "timeout";
 
-/** Every reason a review ran without an anchor, including the two the
- * caller decides before loading: the recipe has none, or the page is a
- * pure image-direct page whose image model already saw it. */
-export type ReviewAnchorSkip = "no-anchor" | "not-html" | ReviewAnchorLoadSkip;
+/** Every reason a review ran without an anchor, including the one the
+ * caller decides before loading: the recipe names no anchor. */
+export type ReviewAnchorSkip = "no-anchor" | ReviewAnchorLoadSkip;
 
 export type ReviewAnchorLoad =
   | { anchor: ReviewAnchor; skipped?: undefined }
@@ -72,7 +74,10 @@ export async function loadReviewAnchor(
     // after the timer wins is still a handled rejection.
     const bytes = await Promise.race([loader(anchorId), timeout]);
     if (bytes === "timeout") return { anchor: null, skipped: "timeout" };
-    if (!bytes || bytes.byteLength === 0) return { anchor: null, skipped: "missing" };
+    // loadStudioAnchorBytes never throws: every fetch, size, and digest
+    // failure comes back as null, so null here is a failed load of a
+    // registered anchor, not an unknown id.
+    if (!bytes || bytes.byteLength === 0) return { anchor: null, skipped: "load-failed" };
     if (bytes.byteLength > REVIEW_ANCHOR_MAX_BYTES) {
       return { anchor: null, skipped: "too-large" };
     }

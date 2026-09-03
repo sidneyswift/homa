@@ -214,21 +214,48 @@ describe("buildChunkSchema", () => {
     assert.deepEqual(parsed, { pass: true, issues: [] });
   });
 
-  it("enumerates exactly the recipe's item ids and the three closed answers", () => {
+  it("enumerates exactly the recipe's item ids and the three closed answers, with no length bounds", () => {
+    // Bounds on the answers array or the note would fail the whole review
+    // on a model quirk and ship the page unchecked; the verifier absorbs
+    // duplicates, omissions, and long notes instead.
     const json = z.toJSONSchema(buildChunkSchema(items)) as unknown as {
       properties: {
         checklist: {
-          items: { properties: { id: { enum: string[] }; answer: { enum: string[] } } };
-          minItems: number;
-          maxItems: number;
+          items: {
+            properties: {
+              id: { enum: string[] };
+              answer: { enum: string[] };
+              note: { maxLength?: number };
+            };
+          };
+          minItems?: number;
+          maxItems?: number;
         };
       };
     };
     const checklist = json.properties.checklist;
     assert.deepEqual(checklist.items.properties.id.enum, ["trace-box-count", "fade-order"]);
     assert.deepEqual(checklist.items.properties.answer.enum, ["yes", "no", "cannot_tell"]);
-    assert.equal(checklist.minItems, 1);
-    assert.equal(checklist.maxItems, items.length);
+    assert.equal(checklist.minItems, undefined);
+    assert.equal(checklist.maxItems, undefined);
+    assert.equal(checklist.items.properties.note.maxLength, undefined);
+  });
+
+  it("parses an empty answer set, a repeated id, and a long note instead of failing", () => {
+    const schema = buildChunkSchema(items);
+    assert.equal(schema.safeParse({ pass: true, issues: [], checklist: [] }).success, true);
+    assert.equal(
+      schema.safeParse({
+        pass: true,
+        issues: [],
+        checklist: [
+          { id: "fade-order", answer: "yes", note: "" },
+          { id: "fade-order", answer: "no", note: "x".repeat(2_000) },
+          { id: "trace-box-count", answer: "cannot_tell", note: "" },
+        ],
+      }).success,
+      true,
+    );
   });
 
   it("rejects an answer for an id the recipe never declared", () => {

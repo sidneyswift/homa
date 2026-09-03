@@ -511,4 +511,38 @@ describe("trusted printable lesson provenance", () => {
       "a slug outside the generated registry never parses",
     );
   });
+
+  it("refuses allowSizeReduction without a revision and the parent's words on the record", () => {
+    // Code cannot verify consent, but it can refuse the flag with nothing
+    // behind it: the size floor only applies to a revision, and the
+    // parent's ask has to be quoted beside the flag.
+    const base = {
+      title: "Letter B, smaller",
+      html: "<main><p>trace the letter B four times in a row</p></main>",
+      allowSizeReduction: true,
+    };
+    assert.equal(createPrintableInputSchema.safeParse(base).success, false, "no revisesId");
+    assert.equal(
+      createPrintableInputSchema.safeParse({ ...base, revisesId: MATERIAL_ID }).success,
+      false,
+      "no requestSummary",
+    );
+    assert.equal(
+      createPrintableInputSchema.safeParse({
+        ...base,
+        revisesId: MATERIAL_ID,
+        requestSummary: "smaller",
+      }).success,
+      false,
+      "requestSummary too short to be her words",
+    );
+    const accepted = createPrintableInputSchema.safeParse({
+      ...base,
+      revisesId: MATERIAL_ID,
+      requestSummary: "She asked: can the letters be a bit smaller so two fit per row?",
+    });
+    assert.equal(accepted.success, true);
+    const message = JSON.stringify(createPrintableInputSchema.safeParse(base).error?.issues ?? []);
+    assert.match(message, /allowSizeReduction needs revisesId/);
+  });
 });

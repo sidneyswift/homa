@@ -83,6 +83,27 @@ describe("summarizePageGeometry", () => {
     assert.equal(page.largestBoxIn, null);
   });
 
+  it("marks a page whose signals could not be taken, with the signals null", () => {
+    // The browser-side signal computation is guarded; when it throws the
+    // page is marked rather than the whole render failing, and the size
+    // floor reads the mark as measurement-error instead of comparing air.
+    const [page] = summarizePageGeometry([
+      {
+        contentPx: 800,
+        usablePx: 912,
+        overflowPx: 0,
+        largestImagePx: null,
+        largestTextPx: null,
+        largestBoxPx: null,
+        measurementError: true,
+      },
+    ]);
+    assert.equal(page.measurementError, true);
+    assert.equal(page.largestImageIn, null);
+    const [clean] = summarizePageGeometry([{ contentPx: 800, usablePx: 912, overflowPx: 0 }]);
+    assert.equal("measurementError" in clean, false, "absent, not false, on a clean page");
+  });
+
   it("emits null for a page with nothing of a kind, never a zero box", () => {
     const [page] = summarizePageGeometry([
       {

@@ -481,6 +481,14 @@ export interface RecipeUsageRow {
   made: number;
   /** Of those, how many the blocking quality check passed. */
   passed: number;
+  /** Of those, how many no review reached at all (off, timed out, or a
+   * schema failure). Kept apart from failures on purpose: a timed-out
+   * review is not a verdict against the format. */
+  unchecked: number;
+  /** Checklist items across those materials the reviewer answered
+   * cannot_tell, and items it never returned (unanswered). */
+  cannotTell: number;
+  unanswered: number;
 }
 
 export interface RecipeUsageRollup {
@@ -507,11 +515,25 @@ export async function getRecipeUsageRollup(
 ): Promise<RecipeUsageRollup> {
   const sql = adminDb();
   const rows = await sql<
-    { recipe: string | null; made: number; passed: number }[]
+    {
+      recipe: string | null;
+      made: number;
+      passed: number;
+      unchecked: number;
+      cannot_tell: number;
+      unanswered: number;
+    }[]
   >`
     select m.generation->'input'->>'recipe' as recipe,
            count(*)::int as made,
-           count(*) filter (where m.generation->'review'->>'pass' = 'true')::int as passed
+           count(*) filter (where m.generation->'review'->>'pass' = 'true')::int as passed,
+           count(*) filter (where m.generation->'review'->>'pass' is null)::int as unchecked,
+           coalesce(sum((select count(*)
+                         from jsonb_array_elements(coalesce(m.generation->'review'->'checklist'->'answers', '[]'::jsonb)) a
+                         where a->>'answer' = 'cannot_tell')), 0)::int as cannot_tell,
+           coalesce(sum((select count(*)
+                         from jsonb_array_elements(coalesce(m.generation->'review'->'checklist'->'answers', '[]'::jsonb)) a
+                         where a->>'answer' = 'unanswered')), 0)::int as unanswered
     from public.materials m
     where m.created_at >= now() - make_interval(days => ${RECIPE_USAGE_WINDOW_DAYS}::int)
       and m.deleted_at is null
@@ -524,15 +546,30 @@ export async function getRecipeUsageRollup(
       unattributed += row.made;
       continue;
     }
-    byRecipe.set(row.recipe, { recipe: row.recipe, made: row.made, passed: row.passed });
+    byRecipe.set(row.recipe, {
+      recipe: row.recipe,
+      made: row.made,
+      passed: row.passed,
+      unchecked: row.unchecked,
+      cannotTell: row.cannot_tell,
+      unanswered: row.unanswered,
+    });
   }
   const shipped = new Set(shippedSlugs);
   const byBusiest = (left: RecipeUsageRow, right: RecipeUsageRow) =>
     right.made - left.made || left.recipe.localeCompare(right.recipe);
+  const empty = (slug: string): RecipeUsageRow => ({
+    recipe: slug,
+    made: 0,
+    passed: 0,
+    unchecked: 0,
+    cannotTell: 0,
+    unanswered: 0,
+  });
   return {
     windowDays: RECIPE_USAGE_WINDOW_DAYS,
     rows: [...shipped]
-      .map((slug) => byRecipe.get(slug) ?? { recipe: slug, made: 0, passed: 0 })
+      .map((slug) => byRecipe.get(slug) ?? empty(slug))
       .sort(byBusiest),
     unknown: [...byRecipe.values()]
       .filter((row) => !shipped.has(row.recipe))

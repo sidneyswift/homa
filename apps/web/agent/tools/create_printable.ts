@@ -72,10 +72,12 @@ import {
 import { buildRenderProvenance } from "../../lib/materials/render-provenance";
 import { materialSaveFailureNote } from "../../lib/materials/save-failure-note";
 import {
-  compareSizeFloor,
+  evaluateSizeFloor,
   loadRevisedPageGeometry,
+  sizeCheckSkippedNote,
   sizeFloorAllowedNote,
   sizeFloorRefusalNote,
+  type RevisedGeometryLoad,
 } from "../../lib/materials/size-floor";
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 import {
@@ -242,7 +244,7 @@ export const createPrintableInputSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      "Only with revisesId, and only when the parent asked for smaller items on this page, or agreed after you asked her. The tool refuses a revision whose largest picture, text, or practice box came out more than a tenth smaller than the version it revises. This flag records her consent; it is never a way to clear that refusal on your own judgment. Quote her words in requestSummary.",
+      "Only with revisesId, and only when the parent asked for smaller items on this page (or asked to remove its largest element), or agreed after you asked her. The tool refuses a revision whose largest picture, text, or bordered box came out more than a tenth smaller than the version it revises. This flag records that you are acting on her words; it is never a way to clear that refusal on your own judgment. Quote her words in requestSummary (required with this flag, at least 12 characters).",
     ),
   sourceFamilyAssetIds: z
     .array(z.uuid())
@@ -257,7 +259,19 @@ export const createPrintableInputSchema = z.object({
     .max(600)
     .optional()
     .describe("One or two sentences of what the parent actually asked for, used by the automatic quality check."),
-});
+}).refine(
+  // Code cannot verify consent, but it can refuse the flag with nothing
+  // behind it: a size reduction is only ever a revision of something, and
+  // the parent's words have to be on the record beside it.
+  (input) =>
+    !input.allowSizeReduction
+    || (input.revisesId !== undefined && (input.requestSummary?.length ?? 0) >= 12),
+  {
+    message:
+      "allowSizeReduction needs revisesId (it only applies to a revision) and a requestSummary of at least 12 characters quoting what the parent asked for.",
+    path: ["allowSizeReduction"],
+  },
+);
 
 export type CreatePrintableInput = z.infer<
   typeof createPrintableInputSchema
@@ -439,7 +453,7 @@ const createPrintable = defineBoundedTool({
     // Started here so it overlaps the source read and the render; it is
     // family-predicated inside and never rejects, so any early return
     // between here and the comparison leaves nothing dangling.
-    const revisedGeometryPromise = input.revisesId
+    const revisedGeometryPromise: Promise<RevisedGeometryLoad | null> = input.revisesId
       ? loadRevisedPageGeometry({ familyId, materialId: input.revisesId })
       : Promise.resolve(null);
     const sourceResolution = await resolveMaterialFamilySources({
@@ -686,17 +700,14 @@ const createPrintable = defineBoundedTool({
     // never from the model: it passed only the slug (2026-09-02).
     const recipeEntry = input.recipe ? RECIPE_REGISTRY[input.recipe] : null;
     // The format's anchor for the reviewer, started now so the load
-    // overlaps the render. Pure image-direct pages skip it: the image
-    // model already had the anchor, and html and hybrid pages are the
-    // ones whose reviewer never saw it. loadReviewAnchor never rejects,
-    // so an early return below leaves no unhandled promise behind.
-    const anchorPromise: Promise<ReviewAnchorLoad> =
-      recipeEntry?.anchorId && source !== "image"
-        ? loadReviewAnchor(recipeEntry.anchorId)
-        : Promise.resolve({
-            anchor: null,
-            skipped: recipeEntry?.anchorId ? "not-html" : "no-anchor",
-          });
+    // overlaps the render. Image-direct pages get it too: the reviewer is
+    // a different model from the one that drew the page, and the format
+    // this exists for (letter-number-formation-practice) is image-direct.
+    // loadReviewAnchor never rejects, so an early return below leaves no
+    // unhandled promise behind.
+    const anchorPromise: Promise<ReviewAnchorLoad> = recipeEntry?.anchorId
+      ? loadReviewAnchor(recipeEntry.anchorId)
+      : Promise.resolve({ anchor: null, skipped: "no-anchor" });
     const document = wrapPrintableDocument(
       resolvedPages.map((page) => page.body),
       input.childName ?? "",
@@ -758,15 +769,31 @@ const createPrintable = defineBoundedTool({
     // the recipe said size is a floor, and nothing enforced it. Same
     // class as the cutoff block above: a renderer proof, never delivered,
     // and refusing here costs one render and leaves no blob or row.
-    // allowSizeReduction is the parent's recorded consent, the only way
-    // past, and generation.sizeFloor below keeps the comparison on the
-    // record either way.
+    // allowSizeReduction records that the model is acting on the parent's
+    // words (code cannot verify consent), and it is the only way past.
+    // generation.sizeFloor below keeps the status, the findings, and the
+    // flag on the record for every created row, so a floor that compared
+    // nothing is never mistaken for one that held.
     const freshPageNumbers = new Set(freshGeometry.map((page) => page.page));
-    const revisedGeometry = await revisedGeometryPromise;
-    const sizeFindings = revisedGeometry
-      ? compareSizeFloor(revisedGeometry, rendered.pageGeometry, freshPageNumbers)
-      : [];
+    const sizeFloor = evaluateSizeFloor({
+      revised: await revisedGeometryPromise,
+      imagePage: source === "image",
+      next: rendered.pageGeometry,
+      freshPages: freshPageNumbers,
+    });
+    const sizeFindings = sizeFloor.findings;
     if (sizeFindings.length > 0 && !input.allowSizeReduction) {
+      // One structured line per refusal, and a stable note prefix, so
+      // refusals are countable in agent_tool_calls and the runtime logs.
+      console.warn(
+        JSON.stringify({
+          event: "size-floor-refusal",
+          familyId,
+          revisesId: input.revisesId,
+          recipe: input.recipe ?? null,
+          findings: sizeFindings,
+        }),
+      );
       return {
         created: false,
         note: sizeFloorRefusalNote(sizeFindings, input.recipe ?? null),
@@ -933,17 +960,19 @@ const createPrintable = defineBoundedTool({
       // small array of numbers per page, cheap to keep, and the durable
       // counterpart to the QC verdict for later history and analysis.
       pageGeometry: rendered.pageGeometry,
-      // The size-floor comparison against the revised version, when one
-      // was possible: what shrank, and whether the parent's recorded
-      // consent let it through. A consent flag set by a model that never
-      // asked is auditable here rather than invisible.
-      sizeFloor: revisedGeometry
-        ? {
-            comparedTo: input.revisesId,
-            findings: sizeFindings,
-            allowedByParent: Boolean(input.allowSizeReduction),
-          }
-        : null,
+      // The size floor's record for every row: whether it compared (and
+      // why not, when it did not), what shrank, and whether the model set
+      // the consent flag, beside the requestSummary it offered as the
+      // parent's words. Code cannot verify consent, so the field names say
+      // who claimed it; a flag set by a model that never asked is
+      // auditable here rather than invisible.
+      sizeFloor: {
+        status: sizeFloor.status,
+        comparedTo: input.revisesId ?? null,
+        findings: sizeFindings,
+        reductionAllowedByModel: Boolean(input.allowSizeReduction),
+        consentNote: input.requestSummary ?? null,
+      },
     };
 
     // The durable record (Postgres is truth; html is what a future
@@ -1168,12 +1197,32 @@ const createPrintable = defineBoundedTool({
             "; ",
           )}. This version IS shown to her. Tell her which page in one plain sentence and offer to fix it; do not rebuild until she says yes, and do not call it a technical problem.`
         : "";
+    // Checklist notes stay separate from the later-pages sentence and
+    // carry no Checklist (<id>) token: Homa is told to relay these in one
+    // plain sentence, and a parent should never read an internal label.
+    const checklistExpected = (recipeEntry?.checklist.length ?? 0) > 0;
+    const checklistUnrunNote =
+      checklistExpected && review === null
+        ? " The format checklist could not run on this version; look at the page yourself against the recipe before sending."
+        : "";
+    const checklistAdvisoryNote =
+      review && review.checklistAdvisory.length > 0
+        ? ` The check also noted on the pages it judged: ${review.checklistAdvisory.join(
+            "; ",
+          )}. This version IS shown to her; mention it in one plain sentence and offer to fix it.`
+        : "";
+    const checklistUnconfirmedNote =
+      review && review.checklistUnconfirmed.length > 0
+        ? ` The check could not confirm: ${review.checklistUnconfirmed.join(
+            "; ",
+          )}. Look at the page yourself for those before sending.`
+        : "";
     const reviewNote =
       review === null
-        ? " The quality check did not run for this version (it is off, timed out, or errored), so nothing has looked at these pages: say it is ready without claiming it was checked."
+        ? ` The quality check did not run for this version (it is off, timed out, or errored), so nothing has looked at these pages: say it is ready without claiming it was checked.${checklistUnrunNote}`
         : review.pass
-          ? ` Quality check passed on the pages it saw.${coverageNote}${advisoryNote}`
-          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}${advisoryNote}`;
+          ? ` Quality check passed on the pages it saw.${coverageNote}${advisoryNote}${checklistAdvisoryNote}${checklistUnconfirmedNote}`
+          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}${advisoryNote}${checklistAdvisoryNote}${checklistUnconfirmedNote}`;
     // Deterministic, from the renderer's own measurements, so a blank
     // band or a cut edge never depends on the vision model noticing it
     // (gh#349). It used to be the ONLY fact available about pages past
@@ -1185,10 +1234,17 @@ const createPrintable = defineBoundedTool({
     });
     const geometryNoteText =
       geometryNotes.length > 0 ? ` ${geometryNotes.join(" ")}` : "";
-    // A smaller revision that the parent's consent let through is said
-    // out loud, so the record and the reply agree about what changed.
+    // A smaller revision the flag let through is said out loud, so the
+    // record and the reply agree about what changed; and a size check
+    // that did not run says so, so Homa compares by eye instead of
+    // assuming the floor held.
+    const sizeCheckSkipped = sizeCheckSkippedNote(sizeFloor.status);
     const sizeFloorNoteText =
-      sizeFindings.length > 0 ? ` ${sizeFloorAllowedNote(sizeFindings)}` : "";
+      sizeFindings.length > 0
+        ? ` ${sizeFloorAllowedNote(sizeFindings)}`
+        : sizeCheckSkipped
+          ? ` ${sizeCheckSkipped}`
+          : "";
 
     return {
       created: true,
