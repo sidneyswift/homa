@@ -106,13 +106,13 @@ describe("parseRecipeChecklist", () => {
     const longCheck = "x".repeat(RECIPE_CHECKLIST_MAX_CHECK_CHARS + 1);
     const parsed = parseRecipeChecklist(blockOf([`- blocking long-one: ${longCheck}`]));
     assert.equal(parsed.items.length, 0);
-    assert.match(parsed.problems[0], /261 characters/);
+    assert.match(parsed.problems[0], /321 characters/);
   });
 
   it("names a check shorter than 12 characters", () => {
     const parsed = parseRecipeChecklist(blockOf(["- blocking short-one: Too short."]));
     assert.equal(parsed.items.length, 0);
-    assert.match(parsed.problems[0], /must be 12 to 260/);
+    assert.match(parsed.problems[0], /must be 12 to 320/);
   });
 
   it("names a line with no colon as malformed", () => {

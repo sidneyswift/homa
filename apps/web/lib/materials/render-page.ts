@@ -376,51 +376,56 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
           }
           let paints = REPLACED_TAGS.indexOf(element.tagName) !== -1;
           let bordered = false;
-          if (!paints) {
-            const elementStyle = getComputedStyle(element);
-            if (elementStyle.visibility !== "hidden") {
-              const background = elementStyle.backgroundColor;
-              paints =
-                elementStyle.backgroundImage !== "none" ||
-                elementStyle.boxShadow !== "none" ||
-                (background !== "" &&
-                  background !== "transparent" &&
-                  !TRANSPARENT.test(background));
-              // The border walk runs even when the background already
-              // paints: a white card with a dashed cut line is still a
-              // bordered box for the size floor.
-              for (let index = 0; !bordered && index < SIDES.length; index += 1) {
-                const side = SIDES[index];
-                const width =
-                  Number.parseFloat(
-                    elementStyle.getPropertyValue(`border-${side}-width`),
-                  ) || 0;
-                const lineStyle = elementStyle.getPropertyValue(
-                  `border-${side}-style`,
-                );
-                const color = elementStyle.getPropertyValue(
-                  `border-${side}-color`,
-                );
-                bordered =
-                  width > 0 &&
-                  lineStyle !== "none" &&
-                  lineStyle !== "hidden" &&
-                  color !== "transparent" &&
-                  !TRANSPARENT.test(color);
+          // The paint and border walk is inside the same guard as the
+          // other signals: an exception here marks the page instead of
+          // failing the render, and the element is then treated as
+          // non-painting for the fill measurement (which is what an
+          // unreadable style is).
+          try {
+            if (!paints) {
+              const elementStyle = getComputedStyle(element);
+              if (elementStyle.visibility !== "hidden") {
+                const background = elementStyle.backgroundColor;
+                paints =
+                  elementStyle.backgroundImage !== "none" ||
+                  elementStyle.boxShadow !== "none" ||
+                  (background !== "" &&
+                    background !== "transparent" &&
+                    !TRANSPARENT.test(background));
+                // The border walk runs even when the background already
+                // paints: a white card with a dashed cut line is still a
+                // bordered box for the size floor.
+                for (let index = 0; !bordered && index < SIDES.length; index += 1) {
+                  const side = SIDES[index];
+                  const width =
+                    Number.parseFloat(
+                      elementStyle.getPropertyValue(`border-${side}-width`),
+                    ) || 0;
+                  const lineStyle = elementStyle.getPropertyValue(
+                    `border-${side}-style`,
+                  );
+                  const color = elementStyle.getPropertyValue(
+                    `border-${side}-color`,
+                  );
+                  bordered =
+                    width > 0 &&
+                    lineStyle !== "none" &&
+                    lineStyle !== "hidden" &&
+                    color !== "transparent" &&
+                    !TRANSPARENT.test(color);
+                }
+                paints = paints || bordered;
               }
-              paints = paints || bordered;
             }
-          }
-          if (bordered) {
-            try {
+            if (bordered) {
               const area = rect.width * rect.height;
               if (area > largestBoxArea) {
                 largestBoxArea = area;
                 largestBoxPx = { width: rect.width, height: rect.height };
               }
-            } catch {
-              signalError = true;
             }
+          } catch {
+            signalError = true;
           }
           if (!paints) continue;
           maxBottom = Math.max(maxBottom, rect.bottom);

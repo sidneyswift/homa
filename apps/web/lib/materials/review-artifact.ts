@@ -199,11 +199,65 @@ export function planReviewChunks(
 }
 
 /** What one reviewer call returns, before code verifies it. */
-interface ChunkModelOutput {
+export interface ChunkModelOutput {
   pass: boolean;
   issues: string[];
   checklist?: ChecklistAnswer[];
 }
+
+/** One reviewer call as handed to the model: the images in order, the
+ * text that follows them, and the closed output schema. */
+export interface ReviewModelCall {
+  model: string;
+  schema: z.ZodType<ChunkModelOutput>;
+  system: string;
+  images: Array<{ mediaType: string; data: Buffer | Uint8Array }>;
+  text: string;
+  maxOutputTokens: number;
+  abortSignal: AbortSignal;
+  familyId: string;
+}
+
+export type ReviewModelRunner = (call: ReviewModelCall) => Promise<{
+  object: ChunkModelOutput;
+  usage: { inputTokens?: number; outputTokens?: number };
+}>;
+
+/** Injectable seams so the review's assembly (which chunk's findings land
+ * where, and in what words) is testable without a model or a database. */
+export interface ReviewDependencies {
+  run?: ReviewModelRunner;
+  recordUsage?: typeof recordModelUsage;
+}
+
+const defaultRunner: ReviewModelRunner = (call) =>
+  generateObject({
+    model: call.model,
+    schema: call.schema,
+    system: call.system,
+    messages: [
+      {
+        role: "user",
+        content: [
+          ...call.images.map((image) => ({
+            type: "file" as const,
+            mediaType: image.mediaType,
+            data: image.data,
+          })),
+          { type: "text" as const, text: call.text },
+        ],
+      },
+    ],
+    maxOutputTokens: call.maxOutputTokens,
+    maxRetries: 1,
+    abortSignal: call.abortSignal,
+    providerOptions: {
+      gateway: {
+        ...gatewayAttribution(call.familyId, "materials_review"),
+        disallowPromptTraining: true,
+      },
+    },
+  });
 
 /**
  * buildChunkSchema(checklist): the reviewer's output contract for one
@@ -250,7 +304,10 @@ export function buildChunkSchema(
             ),
         }),
       )
-      .describe("One entry per checklist item, every id answered once."),
+      .describe("One entry per checklist item, every id answered once.")
+      // Optional, not required: a model that drops the key must yield
+      // "unanswered" items, never a null review.
+      .optional(),
   });
 }
 
@@ -297,7 +354,14 @@ the question.`;
 
 interface ChunkVerdict {
   pass: boolean;
+  /** The model's own free-form issues. */
   issues: string[];
+  /** Blocking checklist items answered no, with the Checklist (<id>) label.
+   * Only the blocking chunk's copy may enter a tool result's issues list. */
+  checklistIssues: string[];
+  /** The same blocking-no items in plain words, for a chunk whose findings
+   * are relayed to the parent rather than fixed (later pages). */
+  checklistBlockingPlain: string[];
   /** Advisory checklist items answered no, plain text, never blocking. */
   advisory: string[];
   /** Checklist items the reviewer could not settle or never answered:
@@ -341,9 +405,13 @@ async function reviewChunk(input: {
   /** The format's fleet anchor, shown after the pages as a size and
    * structure reference that is explicitly not under review. */
   anchor?: ReviewAnchor | null;
+  run?: ReviewModelRunner;
+  recordUsage?: typeof recordModelUsage;
 }): Promise<ChunkVerdict | null> {
   if (input.pages.length === 0) return null;
 
+  const run = input.run ?? defaultRunner;
+  const recordUsage = input.recordUsage ?? recordModelUsage;
   const model = reviewModelId();
   const startedAt = Date.now();
   const controller = new AbortController();
@@ -379,53 +447,27 @@ async function reviewChunk(input: {
       : "";
 
   try {
-    const result = await generateObject({
+    const result = await run({
       model,
       schema: buildChunkSchema(checklist),
       system: REVIEW_SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: [
-            ...shownPages.map((page) => ({
-              type: "file" as const,
-              mediaType: "image/jpeg" as const,
-              data: page.data,
-            })),
-            // The anchor rides AFTER the pages so page numbering in the
-            // reviewer's issues stays aligned with the images it counts.
-            ...(anchor
-              ? [
-                  {
-                    type: "file" as const,
-                    mediaType: anchor.mediaType,
-                    data: anchor.data,
-                  },
-                ]
-              : []),
-            {
-              type: "text",
-              text: `${pageContext}${anchorContext}${geometryContext}The brief:\n${input.brief}${checklistContext}`,
-            },
-          ],
-        },
+      images: [
+        ...shownPages.map((page) => ({ mediaType: "image/jpeg", data: page.data })),
+        // The anchor rides AFTER the pages so page numbering in the
+        // reviewer's issues stays aligned with the images it counts.
+        ...(anchor ? [{ mediaType: anchor.mediaType, data: anchor.data }] : []),
       ],
+      text: `${pageContext}${anchorContext}${geometryContext}The brief:\n${input.brief}${checklistContext}`,
       // Each checklist answer costs a few dozen tokens plus its note; the
       // cap leaves a full eight-item answer with real notes inside the
       // budget, because a truncated JSON object fails the schema and nulls
       // the whole review, which ships the page unchecked.
       maxOutputTokens: Math.min(1_800, 900 + 80 * checklist.length),
-      maxRetries: 1,
       abortSignal: controller.signal,
-      providerOptions: {
-        gateway: {
-          ...gatewayAttribution(input.familyId, "materials_review"),
-          disallowPromptTraining: true,
-        },
-      },
+      familyId: input.familyId,
     });
 
-    await recordModelUsage({
+    await recordUsage({
       familyId: input.familyId,
       surface: "materials_review",
       channel: input.channel,
@@ -446,7 +488,9 @@ async function reviewChunk(input: {
     );
     return {
       pass: result.object.pass && checklistVerdict.pass,
-      issues: [...result.object.issues, ...checklistVerdict.issues],
+      issues: result.object.issues,
+      checklistIssues: checklistVerdict.issues,
+      checklistBlockingPlain: checklistVerdict.blockingPlain,
       advisory: checklistVerdict.advisory,
       unconfirmed: checklistVerdict.unconfirmed,
       reviewedPages: shownNumbers,
@@ -454,9 +498,17 @@ async function reviewChunk(input: {
       duplicateIds: checklistVerdict.duplicateIds,
     };
   } catch (error) {
-    if (controller.signal.aborted) return null;
+    // Both exits are logged: a silent null here reads downstream as
+    // "nothing looked at these pages", and the runtime log is the only
+    // place that says whether that was a timeout or a broken answer.
+    if (controller.signal.aborted) {
+      console.warn(
+        `reviewArtifact chunk timed out after ${REVIEW_TIMEOUT_MS}ms (pages ${shownNumbers.join(", ")} go unreviewed)`,
+      );
+      return null;
+    }
     console.error(
-      "reviewArtifact chunk failed (those pages go unreviewed):",
+      `reviewArtifact chunk failed (pages ${shownNumbers.join(", ")} go unreviewed):`,
       error instanceof Error ? error.message : "unknown",
     );
     return null;
@@ -503,7 +555,7 @@ export async function reviewArtifact(input: {
   /** The format's anchor load (review-anchor.ts), or the reason there is
    * none. Absent means no anchor was even sought. */
   anchor?: ReviewAnchorLoad | null;
-}): Promise<ArtifactReview | null> {
+}, deps: ReviewDependencies = {}): Promise<ArtifactReview | null> {
   if (!reviewEnabled()) return null;
   if (input.pages.length === 0) return null;
 
@@ -514,7 +566,7 @@ export async function reviewArtifact(input: {
   };
 
   const anchor = input.anchor?.anchor ?? null;
-  const chunkInput = { ...input, anchor };
+  const chunkInput = { ...input, anchor, run: deps.run, recordUsage: deps.recordUsage };
   const { blocking, advisory } = planReviewChunks(input.pages);
   const [blockingVerdict, ...advisoryVerdicts] = await Promise.all([
     reviewChunk({ ...chunkInput, pages: blocking, pageGeometry: geometryFor(blocking) }),
@@ -531,12 +583,16 @@ export async function reviewArtifact(input: {
   const checklist = input.checklist ?? [];
   return {
     pass: blockingVerdict.pass,
-    issues: blockingVerdict.issues,
-    // Later pages only, the sentence the caller prefixes "On later pages
-    // the check also found". The blocking chunk's own checklist notes go
-    // through checklistAdvisory and checklistUnconfirmed instead, so a
-    // note about the page she asked about is never filed under "later".
-    advisoryIssues: landed.flatMap((verdict) => [...verdict.issues, ...verdict.advisory]),
+    // The only place the Checklist (<id>) label may appear: the blocking
+    // chunk's issues, which Homa fixes rather than relays.
+    issues: [...blockingVerdict.issues, ...blockingVerdict.checklistIssues],
+    // Later pages' free-form findings only, the sentence the caller
+    // prefixes "On later pages the check also found". Every checklist
+    // finding, from any chunk, goes through checklistAdvisory and
+    // checklistUnconfirmed in plain words instead, because those
+    // sentences are relayed to a parent and must carry no internal label
+    // (review of PR #1069: a six-page recipe material leaked the label).
+    advisoryIssues: landed.flatMap((verdict) => verdict.issues),
     // Only pages a reviewer actually returned on. A chunk that timed
     // out leaves its pages out, so the coverage sentence stays true.
     reviewedPages: [
@@ -554,7 +610,13 @@ export async function reviewArtifact(input: {
             duplicateIds: blockingVerdict.duplicateIds,
           }
         : null,
-    checklistAdvisory: blockingVerdict.advisory,
+    checklistAdvisory: [
+      ...blockingVerdict.advisory,
+      ...landed.flatMap((verdict) => [
+        ...verdict.checklistBlockingPlain,
+        ...verdict.advisory,
+      ]),
+    ],
     checklistUnconfirmed: [
       ...new Set([
         ...blockingVerdict.unconfirmed,

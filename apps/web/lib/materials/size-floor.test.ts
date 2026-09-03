@@ -178,6 +178,18 @@ describe("evaluateSizeFloor", () => {
     assert.deepEqual(result, { status: "image-page", findings: [] });
   });
 
+  it("records a failed read as read-failed even on an image-direct revision", () => {
+    // A double read failure is worth counting on its own; image-page would
+    // hide it behind a page shape that was never going to compare.
+    const result = evaluateSizeFloor({
+      revised: { status: "read-failed" },
+      imagePage: true,
+      next: [page(1)],
+      freshPages: ALL_FRESH,
+    });
+    assert.deepEqual(result, { status: "read-failed", findings: [] });
+  });
+
   it("passes a load status straight through", () => {
     for (const status of ["not-found", "read-failed", "unparseable", "pre-signal"] as const) {
       const result = evaluateSizeFloor({
@@ -348,15 +360,27 @@ describe("loadRevisedPageGeometry", () => {
     assert.deepEqual(result, { status: "unparseable" });
   });
 
-  it("retries a throwing read once, then reports read-failed", async () => {
+  it("retries a throwing read once, then reports read-failed and names the row in the log", async () => {
     let calls = 0;
     const alwaysThrows: RevisedGeometryReader = async () => {
       calls += 1;
       throw new Error("pooler hiccup");
     };
-    const result = await loadRevisedPageGeometry(ids, alwaysThrows);
-    assert.deepEqual(result, { status: "read-failed" });
+    const logged: string[] = [];
+    const originalError = console.error;
+    console.error = (...args: unknown[]) => {
+      logged.push(args.map(String).join(" "));
+    };
+    try {
+      const result = await loadRevisedPageGeometry(ids, alwaysThrows);
+      assert.deepEqual(result, { status: "read-failed" });
+    } finally {
+      console.error = originalError;
+    }
     assert.equal(calls, 2, "exactly one retry");
+    assert.equal(logged.length, 1);
+    assert.match(logged[0], /material material-1 in family family-a/);
+    assert.match(logged[0], /pooler hiccup/);
   });
 
   it("succeeds when the retry succeeds", async () => {

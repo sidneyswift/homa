@@ -90,7 +90,7 @@ describe("recipe registry", () => {
         assert.ok(!ids.has(item.id), `${slug}: duplicate checklist id ${item.id}`);
         ids.add(item.id);
         assert.ok(item.severity === "blocking" || item.severity === "advisory");
-        assert.ok(item.check.length >= 12 && item.check.length <= 260);
+        assert.ok(item.check.length >= 12 && item.check.length <= 320);
       }
       assert.ok(RECIPE_REGISTRY[slug].checklist.length <= 8, `${slug}: more than 8 items`);
     }

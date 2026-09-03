@@ -116,7 +116,7 @@ against the rendered pages; a blocking no holds the page back as
 `Checklist (<id>)`.
 
 ```homa-checklist
-- blocking card-count: Cards fill a whole grid of equal cells (2 by 2 unless the brief names another card size or count); only the deck's last page may hold fewer.
+- blocking card-count: Cards fill a whole grid of equal cells (2 by 2 unless the brief names another card size or count); only the deck's last card page may hold fewer, and a parent key or back page is not a card page.
 - blocking one-prompt: Each card front carries one prompt filling its center, with no answer, direction, or picture cue beside it (backs and parent key pages may carry answers).
 - blocking cut-border: Every card has a complete dashed cut border with quiet space inside it.
 - advisory no-shading: No card carries a filled background.

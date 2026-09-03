@@ -59,8 +59,13 @@ export interface ChecklistVerdict {
   /** False only when a blocking item was answered no. */
   pass: boolean;
   /** Blocking items answered no, worded for the composing agent with the
-   * Checklist (<id>) label. Never relayed to a parent. */
+   * Checklist (<id>) label. Never relayed to a parent, so only the
+   * blocking chunk's copy may enter a tool result's issues list. */
   issues: string[];
+  /** The same blocking-no items in plain words (check text and reviewer
+   * note, no label): what an advisory chunk's findings become, since a
+   * later page's checklist miss is relayed rather than fixed. */
+  blockingPlain: string[];
   /** Advisory items answered no, in plain words (the check text and the
    * reviewer's note), safe for Homa to relay in one sentence. */
   advisory: string[];
@@ -117,6 +122,7 @@ export function verifyChecklistAnswers(
   const verdict: ChecklistVerdict = {
     pass: true,
     issues: [],
+    blockingPlain: [],
     advisory: [],
     unconfirmed: [],
     answers: [],
@@ -143,6 +149,7 @@ export function verifyChecklistAnswers(
       verdict.issues.push(
         withNote(`${checklistIssueLabel(item.id)}: ${item.check}`, note),
       );
+      verdict.blockingPlain.push(withNote(item.check, note));
     } else {
       verdict.advisory.push(withNote(item.check, note));
     }

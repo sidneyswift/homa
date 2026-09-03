@@ -99,7 +99,7 @@ a question the picture can settle.
 ```homa-checklist
 - blocking guide-lines: Every writing row has three guide lines: a solid top line, a dashed midline centered between them, and a solid baseline.
 - blocking letters-on-guides: On every row that shows the name (model or trace), the letters sit on the guides: small letters fill midline to baseline, tall letters reach the top line, and descenders drop below the baseline.
-- blocking name-fills-row: The name, or its repeat on a short-name row, spans most of each row's width at full guide height, never bunched small at the left with a dead right half.
+- blocking name-fills-row: On every row that shows the name, the name (or its repeat on a short-name row) spans most of the row's width at full guide height, never bunched small at the left with a dead right half.
 - blocking fade-to-empty: After any model row, trace rows come first and at least one empty guide row for writing alone comes last, unless the brief says otherwise.
 - advisory trace-style: Trace letters are a dotted outline or a pale fill the child writes over; solid dark ink appears only on a model row.
 - advisory row-spacing: Rows are clearly separated by visible space, never stacked so tight they read as one ruled block.

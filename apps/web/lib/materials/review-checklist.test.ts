@@ -36,6 +36,7 @@ describe("verifyChecklistAnswers", () => {
     assert.deepEqual(verdict, {
       pass: true,
       issues: [],
+      blockingPlain: [],
       advisory: [],
       unconfirmed: [],
       answers: [],
@@ -62,6 +63,11 @@ describe("verifyChecklistAnswers", () => {
     assert.equal(verdict.pass, false);
     assert.deepEqual(verdict.issues, [
       "Checklist (trace-box-count): Exactly four trace boxes sit in one row under the model box. Reviewer: Page 1 shows three boxes.",
+    ]);
+    // The same finding in plain words, for a later-pages chunk whose
+    // findings are relayed to the parent rather than fixed.
+    assert.deepEqual(verdict.blockingPlain, [
+      "Exactly four trace boxes sit in one row under the model box. Reviewer: Page 1 shows three boxes.",
     ]);
     assert.deepEqual(verdict.advisory, []);
   });

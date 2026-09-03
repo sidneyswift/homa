@@ -56,7 +56,7 @@ export const RECIPE_CHECKLIST_SEVERITIES: readonly RecipeChecklistSeverity[] = [
 ];
 export const RECIPE_CHECKLIST_ID_PATTERN = /^[a-z0-9][a-z0-9-]{2,39}$/;
 export const RECIPE_CHECKLIST_MIN_CHECK_CHARS = 12;
-export const RECIPE_CHECKLIST_MAX_CHECK_CHARS = 260;
+export const RECIPE_CHECKLIST_MAX_CHECK_CHARS = 320;
 export const RECIPE_CHECKLIST_MAX_ITEMS = 8;
 
 const FENCE_OPEN = /^```([A-Za-z0-9_-]*)\s*$/;

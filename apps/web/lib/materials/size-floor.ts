@@ -185,8 +185,11 @@ export function evaluateSizeFloor(input: {
 }): SizeFloorEvaluation {
   const { revised } = input;
   if (revised === null) return { status: "no-revision", findings: [] };
-  if (input.imagePage) return { status: "image-page", findings: [] };
+  // A load that produced nothing is reported before the image-page skip:
+  // a double read failure on an image-direct revision is a read failure
+  // worth counting, not a page shape that was never going to compare.
   if (revised.status !== "ok") return { status: revised.status, findings: [] };
+  if (input.imagePage) return { status: "image-page", findings: [] };
   const previous = revised.geometry;
   const freshNext = input.next.filter((page) => input.freshPages.has(page.page));
   const previousByPage = new Map(previous.map((page) => [page.page, page]));
@@ -359,7 +362,7 @@ export async function loadRevisedPageGeometry(
   }
   if (row === null) {
     console.error(
-      "size floor: reading the revised version's geometry failed twice (comparing nothing):",
+      `size floor: reading the revised version's geometry failed twice (comparing nothing) for material ${input.materialId} in family ${input.familyId}:`,
       lastError instanceof Error ? lastError.message : "unknown",
     );
     return { status: "read-failed" };

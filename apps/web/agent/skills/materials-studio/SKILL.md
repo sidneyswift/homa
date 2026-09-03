@@ -749,8 +749,10 @@ tenth smaller than the version it revises, create_printable refuses it
 from 3in x 3in to 1.5in x 4in"). That is a measurement,
 not a verdict: a letter-formation page once shipped too small to trace
 because an overflow fix scaled the letters down and nobody asked the
-parent. Fix the problem you were solving without shrinking (another
-aspect ratio, drop something else, move content to its own page). If she
+parent. Fix the problem you were solving without shrinking: drop
+something else on the page, or move content to its own page. Do not
+regenerate the art at another aspect ratio to make room; that shrinks
+the drawn area and trips the same floor. If she
 asked for smaller, or you asked her one plain question and she agreed,
 call again with `allowSizeReduction: true` and quote her words in
 requestSummary. Never shrink silently, and never call the refusal a

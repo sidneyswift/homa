@@ -7,9 +7,11 @@ import type { RecipeChecklistItem } from "./recipe-checklist";
 import {
   buildChunkSchema,
   planReviewChunks,
+  reviewArtifact,
   REVIEW_MAX_PAGES,
   REVIEW_PAGE_CAP,
   selectPagesForReview,
+  type ReviewModelRunner,
 } from "./review-artifact";
 
 /**
@@ -241,6 +243,12 @@ describe("buildChunkSchema", () => {
     assert.equal(checklist.items.properties.note.maxLength, undefined);
   });
 
+  it("parses an object with no checklist key at all, leaving the items to be recorded as unanswered", () => {
+    const parsed = buildChunkSchema(items).safeParse({ pass: true, issues: [] });
+    assert.equal(parsed.success, true);
+    assert.equal(parsed.success ? parsed.data.checklist : "present", undefined);
+  });
+
   it("parses an empty answer set, a repeated id, and a long note instead of failing", () => {
     const schema = buildChunkSchema(items);
     assert.equal(schema.safeParse({ pass: true, issues: [], checklist: [] }).success, true);
@@ -278,5 +286,115 @@ describe("buildChunkSchema", () => {
     });
     assert.equal(parsed.checklist?.length, 2);
     assert.equal(parsed.checklist?.[0].answer, "no");
+  });
+});
+
+describe("reviewArtifact assembly", () => {
+  // Which chunk's checklist findings land where, in what words. A six-page
+  // recipe material has a blocking chunk (pages 1 to 4) and an advisory
+  // chunk (pages 5, 6); before this test, a blocking-severity no on the
+  // advisory chunk carried its Checklist (<id>) label into advisoryIssues,
+  // which create_printable tells Homa to relay to the parent in one plain
+  // sentence (review of PR #1069).
+  const items: readonly RecipeChecklistItem[] = [
+    { id: "trace-box-count", severity: "blocking", check: "Each model box has exactly four trace boxes beneath it." },
+    { id: "fade-order", severity: "advisory", check: "Support fades left to right across the trace row." },
+  ];
+  const sixPages = Array.from({ length: 6 }, (_, index) => page(index + 1, true));
+  const noUsage = async () => undefined;
+
+  function run(
+    answers: (later: boolean) => { pass: boolean; issues: string[]; checklist?: Array<{ id: string; answer: "yes" | "no" | "cannot_tell"; note: string }> },
+  ): ReviewModelRunner {
+    return async (call) => ({
+      object: answers(call.text.includes("pages 5, 6")),
+      usage: {},
+    });
+  }
+
+  it("relays a later chunk's checklist findings in plain words, never with the internal label", async () => {
+    const review = await reviewArtifact(
+      {
+        familyId: "family-a",
+        channel: "web",
+        pages: sixPages,
+        pageCount: 6,
+        brief: "Title: Letter B",
+        checklist: items,
+        recipe: "letter-number-formation-practice",
+      },
+      {
+        run: run((later) =>
+          later
+            ? {
+                pass: true,
+                issues: ["Page 5: the title is cut off at the right edge."],
+                checklist: [
+                  { id: "trace-box-count", answer: "no", note: "Page 6 shows three boxes." },
+                ],
+              }
+            : {
+                pass: true,
+                issues: [],
+                checklist: [
+                  { id: "trace-box-count", answer: "yes", note: "" },
+                  { id: "fade-order", answer: "yes", note: "" },
+                ],
+              },
+        ),
+        recordUsage: noUsage,
+      },
+    );
+    assert.ok(review);
+    assert.equal(review.pass, true, "a later page never holds the document back");
+    assert.deepEqual(review.issues, []);
+    assert.deepEqual(review.advisoryIssues, ["Page 5: the title is cut off at the right edge."]);
+    assert.deepEqual(review.checklistAdvisory, [
+      "Each model box has exactly four trace boxes beneath it. Reviewer: Page 6 shows three boxes.",
+    ]);
+    assert.deepEqual(review.checklistUnconfirmed, [
+      "Support fades left to right across the trace row.",
+    ]);
+    const relayed = JSON.stringify([
+      review.advisoryIssues,
+      review.checklistAdvisory,
+      review.checklistUnconfirmed,
+    ]);
+    assert.doesNotMatch(relayed, /Checklist \(/, "no internal label in anything Homa relays");
+    assert.deepEqual(review.reviewedPages, [1, 2, 3, 4, 5, 6]);
+  });
+
+  it("keeps the label on the blocking chunk's issues, which Homa fixes rather than relays", async () => {
+    const review = await reviewArtifact(
+      {
+        familyId: "family-a",
+        channel: "web",
+        pages: sixPages,
+        pageCount: 6,
+        brief: "Title: Letter B",
+        checklist: items,
+        recipe: "letter-number-formation-practice",
+      },
+      {
+        run: run((later) =>
+          later
+            ? { pass: true, issues: [] }
+            : {
+                pass: true,
+                issues: [],
+                checklist: [{ id: "trace-box-count", answer: "no", note: "Page 2 shows three boxes." }],
+              },
+        ),
+        recordUsage: noUsage,
+      },
+    );
+    assert.ok(review);
+    assert.equal(review.pass, false);
+    assert.match(review.issues[0], /^Checklist \(trace-box-count\): /);
+    assert.deepEqual(review.checklist?.blockingFailures, ["trace-box-count"]);
+    // The later chunk returned no checklist key at all: unanswered, not a
+    // null review, and both items surface as unconfirmed in plain words.
+    assert.equal(review.checklistUnconfirmed.length, 2);
+    assert.doesNotMatch(JSON.stringify(review.checklistUnconfirmed), /Checklist \(/);
   });
 });
