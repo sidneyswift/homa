@@ -258,7 +258,7 @@ export function sizeFloorRefusalNote(
   const scope = recipe
     ? `A size that has already rendered acceptably is a floor for every later revision of the same material (${recipe} recipe).`
     : "A size that has already rendered acceptably is a floor for every later revision of the same material.";
-  return `${SIZE_FLOOR_REFUSAL_PREFIX} this revision made ${joinFindings(findings)}. ${scope} Fix the problem you were solving without shrinking: drop something else on the page, or move content to its own page. Removing the largest element (a header, a frame, an answer key moved to its own page) also reads as shrinking; when the parent asked for that change, that is a legitimate reason for allowSizeReduction. If the parent asked for smaller, or you asked her and she agreed, call again with allowSizeReduction: true and quote her words in requestSummary. Otherwise ask her one plain question before trading size away; never shrink silently, and never call this a technical problem.`;
+  return `${SIZE_FLOOR_REFUSAL_PREFIX} in this revision, ${joinFindings(findings)}. ${scope} Fix the problem you were solving without shrinking: drop something else on the page, or move content to its own page. Removing the largest element (a header, a frame, an answer key moved to its own page) also reads as shrinking; when the parent asked for that change, that is a legitimate reason for allowSizeReduction. If the parent asked for smaller, or you asked her and she agreed, call again with allowSizeReduction: true and quote her words in requestSummary. Otherwise ask her one plain question before trading size away; never shrink silently, and never call this a technical problem.`;
 }
 
 /**
@@ -267,7 +267,7 @@ export function sizeFloorRefusalNote(
  * is on the record beside the request that permitted it.
  */
 export function sizeFloorAllowedNote(findings: readonly SizeFloorFinding[]): string {
-  return `Size floor: this version made ${joinFindings(findings)}; allowed because allowSizeReduction was set, with requestSummary as the record of what she asked for.`;
+  return `Size floor: in this version, ${joinFindings(findings)}; allowed because allowSizeReduction was set, with requestSummary as the record of what she asked for.`;
 }
 
 const SKIP_REASONS: Record<Exclude<SizeFloorStatus, "compared" | "no-revision">, string> = {

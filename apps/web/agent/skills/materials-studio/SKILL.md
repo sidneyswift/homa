@@ -745,8 +745,8 @@ eight small ones. Never pad with filler to raise the number.
 A revision may not shrink what a page already rendered at. When a
 revision's largest picture, text, or practice box comes out more than a
 tenth smaller than the version it revises, create_printable refuses it
-("Not sent: this revision made page 1's largest picture about 2.1in tall
-where the version it revises had it at 3.4in"). That is a measurement,
+("Not sent (size floor): in this revision, page 1's largest picture went
+from 3in x 3in to 1.5in x 4in"). That is a measurement,
 not a verdict: a letter-formation page once shipped too small to trace
 because an overflow fix scaled the letters down and nobody asked the
 parent. Fix the problem you were solving without shrinking (another
