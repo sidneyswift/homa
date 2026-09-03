@@ -33,8 +33,10 @@ const HELLO_CHARACTER_SIZE = 176;
  * - the sky's lightness span measured 6.7pt versus Headspace's 50pt on
  *   the same region; useWalkSky("vivid") below renders a real gradient.
  * - body-text hierarchy measured as an 18-to-16pt/12.5% step, not a real
- *   level change; the identity and instruction lines now use genuinely
- *   different roles, not a near-identical pair.
+ *   level change; the identity line moved to a genuinely different role
+ *   from the headline, not a near-identical pair. (The instruction line
+ *   this originally paired against is gone, cut 2026-09-03: see the
+ *   identity line's own comment below.)
  * - a real margin bug: the old maxWidth:"92%" put body text at a ~73pt
  *   right inset while every other element used a symmetric 24pt.
  * - copy tightened per the reviewer's exact suggestions (see each line).
@@ -114,33 +116,34 @@ export default function HelloScreen() {
         >
           {firstName !== undefined ? (
             <>
-              {/* Headline and identity line read as one group (tight
-                  gap, both tone="strong"): who's talking. Margin bug
-                  fixed 2026-09-01: the old maxWidth:"92%" put this text
-                  at a ~73pt right inset while every other element on
-                  the screen (including the button below) used a
-                  symmetric 24pt; text now shares that same margin. */}
+              {/* Headline and capability line read as one group (tight
+                  gap, both tone="strong"). Founder direction 2026-09-03:
+                  the headline itself now says who's talking ("I'm
+                  Homa"), so the line below drops the redundant
+                  self-introduction and states the range of what she
+                  does instead. Margin bug fixed 2026-09-01: the old
+                  maxWidth:"92%" put this text at a ~73pt right inset
+                  while every other element on the screen (including the
+                  button below) used a symmetric 24pt; text shares that
+                  same margin. */}
               <NativeText
                 role="display"
                 tone="strong"
                 style={{ fontSize: 40, lineHeight: 50 }}
               >
-                {firstName ? `Hi ${firstName}, glad you're here.` : "Hi, glad you're here."}
+                {firstName ? `Hi ${firstName}, I'm Homa.` : "Hi, I'm Homa."}
               </NativeText>
-              {/* Names what kind of worksheets, per the copy review:
-                  "worksheets" alone didn't commit to a category. */}
+              {/* Founder direction 2026-09-03: names the full range
+                  (a worksheet alone undersold what Homa does); the
+                  national-benchmark and state-hours claims are real,
+                  existing capabilities (progress reports, teaching-hours
+                  logging), not new ones invented for this line. The
+                  instruction line that used to sit below this one
+                  ("Your kid's name goes right on the first worksheet")
+                  is cut: this sentence alone now carries the whole
+                  first impression. */}
               <NativeText role="bodyLarge" tone="strong" style={{ marginTop: space.xs }}>
-                {"I'm Homa. I make custom learning worksheets for your kids."}
-              </NativeText>
-              {/* Decisive hierarchy step, not a 2pt/12.5% one: bodySmall
-                  is a real size-and-role drop from bodyLarge above, the
-                  ~1.8x-class jump the panel measured on Headspace's own
-                  headline-to-subtitle step. The old "Tell me about your
-                  family" sentence is cut per the copy review: it added
-                  no information and sat, unearning its place, between
-                  two stronger sentences. */}
-              <NativeText role="bodySmall" tone="muted" style={{ marginTop: space.lg }}>
-                {"Your kid's name goes right on the first worksheet."}
+                {"I help you make custom printable lesson worksheets for your kids, track their progress across national benchmarks, and save hours for your state."}
               </NativeText>
             </>
           ) : null}
@@ -156,7 +159,7 @@ export default function HelloScreen() {
         >
           {/* Button first, legal line below it: matches every other walk
               screen's footer (intent/kids/you/making all put their
-              secondary line under the primary button), so "Let's talk"
+              secondary line under the primary button), so this button
               lands close to every later screen's CTA instead of drifting
               with whatever sits below it. Caught 2026-09-02: measuring
               Headspace's own onboarding found its primary button pinned
@@ -168,8 +171,11 @@ export default function HelloScreen() {
               disclosure sentence (role="caption", correctly smaller, same
               role paywall.tsx uses for its own Terms/Privacy line), so it
               takes less vertical space and needs the extra padding below
-              to land the button at the same measured height regardless. */}
-          <Button label="Let's talk" size="lg" onPress={advance} testID="hello.letsGo" />
+              to land the button at the same measured height regardless.
+              Label is "Continue" (founder direction 2026-09-03), not
+              "Let's talk"; testID keeps its old name, an internal hook
+              with no user-visible effect. */}
+          <Button label="Continue" size="lg" onPress={advance} testID="hello.letsGo" />
           {/* Confirms what tapping just did, tying the legal links to the
               action already taken rather than two bare words with
               nothing connecting them to it. */}
