@@ -100,17 +100,23 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
 
 /** The full walk: every step re-enters on its own screen, the paywall
  *  and decline beats included (walk v2; resumability is the law). */
+// hello.tsx was cut 2026-09-03 (founder direction): its greeting and
+// pitch copy merged into (auth)/signin.tsx, since sign-in and the first
+// impression are the same moment now, not two screens. The walk itself
+// (this signed-in-only gate) has no reason to route anyone to sign-in,
+// so every step that used to mean "the walk's start" now means "the
+// walk's actual first screen": kids.
+const WALK_START_ROUTE = "/kids";
+
 const STEP_ROUTES: Record<OnboardingStep, string> = {
-  door: "/hello",
-  hello: "/hello",
+  door: WALK_START_ROUTE,
+  hello: WALK_START_ROUTE,
   // The intent screen was cut 2026-09-02 (gh#304): every pick led to
   // the same next step regardless, so the ask was never real. Nothing
-  // in the live walk writes step:"intent" anymore (hello.tsx only ever
-  // wrote "hello" on its own mount; the old intent.tsx screen reported
-  // its arrival but never advanced the saved step past "hello" either),
-  // but a stale row from before this change should still resume
-  // somewhere real rather than a route that no longer exists.
-  intent: "/hello",
+  // in the live walk ever wrote step:"intent" to the resume pointer, but
+  // a stale row from before that change should still resume somewhere
+  // real rather than a route that no longer exists.
+  intent: WALK_START_ROUTE,
   kids: "/kids",
   you: "/you",
   making: "/making",

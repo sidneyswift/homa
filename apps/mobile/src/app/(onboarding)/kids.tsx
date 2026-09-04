@@ -167,11 +167,14 @@ export default function KidsScreen() {
   }
 
   /**
-   * Every ask can be walked back (R4). From the first kid's name the
-   * walk returns to hello (the intent ask that used to sit between them
-   * was cut 2026-09-02: every pick led to the same next step regardless,
-   * gh#304); from a later kid's empty name card it returns to the
-   * previous kid's summary.
+   * Every ask can be walked back (R4), except the very first kid's name
+   * card: sign-in and the greeting merged into one pre-auth screen
+   * (founder direction 2026-09-03), so there is no later screen inside
+   * the signed-in-only walk to return to anymore, and routing back to
+   * sign-in itself would just bounce a session right back out (it
+   * redirects away whenever one exists). firstKidNameCard below hides
+   * the Back control for exactly that one case. From a later kid's
+   * empty name card, back returns to the previous kid's summary.
    */
   function goBack() {
     setError(null);
@@ -182,10 +185,11 @@ export default function KidsScreen() {
     if (kids.length > 1 && !kid.name.trim()) {
       setKids((current) => current.slice(0, -1));
       setSubStep("working");
-      return;
     }
-    router.replace("/hello" as never);
+    // else: the first kid's name card, nothing to go back to (see above).
   }
+
+  const firstKidNameCard = kids.length === 1;
 
   function toggleLove(option: string) {
     hapticTick();
@@ -340,7 +344,7 @@ export default function KidsScreen() {
                   onPress={() => goTo("age")}
                   testID="kids.name.next"
                 />
-                <BackLink onPress={goBack} />
+                {firstKidNameCard ? null : <BackLink onPress={goBack} />}
               </View>
             </View>
           ) : null}

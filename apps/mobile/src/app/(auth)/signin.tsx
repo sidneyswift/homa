@@ -2,30 +2,49 @@ import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 
 import { GoogleGlyph } from "../../components/brand/google-glyph";
 import { Button } from "../../components/ui/button";
 import { InlineError } from "../../components/ui/inline-error";
-import {
-  NativeHeading,
-  NativeIdentity,
-  NativeText,
-} from "../../components/ui/semantic";
+import { NativeText } from "../../components/ui/semantic";
 import { signInWithApple } from "../../features/auth/apple-sign-in";
 import { signInWithGoogle } from "../../features/auth/google-sign-in";
 import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
 import { signInFailureMessage } from "../../features/auth/sign-in-voice";
 import { LegalLine } from "../../features/auth/legal-line";
+import { HomaCharacter } from "../../features/voice/homa-character";
 import { quietColors, quietRadii } from "../../theme/native-projection";
 
+/** The hero's fixed height: bounded on purpose (not "however tall the
+ * mascot wants"), since this screen also has to fit the pitch text and
+ * three sign-in doors below it without pushing them off-screen. Founder
+ * direction 2026-09-03: merges what was two screens (a "Hi, I'm Homa"
+ * greeting, then a separate plain sign-in door screen) into one, since
+ * the greeting's copy has nothing to say that shouldn't be said before a
+ * parent commits, matching Headspace's own combined welcome+signup
+ * screen (surveyed live via Appllama the same session). */
+const HERO_HEIGHT = 156;
+const HERO_CHARACTER_SIZE = 100;
+
 /**
- * The front door. Three ways in, one screen, no distinction between a
- * parent arriving for the first time and one coming back: Apple and
- * Google already decide that themselves, and the email code resolves it
- * server side. Founder ruling 2026-08-18.
+ * The front door AND the first impression, merged (founder direction
+ * 2026-09-03; previously separate screens, hello.tsx and this one).
+ * Three ways in, one screen, no distinction between a parent arriving
+ * for the first time and one coming back: Apple and Google already
+ * decide that themselves, and the email code resolves it server side.
+ * Founder ruling 2026-08-18.
+ *
+ * The greeting can't use a name here (nobody is signed in yet), so it
+ * stays the generic form hello.tsx already used for that case: "Hi, I'm
+ * Homa." The mascot and sky are rendered directly rather than through
+ * WalkScene/WalkCharacterProvider: those exist for the persistent,
+ * animated-between-screens stage inside the signed-in-only (onboarding)
+ * walk, and this is a single pre-auth screen with nothing to persist
+ * across.
  *
  * There is no password anywhere in this app, so there is nothing to
  * recover and no reset action competing with the way in. There is also
@@ -36,8 +55,8 @@ import { quietColors, quietRadii } from "../../theme/native-projection";
  * rather than a credential form, and every one of them says somewhere
  * that the single screen serves new and returning people both. The
  * caption above the doors is that sentence and it is dry on purpose:
- * the screen's charm is spent on the line above the fold, and a second
- * memorable sentence would only compete with the first.
+ * the screen's charm is spent on the pitch above the fold, and a second
+ * memorable sentence would only compete with it.
  *
  * Values come from the contract via native-projection. Not tokens.ts,
  * which apps/mobile/CLAUDE.md freezes as a compatibility export.
@@ -89,16 +108,58 @@ export default function SignInScreen() {
         <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 24 }} />
 
         <View style={{ gap: 16 }}>
-          <NativeIdentity variant="mark" size={48} />
-          {/* Founder line, 2026-08-18. Two words carry the whole screen,
-              so it takes level 1 rather than level 2: at 28pt a line this
-              short stops holding the composition and the canvas above it
-              reads as a page that failed to load.
-
-              The glyph rather than the lockup, because this line does not
-              spell Homa and the mark is the only place the name appears
-              before a parent taps. */}
-          <NativeHeading level={1}>Homeschool, handled.</NativeHeading>
+          <View
+            style={{
+              height: HERO_HEIGHT,
+              borderRadius: quietRadii.card,
+              overflow: "hidden",
+            }}
+          >
+            <Svg
+              pointerEvents="none"
+              width="100%"
+              height="100%"
+              style={{ position: "absolute", top: 0, left: 0 }}
+            >
+              <Defs>
+                <LinearGradient id="signinSky" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0" stopColor="#F2703A" />
+                  <Stop offset="0.46" stopColor="#F7BE6E" />
+                  <Stop offset="0.78" stopColor="#FBE8DF" />
+                  <Stop offset="1" stopColor={quietColors.page} />
+                </LinearGradient>
+              </Defs>
+              <Rect x={0} y={0} width="100%" height="100%" fill="url(#signinSky)" />
+            </Svg>
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                alignItems: "center",
+                paddingBottom: 6,
+              }}
+            >
+              <HomaCharacter state="idle" size={HERO_CHARACTER_SIZE} act={null} />
+            </View>
+          </View>
+          {/* Generic, not a name: nobody is signed in yet. Matches
+              hello.tsx's own no-name fallback line, since it's the same
+              sentence for the same reason now. */}
+          <NativeText role="display" tone="strong" style={{ fontSize: 32, lineHeight: 40 }}>
+            {"Hi, I'm Homa."}
+          </NativeText>
+          {/* Founder direction 2026-09-03, iterated live against the
+              simulator render on hello.tsx before the merge: names the
+              full range (a worksheet alone undersold it). The national-
+              benchmark and state-hours claims are real, existing
+              capabilities (progress reports, teaching-hours logging),
+              not new ones invented for this line. */}
+          <NativeText role="body" tone="strong">
+            {"I make custom printable lessons for your kids, track their progress across national benchmarks, and help save and submit hours to your state."}
+          </NativeText>
         </View>
 
         {/* The largest gap on the screen, and where the error lives. An
