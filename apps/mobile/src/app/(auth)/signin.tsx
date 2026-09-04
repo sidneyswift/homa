@@ -174,11 +174,16 @@ export default function SignInScreen() {
               a thumb that was already reaching for them. Headspace's own
               reference screen carries a comparably large gap here too
               (Appllama, 2026-09-03): a big gap below short copy is a
-              pattern this category already uses, not a hole to fill in. */}
+              pattern this category already uses, not a hole to fill in.
+              flexShrink: 1 carries forward the #985 fix (2026-08-18): at
+              huge Dynamic Type sizes this spacer yields its space back to
+              the now-taller headline/pitch/buttons instead of forcing an
+              overflow, the same structural guarantee the old top-air
+              spacer gave the previous version of this screen. */}
           <View
             style={{
               flexGrow: 1,
-              flexShrink: 0,
+              flexShrink: 1,
               flexBasis: 0,
               minHeight: 24,
               justifyContent: "flex-end",
