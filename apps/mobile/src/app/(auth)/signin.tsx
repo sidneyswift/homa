@@ -19,16 +19,21 @@ import { LegalLine } from "../../features/auth/legal-line";
 import { HomaCharacter } from "../../features/voice/homa-character";
 import { quietColors, quietRadii } from "../../theme/native-projection";
 
-/** The hero's fixed height: bounded on purpose (not "however tall the
+/**
+ * The hero's fixed height: bounded on purpose (not "however tall the
  * mascot wants"), since this screen also has to fit the pitch text and
- * three sign-in doors below it without pushing them off-screen. Founder
- * direction 2026-09-03: merges what was two screens (a "Hi, I'm Homa"
- * greeting, then a separate plain sign-in door screen) into one, since
- * the greeting's copy has nothing to say that shouldn't be said before a
- * parent commits, matching Headspace's own combined welcome+signup
- * screen (surveyed live via Appllama the same session). */
-const HERO_HEIGHT = 156;
-const HERO_CHARACTER_SIZE = 100;
+ * three sign-in doors below it without pushing them off-screen.
+ *
+ * Full-bleed, not a card: checked live against the actual Headspace
+ * "Onboarding Welcome" screen this merge was modeled on (Appllama,
+ * 2026-09-03) and its sky runs edge to edge and behind the status bar,
+ * with a mascot that dominates the top third. The first build of this
+ * merge kept a rounded, margined gradient card instead, which reads
+ * closer to a banner than a backdrop. SafeAreaView below only insets
+ * "bottom" so this block can sit behind the Dynamic Island the same way.
+ */
+const HERO_HEIGHT = 260;
+const HERO_CHARACTER_SIZE = 150;
 
 /**
  * The front door AND the first impression, merged (founder direction
@@ -55,6 +60,13 @@ const HERO_CHARACTER_SIZE = 100;
  * form. Founder direction 2026-09-03: no caption stating that the doors
  * serve new and returning parents alike, the doors already say that by
  * having no separate "sign up" path at all.
+ *
+ * The three doors are deliberately not equal weight, checked against
+ * Headspace's own Log in / Sign up / Activate benefit stack and
+ * Rosebud's Google+Apple / outlined-email pattern (Appllama, 2026-09-03):
+ * Apple stays Apple's own mandated black button, Google stays a filled
+ * secondary door, and email steps back to a quiet text-weight door,
+ * since it is the fallback path rather than a third equal provider.
  *
  * Values come from the contract via native-projection. Not tokens.ts,
  * which apps/mobile/CLAUDE.md freezes as a compatibility export.
@@ -90,155 +102,164 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView
-      edges={["top", "bottom"]}
+      edges={["bottom"]}
       style={{ flex: 1, backgroundColor: quietColors.page }}
     >
       <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingHorizontal: 20,
-          paddingTop: 24,
-          paddingBottom: 24,
-        }}
+        contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Top air. May shrink so the voice block never leaves the screen. */}
-        <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 24 }} />
-
-        <View style={{ gap: 16 }}>
+        {/* Full-bleed hero: edge to edge and behind the status bar /
+            Dynamic Island, not a margined card (see HERO_HEIGHT above). */}
+        <View style={{ height: HERO_HEIGHT }}>
+          <Svg
+            pointerEvents="none"
+            width="100%"
+            height="100%"
+            style={{ position: "absolute", top: 0, left: 0 }}
+          >
+            <Defs>
+              <LinearGradient id="signinSky" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="#F2703A" />
+                <Stop offset="0.46" stopColor="#F7BE6E" />
+                <Stop offset="0.78" stopColor="#FBE8DF" />
+                <Stop offset="1" stopColor={quietColors.page} />
+              </LinearGradient>
+            </Defs>
+            <Rect x={0} y={0} width="100%" height="100%" fill="url(#signinSky)" />
+          </Svg>
           <View
+            pointerEvents="none"
             style={{
-              height: HERO_HEIGHT,
-              borderRadius: quietRadii.card,
-              overflow: "hidden",
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              alignItems: "center",
+              paddingBottom: 6,
             }}
           >
-            <Svg
-              pointerEvents="none"
-              width="100%"
-              height="100%"
-              style={{ position: "absolute", top: 0, left: 0 }}
-            >
-              <Defs>
-                <LinearGradient id="signinSky" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor="#F2703A" />
-                  <Stop offset="0.46" stopColor="#F7BE6E" />
-                  <Stop offset="0.78" stopColor="#FBE8DF" />
-                  <Stop offset="1" stopColor={quietColors.page} />
-                </LinearGradient>
-              </Defs>
-              <Rect x={0} y={0} width="100%" height="100%" fill="url(#signinSky)" />
-            </Svg>
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                alignItems: "center",
-                paddingBottom: 6,
-              }}
-            >
-              <HomaCharacter state="idle" size={HERO_CHARACTER_SIZE} act={null} />
-            </View>
+            <HomaCharacter state="idle" size={HERO_CHARACTER_SIZE} act={null} />
           </View>
-          {/* Generic, not a name: nobody is signed in yet. Matches
-              hello.tsx's own no-name fallback line, since it's the same
-              sentence for the same reason now. */}
-          <NativeText role="display" tone="strong" style={{ fontSize: 32, lineHeight: 40 }}>
-            {"Hi, I'm Homa."}
-          </NativeText>
-          {/* Founder direction 2026-09-03, iterated live against the
-              simulator render on hello.tsx before the merge: names the
-              full range (a worksheet alone undersold it). The national-
-              benchmark and state-hours claims are real, existing
-              capabilities (progress reports, teaching-hours logging),
-              not new ones invented for this line. */}
-          <NativeText role="body" tone="strong">
-            {"I make custom printable lessons for your kids, track their progress across national benchmarks, and help save and submit hours to your state."}
-          </NativeText>
         </View>
 
-        {/* The largest gap on the screen, and where the error lives. An
-            error must eat empty space, never shove the doors down under
-            a thumb that was already reaching for them. */}
         <View
           style={{
-            flexGrow: 1.6,
-            flexShrink: 0,
-            flexBasis: 0,
-            minHeight: 40,
-            justifyContent: "flex-end",
+            flexGrow: 1,
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 24,
           }}
         >
-          {error ? (
-            <View style={{ marginBottom: 16 }}>
-              <InlineError message={error} />
-            </View>
-          ) : null}
-        </View>
+          <View style={{ gap: 16 }}>
+            {/* Generic, not a name: nobody is signed in yet. Matches
+                hello.tsx's own no-name fallback line, since it's the same
+                sentence for the same reason now. */}
+            <NativeText role="display" tone="strong" style={{ fontSize: 32, lineHeight: 40 }}>
+              {"Hi, I'm Homa."}
+            </NativeText>
+            {/* Founder direction 2026-09-03, iterated live against the
+                simulator render on hello.tsx before the merge: names the
+                full range (a worksheet alone undersold it). The national-
+                benchmark and state-hours claims are real, existing
+                capabilities (progress reports, teaching-hours logging),
+                not new ones invented for this line. */}
+            <NativeText role="body" tone="strong">
+              {"I make custom printable lessons for your kids, track their progress across national benchmarks, and help save and submit hours to your state."}
+            </NativeText>
+          </View>
 
-        <View style={{ gap: 12 }}>
-          {Platform.OS === "ios" ? (
-            // Apple's own component, look untouched, first per guideline
-            // 4.8. CONTINUE rather than SIGN_IN: this screen makes no
-            // distinction, so "sign in" would be untrue for a new parent,
-            // and it gives all three doors the same verb. Radius is the
-            // contract's control radius; the old 26 made a pill sitting
-            // on two 12-radius neighbours.
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={
-                AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+          {/* The largest gap on the screen, and where the error lives. An
+              error must eat empty space, never shove the doors down under
+              a thumb that was already reaching for them. Headspace's own
+              reference screen carries a comparably large gap here too
+              (Appllama, 2026-09-03): a big gap below short copy is a
+              pattern this category already uses, not a hole to fill in.
+              flexShrink: 1 carries forward the #985 fix (2026-08-18): at
+              huge Dynamic Type sizes this spacer yields its space back to
+              the now-taller headline/pitch/buttons instead of forcing an
+              overflow, the same structural guarantee the old top-air
+              spacer gave the previous version of this screen. */}
+          <View
+            style={{
+              flexGrow: 1,
+              flexShrink: 1,
+              flexBasis: 0,
+              minHeight: 24,
+              justifyContent: "flex-end",
+            }}
+          >
+            {error ? (
+              <View style={{ marginBottom: 16 }}>
+                <InlineError message={error} />
+              </View>
+            ) : null}
+          </View>
+
+          <View style={{ gap: 12 }}>
+            {Platform.OS === "ios" ? (
+              // Apple's own component, look untouched, first per guideline
+              // 4.8. CONTINUE rather than SIGN_IN: this screen makes no
+              // distinction, so "sign in" would be untrue for a new parent,
+              // and it gives all three doors the same verb. Radius is the
+              // contract's control radius; the old 26 made a pill sitting
+              // on two 12-radius neighbours.
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={
+                  AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+                }
+                buttonStyle={
+                  AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+                }
+                cornerRadius={quietRadii.control}
+                accessibilityLabel="Continue with Apple"
+                accessibilityState={{
+                  disabled: signInBusy,
+                  busy: oauthPending === "apple",
+                }}
+                pointerEvents={signInBusy ? "none" : "auto"}
+                style={{ width: "100%", height: 52, opacity: signInBusy ? 0.55 : 1 }}
+                onPress={() => {
+                  if (signInBusy) return;
+                  void continueWith("apple", signInWithApple);
+                }}
+              />
+            ) : null}
+
+            <Button
+              label={
+                oauthPending === "google"
+                  ? "Opening Google…"
+                  : "Continue with Google"
               }
-              buttonStyle={
-                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-              }
-              cornerRadius={quietRadii.control}
-              accessibilityLabel="Continue with Apple"
-              accessibilityState={{
-                disabled: signInBusy,
-                busy: oauthPending === "apple",
-              }}
-              pointerEvents={signInBusy ? "none" : "auto"}
-              style={{ width: "100%", height: 52, opacity: signInBusy ? 0.55 : 1 }}
-              onPress={() => {
-                if (signInBusy) return;
-                void continueWith("apple", signInWithApple);
-              }}
+              variant="secondary"
+              size="lg"
+              icon={<GoogleGlyph />}
+              onPress={() => void continueWith("google", signInWithGoogle)}
+              disabled={signInBusy}
+              busy={oauthPending === "google"}
             />
-          ) : null}
 
-          <Button
-            label={
-              oauthPending === "google"
-                ? "Opening Google…"
-                : "Continue with Google"
-            }
-            variant="secondary"
-            size="lg"
-            icon={<GoogleGlyph />}
-            onPress={() => void continueWith("google", signInWithGoogle)}
-            disabled={signInBusy}
-            busy={oauthPending === "google"}
-          />
+            {/* Quiet, not a third equal provider: Apple and Google are
+                real accounts a parent already has; email is the fallback
+                for a parent with neither, and every reference screen
+                studied (Headspace, Rosebud, Duolingo ABC) steps its
+                non-provider path down a visual tier instead of matching
+                the providers' own weight (Appllama, 2026-09-03). Smallest
+                size on the scale, not "lg" like the doors above it: a
+                transparent button at door-height left a tall dead box
+                around the text once it lost its fill and border. */}
+            <Button
+              label="Continue with email"
+              variant="ghost"
+              size="sm"
+              accessibilityHint="Opens a step to enter your email, then a six digit code."
+              onPress={() => router.push("/email")}
+              disabled={signInBusy}
+            />
 
-          {/* Same weight as Google, and no mail glyph. The only thing
-              separating the two is Google's own mandated mark, which is
-              Google's requirement rather than a demotion Homa applied.
-              Email is the one route for a parent with neither account,
-              which skews least technical, so it never becomes a control
-              that does not look like a control. */}
-          <Button
-            label="Continue with email"
-            variant="secondary"
-            size="lg"
-            accessibilityHint="Opens a step to enter your email, then a six digit code."
-            onPress={() => router.push("/email")}
-            disabled={signInBusy}
-          />
-
-          <LegalLine />
+            <LegalLine />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
