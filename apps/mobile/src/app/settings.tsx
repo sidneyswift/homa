@@ -183,7 +183,16 @@ export default function SettingsScreen() {
           <Button
             label="Sign out"
             variant="secondary"
-            onPress={() => void supabase.auth.signOut()}
+            onPress={() => {
+              // /settings sits outside the (tabs) group, so the reactive
+              // `if (!session) return <Redirect>` in (tabs)/_layout.tsx
+              // never re-evaluates this screen: signOut() alone cleared
+              // the session but left the parent stranded here until a
+              // full app relaunch (found live 2026-09-03). delete-account.tsx
+              // already navigates explicitly after its own signOut for the
+              // same reason; this mirrors it.
+              void supabase.auth.signOut().then(() => router.replace("/signin"));
+            }}
           />
           <Button
             label="Delete account"
