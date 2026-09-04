@@ -172,14 +172,8 @@ describe("native entry accessibility", () => {
     expect(mockOpenWebOnboarding).not.toHaveBeenCalled();
   });
 
-  it("tells a stranger this screen is for them too, and links both documents", async () => {
+  it("links both documents", async () => {
     const view = await render(<SignInScreen />);
-
-    // Every critic in the design loop asked for this line independently: a
-    // door list says nothing about whether a new parent belongs here.
-    expect(
-      view.getByText("New here or coming back, any of these gets you in."),
-    ).toBeVisible();
 
     for (const name of ["Terms of use", "Privacy policy"]) {
       expect(view.getByRole("link", { name })).toBeVisible();

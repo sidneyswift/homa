@@ -50,13 +50,11 @@ const HERO_CHARACTER_SIZE = 100;
  * recover and no reset action competing with the way in. There is also
  * no route out to the web: setup finishes here.
  *
- * Shape comes from a survey of 28 real iOS entry screens. Two findings
- * drive it. Eight of ten comparable screens are a short list of doors
- * rather than a credential form, and every one of them says somewhere
- * that the single screen serves new and returning people both. The
- * caption above the doors is that sentence and it is dry on purpose:
- * the screen's charm is spent on the pitch above the fold, and a second
- * memorable sentence would only compete with it.
+ * Shape comes from a survey of 28 real iOS entry screens: eight of ten
+ * comparable screens are a short list of doors rather than a credential
+ * form. Founder direction 2026-09-03: no caption stating that the doors
+ * serve new and returning parents alike, the doors already say that by
+ * having no separate "sign up" path at all.
  *
  * Values come from the contract via native-projection. Not tokens.ts,
  * which apps/mobile/CLAUDE.md freezes as a compatibility export.
@@ -182,12 +180,6 @@ export default function SignInScreen() {
         </View>
 
         <View style={{ gap: 12 }}>
-          {/* "any of these" rather than "all three": the Apple door is
-              iOS only, and the sentence has to stay true on Android. */}
-          <NativeText role="caption" tone="muted">
-            New here or coming back, any of these gets you in.
-          </NativeText>
-
           {Platform.OS === "ios" ? (
             // Apple's own component, look untouched, first per guideline
             // 4.8. CONTINUE rather than SIGN_IN: this screen makes no
