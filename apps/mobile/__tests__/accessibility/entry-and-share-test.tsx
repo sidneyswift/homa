@@ -150,13 +150,20 @@ describe("native entry accessibility", () => {
     expect(entryActions[1]).toHaveAccessibleName("Continue with Google");
     expect(entryActions[2]).toHaveAccessibleName("Continue with email");
 
-    // One silhouette. Apple's component takes an exact height, ours a floor.
+    // One silhouette for the two real providers. Apple's component takes
+    // an exact height, Google a floor at the same size. Email steps down
+    // a tier (2026-09-03, checked against Headspace/Rosebud/Duolingo ABC
+    // via Appllama): it is the fallback, not a third equal provider, and
+    // stays only at the platform's 44pt minimum tap target.
     expect(
       view.getByRole("button", { name: "Continue with Apple" }),
     ).toHaveStyle({ height: 52 });
-    for (const name of ["Continue with Google", "Continue with email"]) {
-      expect(view.getByRole("button", { name })).toHaveStyle({ minHeight: 52 });
-    }
+    expect(
+      view.getByRole("button", { name: "Continue with Google" }),
+    ).toHaveStyle({ minHeight: 52 });
+    expect(
+      view.getByRole("button", { name: "Continue with email" }),
+    ).toHaveStyle({ minHeight: 44 });
 
     // Founder ruling 2026-08-18: no password anywhere in this app, so no
     // credential fields and no recovery action for a parent to find.

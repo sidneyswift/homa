@@ -294,6 +294,7 @@ export function NativeAction({
         {
           minHeight: sizeStyle.minHeight,
           borderRadius: radius.control,
+          borderCurve: "continuous",
           borderWidth: 1,
           borderColor: resting.borderColor,
           backgroundColor: resting.backgroundColor,
