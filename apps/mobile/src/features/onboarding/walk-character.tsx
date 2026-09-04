@@ -23,10 +23,13 @@ import type { CharacterAct, CharacterState } from "../voice/character-state";
  * web ThinkingMark's crayon act).
  *
  * Size defaults to DEFAULT_CHARACTER_SIZE everywhere ("one size on every
- * beat" so a scale jump never reads as a different creature). Founder
- * exception 2026-09-01: hello.tsx may request a larger size for its
- * one-time entrance, the stage height grows to match so she never clips
- * (see walk-scene.tsx). Every other screen stays at the default.
+ * beat" so a scale jump never reads as a different creature). A screen
+ * may opt into a larger one-time entrance via useWalkCharacterSize below
+ * (the stage height grows to match so she never clips, see walk-scene.tsx);
+ * none currently does (hello.tsx, the original user, was cut 2026-09-03,
+ * its greeting merged into the pre-auth (auth)/signin.tsx, which isn't
+ * part of this walk and renders HomaCharacter directly instead). Every
+ * screen that never opts in stays at the default.
  */
 
 export const DEFAULT_CHARACTER_SIZE = 96;

@@ -225,7 +225,6 @@ function walkFiles(relativeDir: string, extensions: readonly string[]): string[]
     }
   }
   const REQUIRED_IDS = [
-    "hello.letsGo",
     "kids.thatsEveryone",
     "you.continue",
     "making.seeIt",

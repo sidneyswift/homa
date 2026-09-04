@@ -147,7 +147,7 @@ export const nativeAccessibilityJourneys: readonly NativeAccessibilityJourney[] 
 /** Every Expo surface is classified. New files must declare an owner here. */
 export const nativeAccessibilitySurfaces: readonly NativeAccessibilitySurface[] = [
   { file: "apps/mobile/src/app/_layout.tsx", kind: "layout", owner: "gh#299", reason: "Root bootstrap and navigation shell." },
-  { file: "apps/mobile/src/app/(auth)/signin.tsx", kind: "priority", owner: "gh#304", reason: "Entry. Three doors, no password, no account recovery to reach." },
+  { file: "apps/mobile/src/app/(auth)/signin.tsx", kind: "priority", owner: "gh#304", reason: "Entry and first impression, merged 2026-09-03. Three doors, no password, no account recovery to reach." },
   { file: "apps/mobile/src/app/(auth)/email.tsx", kind: "priority", owner: "gh#304", reason: "Email door: address, then a six digit code." },
   { file: "apps/mobile/src/app/(tabs)/_layout.tsx", kind: "layout", owner: "gh#299", reason: "Signed-in shell and drawer." },
   { file: "apps/mobile/src/app/(tabs)/index.tsx", kind: "priority", owner: "gh#303", reason: "Current front-door redirect and future Today owner." },
@@ -161,7 +161,6 @@ export const nativeAccessibilitySurfaces: readonly NativeAccessibilitySurface[] 
   { file: "apps/mobile/src/app/settings.tsx", kind: "supporting", owner: "gh#299", reason: "Account, family, plan, and policy access." },
   { file: "apps/mobile/src/app/settings/delete-account.tsx", kind: "supporting", owner: "gh#299", reason: "Irreversible account deletion." },
   { file: "apps/mobile/src/app/(onboarding)/_layout.tsx", kind: "layout", owner: "gh#304", reason: "Native onboarding walk shell, signed-in only." },
-  { file: "apps/mobile/src/app/(onboarding)/hello.tsx", kind: "priority", owner: "gh#304", reason: "Post-account celebration beat, auto-advances." },
   { file: "apps/mobile/src/app/(onboarding)/you.tsx", kind: "priority", owner: "gh#304", reason: "Parent name and state ask between kids and making." },
   { file: "apps/mobile/src/app/(onboarding)/kids.tsx", kind: "priority", owner: "gh#304", reason: "Kid intro stepper: name, age, loves, working-on." },
   { file: "apps/mobile/src/app/(onboarding)/making.tsx", kind: "priority", owner: "gh#304", reason: "Live worksheet build with real job progress." },

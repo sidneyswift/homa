@@ -67,7 +67,11 @@ function DevRestartWalk() {
     setBusy(true);
     await resetOnboardingWalk(family.id);
     setBusy(false);
-    router.replace("/hello" as never);
+    // hello.tsx is gone (merged into sign-in, 2026-09-03); kids is the
+    // walk's real first screen now. resetOnboardingWalk still writes
+    // step:"hello" to the DB, which is fine, onboarding-gate.tsx's own
+    // STEP_ROUTES resolves that symbolic value to /kids too.
+    router.replace("/kids" as never);
   }
 
   return (
