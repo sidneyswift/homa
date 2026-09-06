@@ -536,7 +536,7 @@ Month preview contains four weeks. Approval validates children/dates/materials/u
 
 **Acceptance:** web gets a usable current PDF and no native-sheet claim; foreign/stale ID and uncertain answer-key/page-role requests refuse; native canceled/failed/completed states stay distinct; final two-page artifact opens at the expected URL. Physical mobile-web printer output still needs device evidence. Unattended delivery, saved printers and automatic physical printing remain a separate integration/product decision.
 
-**Implementation evidence:** the [current-material print handoff](2026-09-06-material-print-handoff.md) traces the fleet procedure, tool receipt, web/native consumers, authenticated page-selection route and atomic current-revision finalizer. Integrated code and local browser/real-database checks are verified there. Release and physical-device evidence are explicitly separate; this paragraph is not a shipped claim.
+**Implementation and live evidence:** PR #1125 deployed as `7df600cd`, with required CI, the additive print precondition and exact production READY verified. The real mobile-web conversation and card prepared two copies with the answer-key page excluded. Its download returned 422. The actual Next bundle passed a numeric module ID to a Node worker that requires a filesystem path. This live failure was escalated September 6 at 23:04:46 UTC and is being corrected in the [current-material print handoff](2026-09-06-material-print-handoff.md) release evidence. Passing source tests or dependency tracing did not prove the deployed worker. Physical printing remains unverified.
 
 ## Implementation order and completion evidence
 

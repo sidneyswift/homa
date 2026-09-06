@@ -44,6 +44,18 @@ Independent review reproduced an old PDF download when the active-material inven
 
 The first PR #1125 CI run caught an oversized native instruction file and three stale lesson-button expectations. The print procedure stays in the fleet skill, keeping the native instruction file within its budget; the actual lesson-view wrapper now passes all 22 tests with the shipped label, Open PDF to print. These initial CI failures are retained. Final required CI and hosted acceptance are still pending.
 
+## First deployment and runtime correction
+
+PR #1125 merged as `7df600cdfa1d7ef8cc51414d7a922201969bf020`. Required PR/main CI and the OTA workflow passed. Production deployment `dpl_38MG47NTZ9foLGiU7apBWCP2Ueno` was READY at that exact source. The additive print precondition is applied as production migration `20260906223632`.
+
+The first two hosted operators failed before model dispatch because their composer locators were wrong. Two later real conversations prepared the correct two-copy, answer-key-excluded receipt, but stopped on incorrect operator assumptions about embedding attribution and saved-message counts. Those runs remain failures. Their retained fixture cleanup has its own reviewed evidence; a passing model receipt does not certify the UI download.
+
+The next hosted run reached the deployed card. Preparation returned 200, but the selected-PDF request returned 422 and displayed the verification refusal. The actual Next chunk supplied numeric bundle ID `546091` as the worker's PDF-library path. Native Node workers cannot resolve that bundle ID. The previously passing direct TypeScript tests and complete dependency inventory did not prove this runtime boundary. The failed run's two artifacts and DB/Auth fixture records were removed with absence verified; deletion job `7117ceec-e43e-4af7-af27-a5a04af33641` remains for canonical provider/token drain.
+
+The correction gets the filename of the already-loaded external PDF library from Node's public module cache, matching the exact imported PDFDocument, PDFName and PDFArray exports. It neither hardcodes Turbopack's external alias nor assumes the source package symlink ships. The same literal imports retain dependency tracing. Parser limits, static-document validation, selected-page semantics and caller authorization remain unchanged. The actual compiled GET and native worker pass from a relocated inventory of 306 deployment files, with native dependency loading outside that copy blocked. The original app package symlink is absent. Two successful requests preserve exact decoded page streams and page dimensions for selected and all-page output. A deliberate numeric-path fault reproduces 422; signed-out, foreign-artifact and stale-selection controls refuse before a fetch or worker. Auth, material reads and the exact synthetic Blob response are test seams, so hosted authentication remains a separate gate. This contract now runs after every Next build, including Vercel. Final production acceptance remains open until the real button returns verified selected PDF bytes.
+
+The [compiled-worker receipt](../journeys/evidence/2026-09-06-print-worker-build-contract.json) and [original live failure screenshot](../journeys/evidence/2026-09-06-print-download-production-failure.png) preserve the bounded runtime evidence. Root independently reran the compiled contract after review; all three native workers exited within its five-second verification ceiling.
+
 ## Evidence locations
 
 The local integration receipts are under `/tmp/homa-feedback-implementation/1105-*`. The reviewed preparation is retained under `1105-prepared` and `1105-refreshed-bc8f00af`; original failures are preserved. Repository screenshots and release receipts accompany the final PR evidence.

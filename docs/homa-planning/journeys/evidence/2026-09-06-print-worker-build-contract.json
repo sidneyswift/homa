@@ -1,0 +1,81 @@
+{
+  "passed": true,
+  "compiledGet": true,
+  "nativeWorkers": [
+    {
+      "pdfLibPath": "node_modules/.pnpm/pdf-lib@1.17.1/node_modules/pdf-lib/cjs/index.js",
+      "inputBytes": 2363,
+      "injectedNumericFault": false,
+      "exited": true
+    },
+    {
+      "pdfLibPath": "node_modules/.pnpm/pdf-lib@1.17.1/node_modules/pdf-lib/cjs/index.js",
+      "inputBytes": 2363,
+      "injectedNumericFault": false,
+      "exited": true
+    },
+    {
+      "pdfLibPath": "node_modules/.pnpm/pdf-lib@1.17.1/node_modules/pdf-lib/cjs/index.js",
+      "inputBytes": 2363,
+      "injectedNumericFault": true,
+      "exited": true
+    }
+  ],
+  "fixtureSeams": [
+    "getMaterialCaller",
+    "resolveActiveMaterialCaller",
+    "resolveApiFamily"
+  ],
+  "originalAppPackageLinkAbsent": true,
+  "loadFence": "All native file resolution confined to relocated NFT tree, including inherited worker preload",
+  "loadedFileCount": 259,
+  "cases": [
+    {
+      "case": "answer-key-excluded",
+      "status": 200,
+      "pages": 2,
+      "bytes": 1070,
+      "sha256": "ed55aff2b404965ddb31279f6f527eeeb751a1bd3a0a3170c555e9a7ad5108b3",
+      "exactOriginalPageStreams": true
+    },
+    {
+      "case": "all-original-pages",
+      "status": 200,
+      "pages": 3,
+      "bytes": 1298,
+      "sha256": "6517f4d6e9353fef4ab8a02783f0f42b41ffb423b71ee15e1e12a0ee30bcfc3a",
+      "exactOriginalPageStreams": true
+    },
+    {
+      "case": "numeric-worker-path-fault-injection",
+      "status": 422,
+      "note": "Intentional injection of the observed old compiled numeric value, not execution of a preserved old build."
+    },
+    {
+      "case": "signed-out",
+      "status": 401,
+      "fetches": 0,
+      "workers": 0
+    },
+    {
+      "case": "foreign-blob",
+      "status": 409,
+      "fetches": 0,
+      "workers": 0
+    },
+    {
+      "case": "stale-selection",
+      "status": 409,
+      "fetches": 0,
+      "workers": 0
+    }
+  ],
+  "traceFileCount": 306,
+  "traceBytes": 4793644,
+  "traceSha256": "978510762fb96d15e772eff7155f911ec81770ba659c6dbed585eb0311544f7e",
+  "routeSha256": "08e20408197d29f5e7419b6a7aa924a7a04aaf148e830d1a7500181f0d8d73b5",
+  "printSourceSha256": "393c77b94640ac7829f0c33a163402a7faf2f7a2d1eb415937af59e489cc04f1",
+  "scriptSha256": "e1b6466dce5f6fe15b1c3bc4303d71120e8c800d7283fd2cd1e588d1a7f0d11e",
+  "environment": "Only PATH, NODE_ENV and TZ; no app env files or credentials",
+  "cleanup": "Owned relocation removed in finally"
+}

@@ -1,12 +1,23 @@
-import { createRequire } from "node:module";
+import { getBuiltinModule } from "node:process";
+import { isAbsolute } from "node:path";
 import { Worker } from "node:worker_threads";
-// Literal import keeps pdf-lib and its dependencies in Next's file trace.
-import "pdf-lib";
+import { PDFDocument, PDFName, PDFArray } from "pdf-lib";
 import { MAX_PRINT_PAGES, type PreparedPrintRequest } from "@homa/core";
 
 export const MAX_PRINT_PDF_BYTES = 32 * 1024 * 1024;
 export const PRINT_PDF_BUDGET_MS = 40_000;
-const requirePackage = createRequire(import.meta.url);
+
+/** The external library is loaded above; use its native filename, not a bundle ID. */
+function loadedPdfLibraryPath(): string {
+  // Incident gh#1105: Turbopack replaced require.resolve with a numeric module
+  // ID. Its external package alias also differs from the source package name.
+  const nativeRequire = getBuiltinModule("module").createRequire(import.meta.url);
+  for (const entry of Object.values(nativeRequire.cache)) {
+    if (entry?.exports?.PDFDocument === PDFDocument && entry.exports.PDFName === PDFName
+      && entry.exports.PDFArray === PDFArray && isAbsolute(entry.filename)) return entry.filename;
+  }
+  throw new Error("The loaded print PDF library is unavailable to the worker");
+}
 
 /** Isolated parser: termination is real, including synchronous PDF inflation. */
 const subsetWorker = String.raw`
@@ -46,7 +57,7 @@ export async function subsetPrintPdf(
   return new Promise((resolve, reject) => {
     const worker = new Worker(subsetWorker, {
       eval: true,
-      workerData: { bytes, pdfLibPath: requirePackage.resolve("pdf-lib"), maxPages: MAX_PRINT_PAGES, maxBytes: MAX_PRINT_PDF_BYTES, pageCount: request.pageCount, pageIndexes: request.pageIndexes },
+      workerData: { bytes, pdfLibPath: loadedPdfLibraryPath(), maxPages: MAX_PRINT_PAGES, maxBytes: MAX_PRINT_PDF_BYTES, pageCount: request.pageCount, pageIndexes: request.pageIndexes },
       resourceLimits: { maxOldGenerationSizeMb: 256, stackSizeMb: 4 },
     });
     let settled = false;
