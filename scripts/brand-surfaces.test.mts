@@ -771,3 +771,14 @@ test("legacy baseline is hash-specific and quarantined by design era", () => {
     assert.ok(record.legacySignatures.length > 0);
   }
 });
+
+test("the active onboarding artwork recipe remains classified and its residue stays visible", () => {
+  const surface = manifest.surfaces.find((candidate) =>
+    candidate.paths.includes("work/onboardingandpaywall8-30/assets/making-feature-cards/MANIFEST.md"));
+  assert.ok(surface);
+  assert.equal(surface.type, "authoring-rule");
+  assert.equal(surface.reachability, "internal");
+  assert.equal(surface.disposition, "replace-active");
+  assert.deepEqual(surface.targetProfiles, ["authoring"]);
+  assert.ok(surface.legacySignatures.length > 0);
+});

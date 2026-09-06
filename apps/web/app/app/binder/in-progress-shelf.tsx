@@ -26,6 +26,7 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
   const [removed, setRemoved] = useState<Record<string, true>>({});
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [error, setError] = useState<{ id: string; note: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const remaining = materials.filter((material) => !kept[material.id] && !removed[material.id]);
@@ -33,27 +34,39 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
 
   function keep(material: BinderMaterial) {
     setPendingId(material.id);
+    setError(null);
     startTransition(async () => {
-      const result = await keepMaterialAction(material.id);
-      setPendingId(null);
-      if (result.kept) {
-        setKept((current) => ({ ...current, [material.id]: result.note }));
-      } else {
-        window.alert(result.note);
+      try {
+        const result = await keepMaterialAction(material.id);
+        if (result.kept) {
+          setKept((current) => ({ ...current, [material.id]: result.note }));
+        } else {
+          setError({ id: material.id, note: result.note });
+        }
+      } catch {
+        setError({ id: material.id, note: "That did not save. Try again in a moment." });
+      } finally {
+        setPendingId(null);
       }
     });
   }
 
   function remove(material: BinderMaterial) {
     setPendingId(material.id);
+    setError(null);
     startTransition(async () => {
-      const result = await deleteMaterialAction(material.id);
-      setPendingId(null);
-      setConfirmingDeleteId(null);
-      if (result.deleted) {
-        setRemoved((current) => ({ ...current, [material.id]: true }));
-      } else {
-        window.alert(result.note);
+      try {
+        const result = await deleteMaterialAction(material.id);
+        if (result.deleted) {
+          setRemoved((current) => ({ ...current, [material.id]: true }));
+          setConfirmingDeleteId(null);
+        } else {
+          setError({ id: material.id, note: result.note });
+        }
+      } catch {
+        setError({ id: material.id, note: "That did not delete. Try again in a moment." });
+      } finally {
+        setPendingId(null);
       }
     });
   }
@@ -72,52 +85,53 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
           : `${remaining.length} things we made together that are not in your binder yet.`}{" "}
         Keep the ones you want to come back to.
       </p>
-      <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {remaining.map((material) => (
-          <li key={material.id}>
+          <li key={material.id} className="min-w-0" aria-busy={isPending && pendingId === material.id}>
             <span className="quiet-artifact-card__preview block">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={material.previewUrl}
                 alt={`Preview of ${material.title}`}
-                className="block aspect-[8.5/11] w-full object-cover"
+                className="block aspect-[8.5/11] w-full object-contain"
                 loading="lazy"
               />
             </span>
-            <span className="mt-2 block truncate font-semibold text-[color:var(--homa-ink)]">
+            <span className="mt-2 block break-words font-semibold text-[color:var(--homa-ink)]">
               {material.title}
             </span>
-            <span className="mt-0.5 block text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
+            <span className="mt-0.5 block break-words text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
               {KIND_LABELS[material.kind] ?? material.kind}
               {material.childName ? ` for ${material.childName}` : null}
             </span>
             {confirmingDeleteId === material.id ? (
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-                  Delete this? Can&apos;t be undone.
+                <span className="w-full text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
+                  Delete this from the shelf?
                 </span>
                 <QuietAction
                   kind="secondary"
                   onClick={() => remove(material)}
-                  disabled={isPending && pendingId === material.id}
-                  className="text-xs text-[color:var(--homa-error-ink)]"
+                  disabled={isPending}
+                  className="text-xs"
                 >
                   {isPending && pendingId === material.id ? "Deleting…" : "Delete"}
                 </QuietAction>
                 <QuietAction
                   kind="quiet"
                   onClick={() => setConfirmingDeleteId(null)}
+                  disabled={isPending}
                   className="text-xs"
                 >
-                  Keep
+                  Cancel
                 </QuietAction>
               </div>
             ) : (
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <QuietAction
                   kind="secondary"
                   onClick={() => keep(material)}
-                  disabled={isPending && pendingId === material.id}
+                  disabled={isPending}
                   className="text-xs"
                 >
                   {isPending && pendingId === material.id ? "Keeping..." : "Keep this one"}
@@ -133,12 +147,18 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
                 <button
                   type="button"
                   onClick={() => setConfirmingDeleteId(material.id)}
-                  className="quiet-action quiet-action--quiet ml-auto text-xs text-[color:var(--homa-error-ink)]"
+                  disabled={isPending}
+                  className="quiet-action quiet-action--quiet text-xs"
                 >
                   Delete
                 </button>
               </div>
             )}
+            {error?.id === material.id ? (
+              <p role="alert" className="mt-2 break-words text-sm text-[color:var(--homa-error-ink)]">
+                {error.note}
+              </p>
+            ) : null}
           </li>
         ))}
       </ul>

@@ -28,6 +28,7 @@ function row(index: number, overrides: Partial<RestoreRow> = {}): RestoreRow {
     created_at: new Date(Date.UTC(2026, 6, 29, 12, index)).toISOString(),
     generation: { pageCount: 1 },
     subject_lesson_id: null,
+    deleted_at: null,
     ...overrides,
   };
 }
