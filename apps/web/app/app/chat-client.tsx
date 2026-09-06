@@ -38,6 +38,14 @@ import {
 import { VoiceMode } from "./voice-mode";
 import { VoiceModeButton } from "./voice-mode-button";
 import { spokenTurnMessage, type VoiceTranscriptLine } from "./voice-transcript";
+import {
+  appendVoiceEffects,
+  isVoiceEffectMessage,
+  voiceEffectMessageId,
+  type VoiceEffectContext,
+} from "./voice-effects";
+import { VoiceEffectsView } from "./voice-effects-view";
+import type { VoiceHomaBridgeOutput } from "../../lib/voice/homa-bridge";
 import { ChecklistTakeover } from "./checklist-takeover";
 import {
   formatHiddenDirective,
@@ -819,6 +827,14 @@ export function ChatClient({
   /** The in-app voice conversation (#283). Mounted only while open so the
    * socket and the microphone exist exactly as long as she is talking. */
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
+  const [voiceActive, setVoiceActive] = useState(false);
+  const [voiceAnswerSource, setVoiceAnswerSource] = useState<VoiceEffectContext | null>(null);
+  const handledVoiceEffectsRef = useRef(new Set<string>());
+  const latestVoiceUserRef = useRef(new Map<string, number>());
+  const voiceGenerationRef = useRef(0);
+  const [voiceGeneration, setVoiceGeneration] = useState(0);
+  const voiceChecklistRef = useRef(false);
   /** Turns said out loud this visit, in the order they were said.
    *
    * They render as ordinary bubbles in the thread, because that is what
@@ -830,20 +846,50 @@ export function ChatClient({
    */
   const [spoken, setSpoken] = useState<ArchivedMessage[]>([]);
   const appendSpokenTurn = useCallback((line: VoiceTranscriptLine) => {
-    setSpoken((previous) => [
-      ...previous,
-      {
-        at: currentTimeMs(),
-        // Numbered by how many turns this VISIT has heard, which is not the
-        // same as the turn's sequence in its conversation. She can talk,
-        // stop, and talk again, and each conversation numbers itself from
-        // zero; this id has to stay unique across all of them, because it is
-        // what React renders the thread by.
-        message: spokenTurnMessage(line, previous.length) as EveMessage,
+    setSpoken((previous) => {
+      const message = spokenTurnMessage(line, previous.length) as EveMessage;
+      const existing = previous.find((entry) => entry.message.id === message.id);
+      const entry: ArchivedMessage = {
+        at: existing?.at ?? currentTimeMs(),
+        message,
+        sessionId: line.sessionId,
         channel: "web",
         modality: "voice",
-      },
-    ]);
+      };
+      return existing
+        ? previous.map((item) => item.message.id === message.id ? entry : item)
+        : [...previous, entry];
+    });
+    if (line.role === "user") {
+      if (line.sessionId !== undefined && line.sequence !== undefined) {
+        latestVoiceUserRef.current.set(line.sessionId, line.sequence);
+      }
+      setVoiceAnswerSource((current) =>
+        current !== null && current.sessionId === line.sessionId &&
+        line.sequence !== undefined && line.sequence > current.sourceSequence
+          ? null : current,
+      );
+    }
+  }, []);
+  const receiveVoiceEffects = useCallback((
+    output: VoiceHomaBridgeOutput,
+    context: VoiceEffectContext,
+    generation: number,
+  ) => {
+    setSpoken((current) => appendVoiceEffects(current, output, context, currentTimeMs()));
+    if (generation === voiceGenerationRef.current &&
+        (latestVoiceUserRef.current.get(context.sessionId) ?? -1) <= context.sourceSequence) {
+      setVoiceAnswerSource(context);
+    }
+    const unseen = output.effects.filter((effect) => {
+      const key = `${voiceEffectMessageId(context)}:${effect.callId}`;
+      if (handledVoiceEffectsRef.current.has(key)) return false;
+      handledVoiceEffectsRef.current.add(key);
+      return true;
+    });
+    const additions = appendVoiceEffects([], { ...output, effects: unseen }, context, currentTimeMs());
+    const planner = latestPlannerOpen(additions.map((entry) => entry.message));
+    if (planner && generation === voiceGenerationRef.current) setPlannerCanvas(planner.signal);
   }, []);
   useEffect(() => {
     if (!focusChildName) return;
@@ -1530,6 +1576,10 @@ export function ChatClient({
     spoken: renderSources.spoken,
     timeZone,
   });
+  // Receipt arrival order is not session authority. An old action may finish
+  // after a new conversation starts; display it without replacing her form.
+  const currentVoiceEffectId = voiceOpen && voiceAnswerSource !== null
+    ? voiceEffectMessageId(voiceAnswerSource) : null;
   const liveMessageSet = new Set<EveMessage>(renderMessages);
   const progressSessionKey =
     agent.session?.sessionId ??
@@ -1620,7 +1670,7 @@ export function ChatClient({
       setHasNewActivity(true);
     }
     firstScrollDoneRef.current = true;
-  }, [agent.data.messages, archived, queued]);
+  }, [agent.data.messages, archived, queued, spoken]);
 
   const focusComposer = useCallback(() => {
     focusChatComposerInput(composerFormRef.current);
@@ -2308,6 +2358,7 @@ export function ChatClient({
                 item.kind === "message" &&
                 itemIndex === transcript.length - 1 &&
                 item.message.role === "assistant" &&
+                !isVoiceEffectMessage(item.message) &&
                 !messageSaysSomething(item.message)
               ) {
                 return null;
@@ -2344,7 +2395,30 @@ export function ChatClient({
                       .join("")
                       .trim()
                   : null;
-              const messageView = (
+              const messageView = isVoiceEffectMessage(item.message) ? (
+                <VoiceEffectsView
+                  message={item.message}
+                  currentRequest={voiceAnswerSource !== null &&
+                    currentVoiceEffectId === item.message.id &&
+                    item.message.id === voiceEffectMessageId(voiceAnswerSource)}
+                  canAnswerOutLoud={voiceOpen && voiceActive && voiceAnswerSource !== null &&
+                    currentVoiceEffectId === item.message.id &&
+                    item.message.id === voiceEffectMessageId(voiceAnswerSource)}
+                  timeZone={timeZone}
+                  familyId={familyId}
+                  childNameById={childNameById}
+                  onOpenPlanner={setPlannerCanvas}
+                  onOpenChecklist={(childId) => {
+                    voiceChecklistRef.current = true;
+                    setVoiceOpen(false);
+                    setChecklistTakeover(childId);
+                  }}
+                  onOpenReport={(childId) => {
+                    setVoiceOpen(false);
+                    openChildReport(childId);
+                  }}
+                />
+              ) : (
                 <MessageView
                   message={item.message}
                   timeZone={timeZone}
@@ -2660,6 +2734,9 @@ export function ChatClient({
             sending it again.
           </p>
         ) : null}
+        {voiceNotice ? (
+          <p className="text-sm text-muted" role="alert">{voiceNotice}</p>
+        ) : null}
         {/* The scroll target, and the one empty box in this column that
             has to keep its place: the opening layout collapses empty
             children to kill their phantom gap, and a display:none anchor
@@ -2723,6 +2800,12 @@ export function ChatClient({
               childId={checklistTakeover}
               onClose={(exit) => {
                 setChecklistTakeover(null);
+                if (voiceChecklistRef.current) {
+                  // The checklist saved through its own authenticated routes.
+                  // Its voice origin does not authorize a text-session turn.
+                  voiceChecklistRef.current = false;
+                  return;
+                }
                 if (!exit) return;
                 // The handoff. It carries hints, never facts: the counts
                 // are re-derived server-side, and this only tells Homa
@@ -2915,8 +2998,18 @@ export function ChatClient({
             // visible while she talks. The panel is just the microphone.
             <div className="mb-2">
               <VoiceMode
+                key={voiceGeneration}
                 onTurn={appendSpokenTurn}
-                onClose={() => setVoiceOpen(false)}
+                onEffects={(output, context) => receiveVoiceEffects(output, context, voiceGeneration)}
+                onNotice={(message) => {
+                  if (voiceGeneration === voiceGenerationRef.current) setVoiceNotice(message);
+                }}
+                onActiveChange={(active) => {
+                  if (voiceGeneration === voiceGenerationRef.current) setVoiceActive(active);
+                }}
+                onClose={() => {
+                  if (voiceGeneration === voiceGenerationRef.current) setVoiceOpen(false);
+                }}
               />
             </div>
           ) : null}
@@ -3039,7 +3132,13 @@ export function ChatClient({
               // conversation, not a Send with nothing to send (founder
               // direction 2026-07-29). It swaps back to Send on the first
               // character, so the two never compete for the same tap.
-              <VoiceModeButton onStart={() => setVoiceOpen(true)} />
+              <VoiceModeButton onStart={() => {
+                setVoiceAnswerSource(null);
+                setVoiceActive(false);
+                voiceGenerationRef.current += 1;
+                setVoiceGeneration(voiceGenerationRef.current);
+                setVoiceOpen(true);
+              }} />
             ) : (
               <button
                 type="submit"

@@ -10,6 +10,8 @@ Prepared and reverified September 6, 2026. Owner: Sidney. Review and coordinatio
 
 This document holds intent, evidence and acceptance criteria. GitHub Issues hold live status, priority and ownership. F01-F26 are reading references, not a second tracker. “Implement now” means a bounded authorized slice, not a measured delivery-time promise or a claim that it has shipped.
 
+Implementation receipts are appended under the relevant item and linked evidence file; the original production baseline below remains a dated audit snapshot.
+
 ## Sources and verification standard
 
 - **P: Homa planner feedback**, September 5. [Original transcript](/Users/sidneyswift/.codex/attachments/e6287453-0982-40f4-87d3-868a8c131303/pasted-text.txt). Line references use this file.
@@ -410,6 +412,8 @@ Search only sees indexed metadata/embedding content; a useful apple activity lat
 
 **Tracking:** [#1091](https://github.com/sidneyswift/homa/issues/1091).
 
+**September 6 production receipt:** removal FIXED by commit `1834875f69b70b623194f196054be8a73a2e1f22`, PR #1110. Deployment `dpl_5T63hpNJKB38cKRUmpsf1Z2g5GU8` was READY and both removal/visibility migrations applied. A real mobile-web delete plus refresh removed all five sandbox revisions with the same timestamp, retained artifact references, and left an unrelated kept worksheet. A further real Bring back check exposed missing Chromium archives in the Binder function. Restore is now FIXED by PR #1111, commit `dce9f1c55b198f82da0f978983f78c81efe5790a`, READY deployment `dpl_E4TiWzbMdL88PTAQ5SYuhahSxqiG`. The actual mobile-web action rendered a new PDF/preview, retained three versions, and survived refresh. Removing that kept chain hid all three rows while an independent same-title draft remained. Synthetic Binder controls were then removed. The one verified historical poster chain was repaired through the shipped RPC under its family membership: five resurfacing ancestors removed, six history rows and artifact references retained. [Full production receipt](https://github.com/sidneyswift/homa/issues/1091#issuecomment-5560432068).
+
 **Expected, B:** remove abandoned in-progress work because it is unwanted or a better version exists. The meeting proved that sideways scrolling revealed Delete and a tap appeared to work; it did not establish persistence after refresh.
 
 **Active read/layout chain:** [Binder](../../../apps/web/app/app/binder/page.tsx) reads in-progress materials scoped to the family and selected child plus shared records. A read error becomes an empty shelf, so disappearance alone is not a reliable success proof. [Material selection](../../../apps/web/lib/materials/library.ts) reads at most 300 nondeleted rows, then chooses one visible candidate per revision chain. The [shelf](../../../apps/web/app/app/binder/in-progress-shelf.tsx) renders two columns on phones with nonwrapping normal actions; confirmation uses a separate wrapping row. The first Delete tap opens confirmation, Keep cancels, and final Delete calls the authenticated action. Success hides only that material ID locally.
@@ -439,6 +443,8 @@ Hours includes selected-child plus shared rows before subject filtering and tota
 ### F23. Distinguish dictation from conversation and repair voice tools
 
 **Tracking:** [#1103](https://github.com/sidneyswift/homa/issues/1103).
+
+**September 6 implementation verification:** the corrected controller and authenticated routes passed 104 deterministic checks, actual-component browser lifecycle checks, and two isolated model evals with 9/9 gates. [Exact path, observed scenarios and limits](../journeys/evidence/2026-09-06-web-voice-verification.md). Deployment acceptance remains on #1103; physical speech is not certified.
 
 **Expected, R202-219:** intentionally choose dictated editable text or back-and-forth speech. The meeting's greeting did not prove that spoken logging/planning worked.
 
