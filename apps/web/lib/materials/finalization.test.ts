@@ -662,7 +662,7 @@ describe("material finalization transition receipts", () => {
       /export async function finalizeSubjectLessonMaterialPinned/u
     );
     const pinnedStart = librarySource.indexOf(
-      "export async function finalizeMaterialPinned"
+      "export async function finalizeMaterialInTransaction"
     );
     const directKeepStart = librarySource.indexOf(
       "export interface SubjectLessonMaterialFinalization",
@@ -671,7 +671,7 @@ describe("material finalization transition receipts", () => {
     const pinnedSource = librarySource.slice(pinnedStart, directKeepStart);
     assert.match(
       pinnedSource,
-      /planMaterialFinalization\(rows, materialId\)/u,
+      /planMaterialFinalization\(rows, materialId, precondition\)/u,
     );
     assert.doesNotMatch(pinnedSource, /trustedSubjectLessonId/u);
     assert.match(

@@ -395,3 +395,13 @@ describe("packet cards in scrollback", () => {
     assert.equal(part.output.material.pagePreviewUrls?.length, 4);
   });
 });
+
+it("reconstructed history shows the passing descendant instead of the kept ancestor", () => {
+  const kept = material({ status: "final", review_pass: "false" });
+  const failed = material({ id: "20000000-0000-4000-8000-000000000002", revises: kept.id, review_pass: "false", created_at: "2026-07-10T12:05:00Z" });
+  const passing = material({ id: "30000000-0000-4000-8000-000000000003", revises: failed.id, created_at: "2026-07-10T12:06:00Z" });
+  const selected = archiveFromServerHistory({ messages: [], materials: [kept, failed, passing] }, []);
+  assert.deepEqual(selected.flatMap(entry => materialParts(entry.message).map(part => part.id)), [passing.id]);
+  const refused = archiveFromServerHistory({ messages: [], materials: [kept, failed] }, []);
+  assert.deepEqual(refused.flatMap(entry => materialParts(entry.message).map(part => part.id)), [kept.id]);
+});

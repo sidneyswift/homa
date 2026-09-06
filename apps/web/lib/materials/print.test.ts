@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { selectedPrintPages } from "./print";
+import { selectedPrintPages } from "./print-preparation";
 
 describe("material print page selection", () => {
   it("keeps every page when the answer key is requested", () => {

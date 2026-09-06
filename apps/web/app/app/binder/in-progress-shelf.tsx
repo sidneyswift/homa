@@ -143,7 +143,7 @@ export function InProgressShelf({ materials, scopeChildName = null }: {
                   {isPending && pendingId === material.id ? "Keeping..." : "Keep this one"}
                 </QuietAction>
                 <a
-                  href={material.pdfUrl}
+                  href={`/api/materials/${material.id}/pdf`}
                   target="_blank"
                   rel="noreferrer"
                   className="quiet-action quiet-action--quiet text-xs underline underline-offset-2"

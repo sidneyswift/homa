@@ -1,8 +1,8 @@
 import type { EveMessagePart } from "eve/react";
+import { parseMaterialPrintPart } from "@homa/core";
 
 import type { MaterialArtifact } from "../chat/material-card";
 import {
-  parsePreparedPrintRequest,
   type PreparedPrintRequest,
 } from "../materials/material-print-contract";
 import {
@@ -373,13 +373,12 @@ function buildSignal(
   if (MATERIAL_TOOLS.has(toolName)) {
     const material = materialPayload(output);
     if (material === null) return null;
-    const printRequest = toolName === "prepare_material_print"
-      ? parsePreparedPrintRequest(output.printRequest)
-      : null;
+    const printHandoff = parseMaterialPrintPart({ type: "dynamic-tool", state: "output-available", toolName, output });
+    const printRequest = printHandoff?.ready ? printHandoff.request : null;
     const shareRequest = toolName === "prepare_material_share"
       ? parsePreparedMaterialShareRequest(output.shareRequest)
       : null;
-    if (toolName === "prepare_material_print" && !printRequest) return null;
+    if (toolName === "prepare_material_print" && (output.ready !== true || !printRequest || material.id !== printRequest.materialId)) return null;
     if (toolName === "prepare_material_share" && !shareRequest) return null;
     if (shareRequest && material.id !== shareRequest.materialId) return null;
     return {

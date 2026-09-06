@@ -642,6 +642,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:material-removal:postgres
 
+      - name: Material print current-version finalization disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:material-print:postgres
+
       - name: Family PDF cache and processing ownership disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:family-pdf-cache:postgres

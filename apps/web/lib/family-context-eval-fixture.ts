@@ -562,6 +562,61 @@ export const EVAL_FIXTURE_MATERIAL_MIXED_ID = "00000000-0000-4000-8000-000000000
 export const EVAL_FIXTURE_MATERIAL_INTERRUPTED_ID = "00000000-0000-4000-8000-0000000000e5";
 export const EVAL_FIXTURE_MATERIAL_CROSS_OBJECT_ID = "00000000-0000-4000-8000-0000000000e6";
 export const EVAL_FIXTURE_PACKET_PAGES = 12;
+export const EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID = "00000000-0000-4000-8000-0000000000e7";
+export const EVAL_FIXTURE_MATERIAL_PRINT_REVISION_TITLE = "Sound practice";
+
+/**
+ * Dedicated complete worksheet for #1105's title-only revision. The shared
+ * e4 fixture is deliberately left alone: its heading and one sentence are
+ * insufficient to test whether an otherwise usable worksheet can be revised.
+ *
+ * Layout source: actual passing create_printable result
+ * 0d9a9c43-1710-4f2a-8674-607b89908f00, print-revision-first sandbox run
+ * 2026-09-06 (preserved 1105-print-revision-second evidence). This fixture
+ * changes the heading, makes the directions actionable, and starts the title
+ * at 48px so the requested enlargement is meaningful. That earlier model
+ * review does not approve these changed bytes. The seed represents an
+ * explicitly synthetic parent-kept page, with no fabricated review.pass.
+ * Every newly created descendant still runs the current real quality check.
+ */
+export const EVAL_FIXTURE_PRINT_REVISION_HTML = `<div class="page">
+<h2>Sound practice</h2>
+<p class="directions">Say each letter's sound. Write the letter on its line.</p>
+<div class="practice">
+  <div class="row"><span class="letter">S</span><span class="line"></span></div>
+  <div class="row"><span class="letter">A</span><span class="line"></span></div>
+  <div class="row"><span class="letter">T</span><span class="line"></span></div>
+  <div class="row"><span class="letter">M</span><span class="line"></span></div>
+</div>
+</div>
+<style>
+.page{display:flex;flex-direction:column;height:100%;}
+.page h2{font-size:48px;margin:0 0 0.3em 0;text-align:center;font-family:'Fredoka',sans-serif;}
+.page .directions{font-size:26px;text-align:center;margin-bottom:0.6em;}
+.practice{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;}
+.row{display:flex;align-items:center;gap:24px;}
+.letter{font-size:70px;font-weight:700;width:110px;text-align:center;border:3px solid #333;border-radius:10px;padding:10px 0;}
+.line{flex:1;height:0;border-bottom:3px solid #333;}
+</style>`;
+export const EVAL_FIXTURE_PRINT_REVISION_GENERATION = {
+  pageCount: 1,
+  pageRoles: ["child"],
+  // Measured from these exact bytes through wrapPrintableDocument and
+  // renderPrintableHtml, including PDF rasterization, on Chrome 152.
+  pageGeometry: [{
+    page: 1, contentHeightIn: 8.78, overflowIn: 0, fillPercent: 92,
+    largestImageIn: null, largestTextPx: 70,
+    largestBoxIn: { widthIn: 1.21, heightIn: 1.1 },
+  }],
+  fixture: {
+    kind: "synthetic-parent-kept-print-revision",
+    htmlSha256: "5db48e6c6b7292e0ea6e5023dcc66c599b5b5b4658d9928e63dd5c2a69d6052e",
+    earlierPassingLayoutHtmlSha256: "89cc18854f15b58a9cac15358b82c32ac487bba97c4e30bd86b3da342f92f1f9",
+    earlierPassingMaterialId: "0d9a9c43-1710-4f2a-8674-607b89908f00",
+    modelReviewOfFixture: "not-run",
+  },
+};
+
 
 /**
  * Artifact URLs for the seeded packet. pdf_url is NOT NULL, and the
@@ -715,5 +770,19 @@ values
    'web', 'worksheet', 'phonics', 'simple practice', 'html', 'final', now(),
    '{"review":{"pass":true},"pageCount":1,"pageRoles":["child"]}'::jsonb,
    timestamptz '2026-08-01 12:04:00+00');
+
+insert into public.materials
+  (id, family_id, child_id, title, skill, pdf_url, preview_url, html,
+   channel, kind, subject, theme, source, status, approved_at, generation, created_at)
+values
+  (${sqlString(EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID)}, ${sqlString(EVAL_FIXTURE_FAMILY_ID)},
+   ${sqlString(FIXTURE_CHILD_MAYA)}, ${sqlString(EVAL_FIXTURE_MATERIAL_PRINT_REVISION_TITLE)},
+   'letter sounds and early reading',
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/print-revision-sound-practice.pdf`)},
+   ${sqlString(`${EVAL_FIXTURE_ARTIFACT_PREFIX}/print-revision-sound-practice.jpg`)},
+   ${sqlString(EVAL_FIXTURE_PRINT_REVISION_HTML)},
+   'web', 'worksheet', 'phonics', 'simple practice', 'html', 'final', now(),
+   ${sqlString(JSON.stringify(EVAL_FIXTURE_PRINT_REVISION_GENERATION))}::jsonb,
+   timestamptz '2026-08-01 12:05:00+00');
 `.trim();
 }

@@ -1,4 +1,4 @@
-import { isHiddenDirective, visibleOutboundChildFramingText } from "@homa/core";
+import { isHiddenDirective, visibleOutboundChildFramingText, parseMaterialPrintPart } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { parseCurriculumMappingCardPart } from "./curriculum-mapping-card-model";
@@ -131,6 +131,7 @@ export function partIsRenderable(part: EveMessagePart): boolean {
     return part.text.trim().length > 0 && !isHiddenDirective(part.text);
   }
   if (part.type === "dynamic-tool" && part.state === "output-available") {
+    if (parseMaterialPrintPart(part) !== null) return true;
     // Homa's choice card (agent/tools/ask_user_questions.ts) draws as a
     // real tappable card here; question-card-model.ts owns the parsing.
     if (parseQuestionCardPart(part) !== null) return true;

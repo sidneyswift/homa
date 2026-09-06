@@ -15,6 +15,8 @@ import {
   type MemoryChipContent,
 } from "./message-utils";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { MaterialPrintCard } from "./material-print-card";
+import { parseMaterialPrintPart } from "@homa/core";
 import { LibrarySourceCard } from "./library-source-card";
 import { parseLibrarySourceCardPart } from "./library-source-card-model";
 import { CurriculumMappingCard } from "./curriculum-mapping-card";
@@ -201,6 +203,8 @@ function MessagePartView({
         </View>
       );
     }
+    const printHandoff = parseMaterialPrintPart(part);
+    if (printHandoff) return <MaterialPrintCard handoff={printHandoff} />;
     if (part.toolName === "open_planner") {
       const output = part.output as
         | { opened?: boolean; childName?: string | null }

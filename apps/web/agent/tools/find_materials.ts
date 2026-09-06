@@ -35,7 +35,7 @@ export function subjectLessonMaterialFinalOnly(
  */
 export default defineBoundedTool({
   description:
-    "Search this family's saved materials (worksheets, coloring pages, flash cards...) before designing something new. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
+    "Load materials-studio before finding or reopening generated Binder work with this tool, including a named worksheet or packet. Also search before designing something new. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
@@ -48,6 +48,7 @@ export default defineBoundedTool({
       .min(1)
       .optional()
       .describe("With materialId on a multi-page packet, return only THIS page's html (1 is the first page) instead of all of them. Use it when you are revising one page: you need that page's html to rewrite it, and the others come back by reference through create_printable's fromMaterialId + pageIndex."),
+    title: z.string().trim().min(1).max(240).optional().describe("Case-insensitive literal title substring, such as Letter Sounds Workbook. Punctuation is literal, not a wildcard."),
     childId: z.uuid().optional().describe("Only materials made for this child."),
     kind: z.enum(MATERIAL_KINDS).optional(),
     subject: z.string().trim().max(80).optional().describe("Substring match, e.g. 'handwriting'."),
@@ -121,6 +122,7 @@ export default defineBoundedTool({
     }
 
     const filters = {
+      title: input.title,
       childId: input.childId,
       kind: input.kind,
       subject: input.subject,
@@ -154,7 +156,7 @@ export default defineBoundedTool({
     // hung, because every one of Story's existing letter pages was still a
     // draft. Only look when the caller could actually act on the answer.
     let emptyNote =
-      "Nothing saved matches. Design fresh, and finals you make will be here next time.";
+      "No saved materials match these filters. Follow the materials-studio lookup workflow before deciding what to do next.";
     if (materials.length === 0 && !finalOnly && filters.status === "final") {
       const anyStatus = { ...filters, status: "any" as const };
       const unfinalized =

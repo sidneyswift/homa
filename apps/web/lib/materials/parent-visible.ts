@@ -9,10 +9,11 @@ export interface MaterialRevisionCandidate {
 function rootIdFor(
   candidate: MaterialRevisionCandidate,
   byId: ReadonlyMap<string, MaterialRevisionCandidate>,
-): string {
+): string | null {
   let current = candidate;
   const visited = new Set<string>();
-  while (current.revisesId && !visited.has(current.id)) {
+  while (current.revisesId) {
+    if (visited.has(current.id)) return null;
     visited.add(current.id);
     const parent = byId.get(current.revisesId);
     if (!parent) return current.revisesId;
@@ -32,19 +33,16 @@ function newest<T extends MaterialRevisionCandidate>(rows: readonly T[]): T {
   return selected;
 }
 
-/**
- * Returns the one parent-facing material for each connected revision chain.
- * A final always wins. Otherwise, the newest available row that did not fail
- * review wins. Founder-facing reads remain unchanged and keep every attempt.
- */
-export function selectParentVisibleMaterialRevisions<
-  T extends MaterialRevisionCandidate,
->(candidates: readonly T[]): T[] {
+function selectMaterialRevisions<T extends MaterialRevisionCandidate>(
+  candidates: readonly T[],
+  keptOnly: boolean,
+): T[] {
   const byId = new Map(candidates.map((candidate) => [candidate.id, candidate]));
   const chains = new Map<string, T[]>();
 
   for (const candidate of candidates) {
     const rootId = rootIdFor(candidate, byId);
+    if (rootId === null) continue;
     const chain = chains.get(rootId) ?? [];
     chain.push(candidate);
     chains.set(rootId, chain);
@@ -52,15 +50,9 @@ export function selectParentVisibleMaterialRevisions<
 
   const selected: T[] = [];
   for (const chain of chains.values()) {
-    const finals = chain.filter((candidate) => candidate.status === "final");
-    if (finals.length > 0) {
-      selected.push(newest(finals));
-      continue;
-    }
-
-    const available = chain.filter(
-      (candidate) =>
-        candidate.status !== "superseded" && candidate.reviewPass !== false,
+    const available = chain.filter((candidate) =>
+      candidate.status === "final" || (!keptOnly
+        && candidate.status === "draft" && candidate.reviewPass !== false),
     );
     if (available.length > 0) selected.push(newest(available));
   }
@@ -71,22 +63,22 @@ export function selectParentVisibleMaterialRevisions<
   );
 }
 
-/**
- * The chains a parent started and never kept: chain heads whose chain
- * has no final. These are invisible everywhere today, because the binder
- * shows finals only and chat scrollback rotates daily, so a worksheet
- * she liked but never said the magic word about is simply gone.
- *
- * Fleet measurement 2026-07-28 (gh#348): only 41% of revision chains ever
- * reach final, and the rate is the same across families. This is the
- * fleet's largest materials failure, not a power-user problem.
- *
- * Superseded rows and review-failed rows are already excluded upstream by
- * selectParentVisibleMaterialRevisions, which matters for a reason beyond
- * tidiness: finalize deletes the Blob bytes of superseded drafts, so a
- * card for one would render a broken image (gh#350 owns that retention
- * decision).
- */
+/** The newest available draft or final is current. A failed draft cannot
+ * replace a kept final, including a historical final whose review failed.
+ * Missing ancestors can occur in bounded histories; cycles have no current node. */
+export function selectParentVisibleMaterialRevisions<T extends MaterialRevisionCandidate>(candidates: readonly T[]): T[] {
+  return selectMaterialRevisions(candidates, false);
+}
+
+/** Binder's kept shelf still shows the newest final, using the whole chain
+ * to retain lineage through intervening drafts and superseded revisions. */
+export function selectKeptMaterialRevisions<T extends MaterialRevisionCandidate>(candidates: readonly T[]): T[] {
+  return selectMaterialRevisions(candidates, true);
+}
+
+/** Current reviewable drafts include a new revision of a kept material.
+ * The prior final remains on the kept shelf until the parent keeps the revision.
+ * Failed and superseded drafts do not become in-progress cards. */
 export function selectInProgressMaterialRevisions<
   T extends MaterialRevisionCandidate,
 >(candidates: readonly T[]): T[] {

@@ -29,7 +29,7 @@ describe("MaterialCard", () => {
     assert.match(html, /data-brand-layer="material-card"/u);
     assert.match(html, /quiet-artifact-card__preview/u);
     assert.match(html, /Worksheet ready/u);
-    assert.match(html, /Print it/u);
+    assert.match(html, /Open PDF to print/u);
     assert.doesNotMatch(html, /Page 1 of/u);
     assert.doesNotMatch(html, /pages, one PDF/u);
   });
@@ -52,7 +52,7 @@ describe("MaterialCard", () => {
     assert.match(html, /Packet ready/u);
     assert.match(html, /4 pages, one PDF/u);
     assert.match(html, /Page 1 of 4/u);
-    assert.match(html, /Print all 4 pages/u);
+    assert.match(html, /Open all 4 pages to print/u);
     assert.match(html, /aria-label="Next page"/u);
     assert.match(html, /lucide-arrow-left/u);
     assert.match(html, /lucide-arrow-right/u);
@@ -78,7 +78,7 @@ describe("MaterialCard", () => {
     );
     assert.match(html, /Page 1 of 9/u);
     assert.match(html, /previews show the first 6/u);
-    assert.match(html, /Print all 9 pages/u);
+    assert.match(html, /Open all 9 pages to print/u);
   });
 
   it("keeps a packet payload without page previews on the single preview", () => {
@@ -89,7 +89,7 @@ describe("MaterialCard", () => {
     assert.match(html, /Packet ready/u);
     assert.match(html, /4 pages, one PDF/u);
     assert.doesNotMatch(html, /Page 1 of/u);
-    assert.match(html, /Print all 4 pages/u);
+    assert.match(html, /Open all 4 pages to print/u);
   });
 
   it("routes both PDF links through the pdf-open beacon when a real id exists", () => {

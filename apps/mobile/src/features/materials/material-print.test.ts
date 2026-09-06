@@ -29,7 +29,7 @@ describe("native material print contract", () => {
   it("previews the requested copies without claiming they printed", () => {
     const message = readyPrintMessage(valid);
     assert.match(message, /2 copies requested/u);
-    assert.match(message, /answer key is left out/u);
+    assert.match(message, /Answer key excluded/u);
     assert.doesNotMatch(message, /printed/u);
   });
 
@@ -37,10 +37,10 @@ describe("native material print contract", () => {
     const sent = printResultMessage({ status: "completed" });
     assert.equal(sent, "The print job was sent to the printer.");
     assert.doesNotMatch(sent, /printed|completed/u);
-    assert.match(printResultMessage({ status: "canceled" }), /Nothing was sent/u);
+    assert.match(printResultMessage({ status: "canceled" }), /Printing canceled/u);
     assert.match(
       printResultMessage({ status: "failed", reason: "printer-error" }),
-      /did not finish/u,
+      /printing error/u,
     );
   });
 });
