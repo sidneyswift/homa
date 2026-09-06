@@ -10,6 +10,7 @@ import {
   parseAskHomaInput,
 } from "../../../../../lib/voice/realtime-tools";
 import { resolveActiveObject } from "../../../../../lib/voice/active-object";
+import { canonicalVoiceSessionId, validVoiceSequence, validVoiceSessionId } from "../../../../../lib/voice/source-turn";
 
 /**
  * POST /api/voice/realtime/tool: hands one spoken request to the full Homa
@@ -73,6 +74,9 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
   }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
+  }
 
   if (body.name !== ASK_HOMA_TOOL_NAME) {
     return Response.json({
@@ -97,17 +101,9 @@ export async function POST(request: Request): Promise<Response> {
   }
   const sourceText =
     typeof body.sourceText === "string" && body.sourceText.trim().length > 0
-      ? body.sourceText
+      ? body.sourceText.trim()
       : parsed.request;
-  const sessionId =
-    typeof body.sessionId === "string" && body.sessionId.length > 0
-      ? body.sessionId.slice(0, 120)
-      : null;
-  const sourceSequence =
-    typeof body.sourceSequence === "number"
-      ? Math.trunc(body.sourceSequence)
-      : null;
-  if (!sessionId || sourceSequence === null || sourceSequence < 0) {
+  if (!validVoiceSessionId(body.sessionId) || !validVoiceSequence(body.sourceSequence) || sourceText.length > 8_000) {
     return Response.json({
       ok: false,
       output: {
@@ -117,6 +113,8 @@ export async function POST(request: Request): Promise<Response> {
       },
     });
   }
+  const sessionId = canonicalVoiceSessionId(familyId, userId, body.sessionId);
+  const sourceSequence = body.sourceSequence;
   let activeObjectContext: string | undefined;
   if (body.activeObject !== undefined && body.activeObject !== null) {
     const activeObject = await resolveActiveObject(familyId, body.activeObject);

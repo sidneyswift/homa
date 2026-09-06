@@ -1,6 +1,7 @@
 import { persistCanonicalMessage } from "../../../../../lib/conversation-continuity/ledger";
 import { rateLimited } from "../../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../../lib/api-auth";
+import { canonicalVoiceSessionId, validVoiceSequence, validVoiceSessionId } from "../../../../../lib/voice/source-turn";
 
 /**
  * POST /api/voice/realtime/turn: records ONE spoken turn in the thread
@@ -62,20 +63,19 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
   }
-
-  const sessionId =
-    typeof body.sessionId === "string" && body.sessionId.length > 0
-      ? body.sessionId.slice(0, 120)
-      : null;
-  const sequence = typeof body.sequence === "number" ? Math.trunc(body.sequence) : null;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, reason: "bad-json" }, { status: 400 });
+  }
   const role = body.role === "user" || body.role === "assistant" ? body.role : null;
   const content = typeof body.content === "string" ? body.content.trim() : "";
-  if (!sessionId || sequence === null || sequence < 0 || !role || content.length === 0) {
+  if (!validVoiceSessionId(body.sessionId) || !validVoiceSequence(body.sequence) || !role || content.length === 0 || content.length > 8_000) {
     return Response.json({ ok: false, reason: "bad-turn" }, { status: 400 });
   }
+  const sessionId = canonicalVoiceSessionId(familyId, userId, body.sessionId);
+  const sequence = body.sequence;
 
   try {
-    await persistCanonicalMessage({
+    const persisted = await persistCanonicalMessage({
       attributes: { familyId, memberUserId: userId },
       sessionId,
       // Web, because that is where this happened. Spoken-ness is modality,
@@ -91,6 +91,7 @@ export async function POST(request: Request): Promise<Response> {
       terminal: role === "assistant",
       modality: "voice",
     });
+    if (!persisted) throw new Error("voice turn was not saved");
   } catch (error) {
     console.error(
       "voice turn persist failed:",

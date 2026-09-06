@@ -113,16 +113,26 @@ function fallbackReply(
   effects: readonly VoiceHomaEffect[],
 ): string {
   if (result.status === "failed") {
-    return "That did not go through just now. Nothing changed.";
+    return "I could not confirm the full result just now. Check any saved records before trying again.";
   }
   if (result.status === "waiting") {
-    return "I need one quick answer from you. It is on the screen.";
+    return "I could not finish that step in voice. Please make the request in chat.";
   }
-  if (effects.some((effect) => effect.toolName === "ask_user_questions")) {
-    return "I need one quick answer from you. It is on the screen.";
+  const question = effects.find((effect) => {
+    if (effect.toolName !== "ask_user_questions") return false;
+    const output = effect.output as { asked?: unknown; questions?: unknown } | null;
+    return output?.asked === true && Array.isArray(output.questions);
+  });
+  if (question) {
+    const output = question.output as { questions: { question?: unknown }[] };
+    const words = output.questions.flatMap((item) =>
+      typeof item?.question === "string" && item.question.trim()
+        ? [item.question.trim()] : [],
+    );
+    if (words.length > 0) return words.join(" ");
   }
   if (effects.length > 0) {
-    return "Done. You can see it on the screen.";
+    return "I did not get a complete answer back. Please ask me to check the result.";
   }
   return "I could not finish that just now.";
 }
@@ -175,7 +185,7 @@ export async function askHomaFromVoice(
     );
     return {
       ok: false,
-      spokenReply: "That did not go through just now. Nothing changed.",
+      spokenReply: "I could not confirm the result just now. Check any saved records before trying again.",
       effects: [],
     };
   } finally {

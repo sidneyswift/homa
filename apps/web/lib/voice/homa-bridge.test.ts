@@ -146,6 +146,43 @@ describe("voice Homa bridge", () => {
     );
     assert.equal(output.ok, false);
     assert.deepEqual(output.effects, []);
-    assert.match(output.spokenReply, /Nothing changed/u);
+    assert.match(output.spokenReply, /could not confirm/u);
+    assert.doesNotMatch(output.spokenReply, /Nothing changed/u);
+  });
+
+  for (const scenario of [
+    { name: "a read result", status: "completed", effects: [toolResult({ callId: "read", toolName: "get_hours", output: { entries: [] } })] },
+    { name: "an unsuccessful write", status: "completed", effects: [toolResult({ callId: "log", toolName: "log_hours", output: { logged: false } })] },
+    { name: "an unrendered waiting state", status: "waiting", effects: [] },
+    { name: "a failure after a saved effect", status: "failed", effects: [toolResult({ callId: "log", toolName: "log_hours", output: { logged: true } })] },
+  ] as const) {
+    it(`does not invent visible success or rollback for ${scenario.name}`, async () => {
+      const result = await askHomaFromVoice({
+        host: "https://example.test", accessToken: "token", message: "Please help",
+        sourceMessageId: "11111111-1111-4111-8111-111111111111",
+      }, {
+        async run() {
+          return { status: scenario.status, message: undefined,
+            events: [...scenario.effects], sessionId: "eve-one", sessionState: { streamIndex: 1 } };
+        },
+      });
+      assert.doesNotMatch(result.spokenReply, /Done\.|on the screen|Nothing changed/u);
+      if (scenario.status === "failed") assert.equal(result.effects.length, 1);
+    });
+  }
+
+  it("reads the actual question when the agent returned a question card without prose", async () => {
+    const result = await askHomaFromVoice({
+      host: "https://example.test", accessToken: "token", message: "Make it",
+      sourceMessageId: "11111111-1111-4111-8111-111111111111",
+    }, {
+      async run() {
+        return { status: "completed", message: undefined,
+          events: [toolResult({ callId: "question", toolName: "ask_user_questions", output: {
+            asked: true, questions: [{ question: "Which child is this for?" }],
+          } })], sessionId: "eve-one", sessionState: { streamIndex: 1 } };
+      },
+    });
+    assert.equal(result.spokenReply, "Which child is this for?");
   });
 });
