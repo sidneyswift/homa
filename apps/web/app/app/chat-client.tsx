@@ -1576,11 +1576,10 @@ export function ChatClient({
     spoken: renderSources.spoken,
     timeZone,
   });
-  const currentVoiceEffectId = transcript.reduce<string | null>((current, item) => {
-    if (item.kind !== "message") return current;
-    if (item.message.role === "user") return null;
-    return isVoiceEffectMessage(item.message) ? item.message.id : current;
-  }, null);
+  // Receipt arrival order is not session authority. An old action may finish
+  // after a new conversation starts; display it without replacing her form.
+  const currentVoiceEffectId = voiceOpen && voiceAnswerSource !== null
+    ? voiceEffectMessageId(voiceAnswerSource) : null;
   const liveMessageSet = new Set<EveMessage>(renderMessages);
   const progressSessionKey =
     agent.session?.sessionId ??
@@ -2999,11 +2998,18 @@ export function ChatClient({
             // visible while she talks. The panel is just the microphone.
             <div className="mb-2">
               <VoiceMode
+                key={voiceGeneration}
                 onTurn={appendSpokenTurn}
                 onEffects={(output, context) => receiveVoiceEffects(output, context, voiceGeneration)}
-                onNotice={setVoiceNotice}
-                onActiveChange={setVoiceActive}
-                onClose={() => setVoiceOpen(false)}
+                onNotice={(message) => {
+                  if (voiceGeneration === voiceGenerationRef.current) setVoiceNotice(message);
+                }}
+                onActiveChange={(active) => {
+                  if (voiceGeneration === voiceGenerationRef.current) setVoiceActive(active);
+                }}
+                onClose={() => {
+                  if (voiceGeneration === voiceGenerationRef.current) setVoiceOpen(false);
+                }}
               />
             </div>
           ) : null}

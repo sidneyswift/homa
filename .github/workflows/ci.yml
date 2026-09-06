@@ -465,6 +465,9 @@ jobs:
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
 
+      - name: Web voice source identity, delivery, and persona checks
+        run: pnpm check:voice-persona
+
       - name: Homa's tasks UI checks (cards, editor dialog)
         run: pnpm check:tasks-ui
 
