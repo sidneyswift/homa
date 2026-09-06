@@ -3,7 +3,6 @@ import { MAP_INTERESTS_CAP } from "@homa/core";
 import { ageInMonths } from "./child-age";
 import { embedText } from "./learning/embeddings";
 import { isHoursSubject } from "./hours-model";
-import { hoursReadIsComplete } from "./hours-summary";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { effectiveTimeZone, zonedDateString } from "./time-zone";
@@ -305,48 +304,6 @@ function dayLabel(iso: string | null, timeZone: string): string {
  * so every conversation_messages read here repeats visibility = 'family'
  * explicitly (found leaking on this path 2026-07-19).
  */
-/**
- * The family's hours rows on the pinned path (gh#354). Same wall as
- * every other function here: the explicit family_id predicate IS the
- * tenancy boundary, because this connection has no RLS.
- *
- * Reading, never writing. recordHoursPinned owns the write side.
- */
-export async function readHoursPinned(
-  familyId: string,
-): Promise<{ rows: PinnedHoursRow[]; timeZone: string; schoolYearStartOn: string | null; complete: boolean }> {
-  const sql = mapDb();
-  const familyRows = await sql<{ time_zone: string | null; school_year_start_on: string | null }[]>`
-    select time_zone, school_year_start_on::text as school_year_start_on
-    from public.families where id = ${familyId}
-  `;
-  if (!familyRows[0]) throw new Error("Hours family context unavailable.");
-  const rows = await sql<(PinnedHoursRow & { totalCount: number })[]>`
-    select child_id as "childId", subject, minutes,
-           happened_on::text as "happenedOn", source, note,
-           (count(*) over ())::int as "totalCount"
-    from public.hours_log
-    where family_id = ${familyId}
-    order by happened_on desc, created_at desc, id desc
-    limit 3000
-  `;
-  return {
-    rows,
-    timeZone: effectiveTimeZone(familyRows[0].time_zone),
-    schoolYearStartOn: familyRows[0].school_year_start_on,
-    complete: hoursReadIsComplete(rows[0]?.totalCount ?? 0, rows.length),
-  };
-}
-
-export interface PinnedHoursRow {
-  childId: string | null;
-  subject: string;
-  minutes: number;
-  happenedOn: string;
-  source: string;
-  note: string | null;
-}
-
 export async function recallPinned(input: {
   familyId: string;
   memberUserId: string | null;

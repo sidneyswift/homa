@@ -1,6 +1,7 @@
 import { HOUSE_PATH } from "../../components/brand/Logo";
 import { colorTokens } from "@homa/design/contract";
 import { escapeHtml } from "../html-escape";
+import { deriveRecordedLearningDays, hoursRecordChildLabel, type RecordedLearningDay } from "../hours-record-scope";
 import { SHEET_PAGE_CLASS } from "../materials/page-shell";
 import { overrideNoteFor } from "./requirement-overrides";
 import type {
@@ -1110,22 +1111,7 @@ ${rows}
 <p class="sp-body sp-att-total">Total this page: __________</p>`;
 }
 
-export interface StatePackDailyRecord {
-  childName: string;
-  happenedOn: string;
-  subjects: string[];
-  minutes: number;
-}
-
-function recordMatchesChild(
-  entry: StatePackRecordEntry,
-  child: StatePackChild,
-): boolean {
-  if (entry.childId === null) return true;
-  return child.id
-    ? entry.childId === child.id
-    : entry.childName === child.name;
-}
+export type StatePackDailyRecord = RecordedLearningDay;
 
 /**
  * One deterministic row per child and saved learning day. Family-wide
@@ -1136,39 +1122,12 @@ export function deriveStatePackDailyRecords(
   family: StatePackFamily,
   records: StatePackRecords,
 ): StatePackDailyRecord[] {
-  const rows = new Map<string, StatePackDailyRecord>();
-  const add = (childName: string, entry: StatePackRecordEntry) => {
-    const key = `${childName}\u0000${entry.happenedOn}`;
-    const current = rows.get(key);
-    if (current) {
-      current.minutes += entry.minutes;
-      if (!current.subjects.includes(entry.subject)) current.subjects.push(entry.subject);
-      return;
-    }
-    rows.set(key, {
-      childName,
-      happenedOn: entry.happenedOn,
-      subjects: [entry.subject],
-      minutes: entry.minutes,
-    });
-  };
-
-  if (family.children.length > 0) {
-    for (const child of family.children) {
-      for (const entry of records.entries) {
-        if (recordMatchesChild(entry, child)) add(child.name, entry);
-      }
-    }
-  } else {
-    for (const entry of records.entries) {
-      add(entry.childName ?? "Whole family", entry);
-    }
-  }
-
-  return [...rows.values()].sort((left, right) =>
-    left.happenedOn.localeCompare(right.happenedOn) ||
-    left.childName.localeCompare(right.childName),
-  );
+  if (records.entries.length === 0) return [];
+  const children = family.children.map((child) => {
+    if (!child.id) throw new Error("Saved Hours require a durable child identity.");
+    return { id: child.id, name: child.name };
+  });
+  return deriveRecordedLearningDays(records.entries, children);
 }
 
 function recordDateText(dateOnly: string): string {
@@ -1196,13 +1155,15 @@ function recordedSummaryPage(
   records: StatePackRecords,
   daily: readonly StatePackDailyRecord[],
 ): string {
-  const childNames = family.children.length > 0
-    ? family.children.map((child) => child.name)
-    : [...new Set(daily.map((row) => row.childName))];
-  const summaryRows = childNames.map((childName) => {
-    const childRows = daily.filter((row) => row.childName === childName);
+  const children = family.children.length > 0
+    ? family.children.map((child) => ({ id: child.id, name: child.name }))
+    : [{ id: null, name: "Whole family" }];
+  const summaryRows = children.map((child) => {
+    const childRows = daily.filter((row) => row.childId === child.id);
     const minutes = childRows.reduce((total, row) => total + row.minutes, 0);
-    return `<tr><td>${escapeHtml(childName)}</td><td>${childRows.length}</td><td>${escapeHtml(recordTimeText(minutes))}</td></tr>`;
+    const label = child.id === null || child.id === undefined ? child.name
+      : hoursRecordChildLabel({ id: child.id, name: child.name }, family.children.flatMap((kid) => kid.id ? [{ id: kid.id, name: kid.name }] : []));
+    return `<tr><td>${escapeHtml(label)}</td><td>${childRows.length}</td><td>${escapeHtml(recordTimeText(minutes))}</td></tr>`;
   }).join("\n");
   const start = records.schoolYearStartOn
     ? recordDateText(records.schoolYearStartOn)
@@ -1213,10 +1174,10 @@ function recordedSummaryPage(
   return `${pageHeader(
     detail,
     `Your saved family records · state guidance verified ${verifiedMonthYear(detail.sourceLastVerified)}`,
-    "Recorded attendance and hours",
+    "Recorded learning days and hours",
     "A snapshot of the learning time saved in Homa when this packet was made. Review every row before relying on it.",
   )}
-<p class="sp-body"><strong>School year starts:</strong> ${escapeHtml(start)}. A recorded day means at least one saved time entry for that child on that date. Family-wide time counts for every child.</p>
+<p class="sp-body"><strong>School year starts:</strong> ${escapeHtml(start)}. A recorded day means at least one saved time entry for that child on that date. Family-wide time counts for every child. A date without a timed record does not establish absence.</p>
 ${summaryRows ? `<table class="sp-log sp-record-summary"><thead><tr><th>Child</th><th>Recorded days</th><th>Saved time</th></tr></thead><tbody>${summaryRows}</tbody></table>` : ""}
 ${empty}
 <p class="sp-body">Source: your family's Homa Hours record. Homa does not file or submit this record. You review, sign, and file anything your state requires.</p>`;
@@ -1225,6 +1186,7 @@ ${empty}
 function recordedDetailPages(
   detail: StateRequirementsDetail,
   records: StatePackRecords,
+  family: StatePackFamily,
 ): StatePackPage[] {
   const rowsPerPage = 17;
   const pages: StatePackPage[] = [];
@@ -1232,12 +1194,14 @@ function recordedDetailPages(
   for (const entry of records.entries) {
     const scope = entry.childName ?? "Whole family";
     const scopes = byDate.get(entry.happenedOn) ?? new Map<string, StatePackDailyRecord>();
-    const current = scopes.get(scope);
+    const scopeId = entry.childId ?? "family";
+    const current = scopes.get(scopeId);
     if (current) {
       current.minutes += entry.minutes;
       if (!current.subjects.includes(entry.subject)) current.subjects.push(entry.subject);
     } else {
-      scopes.set(scope, {
+      scopes.set(scopeId, {
+        childId: entry.childId,
         childName: scope,
         happenedOn: entry.happenedOn,
         subjects: [entry.subject],
@@ -1252,9 +1216,12 @@ function recordedDetailPages(
     const pageNumber = Math.floor(start / rowsPerPage) + 1;
     const pageCount = Math.ceil(dates.length / rowsPerPage);
     const bodyRows = chunk.map(([date, scopes]) => {
-      const details = [...scopes.values()].map((row) =>
-        `${row.childName}: ${row.subjects.map(humanizeToken).join(", ")}, ${recordTimeText(row.minutes)}`,
-      ).join(" · ");
+      const children = family.children.flatMap((kid) => kid.id ? [{ id: kid.id, name: kid.name }] : []);
+      const details = [...scopes.values()].map((row) => {
+        const child = children.find((kid) => kid.id === row.childId);
+        const label = child ? hoursRecordChildLabel(child, children) : row.childName;
+        return `${label}: ${row.subjects.map(humanizeToken).join(", ")}, ${recordTimeText(row.minutes)}`;
+      }).join(" · ");
       return `<tr><td class="sp-record-date">${escapeHtml(recordDateText(date))}</td><td>${escapeHtml(details)}</td></tr>`;
     }).join("\n");
     pages.push({
@@ -1682,12 +1649,12 @@ export function composeStatePack(input: StatePackInput): StatePack {
     const daily = deriveStatePackDailyRecords(family, input.records);
     contentPages.push({
       page: {
-        title: "Recorded attendance and hours",
+        title: "Recorded learning days and hours",
         body: recordedSummaryPage(detail, family, input.records, daily),
       },
       legalLine: false,
     });
-    for (const page of recordedDetailPages(detail, input.records)) {
+    for (const page of recordedDetailPages(detail, input.records, input.family)) {
       contentPages.push({ page, legalLine: false });
     }
   }

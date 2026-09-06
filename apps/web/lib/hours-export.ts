@@ -1,8 +1,17 @@
+import { createHash } from "node:crypto";
+
 import { isHoursSubject, type HoursSubject } from "./hours-model";
-import { subjectDisplayLabel } from "./hours-view";
+import {
+  ALL_HOURS_RECORDS, deriveRecordedLearningDays, matchesHoursRecordScope,
+  summarizeRecordedLearningDays, type HoursRecordChild, type HoursRecordScope,
+  type RecordedLearningDay,
+} from "./hours-record-scope";
+import { SUBJECT_LABELS } from "./hours-view";
 import { mapDb } from "./map/db";
 
 export interface HoursExportRow {
+  id: string;
+  childId: string | null;
   happenedOn: string;
   childName: string | null;
   subject: HoursSubject;
@@ -13,6 +22,8 @@ export interface HoursExportRow {
 }
 
 interface RawHoursExportRow {
+  id: string;
+  child_id: string | null;
   happened_on: string;
   child_name: string | null;
   subject: string;
@@ -26,12 +37,30 @@ function exportSource(value: string): HoursExportRow["source"] {
   return value === "sms" || value === "call" ? value : "chat";
 }
 
-/** Loads the complete record for an authenticated family. Unlike the screen,
- * the download has no display cap because it is the family's archive. */
-export async function getHoursExportForFamily(familyId: string): Promise<HoursExportRow[]> {
+export class HoursRecordChildNotFound extends Error {}
+
+export interface HoursExportRecord {
+  rows: HoursExportRow[];
+  children: HoursRecordChild[];
+}
+
+/** Server-authenticated family scope, rechecked child ownership, one read-only
+ * snapshot. The archive has no display-row cap. Timeout fails the whole read. */
+export async function getHoursExportRecord(
+  familyId: string,
+  scope: HoursRecordScope = ALL_HOURS_RECORDS,
+): Promise<HoursExportRecord> {
   const sql = mapDb();
-  const rows = await sql<RawHoursExportRow[]>`
-    select h.happened_on::text as happened_on,
+  return sql.begin("isolation level repeatable read read only", async (tx) => {
+    await tx`set local statement_timeout = '15s'`;
+    const children = await tx<HoursRecordChild[]>`
+      select id, name from public.children where family_id = ${familyId} order by created_at, id
+    `;
+    if (scope.childId !== null && !children.some((child) => child.id === scope.childId)) {
+      throw new HoursRecordChildNotFound("Hours child is not in this family.");
+    }
+    const raw = await tx<RawHoursExportRow[]>`
+    select h.id, h.child_id, h.happened_on::text as happened_on,
            c.name as child_name,
            h.subject,
            h.custom_label,
@@ -43,15 +72,22 @@ export async function getHoursExportForFamily(familyId: string): Promise<HoursEx
       on c.id = h.child_id
      and c.family_id = h.family_id
     where h.family_id = ${familyId}
+      and (${scope.from}::date is null or h.happened_on >= ${scope.from}::date)
+      and (${scope.through}::date is null or h.happened_on <= ${scope.through}::date)
+      and (${scope.includeShared}::boolean or h.child_id is not null)
+      and (${scope.childId}::uuid is null or h.child_id = ${scope.childId}::uuid
+           or (${scope.includeShared}::boolean and h.child_id is null))
     order by h.happened_on asc, h.created_at asc, h.id asc
   `;
-  return rows.map((row) => {
+  const rows = raw.map((row) => {
     const minutes = Number(row.minutes);
-    if (!Number.isInteger(minutes) || minutes < 1) {
+    if (!Number.isSafeInteger(minutes) || minutes < 1) {
       throw new Error("hours export found an invalid duration");
     }
     const subject = isHoursSubject(row.subject) ? row.subject : "other";
     return {
+      id: row.id,
+      childId: row.child_id,
       happenedOn: row.happened_on,
       childName: row.child_name,
       subject,
@@ -61,10 +97,16 @@ export async function getHoursExportForFamily(familyId: string): Promise<HoursEx
       note: row.note,
     };
   });
+    if (rows.some((row) => !matchesHoursRecordScope(row, scope)
+      || (row.childId !== null && !children.some((child) => child.id === row.childId)))) {
+      throw new Error("Hours record scope did not match the requested family record.");
+    }
+    return { rows, children };
+  });
 }
 
 function spreadsheetSafe(value: string): string {
-  return /^[=+\-@\t\r]/u.test(value) ? `'${value}` : value;
+  return /^(?:\s*[=+\-@]|[\t\r\n])/u.test(value) ? `'${value}` : value;
 }
 
 function csvCell(value: string | number): string {
@@ -77,15 +119,44 @@ function decimalHours(minutes: number): string {
 }
 
 export function renderHoursCsv(rows: readonly HoursExportRow[]): string {
-  const header = ["Date", "Child", "Subject", "Minutes", "Hours", "Source", "Note"];
+  const header = ["Date", "Child", "Child ID", "Subject", "Category", "Minutes", "Hours", "Source", "Note", "Entry ID"];
   const lines = rows.map((row) => [
     row.happenedOn,
     row.childName ?? "Whole family",
-    subjectDisplayLabel(row),
+    row.childId ?? "",
+    SUBJECT_LABELS[row.subject],
+    row.customLabel ?? "",
     row.minutes,
     decimalHours(row.minutes),
     row.source,
     row.note ?? "",
+    row.id,
   ]);
   return `\uFEFF${[header, ...lines].map((line) => line.map(csvCell).join(",")).join("\r\n")}\r\n`;
 }
+
+export function renderRecordedDaysCsv(days: readonly RecordedLearningDay[]): string {
+  const header = ["Date", "Child", "Child ID", "Recorded learning days", "Minutes", "Hours", "Subjects"];
+  const lines = days.map((day) => [day.happenedOn, day.childName, day.childId ?? "", 1, day.minutes,
+    decimalHours(day.minutes), day.subjects.map((subject) => isHoursSubject(subject) ? SUBJECT_LABELS[subject] : subject).join("; ")]);
+  return `\uFEFF${[header, ...lines].map((line) => line.map(csvCell).join(",")).join("\r\n")}\r\n`;
+}
+
+export function hoursRecordRevision(record: HoursExportRecord, scope: HoursRecordScope): string {
+  return createHash("sha256").update(JSON.stringify({ scope, children: record.children, rows: record.rows })).digest("hex");
+}
+
+export function buildHoursRecordPreview(record: HoursExportRecord, scope: HoursRecordScope) {
+  const days = deriveRecordedLearningDays(record.rows, record.children, scope);
+  return {
+    scope, revision: hoursRecordRevision(record, scope),
+    entryCount: record.rows.length,
+    totalMinutes: record.rows.reduce((sum, row) => sum + row.minutes, 0),
+    recordedDays: new Set(record.rows.map((row) => row.happenedOn)).size,
+    byChild: summarizeRecordedLearningDays(days, record.children, scope),
+    entries: record.rows.slice(0, 20),
+    previewLimit: 20,
+  };
+}
+
+export type HoursRecordPreview = ReturnType<typeof buildHoursRecordPreview>;

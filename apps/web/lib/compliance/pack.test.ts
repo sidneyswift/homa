@@ -140,21 +140,54 @@ const SAVED_RECORDS: StatePackRecords = {
 };
 
 describe("actual attendance and hours records", () => {
+  it("keeps same-name children separate in both printed summary and daily details", () => {
+    const family = { ...WALKERS, children: WALKERS.children.map((child) => ({ ...child, name: "Same" })) };
+    const records = { schoolYearStartOn: "2026-09-01", entries: [
+      { childId: family.children[0].id!, childName: "Same", happenedOn: "2026-09-01", subject: "reading", minutes: 20 },
+      { childId: family.children[1].id!, childName: "Same", happenedOn: "2026-09-01", subject: "math", minutes: 30 },
+      { childId: null, childName: null, happenedOn: "2026-09-02", subject: "art", minutes: 10 },
+    ] };
+    const days = deriveStatePackDailyRecords(family, records);
+    assert.equal(days.length, 4);
+    assert.deepEqual(days.filter((row) => row.childId === family.children[0].id).map((row) => row.minutes), [20, 10]);
+    assert.deepEqual(days.filter((row) => row.childId === family.children[1].id).map((row) => row.minutes), [30, 10]);
+    const pack = composeStatePack({ detail: loadDetail("NY"), family, records, packId: "12345678-abcd-4ef0-8123-456789abcdef", generatedOn: "September 6, 2026" });
+    assert.match(pack.html, /<td>Same \(record 111111\)<\/td><td>2<\/td><td>30m<\/td>/u);
+    assert.match(pack.html, /<td>Same \(record 222222\)<\/td><td>2<\/td><td>40m<\/td>/u);
+    assert.match(pack.html, /Same \(record 111111\): reading, 20m · Same \(record 222222\): math, 30m/u);
+    assert.match(pack.html, /Whole family: art, 10m/u);
+    assert.match(pack.html, /does not establish absence/u);
+  });
+
+  it("uses a renamed child's current label without losing entries recorded under the old name", () => {
+    const family = { ...WALKERS, children: [{ ...WALKERS.children[0], name: "Finley" }, WALKERS.children[1]] };
+    const days = deriveStatePackDailyRecords(family, SAVED_RECORDS);
+    assert.deepEqual(days.filter((row) => row.childId === family.children[0].id).map((row) => [row.childName, row.minutes]), [["Finley", 165]]);
+  });
+
+  it("refuses records whose child identity cannot be verified instead of matching a display name", () => {
+    assert.throws(() => deriveStatePackDailyRecords({ ...WALKERS, children: WALKERS.children.map(({ name, birthdate }) => ({ name, birthdate })) }, SAVED_RECORDS));
+    assert.throws(() => deriveStatePackDailyRecords(WALKERS, { ...SAVED_RECORDS, entries: [{ ...SAVED_RECORDS.entries[0], childId: "foreign-child" }] }));
+  });
+
   it("counts family-wide time for every child and keeps child-specific rows exact", () => {
     assert.deepEqual(deriveStatePackDailyRecords(WALKERS, SAVED_RECORDS), [
       {
+        childId: WALKERS.children[0].id,
         childName: "Finn",
         happenedOn: "2026-08-19",
         subjects: ["math", "co-op"],
         minutes: 165,
       },
       {
+        childId: WALKERS.children[1].id,
         childName: "Maya",
         happenedOn: "2026-08-19",
         subjects: ["co-op"],
         minutes: 120,
       },
       {
+        childId: WALKERS.children[1].id,
         childName: "Maya",
         happenedOn: "2026-08-20",
         subjects: ["reading"],
@@ -171,7 +204,7 @@ describe("actual attendance and hours records", () => {
       generatedOn: "August 21, 2026",
       records: SAVED_RECORDS,
     });
-    assert.ok(pack.pages.some((page) => page.title === "Recorded attendance and hours"));
+    assert.ok(pack.pages.some((page) => page.title === "Recorded learning days and hours"));
     assert.ok(pack.pages.some((page) => page.title === "Logged learning days"));
     assert.match(pack.html, /Aug 18, 2026/u);
     assert.match(pack.html, /Aug 19, 2026/u);

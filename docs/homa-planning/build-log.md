@@ -3,6 +3,10 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-09-06 · Restore the approved Second language database constraint
+
+During #1096's hosted school-year verification, a synthetic `spanish` Hours insert failed with PostgreSQL 23514. Both production subject constraints still had the ten-subject vocabulary; the August 28 approved widening migration was absent from the live ledger. #1120 records the live failure. Root applied the exact already-merged `20260828140000_hours_subject_second_language.sql` while its consumer code was READY on `b8b7969393e9421c36e33e33e623b2ce5a4a5375`; live version `20260906195628` now includes every prior subject plus `spanish` for Hours and Planner. This is recovery of the existing founder ruling, not a new taxonomy decision. Catalog readback and a populated hosted Hours journey passed. [Evidence and cleaned failed attempts](journeys/evidence/2026-09-06-school-year-live-verification.md).
+
 ## 2026-09-01 · Founder ruling: iOS reprices to $9.99/$99.99 on the Headspace recipe (annual returns)
 
 One day after killing the $119 annual, the founder repriced the whole

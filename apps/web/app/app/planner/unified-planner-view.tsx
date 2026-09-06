@@ -57,6 +57,7 @@ import {
   updateFamilyEventAction,
 } from "../calendar/actions";
 import { HoursView } from "../hours/hours-view";
+import { HoursRecordExport } from "../hours/hours-record-export";
 import { HoursEntryOverlay } from "../hours/hours-entry-overlay";
 import {
   deletePlannerLearningActivityAction,
@@ -2029,12 +2030,8 @@ export function UnifiedPlannerView({
                 Your Hours stay available and downloadable if you cancel.
               </p>
             </div>
-            <a
-              href="/api/hours/export"
-              className="quiet-action quiet-action--secondary quiet-action--default"
-            >
-              <span>Download family spreadsheet</span>
-            </a>
+            <HoursRecordExport key={focusChildId ?? "family"} kids={kids} focusChildId={focusChildId}
+              today={today} schoolYearStartOn={schoolYearStartOn} />
           </div>
           <HoursView
             kids={kids}

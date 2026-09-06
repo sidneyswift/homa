@@ -1,0 +1,94 @@
+{
+  "phases": [
+    {
+      "phase": "initial",
+      "cases": 8,
+      "actorRuns": 8,
+      "actorModelRequests": null,
+      "judgeModelRequests": 9,
+      "tokens": {
+        "inputTokens": 196740,
+        "outputTokens": 5427,
+        "totalTokens": 202167
+      },
+      "capturedGatewayCostUSD": null
+    },
+    {
+      "phase": "corrected-contract",
+      "cases": 8,
+      "actorRuns": 8,
+      "actorModelRequests": null,
+      "judgeModelRequests": 9,
+      "tokens": {
+        "inputTokens": 260227,
+        "outputTokens": 6202,
+        "totalTokens": 266429
+      },
+      "capturedGatewayCostUSD": null
+    },
+    {
+      "phase": "load-only-routing",
+      "cases": 5,
+      "actorRuns": 5,
+      "actorModelRequests": 5,
+      "judgeModelRequests": 0,
+      "tokens": {
+        "inputTokens": 52909,
+        "outputTokens": 839,
+        "totalTokens": 53748
+      },
+      "capturedGatewayCostUSD": null
+    },
+    {
+      "phase": "full-menu-routing",
+      "cases": 5,
+      "actorRuns": 5,
+      "actorModelRequests": 5,
+      "judgeModelRequests": 0,
+      "tokens": {
+        "inputTokens": 343194,
+        "outputTokens": 617,
+        "totalTokens": 343811
+      },
+      "capturedGatewayCostUSD": null,
+      "hoursBoundaryPassed": 5,
+      "adjacentDirectToolObservations": [
+        {
+          "id": "logging-negative",
+          "selected": [
+            "TOOL:log_hours"
+          ]
+        },
+        {
+          "id": "state-packet-negative",
+          "selected": [
+            "TOOL:open_state_records"
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "final-full-menu",
+      "cases": 8,
+      "actorRuns": 8,
+      "actorModelRequests": 24,
+      "judgeModelRequests": 9,
+      "tokens": {
+        "inputTokens": 1699875,
+        "outputTokens": 6572,
+        "totalTokens": 1706447
+      },
+      "capturedGatewayCostUSD": "3.465470",
+      "pass": true,
+      "passed": 8
+    }
+  ],
+  "allReportedTokens": {
+    "inputTokens": 2552945,
+    "outputTokens": 19657,
+    "totalTokens": 2572602
+  },
+  "rejectedGatewaySchemaRequests": 1,
+  "rejectedRequestTokensAndCost": "Not returned; no successful model result.",
+  "earlierDollarCosts": "Unavailable, not estimated."
+}

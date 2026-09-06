@@ -54,7 +54,8 @@ All failures below were escalated September 6. The discovery evidence is histori
 | Named book details disappear | Two actual source/tool/row comparisons | F02, [#1093](https://github.com/sidneyswift/homa/issues/1093) | Open; escalated September 6 |
 | Distinct reading time suppressed | Two separate September 3 30-minute activities collided with an existing literature record; at least 60 minutes absent | F03, [#1090](https://github.com/sidneyswift/homa/issues/1090) | Open; escalated September 6 |
 | Child/day aggregation merges equal display names; child totals omit shared records in chat | Actual-function replays | F07, [#1095](https://github.com/sidneyswift/homa/issues/1095) | Open; escalated September 6 |
-| School-year surfaces use different starts | UI July 1, chat/Progress August 1, compliance configured anniversary; real July data exists | F08, [#1096](https://github.com/sidneyswift/homa/issues/1096) | Open; escalated September 6 |
+| School-year surfaces use different starts | UI July 1, chat/Progress August 1, compliance configured anniversary; real July data exists | F08, [#1096](https://github.com/sidneyswift/homa/issues/1096) | FIXED `b8b79693`, F08 live receipt |
+| Second language Hours rejected by an old database constraint | First hosted F08 fixture failed with 23514; both production subject constraints lacked `spanish` | [#1120](https://github.com/sidneyswift/homa/issues/1120) | FIXED against deployed `b8b79693` by exact existing migration, live version `20260906195628`; F08 live receipt |
 | Deeper-question intent is lost and chat check-ins stop early | Live navigation, actual responses and selector comparison | F09-F10, [#1088](https://github.com/sidneyswift/homa/issues/1088) | Open; escalated September 6 |
 | Capability follow-ups remain unscored; subsequent advice bypasses verifier | Three actual `no_match` observations, stale cutting evidence, no next-move tool call | F13-F14, [#1099](https://github.com/sidneyswift/homa/issues/1099), [#1100](https://github.com/sidneyswift/homa/issues/1100) | Open; escalated September 6 |
 | Accepted curricula cannot be read; blank scan can be reported as read | Two actual over-cap files and local blank-text PDF replay | F16, [#1089](https://github.com/sidneyswift/homa/issues/1089) | FIXED `78466fe6`, F16 recovery receipt |
@@ -77,7 +78,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | F05 | Familiar subject display names | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
 | F06 | Child/date-scoped export | Implement now; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
 | F07 | Correct recorded days and shared-child scope | Implement now; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
-| F08 | One configured school-year window | Implement now; [#1096](https://github.com/sidneyswift/homa/issues/1096) |
+| F08 | One configured school-year window | FIXED and verified live; [#1096](https://github.com/sidneyswift/homa/issues/1096) |
 | F09 | Start the selected deeper assessment | Implement now; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
 | F10 | Explore demonstrated ability and stop honestly | Implement now; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
 | F11 | Restore web months-ahead context | Implement now; [#1097](https://github.com/sidneyswift/homa/issues/1097) |
@@ -171,6 +172,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1095](https://github.com/sidneyswift/homa/issues/1095).
 
+**Implementation under verification:** the [record contract](2026-09-06-hours-record-scope.md) now traces the proposed child/date/shared preview through the actual export route and repeatable-read database snapshot. Populated local browser tests open both CSV artifacts; real PostgreSQL proves the archive exceeds 3,000 rows without truncation. This is not yet a shipped or hosted verification claim. The active-chain paragraph below is the audit baseline.
+
 **Expected, P58-59:** choose a child and inclusive start/end dates, including a term or school year, without separating siblings afterward.
 
 **Active chain:** Planner's download link is fixed at `/api/hours/export`, even after selecting a child. The [route](../../../apps/web/app/api/hours/export/route.ts) authenticates but consumes no child/date parameters. [hours-export.ts](../../../apps/web/lib/hours-export.ts) reads the whole family without the UI's 3,000-row cap and emits CSV with escaped/formula-protected values, child or Whole family, subject, exact minutes, rounded hours, source and note. No date-range inputs currently feed it. An empty downloaded file is not a meaningful scope test.
@@ -182,6 +185,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 ### F07. Count recorded learning days per child
 
 **Tracking:** [#1095](https://github.com/sidneyswift/homa/issues/1095).
+
+**Implementation under verification:** child-ID aggregation is implemented and real generated PDFs preserve separate 30m/40m totals for equal-name children. Independent review found that visible duplicate names still needed disambiguation and that chat's raw attribution conflicted with child totals; both corrections are being tested. The first real-model sample also excluded shared time for “Just Avery,” so the judgment procedure is being corrected and evaluated. The [record contract](2026-09-06-hours-record-scope.md) distinguishes these results from remaining complete-reader and hosted-release work.
 
 **Expected, P60-85:** count each child's school dates separately, including the sick-sibling example, and export a chosen period; several activities on one day count once.
 
@@ -195,7 +200,9 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 ### F08. Use one configured school-year window
 
-**Implementation underway, not yet live-certified:** the [configured school-year contract](2026-09-06-configured-school-year.md) records the actual reader changes, independent week/month windows, through-today bounds, explicit All time fallback, Settings clear behavior, and incomplete-read handling. Actual disposable PostgreSQL readers, component tests and phone captures have passed; deployment and authenticated hosted verification remain pending.
+**FIXED and verified live:** [PR #1119](https://github.com/sidneyswift/homa/pull/1119), main `b8b7969393e9421c36e33e33e623b2ce5a4a5375`. The [live receipt](../journeys/evidence/2026-09-06-school-year-live-verification.md) records 381 passing assertions across real Settings save/clear, nine populated Hours states and the authenticated summary. Configured totals were Avery 22m, Blair 28m, and 45m at family level; clearing restored 63m, 28m and 86m. Week/month remained independent and future records stayed outside current totals. Source-matched Progress/packet reads are separately labeled; no hosted subject-panel, generated PDF or model-conversation claim is implied. The [implementation contract](2026-09-06-configured-school-year.md) retains local edge-case evidence.
+
+The first hosted run also found an unapplied existing Second language subject migration. Root applied and verified it as [#1120](https://github.com/sidneyswift/homa/issues/1120). Two further test-script navigation failures and all four fixture cleanups remain in the evidence. The paragraphs below describe the audit baseline before these repairs.
 
 **Tracking:** [#1096](https://github.com/sidneyswift/homa/issues/1096).
 
