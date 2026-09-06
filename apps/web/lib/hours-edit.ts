@@ -33,14 +33,16 @@ export function recordedTimeAudience(context: HoursEditContext): string {
     : "the whole family";
 }
 
-export function hoursMutationError(receipt: unknown): string | null {
+export function hoursMutationError(receipt: unknown, surface: "hours" | "planner" = "hours"): string | null {
   const parsed = z.object({ result: z.string(), reason: z.string().optional() }).safeParse(receipt);
-  if (!parsed.success) return "The change couldn't be confirmed. Reopen the record to check before trying again.";
+  if (!parsed.success) return surface === "planner"
+    ? "The change couldn't be confirmed. Reopen the activity to check before trying again."
+    : "The change couldn't be confirmed. Close this editor and reopen the record to check before trying again.";
   const { result, reason } = parsed.data;
   if (result === "applied") return null;
   if (result === "not_found") return "That entry couldn't be found. Close it and refresh the page.";
   if (result === "invalid") return "Check the subject, minutes and note, then try again.";
   if (reason === "duplicate") return "That change would match another time entry on this day. Nothing changed.";
-  if (reason === "link-shape") return "This change can't be saved safely because the shared time records don't match. Nothing changed. Close this editor and refresh the page. If it still happens, contact support.";
+  if (reason === "link-shape") return "Nothing changed. Homa couldn't update this shared activity's recorded time. Close this editor and refresh the page. If it still happens, contact support.";
   return "This record changed while it was open. Close it and reopen to review the latest version.";
 }

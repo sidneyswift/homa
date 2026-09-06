@@ -124,7 +124,10 @@ test("320px: failure keeps values, pending blocks dismissal and shared deletion 
   await expect(dialog.getByRole("button")).toHaveCount(2);
   await expect(dialog.getByRole("button", { name: "Save changes", exact: true })).toHaveCount(0);
   await expect(dialog).toContainText("This deletes the recorded time, categories and notes for Avery and Alexandria Clementine Montgomery-Swift.");
-  await expect(dialog).toContainText("The activity stays finished in Planner");
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^Sunday, September 6, 2026$/u })).toBeVisible();
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^This deletes the recorded time, categories and notes for/u })).toHaveText("This deletes the recorded time, categories and notes for Avery and Alexandria Clementine Montgomery-Swift.");
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^The activity stays finished/u })).toHaveText("The activity stays finished in Planner, with its Planner notes.");
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^This can't be undone\.$/u })).toBeVisible();
   await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).scrollIntoViewIfNeeded();
   if (screenshots) await page.screenshot({ path: resolve(screenshots, "1092-week-320-delete.png") });
   await dialog.getByRole("button", { name: "Go back", exact: true }).click();
@@ -216,3 +219,23 @@ for (const width of [320, 390]) {
     await page.close();
   });
 }
+
+
+test("standalone deletion identifies the recorded date and keeps the irreversible warning separate", async () => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(origin + route("hours"));
+  await page.getByRole("listitem").filter({ hasText: "Family nature walk" }).getByRole("button", { name: "Edit", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^Monday, September 7, 2026$/u })).toBeVisible();
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^This deletes the 10-minute entry/u })).toHaveText("This deletes the 10-minute entry for the whole family, including its category and note.");
+  await expect(dialog.getByRole("paragraph").filter({ hasText: /^This can't be undone\.$/u })).toBeVisible();
+  await expect(dialog.getByText("The activity stays finished in Planner, with its Planner notes.", { exact: true })).toHaveCount(0);
+  if (screenshots) await page.screenshot({ path: resolve(screenshots, "1092-hours-390-standalone-delete.png") });
+  await dialog.getByRole("button", { name: "Go back", exact: true }).click();
+  await page.evaluate(() => { window.hoursEditorFixture.mode = "throw"; });
+  await dialog.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(dialog.getByRole("alert")).toContainText("Close this editor and reopen the record to check before trying again.");
+  await expect(dialog.getByRole("spinbutton", { name: "Minutes", exact: true })).toHaveValue("10");
+  await page.close();
+});

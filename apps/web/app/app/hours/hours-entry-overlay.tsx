@@ -68,7 +68,7 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
               Category (optional)
               <input name="customLabel" defaultValue={entry.customLabel ?? ""} aria-describedby={categoryHintId} className={FIELD_CLASS} />
             </label>
-            <p id={categoryHintId} className="mt-1 text-sm">A name within the subject, like Math club. Up to 40 characters.</p>
+            <p id={categoryHintId} className="mt-1 text-sm">A label such as Math club or Piano lesson. Up to 40 characters.</p>
             <label className="mt-3 flex flex-col gap-1.5 text-sm font-semibold">
               Note for {annotationOwner}
               <textarea name="note" value={note} onChange={(event) => setNote(event.target.value)} rows={4}
@@ -192,7 +192,7 @@ export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClo
           router.refresh();
         }
       } catch {
-        setError("The change couldn't be confirmed. Reopen the record to check before trying again.");
+        setError("The change couldn't be confirmed. Close this editor and reopen the record to check before trying again.");
       } finally {
         busy.current = false;
         setPending(null);
@@ -226,9 +226,12 @@ export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClo
           </div>
           {confirming ? <div ref={confirmationRef} className="min-h-0 overflow-y-auto">
             {context.activity ? <p className="mt-3 break-words text-sm font-semibold">{context.activity.title}</p> : null}
+            <p className="mt-3 text-sm">{recordedDate(context.entry.happenedOn)}</p>
             <p className="mt-3 text-sm">{context.activity
-              ? `This deletes the recorded time, categories and notes for ${audience}. The activity stays finished in Planner, with its Planner notes. This can't be undone.`
-              : `This deletes the ${context.entry.minutes}-minute entry for ${audience}, including its category and note. This can't be undone.`}</p>
+              ? `This deletes the recorded time, categories and notes for ${audience}.`
+              : `This deletes the ${context.entry.minutes}-minute entry for ${audience}, including its category and note.`}</p>
+            {context.activity ? <p className="mt-3 text-sm">The activity stays finished in Planner, with its Planner notes.</p> : null}
+            <p className="mt-3 text-sm">This can&apos;t be undone.</p>
             {error ? <p ref={errorRef} tabIndex={-1} role="alert" className="mt-3 text-sm text-[color:var(--homa-error-ink)]">{error}</p> : null}
             <div className="mt-4 flex flex-wrap gap-2">
               <QuietAction kind="secondary" disabled={pending !== null} onClick={() => mutate("delete")}>{pending === "delete" ? "Deleting…" : "Delete recorded time"}</QuietAction>

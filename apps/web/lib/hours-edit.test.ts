@@ -35,7 +35,7 @@ describe("recorded-time edit scope", () => {
   });
   it("explains malformed links without implying a review or automatic repair", () => {
     const error = hoursMutationError({ result: "conflict", reason: "link-shape" })!;
-    assert.match(error, /can't be saved safely/u);
+    assert.match(error, /^Nothing changed\. Homa couldn't update this shared activity's recorded time\./u);
     assert.match(error, /Close this editor and refresh/u);
     assert.doesNotMatch(error, /needs a review|Ask Homa/u);
   });
@@ -44,5 +44,8 @@ describe("recorded-time edit scope", () => {
       assert.equal(typeof hoursMutationError(receipt), "string");
     }
     assert.equal(hoursMutationError({ result: "applied" }), null);
+    assert.match(hoursMutationError(null)!, /Close this editor and reopen the record/u);
+    assert.match(hoursMutationError(null, "planner")!, /Reopen the activity/u);
+    assert.doesNotMatch(hoursMutationError(null, "planner")!, /reopen the record/iu);
   });
 });

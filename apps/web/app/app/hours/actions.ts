@@ -46,16 +46,16 @@ export async function updateHoursEntryAction(entryId: string, revision: string, 
       target_subject: subject, target_minutes: minutes,
       target_custom_label: customLabel || null, target_note: note || null,
     });
-    if (error) return { error: "That change couldn't be confirmed. Reopen the record to check before trying again." };
+    if (error) return { error: "That change couldn't be confirmed. Close this editor and reopen the record to check before trying again." };
     const failure = hoursMutationError(data);
     if (failure) return { error: failure };
     const receipt = z.object({ result: z.literal("applied"), entryId: z.string().uuid() }).safeParse(data);
-    if (!receipt.success || receipt.data.entryId !== entryId) return { error: "The change couldn't be confirmed. Reopen the record to check." };
+    if (!receipt.success || receipt.data.entryId !== entryId) return { error: "The change couldn't be confirmed. Close this editor and reopen the record to check." };
     revalidatePath("/app/planner");
     revalidatePath("/app/hours");
     return { error: null };
   } catch {
-    return { error: "That change couldn't be confirmed. Check your connection and reopen the record." };
+    return { error: "That change couldn't be confirmed. Check your connection. Close this editor and reopen the record." };
   }
 }
 
@@ -66,15 +66,15 @@ export async function deleteHoursEntryAction(entryId: string, revision: string):
     const { data, error } = await supabase.rpc("delete_hours_entry", {
       target_entry_id: entryId, target_revision: revision,
     });
-    if (error) return { error: "The removal couldn't be confirmed. Reopen the record to check before trying again." };
+    if (error) return { error: "The removal couldn't be confirmed. Close this editor and reopen the record to check before trying again." };
     const failure = hoursMutationError(data);
     if (failure) return { error: failure };
     const receipt = z.object({ result: z.literal("applied"), entryId: z.string().uuid() }).safeParse(data);
-    if (!receipt.success || receipt.data.entryId !== entryId) return { error: "The change couldn't be confirmed. Reopen the record to check." };
+    if (!receipt.success || receipt.data.entryId !== entryId) return { error: "The change couldn't be confirmed. Close this editor and reopen the record to check." };
     revalidatePath("/app/planner");
     revalidatePath("/app/hours");
     return { error: null };
   } catch {
-    return { error: "The removal couldn't be confirmed. Check your connection and reopen the record." };
+    return { error: "The removal couldn't be confirmed. Check your connection. Close this editor and reopen the record." };
   }
 }

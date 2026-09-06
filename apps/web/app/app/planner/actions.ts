@@ -27,7 +27,7 @@ export async function savePlannerLearningActivityAction(input: {
       target_duration_minutes: input.durationMinutes,
     });
     if (error) return { ok: false, reason: "That change couldn't be confirmed. Reopen the activity to check before trying again." };
-    const failure = hoursMutationError(data);
+    const failure = hoursMutationError(data, "planner");
     if (failure) return { ok: false, reason: failure };
     const parsed = z.object({
       result: z.literal("applied"), title: z.string(), note: z.string().nullable(),
