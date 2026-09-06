@@ -21,6 +21,10 @@ export const hoursEditContextSchema = z.object({
 
 export type HoursEditContext = z.infer<typeof hoursEditContextSchema>;
 
+export function hoursNoteCharacterCount(note: string): number {
+  return Array.from(note.trim()).length;
+}
+
 export function recordedTimeAudience(context: HoursEditContext): string {
   if (!context.activity) return context.entry.childName ?? "the whole family";
   const names = context.activity.children.map((child) => child.name);
@@ -37,6 +41,6 @@ export function hoursMutationError(receipt: unknown): string | null {
   if (result === "not_found") return "That entry couldn't be found. Close it and refresh the page.";
   if (result === "invalid") return "Check the subject, minutes and note, then try again.";
   if (reason === "duplicate") return "That change would match another time entry on this day. Nothing changed.";
-  if (reason === "link-shape") return "This shared record needs a review before it can change. Nothing changed.";
+  if (reason === "link-shape") return "This change can't be saved safely because the shared time records don't match. Nothing changed. Close this editor and refresh the page. If it still happens, contact support.";
   return "This record changed while it was open. Close it and reopen to review the latest version.";
 }

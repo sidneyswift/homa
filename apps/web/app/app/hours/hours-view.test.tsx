@@ -157,10 +157,10 @@ describe("HoursView", () => {
 
   it("keeps source provenance behind Edit instead of competing with the activity", () => {
     assert.doesNotMatch(renderView([entry({ source: "call" })]), /Phone call/);
-    assert.match(renderOverlay(entry({ source: "chat" })), /Saved in your school-time record\./);
-    assert.doesNotMatch(renderOverlay(entry({ source: "chat" })), /mentioned it in Chat/);
-    assert.match(renderOverlay(entry({ source: "sms" })), /Added after you mentioned it by text\./);
-    assert.match(renderOverlay(entry({ source: "call" })), /Added after you mentioned it on a phone call\./);
+    assert.match(renderForm(entry({ source: "chat" })), /Saved in your school-time record\./);
+    assert.doesNotMatch(renderForm(entry({ source: "chat" })), /mentioned it in Chat/);
+    assert.match(renderForm(entry({ source: "sms" })), /Added after you mentioned it by text\./);
+    assert.match(renderForm(entry({ source: "call" })), /Added after you mentioned it on a phone call\./);
   });
 
   it("shows which child a block belongs to only when more than one kid exists", () => {
@@ -209,12 +209,12 @@ describe("HoursEntryOverlay", () => {
   });
 
   it("names who the block is for, or the whole family", () => {
-    const forKid = renderOverlay(entry({ childName: "Maya" }));
-    assert.match(forKid, /For Maya\./);
+    const forKid = renderForm(entry({ childName: "Maya" }));
+    assert.match(forKid, /Recorded time for Maya\./);
     assert.match(forKid, /Saved in your school-time record\./);
 
-    const familyWide = renderOverlay(entry({ childId: null, childName: null }));
-    assert.match(familyWide, /For the whole family\./);
+    const familyWide = renderForm(entry({ childId: null, childName: null }));
+    assert.match(familyWide, /Recorded time for the whole family\./);
   });
 
   it("loads authenticated scope before offering any write", () => {

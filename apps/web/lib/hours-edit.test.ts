@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { hoursEditContextSchema, hoursMutationError, recordedTimeAudience, type HoursEditContext } from "./hours-edit";
+import { hoursEditContextSchema, hoursMutationError, hoursNoteCharacterCount, recordedTimeAudience, type HoursEditContext } from "./hours-edit";
 import { recordedHoursForDate, type HoursEntry } from "./hours-view";
 
 const first = "a0000000-0000-4000-8000-000000000001";
@@ -27,6 +27,17 @@ describe("recorded-time edit scope", () => {
     assert.equal(hoursEditContextSchema.safeParse(context).success, true);
     assert.equal(hoursEditContextSchema.safeParse({ ...context, revision: null }).success, false);
     assert.equal(hoursEditContextSchema.safeParse({ ...context, entry: { ...entry, id: "foreign-looking-label" } }).success, false);
+  });
+  it("counts saved note characters consistently with Unicode PostgreSQL limits", () => {
+    assert.equal(hoursNoteCharacterCount("  🧡🧡  "), 2);
+    assert.equal(hoursNoteCharacterCount("🧡".repeat(200)), 200);
+    assert.equal(hoursNoteCharacterCount("🧡".repeat(201)), 201);
+  });
+  it("explains malformed links without implying a review or automatic repair", () => {
+    const error = hoursMutationError({ result: "conflict", reason: "link-shape" })!;
+    assert.match(error, /can't be saved safely/u);
+    assert.match(error, /Close this editor and refresh/u);
+    assert.doesNotMatch(error, /needs a review|Ask Homa/u);
   });
   it("never treats a missing or failed receipt as success", () => {
     for (const receipt of [null, [], {}, { result: "not_found" }, { result: "invalid" }, { result: "conflict", reason: "stale" }]) {

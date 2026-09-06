@@ -49,7 +49,7 @@ The unchanged isolation guard passed before query/schema edits using its establi
 | --- | --- |
 | Real PostgreSQL | Single child, multiple children, whole family, standalone email source, 11/10 reconciliation, original metadata/IDs, scoped lookup, missing/foreign/malformed IDs, anonymous/helper denial, invalid bounds, Unicode note limits, stale sibling edits, malformed partial/multiple-owner links, uniqueness rollback, combined Planner rollback/success/clear, unfinish then re-record, concurrent edit versus delete, category-only correction versus old voice undo. Passed via `pnpm test:planner-learning-log:postgres`. |
 | Voice PostgreSQL | Existing receipt lifecycle, retry, expiry, scope, interruption, Planner, task, and concurrent-state guards. Passed via `pnpm test:voice-action-receipts:postgres`. |
-| Hours units and browser | `pnpm check:hours-ui`: 73 unit/static cases and 6 Chromium journeys. Day/Week/Hours full-note load, cancel, 11-minute save, unchanged route; 320px draft-preserving failure, pending dismissal prevention, shared deletion, focus after final-row refresh; lookup retry and Escape return focus; combined Planner detail transport failure, preserved draft, and successful retry. |
+| Hours units and browser | `pnpm check:hours-ui`: 75 unit/static cases and 8 Chromium journeys. Day/Week/Hours full-note load, cancel, 11-minute save, unchanged route; 320px draft-preserving failure, pending dismissal prevention, shared deletion, focus after final-row refresh; lookup retry and Escape return focus; combined Planner detail transport failure, preserved draft, and successful retry; 320px and 390px widths with a shortened 420px viewport, fully visible focused Minutes and Save/Cancel, Unicode note limits before submission. |
 | Planner units | `pnpm check:calendar-ui`: 225 cases passed. |
 | Types and lint | Workspace typecheck/lint excluding unchanged mobile, plus web-focused checks. All five tasks passed, with three cache hits. No new lint warnings; four pre-existing unrelated warnings remain. |
 | Agent build | Local `VERCEL=1` Eve build and stream-duration guard use the same generated co-deployed service signal as CI. This is local compilation evidence, not deployment evidence. |
@@ -61,3 +61,20 @@ Set `HOURS_EDITOR_EVIDENCE_DIR` when running the Hours guard to preserve 390px D
 Design token, contract, parity, and brand-residue guards passed.
 
 Independent technical review identified the category-only undo gap and the disappearing last-row focus target. Both were corrected and included in regression evidence. Fresh copy and UX review, hosted deployment, and live route/database probes remain separate rollout gates owned by the parent operator; this builder does not self-approve them.
+
+
+## Follow-up to the first local implementation
+
+The first implementation is preserved in commit `5ae2df86034a94b78f1ad127f3b255b2b47bb687`. Root review found an intermediate uniqueness conflict: changing a linked row from 10 minutes with no category to 30 minutes with category `club` was rejected if a separate 30-minute, uncategorized entry already existed. The final requested row was unique, but the first bulk update evaluated the old category before the next statement changed it.
+
+A new real PostgreSQL regression reproduced `conflict` instead of `applied` before the fix. The linked bulk update now applies the selected row's category and note in the same statement as subject and minutes, preserving sibling annotations. The two-child regression then passed; requesting an actually duplicate final category still rolled back all requested fields. Logs: `1092-simultaneous-before.log` and `1092-simultaneous-after.log`. The unchanged isolation guard and migration-version guards passed again before the query/migration edit. The migration remains local and unapplied remotely.
+
+Fresh copy and UX feedback accepted by root produced these bounded changes:
+
+- The top identifies the activity and everyone affected by time/subject changes. An unqualified selected-child label no longer precedes shared consequences.
+- The selected child's category and note are grouped under a disclosure named for that child. Planner notes are a separate read-only disclosure. The category hint distinguishes it from Subject, and a Unicode-consistent live 200-character note counter prevents an over-limit submission.
+- Save and Cancel sit outside the scrolling content. Focused fields scroll only as far as needed to remain fully visible. Tests use 320px and 390px widths at 420px height as a constrained layout test, not an assertion about physical keyboards.
+- Deletion has its own state with only `Delete recorded time` and `Go back`. The mounted hidden form retains drafts when the parent goes back. Both entry into deletion and its confirmation name the shared audience and explain that the deleted rows' categories/notes go too; the finished Planner activity and its notes remain.
+- Malformed shared records explain that the change cannot safely save, identify the mismatch, and offer refresh/contact support as the next steps. The message does not imply an approval process or promise a Homa repair capability. Uncertain transport-response messages are unchanged.
+
+Final follow-up logs use `1092-hours-ui-followup.log`, `1092-typecheck-lint-followup.log`, and `1092-design-tokens-followup.log`. Final captures replace the earlier local `1092` screenshots and use the same variable DM Sans build asset. The additional shortened-viewport captures are `1092-day-320-short-editor.png` and `1092-day-390-short-editor.png`. These builder checks remain subject to root's fresh review and hosted acceptance.

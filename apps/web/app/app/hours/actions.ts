@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { hoursEditContextSchema, hoursMutationError, type HoursEditContext } from "../../../lib/hours-edit";
+import { hoursEditContextSchema, hoursMutationError, hoursNoteCharacterCount, type HoursEditContext } from "../../../lib/hours-edit";
 import { isHoursSubject } from "../../../lib/hours-model";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
@@ -37,7 +37,7 @@ export async function updateHoursEntryAction(entryId: string, revision: string, 
   }
   const note = String(formData.get("note") ?? "").trim();
   const customLabel = String(formData.get("customLabel") ?? "").trim();
-  if (Array.from(note).length > 200) return { error: "Keep the note to 200 characters or fewer." };
+  if (hoursNoteCharacterCount(note) > 200) return { error: "Keep the note to 200 characters or fewer." };
   if (Array.from(customLabel).length > 40) return { error: "Keep the category name to 40 characters or fewer." };
   try {
     const supabase = await createSupabaseServerClient();

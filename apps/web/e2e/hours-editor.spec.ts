@@ -72,10 +72,12 @@ for (const view of ["day", "week", "hours"]) {
     if (screenshots) await page.screenshot({ path: resolve(screenshots, `1092-${view}-390-context.png`) });
     await opener.click();
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByRole("textbox", { name: "Note", exact: true })).toHaveValue(/This full saved note remains available/u);
-    await expect(dialog).toContainText("Time and subject change for Avery and Alexandria Clementine Montgomery-Swift");
+    await expect(dialog).toContainText("Time and subject changes apply to Avery and Alexandria Clementine Montgomery-Swift");
     await expect(dialog).toContainText("Sunday, September 6, 2026");
+    await expect(dialog.getByRole("button", { name: "Save changes", exact: true })).toBeInViewport();
     if (screenshots) await page.screenshot({ path: resolve(screenshots, `1092-${view}-390-editor.png`) });
+    await dialog.locator("summary").filter({ hasText: "Category and note for Avery" }).click();
+    await expect(dialog.getByRole("textbox", { name: "Note for Avery", exact: true })).toHaveValue(/another way to group the same blocks/u);
     await dialog.getByRole("spinbutton", { name: "Minutes", exact: true }).fill("11");
     await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).scrollIntoViewIfNeeded();
     if (screenshots) await page.screenshot({ path: resolve(screenshots, `1092-${view}-390-editor-footer.png`) });
@@ -114,15 +116,24 @@ test("320px: failure keeps values, pending blocks dismissal and shared deletion 
   await page.evaluate(() => window.hoursEditorFixture.resolve());
   await expect(dialog).toHaveCount(0);
   await page.getByRole("button", { name: "Edit Math, 17m, Avery", exact: true }).click();
+  await dialog.getByRole("spinbutton", { name: "Minutes", exact: true }).fill("19");
+  await dialog.locator("summary").filter({ hasText: "Category and note for Avery" }).click();
+  await dialog.getByRole("textbox", { name: "Note for Avery", exact: true }).fill("Unsaved note to keep when I go back");
+  await dialog.getByRole("textbox", { name: "Category (optional)", exact: true }).fill("club");
   await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
-  await expect(dialog).toContainText("Remove this recorded time for Avery and Alexandria Clementine Montgomery-Swift?");
+  await expect(dialog.getByRole("button")).toHaveCount(2);
+  await expect(dialog.getByRole("button", { name: "Save changes", exact: true })).toHaveCount(0);
+  await expect(dialog).toContainText("This deletes the recorded time, categories and notes for Avery and Alexandria Clementine Montgomery-Swift.");
   await expect(dialog).toContainText("The activity stays finished in Planner");
-  await dialog.getByRole("button", { name: "Delete", exact: true }).scrollIntoViewIfNeeded();
+  await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).scrollIntoViewIfNeeded();
   if (screenshots) await page.screenshot({ path: resolve(screenshots, "1092-week-320-delete.png") });
-  await dialog.getByRole("button", { name: "Keep", exact: true }).click();
+  await dialog.getByRole("button", { name: "Go back", exact: true }).click();
   expect(await page.evaluate(() => window.hoursEditorFixture.calls.filter((row) => row.kind === "delete").length)).toBe(0);
+  await expect(dialog.getByRole("spinbutton", { name: "Minutes", exact: true })).toHaveValue("19");
+  await expect(dialog.getByRole("textbox", { name: "Note for Avery", exact: true })).toHaveValue("Unsaved note to keep when I go back");
+  await expect(dialog.getByRole("textbox", { name: "Category (optional)", exact: true })).toHaveValue("club");
   await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
-  await dialog.getByRole("button", { name: "Delete", exact: true }).click();
+  await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   expect(await page.evaluate(() => window.hoursEditorFixture.activities()[0].status)).toBe("completed");
   expect(await page.evaluate(() => window.hoursEditorFixture.activities()[0].durationMinutes)).toBeNull();
@@ -173,7 +184,35 @@ test("Planner detail Save sends one combined action and releases a failed transp
   expect(await page.evaluate(() => window.hoursEditorFixture.calls.map((row) => row.kind))).toEqual(["plannerSave", "plannerSave"]);
   expect(await page.evaluate(() => window.hoursEditorFixture.activities()[0].durationMinutes)).toBe(11);
   expect(await page.evaluate(() => window.hoursEditorFixture.entries().slice(0, 2).map((row) => row.minutes))).toEqual([11, 11]);
-  expect(await page.evaluate(() => window.hoursEditorFixture.entries()[0].note)).toContain("This full saved note remains available");
+  expect(await page.evaluate(() => window.hoursEditorFixture.entries()[0].note)).toContain("another way to group the same blocks");
   expect(new URL(page.url()).pathname + new URL(page.url()).search).toBe(route("day"));
   await page.close();
 });
+
+
+for (const width of [320, 390]) {
+  test(`${width}px shortened viewport: Save stays reachable and Unicode note limit is visible before saving`, async () => {
+    const page = await browser.newPage({ viewport: { width, height: 420 } });
+    await page.goto(origin + route("day"));
+    await page.getByRole("button", { name: "Edit Math, 10m, Avery", exact: true }).click();
+    const dialog = page.getByRole("dialog");
+    const save = dialog.getByRole("button", { name: "Save changes", exact: true });
+    await expect(save).toBeInViewport();
+    await expect(dialog.getByRole("button", { name: "Cancel", exact: true })).toBeInViewport();
+    await dialog.getByRole("spinbutton", { name: "Minutes", exact: true }).fill("11");
+    await expect(dialog.getByRole("spinbutton", { name: "Minutes", exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(save).toBeInViewport();
+    if (screenshots) await page.screenshot({ path: resolve(screenshots, `1092-day-${width}-short-editor.png`) });
+    await dialog.locator("summary").filter({ hasText: "Category and note for Avery" }).click();
+    const note = dialog.getByRole("textbox", { name: "Note for Avery", exact: true });
+    await note.fill("🧡".repeat(200));
+    await expect(dialog.getByText("200/200 characters", { exact: true })).toBeVisible();
+    await expect(save).toBeEnabled();
+    await note.fill("🧡".repeat(201));
+    await expect(dialog.getByText("201/200 characters. Shorten the note to save.", { exact: true })).toBeVisible();
+    await expect(save).toBeDisabled();
+    expect(await page.evaluate(() => window.hoursEditorFixture.calls.length)).toBe(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.close();
+  });
+}

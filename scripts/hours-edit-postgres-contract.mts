@@ -143,6 +143,29 @@ export async function runHoursEditContract(sql: postgres.Sql) {
   assert.equal((await edit(standaloneId, standFresh.revision, 43, "art", "fine", "a".repeat(41))).result, "invalid");
   assert.equal((await remove(standaloneId, standFresh.revision)).result, "applied");
 
+  const simultaneous = await activity(childIds, 10);
+  const sameTimeId = randomUUID();
+  await sql`insert into public.hours_log(id, family_id, child_id, subject, minutes, happened_on, source)
+    values (${sameTimeId}, ${family}, ${childIds[0]}, 'math', 30, ${date}, 'chat')`;
+  const simultaneousBefore = await snapshot(simultaneous.id);
+  const simultaneousResult = await edit(simultaneous.hours[0], (await context(simultaneous.hours[0])).revision,
+    30, "math", "Club note", "club");
+  assert.equal(simultaneousResult.result, "applied", "simultaneous category change makes the final time row unique");
+  const simultaneousAfter = await snapshot(simultaneous.id);
+  assert.equal(simultaneousAfter.activity.duration_minutes, 30);
+  const selectedAfter = simultaneousAfter.hours.find((row: { id: string }) => row.id === simultaneous.hours[0]);
+  const siblingAfter = simultaneousAfter.hours.find((row: { id: string }) => row.id === simultaneous.hours[1]);
+  assert.equal(selectedAfter.custom_label, "club");
+  assert.equal(selectedAfter.note, "Club note");
+  assert.equal(siblingAfter.minutes, 30);
+  assert.equal(siblingAfter.custom_label, null);
+  assert.equal(siblingAfter.note, "Original Hours note");
+  assert.equal(simultaneousAfter.activity.source_quote, simultaneousBefore.activity.source_quote);
+  assert.equal((await context(sameTimeId)).entry.customLabel, null);
+  assert.equal((await edit(simultaneous.hours[0], (await context(simultaneous.hours[0])).revision,
+    30, "math", "Should not save", null)).reason, "duplicate");
+  assert.deepEqual(await snapshot(simultaneous.id), simultaneousAfter, "a genuinely duplicate final category rolls back every field");
+
   const malformed = await activity(childIds, 50);
   await sql`delete from public.hours_log where id = ${malformed.hours[1]}`;
   assert.equal((await context(malformed.hours[0])).reason, "link-shape");

@@ -148,12 +148,17 @@ begin
   if linked_activity_id is not null then
     update public.planner_learning_activities set subject = target_subject,
       duration_minutes = target_minutes, updated_at = now() where id = linked_activity_id and family_id = authorized_family_id;
-    update public.hours_log h set subject = target_subject, minutes = target_minutes
+    -- Validate uniqueness against the selected row's final category, never an
+    -- intermediate combination of new time and its old category.
+    update public.hours_log h set subject = target_subject, minutes = target_minutes,
+      custom_label = case when h.id = target_entry_id then normalized_label else h.custom_label end,
+      note = case when h.id = target_entry_id then normalized_note else h.note end
       from public.planner_learning_activity_hours l
       where l.activity_id = linked_activity_id and l.family_id = authorized_family_id and h.id = l.hours_entry_id and h.family_id = l.family_id;
+  else
+    update public.hours_log set subject = target_subject, minutes = target_minutes,
+      custom_label = normalized_label, note = normalized_note where id = target_entry_id and family_id = authorized_family_id;
   end if;
-  update public.hours_log set subject = target_subject, minutes = target_minutes,
-    custom_label = normalized_label, note = normalized_note where id = target_entry_id and family_id = authorized_family_id;
   return jsonb_build_object('result', 'applied', 'entryId', target_entry_id);
 exception when unique_violation then
   -- This exception block rolls back every requested field, including Planner.

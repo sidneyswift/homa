@@ -16,7 +16,7 @@ const entry = (id: string, childId: string | null, note: string, happenedOn = "2
   subject: "math", customLabel: null, minutes: 10, happenedOn, source: "chat", note,
 });
 let entries = [
-  entry(firstHours, firstChild, "We read the whole chapter, discussed how the characters solved the problem, and wrote three sentences about the ending. This full saved note remains available when the compact row cannot show it all."),
+  entry(firstHours, firstChild, "We built equal groups with blocks, drew them on paper, and counted the blocks again. Avery explained why three groups of four make twelve, then found another way to group the same blocks."),
   entry(secondHours, secondChild, "A separate note for Alexandria."),
   entry("c0000000-0000-4000-8000-000000000003", null, "Family nature walk", "2026-09-07"),
 ];
