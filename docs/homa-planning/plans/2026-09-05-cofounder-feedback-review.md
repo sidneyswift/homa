@@ -4,6 +4,8 @@ Prepared September 6, 2026. Review owner: Sidney. Review issue: [#1087](https://
 
 **Verification update, September 6:** the first pass verified deployed code, several database facts, and the broken deeper-question route. It assumed likely causes for missing notes, one-question check-ins and handwriting problems, and estimated which changes were small. The second pass checked the actual chat, records, rendered pages and selection functions. The corrections below supersede those assumptions.
 
+**Correction after Sidney's deeper-questions challenge:** the earlier version traced the broken route and chat selector but did not distinguish the older dedicated deep-dive flow from the chat check-in. They use different question-selection algorithms and finish differently. F09-F10 now traces entry, selection, stopping, saved evidence and the resulting screen for both paths, with a comparison using Amalia's actual saved answers. A working link to the existing chat check-in would not by itself meet the reported need.
+
 **Scope confirmed by Sidney:** Carolyng's feedback and feature requests concern the **mobile website**. The discussion about an app with fewer, focused features concerns the **native mobile app**. Native implementation details below are background, not evidence that a mobile-web complaint is already solved.
 
 **Meaning confirmed by Sidney:** “months back” means a comparison such as a child being “15 months ahead” of national benchmarks. It does not mean restoring a generic date/month label. The requested concept is clear; the exact presentation and benchmark claim still need to match what Homa's scoring evidence supports.
@@ -14,7 +16,7 @@ This is a review document, not approval to build every idea below. GitHub Issues
 
 ## Read this first
 
-- **Bounded work we can start today:** repair the deeper-question handoff and Binder layout; connect Day/Week recorded time to the existing editor; add child/date export filters; correct inconsistent school-year windows; investigate the remaining time collisions; improve specific recording and material-generation behavior.
+- **Bounded work we can start today:** repair the deeper-question handoff and Binder layout; connect Day/Week recorded time to the existing editor; add child/date export filters; correct inconsistent school-year windows; investigate the remaining time collisions; improve specific recording and material-generation behavior. The full deeper-assessment outcome also requires the F10 selection and completion review; it is not just the handoff repair.
 - **Existing foundations, with the evidence limits below:** child filtering, deletion, custom labels under any Hours subject, manual reported-time editing, parent-requested progress check-ins, per-child recorded-day arithmetic, curriculum retrieval/mapping tools and web PDF print actions.
 - **Needs a product decision:** reusable subcategory behavior, numeric progress presentation on mobile web, what family-wide time means when one child is absent, and when Homa should ask follow-up questions.
 - **Future concepts or experiments:** automatic whole-year scheduling from owned curricula, holiday-aware finish-date calculations, recurring assessments, quick versus deeply tailored creation, unattended printing, and a narrower public product/funnel.
@@ -25,7 +27,7 @@ This is a review document, not approval to build every idea below. GitHub Issues
 
 | Failure | September 6 evidence | Tracking and disposition |
 |---|---|---|
-| Deeper questions open ordinary chat and lose the request | Reproduced in an authenticated production test session; deployed route drops `dd` | [#1088](https://github.com/sidneyswift/homa/issues/1088). **ESCALATED September 6, not fixed.** |
+| Deeper questions lose the request; manually started check-ins stop before exploring remaining abilities | Live route reproduction plus actual one-question sessions. Replaying both selectors shows chat stops where the older dedicated flow would continue | [#1088](https://github.com/sidneyswift/homa/issues/1088). **ESCALATED September 6, not fixed.** F09 and F10 require separate acceptance checks |
 | Two uploaded curricula cannot be processed or read | Two September 5 originals, 41.3 and 47.2 MiB, have `content_too_large_to_process`; the read tool returned `not-ready` | [#1089](https://github.com/sidneyswift/homa/issues/1089). **ESCALATED September 6, not fixed.** |
 | School-year totals disagree and distinct reading time is lost | Actual source turns confirm two separate 30-minute activities for Alma on September 3 were rejected against her literature journal. Local calls to the deployed date functions return July 1 versus August 1 | [#1090](https://github.com/sidneyswift/homa/issues/1090). **ESCALATED September 6, confirmed and not fixed.** At least these 60 minutes are absent from her Hours rows; this is not a complete historical recovery tally |
 | Binder Delete overflows on phones | Actual deployed component and public production CSS reproduced with sample records at 320, 375 and 390 px. At 390 px, the second Delete ends at x=459.46 | [#1091](https://github.com/sidneyswift/homa/issues/1091). **ESCALATED September 6, not fixed.** This is a local layout reproduction, not a screenshot of Carolyng's authenticated Binder |
@@ -75,6 +77,8 @@ Limits: authenticated screenshots use the existing Activation Test family. Its H
 
 **Code** means the deployed implementation was traced. **Live** means the current browser, saved production records or source messages were inspected. **Replayed** means existing code ran locally with stated inputs. **Reported** means a parent described it; this alone does not identify the cause. **Decision/estimate** is an explicitly proposed future behavior or scope judgment, not a fact needing to be made true by a screenshot.
 
+These labels apply only to the behavior named in each row. They do not mean every feature has been traced or exercised end to end. A complete journey comparison needs the parent's intended outcome, actual entry point, active decision logic, durable effect, visible result and stop/failure behavior. F09-F10 now documents that code chain; its broken entry prevents a live run of the older flow. F17-F18 still lack a successful owned-lesson journey, F19 lacks the literal D artifact, and F23/F26 lack spoken/printed output. Future proposals have no completed implementation to certify.
+
 | References | Verification result | Remaining limit or decision |
 |---|---|---|
 | F01 | Code: Day/Week rows are static; Hours editor fields and mutation path exist | Wiring is an estimate; save/cancel behavior of a new handoff cannot be verified before implementation |
@@ -84,8 +88,8 @@ Limits: authenticated screenshots use the existing Activation Test family. Its H
 | F06 | Code + live UI: fixed `/api/hours/export` link persists after selecting Avery; route ignores filters | Proposed filtered export is not built; empty test-family CSV is not meaningful data validation |
 | F07 | Code + replay: two activities on one day collapse to one child/day; a shared activity counts for both children | This proves recorded-day arithmetic, not absence handling, legal attendance or a fresh PDF |
 | F08 | Code + replay + live July data: July/August starts differ | Which common fallback to adopt remains a policy choice |
-| F09 | Live screenshot + code: `dd` route returns `/app`, old August 15 conversation, empty composer | Fix still required |
-| F10 | Live responses + replay: one-question stop reproduced using actual prior answers and age | Exhausted selection window is not exhausted bank coverage; adaptive behavior needs review |
+| F09 | Live screenshot + code: server redirect loses `dd`; client chat branch also precedes the older deep-dive branch; `/app` has no `dd` handler | Fix still required; starting ordinary chat is not acceptance |
+| F10 | Live responses + comparison replay: chat stops after catching/pouring, while the older deep-dive selector would next ask skipping/puzzle. Save, scoring and completion routes traced | Neither selector certifies the child's true level. Older flow also rebuilds a plan; restoring it unchanged is not an approved solution |
 | F11 | Sidney confirmed months-ahead comparison; code exposes capped `monthsAhead` and signed `frontierDeltaMonths` separately | Exact UI and support for the wording “national benchmarks” are not settled by that clarification |
 | F12 | Live + code: explanatory text and parent-evidence map exist | Whether improved wording helps these parents needs a usability check |
 | F13-F14 | Code + real chat: evidence separation, clarification and next-step offers already happen | Reliability and preferred timing remain unmeasured; do not describe these as wholly missing features |
@@ -116,7 +120,7 @@ Screenshots in this task capture mobile School hours, child-scoped Binder, the f
 | F07 | Show/export recorded days per child | Existing arithmetic; bounded exposure today, absence policy decision | #1092, #1087 |
 | F08 | Consistent school-year totals | Fix today | #1090 |
 | F09 | Deeper questions start the requested check-in | Fix today | [#1088](https://github.com/sidneyswift/homa/issues/1088) |
-| F10 | Assess demonstrated level beyond the age baseline | Selection-window behavior verified; adaptive assessment needs review | #1088, #1087 |
+| F10 | Assess demonstrated level beyond the age baseline | Confirmed mismatch between two assessment paths; repair scope needs review | #1088, #1087 |
 | F11 | Restore a months-ahead benchmark comparison | Meaning confirmed by Sidney; presentation and evidence review | #1087; historical [#625](https://github.com/sidneyswift/homa/issues/625) |
 | F12 | Understand the abilities map and its evidence | Improve existing explanation today | #1092 |
 | F13 | Clarify mastery without interrogating every log | Bounded skill improvement, cadence decision | #1092, #1087 |
@@ -132,7 +136,7 @@ Screenshots in this task capture mobile School hours, child-scoped Binder, the f
 | F23 | Understand dictation versus talking with Homa | Existing capability; clarify controls today | #1092 |
 | F24 | Breaks, target finish dates, and a year of owned lessons | Future planning capability using existing foundations | #1087 |
 | F25 | Pick a compelling first value and public rollout scope | Product/funnel decision and experiment | [#1053](https://github.com/sidneyswift/homa/issues/1053), [#1045](https://github.com/sidneyswift/homa/issues/1045), #1087 |
-| F26 | Print through the app or automatically to a printer | Print sheet exists; unattended printing is future | #1087 |
+| F26 | Print through the app or automatically to a printer | Web PDF link exists; physical output unverified; unattended printing is future | #1087 |
 
 ## Concrete fixes and near-term improvements
 
@@ -193,19 +197,50 @@ Earlier August 31/September 1 chats also explicitly distinguish IR English from 
 
 **Additional defect found:** [UI totals](../../../apps/web/lib/hours-view.ts) use July 1, [chat totals](../../../apps/web/lib/hours-summary.ts) use August 1, and state records use `school_year_start_on`. Calling both existing date functions for September 6 returns `2026-07-01` and `2026-08-01` respectively. Fix this under #1090 before presenting one authoritative school-year total. Acceptance includes configured start dates, year-round schooling, and a documented common fallback.
 
-### F09-F10. Start deeper questions, then test the actual assessment boundary
+### F09-F10. Deeper questions should locate demonstrated ability and update progress
 
-**Heard:** R14-21. The button opens chat without a question; manually asking sometimes produces only one question and reassurance about age instead of locating what the child can do.
+**Heard:** R14-21. The button opens the last chat without a question. After manually requesting an update, Carolyng receives one question and an age-level reassurance. Her stated need is: “I don't want to know if she's on target for a four year old. I want to know where is she?” She gives both harder and easier examples. More questions are a means to discover current ability; a larger fixed question count is not the outcome. The requested months-ahead comparison is a related, separate presentation issue in F11.
 
-**Current:** [ProgressDetailPanel](../../../apps/web/components/progress/progress-detail-panel.tsx) links to `/onboarding?dd=...`; [onboarding](../../../apps/web/app/onboarding/page.tsx) redirects completed families to `/app` and loses that intent. This route failure is reproduced live. Existing `manage_child_progress` and [check-in service](../../../apps/web/lib/child-progress/check-in-service.ts) already support subject check-ins, and Carolyng completed two on September 5.
+**What the button promises:** [ProgressDetailPanel](../../../apps/web/components/progress/progress-detail-panel.tsx) says up to eight questions will sharpen the number and update the progress report. [The tile model](../../../apps/web/lib/child-progress/map-model.ts) offers the action for a mapped, non-exposure-based score; it does not check whether useful questions remain.
 
-**Verified assessment behavior:** Amalia was 48 months old. The gross-motor check-in asked `gross_motor.catches-ball`, received “easily” and completed. The fine-motor check-in refreshed `fine_motor.pours`, received “easily” and completed. Production response rows and tool receipts establish one question each.
+**F09, actual entry path:** the detail panel and [full report](../../../apps/web/app/onboarding/r/[token]/report-view.tsx) link to `/onboarding?dd=<child>.<subject>`. [Server onboarding](../../../apps/web/app/onboarding/page.tsx) redirects an already-completed family to `/app`, dropping that intent. The authenticated production reproduction showed the old August 15 chat and an empty composer. There is another bypass: [MapFlow](../../../apps/web/app/onboarding/map-flow.tsx) enters chat before parsing `dd` when chat onboarding is enabled. [The app page](../../../apps/web/app/app/page.tsx) has no `dd` handler. Preserving the query string alone is insufficient.
 
-[Question planning](../../../packages/core/src/map/bank.ts) chooses a base plus at most two harder questions for these subjects, within an age-plus-24-month bound. Gross motor's selected set at 48 months is galloping, hopping and catching; galloping/hopping were already answered. Skipping at 68 months exists in the bank and lies within the 72-month ceiling, but falls outside the two-rung slice. Fine motor's set is pouring, beads and straight-line cutting; all had July answers, with cutting still “getting there.” The [selector](../../../apps/web/lib/child-progress/check-in-selection.ts) refreshes an old answer when starting, then [the service](../../../apps/web/lib/child-progress/check-in-service.ts) disables refresh after the response. Local replay with the actual answer values and timestamps reproduces pouring followed by no next question; gross-motor replay reproduces catching followed by no next question.
+**F10, two different assessment implementations:**
 
-**Correction to the first pass:** the stop does not prove that the bank has no harder questions or that the child is at her true frontier. It exhausts the selected window. The actual chat reinforces the mismatch: the parent asked for more, reported slow alternating-leg skipping, and later corrected the assumption that straight-line cutting was still a useful stretch. Music was used to demonstrate the broken link in the meeting; no matching completed music check-in was found, so its actual session behavior is not claimed reproduced.
+| Stage | Older dedicated flow behind the `dd` link | Check-in actually started by Carolyng in chat |
+|---|---|---|
+| Entry | `MapFlow` selects the child/subject and renders [DeepDiveStep](../../../apps/web/app/onboarding/deep-dive-step.tsx), if the earlier chat branches do not intercept it | `manage_child_progress.start_check_in`, purpose `subject_deep_dive`, starts or resumes an authenticated check-in |
+| Selection | [nextDeepDiveItem](../../../packages/core/src/map/bank.ts) considers all unanswered items in that subject. It probes near the midpoint between demonstrated ability and a “not yet” answer, or six months above/below the known side when only one exists | [selectNextProgressItem](../../../apps/web/lib/child-progress/check-in-selection.ts) uses the ordinary age-based `planQuestions` and [checklist queue](../../../packages/core/src/map/question-queue.ts). `subject_deep_dive` scopes subjects; it does not select the older deep-dive algorithm |
+| Bounds and refresh | Can explore below the age baseline or beyond its two harder rungs. Asks only never-answered items, including treating prior skips as already answered; it does not refresh stale answers | For fine/gross motor and music, base plus at most two harder rungs, with an age-plus-24-month ceiling. Climbing requires “easily.” Can refresh an old eligible answer at the start |
+| Stopping | Eight new responses or no unanswered bank items. There is no separate confidence-based completion check | After each response, [check-in service](../../../apps/web/lib/child-progress/check-in-service.ts) disables refresh; no next eligible item marks the check-in completed. A non-easy base stops the climb without looking below it |
+| Saving and result | Answers use `/api/map/answer` and the progress adapter. After pending saves succeed, [ScoringStep](../../../apps/web/app/onboarding/scoring-step.tsx) calls `/api/map/score`, then opens the subject plan with `rebuilt=1`; [that page](../../../apps/web/app/onboarding/r/[token]/plan/[subjectId]/page.tsx) rebuilds the four-week plan | A response and its validated progress evidence are recorded through the check-in/progress services. The result contains the saved update, next question or completed state; this path does not navigate through the older scoring/plan screen |
 
-**Done when:** the button preserves child and subject, produces a first question, and the fine-motor/music examples are checked against actual remaining eligible questions. Test an advanced child, a child needing easier questions, an already-answered ladder, and an exhausted bank. Explain coverage honestly rather than giving an age-level reassurance or inventing extra measurement precision.
+**Actual records and comparison replay:** Amalia was 48 months old. Production response rows and tool receipts show catching a ball, answered “easily,” then completion at 01:22 UTC September 5. Fine motor refreshed pouring, answered “easily,” then completed at 01:25 UTC. A fresh family-scoped read confirmed all seven saved fine/gross-motor bank answers and their timestamps. Running both existing selectors locally against those answers gives:
+
+| Input | Chat selector after response | Older dedicated selector with the same answers |
+|---|---|---|
+| Actual gross motor after catching; July galloping/hopping/pedaling already “easily” | No next question | Skipping with alternating feet, 68-month bank anchor |
+| Actual fine motor after pouring; July beads “easily,” straight-line cutting still “getting there” | No next question | Independent 20-plus-piece puzzle, 70-month bank anchor |
+| Synthetic 48-month child whose galloping answer is “not yet” | No next question | Pedaling a tricycle, 44-month bank anchor |
+
+The first two rows are comparisons using actual saved data, not claims that the older screen ran for Carolyng. The third is a synthetic boundary check. Additional local calls verified the older selector returns no question at its eight-response cap or when every bank item is answered. These are selector replays, not new production assessments.
+
+Gross motor's chat window is galloping, hopping and catching. Skipping exists and even fits the 72-month age ceiling; the two-rung slice excludes it. Fine motor's window is pouring, beads and straight-line cutting. Refreshing pouring does not revisit the stale cutting answer. The actual chat reinforces the mismatch: Carolyng explicitly asked for more, reported slow alternating-leg skipping, then explained that suggested straight-line cutting was already easy. Music demonstrated the broken link in the meeting; no completed music check-in was found, so its live session behavior is not claimed reproduced.
+
+**What reaches the report:** [legacy adapters](../../../apps/web/lib/child-progress/legacy-adapters.ts) route real answers into ChildProgress when enabled. [The progress service](../../../apps/web/lib/child-progress/progress-service.ts) appends evidence and refreshes derived progress plus compatibility answers in the transaction. [The projection](../../../apps/web/lib/child-progress/projection.ts) scores effective evidence, and [the Progress page](../../../apps/web/app/app/[childId]/progress/page.tsx) loads that view. A saved answer can legitimately leave the number unchanged. Replaying the bank scorer at 48 months moved gross motor from +4 to +10 after catching, while repeating pouring left fine motor at +4. Those are local bank-only calculations, not screenshots or certification of the complete live graph, which can include other catalog evidence.
+
+**Correction to the earlier file:** the initial route diagnosis and one-question replay were real, but they did not establish equivalence between these paths. Chat's completion means its selection window ended, not that Homa found the child's actual level. The older algorithm already supplies broader probing, but its lack of stale-answer refresh, cap-based stop and automatic plan rebuild mean restoring it unchanged is not an approved solution either. No algorithm here establishes a precise developmental age merely by completing a sitting.
+
+**Required outcome and acceptance:**
+
+- Preserve the selected child and subject and actually ask the first relevant question, including for returning families and older report links.
+- Use existing evidence to explore relevant easier or harder abilities and revisit stale evidence when appropriate. Do not silently stop because the ordinary age-plan window ended.
+- Distinguish a completed bounded sitting, insufficient evidence, and no remaining bank coverage. Explain what the answers establish and what is still unknown.
+- Save only validated evidence for the correct child; verify the resulting evidence and Progress display after the answers. Do not promise every answer changes the number.
+- Check the actual fine/gross-motor examples, music, a child needing easier questions, an already-answered ladder and an exhausted bank. A successful redirect alone cannot close F10.
+- Explicitly decide the finishing experience. The transcript asks to update progress; it does not request an automatic four-week-plan rebuild. Keep F11's numeric presentation separate from question selection.
+
+**Scope:** #1088 records both the broken handoff and this confirmed behavior mismatch, still escalated and unfixed. Reuse the authenticated evidence-writing infrastructure. The assessment procedure and its stop criteria need a deliberate review; do not introduce another assessment store or assume a one-line URL change completes the capability.
 
 ### F11-F12. Numeric context and a comprehensible abilities map
 
@@ -305,7 +340,7 @@ State-specific day/hour requirements and “on schedule” claims require curren
 
 ## Suggested order after this review
 
-1. Repair F09 and F21, reconcile F03, and standardize F08. Establish the safe repair/recovery slice for F16 immediately because actual curricula are blocked.
+1. Repair F09 and F21, review and repair F10's assessment behavior, reconcile F03, and standardize F08. Establish the safe repair/recovery slice for F16 immediately because actual curricula are blocked. Keep the deeper-question work open until both the handoff and assessment acceptance checks pass.
 2. Ship F01/F02 and F06 together as a reliable record workflow. Expose the existing recorded-day summary with honest scope under F07.
 3. Prove the exact F17 owned-lesson journey and fix the specific F19 handwriting failures. Add only the smallest necessary clarification and next-step behavior.
 4. Resolve F04/F05 and F11, then test discoverability with the same parents. Choose a recurring-review cadence only after deciding the acceptable burden for multiple children.
