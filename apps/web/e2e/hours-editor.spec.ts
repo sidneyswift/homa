@@ -50,13 +50,19 @@ test.beforeAll(async () => {
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("Fixture failed to bind");
   origin = `http://127.0.0.1:${address.port}`;
+});
+
+// The Linux serverless build is single-process. Closing a scenario's
+// incognito context can exit that browser, so each scenario owns its process.
+test.beforeEach(async () => {
   let executablePath: string | undefined;
   for (const candidate of ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"]) {
     try { accessSync(candidate); executablePath = candidate; break; } catch { /* Try the next installed browser. */ }
   }
   browser = await chromium.launch({ executablePath: executablePath ?? await serverlessChromium.executablePath(), args: executablePath ? [] : serverlessChromium.args, headless: true });
 });
-test.afterAll(async () => { await browser?.close(); if (server) await new Promise<void>((done) => server.close(() => done())); });
+test.afterEach(async () => { await browser?.close(); });
+test.afterAll(async () => { if (server) await new Promise<void>((done) => server.close(() => done())); });
 
 for (const view of ["day", "week", "hours"]) {
   test(`${view}: full record, cancel, atomic-scope save and unchanged route`, async () => {
