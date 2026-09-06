@@ -284,8 +284,10 @@ describe("UnifiedPlannerView", () => {
     assert.equal((html.match(/<h1/g) ?? []).length, 1);
     assert.match(html, />Recorded time<\/h2>/);
     assert.match(html, /Your Hours stay available and downloadable if you cancel\./u);
-    assert.match(html, /href="\/api\/hours\/export"/u);
-    assert.match(html, />Download family spreadsheet<\/span>/u);
+    assert.match(html, />Download records<\/summary>/u);
+    assert.match(html, />Choose your record<\/h3>/u);
+    assert.match(html, />Preview record<\/span>/u);
+    assert.doesNotMatch(html, /href="\/api\/hours\/export"/u);
     assert.match(html, /30m/);
     assert.match(html, /Homa records the school time you tell her about\. Review or correct it here\./);
     assert.doesNotMatch(html, /The compliance record/);

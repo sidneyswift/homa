@@ -32,3 +32,12 @@ export type HoursSubject = (typeof HOURS_SUBJECTS)[number];
 export function isHoursSubject(value: string): value is HoursSubject {
   return (HOURS_SUBJECTS as readonly string[]).includes(value);
 }
+
+/** Exact storage values from the Hours source constraint, widened by migration #40. */
+export const HOURS_SOURCES = ["chat", "sms", "call", "email", "dispatch"] as const;
+export type HoursSource = (typeof HOURS_SOURCES)[number];
+
+export function requireHoursSource(value: string): HoursSource {
+  if (!(HOURS_SOURCES as readonly string[]).includes(value)) throw new Error("Unknown Hours record source.");
+  return value as HoursSource;
+}

@@ -1,0 +1,85 @@
+{
+  "kind": "local synthetic evidence, not deployed",
+  "browser": {
+    "run": "1095-browser-seventh",
+    "passed": 7,
+    "runtime": "Chrome152.0.7977.76, real React component/CSS/route with injected auth and storage, NextLink boundary",
+    "font": "actual compiled Next DM Sans Latin variable woff2",
+    "screenshotsSourceHashes": {
+      "apps/web/app/app/hours/hours-record-export.tsx": "72bc8278713d6d91f94fedd1d990e52615b9bcfcdfeb8baa3baf4d17e6f3c106",
+      "apps/web/app/api/hours/export/route.ts": "ace41be0b1e22025e08f3389c37e5143810a0c5b795e2f0a0369ddfd478dc5cd",
+      "apps/web/lib/hours-export.ts": "a6fde1b99604d4ab91c731bdde3187b8f39de39db96a7489e7164a9fcfccf593",
+      "apps/web/e2e/hours-record-export.spec.ts": "3392e9d028f3116adc3d7c4391e6a279b36ab2e1084797185a4100b2efb38060",
+      "apps/web/e2e/fixtures/hours-record-export.tsx": "0293a52f6b735fbe269fc0530a7696afdcb5eed59af5dba4d10d7db2e6e89063",
+      "apps/web/lib/hours-record-scope.ts": "722ff43c3ed54a87b79d32d7a4b0ecb2c27a8ae0ae5ab35c76d985b2583bd76a"
+    },
+    "bundleSha256": "4cd6989427ae25e9cd3ca5f3fe1ee035f4edf4ddacfb62126c8815d4125ca263",
+    "fontSha256": "468d56b6b25b05b70190b6c233d773f6f1770e8579827ce022a57f03fa8002fb",
+    "laterParserCorrection": "Uppercase UUIDs normalize before ownership matching; 32 subsequent scope/API tests passed. This parsing-only correction does not re-label the prior screenshots as a new run."
+  },
+  "pdf": {
+    "createdAt": "2026-09-06T20:17:18.105Z",
+    "receipts": [
+      {
+        "stem": "same-name",
+        "pageCount": 11,
+        "renderer": "pdfjs-raster",
+        "rendererVersion": "Chrome/152.0.7977.76",
+        "pdfSha256": "c516cd9f1ba6a5e37b1b3b38142bc72e4b30065c9133536a10489f97ed338cf1",
+        "summaryPage": 10,
+        "detailPage": 11,
+        "childTotals": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "minutes": 30,
+            "days": 2
+          },
+          {
+            "id": "22222222-2222-4222-8222-222222222222",
+            "minutes": 40,
+            "days": 2
+          }
+        ]
+      },
+      {
+        "stem": "renamed",
+        "pageCount": 11,
+        "renderer": "pdfjs-raster",
+        "rendererVersion": "Chrome/152.0.7977.76",
+        "pdfSha256": "5ff596a5c4737199400f462a1df54a81f91ba2da3ca6d68bb7bdb0fd9b7a4c95",
+        "summaryPage": 10,
+        "detailPage": 11,
+        "childTotals": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "minutes": 30,
+            "days": 2
+          },
+          {
+            "id": "22222222-2222-4222-8222-222222222222",
+            "minutes": 40,
+            "days": 2
+          }
+        ]
+      }
+    ],
+    "sources": {
+      "apps/web/lib/compliance/pack.ts": "f21991b5ec9eeb0af2f2e67275dd105e65bf4be62af4a8e70bca9b4790bc3392",
+      "apps/web/lib/hours-record-scope.ts": "722ff43c3ed54a87b79d32d7a4b0ecb2c27a8ae0ae5ab35c76d985b2583bd76a",
+      "apps/web/lib/materials/render-page.ts": "7b9a27f415bac823a30d27817f8032acd0dba305738d007ac263ae13262a17c3",
+      "scripts/hours-record-pack-smoke.mts": "d046872716e15c82bcaf9cf825f7956d8a246ebbbdd1e102a18d5ccd503d1135"
+    },
+    "boundary": "Synthetic records, actual composer, Chrome print and PDF text/raster. No hosted route, account, stored material, legal certification or physical printer."
+  },
+  "artifacts": {
+    "2026-09-06-hours-record-320-child-preview.png": "e3f2b2125cea9b3723363be36e4929b4fc90f5d07305198a465c87be5049eca7",
+    "2026-09-06-hours-record-390-family-preview.png": "d92dc37cf96246781c19eea1e5069a49f04af9af3f1ce582e25757ce7c6522d0",
+    "2026-09-06-hours-record-320-same-name-preview.png": "1b1c30c2df5a35fabca277fd29799757d8ebf83430694ba0ac0ace9a9d9ee7a0",
+    "2026-09-06-hours-record-320-stale-preview.png": "8bac9890de70279db5e5ec07b664672e4641cf3c821debc81ea2c2f7f1dccfbd",
+    "2026-09-06-hours-record-same-name-summary.jpg": "6fe398fd51fa5aba9cebe6662cc181cc63b5ec940bed6699e22f7c09151e83ca",
+    "2026-09-06-hours-record-same-name-details.jpg": "a64b2d8c0181b2571677c31d0632ef6ff6ca984422477dc4682f31a1fac0d2d9",
+    "2026-09-06-hours-record-same-name.pdf": "c516cd9f1ba6a5e37b1b3b38142bc72e4b30065c9133536a10489f97ed338cf1",
+    "2026-09-06-hours-record-renamed.pdf": "5ff596a5c4737199400f462a1df54a81f91ba2da3ca6d68bb7bdb0fd9b7a4c95"
+  },
+  "boundary": "No real account, hosted route, physical phone, legal certification or physical print. Initial fixture failures and first-review findings remain in the implementation contract."
+}

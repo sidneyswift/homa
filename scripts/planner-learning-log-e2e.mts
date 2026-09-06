@@ -5,6 +5,7 @@ import postgres from "postgres";
 
 import { runHoursEditContract } from "./hours-edit-postgres-contract.mts";
 import { runHoursSchoolYearReadContract } from "./hours-school-year-postgres-contract.mjs";
+import { runHoursSummaryReadContract } from "./hours-summary-postgres-contract.mjs";
 
 import {
   EVAL_FIXTURE_FAMILY_ID,
@@ -581,6 +582,7 @@ try {
 
   await runHoursEditContract(sql);
   await runHoursSchoolYearReadContract(sql);
+  await runHoursSummaryReadContract(sql);
   console.log("Planner learning log PostgreSQL contract passed.");
 } finally {
   await sql.end({ timeout: 1 });

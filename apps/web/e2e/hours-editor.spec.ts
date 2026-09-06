@@ -71,7 +71,9 @@ for (const view of ["day", "week", "hours"]) {
     await page.goto(origin + route(view));
     const opener = view === "hours" ? page.getByRole("button", { name: "Edit", exact: true }).first() : page.getByRole("button", { name: "Edit Math, 10m, Avery", exact: true });
     if (view === "hours") {
-      await expect(page.getByText("Alexandria Clementine Montgomery-Swift", { exact: true })).toHaveCount(0);
+      // The export picker offers every owned child. The displayed Hours record
+      // itself must still exclude the sibling's own entries.
+      await expect(page.locator('[data-brand-surface="hours"]').getByText("Alexandria Clementine Montgomery-Swift", { exact: true })).toHaveCount(0);
     }
     await opener.scrollIntoViewIfNeeded();
     await page.evaluate(() => document.fonts.ready);

@@ -1,0 +1,2502 @@
+{
+  "runId": "6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+  "origin": "https://thankshoma.com",
+  "operatorAttestedDeploymentSha": "b8b7969393e9421c36e33e33e623b2ce5a4a5375",
+  "deploymentVerification": "Operator prerequisite; this script cannot establish the deployed Git SHA.",
+  "startedAt": "2026-09-06T19:59:36.754Z",
+  "checks": [
+    {
+      "label": "transaction-local SQL statement and lock deadlines read back correctly",
+      "passed": true
+    },
+    {
+      "label": "expected database selected",
+      "passed": true
+    },
+    {
+      "label": "cleanup connection has verified RLS bypass authority",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.sessions SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.sessions DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_members SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_members UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.children SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.children INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_billing_subscriptions SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.apple_purchase_interlocks SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.stripe_trial_card_claims SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_artifact_tombstones SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_messages SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_episodes SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.hours_log SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.hours_log INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_schedules SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_schedules DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.model_usage SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.model_usage DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.email_sends SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.email_sends DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_signals DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.knowledge_gaps DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.response_engagement DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_phones SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_assets SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials_studio_runs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_artifact_prefixes SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege storage.objects SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_events SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activities SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.working_plans SELECT",
+      "passed": true
+    },
+    {
+      "label": "current guarded family cleanup installed",
+      "passed": true
+    },
+    {
+      "label": "reserved signup family is atomically sandboxed",
+      "passed": true
+    },
+    {
+      "label": "unique fixture login did not exist before signup",
+      "passed": true
+    },
+    {
+      "label": "auth-settings: one exact reviewed setup request",
+      "passed": true
+    },
+    {
+      "label": "auth-settings: not interrupted",
+      "passed": true
+    },
+    {
+      "label": "Auth mailer autoconfirm is enabled; otherwise signup is refused to avoid confirmation email",
+      "passed": true
+    },
+    {
+      "label": "auth-signup: one exact reviewed setup request",
+      "passed": true
+    },
+    {
+      "label": "auth-signup: not interrupted",
+      "passed": true
+    },
+    {
+      "label": "signup returned authenticated new identity",
+      "passed": true
+    },
+    {
+      "label": "auth-identity: one exact reviewed setup request",
+      "passed": true
+    },
+    {
+      "label": "auth-identity: not interrupted",
+      "passed": true
+    },
+    {
+      "label": "JWT identifies this exact new fixture",
+      "passed": true
+    },
+    {
+      "label": "create-my-family: one exact reviewed setup request",
+      "passed": true
+    },
+    {
+      "label": "create-my-family: not interrupted",
+      "passed": true
+    },
+    {
+      "label": "normal authenticated family creation returned the owned family",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "new family begins unset without children or Hours",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, messages, material, asset, studio run, schedule, phone, event, activity, or working plan",
+      "passed": true
+    },
+    {
+      "label": "fresh browser has no imported session",
+      "passed": true
+    },
+    {
+      "label": "sign-in: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "sign-in: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "sign-in: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "signInAction: bounded served script inventory",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "signInAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "signInAction: exactly one served action ID",
+      "passed": true
+    },
+    {
+      "label": "browser-signin: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "settings-action-source: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "settings-action-source: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "settings-action-source: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: bounded served script inventory",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "updateHomeschoolAction: exactly one served action ID",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "browser-signin: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "unset-hours: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "unset-hours: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "unset-hours: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: bounded served script inventory",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: served script readable",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: total served script byte budget",
+      "passed": true
+    },
+    {
+      "label": "setViewContextAction: exactly one served action ID",
+      "passed": true
+    },
+    {
+      "label": "unset-family: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "unset-family: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "unset-family: no password field",
+      "passed": true
+    },
+    {
+      "label": "unset-select-A: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "view scope cookie retains secure/httpOnly boundary",
+      "passed": true
+    },
+    {
+      "label": "unset-child: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "unset-child: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "unset-child: no password field",
+      "passed": true
+    },
+    {
+      "label": "unset-select-family: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "view scope cookie retains secure/httpOnly boundary",
+      "passed": true
+    },
+    {
+      "label": "unset-family-returned: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "unset-family-returned: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "unset-family-returned: no password field",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, messages, material, asset, studio run, schedule, phone, event, activity, or working plan",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "unset-summary: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "unset: actual cookie-authenticated summary has exact family/date coverage",
+      "passed": true
+    },
+    {
+      "label": "unset: State Records has exact start label",
+      "passed": true
+    },
+    {
+      "label": "source read confirms exact new owned family and saved date",
+      "passed": true
+    },
+    {
+      "label": "unset: source-matched caller Progress reader includes child/shared and excludes future",
+      "passed": true
+    },
+    {
+      "label": "unset: source-matched caller Progress reader includes child/shared and excludes future",
+      "passed": true
+    },
+    {
+      "label": "unset: exact source-matched pack entries and nontruncation receipt",
+      "passed": true
+    },
+    {
+      "label": "settings: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "settings: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "settings: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "settings-set-before: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "settings-set-before: no password field",
+      "passed": true
+    },
+    {
+      "label": "settings-set: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "settings-set: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "settings: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "settings: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "settings: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "settings-set-persisted: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "settings-set-persisted: no password field",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "settings-set: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "configured-hours: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "configured-hours: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "configured-hours: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "configured-family: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "configured-family: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "configured-family: no password field",
+      "passed": true
+    },
+    {
+      "label": "configured-select-A: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "view scope cookie retains secure/httpOnly boundary",
+      "passed": true
+    },
+    {
+      "label": "configured-child: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "configured-child: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "configured-child: no password field",
+      "passed": true
+    },
+    {
+      "label": "configured-select-family: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "view scope cookie retains secure/httpOnly boundary",
+      "passed": true
+    },
+    {
+      "label": "configured-family-returned: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "configured-family-returned: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "configured-family-returned: no password field",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, messages, material, asset, studio run, schedule, phone, event, activity, or working plan",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "configured-summary: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "configured: actual cookie-authenticated summary has exact family/date coverage",
+      "passed": true
+    },
+    {
+      "label": "configured: State Records has exact start label",
+      "passed": true
+    },
+    {
+      "label": "source read confirms exact new owned family and saved date",
+      "passed": true
+    },
+    {
+      "label": "configured: source-matched caller Progress reader includes child/shared and excludes future",
+      "passed": true
+    },
+    {
+      "label": "configured: source-matched caller Progress reader includes child/shared and excludes future",
+      "passed": true
+    },
+    {
+      "label": "configured: exact source-matched pack entries and nontruncation receipt",
+      "passed": true
+    },
+    {
+      "label": "fresh-child-progress: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "fresh-child-progress: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "fresh-child-progress: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "unassessed Progress has no unsupported Hours subject-panel claim",
+      "passed": true
+    },
+    {
+      "label": "progress-empty: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "progress-empty: no password field",
+      "passed": true
+    },
+    {
+      "label": "settings: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "settings: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "settings: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "settings-clear-before: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "settings-clear-before: no password field",
+      "passed": true
+    },
+    {
+      "label": "settings-clear: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "settings-clear: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "settings: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "settings: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "settings: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "settings-clear-persisted: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "settings-clear-persisted: no password field",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "settings-clear: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "cleared-hours: exact allowed navigation",
+      "passed": true
+    },
+    {
+      "label": "cleared-hours: hosted route loaded without redirect",
+      "passed": true
+    },
+    {
+      "label": "cleared-hours: bounded fresh-page resources settled before interaction",
+      "passed": true
+    },
+    {
+      "label": "cleared-family: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "cleared-family: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "cleared-family: no password field",
+      "passed": true
+    },
+    {
+      "label": "cleared-select-A: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "view scope cookie retains secure/httpOnly boundary",
+      "passed": true
+    },
+    {
+      "label": "cleared-child: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "cleared-child: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "cleared-child: no password field",
+      "passed": true
+    },
+    {
+      "label": "cleared-select-family: exact dispatched action returned accepted HTTP status",
+      "passed": true
+    },
+    {
+      "label": "view scope cookie retains secure/httpOnly boundary",
+      "passed": true
+    },
+    {
+      "label": "cleared-family-returned: no phone horizontal overflow",
+      "passed": true
+    },
+    {
+      "label": "cleared-family-returned: verified synthetic-only screenshot surface",
+      "passed": true
+    },
+    {
+      "label": "cleared-family-returned: no password field",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, messages, material, asset, studio run, schedule, phone, event, activity, or working plan",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "cleared-summary: exact durable school-year setting read back",
+      "passed": true
+    },
+    {
+      "label": "cleared: actual cookie-authenticated summary has exact family/date coverage",
+      "passed": true
+    },
+    {
+      "label": "cleared: State Records has exact start label",
+      "passed": true
+    },
+    {
+      "label": "source read confirms exact new owned family and saved date",
+      "passed": true
+    },
+    {
+      "label": "cleared: source-matched caller Progress reader includes child/shared and excludes future",
+      "passed": true
+    },
+    {
+      "label": "cleared: source-matched caller Progress reader includes child/shared and excludes future",
+      "passed": true
+    },
+    {
+      "label": "cleared: exact source-matched pack entries and nontruncation receipt",
+      "passed": true
+    },
+    {
+      "label": "exactly one sign-in, two settings saves, six scope actions",
+      "passed": true
+    },
+    {
+      "label": "no unreviewed browser mutations attempted",
+      "passed": true
+    },
+    {
+      "label": "no uncaught browser errors",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "family-local date has not crossed midnight during the journey",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, messages, material, asset, studio run, schedule, phone, event, activity, or working plan",
+      "passed": true
+    },
+    {
+      "label": "cleanup recovered only the exact new fixture login",
+      "passed": true
+    },
+    {
+      "label": "cleanup locked the exact new fixture login before checking memberships",
+      "passed": true
+    },
+    {
+      "label": "cleanup refuses an unexpectedly shared fixture login",
+      "passed": true
+    },
+    {
+      "label": "cleanup family matches this run creation attempt",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, messages, material, asset, studio run, schedule, phone, event, activity, or working plan",
+      "passed": true
+    },
+    {
+      "label": "all and only exact synthetic child/Hours snapshots remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "family differs only by the exact dispatched homeschool settings effect",
+      "passed": true
+    },
+    {
+      "label": "new fixture has no inherited artifact prefixes",
+      "passed": true
+    },
+    {
+      "label": "cleanup refuses to hide an unexpected outbound email",
+      "passed": true
+    },
+    {
+      "label": "canonical artifact denial tombstone and waiting cleanup job are retained",
+      "passed": true
+    },
+    {
+      "label": "fixture has no owned Storage objects before Auth deletion",
+      "passed": true
+    },
+    {
+      "label": "fixture login belongs to no remaining family",
+      "passed": true
+    },
+    {
+      "label": "fixture family, children, membership, auth login, sessions, hours, and conversation rows removed",
+      "passed": true
+    }
+  ],
+  "responses": [
+    {
+      "label": "auth-settings",
+      "status": 200
+    },
+    {
+      "label": "auth-signup",
+      "status": 200
+    },
+    {
+      "label": "auth-identity",
+      "status": 200
+    },
+    {
+      "label": "create-my-family",
+      "status": 200
+    }
+  ],
+  "scope": "Hosted Settings save/clear, phone Hours scopes/totals, and authenticated State Records summary on one fresh synthetic family. Separate source-matched Progress/pack reads are explicitly labeled.",
+  "notCertified": [
+    "Progress subject-panel UI without assessment evidence",
+    "generated pack PDF or browser generation route",
+    "agent conversational judgment",
+    "3001-row hosted truncation",
+    "local/UTC midnight timing in this live run",
+    "existing families",
+    "full provider account deletion lifecycle"
+  ],
+  "browser": {
+    "profile": "fresh ephemeral Playwright context; no user profile or storageState",
+    "actions": [
+      {
+        "stage": "browser-signin",
+        "path": "/signin",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 503,
+          "contentType": "rsc",
+          "elapsedMs": 871,
+          "failureKind": "aborted"
+        },
+        "status": 303
+      },
+      {
+        "stage": "unset-select-A",
+        "path": "/app/planner",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 299,
+          "contentType": "rsc",
+          "elapsedMs": 398,
+          "failureKind": "aborted"
+        },
+        "status": 200
+      },
+      {
+        "stage": "unset-select-family",
+        "path": "/app/planner",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 346,
+          "contentType": "rsc",
+          "elapsedMs": 418,
+          "failureKind": "aborted"
+        },
+        "status": 200
+      },
+      {
+        "stage": "settings-set",
+        "path": "/app/settings",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 395,
+          "contentType": "rsc",
+          "elapsedMs": 400,
+          "failureKind": "aborted"
+        },
+        "status": 200
+      },
+      {
+        "stage": "configured-select-A",
+        "path": "/app/planner",
+        "dispatched": true,
+        "transport": {
+          "terminal": "finished",
+          "headersAtMs": 732,
+          "contentType": "rsc",
+          "elapsedMs": 736
+        },
+        "status": 200
+      },
+      {
+        "stage": "configured-select-family",
+        "path": "/app/planner",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 281,
+          "contentType": "rsc",
+          "elapsedMs": 325,
+          "failureKind": "aborted"
+        },
+        "status": 200
+      },
+      {
+        "stage": "settings-clear",
+        "path": "/app/settings",
+        "dispatched": true,
+        "transport": {
+          "terminal": "not_observed_by_journey_end",
+          "headersAtMs": 302,
+          "contentType": "rsc",
+          "elapsedMs": 7901
+        },
+        "status": 200
+      },
+      {
+        "stage": "cleared-select-A",
+        "path": "/app/planner",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 305,
+          "contentType": "rsc",
+          "elapsedMs": 336,
+          "failureKind": "aborted"
+        },
+        "status": 200
+      },
+      {
+        "stage": "cleared-select-family",
+        "path": "/app/planner",
+        "dispatched": true,
+        "transport": {
+          "terminal": "failed",
+          "headersAtMs": 306,
+          "contentType": "rsc",
+          "elapsedMs": 339,
+          "failureKind": "aborted"
+        },
+        "status": 200
+      }
+    ],
+    "blockedRequestCount": 79,
+    "pageErrorCount": 0,
+    "actionBindings": {
+      "signInAction": [
+        {
+          "actionId": "600033ec7c726ec8b928118d8646d50396c7392c5e",
+          "sourcePath": "/_next/static/chunks/0xb-gz4_42cqv.js",
+          "sha256": "792c40948f6c17e60a2a74ccee4e59f4698e4fc5333e22363e0fec74f81f1d16"
+        }
+      ],
+      "updateHomeschoolAction": [
+        {
+          "actionId": "6011f458908ab3df727876e2ec113924bb44db8f58",
+          "sourcePath": "/_next/static/chunks/19rel7mn-gub2.js",
+          "sha256": "0d70828cb2fb2a75bf59f333a710c995306c2bc19972cc324bc0e3a3546b19c4"
+        }
+      ],
+      "setViewContextAction": [
+        {
+          "actionId": "40d6dc026c1efe364bedddec8321a795fad67593a9",
+          "sourcePath": "/_next/static/chunks/2olgudb9x25ld.js",
+          "sha256": "8f465dd7ce3a158bbe1bf60c346b04ef7c1b249a5431320f4431e3ab1f8d9c4e"
+        }
+      ]
+    },
+    "screenshots": [
+      {
+        "label": "unset-family",
+        "path": "2026-09-06-school-year-live-unset-family.png",
+        "sha256": "c088b685968c7ee863f04b08399a61dc8f7dad7a7663d8e75609e508f23983c6"
+      },
+      {
+        "label": "configured-family",
+        "path": "2026-09-06-school-year-live-configured-family.png",
+        "sha256": "3258d626eb4f735a731ad0cb1263ebb445e0c75581f6856a2b3bccbf82330829"
+      },
+      {
+        "label": "configured-child",
+        "path": "2026-09-06-school-year-live-configured-child.png",
+        "sha256": "6aa211dc43bd6c9491621900f78ab50723ab42309238ccdd4ea8efb3d5a21c1a"
+      },
+      {
+        "label": "settings-set-persisted",
+        "path": "2026-09-06-school-year-live-settings-set-persisted.png",
+        "sha256": "1c056fa3c21ad1a8ef4bd34ad113b488e1b5eacc2303946bc191b81d775a9be6"
+      },
+      {
+        "label": "settings-clear-persisted",
+        "path": "2026-09-06-school-year-live-settings-clear-persisted.png",
+        "sha256": "ec859dca2055f320835bd97363adee12e97471d082431ba3558ba1a2d8556730"
+      },
+      {
+        "label": "cleared-child",
+        "path": "2026-09-06-school-year-live-cleared-child.png",
+        "sha256": "85cb503a55af59cc3b0e8ecd445f01eaac679cb40921e45930b7b0bb87990030"
+      },
+      {
+        "label": "progress-empty",
+        "path": "2026-09-06-school-year-live-progress-empty.png",
+        "sha256": "dd8d8036b6e48223ab074c2d3fc0b6077e60c703ebf9bb905cc992a7458889ec"
+      }
+    ]
+  },
+  "snapshots": [
+    {
+      "label": "unset-family",
+      "kind": "hosted-hours-DOM",
+      "scope": "family",
+      "start": null,
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "1h 3m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "28m",
+            "28m",
+            "28m"
+          ]
+        }
+      ],
+      "rowCount": 6,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "unset-child",
+      "kind": "hosted-hours-DOM",
+      "scope": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "start": null,
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "1h 3m"
+          ]
+        }
+      ],
+      "rowCount": 5,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "unset-family-returned",
+      "kind": "hosted-hours-DOM",
+      "scope": "family",
+      "start": null,
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "1h 3m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "28m",
+            "28m",
+            "28m"
+          ]
+        }
+      ],
+      "rowCount": 6,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "unset",
+      "kind": "hosted-cookie-summary",
+      "status": 200,
+      "ok": true,
+      "schoolYear": {
+        "startOn": null,
+        "label": null
+      },
+      "recordCoverage": {
+        "loggedEntries": 5,
+        "daysWithLoggedTime": 3,
+        "minutesLogged": 86
+      },
+      "documents": 0
+    },
+    {
+      "label": "unset",
+      "kind": "local-execution-of-pinned-source-against-owned-production-fixture",
+      "progress": {
+        "bf7148c9-6e38-4054-b235-ccf25ffd5d15": {
+          "spanish": 63
+        },
+        "452a26c7-8ba1-4cc9-9100-2b17129c9f6c": {
+          "spanish": 28
+        }
+      },
+      "pack": {
+        "truncated": false,
+        "entries": [
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-07-08",
+            "subject": "spanish",
+            "minutes": 30
+          },
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-09-05",
+            "subject": "spanish",
+            "minutes": 11
+          },
+          {
+            "childId": null,
+            "childName": null,
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 5
+          },
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 17
+          },
+          {
+            "childId": "452a26c7-8ba1-4cc9-9100-2b17129c9f6c",
+            "childName": "Blair",
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 23
+          }
+        ]
+      },
+      "authenticatedGetCount": 2,
+      "sourceHashes": {
+        "apps/web/lib/hours.ts": "44a2315e09e274e9b2001f0ce938e0105ef041da8d090dcaa4c2da3b311ab640",
+        "apps/web/lib/hours-summary.ts": "ad2ecd8be660cc15c29aae8baecb6b7de2866d2a2ded06cfddcd5821c3dd08ec",
+        "apps/web/lib/hours-model.ts": "2e79ef9c4bddf93bbd019b3035068edfca18cd952c2cb3af4a0d5bb0a6d757af",
+        "apps/web/lib/compliance/deadlines.ts": "9299eec80ac59ae95c56e0d6c29719a33d69b47cb5a42913535363e47fa1285a",
+        "apps/web/lib/compliance/pack-store.ts": "5d52d85988bcd2cb0260c02e6a7a70ede3683d1396ff3a1a39f0e708647a8922",
+        "apps/web/app/app/settings/profile-actions.ts": "f052bd020881b6ffb10f98a48215484f78eaee3b7ff08073710f6055098a9138",
+        "apps/web/lib/compliance/school-year.ts": "0f71f2e2bf47fb2dc1a8c24581422ccfa9cb9b50efe6f5a944616a87a2b2161b",
+        "apps/web/lib/compliance/state-records.ts": "b26183132abe0e96b12187e3ca45b7f7fb41b97accf4b09639f716664325ea43",
+        "apps/web/lib/time-zone.ts": "2bd32f6a54907988534617d92fee8e6868dc51dd402a9b2037785c8b6f1d666a"
+      }
+    },
+    {
+      "label": "configured-family",
+      "kind": "hosted-hours-DOM",
+      "scope": "family",
+      "start": "2026-09-06",
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "School year"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "22m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "labels": [
+            "This week",
+            "This month",
+            "School year"
+          ],
+          "totals": [
+            "28m",
+            "28m",
+            "28m"
+          ]
+        }
+      ],
+      "rowCount": 6,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "configured-child",
+      "kind": "hosted-hours-DOM",
+      "scope": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "start": "2026-09-06",
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "School year"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "22m"
+          ]
+        }
+      ],
+      "rowCount": 5,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "configured-family-returned",
+      "kind": "hosted-hours-DOM",
+      "scope": "family",
+      "start": "2026-09-06",
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "School year"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "22m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "labels": [
+            "This week",
+            "This month",
+            "School year"
+          ],
+          "totals": [
+            "28m",
+            "28m",
+            "28m"
+          ]
+        }
+      ],
+      "rowCount": 6,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "configured",
+      "kind": "hosted-cookie-summary",
+      "status": 200,
+      "ok": true,
+      "schoolYear": {
+        "startOn": "2026-09-06",
+        "label": "Since Sep 6, 2026"
+      },
+      "recordCoverage": {
+        "loggedEntries": 3,
+        "daysWithLoggedTime": 1,
+        "minutesLogged": 45
+      },
+      "documents": 0
+    },
+    {
+      "label": "configured",
+      "kind": "local-execution-of-pinned-source-against-owned-production-fixture",
+      "progress": {
+        "bf7148c9-6e38-4054-b235-ccf25ffd5d15": {
+          "spanish": 22
+        },
+        "452a26c7-8ba1-4cc9-9100-2b17129c9f6c": {
+          "spanish": 28
+        }
+      },
+      "pack": {
+        "truncated": false,
+        "entries": [
+          {
+            "childId": null,
+            "childName": null,
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 5
+          },
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 17
+          },
+          {
+            "childId": "452a26c7-8ba1-4cc9-9100-2b17129c9f6c",
+            "childName": "Blair",
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 23
+          }
+        ]
+      },
+      "authenticatedGetCount": 2,
+      "sourceHashes": {
+        "apps/web/lib/hours.ts": "44a2315e09e274e9b2001f0ce938e0105ef041da8d090dcaa4c2da3b311ab640",
+        "apps/web/lib/hours-summary.ts": "ad2ecd8be660cc15c29aae8baecb6b7de2866d2a2ded06cfddcd5821c3dd08ec",
+        "apps/web/lib/hours-model.ts": "2e79ef9c4bddf93bbd019b3035068edfca18cd952c2cb3af4a0d5bb0a6d757af",
+        "apps/web/lib/compliance/deadlines.ts": "9299eec80ac59ae95c56e0d6c29719a33d69b47cb5a42913535363e47fa1285a",
+        "apps/web/lib/compliance/pack-store.ts": "5d52d85988bcd2cb0260c02e6a7a70ede3683d1396ff3a1a39f0e708647a8922",
+        "apps/web/app/app/settings/profile-actions.ts": "f052bd020881b6ffb10f98a48215484f78eaee3b7ff08073710f6055098a9138",
+        "apps/web/lib/compliance/school-year.ts": "0f71f2e2bf47fb2dc1a8c24581422ccfa9cb9b50efe6f5a944616a87a2b2161b",
+        "apps/web/lib/compliance/state-records.ts": "b26183132abe0e96b12187e3ca45b7f7fb41b97accf4b09639f716664325ea43",
+        "apps/web/lib/time-zone.ts": "2bd32f6a54907988534617d92fee8e6868dc51dd402a9b2037785c8b6f1d666a"
+      }
+    },
+    {
+      "kind": "hosted-progress-empty",
+      "subjectPanelVerified": false,
+      "reason": "Fresh fixture has no assessment evidence; exact Hours reader checked separately without inventing skill evidence."
+    },
+    {
+      "label": "cleared-family",
+      "kind": "hosted-hours-DOM",
+      "scope": "family",
+      "start": null,
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "1h 3m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "28m",
+            "28m",
+            "28m"
+          ]
+        }
+      ],
+      "rowCount": 6,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "cleared-child",
+      "kind": "hosted-hours-DOM",
+      "scope": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "start": null,
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "1h 3m"
+          ]
+        }
+      ],
+      "rowCount": 5,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "cleared-family-returned",
+      "kind": "hosted-hours-DOM",
+      "scope": "family",
+      "start": null,
+      "through": "2026-09-06",
+      "actual": [
+        {
+          "name": "Avery",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "33m",
+            "33m",
+            "1h 3m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "labels": [
+            "This week",
+            "This month",
+            "All time"
+          ],
+          "totals": [
+            "28m",
+            "28m",
+            "28m"
+          ]
+        }
+      ],
+      "rowCount": 6,
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      },
+      "beforeStartInsideWeek": true,
+      "beforeStartInsideMonth": true,
+      "futureRowVisibleButExcludedFromPeriodTotals": true
+    },
+    {
+      "label": "cleared",
+      "kind": "hosted-cookie-summary",
+      "status": 200,
+      "ok": true,
+      "schoolYear": {
+        "startOn": null,
+        "label": null
+      },
+      "recordCoverage": {
+        "loggedEntries": 5,
+        "daysWithLoggedTime": 3,
+        "minutesLogged": 86
+      },
+      "documents": 0
+    },
+    {
+      "label": "cleared",
+      "kind": "local-execution-of-pinned-source-against-owned-production-fixture",
+      "progress": {
+        "bf7148c9-6e38-4054-b235-ccf25ffd5d15": {
+          "spanish": 63
+        },
+        "452a26c7-8ba1-4cc9-9100-2b17129c9f6c": {
+          "spanish": 28
+        }
+      },
+      "pack": {
+        "truncated": false,
+        "entries": [
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-07-08",
+            "subject": "spanish",
+            "minutes": 30
+          },
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-09-05",
+            "subject": "spanish",
+            "minutes": 11
+          },
+          {
+            "childId": null,
+            "childName": null,
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 5
+          },
+          {
+            "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+            "childName": "Avery",
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 17
+          },
+          {
+            "childId": "452a26c7-8ba1-4cc9-9100-2b17129c9f6c",
+            "childName": "Blair",
+            "happenedOn": "2026-09-06",
+            "subject": "spanish",
+            "minutes": 23
+          }
+        ]
+      },
+      "authenticatedGetCount": 2,
+      "sourceHashes": {
+        "apps/web/lib/hours.ts": "44a2315e09e274e9b2001f0ce938e0105ef041da8d090dcaa4c2da3b311ab640",
+        "apps/web/lib/hours-summary.ts": "ad2ecd8be660cc15c29aae8baecb6b7de2866d2a2ded06cfddcd5821c3dd08ec",
+        "apps/web/lib/hours-model.ts": "2e79ef9c4bddf93bbd019b3035068edfca18cd952c2cb3af4a0d5bb0a6d757af",
+        "apps/web/lib/compliance/deadlines.ts": "9299eec80ac59ae95c56e0d6c29719a33d69b47cb5a42913535363e47fa1285a",
+        "apps/web/lib/compliance/pack-store.ts": "5d52d85988bcd2cb0260c02e6a7a70ede3683d1396ff3a1a39f0e708647a8922",
+        "apps/web/app/app/settings/profile-actions.ts": "f052bd020881b6ffb10f98a48215484f78eaee3b7ff08073710f6055098a9138",
+        "apps/web/lib/compliance/school-year.ts": "0f71f2e2bf47fb2dc1a8c24581422ccfa9cb9b50efe6f5a944616a87a2b2161b",
+        "apps/web/lib/compliance/state-records.ts": "b26183132abe0e96b12187e3ca45b7f7fb41b97accf4b09639f716664325ea43",
+        "apps/web/lib/time-zone.ts": "2bd32f6a54907988534617d92fee8e6868dc51dd402a9b2037785c8b6f1d666a"
+      }
+    }
+  ],
+  "status": "passed",
+  "cleanup": {
+    "status": "family-and-auth-removed",
+    "deletionJobId": "46fcae8e-3682-44d7-b4e9-75a60501a5b8",
+    "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+    "remaining": {
+      "users": 0,
+      "sessions": 0,
+      "families": 0,
+      "children": 0,
+      "memberships": 0,
+      "hours": 0,
+      "messages": 0
+    }
+  },
+  "databaseStartedAt": "2026-09-06 19:59:37.113705+00",
+  "fixtureFamilyId": "750bc710-dd5c-4e5e-9b90-5f0f17b43d37",
+  "fixtureChildren": [
+    {
+      "id": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "name": "Avery"
+    },
+    {
+      "id": "452a26c7-8ba1-4cc9-9100-2b17129c9f6c",
+      "name": "Blair"
+    }
+  ],
+  "fixtureRows": [
+    {
+      "id": "c26c9480-8f34-4b7f-aaae-3967c4fdbd96",
+      "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "minutes": 30,
+      "note": "Synthetic older 6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+      "day": "2026-07-08"
+    },
+    {
+      "id": "acaeb6e9-0cec-422c-a8e9-fa45b0eefa1d",
+      "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "minutes": 11,
+      "note": "Synthetic before start 6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+      "day": "2026-09-05"
+    },
+    {
+      "id": "3e2d22a0-3e42-47e4-833b-1d83e0713365",
+      "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "minutes": 17,
+      "note": "Synthetic at start 6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+      "day": "2026-09-06"
+    },
+    {
+      "id": "37450832-7ddc-4173-a357-e60f5222ec46",
+      "childId": null,
+      "minutes": 5,
+      "note": "Synthetic shared 6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+      "day": "2026-09-06"
+    },
+    {
+      "id": "5344ecae-5865-4cb9-ad62-90dc89bddb5f",
+      "childId": "452a26c7-8ba1-4cc9-9100-2b17129c9f6c",
+      "minutes": 23,
+      "note": "Synthetic other child 6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+      "day": "2026-09-06"
+    },
+    {
+      "id": "2314dd99-01fe-4711-b2b0-0730504771b8",
+      "childId": "bf7148c9-6e38-4054-b235-ccf25ffd5d15",
+      "minutes": 101,
+      "note": "Synthetic future 6f826f01-11c1-47c4-9bf1-2ccf7be45f50",
+      "day": "2026-09-07"
+    }
+  ],
+  "familyLocalToday": "2026-09-06",
+  "sideEffects": {
+    "emails": 0,
+    "models": 0,
+    "messages": 0,
+    "materials": 0,
+    "assets": 0,
+    "studio_runs": 0,
+    "schedules": 0,
+    "phones": 0,
+    "events": 0,
+    "activities": 0,
+    "working_plans": 0
+  },
+  "finishedAt": "2026-09-06T20:00:17.509Z",
+  "deploymentAttestation": {
+    "verifiedAt": "2026-09-06T19:54:37.547254+00:00",
+    "deploymentId": "dpl_5xBvEN5eo79XmFPywFrgpjGfckPX",
+    "url": "homa-9ehlk9l58-homa-1d878b0e.vercel.app",
+    "alias": "thankshoma.com",
+    "state": "READY",
+    "gitSha": "b8b7969393e9421c36e33e33e623b2ce5a4a5375",
+    "httpStatus": 200,
+    "sourcePinsVerified": 9
+  },
+  "operator": {
+    "entry": "school-year-production-ui-probe-v3.mjs",
+    "sha256": "56f7611824fa41bac6b06c9c5e3ea52d93f5f5ba486ca30683a3dafd2f4496e8",
+    "originalSha256": "17421aac89f926015bf8e7f37a3879a49b0783ac5d1a7139e028721aaaab24a7",
+    "offlinePolicyChecks": 83
+  },
+  "priorRuns": [
+    {
+      "runId": "cc48fb90-0be5-49a0-8ef4-4c35e87e64b7",
+      "failure": "seed-own-sandbox failed (23514); raw provider error withheld",
+      "startedAt": "2026-09-06T19:54:41.613Z",
+      "finishedAt": "2026-09-06T19:54:52.480Z",
+      "cleanup": {
+        "status": "family-and-auth-removed",
+        "deletionJobId": "c55759cf-921e-485e-ba58-948fce9251a5",
+        "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+        "remaining": {
+          "users": 0,
+          "sessions": 0,
+          "families": 0,
+          "children": 0,
+          "memberships": 0,
+          "hours": 0,
+          "messages": 0
+        }
+      },
+      "receiptSha256": "863478eb3750448864b80ed6ff9c7f66518ee802464bcba35d98f69cab542333"
+    },
+    {
+      "runId": "9884fde4-ed04-4a91-8077-3e9ef2835fe4",
+      "failure": "updateHomeschoolAction: exactly one served action ID",
+      "startedAt": "2026-09-06T19:56:35.574Z",
+      "finishedAt": "2026-09-06T19:56:50.437Z",
+      "cleanup": {
+        "status": "family-and-auth-removed",
+        "deletionJobId": "e212cf7f-7fd8-45ec-856e-aee00a0ebeab",
+        "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+        "remaining": {
+          "users": 0,
+          "sessions": 0,
+          "families": 0,
+          "children": 0,
+          "memberships": 0,
+          "hours": 0,
+          "messages": 0
+        }
+      },
+      "receiptSha256": "a81d5b423e126f1be1ecef4559c23f5d9a0051e4fad51110aeb00f14e4d7e2d3"
+    },
+    {
+      "runId": "2d39f6d4-20ac-48b9-bea0-b19843d37e03",
+      "failure": "settings-set failed; raw provider error withheld",
+      "startedAt": "2026-09-06T19:58:05.336Z",
+      "finishedAt": "2026-09-06T19:58:35.299Z",
+      "cleanup": {
+        "status": "family-and-auth-removed",
+        "deletionJobId": "d597f99a-0b7e-4afd-95fe-7dfadc7215eb",
+        "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+        "remaining": {
+          "users": 0,
+          "sessions": 0,
+          "families": 0,
+          "children": 0,
+          "memberships": 0,
+          "hours": 0,
+          "messages": 0
+        }
+      },
+      "receiptSha256": "b9c96103b93c3a66c74e4a19358e9b4a4800bc9e016c9aca579b62bd20a51d10"
+    }
+  ],
+  "schemaRecovery": {
+    "issue": 1120,
+    "source": "supabase/migrations/20260828140000_hours_subject_second_language.sql",
+    "sourceSha256": "de208bb5956a3a2a76df246e743a304121d111182c592dba1e21b53a96e65f24",
+    "appliedVersion": "20260906195628",
+    "migrationName": "hours_subject_second_language",
+    "verifiedConstraints": [
+      "hours_log_subject_check",
+      "planner_learning_activities_subject_check"
+    ]
+  }
+}

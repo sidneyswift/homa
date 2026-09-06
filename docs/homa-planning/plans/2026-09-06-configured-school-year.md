@@ -1,6 +1,6 @@
 # One configured school-year window
 
-Implementation and evidence for [#1096](https://github.com/sidneyswift/homa/issues/1096), from F08 in the [meeting review](2026-09-05-cofounder-feedback-review.md). Production repair is not yet certified. GitHub holds live status.
+Implementation and evidence for [#1096](https://github.com/sidneyswift/homa/issues/1096), from F08 in the [meeting review](2026-09-05-cofounder-feedback-review.md). **FIXED** by [PR #1119](https://github.com/sidneyswift/homa/pull/1119), main `b8b7969393e9421c36e33e33e623b2ce5a4a5375`. The [hosted receipt](../journeys/evidence/2026-09-06-school-year-live-verification.md) records READY deployment, 381 passing assertions, actual Settings saves, nine Hours states, a summary read and complete fixture cleanup. GitHub holds live status.
 
 ## Expected and observed behavior
 
@@ -26,13 +26,13 @@ Root applied the reviewed v2 candidate after the isolation guard passed. The ori
 
 The fresh technical reviewer found no introduced blockers and independently passed 76 deterministic tests in an empty environment. Reader feedback added the exact school-year start beside totals and a recovery instruction for incomplete reads. Interface review confirmed the setting link is recognizable and identified existing small-label and shared-total explanation limits; the actual embedded Planner supplies scope guidance and omits the standalone compliance heading. The final error notice distinguishes a loading failure from a record change. Root retained the complete gate outputs locally.
 
-The Next production build and Chromium traces, standalone hosted-shape Eve build, all three stream-duration checks, typecheck, changed-path lint and design contract/parity passed. Final exact-head CI and Vercel preview, deployment attestation, and a bounded authenticated hosted journey remain release gates. No model judgment procedure changed; date arithmetic, tenancy and completeness are tested at the deterministic layer.
+The Next production build and Chromium traces, standalone hosted-shape Eve build, all three stream-duration checks, typecheck, changed-path lint and design contract/parity passed. Both required checks passed on exact PR head `633760a6220f947cf0858285fe4de96dcb04f911`; production deployment and the bounded authenticated journey subsequently passed as recorded above. No model judgment procedure changed; date arithmetic, tenancy and completeness are tested at the deterministic layer.
 
 ## Boundaries carried forward
 
 The whole-history cap can conservatively hide a recent total even if all recent rows were returned. Full pagination and shared-child chat semantics remain [#1095](https://github.com/sidneyswift/homa/issues/1095). Historical Day/Week lists retain their existing bounded-reader behavior. Future-dated records remain visible as records in Hours while being excluded from through-today totals.
 
-The hosted acceptance operator is separately reviewed and defaults to no-op. Its proposed fixture uses two children, six Hours rows, two actual Settings saves and six actual child-scope changes. Hosted Settings, Hours and the read-only compliance summary are distinct from local execution of deployment-identical Progress/packet readers against the same production fixture. A generated compliance PDF, native screen, physical printout and model conversation are not implied by these checks.
+The separately reviewed hosted operator defaults to no-op. Its successful fixture used two children, six Hours rows, two actual Settings saves and six actual child-scope changes. Hosted Settings, Hours and the read-only compliance summary are distinct from local execution of deployment-identical Progress/packet readers against the same production fixture. A generated compliance PDF, native screen, physical printout and model conversation are not implied by these checks. Its first run discovered an older approved but unapplied Second language constraint migration, repaired as #1120 before the successful journey; this release introduced no new schema design.
 
 ## Local screen evidence
 
