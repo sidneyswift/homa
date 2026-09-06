@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import type { FamilyEventRow } from "./family-events";
 import {
   approveMonthPlanDraft,
+  findMonthPlanConflicts,
   proposedMonthPlanSchema,
   resumeMonthPlanDraft,
   restoreMonthPlanDraft,
@@ -324,5 +326,84 @@ describe("month plan proposal schema", () => {
       proposedMonthPlanSchema.safeParse({ ...plan, monthStart: "2026-09-02" }).success,
       false,
     );
+  });
+});
+
+
+describe("month-plan recurrence conflict evidence", () => {
+  const secondId = "00000000-0000-4000-8000-000000000004";
+  const thirdId = "00000000-0000-4000-8000-000000000005";
+  const event: FamilyEventRow = {
+    id: "commitment", familyId: FAMILY_ID, childId: CHILD_ID,
+    childIds: [CHILD_ID, secondId], title: "Co-op",
+    startsOn: "2026-08-03", endsOn: "2026-08-03", startTime: null, endTime: null, note: null,
+    recurrence: { frequency: "weekly", interval: 1, weekdays: [1], until: "2026-09-21" },
+    createdAt: "2026-08-01T00:00:00.000Z",
+  };
+  function scheduledPlan(dates: Array<string | null>): ProposedMonthPlan {
+    return {
+      ...plan,
+      children: [[CHILD_ID, "Maya"], [secondId, "Leo"], [thirdId, "Rae"]].map(([childId, childName]) => ({
+        ...plan.children[0], childId, childName,
+        weeks: [1, 2, 3, 4].map((week) => ({
+          week, focus: "Reading", activities: (week === 1 ? dates : [null]).map((scheduledDate) => ({
+            text: `Read on ${scheduledDate ?? "a flexible day"}`, scheduledDate, reusedMaterialId: null,
+          })),
+        })),
+      })),
+    };
+  }
+  function tuples(conflicts: ReturnType<typeof findMonthPlanConflicts>) {
+    return conflicts.map((conflict) => [conflict.childName, conflict.scheduledDate, conflict.commitment]);
+  }
+
+  it("matches later-month repeats for each selected child, excluding another child", () => {
+    const input = scheduledPlan(["2026-09-07", "2026-09-14", "2026-09-21", "2026-09-28", null]);
+    assert.deepEqual(tuples(findMonthPlanConflicts(input, [event])), [
+      ["Maya", "2026-09-07", "Co-op"], ["Maya", "2026-09-14", "Co-op"], ["Maya", "2026-09-21", "Co-op"],
+      ["Leo", "2026-09-07", "Co-op"], ["Leo", "2026-09-14", "Co-op"], ["Leo", "2026-09-21", "Co-op"],
+    ]);
+  });
+
+  it("removes cancellations and moved-out dates, adding only replacement dates", () => {
+    const changed: FamilyEventRow = { ...event, occurrenceExceptions: [
+      { occurrenceOn: "2026-09-07", kind: "cancelled", startsOn: null, endsOn: null, startTime: null, endTime: null },
+      { occurrenceOn: "2026-09-14", kind: "moved", startsOn: "2026-09-15", endsOn: "2026-09-15", startTime: null, endTime: null },
+      { occurrenceOn: "2026-09-21", kind: "moved", startsOn: "2026-10-02", endsOn: "2026-10-02", startTime: null, endTime: null },
+    ] };
+    const before = structuredClone(changed);
+    assert.deepEqual(tuples(findMonthPlanConflicts(
+      scheduledPlan(["2026-09-07", "2026-09-14", "2026-09-15", "2026-09-21"]), [changed],
+    )), [["Maya", "2026-09-15", "Co-op"], ["Leo", "2026-09-15", "Co-op"]]);
+    assert.deepEqual(changed, before);
+  });
+
+  it("uses the whole-family and legacy audience rules for ordinary multi-day events", () => {
+    const ordinary = { ...event, recurrence: null, startsOn: "2026-08-31", endsOn: "2026-09-02" };
+    const input = scheduledPlan(["2026-09-01", "2026-09-02", "2026-09-03"]);
+    assert.deepEqual(tuples(findMonthPlanConflicts(input, [
+      { ...ordinary, title: "Family trip", childId: null, childIds: [CHILD_ID] },
+      { ...ordinary, title: "Legacy appointment", childId: thirdId, childIds: [CHILD_ID, secondId] },
+    ])), [
+      ["Maya", "2026-09-01", "Family trip"], ["Maya", "2026-09-02", "Family trip"],
+      ["Leo", "2026-09-01", "Family trip"], ["Leo", "2026-09-02", "Family trip"],
+      ["Rae", "2026-09-01", "Family trip"], ["Rae", "2026-09-01", "Legacy appointment"],
+      ["Rae", "2026-09-02", "Family trip"], ["Rae", "2026-09-02", "Legacy appointment"],
+    ]);
+  });
+
+  it("includes future moved-in ranges but not undated activities", () => {
+    const future: FamilyEventRow = {
+      ...event, startsOn: "2026-10-01", endsOn: "2026-10-01",
+      recurrence: { frequency: "weekly", interval: 1, weekdays: [4], until: null },
+      occurrenceExceptions: [{ occurrenceOn: "2026-10-01", kind: "moved",
+        startsOn: "2026-09-10", endsOn: "2026-09-11", startTime: null, endTime: null }],
+    };
+    assert.deepEqual(tuples(findMonthPlanConflicts(
+      scheduledPlan(["2026-09-09", "2026-09-10", "2026-09-11", "2026-09-12", null]), [future],
+    )), [
+      ["Maya", "2026-09-10", "Co-op"], ["Maya", "2026-09-11", "Co-op"],
+      ["Leo", "2026-09-10", "Co-op"], ["Leo", "2026-09-11", "Co-op"],
+    ]);
   });
 });

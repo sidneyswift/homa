@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 
 import postgres, { type TransactionSql } from "postgres";
 
+import { runRecurringMonthPlanConflictContract } from "../apps/web/lib/family-events-postgres-contract";
+
 import {
   EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_PARENT_USER_ID,
@@ -237,6 +239,8 @@ try {
   `;
   assert.equal(cascade.count, 0);
   console.log("PASS  deleting the series cascades its dated exceptions");
+
+  await runRecurringMonthPlanConflictContract(sql, SECOND_PARENT_ID);
 } finally {
   await sql.end({ timeout: 5 });
 }
