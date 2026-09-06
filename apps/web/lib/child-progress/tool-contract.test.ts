@@ -7,7 +7,7 @@ import {
   executeChildProgressCommand,
   type ChildProgressToolOperations,
 } from "./tool-adapter";
-import { createProgressToolContext } from "./tool-contract";
+import { createProgressToolContext, manageChildProgressInputSchema, manageChildProgressToolInputSchema } from "./tool-contract";
 import {
   JOURNAL_HOURS_PROGRESS_NOTE,
   OBSERVATION_ALREADY_USED_PROGRESS_NOTE,
@@ -436,5 +436,31 @@ describe("child progress tool result adapter", () => {
       kind: "refused",
       note: REFUSED_PROGRESS_NOTE,
     });
+  });
+});
+
+
+describe("published pause and stop fields", () => {
+  it("publishes the reason field as pause-only without widening execution", () => {
+    assert.equal(manageChildProgressToolInputSchema.shape.reason.description,
+      "Only for pause_check_in. Omit reason for stop_check_in and every other action; stop_check_in needs only action and checkInId.");
+    assert.equal(manageChildProgressInputSchema.safeParse({
+      action: "stop_check_in", checkInId: CHECK_IN_ID, reason: "explicit_stop",
+    }).success, false);
+    assert.deepEqual(manageChildProgressInputSchema.parse({
+      action: "stop_check_in", checkInId: CHECK_IN_ID,
+    }), {action: "stop_check_in", checkInId: CHECK_IN_ID});
+  });
+
+  it("retains the required reason for pause and refuses reason on answers", () => {
+    assert.equal(manageChildProgressInputSchema.safeParse({
+      action: "pause_check_in", checkInId: CHECK_IN_ID,
+    }).success, false);
+    assert.equal(manageChildProgressInputSchema.safeParse({
+      action: "pause_check_in", checkInId: CHECK_IN_ID, reason: "topic_change",
+    }).success, true);
+    assert.equal(manageChildProgressInputSchema.safeParse({
+      action: "respond_check_in", checkInId: CHECK_IN_ID, answer: "easily", reason: "explicit_stop",
+    }).success, false);
   });
 });

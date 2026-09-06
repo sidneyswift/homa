@@ -8,6 +8,7 @@ import type {
 } from "@homa/core";
 import { getMapSubject, MONTH_PLAN_SUBJECT } from "@homa/core";
 
+import { buildSavedReportComparisons } from "../child-progress/report-comparison";
 import { mapDb, type DbJson } from "./db";
 import {
   firstFamilyStyle,
@@ -41,7 +42,14 @@ export interface ChangedAnswerSinceScoring {
   source: string;
 }
 
+export interface ReportNarrativeClaim extends NarrativeMeta {
+  generationId: string;
+  reportGeneratedAt: string;
+}
+
 export interface ReportNarrativeSource {
+  /** The exact report revision this generation may publish onto. */
+  reportGeneratedAt: string;
   familyId: string;
   childId: string;
   childName: string;
@@ -80,6 +88,17 @@ export async function getReportNarrativeSource(
       context: Record<string, unknown>;
       first_name: string | null;
       scores: MapScores;
+      generated_at: string;
+      bank_version: string;
+      scorer_version: string | null;
+      scored_birth_date: string | null;
+      scored_age_months: number | null;
+      saved_projection: unknown;
+      projection_bank_version: string | null;
+      projection_version: string | null;
+      projection_date: string | null;
+      projected_at: string | null;
+      compatibility_answers: Array<{ itemId: string; answer: MapAnswer }>;
       history: Array<{
         scores: MapScores;
         generated_at: string;
@@ -90,19 +109,43 @@ export async function getReportNarrativeSource(
     select f.id as family_id, c.name as child_name,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month,
            c.profile, c.context, f.first_name,
-           r.scores, r.history
+           r.scores, r.history,
+           to_char(r.generated_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as generated_at,
+           r.bank_version, r.scorer_version,
+           to_char(r.scored_birth_date, 'YYYY-MM-DD') as scored_birth_date,
+           r.scored_age_months, live.projection as saved_projection,
+           live.bank_version as projection_bank_version, live.projection_version,
+           live.projection_date::text as projection_date,
+           to_char(live.projected_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as projected_at,
+           coalesce((select jsonb_agg(jsonb_build_object('itemId', a.question_id, 'answer', a.answer)
+                                     order by a.question_id)
+                     from public.child_answers a where a.child_id = r.child_id), '[]'::jsonb)
+             as compatibility_answers
     from public.child_reports r
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
+    left join public.child_progress_live live
+      on live.child_id = r.child_id and live.family_id = f.id
+     and live.projected_at = r.generated_at
     where r.child_id = ${childId} and f.status <> 'deleted'
       and (${familyId ?? null}::uuid is null or f.id = ${familyId ?? null})
   `;
   const row = rows[0];
   if (!row) return null;
 
-  const answers = await sql<{ question_id: string; answer: MapAnswer }[]>`
-    select question_id, answer from public.child_answers where child_id = ${childId}
-  `;
+  const saved = buildSavedReportComparisons({
+    childId, scores: row.scores, generatedAt: row.generated_at,
+    bankVersion: row.bank_version, scorerVersion: row.scorer_version,
+    scoredBirthDate: row.scored_birth_date, scoredAgeMonths: row.scored_age_months,
+    projection: row.saved_projection, projectionBankVersion: row.projection_bank_version,
+    projectionVersion: row.projection_version, projectionDate: row.projection_date,
+    projectedAt: row.projected_at,
+  });
+  // Legacy rows keep their compatibility data from the same statement.
+  // A canonical report uses every answer in its exact saved projection.
+  const answers = saved.status === "available" ? saved.answers : row.compatibility_answers;
   const siblings = await sql<{ name: string }[]>`
     select c2.name from public.children c2
     where c2.family_id = ${row.family_id} and c2.id <> ${childId}
@@ -126,8 +169,9 @@ export async function getReportNarrativeSource(
         from public.child_progress_evidence e
         left join public.child_progress_evidence prev on prev.id = e.supersedes_id
         where e.child_id = ${childId} and e.family_id = ${row.family_id}
-          and e.superseded_at is null
-          and e.created_at > ${previousScoredAt}::timestamptz
+          and (e.superseded_at is null or e.superseded_at > ${row.generated_at}::text::timestamptz)
+          and e.created_at > ${previousScoredAt}::text::timestamptz
+          and e.created_at <= ${row.generated_at}::text::timestamptz
         order by e.observed_at asc, e.created_at asc
         limit 80
       `
@@ -174,6 +218,7 @@ export async function getReportNarrativeSource(
       : {};
 
   return {
+    reportGeneratedAt: row.generated_at,
     familyId: row.family_id,
     childId,
     childName: row.child_name,
@@ -184,7 +229,7 @@ export async function getReportNarrativeSource(
     parentFirstName: row.first_name,
     scores: row.scores,
     history: row.history ?? [],
-    answers: answers.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
+    answers,
     siblingNames: siblings.map((sibling) => sibling.name),
     priorLetter,
     practice,
@@ -210,13 +255,14 @@ export async function getReportNarrativeSource(
 export async function claimReportNarrative(
   familyId: string,
   childId: string,
-  meta: NarrativeMeta,
+  claim: ReportNarrativeClaim,
 ): Promise<boolean> {
   const sql = mapDb();
   const rows = await sql<{ child_id: string }[]>`
     update public.child_reports
-    set narrative_meta = ${sql.json(meta as unknown as DbJson)}
+    set narrative_meta = ${sql.json(claim as unknown as DbJson)}
     where child_id = ${childId}
+      and generated_at = ${claim.reportGeneratedAt}::text::timestamptz
       and exists (
         select 1 from public.children c
         where c.id = ${childId} and c.family_id = ${familyId}
@@ -238,19 +284,26 @@ export async function storeReportNarrative(
   childId: string,
   narrative: ReportNarrative | null,
   meta: NarrativeMeta,
-): Promise<void> {
+  claim: ReportNarrativeClaim,
+): Promise<boolean> {
   const sql = mapDb();
-  await sql`
+  const rows = await sql<{ child_id: string }[]>`
     update public.child_reports
     set narrative = ${narrative ? sql.json(narrative as unknown as DbJson) : null},
         narrative_meta = ${sql.json(meta as unknown as DbJson)},
         updated_at = now()
     where child_id = ${childId}
+      and generated_at = ${claim.reportGeneratedAt}::text::timestamptz
+      and narrative_meta->>'status' = 'writing'
+      and narrative_meta->>'generationId' = ${claim.generationId}
+      and narrative_meta->>'reportGeneratedAt' = ${claim.reportGeneratedAt}
       and exists (
         select 1 from public.children c
         where c.id = ${childId} and c.family_id = ${familyId}
       )
+    returning child_id
   `;
+  return rows.length > 0;
 }
 
 /** Status for the report page's writing beat, scoped by the report token

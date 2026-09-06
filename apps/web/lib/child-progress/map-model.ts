@@ -1,4 +1,5 @@
 import { subjectLine } from "@homa/core";
+import { buildProgressComparison, type ProgressComparison } from "./comparison";
 import type { MapScores } from "@homa/core";
 
 import type { ChildProgressView, ProgressSubjectView } from "./types";
@@ -28,6 +29,7 @@ export interface ProgressTileFreshness {
 }
 
 export interface ProgressTileModel {
+  comparison?: ProgressComparison;
   subjectId: string;
   displayName: string;
   badge: ProgressTileBadge | null;
@@ -123,6 +125,7 @@ export function buildProgressTiles(
       (entry) => entry.subjectId === subject.subjectId,
     );
     return {
+      comparison: buildProgressComparison(view, subject.subjectId),
       subjectId: subject.subjectId,
       displayName: subject.displayName,
       badge: tileBadge(view.scores, subject.subjectId, view.childName),

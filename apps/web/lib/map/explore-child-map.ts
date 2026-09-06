@@ -24,7 +24,6 @@ import {
   type TaxonomyTopic,
 } from "@homa/taxonomy";
 
-import { chartMonthsForScore, displayMonths } from "./trajectory-format";
 
 /**
  * The explore_child_map query engine: read-only questions over the child's
@@ -166,7 +165,7 @@ function unknownTopic(topicId: string) {
   };
 }
 
-function subjectMap(
+export function exploreSubjectMap(
   context: ExploreChildContext,
   subjectId: string,
 ) {
@@ -181,7 +180,6 @@ function subjectMap(
   const score = scores.subjects.find(
     (entry) => entry.subjectId === subjectId,
   );
-  const chartMonths = score ? chartMonthsForScore(score) : null;
 
   const ladder = [...subject.items]
     .sort((a, b) => a.typicalMonths - b.typicalMonths)
@@ -225,15 +223,12 @@ function subjectMap(
     displayName: subject.displayName,
     exposureBased: subject.exposureBased,
     position: score?.position ?? "not_mapped",
-    chartReads:
-      chartMonths !== null && score
-        ? `${displayMonths(chartMonths, score.beyondScale)} mo`
-        : null,
+    frontierDeltaMonths: score?.frontierDeltaMonths ?? null,
     observations: score?.observations ?? 0,
     ladder,
     domains,
     note:
-      "The ladder is the anchored measurement spine (typicalMonths are cited norms). Domains summarize the teaching graph; use ready_next or topic for detail. Teaching windows are typical teaching ages, never deadlines.",
+      "The ladder lists catalog anchors. frontierDeltaMonths is signed internal scoring data, not text printed on the web chart. Use the canonical comparison receipt for the displayed positive estimate and its evidence. Domains summarize the teaching graph; use ready_next or topic for detail. Teaching windows are typical teaching ages, never deadlines.",
   };
 }
 
@@ -535,7 +530,7 @@ export function exploreChildMap(
 ): Record<string, unknown> {
   switch (query.query) {
     case "subject_map":
-      return subjectMap(context, query.subjectId);
+      return exploreSubjectMap(context, query.subjectId);
     case "topic":
       return topicDetail(context, query.topicId);
     case "ready_next":

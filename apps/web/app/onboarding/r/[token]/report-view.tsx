@@ -28,6 +28,8 @@ import type { SubjectLessonSummary } from "../../../../lib/subject-lessons/types
 import { Logo } from "../../../../components/brand/Logo";
 import { DoorLink } from "../../../../components/billing/door-link";
 import { ReportLockOffer } from "../../../../components/billing/report-lock-offer";
+import { ProgressComparisonReading } from "../../../../components/progress/progress-comparison";
+import type { ReportComparisons } from "../../../../lib/child-progress/report-comparison";
 import {
   SAMPLE_REPORT_TRIAL_LINE,
   TRIAL_GATE_CTA,
@@ -73,6 +75,7 @@ export interface ReportNarrativeView {
 export interface ReportViewData {
   token: string;
   scores: MapScores;
+  comparisons?: ReportComparisons;
   bankVersion: string;
   generatedAt: string;
   childName: string;
@@ -204,7 +207,7 @@ export function ReportView({
    * and used to get a circular device hint. Defaults keep the
    * signed-in viewers receive the current-week Planner handoff; a
    * token-link viewer keeps the plain tokenized month link. */
-  viewerActions?: { call: boolean; month: boolean; lesson: boolean; planner?: boolean };
+  viewerActions?: { call: boolean; month: boolean; lesson: boolean; planner?: boolean; progress?: boolean };
 }) {
   const report = data;
   const inApp = context === "app";
@@ -219,6 +222,7 @@ export function ReportView({
   const editable = !sample && !mirror;
   const staleness = reportStaleness(report.birthMonth, report.generatedAt);
   const scores = report.scores.subjects;
+  const savedComparisons = report.comparisons?.status === "available" ? report.comparisons : null;
   const byId = new Map(scores.map((score) => [score.subjectId, score]));
   const ordered: SubjectScore[] = [
     ...report.scores.strengthOrder.map((id) => byId.get(id)).filter((s): s is SubjectScore => Boolean(s)),
@@ -473,6 +477,7 @@ export function ReportView({
   // places to take it.
   const renderSubjectRow = (score: SubjectScore) => {
         const domain = getMapSubject(score.subjectId);
+        const comparison = savedComparisons?.subjects.find(subject => subject.subjectId === score.subjectId);
         const line = subjectLine(score, report.childName);
         const subjectText = generatedPiece(
           `subject.${score.subjectId}`,
@@ -511,15 +516,16 @@ export function ReportView({
         );
         return (
           <details key={score.subjectId} id={`subject-${score.subjectId}`} className="quiet-report__subject group">
-            <summary className="quiet-report__subject-summary flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
+            <summary className="quiet-report__subject-summary grid cursor-pointer list-none grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-2 gap-y-2 p-4 sm:flex sm:gap-3 [&::-webkit-details-marker]:hidden">
               <span
-                className="quiet-report__status flex-shrink-0 whitespace-nowrap px-3 py-1"
+                className="quiet-report__status col-span-3 w-fit flex-shrink-0 whitespace-nowrap px-3 py-1"
                 style={badgeStyle}
               >
                 {line.badge}
               </span>
               <span className="quiet-report__subject-name min-w-0 flex-1">
                 {domain?.displayName}
+                {comparison?.displayLabel ? <span className="mt-1 block whitespace-normal text-sm font-normal leading-relaxed">{comparison.displayLabel}</span> : null}
               </span>
               <span className="flex-shrink-0 text-right">
                 {/* Speaks only when it adds information beyond the
@@ -549,6 +555,16 @@ export function ReportView({
               </span>
             </summary>
             <div className="quiet-report__subject-body">
+              {comparison && savedComparisons ? (
+                <div className="mb-5">
+                  <ProgressComparisonReading comparison={comparison} timeZone={savedComparisons.timeZone} />
+                </div>
+              ) : !sample ? (
+                <div className="mb-5 space-y-2 text-sm leading-relaxed text-body">
+                  <p>The saved basis for this report&apos;s comparison is unavailable. Today&apos;s answers have not been used to fill it in.</p>
+                  {!mirror && viewerActions.progress ? <Link className="underline" href={`/app/${report.childId}/progress?subject=${score.subjectId}`}>See current Progress</Link> : null}
+                </div>
+              ) : null}
               {/* 1. What this subject is, in plain words. */}
               <p className="quiet-report__subject-copy">{domain?.whatItIs}</p>
 
@@ -556,7 +572,7 @@ export function ReportView({
               {subjectAnswers.length > 0 ? (
                 <>
                   <p className="quiet-report__detail-label mt-5">
-                    Questions I asked {"\u00b7"} your answers
+                    {!sample && !savedComparisons ? "Current checklist answers" : <>Questions I asked {"\u00b7"} your answers</>}
                   </p>
                   <ReceiptsList
                     childId={report.childId}
@@ -564,6 +580,10 @@ export function ReportView({
                     editable={editable}
                   />
                 </>
+              ) : comparison && comparison.observations > 0 ? (
+                <p className="quiet-report__subject-copy mt-4 quiet-report__subject-copy--muted">
+                  The saved evidence for this comparison appears above. This report has no checklist answers to show here.
+                </p>
               ) : (
                 <p className="quiet-report__subject-copy mt-4 quiet-report__subject-copy--muted">
                   No answers here yet. A few would fill this subject in.

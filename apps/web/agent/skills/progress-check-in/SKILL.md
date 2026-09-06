@@ -85,6 +85,13 @@ or unknown area that the evidence supports. State the returned stop reason:
 the sitting limit, the bank's coverage, no useful question, or the parent's
 choice to stop. A bank limit describes the questions, not the child.
 
+Keep the scope of each saved statement when summarizing: alternatives,
+conditions, help, and uncertainty still apply. An easily answer to 'counts
+to 100, by ones or by tens' supports that statement, not both methods
+independently (the September 6 hosted check-in summary failure). If the
+parent did not identify which alternative applies, preserve the alternative
+or quote the saved statement. An unanswered question remains unanswered.
+
 When mixedEvidence is true, explain that the current observations describe
 different skills and do not support one ordered ability level. The check-in
 stops because those observations do not give a useful single direction for

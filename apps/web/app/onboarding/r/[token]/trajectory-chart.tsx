@@ -544,7 +544,7 @@ export function TrajectoryChart({
                   className="quiet-trajectory__swatch"
                   style={{ background: colorFor(subject.subjectId) }}
                 />
-                <span className="quiet-trajectory__subject-name">{subject.name}</span>
+                <span className="quiet-trajectory__subject-name">{subject.name}{opensPanel && doorRow?.comparisonLabel ? <span className="mt-1 block whitespace-normal text-sm font-normal leading-relaxed">{doorRow.comparisonLabel}</span> : null}</span>
                 {doorRow?.needsConfirm ? (
                   <span className="quiet-trajectory__badge quiet-trajectory__badge--attention">
                     {progressSubjectHeadline("conflict")}

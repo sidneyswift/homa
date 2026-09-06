@@ -30,6 +30,7 @@ import {
 import {
   CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
 } from "../child-progress/postgres-repository-helpers";
+import { buildSavedReportComparisons, type ReportComparisons } from "../child-progress/report-comparison";
 import { foldFamilyDataIntoTx } from "../family-fold";
 import { resolveOnboardingCompletion } from "../onboarding/store";
 import { dashboardPlanFromRow, withAgeTemplates, type DashboardPlan } from "../plan-week";
@@ -1849,6 +1850,7 @@ export async function markRetestEmailed(planId: string): Promise<void> {
 export interface ReportView {
   token: string;
   scores: MapScores;
+  comparisons: ReportComparisons;
   bankVersion: string;
   generatedAt: string;
   childName: string;
@@ -2023,6 +2025,14 @@ export async function getReportByToken(
       token: string;
       scores: MapScores;
       bank_version: string;
+      scorer_version: string | null;
+      scored_birth_date: string | null;
+      scored_age_months: number | null;
+      saved_projection: unknown;
+      projection_bank_version: string | null;
+      projection_version: string | null;
+      projection_date: string | null;
+      projected_at: string | null;
       generated_at: string;
       viewed_at: string | null;
       history: ScoreSnapshot[];
@@ -2037,7 +2047,15 @@ export async function getReportByToken(
       us_state: string | null;
     }[]
   >`
-    select r.token, r.scores, r.bank_version, r.generated_at::text as generated_at,
+    select r.token, r.scores, r.bank_version,
+           to_char(r.generated_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as generated_at,
+           r.scorer_version, to_char(r.scored_birth_date, 'YYYY-MM-DD') as scored_birth_date,
+           r.scored_age_months, live.projection as saved_projection,
+           live.bank_version as projection_bank_version, live.projection_version,
+           live.projection_date::text as projection_date,
+           to_char(live.projected_at at time zone 'UTC',
+                   'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as projected_at,
            r.viewed_at::text as viewed_at, r.history, r.narrative, r.narrative_meta,
            c.id as child_id, c.name as child_name,
            to_char(c.birth_month, 'YYYY-MM-DD') as birth_month, c.profile,
@@ -2045,6 +2063,9 @@ export async function getReportByToken(
     from public.child_reports r
     join public.children c on c.id = r.child_id
     join public.families f on f.id = c.family_id
+    left join public.child_progress_live live
+      on live.child_id = r.child_id and live.family_id = f.id
+     and live.projected_at = r.generated_at
     where r.token = ${token} and r.revoked_at is null and f.status <> 'deleted'
   `;
   const row = rows[0];
@@ -2055,9 +2076,20 @@ export async function getReportByToken(
     await sql`update public.child_reports set viewed_at = now() where token = ${token}`;
   }
 
-  const answerRows = await sql<{ question_id: string; answer: MapAnswer }[]>`
+  const comparisons = buildSavedReportComparisons({
+    childId: row.child_id, scores: row.scores, generatedAt: row.generated_at,
+    bankVersion: row.bank_version, scorerVersion: row.scorer_version,
+    scoredBirthDate: row.scored_birth_date, scoredAgeMonths: row.scored_age_months,
+    projection: row.saved_projection, projectionBankVersion: row.projection_bank_version,
+    projectionVersion: row.projection_version, projectionDate: row.projection_date,
+    projectedAt: row.projected_at,
+  });
+  const answerRows = comparisons.status === "available" ? [] : await sql<{ question_id: string; answer: MapAnswer }[]>`
     select question_id, answer from public.child_answers where child_id = ${row.child_id}
   `;
+  const answers = comparisons.status === "available"
+    ? comparisons.answers
+    : answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer }));
 
   const siblingRows = await sql<
     { id: string; name: string; birth_month: string; answered: string; has_report: boolean }[]
@@ -2095,6 +2127,7 @@ export async function getReportByToken(
   return {
     token: row.token,
     scores: row.scores,
+    comparisons,
     bankVersion: row.bank_version,
     generatedAt: row.generated_at,
     childName: row.child_name,
@@ -2105,7 +2138,7 @@ export async function getReportByToken(
     familyId: row.family_id,
     childId: row.child_id,
     firstView,
-    answers: answerRows.map((entry) => ({ itemId: entry.question_id, answer: entry.answer })),
+    answers,
     history,
     eras,
     narrative: row.narrative,

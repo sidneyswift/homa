@@ -118,9 +118,9 @@ clipped fragments are just a different machine tic.
   time unless that exact fact appears in the facts. Do not add a
   diagnosis-adjacent explanation, a developmental generalization, or a
   comparison to another child.
-- When a subject carries `numberIsFloor: true`, the evidence ran beyond this
-  checklist's coverage. You may say the checklist ends before the evidence,
-  without giving a number or comparing the child to an age.
+- `numberIsFloor` is presentation data, not evidence that the checklist ran
+  out of questions. Leave numeric limits to the page and describe only the
+  concrete saved skills (the display-cap failure in gh#1097).
 - Say "progress report", never "map". Say "subject", never "domain". If you
   name the chart colors, they are yellow for clear strengths, green for solid
   footing, and blue for something growing right now.

@@ -61,7 +61,7 @@ function topicWithHardPrerequisite(): {
 }
 
 describe("subject_map", () => {
-  it("joins the child's answers onto the anchored ladder with the chart figure", () => {
+  it("joins the child's answers onto the anchored ladder with the signed scoring frontier", () => {
     const result = run(
       { query: "subject_map", subjectId: "math" },
       {
@@ -72,7 +72,7 @@ describe("subject_map", () => {
       },
     ) as {
       position: string;
-      chartReads: string | null;
+      frontierDeltaMonths: number | null;
       ladder: Array<{ itemId: string; childStatus: string; frontier: boolean }>;
       domains: Array<{ domainId: string; checklistAnswers: number }>;
     };
@@ -87,9 +87,9 @@ describe("subject_map", () => {
     assert.equal(ladderById.get("math.counts-past-20")?.childStatus, "not_yet");
     assert.equal(ladderById.get("math.makes-10")?.childStatus, "no_evidence");
     // A 60-month-old confirmed at the 42-month anchor reads growing, and
-    // the chart figure is the same signed number the parent's chart shows.
+    // the signed frontier remains distinct from visible positive comparison copy.
     assert.equal(result.position, "growing");
-    assert.match(result.chartReads ?? "", /^-\d+ mo$/u);
+    assert.equal(result.frontierDeltaMonths, -18);
     assert.ok(result.ladder.some((rung) => rung.frontier));
     const counting = result.domains.find(
       (domain) => domain.domainId === "counting-cardinality",
@@ -101,9 +101,9 @@ describe("subject_map", () => {
     const result = run(
       { query: "subject_map", subjectId: "spanish" },
       { answers: [{ itemId: "spanish.understands-words", answer: "easily" }] },
-    ) as { exposureBased: boolean; chartReads: string | null };
+    ) as { exposureBased: boolean; frontierDeltaMonths: number | null };
     assert.equal(result.exposureBased, true);
-    assert.equal(result.chartReads, null);
+    assert.equal(result.frontierDeltaMonths, null);
   });
 
   it("fails closed on a made-up subject", () => {

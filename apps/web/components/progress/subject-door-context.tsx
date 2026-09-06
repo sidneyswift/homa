@@ -24,6 +24,8 @@ export interface SubjectDoorRow {
   subjectId: string;
   displayName: string;
   needsConfirm: boolean;
+  /** Live web comparison only, from the canonical view rather than an archive. */
+  comparisonLabel?: string | null;
 }
 
 export const SubjectDoorContext = createContext<SubjectDoor | null>(null);

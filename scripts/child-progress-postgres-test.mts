@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import postgres from "postgres";
 
 import { assertDeeperProgressPostgres } from "./deeper-progress-postgres-contract";
+import { assertReportNarrativePostgres } from "../apps/web/lib/map/report-narrative-postgres-contract";
 
 import type { ProgressCheckInRecord } from "../apps/web/lib/child-progress/types";
 
@@ -267,6 +268,7 @@ const prerequisiteSql = `
     name text not null,
     birth_month date not null,
     context jsonb not null default '{}'::jsonb,
+    profile jsonb not null default '{}'::jsonb,
     -- Mirrors the real schema's composite target, so lesson_recordings
     -- below can carry the same (child_id, family_id) cascade it has in
     -- production rather than a weaker stand-in.
@@ -605,6 +607,12 @@ const prerequisiteSql = `
     source text,
     answered_at timestamptz not null default now(),
     primary key (child_id, question_id)
+  );
+  create table public.child_plans (
+    child_id uuid not null,
+    subject_id text not null,
+    plan jsonb not null,
+    progress jsonb not null default '{}'::jsonb
   );
   create table public.child_reports (
     child_id uuid primary key,
@@ -7014,7 +7022,10 @@ async function main(): Promise<void> {
     );
     await runAdapterAssertions({ socketDir, port, username });
     const deeperSql = postgres({host: socketDir, port, database, username, max: 4, prepare: false});
-    try { await assertDeeperProgressPostgres(deeperSql); }
+    try {
+      await assertDeeperProgressPostgres(deeperSql);
+      await assertReportNarrativePostgres(deeperSql);
+    }
     finally { await deeperSql.end({timeout: 1}); }
   } catch (error) {
     primaryFailure = error;

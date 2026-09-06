@@ -13,6 +13,7 @@ import type {
 import { progressSubjectSummary } from "../../lib/child-progress/view-copy";
 import { formatMinutesAsHours } from "../../lib/hours-view";
 import { ProgressChatDoor } from "./progress-chat-door";
+import { ProgressComparisonReading } from "./progress-comparison";
 import { ProgressDomain } from "./progress-domain";
 import type { ProgressConflictActions } from "./progress-topic-row";
 import { requestConflictResolution } from "./resolve-conflict-request";
@@ -151,6 +152,7 @@ export function ProgressDetailPanel({
         </div>
 
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-4">
+          {tile?.comparison ? <ProgressComparisonReading comparison={tile.comparison} timeZone={timeZone} /> : null}
           {subject.domains.map((domain) => (
             <ProgressDomain
               key={domain.domainId}

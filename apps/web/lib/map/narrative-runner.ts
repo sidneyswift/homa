@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import {
   validateNarrative,
   validatePlanNarrative,
@@ -25,6 +27,7 @@ import {
   getReportNarrativeSource,
   storePlanNarrative,
   storeReportNarrative,
+  type ReportNarrativeClaim,
 } from "./narrative-store";
 
 /**
@@ -48,7 +51,11 @@ export async function runReportNarrative(childId: string, familyId?: string): Pr
   const source = await getReportNarrativeSource(childId, familyId);
   if (!source) return;
 
-  const claim = writingMeta();
+  const claim: ReportNarrativeClaim = {
+    ...writingMeta(),
+    generationId: randomUUID(),
+    reportGeneratedAt: source.reportGeneratedAt,
+  };
   if (!(await claimReportNarrative(source.familyId, childId, claim))) return;
 
   const facts = buildReportFacts(source);
@@ -78,12 +85,14 @@ export async function runReportNarrative(childId: string, familyId?: string): Pr
         ? { failReason: `gate: ${JSON.stringify(verdicts.rejected).slice(0, 400)}` }
         : {}),
     };
-    await storeReportNarrative(
+    const published = await storeReportNarrative(
       source.familyId,
       childId,
       verdicts.failed ? null : generated.value,
       meta,
+      claim,
     );
+    if (!published) return;
 
     if (verdicts.failed) {
       await emitMapEvent("map.narrative_fallback", {
@@ -105,12 +114,13 @@ export async function runReportNarrative(childId: string, familyId?: string): Pr
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown";
-    await storeReportNarrative(source.familyId, childId, null, {
+    const published = await storeReportNarrative(source.familyId, childId, null, {
       ...claim,
       status: "failed",
       generatedAt: new Date().toISOString(),
       failReason: message.slice(0, 400),
-    });
+    }, claim);
+    if (!published) return;
     await emitMapEvent("map.narrative_fallback", {
       family_id: source.familyId,
       child_id: childId,

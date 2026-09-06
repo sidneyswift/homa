@@ -116,6 +116,7 @@ export function ProgressMap({
                   </span>
                 ) : null}
               </span>
+              {tile.comparison?.displayLabel ? <span className="text-sm text-body">{tile.comparison.displayLabel}</span> : null}
               {tile.freshness ? (
                 <span className="flex items-center gap-1.5 font-mono text-[0.66rem] text-subtle">
                   <span
