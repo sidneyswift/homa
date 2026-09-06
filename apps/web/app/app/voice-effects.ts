@@ -11,6 +11,24 @@ export interface VoiceEffectContext {
 
 const PREFIX = "voice-effects:";
 
+/** Web offers a report control beside the ongoing voice conversation. The
+ * native report sheet is not open here, so this exact delivery effect needs
+ * web-specific wording. Other outcomes keep the agent's authored reply. */
+export function webVoiceOutputForDisplay(
+  output: VoiceHomaBridgeOutput,
+): VoiceHomaBridgeOutput {
+  if (!output.ok) return output;
+  const reportReady = output.effects.some((effect) => {
+    if (effect.toolName !== "open_progress_report") return false;
+    const receipt = effect.output as { opened?: unknown; childId?: unknown } | null;
+    return receipt?.opened === true && typeof receipt.childId === "string" &&
+      receipt.childId.length > 0;
+  });
+  return reportReady
+    ? { ...output, spokenReply: "Your report is ready. Use Open report in our chat to see it." }
+    : output;
+}
+
 export function voiceEffectMessageId(context: VoiceEffectContext): string {
   return `${PREFIX}${encodeURIComponent(context.sessionId)}:${context.sourceSequence}`;
 }

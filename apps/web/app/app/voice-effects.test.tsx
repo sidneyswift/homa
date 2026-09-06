@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import type { VoiceHomaBridgeOutput, VoiceHomaEffect } from "../../lib/voice/homa-bridge";
 import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
-import { appendVoiceEffects, voiceEffectPresentation } from "./voice-effects";
+import { appendVoiceEffects, voiceEffectPresentation, webVoiceOutputForDisplay } from "./voice-effects";
 import { VoiceEffectsView } from "./voice-effects-view";
 import { spokenTurnMessage } from "./voice-transcript";
 
@@ -34,6 +34,35 @@ function view(effects: VoiceHomaEffect[], canAnswerOutLoud = true, currentReques
 }
 
 describe("web voice effect rendering", () => {
+  it("projects a successful report control without changing receipts or continuation state", () => {
+    const original: VoiceHomaBridgeOutput = {
+      ...output([hours, { callId: "report", toolName: "open_progress_report", output: {
+        opened: true, childId: "child-one",
+      } }]),
+      spokenReply: "Your report is on screen.",
+      sessionId: "eve-one",
+      sessionState: { sessionId: "eve-one", streamIndex: 9, continuationToken: "next" },
+    };
+    const projected = webVoiceOutputForDisplay(original);
+    assert.equal(projected.spokenReply, "Your report is ready. Use Open report in our chat to see it.");
+    assert.equal(projected.ok, original.ok);
+    assert.equal(projected.sessionId, original.sessionId);
+    assert.equal(projected.effects, original.effects);
+    assert.equal(projected.sessionState, original.sessionState);
+    assert.equal(original.spokenReply, "Your report is on screen.");
+  });
+
+  it("leaves unrelated, refused, and failed results unchanged", () => {
+    for (const original of [
+      output([hours]),
+      output([{ callId: "report", toolName: "open_progress_report", output: { opened: false, childId: "child-one" } }]),
+      output([{ callId: "report", toolName: "open_progress_report", output: { opened: true } }]),
+      { ...output([{ callId: "report", toolName: "open_progress_report", output: { opened: true, childId: "child-one" } }]), ok: false },
+    ]) {
+      assert.equal(webVoiceOutputForDisplay(original), original);
+    }
+  });
+
   it("deduplicates within a batch and on replay while retaining distinct source turns", () => {
     const first = appendVoiceEffects([], output([hours, hours]), context, 10);
     const replay = appendVoiceEffects(first, output([hours]), context, 20);
