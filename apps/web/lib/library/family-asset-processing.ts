@@ -3,7 +3,7 @@ import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
 import { fetchFamilyAssetBytes } from "./family-asset-bytes";
-import { readFamilyPdf } from "./family-pdf-reader";
+import { readFamilyPdf, type FamilyPdfDocument } from "./family-pdf-reader";
 import { FAMILY_ASSET_PROCESSING_BUDGET_MS, FAMILY_PDF_READ_BUDGET_MS, FAMILY_PDF_EXTRACTION_VERSION } from "./family-asset-read-contract";
 import { embedText } from "../learning/embeddings";
 import { mapDb } from "../map/db";
@@ -262,10 +262,14 @@ function clipExtractedText(text: string): string {
 async function extractPdfText(asset: ClaimedFamilyAsset, signal: AbortSignal): Promise<FamilyAssetTextExtraction> {
   const document = await readFamilyPdf(asset, { startOrdinal: 1, maxPages: 8,
     maxChars: FAMILY_ASSET_PROCESSING_MAX_CHARS, maxUncachedOcr: 3, signal });
+  return familyPdfTextForIngestion(document);
+}
+
+export function familyPdfTextForIngestion(document: FamilyPdfDocument): FamilyAssetTextExtraction {
   if (!document.ok) return document;
   const text = clipExtractedText(document.segments.filter(page => page.state === "readable" || page.state === "partial")
     .map(page => `[Page ${page.ordinal}]\n${page.text}`).join("\n"));
-  return text ? { ok: true, text, coverageNote: `Homa organized the Library details from PDF pages ${document.segments.map(page => page.ordinal).join(", ")} of ${document.totalSegments}.${document.nextCursor !== null ? " The remaining pages have not been read." : ""}${document.truncated ? " Some content was incomplete." : ""}` }
+  return text ? { ok: true, text, coverageNote: `Homa organized the Library details from PDF pages ${document.segments.map(page => page.ordinal).join(", ")} of ${document.totalSegments}.${document.nextCursor !== null ? " The remaining pages have not been read." : ""}${document.truncated ? " Some content was incomplete." : ""}${document.stoppedAt ? ` Homa could not finish reading PDF page ${document.stoppedAt.ordinal}.` : ""}` }
     : { ok: false, reason: "unreadable" };
 }
 

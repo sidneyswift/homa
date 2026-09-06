@@ -3,7 +3,7 @@ import { deflateSync } from "node:zlib";
 import { createCanvas } from "@napi-rs/canvas";
 
 /** Synthetic source bytes used by deterministic tests and isolated OCR evals. */
-export function curriculumPdfFixture(pages: Array<{ text?: string; textRepeats?: number; compressed?: boolean; rawContent?: Buffer; contentStreams?: Buffer[]; scan?: string; imageCopies?: number; width?: number; imageWidth?: number; imageHeaderWidth?: number; rotation?: number }>, encrypted = false, paddingBytes = 0): Buffer {
+export function curriculumPdfFixture(pages: Array<{ text?: string; textRepeats?: number; compressed?: boolean; rawContent?: Buffer; contentStreams?: Buffer[]; scan?: string; scanJpeg?: { bytes: Buffer; width: number; height: number }; imageCopies?: number; width?: number; imageWidth?: number; imageHeaderWidth?: number; rotation?: number }>, encrypted = false, paddingBytes = 0): Buffer {
   const objects: Array<Buffer | Buffer[]> = [];
   const reserve = () => { objects.push(Buffer.alloc(0)); return objects.length; };
   const set = (id: number, value: string | Buffer | Buffer[]) => { objects[id - 1] = typeof value === "string" ? Buffer.from(value) : value; };
@@ -14,13 +14,13 @@ export function curriculumPdfFixture(pages: Array<{ text?: string; textRepeats?:
     const id = reserve(); const contents = reserve(); pageIds.push(id);
     const images: number[] = [];
     let drawing = "";
-    if (page.scan !== undefined) {
+    if (page.scan !== undefined || page.scanJpeg) {
       const canvas = createCanvas(1224, 1584);
       const context = canvas.getContext("2d");
       context.fillStyle = "white"; context.fillRect(0, 0, 1224, 1584);
       context.fillStyle = "black"; context.font = "28px sans-serif";
-      page.scan.split("\n").forEach((line, index) => context.fillText(line, 75, 105 + index * 48));
-      const jpeg = canvas.toBuffer("image/jpeg", 90);
+      page.scan?.split("\n").forEach((line, index) => context.fillText(line, 75, 105 + index * 48));
+      const jpeg = page.scanJpeg?.bytes ?? canvas.toBuffer("image/jpeg", 90);
       if (page.imageHeaderWidth ?? page.imageWidth) {
         for (let index = 0; index < jpeg.length - 9; index++) {
           if (jpeg[index] === 0xff && (jpeg[index + 1] === 0xc0 || jpeg[index + 1] === 0xc2)) {
@@ -32,8 +32,8 @@ export function curriculumPdfFixture(pages: Array<{ text?: string; textRepeats?:
       canvas.width = 0; canvas.height = 0;
       for (let index = 0; index < (page.imageCopies ?? 1); index++) {
         const image = reserve(); images.push(image);
-        set(image, [Buffer.from(`<< /Type /XObject /Subtype /Image /Width ${page.imageWidth ?? 1224} /Height 1584 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`), jpeg, Buffer.from("\nendstream")]);
-        drawing += `q 612 0 0 792 0 0 cm /Scan${index} Do Q\n`;
+        set(image, [Buffer.from(`<< /Type /XObject /Subtype /Image /Width ${page.imageWidth ?? page.scanJpeg?.width ?? 1224} /Height ${page.scanJpeg?.height ?? 1584} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`), jpeg, Buffer.from("\nendstream")]);
+        drawing += `q ${page.width ?? 612} 0 0 792 0 0 cm /Scan${index} Do Q\n`;
       }
     }
     if (page.text) drawing += `BT /F1 16 Tf 50 730 Td (${page.text.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)")}) Tj ET\n`.repeat(page.textRepeats ?? 1);
