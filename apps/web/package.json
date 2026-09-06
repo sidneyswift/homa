@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node ../../scripts/dev-oidc-preflight.mjs",
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node ../../scripts/chromium-tracing-check.mjs",
     "start": "next start",
     "test:chat-two-tab": "playwright test e2e/chat-storage-two-tab.spec.ts --workers=1",
     "lint": "eslint --cache --cache-location .next/cache/eslint/.eslintcache --cache-strategy content",

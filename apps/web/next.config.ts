@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 import { withEve } from "eve/next";
 
 const isVercelPreview = process.env.VERCEL_ENV === "preview";
+const chromiumArchives = [
+  "../../node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**",
+];
 
 const nextConfig: NextConfig = {
   // Pull requests are already required to pass the repository-wide tsc
@@ -28,7 +31,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@homa/core", "@homa/taxonomy"],
   // The materials studio's renderer (lib/materials/render-page.ts): the
   // Chromium binary and puppeteer must stay real node_modules, never
-  // bundled, so the .br binaries survive to the deployed function.
+  // bundled. The runtime .br archives also need the explicit traces below.
   // pdfjs-dist and @napi-rs/canvas joined 2026-07-28 when the state pack
   // route became the first NEXT lambda to import the raster stack (the
   // eve build always kept them external via agent.ts
@@ -64,9 +67,13 @@ const nextConfig: NextConfig = {
     // lambda shipped without them. The glob points at the real .pnpm
     // package directory and matches plain files only, never a
     // symlinked directory, which is what broke packaging before.
-    "/api/compliance/pack": [
-      "../../node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**",
-    ],
+    "/api/compliance/pack": chromiumArchives,
+    "/api/compliance/filing": chromiumArchives,
+    // Bring back rebuilds a saved version's PDF in this server action.
+    // Externalizing Chromium alone does not trace its runtime archives.
+    "/app/binder": chromiumArchives,
+    // The founder mirror mounts the same Binder component and actions.
+    "/admin/families/*/screen": chromiumArchives,
     "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],
     "/api/voice/curriculum/insights": ["./agent/curriculum-writer.md"],
     // The learning loops' extraction prompt: the cron route runs the
