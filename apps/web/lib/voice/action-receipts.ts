@@ -48,6 +48,8 @@ const familyEventSnapshotSchema = z.object({
 });
 
 const hoursSnapshotSchema = z.object({
+  // Legacy receipts without a category only match rows whose category is null.
+  customLabel: z.string().max(40).nullable().optional(),
   childId: z.string().uuid().nullable(),
   subject: z.string().min(1).max(80),
   minutes: z.number().int().min(1).max(600),
@@ -450,6 +452,7 @@ type PlannerActivityIdentitySnapshot = z.infer<typeof plannerActivityIdentitySch
 
 interface StoredHoursRow {
   id: string;
+  custom_label: string | null;
   child_id: string | null;
   subject: string;
   minutes: number;
@@ -477,7 +480,8 @@ function sameHoursRows(
       && row.minutes === snapshot.minutes
       && row.happened_on === snapshot.happenedOn
       && row.source === snapshot.source
-      && row.note === snapshot.note;
+      && row.note === snapshot.note
+      && row.custom_label === (snapshot.customLabel ?? null);
   });
 }
 
@@ -551,7 +555,7 @@ async function lockPlannerReceiptState(input: {
   const hoursRows = expectedHoursIds.length === 0
     ? []
     : await input.tx<StoredHoursRow[]>`
-        select id, child_id, subject, minutes, happened_on::text,
+        select id, child_id, subject, custom_label, minutes, happened_on::text,
                source, note
         from public.hours_log
         where family_id = ${input.familyId}
@@ -651,6 +655,7 @@ export async function undoVoiceAction(input: {
             and child_id is not distinct from ${after.childId}
             and subject = ${after.subject} and minutes = ${after.minutes}
             and happened_on = ${after.happenedOn} and source = ${after.source}
+            and custom_label is not distinct from ${after.customLabel ?? null}
             and note is not distinct from ${after.note}
           returning id
         `;
@@ -801,7 +806,7 @@ export async function undoVoiceAction(input: {
         const hoursRows = hoursIds.length === 0
           ? []
           : await tx<StoredHoursRow[]>`
-              select id, child_id, subject, minutes, happened_on::text,
+              select id, child_id, subject, custom_label, minutes, happened_on::text,
                      source, note
               from public.hours_log
               where family_id = ${input.familyId}

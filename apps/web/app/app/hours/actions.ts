@@ -1,100 +1,80 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-import { getMyFamily } from "../../../lib/family";
+import { hoursEditContextSchema, hoursMutationError, type HoursEditContext } from "../../../lib/hours-edit";
 import { isHoursSubject } from "../../../lib/hours-model";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
-/**
- * Planner Hours server actions (CG-02, issue #174). hours_log already
- * carries a real member-scoped RLS policy set (migration #37 plus the
- * update policy this ticket adds), so edits and deletes go straight
- * through the caller's own Supabase client, the same posture as
- * addChildAction in /app/settings. familyId always comes from the
- * caller's OWN membership (getMyFamily), never from the form, and every
- * write re-scopes by it in addition to RLS (tenancy law defense in
- * depth: a forged entryId can only ever miss, never touch another
- * family's row).
- */
+export interface HoursActionState { error: string | null }
 
-export interface HoursActionState {
-  error: string | null;
+export async function getHoursEntryEditContextAction(entryId: string): Promise<
+  | { context: HoursEditContext; error: null }
+  | { context: null; error: string }
+> {
+  if (!z.string().uuid().safeParse(entryId).success) return { context: null, error: "That entry couldn't be found." };
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.rpc("get_hours_entry_edit_context", { target_entry_id: entryId });
+    if (error) return { context: null, error: "That record couldn't load. Try again." };
+    const parsed = hoursEditContextSchema.safeParse(data);
+    return parsed.success && parsed.data.entry.id === entryId
+      ? { context: parsed.data, error: null }
+      : { context: null, error: hoursMutationError(data) ?? "That record couldn't load. Try again." };
+  } catch {
+    return { context: null, error: "That record couldn't load. Check your connection and try again." };
+  }
 }
 
-function parseMinutes(raw: FormDataEntryValue | null): number | { error: string } {
-  const minutes = Number(raw);
+export async function updateHoursEntryAction(entryId: string, revision: string, formData: FormData): Promise<HoursActionState> {
+  if (!z.string().uuid().safeParse(entryId).success) return { error: "That entry couldn't be found." };
+  const subject = String(formData.get("subject") ?? "");
+  if (!isHoursSubject(subject)) return { error: "Pick one of the listed subjects." };
+  const minutes = Number(formData.get("minutes"));
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > 600) {
     return { error: "Minutes needs to be a whole number between 1 and 600." };
   }
-  return minutes;
+  const note = String(formData.get("note") ?? "").trim();
+  const customLabel = String(formData.get("customLabel") ?? "").trim();
+  if (Array.from(note).length > 200) return { error: "Keep the note to 200 characters or fewer." };
+  if (Array.from(customLabel).length > 40) return { error: "Keep the category name to 40 characters or fewer." };
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.rpc("update_hours_entry", {
+      target_entry_id: entryId, target_revision: revision,
+      target_subject: subject, target_minutes: minutes,
+      target_custom_label: customLabel || null, target_note: note || null,
+    });
+    if (error) return { error: "That change couldn't be confirmed. Reopen the record to check before trying again." };
+    const failure = hoursMutationError(data);
+    if (failure) return { error: failure };
+    const receipt = z.object({ result: z.literal("applied"), entryId: z.string().uuid() }).safeParse(data);
+    if (!receipt.success || receipt.data.entryId !== entryId) return { error: "The change couldn't be confirmed. Reopen the record to check." };
+    revalidatePath("/app/planner");
+    revalidatePath("/app/hours");
+    return { error: null };
+  } catch {
+    return { error: "That change couldn't be confirmed. Check your connection and reopen the record." };
+  }
 }
 
-export async function updateHoursEntryAction(
-  entryId: string,
-  _prev: HoursActionState,
-  formData: FormData,
-): Promise<HoursActionState> {
-  const family = await getMyFamily();
-  if (!family) return { error: "Set up your family first." };
-
-  const subjectRaw = String(formData.get("subject") ?? "");
-  if (!isHoursSubject(subjectRaw)) {
-    return { error: "Pick one of the listed subjects." };
+export async function deleteHoursEntryAction(entryId: string, revision: string): Promise<HoursActionState> {
+  if (!z.string().uuid().safeParse(entryId).success) return { error: "That entry couldn't be found." };
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.rpc("delete_hours_entry", {
+      target_entry_id: entryId, target_revision: revision,
+    });
+    if (error) return { error: "The removal couldn't be confirmed. Reopen the record to check before trying again." };
+    const failure = hoursMutationError(data);
+    if (failure) return { error: failure };
+    const receipt = z.object({ result: z.literal("applied"), entryId: z.string().uuid() }).safeParse(data);
+    if (!receipt.success || receipt.data.entryId !== entryId) return { error: "The change couldn't be confirmed. Reopen the record to check." };
+    revalidatePath("/app/planner");
+    revalidatePath("/app/hours");
+    return { error: null };
+  } catch {
+    return { error: "The removal couldn't be confirmed. Check your connection and reopen the record." };
   }
-  const minutes = parseMinutes(formData.get("minutes"));
-  if (typeof minutes !== "number") return { error: minutes.error };
-  const noteRaw = String(formData.get("note") ?? "").trim();
-  if (noteRaw.length > 200) {
-    return { error: "Keep the note under 200 characters." };
-  }
-  const customLabelRaw = String(formData.get("customLabel") ?? "").trim();
-  if (customLabelRaw.length > 40) {
-    return { error: "Keep the category name under 40 characters." };
-  }
-  const customLabel = customLabelRaw || null;
-
-  const supabase = await createSupabaseServerClient();
-  // familyId scopes the update on top of RLS: a forged entryId from
-  // another family simply matches zero rows here, same shape as every
-  // other /app write. .select("id") back so a silent zero-row match
-  // (RLS filtered it out, or the row never existed) reports honestly
-  // instead of a false "saved" -- PostgREST returns 200 with an empty
-  // array for a well-formed update that touched nothing, it does not
-  // error.
-  const { data, error } = await supabase
-    .from("hours_log")
-    .update({ subject: subjectRaw, custom_label: customLabel, minutes, note: noteRaw || null })
-    .eq("id", entryId)
-    .eq("family_id", family.id)
-    .select("id");
-  if (error) {
-    console.error("hours_log update failed:", error.message);
-    return { error: "That didn't save. Nothing else changed; try again in a minute." };
-  }
-  if (!data || data.length === 0) {
-    return { error: "That entry couldn't be found. Refresh the page and try again." };
-  }
-  revalidatePath("/app/planner");
-  revalidatePath("/app/hours");
-  return { error: null };
-}
-
-export async function deleteHoursEntryAction(entryId: string): Promise<HoursActionState> {
-  const family = await getMyFamily();
-  if (!family) return { error: "Set up your family first." };
-
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
-    .from("hours_log")
-    .delete()
-    .eq("id", entryId)
-    .eq("family_id", family.id);
-  if (error) {
-    console.error("hours_log delete failed:", error.message);
-    return { error: "That didn't delete. Try again in a minute." };
-  }
-  revalidatePath("/app/planner");
-  revalidatePath("/app/hours");
-  return { error: null };
 }

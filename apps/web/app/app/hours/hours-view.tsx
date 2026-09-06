@@ -182,7 +182,7 @@ export function HoursView({
   ) : null;
 
   return (
-    <div data-brand-surface="hours" data-brand-fixture="quiet-authority-v1">
+    <div data-hours-focus-anchor tabIndex={-1} data-brand-surface="hours" data-brand-fixture="quiet-authority-v1">
       {embedded ? (
         <p className={`mb-4 text-sm ${MUTED}`}>
           {focusKid

@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import { scopedToViewContext, type HoursEntry } from "../../../lib/hours-view";
-import { HoursEntryOverlay } from "./hours-entry-overlay";
+import { HoursEntryForm, HoursEntryOverlay } from "./hours-entry-overlay";
 import { HoursView, type HoursKid } from "./hours-view";
 
 /**
@@ -71,6 +71,10 @@ function renderOverlay(entryToEdit: HoursEntry): string {
   );
 }
 
+function renderForm(entryToEdit: HoursEntry): string {
+  return renderToStaticMarkup(<HoursEntryForm context={{ result: "ready", revision: "a".repeat(32), entry: entryToEdit, activity: null }} pending={null} onSave={() => {}} onClose={() => {}} />);
+}
+
 describe("HoursView", () => {
   it("explains the selected child's shared time in embedded Hours", () => {
     const rows = [entry(), entry({ id: "shared", childId: null, childName: null, minutes: 5 }),
@@ -99,7 +103,7 @@ describe("HoursView", () => {
     const overlay = renderOverlay(entry());
     assert.match(overlay, /quiet-artifact-backdrop/u);
     assert.match(overlay, /quiet-artifact-dialog/u);
-    assert.match(overlay, /quiet-action quiet-action--primary/u);
+    assert.match(renderForm(entry()), /quiet-action quiet-action--primary/u);
     assert.doesNotMatch(overlay, /clay|bg-brand|text-brand|Schibsted|Hanken|Caveat/u);
   });
 
@@ -153,7 +157,8 @@ describe("HoursView", () => {
 
   it("keeps source provenance behind Edit instead of competing with the activity", () => {
     assert.doesNotMatch(renderView([entry({ source: "call" })]), /Phone call/);
-    assert.match(renderOverlay(entry({ source: "chat" })), /Added after you mentioned it in Chat\./);
+    assert.match(renderOverlay(entry({ source: "chat" })), /Saved in your school-time record\./);
+    assert.doesNotMatch(renderOverlay(entry({ source: "chat" })), /mentioned it in Chat/);
     assert.match(renderOverlay(entry({ source: "sms" })), /Added after you mentioned it by text\./);
     assert.match(renderOverlay(entry({ source: "call" })), /Added after you mentioned it on a phone call\./);
   });
@@ -192,12 +197,11 @@ describe("HoursView", () => {
 
 describe("HoursEntryOverlay", () => {
   it("opens prefilled with the entry's own subject, minutes, and note", () => {
-    const html = renderOverlay(
-      entry({ subject: "science", minutes: 90, note: "Volcano experiment" }),
-    );
-    assert.match(html, /role="dialog"/);
-    assert.match(html, /aria-modal="true"/);
-    assert.match(html, /<h2 id="hours-entry-title"[^>]*>Edit recorded time<\/h2>/);
+    const html = renderForm(entry({ subject: "science", minutes: 90, note: "Volcano experiment" }));
+    const overlay = renderOverlay(entry());
+    assert.match(overlay, /role="dialog"/);
+    assert.match(overlay, /aria-modal="true"/);
+    assert.match(overlay, /<h2 id="hours-entry-title"[^>]*>Edit recorded time<\/h2>/);
     assert.match(html, /<option value="science" selected="">Science<\/option>/);
     assert.match(html, /name="minutes"[^>]*value="90"/);
     assert.match(html, /Volcano experiment/);
@@ -207,15 +211,17 @@ describe("HoursEntryOverlay", () => {
   it("names who the block is for, or the whole family", () => {
     const forKid = renderOverlay(entry({ childName: "Maya" }));
     assert.match(forKid, /For Maya\./);
-    assert.match(forKid, /Added after you mentioned it in Chat\./);
+    assert.match(forKid, /Saved in your school-time record\./);
 
     const familyWide = renderOverlay(entry({ childId: null, childName: null }));
     assert.match(familyWide, /For the whole family\./);
   });
 
-  it("offers delete without immediately confirming it", () => {
+  it("loads authenticated scope before offering any write", () => {
     const html = renderOverlay(entry());
-    assert.match(html, />Delete this entry<\/button>/);
+    assert.match(html, /Loading the full record/);
+    assert.doesNotMatch(html, /Delete recorded time/);
+    assert.doesNotMatch(html, /name="minutes"/);
     assert.doesNotMatch(html, /can&#x27;t be undone/);
   });
 });

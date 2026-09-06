@@ -141,6 +141,16 @@ export interface HoursFilter {
   subject: HoursSubject | null;
 }
 
+/** Day and Week use the same recorded-day and child-plus-family scope. */
+export function recordedHoursForDate(
+  entries: readonly HoursEntry[],
+  date: string,
+  childId: string | null,
+): HoursEntry[] {
+  return entries.filter((entry) => entry.happenedOn === date
+    && (childId === null || entry.childId === null || entry.childId === childId));
+}
+
 export function isDefaultFilter(filter: HoursFilter): boolean {
   return filter.subject === null;
 }

@@ -184,6 +184,7 @@ export default defineBoundedTool({
               after: {
                 childId: input.childId ?? null,
                 subject: input.subject,
+                customLabel,
                 minutes: input.minutes,
                 happenedOn,
                 source: "chat",

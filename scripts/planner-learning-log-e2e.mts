@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 
 import postgres from "postgres";
 
+import { runHoursEditContract } from "./hours-edit-postgres-contract.mts";
+
 import {
   EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_PARENT_USER_ID,
@@ -576,6 +578,7 @@ try {
 
   console.log("set_planner_learning_activity_time PostgreSQL contract passed.");
 
+  await runHoursEditContract(sql);
   console.log("Planner learning log PostgreSQL contract passed.");
 } finally {
   await sql.end({ timeout: 1 });
