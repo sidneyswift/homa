@@ -1,11 +1,4 @@
-import {
-  getMapItem,
-  getMapSubject,
-  isInScoredRange,
-  scoreMap,
-  type MapAnswer,
-  type SubjectScore,
-} from "@homa/core";
+import type { MapAnswer } from "@homa/core";
 
 import {
   FAMILY_MEMORY_CHAR_BUDGET,
@@ -16,7 +9,6 @@ import {
 import { ageInMonths, formatChildAge } from "./child-age";
 import { isProfileNonAnswer } from "./profile-quality";
 import { mapDb } from "./map/db";
-import { chartMonthsForScore, displayMonths } from "./map/trajectory-format";
 import { effectiveTimeZone } from "./time-zone";
 
 /**
@@ -103,121 +95,6 @@ function describeChild(child: ChildRow, now: Date): string {
   return `- ${child.name} (${formatChildAge(months)}, ${months} months; child id ${child.id})${detail}`;
 }
 
-/** The highest-anchor item each subject has an "easily" answer for: the
- * honest floor. The scorer's strongestObservedStatement also counts
- * "getting there" items, which must never render as something the child
- * does easily (that mislabel is the miscalibration this snapshot
- * exists to prevent). */
-function strongestEasilyBySubject(answers: ChildAnswerRow[]): Map<string, string> {
-  const best = new Map<string, { anchor: number; statement: string }>();
-  for (const row of answers) {
-    if (row.answer !== "easily") continue;
-    const found = getMapItem(row.question_id);
-    if (!found) continue;
-    const current = best.get(found.subject.id);
-    if (!current || found.item.typicalMonths > current.anchor) {
-      best.set(found.subject.id, {
-        anchor: found.item.typicalMonths,
-        statement: found.item.statement,
-      });
-    }
-  }
-  return new Map([...best].map(([subjectId, value]) => [subjectId, value.statement]));
-}
-
-/** One compact line per mapped subject: the reading, the exact figure
- * the parent's trajectory chart shows (same value law and formatter as
- * the chart, so the number she is looking at is always in front of the
- * agent), plus the concrete floor (does easily) and working edge, which
- * is exactly what difficulty decisions need. */
-function describeSubjectScore(
-  score: SubjectScore,
-  easilyStatement: string | undefined,
-): string | null {
-  if (score.position === "not_mapped") return null;
-  const subjectName = getMapSubject(score.subjectId)?.displayName ?? score.subjectId;
-  let reading: string;
-  if (score.position === "ahead" && score.monthsAhead !== null) {
-    reading = score.beyondScale
-      ? `ahead about ${score.monthsAhead} months or more`
-      : `ahead about ${score.monthsAhead} months`;
-  } else if (score.position === "on_track") {
-    reading = "on track";
-  } else {
-    reading = "growing";
-  }
-  const parts = [`${subjectName}: ${reading}`];
-  const chartMonths = chartMonthsForScore(score);
-  if (chartMonths !== null && !score.exposureBased) {
-    parts.push(
-      `chart reads ${displayMonths(chartMonths, score.beyondScale)} mo`,
-    );
-  }
-  if (easilyStatement) {
-    parts.push(`does easily: ${easilyStatement}`);
-  }
-  if (score.frontierStatement) {
-    parts.push(`working edge: ${score.frontierStatement}`);
-  }
-  return `- ${parts.join(" · ")}`;
-}
-
-const NO_READINGS_LINE =
-  "no checklist answers yet. When a skill level matters, ask the parent one short question instead of guessing from age.";
-
-/**
- * The per-child skill snapshot (2026-07-10 counting-page lesson): the
- * checklist and recorded observations, scored with the same deterministic
- * scorer as the report, rendered so the agent can never again pick a
- * difficulty its own data contradicts. Every child gets their own
- * section; a child's reading never informs a sibling's.
- */
-function renderMapSnapshot(
-  children: ChildRow[],
-  answers: ChildAnswerRow[],
-  now: Date,
-): string {
-  const inRange = children.filter((child) =>
-    isInScoredRange(ageInMonths(child.birth_month, now)),
-  );
-  if (inRange.length === 0) return "";
-
-  const byChild = new Map<string, ChildAnswerRow[]>();
-  for (const answer of answers) {
-    const list = byChild.get(answer.child_id) ?? [];
-    list.push(answer);
-    byChild.set(answer.child_id, list);
-  }
-
-  const sections = inRange.map((child) => {
-    const months = ageInMonths(child.birth_month, now);
-    const childAnswers = byChild.get(child.id) ?? [];
-    const scores = scoreMap(
-      months,
-      childAnswers.map((row) => ({ itemId: row.question_id, answer: row.answer })),
-    );
-    const easilyBySubject = strongestEasilyBySubject(childAnswers);
-    const bySubject = new Map(scores.subjects.map((score) => [score.subjectId, score]));
-    const lines = scores.strengthOrder
-      .map((subjectId) => bySubject.get(subjectId))
-      .filter((score): score is SubjectScore => score !== undefined)
-      .map((score) => describeSubjectScore(score, easilyBySubject.get(score.subjectId)))
-      .filter((line): line is string => line !== null);
-    if (lines.length === 0) return `${child.name}: ${NO_READINGS_LINE}`;
-    return `${child.name}:\n${lines.join("\n")}`;
-  });
-
-  // Guidance renders BEFORE the per-child sections on purpose: the whole
-  // snapshot is character-bounded from the front, so a big family may lose
-  // trailing data lines but never the rules for reading them.
-  return `
-
-What the map knows (checklist answers plus observations you recorded, scored like the report):
-"chart reads" is the exact figure on that child's Progress trajectory chart: months between their confirmed working edge and what is typical for their age. A minus number means the working edge sits that many months earlier than typical; it locates where growth is happening, it is never a deficit or a grade. When the parent asks about a number she sees on Progress or a report, this is that number: confirm it, then explain it through the working edge. Never tell her you cannot see her child's progress data.
-Ground every difficulty choice (materials, activities, suggestions) in this snapshot and the saved memories. A subject with no reading for the skill you are targeting means ask the parent one short calibrating question first. Each child's snapshot stands alone: never set one child's level from a sibling's, and never compare siblings to each other.
-${sections.join("\n")}`;
-}
-
 /** Loads the context rows with reads pinned to the given familyId. */
 export async function loadFamilyContextPinned(
   familyId: string,
@@ -278,7 +155,7 @@ export function renderFamilyContext(
   rows: FamilyContextRows,
   options?: RenderFamilyContextOptions,
 ): string {
-  const { family, children, memories, answers, members } = rows;
+  const { family, children, memories, members } = rows;
   const childNamesById = new Map(children.map((child) => [child.id, child.name]));
   const focusChild = options?.focusChildId
     ? children.find((child) => child.id === options.focusChildId) ?? null
@@ -341,11 +218,7 @@ export function renderFamilyContext(
         500,
       ),
     })),
-    mapSnapshot:
-      boundedContextField(
-        renderMapSnapshot(contextChildren, answers, now),
-        4_000,
-      ) ?? "",
+    mapSnapshot: "Numeric and skill readings come from canonical Progress data supplied separately. If that data or a requested child or subject is missing, use explore_child_map subject_map; do not infer no evidence or calculate from compatibility answers.",
     savedMemories: {
       usedCharacters: pinnedSelection.pinnedChars,
       budgetCharacters: FAMILY_MEMORY_CHAR_BUDGET,

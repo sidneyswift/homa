@@ -81,7 +81,8 @@ export const manageChildProgressToolInputSchema = z
     answer: progressResponseAnswerSchema
       .optional()
       .describe("The parent's reply to the current check-in question, translated faithfully."),
-    reason: z.enum(["topic_change", "explicit_stop"]).optional(),
+    reason: z.enum(["topic_change", "explicit_stop"]).optional()
+      .describe("Only for pause_check_in. Omit reason for stop_check_in and every other action; stop_check_in needs only action and checkInId."),
     conflictId: uuidSchema.optional(),
     operationId: uuidSchema
       .optional()

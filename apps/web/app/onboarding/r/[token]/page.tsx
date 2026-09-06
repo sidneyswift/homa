@@ -5,6 +5,7 @@ import { freeReportSubjects } from "@homa/core";
 
 import { Logo } from "../../../../components/brand/Logo";
 import { familyWallCheckout, reportLockEnabled, wallEnabled } from "../../../../lib/billing/wall";
+import { liveProgressEnabled } from "../../../../lib/child-progress/flag";
 import { narrativeEnabled } from "../../../../lib/map/narrative-flag";
 import { requireFamilyWithActor } from "../../../../lib/map/session";
 import { getStateRequirements } from "../../../../lib/map/state-requirements";
@@ -152,6 +153,7 @@ export default async function ReportPage({ params }: { params: Promise<{ token: 
         month: viewerIsReportFamily,
         lesson: viewerIsAccountOwner,
         planner: viewerIsSignedInMember,
+        progress: viewerIsSignedInMember && liveProgressEnabled() && reportLock === null,
       }}
     />
   );

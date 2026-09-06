@@ -184,7 +184,10 @@ describe("subject lesson pinned family context", () => {
     assert.equal(callerLoads, 0);
     assert.equal(pinnedLoads, 1);
     assert.equal(focusedChildId, "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
-    assert.equal(markdown, "family context");
+    assert.ok(typeof markdown === "string");
+    assert.ok(markdown.startsWith("family context\n\n"));
+    assert.match(markdown, /Canonical Progress could not be checked this turn/);
+    assert.match(markdown, /unavailable context is not missing evidence/);
   });
 });
 

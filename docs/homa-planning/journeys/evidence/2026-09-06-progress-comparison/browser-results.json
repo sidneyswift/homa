@@ -1,0 +1,185 @@
+{
+  "scope": "Actual full ReportView and receipt/method disclosure components rendered in Chromium at 390/320px with actual Tailwind CSS and local fonts. Synthetic saved projection/calculator evidence. Only Next navigation/link adapters stubbed. Report-viewed POST terminates at local zero-effect sink. No Auth, production, model, external request or database; membership decisions independently covered by actual token page test.",
+  "checks": [
+    "saved numeric subject label visible 390",
+    "numeric label has useful width and at most two lines 390",
+    "subject name stays one line 390",
+    "saved own evidence date visible 390",
+    "saved evidence derivation rendered 390",
+    "saved answer drawer renders catch not skip 390",
+    "no horizontal overflow 390",
+    "method disclosure actually opens 390",
+    "comparison citations only public https 390",
+    "saved numeric subject label visible 320",
+    "numeric label has useful width and at most two lines 320",
+    "subject name stays one line 320",
+    "saved own evidence date visible 320",
+    "saved evidence derivation rendered 320",
+    "saved answer drawer renders catch not skip 320",
+    "no horizontal overflow 320",
+    "method disclosure actually opens 320",
+    "comparison citations only public https 320",
+    "desktop preserves horizontal badge and subject composition",
+    "legacy-public honest missing saved basis",
+    "legacy-public no borrowed numeric comparison",
+    "legacy-public compatibility drawer labeled current",
+    "legacy-public current Progress link authorization",
+    "legacy-owner honest missing saved basis",
+    "legacy-owner no borrowed numeric comparison",
+    "legacy-owner compatibility drawer labeled current",
+    "legacy-owner current Progress link authorization",
+    "legacy-mirror honest missing saved basis",
+    "legacy-mirror no borrowed numeric comparison",
+    "legacy-mirror compatibility drawer labeled current",
+    "legacy-mirror current Progress link authorization",
+    "taxonomy comparison displayed",
+    "taxonomy evidence not falsely absent",
+    "no unsafe gs citations",
+    "zero external requests",
+    "zero browser errors",
+    "only bounded local view beacons"
+  ],
+  "errors": [],
+  "blocked": [],
+  "status": "passed",
+  "passed": 37,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/map/report-viewed"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/map/report-viewed"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/map/report-viewed"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/map/report-viewed"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/map/report-viewed"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/browser-fixture.js"
+    },
+    {
+      "method": "GET",
+      "path": "/dm.woff2"
+    },
+    {
+      "method": "GET",
+      "path": "/eb.ttf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/map/report-viewed"
+    }
+  ],
+  "beacons": 6
+}

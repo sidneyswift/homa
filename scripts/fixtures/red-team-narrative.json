@@ -1,5 +1,5 @@
 {
-  "promptVersion": "2026.08.15n",
+  "promptVersion": "2026.09.06a",
   "narrative": {
     "note": "Thanks for sharing what you are seeing at home.",
     "subjects": {
@@ -22,14 +22,13 @@
     },
     "drawers": {
       "math": "Try this: count the stairs together, touching each one.",
-      "phonics": "Try this: play sound i-spy in the car or bath.",
-      "writing": "Try this: write their name big in marker for them to trace. Use marker and paper.",
-      "language": "Try this: invite them to tell someone what happened at the park.",
-      "science": "Try this: guess sink or float before dropping five small things in a bowl. Use bowl and five small objects.",
+      "phonics": "Try this: play sound i-spy naming a starting sound.",
+      "language": "Try this: tell someone what happened at the park.",
+      "science": "Try this: guess sink or float before dropping each item in. Use bowl of water and five small things.",
+      "art": "Try this: draw how a song feels with fast scribbles or soft colors.",
       "gross_motor": "Try this: race down the hallway as different animals.",
-      "fine_motor": "Try this: snip paper strips into confetti with child-safe scissors. Use child-safe scissors and paper strips.",
-      "executive_function": "Try this: play freeze dance. Use music.",
-      "computer_science": "Try this: let them program you across the room with exact steps."
+      "self_care": "Try this: button an old shirt around a cushion against the timer. Use old shirt with buttons.",
+      "computer_science": "Try this: give you exact step-by-step instructions to follow across the room."
     }
   },
   "gateContext": {

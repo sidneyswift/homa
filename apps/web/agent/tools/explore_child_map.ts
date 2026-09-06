@@ -9,13 +9,9 @@ import {
   resolveAgentAccess,
   type AgentAccess,
 } from "../../lib/agent-db";
-import { ageInMonths } from "../../lib/child-age";
-import {
-  exploreChildMap,
-  type ExploreAnswerRow,
-  type ExploreChildMapQuery,
-} from "../../lib/map/explore-child-map";
-import { mapDb } from "../../lib/map/db";
+import { getChildProgressView } from "../../lib/child-progress/runtime";
+import { readCanonicalChildMap } from "../../lib/map/canonical-explore";
+import type { ExploreChildMapQuery } from "../../lib/map/explore-child-map";
 
 /**
  * Read-only exploration of one child's learning map: the anchored
@@ -26,7 +22,7 @@ import { mapDb } from "../../lib/map/db";
  *
  * Tenancy: familyId comes from session auth only; the model-supplied
  * childId is re-verified inside THAT family on both access paths
- * (caller RLS, pinned server reads), the same wall as every other tool.
+ * (caller RLS child gate, canonical server read pinned to the authenticated family), the same wall as every other tool.
  */
 
 const topicIdSchema = z
@@ -57,7 +53,7 @@ const exploreToolInputSchema = z
         "search_topics",
       ])
       .describe(
-        "subject_map (needs subjectId): the checklist ladder with the child's answers, chart figure, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words.",
+        "subject_map (needs subjectId): the checklist ladder with the child's answers, canonical comparison and credited evidence, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words.",
       ),
     childId: z
       .string()
@@ -102,79 +98,9 @@ const exploreQuerySchema = z.discriminatedUnion("query", [
     .strict(),
 ]);
 
-interface LoadedChild {
-  name: string;
-  birthMonth: string;
-  answers: ExploreAnswerRow[];
-}
-
-/** Loads the child + answers under the caller's own RLS. */
-async function loadChildViaCaller(
-  access: Extract<AgentAccess, { mode: "caller" }>,
-  childId: string,
-): Promise<LoadedChild | null> {
-  const child = await access.db
-    .from("children")
-    .select("id, name, birth_month")
-    .eq("id", childId)
-    .eq("family_id", access.familyId)
-    .maybeSingle();
-  if (child.error || !child.data) return null;
-  // RLS walls these rows to the caller's own children; the inner-join
-  // family filter is the usual belt (same shape as lib family context).
-  const answers = await access.db
-    .from("child_answers")
-    .select("question_id, answer, children!inner()")
-    .eq("child_id", childId)
-    .eq("children.family_id", access.familyId);
-  if (answers.error) return null;
-  return {
-    name: child.data.name as string,
-    birthMonth: child.data.birth_month as string,
-    answers: (answers.data ?? []).map((row) => ({
-      itemId: row.question_id as string,
-      answer: row.answer as ExploreAnswerRow["answer"],
-    })),
-  };
-}
-
-/** Loads the child + answers on the server connection pinned to the
- * session's family (SMS, email, dispatch); the explicit family predicate
- * is the wall, as in lib/agent-pinned. */
-async function loadChildPinned(
-  familyId: string,
-  childId: string,
-): Promise<LoadedChild | null> {
-  const sql = mapDb();
-  const children = await sql<{ name: string; birth_month: string }[]>`
-    select name, to_char(birth_month, 'YYYY-MM-DD') as birth_month
-    from public.children
-    where id = ${childId} and family_id = ${familyId}
-  `;
-  const child = children[0];
-  if (!child) return null;
-  const answers = await sql<{ question_id: string; answer: string }[]>`
-    select a.question_id, a.answer
-    from public.child_answers a
-    join public.children c on c.id = a.child_id
-    where a.child_id = ${childId} and c.family_id = ${familyId}
-  `;
-  return {
-    name: child.name,
-    birthMonth: child.birth_month,
-    answers: answers.map((row) => ({
-      itemId: row.question_id,
-      answer: row.answer as ExploreAnswerRow["answer"],
-    })),
-  };
-}
-
-const WRONG_CHILD_NOTE =
-  "That child id is not in this family. Use a child id from the family context block.";
-
 export default defineBoundedTool({
   description:
-    "Explore one child's learning map, read-only. Use it to answer where a child is, what is missing, what comes next and why; the query values describe themselves. It never records anything; save evidence with manage_child_progress.",
+    "Explore one child's learning map, read-only. For interpreting its comparison or evidence, load progress-reading. Use it to answer where a child is, what is missing, what comes next and why; the query values describe themselves. It never records anything; save evidence with manage_child_progress.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: exploreToolInputSchema,
@@ -203,21 +129,17 @@ export default defineBoundedTool({
       };
     }
 
-    const child =
-      access.mode === "caller"
-        ? await loadChildViaCaller(access, input.childId)
-        : await loadChildPinned(access.familyId, input.childId);
-    if (!child) {
-      return { error: "unknown_child", note: WRONG_CHILD_NOTE };
+    // Preserve the caller-JWT child authorization check before the shared
+    // canonical reader, which uses an explicitly family-pinned server read.
+    if (access.mode === "caller") {
+      const child = await access.db.from("children").select("id")
+        .eq("id", input.childId).eq("family_id", access.familyId).maybeSingle();
+      if (child.error) return { error: "progress_unavailable", note: "The current Progress reading could not be checked. Try again." };
+      if (!child.data) return { error: "unknown_child", note: "That child is not available in this family. Use an authenticated child ID." };
     }
-
-    return exploreChildMap(
-      {
-        childName: child.name,
-        ageMonths: ageInMonths(child.birthMonth, new Date()),
-        answers: child.answers,
-      },
-      parsedQuery.data as ExploreChildMapQuery,
+    return readCanonicalChildMap(
+      { familyId: access.familyId, childId: input.childId, query: parsedQuery.data as ExploreChildMapQuery },
+      { getView: getChildProgressView },
     );
   },
 });

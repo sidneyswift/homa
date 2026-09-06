@@ -307,13 +307,13 @@ export async function resolveFamilyContextInstructionMarkdown(
             `Validated ability id: ${focusedAbility.ability.id}. Treat this as the focus of the parent's next question, not as a new progress answer.`,
           ].join("\n")
         : "";
-    let progressContext = "";
+    let progressContext = "Canonical Progress could not be checked this turn. Use explore_child_map before quoting a current reading; unavailable context is not missing evidence.";
     if (attributes?.familyId) {
       try {
-        progressContext = await dependencies.loadProgressContext({
+        progressContext = (await dependencies.loadProgressContext({
           familyId: attributes.familyId,
-          childIds: rows.children.map((child) => child.id),
-        });
+          childIds: [...rows.children].sort((a, b) => Number(b.id === (attributes.viewChildId ?? attributes.childId)) - Number(a.id === (attributes.viewChildId ?? attributes.childId))).map((child) => child.id),
+        })) || progressContext;
       } catch (error) {
         // The established family context remains available when the new
         // progress read model is temporarily unavailable.

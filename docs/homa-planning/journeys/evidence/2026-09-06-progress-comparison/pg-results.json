@@ -1,0 +1,23 @@
+{
+  "scope": "Actual getReportByToken declaration and SQL against a synthetic minimal PostgreSQL 17 schema, actual saved projection/scorer helper. This is query syntax, join/snapshot and loader integration proof, not a full production schema or RLS claim.",
+  "checks": [
+    "own local cluster attested",
+    "actual SQL returns valid saved comparison",
+    "drawer answers use exact saved basis despite incompatible current compatibility rows",
+    "available comparison skips separate compatibility query",
+    "saved comparison uses old inferred evidence date",
+    "concurrent committed rescore does not mix old comparison with new drawer",
+    "concurrent report revision retains original statement snapshot",
+    "next actual loader call sees new canonical basis",
+    "foreign-family projection excluded",
+    "microsecond revision mismatch excluded",
+    "legacy missing saved basis remains unavailable",
+    "legacy compatibility remains available separately",
+    "revoked report returns null",
+    "deleted family returns null",
+    "unknown token returns null"
+  ],
+  "status": "passed",
+  "passed": 15,
+  "clusterRemoved": true
+}

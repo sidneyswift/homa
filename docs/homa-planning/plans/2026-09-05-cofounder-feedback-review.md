@@ -63,6 +63,7 @@ All failures below were escalated September 6. The discovery evidence is histori
 | Binder Delete overflows and old revision can return | Three-width layout reproduction; actual deleted chain plus selector replay | F21, [#1091](https://github.com/sidneyswift/homa/issues/1091) | FIXED `1834875f` and `dce9f1c5`, F21 live receipt |
 | Web realtime requests cannot reach family tools | Actual request/route replay rejects missing session and sequence | F23, [#1103](https://github.com/sidneyswift/homa/issues/1103) | Bridge FIXED `df9d5860`, F23 live receipt; physical speech unverified |
 | Month preview misses recurring/multi-child calendar conflicts | Active query omits canonical recurrence and child-link expansion | F24, [#1104](https://github.com/sidneyswift/homa/issues/1104) | FIXED `ff3258bf`, F24 live receipt |
+| Late report writer can overwrite a newer score revision | Active claim/write query trace; actual PostgreSQL race reproduction | [#1124](https://github.com/sidneyswift/homa/issues/1124) | Local fix verified, not shipped; escalated September 6, 21:57 UTC |
 | Print tool promises native sheet on channels without a consumer | Active tool/consumer contract trace | F26, [#1105](https://github.com/sidneyswift/homa/issues/1105) | Open; escalated September 6 |
 
 An issue or merged PR is not a production fix receipt. Each implementation must later record its commit, deployment and live verification. Historical recovery is a separately bounded operation using confirmed source records, never a bulk assumption that every old row is wrong.
@@ -277,6 +278,8 @@ Gross motor's chat window is galloping, hopping and catching. Skipping exists an
 ### F11. Restore meaningful numeric context on mobile web
 
 **Tracking:** [#1097](https://github.com/sidneyswift/homa/issues/1097).
+
+**Verified implementation, not yet shipped:** [Comparison procedure, exact evidence and failed evals](2026-09-06-progress-month-context.md). The current scorer already produces the numeric comparison; the candidate restores it on web with dated credited evidence and honest limits. Deep tracing additionally found stale always-on instructions and a full-report payload mixing saved scores with current answers. Those paths are included in the repair. Passing local checks do not establish live acceptance.
 
 **Expected, R20-21:** the months-ahead comparison that helped the parent understand her child's subject progress. Sidney explicitly confirmed this meaning and authorized implementation on web.
 

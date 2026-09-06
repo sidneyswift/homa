@@ -232,6 +232,7 @@ export function ProgressView({
     subjectId: tile.subjectId,
     displayName: tile.displayName,
     needsConfirm: tile.needsConfirm,
+    comparisonLabel: tile.comparison?.displayLabel ?? null,
   }));
 
   // A child with no subjects and no report has never been assessed, so
