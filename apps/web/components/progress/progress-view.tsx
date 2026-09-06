@@ -166,6 +166,7 @@ export function ProgressView({
   abilitiesExplorer = null,
   hoursMinutesBySubject,
   initialSubjectId,
+  hoursWindowLabel = "this school year",
 }: {
   view: ChildProgressView;
   initialSubjectId?: string;
@@ -205,6 +206,7 @@ export function ProgressView({
    * language) has a real value today, since that is the one Hours
    * subject chosen to line up with a real progress-taxonomy subject. */
   hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
+  hoursWindowLabel?: "this school year" | "all time through today";
 }) {
   const now = new Date();
   const updatedLine = progressUpdatedLine(view, now);
@@ -305,6 +307,7 @@ export function ProgressView({
               timeZone={view.timeZone}
               deeperChecks={deeperChecks}
               hoursMinutesBySubject={hoursMinutesBySubject}
+              hoursWindowLabel={hoursWindowLabel}
             >
               <ReportSnapshot
                 childName={view.childName}
@@ -330,6 +333,7 @@ export function ProgressView({
                 timeZone={view.timeZone}
                 deeperChecks={deeperChecks}
                 hoursMinutesBySubject={hoursMinutesBySubject}
+                hoursWindowLabel={hoursWindowLabel}
               />
             </div>
           </div>

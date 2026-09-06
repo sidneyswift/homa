@@ -37,6 +37,7 @@ export function ProgressMap({
   timeZone,
   deeperChecks,
   hoursMinutesBySubject,
+  hoursWindowLabel = "this school year",
 }: {
   childId: string;
   initialSubjectId?: string;
@@ -48,6 +49,7 @@ export function ProgressMap({
   deeperChecks: boolean;
   /** This school year's Hours minutes, keyed by subject id. Display-only. */
   hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
+  hoursWindowLabel?: "this school year" | "all time through today";
 }) {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(() => subjects.some(subject => subject.subjectId === initialSubjectId) ? initialSubjectId ?? null : null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -140,6 +142,7 @@ export function ProgressMap({
           timeZone={timeZone}
           allowDeeperCheck={deeperChecks}
           hoursMinutes={hoursMinutesBySubject?.[openSubject.subjectId] ?? null}
+          hoursWindowLabel={hoursWindowLabel}
           onClose={closePanel}
         />
       ) : null}

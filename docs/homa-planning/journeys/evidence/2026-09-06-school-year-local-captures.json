@@ -1,0 +1,67 @@
+{
+  "boundary": "Actual v2 HoursView and real visual leaves rendered to static HTML. Unmounted edit overlay replaced by refusal stub; Next Link wrapper is inert. No hydration, Next route, auth, actions, data loading or shell certification. Real compiled app CSS plus exact built DM Sans fonts and local EB Garamond embedded. Fresh offline browser; zero resource requests.",
+  "inputs": {
+    "apps/web/app/globals.css": "771a30e6e1c210a4e40feb9e3acdc69147147de8e4038a7ee52ee1b7ca944f2b",
+    "packages/design/generated/web.css": "66b8738a9721b922417fb3027ab78bcedb5560d71326a9a06f36baddfe5e23e4",
+    "apps/web/components/design/quiet-primitives.css": "c5b80758f4d173052764a19e551a3d302dda15ef2fe2ae019b6ee405ebf6fbde",
+    "apps/web/app/thinking-acts.css": "a2e52193cbb1c1ea5accdf1713abdfb3ea6441cbceed8a63f4a11a02f1127cc1",
+    "apps/web/lib/compliance/deadline-anchors.generated.ts": "abdfde237575e447c9b2a36571183d1da3d7699c8097eb7aeda51fa3b0c8b679",
+    "apps/web/lib/compliance/deadlines.ts": "9299eec80ac59ae95c56e0d6c29719a33d69b47cb5a42913535363e47fa1285a",
+    "apps/web/lib/hours-model.ts": "2e79ef9c4bddf93bbd019b3035068edfca18cd952c2cb3af4a0d5bb0a6d757af",
+    "apps/web/lib/hours-summary.ts": "ad2ecd8be660cc15c29aae8baecb6b7de2866d2a2ded06cfddcd5821c3dd08ec",
+    "apps/web/lib/time-zone.ts": "2bd32f6a54907988534617d92fee8e6868dc51dd402a9b2037785c8b6f1d666a",
+    "apps/web/lib/hours-view.ts": "bf53b9f69472d84d7e6e9b579c8990e80f964d57931671792c76255851405463",
+    "apps/web/components/dashboard/kid-avatar.tsx": "a77af4b48fe25ca825bb8ea52b79a253f4d481f2ad07d9720d46372955ccb302",
+    "apps/web/components/design/QuietAction.tsx": "dd3e04bc0f4f978e3e4ff775ad4da75f94adb9fbd4a58ffadf64408367dc0dff",
+    "apps/web/components/design/QuietFrame.tsx": "f43768fafbf75ace85dab8816b23861ac7094d2530cdcd5bd6ba1df2a7a72982",
+    "apps/web/app/app/hours/hours-view.tsx": "b9a9d0fd61796af539f2a2d7aa6d5efb35e33ae128364f8100d36506446d5e59",
+    "/Users/sidneyswift/Documents/Projects/Sidney/homa/apps/web/.next/static/chunks/2ww5h8k25z88e.css": "c2d6b2ef4fe377b179591560f12ba175b04d5dea11080bf75d722c9ae16b5efa",
+    "/Users/sidneyswift/Documents/Projects/Sidney/homa/apps/web/.next/static/media/c3cb240f9c892514-s.3z_x6eowsw16y.woff2": "219b02c7d8884817d3d6ad4c8771f2c000ce4c5669a67ef4e2e5617ffa25c4cc",
+    "/Users/sidneyswift/Documents/Projects/Sidney/homa/apps/web/.next/static/media/5c285b27cdda1fe8-s.p.2_mbdogr7ni8i.woff2": "468d56b6b25b05b70190b6c233d773f6f1770e8579827ce022a57f03fa8002fb",
+    "apps/web/assets/fonts/quiet-authority/eb-garamond-600-latin.ttf": "b536adfa0f5746cfbd148d8a1a669540366edef2c85c4b49450798a037bd928c"
+  },
+  "cssSha256": "731ae23d1df3764dfda8a77fbda6881802c9040af31c05325dae70a70573db8b",
+  "receipts": [
+    {
+      "name": "configured",
+      "htmlSha256": "a2e21aef4764a9435052ff531f31ad0a51439939252228577e005a2f14cfb2a3",
+      "pngSha256": "7d1421a802c857fba96f8357c3fee428d1e4bc5e5616a88bb191939699ec98ab",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "fontSans": true,
+        "fontDisplay": true,
+        "cards": 2,
+        "text": "THE COMPLIANCE RECORD\n\nHours\n\nHoma records the school time you tell her about. Review or correct it here.\n\nSchool-year totals: Sep 10, 2026 through today.\n\nA\nAvery\nTHIS WEEK\n33m\nTHIS MONTH\n33m\nSCHOOL YEAR\n22m\nB\nBlair\nTHIS WEEK\n5m\nTHIS MONTH\n5m\nSCHOOL YEAR\n5m\nTODAY\n22m\nSecond language\n17m\nAvery\nPracticed greetings together\nEdit\nSecond language\n5m\nWhole family\nFamily counting game in Spanish\nEdit\nYESTERDAY\n11m\nSecond language\n11m\nAvery\nSpanish songs with hand motions\nEdit"
+      }
+    },
+    {
+      "name": "unset",
+      "htmlSha256": "ef94c16d60dac90cda10ef3cbe3afacc037da896edf36e82416967541dc8955f",
+      "pngSha256": "7cd5f10c6d279c1e4c91fd1d19f6472218be88a56969543a2dd956287c7d36d5",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "fontSans": true,
+        "fontDisplay": true,
+        "cards": 2,
+        "text": "All time totals include recorded time through today. Set your school-year start to see school-year totals.\n\nTHE COMPLIANCE RECORD\n\nHours\n\nHoma records the school time you tell her about. Review or correct it here.\n\nA\nAvery\nTHIS WEEK\n33m\nTHIS MONTH\n33m\nALL TIME\n33m\nB\nBlair\nTHIS WEEK\n5m\nTHIS MONTH\n5m\nALL TIME\n5m\nTODAY\n22m\nSecond language\n17m\nAvery\nPracticed greetings together\nEdit\nSecond language\n5m\nWhole family\nFamily counting game in Spanish\nEdit\nYESTERDAY\n11m\nSecond language\n11m\nAvery\nSpanish songs with hand motions\nEdit"
+      }
+    },
+    {
+      "name": "incomplete",
+      "htmlSha256": "e69e02ec5eaf9f933709b623059633627493735140f40c948a6d9abf1b1d0a76",
+      "pngSha256": "5b86999901573e2c7cecc204b1c67d68ecd8f3e933e9b8f1189fc8d7a9901a7c",
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "fontSans": true,
+        "fontDisplay": true,
+        "cards": 0,
+        "text": "Only part of the Hours record loaded. Totals are unavailable. This loading problem hasn't changed your saved entries. Reload the page to try again.\n\nTHE COMPLIANCE RECORD\n\nHours\n\nHoma records the school time you tell her about. Review or correct it here.\n\nTODAY\nSecond language\n17m\nAvery\nPracticed greetings together\nEdit"
+      }
+    }
+  ],
+  "networkRequests": 0,
+  "note": "Local static component evidence, not hosted or hydrated UI. Root inspected all three initial captures and configured/incomplete final captures. Independent reader and interface gates saw fixture-only copy and pixels. A later notice sentence clarifies the read failure did not change saved entries; this receipt binds the final captures."
+}

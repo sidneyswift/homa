@@ -35,6 +35,7 @@ import {
 import { saveFamilyContext } from "../../../lib/map/store";
 import { blobConfigured } from "../../../lib/materials/artifact-store";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import { effectiveTimeZone, zonedDateString } from "../../../lib/time-zone";
 import type { SetupFormState } from "./actions";
 
 /**
@@ -378,15 +379,18 @@ export async function updateHomeschoolAction(
   // is a valid answer (never asked, or cleared); a malformed date is
   // refused with its reason rather than silently dropped, because this
   // becomes a legal deadline in someone's inbox.
-  if (schoolYearRaw.length > 0) {
-    const parsed = parseSchoolYearStart(
-      schoolYearRaw,
-      new Date().toISOString().slice(0, 10),
-    );
-    if (!parsed.ok) return { error: parsed.reason };
-    await setSchoolYearStart(family.id, parsed.value);
+  if (formData.has("school_year_start_on")) {
+    if (schoolYearRaw.length > 0) {
+      const parsed = parseSchoolYearStart(
+        schoolYearRaw,
+        zonedDateString(new Date(), effectiveTimeZone(family.time_zone)),
+      );
+      if (!parsed.ok) return { error: parsed.reason };
+      await setSchoolYearStart(family.id, parsed.value);
+    } else {
+      await setSchoolYearStart(family.id, null);
+    }
   }
-
   // gh#424: the name a superintendent reads, which is not the name Homa
   // greets her with. Blank clears it, and a cleared value means the
   // filing prints a labeled blank rather than falling back to a

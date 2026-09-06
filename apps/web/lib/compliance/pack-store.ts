@@ -79,6 +79,7 @@ const MAX_STATE_PACK_RECORD_ENTRIES = 10_000;
 export async function getStatePackRecords(
   familyId: string,
   schoolYearStartOn: string | null,
+  throughDate: string,
 ): Promise<{ entries: StatePackRecordEntry[]; truncated: boolean }> {
   const sql = mapDb();
   const rows = await sql<{
@@ -98,6 +99,7 @@ export async function getStatePackRecords(
       on c.id = h.child_id and c.family_id = h.family_id
     where h.family_id = ${familyId}
       and (${schoolYearStartOn}::date is null or h.happened_on >= ${schoolYearStartOn}::date)
+      and h.happened_on <= ${throughDate}::date
     order by h.happened_on asc, h.created_at asc, h.id asc
     limit ${MAX_STATE_PACK_RECORD_ENTRIES + 1}
   `;

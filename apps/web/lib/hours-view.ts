@@ -1,7 +1,8 @@
+import { periodStart as hoursPeriodStart } from "./hours-summary";
 import type { HoursLogRow, HoursSource } from "./hours";
 import { HOURS_SUBJECTS, type HoursSubject } from "./hours-model";
 import type { ChildRecord } from "./family";
-import { zonedDateParts, zonedDateString } from "./time-zone";
+import { zonedDateString } from "./time-zone";
 import type { ViewContext } from "./view-context";
 
 /**
@@ -226,34 +227,14 @@ export function groupEntriesByDay(
 
 export type HoursPeriod = "week" | "month" | "schoolYear";
 
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-function isoFromParts(year: number, month: number, day: number): string {
-  return `${year}-${pad(month)}-${pad(day)}`;
-}
-
-/**
- * periodStart(period, now, timeZone): YYYY-MM-DD
- * The first day of the running-total window, in the family's own zone.
- * "schoolYear" is a fixed July 1 convention: state_requirements carries
- * no school-year start date today (deferral #1 above), so this is a
- * documented placeholder good enough for a first running total, not a
- * per-state calendar.
- */
-export function periodStart(period: HoursPeriod, now: Date, timeZone: string): string {
-  const { year, month, day, weekday } = zonedDateParts(now, timeZone);
-  if (period === "week") {
-    const sinceMonday = (weekday + 6) % 7;
-    const date = new Date(Date.UTC(year, month - 1, day - sinceMonday));
-    return isoFromParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
-  }
-  if (period === "month") {
-    return isoFromParts(year, month, 1);
-  }
-  const schoolYearStartYear = month >= 7 ? year : year - 1;
-  return isoFromParts(schoolYearStartYear, 7, 1);
+/** Current windows use the family's timezone and saved school-year anniversary. */
+export function periodStart(
+  period: HoursPeriod,
+  now: Date,
+  timeZone: string,
+  schoolYearStartOn: string | null = null,
+): string | null {
+  return hoursPeriodStart(period === "schoolYear" ? "school_year" : period, zonedDateString(now, timeZone), schoolYearStartOn);
 }
 
 export interface ChildHoursTotals {
@@ -278,18 +259,20 @@ export function computeChildTotals(
   children: readonly { id: string; name: string }[],
   now: Date,
   timeZone: string,
+  schoolYearStartOn: string | null = null,
 ): ChildHoursTotals[] {
-  const weekStart = periodStart("week", now, timeZone);
-  const monthStart = periodStart("month", now, timeZone);
-  const schoolYearStart = periodStart("schoolYear", now, timeZone);
+  const weekStart = periodStart("week", now, timeZone)!;
+  const monthStart = periodStart("month", now, timeZone)!;
+  const schoolYearStart = periodStart("schoolYear", now, timeZone, schoolYearStartOn);
+  const today = zonedDateString(now, timeZone);
   return children.map((child) => {
     let week = 0;
     let month = 0;
     let schoolYear = 0;
     for (const entry of entries) {
       if (entry.childId !== null && entry.childId !== child.id) continue;
-      if (entry.happenedOn < schoolYearStart) continue;
-      schoolYear += entry.minutes;
+      if (entry.happenedOn > today) continue;
+      if (schoolYearStart === null || entry.happenedOn >= schoolYearStart) schoolYear += entry.minutes;
       if (entry.happenedOn >= monthStart) month += entry.minutes;
       if (entry.happenedOn >= weekStart) week += entry.minutes;
     }

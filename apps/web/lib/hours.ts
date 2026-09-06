@@ -1,5 +1,5 @@
 import { isHoursSubject, type HoursSubject } from "./hours-model";
-import { minutesBySubjectForChild, periodStart } from "./hours-summary";
+import { hoursReadIsComplete, minutesBySubjectForChild, resolveHoursWindow } from "./hours-summary";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
@@ -10,10 +10,7 @@ import { createSupabaseServerClient } from "./supabase/server";
  * every other /app reader uses (e.g. findMaterialsCaller).
  */
 
-/** hours_log rows accrue fast across chat, SMS, and phone-call capture
- * (a single call can log several blocks at once); comfortably above
- * what one family logs in a school year before this needs real
- * pagination (M2+ scope, same stopgap posture as the Binder's cap). */
+/** Bounded rows are a preview. Only an exact-count receipt establishes completeness. */
 const MAX_HOURS_ROWS = 3000;
 
 export type HoursSource = "chat" | "sms" | "call";
@@ -64,56 +61,54 @@ function toHoursLogRow(row: RawHoursLogRow): HoursLogRow {
 
 const HOURS_LOG_COLUMNS = "id, child_id, subject, custom_label, minutes, happened_on, source, note";
 
-export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRow[]> {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("hours_log")
-    .select(HOURS_LOG_COLUMNS)
-    .eq("family_id", familyId)
-    .order("happened_on", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(MAX_HOURS_ROWS);
-  if (error) throw new Error(`hours_log read failed: ${error.message}`);
-  return (data ?? []).map((row) => toHoursLogRow(row as RawHoursLogRow));
+export interface HoursLogRead {
+  rows: HoursLogRow[];
+  complete: boolean;
 }
 
-/** The Day, Week, and Month Planner reads only the dates already in view.
- * The full compliance record remains exclusive to the Hours view. */
+async function readHoursLogForFamily(
+  familyId: string,
+  fromDate: string | null,
+  throughDate: string | null,
+): Promise<HoursLogRead> {
+  const supabase = await createSupabaseServerClient();
+  let query = supabase.from("hours_log")
+    .select(HOURS_LOG_COLUMNS, { count: "exact" })
+    .eq("family_id", familyId);
+  if (fromDate !== null) query = query.gte("happened_on", fromDate);
+  if (throughDate !== null) query = query.lte("happened_on", throughDate);
+  const { data, error, count } = await query
+    .order("happened_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(MAX_HOURS_ROWS);
+  if (error) throw new Error(`hours_log read failed: ${error.message}`);
+  const rows = (data ?? []).map((row) => toHoursLogRow(row as RawHoursLogRow));
+  return { rows, complete: hoursReadIsComplete(count, rows.length) };
+}
+
+export async function getHoursLogForFamily(familyId: string): Promise<HoursLogRead> {
+  return readHoursLogForFamily(familyId, null, null);
+}
+
+/** Explicit historical views retain their supplied inclusive range. */
 export async function getHoursLogForFamilyBetween(
   familyId: string,
   fromDate: string,
   toDate: string,
 ): Promise<HoursLogRow[]> {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("hours_log")
-    .select(HOURS_LOG_COLUMNS)
-    .eq("family_id", familyId)
-    .gte("happened_on", fromDate)
-    .lte("happened_on", toDate)
-    .order("happened_on", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(MAX_HOURS_ROWS);
-  if (error) throw new Error(`hours_log bounded read failed: ${error.message}`);
-  return (data ?? []).map((row) => toHoursLogRow(row as RawHoursLogRow));
+  return (await readHoursLogForFamily(familyId, fromDate, toDate)).rows;
 }
 
-/**
- * This child's own school-year minutes, one subject at a time (founder
- * ruling 2026-08-28): a display-only companion figure for the Progress
- * page, never an input to any score. Bounded to the current school
- * year, the same window the compliance report itself uses, so a
- * subject's "time logged" line can't surface a stale figure from a
- * year the child has since moved past.
- */
+/** Display-only Progress time. Incomplete retrieval cannot become a total. */
 export async function getHoursMinutesBySubjectForChild(
   familyId: string,
   childId: string,
   todayIso: string,
+  schoolYearStartOn: string | null,
 ): Promise<Partial<Record<HoursSubject, number>>> {
-  // periodStart only returns null for period "all"; "school_year" always
-  // returns a real date.
-  const schoolYearStart = periodStart("school_year", todayIso) as string;
-  const rows = await getHoursLogForFamilyBetween(familyId, schoolYearStart, todayIso);
-  return minutesBySubjectForChild(rows, childId, null);
+  const window = resolveHoursWindow("school_year", todayIso, schoolYearStartOn);
+  const read = await readHoursLogForFamily(familyId, window.from, window.through);
+  if (!read.complete) throw new Error("Hours total unavailable: incomplete record.");
+  return minutesBySubjectForChild(read.rows, childId, window.from, window.through);
 }

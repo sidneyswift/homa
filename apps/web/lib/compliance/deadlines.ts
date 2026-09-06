@@ -67,7 +67,18 @@ function daysInMonth(year: number, month: number): number {
 function toIso(year: number, month: number, day: number): string {
   const mm = String(month).padStart(2, "0");
   const dd = String(day).padStart(2, "0");
-  return `${year}-${mm}-${dd}`;
+  return `${String(year).padStart(4, "0")}-${mm}-${dd}`;
+}
+
+/** A complete Gregorian YYYY-MM-DD date, without Date normalization. */
+export function isValidDateOnly(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return year >= 1 && month >= 1 && month <= 12
+    && day >= 1 && day <= daysInMonth(year, month);
 }
 
 /** Whole days between two "YYYY-MM-DD" dates, calendar-exact and free of
@@ -151,19 +162,21 @@ export function schoolYearStartFor(
   storedIso: string | null,
   todayIso: string,
 ): string | null {
-  if (!storedIso) return null;
-  const stored = /^(\d{4})-(\d{2})-(\d{2})$/.exec(storedIso.trim());
-  const today = /^(\d{4})-(\d{2})-(\d{2})$/.exec(todayIso.trim());
-  if (!stored || !today) return null;
-  const month = Number(stored[2]);
-  const day = Number(stored[3]);
-  const thisYear = Number(today[1]);
-  for (const year of [thisYear, thisYear - 1]) {
+  const stored = storedIso?.trim() ?? "";
+  const today = todayIso.trim();
+  if (!isValidDateOnly(stored) || !isValidDateOnly(today)) return null;
+  const month = Number(stored.slice(5, 7));
+  const day = Number(stored.slice(8, 10));
+  const thisYear = Number(today.slice(0, 4));
+  // Feb 29 stays Feb 29. The non-leap century gap is eight years,
+  // including a date before Feb 29 in the next leap year.
+  for (let offset = 0; offset <= 8 && thisYear - offset >= 1; offset += 1) {
+    const year = thisYear - offset;
     if (day > daysInMonth(year, month)) continue;
     const candidate = toIso(year, month, day);
-    if (candidate <= todayIso) return candidate;
+    if (candidate <= today) return candidate;
   }
-  return storedIso;
+  return null;
 }
 
 export interface DeadlineInput {

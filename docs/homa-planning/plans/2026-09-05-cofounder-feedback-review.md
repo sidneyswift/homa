@@ -10,7 +10,7 @@ Prepared and reverified September 6, 2026. Owner: Sidney. Review and coordinatio
 
 This document holds intent, evidence and acceptance criteria. GitHub Issues hold live status, priority and ownership. F01-F26 are reading references, not a second tracker. “Implement now” means a bounded authorized slice, not a measured delivery-time promise or a claim that it has shipped.
 
-Implementation receipts are appended under the relevant item and linked evidence file; the original production baseline below remains a dated audit snapshot.
+Each repaired item leads with its current implementation receipt and links to the evidence. Sections labeled audit baseline describe behavior before that repair. The ticket index distinguishes shipped repairs from work still being implemented.
 
 ## Sources and verification standard
 
@@ -44,25 +44,25 @@ Focused deterministic baseline tests passed: **61** across progress selection, c
 
 Remaining physical or end-to-end limits: no installed-native certification, real spoken turn, physical printer output, successful generated owned-lesson journey, or complete-book comprehension has been established. A source-verified defect is labeled as such even when no family incident is matched to it.
 
-## Live failures and new defects to carry into issues
+## Production defects found in the audit
 
-All failures below are **unfixed at this audit snapshot, escalated September 6**. The focused issue split below is filed; existing issue numbers are preserved.
+All failures below were escalated September 6. The discovery evidence is historical; the final column points to the shipped repair or identifies work still open. GitHub remains the live tracker.
 
-| Failure | Evidence | Tracking |
-|---|---|---|
-| Recorded-time correction leaves linked Planner duration stale | Real sandbox save: Hours 11, Planner 10 | F01, [#1092](https://github.com/sidneyswift/homa/issues/1092) |
-| Named book details disappear | Two actual source/tool/row comparisons | F02, [#1093](https://github.com/sidneyswift/homa/issues/1093) |
-| Distinct reading time suppressed | Two separate September 3 30-minute activities collided with an existing literature record; at least 60 minutes absent | F03, [#1090](https://github.com/sidneyswift/homa/issues/1090) |
-| Child/day aggregation merges equal display names; child totals omit shared records in chat | Actual-function replays | F07, [#1095](https://github.com/sidneyswift/homa/issues/1095) |
-| School-year surfaces use different starts | UI July 1, chat/Progress August 1, compliance configured anniversary; real July data exists | F08, [#1096](https://github.com/sidneyswift/homa/issues/1096) |
-| Deeper-question intent is lost and chat check-ins stop early | Live navigation, actual responses and selector comparison | F09-F10, [#1088](https://github.com/sidneyswift/homa/issues/1088) |
-| Capability follow-ups remain unscored; subsequent advice bypasses verifier | Three actual `no_match` observations, stale cutting evidence, no next-move tool call | F13-F14, [#1099](https://github.com/sidneyswift/homa/issues/1099), [#1100](https://github.com/sidneyswift/homa/issues/1100) |
-| Accepted curricula cannot be read; blank scan can be reported as read | Two actual over-cap files and local blank-text PDF replay | F16, [#1089](https://github.com/sidneyswift/homa/issues/1089) |
-| Name-tracing geometry is wrong | Actual rejected mixed-case output and measured glyph geometry | F19, [#1094](https://github.com/sidneyswift/homa/issues/1094); related #1080/#1066 |
-| Binder Delete overflows and old revision can return | Three-width layout reproduction; actual deleted chain plus selector replay | F21, [#1091](https://github.com/sidneyswift/homa/issues/1091) |
-| Web realtime requests cannot reach family tools | Actual request/route replay rejects missing session and sequence | F23, [#1103](https://github.com/sidneyswift/homa/issues/1103) |
-| Month preview misses recurring/multi-child calendar conflicts | Active query omits canonical recurrence and child-link expansion | F24, [#1104](https://github.com/sidneyswift/homa/issues/1104) |
-| Print tool promises native sheet on channels without a consumer | Active tool/consumer contract trace | F26, [#1105](https://github.com/sidneyswift/homa/issues/1105) |
+| Failure at discovery | Discovery evidence | Tracking | Repair evidence |
+|---|---|---|---|
+| Recorded-time correction leaves linked Planner duration stale | Real sandbox save: Hours 11, Planner 10 | F01, [#1092](https://github.com/sidneyswift/homa/issues/1092) | FIXED `78f3b4e6`, F01 live receipt |
+| Named book details disappear | Two actual source/tool/row comparisons | F02, [#1093](https://github.com/sidneyswift/homa/issues/1093) | Open; escalated September 6 |
+| Distinct reading time suppressed | Two separate September 3 30-minute activities collided with an existing literature record; at least 60 minutes absent | F03, [#1090](https://github.com/sidneyswift/homa/issues/1090) | Open; escalated September 6 |
+| Child/day aggregation merges equal display names; child totals omit shared records in chat | Actual-function replays | F07, [#1095](https://github.com/sidneyswift/homa/issues/1095) | Open; escalated September 6 |
+| School-year surfaces use different starts | UI July 1, chat/Progress August 1, compliance configured anniversary; real July data exists | F08, [#1096](https://github.com/sidneyswift/homa/issues/1096) | Open; escalated September 6 |
+| Deeper-question intent is lost and chat check-ins stop early | Live navigation, actual responses and selector comparison | F09-F10, [#1088](https://github.com/sidneyswift/homa/issues/1088) | Open; escalated September 6 |
+| Capability follow-ups remain unscored; subsequent advice bypasses verifier | Three actual `no_match` observations, stale cutting evidence, no next-move tool call | F13-F14, [#1099](https://github.com/sidneyswift/homa/issues/1099), [#1100](https://github.com/sidneyswift/homa/issues/1100) | Open; escalated September 6 |
+| Accepted curricula cannot be read; blank scan can be reported as read | Two actual over-cap files and local blank-text PDF replay | F16, [#1089](https://github.com/sidneyswift/homa/issues/1089) | FIXED `78466fe6`, F16 recovery receipt |
+| Name-tracing geometry is wrong | Actual rejected mixed-case output and measured glyph geometry | F19, [#1094](https://github.com/sidneyswift/homa/issues/1094); related #1080/#1066 | Open; escalated September 6 |
+| Binder Delete overflows and old revision can return | Three-width layout reproduction; actual deleted chain plus selector replay | F21, [#1091](https://github.com/sidneyswift/homa/issues/1091) | FIXED `1834875f` and `dce9f1c5`, F21 live receipt |
+| Web realtime requests cannot reach family tools | Actual request/route replay rejects missing session and sequence | F23, [#1103](https://github.com/sidneyswift/homa/issues/1103) | Bridge FIXED `df9d5860`, F23 live receipt; physical speech unverified |
+| Month preview misses recurring/multi-child calendar conflicts | Active query omits canonical recurrence and child-link expansion | F24, [#1104](https://github.com/sidneyswift/homa/issues/1104) | FIXED `ff3258bf`, F24 live receipt |
+| Print tool promises native sheet on channels without a consumer | Active tool/consumer contract trace | F26, [#1105](https://github.com/sidneyswift/homa/issues/1105) | Open; escalated September 6 |
 
 An issue or merged PR is not a production fix receipt. Each implementation must later record its commit, deployment and live verification. Historical recovery is a separately bounded operation using confirmed source records, never a bulk assumption that every old row is wrong.
 
@@ -85,15 +85,15 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | F13 | Capture contextual ability claims; clarify selectively | Implement now; [#1099](https://github.com/sidneyswift/homa/issues/1099) |
 | F14 | Ground one next step in fresh evidence | Implement now; [#1100](https://github.com/sidneyswift/homa/issues/1100) |
 | F15 | Periodic reviews or assessment sheets | Decision / experiment; [#1107](https://github.com/sidneyswift/homa/issues/1107) |
-| F16 | Read accepted curriculum files | Implement now; [#1089](https://github.com/sidneyswift/homa/issues/1089) |
+| F16 | Read accepted curriculum files | FIXED and recovered; selected-page coverage explicit; [#1089](https://github.com/sidneyswift/homa/issues/1089) |
 | F17 | Read and use the correct owned lesson | Implement now; [#1101](https://github.com/sidneyswift/homa/issues/1101) |
 | F18 | Connect useful owned resources to a teaching theme | Implement now; [#1102](https://github.com/sidneyswift/homa/issues/1102) |
 | F19 | Correct handwriting geometry and review | Implement now; [#1094](https://github.com/sidneyswift/homa/issues/1094) |
 | F20 | Respect urgency without sacrificing correctness | Bounded repair now; larger concept deferred; [#1102](https://github.com/sidneyswift/homa/issues/1102), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
-| F21 | Visible, persistent removal from Binder | Implement now; [#1091](https://github.com/sidneyswift/homa/issues/1091) |
-| F22 | Make actual child scope visible | Implement now; [#1106](https://github.com/sidneyswift/homa/issues/1106) |
-| F23 | Working voice tools and distinct controls | Implement now; [#1103](https://github.com/sidneyswift/homa/issues/1103) |
-| F24 | Respect existing calendar facts; longer year planning | Bounded repair now; larger concept deferred; [#1104](https://github.com/sidneyswift/homa/issues/1104), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
+| F21 | Visible, persistent removal from Binder | FIXED and verified live; [#1091](https://github.com/sidneyswift/homa/issues/1091) |
+| F22 | Make actual child scope visible | FIXED and verified live; [#1106](https://github.com/sidneyswift/homa/issues/1106) |
+| F23 | Working voice tools and distinct controls | Bridge FIXED and verified live; physical speech unverified; [#1103](https://github.com/sidneyswift/homa/issues/1103) |
+| F24 | Respect existing calendar facts; longer year planning | Recurring conflict repair FIXED; full-year concept deferred; [#1104](https://github.com/sidneyswift/homa/issues/1104), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
 | F25 | Choose native first value and rollout | Decision / experiment; [#1053](https://github.com/sidneyswift/homa/issues/1053), [#1045](https://github.com/sidneyswift/homa/issues/1045) |
 | F26 | Truthful web/native print handoff | Bounded repair now; larger concept deferred; [#1105](https://github.com/sidneyswift/homa/issues/1105), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
 
@@ -194,6 +194,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 **Acceptance:** duplicate and renamed children, repeat activities/day, shared work, no children, empty window, child/chat/UI/export parity. Regenerate and inspect the actual state-pack PDF after correcting arithmetic. The stronger sick-child attendance outcome is only established where records explicitly identify participants.
 
 ### F08. Use one configured school-year window
+
+**Implementation underway, not yet live-certified:** the [configured school-year contract](2026-09-06-configured-school-year.md) records the actual reader changes, independent week/month windows, through-today bounds, explicit All time fallback, Settings clear behavior, and incomplete-read handling. Actual disposable PostgreSQL readers, component tests and phone captures have passed; deployment and authenticated hosted verification remain pending.
 
 **Tracking:** [#1096](https://github.com/sidneyswift/homa/issues/1096).
 
@@ -350,9 +352,9 @@ The first original now has Ready metadata and a readable instructional spread at
 
 **Verified:** Carolyng's actual 41.3/47.2 MiB September 5 originals hit the cap; a real reader returned not-ready. At 01:42 UTC her Dimensions first-week request ended with Homa asking for another photo. A local PDF with a drawn shape and no text layer produced classifier unreadable but reader success with one empty page. That proves a reader-contract defect. A subsequent read-only inspection of the actual private originals established the missing fact: Preschool Math at Home is 43,261,422 bytes with 51 pages, all without text items; Dimensions Math Teachers Guide PKA is 49,496,583 bytes with 115 pages, all without text items. Thus neither can be repaired by raising the byte cap alone, and neither hits the existing page-count ceilings. These were file reads and PDF text scans, with no model calls or production writes. The original SHA-256 values are `4bca3cad757d3cd9a51915c42dce49943a84562742352388a6113086e9316201` and `b66babd5d88d39a4bfc2569eca3c811d63b5f7b002864c97c5dc69a27d7e33cb`, respectively.
 
-**Implement now:** bounded processing/read support for the observed sizes, page OCR/transcription when a PDF has no usable text, preserved locators/extraction provenance, and honest partial/unreadable states. Avoid a 500 MiB unbounded in-memory download or manually setting Ready. After prevention passes, retry only identified failed originals within an explicit recovery scope and prove numbered-lesson retrieval.
+**Repair scope delivered above:** bounded processing/read support for the observed sizes, page OCR/transcription when a PDF has no usable text, preserved locators/extraction provenance, and honest partial/unreadable states. Avoid a 500 MiB unbounded in-memory download or manually setting Ready. After prevention passes, retry only identified failed originals within an explicit recovery scope and prove numbered-lesson retrieval.
 
-**Acceptance:** observed-size text/scanned/mixed PDFs, late pages beyond 120/240, blank versus unreadable, encrypted/corrupt/foreign files, interruption/retry, bounded memory/deadline and truthful coverage. Upload success alone cannot close #1089.
+**Verification contract, with actual coverage and limits above:** observed-size text/scanned/mixed PDFs, late pages beyond 120/240, blank versus unreadable, encrypted/corrupt/foreign files, interruption/retry, bounded memory/deadline and truthful coverage. Upload success alone cannot close #1089.
 
 ### F17. Use the correct owned lesson
 
@@ -420,15 +422,15 @@ Search only sees indexed metadata/embedding content; a useful apple activity lat
 
 **Expected, B:** remove abandoned in-progress work because it is unwanted or a better version exists. The meeting proved that sideways scrolling revealed Delete and a tap appeared to work; it did not establish persistence after refresh.
 
-**Active read/layout chain:** [Binder](../../../apps/web/app/app/binder/page.tsx) reads in-progress materials scoped to the family and selected child plus shared records. A read error becomes an empty shelf, so disappearance alone is not a reliable success proof. [Material selection](../../../apps/web/lib/materials/library.ts) reads at most 300 nondeleted rows, then chooses one visible candidate per revision chain. The [shelf](../../../apps/web/app/app/binder/in-progress-shelf.tsx) renders two columns on phones with nonwrapping normal actions; confirmation uses a separate wrapping row. The first Delete tap opens confirmation, Keep cancels, and final Delete calls the authenticated action. Success hides only that material ID locally.
+**Audit baseline, read/layout:** [Binder](../../../apps/web/app/app/binder/page.tsx) reads in-progress materials scoped to the family and selected child plus shared records. A read error becomes an empty shelf, so disappearance alone is not a reliable success proof. [Material selection](../../../apps/web/lib/materials/library.ts) reads at most 300 nondeleted rows, then chooses one visible candidate per revision chain. The [shelf](../../../apps/web/app/app/binder/in-progress-shelf.tsx) renders two columns on phones with nonwrapping normal actions; confirmation uses a separate wrapping row. The first Delete tap opens confirmation, Keep cancels, and final Delete calls the authenticated action. Success hides only that material ID locally.
 
-**Active write/reread:** [delete-material-action.ts](../../../apps/web/app/app/binder/delete-material-action.ts) resolves family and caller JWT, then `softDeleteMaterialCaller` updates `deleted_at` for one family-owned, nondeleted material ID and revalidates Binder/chat. It does not remove Blob bytes or other revisions. Reread filters that row before chain selection, allowing an older eligible draft to become the visible card.
+**Audit baseline, write/reread:** [delete-material-action.ts](../../../apps/web/app/app/binder/delete-material-action.ts) resolves family and caller JWT, then `softDeleteMaterialCaller` updates `deleted_at` for one family-owned, nondeleted material ID and revalidates Binder/chat. It does not remove Blob bytes or other revisions. Reread filters that row before chain selection, allowing an older eligible draft to become the visible card.
 
-**Verified:** actual component/production CSS at widths 320/375/390 produced document widths 424/452/459; at 390 the second Delete ended at x459.46 and the first Delete overlapped the next card's Keep. Separately, a six-record *Ara's Ghost-Spider Space Poster* chain contains a revision deleted September 5 16:39:07.904 UTC with eligible undeleted ancestors. Replaying the actual selector on saved rows chooses the deleted revision before filtering, then its preceding draft after the real deletion filter. This proves persistent-state resurfacing; it is not claimed to be the exact recorded meeting tap. No family material was deleted during the audit.
+**Verified before repair:** actual component/production CSS at widths 320/375/390 produced document widths 424/452/459; at 390 the second Delete ended at x459.46 and the first Delete overlapped the next card's Keep. Separately, a six-record *Ara's Ghost-Spider Space Poster* chain contains a revision deleted September 5 16:39:07.904 UTC with eligible undeleted ancestors. Replaying the actual selector on saved rows chooses the deleted revision before filtering, then its preceding draft after the real deletion filter. This proves persistent-state resurfacing; it is not claimed to be the exact recorded meeting tap. No family material was deleted during the audit.
 
-**Implement now:** #1091's layout repair plus durable removal of the visible connected item across revisions, retaining history/bytes under existing collection-removal semantics. Do not hide by title or erase unrelated same-title work. The separate Month plans shelf has Review with Homa and a different archive primitive; its missing Delete was not established by B.
+**Repair scope delivered above:** #1091's layout repair plus durable removal of the visible connected item across revisions, retaining history/bytes under existing collection-removal semantics. Do not hide by title or erase unrelated same-title work. The separate Month plans shelf has Review with Homa and a different archive primitive; its missing Delete was not established by B.
 
-**Acceptance:** normal/confirmation actions at 320/375/390, long titles, keyboard/touch, pending/error/cancel, refresh; observed-style revision chain, kept final, sibling branches, independent same-title chain, already-deleted/missing/foreign IDs and shared/child materials. Verify actual reread, not only optimistic disappearance.
+**Verification contract, with actual coverage and limits above:** normal/confirmation actions at 320/375/390, long titles, keyboard/touch, pending/error/cancel, refresh; observed-style revision chain, kept final, sibling branches, independent same-title chain, already-deleted/missing/foreign IDs and shared/child materials. Verify actual reread, not only optimistic disappearance.
 
 ### F22. Make the actual child scope visible
 
@@ -442,13 +444,13 @@ The populated Binder also showed a false failed-search message when its one kept
 
 **Expected, P22 and B:** review one child's Hours/Binder without confusion. Both parents discovered an existing switcher during the meeting, so a second filter is not the requested solution.
 
-**Active chain:** [context-switcher.tsx](../../../apps/web/components/dashboard/context-switcher.tsx) appears for at least two children after device detection. Its closed trigger is an avatar with an accessible Viewing child label; visible names are inside the open menu. Selection optimistically changes the UI, validates the child against the caller-owned roster, stores an httpOnly preference cookie and refreshes/navigates. Invalid/foreign/stale IDs become no-op or family view; this preference is not authorization or durable child data. The action has no explicit retry/error receipt.
+**Audit baseline, switcher:** [context-switcher.tsx](../../../apps/web/components/dashboard/context-switcher.tsx) appears for at least two children after device detection. Its closed trigger is an avatar with an accessible Viewing child label; visible names are inside the open menu. Selection optimistically changes the UI, validates the child against the caller-owned roster, stores an httpOnly preference cookie and refreshes/navigates. Invalid/foreign/stale IDs become no-op or family view; this preference is not authorization or durable child data. The action has no explicit retry/error receipt.
 
-Hours includes selected-child plus shared rows before subject filtering and totals. Its useful scope explanation is hidden in embedded mode, and Planner always embeds it. Binder scopes kept and in-progress materials; its kept heading names the child plus family-wide items. **Month plans and state-pack cards remain family-wide**. Do not describe the whole Binder as uniformly filtered. The export gap is F06; chat/shared-time inconsistency is F07.
+At audit time, Hours included selected-child plus shared rows before subject filtering and totals. Its useful scope explanation was hidden in embedded mode, and Planner always embeds it. Binder scopes kept and in-progress materials; its kept heading names the child plus family-wide items. **Month plans and state-pack cards remain family-wide**. Do not describe the whole Binder as uniformly filtered. The export gap is F06; chat/shared-time inconsistency is F07.
 
-**Verified:** selecting Avery at 390 px changes the header label and kept-Binder wording. Actual helper tests with populated child-A/child-B/shared inputs confirm Hours/material scoping and shared contributions. The later authorized sandbox records provide populated UI data; they do not by themselves prove every child-switch/export case passed.
+**Initial audit verification:** selecting Avery at 390 px changes the header label and kept-Binder wording. Actual helper tests with populated child-A/child-B/shared inputs confirm Hours/material scoping and shared contributions. The later authorized sandbox records provide populated UI data; they do not by themselves prove every child-switch/export case passed.
 
-**Implement now:** visible concise scope guidance near the records, reuse the switcher, explicitly name shared inclusion and family-wide shelves, and surface failed selection honestly. **Acceptance:** one/two-child families, empty/populated, shared items, reload, child changes and keyboard/touch. An Instagram/onboarding explanation is optional distribution work, not necessary to implement another filter.
+**Repair scope delivered above:** visible concise scope guidance near the records, reuse the switcher, explicitly name shared inclusion and family-wide shelves, and surface failed selection honestly. **Verification contract, with actual coverage and limits above:** one/two-child families, empty/populated, shared items, reload, child changes and keyboard/touch. An Instagram/onboarding explanation is optional distribution work, not necessary to implement another filter.
 
 ### F23. Distinguish dictation from conversation and repair voice tools
 
@@ -460,15 +462,15 @@ Hours includes selected-child plus shared rows before subject filtering and tota
 
 **Dictation chain:** [dictation.tsx](../../../apps/web/app/app/dictation.tsx) checks microphone/MediaRecorder support, requests permission after tap and records with an interruption marker. Cancel discards; accept or the three-minute cutoff stops and sends audio to the authenticated `/api/chat/dictation` route, bounded to 4 MiB and 30/hour. The existing STT path retries transient primary failures then uses a fallback. Success appends text to the editable draft; **only the parent's later Send** enters ordinary chat and family writes. Denial/empty/failure gives a typing/retry path. The recording is not automatically a spoken reply. Transcription disables accept/cancel; no browser/provider timeout is implemented, and recorder-constructor/start exceptions are not fully caught. Those are code limits, not matched new family incidents.
 
-**Realtime chain:** the empty composer exposes [Talk with Homa](../../../apps/web/app/app/voice-mode-button.tsx); a draft/attachment changes that slot to Send. [VoiceMode](../../../apps/web/app/app/voice-mode.tsx) obtains an authenticated, access/rate-limited realtime token, connects, then captures microphone audio. Status and End are visible; End disconnects/releases capture and flushes the transcript. Realtime's `ask_homa` function is required for family tools/facts and artifact work.
+**Audit baseline, realtime chain:** the empty composer exposes [Talk with Homa](../../../apps/web/app/app/voice-mode-button.tsx); a draft/attachment changes that slot to Send. [VoiceMode](../../../apps/web/app/app/voice-mode.tsx) obtains an authenticated, access/rate-limited realtime token, connects, then captures microphone audio. Status and End are visible; End disconnects/releases capture and flushes the transcript. Realtime's `ask_homa` function is required for family tools/facts and artifact work.
 
-**Confirmed source-contract failure:** the web client posts only tool name and args to `/api/voice/realtime/tool`, but the [shared route](../../../apps/web/app/api/voice/realtime/tool/route.ts) requires session ID and nonnegative source sequence. It returns HTTP 200 with `ok:false`, a repeat request and empty effects before persistence or agent dispatch. Replay of the actual client body through the actual route gave zero persistence and agent calls; a complete positive control reached each once. This affects every current web tool call, not merely unclear buttons.
+**Audit baseline, confirmed source-contract failure:** the web client posts only tool name and args to `/api/voice/realtime/tool`, but the [shared route](../../../apps/web/app/api/voice/realtime/tool/route.ts) requires session ID and nonnegative source sequence. It returns HTTP 200 with `ok:false`, a repeat request and empty effects before persistence or agent dispatch. Replay of the actual client body through the actual route gave zero persistence and agent calls; a complete positive control reached each once. This affects every current web tool call, not merely unclear buttons.
 
-**Durable-result gap:** settled transcript turns are separately posted fire-and-forget; a visible transcript does not establish saved canonical messages. The client ignores unsuccessful save receipts/retry and does not consume returned effects or Homa session state as native does. A greeting can therefore coexist with broken action capability.
+**Audit baseline, durable-result gap:** settled transcript turns are separately posted fire-and-forget; a visible transcript does not establish saved canonical messages. The client ignores unsuccessful save receipts/retry and does not consume returned effects or Homa session state as native does. A greeting can therefore coexist with broken action capability.
 
-**Implement now:** separate bridge bug and discoverability issues. Carry stable voice session/source sequence and real transcript provenance, preserve returned continuity state, handle transcript ordering, prevent duplicate writes/dispatch, and show truthful effects. Reuse server contracts rather than relax them. Make the two controls visibly distinct, preserving edit-before-send and text fallback.
+**Repair scope delivered above:** separate bridge bug and discoverability issues. Carry stable voice session/source sequence and real transcript provenance, preserve returned continuity state, handle transcript ordering, prevent duplicate writes/dispatch, and show truthful effects. Reuse server contracts rather than relax them. Make the two controls visibly distinct, preserving edit-before-send and text fallback.
 
-**Acceptance/evals:** actual browser payload, missing/out-of-order transcript, two actions in one conversation, harmless read plus authorized sandbox write, exact effects, denial/expiry/provider-refusal, no duplicate or extra replies, End releases mic. Run continuity/voice/chat suites and isolated bridge evals, then a real mobile-web spoken turn. Screenshots and the mocked positive control cannot certify physical voice output.
+**Verification contract, with actual coverage and limits above:** actual browser payload, missing/out-of-order transcript, two actions in one conversation, harmless read plus authorized sandbox write, exact effects, denial/expiry/provider-refusal, no duplicate or extra replies, End releases mic. Run continuity/voice/chat suites and isolated bridge evals, then a real mobile-web spoken turn. Screenshots and the mocked positive control cannot certify physical voice output.
 
 ## Existing foundations and future contracts
 
@@ -482,11 +484,13 @@ Hours includes selected-child plus shared rows before subject filtering and tota
 
 Month preview contains four weeks. Approval validates children/dates/materials/unresolved choices and versions, then replaces the current plan/dates. Curriculum mapping appends at most 40 placements into existing four-week plans and chooses no dates. Repeatedly calling these tools does not establish a safe persistent year plan or finish-date calculation.
 
-**Bounded bug found:** [month-plan-draft.ts](../../../apps/web/lib/month-plan-draft.ts) checks calendar conflicts by querying original event start/end overlap. It omits recurrence expansion, exception rows and multi-child links used by normal Planner reads. A weekly August event repeating in September is absent from the September preview conflict check. A multi-child event may be treated only through its compatibility child field. This is code-verified, not a claimed Carolyng recurring-break incident.
+**Audit baseline:** [month-plan-draft.ts](../../../apps/web/lib/month-plan-draft.ts) queried original event dates and a compatibility child field. It missed recurrence, occurrence exceptions and authoritative multi-child audiences. The normal Calendar readers also excluded a valid future-series occurrence moved into an earlier window. These were actual-function/source-predicate findings, not claimed Carolyng incidents.
 
-**September 6 follow-through:** the [implementation and verification plan](2026-09-06-recurring-plan-conflicts.md) traces the fleet procedure, pinned tool read, caller-JWT Calendar read, create/revise preview and pure occurrence expansion. It also identifies an edge the current canonical readers miss: a valid future-series occurrence moved into an earlier window. The actual pure expander returned the September 10 replacement of an October 1 occurrence for both selected children, while the readers' original-start predicate excludes that series. This is an actual-function and source-predicate replay; SQL execution and hosted acceptance remain pending. The existing mutation accepts that replacement date, so the implementation must not simply reuse the flawed reader unchanged.
+**Current chain, FIXED September 6:** [PR #1118](https://github.com/sidneyswift/homa/pull/1118), merge `ff3258bf999f665a6ca7154ba0c7df73aae481f4`, is deployed READY on `thankshoma.com`. Caller and pinned readers now include family-scoped moved-in candidates. Create/revise reuse those readers and the existing occurrence expander and child audience rules. Source events, intentional-conflict approval policy and signed history are preserved.
 
-**Implement now:** reuse the canonical event reader/model for month-preview conflicts and test recurring, exception and multi-child fixtures, including completed work remaining unchanged. Then prove one readable curriculum, one child, one existing month and an explicit break with preview and approved save.
+**Verified:** real disposable PostgreSQL reproduced the original omission and passed caller/pinned scope, exact create/revise conflicts, foreign-family denial and unchanged event snapshots. The deployed mobile-web journey passed eight complete Week states and two Day details. The same fixture produced exactly 11 initial and 7 revised conflicts from deployment-identical create/revise code through a read-only worker. Root inspected five screenshots; all owned family/Auth/event/exception data was removed. [Live receipt and precise execution boundaries](../journeys/evidence/2026-09-06-recurring-events-live-verification.md).
+
+**Remaining scope:** this certifies hosted Calendar and actual deployed-source conflict computation against production data, not hosted model/tool dispatch, a native preview overlay or full-year planning. Existing Data API pagination and separate-request consistency limits remain in the [implementation contract](2026-09-06-recurring-plan-conflicts.md). A readable owned curriculum, one child, an explicit break and approved month save remain part of the curriculum journey in [#1101](https://github.com/sidneyswift/homa/issues/1101); they are not claimed by this recurrence repair.
 
 **Future contract:** teaching weekdays, irregular breaks, participants, remaining lesson identity/completion, permissible load, finish target and what may move. An absence ledger, automatic holiday feed and state-specific attendance claims are not inferred. The transcript's 180-day example is not verified law. Full-year scheduling remains a design/decision issue, not a claim that month mapping already implements it.
 
