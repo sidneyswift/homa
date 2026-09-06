@@ -186,7 +186,9 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
                   : "Listening"}
           </span>
           <span className="quiet-chat__voice-copy">
-            {error ?? "Talk normally. Every turn appears in your chat as you go."}
+            {error ?? (ended
+              ? saving ? "Saving our conversation…" : "This conversation has ended."
+              : "Talk normally. Every turn appears in your chat as you go.")}
           </span>
         </span>
         <button
