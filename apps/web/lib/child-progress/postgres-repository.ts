@@ -1,3 +1,4 @@
+import type { MapAnswer } from "@homa/core";
 import type postgres from "postgres";
 
 import { effectiveTimeZone, zonedDateString } from "../time-zone";
@@ -254,14 +255,16 @@ async function loadSelectionResponses(
   childId: string,
 ): Promise<ProgressSelectionAnswer[]> {
   const rows = await sql<PostgresProgressSelectionResponseRow[]>`
-    select selection.id, selection.evidence_id, selection.item_id,
+    select selection.id, selection.child_id, selection.family_id,
+           selection.evidence_id, selection.item_id,
            selection.answer,
            to_char(
              selection.answered_at at time zone 'UTC',
              'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'
            ) as created_at
     from (
-      select response.id::text as id, response.evidence_id,
+      select response.id::text as id, response.child_id, response.family_id,
+             response.evidence_id,
              response.item_id, response.answer,
              response.created_at as answered_at
       from public.progress_check_in_responses response
@@ -273,6 +276,8 @@ async function loadSelectionResponses(
       select
         ${CHILD_ANSWER_SELECTION_PREFIX} || answer.child_id::text || ':' ||
           answer.question_id as id,
+        child.id as child_id,
+        child.family_id,
         exact_evidence.id as evidence_id,
         answer.question_id as item_id,
         answer.answer,
@@ -309,7 +314,7 @@ async function loadFamilyCheckInRows(
   const rows = await sql<PostgresProgressCheckInRow[]>`
     select check_in.id, check_in.child_id, child.name as child_name,
            check_in.family_id, check_in.purpose, check_in.scope,
-           check_in.state, check_in.active_member_user_id,
+           check_in.state, check_in.terminal_reason, check_in.accepted_response_count, check_in.uncertain_response_count, check_in.terminal_mixed_evidence, check_in.active_member_user_id,
            owner.display_name as active_member_display_name,
            check_in.prompt_recipient_member_user_id,
            recipient.display_name as prompt_recipient_display_name,
@@ -372,7 +377,7 @@ async function loadCheckInRow(
     ? await sql<PostgresProgressCheckInRow[]>`
         select check_in.id, check_in.child_id,
                child.name as child_name, check_in.family_id,
-               check_in.purpose, check_in.scope, check_in.state,
+               check_in.purpose, check_in.scope, check_in.state, check_in.terminal_reason, check_in.accepted_response_count, check_in.uncertain_response_count, check_in.terminal_mixed_evidence,
                check_in.active_member_user_id,
                owner.display_name as active_member_display_name,
                check_in.prompt_recipient_member_user_id,
@@ -428,7 +433,7 @@ async function loadCheckInRow(
     : await sql<PostgresProgressCheckInRow[]>`
         select check_in.id, check_in.child_id,
                child.name as child_name, check_in.family_id,
-               check_in.purpose, check_in.scope, check_in.state,
+               check_in.purpose, check_in.scope, check_in.state, check_in.terminal_reason, check_in.accepted_response_count, check_in.uncertain_response_count, check_in.terminal_mixed_evidence,
                check_in.active_member_user_id,
                owner.display_name as active_member_display_name,
                check_in.prompt_recipient_member_user_id,
@@ -492,7 +497,7 @@ async function lockNonterminalCheckInRowByChild(
   const rows = await sql<PostgresProgressCheckInRow[]>`
     select check_in.id, check_in.child_id, child.name as child_name,
            check_in.family_id, check_in.purpose, check_in.scope,
-           check_in.state, check_in.active_member_user_id,
+           check_in.state, check_in.terminal_reason, check_in.accepted_response_count, check_in.uncertain_response_count, check_in.terminal_mixed_evidence, check_in.active_member_user_id,
            owner.display_name as active_member_display_name,
            check_in.prompt_recipient_member_user_id,
            recipient.display_name as prompt_recipient_display_name,
@@ -1388,6 +1393,54 @@ class PostgresChildProgressTransaction
     );
   }
 
+  async claimCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["claimCheckInStartRequest"]>[0]): ReturnType<ProgressCheckInTransaction["claimCheckInStartRequest"]> {
+    const inserted = await this.sql<{request_id: string}[]>`
+      insert into public.progress_check_in_start_requests (family_id, member_user_id, request_id, child_id, subject_id, runtime_session_id, turn_id)
+      select ${input.familyId}, ${input.memberUserId}, ${input.requestId}, ${input.childId}, ${input.subjectId}, ${input.runtimeSessionId}, ${input.turnId}
+      where exists (select 1 from public.children where family_id = ${input.familyId} and id = ${input.childId})
+      on conflict (family_id, member_user_id, request_id) do nothing returning request_id
+    `;
+    if (inserted.length) return {kind: "claimed"};
+    const [row] = await this.sql<{child_id: string; subject_id: string; result: unknown; issued_check_in_id: string | null; issued_revision: number | null; delivered_at: string | null}[]>`
+      select child_id, subject_id, result, issued_check_in_id, issued_revision, delivered_at from public.progress_check_in_start_requests
+      where family_id = ${input.familyId} and member_user_id = ${input.memberUserId} and request_id = ${input.requestId}
+      for update
+    `;
+    if (!row) throw new Error("Selected check-in request left its child scope");
+    return {kind: "existing", childId: row.child_id, subjectId: row.subject_id, result: row.result,
+      issuedCheckInId: row.issued_check_in_id, issuedRevision: row.issued_revision, deliveredAt: row.delivered_at};
+  }
+
+  async completeCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["completeCheckInStartRequest"]>[0]): Promise<void> {
+    const rows = await this.sql<{request_id: string}[]>`
+      update public.progress_check_in_start_requests
+      set result = ${this.sql.json(input.result as DbJson)}, accepted_at = now(),
+          issued_check_in_id = ${input.issuedCheckInId}, issued_revision = ${input.issuedRevision}
+      where family_id = ${input.familyId} and member_user_id = ${input.memberUserId} and request_id = ${input.requestId} and result is null
+      returning request_id
+    `;
+    if (rows.length !== 1) throw new Error("Selected check-in receipt was not completed");
+  }
+
+  async reissueCheckInStartRequests(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequests"]>[0]): Promise<number> {
+    const rows = await this.sql<{request_id: string}[]>`
+      update public.progress_check_in_start_requests set issued_revision = ${input.revision}
+      where family_id = ${input.familyId} and child_id = ${input.childId} and member_user_id = ${input.memberUserId}
+        and issued_check_in_id = ${input.checkInId} and issued_revision = ${input.expectedRevision} and delivered_at is null
+      returning request_id
+    `;
+    return rows.length;
+  }
+
+  async listCheckInResponses(familyId: string, childId: string, checkInId: string) {
+    const rows = await this.sql<{ item_id: string; answer: MapAnswer }[]>`
+      select item_id, answer from public.progress_check_in_responses
+      where family_id = ${familyId} and child_id = ${childId} and check_in_id = ${checkInId}
+      order by revision, id
+    `;
+    return rows.map(row => ({ itemId: row.item_id, answer: row.answer }));
+  }
+
   async insertCheckIn(
     input: InsertProgressCheckInInput,
   ): Promise<InsertProgressCheckInResult> {
@@ -1398,7 +1451,7 @@ class PostgresChildProgressTransaction
         revision, current_item_id, current_delivery_id, episode_id,
         pending_runtime_session_id, pending_turn_id,
         pause_reason, opened_at, paused_at, completed_at, stopped_at,
-        updated_at
+        updated_at, accepted_response_count, uncertain_response_count
       )
       select ${input.childId}, ${input.familyId},
              ${input.idempotencyKey}, ${input.purpose},
@@ -1408,7 +1461,7 @@ class PostgresChildProgressTransaction
              ${input.currentItemId}, null, ${input.episodeId},
              ${input.pendingRuntimeSessionId}, ${input.pendingTurnId},
              null, ${input.openedAt}, null, null, null,
-             ${input.openedAt}
+             ${input.openedAt}, 0, 0
       where exists (
         select 1
         from public.children child
@@ -1472,6 +1525,10 @@ class PostgresChildProgressTransaction
     const rows = await this.sql<{ id: string }[]>`
       update public.progress_check_ins check_in
       set state = ${input.next.state},
+          terminal_reason = ${input.next.terminalReason ?? null},
+          terminal_mixed_evidence = ${input.next.terminalMixedEvidence ?? null},
+          accepted_response_count = coalesce(${input.next.acceptedResponseCount ?? null}::integer, check_in.accepted_response_count),
+          uncertain_response_count = coalesce(${input.next.uncertainResponseCount ?? null}::integer, check_in.uncertain_response_count),
           active_member_user_id =
             ${input.next.ownerMemberUserId},
           prompt_recipient_member_user_id =
@@ -1796,6 +1853,13 @@ class PostgresChildProgressTransaction
       returning check_in.id
     `;
     if (rows[0] === undefined) return null;
+    await this.sql`
+      update public.progress_check_in_start_requests
+      set delivered_at = ${input.updatedAt}
+      where family_id = ${input.familyId} and child_id = ${input.childId}
+        and issued_check_in_id = ${input.checkInId} and issued_revision = ${input.expectedRevision}
+        and delivered_at is null
+    `;
     return loadCheckInRow(
       this.sql,
       input.familyId,

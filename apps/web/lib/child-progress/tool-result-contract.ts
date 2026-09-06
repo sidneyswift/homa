@@ -1,4 +1,5 @@
 import * as z from "zod/mini";
+import { getMapSubject } from "@homa/core";
 
 import { parseOffsetIsoTimestampEpochNanoseconds } from "./timestamp";
 
@@ -33,6 +34,7 @@ const evidenceAnswerSchema = z.enum([
   "not_yet",
 ]);
 const uuidSchema = z.uuid();
+const subjectIdSchema = z.string().check(z.maxLength(80), z.refine(id => getMapSubject(id) !== undefined));
 const affectedTopicsSchema = z
   .array(displayStatementSchema)
   .check(z.maxLength(MAX_AFFECTED_TOPICS));
@@ -67,6 +69,10 @@ const questionPromptSchema = z.strictObject({
   childName: displayNameSchema,
   subjectDisplayName: displayNameSchema,
   statement: displayStatementSchema,
+  childId: z.optional(uuidSchema),
+  subjectId: z.optional(subjectIdSchema),
+  acceptedResponseCount: z.optional(z.int().check(z.nonnegative())),
+  responseLimit: z.optional(z.literal(8)),
   answerOptions: z.tuple([
     z.literal("easily"),
     z.literal("getting_there"),
@@ -150,8 +156,19 @@ export const manageChildProgressResultSchema = z.discriminatedUnion("kind", [
       "Check-in paused",
       "Check-in saved",
       "Check-in moved",
+      "Check-in needs a choice",
+      "Check-in already opened",
+      "No question to ask",
     ]),
     update: z.optional(nestedProgressUpdateSchema),
+    scope: z.optional(z.strictObject({ childId: uuidSchema, childName: displayNameSchema, subjectId: subjectIdSchema, subjectDisplayName: displayNameSchema, progressHref: z.optional(z.string().check(z.maxLength(200))) })),
+    completion: z.optional(z.strictObject({
+      reason: z.nullable(z.enum(["sitting_limit", "bank_coverage_end", "no_useful_question", "parent_stopped"])),
+      acceptedResponseCount: z.nullable(z.int().check(z.nonnegative())),
+      uncertainResponseCount: z.nullable(z.int().check(z.nonnegative())),
+      mixedEvidence: z.boolean(),
+    })),
+    activeCheckIn: z.optional(z.strictObject({ checkInId: uuidSchema, ownerDisplayName: z.nullable(displayNameSchema), needsTakeover: z.boolean() })),
   }),
   z.strictObject({
     kind: z.literal("activity_only"),

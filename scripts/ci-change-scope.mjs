@@ -76,6 +76,7 @@ export function validateCiResults(scope, results) {
       checks: "success",
       "db-checks": "success",
       "e2e-checks": "success",
+      "browser-checks": "success",
     },
     "mobile-only": {
       "classify-changes": "success",
@@ -86,6 +87,7 @@ export function validateCiResults(scope, results) {
       checks: "skipped",
       "db-checks": "skipped",
       "e2e-checks": "skipped",
+      "browser-checks": "skipped",
     },
     "docs-only": {
       "classify-changes": "success",
@@ -96,6 +98,7 @@ export function validateCiResults(scope, results) {
       checks: "skipped",
       "db-checks": "skipped",
       "e2e-checks": "skipped",
+      "browser-checks": "skipped",
     },
   };
 
@@ -212,6 +215,7 @@ function runGateMode() {
     checks: process.env.CI_CHECKS,
     "db-checks": process.env.CI_DB,
     "e2e-checks": process.env.CI_E2E,
+    "browser-checks": process.env.CI_BROWSER,
   };
   try {
     validateCiResults(scope, results);

@@ -87,6 +87,9 @@ export async function executeChildProgressCommand(
   ) {
     return refusedProgressResult();
   }
+  // A selected navigation action contains no answer and authorizes no
+  // stop or takeover of an existing sitting.
+  if (context.selectedAssessment && command.action !== "start_check_in") return refusedProgressResult();
   const idempotencyKey = progressOperationIdempotencyKey(
     context,
     command.action,

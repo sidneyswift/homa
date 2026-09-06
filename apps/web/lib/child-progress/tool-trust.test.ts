@@ -173,6 +173,31 @@ describe("disabled progress result", () => {
 });
 
 describe("trusted progress runtime context", () => {
+  it("preserves the strict selected web action and drops malformed or other-channel pointers", () => {
+    const selectedAssessment = JSON.stringify({requestId: MESSAGE_ID, childId: CHILD_ID, subjectId: "music"});
+    const build = (channel: string, selected = selectedAssessment) => createProgressToolContext({
+      access: {familyId: FAMILY_ID}, attributes: {channel, memberUserId: MEMBER_ID, selectedAssessment: selected},
+      sessionId: "selection-session", turnId: "selection-turn", now: NOW,
+    });
+    assert.deepEqual(build("web").selectedAssessment, {requestId: MESSAGE_ID, childId: CHILD_ID, subjectId: "music"});
+    assert.equal(build("sms").selectedAssessment, null);
+    assert.equal(build("email").selectedAssessment, null);
+    assert.equal(build("web", JSON.stringify({requestId: MESSAGE_ID, childId: CHILD_ID, subjectId: "invented"})).selectedAssessment, null);
+  });
+
+  it("a selected navigation message cannot answer, stop, or take over a sitting", async () => {
+    const context = createProgressToolContext({access: {familyId: FAMILY_ID}, attributes: {
+      channel: "web", memberUserId: MEMBER_ID,
+      canonicalInboundText: "Ask me deeper music questions for Maya.", canonicalInboundMessageId: MESSAGE_ID,
+      selectedAssessment: JSON.stringify({requestId: MESSAGE_ID, childId: CHILD_ID, subjectId: "music"}),
+    }, sessionId: "selection-session", turnId: "selection-turn", now: NOW});
+    for (const command of [
+      {action: "respond_check_in", checkInId: CHECK_IN_ID, answer: "easily"},
+      {action: "stop_check_in", checkInId: CHECK_IN_ID},
+      {action: "takeover_check_in", checkInId: CHECK_IN_ID},
+    ] as const) assert.equal((await executeChildProgressCommand(command, context, throwingOperations())).kind, "refused");
+  });
+
   it("carries server session, turn, and canonical inbound provenance", () => {
     const context = createProgressToolContext({
       access: { familyId: FAMILY_ID },
@@ -204,6 +229,7 @@ describe("trusted progress runtime context", () => {
         "Maya read the whole early reader by herself.",
       inboundMessageId: MESSAGE_ID,
       taskRunId: null,
+      selectedAssessment: null,
       now: NOW.toISOString(),
     });
   });

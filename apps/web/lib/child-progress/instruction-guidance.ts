@@ -3,7 +3,7 @@
  * Signup and invitation branches do not receive this block.
  *
  * SMS-only deltas, nothing more (2026-07-25): the workflow itself lives
- * in instructions.md's Live-progress section and the tool's own schema,
+ * in the progress-check-in fleet skill and the tool's own schema,
  * both present on every SMS turn already. What stays here is what only
  * the texting transport needs: the exact-statement law (a reworded
  * question cannot save), one question per text with no rich cards, the

@@ -684,7 +684,8 @@ export function ReportView({
                       {/* Says the action honestly: this one leaves the
                           report and asks more questions. */}
                       <Link
-                        href={`/onboarding?dd=${report.childId}.${score.subjectId}`}
+                        prefetch={false}
+                        href={`/app?assessment=subject_deep_dive&child=${report.childId}&subject=${score.subjectId}`}
                         className={reportButtonClass(
                           "secondary",
                           "inline-flex min-h-10 items-center px-4 py-2 text-xs font-semibold",

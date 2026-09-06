@@ -55,6 +55,7 @@ describe("conversation log continuity integration", () => {
             id: MESSAGE_ID,
             episodeId: "episode-voice",
             replyClaimed: false,
+            content: input.content,
           };
         },
         embed: async () => null,
@@ -112,6 +113,7 @@ describe("conversation log continuity integration", () => {
             id: "message-inbound-1",
             episodeId: "episode-1",
             replyClaimed: true,
+            content: input.content,
           };
         },
         embed: async () => null,
@@ -159,10 +161,11 @@ describe("conversation log continuity integration", () => {
         resolveInbound: async () => {
           throw new Error("resolveInbound should not run for assistant writes");
         },
-        persistCanonical: async () => ({
+        persistCanonical: async (input) => ({
           id: MESSAGE_ID,
           episodeId: EPISODE_ID,
           replyClaimed: false,
+          content: input.content,
         }),
         embed: async (text) => `embedding:${text}`,
         saveEmbedding: async (messageId, embedding, sourceContent, replaceExisting) => {
@@ -200,10 +203,11 @@ describe("conversation log continuity integration", () => {
         resolveInbound: async () => {
           throw new Error("resolveInbound should not run for assistant writes");
         },
-        persistCanonical: async () => ({
+        persistCanonical: async (input) => ({
           id: MESSAGE_ID,
           episodeId: "episode-1",
           replyClaimed: false,
+          content: input.content,
         }),
         embed: async (text) => `embedding:${text}`,
         saveEmbedding: async (_messageId, _embedding, _sourceContent, replaceExisting) => {
@@ -233,6 +237,7 @@ describe("conversation log continuity integration", () => {
           id: MESSAGE_ID,
           episodeId: EPISODE_ID,
           replyClaimed: false,
+          content: canonicalContent,
         };
       },
       // The terminal write's own embedding call fails/returns nothing here

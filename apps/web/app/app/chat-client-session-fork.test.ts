@@ -102,10 +102,10 @@ describe("ChatClient retry-failed-message wiring (GH #170)", () => {
     );
   });
 
-  it("retries as a card answer, not a composer send, so an unrelated in-progress draft is left alone", () => {
+  it("keeps the exact failed action identity and uses a card source for ordinary retries", () => {
     assert.match(
       source,
-      /function retryFailedMessage\(text: string\): void \{\s*sendMessage\(text, \{ kind: "card_answer" \}\);\s*\}/u,
+      /failedAssessmentActionsRef\.current\.get\(messageId\)/u,
     );
   });
 });

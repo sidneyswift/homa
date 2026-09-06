@@ -152,7 +152,7 @@ jobs:
   # name and verifies the exact job set required by the classified scope.
   # If a job is added below, add it to `needs` here or it stops gating merges.
   build-and-check:
-    needs: [classify-changes, light-checks, brand-checks, mobile-checks, build, checks, db-checks, e2e-checks]
+    needs: [classify-changes, light-checks, brand-checks, mobile-checks, build, checks, db-checks, e2e-checks, browser-checks]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -171,6 +171,7 @@ jobs:
           CI_CHECKS: ${{ needs.checks.result }}
           CI_DB: ${{ needs.db-checks.result }}
           CI_E2E: ${{ needs.e2e-checks.result }}
+          CI_BROWSER: ${{ needs.browser-checks.result }}
 
   # Runs independently of web jobs (no Supabase secrets needed). A mobile
   # pull request or mobile-only main merge proves its own surface, while web
@@ -597,6 +598,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm child-progress:e2e
 
+      - name: Deeper Progress canonical delivery disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:deeper-progress-delivery:postgres
+
       - name: Live fixture sandbox classification disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:live-fixture-sandbox:postgres
@@ -740,3 +745,31 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+  browser-checks:
+    needs: classify-changes
+    if: needs.classify-changes.outputs.scope == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium and its system dependencies
+        timeout-minutes: 5
+        run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Deeper Progress selected-action browser recovery
+        timeout-minutes: 5
+        run: pnpm --filter web exec playwright test --config=e2e/deeper-progress.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deeper-progress-browser
+          path: apps/web/test-results/

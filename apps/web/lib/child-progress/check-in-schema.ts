@@ -5,6 +5,7 @@ import type {
   ProgressCheckInPrompt,
   ProgressCheckInRecord,
   ProgressCheckInResponseOutcome,
+  ProgressCheckInStartOutcome,
   ProgressConflictCard,
   ProgressConflictResolvedOutcome,
 } from "./types";
@@ -72,6 +73,10 @@ const recordCommonFields = {
   episodeId: identifierSchema.nullable(),
   pendingRuntimeSessionId: identifierSchema.nullable(),
   pendingTurnId: identifierSchema.nullable(),
+  terminalReason: z.enum(["sitting_limit", "bank_coverage_end", "no_useful_question", "parent_stopped"]).nullable().optional(),
+  acceptedResponseCount: z.number().int().nonnegative().nullable().optional(),
+  uncertainResponseCount: z.number().int().nonnegative().nullable().optional(),
+  terminalMixedEvidence: z.boolean().nullable().optional(),
   openedAt: offsetTimestampSchema,
   updatedAt: offsetTimestampSchema,
 };
@@ -157,6 +162,9 @@ export const progressCheckInPromptSchema = z
     childName: identifierSchema,
     itemId: identifierSchema,
     personalizedStatement: z.string().min(1),
+    subjectId: identifierSchema.optional(),
+    acceptedResponseCount: z.number().int().nonnegative().optional(),
+    responseLimit: z.number().int().positive().optional(),
     subjectDisplayName: z.string().min(1),
     state: z.enum(["active", "paused", "completed", "stopped"]),
     ownerDisplayName: z.string().nullable(),
@@ -268,4 +276,16 @@ export function parseProgressConflictResolvedOutcome(
   value: unknown,
 ): ProgressConflictResolvedOutcome {
   return progressConflictResolvedOutcomeSchema.parse(value);
+}
+
+export const progressCheckInStartOutcomeSchema = z.discriminatedUnion("status", [
+  z.object({status: z.literal("started"), checkIn: progressCheckInRecordSchema, prompt: progressCheckInPromptSchema}).strict(),
+  z.object({status: z.literal("existing"), checkIn: progressCheckInRecordSchema, prompt: progressCheckInPromptSchema.nullable()}).strict(),
+  z.object({status: z.literal("different_check_in_active"), checkIn: progressCheckInRecordSchema}).strict(),
+  z.object({status: z.literal("no_question"), childId: identifierSchema, childName: identifierSchema, subjectId: identifierSchema, reason: z.enum(["sitting_limit", "bank_coverage_end", "no_useful_question", "parent_stopped"]), mixedEvidence: z.boolean()}).strict(),
+  z.object({status: z.literal("conflict_pending"), conflictId: identifierSchema}).strict(),
+]);
+
+export function parseProgressCheckInStartOutcome(value: unknown): ProgressCheckInStartOutcome {
+  return progressCheckInStartOutcomeSchema.parse(value);
 }

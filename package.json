@@ -124,6 +124,7 @@
     "test:hours-log:postgres": "NODE_OPTIONS=--conditions=react-server tsx scripts/hours-log-race-test.mts",
     "test:voice-action-receipts:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/voice-action-receipts-e2e.mts",
     "test:family-event-occurrences:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/family-event-occurrences-e2e.mts",
+    "test:deeper-progress-delivery:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/deeper-progress-delivery-e2e.mts",
     "test:progress-next-move:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/progress-next-move-e2e.mts",
     "test:family-pdf-cache:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/family-pdf-cache-e2e.mts",
     "test:family-pdf-memory:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/family-curriculum-read-e2e.mts --memory-only",

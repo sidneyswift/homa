@@ -665,6 +665,8 @@ class InMemoryChildProgressRepository
   simulateSelectionResponseAddition(): void {
     this.state.projectionInput?.selectionAnswers.push({
       selectionId: "simulated-response",
+      childId: CHILD_ID,
+      familyId: FAMILY_ID,
       evidenceId: null,
       itemId: "math.counts-to-10",
       answer: "skip",

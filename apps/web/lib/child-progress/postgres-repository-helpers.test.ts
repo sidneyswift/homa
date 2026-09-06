@@ -127,6 +127,8 @@ describe("Postgres child progress row mapping", () => {
   it("maps not-sure and skip responses with selection provenance", () => {
     const notSure = mapPostgresProgressSelectionResponseRow({
       id: "response-not-sure",
+      child_id: "child-1",
+      family_id: "family-1",
       evidence_id: null,
       item_id: "math.counts-to-5",
       answer: "not_sure",
@@ -134,6 +136,8 @@ describe("Postgres child progress row mapping", () => {
     });
     const skip = mapPostgresProgressSelectionResponseRow({
       id: "response-skip",
+      child_id: "child-1",
+      family_id: "family-1",
       evidence_id: null,
       item_id: "literacy.chapter-books",
       answer: "skip",
@@ -142,6 +146,8 @@ describe("Postgres child progress row mapping", () => {
 
     assert.deepEqual(notSure, {
       selectionId: "response-not-sure",
+      childId: "child-1",
+      familyId: "family-1",
       evidenceId: null,
       itemId: "math.counts-to-5",
       answer: "not_sure",
@@ -149,6 +155,8 @@ describe("Postgres child progress row mapping", () => {
     });
     assert.deepEqual(skip, {
       selectionId: "response-skip",
+      childId: "child-1",
+      familyId: "family-1",
       evidenceId: null,
       itemId: "literacy.chapter-books",
       answer: "skip",
@@ -260,6 +268,10 @@ describe("Postgres child progress row mapping", () => {
         episodeId: "episode-1",
         pendingRuntimeSessionId: null,
         pendingTurnId: null,
+        terminalReason: null,
+        acceptedResponseCount: null,
+        uncertainResponseCount: null,
+      terminalMixedEvidence: null,
         pauseReason: "topic_change",
         openedAt: "2026-07-11T18:00:00.000001Z",
         pausedAt: "2026-07-11T18:01:00.000002Z",

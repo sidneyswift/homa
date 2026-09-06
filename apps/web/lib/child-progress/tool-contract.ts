@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 
 import { z } from "zod";
 
+import { assessmentActionFromHeader } from "./assessment-intent";
+
 import type {
   ProgressCheckInChannel,
   ProgressCheckInContext,
@@ -187,6 +189,7 @@ export type ManageChildProgressInput = z.infer<
 >;
 
 interface ProgressToolAuthAttributes {
+  selectedAssessment?: unknown;
   memberUserId?: unknown;
   channel?: unknown;
   providerMessageId?: unknown;
@@ -277,6 +280,7 @@ export function createProgressToolContext(input: {
     activeProgressCheckInId !== null &&
     activeProgressDeliveryId !== null;
   return {
+    selectedAssessment: channel === "web" ? assessmentActionFromHeader(typeof attributes.selectedAssessment === "string" ? attributes.selectedAssessment : null) : null,
     familyId: input.access.familyId,
     memberUserId: optionalAttribute(attributes.memberUserId),
     channel,

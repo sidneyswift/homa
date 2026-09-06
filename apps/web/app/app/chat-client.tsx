@@ -1,5 +1,10 @@
 "use client";
 
+import type { ResolvedAssessmentAction, SelectedAssessmentAction } from "../../lib/child-progress/assessment-intent";
+import { useSelectedAssessment } from "./use-selected-assessment";
+import { SelectedAssessmentNotice } from "./selected-assessment-notice";
+import { selectedAssessmentStatus } from "./assessment-actions";
+
 import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
 import { Client, type HandleMessageStreamEvent } from "eve/client";
@@ -306,6 +311,8 @@ export function ChatClient({
   initialDraft,
   initialWorkingPlanId,
   initialMaterialId,
+  initialAssessment = null,
+  assessmentUnavailable = false,
   kids,
   slashSkills,
   serverHistory = null,
@@ -342,6 +349,8 @@ export function ChatClient({
   initialWorkingPlanId?: string;
   /** The family-checked Binder material selected by a closed deep link. */
   initialMaterialId?: string;
+  initialAssessment?: ResolvedAssessmentAction | null;
+  assessmentUnavailable?: boolean;
   /** The composer's "/" menu: kids to mention + the advertised skills. */
   kids?: { id: string; name: string; avatarUrl: string | null }[];
   slashSkills?: SlashSkillItem[];
@@ -573,7 +582,8 @@ export function ChatClient({
   const durableCursorRef = useRef(
     staleSessionlessEvents ? 0 : prepared.initialSession?.streamIndex ?? 0,
   );
-  const lastSendRef = useRef<{ text: string; atMs: number } | null>(null);
+  const lastSendRef = useRef<{ text: string; atMs: number; assessmentAction?: SelectedAssessmentAction } | null>(null);
+  const failedAssessmentActionsRef = useRef(new Map<string, SelectedAssessmentAction>());
   const replyCutoffTargetRef = useRef<LostTurnRecoveryTarget | null>(null);
   const recoveryRef = useRef<AbortController | null>(null);
   const boundaryWatchdogRef =
@@ -662,6 +672,14 @@ export function ChatClient({
     },
     onFinish(snapshot) {
       boundaryWatchdogRef.current?.finish();
+      const failedUser = snapshot.data.messages.findLast(message => message.role === "user");
+      const submitted = lastSendRef.current;
+      if (failedUser?.metadata?.status === "failed" && submitted?.assessmentAction &&
+        failedUser.parts.map(part => part.type === "text" ? part.text : "").join("") === submitted.text) {
+        // Bind transport failure to this optimistic bubble, never infer an action
+        // from a later parent sentence that happens to use the same words.
+        failedAssessmentActionsRef.current.set(failedUser.id, submitted.assessmentAction);
+      }
       // Stamp this turn's new message ids with the clock (the only time
       // source the transcript has; eve events carry sequence numbers,
       // not times), then persist. Callbacks refresh every render (eve's
@@ -774,11 +792,12 @@ export function ChatClient({
     message: string | UserContent,
     modality: ChatTurnModality,
     lane: ChatSendLane,
+    assessmentAction?: SelectedAssessmentAction,
   ) => {
     const visibleMessage = visibleBoundSendSummary(message);
     return withActiveMaterialHeader({
       headers: withWorkingPlanResumeHeader({
-        headers: chatSendHeaders(modality, lane),
+        headers: chatSendHeaders(modality, lane, assessmentAction),
         visibleMessage,
         initialMessage: initialDraft,
         workingPlanId: initialWorkingPlanId,
@@ -961,7 +980,7 @@ export function ChatClient({
       clearReplyCutoffRecovery();
       setBusySeconds(0);
       turnModalityRef.current = flush.modality;
-      lastSendRef.current = { text: message, atMs: currentTimeMs() };
+      lastSendRef.current = { text: message, atMs: currentTimeMs(), ...(flush.assessmentAction ? {assessmentAction: flush.assessmentAction} : {}) };
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
       void sendRef.current?.({
@@ -970,6 +989,7 @@ export function ChatClient({
           message,
           turnModalityRef.current,
           flush.lane,
+          flush.assessmentAction,
         ),
       });
     }, 0);
@@ -2085,6 +2105,7 @@ export function ChatClient({
       lane: plan.lane,
       modality: plan.modality,
       progressActionKey: plan.progressActionKey,
+      ...(plan.assessmentAction ? {assessmentAction: plan.assessmentAction} : {}),
     });
     const outgoing = flush.outgoing;
     if (outgoing === null) return "rejected";
@@ -2093,7 +2114,7 @@ export function ChatClient({
     setBusySeconds(0);
     autoStoppedRef.current = false;
     turnModalityRef.current = flush.modality;
-    lastSendRef.current = { text: outgoing, atMs: currentTimeMs() };
+    lastSendRef.current = { text: outgoing, atMs: currentTimeMs(), ...(flush.assessmentAction ? {assessmentAction: flush.assessmentAction} : {}) };
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
     void sendRef.current?.({
@@ -2102,6 +2123,7 @@ export function ChatClient({
         outgoing,
         turnModalityRef.current,
         flush.lane,
+        flush.assessmentAction,
       ),
     });
     return "sent";
@@ -2118,8 +2140,16 @@ export function ChatClient({
    * (part 1 of the same fix), and queues it instead, same as anything
    * else typed in that window.
    */
-  function retryFailedMessage(text: string): void {
-    sendMessage(text, { kind: "card_answer" });
+  async function retryFailedMessage(text: string, messageId: string): Promise<void> {
+    const assessmentAction = failedAssessmentActionsRef.current.get(messageId);
+    if (!assessmentAction) { sendMessage(text, {kind: "card_answer"}); return; }
+    const receipt = await selectedAssessmentStatus(assessmentAction).catch(() => ({status: "unavailable" as const}));
+    if (receipt.status !== "accepted" && receipt.status !== "not_started") return;
+    const {retryRevision: previousRevision, ...pointer} = assessmentAction;
+    void previousRevision;
+    sendMessage(text, {kind: "assessment_action", assessmentAction: {
+      ...pointer, ...(receipt.status === "accepted" ? {retryRevision: receipt.revision} : {}),
+    }});
   }
 
   /**
@@ -2244,6 +2274,14 @@ export function ChatClient({
     );
   }
 
+  const selectedAssessment = useSelectedAssessment({
+    action: initialAssessment,
+    storageKey,
+    ready: hydrated && !restoringBoundSession && !bindingSyncFailure && !authorizationParked && !onboarding,
+    walled: Boolean(wall),
+    send: (message, source) => sendMessageRef.current?.(message, source) ?? "rejected",
+  });
+
   return (
     // 3.5rem is /app's phone top bar (h-14); on desktop the sidebar sits
     // beside this column, so the full viewport height is ours. The planner
@@ -2259,6 +2297,10 @@ export function ChatClient({
       className={`quiet-chat ${onboarding ? "flex h-dvh" : "flex h-[calc(100dvh-3.5rem)] lg:h-dvh"}`}
     >
     <div className="quiet-chat__column relative flex h-full min-w-0 flex-1 flex-col">
+      <SelectedAssessmentNotice action={initialAssessment} unavailable={assessmentUnavailable}
+        state={selectedAssessment.state} walled={Boolean(wall)} onRetry={selectedAssessment.retry}
+        onAccountSetup={() => setWallOpen(true)} />
+
       {/* The morning scrolls into everything above it: a soft fade at
           the top edge whenever there is more past to scroll to. This
           lives outside the scrollable <main> as a plain absolute

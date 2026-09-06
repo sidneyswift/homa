@@ -768,6 +768,8 @@ export class ChildProgressService {
           }
           projectionInput.selectionAnswers.push({
             selectionId,
+            childId: input.childId,
+            familyId: input.familyId,
             evidenceId: null,
             itemId: change.itemId,
             answer: change.answer,
@@ -800,6 +802,8 @@ export class ChildProgressService {
         recordedEvidence.push(evidence);
         projectionInput.selectionAnswers.push({
           selectionId,
+          childId: input.childId,
+          familyId: input.familyId,
           evidenceId: evidence.id,
           itemId: change.itemId,
           answer: change.answer,
@@ -1316,6 +1320,8 @@ export class ChildProgressService {
       );
     projectionInput.selectionAnswers.push({
       selectionId,
+      childId: input.childId,
+      familyId: input.familyId,
       evidenceId: null,
       itemId: input.itemId,
       answer: input.answer,

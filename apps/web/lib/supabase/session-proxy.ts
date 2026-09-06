@@ -2,6 +2,7 @@ import type { CookieMethodsServer } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { safeSameOriginPath } from "../safe-redirect";
+import { ASSESSMENT_PENDING_COOKIE, assessmentActionFromQuery } from "../child-progress/assessment-intent";
 
 type CookieWrite = Parameters<
   NonNullable<CookieMethodsServer["setAll"]>
@@ -46,6 +47,15 @@ export function createSessionProxyHandler(
 
     const isSignedIn = await dependencies.hasVerifiedClaims(cookieMethods);
     const path = request.nextUrl.pathname;
+    const isPrefetch = request.headers.has("next-router-prefetch") ||
+      request.headers.get("purpose") === "prefetch" || request.headers.get("sec-purpose")?.includes("prefetch");
+    const selectedAssessment = !isPrefetch && (path === "/app" || path === "/onboarding")
+      ? assessmentActionFromQuery(Object.fromEntries(request.nextUrl.searchParams), crypto.randomUUID()) : null;
+    if (selectedAssessment) {
+      const cookie = {name: ASSESSMENT_PENDING_COOKIE, value: JSON.stringify(selectedAssessment), options: {httpOnly: true, sameSite: "lax" as const, secure: request.nextUrl.protocol === "https:", path: "/", maxAge: 3600}};
+      request.cookies.set(cookie.name, cookie.value);
+      pendingCookies.push(cookie);
+    }
     const needsAuth = path === "/app" || path.startsWith("/app/");
 
     let response: NextResponse;

@@ -28,6 +28,7 @@ const success = {
   checks: "success",
   "db-checks": "success",
   "e2e-checks": "success",
+  "browser-checks": "success",
 };
 
 test("documentation-only changes take the light CI path", () => {
@@ -226,6 +227,7 @@ test("the required-status gate accepts exactly the jobs for each scope", () => {
       checks: "skipped",
       "db-checks": "skipped",
       "e2e-checks": "skipped",
+      "browser-checks": "skipped",
     }),
   );
   assert.doesNotThrow(() =>
@@ -236,6 +238,7 @@ test("the required-status gate accepts exactly the jobs for each scope", () => {
       checks: "skipped",
       "db-checks": "skipped",
       "e2e-checks": "skipped",
+      "browser-checks": "skipped",
     }),
   );
 });
