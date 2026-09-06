@@ -25,7 +25,7 @@ export function embeddingModelId(): string {
 /** Returns the pgvector literal ('[0.1,0.2,...]') or null on any failure. */
 export async function embedText(
   text: string,
-  attribution?: { familyId: string | null },
+  attribution?: { familyId: string | null; signal?: AbortSignal },
 ): Promise<string | null> {
   const value = text.trim().slice(0, EMBED_MAX_CHARS);
   if (value.length < 3) return null;
@@ -37,6 +37,8 @@ export async function embedText(
       model,
       value,
       maxRetries: 1,
+      abortSignal: attribution?.signal
+        ? AbortSignal.any([attribution.signal, AbortSignal.timeout(20_000)]) : undefined,
       providerOptions: {
         gateway: gatewayAttribution(familyId, "embedding"),
       },

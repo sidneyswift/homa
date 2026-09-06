@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { dirname, join, sep } from "node:path";
 
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, type PDFDocumentProxy, type PDFPageProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
 import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 
 /**
@@ -116,7 +116,7 @@ interface NapiCanvasAndContext {
  */
 class NapiCanvasFactory {
   create(width: number, height: number): NapiCanvasAndContext {
-    if (width <= 0 || height <= 0) {
+    if (!validCanvasSize(width, height)) {
       throw new Error("Invalid canvas size");
     }
     const canvas = loadedNapiCanvas().createCanvas(width, height);
@@ -128,7 +128,7 @@ class NapiCanvasFactory {
     width: number,
     height: number,
   ): void {
-    if (!canvasAndContext.canvas || width <= 0 || height <= 0) {
+    if (!canvasAndContext.canvas || !validCanvasSize(width, height)) {
       throw new Error("Invalid canvas reset");
     }
     canvasAndContext.canvas.width = width;
@@ -142,6 +142,69 @@ class NapiCanvasFactory {
     canvasAndContext.canvas = null;
     canvasAndContext.context = null;
   }
+}
+
+/** Applies to page and internal scratch canvases, before native allocation. */
+export function validCanvasSize(width: number, height: number): boolean {
+  return Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0
+    && width <= 8_000 && height <= 8_000 && width * height <= 32_000_000;
+}
+
+/** Untrusted originals use strict decoding: oversized embedded images must
+ * fail rather than disappear and make an unreadable scan look blank. */
+export async function withPdfForReading<T>(
+  pdf: Uint8Array,
+  signal: AbortSignal,
+  read: (document: PDFDocumentProxy) => Promise<T>,
+): Promise<T> {
+  signal.throwIfAborted();
+  await loadNapiCanvas();
+  const task = getDocument({
+    data: new Uint8Array(pdf), CanvasFactory: NapiCanvasFactory,
+    standardFontDataUrl: standardFontDataPath(), maxImageSize: 32_000_000,
+    stopAtErrors: true,
+    // The pinned pdf.js patch applies these before decoder and lexer
+    // allocations, where an output text limit or timer cannot intervene.
+    homaReadLimits: {
+      maxDecodedStreamBytes: 32 * 1024 * 1024,
+      maxAllocatedBytes: 128 * 1024 * 1024,
+      maxTokenChars: 262_144,
+      maxArrayEntries: 100_000,
+      maxImagePixels: 32_000_000,
+    },
+  });
+  const abort = () => { void task.destroy().catch(() => {}); };
+  signal.addEventListener("abort", abort, { once: true });
+  try {
+    signal.throwIfAborted();
+    const document = await task.promise;
+    return await read(document);
+  } finally {
+    signal.removeEventListener("abort", abort);
+    await task.destroy();
+  }
+}
+
+/** Render exactly one requested page; never rasterize its preceding pages. */
+export async function rasterizePdfPageForReading(page: PDFPageProxy, signal: AbortSignal): Promise<Buffer> {
+  signal.throwIfAborted();
+  const original = page.getViewport({ scale: RASTER_SCALE });
+  if (!validCanvasSize(original.width, original.height)) throw new Error("PDF page exceeds rendering limits");
+  const scale = RASTER_SCALE * Math.min(1, Math.sqrt(4_000_000 / (original.width * original.height)));
+  const viewport = page.getViewport({ scale });
+  const factory = new NapiCanvasFactory();
+  const target = factory.create(Math.ceil(viewport.width), Math.ceil(viewport.height));
+  try {
+    const render = page.render({ canvas: target.canvas as unknown as HTMLCanvasElement, viewport, background: "#ffffff" });
+    const abort = () => render.cancel();
+    signal.addEventListener("abort", abort, { once: true });
+    try {
+      signal.throwIfAborted();
+      await render.promise;
+      signal.throwIfAborted();
+      return Buffer.from(target.canvas!.toBuffer("image/jpeg", RASTER_JPEG_QUALITY));
+    } finally { signal.removeEventListener("abort", abort); }
+  } finally { factory.destroy(target); }
 }
 
 /**
@@ -198,8 +261,8 @@ export async function rasterizePdfToJpegs(
     standardFontDataUrl: standardFontDataPath(),
     CanvasFactory: NapiCanvasFactory,
   });
-  const document = await task.promise;
   try {
+    const document = await task.promise;
     const pageCount = document.numPages;
     const canvasFactory = new NapiCanvasFactory();
     const pageJpegs: Buffer[] = [];

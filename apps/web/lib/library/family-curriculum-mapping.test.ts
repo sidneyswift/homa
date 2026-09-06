@@ -184,6 +184,15 @@ describe("family curriculum mapping contract", () => {
     );
   });
 
+  it("accepts canonical partial-page quotes but rejects text labeled unreadable", () => {
+    for (const state of ["readable", "partial", "unreadable", "blank"] as const) {
+      assert.deepEqual(invalidCurriculumEvidenceOrdinals(PROPOSAL, {
+        ok: true, segmentKind: "page", totalSegments: 8, truncated: true,
+        segments: [{ ordinal: 8, locator: "Page 8", text: "Week 1: Living things", state, method: "vision" }],
+      }), state === "readable" || state === "partial" ? [] : [1]);
+    }
+  });
+
   it("uses a distinct Blob URL identity while preserving the original path", () => {
     const source =
       "https://store.public.blob.vercel-storage.com/families/family/library/book.pdf";
