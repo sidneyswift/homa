@@ -1,0 +1,319 @@
+{
+  "startedAt": "2026-09-06T17:22:11.722Z",
+  "finishedAt": "2026-09-06T17:22:31.389Z",
+  "operatorAttestedDeploymentSha": "69abbefdd2cc507c55f07c577c1235ce27168626",
+  "status": "passed",
+  "snapshots": [
+    {
+      "label": "initial-family",
+      "scope": "Whole family",
+      "description": "Showing recorded time for the whole family.",
+      "rows": [
+        "Reading11mAverySynthetic scope A ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading15mBlairSynthetic scope B ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "31m"
+      ],
+      "childTotals": [
+        {
+          "name": "Avery",
+          "values": [
+            "16m",
+            "16m",
+            "16m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "values": [
+            "20m",
+            "20m",
+            "20m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "A-selected",
+      "scope": "Avery",
+      "description": "Showing Avery's recorded time, including time shared with the whole family.",
+      "rows": [
+        "Reading11mAverySynthetic scope A ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "16m"
+      ],
+      "childTotals": [
+        {
+          "name": "Avery",
+          "values": [
+            "16m",
+            "16m",
+            "16m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "A-reloaded",
+      "scope": "Avery",
+      "description": "Showing Avery's recorded time, including time shared with the whole family.",
+      "rows": [
+        "Reading11mAverySynthetic scope A ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "16m"
+      ],
+      "childTotals": [
+        {
+          "name": "Avery",
+          "values": [
+            "16m",
+            "16m",
+            "16m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "query-B-over-cookie-A",
+      "scope": "Blair",
+      "description": "Showing Blair's recorded time, including time shared with the whole family.",
+      "rows": [
+        "Reading15mBlairSynthetic scope B ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "20m"
+      ],
+      "childTotals": [
+        {
+          "name": "Blair",
+          "values": [
+            "20m",
+            "20m",
+            "20m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "B-persisted",
+      "scope": "Blair",
+      "description": "Showing Blair's recorded time, including time shared with the whole family.",
+      "rows": [
+        "Reading15mBlairSynthetic scope B ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "20m"
+      ],
+      "childTotals": [
+        {
+          "name": "Blair",
+          "values": [
+            "20m",
+            "20m",
+            "20m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "B-reloaded",
+      "scope": "Blair",
+      "description": "Showing Blair's recorded time, including time shared with the whole family.",
+      "rows": [
+        "Reading15mBlairSynthetic scope B ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "20m"
+      ],
+      "childTotals": [
+        {
+          "name": "Blair",
+          "values": [
+            "20m",
+            "20m",
+            "20m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "whole-family-selected",
+      "scope": "Whole family",
+      "description": "Showing recorded time for the whole family.",
+      "rows": [
+        "Reading11mAverySynthetic scope A ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading15mBlairSynthetic scope B ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "31m"
+      ],
+      "childTotals": [
+        {
+          "name": "Avery",
+          "values": [
+            "16m",
+            "16m",
+            "16m"
+          ]
+        },
+        {
+          "name": "Blair",
+          "values": [
+            "20m",
+            "20m",
+            "20m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "A-selected-again",
+      "scope": "Avery",
+      "description": "Showing Avery's recorded time, including time shared with the whole family.",
+      "rows": [
+        "Reading11mAverySynthetic scope A ed3bf530-63fc-4265-af25-abcc3a107b31Edit",
+        "Reading5mWhole familySynthetic scope shared ed3bf530-63fc-4265-af25-abcc3a107b31Edit"
+      ],
+      "dayTotals": [
+        "16m"
+      ],
+      "childTotals": [
+        {
+          "name": "Avery",
+          "values": [
+            "16m",
+            "16m",
+            "16m"
+          ]
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    }
+  ],
+  "binder": {
+    "emptyCollection": true,
+    "childScope": "Avery",
+    "sharedFamilyExplanation": true,
+    "productionCoverLimit": "No nonempty fixture or PDF created. Cover-only behavior requires the separate existing production baseline and actual-source local evidence."
+  },
+  "sideEffects": {
+    "emails": 0,
+    "models": 0,
+    "messages": 0,
+    "materials": 0,
+    "assets": 0,
+    "studio_runs": 0,
+    "schedules": 0,
+    "phones": 0,
+    "events": 0,
+    "activities": 0,
+    "working_plans": 0
+  },
+  "cleanup": {
+    "status": "family-and-auth-removed",
+    "deletionJobId": "74b39c93-62a8-4c80-adc2-be6824cdcb6a",
+    "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+    "remaining": {
+      "users": 0,
+      "sessions": 0,
+      "families": 0,
+      "children": 0,
+      "memberships": 0,
+      "hours": 0,
+      "messages": 0
+    }
+  },
+  "assertions": {
+    "passed": 169,
+    "failed": 0,
+    "scope": "One hosted journey, including repeated ownership and cleanup assertions."
+  },
+  "browser": {
+    "actions": [
+      {
+        "stage": "browser-signin",
+        "path": "/signin",
+        "dispatched": true,
+        "status": 303
+      },
+      {
+        "stage": "select-A",
+        "path": "/app/planner",
+        "dispatched": true,
+        "status": 200
+      },
+      {
+        "stage": "persist-query-B",
+        "path": "/app/planner",
+        "dispatched": true,
+        "status": 200
+      },
+      {
+        "stage": "select-family",
+        "path": "/app/planner",
+        "dispatched": true,
+        "status": 200
+      },
+      {
+        "stage": "select-A-again",
+        "path": "/app/planner",
+        "dispatched": true,
+        "status": 200
+      }
+    ],
+    "pageErrorCount": 0,
+    "scopeActionBinding": {
+      "actionId": "40d6dc026c1efe364bedddec8321a795fad67593a9",
+      "sources": [
+        {
+          "actionId": "40d6dc026c1efe364bedddec8321a795fad67593a9",
+          "sourcePath": "/_next/static/chunks/2olgudb9x25ld.js",
+          "sha256": "8f465dd7ce3a158bbe1bf60c346b04ef7c1b249a5431320f4431e3ab1f8d9c4e"
+        }
+      ],
+      "arguments": "Each request body must equal the one-element JSON array containing the expected owned child ID or family."
+    }
+  },
+  "probeSha256": "ec125a9f1c852939a66e7b50ef5098321f9cc33977e5cb589b4093b1cf734e84"
+}
