@@ -55,6 +55,7 @@ let familyLibrarySchemaAvailable = false;
 let familyAssetPlanLinksSchemaAvailable = false;
 let familyCurriculumMappingSchemaAvailable = false;
 let progressNextMovesSchemaAvailable = false;
+let progressStartRequestsSchemaAvailable = false;
 let eveWebSessionOwnersSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
@@ -389,6 +390,29 @@ async function expectAuthenticatedWritesDenied(
     fixture.keyValue,
     `${label} delete`,
   );
+}
+
+// PostgreSQL may reject this joined view as non-updatable before checking
+// privileges. Grant absence is checked separately against pg_catalog below.
+async function expectSelectedProgressWritesDenied(accessToken, table, fixture, label) {
+  for (const [method, pathname, row] of [
+    ["POST", table, fixture.insertRow],
+    ["PATCH", `${table}?request_id=eq.${fixture.keyValue}`, fixture.updateRow],
+    ["DELETE", `${table}?request_id=eq.${fixture.keyValue}`, undefined],
+  ]) {
+    const init = { method, body: row === undefined ? undefined : JSON.stringify(row) };
+    const response = accessToken
+      ? await restAs(accessToken, pathname, init)
+      : await rest(pathname, init);
+    const raw = await response.text();
+    let code = null;
+    try { code = JSON.parse(raw).code; } catch { /* A non-JSON error cannot satisfy the view exception. */ }
+    const denied = response.status === 401 || response.status === 403;
+    const nonUpdatableView = table === "progress_check_in_start_request_status"
+      && response.status === 400 && code === "55000";
+    report(`${label} ${method} ${table}`, denied || nonUpdatableView,
+      `HTTP ${response.status}, code ${code ?? "unknown"}`);
+  }
 }
 
 async function expectEmptyRead(table) {
@@ -4757,6 +4781,69 @@ async function expectAuthenticatedIsolation() {
       );
     }
 
+    if (progressStartRequestsSchemaAvailable) {
+      const requestId = randomUUID();
+      await sql`
+        insert into public.progress_check_in_start_requests (
+          family_id, member_user_id, request_id, child_id, subject_id,
+          runtime_session_id, turn_id, issued_check_in_id, issued_revision
+        ) values (
+          ${familyBId}, ${familyBUser.userId}, ${requestId}, ${childBId}, 'math',
+          'isolation-progress-session', 'isolation-progress-turn',
+          ${childProgressFixtures.checkInId}, 1
+        )
+      `;
+      const fixture = {
+        keyColumn: "request_id",
+        keyValue: requestId,
+        insertRow: {
+          family_id: familyBId,
+          member_user_id: familyBUser.userId,
+          request_id: randomUUID(),
+          child_id: childBId,
+          subject_id: "math",
+          runtime_session_id: "isolation-forged-session",
+          turn_id: "isolation-forged-turn",
+        },
+        updateRow: { subject_id: "music" },
+      };
+      // The status view must retain the receipt's per-adult boundary, not
+      // merely the underlying sitting's broader family-read policy.
+      for (const table of [
+        "progress_check_in_start_requests",
+        "progress_check_in_start_request_status",
+      ]) {
+        const [grants] = await sql`
+          select has_table_privilege('authenticated', ${`public.${table}`}, 'SELECT') as member_read,
+            has_table_privilege('authenticated', ${`public.${table}`}, 'INSERT,UPDATE,DELETE') as member_write,
+            has_table_privilege('anon', ${`public.${table}`}, 'SELECT,INSERT,UPDATE,DELETE') as anon_access
+        `;
+        report(`${table} grants only member reads`,
+          grants.member_read === true && grants.member_write === false && grants.anon_access === false);
+        const relationFixture = { ...fixture, insertRow: { ...fixture.insertRow } };
+        if (table === "progress_check_in_start_request_status") {
+          // Only submit columns actually exposed by the joined view. An
+          // unknown-column error would prove nothing about write access.
+          delete relationFixture.insertRow.runtime_session_id;
+          delete relationFixture.insertRow.turn_id;
+        }
+        for (const [user, count, label] of [
+          [familyBUser, 1, "owning adult"],
+          [familyBSecondUser, 0, "same-family other adult"],
+          [familyAUser, 0, "other-family adult"],
+        ]) {
+          await expectAuthenticatedRead(
+            user.accessToken, table, requestId, count,
+            `${label} sees ${count} selected progress receipt in ${table}`, "request_id",
+          );
+          await expectSelectedProgressWritesDenied(
+            user.accessToken, table, relationFixture, `${label} cannot`,
+          );
+        }
+        await expectSelectedProgressWritesDenied(null, table, relationFixture, "anonymous cannot");
+      }
+    }
+
     const childProgressWriteFixtures = [
       {
         table: "child_progress_evidence",
@@ -5100,6 +5187,36 @@ for (const table of [
   "child_observations",
 ]) {
   await expectAnonymousNoRowsOrDenied(table);
+}
+// Selected-action receipts are additive. Before deployment both relations
+// may be absent; a partial migration fails. Once present, probe both the
+// table and the invoker view, then exercise per-adult access with real JWTs.
+{
+  const relations = [
+    "progress_check_in_start_requests",
+    "progress_check_in_start_request_status",
+  ];
+  const absent = [];
+  for (const table of relations) {
+    const response = await rest(`${table}?select=request_id&limit=1`, {
+      headers: { Prefer: "" },
+    });
+    const raw = await response.text();
+    absent.push(response.status === 404 && raw.includes("PGRST205"));
+  }
+  if (absent.every(Boolean)) {
+    for (const table of relations) coveredTables.add(table);
+    report(
+      "selected progress receipt migration absent from target; nothing exposed",
+      true,
+      "both additive relations absent; deployed behavior is not certified",
+    );
+  } else if (absent.some(Boolean)) {
+    report("selected progress receipt migration is complete", false, "only one relation exists");
+  } else {
+    progressStartRequestsSchemaAvailable = true;
+    for (const table of relations) await expectReadDenied(table);
+  }
 }
 // Stable Progress next moves are derived, server-only state. The additive
 // migration may lead or follow this guard during rollout, so absence is safe;

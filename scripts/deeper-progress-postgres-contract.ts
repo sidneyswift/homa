@@ -56,23 +56,45 @@ export async function assertDeeperProgressPostgres(sql: postgres.Sql): Promise<v
 
   // RLS reads are scoped to the requesting adult as well as their family.
   await sql`grant select on public.family_members to authenticated`;
-  const readAs = (userId: string) => sql.begin(async tx => {
-    await tx`select set_config('request.jwt.claim.sub', ${userId}, true)`;
-    await tx`set local role authenticated`;
-    return tx`select request_id from public.progress_check_in_start_requests where family_id = ${familyId}`;
-  });
-  assert.equal((await readAs(adult)).length, 1);
-  assert.equal((await readAs(partner)).length, 0);
-  assert.equal((await readAs(outsider)).length, 0);
-  for (const statement of [
-    "update public.progress_check_in_start_requests set result = '{}'::jsonb",
-    "delete from public.progress_check_in_start_requests",
-    "insert into public.progress_check_in_start_requests default values",
-  ]) await assert.rejects(sql.begin(async tx => {
-    await tx`select set_config('request.jwt.claim.sub', ${adult}, true)`;
-    await tx`set local role authenticated`;
-    await tx.unsafe(statement);
-  }), /permission denied/u);
+  for (const relation of [
+    "public.progress_check_in_start_requests",
+    "public.progress_check_in_start_request_status",
+  ]) {
+    const [grants] = await sql`
+      select has_table_privilege('authenticated', ${relation}, 'SELECT') as member_read,
+        has_table_privilege('authenticated', ${relation}, 'INSERT,UPDATE,DELETE') as member_write,
+        has_table_privilege('anon', ${relation}, 'SELECT,INSERT,UPDATE,DELETE') as anon_access
+    `;
+    assert.deepEqual({...grants}, {member_read: true, member_write: false, anon_access: false});
+    const readAs = (userId: string) => sql.begin(async tx => {
+      await tx`select set_config('request.jwt.claim.sub', ${userId}, true)`;
+      await tx`set local role authenticated`;
+      return tx`select request_id from ${tx(relation)} where family_id = ${familyId}`;
+    });
+    assert.equal((await readAs(adult)).length, 1, `${relation}: owner`);
+    assert.equal((await readAs(partner)).length, 0, `${relation}: same-family adult`);
+    assert.equal((await readAs(outsider)).length, 0, `${relation}: outsider`);
+    await assert.rejects(sql.begin(async tx => {
+      await tx`set local role anon`;
+      await tx`select request_id from ${tx(relation)}`;
+    }), /permission denied/u);
+    for (const statement of [
+      `update ${relation} set subject_id = 'music'`,
+      `delete from ${relation}`,
+      `insert into ${relation} default values`,
+    ]) {
+      for (const userId of [adult, partner, outsider]) {
+        await assert.rejects(sql.begin(async tx => {
+          await tx`select set_config('request.jwt.claim.sub', ${userId}, true)`;
+          await tx`set local role authenticated`;
+          await tx.unsafe(statement);
+        }), (error: unknown) => {
+          const code = (error as {code?: string}).code;
+          return code === "42501" || (relation.endsWith("_status") && code === "55000");
+        });
+      }
+    }
+  }
 
   const counts = async () => (await sql`select
     (select count(*)::integer from public.progress_check_in_responses where family_id = ${familyId}) responses,
