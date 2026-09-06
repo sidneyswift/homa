@@ -1,276 +1,244 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type Ref } from "react";
 import { useRouter } from "next/navigation";
 
 import { HOURS_SUBJECTS } from "../../../lib/hours-model";
-import { SUBJECT_LABELS, subjectDisplayLabel, type HoursEntry } from "../../../lib/hours-view";
+import { hoursNoteCharacterCount, recordedTimeAudience, type HoursEditContext } from "../../../lib/hours-edit";
+import { SUBJECT_LABELS, type HoursEntry } from "../../../lib/hours-view";
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
-import {
-  deleteHoursEntryAction,
-  updateHoursEntryAction,
-  type HoursActionState,
-} from "./actions";
+import { deleteHoursEntryAction, getHoursEntryEditContextAction, updateHoursEntryAction } from "./actions";
 
-/**
- * The recorded-time dialog: edit subject, minutes, and note, or delete the
- * entry. Focus-trap and Escape behavior mirror the house pattern for
- * centered dialogs (the Binder's MaterialDetailOverlay, the Tasks
- * editor), rather than inventing a new one.
- */
-
-const INITIAL_STATE: HoursActionState = { error: null };
-
-const SOURCE_EXPLANATIONS = {
-  chat: "Added after you mentioned it in Chat.",
+const SOURCE_EXPLANATIONS: Record<string, string> = {
   sms: "Added after you mentioned it by text.",
   call: "Added after you mentioned it on a phone call.",
-} as const;
+  email: "Added after you mentioned it by email.",
+  dispatch: "Added by Homa during a scheduled check-in.",
+};
+const FIELD_CLASS = "min-h-11 w-full rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)]";
+const SUMMARY_CLASS = "min-h-11 cursor-pointer py-3 text-sm font-semibold";
 
-function DeleteEntryButton({ entry, onDone }: { entry: HoursEntry; onDone: () => void }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+function recordedDate(date: string): string {
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "UTC",
+  });
+}
 
-  if (!confirming) {
-    return (
-      <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="quiet-action quiet-action--quiet min-h-9 px-0 text-xs"
-        >
-          Delete this entry
-        </button>
-      </div>
-    );
-  }
-
+export function HoursEntryForm({ context, pending, error, errorRef, onSave, onClose, onDeleteRequest }: {
+  context: HoursEditContext;
+  pending: "save" | "delete" | null;
+  error?: string | null;
+  errorRef?: Ref<HTMLParagraphElement>;
+  onSave: (formData: FormData) => void;
+  onClose: () => void;
+  onDeleteRequest?: () => void;
+}) {
+  const { entry } = context;
+  const audience = recordedTimeAudience(context);
+  const [note, setNote] = useState(entry.note ?? "");
+  const noteCount = hoursNoteCharacterCount(note);
+  const noteCountId = useId();
+  const categoryHintId = useId();
+  const annotationOwner = entry.childName ?? "the whole family";
   return (
-    <div className="mt-4 border-t border-[var(--homa-control-boundary)] pt-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-          {`Delete this ${entry.minutes}-minute ${subjectDisplayLabel(entry).toLowerCase()} entry? This can't be undone.`}
-        </p>
-        <div className="flex shrink-0 gap-2">
-          <QuietAction
-            kind="secondary"
-            size="default"
-            disabled={pending}
-            onClick={() => {
-              setError(null);
-              startTransition(async () => {
-                const result = await deleteHoursEntryAction(entry.id);
-                if (result.error === null) {
-                  onDone();
-                  router.refresh();
-                } else {
-                  setError(result.error);
-                }
-              });
-            }}
-            className="px-3.5 text-xs text-[color:var(--homa-error-ink)]"
-          >
-            {pending ? "Deleting\u2026" : "Delete"}
-          </QuietAction>
-          <QuietAction
-            kind="quiet"
-            size="default"
-            onClick={() => setConfirming(false)}
-            className="px-3.5 text-xs"
-          >
-            Keep
-          </QuietAction>
+    <form onSubmit={(event) => { event.preventDefault(); onSave(new FormData(event.currentTarget)); }} className="flex min-h-0 flex-col">
+      <div className="min-h-0 overflow-y-auto">
+        {context.activity ? <p className="mt-2 break-words text-sm font-semibold">{context.activity.title}</p> : null}
+        <p className="mt-2 text-sm">{recordedDate(entry.happenedOn)}</p>
+        <p className="mt-2 text-sm">{context.activity
+          ? `Time and subject changes apply to ${audience}.`
+          : `Recorded time for ${audience}.`}</p>
+        <fieldset disabled={pending !== null} className="mt-4 flex min-w-0 flex-col gap-3"
+          onFocus={(event) => event.target.scrollIntoView({ block: "nearest" })}>
+          <label className="flex flex-col gap-1.5 text-sm font-semibold">
+            Subject
+            <select name="subject" defaultValue={entry.subject} className={FIELD_CLASS}>
+              {HOURS_SUBJECTS.map((subject) => <option key={subject} value={subject}>{SUBJECT_LABELS[subject]}</option>)}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-semibold">
+            Minutes
+            <input name="minutes" type="number" inputMode="numeric" min={1} max={600} step={1} required defaultValue={entry.minutes} className={FIELD_CLASS} />
+          </label>
+          <details className="border-t border-[var(--homa-control-boundary)]">
+            <summary className={SUMMARY_CLASS}>Category and note for {annotationOwner}</summary>
+            <p className="mb-3 text-sm">{entry.childName ? `These belong only to ${entry.childName}'s time record.` : "These belong to this whole-family time record."}</p>
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Category (optional)
+              <input name="customLabel" defaultValue={entry.customLabel ?? ""} aria-describedby={categoryHintId} className={FIELD_CLASS} />
+            </label>
+            <p id={categoryHintId} className="mt-1 text-sm">A label such as Math club or Piano lesson. Up to 40 characters.</p>
+            <label className="mt-3 flex flex-col gap-1.5 text-sm font-semibold">
+              Note for {annotationOwner}
+              <textarea name="note" value={note} onChange={(event) => setNote(event.target.value)} rows={4}
+                aria-describedby={noteCountId} aria-invalid={noteCount > 200 || undefined} className={FIELD_CLASS} />
+            </label>
+            <p id={noteCountId} className="mt-1 text-sm">{noteCount}/200 characters{noteCount > 200 ? ". Shorten the note to save." : ""}</p>
+          </details>
+        </fieldset>
+        {context.activity?.note ? <details className="border-t border-[var(--homa-control-boundary)]">
+          <summary className={SUMMARY_CLASS}>Planner notes (read only)</summary>
+          <p className="pb-3 whitespace-pre-wrap break-words text-sm">{context.activity.note}</p>
+        </details> : null}
+        <p className="mt-2 text-sm">{SOURCE_EXPLANATIONS[entry.source] ?? "Saved in School hours."}</p>
+        {onDeleteRequest ? <div className="mt-4 border-t border-[var(--homa-control-boundary)] py-3">
+          <p className="mb-2 text-sm">Deleting recorded time removes the categories and notes for {audience} too.</p>
+          <QuietAction kind="quiet" disabled={pending !== null} onClick={onDeleteRequest}>Delete recorded time</QuietAction>
+        </div> : null}
+      </div>
+      <div className="shrink-0 border-t border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] pt-3">
+        {error ? <p ref={errorRef} tabIndex={-1} role="alert" className="mb-3 text-sm text-[color:var(--homa-error-ink)]">{error}</p> : null}
+        <div className="flex flex-wrap justify-end gap-2">
+          <QuietAction kind="quiet" onClick={onClose} disabled={pending !== null}>Cancel</QuietAction>
+          <QuietAction kind="primary" type="submit" disabled={pending !== null || noteCount > 200}>{pending === "save" ? "Saving…" : "Save changes"}</QuietAction>
         </div>
       </div>
-      {error ? <p className="mt-2 text-xs text-[color:var(--homa-error-ink)]">{error}</p> : null}
-    </div>
+    </form>
   );
 }
 
-export function HoursEntryOverlay({
-  entry,
-  onClose,
-}: {
-  entry: HoursEntry;
-  onClose: () => void;
-}) {
+/** One editor is used from Day, Week and Hours. Context always comes from the
+ * authenticated junction lookup, including when Hours loads no Planner rows. */
+export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const confirmationRef = useRef<HTMLDivElement>(null);
+  const deleteTrigger = useRef<HTMLElement | null>(null);
+  const wasConfirming = useRef(false);
+  const closeHandler = useRef(onClose);
+  const busy = useRef(false);
+  const deleted = useRef(false);
   const router = useRouter();
-  const [subject, setSubject] = useState(entry.subject);
+  const [, startTransition] = useTransition();
+  const [context, setContext] = useState<HoursEditContext | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<"save" | "delete" | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
-  const [state, formAction, pending] = useActionState(
-    async (prev: HoursActionState, formData: FormData) => {
-      const result = await updateHoursEntryAction(entry.id, prev, formData);
-      if (result.error === null) {
-        onClose();
-        router.refresh();
+  useEffect(() => { closeHandler.current = confirming ? () => setConfirming(false) : onClose; }, [onClose, confirming]);
+  useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
+  useEffect(() => {
+    if (confirming) confirmationRef.current?.querySelector<HTMLButtonElement>("button:last-child")?.focus();
+    else if (wasConfirming.current) deleteTrigger.current?.focus();
+    wasConfirming.current = confirming;
+  }, [confirming]);
+  useEffect(() => {
+    let active = true;
+    startTransition(async () => {
+      try {
+        const result = await getHoursEntryEditContextAction(entry.id);
+        if (!active) return;
+        setContext(result.context);
+        setLoadError(result.error);
+      } catch {
+        if (active) setLoadError("That time record couldn't load. Check your connection and try again.");
       }
-      return result;
-    },
-    INITIAL_STATE,
-  );
+    });
+    return () => { active = false; };
+  }, [entry.id, attempt]);
 
   useEffect(() => {
-    const previouslyFocused =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const anchor = opener?.closest<HTMLElement>("[data-hours-focus-anchor]")
+      ?? document.querySelector<HTMLElement>("[data-hours-focus-anchor]");
     closeRef.current?.focus();
-
-    function focusableElements(): HTMLElement[] {
-      const dialog = dialogRef.current;
-      if (!dialog) return [];
-      return Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((element) => element.tabIndex >= 0);
-    }
-
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        if (!busy.current) closeHandler.current();
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = focusableElements();
-      if (focusable.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      } else if (!active || !dialogRef.current?.contains(active)) {
-        event.preventDefault();
-        first.focus();
-      }
+      const elements = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])',
+      ) ?? []).filter((element) => element.tabIndex >= 0 && !element.matches(":disabled") && element.getClientRects().length > 0);
+      const first = elements[0];
+      const last = elements.at(-1);
+      if (!first || !last) { event.preventDefault(); dialogRef.current?.focus(); return; }
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      else if (!dialogRef.current?.contains(document.activeElement)) { event.preventDefault(); first.focus(); }
     }
-
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus();
+      if (!deleted.current && opener?.isConnected) opener.focus();
+      else anchor?.focus();
     };
-  }, [onClose]);
+  }, []);
 
+  function close() { if (!busy.current) closeHandler.current(); }
+  function mutate(kind: "save" | "delete", formData?: FormData) {
+    if (!context || busy.current) return;
+    busy.current = true;
+    setPending(kind);
+    setError(null);
+    startTransition(async () => {
+      try {
+        const result = kind === "delete"
+          ? await deleteHoursEntryAction(context.entry.id, context.revision)
+          : await updateHoursEntryAction(context.entry.id, context.revision, formData!);
+        if (result.error) setError(result.error);
+        else {
+          deleted.current = kind === "delete";
+          onClose();
+          router.refresh();
+        }
+      } catch {
+        setError("The change couldn't be confirmed. Close this editor and reopen the time record to check before trying again.");
+      } finally {
+        busy.current = false;
+        setPending(null);
+      }
+    });
+  }
+
+  const audience = context ? recordedTimeAudience(context) : null;
   return (
-    <div
-      ref={dialogRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="hours-entry-title"
-      className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="quiet-artifact-dialog quiet-frame quiet-frame--paper"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <h2 id="hours-entry-title" className="font-display text-xl font-semibold text-[color:var(--homa-ink)]">
-            Edit recorded time
-          </h2>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="quiet-action quiet-action--quiet min-h-10 min-w-10 px-2 text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]"
-          >
-            <Icon name="close" size={20} />
-          </button>
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="hours-entry-title" aria-busy={pending !== null} tabIndex={-1}
+      className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={close}>
+      <div className="quiet-artifact-dialog quiet-frame quiet-frame--paper flex flex-col !overflow-hidden text-[color:var(--homa-ink)]" onClick={(event) => event.stopPropagation()}>
+        <div className="flex shrink-0 items-start justify-between gap-3">
+          <h2 id="hours-entry-title" className="font-display text-xl font-semibold">{confirming ? "Delete recorded time?" : "Edit recorded time"}</h2>
+          {!confirming ? <button ref={closeRef} type="button" onClick={close} disabled={pending !== null} aria-label="Close"
+            className="quiet-action quiet-action--quiet min-h-11 min-w-11 px-2"><Icon name="close" size={20} /></button> : null}
         </div>
-
-        <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-          {entry.childName ? `For ${entry.childName}.` : "For the whole family."}
-        </p>
-        <p className="mt-0.5 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
-          {SOURCE_EXPLANATIONS[entry.source]}
-        </p>
-
-        <form action={formAction} className="mt-4 flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
-            Subject
-            <select
-              name="subject"
-              value={subject}
-              onChange={(event) => setSubject(event.target.value as typeof subject)}
-              className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
-            >
-              {HOURS_SUBJECTS.map((option) => (
-                <option key={option} value={option}>
-                  {SUBJECT_LABELS[option]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
-            Your own category (optional)
-            <input
-              type="text"
-              name="customLabel"
-              maxLength={40}
-              defaultValue={entry.customLabel ?? ""}
-              placeholder="Literature journal, karate, whatever you call it"
-              className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
-            Minutes
-            <input
-              type="number"
-              name="minutes"
-              min={1}
-              max={600}
-              step={1}
-              defaultValue={entry.minutes}
-              className="min-h-11 rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-semibold text-[color:var(--homa-ink)]">
-            Note
-            <textarea
-              name="note"
-              maxLength={200}
-              defaultValue={entry.note ?? ""}
-              rows={3}
-              placeholder="Optional, for your own record"
-              className="rounded-[var(--homa-radius-control)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)] px-3 py-2 text-sm font-normal text-[color:var(--homa-ink)] outline-none focus:border-[var(--homa-midnight-action)]"
-            />
-          </label>
-          {state.error ? <p className="text-sm text-[color:var(--homa-error-ink)]">{state.error}</p> : null}
-          <div className="mt-1 flex justify-end gap-2">
-            <QuietAction
-              kind="quiet"
-              size="default"
-              onClick={onClose}
-              className="px-4 text-sm"
-            >
-              Cancel
-            </QuietAction>
-            <QuietAction
-              kind="primary"
-              size="default"
-              type="submit"
-              disabled={pending}
-              className="px-5 text-sm"
-            >
-              {pending ? "Saving\u2026" : "Save changes"}
-            </QuietAction>
+        {!context ? <div className="mt-4">
+          <p className="mb-2 text-sm">{recordedDate(entry.happenedOn)}</p>
+          {loadError ? <><p role="alert" className="text-sm">{loadError}</p><QuietAction kind="secondary" className="mt-3"
+            onClick={() => { setLoadError(null); setAttempt((value) => value + 1); }}>Try again</QuietAction></>
+            : <p role="status" className="text-sm">Loading the time record…</p>}
+        </div> : <>
+          <div className={confirming ? "hidden" : "flex min-h-0 flex-col"}>
+            <HoursEntryForm key={context.revision} context={context} pending={pending} error={confirming ? null : error} errorRef={errorRef}
+              onSave={(data) => mutate("save", data)} onClose={close} onDeleteRequest={() => {
+                deleteTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+                setError(null);
+                setConfirming(true);
+              }} />
           </div>
-        </form>
-
-        <DeleteEntryButton entry={entry} onDone={onClose} />
+          {confirming ? <div ref={confirmationRef} className="min-h-0 overflow-y-auto">
+            {context.activity ? <p className="mt-3 break-words text-sm font-semibold">{context.activity.title}</p> : null}
+            <p className="mt-3 text-sm">{recordedDate(context.entry.happenedOn)}</p>
+            <p className="mt-3 text-sm">{context.activity
+              ? `This deletes the recorded time, categories and notes for ${audience}.`
+              : `This deletes the ${context.entry.minutes}-minute time record for ${audience}, including its category and note.`}</p>
+            {context.activity ? <p className="mt-3 text-sm">The activity stays finished in Planner, with its Planner notes.</p> : null}
+            <p className="mt-3 text-sm">This can&apos;t be undone.</p>
+            {error ? <p ref={errorRef} tabIndex={-1} role="alert" className="mt-3 text-sm text-[color:var(--homa-error-ink)]">{error}</p> : null}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <QuietAction kind="secondary" disabled={pending !== null} onClick={() => mutate("delete")}>{pending === "delete" ? "Deleting…" : "Delete recorded time"}</QuietAction>
+              <QuietAction kind="quiet" disabled={pending !== null} onClick={() => setConfirming(false)}>Go back</QuietAction>
+            </div>
+          </div> : null}
+        </>}
       </div>
     </div>
   );

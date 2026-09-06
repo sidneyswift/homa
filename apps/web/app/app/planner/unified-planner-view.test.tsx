@@ -247,7 +247,7 @@ describe("UnifiedPlannerView", () => {
   });
 
   it("lets a chat-logged item's title and notes be edited in the window, not only through chat", () => {
-    assert.match(plannerSource, /updatePlannerLearningActivityDetailsAction/u);
+    assert.match(plannerSource, /savePlannerLearningActivityAction/u);
     assert.match(plannerSource, /saveLearningActivityDetails/u);
     assert.match(plannerSource, /Save changes/u);
     assert.match(plannerSource, /placeholder="What she actually did in this section"/u);

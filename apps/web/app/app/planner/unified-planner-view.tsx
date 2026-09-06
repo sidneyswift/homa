@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
@@ -27,6 +27,7 @@ import {
 import {
   formatMinutesAsHours,
   hoursSubjectTone,
+  recordedHoursForDate,
   SUBJECT_LABELS,
   subjectDisplayLabel,
   type HoursEntry,
@@ -56,12 +57,12 @@ import {
   updateFamilyEventAction,
 } from "../calendar/actions";
 import { HoursView } from "../hours/hours-view";
+import { HoursEntryOverlay } from "../hours/hours-entry-overlay";
 import {
   deletePlannerLearningActivityAction,
   deleteScheduledPlanActivityAction,
   setPlannerLearningActivityStatusAction,
-  setPlannerLearningActivityTimeAction,
-  updatePlannerLearningActivityDetailsAction,
+  savePlannerLearningActivityAction,
 } from "./actions";
 
 export interface UnifiedPlannerKid {
@@ -554,56 +555,34 @@ function EventRow({
   );
 }
 
-function RecordedHours({
-  entries,
-  showChild,
-}: {
+function RecordedHours({ entries, showChild, onEdit }: {
   entries: readonly HoursEntry[];
   showChild: boolean;
+  onEdit: (entry: HoursEntry) => void;
 }) {
+  const headingId = useId();
   if (entries.length === 0) return null;
   const totalMinutes = entries.reduce((sum, entry) => sum + entry.minutes, 0);
   return (
-    <section className="mt-5" aria-labelledby="planner-day-hours-title">
+    <section className="mt-5" aria-labelledby={headingId}>
       <div className="flex items-baseline justify-between gap-3">
-        <h3 id="planner-day-hours-title" className="font-display text-base font-semibold text-strong">
-          Recorded time
-        </h3>
-        <span className="text-xs font-semibold text-muted">
-          {formatMinutesAsHours(totalMinutes)}
-        </span>
+        <h3 id={headingId} tabIndex={-1} className="font-display text-xl font-semibold text-strong">Recorded time</h3>
+        <span className="text-sm font-semibold text-muted">{formatMinutesAsHours(totalMinutes)}</span>
       </div>
-      <ul className="mt-2 overflow-hidden rounded-[var(--radius-lg)] border border-border-subtle bg-card shadow-sm">
+      <ul className="mt-2 overflow-hidden rounded-[var(--homa-radius-card)] border border-[var(--homa-control-boundary)] bg-[var(--homa-paper)]">
         {entries.map((entry) => {
           const [background, color] = hoursSubjectTone(entry.subject);
-          return (
-            <li
-              key={entry.id}
-              className="flex min-h-[58px] flex-wrap items-center gap-2 border-b border-border-subtle px-3.5 py-2.5 last:border-b-0"
-            >
-              <span
-                className="rounded-pill px-2.5 py-1 text-[0.68rem] font-bold"
-                style={{ background, color }}
-              >
-                {subjectDisplayLabel(entry)}
-              </span>
-              <span className="font-display text-sm font-semibold text-strong">
-                {formatMinutesAsHours(entry.minutes)}
-              </span>
-              {showChild ? (
-                <span className="text-xs font-semibold text-subtle">
-                  {entry.childName ?? "Whole family"}
-                </span>
-              ) : null}
-              {entry.note ? (
-                <span className="min-w-0 flex-1 basis-32 truncate text-xs text-muted">
-                  {entry.note}
-                </span>
-              ) : (
-                <span className="flex-1" />
-              )}
-            </li>
-          );
+          return <li key={entry.id} className="border-b border-[var(--homa-control-boundary)] last:border-b-0">
+            <button type="button" aria-haspopup="dialog" onClick={() => onEdit(entry)}
+              aria-label={`Edit ${subjectDisplayLabel(entry)}, ${formatMinutesAsHours(entry.minutes)}, ${entry.childName ?? "whole family"}`}
+              className="quiet-action quiet-action--quiet flex min-h-14 w-full flex-wrap items-center justify-start gap-2 px-4 py-3 text-left">
+              <span className="rounded-[var(--homa-radius-control)] px-2 py-1 text-xs font-semibold" style={{ background, color }}>{subjectDisplayLabel(entry)}</span>
+              <span className="text-sm font-semibold">{formatMinutesAsHours(entry.minutes)}</span>
+              {showChild ? <span className="text-sm">{entry.childName ?? "Whole family"}</span> : null}
+              {entry.note ? <span className="min-w-0 flex-1 basis-32 truncate text-sm">{entry.note}</span> : <span className="flex-1" />}
+              <span className="text-sm font-semibold">Edit</span>
+            </button>
+          </li>;
         })}
       </ul>
     </section>
@@ -1546,6 +1525,7 @@ export function UnifiedPlannerView({
   const [learningStatusOverrides, setLearningStatusOverrides] = useState<
     Record<string, PlannerLearningStatus>
   >({});
+  const [selectedHoursEntry, setSelectedHoursEntry] = useState<HoursEntry | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<PlannerActivity | null>(null);
   const [selectedLearningActivity, setSelectedLearningActivity] =
     useState<PlannerLearningActivity | null>(null);
@@ -1605,15 +1585,7 @@ export function UnifiedPlannerView({
     visibleFocusChildId,
   );
   const activeEvents = eventsForDate(familyEvents, activeDate, visibleFocusChildId);
-  const activeHours = hoursEntries.filter(
-    (entry) =>
-      entry.happenedOn === activeDate
-      && (
-        visibleFocusChildId === null
-        || entry.childId === null
-        || entry.childId === visibleFocusChildId
-      ),
-  );
+  const activeHours = recordedHoursForDate(hoursEntries, activeDate, visibleFocusChildId);
   const activeHoursMinutes = activeHours.reduce((sum, entry) => sum + entry.minutes, 0);
   const activityWritable = (activity: PlannerActivity) =>
     planChecks.isWritable(activity.childId, activity.subjectId);
@@ -1735,6 +1707,7 @@ export function UnifiedPlannerView({
 
   async function saveLearningActivityDetails(
     activityId: string,
+    expectedUpdatedAt: string,
     title: string,
     note: string,
     minutesInput: string,
@@ -1754,33 +1727,30 @@ export function UnifiedPlannerView({
 
     setSavingLearningActivityDetail(true);
     setLearningActivityDetailError(null);
-    const detailsResult = await updatePlannerLearningActivityDetailsAction({
-      activityId,
-      title,
-      note,
-    });
-    if (!detailsResult.ok) {
-      setSavingLearningActivityDetail(false);
-      setLearningActivityDetailError(detailsResult.reason);
+    let result: Awaited<ReturnType<typeof savePlannerLearningActivityAction>>;
+    try {
+      result = await savePlannerLearningActivityAction({
+        activityId, expectedUpdatedAt, title, note, durationMinutes: minutes,
+      });
+    } catch {
+      setLearningActivityDetailError("That change couldn't be confirmed. Reopen the activity to check before trying again.");
       return false;
+    } finally {
+      setSavingLearningActivityDetail(false);
     }
-    const timeResult = await setPlannerLearningActivityTimeAction({
-      activityId,
-      durationMinutes: minutes,
-    });
-    setSavingLearningActivityDetail(false);
-    if (!timeResult.ok) {
-      setLearningActivityDetailError(timeResult.reason);
+    if (!result.ok) {
+      setLearningActivityDetailError(result.reason);
       return false;
     }
     setSelectedLearningActivity((current) =>
       current && current.id === activityId
         ? {
             ...current,
-            title: detailsResult.title,
-            note: detailsResult.note,
-            durationMinutes: timeResult.durationMinutes,
-            status: timeResult.status,
+            title: result.title,
+            note: result.note,
+            durationMinutes: result.durationMinutes,
+            status: result.status,
+            updatedAt: result.updatedAt,
           }
         : current,
     );
@@ -1962,7 +1932,7 @@ export function UnifiedPlannerView({
         : "Nothing planned";
 
   return (
-    <div className="mx-auto w-full max-w-[820px]" data-brand-surface="planner">
+    <div className="mx-auto w-full max-w-[820px]" data-hours-focus-anchor tabIndex={-1} data-brand-surface="planner">
       {planChecks.getMessage() ? (
         <QuietStatus tone="attention" className="mb-3">
           <div className="flex items-start justify-between gap-3 text-sm">
@@ -2250,7 +2220,7 @@ export function UnifiedPlannerView({
                 </>
               ) : null}
               </section>
-              <RecordedHours entries={activeHours} showChild={kids.length > 1} />
+              <RecordedHours entries={activeHours} showChild={kids.length > 1} onEdit={setSelectedHoursEntry} />
             </>
           ) : null}
 
@@ -2283,8 +2253,8 @@ export function UnifiedPlannerView({
                     ? "Everything finished"
                     : "Nothing planned";
                 return (
+                  <div key={day.date} className="border-b border-border-subtle last:border-b-0">
                   <Link
-                    key={day.date}
                     href={plannerHref("day", day.date, focusChildId)}
                     className={
                       day.date === today
@@ -2308,6 +2278,10 @@ export function UnifiedPlannerView({
                     </span>
                       <Icon name="next" size={20} className="text-subtle" />
                   </Link>
+                  <div className="px-4 pb-4">
+                    <RecordedHours entries={recordedHoursForDate(hoursEntries, day.date, visibleFocusChildId)} showChild={kids.length > 1} onEdit={setSelectedHoursEntry} />
+                  </div>
+                  </div>
                 );
               })}
             </section>
@@ -2356,6 +2330,7 @@ export function UnifiedPlannerView({
         </>
       )}
 
+      {selectedHoursEntry ? <HoursEntryOverlay key={selectedHoursEntry.id} entry={selectedHoursEntry} onClose={() => setSelectedHoursEntry(null)} /> : null}
       {selectedActivity ? (
         <ActivityDetails
           activity={selectedActivity}
@@ -2372,7 +2347,7 @@ export function UnifiedPlannerView({
           saving={savingLearningActivityDetail}
           error={learningActivityDetailError}
           onSave={(title, note, minutes) =>
-            saveLearningActivityDetails(selectedLearningActivity.id, title, note, minutes)
+            saveLearningActivityDetails(selectedLearningActivity.id, selectedLearningActivity.updatedAt, title, note, minutes)
           }
           onDelete={() => deleteLearningActivity(selectedLearningActivity.id)}
           onClose={() => {

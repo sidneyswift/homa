@@ -1,0 +1,2503 @@
+{
+  "runId": "e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0",
+  "origin": "https://thankshoma.com",
+  "operatorAttestedDeploymentSha": "78f3b4e67f957370c9acecb21250ff68dda76b1d",
+  "startedAt": "2026-09-06T18:55:03.432Z",
+  "finishedAt": "2026-09-06T18:55:48.983Z",
+  "scope": "Real production signin and Hours/Planner UI actions in one new sandbox family, with exact durable state and original-provenance checks.",
+  "notCertified": [
+    "physical touch or mobile keyboard",
+    "native app writers",
+    "hosted forced rollback or concurrency fault injection",
+    "model behavior",
+    "existing family behavior",
+    "full provider account deletion lifecycle"
+  ],
+  "checks": [
+    {
+      "label": "transaction-local SQL statement and lock deadlines read back correctly",
+      "passed": true
+    },
+    {
+      "label": "expected database selected",
+      "passed": true
+    },
+    {
+      "label": "cleanup connection has verified RLS bypass authority",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.sessions SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.sessions DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_members SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_members UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.children SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.children INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_billing_subscriptions SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.apple_purchase_interlocks SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.stripe_trial_card_claims SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_artifact_tombstones SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_messages SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_messages INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_episodes SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.hours_log SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.hours_log INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_schedules SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_schedules DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.model_usage SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.model_usage DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.email_sends SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.email_sends DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_signals DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.knowledge_gaps DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.response_engagement DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_phones SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_assets SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials_studio_runs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_artifact_prefixes SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege storage.objects SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_events SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activities SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activities INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activity_children SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activity_children INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activity_hours SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activity_hours INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.voice_action_receipts SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.working_plans SELECT",
+      "passed": true
+    },
+    {
+      "label": "current guarded family cleanup installed",
+      "passed": true
+    },
+    {
+      "label": "reserved signup family is atomically sandboxed",
+      "passed": true
+    },
+    {
+      "label": "canonical family deletion cascades owned public.planner_learning_activities",
+      "passed": true
+    },
+    {
+      "label": "canonical family deletion cascades owned public.planner_learning_activity_children",
+      "passed": true
+    },
+    {
+      "label": "canonical family deletion cascades owned public.planner_learning_activity_hours",
+      "passed": true
+    },
+    {
+      "label": "canonical family deletion cascades owned public.conversation_messages",
+      "passed": true
+    },
+    {
+      "label": "Hours migration exposes only the reviewed authenticated action",
+      "passed": true
+    },
+    {
+      "label": "Hours migration exposes only the reviewed authenticated action",
+      "passed": true
+    },
+    {
+      "label": "Hours migration exposes only the reviewed authenticated action",
+      "passed": true
+    },
+    {
+      "label": "Hours migration exposes only the reviewed authenticated action",
+      "passed": true
+    },
+    {
+      "label": "preflight caller-role context can be read without privileged RPC effects",
+      "passed": true
+    },
+    {
+      "label": "unique fixture login did not exist before signup",
+      "passed": true
+    },
+    {
+      "label": "auth-settings: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "Auth mailer autoconfirm is enabled; otherwise signup is refused to avoid confirmation email",
+      "passed": true
+    },
+    {
+      "label": "auth-signup: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "signup returned a real authenticated session",
+      "passed": true
+    },
+    {
+      "label": "auth-identity: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "JWT resolves to this new fixture login",
+      "passed": true
+    },
+    {
+      "label": "create-my-family: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "authenticated create_my_family returned a family",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "new fixture has no pre-existing children, activities, Hours, source messages or junctions",
+      "passed": true
+    },
+    {
+      "label": "fixture begins with no children, hours, linked phones, or schedules",
+      "passed": true
+    },
+    {
+      "label": "all fixture rows were created after the preflight database clock",
+      "passed": true
+    },
+    {
+      "label": "seed contains only the two intended synthetic children",
+      "passed": true
+    },
+    {
+      "label": "seed Hours match all exact fixture fields",
+      "passed": true
+    },
+    {
+      "label": "every source message is explicit synthetic content owned by the new member",
+      "passed": true
+    },
+    {
+      "label": "seed activity identity, original source and completion provenance are exact",
+      "passed": true
+    },
+    {
+      "label": "shared activity has the two intended participant links",
+      "passed": true
+    },
+    {
+      "label": "all three linked Hours rows have their exact owned junction",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "seed-baseline: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "browser launch is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "new isolated browser starts without cookies",
+      "passed": true
+    },
+    {
+      "label": "signin-page: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "signin-page: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "signin-page: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "normal production sign-in form returned an accepted action response",
+      "passed": true
+    },
+    {
+      "label": "initial-owned-family: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "initial-owned-family: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "served script inventory is bounded",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served action reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "exactly one served getHoursEntryEditContextAction identity is pinned",
+      "passed": true
+    },
+    {
+      "label": "exactly one served updateHoursEntryAction identity is pinned",
+      "passed": true
+    },
+    {
+      "label": "exactly one served deleteHoursEntryAction identity is pinned",
+      "passed": true
+    },
+    {
+      "label": "exactly one served savePlannerLearningActivityAction identity is pinned",
+      "passed": true
+    },
+    {
+      "label": "four different reviewed action identities are pinned",
+      "passed": true
+    },
+    {
+      "label": "day-A: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "day-A: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "day-A: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "initial-day-A: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "initial-day-A: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-cancel-A: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-cancel-A: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-cancel-A: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-cancel-A: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-cancel-A: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-cancel-A: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "full-owned-record: screenshot belongs to verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "full-owned-record: no password field can enter screenshot",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: cancel preserves route",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "cancel-unchanged: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-edit-A: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-edit-A: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-edit-A: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-edit-A: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-edit-A: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-edit-A: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-A: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "save-A: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-A: save preserves route",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "save-A: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "save-A: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-A: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-A: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-A: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-A: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-A: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "day-after-linked-correction: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "day-after-linked-correction: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "week-A: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "week-A: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "week-A: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "week-after-linked-correction: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "week-after-linked-correction: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-week-A: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-week-A: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-week-A: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-week-A: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-week-A: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-week-A: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: save preserves route",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-week-note: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "week-note-only: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "week-note-only: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "hours-A: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "hours-A: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "hours-A: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "hours-after-linked-correction: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "hours-after-linked-correction: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-hours-link: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-hours-link: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-hours-link: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-hours-link: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-hours-link: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-hours-link: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: cancel preserves route",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "hours-resolved-link: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "planner-detail-day: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "planner-detail-day: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "planner-detail-day: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "planner-detail-before: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "planner-detail-before: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "save-planner: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "save-planner: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-save: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-rendered: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "combined-planner-rendered: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "planner-and-hours-corrected: screenshot belongs to verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "planner-and-hours-corrected: no password field can enter screenshot",
+      "passed": true
+    },
+    {
+      "label": "week-delete-shared: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "week-delete-shared: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "week-delete-shared: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "before-shared-delete: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "before-shared-delete: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-delete-shared: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-delete-shared: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-delete-shared: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-delete-shared: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-delete-shared: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-delete-shared: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "delete-shared-confirmation: screenshot belongs to verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "delete-shared-confirmation: no password field can enter screenshot",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: focus survives refreshed deletion on a connected visible element",
+      "passed": true
+    },
+    {
+      "label": "delete-shared: deletion preserves route",
+      "passed": true
+    },
+    {
+      "label": "shared-time-deleted: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "shared-time-deleted: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "standalone-hours: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "standalone-hours: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "standalone-hours: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-edit: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-edit: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-edit: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-edit: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-edit: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-edit: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: save preserves route",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-standalone: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "standalone-corrected: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "standalone-corrected: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-delete: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-delete: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-delete: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-delete: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-delete: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-standalone-delete: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone-confirmation: screenshot belongs to verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone-confirmation: no password field can enter screenshot",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: focus survives refreshed deletion on a connected visible element",
+      "passed": true
+    },
+    {
+      "label": "delete-standalone: deletion preserves route",
+      "passed": true
+    },
+    {
+      "label": "standalone-deleted: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "standalone-deleted: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-whole-edit: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-whole-edit: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-whole-edit: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-whole-edit: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-whole-edit: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-whole-edit: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-whole: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "save-whole: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "save-whole: save preserves route",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "save-whole: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "save-whole: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-whole: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-whole: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "save-whole: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-whole: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "save-whole: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "whole-family-corrected: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "whole-family-corrected: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "week-delete-whole: run is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "week-delete-whole: navigation is inside fixed fixture journey",
+      "passed": true
+    },
+    {
+      "label": "week-delete-whole: navigation succeeded on the fixed origin",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "load-whole-delete: caller-scoped read supplies exact owned revision",
+      "passed": true
+    },
+    {
+      "label": "load-whole-delete: context preserves owned child, day and activity",
+      "passed": true
+    },
+    {
+      "label": "load-whole-delete: context names exactly the owned activity audience",
+      "passed": true
+    },
+    {
+      "label": "load-whole-delete: opened row is in the current approved state",
+      "passed": true
+    },
+    {
+      "label": "load-whole-delete: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "load-whole-delete: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "delete-whole-confirmation: screenshot belongs to verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "delete-whole-confirmation: no password field can enter screenshot",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: action starts without another pending action",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: exact served action HTTP 200 headers observed",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: focus survives refreshed deletion on a connected visible element",
+      "passed": true
+    },
+    {
+      "label": "delete-whole: deletion preserves route",
+      "passed": true
+    },
+    {
+      "label": "all-time-deleted: no scope-switch error",
+      "passed": true
+    },
+    {
+      "label": "all-time-deleted: view, date and child query are preserved",
+      "passed": true
+    },
+    {
+      "label": "finished-activities-kept: screenshot belongs to verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "finished-activities-kept: no password field can enter screenshot",
+      "passed": true
+    },
+    {
+      "label": "exactly one sign-in, nine owned context reads and eight reviewed UI mutations were dispatched",
+      "passed": true
+    },
+    {
+      "label": "no browser mutation outside the exact approved actions was attempted",
+      "passed": true
+    },
+    {
+      "label": "no uncaught browser page errors",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "final-empty-time-record: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "cleanup recovered only the exact new fixture login",
+      "passed": true
+    },
+    {
+      "label": "cleanup locked the exact new fixture login before checking memberships",
+      "passed": true
+    },
+    {
+      "label": "cleanup refuses an unexpectedly shared fixture login",
+      "passed": true
+    },
+    {
+      "label": "cleanup family matches this run creation attempt",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "no email, model usage, material, asset, studio run, schedule, phone, event, working plan, voice receipt or episode",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: current records match one exact authorized transition state",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: original children unchanged",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: original messages unchanged",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: original childLinks unchanged",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: activity IDs, audience, dates, original/completion source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: surviving Hours IDs, child, date, source and creation fields preserved",
+      "passed": true
+    },
+    {
+      "label": "cleanup inventory: surviving junctions preserve exact activity ownership",
+      "passed": true
+    },
+    {
+      "label": "new fixture has no inherited artifact prefixes",
+      "passed": true
+    },
+    {
+      "label": "cleanup refuses to hide an unexpected outbound email",
+      "passed": true
+    },
+    {
+      "label": "canonical artifact denial tombstone and waiting cleanup job are retained",
+      "passed": true
+    },
+    {
+      "label": "fixture has no owned Storage objects before Auth deletion",
+      "passed": true
+    },
+    {
+      "label": "fixture login belongs to no remaining family",
+      "passed": true
+    },
+    {
+      "label": "fixture family, Auth, sessions, children, Hours, activities, both junctions, messages, episodes and voice receipts removed",
+      "passed": true
+    }
+  ],
+  "snapshots": [
+    {
+      "label": "initial-owned-family",
+      "view": "hours",
+      "child": "Whole family",
+      "state": 0,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Math11mAverySynthetic Hours A e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0. We read the whole chapter, discussed the ending, and recorded enough detail to check that the complete saved note opens.Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Sibling notes10mBlairSynthetic Hours B e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "43m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "initial-day-A",
+      "view": "day",
+      "child": "Avery",
+      "state": 0,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Math11mAverySynthetic Hours A e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0. We read the whole chapter, discussed the ending, and recorded enough detail to check that the complete saved note opens.Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "33m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "day-after-linked-correction",
+      "view": "day",
+      "child": "Avery",
+      "state": 1,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal17mAverySynthetic corrected Hours A e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "39m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "week-after-linked-correction",
+      "view": "week",
+      "child": "Avery",
+      "state": 1,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal17mAverySynthetic corrected Hours A e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "39m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "week-note-only",
+      "view": "week",
+      "child": "Avery",
+      "state": 2,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal17mAverySynthetic Week note only e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "39m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "hours-after-linked-correction",
+      "view": "hours",
+      "child": "Avery",
+      "state": 2,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal17mAverySynthetic Week note only e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "39m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "planner-detail-before",
+      "view": "day",
+      "child": "Avery",
+      "state": 2,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal17mAverySynthetic Week note only e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "39m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "combined-planner-rendered",
+      "view": "day",
+      "child": "Avery",
+      "state": 3,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal19mAverySynthetic Week note only e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "41m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "before-shared-delete",
+      "view": "week",
+      "child": "Avery",
+      "state": 3,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Nature journal19mAverySynthetic Week note only e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "41m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "shared-time-deleted",
+      "view": "week",
+      "child": "Avery",
+      "state": 4,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Science17mAverySynthetic standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "22m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "standalone-corrected",
+      "view": "hours",
+      "child": "Avery",
+      "state": 5,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit",
+        "Independent study18mAverySynthetic corrected standalone Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "23m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "standalone-deleted",
+      "view": "hours",
+      "child": "Avery",
+      "state": 6,
+      "rows": [
+        "Art5mWhole familySynthetic whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "5m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "whole-family-corrected",
+      "view": "hours",
+      "child": "Avery",
+      "state": 7,
+      "rows": [
+        "Art6mWhole familySynthetic corrected whole-family Hours e5b7c3ef-25d6-4c2c-a475-9df3fb934fd0Edit"
+      ],
+      "totals": [
+        "6m"
+      ],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    },
+    {
+      "label": "all-time-deleted",
+      "view": "week",
+      "child": "Avery",
+      "state": 8,
+      "rows": [],
+      "totals": [],
+      "width": {
+        "viewport": 390,
+        "document": 390
+      }
+    }
+  ],
+  "cleanup": {
+    "status": "family-and-auth-removed",
+    "deletionJobId": "110846ef-765f-4326-94e5-dd23106a89e9",
+    "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+    "remaining": {
+      "users": 0,
+      "sessions": 0,
+      "families": 0,
+      "children": 0,
+      "memberships": 0,
+      "hours": 0,
+      "messages": 0,
+      "activities": 0,
+      "activity_children": 0,
+      "activity_hours": 0,
+      "voice_receipts": 0,
+      "episodes": 0
+    }
+  },
+  "installedFunctions": [
+    {
+      "signature": "public.get_hours_entry_edit_context(uuid)",
+      "sha256": "23baf5e5ef8b38fd8d7101bb780f8c1001a24588e1d038901bf1ab3052861a8f"
+    },
+    {
+      "signature": "public.update_hours_entry(uuid,text,text,integer,text,text)",
+      "sha256": "09316679576b784f615b12e61872f87fd2d0f8489b71414f7ef6cb3e90b74b9c"
+    },
+    {
+      "signature": "public.delete_hours_entry(uuid,text)",
+      "sha256": "87f1f79562273a3f8fa9b92798c65adfd084e5685eeecf42105848ce58e32925"
+    },
+    {
+      "signature": "public.update_planner_learning_activity_record(uuid,timestamptz,text,text,integer)",
+      "sha256": "90f79becf10ddf98cab2385bc521a905bcd379cf508b76a07d0e904d0bb1f5bb"
+    }
+  ],
+  "sideEffects": {
+    "emails": 0,
+    "models": 0,
+    "materials": 0,
+    "assets": 0,
+    "studio_runs": 0,
+    "schedules": 0,
+    "phones": 0,
+    "events": 0,
+    "working_plans": 0,
+    "voice_receipts": 0,
+    "episodes": 0
+  },
+  "actions": [
+    {
+      "stage": "browser-signin",
+      "path": "/signin",
+      "action": "normal-signin",
+      "argumentsVerified": false,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 658,
+        "contentType": "rsc",
+        "elapsedMs": 905,
+        "failureKind": "aborted"
+      },
+      "status": 303
+    },
+    {
+      "stage": "load-cancel-A",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 211,
+        "contentType": "rsc",
+        "elapsedMs": 214
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-edit-A",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 128,
+        "contentType": "rsc",
+        "elapsedMs": 139
+      },
+      "status": 200
+    },
+    {
+      "stage": "save-A",
+      "path": "/app/planner",
+      "action": "updateHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 1,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 275,
+        "contentType": "rsc",
+        "elapsedMs": 792,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-week-A",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 481,
+        "contentType": "rsc",
+        "elapsedMs": 494,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "save-week-note",
+      "path": "/app/planner",
+      "action": "updateHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 2,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 1060,
+        "contentType": "rsc",
+        "elapsedMs": 1933,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-hours-link",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 776,
+        "contentType": "rsc",
+        "elapsedMs": 779
+      },
+      "status": 200
+    },
+    {
+      "stage": "save-planner",
+      "path": "/app/planner",
+      "action": "savePlannerLearningActivityAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 3,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 435,
+        "contentType": "rsc",
+        "elapsedMs": 1013,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-delete-shared",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 308,
+        "contentType": "rsc",
+        "elapsedMs": 315
+      },
+      "status": 200
+    },
+    {
+      "stage": "delete-shared",
+      "path": "/app/planner",
+      "action": "deleteHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 4,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 310,
+        "contentType": "rsc",
+        "elapsedMs": 498,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-standalone-edit",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 87,
+        "contentType": "rsc",
+        "elapsedMs": 89
+      },
+      "status": 200
+    },
+    {
+      "stage": "save-standalone",
+      "path": "/app/planner",
+      "action": "updateHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 5,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 262,
+        "contentType": "rsc",
+        "elapsedMs": 297,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-standalone-delete",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 86,
+        "contentType": "rsc",
+        "elapsedMs": 96
+      },
+      "status": 200
+    },
+    {
+      "stage": "delete-standalone",
+      "path": "/app/planner",
+      "action": "deleteHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 6,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 256,
+        "contentType": "rsc",
+        "elapsedMs": 265
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-whole-edit",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "finished",
+        "headersAtMs": 177,
+        "contentType": "rsc",
+        "elapsedMs": 186
+      },
+      "status": 200
+    },
+    {
+      "stage": "save-whole",
+      "path": "/app/planner",
+      "action": "updateHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 7,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 299,
+        "contentType": "rsc",
+        "elapsedMs": 348,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "load-whole-delete",
+      "path": "/app/planner",
+      "action": "getHoursEntryEditContextAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": null,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 123,
+        "contentType": "rsc",
+        "elapsedMs": 126,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    },
+    {
+      "stage": "delete-whole",
+      "path": "/app/planner",
+      "action": "deleteHoursEntryAction",
+      "argumentsVerified": true,
+      "dispatched": true,
+      "nextState": 8,
+      "transport": {
+        "terminal": "failed",
+        "headersAtMs": 231,
+        "contentType": "rsc",
+        "elapsedMs": 349,
+        "failureKind": "aborted"
+      },
+      "status": 200
+    }
+  ],
+  "deployment": {
+    "id": "dpl_3uBkrQWyiyhsFBwb7cBkLCCrWoNT",
+    "ready": true,
+    "aliases": [
+      "thankshoma.com",
+      "www.thankshoma.com"
+    ],
+    "gitSha": "78f3b4e67f957370c9acecb21250ff68dda76b1d"
+  },
+  "migration": {
+    "sourceVersion": "20260906170000",
+    "liveVersion": "20260906183819",
+    "sourceSha256": "b61fdaec47a3c1c19220338ee43322836e4773a9d4ba79b5a4ad082528509b38",
+    "storedFullStatementMd5": "aa64440e748be3c56a9aa9d13e7ce3c3",
+    "allFunctionBodiesMatched": true,
+    "anonymousExecute": false,
+    "authenticatedHelperExecute": false
+  },
+  "screenshots": [
+    {
+      "path": "2026-09-06-hours-full-owned-record.png",
+      "sha256": "63b044727a125d4bb97f6cb00e282709e85cdab81757036111412a4c23478686",
+      "rootVisuallyInspected": true
+    },
+    {
+      "path": "2026-09-06-hours-planner-and-hours-corrected.png",
+      "sha256": "16136fc17df76c6b7df822ec05d7b9f3a9b5c59d6df94144be63e46e71f0873b",
+      "rootVisuallyInspected": true
+    },
+    {
+      "path": "2026-09-06-hours-delete-shared-confirmation.png",
+      "sha256": "48c78aacf0b3a5fbebe9561347c2013f6a9c2c9ab9d94e440f8524c1cecfb1f3",
+      "rootVisuallyInspected": true
+    },
+    {
+      "path": "2026-09-06-hours-delete-standalone-confirmation.png",
+      "sha256": "73c1da116dcb98e510b33c39ce734eb006dd2099f94fc27ab7ce5a242c4bf3eb",
+      "rootVisuallyInspected": true
+    },
+    {
+      "path": "2026-09-06-hours-delete-whole-confirmation.png",
+      "sha256": "998c93b176194754be5e5a713c15e8d846bb6f3a4a943dd66dd2390d981973d6",
+      "rootVisuallyInspected": true
+    },
+    {
+      "path": "2026-09-06-hours-finished-activities-kept.png",
+      "sha256": "cb57629e15644c6cfc9b4b04305e6591ffcf85275c343a2b51566276f2aee7ba",
+      "rootVisuallyInspected": true
+    }
+  ]
+}
