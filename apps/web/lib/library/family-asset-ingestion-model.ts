@@ -71,6 +71,7 @@ export interface ProposeFamilyAssetIngestionInput {
   originalName: string;
   mediaType: string;
   extractedText: string;
+  signal?: AbortSignal;
 }
 
 export function familyAssetIngestionModel(): string {
@@ -110,7 +111,8 @@ export async function proposeFamilyAssetIngestion(
     system: FAMILY_ASSET_INGESTION_SYSTEM,
     prompt: familyAssetIngestionPrompt(input),
     maxOutputTokens: 4_000,
-    maxRetries: 1,
+    maxRetries: 0,
+    abortSignal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(60_000)]) : AbortSignal.timeout(60_000),
     providerOptions: {
       gateway: {
         disallowPromptTraining: true,

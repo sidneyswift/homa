@@ -53,6 +53,7 @@ export interface FamilyAssetRow {
   language: string | null;
   status: FamilyAssetView["status"];
   processing_error_code: string | null;
+  processing_version?: string | null;
   processing_note: string | null;
   source_upload_id: string | null;
   source_attachment_id: string | null;
@@ -65,7 +66,7 @@ export interface FamilyAssetRow {
 export const FAMILY_ASSET_ROW_SELECT = `
   id, title, original_name, url, download_url, media_type, byte_size,
   file_kind, resource_kind, authors, publisher, language, status,
-  processing_error_code, processing_note, source_upload_id,
+  processing_error_code, processing_note, processing_version, source_upload_id,
   source_attachment_id, parent_asset_id, processed_at::text,
   created_at::text, updated_at::text
 `;
@@ -180,6 +181,7 @@ export function toFamilyAssetView(
     language: row.language,
     status: row.status,
     processingErrorCode: row.processing_error_code,
+    processingVersion: row.processing_version ?? null,
     processingNote: row.processing_note,
     sourceUploadId: row.source_upload_id,
     sourceAttachmentId: row.source_attachment_id,

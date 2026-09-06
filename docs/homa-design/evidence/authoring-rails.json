@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "contractVersion": "quiet-authority-v1",
   "contractSourceChecksum": "4cb70938cd3b6866e72ecc67905dd69552ce186615d76af2597151443b56f618",
-  "manifestFingerprint": "abee8b6a20c108ef7b42f33cc8f112dbd910ec2f688c51c14f5da3bb4398f372",
+  "manifestFingerprint": "ffbb87e5e8b52e78f7190d332af40c9949b711a2ee5e035d74e03e7e2addb122",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "authoringRoots": [
     "AGENTS.md",
@@ -30,7 +30,7 @@
   },
   "expectedPaths": 411,
   "coveredPaths": 411,
-  "sourceFingerprint": "b84c5d2978c642b04fd5ef285dd7b633ca885f42d64bbac78f73662ce8488219",
+  "sourceFingerprint": "f51902bfcea9fef0c63a163398f98435215acbd1bd417247136a542a069563a4",
   "assetGenerator": {
     "paths": [
       "scripts/brand-assets.mts"

@@ -17,7 +17,7 @@ import { readFamilyCurriculumSource } from "../../lib/library/family-curriculum-
 /** Authenticated source reading for the Plus decomposition workflow. */
 export default defineBoundedTool({
   description:
-    "Read the next bounded set of exact pages or sections from one ready Family Library curriculum. Use only after get_family_asset identifies the exact curriculum and after loading curriculum-mapping. This is Homa Plus work. It never changes Library or Planner. Continue with nextCursor until null before claiming a full decomposition.",
+    "Read the next bounded pages or sections from one ready Family Library curriculum, caching source transcription. Use only after get_family_asset identifies the exact curriculum and after loading curriculum-mapping. This is Homa Plus work. It never creates Library units or changes Planner. Scanned pages have explicit method and coverage; at most one new page is transcribed per call. Continue with nextCursor and honor gaps before claiming a full decomposition.",
   deadlineMs: TOOL_DEADLINE.fetch,
   repeatable: true,
   inputSchema: z
@@ -68,18 +68,20 @@ export default defineBoundedTool({
       };
     }
     return {
-      read: true,
+      read: result.page.segments.some(segment => segment.text.length > 0 && segment.state !== "unreadable"),
       assetId: result.asset.id,
       title: result.asset.title,
       segmentKind: result.document.segmentKind,
       totalSegments: result.document.totalSegments,
       sourceTruncated: result.document.truncated || result.page.truncated,
+      contentSha256: result.document.contentSha256,
+      extractionVersion: result.document.extractionVersion,
       segments: result.page.segments,
       nextCursor: result.page.nextCursor,
       note:
-        result.page.nextCursor === null
+        result.document.coverageNote ?? (result.page.nextCursor === null
           ? "You reached the end of the readable source. Build the complete preview now, or mark it partial if sourceTruncated is true."
-          : `Continue with cursor ${result.page.nextCursor}. Do not claim a full decomposition yet.`,
+          : `Continue with cursor ${result.page.nextCursor}. Do not claim a full decomposition yet.`),
     };
   },
 });

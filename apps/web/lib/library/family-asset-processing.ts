@@ -1,9 +1,10 @@
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
-import "pdfjs-dist/legacy/build/pdf.worker.mjs";
+import { randomUUID } from "node:crypto";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
-import { signedFamilyBlobReadUrl } from "../family-blob";
+import { fetchFamilyAssetBytes } from "./family-asset-bytes";
+import { readFamilyPdf } from "./family-pdf-reader";
+import { FAMILY_ASSET_PROCESSING_BUDGET_MS, FAMILY_PDF_READ_BUDGET_MS, FAMILY_PDF_EXTRACTION_VERSION } from "./family-asset-read-contract";
 import { embedText } from "../learning/embeddings";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
@@ -26,6 +27,8 @@ import {
   type FamilyAssetStatus,
 } from "./family-assets";
 
+export { FAMILY_ASSET_PROCESSING_MAX_BYTES } from "./family-asset-read-contract";
+
 const WORD_DOCUMENT_TYPE =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const SPREADSHEET_TYPES = new Set([
@@ -39,10 +42,7 @@ const MODEL_IMAGE_TYPES = new Set([
   "image/webp",
 ]);
 
-export const FAMILY_ASSET_PROCESSING_MAX_BYTES = 32 * 1024 * 1024;
 const FAMILY_ASSET_PROCESSING_MAX_CHARS = 64_000;
-const FAMILY_ASSET_PROCESSING_MAX_PDF_PAGES = 120;
-const FAMILY_ASSET_PROCESSING_FETCH_TIMEOUT_MS = 60_000;
 
 /** Plus curriculum reading keeps page identity and may inspect more than the
  *  lightweight Library classifier. It still stays bounded to one ready file. */
@@ -68,6 +68,7 @@ export type FamilyAssetProcessingFailureOutcome =
   FamilyAssetIngestionFailureOutcome;
 
 export interface ClaimedFamilyAsset {
+  processingAttemptId?: string;
   id: string;
   familyId: string;
   title: string;
@@ -79,7 +80,7 @@ export interface ClaimedFamilyAsset {
 }
 
 export type FamilyAssetTextExtraction =
-  | { ok: true; text: string }
+  | { ok: true; text: string; coverageNote?: string }
   | { ok: false; reason: FamilyAssetProcessingFailureReason };
 
 export type FamilyAssetSourceSegmentKind = "page" | "section" | "sheet" | "image";
@@ -88,6 +89,10 @@ export interface FamilyAssetSourceSegment {
   ordinal: number;
   locator: string;
   text: string;
+  state?: "readable" | "blank" | "partial" | "unreadable";
+  method?: "embedded" | "vision";
+  model?: string | null;
+  gaps?: string[];
 }
 
 export type FamilyAssetSourceDocument =
@@ -97,6 +102,10 @@ export type FamilyAssetSourceDocument =
       segments: FamilyAssetSourceSegment[];
       totalSegments: number;
       truncated: boolean;
+      nextCursor?: number | null;
+      contentSha256?: string;
+      extractionVersion?: string;
+      coverageNote?: string;
     }
   | { ok: false; reason: FamilyAssetProcessingFailureReason };
 
@@ -104,6 +113,7 @@ export interface FamilyAssetSourceExtractionWindow {
   startOrdinal: number;
   maxSegments: number;
   maxChars: number;
+  cachedOnly?: boolean;
 }
 
 export interface FamilyAssetProcessingDependencies {
@@ -111,22 +121,25 @@ export interface FamilyAssetProcessingDependencies {
     familyId: string;
     assetId: string;
   }): Promise<ClaimedFamilyAsset | null>;
-  extract(asset: ClaimedFamilyAsset): Promise<FamilyAssetTextExtraction>;
+  extract(asset: ClaimedFamilyAsset, signal?: AbortSignal): Promise<FamilyAssetTextExtraction>;
   propose(input: {
     familyId: string | null;
     originalName: string;
     mediaType: string;
     extractedText: string;
+    signal?: AbortSignal;
   }): Promise<unknown>;
   embed(input: {
     familyId: string;
     text: string;
+    signal?: AbortSignal;
   }): Promise<string | null>;
   complete(input: {
     asset: ClaimedFamilyAsset;
     verified: Extract<VerifiedFamilyAssetIngestion, { ok: true }>;
     embedding: string | null;
-  }): Promise<void>;
+    coverageNote?: string;
+  }): Promise<void | boolean>;
   fail(input: {
     asset: ClaimedFamilyAsset;
     outcome: FamilyAssetProcessingFailureOutcome;
@@ -235,76 +248,8 @@ export function familyAssetEmbeddingDocument(input: {
     .join("\n");
 }
 
-async function fetchBoundedBytes(
-  url: string,
-): Promise<
-  | { ok: true; bytes: Uint8Array }
-  | { ok: false; reason: "too_large" | "transient" }
-> {
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      signal: AbortSignal.timeout(FAMILY_ASSET_PROCESSING_FETCH_TIMEOUT_MS),
-    });
-  } catch {
-    return { ok: false, reason: "transient" };
-  }
-  if (!response.ok || !response.body) {
-    return { ok: false, reason: "transient" };
-  }
-  const declaredLength = Number(response.headers.get("content-length"));
-  if (
-    Number.isFinite(declaredLength) &&
-    declaredLength > FAMILY_ASSET_PROCESSING_MAX_BYTES
-  ) {
-    await response.body.cancel();
-    return { ok: false, reason: "too_large" };
-  }
-
-  const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  try {
-    while (true) {
-      const next = await reader.read();
-      if (next.done) break;
-      total += next.value.byteLength;
-      if (total > FAMILY_ASSET_PROCESSING_MAX_BYTES) {
-        await reader.cancel();
-        return { ok: false, reason: "too_large" };
-      }
-      chunks.push(next.value);
-    }
-  } catch {
-    return { ok: false, reason: "transient" };
-  }
-  if (total === 0) return { ok: false, reason: "transient" };
-
-  const bytes = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return { ok: true, bytes };
-}
-
-async function fetchBoundedFamilyAssetBytes(
-  asset: Pick<ClaimedFamilyAsset, "url" | "familyId">,
-): Promise<
-  | { ok: true; bytes: Uint8Array }
-  | { ok: false; reason: "too_large" | "transient" }
-> {
-  try {
-    const readableUrl = await signedFamilyBlobReadUrl(
-      asset.url,
-      asset.familyId,
-      "library",
-    );
-    return await fetchBoundedBytes(readableUrl);
-  } catch {
-    return { ok: false, reason: "transient" };
-  }
+async function fetchBoundedFamilyAssetBytes(asset: ClaimedFamilyAsset, signal = AbortSignal.timeout(FAMILY_PDF_READ_BUDGET_MS)) {
+  return await fetchFamilyAssetBytes(asset, signal);
 }
 
 function clipExtractedText(text: string): string {
@@ -314,49 +259,14 @@ function clipExtractedText(text: string): string {
     : normalized;
 }
 
-async function extractPdfText(bytes: Uint8Array): Promise<FamilyAssetTextExtraction> {
-  const task = getDocument({ data: bytes });
-  try {
-    const document = await task.promise;
-    const pages: string[] = [];
-    let charCount = 0;
-    try {
-      for (
-        let pageNumber = 1;
-        pageNumber <=
-        Math.min(document.numPages, FAMILY_ASSET_PROCESSING_MAX_PDF_PAGES);
-        pageNumber += 1
-      ) {
-        const page = await document.getPage(pageNumber);
-        try {
-          const content = await page.getTextContent();
-          const text = content.items
-            .flatMap((item) => ("str" in item ? [item.str] : []))
-            .join(" ")
-            .trim();
-          if (text.length > 0) {
-            const pageText = `[Page ${pageNumber}]\n${text}`;
-            pages.push(pageText);
-            charCount += pageText.length + 1;
-            if (charCount >= FAMILY_ASSET_PROCESSING_MAX_CHARS) break;
-          }
-        } finally {
-          page.cleanup();
-        }
-      }
-    } finally {
-      await document.cleanup();
-    }
-    const text = clipExtractedText(pages.join("\n"));
-    return text ? { ok: true, text } : { ok: false, reason: "unreadable" };
-  } catch (error) {
-    const name = error instanceof Error ? error.name : "";
-    if (name === "PasswordException") return { ok: false, reason: "encrypted" };
-    if (name === "InvalidPDFException") return { ok: false, reason: "corrupt" };
-    return { ok: false, reason: "transient" };
-  } finally {
-    await task.destroy();
-  }
+async function extractPdfText(asset: ClaimedFamilyAsset, signal: AbortSignal): Promise<FamilyAssetTextExtraction> {
+  const document = await readFamilyPdf(asset, { startOrdinal: 1, maxPages: 8,
+    maxChars: FAMILY_ASSET_PROCESSING_MAX_CHARS, maxUncachedOcr: 3, signal });
+  if (!document.ok) return document;
+  const text = clipExtractedText(document.segments.filter(page => page.state === "readable" || page.state === "partial")
+    .map(page => `[Page ${page.ordinal}]\n${page.text}`).join("\n"));
+  return text ? { ok: true, text, coverageNote: `Homa organized the Library details from PDF pages ${document.segments.map(page => page.ordinal).join(", ")} of ${document.totalSegments}.${document.nextCursor !== null ? " The remaining pages have not been read." : ""}${document.truncated ? " Some content was incomplete." : ""}` }
+    : { ok: false, reason: "unreadable" };
 }
 
 async function extractWordText(bytes: Uint8Array): Promise<FamilyAssetTextExtraction> {
@@ -386,6 +296,7 @@ function extractSpreadsheetText(bytes: Uint8Array): FamilyAssetTextExtraction {
 
 export async function extractFamilyAssetText(
   asset: ClaimedFamilyAsset,
+  signal = AbortSignal.timeout(FAMILY_ASSET_PROCESSING_BUDGET_MS),
 ): Promise<FamilyAssetTextExtraction> {
   if (!isFamilyLibraryUrl(asset.url, asset.familyId)) {
     return { ok: false, reason: "corrupt" };
@@ -393,7 +304,8 @@ export async function extractFamilyAssetText(
   const capability = familyAssetProcessingCapability(asset.mediaType);
   if (!capability) return { ok: false, reason: "unsupported" };
 
-  const downloaded = await fetchBoundedFamilyAssetBytes(asset);
+  if (capability === "pdf") return await extractPdfText(asset, signal);
+  const downloaded = await fetchBoundedFamilyAssetBytes(asset, signal);
   if (!downloaded.ok) return downloaded;
   const { bytes } = downloaded;
 
@@ -403,7 +315,6 @@ export async function extractFamilyAssetText(
     );
     return text ? { ok: true, text } : { ok: false, reason: "unreadable" };
   }
-  if (capability === "pdf") return await extractPdfText(bytes);
   if (capability === "word") return await extractWordText(bytes);
   if (capability === "spreadsheet") return extractSpreadsheetText(bytes);
 
@@ -465,98 +376,19 @@ export async function extractFamilyAssetSourceDocument(
   }
   const capability = familyAssetProcessingCapability(asset.mediaType);
   if (!capability) return { ok: false, reason: "unsupported" };
+  if (capability === "pdf") {
+    return await readFamilyPdf(asset, {
+      startOrdinal: window?.startOrdinal ?? 1,
+      maxPages: window?.maxSegments ?? FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
+      maxChars: window?.maxChars ?? FAMILY_CURRICULUM_SOURCE_MAX_CHARS,
+      maxUncachedOcr: 1,
+      cachedOnly: window?.cachedOnly,
+      signal: AbortSignal.timeout(FAMILY_PDF_READ_BUDGET_MS),
+    });
+  }
   const downloaded = await fetchBoundedFamilyAssetBytes(asset);
   if (!downloaded.ok) return downloaded;
   const { bytes } = downloaded;
-
-  if (capability === "pdf") {
-    const task = getDocument({ data: bytes });
-    try {
-      const document = await task.promise;
-      const totalSegments = document.numPages;
-      const sourceSegmentLimit = Math.min(
-        document.numPages,
-        FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
-      );
-      const startOrdinal = window
-        ? Math.max(1, Math.min(window.startOrdinal, sourceSegmentLimit + 1))
-        : 1;
-      const segmentLimit = window
-        ? Math.min(
-            sourceSegmentLimit,
-            startOrdinal + Math.max(1, window.maxSegments) - 1,
-          )
-        : sourceSegmentLimit;
-      const charLimit = window
-        ? Math.min(
-            FAMILY_CURRICULUM_SOURCE_MAX_CHARS,
-            Math.max(1, window.maxChars),
-          )
-        : FAMILY_CURRICULUM_SOURCE_MAX_CHARS;
-      const segments: FamilyAssetSourceSegment[] = [];
-      let chars = 0;
-      let truncated = document.numPages > sourceSegmentLimit;
-      try {
-        for (
-          let pageNumber = startOrdinal;
-          pageNumber <= segmentLimit;
-          pageNumber += 1
-        ) {
-          const page = await document.getPage(pageNumber);
-          try {
-            const content = await page.getTextContent();
-            const raw = content.items
-              .flatMap((item) => ("str" in item ? [item.str] : []))
-              .join(" ")
-              .trim();
-            const remaining = charLimit - chars;
-            if (remaining <= 0) {
-              if (!window) truncated = true;
-              break;
-            }
-            if (segments.length > 0 && raw.length > remaining) {
-              if (!window) truncated = true;
-              break;
-            }
-            const segmentChars = Math.min(
-              remaining,
-              FAMILY_CURRICULUM_SOURCE_MAX_SEGMENT_CHARS,
-            );
-            const text = raw.slice(0, segmentChars);
-            if (raw.length > text.length) truncated = true;
-            segments.push({
-              ordinal: pageNumber,
-              locator: `Page ${pageNumber}`,
-              text,
-            });
-            chars += text.length;
-            if (!window && chars >= charLimit && pageNumber < sourceSegmentLimit) {
-              truncated = true;
-              break;
-            }
-          } finally {
-            page.cleanup();
-          }
-        }
-      } finally {
-        await document.cleanup();
-      }
-      return {
-        ok: true,
-        segmentKind: "page",
-        segments,
-        totalSegments,
-        truncated,
-      };
-    } catch (error) {
-      const name = error instanceof Error ? error.name : "";
-      if (name === "PasswordException") return { ok: false, reason: "encrypted" };
-      if (name === "InvalidPDFException") return { ok: false, reason: "corrupt" };
-      return { ok: false, reason: "transient" };
-    } finally {
-      await task.destroy();
-    }
-  }
 
   if (capability === "text") {
     const decoded = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
@@ -658,6 +490,7 @@ async function claimFamilyAssetProcessing(input: {
   assetId: string;
 }): Promise<ClaimedFamilyAsset | null> {
   const sql = mapDb();
+  const attemptId = randomUUID();
   const rows = await sql<
     Array<{
       id: string;
@@ -672,6 +505,8 @@ async function claimFamilyAssetProcessing(input: {
   >`
     update public.family_assets
     set processing_note = ${FAMILY_ASSET_PROCESSING_RUNNING_NOTE},
+        processing_attempt_id = ${attemptId},
+        processing_version = ${FAMILY_PDF_EXTRACTION_VERSION},
         updated_at = now()
     where id = ${input.assetId}
       and family_id = ${input.familyId}
@@ -685,6 +520,7 @@ async function claimFamilyAssetProcessing(input: {
   return row
     ? {
         id: row.id,
+        processingAttemptId: attemptId,
         familyId: row.family_id,
         title: row.title,
         originalName: row.original_name,
@@ -700,7 +536,8 @@ async function completeFamilyAssetProcessing(input: {
   asset: ClaimedFamilyAsset;
   verified: Extract<VerifiedFamilyAssetIngestion, { ok: true }>;
   embedding: string | null;
-}): Promise<void> {
+  coverageNote?: string;
+}): Promise<boolean> {
   const sql = mapDb();
   const completed = await sql.begin(async (transaction) => {
     const rows = await transaction<
@@ -725,6 +562,7 @@ async function completeFamilyAssetProcessing(input: {
         and asset.family_id = ${input.asset.familyId}
         and asset.deleted_at is null
         and asset.status = 'processing'
+        and asset.processing_attempt_id = ${input.asset.processingAttemptId ?? null}
       for update
     `;
     const current = rows[0];
@@ -778,13 +616,14 @@ async function completeFamilyAssetProcessing(input: {
           ),
           status = 'ready',
           processing_error_code = null,
-          processing_note = null,
+          processing_note = ${input.coverageNote ?? null},
           processed_at = now(),
           updated_at = now()
       where id = ${input.asset.id}
         and family_id = ${input.asset.familyId}
         and deleted_at is null
         and status = 'processing'
+        and processing_attempt_id = ${input.asset.processingAttemptId ?? null}
     `;
     return true;
   });
@@ -794,6 +633,7 @@ async function completeFamilyAssetProcessing(input: {
       asset_id: input.asset.id,
     });
   }
+  return completed;
 }
 
 async function failFamilyAssetProcessing(input: {
@@ -812,14 +652,15 @@ async function failFamilyAssetProcessing(input: {
       and family_id = ${input.asset.familyId}
       and deleted_at is null
       and status = 'processing'
+      and processing_attempt_id = ${input.asset.processingAttemptId ?? null}
   `;
 }
 
-const PRODUCTION_PROCESSING_DEPENDENCIES: FamilyAssetProcessingDependencies = {
+export const PRODUCTION_PROCESSING_DEPENDENCIES: FamilyAssetProcessingDependencies = {
   claim: claimFamilyAssetProcessing,
   extract: extractFamilyAssetText,
   propose: proposeFamilyAssetIngestion,
-  embed: async ({ familyId, text }) => await embedText(text, { familyId }),
+  embed: async ({ familyId, text, signal }) => await embedText(text, { familyId, signal }),
   complete: completeFamilyAssetProcessing,
   fail: failFamilyAssetProcessing,
 };
@@ -831,12 +672,13 @@ export async function processFamilyAssetWithDependencies(
   | { ok: true; assetId: string }
   | { ok: false; reason: FamilyAssetProcessingFailureReason | "not-claimed" }
 > {
+  const signal = AbortSignal.timeout(FAMILY_ASSET_PROCESSING_BUDGET_MS);
   const asset = await dependencies.claim(input);
   if (!asset) return { ok: false, reason: "not-claimed" };
 
   let extracted: FamilyAssetTextExtraction;
   try {
-    extracted = await dependencies.extract(asset);
+    extracted = await dependencies.extract(asset, signal);
   } catch {
     extracted = { ok: false, reason: "transient" };
   }
@@ -855,6 +697,7 @@ export async function processFamilyAssetWithDependencies(
       originalName: asset.originalName,
       mediaType: asset.mediaType,
       extractedText: extracted.text,
+      signal,
     });
   } catch {
     await dependencies.fail({
@@ -877,6 +720,7 @@ export async function processFamilyAssetWithDependencies(
   try {
     embedding = await dependencies.embed({
       familyId: asset.familyId,
+      signal,
       text: familyAssetEmbeddingDocument({
         asset,
         extractedText: extracted.text,
@@ -889,7 +733,9 @@ export async function processFamilyAssetWithDependencies(
   }
 
   try {
-    await dependencies.complete({ asset, verified, embedding });
+    signal.throwIfAborted();
+    const completed = await dependencies.complete({ asset, verified, embedding, coverageNote: extracted.coverageNote });
+    if (completed === false) return { ok: false, reason: "not-claimed" };
     return { ok: true, assetId: asset.id };
   } catch {
     await dependencies.fail({
@@ -921,9 +767,12 @@ export async function queueFamilyAssetProcessingRetry(input: {
         status: FamilyAssetStatus;
         processing_error_code: string | null;
         updated_at: string;
+        media_type: string;
+        byte_size: number | string;
+        processing_version: string | null;
       }>
     >`
-      select status, processing_error_code, updated_at::text
+      select status, processing_error_code, updated_at::text, media_type, byte_size, processing_version
       from public.family_assets
       where id = ${input.assetId}
         and family_id = ${input.familyId}
@@ -937,6 +786,9 @@ export async function queueFamilyAssetProcessingRetry(input: {
         status: asset.status,
         processingErrorCode: asset.processing_error_code,
         updatedAt: asset.updated_at,
+        mediaType: asset.media_type,
+        byteSize: Number(asset.byte_size),
+        processingVersion: asset.processing_version,
       })
     ) {
       return { ok: false, reason: "not-retryable" } as const;
@@ -944,6 +796,7 @@ export async function queueFamilyAssetProcessingRetry(input: {
     await transaction`
       update public.family_assets
       set status = 'processing',
+          processing_attempt_id = null,
           processing_error_code = null,
           processing_note = ${FAMILY_ASSET_PROCESSING_QUEUED_NOTE},
           processed_at = null,

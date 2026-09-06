@@ -11,6 +11,9 @@ patchedDependencies:
   eve@0.19.0:
     hash: ca8d2bc1e2fc5efca1348608ebe7fbc9914bc68047f7e5dc202b76127d586f6c
     path: patches/eve@0.19.0.patch
+  pdfjs-dist@6.1.200:
+    hash: fa7f3cf6a9a7f792276d2660458ec1e20735763b8227ee8e2a9c5bf056591066
+    path: patches/pdfjs-dist@6.1.200.patch
 
 importers:
 
@@ -268,7 +271,7 @@ importers:
         version: 6.0.0(@types/react@19.2.17)(react@19.2.4)
       pdfjs-dist:
         specifier: ^6.1.200
-        version: 6.1.200
+        version: 6.1.200(patch_hash=fa7f3cf6a9a7f792276d2660458ec1e20735763b8227ee8e2a9c5bf056591066)
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
@@ -13285,7 +13288,7 @@ snapshots:
 
   pathe@2.0.3: {}
 
-  pdfjs-dist@6.1.200:
+  pdfjs-dist@6.1.200(patch_hash=fa7f3cf6a9a7f792276d2660458ec1e20735763b8227ee8e2a9c5bf056591066):
     optionalDependencies:
       '@napi-rs/canvas': 1.0.2
 

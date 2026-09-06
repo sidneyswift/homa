@@ -1,3 +1,4 @@
+import { FAMILY_PDF_MAX_BYTES, FAMILY_PDF_EXTRACTION_VERSION } from "./family-asset-read-contract";
 import { isFamilyBlobUrl } from "../family-blob-url";
 
 export const FAMILY_ASSET_FILE_KINDS = [
@@ -51,6 +52,7 @@ export interface FamilyAssetSubject {
 }
 
 export interface FamilyAssetView {
+  processingVersion?: string | null;
   id: string;
   title: string;
   originalName: string;
@@ -119,14 +121,18 @@ export function familyAssetProcessingRetryAvailable(
   asset: Pick<
     FamilyAssetView,
     "status" | "processingErrorCode" | "updatedAt"
-  >,
+  > & Partial<Pick<FamilyAssetView, "mediaType" | "byteSize" | "processingVersion">>,
   now = new Date(),
 ): boolean {
   if (
     (asset.status === "failed" || asset.status === "needs_attention") &&
     asset.processingErrorCode !== null
   ) {
-    return RETRYABLE_PROCESSING_ERRORS.has(asset.processingErrorCode);
+    if (RETRYABLE_PROCESSING_ERRORS.has(asset.processingErrorCode)) return true;
+    return (asset.processingErrorCode === "content_too_large_to_process" || asset.processingErrorCode === "content_unreadable")
+      && asset.mediaType?.split(";", 1)[0]?.trim().toLowerCase() === "application/pdf"
+      && typeof asset.byteSize === "number" && asset.byteSize > 0 && asset.byteSize <= FAMILY_PDF_MAX_BYTES
+      && asset.processingVersion !== FAMILY_PDF_EXTRACTION_VERSION;
   }
   if (asset.status !== "processing") return false;
   const updatedAt = new Date(asset.updatedAt).getTime();
