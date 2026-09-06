@@ -607,38 +607,30 @@ export interface SoftDeleteMaterialResult {
 /**
  * Delete a material from the Binder (Carolyng feedback, 2026-08-27),
  * either a kept final or something still in progress. A plain
- * caller-session update, not an RPC: "members update their materials"
- * already grants authenticated UPDATE re-scoped by is_family_member, the
- * same posture keepMaterialAction's finalize call relies on for its own
- * RLS wall. Soft delete only (deleted_at, never a row removal): every
- * find/search read this module exposes now filters it out, but the
- * lineage (version rail, revisesId chain, restore_material_version)
- * stays exactly as it is, matching the house rule that removing a
- * material from a collection never deletes it or its history (gh#530).
- * .select("id") back for the same honest-zero-rows reason as every
- * other /app write: a forged id from another family, or an id that was
- * already deleted, matches nothing and must not read back as success.
+ * caller-session RPC under RLS. Removal covers the complete connected
+ * revision chain so an earlier version cannot reappear after refresh
+ * (gh#1091). Exact-ID reads, history, and artifact bytes remain intact.
  */
 export async function softDeleteMaterialCaller(
   db: SupabaseClient,
   familyId: string,
   materialId: string,
 ): Promise<SoftDeleteMaterialResult> {
-  const { data, error } = await db
-    .from("materials")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", materialId)
-    .eq("family_id", familyId)
-    .is("deleted_at", null)
-    .select("id");
+  const { data, error } = await db.rpc("remove_family_material_chain", {
+    p_family_id: familyId,
+    p_material_id: materialId,
+  });
   if (error) {
     console.error("material soft delete failed:", error.message);
     return { deleted: false, note: "That did not delete. Try again in a moment." };
   }
-  if (!data || data.length === 0) {
+  const result = Array.isArray(data) ? data[0]?.result : null;
+  if (result === "removed") return { deleted: true, note: "Deleted." };
+  if (result === "already_removed") return { deleted: true, note: "Already removed." };
+  if (result === "not_found") {
     return { deleted: false, note: "That's already gone. Refresh the page and try again." };
   }
-  return { deleted: true, note: "Deleted." };
+  return { deleted: false, note: "That did not delete. Try again in a moment." };
 }
 
 interface ChainRow {

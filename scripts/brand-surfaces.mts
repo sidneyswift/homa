@@ -139,6 +139,7 @@ interface Classification {
 }
 
 const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
+  { match: (path) => path === "work/onboardingandpaywall8-30/assets/making-feature-cards/MANIFEST.md", value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring", reachability: "internal", ownerIssue: "gh#729", deliveryState: "controlled-current" } },
   { match: (path) => [".github/workflows/ci.yml", ".github/workflows/android-native-compile.yml", "package.json"].includes(path) || [
     "scripts/channel-evidence-check.mts",
     "scripts/channel-evidence-contract.mts",
