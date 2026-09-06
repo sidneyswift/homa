@@ -179,8 +179,6 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
     runtimeSessionId?: string;
     turnId?: string;
     deliveredContent?: string;
-    /** Native text has no Progress card; its actual statement must be visible. */
-    requireExactStatement?: boolean;
     now?: Date;
   },
   dependencies: ProgressDeliveryBindingDependencies,
@@ -208,6 +206,9 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
   );
   const now = input.now ?? new Date();
   if (deliveryOutcome === "sent" && alreadyBound.length === 1) {
+    if (input.attempt.channel === "web" && !textDeliveryContainsPrompt(alreadyBound[0], input.deliveredContent, true)) {
+      return {status: "no_unique_prompt"};
+    }
     return openBoundProgressReplyLoop({
       checkIn: alreadyBound[0],
       attempt: input.attempt,
@@ -259,12 +260,11 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
       ? { status: "delivery_paused", reason }
       : { status: "no_unique_prompt" };
   }
+  // A web/native tool may commit then time out without emitting its card.
+  // Its canonical text must carry the exact selected statement; the trusted
+  // runtime/turn match above separately binds that text to this revision.
   if (
-    (
-      input.attempt.channel === "sms" ||
-      input.attempt.channel === "email" || input.requireExactStatement === true
-    ) &&
-    !textDeliveryContainsPrompt(checkIn, input.deliveredContent, input.requireExactStatement)
+    !textDeliveryContainsPrompt(checkIn, input.deliveredContent, input.attempt.channel === "web")
   ) {
     return { status: "no_unique_prompt" };
   }

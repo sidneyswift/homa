@@ -20,7 +20,6 @@ export function bindDeliveredProgressCheckIn(input: {
   runtimeSessionId: string;
   turnId: string;
   deliveredContent?: string;
-  requireExactStatement?: boolean;
   now?: Date;
 }) {
   return bindProgressCheckInAfterSuccessfulDelivery(input, {

@@ -17,6 +17,7 @@ let origin: string;
 let sends: unknown[] = [];
 let receiptStatus: "not_started" | "accepted" | "delivered" | "terminal" = "not_started";
 let unavailable = false;
+let receiptRevision = 1;
 const screenshots = resolve(process.env.DEEPER_PROGRESS_SCREENSHOTS ?? "test-results/deeper-progress");
 
 const entry = `
@@ -65,7 +66,7 @@ test.beforeAll(async () => {
     if (url.pathname.startsWith("/fonts/") && /^[a-zA-Z0-9._-]+\.woff2$/.test(url.pathname.slice(7))) {res.setHeader("content-type","font/woff2");res.end(readFileSync(resolve(".next/static/media",url.pathname.slice(7))));return;}
     if (url.pathname === "/bundle.js") {res.setHeader("content-type", "text/javascript"); res.end(built.outputFiles[0].text); return;}
     if (url.pathname === "/style.css") {res.setHeader("content-type", "text/css"); res.end(css.css + fonts + ":root{--font-dm-sans:\"DM Sans\";--font-eb-garamond:\"EB Garamond\"}body{margin:0}main{padding:20px;max-width:700px;margin:auto}textarea{display:block;width:100%}"); return;}
-    if (url.pathname === "/status") {res.setHeader("content-type", "application/json");res.end(JSON.stringify({status: unavailable ? "unavailable" : receiptStatus, checkInId: childId, revision: 1}));return;}
+    if (url.pathname === "/status") {res.setHeader("content-type", "application/json");res.end(JSON.stringify({status: unavailable ? "unavailable" : receiptStatus, checkInId: childId, revision: receiptRevision}));return;}
     if (url.pathname === "/send") {let body="";for await(const chunk of req)body+=chunk;sends.push(JSON.parse(body));res.end("ok");return;}
     res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><div id="root"></div><script src="/bundle.js"></script>');
   });
@@ -75,7 +76,7 @@ test.beforeAll(async () => {
   origin = `http://127.0.0.1:${address.port}`;
   browser = await chromium.launch({...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? {executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH} : {}), headless: true});
 });
-test.beforeEach(() => {sends=[];receiptStatus="not_started";unavailable=false;});
+test.beforeEach(() => {sends=[];receiptStatus="not_started";receiptRevision=1;unavailable=false;});
 test.afterAll(async () => {await browser?.close();await new Promise<void>(done => server?.close(()=>done()));});
 
 test("dispatches exactly once after restore, preserves draft, and reload only checks the same action", async () => {
@@ -173,10 +174,19 @@ test("reload after a committed start exposes explicit recovery until its exact q
   expect(sends[0]).toEqual({message: "Ask me deeper math questions for Maya.", source: {kind: "assessment_action",
     assessmentAction: {requestId: request, childId, subjectId: "math", retryRevision: 1}}});
   await expect(page.getByRole("textbox", {name: "Message"})).toHaveValue("My unrelated draft");
+  receiptRevision = 2;
+  await page.reload();
+  await expect(page.getByTestId("state")).toHaveText("accepted");
+  expect(new URL(page.url()).searchParams.get("request")).toBe(request);
+  expect(sends).toHaveLength(1);
+  await page.getByRole("button", {name: "Check and try again"}).click();
+  await expect.poll(() => sends.length).toBe(2);
+  expect(sends[1]).toEqual({message: "Ask me deeper math questions for Maya.", source: {kind: "assessment_action",
+    assessmentAction: {requestId: request, childId, subjectId: "math", retryRevision: 2}}});
   receiptStatus = "delivered";
   await expect(page.getByTestId("state")).toHaveText("complete", {timeout: 12_000});
   expect(new URL(page.url()).searchParams.has("request")).toBe(false);
-  expect(sends).toHaveLength(1);
+  expect(sends).toHaveLength(2);
   await context.close();
 });
 

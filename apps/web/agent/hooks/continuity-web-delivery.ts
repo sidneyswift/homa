@@ -69,10 +69,9 @@ export const screenDeliveryHook = {
               deliveryOutcome: recorded.deliveryOutcome,
               runtimeSessionId: ctx.session.id,
               turnId: event.data.turnId,
-              ...(attributes.channel === "mobile" ? {
-                deliveredContent: persisted.content,
-                requireExactStatement: true,
-              } : {}),
+              // A committed tool can time out before its question card is
+              // emitted. A pending turn alone is never delivery proof.
+              deliveredContent: persisted.content,
             })
           : { status: "no_unique_prompt" as const };
       const genericContract = replyContractForReactiveMessage(

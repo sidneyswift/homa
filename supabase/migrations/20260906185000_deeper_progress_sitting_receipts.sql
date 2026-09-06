@@ -44,3 +44,24 @@ create policy "adult reads own selected progress actions"
   ));
 revoke all on public.progress_check_in_start_requests from anon, authenticated;
 grant select on public.progress_check_in_start_requests to authenticated;
+
+-- Read receipt and sitting from one statement snapshot. Two REST reads can
+-- straddle a recovery commit and incorrectly settle an undelivered action.
+-- Invoker security keeps both underlying tables under the caller's RLS.
+create view public.progress_check_in_start_request_status
+with (security_invoker = true) as
+select request.family_id, request.member_user_id, request.request_id,
+       request.child_id, request.subject_id, request.result,
+       request.issued_check_in_id, request.issued_revision, request.delivered_at,
+       case when check_in.id is null then null else jsonb_build_object(
+         'id', check_in.id, 'state', check_in.state, 'revision', check_in.revision,
+         'current_delivery_id', check_in.current_delivery_id,
+         'active_member_user_id', check_in.active_member_user_id,
+         'prompt_recipient_member_user_id', check_in.prompt_recipient_member_user_id
+       ) end as current
+from public.progress_check_in_start_requests request
+left join public.progress_check_ins check_in
+  on check_in.family_id = request.family_id and check_in.child_id = request.child_id
+ and check_in.id = request.issued_check_in_id;
+revoke all on public.progress_check_in_start_request_status from anon, authenticated;
+grant select on public.progress_check_in_start_request_status to authenticated;

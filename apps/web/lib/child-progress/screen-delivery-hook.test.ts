@@ -36,7 +36,7 @@ const fixture = {
     return {attempt: {id: "owned-delivery", familyId: "family", memberUserId: "adult", episodeId: "owned-episode", channel: "web", messageId: input.messageId}, deliveryOutcome: "sent"};},
   async bindDeliveredProgressCheckIn(input: Parameters<typeof bindProgressCheckInAfterSuccessfulDelivery>[0]) {
     calls.push({name: "bind", input: input as unknown as Record<string, unknown>});
-    if (input.requireExactStatement) assert.equal(input.deliveredContent, persistedMessages.get(input.attempt.messageId));
+    if (input.attempt.channel === "web") assert.equal(input.deliveredContent, persistedMessages.get(input.attempt.messageId));
     lastBinding = await bindProgressCheckInAfterSuccessfulDelivery(input, {
       listFamilyCheckIns: async () => [checkIn],
       bindDelivery: async () => {bound += 1; return {status: "bound", checkIn};},
@@ -83,22 +83,22 @@ it("actual native text hook uses canonical owned message, recipient and exact ru
     assert.equal(calls[1].input.channel, "web");
     assert.deepEqual(calls[2].input, {attempt: {id: "owned-delivery", familyId: "family", memberUserId: "adult", episodeId: "owned-episode", channel: "web", messageId: "canonical-message"},
       deliveryOutcome: "sent", runtimeSessionId: "exact-runtime", turnId: "exact-turn",
-      ...(channel === "mobile" ? {deliveredContent: statement, requireExactStatement: true} : {})});
+      deliveredContent: statement});
     assert.equal(bound, 1);
   }
 });
 
-it("native canonical prose must contain the exact selected question before the real binder opens it", async () => {
-  for (const message of ["Ready when you are.", statement.split(" ").reverse().join(" "), statement.replace("Maya", "Another child"), "word ".repeat(1600) + statement]) {
+it("web and native canonical prose must contain the exact selected question before the real binder opens it", async () => {
+  for (const channel of ["web", "mobile"]) for (const message of ["Ready when you are.", statement.split(" ").reverse().join(" "), statement.replace("Maya", "Another child"), "word ".repeat(1600) + statement]) {
     calls.length = 0; canonical = true; bound = 0;
-    await completed({data: {...event.data, message}}, session({channel: "mobile", familyId: "family", memberUserId: "adult"}));
+    await completed({data: {...event.data, message}}, session({channel, familyId: "family", memberUserId: "adult"}));
     assert.equal(persistedMessages.get("canonical-message"), message.trim().slice(0, 8000));
     assert.equal(bound, 0);
     assert.deepEqual(lastBinding, {status: "no_unique_prompt"});
   }
   bound = 0;
   await completed({data: {...event.data, message: "Choose an answer on the card."}}, session({channel: "web", familyId: "family", memberUserId: "adult"}));
-  assert.equal(bound, 1, "browser card proof remains sufficient without repeated prose");
+  assert.equal(bound, 0, "a pending turn does not prove a successful browser question result or card");
 });
 
 it("actual hook never binds a partial, empty, parented or unauthenticated message", async () => {
