@@ -1,9 +1,47 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 import { getMyFamily } from "../../../lib/family";
+import { hoursMutationError } from "../../../lib/hours-edit";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
+
+export async function savePlannerLearningActivityAction(input: {
+  activityId: string;
+  expectedUpdatedAt: string;
+  title: string;
+  note: string;
+  durationMinutes: number | null;
+}): Promise<
+  | { ok: true; title: string; note: string | null; durationMinutes: number | null; status: "planned" | "completed"; updatedAt: string }
+  | { ok: false; reason: string }
+> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.rpc("update_planner_learning_activity_record", {
+      target_activity_id: input.activityId,
+      target_expected_updated_at: input.expectedUpdatedAt,
+      target_title: input.title,
+      target_note: input.note,
+      target_duration_minutes: input.durationMinutes,
+    });
+    if (error) return { ok: false, reason: "That change couldn't be confirmed. Reopen the activity to check before trying again." };
+    const failure = hoursMutationError(data, "planner");
+    if (failure) return { ok: false, reason: failure };
+    const parsed = z.object({
+      result: z.literal("applied"), title: z.string(), note: z.string().nullable(),
+      durationMinutes: z.number().int().min(1).max(600).nullable(),
+      status: z.enum(["planned", "completed"]), updatedAt: z.string(),
+    }).safeParse(data);
+    if (!parsed.success) return { ok: false, reason: "The change couldn't be confirmed. Reopen the activity to check." };
+    revalidatePath("/app/planner");
+    revalidatePath("/app/hours");
+    return { ok: true, ...parsed.data };
+  } catch {
+    return { ok: false, reason: "That change couldn't be confirmed. Check your connection and reopen the activity." };
+  }
+}
 
 interface StatusReceipt {
   result: "applied" | "conflict";
