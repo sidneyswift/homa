@@ -1,15 +1,19 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { createClient } from "@supabase/supabase-js";
+
 import {
   applyFamilyEventPatch,
   expandRecurringFamilyEvents,
   familyEventChildIds,
   familyEventPatchIsEmpty,
+  listFamilyEventsCaller,
   MAX_EVENT_WINDOW_DAYS,
   parseFamilyEventInput,
   parseFamilyEventRecurrence,
   resolveEventWindow,
+  type FamilyEventRow,
 } from "./family-events";
 
 describe("family event recurrence", () => {
@@ -465,4 +469,141 @@ describe("applyFamilyEventPatch", () => {
     assert.equal(familyEventPatchIsEmpty({ title: "X" }), false);
     assert.equal(familyEventPatchIsEmpty({ startTime: null }), false);
   });
+});
+
+
+describe("recurrence window edges", () => {
+  const series: FamilyEventRow = {
+    id: "future-series", familyId: "family-a", childId: "child-a",
+    childIds: ["child-a", "child-b"], title: "Thursday co-op",
+    startsOn: "2026-10-01", endsOn: "2026-10-01",
+    startTime: "09:00", endTime: "11:00", note: null,
+    recurrence: { frequency: "weekly", interval: 1, weekdays: [4], until: "2026-10-08" },
+    createdAt: "2026-08-01T00:00:00.000Z",
+  };
+
+  it("includes a valid future occurrence moved before its series starts", () => {
+    const input: FamilyEventRow[] = [{
+      ...series,
+      occurrenceExceptions: [{
+        occurrenceOn: "2026-10-01", kind: "moved", startsOn: "2026-09-10",
+        endsOn: "2026-09-11", startTime: "13:00", endTime: "14:00",
+      }],
+    }];
+    const before = structuredClone(input);
+    const occurrences = expandRecurringFamilyEvents(input, "2026-09-01", "2026-09-30");
+    assert.deepEqual(occurrences.map((event) => [
+      event.startsOn, event.endsOn, event.originalOccurrenceOn, event.occurrenceKey,
+      event.seriesStartsOn, familyEventChildIds(event),
+    ]), [["2026-09-10", "2026-09-11", "2026-10-01", "future-series:2026-10-01",
+      "2026-10-01", ["child-a", "child-b"]]]);
+    assert.deepEqual(input, before);
+    assert.deepEqual(
+      expandRecurringFamilyEvents(input, "2026-10-01", "2026-10-08").map((event) => event.startsOn),
+      ["2026-10-08"],
+    );
+  });
+
+  it("ignores stale exceptions before the series, on a wrong weekday, or after until", () => {
+    const occurrences = expandRecurringFamilyEvents([{
+      ...series,
+      occurrenceExceptions: ["2026-09-24", "2026-10-02", "2026-10-15"].map((occurrenceOn) => ({
+        occurrenceOn, kind: "moved", startsOn: "2026-09-10", endsOn: "2026-09-10",
+        startTime: null, endTime: null,
+      })),
+    }], "2026-09-01", "2026-09-30");
+    assert.deepEqual(occurrences, []);
+  });
+
+  it("keeps duration overlap and interval/until boundaries inclusive", () => {
+    const occurrences = expandRecurringFamilyEvents([{
+      ...series, startsOn: "2026-08-31", endsOn: "2026-09-02",
+      recurrence: { frequency: "weekly", interval: 2, weekdays: [1], until: "2026-09-14" },
+    }], "2026-09-01", "2026-09-30");
+    assert.deepEqual(occurrences.map((event) => [event.startsOn, event.endsOn]), [
+      ["2026-08-31", "2026-09-02"], ["2026-09-14", "2026-09-16"],
+    ]);
+  });
+});
+
+describe("caller family-event window candidates", () => {
+  const familyId = "00000000-0000-4000-8000-000000000001";
+  const ordinaryId = "00000000-0000-4000-8000-000000000002";
+  const futureId = "00000000-0000-4000-8000-000000000003";
+
+  function client(failAt?: "moved" | "extra" | "audience" | "exceptions") {
+    const requests: URL[] = [];
+    const event = (id: string, startsOn: string) => ({
+      id, family_id: familyId, child_id: "child-a", title: id,
+      starts_on: startsOn, ends_on: startsOn, start_time: "09:00:00", end_time: "10:00:00",
+      note: null, recurrence_rule: { frequency: "weekly", interval: 1, weekdays: [4], until: null },
+      created_at: "2026-08-01T00:00:00.000Z",
+    });
+    const db = createClient("http://recurrence-test.invalid", "synthetic-test-key", {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: async (input) => {
+        const url = new URL(String(input));
+        requests.push(url);
+        assert.equal(url.searchParams.get("family_id"), `eq.${familyId}`);
+        const table = url.pathname.split("/").at(-1);
+        const select = url.searchParams.get("select");
+        let rows: unknown[];
+        let stage: typeof failAt;
+        if (table === "family_events") {
+          if (url.searchParams.has("id")) {
+            stage = "extra";
+            assert.equal(url.searchParams.get("id"), `in.(${futureId})`);
+            rows = [event(futureId, "2026-10-01")];
+          } else {
+            assert.equal(url.searchParams.get("starts_on"), "lte.2026-09-30");
+            assert.equal(url.searchParams.get("or"), "(ends_on.gte.2026-09-01,recurrence_rule.not.is.null)");
+            rows = [event(ordinaryId, "2026-08-06")];
+          }
+        } else if (table === "family_event_occurrence_exceptions" && select === "event_id") {
+          stage = "moved";
+          assert.equal(url.searchParams.get("kind"), "eq.moved");
+          assert.equal(url.searchParams.get("starts_on"), "lte.2026-09-30");
+          assert.equal(url.searchParams.get("ends_on"), "gte.2026-09-01");
+          rows = [{ event_id: ordinaryId }, { event_id: futureId }, { event_id: futureId }];
+        } else {
+          assert.equal(url.searchParams.get("event_id"), `in.(${ordinaryId},${futureId})`);
+          if (table === "family_event_children") {
+            stage = "audience";
+            rows = [{ event_id: futureId, child_id: "child-a" }, { event_id: futureId, child_id: "child-b" }];
+          } else {
+            assert.equal(table, "family_event_occurrence_exceptions");
+            stage = "exceptions";
+            rows = [{ event_id: futureId, occurrence_on: "2026-10-01", kind: "moved",
+              starts_on: "2026-09-10", ends_on: "2026-09-10", start_time: null, end_time: null }];
+          }
+        }
+        if (failAt && stage === failAt) {
+          return Response.json({ message: "fixture read failure", code: "XX000" }, { status: 500 });
+        }
+        return Response.json(rows);
+      } },
+    });
+    return { db, requests };
+  }
+
+  it("unions and deduplicates bounded moved IDs, then hydrates the complete audience and exceptions", async () => {
+    const { db, requests } = client();
+    const events = await listFamilyEventsCaller(db, familyId, "2026-09-01", "2026-09-30");
+    assert.deepEqual(events.map((event) => event.id), [ordinaryId, futureId]);
+    assert.equal(events[0].startTime, "09:00");
+    assert.deepEqual(familyEventChildIds(events[1]), ["child-a", "child-b"]);
+    assert.equal(events[1].occurrenceExceptions?.[0].occurrenceOn, "2026-10-01");
+    assert.equal(requests.length, 5);
+    assert.equal(expandRecurringFamilyEvents(events, "2026-09-01", "2026-09-30")
+      .filter((event) => event.id === futureId)[0]?.startsOn, "2026-09-10");
+  });
+
+  for (const stage of ["moved", "extra", "audience", "exceptions"] as const) {
+    it(`fails closed if the ${stage} read fails`, async () => {
+      await assert.rejects(
+        listFamilyEventsCaller(client(stage).db, familyId, "2026-09-01", "2026-09-30"),
+        /fixture read failure/u,
+      );
+    });
+  }
 });

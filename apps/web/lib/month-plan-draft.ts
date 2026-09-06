@@ -9,6 +9,8 @@ import {
 } from "@homa/core";
 import { z } from "zod";
 
+import { listFamilyEventsPinned, type FamilyEventRow } from "./family-events";
+import { expandRecurringFamilyEvents, familyEventChildIds } from "./family-events-model";
 import { mapDb, type DbJson } from "./map/db";
 
 /**
@@ -121,13 +123,6 @@ interface FamilyChildRow {
   id: string;
   name: string;
   birth_month: string;
-}
-
-interface FamilyEventRow {
-  child_id: string | null;
-  title: string;
-  starts_on: string;
-  ends_on: string;
 }
 
 interface ExistingMonthPlanRow {
@@ -393,24 +388,28 @@ async function loadVerifiedPlanInputs(
     updatedAt: versions.get(child.id) ?? null,
   }));
 
-  const events = await sql<FamilyEventRow[]>`
-    select child_id, title, starts_on::text as starts_on, ends_on::text as ends_on
-    from public.family_events
-    where family_id = ${familyId}
-      and starts_on <= ${monthEnd(plan.monthStart)}::date
-      and ends_on >= ${plan.monthStart}::date
-    order by starts_on, created_at
-  `;
+  const events = await listFamilyEventsPinned(familyId, plan.monthStart, monthEnd(plan.monthStart));
+  return { children, baseVersions, conflicts: findMonthPlanConflicts(plan, events) };
+}
+
+/** Exact date overlap against expanded occurrences, using the same child
+ * audience and recurrence semantics as the Calendar and list_family_events. */
+export function findMonthPlanConflicts(
+  plan: ProposedMonthPlan,
+  candidates: FamilyEventRow[],
+): MonthPlanConflict[] {
+  const occurrences = expandRecurringFamilyEvents(candidates, plan.monthStart, monthEnd(plan.monthStart));
   const conflicts: MonthPlanConflict[] = [];
   for (const child of plan.children) {
     for (const week of child.weeks) {
       for (const activity of week.activities) {
         if (!activity.scheduledDate) continue;
-        for (const event of events) {
-          if (event.child_id !== null && event.child_id !== child.childId) continue;
+        for (const event of occurrences) {
+          const audience = familyEventChildIds(event);
+          if (audience.length > 0 && !audience.includes(child.childId)) continue;
           if (
-            activity.scheduledDate >= event.starts_on
-            && activity.scheduledDate <= event.ends_on
+            activity.scheduledDate >= event.startsOn
+            && activity.scheduledDate <= event.endsOn
           ) {
             conflicts.push({
               childId: child.childId,
@@ -424,7 +423,7 @@ async function loadVerifiedPlanInputs(
       }
     }
   }
-  return { children, baseVersions, conflicts };
+  return conflicts;
 }
 
 export async function createMonthPlanDraft(input: {

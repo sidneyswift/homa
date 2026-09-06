@@ -283,8 +283,7 @@ function normalizeTimeOfDay(value: string | null | undefined): string | null {
   return value.slice(0, 5);
 }
 
-/** Exported so family-events-read.ts (the caller-page read) can shape
- * its own Data API rows without duplicating this mapping. */
+/** Full database rows shared by the caller and pinned readers. */
 export interface RawFamilyEventRow {
   id: string;
   family_id: string;
@@ -345,9 +344,8 @@ export function toFamilyEventRow(row: RawFamilyEventRow): FamilyEventRow {
   };
 }
 
-/** The Data API column list family-events-read.ts's page query selects;
- * kept here so the read file and this file's own listFamilyEventsPinned
- * can never drift on what a "full row" means. */
+/** The caller's Data API column list, kept beside the pinned projection
+ * so both readers return the same full row. */
 export const EVENT_COLUMNS =
   "id, family_id, child_id, title, starts_on, ends_on, start_time, end_time, note, recurrence_rule, created_at";
 
@@ -405,6 +403,60 @@ export async function getFamilyEventOccurrenceExceptionsCaller(
     exceptions.sort((left, right) => left.occurrenceOn.localeCompare(right.occurrenceOn));
   }
   return exceptionsByEvent;
+}
+
+/** Window candidates include series with an occurrence moved in from a later
+ * date. Exception dates are replacement dates here; the pure expander checks
+ * whether their original dates still belong to the current recurrence rule. */
+export async function listFamilyEventsCaller(
+  db: SupabaseClient,
+  familyId: string,
+  fromDate: string,
+  toDate: string,
+): Promise<FamilyEventRow[]> {
+  const [ordinary, moved] = await Promise.all([
+    db.from("family_events")
+      .select(EVENT_COLUMNS)
+      .eq("family_id", familyId)
+      .lte("starts_on", toDate)
+      .or(`ends_on.gte.${fromDate},recurrence_rule.not.is.null`)
+      .order("starts_on", { ascending: true }),
+    db.from("family_event_occurrence_exceptions")
+      .select("event_id")
+      .eq("family_id", familyId)
+      .eq("kind", "moved")
+      .lte("starts_on", toDate)
+      .gte("ends_on", fromDate),
+  ]);
+  if (ordinary.error) throw new Error(`family_events read failed: ${ordinary.error.message}`);
+  if (moved.error) {
+    throw new Error(`family event moved occurrences read failed: ${moved.error.message}`);
+  }
+  const rowsById = new Map(
+    ((ordinary.data ?? []) as RawFamilyEventRow[]).map((row) => [row.id, row]),
+  );
+  const movedIds = [...new Set((moved.data ?? []).map((row) => row.event_id as string))]
+    .filter((eventId) => !rowsById.has(eventId));
+  if (movedIds.length > 0) {
+    const { data, error } = await db.from("family_events")
+      .select(EVENT_COLUMNS)
+      .eq("family_id", familyId)
+      .in("id", movedIds);
+    if (error) throw new Error(`family_events read failed: ${error.message}`);
+    for (const row of (data ?? []) as RawFamilyEventRow[]) rowsById.set(row.id, row);
+  }
+  const rows = [...rowsById.values()].sort((left, right) =>
+    left.starts_on.localeCompare(right.starts_on),
+  );
+  const eventIds = rows.map((row) => row.id);
+  const [childIdsByEvent, exceptionsByEvent] = await Promise.all([
+    getFamilyEventChildIdsCaller(db, familyId, eventIds),
+    getFamilyEventOccurrenceExceptionsCaller(db, familyId, eventIds),
+  ]);
+  return rows.map((row) => ({
+    ...toFamilyEventRow({ ...row, child_ids: childIdsByEvent.get(row.id) ?? [] }),
+    occurrenceExceptions: exceptionsByEvent.get(row.id) ?? [],
+  }));
 }
 
 export async function getFamilyEventCaller(
@@ -519,8 +571,19 @@ export async function listFamilyEventsPinned(
            ), '[]'::jsonb) as occurrence_exceptions
     from public.family_events event
     where event.family_id = ${familyId}
-      and event.starts_on <= ${toDate}
-      and (event.ends_on >= ${fromDate} or event.recurrence_rule is not null)
+      and (
+        (event.starts_on <= ${toDate}
+          and (event.ends_on >= ${fromDate} or event.recurrence_rule is not null))
+        or exists (
+          select 1
+          from public.family_event_occurrence_exceptions moved
+          where moved.family_id = event.family_id
+            and moved.event_id = event.id
+            and moved.kind = 'moved'
+            and moved.starts_on <= ${toDate}
+            and moved.ends_on >= ${fromDate}
+        )
+      )
     order by event.starts_on asc
   `;
   return rows.map(toFamilyEventRow);

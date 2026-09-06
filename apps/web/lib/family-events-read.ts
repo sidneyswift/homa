@@ -1,11 +1,4 @@
-import {
-  EVENT_COLUMNS,
-  getFamilyEventChildIdsCaller,
-  getFamilyEventOccurrenceExceptionsCaller,
-  toFamilyEventRow,
-  type FamilyEventRow,
-  type RawFamilyEventRow,
-} from "./family-events";
+import { listFamilyEventsCaller, type FamilyEventRow } from "./family-events";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
@@ -25,30 +18,5 @@ export async function getFamilyEventsForFamily(
   toDate: string,
 ): Promise<FamilyEventRow[]> {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("family_events")
-    .select(EVENT_COLUMNS)
-    .eq("family_id", familyId)
-    .lte("starts_on", toDate)
-    .or(`ends_on.gte.${fromDate},recurrence_rule.not.is.null`)
-    .order("starts_on", { ascending: true });
-  if (error) throw new Error(`family_events read failed: ${error.message}`);
-  const rows = (data ?? []) as RawFamilyEventRow[];
-  const eventIds = rows.map((row) => row.id);
-  const [childIdsByEvent, exceptionsByEvent] = await Promise.all([
-    getFamilyEventChildIdsCaller(supabase, familyId, eventIds),
-    getFamilyEventOccurrenceExceptionsCaller(supabase, familyId, eventIds),
-  ]);
-  return rows.map((row) => toFamilyEventRow({
-    ...row,
-    child_ids: childIdsByEvent.get(row.id) ?? [],
-    occurrence_exceptions: (exceptionsByEvent.get(row.id) ?? []).map((exception) => ({
-      occurrence_on: exception.occurrenceOn,
-      kind: exception.kind,
-      starts_on: exception.startsOn,
-      ends_on: exception.endsOn,
-      start_time: exception.startTime,
-      end_time: exception.endTime,
-    })),
-  }));
+  return listFamilyEventsCaller(supabase, familyId, fromDate, toDate);
 }
