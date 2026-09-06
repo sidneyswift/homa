@@ -207,7 +207,7 @@ The [Hours overlay](../../../apps/web/app/app/hours/hours-entry-overlay.tsx) edi
 
 **Implement now:** one shared date-only resolver using the family's saved start; carry it through UI, chat, Progress and export. Preserve the existing compliance meaning for an unset start: show an honestly labeled all-time total and offer the existing setting rather than invent a school year. No new policy choice is needed to respect the setting or avoid a false period label.
 
-**Acceptance:** anniversary and year rollover, February 29, timezone boundary, missing/invalid start, no future records in a current-period total, and identical UI/chat/Progress/export scope. Tracking: #1090, with F06/F07 dependencies.
+**Acceptance:** anniversary and year rollover, February 29, timezone boundary, missing/invalid start, no future records in a current-period total, and identical UI/chat/Progress/export scope. Tracking: #1096, with F06/F07 dependencies.
 
 ### F09-F10. Deeper questions should locate demonstrated ability and update progress
 
@@ -485,6 +485,8 @@ Hours includes selected-child plus shared rows before subject filtering and tota
 Month preview contains four weeks. Approval validates children/dates/materials/unresolved choices and versions, then replaces the current plan/dates. Curriculum mapping appends at most 40 placements into existing four-week plans and chooses no dates. Repeatedly calling these tools does not establish a safe persistent year plan or finish-date calculation.
 
 **Bounded bug found:** [month-plan-draft.ts](../../../apps/web/lib/month-plan-draft.ts) checks calendar conflicts by querying original event start/end overlap. It omits recurrence expansion, exception rows and multi-child links used by normal Planner reads. A weekly August event repeating in September is absent from the September preview conflict check. A multi-child event may be treated only through its compatibility child field. This is code-verified, not a claimed Carolyng recurring-break incident.
+
+**September 6 follow-through:** the [implementation and verification plan](2026-09-06-recurring-plan-conflicts.md) traces the fleet procedure, pinned tool read, caller-JWT Calendar read, create/revise preview and pure occurrence expansion. It also identifies an edge the current canonical readers miss: a valid future-series occurrence moved into an earlier window. The actual pure expander returned the September 10 replacement of an October 1 occurrence for both selected children, while the readers' original-start predicate excludes that series. This is an actual-function and source-predicate replay; SQL execution and hosted acceptance remain pending. The existing mutation accepts that replacement date, so the implementation must not simply reuse the flawed reader unchanged.
 
 **Implement now:** reuse the canonical event reader/model for month-preview conflicts and test recurring, exception and multi-child fixtures, including completed work remaining unchanged. Then prove one readable curriculum, one child, one existing month and an explicit break with preview and approved save.
 
