@@ -441,6 +441,9 @@ jobs:
       - name: Runtime prompt asset checks
         run: pnpm check:runtime-prompts
 
+      - name: Chromium function tracing guard tests
+        run: node --test scripts/chromium-tracing-check.test.mjs
+
       - name: Eval-host isolation checks (no prod writes from local eval runs)
         run: pnpm check:eval-isolation
 
