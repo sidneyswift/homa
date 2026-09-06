@@ -1,0 +1,21 @@
+{
+  "kind": "incomplete-hosted-journey",
+  "deployedCommit": "325216fa6fe60a17e732d9ad410720f4eca5dbe2",
+  "runId": "07577fb2-1030-45a9-963b-b360ad5a7a80",
+  "operatorStatus": "failed",
+  "operatorFailure": "36 status reads exhausted before completed turn was observed",
+  "cleanup": "retained pending exact reviewed recovery",
+  "independentRuntimeTurnStatus": "completed",
+  "independentRuntimeTurnId": "turn_0",
+  "fixtureOnly": true,
+  "sourceHashes": {
+    "failedOperatorReceipt": "04252d4a4920cddcf015569af77fee1230a356264367f88872308c5b6fdbcf03",
+    "independentVercelTrace": "9265f3b8a738988da2ac78cf18a3b032dc2611063fad0a1a7eab6220c3d7dbf6"
+  },
+  "notCertified": [
+    "saved responses",
+    "updated Progress UI",
+    "full browser journey",
+    "physical phone"
+  ]
+}

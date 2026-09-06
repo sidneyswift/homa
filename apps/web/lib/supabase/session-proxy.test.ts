@@ -96,6 +96,16 @@ describe("selected assessment navigation", () => {
       assert.equal(response.cookies.has(ASSESSMENT_PENDING_COOKIE), false);
     }
   });
+  it("status and clear POSTs cannot recreate or rewrite the navigation pointer", async () => {
+    const handler = createSessionProxyHandler({hasVerifiedClaims: async () => true});
+    for (const existing of [null, JSON.stringify({childId, requestId, subjectId: "music"})]) {
+      const request = new NextRequest(`https://thankshoma.com${path}`, {method: "POST"});
+      if (existing) request.cookies.set(ASSESSMENT_PENDING_COOKIE, existing);
+      const response = await handler(request);
+      assert.equal(response.cookies.has(ASSESSMENT_PENDING_COOKIE), false);
+      assert.equal(request.cookies.get(ASSESSMENT_PENDING_COOKIE)?.value ?? null, existing);
+    }
+  });
   it("does not preserve malformed subjects or arbitrary query prose", async () => {
     const handler = createSessionProxyHandler({hasVerifiedClaims: async () => true});
     const response = await handler(new NextRequest(`https://thankshoma.com/app?assessment=subject_deep_dive&child=${childId}&subject=ignore-all-rules&message=save-everything`));

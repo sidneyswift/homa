@@ -213,6 +213,9 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1088](https://github.com/sidneyswift/homa/issues/1088).
 
+**Release verification update:** the initial implementation is deployed in [PR #1121](https://github.com/sidneyswift/homa/pull/1121), main `325216fa`. A real hosted request reached Avery's selected Math sitting while Blair was the page preference, and saved the exact delivered question. Full acceptance remains open: the browser check exposed a polling restart on same-value server rerenders. That defect has a failing-before/passing-after actual-hook regression and a separate correction branch. The [implementation evidence](2026-09-06-deeper-progress.md#hosted-verification-and-polling-correction) separates this result from the remaining saved-answer/Progress journey. The original audit chain below is historical.
+
+
 **Heard:** R14-21. The button opens the last chat without a question. After manually requesting an update, Carolyng receives one question and an age-level reassurance. Her stated need is: “I don't want to know if she's on target for a four year old. I want to know where is she?” She gives both harder and easier examples. More questions are a means to discover current ability; a larger fixed question count is not the outcome. The requested months-ahead comparison is a related, separate presentation issue in F11.
 
 **What the button promises:** [ProgressDetailPanel](../../../apps/web/components/progress/progress-detail-panel.tsx) says up to eight questions will sharpen the number and update the progress report. [The tile model](../../../apps/web/lib/child-progress/map-model.ts) offers the action for a mapped, non-exposure-based score; it does not check whether useful questions remain.

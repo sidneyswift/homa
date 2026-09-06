@@ -1,6 +1,6 @@
 # Deeper questions that follow the child's evidence
 
-Implementation and evidence for [#1088](https://github.com/sidneyswift/homa/issues/1088), F09-F10 in the [meeting review](2026-09-05-cofounder-feedback-review.md). Not yet deployed or live-certified. GitHub holds status and ownership.
+Implementation and evidence for [#1088](https://github.com/sidneyswift/homa/issues/1088), F09-F10 in the [meeting review](2026-09-05-cofounder-feedback-review.md). The initial implementation is deployed at main `325216fa6fe60a17e732d9ad410720f4eca5dbe2`; full hosted acceptance remains open after the polling failure below. GitHub holds status and ownership.
 
 ## What the request means
 
@@ -46,3 +46,14 @@ The updated disposable PostgreSQL contract passed for both relations: owner read
 Fresh review of the recovery correction, final copy and interface gates, integration of newer main, exact-head CI/Vercel checks, the additive migration and production READY attestation precede the hosted acceptance run. That run must show the selected entry, actual visible question and canonical delivery, real answers, durable stop, reload without restart, and the correct child's resulting Progress. A start receipt alone cannot close this issue.
 
 Numeric months-ahead presentation remains #1097. Contextual journal capture remains #1099, fresh next-step advice #1100, and recurring assessment cadence #1107. Native text delivery receives deterministic coverage here; physical native interaction and spoken voice are not certified by these tests.
+
+
+## Hosted verification and polling correction
+
+PR #1121 merged with required checks and deployed READY as `dpl_5123698ncCY7E497RV12v2DA2ANM` at thankshoma.com. The receipt migration is installed as live version `20260906203800`; RLS and the invoker view's read-only grants were verified.
+
+The first operator attempt stopped before creating an account because its own preflight named `memories` instead of `family_memories`. A two-reference script correction passed fresh catalog validation and exact counter tests. The second attempt created its own synthetic account, selected Blair, and sent the requested deeper Math action for Avery. It reached its 36-status-read limit before observing the turn boundary and retained the fixture. Vercel's independent trace proves the only turn completed two seconds later, with the correct fleet skill and `start_check_in` command. Canonical rows show the exact Avery question and matching adult/delivery, one active sitting and zero answers. This proves selected scope and first-question persistence, not the full browser journey or completed assessment.
+
+Inspection then found a product issue: each new server copy of the same selected-action object restarted the hook's polling effect, and the session proxy rewrote the navigation cookie on status and clear POSTs. A new actual-hook browser regression reproduced 23 extra status reads after twelve same-value rerenders. The correction depends on stable request/child/subject/message values and writes navigation intent only on GET. The same regression and all eight browser journeys pass; the full authentication/proxy suite passes 26 tests. It preserves explicit retry, readiness gates and no-resend reload behavior. This changes no model procedure, scorer or question selection.
+
+The failed hosted receipt and completed first-turn trace remain distinct evidence. Cleanup of that exact retained fixture and a fresh full hosted run remain required before closure. The correction is under review on `codex/gh-1088-stable-recovery-polling`.

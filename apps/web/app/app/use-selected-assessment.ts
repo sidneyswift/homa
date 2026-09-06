@@ -18,13 +18,18 @@ export function useSelectedAssessment(input: {
   const sendRef = useRef(input.send);
   const dispatched = useRef(new Set<string>());
   useEffect(() => { sendRef.current = input.send; });
-  const action = input.action;
+  // Server responses can deserialize an unchanged action into a new object.
+  // The request values, not object identity, own one bounded poll lifecycle.
+  const requestId = input.action?.requestId;
+  const childId = input.action?.childId;
+  const subjectId = input.action?.subjectId;
+  const message = input.action?.message;
   useEffect(() => {
-    if (!action || !input.ready || input.walled) return;
+    if (!requestId || !childId || !subjectId || !message || !input.ready || input.walled) return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const key = `${input.storageKey}:assessment:${action.requestId}`;
-    const pointer = {requestId: action.requestId, childId: action.childId, subjectId: action.subjectId};
+    const key = `${input.storageKey}:assessment:${requestId}`;
+    const pointer = {requestId, childId, subjectId};
     const finish = async () => {
       if (cancelled) return;
       setState("complete");
@@ -32,7 +37,7 @@ export function useSelectedAssessment(input: {
       await clearSelectedAssessment(pointer).catch(() => undefined);
       if (cancelled) return;
       const url = new URL(window.location.href);
-      if (url.searchParams.get("request") === action.requestId) {
+      if (url.searchParams.get("request") === requestId) {
         for (const name of ["assessment", "child", "subject", "request"]) url.searchParams.delete(name);
         window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
       }
@@ -59,7 +64,7 @@ export function useSelectedAssessment(input: {
       dispatched.current.add(`${key}:attempt:${retry}`);
       try { sessionStorage.setItem(key, "dispatching"); } catch { /* The server still deduplicates this action. */ }
       setState("opening");
-      const result = sendRef.current(action.message, {kind: "assessment_action", assessmentAction: {
+      const result = sendRef.current(message, {kind: "assessment_action", assessmentAction: {
         ...pointer, ...(receipt.status === "accepted" ? {retryRevision: receipt.revision} : {}),
       }});
       if (result === "rejected") {
@@ -71,6 +76,6 @@ export function useSelectedAssessment(input: {
       void poll(20);
     })();
     return () => { cancelled = true; if (timer) clearTimeout(timer); };
-  }, [action, input.ready, input.storageKey, input.walled, retry]);
+  }, [requestId, childId, subjectId, message, input.ready, input.storageKey, input.walled, retry]);
   return {state, retry: () => setRetry(value => value + 1)};
 }
