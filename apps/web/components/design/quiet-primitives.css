@@ -1232,6 +1232,8 @@ textarea.quiet-field__control { min-height: 96px; resize: vertical; }
 .quiet-shell__family-avatar { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--homa-control-boundary) 42%, transparent); border-radius: 50%; background: var(--homa-info-tint); color: var(--homa-info-ink); }
 .quiet-shell__context-trigger {
   display: inline-flex;
+  min-height: 44px;
+  gap: 8px;
   align-items: center;
   border: 1px solid transparent;
   border-radius: var(--homa-radius-control);

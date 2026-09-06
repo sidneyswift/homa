@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  Suspense,
   useCallback,
   useEffect,
   useId,
@@ -18,6 +19,8 @@ import { setViewContextAction } from "../../app/app/view-context-actions";
 import {
   kidSwitchTargetPath,
   pageShowsContextSwitcher,
+  plannerPathAfterContextPick,
+  resolvePlannerViewContext,
   VIEW_CONTEXT_FAMILY,
 } from "../../lib/view-context";
 import { Icon } from "../design/Icon";
@@ -86,35 +89,66 @@ type ViewContextPickHandler = (target: string) => void | Promise<void>;
 
 function useViewContextPick(
   selected: string,
+  childIds: readonly string[],
   onSelect?: ViewContextPickHandler,
 ) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  const route = `${pathname}?${search}`;
+  const queryChildren = searchParams.getAll("child");
+  const context = resolvePlannerViewContext(
+    selected,
+    pathname === "/app/planner"
+      ? queryChildren.length === 1 ? queryChildren[0] : queryChildren
+      : undefined,
+    childIds,
+  ).context;
+  const resolved = context.kind === "child" ? context.childId : VIEW_CONTEXT_FAMILY;
   const [isPending, startTransition] = useTransition();
-  const [picked, setPicked] = useState<string | null>(null);
+  const [picked, setPicked] = useState<{ target: string; route: string } | null>(null);
+  const [failure, setFailure] = useState<{ target: string; route: string } | null>(null);
+  const inFlight = useRef(false);
 
-  const current = isPending && picked !== null ? picked : selected;
+  const current = isPending && picked?.route === route ? picked.target : resolved;
+  const retryTarget = failure?.route === route ? failure.target : null;
 
   function pick(target: string) {
-    if (target === current) return;
-    setPicked(target);
+    const plannerDestination = plannerPathAfterContextPick(pathname, search);
+    if (isPending || inFlight.current || (target === current && !plannerDestination)) return;
+    inFlight.current = true;
+    setPicked({ target, route });
+    setFailure(null);
+    const startedAtHref = window.location.href;
     const destination =
       target === VIEW_CONTEXT_FAMILY ? null : kidSwitchTargetPath(pathname, target);
     startTransition(async () => {
-      if (onSelect) {
-        await onSelect(target);
-        return;
-      }
-      await setViewContextAction(target);
-      if (destination) {
-        router.push(destination);
-      } else {
-        router.refresh();
+      try {
+        if (onSelect) {
+          await onSelect(target);
+          return;
+        }
+        await setViewContextAction(target);
+        // A slow preference write must never drag the parent back to a
+        // surface she left while it was saving.
+        if (window.location.href !== startedAtHref) return;
+        if (plannerDestination) {
+          router.replace(plannerDestination, { scroll: false });
+        } else if (destination) {
+          router.push(destination);
+        } else {
+          router.refresh();
+        }
+      } catch {
+        setFailure({ target, route });
+      } finally {
+        inFlight.current = false;
       }
     });
   }
 
-  return { current, pick };
+  return { current, pick, isPending, retryTarget, dismissFailure: () => setFailure(null) };
 }
 
 /**
@@ -154,7 +188,9 @@ function SwitcherMenu({
   const menuId = useId();
   const sheetId = useId();
   const sheetHeadingId = useId();
-  const { current, pick } = useViewContextPick(selected, onSelect);
+  const { current, pick, isPending, retryTarget, dismissFailure } = useViewContextPick(
+    selected, kids.map((kid) => kid.id), onSelect,
+  );
 
   const finishClose = useCallback(() => {
     if (closeTimerRef.current !== null) {
@@ -345,6 +381,8 @@ function SwitcherMenu({
         aria-haspopup={isPhone ? "dialog" : "menu"}
         aria-expanded={open ? "true" : "false"}
         aria-controls={isPhone ? sheetId : menuId}
+        aria-busy={isPending ? "true" : undefined}
+        disabled={isPending}
         aria-label={
           currentKid
             ? `Viewing ${currentKid.name}. Change who you're viewing`
@@ -358,7 +396,25 @@ function SwitcherMenu({
         ) : (
           <FamilyAvatar size={32} />
         )}
+        <span className="max-w-20 truncate text-xs font-semibold text-[var(--homa-ink)]">
+          {currentKid ? currentKid.name : "Whole family"}
+        </span>
+        <Icon name="collapse" size={16} className="shrink-0" />
       </button>
+
+      {retryTarget ? (
+        <QuietStatus tone="attention" className="absolute right-0 top-full z-40 mt-2 w-64 text-sm">
+          <p role="alert">
+            Viewing {currentKid ? currentKid.name : "the whole family"}. The switch could not be confirmed.
+          </p>
+          <div className="mt-2 flex gap-4">
+            <button type="button" className="min-h-11 font-semibold underline" disabled={isPending} onClick={() => pick(retryTarget)}>
+              Try again
+            </button>
+            <button type="button" className="min-h-11 font-semibold underline" onClick={dismissFailure}>Dismiss</button>
+          </div>
+        </QuietStatus>
+      ) : null}
 
       {open && !isPhone ? (
         <>
@@ -517,12 +573,14 @@ export function ContextSwitcher({
   onSelect?: ViewContextPickHandler;
 }) {
   return (
-    <SwitcherMenu
-      kids={kids}
-      selected={selected}
-      buttonClassName="quiet-shell__context-trigger"
-      onSelect={onSelect}
-    />
+    <Suspense fallback={null}>
+      <SwitcherMenu
+        kids={kids}
+        selected={selected}
+        buttonClassName="quiet-shell__context-trigger"
+        onSelect={onSelect}
+      />
+    </Suspense>
   );
 }
 
@@ -548,12 +606,14 @@ export function DesktopContextSwitcher({
 
   return (
     <div className="quiet-shell__context-desktop print:hidden">
+      <Suspense fallback={null}>
       <SwitcherMenu
         kids={kids}
         selected={selected}
         buttonClassName="quiet-shell__context-trigger quiet-shell__context-trigger--desktop"
         onSelect={onSelect}
       />
+      </Suspense>
     </div>
   );
 }

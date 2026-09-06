@@ -21,7 +21,10 @@ import { keepMaterialAction } from "./keep-material-action";
  * Nothing here is wrong; she just has not said which one to keep. One
  * card per chain, newest first, and keeping one is a single tap.
  */
-export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) {
+export function InProgressShelf({ materials, scopeChildName = null }: {
+  materials: BinderMaterial[];
+  scopeChildName?: string | null;
+}) {
   const [kept, setKept] = useState<Record<string, string>>({});
   const [removed, setRemoved] = useState<Record<string, true>>({});
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -79,6 +82,9 @@ export function InProgressShelf({ materials }: { materials: BinderMaterial[] }) 
       >
         Still in progress
       </h2>
+      <p className="mt-1 text-xs font-semibold text-[var(--homa-ink)]">
+        {scopeChildName ? `For ${scopeChildName}, plus shared family materials` : "For the whole family"}
+      </p>
       <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
         {remaining.length === 1
           ? "One thing we made together that is not in your binder yet."

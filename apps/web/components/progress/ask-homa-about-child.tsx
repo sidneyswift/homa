@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { setViewContextAction } from "../../app/app/view-context-actions";
 import { focusChildThenOpenChat } from "./ask-homa-about-child-action";
@@ -24,17 +24,24 @@ export function AskHomaAboutChild({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [failed, setFailed] = useState(false);
 
   function openFocusedChat() {
     startTransition(async () => {
-      await focusChildThenOpenChat(childId, {
-        setViewContext: setViewContextAction,
-        navigate: (href) => router.push(href),
-      });
+      setFailed(false);
+      try {
+        await focusChildThenOpenChat(childId, {
+          setViewContext: setViewContextAction,
+          navigate: (href) => router.push(href),
+        });
+      } catch {
+        setFailed(true);
+      }
     });
   }
 
   return (
+    <>
     <button
       type="button"
       onClick={openFocusedChat}
@@ -44,5 +51,7 @@ export function AskHomaAboutChild({
     >
       Ask Homa about {childName}
     </button>
+    {failed ? <p role="alert" className="mt-2 text-sm text-muted">I could not open that conversation. Try again.</p> : null}
+    </>
   );
 }

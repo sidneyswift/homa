@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { KidAvatar } from "../../components/dashboard/kid-avatar";
 import { Icon } from "../../components/design/Icon";
+import { QuietStatus } from "../../components/design/QuietStatus";
 import { setViewContextAction } from "./view-context-actions";
 
 /**
@@ -88,7 +89,21 @@ export function SlashComposer({
   const [caret, setCaret] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [dismissedFor, setDismissedFor] = useState<number | null>(null);
-  const [, startTransition] = useTransition();
+  const [savingContext, startTransition] = useTransition();
+  const [failedContext, setFailedContext] = useState<string | null>(null);
+  const contextRequest = useRef(0);
+
+  function saveKidContext(kidId: string) {
+    const request = ++contextRequest.current;
+    setFailedContext(null);
+    startTransition(async () => {
+      try {
+        await setViewContextAction(kidId);
+      } catch {
+        if (request === contextRequest.current) setFailedContext(kidId);
+      }
+    });
+  }
 
   const allItems = useMemo<MenuItem[]>(
     () => [
@@ -153,10 +168,7 @@ export function SlashComposer({
     // switcher), except for single-kid families, where the hidden
     // switcher could never clear it again.
     if (item.kidId && kids.length > 1) {
-      const kidId = item.kidId;
-      startTransition(async () => {
-        await setViewContextAction(kidId);
-      });
+      saveKidContext(item.kidId);
     }
   }
 
@@ -226,6 +238,15 @@ export function SlashComposer({
 
   return (
     <div className="relative min-w-0 flex-1">
+      {!menuOpen && failedContext ? (
+        <QuietStatus tone="attention" className="absolute bottom-full left-0 right-0 z-40 mb-3 text-sm">
+          <p role="alert">The child selection could not be confirmed. Your draft is still here.</p>
+          <div className="mt-2 flex gap-4">
+            <button type="button" className="font-semibold underline" disabled={savingContext} onClick={() => saveKidContext(failedContext)}>Try again</button>
+            <button type="button" className="font-semibold underline" onClick={() => setFailedContext(null)}>Dismiss</button>
+          </div>
+        </QuietStatus>
+      ) : null}
       {menuOpen ? (
         <div
           role="menu"

@@ -47,6 +47,12 @@ The safe-sense case returned exactly: “The research behind this activity gives
 
 The first run failed with two fetch errors after an environment-file watcher reload interrupted the local Eve worker. It was not counted as a pass. A stable isolated environment snapshot eliminated that reload; the original ignored environment link was restored after the successful run.
 
-## Deployment acceptance
+## Production acceptance, September 6
 
-At this evidence snapshot, implementation is committed and validated locally; production deployment and authenticated post-deploy bridge checks remain pending. No physical-device spoken conversation is certified. GitHub #1103 holds the live rollout status and subsequent receipts.
+PR #1112 merged as `df9d5860ae3c5ede42fad3624588223a089b47f3` after all required CI and preview checks passed. Deployment `dpl_7C9DPVKykuKXgHjVHmpYPCaQVNtG` is READY and owns the `thankshoma.com` alias. GitHub's commit status links this exact merge to that deployment.
+
+A real Bearer-authenticated production probe created one new sandbox family, saved the exact parent source through `/api/voice/realtime/turn`, and invoked the bridge with that source identity. The actual `log_hours` effect saved one 17-minute reading entry. A follow-up used the returned Eve continuation and `find_hours` read back exactly one entry and 17 minutes, with no second write. Independent database checks found one actor/session-bound action receipt and four exact canonical conversation rows in order, owned by the fixture member. All 88 assertions passed, including access, source ownership, and the listed side-effect checks.
+
+The probe completed at `2026-09-06T16:22:30.935Z`. Its fresh sandbox family, Auth login/sessions, Hours and conversation rows were removed and reread as absent. The canonical artifact-denial tombstone and waiting cleanup job remain for the normal token drain. This was a narrowly guarded fixture cleanup, not general account-deletion certification. Evidence: `/tmp/homa-feedback-implementation/voice-production-bridge-2641b810-518f-440b-af6f-ce9256f70cde.json`.
+
+This proves the live HTTP/auth/model/tool/persistence chain. It does not certify browser-cookie transport, physical microphone capture, spoken Realtime events, interruption, audio playback, or rendered cards. Local actual-component fixtures cover the UI/controller scenarios above. Sidney was asked to verify the physical phone conversation separately; that result remains pending.

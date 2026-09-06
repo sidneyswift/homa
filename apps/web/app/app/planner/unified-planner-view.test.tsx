@@ -285,10 +285,22 @@ describe("UnifiedPlannerView", () => {
     assert.match(html, />Recorded time<\/h2>/);
     assert.match(html, /Your Hours stay available and downloadable if you cancel\./u);
     assert.match(html, /href="\/api\/hours\/export"/u);
-    assert.match(html, />Download CSV<\/span>/u);
+    assert.match(html, />Download family spreadsheet<\/span>/u);
     assert.match(html, /30m/);
     assert.match(html, /Homa records the school time you tell her about\. Review or correct it here\./);
     assert.doesNotMatch(html, /The compliance record/);
+  });
+
+  it("keeps the selected child across Planner tabs and date navigation", () => {
+    for (const view of ["week", "month", "hours"] as const) {
+      const html = renderView({ view, focusChildId: KID.id });
+      const links = [...html.matchAll(/href="(\/app\/planner\?[^"]+)"/gu)].map((match) => match[1]);
+      assert.ok(links.length >= 4);
+      for (const link of links) {
+        assert.ok(link.includes(`&amp;child=${encodeURIComponent(KID.id)}`), link);
+        assert.ok(!link.includes("handoff="), link);
+      }
+    }
   });
 
   it("shows recorded time on the day with subject and child context", () => {

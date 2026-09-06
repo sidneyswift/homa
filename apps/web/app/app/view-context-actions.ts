@@ -9,20 +9,24 @@ import { VIEW_CONTEXT_COOKIE, VIEW_CONTEXT_FAMILY } from "../../lib/view-context
 /**
  * The context switcher's one write: remember who the parent is viewing.
  * The target is validated against the caller's OWN children (RLS reads,
- * never client trust) before anything is stored; a foreign or unknown id
- * is a silent no-op, the same posture as every other id that arrives
- * from a client. httpOnly because no client code ever reads the cookie:
+ * never client trust) before anything is stored; rejection must not look
+ * like a successful selection. httpOnly because no client reads the cookie:
  * the UI learns the selection from server props, and the eve channel
  * reads it server-side off the request.
  */
 export async function setViewContextAction(target: string): Promise<void> {
-  if (typeof target !== "string" || target.length === 0 || target.length > 64) return;
+  if (typeof target !== "string" || target.length === 0 || target.length > 64) {
+    throw new Error("view_context_unavailable");
+  }
+
+  const family = await getMyFamily();
+  if (!family) throw new Error("view_context_unavailable");
 
   if (target !== VIEW_CONTEXT_FAMILY) {
-    const family = await getMyFamily();
-    if (!family) return;
     const children = await getMyChildren(family.id);
-    if (!children.some((child) => child.id === target)) return;
+    if (!children.some((child) => child.id === target)) {
+      throw new Error("view_context_unavailable");
+    }
   }
 
   const cookieStore = await cookies();

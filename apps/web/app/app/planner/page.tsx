@@ -22,7 +22,7 @@ import {
   todayDateOnly,
   weekRangeForDate,
 } from "../../../lib/unified-planner";
-import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
+import { resolvePlannerViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
 import { FirstWeekHandoff } from "./first-week-handoff";
 import { UnifiedPlannerView } from "./unified-planner-view";
 
@@ -56,23 +56,19 @@ export default async function PlannerPage({
   const plans = paidData?.plans ?? [];
 
   const cookieStore = await cookies();
-  const viewContext = parseViewContext(
+  const { context: viewContext, linkedChildId } = resolvePlannerViewContext(
     cookieStore.get(VIEW_CONTEXT_COOKIE)?.value,
+    query.child,
     children.map((child) => child.id),
   );
   // A report can take a signed-in parent straight to this child's week.
   // The query is only a focus preference, never authority: it is accepted
   // only after checking against the authenticated family's loaded children.
-  const queryChildId = typeof query.child === "string" ? query.child : null;
-  const focusChildId = children.some((child) => child.id === queryChildId)
-    ? queryChildId
-    : viewContext.kind === "child"
-      ? viewContext.childId
-      : null;
+  const focusChildId = viewContext.kind === "child" ? viewContext.childId : null;
   // A report can start this focused handoff, but the query cannot turn on a
   // child experience unless the child itself was authenticated above.
-  const handoffChild = query.handoff === "report" && focusChildId !== null
-    ? children.find((child) => child.id === focusChildId) ?? null
+  const handoffChild = query.handoff === "report" && linkedChildId !== null
+    ? children.find((child) => child.id === linkedChildId) ?? null
     : null;
   const timeZone = effectiveTimeZone(family.time_zone);
   const now = new Date();

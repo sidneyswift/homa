@@ -1,0 +1,19 @@
+{
+  "at": "2026-09-06T16:41:48.241Z",
+  "findings": [
+    "URL overrides preference consistently; selecting the checked child persists it and clears child/handoff while preserving date/view.",
+    "Whole-family and each child scope contain exactly their expected rows; rejected selection keeps Avery and retry saves the requested second child.",
+    "Resolving a pending preference after leaving Planner does not navigate back.",
+    "Repeated and unowned child query values fall back to the validated preference.",
+    "Actual 320-pixel frame has no horizontal document overflow with the long name; full child name is visible in the selector.",
+    "Single-child fixture has no multi-child switcher.",
+    "Empty Binder retains guidance; one/three cover items do not show false no-results; four items show one remaining item.",
+    "Real search still shows zero-results; child Binder retains shared items and family-wide month plan while excluding the other child."
+  ],
+  "geometry": {
+    "viewport": 320,
+    "content": 320
+  },
+  "pageErrors": [],
+  "boundary": "Actual components and CSS in synthetic local fixture; mocked Next navigation/server preferences/data, no production auth."
+}

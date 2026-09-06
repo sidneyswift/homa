@@ -30,6 +30,7 @@ export function WorkingPlanShelf({
       >
         Month plans in progress
       </h2>
+      <p className="mt-1 text-xs font-semibold text-[var(--homa-ink)]">For the whole family</p>
       <p className="mt-1 text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_74%,var(--homa-canvas))]">
         Open a saved draft to review or change it. Your Planner stays the same
         until you approve the plan.

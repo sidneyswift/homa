@@ -183,6 +183,13 @@ export function HoursView({
 
   return (
     <div data-brand-surface="hours" data-brand-fixture="quiet-authority-v1">
+      {embedded ? (
+        <p className={`mb-4 text-sm ${MUTED}`}>
+          {focusKid
+            ? `Showing ${focusKid.name}'s recorded time, including time shared with the whole family.`
+            : "Showing recorded time for the whole family."}
+        </p>
+      ) : null}
       {embedded ? null : (
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>

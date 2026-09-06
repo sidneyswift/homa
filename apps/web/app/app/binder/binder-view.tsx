@@ -185,11 +185,11 @@ export function BinderView({
 
       {materials.length === 0 ? (
         <QuietFrame tone="paper" as="section" className="mt-8 border-dashed p-8 text-center">
-          <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">Nothing kept yet.</p>
+          <p className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">
+            {scopeChildName ? `Nothing kept for ${scopeChildName} or the whole family yet.` : "Nothing kept yet."}
+          </p>
           <p className="mx-auto mt-1.5 max-w-sm text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-            {scopeChildName
-              ? `When you tell Homa that something she made for ${scopeChildName} is a keeper, it lands here on its own.`
-              : "When you tell Homa that something she made is a keeper, it lands here on its own."}
+            Tell Homa which material you would like to keep, or choose Keep this on a draft.
           </p>
           <div
             className="mx-auto mt-5 flex max-w-md flex-wrap justify-center gap-2"
@@ -205,7 +205,7 @@ export function BinderView({
             ))}
           </div>
           <p className="mx-auto mt-5 max-w-sm text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-            Your first one starts in chat.
+            Make something new in chat.
           </p>
           <QuietAction href="/app" className="mt-3" size="large" icon={<Icon name="next" size={20} />}>
             Ask Homa
@@ -229,7 +229,7 @@ export function BinderView({
             </QuietFrame>
           ) : null}
 
-          <section className="mt-7">
+          {!showCover || gridItems.length > 0 ? <section className="mt-7">
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">{sectionTitle}</h2>
               <span className="text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
@@ -247,7 +247,7 @@ export function BinderView({
                 {noResultsMessage(filter)}
               </p>
             )}
-          </section>
+          </section> : null}
         </>
       )}
 

@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "ffbb87e5e8b52e78f7190d332af40c9949b711a2ee5e035d74e03e7e2addb122",
+  "ownedInputFingerprint": "f93ac690cabb12c3d0a9ec4b64bcd09d4237ce8350b2179409bd36cbe3d49e26",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2503,7 +2503,7 @@
     {
       "surfaceId": "surface:0251c96a3bf92d13",
       "path": "apps/web/app/app/planner/unified-planner-view.tsx",
-      "sourceHash": "6833e51a899c359dd841d06b6c49f987294f01c80a0d6753c712605eea5cdd39",
+      "sourceHash": "538e22125c7ff93a1843425c5df3ac02c74029d850449f8633e16e267f577f82",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
@@ -4191,7 +4191,7 @@
     {
       "surfaceId": "surface:ae88754b4ff63a0b",
       "path": "apps/web/components/design/quiet-primitives.css",
-      "sourceHash": "b8bb387707926539b92a1a9b6aa4e689ebe850dda821f15dabe2a7ef3c515dc6",
+      "sourceHash": "c5b80758f4d173052764a19e551a3d302dda15ef2fe2ae019b6ee405ebf6fbde",
       "legacySignatures": [],
       "detectedSourceHash": "4e9182f1662608194f946d04dbaa9c510c1ca7b860f9b61d58e0325acf28460d",
       "detectedLegacySignatures": [
@@ -5475,7 +5475,7 @@
     {
       "surfaceId": "surface:3b2508400e664f0a",
       "path": "apps/web/components/progress/ask-homa-about-child.tsx",
-      "sourceHash": "917476bdc842c4c0798431136407389361f696128e9ff0fdf2a7135250b0d3f4",
+      "sourceHash": "72257745969c393b0b8776f71e73e1277057539a91815a0345b8c0c4ee59254b",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5584,7 +5584,7 @@
     {
       "surfaceId": "surface:90d533f86d88df02",
       "path": "apps/web/components/progress/progress-chat-door.tsx",
-      "sourceHash": "0695694bd6b1a6edc15c6008800528aa9e3c61e07a75e05a24870bcb2b263ebf",
+      "sourceHash": "8140f49bb1a8dc6e10dfd4f4839dae3167c2fc70b76a9f1b241d59ffce7dfdb1",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"

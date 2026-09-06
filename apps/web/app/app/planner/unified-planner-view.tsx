@@ -117,8 +117,8 @@ const VIEW_LABELS: ReadonlyArray<{ mode: PlannerViewMode; label: string }> = [
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
-function plannerHref(view: PlannerViewMode, date: string): string {
-  return `/app/planner?view=${view}&date=${date}`;
+function plannerHref(view: PlannerViewMode, date: string, childId: string | null): string {
+  return `/app/planner?view=${view}&date=${date}${childId ? `&child=${encodeURIComponent(childId)}` : ""}`;
 }
 
 function dateObject(value: string): Date {
@@ -2030,7 +2030,7 @@ export function UnifiedPlannerView({
         {VIEW_LABELS.map(({ mode, label }) => (
           <Link
             key={mode}
-            href={plannerHref(mode, activeDate)}
+            href={plannerHref(mode, activeDate, focusChildId)}
             aria-current={view === mode ? "page" : undefined}
             className={
               view === mode
@@ -2059,7 +2059,7 @@ export function UnifiedPlannerView({
               href="/api/hours/export"
               className="quiet-action quiet-action--secondary quiet-action--default"
             >
-              <span>Download CSV</span>
+              <span>Download family spreadsheet</span>
             </a>
           </div>
           <HoursView
@@ -2075,7 +2075,7 @@ export function UnifiedPlannerView({
         <>
           <div className="mt-7 flex items-center justify-between gap-3">
             <Link
-              href={plannerHref(view, dayNavigationDate(view, activeDate, -1))}
+              href={plannerHref(view, dayNavigationDate(view, activeDate, -1), focusChildId)}
               aria-label={`Previous ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
@@ -2099,7 +2099,7 @@ export function UnifiedPlannerView({
               </p>
             </div>
             <Link
-              href={plannerHref(view, dayNavigationDate(view, activeDate, 1))}
+              href={plannerHref(view, dayNavigationDate(view, activeDate, 1), focusChildId)}
               aria-label={`Next ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
@@ -2285,7 +2285,7 @@ export function UnifiedPlannerView({
                 return (
                   <Link
                     key={day.date}
-                    href={plannerHref("day", day.date)}
+                    href={plannerHref("day", day.date, focusChildId)}
                     className={
                       day.date === today
                         ? "grid min-h-[78px] grid-cols-[7rem_minmax(0,1fr)_1.25rem] items-center gap-3 border-b border-border-subtle bg-[var(--clay-50)] px-4 py-3 last:border-b-0 hover:bg-[var(--clay-100)]"
@@ -2331,7 +2331,7 @@ export function UnifiedPlannerView({
                   return (
                     <Link
                       key={cell.date}
-                      href={plannerHref("day", cell.date)}
+                      href={plannerHref("day", cell.date, focusChildId)}
                       aria-label={label}
                       className={
                         cell.isToday
