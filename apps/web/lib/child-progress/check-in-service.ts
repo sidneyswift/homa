@@ -359,7 +359,25 @@ export class ProgressCheckInService {
           const original = parseProgressCheckInStartOutcome(request.result);
           const currentCheckIn = "checkIn" in original
             ? await transaction.lockCheckIn(context.familyId, selected.childId, original.checkIn.id) : null;
+          if (selected.retryRevision !== undefined && selected.retryRevision === request.issuedRevision &&
+            request.deliveredAt === null && currentCheckIn?.id === request.issuedCheckInId &&
+            currentCheckIn.state === "active" && currentCheckIn.currentDeliveryId === null &&
+            currentCheckIn.revision === request.issuedRevision &&
+            currentCheckIn.ownerMemberUserId === context.memberUserId && currentCheckIn.recipientMemberUserId === context.memberUserId) {
+            // Explicit recovery reissues only the still-undelivered question.
+            // The original receipt stays immutable; a raced retry cannot move
+            // the new marker because it carries the previously issued revision.
+            const current = await this.refreshExistingActivePrompt(transaction, context, currentCheckIn);
+            await transaction.reissueCheckInStartRequest({familyId: context.familyId, memberUserId: context.memberUserId,
+              requestId: selected.requestId, expectedRevision: selected.retryRevision, revision: current.revision});
+            return {status: "existing", checkIn: current, prompt: requirePrompt(current)};
+          }
           return {status: "duplicate_start", original, currentCheckIn};
+        }
+        if (selected.retryRevision !== undefined) {
+          // Roll back the provisional claim too. Recovery can never create a
+          // sitting when its original receipt is absent.
+          throw new Error("Question recovery requires an existing start receipt");
         }
       }
       const executeStart = async (): Promise<ProgressCheckInResult> => {
@@ -448,7 +466,9 @@ export class ProgressCheckInService {
       const result = await executeStart();
       if (selected && context.memberUserId) {
         const outcome: ProgressCheckInStartOutcome = parseProgressCheckInStartOutcome(result);
-        await transaction.completeCheckInStartRequest({familyId: context.familyId, memberUserId: context.memberUserId, requestId: selected.requestId, result: outcome});
+        const issued = (outcome.status === "started" || outcome.status === "existing") && outcome.checkIn.state === "active" ? outcome.checkIn : null;
+        await transaction.completeCheckInStartRequest({familyId: context.familyId, memberUserId: context.memberUserId, requestId: selected.requestId, result: outcome,
+          issuedCheckInId: issued?.id ?? null, issuedRevision: issued?.revision ?? null});
       }
       return result;
     });

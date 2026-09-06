@@ -3,6 +3,7 @@
 import type { ResolvedAssessmentAction, SelectedAssessmentAction } from "../../lib/child-progress/assessment-intent";
 import { useSelectedAssessment } from "./use-selected-assessment";
 import { SelectedAssessmentNotice } from "./selected-assessment-notice";
+import { selectedAssessmentStatus } from "./assessment-actions";
 
 import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
@@ -2139,9 +2140,16 @@ export function ChatClient({
    * (part 1 of the same fix), and queues it instead, same as anything
    * else typed in that window.
    */
-  function retryFailedMessage(text: string, messageId: string): void {
+  async function retryFailedMessage(text: string, messageId: string): Promise<void> {
     const assessmentAction = failedAssessmentActionsRef.current.get(messageId);
-    sendMessage(text, assessmentAction ? {kind: "assessment_action", assessmentAction} : {kind: "card_answer"});
+    if (!assessmentAction) { sendMessage(text, {kind: "card_answer"}); return; }
+    const receipt = await selectedAssessmentStatus(assessmentAction).catch(() => ({status: "unavailable" as const}));
+    if (receipt.status !== "accepted" && receipt.status !== "not_started") return;
+    const {retryRevision: previousRevision, ...pointer} = assessmentAction;
+    void previousRevision;
+    sendMessage(text, {kind: "assessment_action", assessmentAction: {
+      ...pointer, ...(receipt.status === "accepted" ? {retryRevision: receipt.revision} : {}),
+    }});
   }
 
   /**

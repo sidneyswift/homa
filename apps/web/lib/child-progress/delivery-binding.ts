@@ -100,6 +100,7 @@ function normalizedPromptTokens(text: string): string[] {
 function textDeliveryContainsPrompt(
   checkIn: ProgressCheckInRecord,
   content: string | undefined,
+  exactStatement = false,
 ): boolean {
   if (content === undefined || checkIn.currentItemId === null) {
     return false;
@@ -110,6 +111,7 @@ function textDeliveryContainsPrompt(
     checkIn.childName,
     located.item,
   );
+  if (exactStatement) return content.includes(prompt);
   const messageTokens = new Set(normalizedPromptTokens(content));
   return normalizedPromptTokens(prompt).every((token) =>
     messageTokens.has(token),
@@ -177,6 +179,8 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
     runtimeSessionId?: string;
     turnId?: string;
     deliveredContent?: string;
+    /** Native text has no Progress card; its actual statement must be visible. */
+    requireExactStatement?: boolean;
     now?: Date;
   },
   dependencies: ProgressDeliveryBindingDependencies,
@@ -258,9 +262,9 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
   if (
     (
       input.attempt.channel === "sms" ||
-      input.attempt.channel === "email"
+      input.attempt.channel === "email" || input.requireExactStatement === true
     ) &&
-    !textDeliveryContainsPrompt(checkIn, input.deliveredContent)
+    !textDeliveryContainsPrompt(checkIn, input.deliveredContent, input.requireExactStatement)
   ) {
     return { status: "no_unique_prompt" };
   }

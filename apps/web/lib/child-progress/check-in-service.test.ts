@@ -89,7 +89,7 @@ interface FakeProgressReplyLoop {
 interface FakeState {
   projectionInputs: Map<string, ChildProgressProjectionInput>;
   checkIns: Map<string, ProgressCheckInRecord>;
-  startRequests: Map<string, {childId: string; subjectId: string; result: unknown}>;
+  startRequests: Map<string, {childId: string; subjectId: string; result: unknown; issuedCheckInId: string | null; issuedRevision: number | null; deliveredAt: string | null}>;
   responses: Map<string, FakeResponse>;
   snapshots: Map<string, FakeSnapshot>;
   progressReplyLoops: Map<string, FakeProgressReplyLoop>;
@@ -421,7 +421,7 @@ class FakeChildProgressTransaction
     const key = [input.familyId, input.memberUserId, input.requestId].join(":");
     const existing = this.draft.startRequests.get(key);
     if (existing) return {kind: "existing", ...structuredClone(existing)};
-    this.draft.startRequests.set(key, {childId: input.childId, subjectId: input.subjectId, result: null});
+    this.draft.startRequests.set(key, {childId: input.childId, subjectId: input.subjectId, result: null, issuedCheckInId: null, issuedRevision: null, deliveredAt: null});
     return {kind: "claimed"};
   }
 
@@ -429,6 +429,14 @@ class FakeChildProgressTransaction
     const row = this.draft.startRequests.get([input.familyId, input.memberUserId, input.requestId].join(":"));
     assert.ok(row);
     row.result = structuredClone(input.result);
+    row.issuedCheckInId = input.issuedCheckInId;
+    row.issuedRevision = input.issuedRevision;
+  }
+
+  async reissueCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequest"]>[0]): Promise<void> {
+    const row = this.draft.startRequests.get([input.familyId, input.memberUserId, input.requestId].join(":"));
+    assert.ok(row && row.issuedRevision === input.expectedRevision && row.deliveredAt === null);
+    row.issuedRevision = input.revision;
   }
 
   async listCheckInResponses(familyId: string, childId: string, checkInId: string) {
@@ -792,6 +800,9 @@ class FakeChildProgressTransaction
       return null;
     }
     checkIn.currentDeliveryId = input.deliveryId;
+    for (const row of this.draft.startRequests.values()) {
+      if (row.issuedCheckInId === input.checkInId && row.issuedRevision === input.expectedRevision && row.deliveredAt === null) row.deliveredAt = input.updatedAt;
+    }
     checkIn.episodeId = input.episodeId;
     checkIn.updatedAt = input.updatedAt;
     return structuredClone(checkIn);
@@ -3187,5 +3198,56 @@ describe("parent-selected deeper check-in start", () => {
     assert.equal(result.status, "different_check_in_active");
     assert.deepEqual(fixture.repository.checkIns, before);
     assert.equal(fixture.repository.progressReplyLoop("delivery-1").state, "open");
+  });
+});
+
+describe("selected start delivery recovery", () => {
+  it("reissues a crashed start once at the requested revision and never resends delivered or advanced questions", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "crashed-start", childId: CHILD_ID, subjectId: "gross_motor"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["gross_motor"], idempotencyKey: "crashed-start"};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    const old = structuredClone(started.checkIn);
+    assert.equal((await service.startCheckIn({...ctx, turnId: "passive-reload"}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns[0], old, "reload alone cannot reissue");
+    const retryContext = {...ctx, turnId: "explicit-retry", selectedAssessment: {...action, retryRevision: old.revision}};
+    const retries = await Promise.all([service.startCheckIn(retryContext, input), service.startCheckIn({...retryContext, turnId: "raced-retry"}, input)]);
+    assert.deepEqual(retries.map(row => row.status).sort(), ["duplicate_start", "existing"]);
+    const current = repository.checkIns[0];
+    assert.equal(current.id, old.id);
+    assert.equal(current.currentItemId, old.currentItemId);
+    assert.equal(current.revision, old.revision + 1);
+    assert.equal(current.pendingTurnId, "explicit-retry");
+    assert.equal(repository.responses.length, 0);
+    assert.deepEqual(await service.bindCurrentDelivery(ctx, {checkInId: old.id, expectedRevision: old.revision, deliveryId: "delivery-1"}), {status: "stale_prompt"});
+    assert.equal((await service.bindCurrentDelivery(retryContext, {checkInId: current.id, expectedRevision: current.revision, deliveryId: "delivery-1"})).status, "bound");
+    const bound = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...retryContext, selectedAssessment: {...action, retryRevision: current.revision}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, bound);
+    const answered = await service.respondCheckIn(context({channel: "web", repliedDeliveryId: "delivery-1", providerMessageId: "recovered-answer"}), {checkInId: current.id, answer: "skip", idempotencyKey: "recovered-answer"});
+    assert.equal(answered.status, "advanced");
+    const advanced = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...retryContext, selectedAssessment: {...action, retryRevision: repository.checkIns[0].revision}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, advanced);
+    assert.equal(repository.responses.length, 1);
+  });
+
+  it("does not use an old selected action to resume a parent pause or reopen a stopped sitting", async () => {
+    for (const stop of [false, true]) {
+      const {service, repository} = createFixture();
+      const action = {requestId: "paused-action", childId: CHILD_ID, subjectId: "art"};
+      const ctx = context({channel: "web", selectedAssessment: action});
+      const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: "paused-action"};
+      const started = await service.startCheckIn(ctx, input);
+      if (started.status !== "started") throw new Error("Missing fixture question");
+      if (stop) await service.stopCheckIn(context(), {checkInId: started.checkIn.id});
+      else await service.pauseCheckIn(context(), {checkInId: started.checkIn.id, reason: "explicit_pause"});
+      const before = structuredClone(repository.checkIns);
+      const replay = await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: started.checkIn.revision}}, input);
+      assert.equal(replay.status, "duplicate_start");
+      assert.deepEqual(repository.checkIns, before);
+    }
   });
 });

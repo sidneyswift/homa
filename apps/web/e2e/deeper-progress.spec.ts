@@ -15,9 +15,9 @@ let browser: Browser;
 let server: Server;
 let origin: string;
 let sends: unknown[] = [];
-let accepted = false;
+let receiptStatus: "not_started" | "accepted" | "delivered" | "terminal" = "not_started";
 let unavailable = false;
-const screenshots = "/tmp/homa-feedback-implementation/1088-browser";
+const screenshots = resolve(process.env.DEEPER_PROGRESS_SCREENSHOTS ?? "test-results/deeper-progress");
 
 const entry = `
 import React, {StrictMode, useState} from 'react';
@@ -65,7 +65,7 @@ test.beforeAll(async () => {
     if (url.pathname.startsWith("/fonts/") && /^[a-zA-Z0-9._-]+\.woff2$/.test(url.pathname.slice(7))) {res.setHeader("content-type","font/woff2");res.end(readFileSync(resolve(".next/static/media",url.pathname.slice(7))));return;}
     if (url.pathname === "/bundle.js") {res.setHeader("content-type", "text/javascript"); res.end(built.outputFiles[0].text); return;}
     if (url.pathname === "/style.css") {res.setHeader("content-type", "text/css"); res.end(css.css + fonts + ":root{--font-dm-sans:\"DM Sans\";--font-eb-garamond:\"EB Garamond\"}body{margin:0}main{padding:20px;max-width:700px;margin:auto}textarea{display:block;width:100%}"); return;}
-    if (url.pathname === "/status") {res.setHeader("content-type", "application/json");res.end(JSON.stringify({status: unavailable ? "unavailable" : accepted ? "accepted" : "not_started", checkInId: childId}));return;}
+    if (url.pathname === "/status") {res.setHeader("content-type", "application/json");res.end(JSON.stringify({status: unavailable ? "unavailable" : receiptStatus, checkInId: childId, revision: 1}));return;}
     if (url.pathname === "/send") {let body="";for await(const chunk of req)body+=chunk;sends.push(JSON.parse(body));res.end("ok");return;}
     res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><div id="root"></div><script src="/bundle.js"></script>');
   });
@@ -73,9 +73,9 @@ test.beforeAll(async () => {
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("Fixture server unavailable");
   origin = `http://127.0.0.1:${address.port}`;
-  browser = await chromium.launch({executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", headless: true});
+  browser = await chromium.launch({...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? {executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH} : {}), headless: true});
 });
-test.beforeEach(() => {sends=[];accepted=false;unavailable=false;});
+test.beforeEach(() => {sends=[];receiptStatus="not_started";unavailable=false;});
 test.afterAll(async () => {await browser?.close();await new Promise<void>(done => server?.close(()=>done()));});
 
 test("dispatches exactly once after restore, preserves draft, and reload only checks the same action", async () => {
@@ -99,8 +99,8 @@ test("dispatches exactly once after restore, preserves draft, and reload only ch
   await page.getByRole("button", {name: "Check and try again"}).click();
   await expect.poll(() => sends.length).toBe(2);
   expect(sends[1]).toEqual(sends[0]);
-  accepted = true;
-  await expect(page.getByTestId("state")).toHaveText("accepted", {timeout: 12_000});
+  receiptStatus = "delivered";
+  await expect(page.getByTestId("state")).toHaveText("complete", {timeout: 12_000});
   expect(new URL(page.url()).searchParams.has("request")).toBe(false);
   expect(sends).toHaveLength(2);
   await context.close();
@@ -121,10 +121,10 @@ test("holds the selected scope through the account wall, and unavailable receipt
   await context.close();
 });
 
-test("receipt replay is accepted without sending another model turn", async () => {
-  accepted=true;const context=await browser.newContext();const page=await context.newPage();
+test("delivered receipt replay finishes without sending another model turn", async () => {
+  receiptStatus="delivered";const context=await browser.newContext();const page=await context.newPage();
   await page.goto(`${origin}/app?mode=handoff&request=${randomUUID()}`);
-  await expect(page.getByTestId("state")).toHaveText("accepted");expect(sends).toHaveLength(0);
+  await expect(page.getByTestId("state")).toHaveText("complete");expect(sends).toHaveLength(0);
   await context.close();
 });
 
@@ -152,5 +152,40 @@ test("actual question and completion cards fit narrow screens and return to the 
   await page.getByRole("button",{name:"Close",exact:true}).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator("#progress-heading")).toBeFocused();
+  await context.close();
+});
+
+test("reload after a committed start exposes explicit recovery until its exact question is delivered", async () => {
+  receiptStatus = "accepted";
+  const context = await browser.newContext({viewport: {width: 390, height: 844}});
+  const page = await context.newPage();
+  const request = randomUUID();
+  await page.goto(`${origin}/app?mode=handoff&request=${request}`);
+  await expect(page.getByTestId("state")).toHaveText("accepted");
+  expect(sends).toHaveLength(0);
+  expect(new URL(page.url()).searchParams.get("request")).toBe(request);
+  await page.reload();
+  await expect(page.getByTestId("state")).toHaveText("accepted");
+  expect(sends).toHaveLength(0);
+  await page.screenshot({path: resolve(screenshots, "accepted-undelivered-390.png"), fullPage: true, animations: "disabled"});
+  await page.getByRole("button", {name: "Check and try again"}).click();
+  await expect.poll(() => sends.length).toBe(1);
+  expect(sends[0]).toEqual({message: "Ask me deeper math questions for Maya.", source: {kind: "assessment_action",
+    assessmentAction: {requestId: request, childId, subjectId: "math", retryRevision: 1}}});
+  await expect(page.getByRole("textbox", {name: "Message"})).toHaveValue("My unrelated draft");
+  receiptStatus = "delivered";
+  await expect(page.getByTestId("state")).toHaveText("complete", {timeout: 12_000});
+  expect(new URL(page.url()).searchParams.has("request")).toBe(false);
+  expect(sends).toHaveLength(1);
+  await context.close();
+});
+
+test("a terminal selected action never starts another sitting on reload", async () => {
+  receiptStatus = "terminal";
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(`${origin}/app?mode=handoff&request=${randomUUID()}`);
+  await expect(page.getByTestId("state")).toHaveText("complete");
+  expect(sends).toHaveLength(0);
   await context.close();
 });

@@ -13,7 +13,7 @@ export function useSelectedAssessment(input: {
   walled: boolean;
   send: (message: string, source: ChatSendSource) => ChatSendAcceptance;
 }) {
-  const [state, setState] = useState<"opening" | "accepted" | "uncertain" | "unavailable">("opening");
+  const [state, setState] = useState<"opening" | "accepted" | "complete" | "uncertain" | "unavailable">("opening");
   const [retry, setRetry] = useState(0);
   const sendRef = useRef(input.send);
   const dispatched = useRef(new Set<string>());
@@ -27,7 +27,7 @@ export function useSelectedAssessment(input: {
     const pointer = {requestId: action.requestId, childId: action.childId, subjectId: action.subjectId};
     const finish = async () => {
       if (cancelled) return;
-      setState("accepted");
+      setState("complete");
       try { sessionStorage.removeItem(key); } catch { /* Durable receipt is authoritative. */ }
       await clearSelectedAssessment(pointer).catch(() => undefined);
       if (cancelled) return;
@@ -40,15 +40,18 @@ export function useSelectedAssessment(input: {
     const poll = async (remaining: number) => {
       const result = await selectedAssessmentStatus(pointer).catch(() => ({status: "unavailable" as const}));
       if (cancelled) return;
-      if (result.status === "accepted") { await finish(); return; }
+      if (result.status === "delivered" || result.status === "terminal") { await finish(); return; }
+      if (result.status === "accepted") setState("accepted");
+      if (remaining <= 0 && result.status === "accepted") return;
       if (remaining <= 0 || result.status === "unavailable") { setState("uncertain"); return; }
       timer = setTimeout(() => { void poll(remaining - 1); }, 3000);
     };
     void (async () => {
       const receipt = await selectedAssessmentStatus(pointer).catch(() => ({status: "unavailable" as const}));
       if (cancelled) return;
-      if (receipt.status === "accepted") { await finish(); return; }
+      if (receipt.status === "delivered" || receipt.status === "terminal") { await finish(); return; }
       if (receipt.status === "unavailable") { setState("unavailable"); return; }
+      if (receipt.status === "accepted" && retry === 0) { setState("accepted"); void poll(20); return; }
       let previouslySent = dispatched.current.has(key);
       try { previouslySent ||= sessionStorage.getItem(key) !== null; } catch { /* In-memory guard remains. */ }
       if ((previouslySent && retry === 0) || dispatched.current.has(`${key}:attempt:${retry}`)) { setState("uncertain"); void poll(20); return; }
@@ -56,7 +59,9 @@ export function useSelectedAssessment(input: {
       dispatched.current.add(`${key}:attempt:${retry}`);
       try { sessionStorage.setItem(key, "dispatching"); } catch { /* The server still deduplicates this action. */ }
       setState("opening");
-      const result = sendRef.current(action.message, {kind: "assessment_action", assessmentAction: pointer});
+      const result = sendRef.current(action.message, {kind: "assessment_action", assessmentAction: {
+        ...pointer, ...(receipt.status === "accepted" ? {retryRevision: receipt.revision} : {}),
+      }});
       if (result === "rejected") {
         dispatched.current.delete(key);
         try { sessionStorage.removeItem(key); } catch { /* No request was accepted. */ }

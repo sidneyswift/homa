@@ -5,6 +5,7 @@ export const ASSESSMENT_ACTION_HEADER = "x-homa-assessment-action";
 export const ASSESSMENT_PENDING_COOKIE = "homa-assessment-action";
 const intentSchema = z.strictObject({
   requestId: z.uuid(),
+  retryRevision: z.optional(z.int().check(z.positive())),
   childId: z.uuid(),
   subjectId: z.string().check(z.maxLength(80), z.refine(id => getMapSubject(id) !== undefined)),
 });

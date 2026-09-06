@@ -17,6 +17,7 @@ const expectedTimeouts = {
   checks: 20,
   "db-checks": 35,
   "e2e-checks": 20,
+  "browser-checks": 15,
 };
 
 test("every CI job has its reviewed timeout", () => {
@@ -36,4 +37,15 @@ test("the PostgreSQL package fallback is bounded and only installs missing packa
   assert.match(step, /if \[ ! -f \/usr\/share\/postgresql\/16\/extension\/vector\.control \]; then/);
   assert.match(step, /if \[ "\$\{#packages\[@\]\}" -gt 0 \]; then/);
   assert.match(step, /sudo apt-get install --yes "\$\{packages\[@\]\}"/);
+});
+
+test("deeper Progress browser and canonical delivery checks are required with their runtimes", () => {
+  const browser = workflow.match(/^  browser-checks:\n(?:(?!^  [A-Za-z0-9_-]+:)[\s\S])*/m)?.[0] ?? "";
+  assert.match(browser, /if: needs\.classify-changes\.outputs\.scope == 'full'/u);
+  const install = browser.indexOf("pnpm --filter web exec playwright install --with-deps chromium");
+  const run = browser.indexOf("pnpm --filter web exec playwright test --config=e2e/deeper-progress.config.ts");
+  assert.ok(install >= 0 && run > install, "Chromium must be installed before the browser fixture runs");
+  assert.match(workflow, /^  build-and-check:\n    needs: \[[^\n]*browser-checks[^\n]*\]/m);
+  const database = workflow.match(/^  db-checks:\n(?:(?!^  [A-Za-z0-9_-]+:)[\s\S])*/m)?.[0] ?? "";
+  assert.match(database, /run: pnpm test:deeper-progress-delivery:postgres/u);
 });

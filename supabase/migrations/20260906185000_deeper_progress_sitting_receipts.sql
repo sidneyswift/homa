@@ -23,10 +23,16 @@ create table public.progress_check_in_start_requests (
   runtime_session_id text not null check (length(runtime_session_id) between 1 and 256),
   turn_id text not null check (length(turn_id) between 1 and 256),
   result jsonb,
+  issued_check_in_id uuid,
+  issued_revision integer check (issued_revision > 0),
+  delivered_at timestamptz,
   created_at timestamptz not null default now(),
   accepted_at timestamptz,
   primary key (family_id, member_user_id, request_id),
   foreign key (child_id, family_id) references public.children(id, family_id) on update cascade on delete cascade,
+  foreign key (issued_check_in_id, child_id, family_id) references public.progress_check_ins(id, child_id, family_id) on update cascade on delete cascade,
+  check ((issued_check_in_id is null) = (issued_revision is null)),
+  check (delivered_at is null or issued_check_in_id is not null),
   check ((result is null) = (accepted_at is null))
 );
 

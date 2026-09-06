@@ -36,6 +36,11 @@ export async function assertDeeperProgressPostgres(sql: postgres.Sql): Promise<v
   });
   const selected = {requestId: randomUUID(), childId, subjectId: "gross_motor"};
   const startInput = {childId, purpose: "subject_deep_dive" as const, subjectIds: [selected.subjectId], idempotencyKey: "deeper-start"};
+  const missingAction = {...selected, requestId: randomUUID(), retryRevision: 1};
+  await assert.rejects(service.startCheckIn(context({selectedAssessment: missingAction}), startInput),
+    /Question recovery requires an existing start receipt/u);
+  assert.equal(Number((await sql`select count(*) as count from public.progress_check_in_start_requests where family_id = ${familyId}`)[0].count), 0);
+  assert.equal(Number((await sql`select count(*) as count from public.progress_check_ins where family_id = ${familyId}`)[0].count), 0);
   const starts = await Promise.all([1, 2].map(index => service.startCheckIn(context({selectedAssessment: selected}), {...startInput, idempotencyKey: `transport-${index}`})));
   assert.deepEqual(starts.map(row => row.status).sort(), ["duplicate_start", "started"]);
   const started = starts.find(row => row.status === "started");
@@ -87,6 +92,24 @@ export async function assertDeeperProgressPostgres(sql: postgres.Sql): Promise<v
   const beforeAnswer = await counts();
   assert.deepEqual(await service.respondCheckIn(context(), {checkInId: current.id, answer: "easily", idempotencyKey: "unbound"}), {status: "wrong_delivery"});
   assert.deepEqual(await counts(), beforeAnswer);
+  // Crash after the durable start, before any delivered question. Passive
+  // reload preserves it; only one explicit retry can replace its old marker.
+  const originalReceipt = (await sql`select result from public.progress_check_in_start_requests where family_id = ${familyId} and request_id = ${selected.requestId}`)[0].result;
+  assert.equal((await service.startCheckIn(context({selectedAssessment: selected}), startInput)).status, "duplicate_start");
+  const retries = await Promise.all([1, 2].map(index => service.startCheckIn(context({turnId: `recovery-${index}`,
+    selectedAssessment: {...selected, retryRevision: current.revision}}), startInput)));
+  assert.deepEqual(retries.map(row => row.status).sort(), ["duplicate_start", "existing"]);
+  const recovered = retries.find(row => row.status === "existing");
+  if (recovered?.status !== "existing") throw new Error("Missing recovered question");
+  assert.equal(recovered.checkIn.id, current.id);
+  assert.equal(recovered.checkIn.currentItemId, current.currentItemId);
+  assert.equal(recovered.checkIn.revision, current.revision + 1);
+  assert.deepEqual(await service.bindCurrentDelivery(context({runtimeSessionId: current.pendingRuntimeSessionId!, turnId: current.pendingTurnId!}), {
+    checkInId: current.id, expectedRevision: current.revision, deliveryId: randomUUID(),
+  }), {status: "stale_prompt"});
+  current = recovered.checkIn;
+  assert.deepEqual(await counts(), beforeAnswer);
+  assert.deepEqual((await sql`select result from public.progress_check_in_start_requests where family_id = ${familyId} and request_id = ${selected.requestId}`)[0].result, originalReceipt);
   const seen = new Set<string>();
   for (let index = 0; index < 8; index += 1) {
     assert.ok(current.currentItemId && !seen.has(current.currentItemId));
@@ -94,6 +117,13 @@ export async function assertDeeperProgressPostgres(sql: postgres.Sql): Promise<v
     // Native text shares web canonical provenance; SMS/email retain their own.
     const channel = (["web", "sms", "email", "web"] as const)[index % 4];
     const deliveryId = await bind(current, channel);
+    if (index === 0) {
+      const [receipt] = await sql`select delivered_at, issued_revision from public.progress_check_in_start_requests where family_id = ${familyId} and request_id = ${selected.requestId}`;
+      assert.ok(receipt.delivered_at, "actual delivery atomically stamps the selected receipt");
+      assert.equal(receipt.issued_revision, current.revision);
+      assert.equal((await service.startCheckIn(context({selectedAssessment: {...selected, retryRevision: current.revision}}), startInput)).status, "duplicate_start");
+      assert.equal((await repository.loadNonterminalCheckInByChild(familyId, childId))?.currentDeliveryId, deliveryId);
+    }
     const inboundMessageId = randomUUID();
     await sql`insert into public.conversation_messages (id, family_id) values (${inboundMessageId}, ${familyId})`;
     const ctx = context({channel, repliedDeliveryId: deliveryId, inboundMessageId, canonicalInboundText: index === 0 ? "She does that by herself without any help." : "I haven't seen that yet, so I'm not sure.", providerMessageId: `deeper-answer-${index}`});

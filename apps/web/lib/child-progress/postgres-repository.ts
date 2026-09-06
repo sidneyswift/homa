@@ -1401,23 +1401,35 @@ class PostgresChildProgressTransaction
       on conflict (family_id, member_user_id, request_id) do nothing returning request_id
     `;
     if (inserted.length) return {kind: "claimed"};
-    const [row] = await this.sql<{child_id: string; subject_id: string; result: unknown}[]>`
-      select child_id, subject_id, result from public.progress_check_in_start_requests
+    const [row] = await this.sql<{child_id: string; subject_id: string; result: unknown; issued_check_in_id: string | null; issued_revision: number | null; delivered_at: string | null}[]>`
+      select child_id, subject_id, result, issued_check_in_id, issued_revision, delivered_at from public.progress_check_in_start_requests
       where family_id = ${input.familyId} and member_user_id = ${input.memberUserId} and request_id = ${input.requestId}
       for update
     `;
     if (!row) throw new Error("Selected check-in request left its child scope");
-    return {kind: "existing", childId: row.child_id, subjectId: row.subject_id, result: row.result};
+    return {kind: "existing", childId: row.child_id, subjectId: row.subject_id, result: row.result,
+      issuedCheckInId: row.issued_check_in_id, issuedRevision: row.issued_revision, deliveredAt: row.delivered_at};
   }
 
   async completeCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["completeCheckInStartRequest"]>[0]): Promise<void> {
     const rows = await this.sql<{request_id: string}[]>`
       update public.progress_check_in_start_requests
-      set result = ${this.sql.json(input.result as DbJson)}, accepted_at = now()
+      set result = ${this.sql.json(input.result as DbJson)}, accepted_at = now(),
+          issued_check_in_id = ${input.issuedCheckInId}, issued_revision = ${input.issuedRevision}
       where family_id = ${input.familyId} and member_user_id = ${input.memberUserId} and request_id = ${input.requestId} and result is null
       returning request_id
     `;
     if (rows.length !== 1) throw new Error("Selected check-in receipt was not completed");
+  }
+
+  async reissueCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequest"]>[0]): Promise<void> {
+    const rows = await this.sql<{request_id: string}[]>`
+      update public.progress_check_in_start_requests set issued_revision = ${input.revision}
+      where family_id = ${input.familyId} and member_user_id = ${input.memberUserId} and request_id = ${input.requestId}
+        and issued_revision = ${input.expectedRevision} and delivered_at is null
+      returning request_id
+    `;
+    if (rows.length !== 1) throw new Error("Selected check-in retry lost its undelivered revision");
   }
 
   async listCheckInResponses(familyId: string, childId: string, checkInId: string) {
@@ -1841,6 +1853,13 @@ class PostgresChildProgressTransaction
       returning check_in.id
     `;
     if (rows[0] === undefined) return null;
+    await this.sql`
+      update public.progress_check_in_start_requests
+      set delivered_at = ${input.updatedAt}
+      where family_id = ${input.familyId} and child_id = ${input.childId}
+        and issued_check_in_id = ${input.checkInId} and issued_revision = ${input.expectedRevision}
+        and delivered_at is null
+    `;
     return loadCheckInRow(
       this.sql,
       input.familyId,

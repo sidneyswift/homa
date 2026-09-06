@@ -15,7 +15,7 @@ import { isParentedEveSession } from "../../lib/conversation-continuity/session-
  * in the same per-recipient ledger as SMS/email so a new device or rotated Eve
  * session can resolve the question Homa visibly asked.
  */
-export default defineHook({
+export const screenDeliveryHook = {
   events: {
     async "message.completed"(event, ctx) {
       if (isParentedEveSession(ctx.session.parent)) {
@@ -59,7 +59,7 @@ export default defineHook({
         channel: "web",
         destination: `member:${attributes.memberUserId}`,
         providerThreadKey: `web:${ctx.session.id}`,
-        content: event.data.message,
+        content: persisted.content,
         delivered: true,
       });
       const progress =
@@ -69,6 +69,10 @@ export default defineHook({
               deliveryOutcome: recorded.deliveryOutcome,
               runtimeSessionId: ctx.session.id,
               turnId: event.data.turnId,
+              ...(attributes.channel === "mobile" ? {
+                deliveredContent: persisted.content,
+                requireExactStatement: true,
+              } : {}),
             })
           : { status: "no_unique_prompt" as const };
       const genericContract = replyContractForReactiveMessage(
@@ -86,4 +90,6 @@ export default defineHook({
       }
     },
   },
-});
+} satisfies Parameters<typeof defineHook>[0];
+
+export default defineHook(screenDeliveryHook);
