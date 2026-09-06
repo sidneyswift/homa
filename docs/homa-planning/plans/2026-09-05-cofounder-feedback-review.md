@@ -352,7 +352,7 @@ The [component](../../../apps/web/components/progress/abilities-explorer.tsx) al
 
 **Tracking:** [#1101](https://github.com/sidneyswift/homa/issues/1101).
 
-**Expected, R37-63, R122-143 and R306-318:** “lesson 12” identifies the child's actual curriculum/edition; Homa reads it and produces matching practice or another teaching activity. Completion is not mastery.
+**Expected, R37-63, R122-143 and R306-318:** “lesson 12” identifies the child's actual curriculum/edition; Homa reads it and produces matching practice or another teaching activity. The parent also asks for the next five lessons and a useful lesson packet with teacher guidance, discussion, hands-on activities and supporting printables. That bounded packet is an operational request, separate from choosing a native first value or scheduling a full year. Completion is not mastery.
 
 **Active retrieval:** [family-librarian](../../../apps/web/agent/skills/family-librarian/SKILL.md) finds and opens an asset before handing off. [family-asset-retrieval.ts](../../../apps/web/lib/library/family-asset-retrieval.ts) searches title/file/authors/publisher/tags and one embedding, whose input is clipped to 8,000 characters. Search excludes derived unit assets. Opening an original returns metadata and up to 20 evidence quotes, not lesson pages or its units. A known unit ID from a previous approval/Planner source can still be opened; not all unit access is absent.
 
@@ -362,7 +362,7 @@ Material source provenance validates identity and inheritance, but a direct-orig
 
 **Implement now:** teach existing skills the targeted resolve/read/use procedure; extend exact source-page/unit retrieval only where the current tools lack it. Resolve real child/curriculum/edition ambiguity once. Carry lesson/page evidence through generation. Preserve current access/tiering rules and avoid requiring a whole-book decomposition for one lesson.
 
-**Acceptance/eval:** readable fixture with correct and wrong-edition lesson 12 and multiple children; correct source/page, content-matched exercise and saved citation; late lesson, scanned page, missing lesson, unclear child and known saved unit. No Planner/date/mastery write merely from asking for practice. Judge actual output against source pages. Existing find/get-order tests do not establish this outcome.
+**Acceptance/eval:** readable fixture with correct and wrong-edition lesson 12 and multiple children; correct source/page, content-matched exercise and saved citation; late lesson, scanned page, missing lesson, unclear child and known saved unit. No Planner/date/mastery write merely from asking for practice. Judge actual output against source pages. Include a requested next-five-lessons packet: identify and read each lesson, preserve order and child/edition, include usable teacher guidance, discussion or hands-on work where supported, and assemble the requested supporting printables. Report any unreadable or missing lesson explicitly; do not claim a complete packet from one generic worksheet. This does not require automatic calendar placement. Existing find/get-order tests do not establish this outcome.
 
 ### F18. Connect relevant owned resources to a teaching theme
 
