@@ -50,6 +50,10 @@ it("the production status action reads one receipt/sitting snapshot across a ret
     assert.deepEqual(await production.selectedAssessmentStatus(action), {status: "accepted", checkInId: record.id, revision: 1});
     assert.deepEqual(await production.selectedAssessmentStatus(action), {status: "accepted", checkInId: record.id, revision: 2});
     assert.deepEqual(queries, ["children", "progress_check_in_start_request_status", "children", "progress_check_in_start_request_status"]);
+    receipt.current.revision = 3;
+    assert.deepEqual(await production.selectedAssessmentStatus(action), {status: "unavailable"}, "unexplained active unbound mismatch must preserve recovery intent");
+    receipt.issued_revision = 3;
+    assert.deepEqual(await production.selectedAssessmentStatus(action), {status: "accepted", checkInId: record.id, revision: 3});
   } finally {
     delete (globalThis as unknown as Record<string, unknown>).__assessmentStatusFixture;
     if (previousFlag === undefined) delete process.env.HOMA_LIVE_PROGRESS_ENABLED; else process.env.HOMA_LIVE_PROGRESS_ENABLED = previousFlag;

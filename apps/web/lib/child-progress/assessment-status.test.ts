@@ -18,10 +18,12 @@ it("only the owned issued unbound revision offers recovery; delivered and finish
   assert.deepEqual(assessmentStatusFromReceipt(input), {status: "accepted", checkInId: "sitting", revision: 2});
   for (const change of [
     {current: null}, {issuedCheckInId: null, issuedRevision: null},
-    ...[{state: "paused"}, {state: "stopped"}, {state: "completed"}, {revision: 3},
+    ...[{state: "paused"}, {state: "stopped"}, {state: "completed"},
       {active_member_user_id: "partner"}, {prompt_recipient_member_user_id: "partner"}, {current_delivery_id: "delivery"}]
       .map(fields => ({current: {...input.current!, ...fields}})),
   ]) assert.equal(assessmentStatusFromReceipt({...input, ...change}).status, "terminal");
+  assert.deepEqual(assessmentStatusFromReceipt({...input, current: {...input.current!, revision: 3}}), {status: "unavailable"},
+    "an active owned unbound revision mismatch cannot erase recovery intent");
   assert.equal(assessmentStatusFromReceipt({...input, deliveredAt: "2026-09-06T12:00:00Z", current: {...input.current!, revision: 3}}).status, "delivered",
     "advancing clears the sitting delivery, but never erases the action delivery receipt");
 });

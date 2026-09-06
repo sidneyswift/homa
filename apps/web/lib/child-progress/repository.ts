@@ -532,7 +532,7 @@ export interface ProgressCheckInTransaction
   ): Promise<ProgressCheckInRecord | null>;
   claimCheckInStartRequest(input: {familyId: string; memberUserId: string; requestId: string; childId: string; subjectId: string; runtimeSessionId: string; turnId: string}): Promise<{kind: "claimed"} | {kind: "existing"; childId: string; subjectId: string; result: unknown; issuedCheckInId: string | null; issuedRevision: number | null; deliveredAt: string | null}>;
   completeCheckInStartRequest(input: {familyId: string; memberUserId: string; requestId: string; result: unknown; issuedCheckInId: string | null; issuedRevision: number | null}): Promise<void>;
-  reissueCheckInStartRequest(input: {familyId: string; memberUserId: string; requestId: string; expectedRevision: number; revision: number}): Promise<void>;
+  reissueCheckInStartRequests(input: {familyId: string; childId: string; checkInId: string; memberUserId: string; expectedRevision: number; revision: number}): Promise<number>;
   listCheckInResponses(familyId: string, childId: string, checkInId: string): Promise<Array<Pick<StoredProgressCheckInResponse, "itemId" | "answer">>>;
   insertCheckIn(
     input: InsertProgressCheckInInput,

@@ -368,8 +368,6 @@ export class ProgressCheckInService {
             // The original receipt stays immutable; a raced retry cannot move
             // the new marker because it carries the previously issued revision.
             const current = await this.refreshExistingActivePrompt(transaction, context, currentCheckIn);
-            await transaction.reissueCheckInStartRequest({familyId: context.familyId, memberUserId: context.memberUserId,
-              requestId: selected.requestId, expectedRevision: selected.retryRevision, revision: current.revision});
             return {status: "existing", checkIn: current, prompt: requirePrompt(current)};
           }
           return {status: "duplicate_start", original, currentCheckIn};
@@ -1377,6 +1375,18 @@ export class ProgressCheckInService {
     });
     if (updated === null) {
       throw new Error("Existing active prompt marker refresh failed");
+    }
+    // Every reissue of this exact undelivered question carries its selected
+    // receipts forward, including an ordinary chat start without action metadata.
+    // A paused/resumed, delivered, advanced or transferred question cannot
+    // acquire that lineage: only receipts matching the prior owned revision move.
+    if (checkIn.state === "active" && checkIn.currentDeliveryId === null && context.memberUserId !== null &&
+      checkIn.ownerMemberUserId === context.memberUserId && checkIn.recipientMemberUserId === context.memberUserId) {
+      const moved = await transaction.reissueCheckInStartRequests({familyId: checkIn.familyId, childId: checkIn.childId,
+        checkInId: checkIn.id, memberUserId: context.memberUserId, expectedRevision: checkIn.revision, revision: updated.revision});
+      if (context.selectedAssessment?.retryRevision !== undefined && moved === 0) {
+        throw new Error("Selected check-in retry lost its undelivered revision");
+      }
     }
     await this.cancelSupersededReplyLoops(transaction, updated);
     return updated;

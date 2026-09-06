@@ -3,11 +3,13 @@ import { describe, it } from "node:test";
 
 import { getMapItem } from "@homa/core";
 
+import { assessmentStatusFromReceipt } from "./assessment-status";
 import {
   ProgressCheckInService,
   type ProgressCheckInServiceOptions,
 } from "./check-in-service";
 import {
+  parseProgressCheckInStartOutcome,
   storedProgressCheckInResponseOutcomeSchema,
 } from "./check-in-schema";
 import { buildChildProgressView } from "./projection";
@@ -433,10 +435,16 @@ class FakeChildProgressTransaction
     row.issuedRevision = input.issuedRevision;
   }
 
-  async reissueCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequest"]>[0]): Promise<void> {
-    const row = this.draft.startRequests.get([input.familyId, input.memberUserId, input.requestId].join(":"));
-    assert.ok(row && row.issuedRevision === input.expectedRevision && row.deliveredAt === null);
-    row.issuedRevision = input.revision;
+  async reissueCheckInStartRequests(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequests"]>[0]): Promise<number> {
+    let moved = 0;
+    for (const [key, row] of this.draft.startRequests) {
+      if (key.startsWith(`${input.familyId}:${input.memberUserId}:`) && row.childId === input.childId &&
+        row.issuedCheckInId === input.checkInId && row.issuedRevision === input.expectedRevision && row.deliveredAt === null) {
+        row.issuedRevision = input.revision;
+        moved += 1;
+      }
+    }
+    return moved;
   }
 
   async listCheckInResponses(familyId: string, childId: string, checkInId: string) {
@@ -907,6 +915,12 @@ class FakeChildProgressRepository
 
   get checkIns(): ProgressCheckInRecord[] {
     return [...this.state.checkIns.values()];
+  }
+
+  startReceipt(requestId: string) {
+    const receipt = this.state.startRequests.get([FAMILY_ID, ADULT_A, requestId].join(":"));
+    assert.ok(receipt);
+    return structuredClone(receipt);
   }
 
   get responses(): FakeResponse[] {
@@ -3202,6 +3216,79 @@ describe("parent-selected deeper check-in start", () => {
 });
 
 describe("selected start delivery recovery", () => {
+  it("preserves selected receipt recovery when ordinary chat reissues an undelivered question", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "ordinary-recovery", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: action.requestId};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    const original = repository.startReceipt(action.requestId);
+    const ordinary = await service.startCheckIn({...ctx, selectedAssessment: null, turnId: "ordinary-reissue"}, {...input, idempotencyKey: "ordinary"});
+    if (ordinary.status !== "existing") throw new Error("Missing ordinary reissue");
+    assert.equal(ordinary.checkIn.id, started.checkIn.id);
+    assert.equal(ordinary.checkIn.currentItemId, started.checkIn.currentItemId);
+    const receipt = repository.startReceipt(action.requestId);
+    assert.deepEqual(receipt.result, original.result, "original result is immutable");
+    assert.equal(receipt.issuedRevision, 2);
+    assert.equal(receipt.deliveredAt, null);
+    assert.deepEqual(assessmentStatusFromReceipt({...receipt, result: parseProgressCheckInStartOutcome(receipt.result), memberUserId: ADULT_A,
+      current: {id: ordinary.checkIn.id, state: ordinary.checkIn.state, revision: ordinary.checkIn.revision, current_delivery_id: ordinary.checkIn.currentDeliveryId,
+        active_member_user_id: ordinary.checkIn.ownerMemberUserId, prompt_recipient_member_user_id: ordinary.checkIn.recipientMemberUserId}}),
+      {status: "accepted", checkInId: started.checkIn.id, revision: 2});
+    assert.equal((await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: 1}}, input)).status, "duplicate_start");
+    assert.equal(repository.checkIns[0].revision, 2);
+    const retry = await service.startCheckIn({...ctx, turnId: "selected-retry", selectedAssessment: {...action, retryRevision: 2}}, input);
+    assert.equal(retry.status, "existing");
+    assert.equal(repository.checkIns[0].revision, 3);
+    assert.equal(repository.startReceipt(action.requestId).issuedRevision, 3);
+    assert.equal(repository.responses.length, 0);
+  });
+
+  it("ordinary reissues never advance a delivered receipt, including after its answer", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "delivered-ordinary", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: action.requestId};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    await service.bindCurrentDelivery(ctx, {checkInId: started.checkIn.id, expectedRevision: 1, deliveryId: "delivery-1"});
+    const delivered = repository.startReceipt(action.requestId);
+    assert.ok(delivered.deliveredAt);
+    const ordinaryCtx = {...ctx, selectedAssessment: null, turnId: "ordinary-delivered"};
+    await service.startCheckIn(ordinaryCtx, {...input, idempotencyKey: "ordinary-delivered"});
+    assert.deepEqual(repository.startReceipt(action.requestId), delivered);
+    await service.bindCurrentDelivery(ordinaryCtx, {checkInId: started.checkIn.id, expectedRevision: 2, deliveryId: "delivery-2"});
+    assert.equal((await service.respondCheckIn({...ordinaryCtx, repliedDeliveryId: "delivery-2"},
+      {checkInId: started.checkIn.id, answer: "skip", idempotencyKey: "ordinary-answer"})).status, "advanced");
+    await service.startCheckIn({...ordinaryCtx, turnId: "ordinary-advanced"}, {...input, idempotencyKey: "ordinary-advanced"});
+    assert.deepEqual(repository.startReceipt(action.requestId), delivered);
+    const before = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: 1}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, before);
+  });
+
+  it("a later resume and ordinary reissue cannot attach an old paused action to a new revision", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "old-paused", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: action.requestId};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    await service.pauseCheckIn(ctx, {checkInId: started.checkIn.id, reason: "explicit_pause"});
+    const paused = structuredClone(repository.checkIns);
+    const originalReceipt = repository.startReceipt(action.requestId);
+    await service.startCheckIn({...ctx, selectedAssessment: null}, {...input, idempotencyKey: "ordinary-paused"});
+    assert.deepEqual(repository.checkIns, paused);
+    await service.startCheckIn({...ctx, selectedAssessment: {...action, requestId: "new-resume"}}, {...input, idempotencyKey: "new-resume"});
+    await service.startCheckIn({...ctx, selectedAssessment: null, turnId: "ordinary-resumed"}, {...input, idempotencyKey: "ordinary-resumed"});
+    assert.deepEqual(repository.startReceipt(action.requestId), originalReceipt);
+    assert.equal(repository.startReceipt("new-resume").issuedRevision, repository.checkIns[0].revision);
+    const before = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: 1}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, before);
+  });
+
   it("reissues a crashed start once at the requested revision and never resends delivered or advanced questions", async () => {
     const {service, repository} = createFixture();
     const action = {requestId: "crashed-start", childId: CHILD_ID, subjectId: "gross_motor"};

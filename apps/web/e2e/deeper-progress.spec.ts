@@ -199,3 +199,37 @@ test("a terminal selected action never starts another sitting on reload", async 
   expect(sends).toHaveLength(0);
   await context.close();
 });
+
+test("ordinary-chat reissue keeps recovery intent and retry uses the synchronized receipt revision", async () => {
+  receiptStatus = "accepted";
+  const context = await browser.newContext({viewport: {width: 390, height: 844}});
+  const page = await context.newPage();
+  const request = randomUUID();
+  await page.goto(`${origin}/app?mode=handoff&request=${request}`);
+  await expect(page.getByTestId("state")).toHaveText("accepted");
+  // A defensive unavailable snapshot cannot settle or dispatch this action.
+  unavailable = true;
+  await page.reload();
+  await expect(page.getByTestId("state")).toHaveText("unavailable");
+  expect(new URL(page.url()).searchParams.get("request")).toBe(request);
+  expect(sends).toHaveLength(0);
+  // Ordinary chat reissued without a selected send from this hook. The next
+  // status read carries that revision into the parent's explicit retry.
+  unavailable = false;
+  receiptRevision = 2;
+  await page.reload();
+  await expect(page.getByTestId("state")).toHaveText("accepted");
+  expect(new URL(page.url()).searchParams.get("request")).toBe(request);
+  expect(sends).toHaveLength(0);
+  await page.screenshot({path: resolve(screenshots, "ordinary-reissue-recovery-390.png"), fullPage: true, animations: "disabled"});
+  await page.getByRole("button", {name: "Check and try again"}).click();
+  await expect.poll(() => sends.length).toBe(1);
+  expect(sends[0]).toEqual({message: "Ask me deeper math questions for Maya.", source: {kind: "assessment_action",
+    assessmentAction: {requestId: request, childId, subjectId: "math", retryRevision: 2}}});
+  await expect(page.getByRole("textbox", {name: "Message"})).toHaveValue("My unrelated draft");
+  receiptStatus = "delivered";
+  await expect(page.getByTestId("state")).toHaveText("complete", {timeout: 12_000});
+  expect(new URL(page.url()).searchParams.has("request")).toBe(false);
+  expect(sends).toHaveLength(1);
+  await context.close();
+});

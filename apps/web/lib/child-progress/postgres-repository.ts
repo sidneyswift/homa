@@ -1422,14 +1422,14 @@ class PostgresChildProgressTransaction
     if (rows.length !== 1) throw new Error("Selected check-in receipt was not completed");
   }
 
-  async reissueCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequest"]>[0]): Promise<void> {
+  async reissueCheckInStartRequests(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequests"]>[0]): Promise<number> {
     const rows = await this.sql<{request_id: string}[]>`
       update public.progress_check_in_start_requests set issued_revision = ${input.revision}
-      where family_id = ${input.familyId} and member_user_id = ${input.memberUserId} and request_id = ${input.requestId}
-        and issued_revision = ${input.expectedRevision} and delivered_at is null
+      where family_id = ${input.familyId} and child_id = ${input.childId} and member_user_id = ${input.memberUserId}
+        and issued_check_in_id = ${input.checkInId} and issued_revision = ${input.expectedRevision} and delivered_at is null
       returning request_id
     `;
-    if (rows.length !== 1) throw new Error("Selected check-in retry lost its undelivered revision");
+    return rows.length;
   }
 
   async listCheckInResponses(familyId: string, childId: string, checkInId: string) {

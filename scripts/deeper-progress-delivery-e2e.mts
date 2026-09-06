@@ -9,6 +9,7 @@ import { ProgressCheckInService } from "../apps/web/lib/child-progress/check-in-
 import { PostgresChildProgressRepository } from "../apps/web/lib/child-progress/postgres-repository";
 import { ChildProgressService } from "../apps/web/lib/child-progress/progress-service";
 import { buildChildProgressView } from "../apps/web/lib/child-progress/projection";
+import type { ProgressCheckInTransaction } from "../apps/web/lib/child-progress/repository";
 import { progressQuestionResult } from "../apps/web/lib/child-progress/tool-result-payloads";
 import type { ProgressCheckInContext, ProgressCheckInResult } from "../apps/web/lib/child-progress/types";
 import { persistCanonicalMessage } from "../apps/web/lib/conversation-continuity/ledger";
@@ -23,6 +24,19 @@ process.env.HOMA_LIVE_PROGRESS_ENABLED = "true";
 const sql = mapDb();
 const repository = new PostgresChildProgressRepository(() => sql);
 const service = new ProgressCheckInService(repository, new ChildProgressService(repository, {buildView: buildChildProgressView}));
+class FailingReceiptRepository extends PostgresChildProgressRepository {
+  override withTransaction<T>(operation: (transaction: ProgressCheckInTransaction) => Promise<T>): Promise<T> {
+    return super.withTransaction(async transaction => {
+      const reissue = transaction.reissueCheckInStartRequests.bind(transaction);
+      transaction.reissueCheckInStartRequests = async input => {
+        const moved = await reissue(input);
+        assert.ok(moved > 0, "the failure occurs after the real receipt update");
+        throw new Error("Injected failure after receipt reissue");
+      };
+      return operation(transaction);
+    });
+  }
+}
 const completed = screenDeliveryHook.events["message.completed"] as (event: unknown, context: unknown) => Promise<void>;
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -113,6 +127,31 @@ try {
     assert.deepEqual(await counts(), {responses: 0, evidence: 0});
     assert.equal((await service.startCheckIn({...context, turnId: randomUUID()}, startInput)).status, "duplicate_start");
 
+    // Ordinary chat can reissue the same question without selected metadata.
+    // Both real SQL updates must roll back together, then a successful reissue
+    // must move the original receipt even when its own output is only an apology.
+    const originalSnapshot = await readSnapshot();
+    const failingRepository = new FailingReceiptRepository(() => sql);
+    const failingService = new ProgressCheckInService(failingRepository, new ChildProgressService(failingRepository, {buildView: buildChildProgressView}));
+    await assert.rejects(failingService.startCheckIn({...context, selectedAssessment: null, turnId: randomUUID()},
+      {...startInput, idempotencyKey: randomUUID()}), /Injected failure after receipt reissue/);
+    assert.deepEqual(await readSnapshot(), originalSnapshot, "rollback restores both receipt and sitting marker");
+    const ordinaryTurnId = randomUUID();
+    const ordinary = await service.startCheckIn({...context, selectedAssessment: null, turnId: ordinaryTurnId},
+      {...startInput, idempotencyKey: randomUUID()});
+    if (ordinary.status !== "existing") throw new Error("Missing ordinary recovery question");
+    assert.equal(ordinary.checkIn.id, started.checkIn.id);
+    assert.equal(ordinary.checkIn.currentItemId, started.checkIn.currentItemId);
+    assert.equal(ordinary.checkIn.revision, 2);
+    assert.deepEqual((await readSnapshot())[0].result, originalSnapshot[0].result, "ordinary reissue preserves immutable start result");
+    await emit(apology, ordinaryTurnId, 1);
+    await emit(apology, ordinaryTurnId, 1);
+    assert.equal((await current())?.currentDeliveryId, null, "ordinary recovery apology cannot bind");
+    assert.deepEqual(await status(), {status: "accepted", checkInId: started.checkIn.id, revision: 2});
+    assert.equal((await service.startCheckIn({...context, turnId: randomUUID(), selectedAssessment: {...selected, retryRevision: 1}}, startInput)).status, "duplicate_start");
+    assert.equal((await current())?.revision, 2, "stale selected recovery cannot move the ordinary turn marker");
+    assert.deepEqual(await counts(), {responses: 0, evidence: 0});
+
     // A reader that straddles the retry observes either whole snapshot,
     // never old receipt revision plus new sitting revision.
     const recoveredTurnId = randomUUID();
@@ -122,16 +161,17 @@ try {
       await tx`set local role authenticated`;
       const [before] = await tx`select * from public.progress_check_in_start_request_status where request_id = ${selected.requestId}`;
       const recovered = await service.startCheckIn({...context, turnId: recoveredTurnId,
-        selectedAssessment: {...selected, retryRevision: started.checkIn.revision}}, startInput);
+        selectedAssessment: {...selected, retryRevision: ordinary.checkIn.revision}}, startInput);
       assert.equal(recovered.status, "existing");
       const [during] = await tx`select * from public.progress_check_in_start_request_status where request_id = ${selected.requestId}`;
-      assert.equal(before.issued_revision, 1);
+      assert.equal(before.issued_revision, 2);
       assert.equal(during.issued_revision, during.current.revision);
-      assert.equal(during.issued_revision, 1);
+      assert.equal(during.issued_revision, 2);
     });
-    assert.deepEqual(await status(), {status: "accepted", checkInId: started.checkIn.id, revision: 2});
+    assert.deepEqual(await status(), {status: "accepted", checkInId: started.checkIn.id, revision: 3});
     assert.equal((await current())?.currentItemId, started.checkIn.currentItemId);
     await emit(statement, originalTurnId, 1);
+    await emit(statement, ordinaryTurnId, 1);
     assert.equal((await current())?.currentDeliveryId, null, "late old-turn exact text cannot bind the recovered revision");
     let sequence = 3;
     for (const message of ["Choose an answer on the card.", statement.split(" ").reverse().join(" "), statement.replace("Delivery fixture", "Another child"), "word ".repeat(1600) + statement]) {
@@ -166,7 +206,7 @@ try {
     assert.equal(proof.channel, "web");
     assert.equal(proof.status, "sent");
     assert.ok(proof.delivered_at);
-    assert.equal(proof.issued_revision, 2);
+    assert.equal(proof.issued_revision, 3);
     assert.equal((await status()).status, "delivered");
     assert.equal((await sql`select count(*)::integer count from public.conversation_deliveries where family_id = ${familyId} and message_id = ${proof.id}`)[0].count, 1);
     assert.equal((await sql`select count(*)::integer count from public.conversation_open_loops where family_id = ${familyId} and delivery_id = ${bound.currentDeliveryId} and state = 'open'`)[0].count, 1);
@@ -195,9 +235,14 @@ try {
       message_id: inbound.id, member_user_id: memberUserId, check_in_id: bound.id, channel: "web"});
     assert.ok(await repository.loadLiveView(familyId, childId, new Date()));
     assert.equal((await status()).status, "delivered", "answer advancement never erases the delivered action receipt");
-    assert.equal((await service.startCheckIn({...context, turnId: randomUUID(), selectedAssessment: {...selected, retryRevision: 2}}, startInput)).status, "duplicate_start");
+    assert.equal((await service.startCheckIn({...context, turnId: randomUUID(), selectedAssessment: {...selected, retryRevision: 3}}, startInput)).status, "duplicate_start");
+    await service.startCheckIn({...context, selectedAssessment: null, turnId: randomUUID()}, {...startInput, idempotencyKey: randomUUID()});
+    const [afterAdvancedReissue] = await readSnapshot();
+    assert.equal(afterAdvancedReissue.issued_revision, 3, "ordinary reissue of next question cannot inherit delivered receipt");
+    assert.ok(afterAdvancedReissue.delivered_at);
+    assert.equal((await status()).status, "delivered");
     assert.deepEqual(await counts(), {responses: 1, evidence: 1});
-    console.log(`PASS ${channel}: deadline/no-question -> canonical duplicate/upsert -> snapshot recovery -> exact delivery -> canonical bound answer/provenance/replay`);
+    console.log(`PASS ${channel}: deadline/no-question -> canonical duplicate/upsert -> ordinary reissue/rollback/apology -> receipt recovery -> exact delivery -> canonical bound answer/provenance/replay`);
   }
   // Other web check-in purposes share the fleet's exact-statement contract.
   // Onboarding's full-screen checklist uses its own start_child_checklist

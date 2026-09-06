@@ -19,9 +19,13 @@ export function assessmentStatusFromReceipt(input: {
   if (input.deliveredAt !== null) return {status: "delivered", checkInId};
   const current = input.current;
   if (current && current.id === input.issuedCheckInId && current.state === "active" &&
-    current.revision === input.issuedRevision && current.current_delivery_id === null &&
+    current.current_delivery_id === null &&
     current.active_member_user_id === input.memberUserId && current.prompt_recipient_member_user_id === input.memberUserId) {
-    return {status: "accepted", checkInId: current.id, revision: current.revision};
+    // An unexplained reissue is not evidence that this action finished.
+    // Preserve its pointer until the durable revision lineage is reconciled.
+    return current.revision === input.issuedRevision
+      ? {status: "accepted", checkInId: current.id, revision: current.revision}
+      : {status: "unavailable"};
   }
   return {status: "terminal", checkInId};
 }
