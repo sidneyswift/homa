@@ -1,0 +1,379 @@
+{
+  "verifiedAt": "2026-09-06T21:22:07.327Z",
+  "status": "shipped-and-hosted-record-output-verified",
+  "issue": 1095,
+  "pr": 1122,
+  "sha": "c3409c107100fccac162ddcd274f902159abf31d",
+  "deploymentId": "dpl_HrLSst2SToxkoggeUYV8LCbZaNx1",
+  "migrationVersion": "20260906205743",
+  "hostedRunId": "28d3d7b3-3070-486c-a0b0-7dc3c20e5e21",
+  "originalOperatorStatus": "failed",
+  "originalReceiptSha256": "a8b17c2ba3a7ca589008a0137010ad503824cc0f84c475cc7bd45b8f9c2c4463",
+  "hours": {
+    "status": "passed",
+    "actualCsvDownloads": 4,
+    "archiveEntries": 3007,
+    "currentYearEntries": 5
+  },
+  "previews": [
+    {
+      "label": "family-school-year",
+      "kind": "actual-hosted-preview-and-DOM",
+      "scope": {
+        "childId": null,
+        "from": "2026-08-30",
+        "through": "2026-09-06",
+        "includeShared": true
+      },
+      "revision": "09f2397694443dca6917d520a5db7ed5899a467f471efd30d4261b51ba1a13fb",
+      "entryCount": 5,
+      "totalMinutes": 63,
+      "byChild": [
+        {
+          "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+          "childName": "Avery",
+          "recordedDays": 2,
+          "minutes": 33
+        },
+        {
+          "childId": "7bfc7552-2a0c-480b-a92d-3aaa0e3ae749",
+          "childName": "Avery",
+          "recordedDays": 2,
+          "minutes": 35
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "child-a-shared",
+      "kind": "actual-hosted-preview-and-DOM",
+      "scope": {
+        "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+        "from": "2026-08-30",
+        "through": "2026-09-06",
+        "includeShared": true
+      },
+      "revision": "8da4f0663a4b5ae7144b063b37b6a9537661fefee41cf51f7a154d9401a38481",
+      "entryCount": 3,
+      "totalMinutes": 33,
+      "byChild": [
+        {
+          "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+          "childName": "Avery",
+          "recordedDays": 2,
+          "minutes": 33
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "same-name-child-b",
+      "kind": "actual-hosted-preview-and-DOM",
+      "scope": {
+        "childId": "7bfc7552-2a0c-480b-a92d-3aaa0e3ae749",
+        "from": "2026-08-30",
+        "through": "2026-09-06",
+        "includeShared": true
+      },
+      "revision": "eafe53f3d1aa7d97caad0113956bc2eda32f88cab2f96ebaae8bcb78a4b40946",
+      "entryCount": 3,
+      "totalMinutes": 35,
+      "byChild": [
+        {
+          "childId": "7bfc7552-2a0c-480b-a92d-3aaa0e3ae749",
+          "childName": "Avery",
+          "recordedDays": 2,
+          "minutes": 35
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "child-a-no-shared",
+      "kind": "actual-hosted-preview-and-DOM",
+      "scope": {
+        "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+        "from": "2026-08-30",
+        "through": "2026-09-06",
+        "includeShared": false
+      },
+      "revision": "8f6c2ee0c346f9e6c1cbb987305a4d5395a2d5f41beb86cf2283b4e8a9782436",
+      "entryCount": 2,
+      "totalMinutes": 28,
+      "byChild": [
+        {
+          "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+          "childName": "Avery",
+          "recordedDays": 2,
+          "minutes": 28
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "inclusive-boundaries",
+      "kind": "actual-hosted-preview-and-DOM",
+      "scope": {
+        "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+        "from": "2026-08-30",
+        "through": "2026-08-30",
+        "includeShared": true
+      },
+      "revision": "8bb55fecfff3a08e0d56ac85f187e7396ad955803f275562d88bc99876903b69",
+      "entryCount": 2,
+      "totalMinutes": 22,
+      "byChild": [
+        {
+          "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+          "childName": "Avery",
+          "recordedDays": 1,
+          "minutes": 22
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "label": "complete-archive",
+      "kind": "actual-hosted-preview-and-DOM",
+      "scope": {
+        "childId": null,
+        "from": null,
+        "through": null,
+        "includeShared": true
+      },
+      "revision": "6dd9ee50b1130700531d977d05f4c3deca3eb2eae9089787a848471ab969bc4e",
+      "entryCount": 3007,
+      "totalMinutes": 3165,
+      "byChild": [
+        {
+          "childId": "dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+          "childName": "Avery",
+          "recordedDays": 3004,
+          "minutes": 3135
+        },
+        {
+          "childId": "7bfc7552-2a0c-480b-a92d-3aaa0e3ae749",
+          "childName": "Avery",
+          "recordedDays": 2,
+          "minutes": 35
+        }
+      ],
+      "geometry": {
+        "viewport": 390,
+        "content": 390
+      }
+    }
+  ],
+  "csvDownloads": [
+    {
+      "sha256": "a380e13d9adf6ce4627857c74785b10668062ca782114d9c2a0dac87ba83842a",
+      "file": "hours-record-28d3d7b3-3070-486c-a0b0-7dc3c20e5e21-child-a-time.csv"
+    },
+    {
+      "sha256": "15b4f8f997ca23179e76b5ff7fdaf7b88542462a3b88db60c3bf494fb2624d7d",
+      "file": "hours-record-28d3d7b3-3070-486c-a0b0-7dc3c20e5e21-child-a-days.csv"
+    },
+    {
+      "sha256": "9f2b215c9721d4313a54f62250bf573bd781e4a2f66f0ebd96c299cd11a9a3fd",
+      "file": "hours-record-28d3d7b3-3070-486c-a0b0-7dc3c20e5e21-archive-time.csv"
+    },
+    {
+      "sha256": "8b7a4e8c472fbc44bfc37e7c8e9b357bb8802d921a359673f2afb8e6c4fee74e",
+      "file": "hours-record-28d3d7b3-3070-486c-a0b0-7dc3c20e5e21-archive-days.csv"
+    }
+  ],
+  "pdf": {
+    "originalRunStatus": "failed",
+    "originalReceiptSha256": "a8b17c2ba3a7ca589008a0137010ad503824cc0f84c475cc7bd45b8f9c2c4463",
+    "status": "downloaded-pdf-verified-offline",
+    "checks": [
+      {
+        "label": "actual downloaded PDF has 11 pages",
+        "passed": true
+      },
+      {
+        "label": "exact child identity, two recorded days and saved minutes dd6e8bc3-1c4b-4805-90b6-175b249adc87",
+        "passed": true
+      },
+      {
+        "label": "exact child identity, two recorded days and saved minutes 7bfc7552-2a0c-480b-a92d-3aaa0e3ae749",
+        "passed": true
+      },
+      {
+        "label": "saved-record section is present",
+        "passed": true
+      },
+      {
+        "label": "downloaded bytes match original exact Blob catalog",
+        "passed": true
+      }
+    ],
+    "pdfSha256": "80ae4964cc5d59096ac33d825b51ba4a37b7d4cff1bcbc57ca01e387f5ba328e",
+    "textSha256": "8a049f86b7c875014a56029e5c74218360f02e372dbddf01b13bcbe526eeb0d1",
+    "inspectorSha256": "079e05f3e932475c8942d9402d7dd4bf09dd925048ccbb730ec1b18f8763f066",
+    "cleanup": "not-attempted; separate reviewed recovery required",
+    "correction": "PDFDocumentLoadingTask.destroy owns cleanup in installed pdfjs-dist6.1.200; PDFDocumentProxy has no destroy. Original operator untouched."
+  },
+  "cleanup": {
+    "version": 1,
+    "mode": "execute",
+    "fixtureRunId": "28d3d7b3-3070-486c-a0b0-7dc3c20e5e21",
+    "originalRunStatus": "failed",
+    "startedAt": "2026-09-06T21:21:00.386Z",
+    "operatorPinsHash": "43b104e730f5ef86816b2956bc7bef94c5fe94c8d8be746d51385eb495165870",
+    "evidencePinsHash": "b527a221589dc6c7e47928fad7bb204ec6920526f4e4305988f19866032f0714",
+    "status": "failed",
+    "cleanup": "database-removed-blob-removal-pending",
+    "boundary": "Exact existing synthetic family only. No sign-in, regeneration, download, Auth API, browser, model, outbound or new fixture. Canonical provider cleanup/token drain is separate from exact Blob absence.",
+    "blobRequests": [
+      {
+        "label": "before-database-delete",
+        "status": 200
+      },
+      {
+        "label": "before-blob-delete",
+        "status": 200
+      },
+      {
+        "label": "delete-exact-twelve",
+        "status": 200
+      }
+    ],
+    "deletionJobId": "9a550f6b-52c7-4dd9-be23-50cf1290152e",
+    "remaining": {
+      "auth_users": 0,
+      "auth_sessions": 0,
+      "families": 0,
+      "memberships": 0,
+      "children": 0,
+      "hours": 0,
+      "materials": 0,
+      "telemetry": 0
+    },
+    "markers": [
+      {
+        "id": "9a550f6b-52c7-4dd9-be23-50cf1290152e",
+        "status": "waiting_for_artifacts",
+        "final_cleanup_after": "2026-09-07 03:51:00.582856+00",
+        "family_id": "f6e9f647-e85f-46db-85a2-2e6601d89dce"
+      }
+    ],
+    "failure": "Blob HTTP/JSON response must be successful and readable",
+    "finishedAt": "2026-09-06T21:21:04.630Z"
+  },
+  "blobAbsence": {
+    "verifiedAt": "2026-09-06T21:22:07.327Z",
+    "status": "exact-family-blob-catalog-empty",
+    "familyId": "f6e9f647-e85f-46db-85a2-2e6601d89dce",
+    "readOnly": true,
+    "requests": 1,
+    "httpStatus": 200,
+    "remaining": 0,
+    "hasMore": false,
+    "priorExecutionSha256": "8b1a59c7496060e696daef79cd3ec6cb688a2c67f2ee531bdceed24c3658e433",
+    "deletionRepeated": false,
+    "canonicalJobId": "9a550f6b-52c7-4dd9-be23-50cf1290152e",
+    "finalCleanupAfter": "2026-09-07 03:51:00.582856+00",
+    "limits": "Exact authenticated catalog absence. Canonical provider cleanup, token drain and CDN cache eviction are not certified."
+  },
+  "mobile": {
+    "schemaVersion": 1,
+    "receiptVersion": "mobile-delivery-receipt-v1",
+    "status": "published",
+    "source": {
+      "repository": "sidneyswift/homa",
+      "sha": "c3409c107100fccac162ddcd274f902159abf31d"
+    },
+    "classification": {
+      "compatibilityClass": "ota-safe",
+      "requiredRail": "eas-update",
+      "fingerprint": "bc62e95f737ecb7dec5083286e8dc4f08813b7b1",
+      "changeCategories": [
+        "icon-or-image",
+        "javascript-or-typescript",
+        "other-governed-input"
+      ]
+    },
+    "matchingBuild": {
+      "id": "4053fd04-0c78-422c-9e26-0c4386db1482",
+      "platform": "ios",
+      "status": "finished",
+      "distribution": "store",
+      "buildProfile": "production",
+      "channel": "production",
+      "gitCommitHash": "93bd38b81d41cae14219c9177d945abcaf1d0548",
+      "fingerprint": "bc62e95f737ecb7dec5083286e8dc4f08813b7b1",
+      "appVersion": "1.0.0",
+      "appBuildVersion": "48",
+      "createdAt": "2026-09-01T19:18:32.357Z"
+    },
+    "productionGates": {
+      "buildAndCheck": {
+        "id": "101559381906",
+        "detailsUrl": "https://github.com/sidneyswift/homa/actions/runs/34059871619/job/101559381906",
+        "completedAt": "2026-09-06T21:11:10.000Z"
+      },
+      "vercel": {
+        "id": "53638986222",
+        "targetUrl": "https://vercel.com/homa-1d878b0e/homa/HrLSst2SToxkoggeUYV8LCbZaNx1",
+        "updatedAt": "2026-09-06T21:07:11.000Z"
+      }
+    },
+    "bundle": {
+      "fingerprint": "27aeb49b5984e94aa8acee0a77ddf0eaaabca8347efb4bd9b03cde32bdfb9318",
+      "fileCount": 61,
+      "bundleCount": 1,
+      "sourceMapCount": 1,
+      "sourceFileCount": 4425,
+      "totalBytes": 35919277
+    },
+    "update": {
+      "id": "01a07891-9adf-767b-8858-7a87fc8f562d",
+      "groupId": "238907b2-bb87-45e2-90ae-7021c0ca8452",
+      "runtimeVersion": "bc62e95f737ecb7dec5083286e8dc4f08813b7b1",
+      "platform": "ios",
+      "channel": "production",
+      "gitCommitHash": "c3409c107100fccac162ddcd274f902159abf31d",
+      "createdAt": "2026-09-06T21:13:23.423Z",
+      "branch": "production",
+      "message": "Hours: export chosen child records and read complete shared totals (#1122)",
+      "manifestPermalink": "https://u.expo.dev/update/01a07891-9adf-767b-8858-7a87fc8f562d"
+    },
+    "workflow": {
+      "runId": "34059871626",
+      "runUrl": "https://github.com/sidneyswift/homa/actions/runs/34059871626"
+    },
+    "receiptFingerprint": "3ad3c2326e1789da6ac2c513a198a9eaea8cabdf1735f0cf8bb93f915153e6f1"
+  },
+  "screenshots": [
+    {
+      "file": "2026-09-06-hours-hosted-child.png",
+      "sha256": "df4eb4f5757c7233fc9fb020e7ffa3cc86a350744979b5b647893704f19f1c9d"
+    },
+    {
+      "file": "2026-09-06-hours-hosted-archive.png",
+      "sha256": "1c6cae5afe7bd6b19845383458567e9658db035670ae0887ab5a6f9c44da54e6"
+    }
+  ],
+  "limits": [
+    "Local PDF inspector initially used a nonexistent cleanup method; the corrected inspector verified identical downloaded bytes.",
+    "The cleanup operator stopped after a successful DELETE acknowledgement because it expected JSON. A separate read proved all artifacts absent without repeating DELETE.",
+    "Physical printing and installed-device uptake were not observed.",
+    "Canonical provider cleanup and token drain remain pending under the retained deletion job."
+  ]
+}

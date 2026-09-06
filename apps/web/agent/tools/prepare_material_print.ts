@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { printPageSummary } from "@homa/core";
 
 import {
   defineBoundedTool,
@@ -6,6 +7,8 @@ import {
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
 import { emitMapEvent } from "../../lib/map/events";
+import { siteUrl } from "../../lib/map/email";
+import { printSigninUrl } from "../../lib/materials/print-handoff-link";
 import {
   prepareMaterialPrintCaller,
   prepareMaterialPrintPinned,
@@ -13,14 +16,14 @@ import {
 import { usageChannelFromAttributes } from "../../lib/model-usage";
 
 /**
- * Exact server half of native printing. The materials skill decides what the
+ * Exact server preparation for printing. The materials skill decides what the
  * parent meant. This tool re-scopes the id, verifies the current revision,
  * finalizes a visible draft, selects labelled pages, and returns a bounded
- * request that only the native app can hand to UIKit.
+ * request that web and native controls can recheck before opening print options.
  */
 export default defineBoundedTool({
   description:
-    "Prepare the current visible material for the native iOS print sheet after the parent asks to print it. Re-verifies the family and revision, finalizes an approved draft before printing, and returns exact pages and requested copies. Use the server-verified visible material id. The result means ready for the system sheet, never paper printed.",
+    "Prepare the current visible material for printing, following the loaded materials-studio skill. That skill owns approval, revision-before-print and channel handoff choices. Re-verifies the family and revision, finalizes an approved draft, and returns exact pages and requested copies. Use the server-verified visible material id. The result prepares pages and a requested copy count. It does not open a sheet or send a print job.",
   deadlineMs: TOOL_DEADLINE.fetch,
   repeatable: true,
   inputSchema: z.object({
@@ -80,6 +83,7 @@ export default defineBoundedTool({
       });
     }
 
+    const printUrl = channel === "sms" ? printSigninUrl(siteUrl(), result.printRequest) : null;
     return {
       ready: true,
       done: true,
@@ -102,8 +106,13 @@ export default defineBoundedTool({
           : {}),
       },
       printRequest: result.printRequest,
-      note:
-        "The final PDF and pages are ready. The app is opening Apple's print sheet now. Tell her to choose the printer and confirm copies there. Do not say printed until the native completion result arrives.",
+      ...(printUrl ? { printUrl, printSummary: printPageSummary(result.printRequest) } : {}),
+      note: channel === "sms"
+        ? printUrl
+          ? "Include the returned printUrl and printSummary in your text reply. This link opens sign-in if needed, then opens only the verified selected PDF pages. She uses the PDF print button and confirms copies in the system dialog. No text print control exists, no link was sent by this tool, and no print job was sent. Never substitute the original full PDF for this selection."
+          : "The pages were prepared, but a verified sign-in link could not be created. Explain that the print handoff could not be completed. Do not claim a text print control or send the original full PDF instead."
+        :
+        "The PDF, selected pages, and requested copies are prepared. This result does not open a print sheet or send a print job. The print control handles the next step. Copies must be confirmed in the system print dialog. Never claim physical printing.",
     };
   },
 });

@@ -233,3 +233,10 @@ describe("selectParentVisibleMaterialMessageParts", () => {
     );
   });
 });
+
+it("within-message cards show the passing revision of a kept material, never its failed intermediate", () => {
+  const base = { title: "Synthetic", previewUrl: "https://synthetic.invalid/preview.jpg", pdfUrl: "https://synthetic.invalid/print.pdf", status: "final", reviewPassed: true };
+  const parts = [printablePart({ ...base, id: "kept" }), printablePart({ ...base, id: "failed", status: "draft", reviewPassed: false, revisesId: "kept" }), printablePart({ ...base, id: "passing", status: "draft", revisesId: "failed" })];
+  assert.deepEqual(selectParentVisibleMaterialMessageParts(parts).map(part => part.id), ["passing"]);
+  assert.deepEqual(selectParentVisibleMaterialMessageParts(parts.slice(0, 2)).map(part => part.id), ["kept"]);
+});

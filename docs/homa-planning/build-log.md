@@ -3,6 +3,10 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-09-06 · Prepare exact pages before an explicit print handoff
+
+#1105 keeps print interpretation in the existing materials-studio fleet procedure and exact selection/finalization in the existing preparation tool. Shared validated receipts now feed web and native text consumers; activation rechecks the current material before opening a selected PDF or the existing native sheet. The authenticated PDF-selection route uses a bounded worker, and an additive finalization precondition prevents stale approval. Requested copies remain a print-dialog confirmation, never a claim of physical output. The [implementation evidence](plans/2026-09-06-material-print-handoff.md) separates local checks, model evals, publication and device certification. Unattended printing remains #1108.
+
 ## 2026-09-06 · Complete Hours records and preserve exact source provenance
 
 #1095 applies one child/date/shared contract to chat summaries, preview/CSV and packet recorded days. Family totals count shared entries once; each included child's record includes shared time. A missing timed entry is not an absence. Existing tools already provide read effects, so the fleet Hours procedure owns explanation and tool choice while a STABLE invoker function owns complete, validated snapshot totals. A live-schema trace also corrected the readers' old three-source assumption: email and scheduled check-in records keep their actual source on web, export and native. The [implementation and versioned evidence](plans/2026-09-06-hours-record-scope.md) distinguish tests, model runs, deployment and hosted acceptance. This entry records implementation decisions, not a production completion claim.

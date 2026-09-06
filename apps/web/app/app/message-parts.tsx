@@ -20,6 +20,8 @@ import {
 import type { ChatAttachmentReceipt } from "./chat-attachments";
 import { MarkdownText } from "./markdown-text";
 import { MaterialCard, type MaterialArtifact } from "./material-card";
+import { MaterialPrintCard } from "./material-print-card";
+import { parseMaterialPrintPart, type PrintHandoff } from "@homa/core";
 import {
   FamilyAssetSourceCard,
   parseFamilyAssetSourceCardPart,
@@ -269,6 +271,7 @@ type AssistantItem =
   | { kind: "authorization"; part: AuthorizationPart }
   | { kind: "material"; material: MaterialArtifact }
   | { kind: "material_fallback" }
+  | { kind: "material_print"; handoff: PrintHandoff }
   | { kind: "library_source"; source: FamilyAssetSourceCardData }
   | { kind: "curriculum_mapping"; card: CurriculumMappingCardData }
   | { kind: "chip"; chip: MemoryChipContent }
@@ -374,6 +377,8 @@ function assistantItems(message: EveMessage): AssistantItem[] {
     // from the same part once its output lands.
     if (endsTheTurn(part)) turnEnded = true;
     if (part.type !== "dynamic-tool" || part.state !== "output-available") continue;
+    const printHandoff = parseMaterialPrintPart(part);
+    if (printHandoff) { items.push({ kind: "material_print", handoff: printHandoff }); continue; }
     const progressItem = parseProgressMessagePart(part);
     if (progressItem) {
       items.push({
@@ -706,6 +711,8 @@ function AssistantItemView({
       );
     case "authorization":
       return <AuthorizationCard part={item.part} />;
+    case "material_print":
+      return <MaterialPrintCard handoff={item.handoff} />;
     case "material":
       return <MaterialCard material={item.material} />;
     case "material_fallback":

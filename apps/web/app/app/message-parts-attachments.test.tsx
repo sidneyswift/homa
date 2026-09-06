@@ -190,7 +190,7 @@ describe("re-shown material", () => {
     assert.match(html, /Worksheet ready/u);
     assert.match(html, /Mateo(&#x27;|')s Letter M Tracing/u);
     assert.match(html, /src="https:\/\/blob\.example\/preview\.jpg"/u);
-    assert.match(html, />Print it</u);
+    assert.match(html, />Open PDF to print</u);
     assert.match(html, /Here it is again\./u);
   });
 
@@ -209,7 +209,7 @@ describe("re-shown material", () => {
         ])}
       />,
     );
-    assert.doesNotMatch(html, /Print it/u);
+    assert.doesNotMatch(html, /Open PDF to print/u);
     assert.match(html, /Let me look again\./u);
   });
 

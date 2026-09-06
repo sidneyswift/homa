@@ -313,3 +313,15 @@ describe("mobile child-framing display", () => {
     );
   });
 });
+
+describe("prepared print transcript", () => {
+  it("keeps ready and refused print handoffs visible without a generic fallback", () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    const request = { materialId: id, title: "Synthetic worksheet", authorizedPdfPath: `/api/materials/${id}/pdf`, pageCount: 2, pageIndexes: [0], copies: 2, includeAnswerKey: false, answerKeyExcluded: true };
+    for (const output of [{ ready: true, printRequest: request, material: { id, title: request.title, pageCount: 2, status: "final" } }, { ready: false, note: "This version is stale. Show it again." }]) {
+      const part = { type: "dynamic-tool", toolName: "prepare_material_print", state: "output-available", output } as unknown as EveMessagePart;
+      assert.equal(partIsRenderable(part), true);
+      assert.equal(toolOnlyFallback({ id: "synthetic-print", role: "assistant", parts: [part] } as unknown as EveMessage), null);
+    }
+  });
+});

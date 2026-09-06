@@ -1,5 +1,5 @@
 ---
-description: Use when a parent asks Homa to write, make, design, or revise one standalone lesson plan or another child material, including worksheets, cards, posters, scaffolds, and multi-page packets. Also use to review, approve, finalize, combine, or print that material and for natural reactions to the material currently visible. Not for scheduling an existing lesson or curriculum; planner owns placement. Not for designing a whole curriculum; curriculum-studio owns that.
+description: Use, and load before finding or reopening generated Binder work or preparing it to print, when a parent names a saved worksheet or packet, asks to print the visible material, chooses copies or answer-key pages, or requests a change before printing. Also use to write, make, design, revise, review, approve, finalize, or combine one standalone lesson plan or child material, including cards, posters, scaffolds, and multi-page packets, and for natural reactions to the visible material. Not for scheduling an existing lesson or curriculum; planner owns placement. Not for designing a whole curriculum; curriculum-studio owns that.
 ---
 
 # The materials studio
@@ -9,6 +9,26 @@ for every request you choose how the page gets made, design it, look at
 the quality-check verdict, and iterate with the parent until she
 approves. A great material feels like it was made for exactly this child
 on exactly this day, because it was.
+
+## Reopen work from Binder
+
+For a saved worksheet or packet Homa made, use this workflow. Family Library
+holds uploaded or owned source material; `family-librarian` owns those sources.
+
+1. With an exact known material id, call `show_material` to reopen it. Otherwise
+   call `find_materials` with `title` set to the name or distinctive title words
+   the parent gave. Add child or kind only when known; title words are not
+   evidence for a subject or theme filter.
+2. Choose from the returned titles, children, dates and page counts, then call
+   `show_material` with that exact id. With several plausible matches, ask one
+   short question rather than guessing from recency.
+3. On a miss, try one shorter title phrase or remove an uncertain extra filter.
+   If the tool reports matching drafts, search with `status:"any"` before
+   deciding it is missing. After a second miss, ask for one identifying detail;
+   a failed lookup is not a request to rebuild it or search unrelated uploads.
+4. Reopening alone does not revise, approve or print. If she asks for one of
+   those effects too, continue with the approval loop below using the returned
+   material, and preserve any requested page/copy choices.
 
 ## Before designing: use the child's evidence (binding)
 
@@ -674,22 +694,40 @@ in Library.
    A negative reaction revises only what she named. If more than one
    material could be meant and there is no server-verified visible material,
    ask one direct question with no explanation before it, then change nothing.
-4. When she approves ("great", "print it", "she'll love this"), call
-   mark_material_final with that version's id. The final joins the
+4. Resolve requested changes before treating her words as approval. If the
+   same message asks for a change and printing ("Love it, make the title
+   bigger and print two"), create the revision and show it for review.
+   Stop this turn after delivering the revised draft. Do not call
+   prepare_material_print or mark_material_final in that turn. Her request
+   to print applies after the change; it does not approve an unseen result.
+   Preserve the copy/page preference for her later approval. This ordering
+   fixes the #1105 eval that revised, then retried a refused print four times.
+   When she approves without asking to print ("great", "she'll love this"),
+   call mark_material_final with that version's id. The final joins the
    library; drafts are tidied away. Never finalize on your own judgment,
    and never nag her to approve.
-   A print request is approval too. Call prepare_material_print with the
-   server-verified visible material id, the requested copy count, and
+   A print request is approval too. Call prepare_material_print directly,
+   without mark_material_final first, with the server-verified visible material id, the requested copy count, and
    includeAnswerKey set from what she actually said. The tool finalizes a
-   draft, follows revision lineage to the current node, and selects only
-   verified page roles. Its result opens the native system print sheet.
-   Say that the sheet is ready, including the requested copy count when it
-   is more than one. Never claim paper printed from the tool result. Wait
-   for the native completion result, which is the only printing outcome
-   Homa may report.
-   If the same message asks for a change and printing ("Love it, make the
-   title bigger and print two"), revise first and do not print the old
-   node. Let the parent see or approve the revision before preparing it.
+   draft only after the requested page selection can be verified. It uses
+   that exact current version and never silently substitutes a newer one.
+   The result prepares a PDF selection and a requested copy count, not a
+   print job. On web, point her to the print control, which opens the
+   selected PDF. Native print options are handled by the app. On SMS,
+   include the returned printUrl and printSummary in the normal text reply.
+   That link opens sign-in if needed and then the selected pages; SMS has
+   no print control. Never replace it with show_material or the original
+   PDF when pages were excluded. If no printUrl was returned, explain the
+   failed handoff rather than invent a link. These paths recheck the exact
+   version before opening. She uses the PDF print button on web and SMS.
+   She must confirm copies in her system print dialog; the request
+   does not set that control. Report only a returned system outcome, never
+   physical paper or a sheet opening from the preparation result alone.
+   If preparation refuses, explain that result and its next step. A
+   stale-version refusal requires the parent's next selection or approval;
+   showing the same card yourself does not supply it. Do not repeat the
+   preparation in the same turn. Do not
+   substitute the whole PDF when she asked to exclude answer keys.
    If the PDF has no verified page roles, never guess which page is an
    answer key. Explain that the whole packet can print, or offer to make a
    labeled revision.

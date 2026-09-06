@@ -162,7 +162,7 @@ export function MaterialCard({
         rel="noopener noreferrer"
         className="quiet-action quiet-action--primary quiet-artifact-card__print-action"
       >
-        {pageCount > 1 ? `Print all ${pageCount} pages` : "Print it"}
+        {pageCount > 1 ? `Open all ${pageCount} pages to print` : "Open PDF to print"}
       </a>
     </div>
   );

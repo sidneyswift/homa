@@ -1,3 +1,4 @@
+import { materialReviewAdvisoryNotes } from "../../lib/materials/review-advisory-notes";
 import { randomUUID } from "node:crypto";
 
 import { defineDynamic } from "eve/tools";
@@ -1190,13 +1191,11 @@ const createPrintable = defineBoundedTool({
     // it, hears which page, and decides. Naming the page is the whole
     // value, so these are passed through verbatim and never collapsed
     // into "there were some issues".
-    const advisoryIssues = review?.advisoryIssues ?? [];
-    const advisoryNote =
-      advisoryIssues.length > 0
-        ? ` On later pages the check also found: ${advisoryIssues.join(
-            "; ",
-          )}. This version IS shown to her. Tell her which page in one plain sentence and offer to fix it; do not rebuild until she says yes, and do not call it a technical problem.`
-        : "";
+    const advisoryNote = materialReviewAdvisoryNotes({
+      reviewPassed,
+      advisoryIssues: review?.advisoryIssues ?? [],
+      checklistAdvisory: review?.checklistAdvisory ?? [],
+    });
     // Checklist notes stay separate from the later-pages sentence and
     // carry no Checklist (<id>) token: Homa is told to relay these in one
     // plain sentence, and a parent should never read an internal label.
@@ -1204,12 +1203,6 @@ const createPrintable = defineBoundedTool({
     const checklistUnrunNote =
       checklistExpected && review === null
         ? " The format checklist could not run on this version; look at the page yourself against the recipe before sending."
-        : "";
-    const checklistAdvisoryNote =
-      review && review.checklistAdvisory.length > 0
-        ? ` The check also noted on the pages it judged: ${review.checklistAdvisory.join(
-            "; ",
-          )}. This version IS shown to her; mention it in one plain sentence and offer to fix it.`
         : "";
     const checklistUnconfirmedNote =
       review && review.checklistUnconfirmed.length > 0
@@ -1221,8 +1214,8 @@ const createPrintable = defineBoundedTool({
       review === null
         ? ` The quality check did not run for this version (it is off, timed out, or errored), so nothing has looked at these pages: say it is ready without claiming it was checked.${checklistUnrunNote}`
         : review.pass
-          ? ` Quality check passed on the pages it saw.${coverageNote}${advisoryNote}${checklistAdvisoryNote}${checklistUnconfirmedNote}`
-          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}${advisoryNote}${checklistAdvisoryNote}${checklistUnconfirmedNote}`;
+          ? ` Quality check passed on the pages it saw.${coverageNote}${advisoryNote}${checklistUnconfirmedNote}`
+          : ` Quality check found issues: ${review.issues.join("; ")}.${coverageNote}${advisoryNote}${checklistUnconfirmedNote}`;
     // Deterministic, from the renderer's own measurements, so a blank
     // band or a cut edge never depends on the vision model noticing it
     // (gh#349). It used to be the ONLY fact available about pages past

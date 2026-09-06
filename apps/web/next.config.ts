@@ -39,6 +39,7 @@ const nextConfig: NextConfig = {
   // module load with no canvas polyfill and drops the native .node
   // addon, which 500ed POST /api/compliance/pack on every request.
   serverExternalPackages: [
+    "pdf-lib",
     "@sparticuz/chromium",
     "puppeteer-core",
     "pdfjs-dist",

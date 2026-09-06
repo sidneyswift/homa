@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   selectInProgressMaterialRevisions,
+  selectKeptMaterialRevisions,
   selectParentVisibleMaterialRevisions,
   type MaterialRevisionCandidate,
 } from "./parent-visible";
@@ -93,7 +94,7 @@ describe("selectInProgressMaterialRevisions", () => {
     assert.deepEqual(selected.map((entry) => entry.id), ["b"]);
   });
 
-  it("omits a chain that reached final, because it is already in the binder", () => {
+  it("omits a chain whose current node is final", () => {
     const selected = selectInProgressMaterialRevisions([
       row("a", null, "superseded", 1),
       row("b", "a", "final", 2),
@@ -108,7 +109,7 @@ describe("selectInProgressMaterialRevisions", () => {
     assert.deepEqual(selected, []);
   });
 
-  it("returns one row per unkept chain, not one per attempt", () => {
+  it("returns one current draft per chain, not one per attempt", () => {
     const selected = selectInProgressMaterialRevisions([
       row("a", null, "superseded", 1),
       row("b", "a", "superseded", 2),
@@ -116,5 +117,28 @@ describe("selectInProgressMaterialRevisions", () => {
       row("x", null, "draft", 4),
     ]);
     assert.deepEqual(selected.map((entry) => entry.id), ["c", "x"]);
+  });
+});
+
+describe("current review versus kept shelf", () => {
+  it("a passing or unknown-review descendant becomes current while the final stays kept", () => {
+    for (const review of [true, null]) {
+      const rows = [revision("a", null, "final", false, 1), revision("b", "a", "draft", false, 2), revision("c", "b", "draft", review, 3)];
+      assert.deepEqual(selectParentVisibleMaterialRevisions(rows).map(row => row.id), ["c"]);
+      assert.deepEqual(selectInProgressMaterialRevisions(rows).map(row => row.id), ["c"]);
+      assert.deepEqual(selectKeptMaterialRevisions(rows).map(row => row.id), ["a"]);
+      assert.deepEqual(selectParentVisibleMaterialRevisions(rows.slice(0, 2)).map(row => row.id), ["a"]);
+    }
+  });
+  it("kept selection groups through intervening draft nodes and preserves UUID ties", () => {
+    const rows = [revision("a", null, "final", true, 1), revision("b", "a", "draft", true, 2), revision("c", "b", "final", true, 3), revision("d", "c", "draft", true, 3)];
+    assert.deepEqual(selectKeptMaterialRevisions(rows).map(row => row.id), ["c"]);
+    assert.deepEqual(selectParentVisibleMaterialRevisions(rows).map(row => row.id), ["d"]);
+  });
+  it("cyclic chains and their descendants have no current or kept node", () => {
+    for (const rows of [[revision("a", "a", "final", true, 1)], [revision("a", "b", "final", true, 1), revision("b", "a", "draft", true, 2), revision("c", "b", "draft", true, 3)]]) {
+      assert.deepEqual(selectParentVisibleMaterialRevisions(rows), []);
+      assert.deepEqual(selectKeptMaterialRevisions(rows), []);
+    }
   });
 });

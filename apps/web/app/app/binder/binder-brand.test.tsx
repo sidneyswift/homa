@@ -113,7 +113,7 @@ describe("Binder Quiet authority projection", () => {
     assert.match(html, /aria-modal="true"/u);
     assert.match(html, /quiet-artifact-backdrop/u);
     assert.match(html, /quiet-artifact-dialog/u);
-    assert.match(html, /Print it/u);
+    assert.match(html, /Open PDF to print/u);
     assert.doesNotMatch(html, /rgba\(51,42,33|clay|bg-brand/u);
   });
 });

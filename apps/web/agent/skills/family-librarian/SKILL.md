@@ -1,5 +1,5 @@
 ---
-description: Use, and load before calling find_family_assets or get_family_asset, when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use before another skill works from a family source, including "use my curriculum" and "what do we already have about this?" Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
+description: Use, and load before calling find_family_assets or get_family_asset, when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use before another skill works from a family source, including "use my curriculum" and "what do we already have about this?" Not for reopening work Homa created in Binder; materials-studio owns that. Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
 metadata:
   homa-related-skills: materials-studio, curriculum-studio, curriculum-mapping, planner
 ---
@@ -9,6 +9,8 @@ metadata:
 The Family Library is the shelf for resources a family brings to Homa. Binder
 is the shelf for work Homa creates. Keep that ownership line visible in every
 decision: originals stay in Library, and later Homa outputs stay in Binder.
+For a named Binder worksheet or packet, load `materials-studio` and follow its
+reopening workflow; do not substitute Library source searches.
 
 ## Decide the Library action first
 

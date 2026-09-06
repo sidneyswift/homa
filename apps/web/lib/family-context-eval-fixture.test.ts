@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { describe, it } from "node:test";
 
 import { resolveAgentAccess } from "./agent-db";
@@ -9,6 +10,12 @@ import {
   EVAL_FIXTURE_FAMILY_ID,
   EVAL_FIXTURE_LIBRARY_ASSET_ID,
   EVAL_FIXTURE_LIBRARY_TITLE,
+  EVAL_FIXTURE_MATERIAL_MIXED_ID,
+  EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID,
+  EVAL_FIXTURE_MATERIAL_PRINT_REVISION_TITLE,
+  EVAL_FIXTURE_PRINT_REVISION_HTML,
+  EVAL_FIXTURE_PRINT_REVISION_GENERATION,
+  evalFixturePacketSeedSql,
   EVAL_FIXTURE_PARENT_USER_ID,
   EVAL_FIXTURE_PAST_EVENT_TITLE,
   EVAL_FIXTURE_PLAN_CHILD_ID,
@@ -308,5 +315,29 @@ describe("evalFamilyFixtureSeedSql", () => {
     assert.ok(sql.includes("'Co-op day'"));
     assert.ok(sql.includes(`'${EVAL_FIXTURE_PAST_EVENT_TITLE}'`));
     assert.ok(sql.includes("current_date - 2"));
+  });
+});
+
+describe("print-revision worksheet seed", () => {
+  it("pins complete source and real geometry without inventing a review pass", () => {
+    assert.equal(createHash("sha256").update(EVAL_FIXTURE_PRINT_REVISION_HTML).digest("hex"),
+      EVAL_FIXTURE_PRINT_REVISION_GENERATION.fixture.htmlSha256);
+    assert.ok(EVAL_FIXTURE_PRINT_REVISION_HTML.includes(`<h2>${EVAL_FIXTURE_MATERIAL_PRINT_REVISION_TITLE}</h2>`));
+    assert.equal((EVAL_FIXTURE_PRINT_REVISION_HTML.match(/class="row"/g) ?? []).length, 4);
+    assert.equal((EVAL_FIXTURE_PRINT_REVISION_HTML.match(/class="line"/g) ?? []).length, 4);
+    assert.equal("review" in EVAL_FIXTURE_PRINT_REVISION_GENERATION, false);
+    assert.equal(EVAL_FIXTURE_PRINT_REVISION_GENERATION.fixture.modelReviewOfFixture, "not-run");
+    assert.deepEqual(EVAL_FIXTURE_PRINT_REVISION_GENERATION.pageRoles, ["child"]);
+    assert.equal(EVAL_FIXTURE_PRINT_REVISION_GENERATION.pageGeometry[0].overflowIn, 0);
+  });
+
+  it("adds a separate parent-kept material and preserves the shared reaction fixture", () => {
+    const sql = evalFixturePacketSeedSql();
+    assert.notEqual(EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID, EVAL_FIXTURE_MATERIAL_MIXED_ID);
+    assert.ok(sql.includes(EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID));
+    assert.ok(sql.includes(EVAL_FIXTURE_MATERIAL_MIXED_ID));
+    assert.ok(sql.includes('<p>Read these long directions before you begin the page.</p>'));
+    assert.ok(sql.includes(EVAL_FIXTURE_PRINT_REVISION_HTML.replaceAll("'", "''")));
+    assert.ok(sql.includes(JSON.stringify(EVAL_FIXTURE_PRINT_REVISION_GENERATION)));
   });
 });

@@ -28,6 +28,7 @@ export const IOS_MODE_MARKDOWN = `
   costs or how to manage or cancel it, say that plainly and point her to
   Settings; never say you cannot access billing details, you know this
   one.
+- Prepared print requests in text Chat have an Open print options button.
 - Report links, the binder, and the planner still open the same way; only
   the account chrome differs from web.
 `.trim();

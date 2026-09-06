@@ -287,12 +287,12 @@ export function MaterialDetailOverlay({
         ) : null}
 
         <a
-          href={material.pdfUrl}
+          href={`/api/materials/${material.id}/pdf`}
           target="_blank"
           rel="noopener noreferrer"
           className="quiet-action quiet-action--primary mt-4"
         >
-          <span>{material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}</span>
+          <span>{material.pageCount > 1 ? `Open all ${material.pageCount} pages to print` : "Open PDF to print"}</span>
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="print" size={20} /></span>
         </a>
 

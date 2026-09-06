@@ -383,7 +383,8 @@ describe("deriveOverlaySignals: mapping", () => {
       [
         assistantMessage("msg-print", [
           toolPart("prepare_material_print", {
-            material: { ...material, id, status: "final" },
+            ready: true,
+            material: { ...material, id, status: "final", pageCount: 2 },
             printRequest,
           }),
         ]),

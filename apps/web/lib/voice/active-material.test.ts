@@ -60,3 +60,12 @@ describe("voice active material adapter", () => {
     assert.equal(parseMaterialPageRoles(["child", "solutions"], 2), null);
   });
 });
+
+it("current active authorization accepts a passing descendant of a final and refuses the old ID", () => {
+  const final = { id: V1, title: "Kept", status: "final" as const, revises: null, created_at: "2026-09-06T12:00:00Z", review_pass: "false", page_count: 1, page_roles: ["child"] };
+  const draft = { ...final, id: V2, title: "Revised", status: "draft" as const, revises: V1, created_at: "2026-09-06T12:01:00Z", review_pass: "true" };
+  assert.equal(selectActiveMaterial([final, draft], V1), null);
+  assert.equal(selectActiveMaterial([final, draft], V2)?.id, V2);
+  assert.equal(selectActiveMaterial([final, { ...draft, review_pass: "false" }], V1)?.id, V1);
+  assert.equal(selectActiveMaterial([final, { ...draft, review_pass: "false" }], V2), null);
+});

@@ -53,10 +53,10 @@ All failures below were escalated September 6. The discovery evidence is histori
 | Recorded-time correction leaves linked Planner duration stale | Real sandbox save: Hours 11, Planner 10 | F01, [#1092](https://github.com/sidneyswift/homa/issues/1092) | FIXED `78f3b4e6`, F01 live receipt |
 | Named book details disappear | Two actual source/tool/row comparisons | F02, [#1093](https://github.com/sidneyswift/homa/issues/1093) | Open; escalated September 6 |
 | Distinct reading time suppressed | Two separate September 3 30-minute activities collided with an existing literature record; at least 60 minutes absent | F03, [#1090](https://github.com/sidneyswift/homa/issues/1090) | Open; escalated September 6 |
-| Child/day aggregation merges equal display names; child totals omit shared records in chat | Actual-function replays | F07, [#1095](https://github.com/sidneyswift/homa/issues/1095) | Open; escalated September 6 |
+| Child/day aggregation merges equal display names; child totals omit shared records in chat | Actual-function replays and hosted output | F07, [#1095](https://github.com/sidneyswift/homa/issues/1095) | FIXED c3409c10; hosted UI, CSV and packet verified |
 | School-year surfaces use different starts | UI July 1, chat/Progress August 1, compliance configured anniversary; real July data exists | F08, [#1096](https://github.com/sidneyswift/homa/issues/1096) | FIXED `b8b79693`, F08 live receipt |
 | Second language Hours rejected by an old database constraint | First hosted F08 fixture failed with 23514; both production subject constraints lacked `spanish` | [#1120](https://github.com/sidneyswift/homa/issues/1120) | FIXED against deployed `b8b79693` by exact existing migration, live version `20260906195628`; F08 live receipt |
-| Deeper-question intent is lost and chat check-ins stop early | Live navigation, actual responses and selector comparison | F09-F10, [#1088](https://github.com/sidneyswift/homa/issues/1088) | Open; escalated September 6 |
+| Deeper-question intent is lost and chat check-ins stop early | Live navigation, actual responses and selector comparison | F09-F10, [#1088](https://github.com/sidneyswift/homa/issues/1088) | Entry and selector FIXED `8e70c942`; live stop-summary defect escalated September 6, 21:51 UTC |
 | Capability follow-ups remain unscored; subsequent advice bypasses verifier | Three actual `no_match` observations, stale cutting evidence, no next-move tool call | F13-F14, [#1099](https://github.com/sidneyswift/homa/issues/1099), [#1100](https://github.com/sidneyswift/homa/issues/1100) | Open; escalated September 6 |
 | Accepted curricula cannot be read; blank scan can be reported as read | Two actual over-cap files and local blank-text PDF replay | F16, [#1089](https://github.com/sidneyswift/homa/issues/1089) | FIXED `78466fe6`, F16 recovery receipt |
 | Name-tracing geometry is wrong | Actual rejected mixed-case output and measured glyph geometry | F19, [#1094](https://github.com/sidneyswift/homa/issues/1094); related #1080/#1066 | Open; escalated September 6 |
@@ -76,8 +76,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | F03 | Count distinct work while deduplicating true retries | Implement now; [#1090](https://github.com/sidneyswift/homa/issues/1090) |
 | F04 | Reuse/filter/subtotal family categories | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
 | F05 | Familiar subject display names | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
-| F06 | Child/date-scoped export | Implement now; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
-| F07 | Correct recorded days and shared-child scope | Implement now; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
+| F06 | Child/date-scoped export | Shipped and hosted verified; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
+| F07 | Correct recorded days and shared-child scope | Shipped and hosted verified; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
 | F08 | One configured school-year window | FIXED and verified live; [#1096](https://github.com/sidneyswift/homa/issues/1096) |
 | F09 | Start the selected deeper assessment | Implement now; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
 | F10 | Explore demonstrated ability and stop honestly | Implement now; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
@@ -182,6 +182,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Acceptance:** populated two-child/shared fixture, invalid/foreign child, reversed or invalid dates, first/last boundary day, timezone, shared inclusion, empty result, more than 3,000 rows, CSV formulas/quotes/Unicode. Open the exported artifact and compare its rows/totals with the requested scope, not just the link URL.
 
+**Release verification, F06-F07:** PR #1122 merged as `c3409c107100fccac162ddcd274f902159abf31d`, required checks passed, the additive summary function is installed, and its production deployment was READY. Six mobile-width previews, four real CSV downloads and the actual eleven-page state packet preserved child/date/shared scope, including 3,007 archive entries and two children with identical names. The exact 33m and 35m child totals each covered two recorded days. The native source update published to the matching production runtime. [Hosted evidence](../journeys/evidence/2026-09-06-hours-hosted-receipt.json) preserves the two local harness failures and independent correction proofs. All test records and twelve artifacts were removed and absence verified; provider cleanup/token drain remains separately pending. No physical printing or installed-device uptake is claimed.
+
 ### F07. Count recorded learning days per child
 
 **Tracking:** [#1095](https://github.com/sidneyswift/homa/issues/1095).
@@ -219,6 +221,8 @@ The first hosted run also found an unapplied existing Second language subject mi
 ### F09-F10. Deeper questions should locate demonstrated ability and update progress
 
 **Tracking:** [#1088](https://github.com/sidneyswift/homa/issues/1088).
+
+**Implementation and current verification:** PRs #1121 and #1123 shipped the selected request, adaptive questions and polling correction. On deployed `8e70c942`, a returning synthetic family received three actual selected-child math questions and saved two canonical answers while its ordinary page preference named the other child. The explicit stop first failed schema validation on an extra parameter, then corrected itself and received `parent_stopped`. Return-to-Progress and reload acceptance remain unverified. Its final prose also changed the saved “by ones or by tens” to “both by ones and tens”; #1088 is reopened for that observed language defect and final live verification. The retained synthetic family was removed through reviewed canonical account deletion on September 6 at 22:00 UTC: all 21 checked database/Auth scopes are empty; deletion job `ead7748b-cf58-42e8-8e73-5cff6209a1eb` retains provider cleanup and token drain until September 7 at 04:30 UTC. The initial failure receipts remain evidence, not passes. A local skill/schema correction now preserves alternatives and publishes the pause-only parameter boundary; nine deterministic tests and both real model checks pass, including the actual disposable-PostgreSQL behavior journey. Hosted return/reload and final summary verification remain pending.
 
 **Release verification update:** the initial implementation is deployed in [PR #1121](https://github.com/sidneyswift/homa/pull/1121), main `325216fa`. A real hosted request reached Avery's selected Math sitting while Blair was the page preference, and saved the exact delivered question. Full acceptance remains open: the browser check exposed a polling restart on same-value server rerenders. That defect has a failing-before/passing-after actual-hook regression and a separate correction branch. The [implementation evidence](2026-09-06-deeper-progress.md#hosted-verification-and-polling-correction) separates this result from the remaining saved-answer/Progress journey. The original audit chain below is historical.
 
@@ -531,6 +535,8 @@ Month preview contains four weeks. Approval validates children/dates/materials/u
 **Implement now:** channel-aware skill/tool results: native prepares the system sheet; mobile web provides the correct current PDF action with truthful instructions. Preserve selected revision/finalization, requested copy/page roles and source access. Consistently using the authenticated PDF route in Binder can align access/open tracking, without relabeling opening as printing.
 
 **Acceptance:** web gets a usable current PDF and no native-sheet claim; foreign/stale ID and uncertain answer-key/page-role requests refuse; native canceled/failed/completed states stay distinct; final two-page artifact opens at the expected URL. Physical mobile-web printer output still needs device evidence. Unattended delivery, saved printers and automatic physical printing remain a separate integration/product decision.
+
+**Implementation evidence:** the [current-material print handoff](2026-09-06-material-print-handoff.md) traces the fleet procedure, tool receipt, web/native consumers, authenticated page-selection route and atomic current-revision finalizer. Integrated code and local browser/real-database checks are verified there. Release and physical-device evidence are explicitly separate; this paragraph is not a shipped claim.
 
 ## Implementation order and completion evidence
 

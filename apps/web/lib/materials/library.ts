@@ -1,6 +1,7 @@
 import { del } from "@vercel/blob";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type postgres from "postgres";
+import { PRINT_STALE_MESSAGE } from "@homa/core";
 
 import {
   parseFamilyAssetReferenceSnapshots,
@@ -14,6 +15,7 @@ import {
 import type { MaterialKind, MaterialSource } from "./artifact-store";
 import {
   selectInProgressMaterialRevisions,
+  selectKeptMaterialRevisions,
   selectParentVisibleMaterialRevisions,
 } from "./parent-visible";
 
@@ -57,6 +59,7 @@ export interface MaterialSummary {
 }
 
 export interface MaterialFilters {
+  title?: string;
   childId?: string;
   kind?: MaterialKind;
   subject?: string;
@@ -169,7 +172,7 @@ function selectSearchRows(
   status: MaterialFilters["status"],
 ): MaterialSearchRow[] {
   if ((status ?? "final") !== "final") return [...rows];
-  return selectParentVisibleMaterialRevisions(
+  return selectKeptMaterialRevisions(
     rows.map((row) => ({
       ...row,
       revisesId: row.revises,
@@ -424,6 +427,13 @@ export async function getMaterialCaller(
   return data ? toSummary(data as unknown as MaterialDbRow) : null;
 }
 
+/** Exact title substring, not a model-meaning or fuzzy match. PostgREST's
+ * ILIKE aliases `*` to `%`; escaped regex keeps all title punctuation literal
+ * on both adapters, including percent, underscore, backslash and star. */
+function literalTitlePattern(title: string): string {
+  return title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function findMaterialsPinnedLegacy(
   familyId: string,
   filters: MaterialFilters,
@@ -444,6 +454,7 @@ async function findMaterialsPinnedLegacy(
       and (${status === "any" || status === "final"} or status = ${status === "any" ? "final" : status})
       and (${!filters.childId} or child_id = ${filters.childId ?? null})
       and (${!filters.kind} or kind = ${filters.kind ?? null})
+      and (${!filters.title} or title ~* ${literalTitlePattern(filters.title ?? "")})
       and (${!filters.subject} or subject ilike ${"%" + (filters.subject ?? "") + "%"})
       and (${!filters.theme} or theme ilike ${"%" + (filters.theme ?? "") + "%"})
       and (${!filters.character} or exists (
@@ -480,6 +491,7 @@ async function findMaterialsPinnedProtected(
       )
       and (${!filters.childId} or child_id = ${filters.childId ?? null})
       and (${!filters.kind} or kind = ${filters.kind ?? null})
+      and (${!filters.title} or title ~* ${literalTitlePattern(filters.title ?? "")})
       and (${!filters.subject} or subject ilike ${"%" + (filters.subject ?? "") + "%"})
       and (${!filters.theme} or theme ilike ${"%" + (filters.theme ?? "") + "%"})
       and (${!filters.character} or exists (
@@ -532,6 +544,7 @@ export async function findMaterialsCaller(
   if (status !== "any" && status !== "final") query = query.eq("status", status);
   if (filters.childId) query = query.eq("child_id", filters.childId);
   if (filters.kind) query = query.eq("kind", filters.kind);
+  if (filters.title) query = query.regexIMatch("title", literalTitlePattern(filters.title));
   if (filters.subject) query = query.ilike("subject", `%${filters.subject}%`);
   if (filters.theme) query = query.ilike("theme", `%${filters.theme}%`);
   // Array-contains is exact-match; the pinned path's ilike-over-unnest
@@ -642,6 +655,8 @@ interface ChainRow {
   title: string;
   approved_at: string | null;
   subject_lesson_id?: string | null;
+  created_at?: string;
+  review_pass?: string | null;
 }
 
 /** The whole revision chain containing `materialId` (ancestors via
@@ -685,8 +700,15 @@ export interface MaterialFinalizationPlan {
   draftRowsToDelete: ChainRow[];
 }
 
+export interface MaterialFinalizationPrecondition {
+  requireCurrentVisible: true;
+}
 interface MaterialFinalizationOptions {
   trustedSubjectLessonId?: string;
+  requireCurrentVisible?: true;
+}
+function staleFinalizationPlan(): MaterialFinalizationPlan {
+  return { targetId: null, result: { finalized: false, transitioned: false, versionsSuperseded: 0, note: PRINT_STALE_MESSAGE }, supersededRows: [], draftRowsToDelete: [] };
 }
 
 /**
@@ -713,6 +735,16 @@ export function planMaterialFinalization(
     };
   }
   const chain = collectChain([...rows], materialId);
+  if (options.requireCurrentVisible) {
+    const chainIds = new Set(chain.map((row) => row.id));
+    if (chain.filter((row) => row.revises === null || !chainIds.has(row.revises)).length !== 1) return staleFinalizationPlan();
+    if (chain.some((row) => row.created_at === undefined || !Number.isFinite(Date.parse(row.created_at)) || row.review_pass === undefined)) return staleFinalizationPlan();
+    const visible = selectParentVisibleMaterialRevisions(chain.map((row) => ({
+      ...row, revisesId: row.revises, order: Date.parse(row.created_at!),
+      reviewPass: row.review_pass === null ? null : row.review_pass !== "false",
+    })));
+    if (visible.length !== 1 || visible[0]?.id !== materialId) return staleFinalizationPlan();
+  }
   const lessonIds = new Set(
     chain.flatMap((row) =>
       row.subject_lesson_id ? [row.subject_lesson_id] : [],
@@ -848,7 +880,8 @@ async function loadPinnedMaterialRows(
         where next.family_id = ${familyId}
       )
       select id, status, revises, pdf_url, preview_url, title,
-             approved_at::text as approved_at
+             approved_at::text as approved_at, created_at::text as created_at,
+             generation->'review'->>'pass' as review_pass
       from public.materials
       where family_id = ${familyId} and id in (select id from chain)
       order by id
@@ -867,7 +900,8 @@ async function loadPinnedMaterialRows(
       where next.family_id = ${familyId}
     )
     select id, status, revises, pdf_url, preview_url, title,
-           approved_at::text as approved_at, subject_lesson_id
+           approved_at::text as approved_at, subject_lesson_id,
+           created_at::text as created_at, generation->'review'->>'pass' as review_pass
     from public.materials
     where family_id = ${familyId} and id in (select id from chain)
     order by id
@@ -919,23 +953,43 @@ async function applyPinnedMaterialFinalization(
   `;
 }
 
+/** Same transaction primitive used by the pinned adapter and disposable PG tests. */
+export async function finalizeMaterialInTransaction(
+  transaction: postgres.TransactionSql,
+  familyId: string,
+  materialId: string,
+  hasSubjectLessonProvenance: boolean,
+  precondition?: MaterialFinalizationPrecondition,
+): Promise<MaterialFinalizationPlan> {
+  let rows = await loadPinnedMaterialRows(transaction, familyId, hasSubjectLessonProvenance, materialId);
+  if (precondition?.requireCurrentVisible) {
+    // A child may have committed while the first SELECT waited on its parent's
+    // FK lock. Re-read after locking until every row in the fresh chain is held.
+    // New children then wait on the locked FK parent until this transaction ends.
+    let stable = false;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const fresh = await loadPinnedMaterialRows(transaction, familyId, hasSubjectLessonProvenance, materialId);
+      stable = fresh.length === rows.length && fresh.every((row, index) => row.id === rows[index]?.id);
+      rows = fresh;
+      if (stable) break;
+    }
+    if (!stable) return staleFinalizationPlan();
+  }
+  const plan = planMaterialFinalization(rows, materialId, precondition);
+  await applyPinnedMaterialFinalization(transaction, familyId, plan);
+  return plan;
+}
+
 export async function finalizeMaterialPinned(
   familyId: string,
-  materialId: string
+  materialId: string,
+  precondition?: MaterialFinalizationPrecondition,
 ): Promise<FinalizeResult> {
   const sql = mapDb();
   const hasSubjectLessonProvenance =
     await materialSubjectLessonProvenanceExists();
   const plan = await sql.begin(async (transaction) => {
-    const rows = await loadPinnedMaterialRows(
-      transaction,
-      familyId,
-      hasSubjectLessonProvenance,
-      materialId
-    );
-    const nextPlan = planMaterialFinalization(rows, materialId);
-    await applyPinnedMaterialFinalization(transaction, familyId, nextPlan);
-    return nextPlan;
+    return await finalizeMaterialInTransaction(transaction, familyId, materialId, hasSubjectLessonProvenance, precondition);
   });
   if (plan.result.transitioned) {
   // Only the print file. The preview thumbnail of every superseded version
@@ -1207,15 +1261,18 @@ export async function finalizeMaterialCaller(
   familyId: string,
   materialId: string,
   deleteDraftUrls: DeleteMaterialDraftUrls = deleteMaterialDraftUrls,
-  isSubjectLessonsEnabled: () => boolean = subjectLessonsEnabled
+  isSubjectLessonsEnabled: () => boolean = subjectLessonsEnabled,
+  precondition?: MaterialFinalizationPrecondition,
 ): Promise<FinalizeResult> {
   const { data, error } = await db.rpc("finalize_family_material", {
     p_family_id: familyId,
     p_material_id: materialId,
+    ...(precondition?.requireCurrentVisible ? { p_require_current_visible: true } : {}),
   });
   if (error) {
     if (
-      !isSubjectLessonsEnabled()
+      !precondition?.requireCurrentVisible
+      && !isSubjectLessonsEnabled()
       && (
         isMissingMaterialFinalizationRpc(error)
         || isMissingSubjectLessonProvenanceColumn(error)
@@ -1235,6 +1292,7 @@ export async function finalizeMaterialCaller(
       note: `Could not finalize: ${error.message}`,
     };
   }
+  if (precondition?.requireCurrentVisible && (!Array.isArray(data) || data[0]?.current_visible !== true)) return staleFinalizationPlan().result;
   const receipt = decodeMaterialFinalizationRpcRow(
     Array.isArray(data) ? data[0] : null
   );
