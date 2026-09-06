@@ -75,12 +75,12 @@ export function parseSchoolYearStart(
 }
 
 /**
- * Saves the family's school-year start. familyId always comes from
+ * Saves or explicitly clears the family's school-year start. familyId always comes from
  * session auth; this never accepts one from a client or a model.
  */
 export async function setSchoolYearStart(
   familyId: string,
-  startOn: string,
+  startOn: string | null,
 ): Promise<void> {
   const sql = mapDb();
   await sql`

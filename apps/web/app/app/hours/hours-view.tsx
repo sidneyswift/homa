@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from "react";
 
+import { resolveHoursWindow } from "../../../lib/hours-summary";
+import { zonedDateString } from "../../../lib/time-zone";
+
 import {
   computeChildTotals,
   formatMinutesAsHours,
@@ -48,10 +51,12 @@ export interface HoursKid {
 
 function TotalsCard({
   total,
+  schoolYearLabel,
   kidIndex,
   avatarUrl,
 }: {
   total: ChildHoursTotals;
+  schoolYearLabel: string;
   kidIndex: number;
   avatarUrl: string | null;
 }) {
@@ -75,7 +80,7 @@ function TotalsCard({
           </dd>
         </div>
         <div>
-          <dt className={`text-[0.6rem] font-bold uppercase tracking-wide ${SUBTLE}`}>School year</dt>
+          <dt className={`text-[0.6rem] font-bold uppercase tracking-wide ${SUBTLE}`}>{schoolYearLabel}</dt>
           <dd className={`mt-0.5 font-display text-lg font-semibold ${INK}`}>
             {formatMinutesAsHours(total.schoolYear)}
           </dd>
@@ -126,6 +131,8 @@ function EntryRow({
 export function HoursView({
   kids,
   entries,
+  entriesComplete = false,
+  schoolYearStartOn = null,
   focusChildId,
   timeZone,
   now,
@@ -138,6 +145,8 @@ export function HoursView({
   /** Already scoped to the view context (page.tsx's job): the whole
    * family's blocks, or one kid's own blocks plus anything family-wide. */
   entries: HoursEntry[];
+  entriesComplete?: boolean;
+  schoolYearStartOn?: string | null;
   /** One kid selected in the context switcher, or null for everyone. */
   focusChildId: string | null;
   timeZone: string;
@@ -153,6 +162,10 @@ export function HoursView({
 
   const focusKid = focusChildId ? kids.find((kid) => kid.id === focusChildId) ?? null : null;
 
+  const schoolWindow = resolveHoursWindow("school_year", zonedDateString(now, timeZone), schoolYearStartOn);
+  const schoolStartLabel = schoolWindow.from === null ? null : new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC", year: "numeric", month: "short", day: "numeric",
+  }).format(new Date(`${schoolWindow.from}T00:00:00Z`));
   const subjects = useMemo(() => subjectOptions(entries), [entries]);
   const filtered = useMemo(() => filterEntries(entries, filter), [entries, filter]);
   const groups = useMemo(
@@ -160,29 +173,46 @@ export function HoursView({
     [filtered, timeZone, now],
   );
   const totals = useMemo(
-    () => computeChildTotals(filtered, focusKid ? [focusKid] : kids, now, timeZone),
-    [filtered, focusKid, kids, now, timeZone],
+    () => computeChildTotals(filtered, focusKid ? [focusKid] : kids, now, timeZone, schoolYearStartOn),
+    [filtered, focusKid, kids, now, timeZone, schoolYearStartOn],
   );
   const editing = entries.find((entry) => entry.id === editingId) ?? null;
-  const totalsGrid = entries.length > 0 && totals.length > 0 ? (
-    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {totals.map((total) => {
-        const kidIndex = kids.findIndex((kid) => kid.id === total.childId);
-        const kid = kids[kidIndex];
-        return (
-          <TotalsCard
-            key={total.childId}
-            total={total}
-            kidIndex={Math.max(0, kidIndex)}
-            avatarUrl={kid?.avatar_url ?? null}
-          />
-        );
-      })}
-    </section>
+  const totalsGrid = entriesComplete && entries.length > 0 && totals.length > 0 ? (
+    <div>
+      {schoolStartLabel ? (
+        <p className={`mb-3 text-xs ${MUTED}`}>School-year totals: {schoolStartLabel} through today.</p>
+      ) : null}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {totals.map((total) => {
+          const kidIndex = kids.findIndex((kid) => kid.id === total.childId);
+          const kid = kids[kidIndex];
+          return (
+            <TotalsCard
+              key={total.childId}
+              total={total}
+              schoolYearLabel={schoolWindow.label}
+              kidIndex={Math.max(0, kidIndex)}
+              avatarUrl={kid?.avatar_url ?? null}
+            />
+          );
+        })}
+      </section>
+    </div>
   ) : null;
 
   return (
     <div data-hours-focus-anchor tabIndex={-1} data-brand-surface="hours" data-brand-fixture="quiet-authority-v1">
+      {!entriesComplete ? (
+        <p role="status" className={`mb-4 text-sm ${MUTED}`}>
+          Only part of the Hours record loaded. Totals are unavailable. This loading problem hasn&apos;t changed your saved entries. Reload the page to try again.
+        </p>
+      ) : null}
+      {schoolWindow.schoolYearFallback ? (
+        <p className={`mb-4 text-sm ${MUTED}`}>
+          {entriesComplete ? "All time totals include recorded time through today. " : ""}
+          <a href="/app/settings#school-year-start" className="underline">Set your school-year start</a> to see school-year totals.
+        </p>
+      ) : null}
       {embedded ? (
         <p className={`mb-4 text-sm ${MUTED}`}>
           {focusKid
@@ -241,13 +271,15 @@ export function HoursView({
         </div>
       ) : null}
 
-      {entries.length === 0 ? (
+      {entries.length === 0 && !entriesComplete ? null : entries.length === 0 ? (
         <QuietFrame className="mt-8 border-dashed p-8 text-center">
           <p className={`font-display text-lg font-semibold ${INK}`}>Nothing logged yet.</p>
           <p className={`mx-auto mt-1.5 max-w-sm text-sm ${MUTED}`}>
             Tell Homa how long schoolwork took in Chat, by text, or on a call. She records it here.
           </p>
         </QuietFrame>
+      ) : groups.length === 0 && !entriesComplete ? (
+        <p className={`mt-8 text-sm ${MUTED}`}>None of the loaded records match this subject.</p>
       ) : groups.length === 0 ? (
         <p className={`quiet-frame quiet-frame--paper mt-8 border-dashed p-6 text-center text-sm ${MUTED}`}>
           {filter.subject
@@ -262,9 +294,11 @@ export function HoursView({
                 <h2 className={`text-[0.68rem] font-bold uppercase tracking-[0.16em] ${SUBTLE}`}>
                   {group.label}
                 </h2>
-                <span className={`text-xs font-semibold ${MUTED}`}>
-                  {formatMinutesAsHours(group.totalMinutes)}
-                </span>
+                {entriesComplete ? (
+                  <span className={`text-xs font-semibold ${MUTED}`}>
+                    {formatMinutesAsHours(group.totalMinutes)}
+                  </span>
+                ) : null}
               </div>
               <ul className="mt-2 flex flex-col gap-2">
                 {group.entries.map((entry) => (

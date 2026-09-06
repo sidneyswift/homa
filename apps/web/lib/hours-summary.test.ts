@@ -45,9 +45,9 @@ describe("periodStart", () => {
     assert.equal(periodStart("month", "2026-07-29"), "2026-07-01");
   });
 
-  it("starts the school year on August 1, and stays in the prior year before August", () => {
-    assert.equal(periodStart("school_year", "2026-09-03"), "2026-08-01");
-    assert.equal(periodStart("school_year", "2026-07-29"), "2025-08-01");
+  it("uses the saved August start, including before its anniversary", () => {
+    assert.equal(periodStart("school_year", "2026-09-03", "2020-08-01"), "2026-08-01");
+    assert.equal(periodStart("school_year", "2026-07-29", "2020-08-01"), "2025-08-01");
   });
 
   it("has no lower bound for all", () => {

@@ -195,14 +195,14 @@ describe("periodStart", () => {
     assert.equal(periodStart("month", now, "America/New_York"), "2027-02-01");
   });
 
-  it("finds last July 1 when the current month is before July", () => {
+  it("finds the previous configured July anniversary", () => {
     const now = new Date("2027-02-17T18:00:00.000Z");
-    assert.equal(periodStart("schoolYear", now, "America/New_York"), "2026-07-01");
+    assert.equal(periodStart("schoolYear", now, "America/New_York", "2020-07-01"), "2026-07-01");
   });
 
-  it("finds this year's July 1 when the current month is July or later", () => {
+  it("finds this year's configured July anniversary", () => {
     const now = new Date("2026-07-11T22:00:00.000Z");
-    assert.equal(periodStart("schoolYear", now, "America/New_York"), "2026-07-01");
+    assert.equal(periodStart("schoolYear", now, "America/New_York", "2020-07-01"), "2026-07-01");
   });
 });
 
@@ -222,7 +222,7 @@ describe("computeChildTotals", () => {
       ],
       [MAYA, LEO],
     );
-    const totals = computeChildTotals(entries, [MAYA, LEO], now, timeZone);
+    const totals = computeChildTotals(entries, [MAYA, LEO], now, timeZone, "2020-07-01");
     const maya = totals.find((t) => t.childId === "child-maya");
     assert.deepEqual(maya, { childId: "child-maya", childName: "Maya", week: 30, month: 50, schoolYear: 60 });
   });
@@ -232,7 +232,7 @@ describe("computeChildTotals", () => {
       [row({ id: "a", childId: null, happenedOn: "2027-02-16", minutes: 40 })],
       [MAYA, LEO],
     );
-    const totals = computeChildTotals(entries, [MAYA, LEO], now, timeZone);
+    const totals = computeChildTotals(entries, [MAYA, LEO], now, timeZone, "2020-07-01");
     assert.equal(totals.find((t) => t.childId === "child-maya")?.week, 40);
     assert.equal(totals.find((t) => t.childId === "child-leo")?.week, 40);
   });
@@ -242,7 +242,7 @@ describe("computeChildTotals", () => {
       [row({ id: "a", childId: "child-leo", happenedOn: "2027-02-16", minutes: 40 })],
       [MAYA, LEO],
     );
-    const totals = computeChildTotals(entries, [MAYA, LEO], now, timeZone);
+    const totals = computeChildTotals(entries, [MAYA, LEO], now, timeZone, "2020-07-01");
     assert.equal(totals.find((t) => t.childId === "child-maya")?.week, 0);
     assert.equal(totals.find((t) => t.childId === "child-leo")?.week, 40);
   });
