@@ -6,6 +6,7 @@ import { validCanvasSize } from "../materials/rasterize-pdf";
 import { readFamilyPdf, type FamilyPdfReaderDependencies } from "./family-pdf-reader";
 import { curriculumPdfFixture } from "./pdf-read-fixture";
 import type { PdfPageRead } from "./family-asset-read-contract";
+import { PdfTranscriptionError } from "./pdf-page-transcription";
 
 const asset = { id: "11111111-1111-4111-8111-111111111111", familyId: "22222222-2222-4222-8222-222222222222", url: "https://fixture.invalid/original.pdf", mediaType: "application/pdf" };
 function fixture(bytes: Buffer) {
@@ -26,8 +27,85 @@ function fixture(bytes: Buffer) {
   const read = (startOrdinal = 1, maxPages = 8, extra = {}) => readFamilyPdf(asset, {
     startOrdinal, maxPages, maxChars: 32_000, maxUncachedOcr: 1, signal: AbortSignal.timeout(10_000), ...extra,
   }, deps);
-  return { read, deps, calls: () => modelCalls };
+  return { read, deps, calls: () => modelCalls, cached: () => [...pages.values()], leases: () => leases.size };
 }
+
+const timeout = () => new PdfTranscriptionError({ reason: "timeout", elapsedMs: 40_000, providerStatus: null });
+
+test("a later transcription timeout returns only completed evidence and keeps the missing page retryable", async () => {
+  const f = fixture(curriculumPdfFixture([{ text: "Teacher guide" }, { text: "Reading list" }, { scan: "Dense lesson" }, { scan: "Later lesson" }]));
+  const transcribe = f.deps.transcribe;
+  let attempted = 0;
+  f.deps.transcribe = async () => { attempted++; throw timeout(); };
+  const partial = await f.read(); assert.ok(partial.ok);
+  assert.deepEqual(partial.segments.map(page => page.ordinal), [1, 2]);
+  assert.equal(partial.nextCursor, 3); assert.equal(partial.truncated, true);
+  assert.deepEqual(partial.stoppedAt, { ordinal: 3, failure: timeout().failure });
+  assert.match(partial.coverageNote, /could not finish reading PDF page 3/);
+  assert.equal(attempted, 1); assert.equal(f.leases(), 0);
+  assert.deepEqual(f.cached().map(page => page.ordinal), [1, 2]);
+  f.deps.transcribe = transcribe;
+  const recovered = await f.read(3, 1); assert.ok(recovered.ok);
+  assert.equal(recovered.segments[0].ordinal, 3);
+  const replay = await f.read(3, 1); assert.ok(replay.ok);
+  assert.deepEqual(replay.segments, recovered.segments); assert.equal(f.calls(), 1);
+});
+
+test("an exact-page timeout fails without claiming that page was read", async () => {
+  const f = fixture(curriculumPdfFixture([{ scan: "Dense lesson" }]));
+  f.deps.transcribe = async () => { throw timeout(); };
+  assert.deepEqual(await f.read(), { ok: false, reason: "transient", failure: timeout().failure });
+  assert.equal(f.cached().length, 0); assert.equal(f.leases(), 0);
+});
+
+test("an actual later API failure preserves prior text, while blank earlier pages cannot hide a failure", async () => {
+  const providerFailure = new PdfTranscriptionError({ reason: "provider", elapsedMs: 100, providerStatus: 503 });
+  const readable = fixture(curriculumPdfFixture([{ text: "Prior evidence" }, { scan: "Next page" }]));
+  readable.deps.transcribe = async () => { throw providerFailure; };
+  const result = await readable.read(); assert.ok(result.ok);
+  assert.deepEqual(result.stoppedAt, { ordinal: 2, failure: providerFailure.failure });
+  assert.equal(result.nextCursor, 2); assert.equal(readable.leases(), 0);
+  const blank = fixture(curriculumPdfFixture([{}, { scan: "Next page" }]));
+  let attempts = 0;
+  blank.deps.transcribe = async () => {
+    if (attempts++ === 0) return { text: "", state: "blank", method: "vision", model: "fixture", gaps: [] };
+    throw providerFailure;
+  };
+  assert.deepEqual(await blank.read(1, 8, { maxUncachedOcr: 2 }), { ok: false, reason: "transient", failure: providerFailure.failure });
+  assert.deepEqual(blank.cached().map(page => page.state), ["blank"]); assert.equal(blank.leases(), 0);
+});
+
+test("partial evidence does not hide parent abort, invalid output, source loss, storage errors or parser limits", async () => {
+  for (const failure of ["abort", "recheck-abort", "invalid", "unknown", "source", "release", "complete", "parser"] as const) {
+    const f = fixture(curriculumPdfFixture([{ text: "Prior evidence" }, { scan: "Next page", ...(failure === "parser" ? { width: 100_000 } : {}) }]));
+    const controller = new AbortController();
+    const get = f.deps.cache.get;
+    let stopped = false;
+    f.deps.cache.get = async (source, ordinal) => {
+      if (failure === "recheck-abort" && stopped) controller.abort();
+      return failure === "source" && stopped ? null : get(source, ordinal);
+    };
+    if (failure === "release") {
+      const release = f.deps.cache.release;
+      f.deps.cache.release = async (source, ordinal, lease) => {
+        if (ordinal === 2) throw new Error("Database unavailable");
+        await release(source, ordinal, lease);
+      };
+    }
+    if (failure === "complete") {
+      const complete = f.deps.cache.complete;
+      f.deps.cache.complete = async (source, page, lease) => page.ordinal === 2 ? false : complete(source, page, lease);
+    } else f.deps.transcribe = async () => {
+      stopped = true;
+      if (failure === "abort") controller.abort();
+      if (failure === "unknown") throw new Error("Unexpected failure");
+      throw new PdfTranscriptionError({ reason: failure === "invalid" ? "invalid-output" : "timeout", elapsedMs: 1, providerStatus: null });
+    };
+    const result = await f.read(1, 8, { signal: controller.signal });
+    assert.equal(result.ok, false, failure);
+    assert.deepEqual(f.cached().map(page => page.ordinal), [1], failure);
+  }
+});
 
 test("mixed PDF reads preserve ordinals, bound new OCR, and repeat canonical text", async () => {
   const f = fixture(curriculumPdfFixture([{ text: "Contents" }, { scan: "Lesson 7: Count six shells." }, { scan: "Lesson 8: Sort shells." }]));

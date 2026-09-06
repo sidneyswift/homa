@@ -7,7 +7,7 @@ import {
   type PdfPageRead,
 } from "./family-asset-read-contract";
 import { pdfPageCache, type PdfPageCache } from "./pdf-page-cache";
-import { transcribePdfPage } from "./pdf-page-transcription";
+import { PdfTranscriptionError, transcribePdfPage, type PdfTranscriptionFailure } from "./pdf-page-transcription";
 
 export interface FamilyPdfReaderDependencies {
   download: typeof fetchFamilyAssetBytes;
@@ -18,7 +18,8 @@ export type FamilyPdfDocument = {
   ok: true; segmentKind: "page"; segments: PdfPageRead[]; totalSegments: number;
   truncated: boolean; contentSha256: string; extractionVersion: string;
   nextCursor: number | null; coverageNote: string;
-} | { ok: false; reason: "too_large" | "transient" | "corrupt" | "encrypted" | "unreadable" };
+  stoppedAt?: { ordinal: number; failure: PdfTranscriptionFailure };
+} | { ok: false; reason: "too_large" | "transient" | "corrupt" | "encrypted" | "unreadable"; failure?: PdfTranscriptionFailure };
 
 /** Stop the text stream at the retained page limit instead of first collecting
  * every text item from an arbitrarily dense original. */
@@ -73,6 +74,7 @@ export async function readFamilyPdf(
       let firstMissing: number | null = null;
       let nextCursor: number | null = start <= limit ? start : null;
       let truncated = totalSegments > limit || start > limit;
+      let stoppedAt: { ordinal: number; failure: PdfTranscriptionFailure } | undefined;
       for (let ordinal = start; ordinal <= Math.min(limit, start + options.maxPages - 1); ordinal++) {
         options.signal.throwIfAborted();
         let result = await dependencies.cache.get(source, ordinal);
@@ -96,7 +98,23 @@ export async function readFamilyPdf(
               } else {
                 ocr++;
                 const jpeg = await rasterizePdfPageForReading(page, pageSignal);
-                result = { ...await dependencies.transcribe({ jpeg, familyId: asset.familyId, signal: pageSignal }), ordinal, locator: `Page ${ordinal}` };
+                try {
+                  result = { ...await dependencies.transcribe({ jpeg, familyId: asset.familyId, signal: pageSignal }), ordinal, locator: `Page ${ordinal}` };
+                } catch (error) {
+                  // A later model timeout need not erase already completed
+                  // evidence. Parser, identity, storage and caller failures
+                  // remain fatal, and the missing page is never completed.
+                  if (error instanceof PdfTranscriptionError
+                    && (error.failure.reason === "timeout" || error.failure.reason === "provider")
+                    && !pageSignal.aborted && !options.signal.aborted
+                    && segments.some(page => (page.state === "readable" || page.state === "partial") && page.text.trim())) {
+                    stoppedAt = { ordinal, failure: error.failure };
+                    truncated = true;
+                    nextCursor = ordinal;
+                    break;
+                  }
+                  throw error;
+                }
               }
               options.signal.throwIfAborted();
               if (!(await dependencies.cache.complete(source, result, lease))) return { ok: false, reason: "transient" } as const;
@@ -119,18 +137,26 @@ export async function readFamilyPdf(
         nextCursor = ordinal < limit ? ordinal + 1 : null;
         if (chars >= options.maxChars) break;
       }
+      options.signal.throwIfAborted();
+      // Recheck active source identity after releasing the failed page's
+      // lease. Completed canonical rows are immutable within that identity.
+      if (stoppedAt && !(await dependencies.cache.get(source, segments[0].ordinal))) return { ok: false, reason: "transient" } as const;
+      options.signal.throwIfAborted();
       if (firstMissing !== null) nextCursor = firstMissing;
       // Verification cannot call a source complete when its aggregate text
       // budget omitted cached pages, including unexamined missing pages.
       if (options.cachedOnly && nextCursor !== null) truncated = true;
       const inspected = segments.map(page => page.ordinal).join(", ");
-      const coverageNote = start > limit
+      const coverageNote = (start > limit
         ? `PDF page ${start} is outside the readable scope of ${limit} of ${totalSegments} pages.`
-        : `Inspected PDF pages ${inspected || "none"} of ${totalSegments}. ${nextCursor === null ? "No further pages within this read scope." : `Continue at PDF page ${nextCursor}.`} ${totalSegments > limit ? `Reading stops at PDF page ${limit}; later pages were not read.` : ""}`.trim();
+        : `Inspected PDF pages ${inspected || "none"} of ${totalSegments}. ${nextCursor === null ? "No further pages within this read scope." : `Continue at PDF page ${nextCursor}.`} ${totalSegments > limit ? `Reading stops at PDF page ${limit}; later pages were not read.` : ""}`.trim())
+        + (stoppedAt ? ` Homa could not finish reading PDF page ${stoppedAt.ordinal}.` : "");
       return { ok: true, segmentKind: "page", segments, totalSegments, truncated,
-        contentSha256: source.sha256, extractionVersion: FAMILY_PDF_EXTRACTION_VERSION, nextCursor, coverageNote };
+        contentSha256: source.sha256, extractionVersion: FAMILY_PDF_EXTRACTION_VERSION, nextCursor, coverageNote,
+        ...(stoppedAt ? { stoppedAt } : {}) };
     });
   } catch (error) {
+    if (error instanceof PdfTranscriptionError) return { ok: false, reason: "transient", failure: error.failure };
     const name = error instanceof Error ? error.name : "";
     return { ok: false, reason: name === "PasswordException" ? "encrypted" : name === "InvalidPDFException" ? "corrupt" : "transient" };
   }
