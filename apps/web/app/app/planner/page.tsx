@@ -80,7 +80,7 @@ export default async function PlannerPage({
 
   // Calendar and day-hours reads stay bounded to the visible range. Hours
   // alone loads the full compliance record.
-  const [familyEvents, scheduledActivities, learningActivities, hoursRows] = await Promise.all([
+  const [familyEvents, scheduledActivities, learningActivities, hoursRead] = await Promise.all([
     view === "hours"
       ? Promise.resolve([])
       : getFamilyEventsForFamily(family.id, range.start, range.end).catch((error: unknown) => {
@@ -114,17 +114,17 @@ export default async function PlannerPage({
         ),
     view === "hours"
       ? getHoursLogForFamily(family.id)
-      : getHoursLogForFamilyBetween(family.id, range.start, range.end).catch(
+      : getHoursLogForFamilyBetween(family.id, range.start, range.end).then((rows) => ({ rows, complete: false })).catch(
           (error: unknown) => {
             console.error(
               "planner: bounded hours_log read failed:",
               error instanceof Error ? error.message : "unknown",
             );
-            return [];
+            return { rows: [], complete: false };
           },
         ),
   ]);
-  const allHoursEntries = toHoursEntries(hoursRows, children);
+  const allHoursEntries = toHoursEntries(hoursRead.rows, children);
   const hoursEntries = view === "hours"
     ? scopedToViewContext(allHoursEntries, viewContext)
     : allHoursEntries;
@@ -156,6 +156,8 @@ export default async function PlannerPage({
         scheduledActivities={scheduledActivities}
         learningActivities={learningActivities}
         hoursEntries={hoursEntries}
+        hoursEntriesComplete={hoursRead.complete}
+        schoolYearStartOn={family.school_year_start_on}
         timeZone={timeZone}
         now={now}
         today={today}

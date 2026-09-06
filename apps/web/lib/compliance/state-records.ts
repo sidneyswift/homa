@@ -2,7 +2,7 @@ import { composeFilingLetter } from "./filing-letter";
 import { mayGenerateLetter } from "./filing-method";
 import { FILING_METHODS_BY_STATE } from "./filing-methods.data";
 import { getFilingFamily } from "./filing-store";
-import { schoolYearStartFor } from "./deadlines";
+import { isValidDateOnly, schoolYearStartFor } from "./deadlines";
 import { composeStatePack } from "./pack";
 import { mapDb } from "../map/db";
 import { getStateRequirementsDetail } from "../map/state-requirements";
@@ -99,10 +99,14 @@ export interface StateRecordsSummary {
   parentAction: string;
 }
 
-function schoolYearLabel(startOn: string | null): string | null {
-  if (!startOn) return null;
-  const year = Number(startOn.slice(0, 4));
-  return Number.isInteger(year) ? `${year}-${String(year + 1).slice(-2)}` : null;
+export function schoolYearLabel(startOn: string | null): string | null {
+  if (!startOn || !isValidDateOnly(startOn)) return null;
+  return `Since ${new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(`${startOn}T00:00:00Z`))}`;
 }
 
 /**

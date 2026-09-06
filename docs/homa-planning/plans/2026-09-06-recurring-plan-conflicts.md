@@ -1,6 +1,6 @@
 # Recurring commitments and month-plan conflicts, gh#1104
 
-Source audit against production source69abbefdd2cc507c55f07c577c1235ce27168626. This is an implementation plan, not a shipped-fix receipt.
+Original source audit: `69abbefdd2cc507c55f07c577c1235ce27168626`. FIXED by PR #1118, merge `ff3258bf999f665a6ca7154ba0c7df73aae481f4`, deployed READY and verified September 6. The dated implementation sections below preserve the investigation and boundaries; the final section links the production receipt.
 
 ## Expected behavior and verified current path
 
@@ -38,3 +38,7 @@ The reviewed probe uses one new family, three children, three events, four initi
 This is an explicit verification limit: the ordinary hosted Eve channel has no caller-controlled per-turn tool allowlist or hard tool/model-call budget. A browser send limit cannot restrict server-side model actions. Adding a test endpoint or changing product capabilities solely for a probe is not part of this fix. The exact changed computation is verified on real PostgreSQL and, after deploy, on the production fixture through identical source; this does not claim hosted model/tool or native preview rendering. The web renderer has no dedicated month-preview overlay.
 
 The existing caller Data API reads are unpaginated and separate requests are not one consistent snapshot. This patch does not certify arbitrarily large candidate inventories or change that pre-existing boundary.
+
+## Production closure
+
+The real mobile-web journey passed 205 checks across eight Week states and two Day details; source-identical create/revise returned exactly 11 then 7 conflicts against the same production fixture. Root inspected five screenshots and verified cleanup. The first probe attempt hit its own request counter; its cleanup and corrected accounting are recorded, not hidden. [Deployment, exact results, screenshots, receipt and limits](../journeys/evidence/2026-09-06-recurring-events-live-verification.md). No hosted model/tool-dispatch or native preview claim is made.

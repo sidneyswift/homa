@@ -26,6 +26,7 @@ export function ProgressSubjects({
   timeZone,
   deeperChecks,
   hoursMinutesBySubject,
+  hoursWindowLabel = "this school year",
   children,
 }: {
   childId: string;
@@ -38,6 +39,7 @@ export function ProgressSubjects({
   deeperChecks: boolean;
   /** This school year's Hours minutes, keyed by subject id. Display-only. */
   hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
+  hoursWindowLabel?: "this school year" | "all time through today";
   children: ReactNode;
 }) {
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
@@ -95,6 +97,7 @@ export function ProgressSubjects({
           timeZone={timeZone}
           allowDeeperCheck={deeperChecks}
           hoursMinutes={hoursMinutesBySubject?.[openSubject.subjectId] ?? null}
+          hoursWindowLabel={hoursWindowLabel}
           onClose={closePanel}
         />
       ) : null}

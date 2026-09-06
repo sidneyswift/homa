@@ -9,7 +9,8 @@ import {
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
 import {
   filterHours,
-  periodStart,
+  hoursReadIsComplete,
+  resolveHoursWindow,
   summarizeHours,
   type HoursPeriod,
   type HoursRow,
@@ -36,7 +37,7 @@ const findInput = z.object({
     .enum(["week", "month", "school_year", "all"])
     .default("week")
     .describe(
-      "How far back to total. 'week' is this week starting Monday, 'school_year' starts August 1. Use 'all' when she asks about everything or names a range you cannot express here.",
+      "How far back to total. 'week' is this week starting Monday, 'school_year' uses the family's saved start-date anniversary, or explicitly labeled all-time-through-today when unset. Use 'all' when she asks about everything or names a range you cannot express here.",
     ),
   childId: z
     .uuid()
@@ -67,39 +68,47 @@ export default defineBoundedTool({
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
     } catch (error) {
       if (error instanceof MissingFamilyContextError) {
-        return { found: 0, note: error.message };
+        return { found: null, complete: false, note: error.message };
       }
       throw error;
     }
 
     let rows: HoursRow[];
     let timeZone: string;
+    let schoolYearStartOn: string | null;
+    let complete: boolean;
 
     if (access.mode === "pinned") {
       const pinned = await readHoursPinned(access.familyId);
       rows = pinned.rows;
       timeZone = pinned.timeZone;
+      schoolYearStartOn = pinned.schoolYearStartOn;
+      complete = pinned.complete;
     } else {
       const { db, familyId } = access;
-      const { data: family } = await db
+      const { data: family, error: familyError } = await db
         .from("families")
-        .select("time_zone")
+        .select("time_zone, school_year_start_on")
         .eq("id", familyId)
         .maybeSingle();
-      timeZone = effectiveTimeZone(family?.time_zone);
-      const { data, error } = await db
+      if (familyError || !family) return { found: null, complete: false, note: "Could not read the family settings. Do not report a total or claim nothing is logged." };
+      timeZone = effectiveTimeZone(family.time_zone);
+      schoolYearStartOn = family.school_year_start_on;
+      const { data, error, count } = await db
         .from("hours_log")
-        .select("child_id, subject, minutes, happened_on, source, note")
+        .select("child_id, subject, minutes, happened_on, source, note", { count: "exact" })
         .eq("family_id", familyId)
         .order("happened_on", { ascending: false })
         .limit(3000);
       if (error) {
         console.error("find_hours read failed:", error.message);
         return {
-          found: 0,
+          found: null,
+          complete: false,
           note: "Could not read the hours record just now. Say so plainly rather than telling her nothing is logged.",
         };
       }
+      complete = hoursReadIsComplete(count, (data ?? []).length);
       rows = (data ?? []).map((row) => ({
         childId: (row.child_id as string | null) ?? null,
         subject: row.subject as string,
@@ -111,17 +120,33 @@ export default defineBoundedTool({
     }
 
     const today = zonedDateString(new Date(), timeZone);
-    const from = periodStart(input.period as HoursPeriod, today);
+    const window = resolveHoursWindow(input.period as HoursPeriod, today, schoolYearStartOn);
+    const from = window.from;
     const matching = filterHours(rows, {
       from,
+      through: window.through,
       ...(input.childId === undefined ? {} : { childId: input.childId }),
       ...(input.subject === undefined ? {} : { subject: input.subject }),
     });
+    if (!complete) return {
+      found: null,
+      complete: false,
+      requestedPeriod: input.period,
+      period: window.period,
+      since: from,
+      through: window.through,
+      note: "Only part of the Hours record loaded. Do not report a total or claim no entries match; the full window has not been read.",
+    };
     const totals = summarizeHours(matching);
 
     return {
       found: totals.entryCount,
-      period: input.period,
+      complete: true,
+      requestedPeriod: input.period,
+      period: window.period,
+      periodLabel: window.label,
+      through: window.through,
+      schoolYearSettingHref: window.schoolYearFallback ? "/app/settings#school-year-start" : null,
       since: from,
       totalMinutes: totals.totalMinutes,
       byChild: totals.byChild,
@@ -136,10 +161,10 @@ export default defineBoundedTool({
         source: row.source,
         note: row.note,
       })),
-      note:
+      note: (window.schoolYearFallback ? "No valid school-year start is saved. These are all-time totals through today, not school-year totals. Offer the existing school-year setting. " : "") + (
         totals.entryCount === 0
           ? "Nothing logged in that window. Say that plainly, and offer to log what she just described rather than implying she did no school."
-          : "These are her real rows. Growth framing only: never call a total behind, and never compare one child to another.",
+          : "These are her real rows. Growth framing only: never call a total behind, and never compare one child to another."),
     };
   },
 });

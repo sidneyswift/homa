@@ -16,6 +16,7 @@ import { buildAbilitiesExplorerPayload } from "../../../../lib/child-progress/ab
 import { loadChildProgressPageState } from "../../../../lib/child-progress/page-state";
 import { progressRoutePolicy } from "../../../../lib/child-progress/route-policy";
 import { getHoursMinutesBySubjectForChild } from "../../../../lib/hours";
+import { resolveHoursWindow } from "../../../../lib/hours-summary";
 import { lessonListenEnabled } from "../../../../lib/lessons/flag";
 import { listLessonsForChild } from "../../../../lib/lessons/store";
 import { getTrajectoryEvidence } from "../../../../lib/map/store";
@@ -64,6 +65,8 @@ export default async function ChildProgressPage({
   }
 
   const timeZone = effectiveTimeZone(data.family.time_zone);
+  const today = zonedDateString(new Date(), timeZone);
+  const hoursWindow = resolveHoursWindow("school_year", today, data.family.school_year_start_on);
 
   // Lessons, the firsts ledger, and this school year's Hours minutes
   // load alongside the view: all four need only the family and the
@@ -92,7 +95,8 @@ export default async function ChildProgressPage({
     getHoursMinutesBySubjectForChild(
       data.family.id,
       child.id,
-      zonedDateString(new Date(), timeZone),
+      today,
+      data.family.school_year_start_on,
     ).catch(() => ({})),
   ]);
   if (pageState.status === "unavailable") {
@@ -171,6 +175,7 @@ export default async function ChildProgressPage({
       }
       abilitiesExplorer={abilitiesExplorer}
       hoursMinutesBySubject={hoursMinutesBySubject}
+      hoursWindowLabel={hoursWindow.schoolYearFallback ? "all time through today" : "this school year"}
     />
   );
 }

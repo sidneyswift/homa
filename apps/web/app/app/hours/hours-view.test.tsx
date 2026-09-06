@@ -53,7 +53,7 @@ function renderView(
   focusChildId: string | null = null,
 ): string {
   return renderToStaticMarkup(
-    <HoursView
+    <HoursView entriesComplete schoolYearStartOn="2020-07-01"
       kids={kids}
       entries={entries}
       focusChildId={focusChildId}
@@ -76,10 +76,26 @@ function renderForm(entryToEdit: HoursEntry): string {
 }
 
 describe("HoursView", () => {
+  it("withholds every aggregate when only part of the record loaded", () => {
+    const html = renderToStaticMarkup(<HoursView entriesComplete={false} schoolYearStartOn="2020-07-01"
+      kids={[MAYA]} entries={[entry()]} focusChildId={MAYA.id}
+      timeZone="America/New_York" now={RENDER_NOW} />);
+    assert.match(html, /Only part of the Hours record loaded\. Totals are unavailable\./u);
+    assert.match(html, /<h2[^>]*>Today<\/h2>/u);
+    assert.doesNotMatch(html, /<h2[^>]*>Today<\/h2><span/u);
+    assert.doesNotMatch(html, /This week<\/dt>|This month<\/dt>|School year<\/dt>/u);
+    assert.match(html, />45m</u);
+  });
+
+  it("shows the day total only with a complete record receipt", () => {
+    const html = renderView([entry()]);
+    assert.match(html, /<h2[^>]*>Today<\/h2><span[^>]*>45m<\/span>/u);
+  });
+
   it("explains the selected child's shared time in embedded Hours", () => {
     const rows = [entry(), entry({ id: "shared", childId: null, childName: null, minutes: 5 }),
       entry({ id: "leo", childId: LEO.id, childName: LEO.name, minutes: 60 })];
-    const html = renderToStaticMarkup(<HoursView kids={[MAYA, LEO]}
+    const html = renderToStaticMarkup(<HoursView entriesComplete schoolYearStartOn="2020-07-01" kids={[MAYA, LEO]}
       entries={scopedToViewContext(rows, { kind: "child", childId: MAYA.id })}
       focusChildId={MAYA.id} timeZone="America/New_York" now={RENDER_NOW} embedded />);
     assert.match(html, /Showing Maya&#x27;s recorded time, including time shared with the whole family\./u);
@@ -88,7 +104,7 @@ describe("HoursView", () => {
   });
 
   it("keeps whole-family scope visible for one child and empty embedded records", () => {
-    const html = renderToStaticMarkup(<HoursView kids={[MAYA]} entries={[]} focusChildId={null}
+    const html = renderToStaticMarkup(<HoursView entriesComplete schoolYearStartOn="2020-07-01" kids={[MAYA]} entries={[]} focusChildId={null}
       timeZone="America/New_York" now={RENDER_NOW} embedded />);
     assert.match(html, /Showing recorded time for the whole family\./u);
   });
@@ -124,6 +140,7 @@ describe("HoursView", () => {
     assert.match(html, />This week<\/dt>/);
     assert.match(html, />This month<\/dt>/);
     assert.match(html, />School year<\/dt>/);
+    assert.match(html, /School-year totals: Jul 1, 2026 through today\./u);
   });
 
   it("narrows totals to the focused kid only, never their sibling", () => {

@@ -1495,6 +1495,8 @@ export function UnifiedPlannerView({
   scheduledActivities,
   learningActivities,
   hoursEntries,
+  hoursEntriesComplete = false,
+  schoolYearStartOn = null,
   timeZone,
   now,
   today,
@@ -1508,6 +1510,8 @@ export function UnifiedPlannerView({
   scheduledActivities: PlanActivityScheduleRow[];
   learningActivities: PlannerLearningActivity[];
   hoursEntries: HoursEntry[];
+  hoursEntriesComplete?: boolean;
+  schoolYearStartOn?: string | null;
   timeZone: string;
   now: Date;
   today: string;
@@ -2035,6 +2039,8 @@ export function UnifiedPlannerView({
           <HoursView
             kids={kids}
             entries={hoursEntries}
+            entriesComplete={hoursEntriesComplete}
+            schoolYearStartOn={schoolYearStartOn}
             focusChildId={focusChildId}
             timeZone={timeZone}
             now={now}

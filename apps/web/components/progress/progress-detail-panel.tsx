@@ -44,6 +44,7 @@ export function ProgressDetailPanel({
   timeZone,
   allowDeeperCheck,
   hoursMinutes = null,
+  hoursWindowLabel = "this school year",
   onClose,
 }: {
   childId: string;
@@ -61,6 +62,7 @@ export function ProgressDetailPanel({
    * into, the evidence below: Hours time is not verified skill
    * evidence, so it must never look like a score. */
   hoursMinutes?: number | null;
+  hoursWindowLabel?: "this school year" | "all time through today";
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -129,9 +131,13 @@ export function ProgressDetailPanel({
                 {summary}
               </p>
             ) : null}
+            {hoursWindowLabel === "all time through today" ? (
+              <a href="/app/settings#school-year-start" className="text-xs underline">Set your school-year start</a>
+            ) : null}
             {hoursMinutes ? (
               <p className="mt-1 text-xs font-semibold text-subtle">
-                {formatMinutesAsHours(hoursMinutes)} logged in Hours this school year
+                {hoursWindowLabel === "all time through today" ? "All time: " : ""}
+                {formatMinutesAsHours(hoursMinutes)} logged in Hours {hoursWindowLabel === "all time through today" ? "through today" : hoursWindowLabel}
               </p>
             ) : null}
           </div>

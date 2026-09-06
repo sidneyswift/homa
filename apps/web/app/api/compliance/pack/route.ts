@@ -139,7 +139,7 @@ export async function POST(request: Request): Promise<Response> {
   const schoolYearStartOn = schoolYearStartFor(profile.schoolYearStartOn, todayIso);
   let recordSet;
   try {
-    recordSet = await getStatePackRecords(family.id, schoolYearStartOn);
+    recordSet = await getStatePackRecords(family.id, schoolYearStartOn, todayIso);
   } catch (error) {
     console.error(
       "state pack record read failed:",
