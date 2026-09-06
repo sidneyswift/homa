@@ -186,7 +186,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1095](https://github.com/sidneyswift/homa/issues/1095).
 
-**Implementation under verification:** child-ID aggregation is implemented and real generated PDFs preserve separate 30m/40m totals for equal-name children. Independent review found that visible duplicate names still needed disambiguation and that chat's raw attribution conflicted with child totals; both corrections are being tested. The first real-model sample also excluded shared time for “Just Avery,” so the judgment procedure is being corrected and evaluated. The [record contract](2026-09-06-hours-record-scope.md) distinguishes these results from remaining complete-reader and hosted-release work.
+**Implementation under verification:** child-ID aggregation and disambiguated labels preserve separate records in real generated PDFs. The fleet procedure now includes shared time for a selected child unless explicitly excluded. The corrected eight-case model matrix, five routing samples, two final full-menu cases and an actual disposable Eve/SQL route passed. The complete reader passes 15 database groups, including more than 4,000 records and all five saved sources. The [record contract](2026-09-06-hours-record-scope.md) distinguishes source versions and local evidence from pending hosted release verification.
 
 **Expected, P60-85:** count each child's school dates separately, including the sick-sibling example, and export a chosen period; several activities on one day count once.
 

@@ -29,6 +29,15 @@ describe("complete Hours summary receipts", () => {
     assert.equal(result.totalMinutes, 4001);
     assert.equal(result.entries.reduce((sum, entry) => sum + entry.minutes, 0), 20);
   });
+  it("preserves every persisted source and refuses invented sources", () => {
+    for (const source of ["chat", "sms", "call", "email", "dispatch"]) {
+      const r = record();
+      const entries = [{ ...r.entries[0], source }, ...r.entries.slice(1)];
+      assert.equal(validateHoursSummaryRecord({ ...r, entries }, familyId, request, now).entries[0].source, source);
+    }
+    const r = record();
+    assert.throws(() => validateHoursSummaryRecord({ ...r, entries: [{ ...r.entries[0], source: "invented" }, ...r.entries.slice(1)] }, familyId, request, now), invalidReceipt);
+  });
   it("normalizes UUID spelling without changing authenticated identity", () => {
     const result = validateHoursSummaryRecord(record(), familyId.toUpperCase(), { ...request, childId: childId.toUpperCase() }, now);
     assert.equal(result.familyId, familyId);

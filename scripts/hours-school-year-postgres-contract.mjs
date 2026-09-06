@@ -248,6 +248,14 @@ export async function runHoursSchoolYearReadContract(sql) {
       assert.equal((await hours.getHoursLogForFamily(familyA)).rows.length, 0);
       const own = await hours.getHoursLogForFamily(familyB);
       assert.equal(own.rows.length, 1); assert.equal(own.rows[0].minutes, 500);
+      for (const source of ['email', 'dispatch']) {
+        await sql`update public.hours_log set source=${source} where family_id=${familyB}`;
+        assert.equal((await hours.getHoursLogForFamily(familyB)).rows[0].source, source);
+        const archive = await recordExport.getHoursExportRecord(familyB);
+        assert.equal(archive.rows[0].source, source);
+        assert(recordExport.renderHoursCsv(archive.rows).includes(`,"${source}",`));
+      }
+      await sql`update public.hours_log set source='chat' where family_id=${familyB}`;
       callerToken = tokenA;
       const beforeTheirMidnight = await pinned.readHoursSummaryPinned(familyB, { period: 'all' }, new Date(instant));
       assert.equal(beforeTheirMidnight.entryCount, 0, 'September10 is still future-dated in this Los Angeles family');

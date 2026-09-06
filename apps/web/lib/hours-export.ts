@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { isHoursSubject, type HoursSubject } from "./hours-model";
+import { isHoursSubject, requireHoursSource, type HoursSource, type HoursSubject } from "./hours-model";
 import {
   ALL_HOURS_RECORDS, deriveRecordedLearningDays, matchesHoursRecordScope,
   summarizeRecordedLearningDays, type HoursRecordChild, type HoursRecordScope,
@@ -17,7 +17,7 @@ export interface HoursExportRow {
   subject: HoursSubject;
   customLabel: string | null;
   minutes: number;
-  source: "chat" | "sms" | "call";
+  source: HoursSource;
   note: string | null;
 }
 
@@ -31,10 +31,6 @@ interface RawHoursExportRow {
   minutes: string;
   source: string;
   note: string | null;
-}
-
-function exportSource(value: string): HoursExportRow["source"] {
-  return value === "sms" || value === "call" ? value : "chat";
 }
 
 export class HoursRecordChildNotFound extends Error {}
@@ -93,7 +89,7 @@ export async function getHoursExportRecord(
       subject,
       customLabel: row.custom_label,
       minutes,
-      source: exportSource(row.source),
+      source: requireHoursSource(row.source),
       note: row.note,
     };
   });

@@ -1,0 +1,117 @@
+{
+  "kind": "later-five-source-local-correction",
+  "deployed": false,
+  "focusedTests": 38,
+  "postgresSuites": [
+    {
+      "suite": "Hours school-year reader PostgreSQL contract",
+      "tests": [
+        "configured caller/pinned totals, actual family setting and future exclusion",
+        "real RLS refuses the other family while pinned reader retains exact family predicate",
+        "Progress child plus shared window and exact pack upper bound",
+        "actual scoped archive read and chat agree on child, dates, shared time and recorded days",
+        "family local midnight changes current anniversary consistently",
+        "rowset caps and missing counts refuse list totals while scalar summaries remain exact",
+        "actual HTTP read error and missing auth never claim zero",
+        "3001 rows yield complete chat and CSV records while capped Progress refuses a partial total",
+        "exact 3000 and true zero counts remain complete; pack cap-plus-one remains truthful"
+      ],
+      "sourceHashes": {
+        "apps/web/lib/hours.ts": "2b45efbd623a5711c045c03ffe8a4317146de5d24596efada6ac4260f9fbdcbc",
+        "apps/web/lib/hours-model.ts": "e596b6446c5805576d7f0ffcae416a4eb91247ea11c85f336687deda78c3b218",
+        "apps/web/lib/hours-summary.ts": "e8e0e7183253d7b7f33265d1b6d1ac400d70fe3399a0e7aa622b00d27b85a02f",
+        "apps/web/lib/compliance/deadlines.ts": "9299eec80ac59ae95c56e0d6c29719a33d69b47cb5a42913535363e47fa1285a",
+        "apps/web/lib/compliance/deadline-anchors.generated.ts": "abdfde237575e447c9b2a36571183d1da3d7699c8097eb7aeda51fa3b0c8b679",
+        "apps/web/lib/hours-record-scope.ts": "c1af43050784a2bda283207645b231ea38d24731d9077981612dde4f8057e360",
+        "apps/web/lib/hours-summary-reader.ts": "c1f92af27c612b19989b0a21df6e0556346bd66da587598b6da2904f4641d264",
+        "apps/web/lib/time-zone.ts": "2bd32f6a54907988534617d92fee8e6868dc51dd402a9b2037785c8b6f1d666a",
+        "apps/web/lib/compliance/pack-store.ts": "5d52d85988bcd2cb0260c02e6a7a70ede3683d1396ff3a1a39f0e708647a8922",
+        "apps/web/lib/hours-export.ts": "3aea5c72fc053bad6e4f40c61884016575fbc06df9b3bd2063cb8e5dea978143",
+        "apps/web/lib/hours-view.ts": "e6bf97a224c92847b27ba0a6a7d3ab496a6e4dc7526b43c5cc3358520c92841d",
+        "apps/web/agent/tools/find_hours.ts": "d2a80727b2114b8f6d3e615902915025ea0712dee2b522d8a1ad3721bd717ada",
+        "apps/web/lib/agent-db.ts": "9b73ba3420eccd6c318549d82fe5b19d60d9cce42d8ec475efc9d4beae2e5b87"
+      },
+      "boundaries": "Real PostgreSQL/RLS and actual reader source/Supabase SDK; synthetic session tokens and local read-only REST adapter. No actual PostgREST server, Next cookie runtime, model or production service."
+    },
+    {
+      "suite": "complete Hours summary PostgreSQL contract",
+      "results": [
+        {
+          "name": "local isolation verifies authenticated family, child and Hours visibility",
+          "ms": 2
+        },
+        {
+          "name": "installed migration versions and exact function source match the checked repository",
+          "ms": 3
+        },
+        {
+          "name": "new function is STABLE SECURITY INVOKER and anonymous execution is denied",
+          "ms": 2
+        },
+        {
+          "name": "caller SDK and pinned summary include >3000 complete history, with bounded sample and uncropped recent totals",
+          "ms": 74
+        },
+        {
+          "name": "email and scheduled entry sources remain readable in complete caller and pinned records",
+          "ms": 4
+        },
+        {
+          "name": "owned child, shared inclusion, date boundaries, subject, repeated days, renamed and duplicate names are exact",
+          "ms": 16
+        },
+        {
+          "name": "foreign family and child, missing family, invalid enum/date/limit never yield totals on caller or pinned paths",
+          "ms": 11
+        },
+        {
+          "name": "week and month include records before a newly started school year; per-child days do not infer sibling attendance",
+          "ms": 32
+        },
+        {
+          "name": "SQL anniversary mirror matches actual TS helper including2100, family midnight, unset and invalid saved years",
+          "ms": 257
+        },
+        {
+          "name": "missing scalar, actual SDK HTTP failure and tampered window/identity receipt fail closed",
+          "ms": 4
+        },
+        {
+          "name": "single STABLE snapshot cannot mix an old setting/roster with a concurrent committed Hours change",
+          "ms": 22
+        },
+        {
+          "name": "pinned actual lock deadline returns unavailable instead of an empty or partial result",
+          "ms": 2010
+        },
+        {
+          "name": "caller SDK aborts a stalled HTTP response within its15-second read deadline",
+          "ms": 15005
+        },
+        {
+          "name": "true empty and no-child shared family results are complete zeros or exact shared records",
+          "ms": 58
+        },
+        {
+          "name": "roster bound fails honestly instead of omitting children from a claimed total",
+          "ms": 12
+        }
+      ],
+      "sourceHashes": {
+        "supabase/migrations/20260906213000_hours_summary_snapshot.sql": "c82aa9aaf52070a70acaa4a87686ddbf021c7fbafa4357b2058c656a38c455da",
+        "apps/web/lib/hours-summary-reader.ts": "c1f92af27c612b19989b0a21df6e0556346bd66da587598b6da2904f4641d264",
+        "apps/web/lib/compliance/deadlines.ts": "9299eec80ac59ae95c56e0d6c29719a33d69b47cb5a42913535363e47fa1285a",
+        "apps/web/lib/compliance/deadline-anchors.generated.ts": "abdfde237575e447c9b2a36571183d1da3d7699c8097eb7aeda51fa3b0c8b679",
+        "apps/web/lib/hours-model.ts": "e596b6446c5805576d7f0ffcae416a4eb91247ea11c85f336687deda78c3b218",
+        "apps/web/lib/hours-record-scope.ts": "c1af43050784a2bda283207645b231ea38d24731d9077981612dde4f8057e360",
+        "apps/web/lib/hours-summary.ts": "e8e0e7183253d7b7f33265d1b6d1ac400d70fe3399a0e7aa622b00d27b85a02f",
+        "apps/web/lib/time-zone.ts": "2bd32f6a54907988534617d92fee8e6868dc51dd402a9b2037785c8b6f1d666a"
+      },
+      "requests": 58,
+      "boundary": "Actual new reader+SQL+canonical date helper; actual Supabase SDK against scalar loopback RPC adapter using SET LOCAL authenticated and real RLS. Fresh disposable PostgreSQL17; no PostgREST server/Auth/Next/model/production calls. HTTP timeout proves local caller cancellation, not deployed database cancellation."
+    }
+  ],
+  "logSha256": "73d307a69a72dc706e65f05e4fe370202f7f4aa5125b1222df7e3825ba98f58b",
+  "priorEvidencePreserved": "2026-09-06-hours-record-database-evidence.json",
+  "modelEvidenceBoundary": "Final model runs at cb0c8a81 precede this source enum correction."
+}

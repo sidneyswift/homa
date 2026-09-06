@@ -2,7 +2,7 @@ import { MAP_INTERESTS_CAP } from "@homa/core";
 
 import { ageInMonths } from "./child-age";
 import { embedText } from "./learning/embeddings";
-import { isHoursSubject } from "./hours-model";
+import { isHoursSubject, type HoursSource } from "./hours-model";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
 import { effectiveTimeZone, zonedDateString } from "./time-zone";
@@ -143,7 +143,7 @@ export async function recordHoursPinned(input: {
   familyId: string;
   minutes: number;
   subject: string;
-  source: "chat" | "sms" | "call" | "email" | "dispatch";
+  source: HoursSource;
   childId?: string | null;
   childName?: string | null;
   happenedOn?: string | null;

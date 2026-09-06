@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { isValidDateOnly } from "./compliance/deadlines";
-import { HOURS_SUBJECTS } from "./hours-model";
+import { HOURS_SOURCES, HOURS_SUBJECTS } from "./hours-model";
 import { matchesHoursRecordScope, parseHoursRecordRequest } from "./hours-record-scope";
 import { resolveHoursWindow } from "./hours-summary";
 import { mapDb } from "./map/db";
@@ -30,7 +30,7 @@ const resultSchema = z.object({
   bySubject: z.array(z.object({ subject: z.enum(HOURS_SUBJECTS), minutes: number }).strict()).max(HOURS_SUBJECTS.length),
   recordedDaysByChild: z.array(z.object({ childId, childName: z.string(), recordedDays: number, minutes: number }).strict()).max(1000),
   entries: z.array(z.object({ childId, subject: z.enum(HOURS_SUBJECTS), minutes: number.min(1).max(600),
-    happenedOn: dateOnly, source: z.enum(["chat", "sms", "call"]), note: z.string().max(400).nullable(), noteTruncated: z.boolean() }).strict()).max(50),
+    happenedOn: dateOnly, source: z.enum(HOURS_SOURCES), note: z.string().max(400).nullable(), noteTruncated: z.boolean() }).strict()).max(50),
 }).strict();
 export type HoursSummaryRecord = z.infer<typeof resultSchema>;
 
