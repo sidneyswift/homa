@@ -2,6 +2,12 @@
 
 Prepared September 6, 2026. Review owner: Sidney. Review issue: [#1087](https://github.com/sidneyswift/homa/issues/1087).
 
+**Verification update, September 6:** the first pass verified deployed code, several database facts, and the broken deeper-question route. It assumed likely causes for missing notes, one-question check-ins and handwriting problems, and estimated which changes were small. The second pass checked the actual chat, records, rendered pages and selection functions. The corrections below supersede those assumptions.
+
+**Scope confirmed by Sidney:** Carolyng's feedback and feature requests concern the **mobile website**. The discussion about an app with fewer, focused features concerns the **native mobile app**. Native implementation details below are background, not evidence that a mobile-web complaint is already solved.
+
+**Meaning confirmed by Sidney:** “months back” means a comparison such as a child being “15 months ahead” of national benchmarks. It does not mean restoring a generic date/month label. The requested concept is clear; the exact presentation and benchmark claim still need to match what Homa's scoring evidence supports.
+
 **The main request is to make Homa dependable with the work these families already do.** Record every real learning activity, let the parent correct the record directly, make progress updates easy to initiate, use the curriculum she already owns, and produce pages she can actually teach from. A generic worksheet alone does not capture the value described in these meetings.
 
 This is a review document, not approval to build every idea below. GitHub Issues hold live status, priority, and ownership. The classifications and evidence here are a September 6 snapshot. The numbered F-items are reading references within this document, not another issue tracker.
@@ -9,11 +15,11 @@ This is a review document, not approval to build every idea below. GitHub Issues
 ## Read this first
 
 - **Bounded work we can start today:** repair the deeper-question handoff and Binder layout; connect Day/Week recorded time to the existing editor; add child/date export filters; correct inconsistent school-year windows; investigate the remaining time collisions; improve specific recording and material-generation behavior.
-- **Already exists, but incomplete or hard to discover:** child filtering, deletion, custom labels under any Hours subject, manual reported-time editing, parent-requested progress check-ins, per-child recorded-day arithmetic in state packs, curriculum retrieval/mapping tools, and the native print sheet.
-- **Needs a small product decision:** reusable subcategory behavior, numeric progress presentation across web/native, what family-wide time means when one child is absent, and when Homa should ask follow-up questions.
+- **Existing foundations, with the evidence limits below:** child filtering, deletion, custom labels under any Hours subject, manual reported-time editing, parent-requested progress check-ins, per-child recorded-day arithmetic, curriculum retrieval/mapping tools and web PDF print actions.
+- **Needs a product decision:** reusable subcategory behavior, numeric progress presentation on mobile web, what family-wide time means when one child is absent, and when Homa should ask follow-up questions.
 - **Future concepts or experiments:** automatic whole-year scheduling from owned curricula, holiday-aware finish-date calculations, recurring assessments, quick versus deeply tailored creation, unattended printing, and a narrower public product/funnel.
 
-“Today” means a bounded implementation or investigation can begin with the current architecture. It does not mean all these items fit in one day, that a fix is already shipped, or that an uncertain root cause has been proven.
+“Today” is an engineering scope estimate, not a verified delivery time. Existing code establishes possible starting points. No implementation, measured effort, end-to-end fix or shipping commitment has been verified. Future concepts and proposed acceptance criteria are proposals, not assumed current behavior or approved requirements.
 
 ### Live failures requiring attention
 
@@ -21,8 +27,10 @@ This is a review document, not approval to build every idea below. GitHub Issues
 |---|---|---|
 | Deeper questions open ordinary chat and lose the request | Reproduced in an authenticated production test session; deployed route drops `dd` | [#1088](https://github.com/sidneyswift/homa/issues/1088). **ESCALATED September 6, not fixed.** |
 | Two uploaded curricula cannot be processed or read | Two September 5 originals, 41.3 and 47.2 MiB, have `content_too_large_to_process`; the read tool returned `not-ready` | [#1089](https://github.com/sidneyswift/homa/issues/1089). **ESCALATED September 6, not fixed.** |
-| School-year totals use different windows; distinct-time loss may remain | UI starts July 1, chat August 1, state records use the family setting. Two recent reading calls were suppressed as duplicates, but whether they were distinct work remains unproven | [#1090](https://github.com/sidneyswift/homa/issues/1090). **ESCALATED September 6. Date inconsistency is a deployed defect; additional lost blocks are suspected.** |
-| Binder Delete is outside the visible mobile action row | Demonstrated in the meeting; deployed two-column shelf and non-wrapping actions fit the reported mechanism | [#1091](https://github.com/sidneyswift/homa/issues/1091). **ESCALATED September 6. Reported live, source corroborated; populated mobile shelf not independently reproduced.** |
+| School-year totals disagree and distinct reading time is lost | Actual source turns confirm two separate 30-minute activities for Alma on September 3 were rejected against her literature journal. Local calls to the deployed date functions return July 1 versus August 1 | [#1090](https://github.com/sidneyswift/homa/issues/1090). **ESCALATED September 6, confirmed and not fixed.** At least these 60 minutes are absent from her Hours rows; this is not a complete historical recovery tally |
+| Binder Delete overflows on phones | Actual deployed component and public production CSS reproduced with sample records at 320, 375 and 390 px. At 390 px, the second Delete ends at x=459.46 | [#1091](https://github.com/sidneyswift/homa/issues/1091). **ESCALATED September 6, not fixed.** This is a local layout reproduction, not a screenshot of Carolyng's authenticated Binder |
+| Saved Hours notes lose supplied book titles | September 1 source/Hours comparison and September 4 source/tool/Hours comparison identify two different mechanisms | [#1093](https://github.com/sidneyswift/homa/issues/1093). **ESCALATED September 6 at 14:06 UTC, confirmed and not fixed** |
+| Name-tracing geometry passes review despite a visible error | Actual September 1 rejected page inspected; model review passed, parent replied “Still wrong.” Later workaround changes mixed case to capitals | [#1094](https://github.com/sidneyswift/homa/issues/1094). **ESCALATED September 6 at 14:06 UTC, not fixed as a reusable mixed-case capability** |
 
 No fix or delay has been approved through this document. These are explicit escalations, not claims that recording a ticket resolves the production failure. This pass created the requested evidence and review artifact; it did not change product code or repair family data.
 
@@ -34,7 +42,7 @@ Sources:
 - **R: Progress report issues**, September 5. [Original transcript](/Users/sidneyswift/.codex/attachments/91b92cfb-992c-43a0-a02b-75cb3e52f54b/pasted-text.txt).
 - **B: Binder organization: delete options**, September 5. Pasted directly into this task. The key sequence is: delete requested, hidden Delete discovered by scrolling sideways, deletion succeeds, then child filtering is discovered and works.
 
-The speaker labels are anonymous and the headers list only Sidney. I have not guessed which A/B/C label belongs to Alessa or Carolyng. Product names are normalized to Homa in this document. The meeting metadata supplies the date; conversational references to August are not used to date an incident.
+The speaker labels are anonymous and the headers list only Sidney. Speaker identities are not inferred from letters; Sidney's later clarifications establish platform scope and the intended benchmark comparison. Product names are normalized to Homa. The meeting metadata supplies the date; conversational references to August are not used to date an incident. Database timestamps below are explicitly UTC; the September 5 01:22-01:29 UTC check-ins occurred on September 4 in New York time.
 
 The meetings contain genuine disagreement that should remain visible:
 
@@ -42,7 +50,7 @@ The meetings contain genuine disagreement that should remain visible:
 - One proposed simplifying the public app to one dependable capability. Another said the broader assistant, personalization, and reduction in planning work were her reason to use Homa.
 - The group considered deleting curriculum upload, then described in detail why using already-purchased curricula matters. **There was no settled instruction to remove Library or replace families' curricula.**
 - Weekly, fortnightly, monthly, and quarterly check-ins/tests were discussed. **No single cadence was agreed.**
-- Sidney explicitly said to put months back in the progress presentation. That is a concrete direction; its exact web/native scope and treatment of uncertain measurements still need definition.
+- The requested numeric context is a months-ahead comparison, as Sidney confirmed in this task. That clarification establishes the concept, not an approval of a particular design, scoring change, or extension to native.
 
 ## Current production, verified separately from the repository
 
@@ -55,20 +63,52 @@ The meetings contain genuine disagreement that should remain visible:
 | Authenticated production browser | Planner, Binder, Progress, and chat loaded in the existing Activation Test session. A child/subject `dd` URL landed on `/app`, showing the old conversation and empty composer | The deeper-check handoff failure reproduces today. No message or check-in answer was submitted |
 | Carolyng's Library | 63 active top-level assets: 61 Ready and 2 Needs attention. Both failing originals were uploaded September 5 and exceed 32 MiB | A specific processing failure, not a general claim that Library never works |
 | Carolyng's curriculum workflow | September 5 `read_family_curriculum` returned `read: false`, `error: not-ready`. No derived curriculum-unit rows or mapping approvals found for her family | The observed workflow has not reached usable lesson mapping. Ready metadata alone does not establish lesson comprehension |
-| Carolyng's progress | Two `subject_deep_dive` check-ins completed September 5 | Check-ins can work through chat; this does not show the broken button works or that the assessment reached the right frontier |
-| Carolyng's Hours since September 2 | 48 saved entries, 2 with custom labels. Two `log_hours` reading calls on September 3 and 4 returned the already-recorded receipt | Labels are being used, but rarely in this sample. Suppression is observed; erroneous suppression still needs source-turn reconciliation |
+| Carolyng's progress | Gross-motor and fine-motor check-ins each completed after exactly one response at 01:22 and 01:25 UTC September 5 | The one-question report is verified. Local selection replay explains the stop using existing answers and bounded ladders; it does not certify a measured developmental ceiling |
+| Carolyng's Hours since September 2 | 48 saved entries, 2 with custom labels. Two `log_hours` reading calls returned the already-recorded receipt | Original messages and the existing rows now confirm erroneous suppression of distinct work, not retries |
 | July Hours across non-sandbox families | 51 rows across 3 families, totaling 2,229 minutes | The July/August window disagreement has real data to affect |
 
-Methods: read-only Vercel CLI/API inspection, Git comparison, read-only Supabase queries, source tracing, existing issue history, and browser navigation. The older July production-baseline document was treated as historical. No model eval, generation job, outbound message, migration, data replay, or deployment was run.
+Methods: read-only Vercel CLI/API inspection, Git comparison, read-only Supabase queries, source tracing, issue history, authenticated browser navigation/screenshots, actual saved worksheet previews, and local calls to existing pure functions. At Sidney's request, the second pass inspected 198 stored conversation messages from August 30 through September 6, including scheduled prompts, and corresponding Hours/tool records. The Binder layout fixture uses the real component and deployed CSS with sample records and disabled write actions. No new model eval, generation job, outbound family message, migration, production-data replay or deployment was run.
 
-Limitations: the browser session was a test family, not either interviewee's session; the exact failing handwriting artifacts and affected device viewports were not inspected; installed iOS/OTA state was not verified. Family diagnostics were filtered by the named parent and sandbox flag. Alessa's name matched two non-sandbox family records, so I have not presented name-grouped counts as one verified Alessa account.
+Limits: authenticated screenshots use the existing Activation Test family. Its Hours are empty and it has no in-progress materials, so these screenshots do not prove editing saves, populated export correctness or deletion against interviewee data. The populated Binder geometry was checked separately in the read-only fixture. Carolyng's actual name-tracing pages were inspected, but the literal D page mentioned in the meeting was not identified in her last-week records. The name-page failure corroborates the same guide problem without pretending it is that D artifact. Installed native/OTA state, physical printing, microphone audio, complete-book understanding and a live owned-lesson generation were not tested. They are not claimed working.
+
+### What is verified versus still a proposal
+
+**Code** means the deployed implementation was traced. **Live** means the current browser, saved production records or source messages were inspected. **Replayed** means existing code ran locally with stated inputs. **Reported** means a parent described it; this alone does not identify the cause. **Decision/estimate** is an explicitly proposed future behavior or scope judgment, not a fact needing to be made true by a screenshot.
+
+| References | Verification result | Remaining limit or decision |
+|---|---|---|
+| F01 | Code: Day/Week rows are static; Hours editor fields and mutation path exist | Wiring is an estimate; save/cancel behavior of a new handoff cannot be verified before implementation |
+| F02 | Live + code: two real missing-title examples and two causes traced | Historical prevalence and exact recovery scope not measured |
+| F03 | Live + code: two distinct post-fix reading blocks suppressed; 60 minutes absent | Additional losses, including older Portuguese/English examples, need separate recovery reconciliation |
+| F04-F05 | Code + live rows: custom labels exist; reusable category/filter/subtotal path does not | Proposed category ownership and display names remain decisions |
+| F06 | Code + live UI: fixed `/api/hours/export` link persists after selecting Avery; route ignores filters | Proposed filtered export is not built; empty test-family CSV is not meaningful data validation |
+| F07 | Code + replay: two activities on one day collapse to one child/day; a shared activity counts for both children | This proves recorded-day arithmetic, not absence handling, legal attendance or a fresh PDF |
+| F08 | Code + replay + live July data: July/August starts differ | Which common fallback to adopt remains a policy choice |
+| F09 | Live screenshot + code: `dd` route returns `/app`, old August 15 conversation, empty composer | Fix still required |
+| F10 | Live responses + replay: one-question stop reproduced using actual prior answers and age | Exhausted selection window is not exhausted bank coverage; adaptive behavior needs review |
+| F11 | Sidney confirmed months-ahead comparison; code exposes capped `monthsAhead` and signed `frontierDeltaMonths` separately | Exact UI and support for the wording “national benchmarks” are not settled by that clarification |
+| F12 | Live + code: explanatory text and parent-evidence map exist | Whether improved wording helps these parents needs a usability check |
+| F13-F14 | Code + real chat: evidence separation, clarification and next-step offers already happen | Reliability and preferred timing remain unmeasured; do not describe these as wholly missing features |
+| F15 | Transcript + issue history: cadence proposals conflict; prior weekly proposal was cut | Cadence, consent and demand are decisions; no new recurring review is established |
+| F16 | Live + code: two actual over-cap files fail processing and the reader refuses a not-ready source | Scanned-PDF text/OCR quality and complete-book coverage are separate unverified limits |
+| F17-F18 | Code + live: tools exist; her Dimensions attempt asked for a fresh photo after source reading failed | Correct lesson-level/proactive output has not been demonstrated; feasibility is an estimate |
+| F19 | Live chat, generation metadata and actual rendered name pages inspected | HTML name geometry is distinct from #1080's image-direct D probes; literal D artifact remains unidentified |
+| F20 | Transcript: two/eight-minute choices are hypothetical | No latency promise, preferred default or measured quality tradeoff established |
+| F21 | Report + code + local rendered geometry at three widths | Layout cause verified; no real material was deleted during this audit |
+| F22 | Live: selected-child control changes to Avery; Binder copy scopes to Avery. Code scopes child plus shared records | Empty fixture cannot establish all populated-record cases; meeting supplies the real-parent filtering observation |
+| F23 | Live screenshot + code: both controls and their distinct functions exist | Actual spoken turn and comprehension are untested; usability improvement is proposed |
+| F24 | Code: component scheduling/mapping foundations exist | Full-year automatic planning, breaks and finish-date behavior are concepts, not current capability claims |
+| F25 | Sidney confirmed native focus discussion; transcript establishes reported preferences | Funnel recollections have no defined cohort/window; conversion, retention and market-timing predictions remain hypotheses |
+| F26 | Code + live chat: web Print action opens the PDF; native print-sheet path exists in source | No physical printing or installed-native certification; unattended delivery is a concept |
+
+Screenshots in this task capture mobile School hours, child-scoped Binder, the failed deeper-question handoff, the local populated Binder fixture and saved worksheet pages. They support the specific observations above, not blanket certification of production.
 
 ## Ticket index
 
 | Ref | Requested outcome | Classification | Tracking |
 |---|---|---|---|
 | F01 | Edit recorded time directly from Day/Week | Build today | [#1092](https://github.com/sidneyswift/homa/issues/1092) |
-| F02 | Keep book titles and lesson details in the saved note | Improve and measure today | #1092 |
+| F02 | Keep book titles and lesson details in the saved note | Confirmed bug; bounded repair investigation | [#1093](https://github.com/sidneyswift/homa/issues/1093) |
 | F03 | Count separate same-subject activities correctly | Investigate/fix today | [#1090](https://github.com/sidneyswift/homa/issues/1090) |
 | F04 | Reusable subcategories under stable parent subjects | Existing partial support; next feature slice | [#1035](https://github.com/sidneyswift/homa/issues/1035), [#1059](https://github.com/sidneyswift/homa/issues/1059) |
 | F05 | Use curriculum-familiar subject names | Small display change after scope review | #1092 |
@@ -76,8 +116,8 @@ Limitations: the browser session was a test family, not either interviewee's ses
 | F07 | Show/export recorded days per child | Existing arithmetic; bounded exposure today, absence policy decision | #1092, #1087 |
 | F08 | Consistent school-year totals | Fix today | #1090 |
 | F09 | Deeper questions start the requested check-in | Fix today | [#1088](https://github.com/sidneyswift/homa/issues/1088) |
-| F10 | Assess demonstrated level beyond the age baseline | Investigate today before changing scoring | #1088, #1087 |
-| F11 | Restore meaningful numeric progress context | Founder direction; presentation scope decision | #1087; historical [#625](https://github.com/sidneyswift/homa/issues/625) |
+| F10 | Assess demonstrated level beyond the age baseline | Selection-window behavior verified; adaptive assessment needs review | #1088, #1087 |
+| F11 | Restore a months-ahead benchmark comparison | Meaning confirmed by Sidney; presentation and evidence review | #1087; historical [#625](https://github.com/sidneyswift/homa/issues/625) |
 | F12 | Understand the abilities map and its evidence | Improve existing explanation today | #1092 |
 | F13 | Clarify mastery without interrogating every log | Bounded skill improvement, cadence decision | #1092, #1087 |
 | F14 | Offer a useful next step after saving progress | Bounded skill/handoff improvement | #1092 |
@@ -85,7 +125,7 @@ Limitations: the browser session was a test family, not either interviewee's ses
 | F16 | Make accepted curriculum PDFs readable | Repair investigation today; full-book support is larger | [#1089](https://github.com/sidneyswift/homa/issues/1089) |
 | F17 | “Lesson 12” uses the right owned curriculum | Prove an existing workflow first; bounded integration work | #1087, #1089; historical [#578](https://github.com/sidneyswift/homa/issues/578), [#579](https://github.com/sidneyswift/homa/issues/579) |
 | F18 | Suggest relevant owned books and connected activities | Small proof possible today; broader concept unvalidated | #1087 |
-| F19 | Handwriting pages have correct geometry and usable practice | Quality correction today, tied to exact failed artifact | [#1080](https://github.com/sidneyswift/homa/issues/1080), [#1066](https://github.com/sidneyswift/homa/issues/1066) |
+| F19 | Handwriting pages have correct geometry and usable practice | Actual HTML name-page failure verified | [#1094](https://github.com/sidneyswift/homa/issues/1094); related [#1080](https://github.com/sidneyswift/homa/issues/1080), [#1066](https://github.com/sidneyswift/homa/issues/1066) |
 | F20 | Choose speed versus deeper personalization | Future UX/performance experiment | #1087 |
 | F21 | See Binder Delete on a phone | Fix today; delete already exists | [#1091](https://github.com/sidneyswift/homa/issues/1091) |
 | F22 | Discover child filtering in Hours and Binder | Existing capability; teach/reveal today | #1092 |
@@ -108,9 +148,12 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Heard:** P18-20. Homa sometimes summarizes away a named book even though the parent supplied it.
 
-**Current:** Hours has durable `note`; Planner learning records also carry notes and source quotes. The storage can hold the detail. The exact omission in the meeting has not been matched to its original message.
+**Verified examples from Carolyng's last week:**
 
-**Smallest change:** inspect a few affected source/record pairs, then improve the relevant logging skill's rule for retaining named books, lesson numbers, chapters, and activity distinctions. **Done when:** representative narrated logs retain those supplied facts without invented details. This is model judgment plus exact record validation, not a keyword extractor. F01 provides the parent's direct correction path even when the first summary is imperfect.
+- September 1, 17:41 UTC: she named Make Way for Ducklings and its Spanish version. The later 40-minute `log_hours` call and saved Hours note described “Blossom and Root read-aloud and discussion plus word building” without either title. The title survived in the conversation and Planner summary, but was omitted from the Hours summary.
+- September 4, 16:55 UTC: the `record_planner_activity` title included The Lion, the Witch and the Wardrobe, chapters 3-4. Its selected `sourceQuote` said only “today I read the following two chapters...” and all three children's 25-minute Hours notes contain that fragment without the title. [plannerHoursNote](../../../apps/web/lib/planner-learning-activities.ts) copies the first 200 code points of the quote rather than combining the readable title and note. The record bridge, not only the summarizing model, drops context.
+
+**Correction to the first pass:** this is not merely a possible skill-writing improvement. #1093 covers both the model-generated summary and the deterministic Planner-to-Hours note format. Keep verbatim evidence separately from a useful parent-facing description. **Done when:** representative narrated logs retain supplied book titles, chapters, lesson numbers and activity distinctions in both paths, without invented details. F01 provides direct correction when the first saved record is imperfect.
 
 ### F03. Count distinct activities, preserve true deduplication
 
@@ -118,7 +161,9 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Current:** #1059 already expanded custom labels and included them in the database uniqueness key. The live key is family + child + date + subject + minutes + custom label. Two distinct activities with identical values, especially no label, can still collide. The tool returns `logged: true` with an already-recorded receipt, so tool completion alone is not evidence of a new row.
 
-**Next:** reconcile the two observed suppressed reading calls with their source turns and existing entries. **Done when:** separately named Spanish/Portuguese and independent/curriculum reading both save, repeated delivery of the same event saves once, and any recovery names the exact missing blocks. Do not remove deduplication or replay historical logs wholesale. Label management and correct event identity are related but separate problems.
+**Now verified:** on September 3 at 19:57 UTC, Carolyng reported Alma's independent reading of House of Secrets book 2 for 30 minutes. On September 4 at 16:54 UTC, she separately reported the previous day's 30-minute family read-aloud of The Lion, the Witch and the Wardrobe, chapters 1-2, with all three girls. Both calls returned the already-recorded receipt. Alma's September 3 Hours contain only the 30-minute literature journal and five-minute dictation, with neither new 30-minute activity. The original literature-journal message is also present. These are three different described activities, not duplicate deliveries. **At least 60 minutes from these two activities are missing from Hours.** Planner preservation does not repair an Hours total.
+
+Earlier August 31/September 1 chats also explicitly distinguish IR English from Frindle and show a Portuguese/ABC Mouse collision, but those precede the September 2 fix and are not included in this 60-minute post-fix tally. **Done when:** separately named Spanish/Portuguese and independent/curriculum reading both save, repeated delivery of the same event saves once, and any recovery names the exact missing blocks. Do not remove deduplication or replay historical logs wholesale. Label management and correct event identity are related but separate problems.
 
 ### F04-F05. Subcategories and familiar subject names
 
@@ -140,13 +185,13 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Heard:** P60-85. Count each child's school days independently, including days when a sibling is absent, and export the count for a chosen period.
 
-**Current:** [state-pack derivation](../../../apps/web/lib/compliance/pack.ts) already groups recorded time into one row per child/date and prints per-child Recorded days and Saved time. [The pack route](../../../apps/web/app/api/compliance/pack/route.ts) supplies those records. The [state-records summary](../../../apps/web/lib/compliance/state-records.ts) also counts family-level days with logged time. This pass did not generate or inspect a fresh pack PDF.
+**Current:** [state-pack derivation](../../../apps/web/lib/compliance/pack.ts) matches records to children and groups them by child display name/date, then prints per-child Recorded days and Saved time. Local replay with distinct child names verified that two entries on September 1 make one day for child A, while a shared September 2 entry adds one day to both A and B. That proves the intended arithmetic for this example; it does not certify distinct children with identical display names. [The pack route](../../../apps/web/app/api/compliance/pack/route.ts) supplies records; [state-records summary](../../../apps/web/lib/compliance/state-records.ts) counts family-level days. No fresh pack PDF or statutory attendance claim was verified.
 
 **Gap:** these are not a standalone per-child attendance editor/export. A family-wide row currently counts for every child. No recorded time cannot safely mean absent. A child can also do school without timed work being logged.
 
 **Smallest change:** expose the existing recorded-day calculation alongside F06, clearly labeled as days with recorded learning. **Decision before stronger attendance claims:** how to exclude one child from a shared activity, record an untimed school day, and correct an attendance day. **Done when:** the sick-child example yields the correct separate counts and repeat activities on one day count as one day.
 
-**Additional defect found:** [UI totals](../../../apps/web/lib/hours-view.ts) use July 1, [chat totals](../../../apps/web/lib/hours-summary.ts) use August 1, and state records use `school_year_start_on`. Fix this under #1090 before presenting one authoritative school-year total. Acceptance includes configured start dates, year-round schooling, and a documented common fallback.
+**Additional defect found:** [UI totals](../../../apps/web/lib/hours-view.ts) use July 1, [chat totals](../../../apps/web/lib/hours-summary.ts) use August 1, and state records use `school_year_start_on`. Calling both existing date functions for September 6 returns `2026-07-01` and `2026-08-01` respectively. Fix this under #1090 before presenting one authoritative school-year total. Acceptance includes configured start dates, year-round schooling, and a documented common fallback.
 
 ### F09-F10. Start deeper questions, then test the actual assessment boundary
 
@@ -154,7 +199,11 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Current:** [ProgressDetailPanel](../../../apps/web/components/progress/progress-detail-panel.tsx) links to `/onboarding?dd=...`; [onboarding](../../../apps/web/app/onboarding/page.tsx) redirects completed families to `/app` and loses that intent. This route failure is reproduced live. Existing `manage_child_progress` and [check-in service](../../../apps/web/lib/child-progress/check-in-service.ts) already support subject check-ins, and Carolyng completed two on September 5.
 
-**Assessment distinction:** [question planning](../../../packages/core/src/map/bank.ts) selects an age-based starting point and harder ladder questions, with scope/rung limits; it is not simply “stop at chronological age.” The [selection code](../../../apps/web/lib/child-progress/check-in-selection.ts) also responds to existing answers. One question may reflect limited remaining bank coverage, a valid stop, or a routing/selection problem. The meeting alone does not resolve which.
+**Verified assessment behavior:** Amalia was 48 months old. The gross-motor check-in asked `gross_motor.catches-ball`, received “easily” and completed. The fine-motor check-in refreshed `fine_motor.pours`, received “easily” and completed. Production response rows and tool receipts establish one question each.
+
+[Question planning](../../../packages/core/src/map/bank.ts) chooses a base plus at most two harder questions for these subjects, within an age-plus-24-month bound. Gross motor's selected set at 48 months is galloping, hopping and catching; galloping/hopping were already answered. Skipping at 68 months exists in the bank and lies within the 72-month ceiling, but falls outside the two-rung slice. Fine motor's set is pouring, beads and straight-line cutting; all had July answers, with cutting still “getting there.” The [selector](../../../apps/web/lib/child-progress/check-in-selection.ts) refreshes an old answer when starting, then [the service](../../../apps/web/lib/child-progress/check-in-service.ts) disables refresh after the response. Local replay with the actual answer values and timestamps reproduces pouring followed by no next question; gross-motor replay reproduces catching followed by no next question.
+
+**Correction to the first pass:** the stop does not prove that the bank has no harder questions or that the child is at her true frontier. It exhausts the selected window. The actual chat reinforces the mismatch: the parent asked for more, reported slow alternating-leg skipping, and later corrected the assumption that straight-line cutting was still a useful stretch. Music was used to demonstrate the broken link in the meeting; no matching completed music check-in was found, so its actual session behavior is not claimed reproduced.
 
 **Done when:** the button preserves child and subject, produces a first question, and the fine-motor/music examples are checked against actual remaining eligible questions. Test an advanced child, a child needing easier questions, an already-answered ladder, and an exhausted bank. Explain coverage honestly rather than giving an age-level reassurance or inventing extra measurement precision.
 
@@ -164,7 +213,9 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Current:** the [trajectory chart](../../../apps/web/app/onboarding/r/[token]/trajectory-chart.tsx) still plots numeric month values internally but presents labels such as A clear strength and an age reference. [Other tile code](../../../apps/web/lib/child-progress/map-model.ts) can still expose a numeric label. Native month/verdict pills were deliberately removed in #625, so web and native must be considered separately.
 
-**Numeric proposal:** honor Sidney's September 5 direction with a defined presentation of existing, supported numbers. Before implementation, specify whether that applies to web detail, full report, native, or all three. Include unknown, sparse, capped, conflicting, and below-age evidence; do not invent a number or introduce a “behind” verdict. This is display policy, not permission to change the scorer.
+**Meaning confirmed by Sidney:** restore the concept of being “15 months ahead” of national benchmarks on the mobile-web progress experience. This is not just adding the word months to a chart.
+
+**What the code actually computes:** [scoring.ts](../../../packages/core/src/map/scoring.ts) derives a frontier from parent answers and cited age anchors, adjusts documented age windows, then subtracts the child's age. Displayed `monthsAhead` is capped at the smaller of 24 months and approximately one-third of the child's age; `frontierDeltaMonths` is a separate signed value. A four-year-old's display cap is 16 months. Restoring numbers must distinguish the capped estimate, raw distance, sparse/unknown evidence and beyond-scale results. The implementation is not evidence that the resulting number is a validated national test score. The precise benchmark description and placement in web detail/full report remain to be reviewed. Native is not automatically included, and no scorer change or “behind” verdict is authorized here.
 
 **Map proposal:** improve the existing explanation at the point of use. The live web page already explains dots, the age band, prerequisite connections, and parent-answer provenance. [The map projection](../../../apps/web/lib/child-progress/abilities-explorer.ts) derives statuses from saved evidence, not minutes. **Done when:** a parent can explain known / working on / not yet observed, the age band, and prerequisites without a founder explaining the diagram, and can open the evidence or appropriate follow-up for one ability. Do not build another map.
 
@@ -174,7 +225,9 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Current:** the [Planner skill](../../../apps/web/agent/skills/planner/SKILL.md) explicitly separates completion from mastery. The progress tool validates quoted evidence; [progress-next-move](../../../apps/web/agent/skills/progress-next-move/SKILL.md) already defines one evidence-based next action. The old automatic weekly proposal #401 was closed without shipping that new recurring beat, pending demand/cadence evidence. These meetings provide new demand, not an agreed schedule.
 
-**Near-term slice:** after logging, ask one relevant clarification only when the meaning would change the saved progress claim. “We moved on” should not become mastery without support. After a saved progress update, offer one optional practice, extension, or targeted lesson using the existing tools. **Done when:** minutes and completion never raise mastery by themselves; the parent can decline or say “not yet”; three children do not trigger an interrogation; the suggested next step matches the saved skill.
+**Verified in actual use:** the last-week chat already contains clarification and optional next-step offers. After the motor check-ins, Homa offered cutting practice; Carolyng said the suggested work was already easy. It then asked about curves/zigzags and offered a more specific page. F13-F14 are therefore improvements to accuracy, timing and consistency, not wholly absent features. The chat also contains observations saved without a matched score change, so “noted” is not proof that the progress graph changed.
+
+**Near-term proposal:** after logging, ask one relevant clarification only when the meaning would change the saved progress claim. “We moved on” should not become mastery without support. After a saved progress update, offer one optional practice, extension or targeted lesson using the existing tools. **Done when:** minutes and completion never raise mastery by themselves; the parent can decline or say “not yet”; three children do not trigger an interrogation; the suggested next step matches current evidence rather than a stale answer.
 
 **Future decision:** immediate versus end-of-week review, monthly reminders, or periodic assessment sheets. Choose cadence, per-child scope, opt-in/stop behavior, and whether the task is a parent observation or an actual assessment. No new outbound schedule, weekly test, grading promise, or automatic credit assignment is authorized by this meeting.
 
@@ -185,6 +238,8 @@ Limitations: the browser session was a test family, not either interviewee's ses
 **Current:** Library upload accepts 500 MiB. [Automatic processing](../../../apps/web/lib/library/family-asset-processing.ts) limits bytes to 32 MiB, initial PDF classification to 120 pages/64,000 characters, and uses PDF text extraction. An image-only PDF cannot be assumed readable just because it is stored. The separate curriculum reader has its own bounds, including 240 source segments, and returns at most eight segments per call.
 
 **Confirmed failure:** two September 5 originals exceed the processing byte cap; one actual reader call was refused as not Ready. Raising only the upload limit or marking a file Ready would not make it readable.
+
+**Actual parent journey:** on September 5 at 01:42 UTC Carolyng asked for the first week's Dimensions lesson and worksheet from the teacher book. After the failed source read, Homa asked for a new photo of the lesson page. That verifies the blocked owned-source workflow. It does not prove that every Ready curriculum is unreadable, that child assignment is the cause of this attempt, or that raising the byte cap alone solves scanned books.
 
 **Existing foundations:** [family-librarian](../../../apps/web/agent/skills/family-librarian/SKILL.md), `find_family_assets`, `get_family_asset`, [read_family_curriculum](../../../apps/web/agent/tools/read_family_curriculum.ts), and [curriculum-mapping](../../../apps/web/agent/skills/curriculum-mapping/SKILL.md) already retrieve, cite, propose units, and append approved work to existing Planner weeks. Mapping requires a ready original, a saved child assignment, source evidence, and Homa Plus. It is not automatic mapping upon upload. Carolyng has no saved derived units or approvals in the inspected data.
 
@@ -198,17 +253,21 @@ Limitations: the browser session was a test family, not either interviewee's ses
 
 **Heard:** R145-181, R312-322. The letters should fit their guides; examples already supplied do not have the generated mistakes. In a rush, a parent used a Google worksheet instead. She may wait longer for richer personalization when preparing ahead.
 
-**Current:** [materials-studio](../../../apps/web/agent/skills/materials-studio/SKILL.md) already requires an SVG guide-row recipe for letters on writing guides. A separate [letter/number formation recipe](../../../apps/web/agent/skills/materials-studio/references/recipes/letter-number-formation-practice.md) moved to image-direct on September 2. #1080 already records formation-page problems, including mismatched reference content, practice sizing, and missing independent work; #1066 covers measured per-format consistency.
+**Verified family artifact:** Carolyng's September 1 16:29 UTC message says Amalia's name worksheet puts the middle of the letters above the writing-guide midline. The 16:35 revision passed Homa's reviewer; at 16:39 she replied “Still wrong.” The actual [rejected mixed-case page](https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/families/304f0003-6c55-4c31-807a-941aff214283/materials/amalia-s-name-tracing-practice-A4D83SDt8CVucpAxN4O3mzEor87G9o.jpg) shows the capital A and tall letter strokes stopping below the top guide. Another revision failed review, then the [16:44 revision](https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/families/304f0003-6c55-4c31-807a-941aff214283/materials/amalia-s-name-tracing-practice-bNHRnqVA5X0QQMN4lr4YvCq8cMF9tk.jpg) changed the name to all capitals. These existing previews were opened and visually inspected; no new page was generated or physically printed.
 
-**Today:** identify the exact failed artifact and its recipe/rendering path, then improve that recipe/reference/reviewer loop. **Done when:** uppercase, lowercase, trace, and independent practice match the intended curriculum format, letter geometry aligns with the guides or boxes, and the final PDF is inspected at print size. More uploaded examples alone are not a fix. Preserve separate tests for choosing the right reference and rendering it correctly.
+**Correction to the first pass:** the four revisions record `input.path: html`, with no explicit recipe recorded. They are not proven to have used the image-direct [letter/number formation recipe](../../../apps/web/agent/skills/materials-studio/references/recipes/letter-number-formation-practice.md) or #1080's D probe. [materials-studio](../../../apps/web/agent/skills/materials-studio/SKILL.md) does instruct guide-row construction, but having that instruction is not proof of correct rendered geometry. #1094 owns this actual family failure; #1080 and #1066 remain related quality work. The literal D example from the meeting is still unidentified, and no equivalence is assumed.
+
+**Repair proposal:** verify font cap height, x-height, baseline and guide alignment, then test the actual rendering/reviewer path. A reviewer pass is not enough: this exact rejected page passed. Changing requested letter case is an alternative, not proof that mixed-case output is fixed. **Done when:** uppercase, lowercase, trace and independent practice match the intended format, geometry aligns with the guides, and the final PDF is inspected at print size. More uploaded examples alone are not a fix. Preserve separate checks for reference selection and rendering.
 
 **Future UX experiment:** quick useful first output versus a slower source-grounded packet. The spoken two/eight-minute figures are hypothetical choices, not measured latency targets. Measure actual wait/revision/abandonment first. Test a remembered preference or optional deeper follow-up before asking the same speed question on every request.
 
 ### F21-F23. Make existing controls discoverable
 
-**Binder Delete, B:** deletion worked once discovered. Fix the [material shelf](../../../apps/web/app/app/binder/in-progress-shelf.tsx) action layout at phone widths; retain the current delete/confirmation implementation. The separate [Month plans shelf](../../../apps/web/app/app/binder/working-plan-shelf.tsx) has different controls and is not established as the transcript's target. **Done when:** Keep, Open, Delete, and confirmation fit without sideways scrolling at 320/375/390 CSS pixels.
+**Binder Delete, B:** deletion worked once discovered in the meeting. The [material shelf](../../../apps/web/app/app/binder/in-progress-shelf.tsx) has two columns on phones and a non-wrapping action row. A read-only fixture rendered this actual component and production CSS with two sample records. At viewport widths 320 / 375 / 390 px, document widths were 424 / 452 / 459 px; the second Delete button extended to x=424.46 / 451.96 / 459.46. The 390 px screenshot also shows the first card's Delete overlapping the second card's Keep action. This verifies the layout mechanism. No family material was deleted. The separate [Month plans shelf](../../../apps/web/app/app/binder/working-plan-shelf.tsx) has different controls and is not established as the transcript's target. **Done when:** Keep, Open, Delete and confirmation fit without sideways scrolling or overlapping at all three widths.
 
 **Child filtering, P22 and B:** both requests were resolved in the meeting by discovering an existing switcher. [Hours scoping](../../../apps/web/lib/hours-view.ts) keeps the selected child's rows plus family-wide rows; Binder follows the same general view-context pattern. Improve the visible selected-child cue and brief contextual guidance, then verify both scopes. A social/onboarding explanation is an optional distribution idea; it is not a ticket to build another filter. Export scoping remains the separate F06 gap.
+
+**Live check:** at 390 px, choosing Avery changes the header's accessible label to “Viewing Avery” and Binder says “Everything kept for Avery, plus anything for the whole family.” The CSV link still points to the unfiltered endpoint. Those are verified UI observations; the test family's empty Hours do not prove populated filtered totals.
 
 **Voice, R202-219:** the parent uses voice dictation in chat and did not know the other control starts a spoken conversation. Production has both “Talk instead of typing” and “Talk with Homa.” Clarify [dictation](../../../apps/web/app/app/dictation.tsx) and [voice mode](../../../apps/web/app/app/voice-mode-button.tsx) affordances and recording state. **Done when:** a parent can intentionally choose dictated text or a spoken conversation without relying on red/blue button descriptions. This is not a request to replace the voice model or make every dictated message receive a spoken reply.
 
@@ -226,11 +285,11 @@ State-specific day/hour requirements and “on schedule” claims require curren
 
 ### F25. The first value, the public product, and a gradual rollout
 
-**Heard:** R182-201, R221-299. Possible focus: personalized printables, a complete lesson packet, planning/logging, or a progress report that immediately produces a useful next week. Consider a narrower mobile offer, a founder-only experimental surface, then broader features after proving reliability. Progressive onboarding should collect more context as value becomes clear.
+**Heard:** R182-201, R221-299. Possible focus: personalized printables, a complete lesson packet, planning/logging, or a progress report that immediately produces a useful next week. **Sidney confirmed the narrower offer discussed here is for the native mobile app**, while Carolyng's operational feedback concerns the mobile website. A founder-only experimental surface and broader rollout were ideas, not approved architecture. Progressive onboarding was proposed to collect more context as value becomes clear.
 
 **What is strong evidence:** both parents describe using dictated logs; one says she no longer uses her old planner. A parent wants her chosen curriculum respected and values personalized lesson packets over generic worksheets. The other used an outside worksheet when time was tight. These are concrete behaviors and constraints.
 
-**What remains a hypothesis:** that printables alone will attract and retain families; that a report plus a free week will convert; that simplifying the public app will beat the broader assistant; that the next school-year buying cycle dictates the whole roadmap. Meeting figures about signups, completion, and paid accounts are recollections, not freshly verified funnel metrics.
+**What remains a hypothesis:** that printables alone will attract and retain families; that a report plus a free week will convert; that simplifying native will beat the broader assistant; that the next school-year buying cycle dictates the whole roadmap. Meeting figures about signups, completion and paid accounts do not specify a cohort/window, so they cannot be reconciled honestly to one production number. They are excluded from factual sizing or prioritization here. No claim that the meeting's numerical recollections are correct is made.
 
 **Reuse:** #1053 already investigates onboarding completion without retention; #1045 owns current mobile onboarding/paywall work. Do not launch a competing rebuild, promise a free week, change pricing, remove existing features, or create a founder-only environment from this transcript alone.
 
@@ -240,7 +299,7 @@ State-specific day/hour requirements and “on schedule” claims require curren
 
 **Heard:** R230-256. The tangible printed result may be the magic moment; an app could make printing easier, or material could simply appear at the printer.
 
-**Current:** [native Binder](../../../apps/mobile/src/features/binder/material-detail-modal.tsx) already has a Print it action and a system print-sheet path. Source presence does not certify the installed build or a physical printer. Web also exposes PDF print/download actions.
+**Current:** the mobile-web [Binder overlay](../../../apps/web/app/app/binder/material-detail-overlay.tsx) implements Print it / Print all pages as a link to the PDF in a new tab; the browser's PDF viewer handles printing/downloading. The authenticated chat also visibly exposes Print all 2 pages for the existing test worksheet. This verifies the action/link, not AirPrint or physical output. [Native Binder](../../../apps/mobile/src/features/binder/material-detail-modal.tsx) has a system print-sheet path in source, but the installed build and printer were not tested. Native presence is background and cannot close a mobile-web request.
 
 **Split:** verify the existing print-sheet journey as normal product quality work. Treat unattended printer delivery, saved printer destinations, and automatic physical printing as a separate future feature requiring explicit setup and supported-device decisions. The meeting did not authorize a new printer integration.
 
@@ -259,11 +318,11 @@ These are the unresolved choices exposed by the meetings, not questions that mus
 | Decision | Proposed starting point | What remains open |
 |---|---|---|
 | Subject categories | Reusable family labels under fixed parent subjects | Whether categories belong to the whole family or can be child-specific; display names |
-| Numeric progress | Restore supported numeric context where requested, retain evidence and uncertainty | Exact web/report/native scope and below-age presentation |
+| Numeric progress | Restore the months-ahead comparison requested by Sidney on mobile web, grounded in existing evidence | Exact placement, capped versus raw values, benchmark wording and unknown/below-age handling; native extension is not assumed |
 | Attendance | Call the first version recorded learning days | Untimed days, absences, and exclusions from family-wide activities |
 | Progress prompts | One relevant in-session clarification; optional next step | When recurring reviews happen, for which child, and how to opt out |
 | Curriculum scope | One correct owned lesson and useful follow-up first | Full-book processing appetite and full-year planning horizon |
-| Product focus | Test a concrete useful outcome with actual returning behavior | Report-first, personalized packet-first, or logging/planning-first |
+| Product focus | Test a concrete useful first outcome for the focused native offer | Report-first, personalized packet-first or logging/planning-first; mobile web remains the surface of Carolyng's operational feedback |
 
 Review notes:
 
@@ -278,4 +337,6 @@ Update the linked issue when an item is approved, rejected, split, shipped, or s
 
 The review lives in the isolated `codex/gh-1087-sep5-feedback-review` lane. It is a local review artifact, not a merged specification or a deployed change.
 
-Verification of this artifact: all local source links resolve, the index contains 26 distinct feedback references, and no em dashes were introduced. The full `check:docs` gate fails on existing reconciliation/manifest/migration-evidence problems, reproduced with this new file temporarily excluded. This new review is also not registered in that historical manifest. No repository-wide documentation cleanup was attempted or claimed complete.
+Verification of this artifact: local source links, all 26 index references and the no-em-dash rule are checked after revision. The full `check:docs` gate previously failed on existing reconciliation/manifest/migration-evidence problems, reproduced with this new file temporarily excluded. This review is also not registered in that historical manifest. No repository-wide documentation cleanup is claimed.
+
+No assumption is silently promoted to a verified fact: causes that were established now include evidence; unsupported artifact attribution was removed; scope and numeric meaning were clarified with Sidney; estimates, future product choices and tests requiring a real printer, microphone or new implementation remain explicitly unverified. This document does not claim that every capability or future proposal has been certified.
