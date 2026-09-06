@@ -430,6 +430,12 @@ Search only sees indexed metadata/embedding content; a useful apple activity lat
 
 **Tracking:** [#1106](https://github.com/sidneyswift/homa/issues/1106).
 
+**September 6 additional production verification:** the populated sandbox proved normal child selection: Avery's 11 minutes plus 5 shared minutes remained, while Jordan's separate 15 minutes disappeared. A contradictory child link exposed another live defect: Avery's stored selection plus a Jordan query showed Avery's 16-minute record list but Jordan's 5-minute total. [Exact reproduction](https://github.com/sidneyswift/homa/issues/1106#issuecomment-5560478415). #1106 is now a production bug. The active repair uses one owned-child resolver for the page and selector, preserves that focus across Planner navigation, and clears a link override when the parent makes a new selection. Local implementation is underway; this paragraph does not claim deployment.
+
+The populated Binder also showed a false failed-search message when its one kept item was already on the default cover and no search was active. This is separately tracked in [#1113](https://github.com/sidneyswift/homa/issues/1113), bundled into the same UI repair. Actual search/filter no-results and a truly empty Binder must remain distinct.
+
+**Implementation verification:** the shared resolver, visible labels, failed-selection recovery and Binder empty-state repair passed 62 focused tests, 180 onboarding checks, TypeScript, scoped lint, the isolation preflight, full Next build and independent source/copy review. [Detailed verification and explicit browser/production limits](../journeys/evidence/2026-09-06-child-scope-verification.md). These are local results, not a shipped-fix receipt.
+
 **Expected, P22 and B:** review one child's Hours/Binder without confusion. Both parents discovered an existing switcher during the meeting, so a second filter is not the requested solution.
 
 **Active chain:** [context-switcher.tsx](../../../apps/web/components/dashboard/context-switcher.tsx) appears for at least two children after device detection. Its closed trigger is an avatar with an accessible Viewing child label; visible names are inside the open menu. Selection optimistically changes the UI, validates the child against the caller-owned roster, stores an httpOnly preference cookie and refreshes/navigates. Invalid/foreign/stale IDs become no-op or family view; this preference is not authorization or durable child data. The action has no explicit retry/error receipt.
@@ -444,7 +450,7 @@ Hours includes selected-child plus shared rows before subject filtering and tota
 
 **Tracking:** [#1103](https://github.com/sidneyswift/homa/issues/1103).
 
-**September 6 implementation verification:** the corrected controller and authenticated routes passed 104 deterministic checks, actual-component browser lifecycle checks, and two isolated model evals with 9/9 gates. [Exact path, observed scenarios and limits](../journeys/evidence/2026-09-06-web-voice-verification.md). Deployment acceptance remains on #1103; physical speech is not certified.
+**September 6 production receipt:** FIXED by PR #1112, merge `df9d5860ae3c5ede42fad3624588223a089b47f3`, READY deployment `dpl_7C9DPVKykuKXgHjVHmpYPCaQVNtG` on thankshoma.com. The corrected controller/routes passed 104 deterministic checks, actual-component browser lifecycle checks, and two isolated model evals with 9/9 gates. A real production bridge probe passed 88 assertions: one 17-minute Hours write, read-only follow-up using the returned continuation, one exact action receipt and four owned canonical turns, then verified fixture cleanup. [Exact path, observed scenarios and limits](../journeys/evidence/2026-09-06-web-voice-verification.md). Physical phone speech remains unverified; Sidney has been asked for that check.
 
 **Expected, R202-219:** intentionally choose dictated editable text or back-and-forth speech. The meeting's greeting did not prove that spoken logging/planning worked.
 

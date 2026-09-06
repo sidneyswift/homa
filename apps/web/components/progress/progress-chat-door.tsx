@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition, type ReactNode } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 
 import { setViewContextAction } from "../../app/app/view-context-actions";
 import { focusChildThenOpenChat } from "./ask-homa-about-child-action";
@@ -32,18 +32,25 @@ export function ProgressChatDoor({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [failed, setFailed] = useState(false);
 
   function openFocusedChat() {
     startTransition(async () => {
-      await onOpen?.();
-      await focusChildThenOpenChat(childId, {
-        setViewContext: setViewContextAction,
-        navigate: (href) => router.push(href),
-      });
+      setFailed(false);
+      try {
+        await onOpen?.();
+        await focusChildThenOpenChat(childId, {
+          setViewContext: setViewContextAction,
+          navigate: (href) => router.push(href),
+        });
+      } catch {
+        setFailed(true);
+      }
     });
   }
 
   return (
+    <>
     <button
       type="button"
       onClick={openFocusedChat}
@@ -53,5 +60,7 @@ export function ProgressChatDoor({
     >
       {children}
     </button>
+    {failed ? <p role="alert" className="mt-2 text-sm text-muted">I could not open that conversation. Try again.</p> : null}
+    </>
   );
 }

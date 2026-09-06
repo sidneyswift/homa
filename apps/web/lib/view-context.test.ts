@@ -4,8 +4,45 @@ import { describe, it } from "node:test";
 import {
   kidSwitchTargetPath,
   pageShowsContextSwitcher,
+  plannerPathAfterContextPick,
+  resolvePlannerViewContext,
   resolveProgressChildId,
 } from "./view-context";
+
+describe("Planner scope across links and saved preference", () => {
+  const children = ["child-one", "child-two"];
+
+  it("uses the same owned linked child instead of a different saved preference", () => {
+    assert.deepEqual(resolvePlannerViewContext("child-one", "child-two", children), {
+      context: { kind: "child", childId: "child-two" }, linkedChildId: "child-two",
+    });
+  });
+
+  it("falls back identically for missing, stale, foreign, and repeated child queries", () => {
+    for (const query of [undefined, "", "foreign-child", ["child-two", "child-one"], ["child-two", "child-two"]]) {
+      assert.deepEqual(resolvePlannerViewContext("child-one", query, children), {
+        context: { kind: "child", childId: "child-one" }, linkedChildId: null,
+      });
+    }
+  });
+
+  it("never exposes an unowned saved preference or false report handoff", () => {
+    assert.deepEqual(resolvePlannerViewContext("deleted-child", "foreign-child", children), {
+      context: { kind: "family" }, linkedChildId: null,
+    });
+    assert.deepEqual(resolvePlannerViewContext("child-one", "child-one", []), {
+      context: { kind: "family" }, linkedChildId: null,
+    });
+  });
+
+  it("an explicit pick clears every child override and entry handoff, preserving view/date", () => {
+    assert.equal(plannerPathAfterContextPick("/app/planner", "view=hours&child=child-two&child=child-one&date=2026-09-06&handoff=report"),
+      "/app/planner?view=hours&date=2026-09-06");
+    assert.equal(plannerPathAfterContextPick("/app/planner", "child=child-two"), "/app/planner");
+    assert.equal(plannerPathAfterContextPick("/app/planner", "view=week"), null);
+    assert.equal(plannerPathAfterContextPick("/app/binder", "child=child-two"), null);
+  });
+});
 
 describe("kidSwitchTargetPath", () => {
   it("keeps a child switch on the live Progress surface", () => {

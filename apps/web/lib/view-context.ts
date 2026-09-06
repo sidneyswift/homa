@@ -23,6 +23,36 @@ export const VIEW_CONTEXT_FAMILY = "family";
 
 export type ViewContext = { kind: "family" } | { kind: "child"; childId: string };
 
+/** A Planner link may focus an owned child. Repeated query parameters are
+ * rejected just like the server page's string[] values, never first-wins. */
+export function resolvePlannerViewContext(
+  preference: string | undefined,
+  queryChild: string | readonly string[] | undefined,
+  childIds: readonly string[],
+): { context: ViewContext; linkedChildId: string | null } {
+  const linkedChildId = typeof queryChild === "string" && childIds.includes(queryChild)
+    ? queryChild
+    : null;
+  return {
+    context: linkedChildId
+      ? { kind: "child", childId: linkedChildId }
+      : parseViewContext(preference, childIds),
+    linkedChildId,
+  };
+}
+
+/** An explicit pick replaces a Planner link's temporary focus. Preserve
+ * the actual view/date, but retire the entry-only report handoff. */
+export function plannerPathAfterContextPick(pathname: string, search: string): string | null {
+  if (pathname !== "/app/planner") return null;
+  const query = new URLSearchParams(search);
+  if (!query.has("child") && !query.has("handoff")) return null;
+  query.delete("child");
+  query.delete("handoff");
+  const remaining = query.toString();
+  return `/app/planner${remaining ? `?${remaining}` : ""}`;
+}
+
 /**
  * parseViewContext(raw, childIds): ViewContext
  * Anything that is not exactly one of the caller's own child ids means

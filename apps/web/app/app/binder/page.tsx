@@ -161,6 +161,7 @@ export default async function BinderPage({
   return (
     <PageColumn>
       <div className="mb-6">
+        <p className="mb-2 text-xs font-semibold text-[var(--homa-ink)]">For the whole family</p>
         {packReady ? (
           <StatePackCard
             stateName={stateDetail.stateName}
@@ -209,7 +210,7 @@ export default async function BinderPage({
         )}
       </div>
       <WorkingPlanShelf plans={workingPlans} timeZone={timeZone} />
-      <InProgressShelf materials={inProgressMaterials} />
+      <InProgressShelf materials={inProgressMaterials} scopeChildName={focusChild?.name ?? null} />
       <BinderView
         materials={binderMaterials}
         scopeChildName={focusChild?.name ?? null}

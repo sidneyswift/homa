@@ -72,6 +72,22 @@ function renderOverlay(entryToEdit: HoursEntry): string {
 }
 
 describe("HoursView", () => {
+  it("explains the selected child's shared time in embedded Hours", () => {
+    const rows = [entry(), entry({ id: "shared", childId: null, childName: null, minutes: 5 }),
+      entry({ id: "leo", childId: LEO.id, childName: LEO.name, minutes: 60 })];
+    const html = renderToStaticMarkup(<HoursView kids={[MAYA, LEO]}
+      entries={scopedToViewContext(rows, { kind: "child", childId: MAYA.id })}
+      focusChildId={MAYA.id} timeZone="America/New_York" now={RENDER_NOW} embedded />);
+    assert.match(html, /Showing Maya&#x27;s recorded time, including time shared with the whole family\./u);
+    assert.match(html, /50m/u);
+    assert.doesNotMatch(html, /60m|>Leo</u);
+  });
+
+  it("keeps whole-family scope visible for one child and empty embedded records", () => {
+    const html = renderToStaticMarkup(<HoursView kids={[MAYA]} entries={[]} focusChildId={null}
+      timeZone="America/New_York" now={RENDER_NOW} embedded />);
+    assert.match(html, /Showing recorded time for the whole family\./u);
+  });
   it("projects the log and editor onto the Quiet authority surface contract", () => {
     const html = renderView([entry()]);
     assert.match(html, /data-brand-surface="hours"/u);
