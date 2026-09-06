@@ -240,14 +240,14 @@ describe("one row while Homa works", () => {
   //
   // A source check, because the bug only exists in the composition of
   // the transcript map and the busy row, which no unit can see.
-  it("skips the in-flight message that has nothing to show yet", () => {
+  it("skips the empty in-flight text message while keeping independent voice receipts", () => {
     const source = readFileSync(
       new URL("./chat-client.tsx", import.meta.url),
       "utf8",
     );
     assert.match(
       source,
-      /renderBusy &&\s*item\.kind === "message" &&\s*itemIndex === transcript\.length - 1 &&\s*item\.message\.role === "assistant" &&\s*!messageSaysSomething\(item\.message\)/u,
+      /renderBusy &&\s*item\.kind === "message" &&\s*itemIndex === transcript\.length - 1 &&\s*item\.message\.role === "assistant" &&\s*!isVoiceEffectMessage\(item\.message\) &&\s*!messageSaysSomething\(item\.message\)/u,
     );
   });
 
