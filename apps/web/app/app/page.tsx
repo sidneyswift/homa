@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { getAppData } from "../../lib/app-data";
 import { firstWeekAdjustmentDraft } from "../../lib/activation/first-week-handoff";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
+import { ASSESSMENT_PENDING_COOKIE, assessmentActionFromHeader, assessmentActionFromQuery, assessmentActionHref, resolveAssessmentAction } from "../../lib/child-progress/assessment-intent";
 import { materialRevisionDraft } from "../../lib/material-revision-handoff";
 import { plannerActivityHelpDraft } from "../../lib/planner-activity-help";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
@@ -51,6 +53,8 @@ export default async function ChatPage({
     check?: string;
     plan?: string;
     material?: string;
+    assessment?: string;
+    request?: string;
   }>;
 }) {
   const supabase = await createSupabaseServerClient();
@@ -58,6 +62,11 @@ export default async function ChatPage({
   const userId = (data?.claims?.sub as string | undefined) ?? "anonymous";
   const app = await getAppData();
   const query = await searchParams;
+  const pendingAction = assessmentActionFromHeader((await cookies()).get(ASSESSMENT_PENDING_COOKIE)?.value ?? null);
+  const selectedAction = query.assessment !== undefined
+    ? assessmentActionFromQuery(query, pendingAction?.requestId ?? "") : pendingAction;
+  if (query.assessment && selectedAction && !query.request) redirect(assessmentActionHref(selectedAction));
+  const initialAssessment = selectedAction && app ? resolveAssessmentAction(selectedAction, app.children) : null;
   const { draft } = query;
   const workingPlanResume = workingPlanResumeDraft({
     draft,
@@ -122,6 +131,8 @@ export default async function ChatPage({
 
   return (
     <ChatClient
+      initialAssessment={initialAssessment}
+      assessmentUnavailable={Boolean(query.assessment || pendingAction) && !initialAssessment}
       wall={wall}
       serverHistory={serverHistory}
       storageKey={`homa-chat-${userId}`}

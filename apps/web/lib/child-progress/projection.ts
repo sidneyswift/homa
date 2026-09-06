@@ -344,8 +344,9 @@ export function buildProgressSelectionAnswers(input: {
   );
   const independentSelectionAnswers = input.selectionAnswers.filter(
     (answer) =>
-      answer.evidenceId === null ||
-      !ledgerEvidenceIds.has(answer.evidenceId),
+      answer.childId === input.childId && answer.familyId === input.familyId &&
+      (answer.evidenceId === null ||
+      !ledgerEvidenceIds.has(answer.evidenceId)),
   );
   const mergedSelectionAnswers = new Map(
     independentSelectionAnswers.map((answer) => [
@@ -356,6 +357,8 @@ export function buildProgressSelectionAnswers(input: {
   for (const evidence of selectionEvidence) {
     mergedSelectionAnswers.set(evidence.id, {
       selectionId: evidence.id,
+      childId: evidence.childId,
+      familyId: evidence.familyId,
       evidenceId: evidence.id,
       itemId: evidence.itemId,
       answer: evidence.answer,

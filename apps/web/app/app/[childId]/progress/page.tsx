@@ -32,10 +32,13 @@ export const metadata: Metadata = {
 
 export default async function ChildProgressPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ childId: string }>;
+  searchParams: Promise<{subject?: string}>;
 }) {
   const { childId } = await params;
+  const requestedSubject = (await searchParams).subject;
 
   const data = await getAppData();
   if (!data) redirect("/onboarding");
@@ -147,6 +150,7 @@ export default async function ChildProgressPage({
 
   return (
     <ProgressView
+      initialSubjectId={pageState.view.subjects.some(subject => subject.subjectId === requestedSubject) ? requestedSubject : undefined}
       view={pageState.view}
       reportHref={report?.token ? `/onboarding/r/${report.token}` : null}
       report={report}

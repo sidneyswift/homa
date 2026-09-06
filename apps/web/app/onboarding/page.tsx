@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 import {
   familyAccountCheckout,
@@ -7,6 +8,7 @@ import {
   signupPaywallEnabled,
 } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
+import { ASSESSMENT_PENDING_COOKIE, assessmentActionFromHeader, assessmentActionHref } from "../../lib/child-progress/assessment-intent";
 import {
   appWouldAdmit,
   chatOnboardingEnabled,
@@ -160,7 +162,13 @@ async function loadChatProps(): Promise<OnboardingChatProps | null> {
   };
 }
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({searchParams}: {searchParams: Promise<{dd?: string}>}) {
+  const query = await searchParams;
+  if (query.dd) {
+    const action = assessmentActionFromHeader((await cookies()).get(ASSESSMENT_PENDING_COOKIE)?.value ?? null);
+    if (action && `${action.childId}.${action.subjectId}` === query.dd) redirect(assessmentActionHref(action));
+    redirect("/app?assessment=unavailable");
+  }
   const paywall = await signupPaywallDisposition();
   // "pending" skips the chat props on purpose: building them runs
   // beginOnboarding (the durable record write) and would drop an

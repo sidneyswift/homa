@@ -20,6 +20,7 @@ import { SubjectDoorContext } from "./subject-door-context";
  */
 export function ProgressSubjects({
   childId,
+  initialSubjectId,
   subjects,
   tiles,
   conflicts,
@@ -29,6 +30,7 @@ export function ProgressSubjects({
   children,
 }: {
   childId: string;
+  initialSubjectId?: string;
   subjects: ProgressSubjectView[];
   /** Panel-header facts (badge) per subject, keyed by subjectId. */
   tiles: ProgressTileModel[];
@@ -40,7 +42,7 @@ export function ProgressSubjects({
   hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
   children: ReactNode;
 }) {
-  const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
+  const [openSubjectId, setOpenSubjectId] = useState<string | null>(() => subjects.some(subject => subject.subjectId === initialSubjectId) ? initialSubjectId ?? null : null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
   // A full-height panel over a scrolled page: the page underneath stays
@@ -80,7 +82,7 @@ export function ProgressSubjects({
 
   function closePanel() {
     setOpenSubjectId(null);
-    triggerRef.current?.focus();
+    (triggerRef.current ?? document.getElementById("progress-heading"))?.focus();
   }
 
   return (

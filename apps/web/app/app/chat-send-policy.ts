@@ -1,3 +1,4 @@
+import { ASSESSMENT_ACTION_HEADER, type SelectedAssessmentAction } from "../../lib/child-progress/assessment-intent";
 import { isHiddenDirective } from "../../lib/onboarding/directives";
 import {
   isVoiceTranscriptionText,
@@ -10,6 +11,7 @@ export type ChatTurnModality = "text" | "voice";
 
 export type ChatSendSource =
   | { kind: "composer" }
+  | { kind: "assessment_action"; assessmentAction: SelectedAssessmentAction }
   | { kind: "progress_card"; progressActionKey: string }
   | { kind: "question_card" }
   /** A card the composer was standing in for. Her entries go out as an
@@ -31,13 +33,15 @@ export type ChatSendAcceptance = "rejected" | "queued" | "sent";
  * never string-join with the parent's typed words. Each carries different
  * provenance, and one request can truthfully carry only one source header.
  */
-export type ChatSendLane = "parent" | "saved_card_answer" | "directive";
+export type ChatSendLane = "parent" | "saved_card_answer" | "directive" | "assessment_action";
 
 export function chatSendHeaders(
   modality: ChatTurnModality,
   lane: ChatSendLane,
+  assessmentAction?: SelectedAssessmentAction,
 ): Readonly<Record<string, string>> {
   return {
+    ...(lane === "assessment_action" && assessmentAction ? {[ASSESSMENT_ACTION_HEADER]: JSON.stringify(assessmentAction)} : {}),
     ...messageModalityHeaders(modality),
     ...messageSourceHeaders(
       lane === "saved_card_answer" ? "saved_card_answer" : "parent",
@@ -82,9 +86,11 @@ export interface PreparedChatSend {
   resetDraftFromVoice: boolean;
   progressActionKey: string | null;
   lane: ChatSendLane;
+  assessmentAction?: SelectedAssessmentAction;
 }
 
 export interface QueuedChatMessage {
+  assessmentAction?: SelectedAssessmentAction;
   text: string;
   progressActionKey: string | null;
   lane: ChatSendLane;
@@ -102,6 +108,7 @@ export function prepareChatSend(input: {
   // A tap on a card is not typing: it stays a text turn and it leaves
   // whatever she had half-written in the composer alone.
   const fromCard =
+    input.source.kind === "assessment_action" ||
     input.source.kind === "progress_card" ||
     input.source.kind === "question_card" ||
     input.source.kind === "card_answer";
@@ -125,11 +132,12 @@ export function prepareChatSend(input: {
     modality,
     clearDraft: !fromCard && !directive,
     resetDraftFromVoice: !fromCard && !directive,
+    ...(input.source.kind === "assessment_action" ? {assessmentAction: input.source.assessmentAction} : {}),
     progressActionKey:
-      input.source.kind === "progress_card"
+      input.source.kind === "assessment_action" ? `assessment:${input.source.assessmentAction.requestId}` : input.source.kind === "progress_card"
         ? input.source.progressActionKey
         : null,
-    lane: directive
+    lane: input.source.kind === "assessment_action" ? "assessment_action" : directive
       ? "directive"
       : input.source.kind === "card_answer"
         ? "saved_card_answer"
@@ -165,6 +173,7 @@ export function appendPreparedChatSendToQueue(
   return [
     ...queue,
     {
+      ...(plan.assessmentAction ? {assessmentAction: plan.assessmentAction} : {}),
       text: plan.message,
       progressActionKey: plan.progressActionKey,
       lane: plan.lane,
@@ -174,6 +183,7 @@ export function appendPreparedChatSendToQueue(
 }
 
 export interface ChatQueueFlush {
+  assessmentAction?: SelectedAssessmentAction;
   /** The turn to send now, or null when there is nothing to say. */
   outgoing: string | null;
   /** What stays queued for the next idle line. */
@@ -204,12 +214,14 @@ export function flushChatQueue(
     lane: ChatSendLane;
     modality: ChatTurnModality;
     progressActionKey?: string | null;
+    assessmentAction?: SelectedAssessmentAction;
   },
 ): ChatQueueFlush {
   const all: QueuedChatMessage[] = appended
     ? [
         ...queue,
         {
+          ...(appended.assessmentAction ? {assessmentAction: appended.assessmentAction} : {}),
           text: appended.text,
           progressActionKey: appended.progressActionKey ?? null,
           lane: appended.lane,
@@ -226,11 +238,12 @@ export function flushChatQueue(
     };
   }
 
-  if (all[0].lane === "directive") {
+  if (all[0].lane === "directive" || all[0].lane === "assessment_action") {
     return {
       outgoing: all[0].text,
       remaining: all.slice(1),
-      lane: "directive",
+      lane: all[0].lane,
+      ...(all[0].assessmentAction ? {assessmentAction: all[0].assessmentAction} : {}),
       modality: "text",
     };
   }

@@ -55,7 +55,7 @@ describe("ProgressDetailPanel", () => {
     // The validate-the-reading door (founder ask 2026-07-14): the deep
     // dive link for this child and subject.
     assert.match(html, /Answer a few deeper questions/);
-    assert.match(html, /\/onboarding\?dd=child-1\.math/);
+    assert.match(html, /\/app\?assessment=subject_deep_dive&amp;child=child-1&amp;subject=math/);
     // The dated movement chip retired from this surface (2026-07-13).
     assert.doesNotMatch(html, /since Jun 10/);
     assert.match(
@@ -192,6 +192,6 @@ describe("ProgressDetailPanel", () => {
     // the card and label render, but there is no live door.
     assert.match(html, /Answer a few deeper questions/);
     assert.match(html, /hers to tap/);
-    assert.doesNotMatch(html, /href="\/onboarding\?dd=/);
+    assert.doesNotMatch(html, /href="\/app\?assessment=/);
   });
 });

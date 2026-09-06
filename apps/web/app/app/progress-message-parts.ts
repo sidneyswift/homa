@@ -42,6 +42,8 @@ export interface ProgressUpdateCardData {
 }
 
 export interface ProgressQuestionCardData {
+  acceptedResponseCount?: number;
+  responseLimit?: number;
   childName: string;
   subjectDisplayName: string;
   statement: string;
@@ -78,7 +80,10 @@ export type ProgressAssistantItem =
   | { kind: "progress_conflict"; card: ProgressConflictCardData }
   | {
       kind: "progress_workflow";
-      label: "Check-in paused" | "Check-in saved" | "Check-in moved";
+      label: Extract<ManageChildProgressResult, {kind: "progress_workflow"}>["label"];
+      scope?: Extract<ManageChildProgressResult, {kind: "progress_workflow"}>["scope"];
+      completion?: Extract<ManageChildProgressResult, {kind: "progress_workflow"}>["completion"];
+      activeCheckIn?: Extract<ManageChildProgressResult, {kind: "progress_workflow"}>["activeCheckIn"];
       update?: ProgressUpdateCardData;
     };
 
@@ -154,6 +159,8 @@ function progressItemFromResult(
           childName: result.prompt.childName,
           subjectDisplayName: result.prompt.subjectDisplayName,
           statement: result.prompt.statement,
+          ...(result.prompt.acceptedResponseCount !== undefined ? {acceptedResponseCount: result.prompt.acceptedResponseCount} : {}),
+          ...(result.prompt.responseLimit !== undefined ? {responseLimit: result.prompt.responseLimit} : {}),
           answerLabels: result.prompt.answerOptions.map(progressChoiceLabel),
           ...(result.update
             ? { update: nestedUpdateData(result.update) }
@@ -192,6 +199,9 @@ function progressItemFromResult(
       return {
         kind: "progress_workflow",
         label: result.label,
+        ...(result.scope ? {scope: result.scope} : {}),
+        ...(result.completion ? {completion: result.completion} : {}),
+        ...(result.activeCheckIn ? {activeCheckIn: result.activeCheckIn} : {}),
         ...(result.update
           ? { update: nestedUpdateData(result.update) }
           : {}),

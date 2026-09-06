@@ -21,6 +21,7 @@ import type {
   ProgressCheckInRecord,
   ProgressCheckInScope,
   ProgressCheckInState,
+  ProgressCheckInTerminalReason,
   ProgressConflict,
   ProgressEvidenceAnswer,
   ProgressEvidenceDerivation,
@@ -75,6 +76,8 @@ export interface PostgresProgressConflictRow {
 
 export interface PostgresProgressSelectionResponseRow {
   id: string;
+  child_id: string;
+  family_id: string;
   evidence_id: string | null;
   item_id: string;
   answer: MapAnswer;
@@ -99,6 +102,10 @@ export interface PostgresProgressCheckInRow {
   episode_id: string | null;
   pending_runtime_session_id: string | null;
   pending_turn_id: string | null;
+  terminal_reason?: ProgressCheckInTerminalReason | null;
+  accepted_response_count?: number | null;
+  uncertain_response_count?: number | null;
+  terminal_mixed_evidence?: boolean | null;
   pause_reason: ProgressCheckInPauseReason | null;
   opened_at: string;
   paused_at: string | null;
@@ -233,6 +240,8 @@ export function mapPostgresProgressSelectionResponseRow(
 ): ProgressSelectionAnswer {
   return {
     selectionId: row.id,
+    childId: row.child_id,
+    familyId: row.family_id,
     evidenceId: row.evidence_id,
     itemId: row.item_id,
     answer: row.answer,
@@ -320,6 +329,10 @@ export function mapPostgresProgressCheckInRow(
       pendingRuntimeSessionId:
         row.pending_runtime_session_id,
       pendingTurnId: row.pending_turn_id,
+      terminalReason: row.terminal_reason ?? null,
+      acceptedResponseCount: row.accepted_response_count ?? null,
+      uncertainResponseCount: row.uncertain_response_count ?? null,
+      terminalMixedEvidence: row.terminal_mixed_evidence ?? null,
       pauseReason: row.pause_reason,
       openedAt: row.opened_at,
       pausedAt: row.paused_at,

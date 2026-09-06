@@ -15,6 +15,28 @@ import { formatHiddenDirective } from "../../lib/onboarding/directives";
 import { HOMA_MESSAGE_SOURCE_HEADER } from "../../lib/chat-message-source";
 import { HOMA_MESSAGE_MODALITY_HEADER } from "../../lib/web-message-modality";
 import { VOICE_TRANSCRIPTION_MARKER } from "../../lib/voice/transcription-marker";
+import { ASSESSMENT_ACTION_HEADER } from "../../lib/child-progress/assessment-intent";
+
+describe("selected assessment queue identity", () => {
+  const assessmentAction = {requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", childId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", subjectId: "music"};
+  it("keeps the typed action separate from drafts, saved answers, and another selected action", () => {
+    const first = prepareChatSend({text: "Ask me deeper music questions for Maya.", busy: true, draftFromVoice: true, source: {kind: "assessment_action", assessmentAction}});
+    assert.ok(first);
+    assert.equal(first.clearDraft, false);
+    assert.equal(first.modality, "text");
+    const queue = appendPreparedChatSendToQueue([], first);
+    assert.deepEqual(appendPreparedChatSendToQueue(queue, first), queue);
+    const flush = flushChatQueue(queue, {text: "My separate thought", lane: "parent", modality: "text"});
+    assert.equal(flush.outgoing, first.message);
+    assert.deepEqual(flush.assessmentAction, assessmentAction);
+    assert.equal(flush.remaining[0].text, "My separate thought");
+    assert.deepEqual(JSON.parse(chatSendHeaders(flush.modality, flush.lane, flush.assessmentAction)[ASSESSMENT_ACTION_HEADER]), assessmentAction);
+    assert.equal(chatSendHeaders("text", "parent", assessmentAction)[ASSESSMENT_ACTION_HEADER], undefined);
+    const another = prepareChatSend({text: "Ask me deeper art questions for Maya.", busy: true, draftFromVoice: false, source: {kind: "assessment_action", assessmentAction: {...assessmentAction, requestId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", subjectId: "art"}}});
+    assert.ok(another);
+    assert.equal(flushChatQueue(appendPreparedChatSendToQueue(queue, another)).remaining.length, 1);
+  });
+});
 
 describe("chatSendHeaders", () => {
   it("carries saved-card provenance into the agent request", () => {

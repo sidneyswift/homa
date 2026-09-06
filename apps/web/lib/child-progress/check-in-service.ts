@@ -6,15 +6,16 @@ import {
   getMapSubject,
   personalizeStatement,
   type MapAnswer,
-  type MapItem,
 } from "@homa/core";
 
 import { zonedDateString } from "../time-zone";
 import {
   parseProgressConflictResolvedOutcome,
+  parseProgressCheckInStartOutcome,
   parseStoredProgressCheckInResponseOutcome,
 } from "./check-in-schema";
 import { selectNextProgressItem } from "./check-in-selection";
+import { DEEP_DIVE_RESPONSE_LIMIT, selectSubjectDeepDiveQuestion } from "./deep-dive-selection";
 import {
   hashChildProgressOperationPayload,
   storedChildProgressOperationResultSchema,
@@ -43,6 +44,7 @@ import type {
   ProgressCheckInResponseOutcome,
   ProgressCheckInResult,
   ProgressCheckInScope,
+  ProgressCheckInStartOutcome,
   ProgressCheckInUpdate,
   ProgressConflictCard,
   ProgressEvidenceAnswer,
@@ -172,6 +174,9 @@ function promptForCheckIn(
       located.item,
     ),
     subjectDisplayName: located.subject.displayName,
+    subjectId: located.subject.id,
+    acceptedResponseCount: checkIn.acceptedResponseCount ?? 0,
+    ...(checkIn.purpose === "subject_deep_dive" ? {responseLimit: DEEP_DIVE_RESPONSE_LIMIT} : {}),
     state: checkIn.state,
     ownerDisplayName: checkIn.ownerDisplayName,
   };
@@ -189,13 +194,31 @@ function requirePrompt(
   return prompt;
 }
 
-function nextProgressItem(
+function nextProgressQuestion(
   projectionInput: ChildProgressProjectionInput,
+  purpose: ProgressCheckInPurpose,
   scope: ProgressCheckInScope,
   now: Date,
   allowRefresh: boolean,
-): MapItem | null {
-  return selectNextProgressItem({
+  responses: Array<Pick<StoredProgressCheckInResponse, "itemId" | "answer">> = [],
+) {
+  if (purpose === "subject_deep_dive") {
+    // Existing durable multi-subject sittings remain readable. New web actions
+    // and the model-facing start schema select exactly one subject.
+    const decisions = (scope.subjectIds ?? []).map(subjectId => selectSubjectDeepDiveQuestion({
+      ...projectionInput,
+      childId: projectionInput.child.id,
+      subjectId,
+      ageMonths: ageMonthsForProjection(projectionInput, now),
+      now,
+      sittingItemIds: responses.map(row => row.itemId),
+    }));
+    const question = decisions.find(decision => decision.kind === "question");
+    if (question?.kind === "question") return { item: question.item, reason: null, mixedEvidence: false };
+    const stop = decisions.find(decision => decision.kind === "stop");
+    return { item: null, reason: stop?.reason ?? "no_useful_question" as const, mixedEvidence: stop?.mixedEvidence ?? false };
+  }
+  return { item: selectNextProgressItem({
     ageMonths: ageMonthsForProjection(projectionInput, now),
     subjectIds: scope.subjectIds,
     answers: buildProgressSelectionAnswers({
@@ -206,7 +229,7 @@ function nextProgressItem(
       selectionAnswers: projectionInput.selectionAnswers,
     }),
     allowRefresh,
-  });
+  }), reason: null, mixedEvidence: false };
 }
 
 function openConflictForCheckIn(
@@ -319,83 +342,115 @@ export class ProgressCheckInService {
       if (projectionInput === null) {
         return { status: "unknown_child" };
       }
-      const existing =
-        await transaction.lockNonterminalCheckInByChild(
-          context.familyId,
-          input.childId,
-        );
-      if (existing !== null) {
-        const current =
-          await this.refreshExistingActivePrompt(
-            transaction,
-            context,
-            existing,
-          );
-        return {
-          status: "existing",
-          checkIn: current,
-          prompt: promptForCheckIn(current),
-        };
-      }
       const scope = normalizedScope(input.purpose, input.subjectIds);
       if (scope === null) return { status: "invalid_scope" };
-      const item = nextProgressItem(
-        projectionInput,
-        scope,
-        now,
-        true,
-      );
-      if (item === null) return { status: "invalid_scope" };
-      const inserted = await transaction.insertCheckIn({
-        childId: projectionInput.child.id,
-        childName: projectionInput.child.name,
-        familyId: projectionInput.familyId,
-        purpose: input.purpose,
-        scope,
-        ownerMemberUserId: context.memberUserId,
-        recipientMemberUserId: context.memberUserId,
-        currentItemId: item.id,
-        episodeId: context.episodeId,
-        pendingRuntimeSessionId: context.runtimeSessionId,
-        pendingTurnId: context.turnId,
-        idempotencyKey: input.idempotencyKey,
-        openedAt: context.now,
-      });
-      if (inserted.kind === "existing") {
-        const current =
-          await this.refreshExistingActivePrompt(
-            transaction,
-            context,
-            inserted.checkIn,
-          );
-        return {
-          status: "existing",
-          checkIn: current,
-          prompt: promptForCheckIn(current),
-        };
+      const selected = context.selectedAssessment;
+      if (selected) {
+        if (context.channel !== "web" || context.memberUserId === null || selected.childId !== input.childId || input.purpose !== "subject_deep_dive" || scope.subjectIds?.length !== 1 || scope.subjectIds[0] !== selected.subjectId) {
+          return {status: "idempotency_mismatch"};
+        }
+        const request = await transaction.claimCheckInStartRequest({
+          familyId: context.familyId, memberUserId: context.memberUserId,
+          requestId: selected.requestId, childId: selected.childId, subjectId: selected.subjectId,
+          runtimeSessionId: context.runtimeSessionId, turnId: context.turnId,
+        });
+        if (request.kind === "existing") {
+          if (request.childId !== selected.childId || request.subjectId !== selected.subjectId) return {status: "idempotency_mismatch"};
+          const original = parseProgressCheckInStartOutcome(request.result);
+          const currentCheckIn = "checkIn" in original
+            ? await transaction.lockCheckIn(context.familyId, selected.childId, original.checkIn.id) : null;
+          return {status: "duplicate_start", original, currentCheckIn};
+        }
       }
-      const baseline = this.childProgressService.buildCurrentProgressView(
-        projectionInput,
-        now,
-      );
-      await transaction.insertCheckInBaselineSnapshot({
-        childId: projectionInput.child.id,
-        familyId: projectionInput.familyId,
-        checkInId: inserted.checkIn.id,
-        evidenceIds: projectionInput.evidence.map(
-          (evidence) => evidence.id,
-        ),
-        ageMonths: ageMonthsForProjection(projectionInput, now),
-        bankVersion: MAP_BANK_VERSION,
-        scorerVersion: CHILD_PROGRESS_SCORER_VERSION,
-        projection: baseline,
-        createdAt: context.now,
-      });
-      return {
-        status: "started",
-        checkIn: inserted.checkIn,
-        prompt: requirePrompt(inserted.checkIn),
+      const executeStart = async (): Promise<ProgressCheckInResult> => {
+        const existing =
+          await transaction.lockNonterminalCheckInByChild(
+            context.familyId,
+            input.childId,
+          );
+        if (existing !== null) {
+          if (existing.purpose !== input.purpose ||
+            JSON.stringify([...(existing.scope.subjectIds ?? [])].sort()) !== JSON.stringify([...(scope.subjectIds ?? [])].sort()) ||
+            existing.recipientMemberUserId !== context.memberUserId || existing.ownerMemberUserId !== context.memberUserId) {
+            return { status: "different_check_in_active", checkIn: existing };
+          }
+          const current =
+            await this.refreshExistingActivePrompt(
+              transaction,
+              context,
+              existing,
+            );
+          return {
+            status: "existing",
+            checkIn: current,
+            prompt: promptForCheckIn(current),
+          };
+        }
+        const openConflict = projectionInput.conflicts.find(conflict => conflict.state === "open" &&
+          (!scope.subjectIds || scope.subjectIds.includes(getMapItem(conflict.itemId)?.subject.id ?? "")));
+        if (openConflict && input.purpose === "subject_deep_dive") return {status: "conflict_pending", conflictId: openConflict.id};
+        const decision = nextProgressQuestion(projectionInput, input.purpose, scope, now, true);
+        const item = decision.item;
+        if (item === null) return input.purpose === "subject_deep_dive"
+          ? { status: "no_question", childId: projectionInput.child.id, childName: projectionInput.child.name, subjectId: scope.subjectIds![0], reason: decision.reason ?? "no_useful_question", mixedEvidence: decision.mixedEvidence }
+          : { status: "invalid_scope" };
+        const inserted = await transaction.insertCheckIn({
+          childId: projectionInput.child.id,
+          childName: projectionInput.child.name,
+          familyId: projectionInput.familyId,
+          purpose: input.purpose,
+          scope,
+          ownerMemberUserId: context.memberUserId,
+          recipientMemberUserId: context.memberUserId,
+          currentItemId: item.id,
+          episodeId: context.episodeId,
+          pendingRuntimeSessionId: context.runtimeSessionId,
+          pendingTurnId: context.turnId,
+          idempotencyKey: input.idempotencyKey,
+          openedAt: context.now,
+        });
+        if (inserted.kind === "existing") {
+          const current =
+            await this.refreshExistingActivePrompt(
+              transaction,
+              context,
+              inserted.checkIn,
+            );
+          return {
+            status: "existing",
+            checkIn: current,
+            prompt: promptForCheckIn(current),
+          };
+        }
+        const baseline = this.childProgressService.buildCurrentProgressView(
+          projectionInput,
+          now,
+        );
+        await transaction.insertCheckInBaselineSnapshot({
+          childId: projectionInput.child.id,
+          familyId: projectionInput.familyId,
+          checkInId: inserted.checkIn.id,
+          evidenceIds: projectionInput.evidence.map(
+            (evidence) => evidence.id,
+          ),
+          ageMonths: ageMonthsForProjection(projectionInput, now),
+          bankVersion: MAP_BANK_VERSION,
+          scorerVersion: CHILD_PROGRESS_SCORER_VERSION,
+          projection: baseline,
+          createdAt: context.now,
+        });
+        return {
+          status: "started",
+          checkIn: inserted.checkIn,
+          prompt: requirePrompt(inserted.checkIn),
+        };
       };
+      const result = await executeStart();
+      if (selected && context.memberUserId) {
+        const outcome: ProgressCheckInStartOutcome = parseProgressCheckInStartOutcome(result);
+        await transaction.completeCheckInStartRequest({familyId: context.familyId, memberUserId: context.memberUserId, requestId: selected.requestId, result: outcome});
+      }
+      return result;
     });
   }
 
@@ -450,6 +505,7 @@ export class ProgressCheckInService {
         context,
       );
       if (refusal !== null) return refusal;
+      if (input.expectedRevision !== undefined && input.expectedRevision !== locked.checkIn.revision) return {status: "stale_prompt"};
       const itemId = locked.checkIn.currentItemId;
       if (itemId === null) {
         return { status: "no_active_check_in" };
@@ -477,6 +533,8 @@ export class ProgressCheckInService {
       }
       const selectionAnswer = {
         selectionId: inserted.response.id,
+        childId: locked.checkIn.childId,
+        familyId: locked.checkIn.familyId,
         evidenceId: null as string | null,
         itemId,
         answer: input.answer,
@@ -518,21 +576,19 @@ export class ProgressCheckInService {
         selectionAnswer.evidenceId = evidenceId;
       }
 
-      const nextItem =
-        conflictId === null
-          ? nextProgressItem(
-              locked.projectionInput,
-              locked.checkIn.scope,
-              now,
-              false,
-            )
-          : null;
+      const responses = await transaction.listCheckInResponses(context.familyId, locked.checkIn.childId, locked.checkIn.id);
+      const decision = nextProgressQuestion(locked.projectionInput, locked.checkIn.purpose, locked.checkIn.scope, now, false, responses);
+      const nextItem = conflictId === null ? decision.item : null;
       const nextCheckIn = await transaction.compareAndSwapCheckIn({
         familyId: locked.checkIn.familyId,
         childId: locked.checkIn.childId,
         checkInId: locked.checkIn.id,
         expectedRevision: locked.checkIn.revision,
         next: {
+          acceptedResponseCount: responses.length,
+          uncertainResponseCount: responses.filter(row => row.answer === "skip" || row.answer === "not_sure").length,
+          terminalReason: conflictId === null && nextItem === null ? decision.reason : null,
+          terminalMixedEvidence: conflictId === null && nextItem === null ? decision.mixedEvidence : null,
           state:
             conflictId !== null
               ? "paused"
@@ -889,6 +945,7 @@ export class ProgressCheckInService {
           next: {
             ...this.preservedNextState(locked.checkIn, context),
             state: "stopped" as const,
+            terminalReason: "parent_stopped" as const,
             currentItemId: null,
             currentDeliveryId: null,
             pendingRuntimeSessionId: null,
@@ -1034,12 +1091,9 @@ export class ProgressCheckInService {
           lockedCheckIn.state === "paused" &&
           lockedCheckIn.pauseReason === "conflict"
         ) {
-          const resumedItem = nextProgressItem(
-            projectionInput,
-            lockedCheckIn.scope,
-            now,
-            false,
-          );
+          const responses = await transaction.listCheckInResponses(context.familyId, lockedCheckIn.childId, lockedCheckIn.id);
+          const decision = nextProgressQuestion(projectionInput, lockedCheckIn.purpose, lockedCheckIn.scope, now, false, responses);
+          const resumedItem = decision.item;
           relatedCheckIn =
             await transaction.compareAndSwapCheckIn({
               familyId: lockedCheckIn.familyId,
@@ -1051,6 +1105,10 @@ export class ProgressCheckInService {
                   lockedCheckIn,
                   context,
                 ),
+                acceptedResponseCount: responses.length,
+                uncertainResponseCount: responses.filter(row => row.answer === "skip" || row.answer === "not_sure").length,
+                terminalReason: resumedItem === null ? decision.reason : null,
+                terminalMixedEvidence: resumedItem === null ? decision.mixedEvidence : null,
                 state:
                   resumedItem === null
                     ? "completed"
@@ -1279,7 +1337,10 @@ export class ProgressCheckInService {
     context: ProgressCheckInContext,
     checkIn: ProgressCheckInRecord,
   ): Promise<ProgressCheckInRecord> {
-    if (checkIn.state !== "active") return checkIn;
+    const resumeSelected = context.selectedAssessment !== undefined && context.selectedAssessment !== null &&
+      checkIn.state === "paused" && checkIn.currentItemId !== null &&
+      checkIn.pauseReason !== "conflict" && checkIn.pauseReason !== "member_removed";
+    if (checkIn.state !== "active" && !resumeSelected) return checkIn;
     const updated = await transaction.compareAndSwapCheckIn({
       familyId: checkIn.familyId,
       childId: checkIn.childId,
@@ -1287,6 +1348,7 @@ export class ProgressCheckInService {
       expectedRevision: checkIn.revision,
       next: {
         ...this.preservedNextState(checkIn, context),
+        ...(resumeSelected ? {state: "active" as const, pauseReason: null, pausedAt: null} : {}),
         currentDeliveryId: null,
         episodeId: context.episodeId,
         pendingRuntimeSessionId: context.runtimeSessionId,
@@ -1377,6 +1439,7 @@ export class ProgressCheckInService {
       return { status: "wrong_recipient" };
     }
     if (
+      (locked.checkIn.state === "active" && locked.checkIn.currentDeliveryId === null) ||
       locked.checkIn.currentDeliveryId !==
       context.repliedDeliveryId
     ) {
@@ -1523,6 +1586,10 @@ export class ProgressCheckInService {
   ) {
     return {
       state: checkIn.state,
+      terminalReason: checkIn.terminalReason ?? null,
+      terminalMixedEvidence: checkIn.terminalMixedEvidence ?? null,
+      acceptedResponseCount: checkIn.acceptedResponseCount ?? null,
+      uncertainResponseCount: checkIn.uncertainResponseCount ?? null,
       ownerMemberUserId: checkIn.ownerMemberUserId,
       recipientMemberUserId:
         checkIn.recipientMemberUserId,

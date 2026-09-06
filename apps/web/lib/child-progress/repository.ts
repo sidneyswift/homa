@@ -9,6 +9,7 @@ import type {
   ProgressCheckInRecord,
   ProgressCheckInScope,
   ProgressCheckInState,
+  ProgressCheckInTerminalReason,
   ProgressConflict,
   ProgressEvidence,
   ProgressEvidenceAnswer,
@@ -246,6 +247,10 @@ export type InsertProgressCheckInResult =
     };
 
 export interface ProgressCheckInNextState {
+  terminalReason?: ProgressCheckInTerminalReason | null;
+  acceptedResponseCount?: number | null;
+  uncertainResponseCount?: number | null;
+  terminalMixedEvidence?: boolean | null;
   state: ProgressCheckInState;
   ownerMemberUserId: string | null;
   recipientMemberUserId: string | null;
@@ -525,6 +530,9 @@ export interface ProgressCheckInTransaction
     familyId: string,
     childId: string,
   ): Promise<ProgressCheckInRecord | null>;
+  claimCheckInStartRequest(input: {familyId: string; memberUserId: string; requestId: string; childId: string; subjectId: string; runtimeSessionId: string; turnId: string}): Promise<{kind: "claimed"} | {kind: "existing"; childId: string; subjectId: string; result: unknown}>;
+  completeCheckInStartRequest(input: {familyId: string; memberUserId: string; requestId: string; result: unknown}): Promise<void>;
+  listCheckInResponses(familyId: string, childId: string, checkInId: string): Promise<Array<Pick<StoredProgressCheckInResponse, "itemId" | "answer">>>;
   insertCheckIn(
     input: InsertProgressCheckInInput,
   ): Promise<InsertProgressCheckInResult>;

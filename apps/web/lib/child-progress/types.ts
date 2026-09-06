@@ -1,5 +1,7 @@
 import type { MapAnswer, MapScores } from "@homa/core";
 
+import type { SelectedAssessmentAction } from "./assessment-intent";
+
 export type ProgressEvidenceAnswer =
   | "easily"
   | "getting_there"
@@ -26,6 +28,8 @@ export type ProgressSourceKind =
 
 export interface ProgressSelectionAnswer {
   selectionId: string;
+  childId: string;
+  familyId: string;
   evidenceId: string | null;
   itemId: string;
   answer: MapAnswer;
@@ -75,6 +79,12 @@ export interface ProgressCheckInScope {
   subjectIds?: string[];
 }
 
+export type ProgressCheckInTerminalReason =
+  | "sitting_limit"
+  | "bank_coverage_end"
+  | "no_useful_question"
+  | "parent_stopped";
+
 export interface ProgressCheckInRecord {
   id: string;
   childId: string;
@@ -94,6 +104,10 @@ export interface ProgressCheckInRecord {
   pendingRuntimeSessionId: string | null;
   pendingTurnId: string | null;
   pauseReason: ProgressCheckInPauseReason | null;
+  terminalReason?: ProgressCheckInTerminalReason | null;
+  acceptedResponseCount?: number | null;
+  uncertainResponseCount?: number | null;
+  terminalMixedEvidence?: boolean | null;
   openedAt: string;
   pausedAt: string | null;
   completedAt: string | null;
@@ -108,12 +122,16 @@ export interface ProgressCheckInPrompt {
   childName: string;
   itemId: string;
   personalizedStatement: string;
+  subjectId?: string;
+  acceptedResponseCount?: number;
+  responseLimit?: number;
   subjectDisplayName: string;
   state: ProgressCheckInState;
   ownerDisplayName: string | null;
 }
 
 export interface ProgressCheckInContext {
+  selectedAssessment?: SelectedAssessmentAction | null;
   familyId: string;
   memberUserId: string | null;
   channel: ProgressCheckInChannel;
@@ -198,7 +216,7 @@ export type ProgressCheckInBindResult =
   | { status: "wrong_recipient" }
   | { status: "wrong_delivery" };
 
-export type ProgressCheckInResult =
+export type ProgressCheckInStartOutcome =
   | {
       status: "started";
       checkIn: ProgressCheckInRecord;
@@ -209,6 +227,13 @@ export type ProgressCheckInResult =
       checkIn: ProgressCheckInRecord;
       prompt: ProgressCheckInPrompt | null;
     }
+  | { status: "different_check_in_active"; checkIn: ProgressCheckInRecord }
+  | { status: "no_question"; childId: string; childName: string; subjectId: string; reason: ProgressCheckInTerminalReason; mixedEvidence: boolean }
+  | { status: "conflict_pending"; conflictId: string };
+
+export type ProgressCheckInResult =
+  | ProgressCheckInStartOutcome
+  | { status: "duplicate_start"; original: ProgressCheckInStartOutcome; currentCheckIn: ProgressCheckInRecord | null }
   | ProgressCheckInResponseOutcome
   | {
       status: "paused";

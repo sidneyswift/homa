@@ -1,6 +1,7 @@
 import { defineHook } from "eve/hooks";
 
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
+import { isWebDeliveryChannel } from "../../lib/child-progress/screen-delivery";
 import {
   openReplyLoop,
   recordReactiveDelivery,
@@ -10,14 +11,10 @@ import { persistCanonicalMessage } from "../../lib/conversation-continuity/ledge
 import { isParentedEveSession } from "../../lib/conversation-continuity/session-lineage";
 
 /**
- * A completed web stream is a real delivery to the signed-in adult. Record it
+ * A completed web or native text stream is a real delivery to the signed-in adult. Record it
  * in the same per-recipient ledger as SMS/email so a new device or rotated Eve
  * session can resolve the question Homa visibly asked.
  */
-export function isWebDeliveryChannel(channel: unknown): boolean {
-  return channel === undefined || channel === "web";
-}
-
 export default defineHook({
   events: {
     async "message.completed"(event, ctx) {
@@ -32,9 +29,12 @@ export default defineHook({
         channel?: string;
         familyId?: string;
         memberUserId?: string;
+        voiceBridge?: string;
       };
       if (
         !isWebDeliveryChannel(attributes.channel) ||
+        // Native bridge speech retains its existing voice delivery protocol.
+        (attributes.channel === "mobile" && attributes.voiceBridge === "true") ||
         !attributes.familyId ||
         !attributes.memberUserId
       ) {

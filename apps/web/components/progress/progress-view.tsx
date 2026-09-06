@@ -165,8 +165,10 @@ export function ProgressView({
   deeperChecks = true,
   abilitiesExplorer = null,
   hoursMinutesBySubject,
+  initialSubjectId,
 }: {
   view: ChildProgressView;
+  initialSubjectId?: string;
   /**
    * The child's permanent token report, kept available by the
    * agent-led-live-progress ruling. Null when no report exists yet.
@@ -252,7 +254,7 @@ export function ProgressView({
                   {updatedLine.label}
                 </p>
               ) : null}
-              <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-[-0.015em] text-strong sm:text-4xl">
+              <h1 id="progress-heading" tabIndex={-1} className="mt-2 font-display text-3xl font-bold leading-tight tracking-[-0.015em] text-strong sm:text-4xl">
                 {view.childName}&apos;s progress
               </h1>
             </div>
@@ -296,6 +298,7 @@ export function ProgressView({
           <div className="mt-6">
             <ProgressSubjects
               childId={view.childId}
+              initialSubjectId={initialSubjectId}
               subjects={view.subjects}
               tiles={tiles}
               conflicts={view.conflicts}
@@ -320,6 +323,7 @@ export function ProgressView({
             <div className="mt-3">
               <ProgressMap
                 childId={view.childId}
+                initialSubjectId={initialSubjectId}
                 tiles={tiles}
                 subjects={view.subjects}
                 conflicts={view.conflicts}

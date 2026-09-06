@@ -28,10 +28,9 @@ import { requestConflictResolution } from "./resolve-conflict-request";
  *
  * When the subject can take one (tile.deeperCheck), the footer carries
  * the double-check door (founder ask 2026-07-14: a scary number's first
- * question is "is that right?"): the deep dive flow at /onboarding?dd,
- * which re-asks harder or easier questions, rescores, and rewrites the
- * report around what changed. On read-only mirrors the card still
- * renders, faithful to her screen, with the button inert: tappable
+ * question is "is that right?"): the selected subject check-in in chat,
+ * which asks harder or easier bank questions and updates live Progress.
+ * On read-only mirrors the card still renders, faithful to her screen, with the button inert: tappable
  * only in the family's own session (founder ask 2026-07-14 afternoon,
  * "I still see this in my admin": a mirror that hides her doors reads
  * as the feature not existing).
@@ -161,12 +160,13 @@ export function ProgressDetailPanel({
           {tile?.deeperCheck ? (
             <div className="mb-3 rounded-md border border-sage/30 bg-[var(--accent-sage-soft)] p-3.5">
               <p className="text-sm text-body">
-                This number comes from the answers above. Eight questions at most sharpen it
-                and update the progress report, in about two minutes.
+                A few questions can fill in what Homa knows about this subject.
+                Eight answers at most, and you can stop sooner.
               </p>
               {allowDeeperCheck ? (
                 <Link
-                  href={`/onboarding?dd=${childId}.${subject.subjectId}`}
+                  prefetch={false}
+                  href={`/app?assessment=subject_deep_dive&child=${childId}&subject=${subject.subjectId}`}
                   className="mt-2.5 inline-flex min-h-10 items-center rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand hover:bg-brand-hover"
                 >
                   Answer a few deeper questions

@@ -1,3 +1,7 @@
+import { getMapSubject } from "@homa/core";
+
+import { progressSubjectHref } from "./assessment-intent";
+
 import type {
   RecordJournalProgressEvidenceResult,
   UndoProgressOperationResult,
@@ -15,6 +19,7 @@ import {
   progressQuestionResult,
   progressUpdateResult,
   progressWorkflowResult,
+  progressWorkflowDetails,
   refusedProgressResult,
   reissueProgressResult,
 } from "./tool-result-payloads";
@@ -56,30 +61,47 @@ export async function adaptCheckInResult(input: {
         result.prompt,
         result.progressUpdate,
       );
+    case "duplicate_start":
+      if (result.currentCheckIn) return progressWorkflowResult(
+        result.currentCheckIn.state === "completed" || result.currentCheckIn.state === "stopped" ? "Check-in saved" : "Check-in already opened",
+        undefined, progressWorkflowDetails(result.currentCheckIn),
+      );
+      return adaptCheckInResult({...input, result: result.original});
+    case "different_check_in_active":
+      return progressWorkflowResult("Check-in needs a choice", undefined, {
+        ...progressWorkflowDetails(result.checkIn),
+        activeCheckIn: {checkInId: result.checkIn.id, ownerDisplayName: result.checkIn.ownerDisplayName, needsTakeover: result.checkIn.recipientMemberUserId !== input.context.memberUserId},
+      });
+    case "no_question":
+      return progressWorkflowResult("No question to ask", undefined, {
+        scope: {childId: result.childId, childName: result.childName, subjectId: result.subjectId, subjectDisplayName: getMapSubject(result.subjectId)!.displayName, progressHref: progressSubjectHref(result.childId, result.subjectId)},
+        completion: {reason: result.reason, acceptedResponseCount: 0, uncertainResponseCount: 0, mixedEvidence: result.mixedEvidence},
+      });
     case "existing":
       if (result.checkIn.state === "paused") {
-        return progressWorkflowResult("Check-in paused");
+        return progressWorkflowResult("Check-in paused", undefined, progressWorkflowDetails(result.checkIn));
       }
       return result.prompt
         ? progressQuestionResult(result.prompt)
-        : refusedProgressResult();
+        : progressWorkflowResult("Check-in saved", undefined, progressWorkflowDetails(result.checkIn));
     case "stopped":
-      return progressWorkflowResult("Check-in saved");
+      return progressWorkflowResult("Check-in saved", undefined, progressWorkflowDetails(result.checkIn));
     case "completed":
       return progressWorkflowResult(
         "Check-in saved",
         result.progressUpdate,
+        progressWorkflowDetails(result.checkIn),
       );
     case "conflict_open":
       return progressConflictCardResult(result.conflict);
     case "paused":
-      return progressWorkflowResult("Check-in paused");
+      return progressWorkflowResult("Check-in paused", undefined, progressWorkflowDetails(result.checkIn));
     case "takeover_accepted":
       return progressWorkflowResult("Check-in moved");
     case "conflict_resolved":
       return result.prompt
         ? progressQuestionResult(result.prompt)
-        : progressWorkflowResult("Check-in saved");
+        : progressWorkflowResult("Check-in saved", undefined, result.checkIn ? progressWorkflowDetails(result.checkIn) : {});
     case "duplicate":
       return adaptCheckInResult({ ...input, result: result.original });
     case "conflict_pending": {

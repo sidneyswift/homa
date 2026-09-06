@@ -217,6 +217,7 @@ describe("child progress tool result adapter", () => {
     assert.deepEqual(result, {
       kind: "progress_workflow",
       label: "Check-in saved",
+      completion: {reason: null, acceptedResponseCount: null, uncertainResponseCount: null, mixedEvidence: false},
       update: {
         label: "Progress updated",
         undoToken: OPERATION_ID,
