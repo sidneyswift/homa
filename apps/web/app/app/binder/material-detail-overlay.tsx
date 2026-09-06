@@ -50,9 +50,9 @@ function DeleteMaterialControl({ material, onDeleted }: { material: BinderMateri
   return (
     <div className="mt-3 border-t border-[var(--homa-control-boundary)] pt-3">
       <p className="text-xs font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-        {`Delete "${material.title}"? This can't be undone.`}
+        {`Delete "${material.title}" from your binder?`}
       </p>
-      <div className="mt-2 flex gap-2">
+      <div className="mt-2 flex flex-wrap gap-2">
         <QuietAction
           kind="secondary"
           disabled={pending}
@@ -60,23 +60,27 @@ function DeleteMaterialControl({ material, onDeleted }: { material: BinderMateri
           onClick={() => {
             setError(null);
             startTransition(async () => {
-              const result = await deleteMaterialAction(material.id);
-              if (result.deleted) {
-                onDeleted();
-                router.refresh();
-              } else {
-                setError(result.note);
+              try {
+                const result = await deleteMaterialAction(material.id);
+                if (result.deleted) {
+                  onDeleted();
+                  router.refresh();
+                } else {
+                  setError(result.note);
+                }
+              } catch {
+                setError("That did not delete. Try again in a moment.");
               }
             });
           }}
         >
           {pending ? "Deleting…" : "Delete"}
         </QuietAction>
-        <QuietAction kind="quiet" onClick={() => setConfirming(false)} className="px-3.5 text-xs">
-          Keep
+        <QuietAction kind="quiet" disabled={pending} onClick={() => setConfirming(false)} className="px-3.5 text-xs">
+          Cancel
         </QuietAction>
       </div>
-      {error ? <p className="mt-2 text-xs text-[color:var(--homa-error-ink)]">{error}</p> : null}
+      {error ? <p role="alert" className="mt-2 text-xs text-[color:var(--homa-error-ink)]">{error}</p> : null}
     </div>
   );
 }

@@ -7,7 +7,6 @@ import {
   uploadMaterialArtifacts,
 } from "./artifact-store";
 import {
-  joinPageBodies,
   printableSlug,
   splitPageBodies,
   wrapPrintableDocument,
@@ -17,6 +16,7 @@ import {
   renderPrintableHtml,
 } from "./render-page";
 import { buildRenderProvenance } from "./render-provenance";
+import { insertRestoredMaterialCaller, insertRestoredMaterialPinned } from "./restore-record";
 
 const RESTORABLE_SINCE = Date.parse("2026-07-29T00:00:00.000Z");
 
@@ -41,6 +41,7 @@ export interface RestoreRow {
   created_at: string;
   generation: unknown;
   subject_lesson_id: string | null;
+  deleted_at: string | null;
 }
 
 export interface RestoredMaterial {
@@ -241,7 +242,7 @@ async function restoreWithAccess(input: {
 const RESTORE_COLUMNS =
   "id, family_id, child_id, title, kind, skill, subject, curriculum, theme, "
   + "characters, tags, html, source, status, revises, preview_url, created_at, "
-  + "generation, subject_lesson_id";
+  + "generation, subject_lesson_id, deleted_at";
 
 export async function restoreMaterialVersionCaller(input: {
   db: SupabaseClient;
@@ -279,33 +280,15 @@ export async function restoreMaterialVersionCaller(input: {
         }));
       },
       async insert({ row, artifacts, generation, channel }) {
-        const { data, error } = await input.db
-          .from("materials")
-          .insert({
-            family_id: input.familyId,
-            child_id: row.child_id,
-            title: row.title,
-            kind: row.kind,
-            skill: row.skill,
-            subject: row.subject,
-            curriculum: row.curriculum,
-            theme: row.theme,
-            characters: row.characters,
-            tags: row.tags,
-            pdf_url: artifacts.pdfUrl,
-            preview_url: artifacts.previewUrl,
-            html: joinPageBodies(splitPageBodies(row.html)),
-            source: row.source,
-            status: "final",
-            revises: row.id,
-            approved_at: new Date().toISOString(),
-            channel,
-            generation,
-          })
-          .select("id")
-          .single();
-        if (error || !data) return null;
-        return { id: data.id };
+        return await insertRestoredMaterialCaller(input.db, {
+          familyId: input.familyId,
+          sourceMaterialId: row.id,
+          expectedDeletedAt: row.deleted_at,
+          pdfUrl: artifacts.pdfUrl,
+          previewUrl: artifacts.previewUrl,
+          generation,
+          channel,
+        });
       },
     },
   });
@@ -330,7 +313,8 @@ export async function restoreMaterialVersionPinned(input: {
                  material.theme, material.characters, material.tags,
                  material.html, material.source, material.status,
                  material.revises, material.preview_url, material.created_at,
-                 material.generation, material.subject_lesson_id
+                 material.generation, material.subject_lesson_id,
+                 material.deleted_at::text as deleted_at
           from public.materials material
           left join public.children child
             on child.id = material.child_id
@@ -341,23 +325,15 @@ export async function restoreMaterialVersionPinned(input: {
         `;
       },
       async insert({ row, artifacts, generation, channel }) {
-        const inserted = await sql<{ id: string }[]>`
-          insert into public.materials
-            (family_id, child_id, title, kind, skill, subject, curriculum,
-             theme, characters, tags, pdf_url, preview_url, html, source,
-             status, revises, approved_at, channel, generation)
-          select ${input.familyId}, source.child_id, source.title, source.kind,
-                 source.skill, source.subject, source.curriculum, source.theme,
-                 source.characters, source.tags, ${artifacts.pdfUrl},
-                 ${artifacts.previewUrl}, source.html, source.source, 'final',
-                 source.id, now(), ${channel}, ${sql.json(generation as never)}
-          from public.materials source
-          where source.id = ${row.id}
-            and source.family_id = ${input.familyId}
-            and source.subject_lesson_id is null
-          returning id
-        `;
-        return inserted[0] ?? null;
+        return await insertRestoredMaterialPinned({
+          familyId: input.familyId,
+          sourceMaterialId: row.id,
+          expectedDeletedAt: row.deleted_at,
+          pdfUrl: artifacts.pdfUrl,
+          previewUrl: artifacts.previewUrl,
+          generation,
+          channel,
+        });
       },
     },
   });

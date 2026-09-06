@@ -15,16 +15,15 @@ import { createSupabaseServerClient } from "../../../lib/supabase/server";
  * Same shape as keepMaterialAction: runs on the caller's own session so
  * RLS is the wall, re-scopes the id inside the caller's family before
  * touching anything, and the underlying soft delete is idempotent (a
- * double click just reports "already gone").
+ * double click reports "Already removed.").
  */
 export async function deleteMaterialAction(
   materialId: string,
 ): Promise<{ deleted: boolean; note: string }> {
-  const data = await getAppData();
-  if (!data) return { deleted: false, note: "Sign in to delete this." };
-
-  const supabase = await createSupabaseServerClient();
   try {
+    const data = await getAppData();
+    if (!data) return { deleted: false, note: "Sign in to delete this." };
+    const supabase = await createSupabaseServerClient();
     const result = await softDeleteMaterialCaller(supabase, data.family.id, materialId);
     if (result.deleted) {
       revalidatePath("/app/binder");
