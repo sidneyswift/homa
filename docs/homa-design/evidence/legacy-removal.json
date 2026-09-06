@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "1e1fc6234c38962d35a01ec7633ce62bceddfb9bafc5d255d6905884ddda03fe",
+  "ownedInputFingerprint": "f701fdcf31fa1a41e0fb901c6ea3827b73bb22238c15656db881f47a1a8e810b",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -63,7 +63,7 @@
     {
       "surfaceId": "surface:be910adc175f4550",
       "path": "apps/web/agent/activity-formats.md",
-      "sourceHash": "cda1f9103a04096e34edd7763a62960347ede50371e805b494e1ea4e6ab89ac0",
+      "sourceHash": "6261c66460c7e58380e6e6989eb72ce9d1757e9da129a9413f9ed622a2f765a7",
       "legacySignatures": [
         "legacy-shape-language"
       ],
@@ -116,7 +116,7 @@
     {
       "surfaceId": "surface:0181a9657036c0f8",
       "path": "apps/web/agent/skills/materials-studio/SKILL.md",
-      "sourceHash": "13b66463325df995e3808b4bbeb493b21a77fb11ee30871c3f89a42458949a76",
+      "sourceHash": "39ce890cb20828a9fa565c8000b16edb32cbf49f6a8473b0887226196f26569f",
       "legacySignatures": [
         "legacy-shape-language"
       ],
@@ -1566,7 +1566,7 @@
     {
       "surfaceId": "surface:b32b7fc1bd07f5ab",
       "path": "apps/web/app/admin/studio/page.tsx",
-      "sourceHash": "8ae8df60f1b6cb798c7d82aa0a90ede48451b0afd498cf061d9c55c44cdd1e01",
+      "sourceHash": "76ed32eda59815847ea0e54831ee0f9c31f0bf5a389199a6d32baffc2a401d34",
       "legacySignatures": [
         "legacy-rounded-pill"
       ],
@@ -2503,7 +2503,7 @@
     {
       "surfaceId": "surface:0251c96a3bf92d13",
       "path": "apps/web/app/app/planner/unified-planner-view.tsx",
-      "sourceHash": "8be3c455883362acef8186a61eb43b674c46a2b24f967c75e6376d62531978f5",
+      "sourceHash": "6833e51a899c359dd841d06b6c49f987294f01c80a0d6753c712605eea5cdd39",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
@@ -5640,7 +5640,7 @@
     {
       "surfaceId": "surface:21e82a508a0cef0e",
       "path": "apps/web/components/progress/progress-detail-panel.tsx",
-      "sourceHash": "7254b373424e254d14b30feca988a7bdadc998eb3771faaec38ab1ad76279d56",
+      "sourceHash": "9e8873f6d81536d721de46369829d3eea0b31aff13f65f7a47b507e9d0f0c3f8",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5696,7 +5696,7 @@
     {
       "surfaceId": "surface:6b074833e02c2a88",
       "path": "apps/web/components/progress/progress-map.tsx",
-      "sourceHash": "5f02b0e7e0ee24710fb3073368099068b2c200179c9747cb184769ac6a8a3f0f",
+      "sourceHash": "4535ec91009ccde7261c761431a6d9ca16398c37332de1c94991c43ffb9fcea4",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5861,7 +5861,7 @@
     {
       "surfaceId": "surface:91593b41f57ed79a",
       "path": "apps/web/components/progress/progress-view.tsx",
-      "sourceHash": "f13edcfd1109e3528a0a652b47e7884591a2f4498278e8e108726391eff6fe96",
+      "sourceHash": "46c2ba9681c6b3cee548b6b5857e4d7d5399bc935d631eb4a0a88bb3a233fcac",
       "legacySignatures": [],
       "detectedSourceHash": "8ff9259339264eca65dfc6404ccaa828c2204aa77c3a05bb868f73c1c9789433",
       "detectedLegacySignatures": [
@@ -6389,7 +6389,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "2d319b85bc245f594fb6880500808b75c1649da0eaf3017bd57310a4ac397a91",
+      "sourceHash": "c9dce5bce3d53f7702172b5405f97978c7f84288a48520a423f2f44d3cff163f",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
@@ -6505,7 +6505,7 @@
     {
       "surfaceId": "surface:1aac9cfdef6206ce",
       "path": "docs/homa-planning/journeys/10-reconciliation.md",
-      "sourceHash": "77651952ab1cca90f1bde6c7cbfe31efd1c7a3aa939a4102676a9112def8cdba",
+      "sourceHash": "7ff3d8c29426029a796de0da6d2e029e34b26e33a353e2cc7df27f6485a42703",
       "legacySignatures": [],
       "detectedSourceHash": "e2ca1ca294cb2e4e739a96957d9b84251c1d2910acd2e16c089b2433ebede8d9",
       "detectedLegacySignatures": [
@@ -10614,10 +10614,8 @@
     {
       "surfaceId": "surface:71f4b49e3454ad90",
       "path": "marketing/content/drafts/2026-07-05-how-to-track-homeschool-hours/video/script.md",
-      "sourceHash": "69223d8ed1a226fd1e5b25d2b6caab09b8c5ed9775d2c4f51a515eca97058f95",
-      "legacySignatures": [
-        "legacy-color-canvas"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "69223d8ed1a226fd1e5b25d2b6caab09b8c5ed9775d2c4f51a515eca97058f95",
       "detectedLegacySignatures": [
         "legacy-color-canvas"
@@ -10641,7 +10639,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -10667,10 +10665,8 @@
     {
       "surfaceId": "surface:19543823f306ea76",
       "path": "marketing/content/drafts/2026-07-05-ugc-homa-intro/video/script.md",
-      "sourceHash": "cb937c1573778d3cbd4054709129049406b2e95aeb888a1f7a5638349d7022b9",
-      "legacySignatures": [
-        "legacy-color-canvas"
-      ],
+      "sourceHash": null,
+      "legacySignatures": [],
       "detectedSourceHash": "cb937c1573778d3cbd4054709129049406b2e95aeb888a1f7a5638349d7022b9",
       "detectedLegacySignatures": [
         "legacy-color-canvas"
@@ -10694,7 +10690,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "absent",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -11237,6 +11233,59 @@
         "rollbackBoundary": "web-deployment"
       },
       "sourceState": "present-clear",
+      "status": "open",
+      "evidence": {
+        "replacement": null,
+        "deletion": null,
+        "immutableResidual": null,
+        "productionReadback": null,
+        "cacheReadback": null,
+        "installedClientReadback": null,
+        "historicalDeliveryReadback": null,
+        "privateProvenanceReadback": null,
+        "observedAt": null
+      },
+      "rollback": {
+        "boundary": "web-deployment",
+        "rehearsalEvidence": null
+      },
+      "deletionCommit": null,
+      "stopGeneration": {
+        "observedAt": null,
+        "evidencePath": null
+      }
+    },
+    {
+      "surfaceId": "surface:b75dcec3e74d1e13",
+      "path": "work/onboardingandpaywall8-30/assets/making-feature-cards/MANIFEST.md",
+      "sourceHash": "2abe6a4d8087e2030df6d3fca50be464444e16b142c03f0bfe6f6d75c8b67d11",
+      "legacySignatures": [
+        "legacy-shape-language"
+      ],
+      "detectedSourceHash": "2abe6a4d8087e2030df6d3fca50be464444e16b142c03f0bfe6f6d75c8b67d11",
+      "detectedLegacySignatures": [
+        "legacy-shape-language"
+      ],
+      "ownerIssue": "gh#729",
+      "disposition": "replace-active",
+      "reachability": "internal",
+      "criticality": "journey-critical",
+      "deliveryState": "controlled-current",
+      "preservedBinding": {
+        "surfaceId": "surface:b75dcec3e74d1e13",
+        "path": "work/onboardingandpaywall8-30/assets/making-feature-cards/MANIFEST.md",
+        "detectedSourceHash": "2abe6a4d8087e2030df6d3fca50be464444e16b142c03f0bfe6f6d75c8b67d11",
+        "detectedLegacySignatures": [
+          "legacy-shape-language"
+        ],
+        "ownerIssue": "gh#729",
+        "disposition": "replace-active",
+        "reachability": "internal",
+        "criticality": "journey-critical",
+        "deliveryState": "controlled-current",
+        "rollbackBoundary": "web-deployment"
+      },
+      "sourceState": "present-signaled",
       "status": "open",
       "evidence": {
         "replacement": null,
