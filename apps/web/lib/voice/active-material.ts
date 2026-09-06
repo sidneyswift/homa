@@ -99,24 +99,37 @@ export function selectActiveMaterial(
   };
 }
 
+const ACTIVE_MATERIAL_INVENTORY_LIMIT = 3000;
+
+/** A bounded listing is authoritative only when the same read proves it is
+ * complete. Otherwise an omitted newer revision can make an old final current. */
+function completeInventory(rows: readonly ActiveMaterialRow[], total: unknown): boolean {
+  return typeof total === "number" && Number.isSafeInteger(total)
+    && total >= 0 && total <= ACTIVE_MATERIAL_INVENTORY_LIMIT
+    && rows.length === total;
+}
+
 export async function resolveActiveMaterialCaller(
   db: SupabaseClient,
   familyId: string,
   requestedId: string,
 ): Promise<ResolvedActiveMaterial | null> {
-  const { data, error } = await db
+  const { data, count, error } = await db
     .from("materials")
     .select(
       "id, title, status, revises, created_at, review_pass:generation->review->>pass, " +
         "page_count:generation->pageCount, page_roles:generation->pageRoles",
+      { count: "exact" },
     )
     .eq("family_id", familyId)
-    .limit(3000);
+    .limit(ACTIVE_MATERIAL_INVENTORY_LIMIT);
   if (error) {
     console.error("active material lookup failed:", error.message);
     return null;
   }
-  return selectActiveMaterial((data ?? []) as unknown as ActiveMaterialRow[], requestedId);
+  const rows = (data ?? []) as unknown as ActiveMaterialRow[];
+  if (!completeInventory(rows, count)) return null;
+  return selectActiveMaterial(rows, requestedId);
 }
 
 export async function resolveActiveMaterialPinned(
@@ -124,16 +137,21 @@ export async function resolveActiveMaterialPinned(
   requestedId: string,
 ): Promise<ResolvedActiveMaterial | null> {
   const sql = mapDb();
-  const rows = await sql<ActiveMaterialRow[]>`
+  const rows = await sql<Array<ActiveMaterialRow & { inventory_count: string }>>`
     select id, title, status, revises, created_at,
            generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
-           generation->'pageRoles' as page_roles
+           generation->'pageRoles' as page_roles,
+           (count(*) over ())::text as inventory_count
     from public.materials
     where family_id = ${familyId}
     order by created_at asc
-    limit 3000
+    limit ${ACTIVE_MATERIAL_INVENTORY_LIMIT}
   `;
+  const total = rows[0]?.inventory_count;
+  if (typeof total !== "string" || !/^[0-9]+$/u.test(total)
+    || !completeInventory(rows, Number(total))
+    || rows.some((row) => row.inventory_count !== total)) return null;
   return selectActiveMaterial(rows, requestedId);
 }
 

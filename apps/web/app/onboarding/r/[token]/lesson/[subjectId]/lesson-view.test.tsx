@@ -310,7 +310,7 @@ describe("retained subject lesson states", () => {
     ]);
     assert.doesNotMatch(
       html,
-      /practice page|Try the page|Print it|Keep/u,
+      /practice page|Try the page|Open PDF to print|Keep/u,
     );
   });
 
@@ -349,7 +349,7 @@ describe("retained subject lesson states", () => {
       READY_CONTENT.practice,
       "Worksheet",
       "Maya&#x27;s counting practice",
-      "Print it",
+      "Open PDF to print",
       "Keep in Binder",
       "Binder saves the worksheet for later. The lesson stays at this link.",
     ]);
@@ -372,7 +372,7 @@ describe("retained subject lesson states", () => {
       access: "token",
       ownerMaterial: null,
     });
-    assert.match(readyHtml, /Print it/u);
+    assert.match(readyHtml, /Open PDF to print/u);
     assert.doesNotMatch(
       readyHtml,
       new RegExp(
@@ -688,7 +688,7 @@ describe("retained lesson contrast and retry", () => {
       ownerMaterial: null,
     });
     for (const className of [
-      interactiveClassForText(readyHtml, "Print it"),
+      interactiveClassForText(readyHtml, "Open PDF to print"),
       interactiveClassForText(readyHtml, "Keep in Binder"),
       interactiveClassForText(failedHtml, "Make the lesson again"),
       interactiveClassForText(inactiveHtml, "Back to the report"),

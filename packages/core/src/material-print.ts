@@ -1,7 +1,7 @@
 /** Exact prepared-print receipts shared by web and native. No device effect. */
 export const MAX_PRINT_PAGES = 240;
 export const MAX_PRINT_COPIES = 20;
-export const PRINT_STALE_MESSAGE = "That is not the current visible version anymore. Show the material again before printing.";
+export const PRINT_STALE_MESSAGE = "I could not verify this as the current visible version. Show the material again before printing.";
 export const PRINT_INVALID_MESSAGE = "I could not verify these print details. Show the material again and ask me to prepare it for printing.";
 
 export interface PreparedPrintRequest {
