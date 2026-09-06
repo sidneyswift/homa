@@ -1,0 +1,635 @@
+diff --git a/build/pdf.mjs b/build/pdf.mjs
+index 4b9620cb0fe6dd4703a5922ebee5d3c2f8f55a24..2e353dbc4007b0d219bc9979881ca5214082d915 100644
+--- a/build/pdf.mjs
++++ b/build/pdf.mjs
+@@ -15165,6 +15165,15 @@ function getDocument(src = {}) {
+   const standardFontDataUrl = getFactoryUrlProp(src.standardFontDataUrl);
+   const wasmUrl = getFactoryUrlProp(src.wasmUrl);
+   const ignoreErrors = src.stopAtErrors !== true;
++  // Homa's original-file reader opts into per-document allocation limits.
++  // Rebuild the object so callers cannot provide mutable accounting state.
++  const homaReadLimits = src.homaReadLimits ? Object.fromEntries(
++    ["maxDecodedStreamBytes", "maxAllocatedBytes", "maxTokenChars", "maxArrayEntries", "maxImagePixels"].map(key => {
++      const value = src.homaReadLimits[key];
++      if (!Number.isSafeInteger(value) || value <= 0) throw new Error("Invalid PDF read limit");
++      return [key, value];
++    })
++  ) : null;
+   const maxImageSize = Number.isInteger(src.maxImageSize) && src.maxImageSize > -1 ? src.maxImageSize : -1;
+   const isOffscreenCanvasSupported = typeof src.isOffscreenCanvasSupported === "boolean" ? src.isOffscreenCanvasSupported : !isNodeJS;
+   const isImageDecoderSupported = typeof src.isImageDecoderSupported === "boolean" ? src.isImageDecoderSupported : !isNodeJS;
+@@ -15221,6 +15230,7 @@ function getDocument(src = {}) {
+     docBaseUrl,
+     enableXfa,
+     evaluatorOptions: {
++      homaReadLimits,
+       maxImageSize,
+       disableFontFace,
+       ignoreErrors,
+@@ -15877,10 +15887,17 @@ class PDFPageProxy {
+         if (this._transport.destroyed) {
+           return;
+         }
++        // Reject before marking a failed stream complete. Otherwise the
++        // operator-list task resolves first and a failed image renders blank.
++        intentState.opListReadCapability?.reject(reason);
+         if (intentState.operatorList) {
+           intentState.operatorList.lastChunk = true;
+           for (const internalRenderTask of intentState.renderTasks) {
+-            internalRenderTask.operatorListChanged();
++            if (typeof internalRenderTask.cancel === "function") {
++              internalRenderTask.cancel(reason);
++            } else {
++              internalRenderTask.operatorListChanged();
++            }
+           }
+           this.#tryCleanup();
+         }
+diff --git a/build/pdf.worker.mjs b/build/pdf.worker.mjs
+index 72a8a90eca8044a2911e0ef401139efa8151322f..b660b7b18393c8b13e17480d20192093a4589663 100644
+--- a/build/pdf.worker.mjs
++++ b/build/pdf.worker.mjs
+@@ -1073,6 +1073,9 @@ function isRefsEqual(v1, v2) {
+ ;// ./src/core/base_stream.js
+ 
+ class BaseStream {
++  get homaReadLimits() {
++    return this._homaReadLimits || this.dict?.xref?.pdfManager?.evaluatorOptions?.homaReadLimits || this.stream?.homaReadLimits || null;
++  }
+   get length() {
+     unreachable("Abstract getter `length` accessed");
+   }
+@@ -2839,10 +2842,14 @@ class Stream extends BaseStream {
+     this.start = this.pos;
+   }
+   makeSubStream(start, length, dict = null) {
+-    return new Stream(this.bytes.buffer, start, length, dict);
++    const substream = new Stream(this.bytes.buffer, start, length, dict);
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+   clone() {
+-    return new Stream(this.bytes.buffer, this.start, this.length, this.dict?.clone());
++    const substream = new Stream(this.bytes.buffer, this.start, this.length, this.dict?.clone());
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+ }
+ class StringStream extends Stream {
+@@ -3762,14 +3769,23 @@ class DecodeStream extends BaseStream {
+     return this.bufferLength === 0;
+   }
+   ensureBuffer(requested) {
++    const limits = this.homaReadLimits;
++    if (limits && (!Number.isSafeInteger(requested) || requested > limits.maxDecodedStreamBytes)) {
++      throw new FormatError("PDF decoded stream exceeds reading limit");
++    }
+     const buffer = this.buffer;
+     if (requested <= buffer.byteLength) {
+       return buffer;
+     }
+-    let size = this.minBufferLength;
++    let size = Math.min(this.minBufferLength, limits?.maxDecodedStreamBytes || Infinity);
+     while (size < requested) {
+       size *= 2;
+     }
++    if (limits) {
++      size = Math.min(size, limits.maxDecodedStreamBytes);
++      limits.allocatedBytes = (limits.allocatedBytes || 0) + size;
++      if (limits.allocatedBytes > limits.maxAllocatedBytes) throw new FormatError("PDF allocation exceeds reading limit");
++    }
+     const buffer2 = new Uint8Array(size);
+     buffer2.set(buffer);
+     return this.buffer = buffer2;
+@@ -3833,8 +3849,19 @@ class DecodeStream extends BaseStream {
+       const chunks = [];
+       let totalLength = 0;
+       for await (const chunk of readable) {
+-        chunks.push(chunk);
+         totalLength += chunk.byteLength;
++        const limits = this.homaReadLimits;
++        if (limits) {
++          if (totalLength > limits.maxDecodedStreamBytes) throw new FormatError("PDF decoded stream exceeds reading limit");
++          limits.allocatedBytes = (limits.allocatedBytes || 0) + chunk.byteLength;
++          if (limits.allocatedBytes > limits.maxAllocatedBytes) throw new FormatError("PDF allocation exceeds reading limit");
++        }
++        chunks.push(chunk);
++      }
++      const limits = this.homaReadLimits;
++      if (limits) {
++        limits.allocatedBytes = (limits.allocatedBytes || 0) + totalLength;
++        if (limits.allocatedBytes > limits.maxAllocatedBytes) throw new FormatError("PDF allocation exceeds reading limit");
+       }
+       const data = new Uint8Array(totalLength);
+       let offset = 0;
+@@ -3846,7 +3873,8 @@ class DecodeStream extends BaseStream {
+         decompressed: data,
+         compressed: bytes
+       };
+-    } catch {
++    } catch (error) {
++      if (this.homaReadLimits && error instanceof FormatError) throw error;
+       return {
+         decompressed: null,
+         compressed: bytes
+@@ -3867,13 +3895,17 @@ class DecodeStream extends BaseStream {
+         this.readBlock();
+       }
+     }
+-    return new Stream(this.buffer, start, length, dict);
++    const substream = new Stream(this.buffer, start, length, dict);
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+   clone() {
+     while (!this.eof) {
+       this.readBlock();
+     }
+-    return new Stream(this.buffer, 0, this.bufferLength, this.dict?.clone());
++    const substream = new Stream(this.buffer, 0, this.bufferLength, this.dict?.clone());
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+   getBaseStreams() {
+     return this.stream ? this.stream.getBaseStreams() : null;
+@@ -3887,6 +3919,7 @@ class StreamsSequenceStream extends DecodeStream {
+       maybeLength += stream instanceof DecodeStream ? stream._rawMinBufferLength : stream.length;
+     }
+     super(maybeLength);
++    this._homaReadLimits = streams.find(stream => stream.homaReadLimits)?.homaReadLimits || null;
+     this.streams = streams;
+     this._onError = onError;
+   }
+@@ -4748,7 +4781,12 @@ function findNextFileMarker(data, view, currentPos, startPos = currentPos) {
+     offset: newPos
+   };
+ }
+-function prepareComponents(frame) {
++function prepareComponents(frame, readLimits) {
++  if (readLimits) {
++    const pixels = frame.samplesPerLine * frame.scanLines;
++    readLimits.jpegPixels = (readLimits.jpegPixels || 0) + pixels;
++    if (!Number.isSafeInteger(pixels) || pixels <= 0 || readLimits.jpegPixels > readLimits.maxImagePixels) throw new FormatError("JPEG dimensions exceed reading limit");
++  }
+   const mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / frame.maxH);
+   const mcusPerColumn = Math.ceil(frame.scanLines / 8 / frame.maxV);
+   for (const component of frame.components) {
+@@ -4757,6 +4795,11 @@ function prepareComponents(frame) {
+     const blocksPerLineForMcu = mcusPerLine * component.h;
+     const blocksPerColumnForMcu = mcusPerColumn * component.v;
+     const blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
++    if (readLimits) {
++      const bytes = blocksBufferSize * 2;
++      readLimits.allocatedBytes = (readLimits.allocatedBytes || 0) + bytes;
++      if (!Number.isSafeInteger(bytes) || bytes <= 0 || readLimits.allocatedBytes > readLimits.maxAllocatedBytes) throw new FormatError("JPEG allocation exceeds reading limit");
++    }
+     component.blockData = new Int16Array(blocksBufferSize);
+     component.blocksPerLine = blocksPerLine;
+     component.blocksPerColumn = blocksPerColumn;
+@@ -4793,8 +4836,10 @@ function skipData(data, view, offset) {
+ class JpegImage {
+   constructor({
+     decodeTransform = null,
+-    colorTransform = -1
++    colorTransform = -1,
++    homaReadLimits = null
+   } = {}) {
++    this._homaReadLimits = homaReadLimits;
+     this._decodeTransform = decodeTransform;
+     this._colorTransform = colorTransform;
+   }
+@@ -4994,7 +5039,7 @@ class JpegImage {
+           }
+           frame.maxH = maxH;
+           frame.maxV = maxV;
+-          prepareComponents(frame);
++          prepareComponents(frame, this._homaReadLimits);
+           break;
+         case 0xffc4:
+           const huffmanLength = view.getUint16(offset);
+@@ -5309,6 +5354,7 @@ class JpegStream extends DecodeStream {
+   }
+   get jpegOptions() {
+     const jpegOptions = {
++      homaReadLimits: this.homaReadLimits,
+       decodeTransform: undefined,
+       colorTransform: undefined
+     };
+@@ -11237,6 +11283,7 @@ class Parser {
+         case "[":
+           const array = [];
+           while (!isCmd(this.buf1, "]") && this.buf1 !== EOF) {
++            if (this.lexer.homaReadLimits && array.length >= this.lexer.homaReadLimits.maxArrayEntries) throw new FormatError("PDF array exceeds reading limit");
+             array.push(this.getObj(cipherTransform));
+           }
+           if (this.buf1 === EOF) {
+@@ -11820,6 +11867,7 @@ class Lexer {
+     this.stream = stream;
+     this.nextChar();
+     this.strBuf = [];
++    this.homaReadLimits = stream.homaReadLimits;
+     this.knownCommands = knownCommands;
+     this._hexStringNumWarn = 0;
+     this.beginInlineImagePos = -1;
+@@ -11892,6 +11940,7 @@ class Lexer {
+     strBuf.length = 0;
+     let ch = this.nextChar();
+     while (true) {
++      if (this.homaReadLimits && strBuf.length >= this.homaReadLimits.maxTokenChars) throw new FormatError("PDF string exceeds reading limit");
+       let charBuffered = false;
+       switch (ch | 0) {
+         case -1:
+@@ -11988,6 +12037,7 @@ class Lexer {
+     const strBuf = this.strBuf;
+     strBuf.length = 0;
+     while ((ch = this.nextChar()) >= 0 && !specialChars[ch]) {
++      if (this.homaReadLimits && strBuf.length >= this.homaReadLimits.maxTokenChars) throw new FormatError("PDF name exceeds reading limit");
+       if (ch === 0x23) {
+         ch = this.nextChar();
+         if (specialChars[ch]) {
+@@ -12041,6 +12091,7 @@ class Lexer {
+       digit = -1;
+     this._hexStringNumWarn = 0;
+     while (true) {
++      if (this.homaReadLimits && strBuf.length >= this.homaReadLimits.maxTokenChars) throw new FormatError("PDF hex string exceeds reading limit");
+       if (ch < 0) {
+         warn("Unterminated hex string");
+         break;
+@@ -34365,6 +34416,13 @@ class PartialEvaluator {
+       warn("Image dimensions are missing, or not numbers.");
+       return;
+     }
++    const readLimits = this.options.homaReadLimits;
++    if (readLimits) {
++      readLimits.imagePixels = (readLimits.imagePixels || 0) + w * h;
++      if (!Number.isSafeInteger(w * h) || w <= 0 || h <= 0 || readLimits.imagePixels > readLimits.maxImagePixels) {
++        throw new FormatError("PDF images exceed reading limit");
++      }
++    }
+     if (maxImageSize !== -1 && w * h > maxImageSize) {
+       const msg = "Image exceeded maximum allowed size and was removed.";
+       if (!ignoreErrors) {
+@@ -34503,7 +34561,7 @@ class PartialEvaluator {
+         }
+       }
+     }
+-    PDFImage.buildImage({
++    const imageDecode = PDFImage.buildImage({
+       xref: this.xref,
+       res: resources,
+       image,
+@@ -34520,12 +34578,14 @@ class PartialEvaluator {
+       }
+       return this._sendImgData(objId, imgData, cacheGlobally);
+     }).catch(reason => {
++      if (readLimits) throw reason;
+       warn(`Unable to decode image "${objId}": "${reason}".`);
+       if (imageRef) {
+         this.globalImageCache.addDecodeFailed(imageRef);
+       }
+       return this._sendImgData(objId, null, cacheGlobally);
+     });
++    if (readLimits) await imageDecode;
+     if (cacheKey) {
+       const cacheData = {
+         objId,
+@@ -60262,6 +60322,7 @@ class LocalPdfManager extends BasePdfManager {
+   constructor(args) {
+     super(args);
+     const stream = new Stream(args.source);
++    stream._homaReadLimits = this.evaluatorOptions.homaReadLimits;
+     this.pdfDocument = new PDFDocument(this, stream);
+     this._loadedStreamPromise = Promise.resolve(stream);
+   }
+@@ -60289,6 +60350,7 @@ class NetworkPdfManager extends BasePdfManager {
+       disableAutoFetch: args.disableAutoFetch,
+       rangeChunkSize: args.rangeChunkSize
+     });
++    this.streamManager.getStream()._homaReadLimits = this.evaluatorOptions.homaReadLimits;
+     this.pdfDocument = new PDFDocument(this, this.streamManager.getStream());
+   }
+   async ensure(obj, prop, args) {
+diff --git a/legacy/build/pdf.mjs b/legacy/build/pdf.mjs
+index 2de88b83f9f6789ef18359514a1ecd9a639e1049..fb87d3fccef6275ca6b5763fcb4841954ccaab95 100644
+--- a/legacy/build/pdf.mjs
++++ b/legacy/build/pdf.mjs
+@@ -21452,6 +21452,15 @@ function getDocument(src = {}) {
+   const standardFontDataUrl = getFactoryUrlProp(src.standardFontDataUrl);
+   const wasmUrl = getFactoryUrlProp(src.wasmUrl);
+   const ignoreErrors = src.stopAtErrors !== true;
++  // Homa's original-file reader opts into per-document allocation limits.
++  // Rebuild the object so callers cannot provide mutable accounting state.
++  const homaReadLimits = src.homaReadLimits ? Object.fromEntries(
++    ["maxDecodedStreamBytes", "maxAllocatedBytes", "maxTokenChars", "maxArrayEntries", "maxImagePixels"].map(key => {
++      const value = src.homaReadLimits[key];
++      if (!Number.isSafeInteger(value) || value <= 0) throw new Error("Invalid PDF read limit");
++      return [key, value];
++    })
++  ) : null;
+   const maxImageSize = Number.isInteger(src.maxImageSize) && src.maxImageSize > -1 ? src.maxImageSize : -1;
+   const isOffscreenCanvasSupported = typeof src.isOffscreenCanvasSupported === "boolean" ? src.isOffscreenCanvasSupported : !isNodeJS;
+   const isImageDecoderSupported = typeof src.isImageDecoderSupported === "boolean" ? src.isImageDecoderSupported : !isNodeJS;
+@@ -21508,6 +21517,7 @@ function getDocument(src = {}) {
+     docBaseUrl,
+     enableXfa,
+     evaluatorOptions: {
++      homaReadLimits,
+       maxImageSize,
+       disableFontFace,
+       ignoreErrors,
+@@ -22164,10 +22174,17 @@ class PDFPageProxy {
+         if (this._transport.destroyed) {
+           return;
+         }
++        // Reject before marking a failed stream complete. Otherwise the
++        // operator-list task resolves first and a failed image renders blank.
++        intentState.opListReadCapability?.reject(reason);
+         if (intentState.operatorList) {
+           intentState.operatorList.lastChunk = true;
+           for (const internalRenderTask of intentState.renderTasks) {
+-            internalRenderTask.operatorListChanged();
++            if (typeof internalRenderTask.cancel === "function") {
++              internalRenderTask.cancel(reason);
++            } else {
++              internalRenderTask.operatorListChanged();
++            }
+           }
+           this.#tryCleanup();
+         }
+diff --git a/legacy/build/pdf.worker.mjs b/legacy/build/pdf.worker.mjs
+index 13fe8874e92878ca77f64cb27cbd63ba6074209d..49065908dc96fc123369190d72e3532d433bdab9 100644
+--- a/legacy/build/pdf.worker.mjs
++++ b/legacy/build/pdf.worker.mjs
+@@ -6585,6 +6585,9 @@ function isRefsEqual(v1, v2) {
+ ;// ./src/core/base_stream.js
+ 
+ class BaseStream {
++  get homaReadLimits() {
++    return this._homaReadLimits || this.dict?.xref?.pdfManager?.evaluatorOptions?.homaReadLimits || this.stream?.homaReadLimits || null;
++  }
+   get length() {
+     unreachable("Abstract getter `length` accessed");
+   }
+@@ -8396,10 +8399,14 @@ class Stream extends BaseStream {
+     this.start = this.pos;
+   }
+   makeSubStream(start, length, dict = null) {
+-    return new Stream(this.bytes.buffer, start, length, dict);
++    const substream = new Stream(this.bytes.buffer, start, length, dict);
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+   clone() {
+-    return new Stream(this.bytes.buffer, this.start, this.length, this.dict?.clone());
++    const substream = new Stream(this.bytes.buffer, this.start, this.length, this.dict?.clone());
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+ }
+ class StringStream extends Stream {
+@@ -9350,14 +9357,23 @@ class DecodeStream extends BaseStream {
+     return this.bufferLength === 0;
+   }
+   ensureBuffer(requested) {
++    const limits = this.homaReadLimits;
++    if (limits && (!Number.isSafeInteger(requested) || requested > limits.maxDecodedStreamBytes)) {
++      throw new FormatError("PDF decoded stream exceeds reading limit");
++    }
+     const buffer = this.buffer;
+     if (requested <= buffer.byteLength) {
+       return buffer;
+     }
+-    let size = this.minBufferLength;
++    let size = Math.min(this.minBufferLength, limits?.maxDecodedStreamBytes || Infinity);
+     while (size < requested) {
+       size *= 2;
+     }
++    if (limits) {
++      size = Math.min(size, limits.maxDecodedStreamBytes);
++      limits.allocatedBytes = (limits.allocatedBytes || 0) + size;
++      if (limits.allocatedBytes > limits.maxAllocatedBytes) throw new FormatError("PDF allocation exceeds reading limit");
++    }
+     const buffer2 = new Uint8Array(size);
+     buffer2.set(buffer);
+     return this.buffer = buffer2;
+@@ -9421,8 +9437,19 @@ class DecodeStream extends BaseStream {
+       const chunks = [];
+       let totalLength = 0;
+       for await (const chunk of readable) {
+-        chunks.push(chunk);
+         totalLength += chunk.byteLength;
++        const limits = this.homaReadLimits;
++        if (limits) {
++          if (totalLength > limits.maxDecodedStreamBytes) throw new FormatError("PDF decoded stream exceeds reading limit");
++          limits.allocatedBytes = (limits.allocatedBytes || 0) + chunk.byteLength;
++          if (limits.allocatedBytes > limits.maxAllocatedBytes) throw new FormatError("PDF allocation exceeds reading limit");
++        }
++        chunks.push(chunk);
++      }
++      const limits = this.homaReadLimits;
++      if (limits) {
++        limits.allocatedBytes = (limits.allocatedBytes || 0) + totalLength;
++        if (limits.allocatedBytes > limits.maxAllocatedBytes) throw new FormatError("PDF allocation exceeds reading limit");
+       }
+       const data = new Uint8Array(totalLength);
+       let offset = 0;
+@@ -9434,7 +9461,8 @@ class DecodeStream extends BaseStream {
+         decompressed: data,
+         compressed: bytes
+       };
+-    } catch {
++    } catch (error) {
++      if (this.homaReadLimits && error instanceof FormatError) throw error;
+       return {
+         decompressed: null,
+         compressed: bytes
+@@ -9455,13 +9483,17 @@ class DecodeStream extends BaseStream {
+         this.readBlock();
+       }
+     }
+-    return new Stream(this.buffer, start, length, dict);
++    const substream = new Stream(this.buffer, start, length, dict);
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+   clone() {
+     while (!this.eof) {
+       this.readBlock();
+     }
+-    return new Stream(this.buffer, 0, this.bufferLength, this.dict?.clone());
++    const substream = new Stream(this.buffer, 0, this.bufferLength, this.dict?.clone());
++    substream._homaReadLimits = this.homaReadLimits;
++    return substream;
+   }
+   getBaseStreams() {
+     return this.stream ? this.stream.getBaseStreams() : null;
+@@ -9475,6 +9507,7 @@ class StreamsSequenceStream extends DecodeStream {
+       maybeLength += stream instanceof DecodeStream ? stream._rawMinBufferLength : stream.length;
+     }
+     super(maybeLength);
++    this._homaReadLimits = streams.find(stream => stream.homaReadLimits)?.homaReadLimits || null;
+     this.streams = streams;
+     this._onError = onError;
+   }
+@@ -10342,7 +10375,12 @@ function findNextFileMarker(data, view, currentPos, startPos = currentPos) {
+     offset: newPos
+   };
+ }
+-function prepareComponents(frame) {
++function prepareComponents(frame, readLimits) {
++  if (readLimits) {
++    const pixels = frame.samplesPerLine * frame.scanLines;
++    readLimits.jpegPixels = (readLimits.jpegPixels || 0) + pixels;
++    if (!Number.isSafeInteger(pixels) || pixels <= 0 || readLimits.jpegPixels > readLimits.maxImagePixels) throw new FormatError("JPEG dimensions exceed reading limit");
++  }
+   const mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / frame.maxH);
+   const mcusPerColumn = Math.ceil(frame.scanLines / 8 / frame.maxV);
+   for (const component of frame.components) {
+@@ -10351,6 +10389,11 @@ function prepareComponents(frame) {
+     const blocksPerLineForMcu = mcusPerLine * component.h;
+     const blocksPerColumnForMcu = mcusPerColumn * component.v;
+     const blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
++    if (readLimits) {
++      const bytes = blocksBufferSize * 2;
++      readLimits.allocatedBytes = (readLimits.allocatedBytes || 0) + bytes;
++      if (!Number.isSafeInteger(bytes) || bytes <= 0 || readLimits.allocatedBytes > readLimits.maxAllocatedBytes) throw new FormatError("JPEG allocation exceeds reading limit");
++    }
+     component.blockData = new Int16Array(blocksBufferSize);
+     component.blocksPerLine = blocksPerLine;
+     component.blocksPerColumn = blocksPerColumn;
+@@ -10387,8 +10430,10 @@ function skipData(data, view, offset) {
+ class JpegImage {
+   constructor({
+     decodeTransform = null,
+-    colorTransform = -1
++    colorTransform = -1,
++    homaReadLimits = null
+   } = {}) {
++    this._homaReadLimits = homaReadLimits;
+     this._decodeTransform = decodeTransform;
+     this._colorTransform = colorTransform;
+   }
+@@ -10588,7 +10633,7 @@ class JpegImage {
+           }
+           frame.maxH = maxH;
+           frame.maxV = maxV;
+-          prepareComponents(frame);
++          prepareComponents(frame, this._homaReadLimits);
+           break;
+         case 0xffc4:
+           const huffmanLength = view.getUint16(offset);
+@@ -10904,6 +10949,7 @@ class JpegStream extends DecodeStream {
+   }
+   get jpegOptions() {
+     const jpegOptions = {
++      homaReadLimits: this.homaReadLimits,
+       decodeTransform: undefined,
+       colorTransform: undefined
+     };
+@@ -16918,6 +16964,7 @@ class Parser {
+         case "[":
+           const array = [];
+           while (!isCmd(this.buf1, "]") && this.buf1 !== EOF) {
++            if (this.lexer.homaReadLimits && array.length >= this.lexer.homaReadLimits.maxArrayEntries) throw new FormatError("PDF array exceeds reading limit");
+             array.push(this.getObj(cipherTransform));
+           }
+           if (this.buf1 === EOF) {
+@@ -17501,6 +17548,7 @@ class Lexer {
+     this.stream = stream;
+     this.nextChar();
+     this.strBuf = [];
++    this.homaReadLimits = stream.homaReadLimits;
+     this.knownCommands = knownCommands;
+     this._hexStringNumWarn = 0;
+     this.beginInlineImagePos = -1;
+@@ -17573,6 +17621,7 @@ class Lexer {
+     strBuf.length = 0;
+     let ch = this.nextChar();
+     while (true) {
++      if (this.homaReadLimits && strBuf.length >= this.homaReadLimits.maxTokenChars) throw new FormatError("PDF string exceeds reading limit");
+       let charBuffered = false;
+       switch (ch | 0) {
+         case -1:
+@@ -17669,6 +17718,7 @@ class Lexer {
+     const strBuf = this.strBuf;
+     strBuf.length = 0;
+     while ((ch = this.nextChar()) >= 0 && !specialChars[ch]) {
++      if (this.homaReadLimits && strBuf.length >= this.homaReadLimits.maxTokenChars) throw new FormatError("PDF name exceeds reading limit");
+       if (ch === 0x23) {
+         ch = this.nextChar();
+         if (specialChars[ch]) {
+@@ -17722,6 +17772,7 @@ class Lexer {
+       digit = -1;
+     this._hexStringNumWarn = 0;
+     while (true) {
++      if (this.homaReadLimits && strBuf.length >= this.homaReadLimits.maxTokenChars) throw new FormatError("PDF hex string exceeds reading limit");
+       if (ch < 0) {
+         warn("Unterminated hex string");
+         break;
+@@ -40235,6 +40286,13 @@ class PartialEvaluator {
+       warn("Image dimensions are missing, or not numbers.");
+       return;
+     }
++    const readLimits = this.options.homaReadLimits;
++    if (readLimits) {
++      readLimits.imagePixels = (readLimits.imagePixels || 0) + w * h;
++      if (!Number.isSafeInteger(w * h) || w <= 0 || h <= 0 || readLimits.imagePixels > readLimits.maxImagePixels) {
++        throw new FormatError("PDF images exceed reading limit");
++      }
++    }
+     if (maxImageSize !== -1 && w * h > maxImageSize) {
+       const msg = "Image exceeded maximum allowed size and was removed.";
+       if (!ignoreErrors) {
+@@ -40373,7 +40431,7 @@ class PartialEvaluator {
+         }
+       }
+     }
+-    PDFImage.buildImage({
++    const imageDecode = PDFImage.buildImage({
+       xref: this.xref,
+       res: resources,
+       image,
+@@ -40390,12 +40448,14 @@ class PartialEvaluator {
+       }
+       return this._sendImgData(objId, imgData, cacheGlobally);
+     }).catch(reason => {
++      if (readLimits) throw reason;
+       warn(`Unable to decode image "${objId}": "${reason}".`);
+       if (imageRef) {
+         this.globalImageCache.addDecodeFailed(imageRef);
+       }
+       return this._sendImgData(objId, null, cacheGlobally);
+     });
++    if (readLimits) await imageDecode;
+     if (cacheKey) {
+       const cacheData = {
+         objId,
+@@ -66387,6 +66447,7 @@ class LocalPdfManager extends BasePdfManager {
+   constructor(args) {
+     super(args);
+     const stream = new Stream(args.source);
++    stream._homaReadLimits = this.evaluatorOptions.homaReadLimits;
+     this.pdfDocument = new PDFDocument(this, stream);
+     this._loadedStreamPromise = Promise.resolve(stream);
+   }
+@@ -66414,6 +66475,7 @@ class NetworkPdfManager extends BasePdfManager {
+       disableAutoFetch: args.disableAutoFetch,
+       rangeChunkSize: args.rangeChunkSize
+     });
++    this.streamManager.getStream()._homaReadLimits = this.evaluatorOptions.homaReadLimits;
+     this.pdfDocument = new PDFDocument(this, this.streamManager.getStream());
+   }
+   async ensure(obj, prop, args) {
+diff --git a/types/src/display/api.d.ts b/types/src/display/api.d.ts
+index 509c99ff1ce41da3eead1e8c07f23dfca695abaa..99877ba74b47abe2886214b3d6d2e17e3b12f86e 100644
+--- a/types/src/display/api.d.ts
++++ b/types/src/display/api.d.ts
+@@ -7,6 +7,8 @@ export type RefProxy = {
+  * Document initialization / loading parameters object.
+  */
+ export type DocumentInitParameters = {
++    /** Homa opt-in per-document allocation bounds. Ordinary rendering is unchanged. */
++    homaReadLimits?: { maxDecodedStreamBytes: number; maxAllocatedBytes: number; maxTokenChars: number; maxArrayEntries: number; maxImagePixels: number };
+     /**
+      * - The URL of the PDF.
+      */

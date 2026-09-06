@@ -170,11 +170,22 @@ export function sliceFamilyCurriculumDocument(
     document.totalSegments,
     FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
   );
-  const nextCursor =
+  const nextCursor = document.nextCursor !== undefined ? document.nextCursor :
     last && last.ordinal < readableLastOrdinal
       ? last.ordinal + 1
       : null;
   return { segments, nextCursor, truncated };
+}
+
+/** Quote verification reuses canonical PDF reads; it never launches OCR of a
+ * whole book while creating a preview. Missing pages make coverage partial. */
+export async function verifiedFamilyCurriculumDocument(asset: ReadyFamilyCurriculum) {
+  return await extractFamilyAssetSourceDocument(asset, {
+    startOrdinal: 1,
+    maxSegments: FAMILY_CURRICULUM_SOURCE_MAX_SEGMENTS,
+    maxChars: 1_000_000,
+    cachedOnly: true,
+  });
 }
 
 export async function readFamilyCurriculumSource(input: {

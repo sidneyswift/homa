@@ -171,6 +171,13 @@ describe("Family Library shelf contract", () => {
     );
   });
 
+  it("shows the bounded PDF sample on a ready original", () => {
+    const note = "Homa organized the Library details from PDF pages 1, 2, 3 of 115. The remaining pages have not been read.";
+    assert.deepEqual(familyAssetStatusCopy({ status: "ready", processingNote: note }), {
+      label: "Ready", detail: note, tone: "ready",
+    });
+  });
+
   it("accepts only closed, deduplicated parent edits", () => {
     const valid = familyAssetUpdateSchema.safeParse({
       id: ASSETS[0].id,

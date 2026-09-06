@@ -5554,6 +5554,16 @@ const FAMILY_LIBRARY_TABLES = [
   "family_asset_tags",
 ];
 {
+  const response = await rest("family_pdf_page_reads?select=asset_id&limit=1", { headers: { Prefer: "" } });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_pdf_page_reads");
+    report("family PDF page cache absent from target (additive migration not applied yet); nothing exposed", true);
+  } else {
+    await expectReadDenied("family_pdf_page_reads");
+  }
+}
+{
   const response = await rest("family_assets?select=id&limit=1", {
     headers: { Prefer: "" },
   });

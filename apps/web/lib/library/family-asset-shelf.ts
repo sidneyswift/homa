@@ -204,7 +204,7 @@ export function familyAssetStatusCopy(
   if (asset.status === "ready") {
     return {
       label: FAMILY_ASSET_STATUS_LABELS.ready,
-      detail: "Your original is saved and ready to download.",
+      detail: asset.processingNote ?? "Your original is saved and ready to download.",
       tone: "ready",
     };
   }

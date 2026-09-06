@@ -13,10 +13,10 @@ import {
 import { familyAssetLibraryHref } from "./family-asset-reference";
 import {
   getReadyFamilyCurriculum,
+  verifiedFamilyCurriculumDocument,
   type ReadyFamilyCurriculum,
 } from "./family-curriculum-source";
 import {
-  extractFamilyAssetSourceDocument,
   type FamilyAssetSourceDocument,
 } from "./family-asset-processing";
 
@@ -404,7 +404,8 @@ export function invalidCurriculumEvidenceOrdinals(
   document: Extract<FamilyAssetSourceDocument, { ok: true }>,
 ): number[] {
   const sourceByLocator = new Map(
-    document.segments.map((segment) => [segment.locator, segment.text]),
+    document.segments.filter((segment) => segment.state !== "unreadable" && segment.state !== "blank")
+      .map((segment) => [segment.locator, segment.text]),
   );
   return proposal.units.flatMap((unit) => {
     const source = sourceByLocator.get(unit.sourceLocator);
@@ -494,7 +495,7 @@ async function loadVerifiedDraftInputs(
       },
     };
   }
-  const document = await extractFamilyAssetSourceDocument(ready.asset);
+  const document = await verifiedFamilyCurriculumDocument(ready.asset);
   if (!document.ok) {
     return {
       ok: false,
@@ -504,7 +505,7 @@ async function loadVerifiedDraftInputs(
       },
     };
   }
-  if (proposal.decompositionQuality === "full" && document.truncated) {
+  if (proposal.decompositionQuality === "full" && (document.truncated || document.nextCursor != null)) {
     return {
       ok: false,
       failure: {
