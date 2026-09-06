@@ -44,8 +44,12 @@ describe("recorded-time edit scope", () => {
       assert.equal(typeof hoursMutationError(receipt), "string");
     }
     assert.equal(hoursMutationError({ result: "applied" }), null);
-    assert.match(hoursMutationError(null)!, /Close this editor and reopen the record/u);
+    assert.match(hoursMutationError(null)!, /Close this editor and reopen the time record/u);
     assert.match(hoursMutationError(null, "planner")!, /Reopen the activity/u);
-    assert.doesNotMatch(hoursMutationError(null, "planner")!, /reopen the record/iu);
+    assert.doesNotMatch(hoursMutationError(null, "planner")!, /reopen the time record/iu);
+    for (const receipt of [{ result: "not_found" }, { result: "conflict", reason: "stale" }]) {
+      assert.match(hoursMutationError(receipt, "planner")!, /activity/u);
+      assert.doesNotMatch(hoursMutationError(receipt, "planner")!, /time record/u);
+    }
   });
 });

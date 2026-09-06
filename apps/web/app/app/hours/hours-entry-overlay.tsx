@@ -63,7 +63,7 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
           </label>
           <details className="border-t border-[var(--homa-control-boundary)]">
             <summary className={SUMMARY_CLASS}>Category and note for {annotationOwner}</summary>
-            <p className="mb-3 text-sm">{entry.childName ? `These belong only to ${entry.childName}'s recorded-time entry.` : "These belong to this whole-family recorded-time entry."}</p>
+            <p className="mb-3 text-sm">{entry.childName ? `These belong only to ${entry.childName}'s time record.` : "These belong to this whole-family time record."}</p>
             <label className="flex flex-col gap-1.5 text-sm font-semibold">
               Category (optional)
               <input name="customLabel" defaultValue={entry.customLabel ?? ""} aria-describedby={categoryHintId} className={FIELD_CLASS} />
@@ -81,7 +81,7 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
           <summary className={SUMMARY_CLASS}>Planner notes (read only)</summary>
           <p className="pb-3 whitespace-pre-wrap break-words text-sm">{context.activity.note}</p>
         </details> : null}
-        <p className="mt-2 text-sm">{SOURCE_EXPLANATIONS[entry.source] ?? "Saved in your school-time record."}</p>
+        <p className="mt-2 text-sm">{SOURCE_EXPLANATIONS[entry.source] ?? "Saved in School hours."}</p>
         {onDeleteRequest ? <div className="mt-4 border-t border-[var(--homa-control-boundary)] py-3">
           <p className="mb-2 text-sm">Deleting recorded time removes the categories and notes for {audience} too.</p>
           <QuietAction kind="quiet" disabled={pending !== null} onClick={onDeleteRequest}>Delete recorded time</QuietAction>
@@ -135,7 +135,7 @@ export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClo
         setContext(result.context);
         setLoadError(result.error);
       } catch {
-        if (active) setLoadError("That record couldn't load. Check your connection and try again.");
+        if (active) setLoadError("That time record couldn't load. Check your connection and try again.");
       }
     });
     return () => { active = false; };
@@ -192,7 +192,7 @@ export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClo
           router.refresh();
         }
       } catch {
-        setError("The change couldn't be confirmed. Close this editor and reopen the record to check before trying again.");
+        setError("The change couldn't be confirmed. Close this editor and reopen the time record to check before trying again.");
       } finally {
         busy.current = false;
         setPending(null);
@@ -214,7 +214,7 @@ export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClo
           <p className="mb-2 text-sm">{recordedDate(entry.happenedOn)}</p>
           {loadError ? <><p role="alert" className="text-sm">{loadError}</p><QuietAction kind="secondary" className="mt-3"
             onClick={() => { setLoadError(null); setAttempt((value) => value + 1); }}>Try again</QuietAction></>
-            : <p role="status" className="text-sm">Loading the full record…</p>}
+            : <p role="status" className="text-sm">Loading the time record…</p>}
         </div> : <>
           <div className={confirming ? "hidden" : "flex min-h-0 flex-col"}>
             <HoursEntryForm key={context.revision} context={context} pending={pending} error={confirming ? null : error} errorRef={errorRef}
@@ -229,7 +229,7 @@ export function HoursEntryOverlay({ entry, onClose }: { entry: HoursEntry; onClo
             <p className="mt-3 text-sm">{recordedDate(context.entry.happenedOn)}</p>
             <p className="mt-3 text-sm">{context.activity
               ? `This deletes the recorded time, categories and notes for ${audience}.`
-              : `This deletes the ${context.entry.minutes}-minute entry for ${audience}, including its category and note.`}</p>
+              : `This deletes the ${context.entry.minutes}-minute time record for ${audience}, including its category and note.`}</p>
             {context.activity ? <p className="mt-3 text-sm">The activity stays finished in Planner, with its Planner notes.</p> : null}
             <p className="mt-3 text-sm">This can&apos;t be undone.</p>
             {error ? <p ref={errorRef} tabIndex={-1} role="alert" className="mt-3 text-sm text-[color:var(--homa-error-ink)]">{error}</p> : null}

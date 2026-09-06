@@ -157,7 +157,7 @@ describe("HoursView", () => {
 
   it("keeps source provenance behind Edit instead of competing with the activity", () => {
     assert.doesNotMatch(renderView([entry({ source: "call" })]), /Phone call/);
-    assert.match(renderForm(entry({ source: "chat" })), /Saved in your school-time record\./);
+    assert.match(renderForm(entry({ source: "chat" })), /Saved in School hours\./);
     assert.doesNotMatch(renderForm(entry({ source: "chat" })), /mentioned it in Chat/);
     assert.match(renderForm(entry({ source: "sms" })), /Added after you mentioned it by text\./);
     assert.match(renderForm(entry({ source: "call" })), /Added after you mentioned it on a phone call\./);
@@ -211,7 +211,7 @@ describe("HoursEntryOverlay", () => {
   it("names who the block is for, or the whole family", () => {
     const forKid = renderForm(entry({ childName: "Maya" }));
     assert.match(forKid, /Recorded time for Maya\./);
-    assert.match(forKid, /Saved in your school-time record\./);
+    assert.match(forKid, /Saved in School hours\./);
 
     const familyWide = renderForm(entry({ childId: null, childName: null }));
     assert.match(familyWide, /Recorded time for the whole family\./);
@@ -219,7 +219,7 @@ describe("HoursEntryOverlay", () => {
 
   it("loads authenticated scope before offering any write", () => {
     const html = renderOverlay(entry());
-    assert.match(html, /Loading the full record/);
+    assert.match(html, /Loading the time record/);
     assert.doesNotMatch(html, /Delete recorded time/);
     assert.doesNotMatch(html, /name="minutes"/);
     assert.doesNotMatch(html, /can&#x27;t be undone/);

@@ -60,7 +60,7 @@ Set `HOURS_EDITOR_EVIDENCE_DIR` when running the Hours guard to preserve 390px D
 
 Design token, contract, parity, and brand-residue guards passed.
 
-Independent technical review identified the category-only undo gap and the disappearing last-row focus target. Both were corrected and included in regression evidence. Fresh copy and UX review, hosted deployment, and live route/database probes remain separate rollout gates owned by the parent operator; this builder does not self-approve them.
+Independent technical review identified the category-only undo gap and the disappearing last-row focus target. Both were corrected and included in regression evidence. Root's completed copy and UX gates are recorded below. Hosted deployment and live route/database probes remain separate rollout gates.
 
 
 ## Follow-up to the first local implementation
@@ -85,3 +85,20 @@ Final follow-up logs use `1092-hours-ui-followup.log`, `1092-typecheck-lint-foll
 The final narrow copy pass adds the recorded date to both shared and standalone deletion confirmation. Deleted data, retained Planner data, and the irreversible warning occupy separate paragraphs. The category hint calls it a label, with Math club and Piano lesson as examples; it promises no grouping or filtering. The malformed-record message explains that nothing changed and gives refresh/support as the next steps. Uncertain Hours mutations explicitly say to close the editor and reopen the record; Planner detail errors continue to identify the activity.
 
 `1092-hours-ui-final-copy.log` records 75 unit/static cases and nine browser journeys, including the shared/standalone confirmation date and paragraph checks and an uncertain Hours response. `1092-typecheck-lint-final-copy.log` records the final type/lint check. No SQL, deletion semantics, taxonomy, or duplicate-identity rule changed in this pass. The final corpus is `/tmp/homa-feedback-implementation/1092-final-copy-corpus.md`; screenshot filenames remain the same, with `1092-hours-390-standalone-delete.png` added.
+
+## Root release review, September 6
+
+Fresh contexts performed the copy reader, interface reader, revised copy/interface reads, and final copy editor. The final interface reader inspected the recaptured five-screen flow after the deletion date, paragraph separation and editor wording changes. Dispatches include the complete required personas and protocols. The installed Codex CLI ran these reviewers ephemerally in read-only mode because the built-in fresh-agent thread limit was exhausted. No real family data was given to a reviewer.
+
+The final editor's four required corrections were accepted: use one noun, `time record`, for the saved Hours item; name the deletion consistently; explicitly name the editor in recovery instructions; and give missing-record errors a next step. Its grammar and uncertain-response consistency suggestions were also accepted. Planner errors continue to identify the activity instead of sending the parent to a different surface. The generic provenance line now names the actual School hours destination without claiming that a legacy `chat` source proves a chat utterance.
+
+The final interface reader could complete the correction, understood shared effects and deletion consequences, and found Save/Cancel usable in the constrained viewport. Root retained the following reviewed tradeoffs:
+
+- The Week row already is a full-width button, including its small visible Edit label. Its child label describes the actual selected Hours row; the editor explains the wider linked mutation before Save. Labeling that row as both children's time would misdescribe its underlying record.
+- Category/note and Planner notes are collapsed during the ordinary minutes correction. The third screenshot deliberately opens details and scrolls; that movement is not automatic. Keeping every heading fixed would reduce editable space on a short phone.
+- Deletion remains discoverable, with its shared consequences stated before the separate confirmation. It follows the optional details, and Save/Cancel remain fixed. Concealing it would repeat the meeting's Binder discoverability failure. The reader's anxiety about irreversible deletion is retained as feedback, not represented as an inability to complete the correction.
+- Each independently reached destructive state names the affected children. Root kept this explicit scope despite the cost of a long-name fixture wrapping. The note field retains its full editable value and native scrolling; the screenshot is not a truncated saved note.
+
+Root independently inspected the current screenshots, SQL, mutation boundaries and final copy delta. `1092-editor-polish-check.log` records 75 passing unit/static cases. The first browser run found one outdated exact-text test locator; after correcting the locator, `1092-editor-polish-browser-check.log` records all nine journeys passing. Focused lint passed with no diagnostics. The final surface-specific error check passed six cases. The integrated Eve build at `71216f8c` and the three-case stream-duration guard passed after merging the deployed dense-PDF correction; the subsequent edits only refine UI/error wording and evidence.
+
+Final fresh review outputs are `1092-final-copy-editor-result.md` and `1092-final-ux-reader-result.md` in the local evidence directory. These are local review and test results. CI, the production migration, deployment readiness and the separately reviewed hosted acceptance probe must still establish the release outcome.
