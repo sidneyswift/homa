@@ -29,6 +29,8 @@ export const SOURCE_LABELS: Record<HoursSource, string> = {
   chat: "Chat",
   sms: "Text",
   call: "Phone call",
+  email: "Email",
+  dispatch: "Scheduled check-in",
 };
 
 export const FALLBACK_TIME_ZONE = "America/Chicago";

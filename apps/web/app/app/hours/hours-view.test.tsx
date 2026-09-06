@@ -178,6 +178,8 @@ describe("HoursView", () => {
     assert.doesNotMatch(renderForm(entry({ source: "chat" })), /mentioned it in Chat/);
     assert.match(renderForm(entry({ source: "sms" })), /Added after you mentioned it by text\./);
     assert.match(renderForm(entry({ source: "call" })), /Added after you mentioned it on a phone call\./);
+    assert.match(renderForm(entry({ source: "email" })), /Added after you mentioned it by email\./);
+    assert.match(renderForm(entry({ source: "dispatch" })), /Added by Homa during a scheduled check-in\./);
   });
 
   it("shows which child a block belongs to only when more than one kid exists", () => {

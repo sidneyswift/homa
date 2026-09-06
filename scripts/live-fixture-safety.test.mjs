@@ -355,3 +355,31 @@ test("the continuity fold fixture remains anonymous and exactly retireable", () 
     /f\.name = 'Continuity fold stub'[\s\S]*?and f\.email is null/u,
   );
 });
+
+
+test("selected receipt view write checks accept only exact non-updatable failures", async () => {
+  const source = readFileSync(path.join(repoRoot, "scripts/isolation-check.mjs"), "utf8");
+  const start = source.indexOf("async function expectSelectedProgressWritesDenied(");
+  const end = source.indexOf("\nasync function expectEmptyRead(", start);
+  assert.ok(start >= 0 && end > start);
+  const execute = new Function("restAs", "rest", "report", `${source.slice(start, end)}; return expectSelectedProgressWritesDenied;`);
+  const view = "progress_check_in_start_request_status";
+  for (const [table, status, code, expected] of [
+    [view, 500, "55000", true], [view, 400, "55000", true],
+    [view, 500, "XX000", false], [view, 500, null, false],
+    [view, 200, "55000", false], [view, 404, "55000", false],
+    ["progress_check_in_start_requests", 500, "55000", false],
+    [view, 401, null, true], [view, 403, "42501", true],
+  ]) for (const token of [null, "synthetic-token"]) {
+    const calls = [], outcomes = [];
+    const respond = async (...args) => {
+      calls.push(args);
+      return new Response(code === null ? "non-JSON" : JSON.stringify({ code }), { status });
+    };
+    const run = execute(respond, respond, (_label, passed) => outcomes.push(passed));
+    await run(token, table, { keyValue: "owned-request", insertRow: {}, updateRow: {} }, "fixture");
+    assert.equal(calls.length, 3);
+    assert.deepEqual(calls.map(args => args.at(-1).method), ["POST", "PATCH", "DELETE"]);
+    assert.deepEqual(outcomes, [expected, expected, expected], `${table} HTTP${status} ${code}`);
+  }
+});

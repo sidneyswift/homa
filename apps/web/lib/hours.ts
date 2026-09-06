@@ -1,4 +1,4 @@
-import { isHoursSubject, type HoursSubject } from "./hours-model";
+import { isHoursSubject, requireHoursSource, type HoursSource, type HoursSubject } from "./hours-model";
 import { hoursReadIsComplete, minutesBySubjectForChild, resolveHoursWindow } from "./hours-summary";
 import { createSupabaseServerClient } from "./supabase/server";
 
@@ -13,7 +13,7 @@ import { createSupabaseServerClient } from "./supabase/server";
 /** Bounded rows are a preview. Only an exact-count receipt establishes completeness. */
 const MAX_HOURS_ROWS = 3000;
 
-export type HoursSource = "chat" | "sms" | "call";
+export type { HoursSource } from "./hours-model";
 
 export interface HoursLogRow {
   id: string;
@@ -28,10 +28,6 @@ export interface HoursLogRow {
   happenedOn: string;
   source: HoursSource;
   note: string | null;
-}
-
-function normalizeSource(value: string): HoursSource {
-  return value === "sms" || value === "call" ? value : "chat";
 }
 
 interface RawHoursLogRow {
@@ -54,7 +50,7 @@ function toHoursLogRow(row: RawHoursLogRow): HoursLogRow {
     customLabel: row.custom_label ?? null,
     minutes: row.minutes,
     happenedOn: row.happened_on,
-    source: normalizeSource(row.source),
+    source: requireHoursSource(row.source),
     note: row.note ?? null,
   };
 }

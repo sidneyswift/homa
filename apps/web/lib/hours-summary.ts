@@ -1,5 +1,6 @@
 import { isValidDateOnly, schoolYearStartFor } from "./compliance/deadlines";
 import { isHoursSubject, type HoursSubject } from "./hours-model";
+import { matchesHoursRecordScope } from "./hours-record-scope";
 
 /**
  * Shaping raw hours rows into an answer (gh#354).
@@ -145,14 +146,13 @@ export function minutesBySubjectForChild(
 /** Filters in code, never in the model's head. */
 export function filterHours(
   rows: readonly HoursRow[],
-  filters: { from: string | null; through?: string; childId?: string; subject?: string },
+  filters: { from: string | null; through?: string; childId?: string; subject?: string; includeShared?: boolean },
 ): HoursRow[] {
   return rows.filter((row) => {
-    if (filters.from !== null && row.happenedOn < filters.from) return false;
-    if (filters.through !== undefined && row.happenedOn > filters.through) return false;
-    if (filters.childId !== undefined && row.childId !== filters.childId) {
-      return false;
-    }
+    if (!matchesHoursRecordScope(row, {
+      from: filters.from, through: filters.through ?? null,
+      childId: filters.childId ?? null, includeShared: filters.includeShared ?? true,
+    })) return false;
     if (filters.subject !== undefined && row.subject !== filters.subject) {
       return false;
     }

@@ -393,7 +393,8 @@ async function expectAuthenticatedWritesDenied(
 }
 
 // PostgreSQL may reject this joined view as non-updatable before checking
-// privileges. Grant absence is checked separately against pg_catalog below.
+// privileges. Hosted PostgREST reports SQLSTATE55000 as HTTP500; local adapters
+// may use HTTP400. Grant absence is checked separately against pg_catalog below.
 async function expectSelectedProgressWritesDenied(accessToken, table, fixture, label) {
   for (const [method, pathname, row] of [
     ["POST", table, fixture.insertRow],
@@ -409,7 +410,7 @@ async function expectSelectedProgressWritesDenied(accessToken, table, fixture, l
     try { code = JSON.parse(raw).code; } catch { /* A non-JSON error cannot satisfy the view exception. */ }
     const denied = response.status === 401 || response.status === 403;
     const nonUpdatableView = table === "progress_check_in_start_request_status"
-      && response.status === 400 && code === "55000";
+      && [400, 500].includes(response.status) && code === "55000";
     report(`${label} ${method} ${table}`, denied || nonUpdatableView,
       `HTTP ${response.status}, code ${code ?? "unknown"}`);
   }

@@ -36,7 +36,9 @@ function isHoursSubject(value: string): value is HoursSubject {
   return (HOURS_SUBJECTS as readonly string[]).includes(value);
 }
 
-export type HoursSource = "chat" | "sms" | "call";
+/** Exact persisted values from 20260709233000_conversation_idempotency_key.sql. */
+export const HOURS_SOURCES = ["chat", "sms", "call", "email", "dispatch"] as const;
+export type HoursSource = (typeof HOURS_SOURCES)[number];
 
 export interface HoursLogRow {
   id: string;
@@ -49,8 +51,11 @@ export interface HoursLogRow {
   note: string | null;
 }
 
-function normalizeSource(value: string): HoursSource {
-  return value === "sms" || value === "call" ? value : "chat";
+function requireHoursSource(value: unknown): HoursSource {
+  if (typeof value !== "string" || !(HOURS_SOURCES as readonly string[]).includes(value)) {
+    throw new Error("Unknown Hours record source.");
+  }
+  return value as HoursSource;
 }
 
 const MAX_HOURS_ROWS = 3000;
@@ -71,7 +76,7 @@ function toHoursLogRow(row: {
     subject: isHoursSubject(subjectRaw) ? subjectRaw : "other",
     minutes: row.minutes as number,
     happenedOn: row.happened_on as string,
-    source: normalizeSource(row.source as string),
+    source: requireHoursSource(row.source),
     note: (row.note as string | null) ?? null,
   };
 }

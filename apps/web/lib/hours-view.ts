@@ -41,6 +41,8 @@ export const SOURCE_LABELS: Record<HoursSource, string> = {
   chat: "Chat",
   sms: "Text",
   call: "Phone call",
+  email: "Email",
+  dispatch: "Scheduled check-in",
 };
 
 const HOURS_SUBJECT_TONES: ReadonlyArray<readonly [string, string]> = [
