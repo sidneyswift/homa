@@ -100,6 +100,7 @@ function normalizedPromptTokens(text: string): string[] {
 function textDeliveryContainsPrompt(
   checkIn: ProgressCheckInRecord,
   content: string | undefined,
+  exactStatement = false,
 ): boolean {
   if (content === undefined || checkIn.currentItemId === null) {
     return false;
@@ -110,6 +111,7 @@ function textDeliveryContainsPrompt(
     checkIn.childName,
     located.item,
   );
+  if (exactStatement) return content.includes(prompt);
   const messageTokens = new Set(normalizedPromptTokens(content));
   return normalizedPromptTokens(prompt).every((token) =>
     messageTokens.has(token),
@@ -204,6 +206,9 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
   );
   const now = input.now ?? new Date();
   if (deliveryOutcome === "sent" && alreadyBound.length === 1) {
+    if (input.attempt.channel === "web" && !textDeliveryContainsPrompt(alreadyBound[0], input.deliveredContent, true)) {
+      return {status: "no_unique_prompt"};
+    }
     return openBoundProgressReplyLoop({
       checkIn: alreadyBound[0],
       attempt: input.attempt,
@@ -255,12 +260,11 @@ export async function bindProgressCheckInAfterSuccessfulDelivery(
       ? { status: "delivery_paused", reason }
       : { status: "no_unique_prompt" };
   }
+  // A web/native tool may commit then time out without emitting its card.
+  // Its canonical text must carry the exact selected statement; the trusted
+  // runtime/turn match above separately binds that text to this revision.
   if (
-    (
-      input.attempt.channel === "sms" ||
-      input.attempt.channel === "email"
-    ) &&
-    !textDeliveryContainsPrompt(checkIn, input.deliveredContent)
+    !textDeliveryContainsPrompt(checkIn, input.deliveredContent, input.attempt.channel === "web")
   ) {
     return { status: "no_unique_prompt" };
   }

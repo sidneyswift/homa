@@ -1,6 +1,7 @@
 import { defineHook } from "eve/hooks";
 
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
+import { isWebDeliveryChannel } from "../../lib/child-progress/screen-delivery";
 import {
   openReplyLoop,
   recordReactiveDelivery,
@@ -10,15 +11,11 @@ import { persistCanonicalMessage } from "../../lib/conversation-continuity/ledge
 import { isParentedEveSession } from "../../lib/conversation-continuity/session-lineage";
 
 /**
- * A completed web stream is a real delivery to the signed-in adult. Record it
+ * A completed web or native text stream is a real delivery to the signed-in adult. Record it
  * in the same per-recipient ledger as SMS/email so a new device or rotated Eve
  * session can resolve the question Homa visibly asked.
  */
-export function isWebDeliveryChannel(channel: unknown): boolean {
-  return channel === undefined || channel === "web";
-}
-
-export default defineHook({
+export const screenDeliveryHook = {
   events: {
     async "message.completed"(event, ctx) {
       if (isParentedEveSession(ctx.session.parent)) {
@@ -32,9 +29,12 @@ export default defineHook({
         channel?: string;
         familyId?: string;
         memberUserId?: string;
+        voiceBridge?: string;
       };
       if (
         !isWebDeliveryChannel(attributes.channel) ||
+        // Native bridge speech retains its existing voice delivery protocol.
+        (attributes.channel === "mobile" && attributes.voiceBridge === "true") ||
         !attributes.familyId ||
         !attributes.memberUserId
       ) {
@@ -59,7 +59,7 @@ export default defineHook({
         channel: "web",
         destination: `member:${attributes.memberUserId}`,
         providerThreadKey: `web:${ctx.session.id}`,
-        content: event.data.message,
+        content: persisted.content,
         delivered: true,
       });
       const progress =
@@ -69,6 +69,9 @@ export default defineHook({
               deliveryOutcome: recorded.deliveryOutcome,
               runtimeSessionId: ctx.session.id,
               turnId: event.data.turnId,
+              // A committed tool can time out before its question card is
+              // emitted. A pending turn alone is never delivery proof.
+              deliveredContent: persisted.content,
             })
           : { status: "no_unique_prompt" as const };
       const genericContract = replyContractForReactiveMessage(
@@ -86,4 +89,6 @@ export default defineHook({
       }
     },
   },
-});
+} satisfies Parameters<typeof defineHook>[0];
+
+export default defineHook(screenDeliveryHook);

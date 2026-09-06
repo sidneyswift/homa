@@ -8,9 +8,10 @@ import { z } from "zod";
 
 import type { ChildProgressProjectionInput } from "./repository";
 import { resolveEffectiveProgressEvidence } from "./effective-evidence";
+import { PROGRESS_EVIDENCE_FRESH_DAYS } from "./evidence-freshness";
 import { SKILL_CATALOG_BY_ID } from "./skill-catalog";
 
-export const PROGRESS_NEXT_MOVE_FRESH_DAYS = 30;
+export const PROGRESS_NEXT_MOVE_FRESH_DAYS = PROGRESS_EVIDENCE_FRESH_DAYS;
 const MAX_MODEL_TARGETS = 8;
 const MAX_MODEL_EVIDENCE = 12;
 const DAY_MS = 24 * 60 * 60 * 1_000;

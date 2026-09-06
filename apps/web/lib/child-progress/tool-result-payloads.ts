@@ -1,7 +1,12 @@
+import { getMapSubject } from "@homa/core";
+
+import { progressSubjectHref } from "./assessment-intent";
+
 import type {
   ChildProgressView,
   ProgressCheckInContext,
   ProgressCheckInPrompt,
+  ProgressCheckInRecord,
   ProgressCheckInUpdate,
   ProgressConflictCard,
 } from "./types";
@@ -79,6 +84,7 @@ export function progressQuestionResult(
       childName: prompt.childName,
       subjectDisplayName: prompt.subjectDisplayName,
       statement: prompt.personalizedStatement,
+      ...(prompt.subjectId ? {childId: prompt.childId, subjectId: prompt.subjectId, acceptedResponseCount: prompt.acceptedResponseCount ?? 0, ...(prompt.responseLimit === 8 ? {responseLimit: 8 as const} : {})} : {}),
       answerOptions: ANSWER_OPTIONS,
     },
     ...(update
@@ -214,12 +220,27 @@ export async function progressUpdateResult(input: {
   });
 }
 
+export function progressWorkflowDetails(checkIn: ProgressCheckInRecord) {
+  const subject = getMapSubject(checkIn.scope.subjectIds?.[0] ?? "");
+  return {
+    ...(subject ? { scope: {childId: checkIn.childId, childName: checkIn.childName, subjectId: subject.id, subjectDisplayName: subject.displayName, progressHref: progressSubjectHref(checkIn.childId, subject.id)} } : {}),
+    ...((checkIn.state === "completed" || checkIn.state === "stopped") ? {completion: {
+      reason: checkIn.terminalReason ?? null,
+      acceptedResponseCount: checkIn.acceptedResponseCount ?? null,
+      uncertainResponseCount: checkIn.uncertainResponseCount ?? null,
+      mixedEvidence: checkIn.terminalMixedEvidence ?? false,
+    }} : {}),
+  };
+}
+
 export function progressWorkflowResult(
-  label: "Check-in paused" | "Check-in saved" | "Check-in moved",
+  label: Extract<ManageChildProgressResult, {kind: "progress_workflow"}>["label"],
   update?: ProgressCheckInUpdate,
+  details: Pick<Extract<ManageChildProgressResult, {kind: "progress_workflow"}>, "scope" | "completion" | "activeCheckIn"> = {},
 ): ManageChildProgressResult {
   return parsed({
     kind: "progress_workflow",
+    ...details,
     label,
     ...(update
       ? {

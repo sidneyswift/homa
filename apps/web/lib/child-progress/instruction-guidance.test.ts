@@ -23,7 +23,7 @@ describe("linked SMS progress guidance", () => {
 
   it("carries no second copy of the channel-agnostic workflow", () => {
     // The trim (2026-07-25) left the workflow's one home in
-    // instructions.md and the tool schema. If these phrases creep back
+    // the fleet skill and the tool schema. If these phrases creep back
     // in, the SMS turn is paying for the same rule twice.
     assert.doesNotMatch(LINKED_SMS_PROGRESS_GUIDANCE, /record_journal_evidence/u);
     assert.doesNotMatch(LINKED_SMS_PROGRESS_GUIDANCE, /log_hours/u);
@@ -36,9 +36,10 @@ describe("linked SMS progress guidance", () => {
   });
 
   it("finds the moved bounded-partial rule in its canonical home", () => {
-    // Moved from this constant into instructions.md's
-    // translate-conservatively bullet (channel-agnostic judgment).
-    assert.match(instructions, /bounded partial answer/iu);
-    assert.match(instructions, /getting_there/u);
+    const skill = readFileSync(new URL("../../agent/skills/progress-check-in/SKILL.md", import.meta.url), "utf8");
+    assert.match(instructions, /load\s+progress-check-in/u);
+    assert.match(skill, /bounded partial performance/iu);
+    assert.match(skill, /getting_there/u);
+    assert.doesNotMatch(instructions, /bounded partial answer/iu);
   });
 });

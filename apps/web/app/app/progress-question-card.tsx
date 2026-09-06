@@ -32,7 +32,7 @@ export function ProgressQuestionCard({
       ) : null}
       <div className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm sm:p-5">
         <p className="text-xs font-semibold text-muted">
-          {card.childName} · {card.subjectDisplayName} · one question at a time
+          {card.childName} · {card.subjectDisplayName} · {card.responseLimit ? `${card.acceptedResponseCount ?? 0} of ${card.responseLimit} answers` : "one question at a time"}
         </p>
         <p className="mt-3 text-base font-semibold leading-relaxed text-strong">
           {card.statement}
@@ -78,7 +78,7 @@ export function ProgressQuestionCard({
               onClick={onFocusComposer}
               className="min-h-11 rounded-pill px-2 py-2 text-sm font-medium text-muted transition-colors hover:text-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Ask HOMA something else
+              Ask Homa something else
             </button>
             <button
               type="button"

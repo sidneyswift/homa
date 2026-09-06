@@ -30,6 +30,7 @@ const TILE_DOT_TONES: Record<
 
 export function ProgressMap({
   childId,
+  initialSubjectId,
   tiles,
   subjects,
   conflicts,
@@ -39,6 +40,7 @@ export function ProgressMap({
   hoursWindowLabel = "this school year",
 }: {
   childId: string;
+  initialSubjectId?: string;
   tiles: ProgressTileModel[];
   subjects: ProgressSubjectView[];
   conflicts: readonly OpenProgressConflictView[];
@@ -49,7 +51,7 @@ export function ProgressMap({
   hoursMinutesBySubject?: Readonly<Partial<Record<string, number>>>;
   hoursWindowLabel?: "this school year" | "all time through today";
 }) {
-  const [openSubjectId, setOpenSubjectId] = useState<string | null>(null);
+  const [openSubjectId, setOpenSubjectId] = useState<string | null>(() => subjects.some(subject => subject.subjectId === initialSubjectId) ? initialSubjectId ?? null : null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   // A full-height panel over a scrolled page: the page underneath stays
@@ -75,7 +77,7 @@ export function ProgressMap({
 
   function closePanel() {
     setOpenSubjectId(null);
-    triggerRef.current?.focus();
+    (triggerRef.current ?? document.getElementById("progress-heading"))?.focus();
   }
 
   return (

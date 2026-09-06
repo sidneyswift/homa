@@ -3,11 +3,13 @@ import { describe, it } from "node:test";
 
 import { getMapItem } from "@homa/core";
 
+import { assessmentStatusFromReceipt } from "./assessment-status";
 import {
   ProgressCheckInService,
   type ProgressCheckInServiceOptions,
 } from "./check-in-service";
 import {
+  parseProgressCheckInStartOutcome,
   storedProgressCheckInResponseOutcomeSchema,
 } from "./check-in-schema";
 import { buildChildProgressView } from "./projection";
@@ -37,6 +39,7 @@ import type {
   ProgressCheckInChannel,
   ProgressCheckInContext,
   ProgressCheckInRecord,
+  ProgressCheckInPurpose,
   ResolvedProgressConflict,
 } from "./types";
 
@@ -88,6 +91,7 @@ interface FakeProgressReplyLoop {
 interface FakeState {
   projectionInputs: Map<string, ChildProgressProjectionInput>;
   checkIns: Map<string, ProgressCheckInRecord>;
+  startRequests: Map<string, {childId: string; subjectId: string; result: unknown; issuedCheckInId: string | null; issuedRevision: number | null; deliveredAt: string | null}>;
   responses: Map<string, FakeResponse>;
   snapshots: Map<string, FakeSnapshot>;
   progressReplyLoops: Map<string, FakeProgressReplyLoop>;
@@ -415,6 +419,38 @@ class FakeChildProgressTransaction
     return checkIn === undefined ? null : structuredClone(checkIn);
   }
 
+  async claimCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["claimCheckInStartRequest"]>[0]): ReturnType<ProgressCheckInTransaction["claimCheckInStartRequest"]> {
+    const key = [input.familyId, input.memberUserId, input.requestId].join(":");
+    const existing = this.draft.startRequests.get(key);
+    if (existing) return {kind: "existing", ...structuredClone(existing)};
+    this.draft.startRequests.set(key, {childId: input.childId, subjectId: input.subjectId, result: null, issuedCheckInId: null, issuedRevision: null, deliveredAt: null});
+    return {kind: "claimed"};
+  }
+
+  async completeCheckInStartRequest(input: Parameters<ProgressCheckInTransaction["completeCheckInStartRequest"]>[0]): Promise<void> {
+    const row = this.draft.startRequests.get([input.familyId, input.memberUserId, input.requestId].join(":"));
+    assert.ok(row);
+    row.result = structuredClone(input.result);
+    row.issuedCheckInId = input.issuedCheckInId;
+    row.issuedRevision = input.issuedRevision;
+  }
+
+  async reissueCheckInStartRequests(input: Parameters<ProgressCheckInTransaction["reissueCheckInStartRequests"]>[0]): Promise<number> {
+    let moved = 0;
+    for (const [key, row] of this.draft.startRequests) {
+      if (key.startsWith(`${input.familyId}:${input.memberUserId}:`) && row.childId === input.childId &&
+        row.issuedCheckInId === input.checkInId && row.issuedRevision === input.expectedRevision && row.deliveredAt === null) {
+        row.issuedRevision = input.revision;
+        moved += 1;
+      }
+    }
+    return moved;
+  }
+
+  async listCheckInResponses(familyId: string, childId: string, checkInId: string) {
+    return [...this.draft.responses.values()].filter(row => row.familyId === familyId && row.childId === childId && row.checkInId === checkInId).map(row => ({itemId: row.itemId, answer: row.answer}));
+  }
+
   async insertCheckIn(
     input: Parameters<ProgressCheckInTransaction["insertCheckIn"]>[0],
   ): ReturnType<ProgressCheckInTransaction["insertCheckIn"]> {
@@ -457,6 +493,9 @@ class FakeChildProgressTransaction
       pendingRuntimeSessionId: input.pendingRuntimeSessionId,
       pendingTurnId: input.pendingTurnId,
       pauseReason: null,
+      terminalReason: null,
+      acceptedResponseCount: 0,
+      uncertainResponseCount: 0,
       openedAt: input.openedAt,
       pausedAt: null,
       completedAt: null,
@@ -591,6 +630,8 @@ class FakeChildProgressTransaction
     );
     projectionInput.selectionAnswers.push({
       selectionId: response.id,
+      childId: response.childId,
+      familyId: response.familyId,
       evidenceId: null,
       itemId: response.itemId,
       answer: response.answer,
@@ -767,6 +808,9 @@ class FakeChildProgressTransaction
       return null;
     }
     checkIn.currentDeliveryId = input.deliveryId;
+    for (const row of this.draft.startRequests.values()) {
+      if (row.issuedCheckInId === input.checkInId && row.issuedRevision === input.expectedRevision && row.deliveredAt === null) row.deliveredAt = input.updatedAt;
+    }
     checkIn.episodeId = input.episodeId;
     checkIn.updatedAt = input.updatedAt;
     return structuredClone(checkIn);
@@ -844,6 +888,7 @@ class FakeChildProgressRepository
       ],
     ]),
     checkIns: new Map(),
+    startRequests: new Map(),
     responses: new Map(),
     snapshots: new Map(),
     progressReplyLoops: new Map(),
@@ -870,6 +915,12 @@ class FakeChildProgressRepository
 
   get checkIns(): ProgressCheckInRecord[] {
     return [...this.state.checkIns.values()];
+  }
+
+  startReceipt(requestId: string) {
+    const receipt = this.state.startRequests.get([FAMILY_ID, ADULT_A, requestId].join(":"));
+    assert.ok(receipt);
+    return structuredClone(receipt);
   }
 
   get responses(): FakeResponse[] {
@@ -1141,6 +1192,8 @@ function context(
   };
 }
 
+const fixtureRepositories = new WeakMap<ProgressCheckInService, FakeChildProgressRepository>();
+
 function createFixture(
   options: ProgressCheckInServiceOptions = {},
 ): {
@@ -1152,23 +1205,42 @@ function createFixture(
     buildView: buildChildProgressView,
     now: () => new Date("2026-07-11T18:00:00.000Z"),
   });
-  return {
-    repository,
-    service: new ProgressCheckInService(
-      repository,
-      childProgressService,
-      options,
-    ),
-  };
+  const service = new ProgressCheckInService(repository, childProgressService, options);
+  fixtureRepositories.set(service, repository);
+  return { repository, service };
+}
+
+/** Positive-path fixture: deliver the exact active prompt before the simulated
+ * parent responds. Refusal tests call respondCheckIn directly. */
+async function respondToDeliveredQuestion(
+  service: ProgressCheckInService,
+  ctx: ProgressCheckInContext,
+  input: Parameters<ProgressCheckInService["respondCheckIn"]>[1],
+) {
+  const repository = fixtureRepositories.get(service);
+  assert.ok(repository);
+  const replay = repository.responses.find(row => row.familyId === ctx.familyId &&
+    (row.idempotencyKey === input.idempotencyKey || (ctx.providerMessageId !== null && row.providerMessageId === ctx.providerMessageId)));
+  if (ctx.repliedDeliveryId === null && replay) ctx = {...ctx, repliedDeliveryId: replay.deliveryId};
+  const current = repository.checkIns.find(row => row.id === input.checkInId && row.familyId === ctx.familyId);
+  if (!replay && current?.state === "active" && current.currentDeliveryId === null && current.recipientMemberUserId === ctx.memberUserId && ctx.repliedDeliveryId === null) {
+    const deliveryId = `fixture-delivery-${current.id}-${current.revision}`;
+    repository.deliveryRecipients.set(`${ctx.familyId}:${deliveryId}`, ctx.memberUserId);
+    const bound = await service.bindCurrentDelivery({...ctx, runtimeSessionId: current.pendingRuntimeSessionId!, turnId: current.pendingTurnId!}, {checkInId: current.id, expectedRevision: current.revision, deliveryId});
+    assert.equal(bound.status, "bound");
+    ctx = {...ctx, repliedDeliveryId: deliveryId};
+  }
+  return service.respondCheckIn(ctx, input);
 }
 
 async function startArtCheckIn(
   service: ProgressCheckInService,
   overrides: Partial<ProgressCheckInContext> = {},
+  purpose: ProgressCheckInPurpose = "subject_deep_dive",
 ) {
   return service.startCheckIn(context(overrides), {
     childId: CHILD_ID,
-    purpose: "subject_deep_dive",
+    purpose,
     subjectIds: ["art"],
     idempotencyKey: "start-art",
   });
@@ -1177,8 +1249,9 @@ async function startArtCheckIn(
 async function startBoundArtCheckInWithReplyLoop(
   fixture: ReturnType<typeof createFixture>,
   deliveryId = "delivery-1",
+  purpose: ProgressCheckInPurpose = "subject_deep_dive",
 ) {
-  const started = await startArtCheckIn(fixture.service);
+  const started = await startArtCheckIn(fixture.service, {}, purpose);
   assert.equal(started.status, "started");
   if (started.status !== "started") {
     throw new Error("Bound-loop fixture did not start");
@@ -1304,7 +1377,8 @@ describe("durable progress check-in workflow", () => {
       }),
       {
         childId: CHILD_ID,
-        purpose: "whole_map_refresh",
+        purpose: "subject_deep_dive",
+        subjectIds: ["art"],
         idempotencyKey: "different-start-key",
       },
     );
@@ -1482,7 +1556,7 @@ describe("durable progress check-in workflow", () => {
   it("clears the delivered reply loop when completing", async () => {
     const complete = createFixture();
     const completeStarted =
-      await startBoundArtCheckInWithReplyLoop(complete);
+      await startBoundArtCheckInWithReplyLoop(complete, "delivery-1", "age_refresh");
     assert.equal(
       (
         await complete.service.respondCheckIn(
@@ -1641,18 +1715,18 @@ describe("durable progress check-in workflow", () => {
     }
   });
 
-  it("saves non-evidence answers and advances without refreshing exhausted scope", async () => {
+  it("keeps the ordinary age-refresh exhaustion behavior for non-evidence answers", async () => {
     const { repository, service } = createFixture();
     const started = await service.startCheckIn(context(), {
       childId: CHILD_ID,
-      purpose: "subject_deep_dive",
+      purpose: "age_refresh",
       subjectIds: ["art", "music"],
       idempotencyKey: "start-skip",
     });
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
 
-    const advanced = await service.respondCheckIn(
+    const advanced = await respondToDeliveredQuestion(service,
       context({
         providerMessageId: "provider-skip-1",
         runtimeSessionId: "runtime-advance",
@@ -1682,7 +1756,7 @@ describe("durable progress check-in workflow", () => {
     assert.equal(repository.responses[0].evidenceId, null);
     assert.equal(repository.projectionInput().evidence.length, 0);
 
-    const completed = await service.respondCheckIn(
+    const completed = await respondToDeliveredQuestion(service,
       context({ providerMessageId: "provider-skip-2" }),
       {
         checkInId: started.checkIn.id,
@@ -1706,7 +1780,7 @@ describe("durable progress check-in workflow", () => {
     assert.equal(repository.projectionInput().evidence.length, 0);
     assert.equal(repository.savedDerivedProgress.length, 0);
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({
           providerMessageId: "provider-after-completed",
         }),
@@ -1730,7 +1804,7 @@ describe("durable progress check-in workflow", () => {
       }),
       {
         childId: CHILD_ID,
-        purpose: "subject_deep_dive",
+        purpose: "age_refresh",
         subjectIds: ["art"],
         idempotencyKey: "start-unpinned",
       },
@@ -1739,7 +1813,7 @@ describe("durable progress check-in workflow", () => {
     if (started.status !== "started") return;
 
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({
           memberUserId: ADULT_A,
           providerMessageId: "provider-pinned-answer",
@@ -1753,7 +1827,7 @@ describe("durable progress check-in workflow", () => {
       ),
       { status: "wrong_recipient" },
     );
-    const completed = await service.respondCheckIn(
+    const completed = await respondToDeliveredQuestion(service,
       context({
         memberUserId: null,
         providerMessageId: "provider-unpinned-answer",
@@ -1774,7 +1848,7 @@ describe("durable progress check-in workflow", () => {
       );
       assert.ok(completed.progressUpdate?.operationId);
     }
-    const replay = await service.respondCheckIn(
+    const replay = await respondToDeliveredQuestion(service,
       context({
         memberUserId: null,
         providerMessageId: "provider-unpinned-answer",
@@ -1824,7 +1898,7 @@ describe("durable progress check-in workflow", () => {
       idempotencyKey: "answer-1",
     };
 
-    const first = await service.respondCheckIn(
+    const first = await respondToDeliveredQuestion(service,
       responseContext,
       input,
     );
@@ -1840,7 +1914,7 @@ describe("durable progress check-in workflow", () => {
         (first.progressUpdate?.affectedTopics[0]?.length ?? 0) > 0,
       );
     }
-    assert.equal(repository.transactionCount, 2);
+    assert.equal(repository.transactionCount, 3);
     assert.equal(repository.responses.length, 1);
     assert.equal(repository.projectionInput().evidence.length, 1);
     assert.equal(
@@ -1852,11 +1926,11 @@ describe("durable progress check-in workflow", () => {
       "check_in",
     );
 
-    const idempotencyReplay = await service.respondCheckIn(
+    const idempotencyReplay = await respondToDeliveredQuestion(service,
       responseContext,
       input,
     );
-    const providerReplay = await service.respondCheckIn(
+    const providerReplay = await respondToDeliveredQuestion(service,
       responseContext,
       {
         ...input,
@@ -1978,7 +2052,7 @@ describe("durable progress check-in workflow", () => {
       idempotencyKey: "strict-replay",
     };
     assert.equal(
-      (await service.respondCheckIn(responseContext, responseInput))
+      (await respondToDeliveredQuestion(service,responseContext, responseInput))
         .status,
       "advanced",
     );
@@ -1994,7 +2068,7 @@ describe("durable progress check-in workflow", () => {
         [nestedKey]: { ...nested, unexpected: true },
       };
       await assert.rejects(
-        service.respondCheckIn(responseContext, responseInput),
+        respondToDeliveredQuestion(service,responseContext, responseInput),
       );
     }
     response.result = {
@@ -2002,7 +2076,7 @@ describe("durable progress check-in workflow", () => {
       status: "paused",
     };
     await assert.rejects(
-      service.respondCheckIn(responseContext, responseInput),
+      respondToDeliveredQuestion(service,responseContext, responseInput),
     );
   });
 
@@ -2016,7 +2090,7 @@ describe("durable progress check-in workflow", () => {
     });
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
-    const advanced = await service.respondCheckIn(
+    const advanced = await respondToDeliveredQuestion(service,
       context({ providerMessageId: "provider-before-pause" }),
       {
         checkInId: started.checkIn.id,
@@ -2041,7 +2115,7 @@ describe("durable progress check-in workflow", () => {
     assert.equal(repository.responses.length, 1);
 
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({ providerMessageId: "provider-paused-answer" }),
         {
           checkInId: started.checkIn.id,
@@ -2084,7 +2158,7 @@ describe("durable progress check-in workflow", () => {
     });
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
-    const firstAnswer = await service.respondCheckIn(
+    const firstAnswer = await respondToDeliveredQuestion(service,
       context({ providerMessageId: "provider-before-takeover" }),
       {
         checkInId: started.checkIn.id,
@@ -2135,7 +2209,7 @@ describe("durable progress check-in workflow", () => {
     );
 
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({
           memberUserId: ADULT_A,
           providerMessageId: "provider-old-owner",
@@ -2161,7 +2235,7 @@ describe("durable progress check-in workflow", () => {
     });
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
-    const advanced = await service.respondCheckIn(
+    const advanced = await respondToDeliveredQuestion(service,
       context({ providerMessageId: "member-removal-response" }),
       {
         checkInId: started.checkIn.id,
@@ -2235,14 +2309,14 @@ describe("durable progress check-in workflow", () => {
       context({ memberUserId: ADULT_B }),
       {
         childId: CHILD_ID,
-        purpose: "subject_deep_dive",
+        purpose: "age_refresh",
         subjectIds: ["literacy"],
         idempotencyKey: "start-member-conflict",
       },
     );
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
-    const opened = await service.respondCheckIn(
+    const opened = await respondToDeliveredQuestion(service,
       context({
         memberUserId: ADULT_B,
         providerMessageId: "member-conflict-response",
@@ -2357,7 +2431,7 @@ describe("durable progress check-in workflow", () => {
     );
     assert.equal(repository.responses.length, 0);
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({
           providerMessageId: "unrelated-after-uncertain",
           runtimeSessionId: "runtime-unrelated",
@@ -2422,7 +2496,7 @@ describe("durable progress check-in workflow", () => {
       savedBeforeStop,
     );
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({ providerMessageId: "provider-after-stopped" }),
         {
           checkInId: started.checkIn.id,
@@ -2473,7 +2547,7 @@ describe("durable progress check-in workflow", () => {
       }),
       {
         childId: CHILD_ID,
-        purpose: "subject_deep_dive",
+        purpose: "age_refresh",
         subjectIds: ["literacy"],
         idempotencyKey: "start-conflict",
       },
@@ -2503,7 +2577,7 @@ describe("durable progress check-in workflow", () => {
       revision: started.checkIn.revision,
     });
 
-    const opened = await service.respondCheckIn(
+    const opened = await respondToDeliveredQuestion(service,
       context({
         memberUserId: ADULT_B,
         providerMessageId: "provider-conflict-answer",
@@ -2565,7 +2639,7 @@ describe("durable progress check-in workflow", () => {
       conflict: { ...storedConflict, unexpected: true },
     };
     await assert.rejects(
-      service.respondCheckIn(
+      respondToDeliveredQuestion(service,
         context({
           memberUserId: ADULT_B,
           providerMessageId: "provider-conflict-answer",
@@ -2612,7 +2686,7 @@ describe("durable progress check-in workflow", () => {
     );
 
     assert.deepEqual(
-      await service.respondCheckIn(
+      await respondToDeliveredQuestion(service,
         context({
           memberUserId: ADULT_B,
           providerMessageId: "provider-conflict-extra",
@@ -2725,14 +2799,14 @@ describe("durable progress check-in workflow", () => {
       context({ memberUserId: ADULT_B }),
       {
         childId: CHILD_ID,
-        purpose: "subject_deep_dive",
+        purpose: "age_refresh",
         subjectIds: ["literacy"],
         idempotencyKey: "start-third-evidence",
       },
     );
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
-    const opened = await service.respondCheckIn(
+    const opened = await respondToDeliveredQuestion(service,
       context({
         memberUserId: ADULT_B,
         providerMessageId: "third-evidence-open",
@@ -2889,7 +2963,7 @@ describe("durable progress check-in workflow", () => {
     assert.equal(started.status, "started");
     if (started.status !== "started") return;
 
-    const result = await service.respondCheckIn(
+    const result = await respondToDeliveredQuestion(service,
       context({
         providerMessageId: "provider-current-revision",
       }),
@@ -2928,5 +3002,339 @@ describe("durable progress check-in workflow", () => {
       { checkInId: started.checkIn.id },
     );
     assert.equal(stopped.status, "stopped");
+  });
+});
+
+
+describe("parent-selected deeper check-in start", () => {
+  it("rejects every purpose's undelivered answer and stale delivered revision without writes", async () => {
+    for (const purpose of ["subject_deep_dive", "whole_map_refresh", "age_refresh", "journal_followup"] as const) {
+      const {service, repository} = createFixture();
+      const started = await service.startCheckIn(context(), {childId: CHILD_ID, purpose, subjectIds: ["art"], idempotencyKey: "unbound"});
+      if (started.status !== "started") throw new Error("Fixture failed");
+      const response = {checkInId: started.checkIn.id, answer: "easily" as const, idempotencyKey: "unbound-answer"};
+      for (const channel of ["web", "sms", "email"] as const) {
+        assert.deepEqual(await service.respondCheckIn(context({channel}), response), {status: "wrong_delivery"});
+      }
+      assert.equal(repository.responses.length, 0);
+      assert.equal(repository.projectionInput().evidence.length, 0);
+      assert.equal(repository.savedDerivedProgress.length, 0);
+      const bound = await service.bindCurrentDelivery(context(), {checkInId: started.checkIn.id, expectedRevision: started.checkIn.revision, deliveryId: "delivery-1"});
+      assert.equal(bound.status, "bound");
+      const before = structuredClone(repository.checkIns);
+      assert.deepEqual(await service.respondCheckIn(context({repliedDeliveryId: "delivery-1"}), {...response, expectedRevision: 99}), {status: "stale_prompt"});
+      assert.deepEqual(repository.checkIns, before);
+      assert.equal(repository.responses.length, 0);
+      assert.equal(repository.projectionInput().evidence.length, 0);
+    }
+  });
+
+  it("claims one action across concurrent starts and never reopens it after stop", async () => {
+    const {service, repository} = createFixture();
+    const selectedAssessment = {requestId: "first-request", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: "first-click"};
+    const [first, second] = await Promise.all([service.startCheckIn(ctx, input), service.startCheckIn({...ctx, turnId: "retry-turn"}, {...input, idempotencyKey: "new-transport-key"})]);
+    assert.equal(first.status, "started");
+    assert.equal(second.status, "duplicate_start");
+    if (first.status !== "started") return;
+    assert.equal(repository.checkIns.length, 1);
+    assert.equal(repository.checkIns[0].revision, 1);
+    assert.equal(repository.checkIns[0].pendingTurnId, ctx.turnId);
+    await service.stopCheckIn(ctx, {checkInId: first.checkIn.id});
+    const before = structuredClone(repository.checkIns);
+    const replay = await service.startCheckIn({...ctx, turnId: "after-stop"}, input);
+    assert.equal(replay.status, "duplicate_start");
+    if (replay.status === "duplicate_start") assert.equal(replay.currentCheckIn?.state, "stopped");
+    assert.deepEqual(repository.checkIns, before);
+  });
+
+  it("resumes the owned paused subject once for a fresh selected action", async () => {
+    const {service, repository} = createFixture();
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: "paused-start"};
+    const started = await service.startCheckIn(context(), input);
+    if (started.status !== "started") throw new Error("Fixture failed");
+    await service.pauseCheckIn(context(), {checkInId: started.checkIn.id, reason: "explicit_pause"});
+    const before = repository.checkIns[0];
+    const ctx = context({channel: "web", selectedAssessment: {requestId: "new-click", childId: CHILD_ID, subjectId: "art"}});
+    const result = await service.startCheckIn(ctx, {...input, idempotencyKey: "resume-click"});
+    assert.equal(result.status, "existing");
+    if (result.status !== "existing") return;
+    assert.equal(result.checkIn.state, "active");
+    assert.equal(result.checkIn.currentItemId, before.currentItemId);
+    assert.equal(result.checkIn.revision, before.revision + 1);
+    assert.equal(result.checkIn.pauseReason, null);
+    assert.equal(result.checkIn.currentDeliveryId, null);
+    assert.equal(repository.responses.length, 0);
+    const after = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn(ctx, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, after);
+  });
+
+  it("refuses changed scope for the same action identity", async () => {
+    const {service, repository} = createFixture();
+    const selectedAssessment = {requestId: "same-request", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: "first-click"};
+    assert.equal((await service.startCheckIn(ctx, input)).status, "started");
+    const before = structuredClone(repository.checkIns);
+    assert.deepEqual(await service.startCheckIn({...ctx, selectedAssessment: {...selectedAssessment, subjectId: "music"}}, {...input, subjectIds: ["music"]}), {status: "idempotency_mismatch"});
+    assert.deepEqual(await service.startCheckIn({...ctx, selectedAssessment: {...selectedAssessment, childId: SIBLING_ID}}, {...input, childId: SIBLING_ID}), {status: "idempotency_mismatch"});
+    assert.deepEqual(repository.checkIns, before);
+  });
+
+  it("remembers a no-question outcome even if evidence later changes", async () => {
+    const {service, repository} = createFixture();
+    repository.seedEvidence({itemId: "gross_motor.own-fitness", answer: "easily", memberUserId: ADULT_A});
+    const ctx = context({channel: "web", selectedAssessment: {requestId: "no-question-click", childId: CHILD_ID, subjectId: "gross_motor"}});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["gross_motor"], idempotencyKey: "no-question-click"};
+    assert.equal((await service.startCheckIn(ctx, input)).status, "no_question");
+    repository.projectionInput().evidence.length = 0;
+    const replay = await service.startCheckIn(ctx, input);
+    assert.equal(replay.status, "duplicate_start");
+    if (replay.status === "duplicate_start") assert.equal(replay.original.status, "no_question");
+    assert.equal(repository.checkIns.length, 0);
+  });
+
+  it("counts eight unique responses across pause, resume and replay without fabricating evidence", async () => {
+    const {service, repository} = createFixture();
+    const started = await service.startCheckIn(context(), {childId: CHILD_ID, purpose: "subject_deep_dive", subjectIds: ["gross_motor"], idempotencyKey: "eight-start"});
+    assert.equal(started.status, "started");
+    if (started.status !== "started") return;
+    const selected = new Set([started.prompt.itemId]);
+    for (let index = 1; index <= 8; index += 1) {
+      const ctx = context({providerMessageId: `eight-${index}`});
+      const input: Parameters<ProgressCheckInService["respondCheckIn"]>[1] = {checkInId: started.checkIn.id, answer: index % 2 ? "skip" as const : "not_sure" as const, idempotencyKey: `eight-${index}`};
+      const result = await respondToDeliveredQuestion(service,ctx, input);
+      assert.equal(result.status, index === 8 ? "completed" : "advanced");
+      if (result.status !== "completed" && result.status !== "advanced") return;
+      assert.equal(result.checkIn.acceptedResponseCount, index);
+      assert.equal(result.checkIn.uncertainResponseCount, index);
+      if (result.status === "advanced") {
+        assert.ok(!selected.has(result.prompt.itemId));
+        selected.add(result.prompt.itemId);
+        assert.equal(result.prompt.acceptedResponseCount, index);
+      } else {
+        assert.equal(result.checkIn.currentItemId, null);
+        assert.equal(result.checkIn.terminalReason, "sitting_limit");
+      }
+      assert.deepEqual(await respondToDeliveredQuestion(service,ctx, input), {status: "duplicate", original: result});
+      if (index === 3) {
+        assert.equal((await service.pauseCheckIn(context(), {checkInId: started.checkIn.id, reason: "explicit_pause"})).status, "paused");
+        const resumed = await service.resumeCheckIn(context(), {checkInId: started.checkIn.id});
+        assert.equal(resumed.status, "resumed");
+        if (resumed.status === "resumed") assert.equal(resumed.checkIn.acceptedResponseCount, 3);
+      }
+    }
+    assert.equal(repository.responses.length, 8);
+    assert.equal(repository.projectionInput().evidence.length, 0);
+    assert.equal(repository.savedDerivedProgress.length, 0);
+    assert.equal(repository.checkIns[0].terminalReason, "sitting_limit");
+    assert.deepEqual(await respondToDeliveredQuestion(service,context({providerMessageId: "ninth"}), {checkInId: started.checkIn.id, answer: "easily", idempotencyKey: "ninth"}), {status: "no_active_check_in"});
+    assert.equal(repository.responses.length, 8);
+  });
+
+  it("keeps the sitting cap through conflict on the eighth answer and its resolution", async () => {
+    const {service, repository} = createFixture();
+    const started = await service.startCheckIn(context(), {childId: CHILD_ID, purpose: "subject_deep_dive", subjectIds: ["gross_motor"], idempotencyKey: "conflict-eight-start"});
+    assert.equal(started.status, "started");
+    if (started.status !== "started") return;
+    let itemId = started.prompt.itemId;
+    for (let index = 1; index < 8; index += 1) {
+      const result = await respondToDeliveredQuestion(service,context({providerMessageId: `conflict-eight-${index}`}), {checkInId: started.checkIn.id, answer: "skip", idempotencyKey: `conflict-eight-${index}`});
+      assert.equal(result.status, "advanced");
+      if (result.status !== "advanced") return;
+      itemId = result.prompt.itemId;
+    }
+    repository.seedEvidence({itemId, answer: "not_yet", memberUserId: ADULT_B});
+    const result = await respondToDeliveredQuestion(service,context({providerMessageId: "conflict-eight-final"}), {checkInId: started.checkIn.id, answer: "easily", idempotencyKey: "conflict-eight-final"});
+    assert.equal(result.status, "conflict_open");
+    if (result.status !== "conflict_open") return;
+    assert.equal(result.checkIn.acceptedResponseCount, 8);
+    assert.equal(result.checkIn.state, "paused");
+    assert.equal(result.checkIn.terminalReason, null);
+    const resolved = await service.resolveProgressConflict(context(), {conflictId: result.conflict.id, answer: "easily", idempotencyKey: "resolve-eighth"});
+    assert.equal(resolved.status, "conflict_resolved");
+    if (resolved.status !== "conflict_resolved") return;
+    assert.equal(resolved.checkIn?.state, "completed");
+    assert.equal(resolved.checkIn?.terminalReason, "sitting_limit");
+    assert.equal(resolved.checkIn?.acceptedResponseCount, 8);
+    assert.equal(resolved.prompt, null);
+    assert.equal(repository.responses.length, 8);
+    assert.equal(repository.projectionInput().evidence.length, 2);
+  });
+
+  it("returns an honest empty-bank result without a sitting or a saved answer", async () => {
+    const {service, repository} = createFixture();
+    repository.seedEvidence({itemId: "gross_motor.own-fitness", answer: "easily", memberUserId: ADULT_A});
+    const result = await service.startCheckIn(context(), {childId: CHILD_ID, purpose: "subject_deep_dive", subjectIds: ["gross_motor"], idempotencyKey: "bank-end-start"});
+    assert.equal(result.status, "no_question");
+    if (result.status === "no_question") assert.equal(result.reason, "bank_coverage_end");
+    assert.equal(repository.checkIns.length, 0);
+    assert.equal(repository.responses.length, 0);
+  });
+
+  it("records explicit stop separately from completion and keeps saved evidence", async () => {
+    const {service, repository} = createFixture();
+    const started = await startArtCheckIn(service);
+    if (started.status !== "started") throw new Error("Fixture failed");
+    const saved = await respondToDeliveredQuestion(service,context({providerMessageId: "before-stop"}), {checkInId: started.checkIn.id, answer: "easily", idempotencyKey: "before-stop"});
+    assert.equal(saved.status, "advanced");
+    const result = await service.stopCheckIn(context(), {checkInId: started.checkIn.id});
+    assert.equal(result.status, "stopped");
+    if (result.status !== "stopped") return;
+    assert.equal(result.checkIn.terminalReason, "parent_stopped");
+    assert.equal(result.checkIn.acceptedResponseCount, 1);
+    assert.equal(repository.projectionInput().evidence.length, 1);
+    assert.equal(repository.projectionInput().evidence[0].checkInId, started.checkIn.id);
+    assert.equal(repository.projectionInput().evidence[0].derivation, "direct");
+  });
+
+  it("preserves the delivered sitting when a different subject is requested", async () => {
+    const fixture = createFixture();
+    await startBoundArtCheckInWithReplyLoop(fixture);
+    const before = structuredClone(fixture.repository.checkIns);
+    const result = await fixture.service.startCheckIn(context({ turnId: "new-music-turn" }), {
+      childId: CHILD_ID, purpose: "subject_deep_dive", subjectIds: ["music"], idempotencyKey: "new-music-request",
+    });
+    assert.equal(result.status, "different_check_in_active");
+    assert.deepEqual(fixture.repository.checkIns, before);
+    assert.equal(fixture.repository.progressReplyLoop("delivery-1").state, "open");
+  });
+
+  it("preserves the other adult's delivered sitting before requiring takeover", async () => {
+    const fixture = createFixture();
+    await startBoundArtCheckInWithReplyLoop(fixture);
+    const before = structuredClone(fixture.repository.checkIns);
+    const result = await fixture.service.startCheckIn(context({ memberUserId: ADULT_B, turnId: "other-adult-turn" }), {
+      childId: CHILD_ID, purpose: "subject_deep_dive", subjectIds: ["art"], idempotencyKey: "other-adult-request",
+    });
+    assert.equal(result.status, "different_check_in_active");
+    assert.deepEqual(fixture.repository.checkIns, before);
+    assert.equal(fixture.repository.progressReplyLoop("delivery-1").state, "open");
+  });
+});
+
+describe("selected start delivery recovery", () => {
+  it("preserves selected receipt recovery when ordinary chat reissues an undelivered question", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "ordinary-recovery", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: action.requestId};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    const original = repository.startReceipt(action.requestId);
+    const ordinary = await service.startCheckIn({...ctx, selectedAssessment: null, turnId: "ordinary-reissue"}, {...input, idempotencyKey: "ordinary"});
+    if (ordinary.status !== "existing") throw new Error("Missing ordinary reissue");
+    assert.equal(ordinary.checkIn.id, started.checkIn.id);
+    assert.equal(ordinary.checkIn.currentItemId, started.checkIn.currentItemId);
+    const receipt = repository.startReceipt(action.requestId);
+    assert.deepEqual(receipt.result, original.result, "original result is immutable");
+    assert.equal(receipt.issuedRevision, 2);
+    assert.equal(receipt.deliveredAt, null);
+    assert.deepEqual(assessmentStatusFromReceipt({...receipt, result: parseProgressCheckInStartOutcome(receipt.result), memberUserId: ADULT_A,
+      current: {id: ordinary.checkIn.id, state: ordinary.checkIn.state, revision: ordinary.checkIn.revision, current_delivery_id: ordinary.checkIn.currentDeliveryId,
+        active_member_user_id: ordinary.checkIn.ownerMemberUserId, prompt_recipient_member_user_id: ordinary.checkIn.recipientMemberUserId}}),
+      {status: "accepted", checkInId: started.checkIn.id, revision: 2});
+    assert.equal((await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: 1}}, input)).status, "duplicate_start");
+    assert.equal(repository.checkIns[0].revision, 2);
+    const retry = await service.startCheckIn({...ctx, turnId: "selected-retry", selectedAssessment: {...action, retryRevision: 2}}, input);
+    assert.equal(retry.status, "existing");
+    assert.equal(repository.checkIns[0].revision, 3);
+    assert.equal(repository.startReceipt(action.requestId).issuedRevision, 3);
+    assert.equal(repository.responses.length, 0);
+  });
+
+  it("ordinary reissues never advance a delivered receipt, including after its answer", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "delivered-ordinary", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: action.requestId};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    await service.bindCurrentDelivery(ctx, {checkInId: started.checkIn.id, expectedRevision: 1, deliveryId: "delivery-1"});
+    const delivered = repository.startReceipt(action.requestId);
+    assert.ok(delivered.deliveredAt);
+    const ordinaryCtx = {...ctx, selectedAssessment: null, turnId: "ordinary-delivered"};
+    await service.startCheckIn(ordinaryCtx, {...input, idempotencyKey: "ordinary-delivered"});
+    assert.deepEqual(repository.startReceipt(action.requestId), delivered);
+    await service.bindCurrentDelivery(ordinaryCtx, {checkInId: started.checkIn.id, expectedRevision: 2, deliveryId: "delivery-2"});
+    assert.equal((await service.respondCheckIn({...ordinaryCtx, repliedDeliveryId: "delivery-2"},
+      {checkInId: started.checkIn.id, answer: "skip", idempotencyKey: "ordinary-answer"})).status, "advanced");
+    await service.startCheckIn({...ordinaryCtx, turnId: "ordinary-advanced"}, {...input, idempotencyKey: "ordinary-advanced"});
+    assert.deepEqual(repository.startReceipt(action.requestId), delivered);
+    const before = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: 1}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, before);
+  });
+
+  it("a later resume and ordinary reissue cannot attach an old paused action to a new revision", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "old-paused", childId: CHILD_ID, subjectId: "art"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: action.requestId};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    await service.pauseCheckIn(ctx, {checkInId: started.checkIn.id, reason: "explicit_pause"});
+    const paused = structuredClone(repository.checkIns);
+    const originalReceipt = repository.startReceipt(action.requestId);
+    await service.startCheckIn({...ctx, selectedAssessment: null}, {...input, idempotencyKey: "ordinary-paused"});
+    assert.deepEqual(repository.checkIns, paused);
+    await service.startCheckIn({...ctx, selectedAssessment: {...action, requestId: "new-resume"}}, {...input, idempotencyKey: "new-resume"});
+    await service.startCheckIn({...ctx, selectedAssessment: null, turnId: "ordinary-resumed"}, {...input, idempotencyKey: "ordinary-resumed"});
+    assert.deepEqual(repository.startReceipt(action.requestId), originalReceipt);
+    assert.equal(repository.startReceipt("new-resume").issuedRevision, repository.checkIns[0].revision);
+    const before = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: 1}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, before);
+  });
+
+  it("reissues a crashed start once at the requested revision and never resends delivered or advanced questions", async () => {
+    const {service, repository} = createFixture();
+    const action = {requestId: "crashed-start", childId: CHILD_ID, subjectId: "gross_motor"};
+    const ctx = context({channel: "web", selectedAssessment: action});
+    const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["gross_motor"], idempotencyKey: "crashed-start"};
+    const started = await service.startCheckIn(ctx, input);
+    if (started.status !== "started") throw new Error("Missing fixture question");
+    const old = structuredClone(started.checkIn);
+    assert.equal((await service.startCheckIn({...ctx, turnId: "passive-reload"}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns[0], old, "reload alone cannot reissue");
+    const retryContext = {...ctx, turnId: "explicit-retry", selectedAssessment: {...action, retryRevision: old.revision}};
+    const retries = await Promise.all([service.startCheckIn(retryContext, input), service.startCheckIn({...retryContext, turnId: "raced-retry"}, input)]);
+    assert.deepEqual(retries.map(row => row.status).sort(), ["duplicate_start", "existing"]);
+    const current = repository.checkIns[0];
+    assert.equal(current.id, old.id);
+    assert.equal(current.currentItemId, old.currentItemId);
+    assert.equal(current.revision, old.revision + 1);
+    assert.equal(current.pendingTurnId, "explicit-retry");
+    assert.equal(repository.responses.length, 0);
+    assert.deepEqual(await service.bindCurrentDelivery(ctx, {checkInId: old.id, expectedRevision: old.revision, deliveryId: "delivery-1"}), {status: "stale_prompt"});
+    assert.equal((await service.bindCurrentDelivery(retryContext, {checkInId: current.id, expectedRevision: current.revision, deliveryId: "delivery-1"})).status, "bound");
+    const bound = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...retryContext, selectedAssessment: {...action, retryRevision: current.revision}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, bound);
+    const answered = await service.respondCheckIn(context({channel: "web", repliedDeliveryId: "delivery-1", providerMessageId: "recovered-answer"}), {checkInId: current.id, answer: "skip", idempotencyKey: "recovered-answer"});
+    assert.equal(answered.status, "advanced");
+    const advanced = structuredClone(repository.checkIns);
+    assert.equal((await service.startCheckIn({...retryContext, selectedAssessment: {...action, retryRevision: repository.checkIns[0].revision}}, input)).status, "duplicate_start");
+    assert.deepEqual(repository.checkIns, advanced);
+    assert.equal(repository.responses.length, 1);
+  });
+
+  it("does not use an old selected action to resume a parent pause or reopen a stopped sitting", async () => {
+    for (const stop of [false, true]) {
+      const {service, repository} = createFixture();
+      const action = {requestId: "paused-action", childId: CHILD_ID, subjectId: "art"};
+      const ctx = context({channel: "web", selectedAssessment: action});
+      const input = {childId: CHILD_ID, purpose: "subject_deep_dive" as const, subjectIds: ["art"], idempotencyKey: "paused-action"};
+      const started = await service.startCheckIn(ctx, input);
+      if (started.status !== "started") throw new Error("Missing fixture question");
+      if (stop) await service.stopCheckIn(context(), {checkInId: started.checkIn.id});
+      else await service.pauseCheckIn(context(), {checkInId: started.checkIn.id, reason: "explicit_pause"});
+      const before = structuredClone(repository.checkIns);
+      const replay = await service.startCheckIn({...ctx, selectedAssessment: {...action, retryRevision: started.checkIn.revision}}, input);
+      assert.equal(replay.status, "duplicate_start");
+      assert.deepEqual(repository.checkIns, before);
+    }
   });
 });

@@ -156,7 +156,7 @@ describe("ProgressQuestionCard", () => {
     assert.deepEqual(sent, ["Save and stop"]);
   });
 
-  it("focuses the composer without sending from Ask HOMA something else", () => {
+  it("focuses the composer without sending from Ask Homa something else", () => {
     const sent: string[] = [];
     let focusCount = 0;
     const tree = ProgressQuestionCard({
@@ -167,7 +167,7 @@ describe("ProgressQuestionCard", () => {
       },
     });
 
-    buttonWithText(tree, "Ask HOMA something else").props.onClick?.();
+    buttonWithText(tree, "Ask Homa something else").props.onClick?.();
 
     assert.equal(focusCount, 1);
     assert.deepEqual(sent, []);

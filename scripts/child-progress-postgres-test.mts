@@ -9,6 +9,10 @@ import { fileURLToPath } from "node:url";
 
 import postgres from "postgres";
 
+import { assertDeeperProgressPostgres } from "./deeper-progress-postgres-contract";
+
+import type { ProgressCheckInRecord } from "../apps/web/lib/child-progress/types";
+
 import type { MapAnswer } from "../packages/core/src/index";
 
 import {
@@ -234,6 +238,11 @@ const prerequisiteSql = `
   create role authenticated nologin;
   create schema auth;
   create table auth.users (id uuid primary key);
+  create function auth.uid() returns uuid language sql stable as $$
+    select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+  $$;
+  grant usage on schema auth to authenticated;
+  grant execute on function auth.uid() to authenticated;
   create table public.families (
     id uuid primary key,
     email text,
@@ -4517,9 +4526,26 @@ async function runAdapterAssertions(input: {
       inboundMessageId: randomUUID(),
       now: input.now,
     });
+    // Positive fixtures deliver and bind a real owned ledger row before answering.
+    const bindFixtureQuestion = async (checkIn: ProgressCheckInRecord) => {
+      const deliveryId = randomUUID();
+      await sql`
+        insert into public.conversation_deliveries
+          (id, family_id, episode_id, recipient_member_user_id, channel, status)
+        values (${deliveryId}, ${checkIn.familyId}, ${checkIn.episodeId},
+          ${checkIn.recipientMemberUserId}, 'sms', 'sent')
+      `;
+      const result = await checkInService.bindCurrentDelivery(task5Context({
+        memberUserId: checkIn.recipientMemberUserId!, providerMessageId: `bind:${deliveryId}`,
+        runtimeSessionId: checkIn.pendingRuntimeSessionId!, turnId: checkIn.pendingTurnId!,
+        now: checkIn.updatedAt,
+      }), {checkInId: checkIn.id, expectedRevision: checkIn.revision, deliveryId});
+      assert.equal(result.status, "bound");
+      return deliveryId;
+    };
     const firstStartInput = {
       childId,
-      purpose: "subject_deep_dive" as const,
+      purpose: "age_refresh" as const,
       subjectIds: ["social_emotional", "self_care"],
       idempotencyKey: "postgres-check-in-start",
     };
@@ -5144,7 +5170,7 @@ async function runAdapterAssertions(input: {
         }),
         input: {
           checkInId: firstStarted.checkIn.id,
-          expectedRevision: 1,
+          expectedRevision: bound.checkIn.revision,
           answer: "easily" as const,
           idempotencyKey: "postgres-cas-a",
         },
@@ -5158,7 +5184,7 @@ async function runAdapterAssertions(input: {
         }),
         input: {
           checkInId: firstStarted.checkIn.id,
-          expectedRevision: 1,
+          expectedRevision: bound.checkIn.revision,
           answer: "getting_there" as const,
           idempotencyKey: "postgres-cas-b",
         },
@@ -5520,7 +5546,7 @@ async function runAdapterAssertions(input: {
     assert.equal(conflictCoverageSeed.status, "recorded");
     const conflictStartInput = {
       childId,
-      purpose: "subject_deep_dive" as const,
+      purpose: "age_refresh" as const,
       subjectIds: ["art"],
       idempotencyKey: "postgres-conflict-check-in",
     };
@@ -5540,10 +5566,12 @@ async function runAdapterAssertions(input: {
       conflictStarted.prompt.itemId,
       "art.plans-artwork",
     );
+    const conflictDeliveryId = await bindFixtureQuestion(conflictStarted.checkIn);
     const conflictOpened = await checkInService.respondCheckIn(
       task5Context({
         memberUserId: adultB,
         providerMessageId: "postgres-conflict-answer",
+        repliedDeliveryId: conflictDeliveryId,
         now: "2026-07-11T18:36:00.000000Z",
       }),
       {
@@ -6443,6 +6471,7 @@ async function runAdapterAssertions(input: {
     if (authResponseStart.status !== "started") {
       throw new Error("Auth response race check-in did not start");
     }
+    const authResponseDeliveryId = await bindFixtureQuestion(authResponseStart.checkIn);
     const authResponseResult = await runAuthDeletionRace(
       adultE,
       () =>
@@ -6450,6 +6479,7 @@ async function runAdapterAssertions(input: {
           task5Context({
             memberUserId: adultE,
             providerMessageId: "postgres-auth-response-race",
+            repliedDeliveryId: authResponseDeliveryId,
             now: "2026-07-11T18:44:10.000000Z",
           }),
           {
@@ -6977,10 +7007,15 @@ async function main(): Promise<void> {
         database,
         "-f",
         familyDeleteProgressTriggerMigrationPath,
+        "-f",
+        path.join(repoRoot, "supabase/migrations/20260906185000_deeper_progress_sitting_receipts.sql"),
       ],
       env,
     );
     await runAdapterAssertions({ socketDir, port, username });
+    const deeperSql = postgres({host: socketDir, port, database, username, max: 4, prepare: false});
+    try { await assertDeeperProgressPostgres(deeperSql); }
+    finally { await deeperSql.end({timeout: 1}); }
   } catch (error) {
     primaryFailure = error;
     throw error;

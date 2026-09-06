@@ -130,7 +130,7 @@ function dependencies(input: {
 }
 
 describe("trusted progress delivery markers", () => {
-  it("lets web bind a card prompt without duplicated terminal prose", async () => {
+  it("requires actual exact web text rather than assuming a question card from its pending turn", async () => {
     const result =
       await bindProgressCheckInAfterSuccessfulDelivery(
         {
@@ -147,7 +147,20 @@ describe("trusted progress delivery markers", () => {
         dependencies(),
       );
 
-    assert.equal(result.status, "bound");
+    assert.equal(result.status, "no_unique_prompt");
+    assert.equal((await bindProgressCheckInAfterSuccessfulDelivery({attempt: attempt({channel: "web"}),
+      deliveryOutcome: "sent", runtimeSessionId: "runtime-1", turnId: "turn-1", deliveredContent: PROMPT, now: NOW}, dependencies())).status, "bound");
+  });
+
+  it("does not reopen a web reply loop from a duplicate whose canonical text lacks the question", async () => {
+    let opens = 0;
+    const delivery = attempt({channel: "web"});
+    const dependenciesForReplay = dependencies({checkIns: [checkIn({currentDeliveryId: delivery.id})], onOpen: () => {opens += 1;}});
+    assert.deepEqual(await bindProgressCheckInAfterSuccessfulDelivery({attempt: delivery, deliveryOutcome: "sent", deliveredContent: "Please try again."}, dependenciesForReplay),
+      {status: "no_unique_prompt"});
+    assert.equal(opens, 0);
+    assert.equal((await bindProgressCheckInAfterSuccessfulDelivery({attempt: delivery, deliveryOutcome: "sent", deliveredContent: PROMPT}, dependenciesForReplay)).status, "bound");
+    assert.equal(opens, 1);
   });
 
   it("requires exact prompt text for SMS and email", async () => {

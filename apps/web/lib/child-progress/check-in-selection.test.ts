@@ -84,6 +84,8 @@ function answer(
       : null;
   return {
     selectionId,
+    childId: "child-1",
+    familyId: "family-1",
     evidenceId,
     itemId,
     answer: value,

@@ -11,7 +11,7 @@ import {
   getProgressTaxonomyTopic,
 } from "@homa/taxonomy/progress";
 
-import { buildChildProgressView } from "./projection";
+import { buildChildProgressView, buildProgressSelectionAnswers } from "./projection";
 import type {
   OpenProgressConflict,
   ProgressEvidence,
@@ -565,6 +565,8 @@ describe("child progress projection", () => {
         selectionAnswers: [
           {
             selectionId: `response-${answer}`,
+            childId: CHILD.id,
+            familyId: FAMILY_ID,
             evidenceId: null,
             itemId: "math.mental-add-10",
             answer,
@@ -597,6 +599,8 @@ describe("child progress projection", () => {
       selectionAnswers: [
         {
           selectionId: "response-row",
+          childId: CHILD.id,
+          familyId: FAMILY_ID,
           evidenceId: "effective-answer",
           itemId: "math.mental-add-10",
           answer: "not_yet",
@@ -631,6 +635,8 @@ describe("child progress projection", () => {
       selectionAnswers: [
         {
           selectionId: "superseded-response",
+          childId: CHILD.id,
+          familyId: FAMILY_ID,
           evidenceId: "superseded-response-evidence",
           itemId: "math.mental-add-10",
           answer: "not_yet",
@@ -703,4 +709,13 @@ describe("child progress projection", () => {
       },
     );
   });
+});
+
+
+it("selection history cannot suppress an own question using a foreign child or family", () => {
+  const own: ProgressSelectionAnswer = {selectionId: "own", childId: CHILD.id, familyId: FAMILY_ID,
+    evidenceId: null, itemId: "math.mental-add-10", answer: "skip", answeredAt: NOW.toISOString()};
+  const result = buildProgressSelectionAnswers({childId: CHILD.id, familyId: FAMILY_ID, evidence: [], conflicts: [],
+    selectionAnswers: [{...own, selectionId: "sibling", childId: "child-2"}, {...own, selectionId: "foreign", familyId: "family-2"}, own]});
+  assert.deepEqual(result, [own]);
 });

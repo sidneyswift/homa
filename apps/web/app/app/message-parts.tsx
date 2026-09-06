@@ -44,6 +44,7 @@ import {
   type ProgressAssistantItem,
 } from "./progress-message-parts";
 import { ProgressQuestionCard } from "./progress-question-card";
+import { ProgressWorkflowCard } from "./progress-workflow-card";
 import { ProgressUpdateChip } from "./progress-update-chip";
 import {
   parsePlannerOpenPart,
@@ -836,9 +837,7 @@ function AssistantItemView({
               onSendSuggestion={progressSendSuggestion}
             />
           ) : null}
-          <p className="quiet-message__workflow-chip">
-            {item.label}
-          </p>
+          <ProgressWorkflowCard item={item} />
         </div>
       );
     default: {
@@ -922,7 +921,7 @@ export function MessageView({
    *  session-fork guard and queueing apply the same as any other send).
    *  Undefined only hides the retry control, never the "Not sent" state
    *  itself: a message that failed to send stays honest either way. */
-  onRetryFailedMessage?: (text: string) => void;
+  onRetryFailedMessage?: (text: string, messageId: string) => void;
 }) {
   if (message.role === "user") {
     const text = message.parts
@@ -968,7 +967,7 @@ export function MessageView({
                 {onRetryFailedMessage ? (
                   <button
                     type="button"
-                    onClick={() => onRetryFailedMessage(visibleText)}
+                    onClick={() => onRetryFailedMessage(visibleText, message.id)}
                     className="quiet-message__retry"
                   >
                     <Icon name="refresh" size={16} />

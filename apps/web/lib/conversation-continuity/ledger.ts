@@ -454,6 +454,7 @@ export async function persistCanonicalMessage(
   id: string;
   episodeId: string;
   replyClaimed: boolean;
+  content: string;
 } | null> {
   const attrs = (input.attributes ?? {}) as ContinuityAuthAttributes;
   const familyId = attrs.familyId;
@@ -486,8 +487,8 @@ export async function persistCanonicalMessage(
   const persisted = await sql.begin(async (tx) => {
     const duplicate = providerMessageId
       ? (
-          await tx<{ id: string; episode_id: string | null }[]>`
-            select id, episode_id from public.conversation_messages
+          await tx<{ id: string; episode_id: string | null; content: string }[]>`
+            select id, episode_id, content from public.conversation_messages
             where family_id = ${familyId}
               and channel = ${input.channel}
               and provider_message_id = ${providerMessageId}
@@ -495,10 +496,10 @@ export async function persistCanonicalMessage(
           `
         )[0]
       : null;
-    const messageId =
-      duplicate?.id ??
+    const storedMessage =
+      duplicate ??
       (
-        await tx<{ id: string }[]>`
+        await tx<{ id: string; content: string }[]>`
           insert into public.conversation_messages
             (family_id, session_id, sequence, channel, role, content, turn_id,
              episode_id, member_user_id, visibility, task_run_id,
@@ -558,9 +559,10 @@ export async function persistCanonicalMessage(
               when excluded.modality = 'voice' then 'voice'
               else public.conversation_messages.modality
             end
-          returning id
+          returning id, content
         `
-      )[0].id;
+      )[0];
+    const messageId = storedMessage.id;
     if (duplicate) {
       await tx`
         update public.conversation_messages
@@ -612,6 +614,7 @@ export async function persistCanonicalMessage(
       id: messageId,
       episodeId: duplicate?.episode_id ?? episodeId,
       replyClaimed,
+      content: storedMessage.content,
     };
   });
   if (input.channel !== "dispatch") {
