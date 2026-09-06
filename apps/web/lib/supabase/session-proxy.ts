@@ -49,7 +49,7 @@ export function createSessionProxyHandler(
     const path = request.nextUrl.pathname;
     const isPrefetch = request.headers.has("next-router-prefetch") ||
       request.headers.get("purpose") === "prefetch" || request.headers.get("sec-purpose")?.includes("prefetch");
-    const selectedAssessment = !isPrefetch && (path === "/app" || path === "/onboarding")
+    const selectedAssessment = request.method === "GET" && !isPrefetch && (path === "/app" || path === "/onboarding")
       ? assessmentActionFromQuery(Object.fromEntries(request.nextUrl.searchParams), crypto.randomUUID()) : null;
     if (selectedAssessment) {
       const cookie = {name: ASSESSMENT_PENDING_COOKIE, value: JSON.stringify(selectedAssessment), options: {httpOnly: true, sameSite: "lax" as const, secure: request.nextUrl.protocol === "https:", path: "/", maxAge: 3600}};

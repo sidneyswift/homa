@@ -17,6 +17,7 @@ let origin: string;
 let sends: unknown[] = [];
 let receiptStatus: "not_started" | "accepted" | "delivered" | "terminal" = "not_started";
 let unavailable = false;
+let statusReads = 0;
 let receiptRevision = 1;
 const screenshots = resolve(process.env.DEEPER_PROGRESS_SCREENSHOTS ?? "test-results/deeper-progress");
 
@@ -31,8 +32,9 @@ import {ProgressSubjects} from './components/progress/progress-subjects';
 import {PROGRESS_FIXTURE_VIEW} from './components/progress/progress-view.fixture';
 import {resolveAssessmentAction} from './lib/child-progress/assessment-intent';
 const params=new URLSearchParams(location.search);
-const action=resolveAssessmentAction({requestId:params.get('request'),childId:'${childId}',subjectId:'math'},[{id:'${childId}',name:'Maya'}]);
+const initialAction=resolveAssessmentAction({requestId:params.get('request'),childId:'${childId}',subjectId:'math'},[{id:'${childId}',name:'Maya'}]);
 function App(){
+ const [action,setAction]=useState(initialAction);
  const [ready,setReady]=useState(params.get('ready')!=='false');
  const [walled,setWalled]=useState(params.get('wall')==='true');
  const [draft,setDraft]=useState('My unrelated draft');
@@ -40,7 +42,7 @@ function App(){
  if(params.get('mode')==='return') return <main><h1 id="progress-heading" tabIndex={-1}>Maya's Progress</h1><ProgressSubjects childId="${childId}" initialSubjectId={params.get('subject')} subjects={PROGRESS_FIXTURE_VIEW.subjects} tiles={[]} conflicts={[]} timeZone="America/New_York" deeperChecks><p>Progress overview</p></ProgressSubjects></main>;
  if(params.get('mode')==='question') return <main><ProgressQuestionCard card={{checkInId:'${childId}',revision:1,childName:'Maya',subjectDisplayName:'Math',statement:'Maya counts out loud to 10 without skipping numbers.',answerLabels:['Easily','Getting there','Not yet','Not sure','Skip'],acceptedResponseCount:2,responseLimit:8}} onSendSuggestion={setDraft} onFocusComposer={()=>document.querySelector("textarea")?.focus()}/><label>Message<textarea value={draft} onChange={e=>setDraft(e.target.value)}/></label></main>;
  if(params.get('mode')==='complete') return <main><ProgressWorkflowCard item={{kind:'progress_workflow',label:'Check-in saved',scope:{childId:'${childId}',childName:'Maya',subjectId:'math',subjectDisplayName:'Math'},completion:{reason:params.get('reason')||'sitting_limit',acceptedResponseCount:8,uncertainResponseCount:2,mixedEvidence:params.has('mixed')}}}/></main>;
- return <main><SelectedAssessmentNotice action={action} unavailable={false} state={selected.state} walled={walled} onRetry={selected.retry} onAccountSetup={()=>setWalled(false)}/><label>Message<textarea value={draft} onChange={e=>setDraft(e.target.value)}/></label><button onClick={()=>setReady(!ready)}>Toggle ready</button><output data-testid="state">{selected.state}</output></main>;
+ return <main><SelectedAssessmentNotice action={action} unavailable={false} state={selected.state} walled={walled} onRetry={selected.retry} onAccountSetup={()=>setWalled(false)}/><label>Message<textarea value={draft} onChange={e=>setDraft(e.target.value)}/></label><button onClick={()=>setReady(!ready)}>Toggle ready</button><button onClick={()=>setAction(current=>({...current}))}>Refresh same action</button><output data-testid="state">{selected.state}</output></main>;
 }
 createRoot(document.getElementById('root')).render(<StrictMode><App/></StrictMode>);
 `;
@@ -66,7 +68,7 @@ test.beforeAll(async () => {
     if (url.pathname.startsWith("/fonts/") && /^[a-zA-Z0-9._-]+\.woff2$/.test(url.pathname.slice(7))) {res.setHeader("content-type","font/woff2");res.end(readFileSync(resolve(".next/static/media",url.pathname.slice(7))));return;}
     if (url.pathname === "/bundle.js") {res.setHeader("content-type", "text/javascript"); res.end(built.outputFiles[0].text); return;}
     if (url.pathname === "/style.css") {res.setHeader("content-type", "text/css"); res.end(css.css + fonts + ":root{--font-dm-sans:\"DM Sans\";--font-eb-garamond:\"EB Garamond\"}body{margin:0}main{padding:20px;max-width:700px;margin:auto}textarea{display:block;width:100%}"); return;}
-    if (url.pathname === "/status") {res.setHeader("content-type", "application/json");res.end(JSON.stringify({status: unavailable ? "unavailable" : receiptStatus, checkInId: childId, revision: receiptRevision}));return;}
+    if (url.pathname === "/status") {statusReads++;res.setHeader("content-type", "application/json");res.end(JSON.stringify({status: unavailable ? "unavailable" : receiptStatus, checkInId: childId, revision: receiptRevision}));return;}
     if (url.pathname === "/send") {let body="";for await(const chunk of req)body+=chunk;sends.push(JSON.parse(body));res.end("ok");return;}
     res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/style.css"><div id="root"></div><script src="/bundle.js"></script>');
   });
@@ -227,6 +229,26 @@ test("ordinary-chat reissue keeps recovery intent and retry uses the synchronize
   expect(sends[0]).toEqual({message: "Ask me deeper math questions for Maya.", source: {kind: "assessment_action",
     assessmentAction: {requestId: request, childId, subjectId: "math", retryRevision: 2}}});
   await expect(page.getByRole("textbox", {name: "Message"})).toHaveValue("My unrelated draft");
+  receiptStatus = "delivered";
+  await expect(page.getByTestId("state")).toHaveText("complete", {timeout: 12_000});
+  expect(new URL(page.url()).searchParams.has("request")).toBe(false);
+  expect(sends).toHaveLength(1);
+  await context.close();
+});
+
+
+test("same-value server rerenders preserve one pending poll loop and never resend", async () => {
+  const context = await browser.newContext({viewport: {width: 390, height: 844}});
+  const page = await context.newPage();
+  const request = randomUUID();
+  await page.goto(`${origin}/app?mode=handoff&request=${request}`);
+  await expect.poll(() => sends.length).toBe(1);
+  const before = statusReads;
+  // Server Actions can deserialize the same selected action into a new object.
+  // A copied prop must not bypass the three-second poll cadence.
+  for (let i = 0; i < 12; i++) await page.getByRole("button", {name: "Refresh same action"}).click();
+  expect(statusReads - before).toBeLessThanOrEqual(2);
+  expect(sends).toHaveLength(1);
   receiptStatus = "delivered";
   await expect(page.getByTestId("state")).toHaveText("complete", {timeout: 12_000});
   expect(new URL(page.url()).searchParams.has("request")).toBe(false);
