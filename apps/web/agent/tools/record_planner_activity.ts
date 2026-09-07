@@ -5,11 +5,11 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { learningOperationFailure, sourceActivityOrdinalSchema } from "../../lib/learning-write-operations";
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
 import { emitMapEvent } from "../../lib/map/events";
 import {
   findLoggedActivityCandidates,
-  getPlannerLearningActivityPinned,
   plannerHoursNote,
   plannerHoursSourceForChannel,
   plannerLearningIdempotencyKey,
@@ -62,6 +62,7 @@ const inputSchema = z
       .max(500)
       .optional()
       .describe("Useful detail the parent supplied that does not belong in the short title."),
+    sourceActivityOrdinal: sourceActivityOrdinalSchema,
     sourceQuote: z
       .string()
       .trim()
@@ -113,14 +114,7 @@ export default defineBoundedTool({
       const idempotencyKey = plannerLearningIdempotencyKey({
         action: "record",
         sourceMessageId: trusted.sourceMessageId,
-        identity: [
-          input.title.trim(),
-          input.subject,
-          input.activityDate,
-          input.status,
-          input.durationMinutes ?? null,
-          childIds.join(","),
-        ],
+        identity: [input.sourceActivityOrdinal],
       });
       const activityId = plannerLearningMutationUuid(idempotencyKey, "activity");
       if (childIds.length > 0 && !input.confirmNotDuplicate) {
@@ -183,6 +177,7 @@ export default defineBoundedTool({
           sourceQuote,
           sourceMessageId: trusted.sourceMessageId,
           idempotencyKey,
+          sourceActivityOrdinal: input.sourceActivityOrdinal,
           activityId,
           hoursEntryIds,
         });
@@ -217,7 +212,7 @@ export default defineBoundedTool({
                     minutes: input.durationMinutes!,
                     happenedOn: input.activityDate,
                     source: plannerHoursSourceForChannel(trusted.sourceChannel),
-                    note: plannerHoursNote(sourceQuote),
+                    note: plannerHoursNote(sourceQuote, input.title, input.note),
                   })),
                 },
               },
@@ -230,22 +225,13 @@ export default defineBoundedTool({
                   note: "That Voice action already ran and was undone.",
                 };
               }
-              const activity = await getPlannerLearningActivityPinned({
-                familyId: access.familyId,
-                activityId,
-              });
-              return activity
-                ? { status: "recorded" as const, activity, created: false }
-                : {
-                    status: "unknown_child" as const,
-                    note: "That Voice action no longer has a Planner activity.",
-                  };
+              return await mutate();
             },
             succeeded: (result) => result.status === "recorded" && result.created,
           })
         : { actionReceipt: null, result: await mutate(), replayed: false };
       const result = armed.result;
-      if (result.status === "unknown_child") {
+      if (result.status !== "recorded") {
         return { recorded: false, note: result.note };
       }
       if (result.created) {
@@ -283,6 +269,8 @@ export default defineBoundedTool({
           : "That exact activity is already in Planner from this message; nothing was added twice.",
       };
     } catch (error) {
+      const failure = learningOperationFailure(error);
+      if (failure) return { recorded: false, ...failure };
       if (error instanceof MissingFamilyContextError) {
         return { recorded: false, note: error.message };
       }

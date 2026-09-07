@@ -1,9 +1,11 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 
 import type { FourWeekPlan } from "@homa/core";
 import { z } from "zod";
 
 import { HOURS_SUBJECTS, type HoursSubject } from "./hours-model";
+import { composeHoursNote } from "./hours-note-context";
+import { sourceActivityOrdinalSchema, withLearningWriteOperation } from "./learning-write-operations";
 import { mapDb, type DbJson } from "./map/db";
 
 export const PLANNER_LEARNING_STATUSES = ["planned", "completed"] as const;
@@ -102,7 +104,7 @@ function validDateOnly(value: string): boolean {
 }
 
 function normalizedUuidList(values: readonly string[]): string[] {
-  const unique = [...new Set(values)];
+  const unique = [...new Set(values.map((value) => value.toLowerCase()))];
   if (unique.length > 12 || unique.some((value) => !uuidSchema.safeParse(value).success)) {
     throw new TypeError("Planner activities accept up to 12 valid child ids");
   }
@@ -136,8 +138,8 @@ export function plannerLearningIdempotencyKey(input: {
     .update(
       JSON.stringify([
         input.action,
-        input.sourceMessageId,
-        ...input.identity,
+        uuidSchema.parse(input.sourceMessageId).toLowerCase(),
+        ...input.identity.map((value) => typeof value === "string" && uuidSchema.safeParse(value).success ? value.toLowerCase() : value),
       ]),
     )
     .digest("hex");
@@ -167,8 +169,8 @@ export function plannerHoursSourceForChannel(
   return "chat";
 }
 
-export function plannerHoursNote(sourceQuote: string): string {
-  return Array.from(sourceQuote).slice(0, 200).join("");
+export function plannerHoursNote(sourceQuote: string, title?: string | null, note?: string | null): string {
+  return composeHoursNote({ title, note, sourceQuote }).text;
 }
 
 export interface RecordPlannerLearningActivityInput {
@@ -184,13 +186,15 @@ export interface RecordPlannerLearningActivityInput {
   sourceQuote: string;
   sourceMessageId: string;
   idempotencyKey: string;
+  sourceActivityOrdinal: number;
   activityId?: string;
   hoursEntryIds?: readonly string[];
 }
 
 export type RecordPlannerLearningActivityResult =
   | { status: "recorded"; activity: PlannerLearningActivity; created: boolean }
-  | { status: "unknown_child"; note: string };
+  | { status: "unknown_child"; note: string }
+  | { status: "conflict"; note: string };
 
 /**
  * Server-pinned Planner write. The family comes from authenticated runtime
@@ -234,7 +238,12 @@ export async function recordPlannerLearningActivity(
   if (input.idempotencyKey.length < 16 || input.idempotencyKey.length > 200) {
     throw new TypeError("Planner activity idempotency key is invalid");
   }
-  const activityId = input.activityId ?? randomUUID();
+  sourceActivityOrdinalSchema.parse(input.sourceActivityOrdinal);
+  const expectedKey = plannerLearningIdempotencyKey({ action: "record", sourceMessageId: input.sourceMessageId,
+    identity: [input.sourceActivityOrdinal] });
+  if (input.idempotencyKey !== expectedKey) throw new TypeError("Planner capture identity is invalid");
+  const activityId = input.activityId ?? plannerLearningMutationUuid(expectedKey, "activity");
+  if (activityId !== plannerLearningMutationUuid(expectedKey, "activity")) throw new TypeError("Planner activity identity is invalid");
   if (!uuidSchema.safeParse(activityId).success) {
     throw new TypeError("Planner activity id is invalid");
   }
@@ -242,23 +251,22 @@ export async function recordPlannerLearningActivity(
     ? 0
     : Math.max(1, childIds.length);
   const proposedHoursEntryIds = input.hoursEntryIds === undefined
-    ? Array.from({ length: expectedHoursCount }, () => randomUUID())
+    ? Array.from({ length: expectedHoursCount }, (_, index) => plannerLearningMutationUuid(input.idempotencyKey, `hours:${index}`))
     : [...input.hoursEntryIds];
   if (
     proposedHoursEntryIds.length !== expectedHoursCount
-    || proposedHoursEntryIds.some((id) => !uuidSchema.safeParse(id).success)
+    || proposedHoursEntryIds.some((id, index) => id !== plannerLearningMutationUuid(input.idempotencyKey, `hours:${index}`))
     || new Set(proposedHoursEntryIds).size !== proposedHoursEntryIds.length
   ) {
     throw new TypeError("Planner activity Hours identities are invalid");
   }
 
-  const sql = mapDb();
-  return await sql.begin(async (tx): Promise<RecordPlannerLearningActivityResult> => {
-    await tx`
-      select pg_advisory_xact_lock(
-        hashtextextended(${`${input.familyId}:${input.idempotencyKey}`}, 0)
-      )
-    `;
+  return await withLearningWriteOperation({
+    familyId: input.familyId, key: input.idempotencyKey, sourceMessageId: input.sourceMessageId,
+    sourceQuote: input.sourceQuote, hoursIds: proposedHoursEntryIds, requestedDate: input.activityDate,
+    request: { sourceActivityOrdinal: input.sourceActivityOrdinal, title, subject: input.subject, activityDate: input.activityDate, status: input.status,
+      durationMinutes, note, childIds, sourceChannel: input.sourceChannel },
+  }, async (tx, operation): Promise<RecordPlannerLearningActivityResult> => {
     const existing = await tx<PlannerLearningActivityDbRow[]>`
       select activity.id, activity.family_id, activity.title, activity.subject,
              activity.activity_date::text, activity.status,
@@ -282,6 +290,9 @@ export async function recordPlannerLearningActivity(
         and activity.idempotency_key = ${input.idempotencyKey}
       group by activity.id
     `;
+    if (!operation.inserted && !existing[0]) {
+      return { status: "conflict", note: "That activity was removed after it was recorded. Nothing was recreated." };
+    }
     if (existing[0]) {
       return {
         status: "recorded",
@@ -306,7 +317,7 @@ export async function recordPlannerLearningActivity(
     }
 
     const completed = input.status === "completed";
-    await tx`
+    const [insertedActivity] = await tx<{ created_at: string; updated_at: string; completed_at: string | null }[]>`
       insert into public.planner_learning_activities (
         id, family_id, title, subject, activity_date, status,
         duration_minutes, note, source_channel, source_quote,
@@ -322,9 +333,11 @@ export async function recordPlannerLearningActivity(
         ${completed ? input.sourceQuote : null},
         ${completed ? input.sourceMessageId : null},
         ${completed ? input.idempotencyKey : null},
-        ${completed ? new Date().toISOString() : null}
+        case when ${completed} then now() else null end
       )
+      returning created_at::text, updated_at::text, completed_at::text
     `;
+    if (!insertedActivity) throw new Error("Planner did not return its saved timestamps");
 
     for (const childId of childIds) {
       await tx`
@@ -341,12 +354,12 @@ export async function recordPlannerLearningActivity(
         const proposedHoursId = proposedHoursEntryIds[index];
         const inserted = await tx<{ id: string }[]>`
           insert into public.hours_log
-            (id, family_id, child_id, subject, minutes, happened_on, source, note)
+            (id, family_id, child_id, subject, minutes, happened_on, source, note, capture_operation_id)
           values (
             ${proposedHoursId}, ${input.familyId}, ${childId}, ${input.subject},
             ${durationMinutes}, ${input.activityDate},
             ${plannerHoursSourceForChannel(input.sourceChannel)},
-            ${plannerHoursNote(input.sourceQuote)}
+            ${plannerHoursNote(input.sourceQuote, title, note)}, ${operation.id}
           )
           returning id
         `;
@@ -364,7 +377,6 @@ export async function recordPlannerLearningActivity(
       }
     }
 
-    const now = new Date().toISOString();
     return {
       status: "recorded",
       created: true,
@@ -383,9 +395,9 @@ export async function recordPlannerLearningActivity(
         completionSourceChannel: completed ? input.sourceChannel : null,
         completionSourceQuote: completed ? input.sourceQuote : null,
         completionSourceMessageId: completed ? input.sourceMessageId : null,
-        completedAt: completed ? now : null,
-        createdAt: now,
-        updatedAt: now,
+        completedAt: insertedActivity.completed_at,
+        createdAt: insertedActivity.created_at,
+        updatedAt: insertedActivity.updated_at,
         childIds,
         hoursEntryIds,
       },
@@ -394,6 +406,8 @@ export async function recordPlannerLearningActivity(
 }
 
 export interface CompletePlannerLearningActivityInput {
+  /** Caller snapshot for exact Voice undo; checked only on a new completion. */
+  expectedUpdatedAt?: string;
   familyId: string;
   activityId: string;
   expectedStatus: "planned";
@@ -456,8 +470,19 @@ export async function completePlannerLearningActivity(
   ) {
     throw new TypeError("Planner activity duration must be between 1 and 600 minutes");
   }
-  const sql = mapDb();
-  return await sql.begin(async (tx): Promise<CompletePlannerLearningActivityResult> => {
+  const expectedKey = plannerLearningIdempotencyKey({ action: "complete-independent",
+    sourceMessageId: input.sourceMessageId, identity: [input.activityId] });
+  if (input.idempotencyKey !== expectedKey) throw new TypeError("Planner completion identity is invalid");
+  const prior = await getPlannerLearningActivityPinned({ familyId: input.familyId, activityId: input.activityId });
+  const count = durationMinutes === null ? 0 : Math.max(1, prior?.childIds.length ?? 0);
+  const expectedHoursIds = input.hoursEntryIds ?? Array.from({ length: count }, (_, index) =>
+    plannerLearningMutationUuid(expectedKey, `hours:${index}`));
+  return await withLearningWriteOperation({
+    familyId: input.familyId, key: expectedKey, sourceMessageId: input.sourceMessageId,
+    sourceQuote: input.sourceQuote, hoursIds: expectedHoursIds, requestedDate: null,
+    request: { activityId: input.activityId.toLowerCase(), expectedStatus: input.expectedStatus,
+      durationMinutes, sourceChannel: input.sourceChannel },
+  }, async (tx, operation): Promise<CompletePlannerLearningActivityResult> => {
     const rows = await tx<PlannerLearningActivityDbRow[]>`
       select activity.id, activity.family_id, activity.title, activity.subject,
              activity.activity_date::text, activity.status,
@@ -499,8 +524,8 @@ export async function completePlannerLearningActivity(
     `;
     const childIds = childRows.map((row) => row.child_id);
     const existingHoursEntryIds = hoursRows.map((row) => row.hours_entry_id);
-    if (current.status === "completed") {
-      if (current.completion_source_message_id === input.sourceMessageId) {
+    if (!operation.inserted) {
+      if (current.status === "completed") {
         return {
           status: "completed",
           activity: toPlannerLearningActivity({
@@ -518,15 +543,22 @@ export async function completePlannerLearningActivity(
       };
     }
 
+    if (input.expectedUpdatedAt !== undefined && current.updated_at !== input.expectedUpdatedAt) {
+      return { status: "conflict", reason: "status-mismatch", note: "That activity changed while Homa was saving it. Reopen it before recording time." };
+    }
+
+    if (current.status !== input.expectedStatus) {
+      return { status: "conflict", reason: "status-mismatch", note: "That activity is already finished. No additional time was recorded." };
+    }
     const expectedHoursCount = durationMinutes === null
       ? 0
       : Math.max(1, childIds.length);
     const proposedHoursEntryIds = input.hoursEntryIds === undefined
-      ? Array.from({ length: expectedHoursCount }, () => randomUUID())
+      ? Array.from({ length: expectedHoursCount }, (_, index) => plannerLearningMutationUuid(input.idempotencyKey, `hours:${index}`))
       : [...input.hoursEntryIds];
     if (
       proposedHoursEntryIds.length !== expectedHoursCount
-      || proposedHoursEntryIds.some((id) => !uuidSchema.safeParse(id).success)
+      || proposedHoursEntryIds.some((id, index) => id !== plannerLearningMutationUuid(input.idempotencyKey, `hours:${index}`))
       || new Set(proposedHoursEntryIds).size !== proposedHoursEntryIds.length
     ) {
       throw new TypeError("Planner completion Hours identities are invalid");
@@ -538,12 +570,12 @@ export async function completePlannerLearningActivity(
         const proposedHoursId = proposedHoursEntryIds[index];
         const inserted = await tx<{ id: string }[]>`
           insert into public.hours_log
-            (id, family_id, child_id, subject, minutes, happened_on, source, note)
+            (id, family_id, child_id, subject, minutes, happened_on, source, note, capture_operation_id)
           values (
             ${proposedHoursId}, ${input.familyId}, ${childId}, ${current.subject},
             ${durationMinutes}, ${current.activity_date},
             ${plannerHoursSourceForChannel(input.sourceChannel)},
-            ${plannerHoursNote(input.sourceQuote)}
+            ${plannerHoursNote(input.sourceQuote, current.title, current.note)}, ${operation.id}
           )
           returning id
         `;
@@ -606,6 +638,8 @@ export interface CompleteGeneratedPlanActivityInput {
   hoursSubject?: HoursSubject | null;
   sourceChannel: PlannerLearningSourceChannel;
   sourceQuote: string;
+  sourceMessageId: string;
+  idempotencyKey: string;
   hoursEntryId?: string | null;
 }
 
@@ -758,18 +792,26 @@ export async function completeGeneratedPlanActivity(
   if ((durationMinutes === null) !== (input.hoursSubject == null)) {
     throw new TypeError("Duration and Hours subject must be supplied together");
   }
+  const expectedKey = plannerLearningIdempotencyKey({ action: "complete-generated", sourceMessageId: input.sourceMessageId,
+    identity: [input.childId, input.subjectId, input.week, input.activityIndex, input.planRevision] });
+  if (input.idempotencyKey !== expectedKey) throw new TypeError("Generated completion identity is invalid");
   const proposedHoursEntryId = input.hoursEntryId ?? (
-    durationMinutes === null ? null : randomUUID()
+    durationMinutes === null ? null : plannerLearningMutationUuid(expectedKey, "hours:0")
   );
   if (
     (durationMinutes === null) !== (proposedHoursEntryId === null)
-    || (proposedHoursEntryId !== null && !uuidSchema.safeParse(proposedHoursEntryId).success)
+    || (proposedHoursEntryId !== null && proposedHoursEntryId !== plannerLearningMutationUuid(expectedKey, "hours:0"))
   ) {
     throw new TypeError("Generated Planner completion Hours identity is invalid");
   }
 
-  const sql = mapDb();
-  return await sql.begin(async (tx): Promise<CompleteGeneratedPlanActivityResult> => {
+  return await withLearningWriteOperation({
+    familyId: input.familyId, key: expectedKey, sourceMessageId: input.sourceMessageId,
+    sourceQuote: input.sourceQuote, hoursIds: proposedHoursEntryId ? [proposedHoursEntryId] : [], requestedDate: input.happenedOn,
+    request: { childId: input.childId.toLowerCase(), subjectId: input.subjectId, week: input.week, activityIndex: input.activityIndex,
+      expectedText: input.expectedText, planRevision: input.planRevision, happenedOn: input.happenedOn,
+      durationMinutes, hoursSubject: input.hoursSubject ?? null, sourceChannel: input.sourceChannel },
+  }, async (tx, operation): Promise<CompleteGeneratedPlanActivityResult> => {
     const rows = await tx<GeneratedPlanRow[]>`
       select plan.id, plan.plan, plan.progress,
              plan.plan_revision::integer as plan_revision,
@@ -793,14 +835,23 @@ export async function completeGeneratedPlanActivity(
     if (inspected.status === "conflict") return inspected;
     const progressKey = inspected.progressKey;
     const progress = plan.progress ?? {};
+    if (!operation.inserted && progress[progressKey] !== true) {
+      return generatedPlanConflict("activity-mismatch");
+    }
+    if (operation.inserted && progress[progressKey] === true) {
+      return generatedPlanConflict("activity-mismatch");
+    }
     if (progress[progressKey] === true) {
+      const currentHours = proposedHoursEntryId ? await tx<{ id: string }[]>`
+        select id from public.hours_log where family_id = ${input.familyId} and id = ${proposedHoursEntryId}
+      ` : [];
       return {
         status: "completed",
         planId: plan.id,
         progressKey,
         progressRevision: plan.progress_revision,
         changed: false,
-        hoursEntryIds: [],
+        hoursEntryIds: currentHours.map((row) => row.id),
       };
     }
 
@@ -821,12 +872,12 @@ export async function completeGeneratedPlanActivity(
     if (durationMinutes !== null && input.hoursSubject) {
       const inserted = await tx<{ id: string }[]>`
         insert into public.hours_log
-          (id, family_id, child_id, subject, minutes, happened_on, source, note)
+          (id, family_id, child_id, subject, minutes, happened_on, source, note, capture_operation_id)
         values (
           ${proposedHoursEntryId}, ${input.familyId}, ${input.childId},
           ${input.hoursSubject}, ${durationMinutes}, ${input.happenedOn},
           ${plannerHoursSourceForChannel(input.sourceChannel)},
-          ${plannerHoursNote(input.sourceQuote)}
+          ${plannerHoursNote(input.sourceQuote, input.expectedText)}, ${operation.id}
         )
         returning id
       `;

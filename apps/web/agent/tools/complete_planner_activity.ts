@@ -5,6 +5,7 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { learningOperationFailure } from "../../lib/learning-write-operations";
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
 import { emitMapEvent } from "../../lib/map/events";
 import {
@@ -205,7 +206,7 @@ export default defineBoundedTool({
         const idempotencyKey = plannerLearningIdempotencyKey({
           action: "complete-independent",
           sourceMessageId: trusted.sourceMessageId,
-          identity: [loggedInput.activityId, input.durationMinutes ?? null],
+          identity: [loggedInput.activityId],
         });
         const hoursChildren = input.durationMinutes === undefined
           ? []
@@ -225,6 +226,7 @@ export default defineBoundedTool({
           };
         }
         const mutate = () => completePlannerLearningActivity({
+          expectedUpdatedAt: before.updatedAt,
             familyId: access.familyId,
             activityId: loggedInput.activityId,
             expectedStatus: "planned",
@@ -269,7 +271,7 @@ export default defineBoundedTool({
                       minutes: input.durationMinutes!,
                       happenedOn: before.activityDate,
                       source: plannerHoursSourceForChannel(trusted.sourceChannel),
-                      note: plannerHoursNote(sourceQuote),
+                      note: plannerHoursNote(sourceQuote, before.title, before.note),
                     })),
                   },
                 },
@@ -283,17 +285,7 @@ export default defineBoundedTool({
                     note: "That Voice action already ran and was undone.",
                   };
                 }
-                const current = await getPlannerLearningActivityPinned({
-                  familyId: access.familyId,
-                  activityId: loggedInput.activityId,
-                });
-                return current?.status === "completed"
-                  ? { status: "completed" as const, activity: current, changed: false }
-                  : {
-                      status: "conflict" as const,
-                      reason: "status-mismatch" as const,
-                      note: "That Planner activity is no longer finished.",
-                    };
+                return await mutate();
               },
               succeeded: (result) => result.status === "completed" && result.changed,
             })
@@ -352,11 +344,7 @@ export default defineBoundedTool({
           generatedInput.subjectId,
           generatedInput.week,
           generatedInput.activityIndex,
-          generatedInput.expectedText,
           generatedInput.planRevision,
-          generatedInput.happenedOn,
-          input.durationMinutes ?? null,
-          input.hoursSubject ?? null,
         ],
       });
       const hoursEntryId = input.durationMinutes === undefined
@@ -381,6 +369,8 @@ export default defineBoundedTool({
           hoursSubject: input.hoursSubject ?? null,
           sourceChannel: trusted.sourceChannel,
           sourceQuote,
+          sourceMessageId: trusted.sourceMessageId,
+          idempotencyKey,
           hoursEntryId,
         });
       const armed = receiptContext
@@ -416,7 +406,7 @@ export default defineBoundedTool({
                         minutes: input.durationMinutes,
                         happenedOn: generatedInput.happenedOn,
                         source: plannerHoursSourceForChannel(trusted.sourceChannel),
-                        note: plannerHoursNote(sourceQuote),
+                        note: plannerHoursNote(sourceQuote, generatedInput.expectedText),
                       }]
                     : [],
                 },
@@ -429,16 +419,7 @@ export default defineBoundedTool({
                   reason: "activity-mismatch" as const,
                   note: "That Voice action already ran and was undone.",
                 }
-              : {
-                  status: "completed" as const,
-                  planId: target.planId,
-                  progressKey: target.progressKey,
-                  progressRevision: target.previousValue === true
-                    ? target.progressRevision
-                    : target.progressRevision + 1,
-                  changed: false,
-                  hoursEntryIds: hoursEntryId ? [hoursEntryId] : [],
-                },
+              : await mutate(),
             succeeded: (result) => result.status === "completed" && result.changed,
           })
         : { actionReceipt: null, result: await mutate(), replayed: false };
@@ -474,6 +455,8 @@ export default defineBoundedTool({
           : "That generated-plan activity was already finished; nothing changed twice.",
       };
     } catch (error) {
+      const failure = learningOperationFailure(error);
+      if (failure) return { completed: false, ...failure };
       if (error instanceof MissingFamilyContextError) {
         return { completed: false, note: error.message };
       }

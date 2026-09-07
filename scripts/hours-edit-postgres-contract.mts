@@ -1,15 +1,17 @@
+import { installHoursPostgresFixture } from "./hours-postgres-fixture.mjs";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
 import postgres from "postgres";
 
-import { recordPlannerLearningActivity } from "../apps/web/lib/planner-learning-activities";
+import { plannerLearningIdempotencyKey, plannerLearningMutationUuid, recordPlannerLearningActivity } from "../apps/web/lib/planner-learning-activities";
 import { armVoiceActionThenMutate, recordVoiceAction, undoVoiceAction } from "../apps/web/lib/voice/action-receipts";
 
 import { EVAL_FIXTURE_FAMILY_ID, EVAL_FIXTURE_PARENT_USER_ID } from "../apps/web/lib/family-context-eval-fixture";
 
 /** Runs only in the existing disposable Planner PostgreSQL harness. */
 export async function runHoursEditContract(sql: postgres.Sql) {
+  await installHoursPostgresFixture(sql);
   const family = EVAL_FIXTURE_FAMILY_ID;
   const children = await sql<{ id: string }[]>`select id from public.children where family_id = ${family} order by id limit 2`;
   const childIds = children.map((child) => child.id);
@@ -47,7 +49,7 @@ export async function runHoursEditContract(sql: postgres.Sql) {
     }
     for (const childId of audience.length ? audience : [null]) {
       const hoursId = randomUUID();
-      await sql`insert into public.hours_log (id, family_id, child_id, subject, minutes, happened_on, source, note)
+      await sql`insert into homa_test_fixture.hours_log (id, family_id, child_id, subject, minutes, happened_on, source, note)
         values (${hoursId}, ${family}, ${childId}, ${subject}, ${minutes}, ${date}, 'call', 'Original Hours note')`;
       await sql`insert into public.planner_learning_activity_hours (family_id, activity_id, hours_entry_id) values (${family}, ${id}, ${hoursId})`;
       hours.push(hoursId);
@@ -127,7 +129,7 @@ export async function runHoursEditContract(sql: postgres.Sql) {
   assert.equal((await snapshot(whole.id)).activity.status, "completed");
 
   const standaloneId = randomUUID();
-  await sql`insert into public.hours_log(id, family_id, child_id, subject, minutes, happened_on, source, note)
+  await sql`insert into homa_test_fixture.hours_log(id, family_id, child_id, subject, minutes, happened_on, source, note)
     values (${standaloneId}, ${family}, null, 'art', 42, ${date}, 'email', 'Original standalone note')`;
   const standalone = await context(standaloneId);
   assert.equal(standalone.activity, null);
@@ -145,7 +147,7 @@ export async function runHoursEditContract(sql: postgres.Sql) {
 
   const simultaneous = await activity(childIds, 10);
   const sameTimeId = randomUUID();
-  await sql`insert into public.hours_log(id, family_id, child_id, subject, minutes, happened_on, source)
+  await sql`insert into homa_test_fixture.hours_log(id, family_id, child_id, subject, minutes, happened_on, source)
     values (${sameTimeId}, ${family}, ${childIds[0]}, 'math', 30, ${date}, 'chat')`;
   const simultaneousBefore = await snapshot(simultaneous.id);
   const simultaneousResult = await edit(simultaneous.hours[0], (await context(simultaneous.hours[0])).revision,
@@ -163,8 +165,8 @@ export async function runHoursEditContract(sql: postgres.Sql) {
   assert.equal(simultaneousAfter.activity.source_quote, simultaneousBefore.activity.source_quote);
   assert.equal((await context(sameTimeId)).entry.customLabel, null);
   assert.equal((await edit(simultaneous.hours[0], (await context(simultaneous.hours[0])).revision,
-    30, "math", "Should not save", null)).reason, "duplicate");
-  assert.deepEqual(await snapshot(simultaneous.id), simultaneousAfter, "a genuinely duplicate final category rolls back every field");
+    30, "math", "Distinct activity", null)).result, "applied");
+  assert.equal((await snapshot(simultaneous.id)).hours.length, 2, "equal-looking independent records remain distinct");
 
   const malformed = await activity(childIds, 50);
   await sql`delete from public.hours_log where id = ${malformed.hours[1]}`;
@@ -180,8 +182,9 @@ export async function runHoursEditContract(sql: postgres.Sql) {
 
   const atomic = await activity([childIds[0]], 70, "music");
   const conflictId = randomUUID();
-  await sql`insert into public.hours_log(id, family_id, child_id, subject, minutes, happened_on, source)
+  await sql`insert into homa_test_fixture.hours_log(id, family_id, child_id, subject, minutes, happened_on, source)
     values (${conflictId}, ${family}, ${childIds[0]}, 'music', 71, ${date}, 'chat')`;
+  await sql.unsafe(`create function homa_test_fixture.reject_atomic_edit() returns trigger language plpgsql as $$ begin if new.id='${atomic.hours[0]}'::uuid and new.minutes=71 then raise exception 'injected write conflict' using errcode='23505'; end if; return new; end $$; create trigger fixture_hours_atomic_failure before update on public.hours_log for each row execute function homa_test_fixture.reject_atomic_edit()`);
   const beforeConflict = await snapshot(atomic.id);
   assert.equal((await plannerEdit(atomic.id, beforeConflict.activity.updated_at, 71)).reason, "duplicate");
   assert.deepEqual(await snapshot(atomic.id), beforeConflict, "failed time rolls back title and Planner notes");
@@ -231,12 +234,14 @@ export async function runHoursEditContract(sql: postgres.Sql) {
     else assert.equal(raced.hours[0].minutes, raced.activity.duration_minutes);
   } finally { await secondary.end({ timeout: 1 }); }
 
-  const voiceId = randomUUID();
-  const voiceHoursId = randomUUID();
   const voiceMessageId = randomUUID();
-  const voiceKey = randomUUID();
+  const voiceKey = plannerLearningIdempotencyKey({ action: "record", sourceMessageId: voiceMessageId, identity: [1] });
+  const voiceId = plannerLearningMutationUuid(voiceKey, "activity");
+  const voiceHoursId = plannerLearningMutationUuid(voiceKey, "hours:0");
   const voiceNow = new Date("2026-09-06T12:00:00Z");
   const voiceQuote = "We did ninety minutes of math.";
+  await sql`insert into public.conversation_messages(id,family_id,session_id,sequence,channel,role,content)
+    values(${voiceMessageId},${family},${`hours-edit:${voiceMessageId}`},1,'web','user',${voiceQuote})`;
   const voiceHours = [{ id: voiceHoursId, childId: childIds[0], subject: "math" as const,
     minutes: 90, happenedOn: date, source: "call", note: voiceQuote }];
   const voice = await armVoiceActionThenMutate({
@@ -252,7 +257,7 @@ export async function runHoursEditContract(sql: postgres.Sql) {
     mutate: () => recordPlannerLearningActivity({ familyId: family, activityId: voiceId, title: "Voice math",
       subject: "math", activityDate: date, status: "completed", durationMinutes: 90, childIds: [childIds[0]],
       sourceChannel: "voice", sourceQuote: voiceQuote, sourceMessageId: voiceMessageId, idempotencyKey: voiceKey,
-      hoursEntryIds: [voiceHoursId] }),
+      hoursEntryIds: [voiceHoursId], sourceActivityOrdinal: 1 }),
     replay: async () => { throw new Error("Fresh fixture must not replay"); },
     succeeded: (result) => result.status === "recorded" && result.created,
   });

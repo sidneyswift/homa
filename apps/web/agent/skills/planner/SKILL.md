@@ -1,7 +1,7 @@
 ---
 description: Use first, before clarifying or acting, when the parent tells Homa what school, enrichment, PE, music, co-op, or life-skills work the family did and wants it logged, asks Homa to mark planned work finished, asks what is planned or completed, wants the week or month adjusted, asks to schedule existing lessons or curriculum, asks to add or move a family event, or wants work reshuffled around real life. Not for writing, creating, or drafting a new lesson plan, even when the parent names a week; materials-studio owns authoring and nothing is added to Planner unless she separately asks to schedule it. Contains log-first capture, exact completion, open-then-edit, real calendar dates, and preview-first month planning.
 metadata:
-  homa-tools: open_planner, record_planner_activity, complete_planner_activity, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
+  homa-tools: log_hours, open_planner, record_planner_activity, complete_planner_activity, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
   homa-related-skills: curriculum-studio, curriculum-mapping, materials-studio, family-librarian
 ---
 
@@ -60,6 +60,8 @@ either way.
 1. **Use the current parent message as evidence.** Record only what she said
    happened or asked to place on a date. Give every call an exact sourceQuote
    from that message. Never convert a suggestion from Homa into family history.
+   Read `references/hours-identity.md` before capture or completion: it owns
+   distinct activities, retry identity, existing records, and honest failures.
 2. **Choose the existing item when there is one.** If she says "we finished
    the worksheet" or names work likely already planned, call open_planner and
    identify one exact row. A stable learningActivity uses its id. A generated

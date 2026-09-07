@@ -1,3 +1,4 @@
+import { installHoursPostgresFixture } from "./hours-postgres-fixture.mjs";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
@@ -42,6 +43,7 @@ const eventSnapshot: EventSnapshot = {
 };
 
 try {
+  await installHoursPostgresFixture(sql);
   const [family] = await sql<{ id: string }[]>`
     select id from public.families order by created_at limit 1
   `;
@@ -58,7 +60,7 @@ try {
     const minutes = 40 + hoursSequence;
     const id = randomUUID();
     await sql`
-      insert into public.hours_log
+      insert into homa_test_fixture.hours_log
         (id, family_id, child_id, subject, minutes, happened_on, source, note)
       values
         (${id}, ${familyId}, null, 'math', ${minutes}, '2026-08-01',
@@ -261,7 +263,7 @@ try {
   const retryMutation = async () => {
     retryMutationCount += 1;
     await sql`
-      insert into public.hours_log
+      insert into homa_test_fixture.hours_log
         (id, family_id, child_id, subject, minutes, happened_on, source, note)
       values
         (${retryHoursId}, ${family.id}, ${retryAfter.childId},

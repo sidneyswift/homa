@@ -253,26 +253,14 @@ async function moveLockedFamilyDataIntoTx(
     where family_id = ${sourceFamilyId}
   `;
 
-  // hours_log_block_unique_idx forbids two identical blocks in one
-  // family; a source row the destination already has is the same
-  // dedupe the writers enforce, so it is dropped, not moved.
-  await tx`
-    update public.hours_log source
-    set family_id = ${destinationFamilyId}
-    where source.family_id = ${sourceFamilyId}
-      and not exists (
-        select 1 from public.hours_log target
-        where target.family_id = ${destinationFamilyId}
-          and target.subject = source.subject
-          and target.minutes = source.minutes
-          and target.happened_on = source.happened_on
-          and target.child_id is not distinct from source.child_id
-      )
-  `;
-  await tx`
-    delete from public.hours_log
-    where family_id = ${sourceFamilyId}
-  `;
+  // Distinct entry ids are preserved, even when subject/time/date happen to match.
+  // Deferred composite FKs validate the complete graph when this fold commits.
+  // A real operation-key collision aborts the transaction instead of discarding data.
+  await tx`update public.learning_write_operations set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
+  await tx`update public.planner_learning_activities set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
+  await tx`update public.planner_learning_activity_children set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
+  await tx`update public.planner_learning_activity_hours set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
+  await tx`update public.hours_log set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
 
   await tx`
     update public.family_skills source

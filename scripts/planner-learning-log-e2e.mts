@@ -1,8 +1,10 @@
+import { installHoursPostgresFixture } from "./hours-postgres-fixture.mjs";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
 import postgres from "postgres";
 
+import { runHoursContextContract } from "./hours-context-postgres-contract.mjs";
 import { runHoursEditContract } from "./hours-edit-postgres-contract.mts";
 import { runHoursSchoolYearReadContract } from "./hours-school-year-postgres-contract.mjs";
 import { runHoursSummaryReadContract } from "./hours-summary-postgres-contract.mjs";
@@ -15,15 +17,15 @@ import {
 } from "../apps/web/lib/family-context-eval-fixture";
 import { mapDb } from "../apps/web/lib/map/db";
 import {
-  completeGeneratedPlanActivity,
-  completePlannerLearningActivity,
+  completeGeneratedPlanActivity as completeGeneratedPlanActivityActual,
+  completePlannerLearningActivity as completePlannerLearningActivityActual,
   getGeneratedPlanActivityCompletionTarget,
   getPlannerLearningActivityPinned,
   plannerHoursNote,
   plannerHoursSourceForChannel,
   plannerLearningIdempotencyKey,
   plannerLearningMutationUuid,
-  recordPlannerLearningActivity,
+  recordPlannerLearningActivity as recordPlannerLearningActivityActual,
 } from "../apps/web/lib/planner-learning-activities";
 import {
   armVoiceActionThenMutate,
@@ -39,8 +41,25 @@ if (!databaseUrl) {
 const sql = postgres(databaseUrl, { prepare: false, max: 1 });
 const now = new Date("2026-08-03T14:00:00.000Z");
 const sourceChannel = "voice" as const;
+async function seedSource(input: { familyId: string; sourceMessageId: string; sourceQuote: string }) {
+  await sql`insert into public.conversation_messages(id,family_id,session_id,sequence,channel,role,content)
+    values(${input.sourceMessageId},${input.familyId},${`identity-contract:${input.sourceMessageId}`},1,'web','user',${input.sourceQuote})
+    on conflict(id) do nothing`;
+}
+async function recordPlannerLearningActivity(input: Omit<Parameters<typeof recordPlannerLearningActivityActual>[0], "sourceActivityOrdinal">) {
+  await seedSource(input);
+  return recordPlannerLearningActivityActual({ ...input, sourceActivityOrdinal: 1 });
+}
+async function completePlannerLearningActivity(input: Parameters<typeof completePlannerLearningActivityActual>[0]) {
+  await seedSource(input); return completePlannerLearningActivityActual(input);
+}
+async function completeGeneratedPlanActivity(input: Parameters<typeof completeGeneratedPlanActivityActual>[0]) {
+  await seedSource(input); return completeGeneratedPlanActivityActual(input);
+}
+
 
 try {
+  await installHoursPostgresFixture(sql);
   const children = await sql<{ id: string }[]>`
     select id from public.children
     where family_id = ${EVAL_FIXTURE_FAMILY_ID}
@@ -54,7 +73,7 @@ try {
   const plannedKey = plannerLearningIdempotencyKey({
     action: "record",
     sourceMessageId: plannedMessageId,
-    identity: ["Horizons lesson 42", "math", "2026-08-03", "planned", null, childIds.join(",")],
+    identity: [1],
   });
   const plannedActivityId = plannerLearningMutationUuid(plannedKey, "activity");
   const planned = await recordPlannerLearningActivity({
@@ -79,7 +98,7 @@ try {
   const completionKey = plannerLearningIdempotencyKey({
     action: "complete-independent",
     sourceMessageId: completionMessageId,
-    identity: [plannedActivityId, 25],
+    identity: [plannedActivityId],
   });
   const completionHoursIds = childIds.map((_, index) =>
     plannerLearningMutationUuid(completionKey, `hours:${index}`));
@@ -90,7 +109,7 @@ try {
     minutes: 25,
     happenedOn: "2026-08-03",
     source: plannerHoursSourceForChannel(sourceChannel),
-    note: plannerHoursNote(completionQuote),
+    note: plannerHoursNote(completionQuote, "Horizons lesson 42"),
   }));
   const completed = await armVoiceActionThenMutate({
     familyId: EVAL_FIXTURE_FAMILY_ID,
@@ -177,7 +196,7 @@ try {
   const correctionKey = plannerLearningIdempotencyKey({
     action: "record",
     sourceMessageId: correctionMessageId,
-    identity: ["Piano practice", "music", "2026-08-03", "completed", 20, childIds[0]],
+    identity: [1],
   });
   const correctionActivityId = plannerLearningMutationUuid(correctionKey, "activity");
   const correctionHoursId = plannerLearningMutationUuid(correctionKey, "hours:0");
@@ -242,7 +261,7 @@ try {
   const recordedKey = plannerLearningIdempotencyKey({
     action: "record",
     sourceMessageId: recordedMessageId,
-    identity: ["Gymnastics", "PE", "2026-08-03", "completed", 40, childIds[0]],
+    identity: [1],
   });
   const recordedActivityId = plannerLearningMutationUuid(recordedKey, "activity");
   const recordedHoursId = plannerLearningMutationUuid(recordedKey, "hours:0");
@@ -253,7 +272,7 @@ try {
     minutes: 40,
     happenedOn: "2026-08-03",
     source: plannerHoursSourceForChannel(sourceChannel),
-    note: plannerHoursNote(recordedQuote),
+    note: plannerHoursNote(recordedQuote, "Gymnastics"),
   }];
   const recorded = await armVoiceActionThenMutate({
     familyId: EVAL_FIXTURE_FAMILY_ID,
@@ -345,7 +364,7 @@ try {
   const generatedKey = plannerLearningIdempotencyKey({
     action: "complete-generated",
     sourceMessageId: generatedMessageId,
-    identity: [EVAL_FIXTURE_PLAN_CHILD_ID, EVAL_FIXTURE_PLAN_SUBJECT, 2, 0, expectedText, planRow.plan_revision, "2026-08-03", 15, "math"],
+    identity: [EVAL_FIXTURE_PLAN_CHILD_ID, EVAL_FIXTURE_PLAN_SUBJECT, 2, 0, planRow.plan_revision],
   });
   const generatedHoursId = plannerLearningMutationUuid(generatedKey, "hours:0");
   const generatedHours = [{
@@ -355,7 +374,7 @@ try {
     minutes: 15,
     happenedOn: "2026-08-03",
     source: plannerHoursSourceForChannel(sourceChannel),
-    note: plannerHoursNote(generatedQuote),
+    note: plannerHoursNote(generatedQuote, expectedText),
   }];
   const generated = await armVoiceActionThenMutate({
     familyId: EVAL_FIXTURE_FAMILY_ID,
@@ -400,6 +419,8 @@ try {
       hoursSubject: "math",
       sourceChannel,
       sourceQuote: generatedQuote,
+      sourceMessageId: generatedMessageId,
+      idempotencyKey: generatedKey,
       hoursEntryId: generatedHoursId,
     }),
     replay: async () => {
@@ -434,30 +455,25 @@ try {
   // "add the reported time manually"). Reuses the same authenticated-RPC
   // shape as set_planner_learning_activity_status above.
   async function callSetTime(activityId: string, durationMinutes: number | null) {
+    const current = await getPlannerLearningActivityPinned({ familyId: EVAL_FIXTURE_FAMILY_ID, activityId });
+    if (!current) throw new Error("Fixture activity missing");
     const [row] = await sql.begin(async (transaction) => {
-      await transaction`
-        select set_config('request.jwt.claim.sub', ${EVAL_FIXTURE_PARENT_USER_ID}, true)
-      `;
+      await transaction`select set_config('request.jwt.claim.sub', ${EVAL_FIXTURE_PARENT_USER_ID}, true)`;
       await transaction`set local role authenticated`;
-      return transaction<{
-        result: string;
-        reason: string | null;
-        activity_status: string;
-        duration_minutes: number | null;
-        hours_entry_ids: string[];
-      }[]>`
-        select result, reason, activity_status, duration_minutes, hours_entry_ids
-        from public.set_planner_learning_activity_time(${activityId}, ${durationMinutes})
-      `;
+      return transaction<{ receipt: { result: string; status: string; durationMinutes: number | null; reason?: string } }[]>`
+        select public.update_planner_learning_activity_record(${activityId},${current.updatedAt}::text::timestamptz,
+          ${current.title},${current.note},${durationMinutes}) as receipt`;
     });
-    return row;
+    const after = await getPlannerLearningActivityPinned({ familyId: EVAL_FIXTURE_FAMILY_ID, activityId });
+    return { result: row.receipt.result, reason: row.receipt.reason, activity_status: row.receipt.status,
+      duration_minutes: row.receipt.durationMinutes, hours_entry_ids: after?.hoursEntryIds ?? [] };
   }
 
   const natureWalkMessageId = randomUUID();
   const natureWalkKey = plannerLearningIdempotencyKey({
     action: "record",
     sourceMessageId: natureWalkMessageId,
-    identity: ["Nature walk", "science", "2026-08-03", "planned", null, childIds[0]],
+    identity: [1],
   });
   const natureWalkActivityId = plannerLearningMutationUuid(natureWalkKey, "activity");
   const natureWalk = await recordPlannerLearningActivity({
@@ -527,12 +543,9 @@ try {
   `;
   assert.equal(hoursRowCountAfterClear, 0);
 
-  // A genuine collision with an unrelated Hours entry (same family,
-  // subject, minutes, day, child, and no custom label on either side) is
-  // reported as a conflict instead of a raw constraint error, and
-  // changes nothing.
+  // Equal-shaped but unrelated activities retain independent identities.
   const [unrelatedBlock] = await sql<{ id: string }[]>`
-    insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note)
+    insert into homa_test_fixture.hours_log (family_id, child_id, subject, minutes, happened_on, source, note)
     values (${EVAL_FIXTURE_FAMILY_ID}, ${childIds[0]}, 'science', 20, '2026-08-03', 'chat', 'Unrelated block')
     returning id
   `;
@@ -540,7 +553,7 @@ try {
   const secondScienceKey = plannerLearningIdempotencyKey({
     action: "record",
     sourceMessageId: secondScienceMessageId,
-    identity: ["Second science block", "science", "2026-08-03", "planned", null, childIds[0]],
+    identity: [1],
   });
   const secondScienceActivityId = plannerLearningMutationUuid(secondScienceKey, "activity");
   const secondScience = await recordPlannerLearningActivity({
@@ -559,8 +572,8 @@ try {
   });
   assert.equal(secondScience.status, "recorded");
   const conflictTime = await callSetTime(secondScienceActivityId, 20);
-  assert.equal(conflictTime.result, "conflict");
-  assert.equal(conflictTime.reason, "duplicate");
+  assert.equal(conflictTime.result, "applied");
+  assert.equal(conflictTime.duration_minutes, 20);
   const [secondScienceState] = await sql<{
     status: string;
     duration_minutes: number | null;
@@ -568,14 +581,14 @@ try {
     select status, duration_minutes from public.planner_learning_activities
     where id = ${secondScienceActivityId}
   `;
-  assert.equal(secondScienceState.status, "planned");
-  assert.equal(secondScienceState.duration_minutes, null);
+  assert.equal(secondScienceState.status, "completed");
+  assert.equal(secondScienceState.duration_minutes, 20);
   const [{ count: unrelatedStillAlone }] = await sql<{ count: number }[]>`
     select count(*)::integer as count from public.hours_log
     where family_id = ${EVAL_FIXTURE_FAMILY_ID} and subject = 'science' and minutes = 20
       and happened_on = '2026-08-03' and child_id = ${childIds[0]}
   `;
-  assert.equal(unrelatedStillAlone, 1, "the conflict must not have inserted a second row");
+  assert.equal(unrelatedStillAlone, 2, "distinct activity identity preserves both equal-duration records");
   assert.ok(unrelatedBlock.id);
 
   console.log("set_planner_learning_activity_time PostgreSQL contract passed.");
@@ -583,6 +596,7 @@ try {
   await runHoursEditContract(sql);
   await runHoursSchoolYearReadContract(sql);
   await runHoursSummaryReadContract(sql);
+  await runHoursContextContract();
   console.log("Planner learning log PostgreSQL contract passed.");
 } finally {
   await sql.end({ timeout: 1 });

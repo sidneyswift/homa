@@ -1,3 +1,4 @@
+import { installHoursPostgresFixture } from "./hours-postgres-fixture.mjs";
 /**
  * Proves a seeded family history reads back the way the product will
  * see it (gh#343). Run inside the disposable sandbox, after seeding:
@@ -22,6 +23,7 @@ if (!url) {
 
 const postgres = (await import("postgres")).default;
 const sql = postgres(url, { max: 1 });
+await installHoursPostgresFixture(sql);
 
 const asOf = new Date("2026-07-28T00:00:00Z");
 const history = generateFamilyHistory({ profile: "year1", childCount: 2, asOf });
@@ -40,7 +42,7 @@ for (const [index, childId] of childIds.entries()) {
 }
 for (const row of history.hours) {
   await sql`
-    insert into public.hours_log
+    insert into homa_test_fixture.hours_log
       (family_id, child_id, subject, minutes, happened_on, source, note)
     values (${familyId}, ${row.childIndex === null ? null : childIds[row.childIndex]},
             ${row.subject}, ${row.minutes}, ${row.happenedOn}, ${row.source}, ${row.note})
