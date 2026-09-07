@@ -26,6 +26,8 @@ export default defineEval({
       { scenario: "post_save_offer", accepted: false, response: "That cutting observation is saved. Such a big improvement from where Maya started in fine motor." },
       { scenario: "post_save_offer", accepted: false, response: "Saved Getting there for cutting curves. That is exactly the right place for her age." },
       { scenario: "post_save_offer", accepted: false, response: "Got it, that's saved to Maya's binder: cutting out a circle or curved shape, getting there. Nice one to have on record." },
+      { scenario: "post_save_offer", accepted: true, response: "Got it, that's saved for Maya: cutting out curved shapes, marked as getting there. Nice progress on the scissor work." },
+      { scenario: "post_save_offer", accepted: false, response: "Got it, that's saved for Maya: cutting out curved shapes, marked as getting there. Nice progress on the scissor work compared with last month." },
       { scenario: "read_unavailable", accepted: false, response: "The cutting read isn't coming through on my end right now, so I can't check Maya's exact current status before suggesting anything. That's a system hiccup on my side, not missing evidence, so no need to redo anything.\n\nGive me a moment and try again shortly, or let me know what you've noticed with her scissors lately and I can go from there." },
       { scenario: "read_unavailable", accepted: true, response: "I couldn't check Progress right now. You can try again shortly." },
     ];
