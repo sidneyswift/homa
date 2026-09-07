@@ -27,10 +27,11 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 
 import { HomaCharacter } from "../voice/homa-character";
 import type { CharacterState } from "../voice/character-state";
@@ -55,7 +56,92 @@ export const BUBBLE_MS = 240;
 export type Posture = "big" | "docked" | "plain";
 
 const BIG_SIZE = 132;
-const DOCKED_SIZE = 44;
+// Measured against the real Keiki reference, 2026-09-07: their docked
+// character runs about 20% of screen width; 44 was about 11%. 80 targets
+// that same proportion on a typical iPhone width instead of guessing.
+const DOCKED_SIZE = 80;
+
+export type MascotGesture = "wave";
+
+/**
+ * A temporary limb, not a body (founder ruling 2026-09-07: "no body on the
+ * guy... it should just have arms that come out of itself when necessary,
+ * not all the time, but it should just be the logo"). One arm emerges from
+ * the shape's side for a specific moment and retracts, the same additive
+ * pattern the real production rig already uses for its drawing act (a
+ * crayon appears in her hand for that one moment, never a permanent
+ * redesign of the mark). Real rotation, not swapped frames: smoother than
+ * a sprite sheet, and it can never drift from the mark's own fill color
+ * because it IS the mark's fill color, not an approximation of it.
+ */
+function WaveArm({ size, play }: { size: number; play: boolean }) {
+  const reducedMotion = useReducedMotion();
+  const unit = size / 48;
+  const rotate = useSharedValue(-100);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    if (!play) {
+      opacity.value = 0;
+      rotate.value = -100;
+      return;
+    }
+    if (reducedMotion) {
+      opacity.value = 1;
+      rotate.value = -20;
+      return;
+    }
+    opacity.value = withSequence(
+      withTiming(1, { duration: 160, easing: SETTLE }),
+      withTiming(1, { duration: 900 }),
+      withTiming(0, { duration: 260, easing: SETTLE }),
+    );
+    rotate.value = withSequence(
+      withTiming(-15, { duration: 340, easing: SETTLE }),
+      withTiming(-32, { duration: 160 }),
+      withTiming(-4, { duration: 190 }),
+      withTiming(-28, { duration: 170 }),
+      withTiming(-15, { duration: 190 }),
+      withTiming(-100, { duration: 300, easing: SETTLE }),
+    );
+  }, [play, reducedMotion, opacity, rotate]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ rotate: `${rotate.value}deg` }],
+  }));
+
+  const armWidth = 9 * unit;
+  const armHeight = 22 * unit;
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          left: size * 0.76,
+          top: size * 0.4,
+          width: armWidth,
+          height: armHeight,
+          // Pixel values, not a percentage string: percentage transformOrigin
+          // on an Animated.View silently blanks the whole subtree on Fabric
+          // (the same Fabric gotcha the real homa-character.tsx rig documents
+          // for its own base-anchored transforms).
+          transformOrigin: [armWidth / 2, 2 * unit, 0],
+        },
+        style,
+      ]}
+    >
+      <Svg width={armWidth} height={armHeight} viewBox="0 0 9 22">
+        <Path
+          d="M4.5 0 C7 0 9 2 9 4.5 L9 17.5 C9 20 7 22 4.5 22 C2 22 0 20 0 17.5 L0 4.5 C0 2 2 0 4.5 0 Z"
+          fill={v2Colors.coral}
+        />
+      </Svg>
+    </Animated.View>
+  );
+}
 
 /** Full-width gradient sky behind the big posture only, ported from the
  * merged sign-in hero (apps/mobile/src/app/(auth)/signin.tsx) so Hello and
@@ -77,21 +163,53 @@ function Sky({ height }: { height: number }) {
 
 /** Homa herself, one size driven by an outer scale wrapper so
  * HomaCharacter's own `size` prop, which bakes into internal SVG math,
- * never changes mid-transition (the same rule signin.tsx's hero follows). */
-export function Mascot({ posture, characterState = "idle" }: { posture: Posture; characterState?: CharacterState }) {
+ * never changes mid-transition (the same rule signin.tsx's hero follows).
+ *
+ * `entrance`: a one-time pop-in for the very first reveal (Hello only),
+ * separate from the posture-driven scale above it: starts small, settles
+ * past 1 and back, so the mascot's first appearance reads as an arrival,
+ * not just "the screen mounted with an image already on it". */
+export function Mascot({
+  posture,
+  characterState = "idle",
+  entrance = false,
+  gesture,
+}: {
+  posture: Posture;
+  characterState?: CharacterState;
+  entrance?: boolean;
+  /** A temporary arm accessory for one specific beat, never a standing
+   * pose (see WaveArm's own docstring). Undefined/falsy: no arm at all. */
+  gesture?: MascotGesture | null;
+}) {
   const reducedMotion = useReducedMotion();
-  const scale = useSharedValue(posture === "big" ? 1 : DOCKED_SIZE / BIG_SIZE);
+  const postureScale = useSharedValue(posture === "big" ? 1 : DOCKED_SIZE / BIG_SIZE);
+  const entranceScale = useSharedValue(entrance && !reducedMotion ? 0.4 : 1);
 
   useEffect(() => {
     const target = posture === "big" ? 1 : DOCKED_SIZE / BIG_SIZE;
-    scale.value = reducedMotion ? target : withTiming(target, { duration: SETTLE_MS, easing: SETTLE });
-  }, [posture, reducedMotion, scale]);
+    postureScale.value = reducedMotion ? target : withTiming(target, { duration: SETTLE_MS, easing: SETTLE });
+  }, [posture, reducedMotion, postureScale]);
 
-  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  useEffect(() => {
+    if (!entrance || reducedMotion) return;
+    entranceScale.value = withSequence(
+      withTiming(1.08, { duration: 420, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 220, easing: SETTLE }),
+    );
+    // `entrance` is a fixed prop for the screen's whole lifetime (Hello
+    // always passes true), so in practice this fires exactly once, on
+    // mount; it isn't keyed to characterState or posture.
+  }, [entrance, reducedMotion, entranceScale]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: postureScale.value * entranceScale.value }],
+  }));
 
   return (
     <Animated.View style={style}>
       <HomaCharacter state={characterState} size={BIG_SIZE} act={null} />
+      <WaveArm size={BIG_SIZE} play={gesture === "wave"} />
     </Animated.View>
   );
 }
@@ -246,6 +364,14 @@ export interface OnboardingStageProps {
    * explicitly. Content-heavy big screens (a report, a paywall's pricing
    * cards) keep the default, or their cards get pushed into the footer. */
   heroPaddingTop?: number;
+  /** Plays a one-time pop-in on the mascot when this screen mounts.
+   * Hello only: the reference has a distinct arrival moment on its
+   * welcome screen that every other screen deliberately skips. */
+  entrance?: boolean;
+  /** A temporary arm accessory for one specific beat, not a standing pose.
+   * See WaveArm's own docstring for why this stays an accessory rather
+   * than a body redesign. */
+  gesture?: MascotGesture | null;
   children?: React.ReactNode;
   footer?: React.ReactNode;
   scroll?: boolean;
@@ -261,6 +387,8 @@ export function OnboardingStage({
   onBack,
   characterState = "idle",
   heroPaddingTop = 32,
+  entrance = false,
+  gesture = null,
   children,
   footer,
   scroll = true,
@@ -316,7 +444,7 @@ export function OnboardingStage({
             gap: v2Space.md,
           }}
         >
-          <Mascot posture={posture} characterState={characterState} />
+          <Mascot posture={posture} characterState={characterState} entrance={entrance} gesture={gesture} />
           <View style={{ flex: posture === "docked" ? 1 : undefined, alignItems: posture === "docked" ? "flex-start" : "center" }}>
             <Bubble tail={bubbleTail} bubbleKey={bubbleKey}>
               {bubble}

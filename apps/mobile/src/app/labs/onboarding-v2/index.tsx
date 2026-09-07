@@ -31,6 +31,8 @@ export default function HelloScreen() {
       posture="big"
       characterState="speaking"
       heroPaddingTop={160}
+      entrance
+      gesture={bubbleIndex === 0 ? "wave" : null}
       bubbleKey={`hello-${bubbleIndex}`}
       bubble={BUBBLES[bubbleIndex]}
       scroll={false}
