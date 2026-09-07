@@ -11,6 +11,8 @@ import type {
   AbilitiesExplorerSubject,
   AbilitiesExplorerSubjectId,
 } from "../../lib/child-progress/abilities-explorer-types";
+import { abilityQuestion, abilityQuestionHref } from "../../lib/child-progress/ability-question";
+import { formatProgressDate, progressEvidenceDerivationLabel } from "../../lib/child-progress/view-copy";
 import { ProgressChatDoor } from "./progress-chat-door";
 
 const GRAPH_WIDTH = 1000;
@@ -24,26 +26,13 @@ const AXIS_TICKS = [48, 72, 96, 120, 144, 168] as const;
 
 const STATUS_META: Record<
   AbilitiesExplorerDisplayState,
-  { label: string; description: string; color: string; fill: string }
+  { label: string; color: string; fill: string }
 > = {
-  knows: {
-    label: "Knows",
-    description: "A parent answer says this is in place.",
-    color: "var(--sage-700)",
-    fill: "var(--sage-700)",
-  },
-  working_on_now: {
-    label: "Working on now",
-    description: "A parent answer says this is the current practice edge.",
-    color: "var(--gold-ink)",
-    fill: "var(--gold-400)",
-  },
-  up_next: {
-    label: "Up next",
-    description: "Homa has not marked this as known yet.",
-    color: "var(--text-muted)",
-    fill: "var(--stone-400)",
-  },
+  knows: { label: "Easily", color: "var(--sage-700)", fill: "var(--sage-700)" },
+  working_on_now: { label: "Getting there", color: "var(--gold-ink)", fill: "var(--gold-400)" },
+  unobserved: { label: "Not observed", color: "var(--text-muted)", fill: "var(--surface-card)" },
+  not_yet: { label: "Not yet", color: "var(--text-muted)", fill: "var(--stone-400)" },
+  conflict: { label: "Different observations", color: "var(--sky-600)", fill: "var(--info-soft)" },
 };
 
 function graphX(node: AbilitiesExplorerNode): number {
@@ -65,10 +54,6 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function ageLabel(months: number): string {
-  const years = months / 12;
-  return Number.isInteger(years) ? `${years}` : years.toFixed(1);
-}
 
 function chooseInitialNode(
   subject: AbilitiesExplorerSubject,
@@ -96,42 +81,21 @@ function chooseInitialNode(
   );
 }
 
-function statusClass(state: AbilitiesExplorerDisplayState): string {
-  return state === "working_on_now"
-    ? "border-[var(--gold-ink)] bg-[var(--gold-400)]"
-    : state === "knows"
-      ? "border-[var(--sage-700)] bg-[var(--sage-700)]"
-      : "border-[var(--stone-400)] bg-[var(--stone-300)]";
+function StatusDot({ state }: { state: AbilitiesExplorerDisplayState }) {
+  return <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-full border-2"
+    style={{ background: STATUS_META[state].fill, borderColor: STATUS_META[state].color,
+      borderStyle: state === "conflict" ? "dashed" : "solid" }} />;
 }
 
-function evidenceLine(
-  node: AbilitiesExplorerNode,
-  childName: string,
-): string {
-  if (node.evidence.conflict) {
-    return "Two parent answers need a closer look before Homa marks this one.";
-  }
-  if (node.evidence.answer === "easily") {
-    return `${childName} has a parent answer showing this is familiar.`;
-  }
-  if (node.evidence.answer === "getting_there") {
-    return `${childName} has a parent answer showing this is being practiced now.`;
-  }
-  if (node.evidence.answer === "not_yet") {
-    return `${childName} has a parent answer saying this is still ahead.`;
-  }
-  return `Homa has not heard a direct answer about ${childName} doing this yet.`;
+function evidenceLine(node: AbilitiesExplorerNode, childName: string): string {
+  if (node.evidence.conflict) return "Saved observations differ. Homa has not settled on one answer.";
+  if (node.evidence.answer === null) return `No observation is saved for ${childName} doing this. That does not tell us whether it is easy or not yet.`;
+  if (node.evidence.answer === "not_yet") return "The saved answer is Not yet. This is an observation, not a missing answer or a next-lesson assignment.";
+  return "This is the saved answer. Its source and date tell you what it is based on.";
 }
 
-function formatObservedAt(value: string | null): string | null {
-  if (value === null) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+function formatObservedAt(value: string | null, timeZone: string): string | null {
+  return value === null ? null : formatProgressDate(value, timeZone);
 }
 
 function countStates(subject: AbilitiesExplorerSubject) {
@@ -140,7 +104,7 @@ function countStates(subject: AbilitiesExplorerSubject) {
       counts[node.state] += 1;
       return counts;
     },
-    { knows: 0, working_on_now: 0, up_next: 0 },
+    { knows: 0, working_on_now: 0, unobserved: 0, not_yet: 0, conflict: 0 },
   );
 }
 
@@ -168,7 +132,7 @@ function Connections({
   if (buildsOn.length === 0 && leadsTo.length === 0) {
     return (
       <p className="mt-3 text-sm leading-6 text-muted">
-        This ability is a starting point in the map.
+        No connections are listed for this ability in this subject map.
       </p>
     );
   }
@@ -177,7 +141,7 @@ function Connections({
     <div className="mt-4 space-y-4">
       {buildsOn.length > 0 ? (
         <div>
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
             Builds on
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -186,7 +150,7 @@ function Connections({
                 key={node.id}
                 type="button"
                 onClick={() => onSelect(node.id, "connected")}
-                className="min-h-11 rounded-pill border border-border-subtle bg-card px-3.5 py-2 text-left text-sm font-semibold text-strong transition-colors hover:border-brand"
+                className="min-h-11 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-3.5 py-2 text-left text-sm font-semibold text-strong transition-colors hover:border-brand"
               >
                 {node.name}
               </button>
@@ -196,8 +160,8 @@ function Connections({
       ) : null}
       {leadsTo.length > 0 ? (
         <div>
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
-            Leads to
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-subtle">
+            Other abilities that build on this
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {leadsTo.map((node) => (
@@ -205,7 +169,7 @@ function Connections({
                 key={node.id}
                 type="button"
                 onClick={() => onSelect(node.id, "connected")}
-                className="min-h-11 rounded-pill border border-border-subtle bg-card px-3.5 py-2 text-left text-sm font-semibold text-strong transition-colors hover:border-brand"
+                className="min-h-11 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-3.5 py-2 text-left text-sm font-semibold text-strong transition-colors hover:border-brand"
               >
                 {node.name}
               </button>
@@ -235,10 +199,9 @@ function AbilityDetail({
   mobileOpen: boolean;
 }) {
   const selectedIndex = subject.nodes.findIndex((node) => node.id === selected.id);
-  const practiceId = `practice-${selected.id}`;
-  const [practiceShown, setPracticeShown] = useState(false);
   const status = STATUS_META[selected.state];
-  const observedAt = formatObservedAt(selected.evidence.observedAt);
+  const observedAt = formatObservedAt(selected.evidence.observedAt, payload.timeZone);
+  const question = abilityQuestion(payload.childName, selected.name);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -262,7 +225,7 @@ function AbilityDetail({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[var(--clay-600)]">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[var(--clay-600)]">
             Selected ability
           </p>
           <h3 className="mt-2 font-display text-3xl font-semibold leading-[0.98] tracking-[-0.02em] text-strong">
@@ -287,33 +250,42 @@ function AbilityDetail({
       <div className="mt-5 border-t border-border-subtle pt-5">
         <p className="text-sm font-semibold text-strong">{payload.childName}&apos;s progress</p>
         <p
-          className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-pill px-3.5 py-2 text-sm font-bold"
+          className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-[var(--homa-radius-control)] px-3.5 py-2 text-sm font-bold"
           style={{ background: "var(--accent-sage-soft)", color: status.color }}
         >
-          <span
-            aria-hidden="true"
-            className={`h-3 w-3 rounded-full border ${statusClass(selected.state)}`}
-          />
+          <StatusDot state={selected.state} />
           {status.label}
         </p>
         <p className="mt-3 text-sm leading-6 text-muted">
           {evidenceLine(selected, payload.childName)}
         </p>
+        {selected.evidence.answer !== null ? (
+          <p className="mt-2 text-sm font-medium text-body">
+            {progressEvidenceDerivationLabel(selected.evidence.derivation ?? "unknown")}
+          </p>
+        ) : null}
+        {selected.evidence.conflictingAnswers.map((answer, index) => (
+          <p key={index} className="mt-2 text-sm leading-6 text-body">
+            {answer.answer === "easily" ? "Easily" : answer.answer === "getting_there" ? "Getting there" : "Not yet"}
+            {" · "}{progressEvidenceDerivationLabel(answer.derivation)}
+            {" · "}{formatObservedAt(answer.observedAt, payload.timeZone) ?? "Date unavailable"}
+          </p>
+        ))}
         {selected.evidence.source || observedAt ? (
           <p className="mt-2 text-xs font-medium text-subtle">
-            {[selected.evidence.source, observedAt].filter(Boolean).join(" · ")}
+            {[selected.evidence.source, observedAt ? `${selected.evidence.conflict ? "Conflict noted" : "Saved"} ${observedAt}` : null].filter(Boolean).join(" · ")}
           </p>
         ) : null}
       </div>
 
       <div className="mt-5 border-t border-border-subtle pt-5">
-        <p className="text-sm font-semibold text-strong">Move through abilities</p>
+        <p className="text-sm font-semibold text-strong">Browse abilities</p>
         <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <button
             type="button"
             disabled={selectedIndex <= 0}
             onClick={() => onSelect(subject.nodes[selectedIndex - 1]?.id ?? selected.id)}
-            className="min-h-11 rounded-pill border border-border-subtle bg-card px-3 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:cursor-not-allowed disabled:opacity-40"
+            className="min-h-11 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-3 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:cursor-not-allowed disabled:opacity-40"
           >
             ← Previous
           </button>
@@ -324,7 +296,7 @@ function AbilityDetail({
             type="button"
             disabled={selectedIndex < 0 || selectedIndex >= subject.nodes.length - 1}
             onClick={() => onSelect(subject.nodes[selectedIndex + 1]?.id ?? selected.id)}
-            className="min-h-11 rounded-pill border border-border-subtle bg-card px-3 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:cursor-not-allowed disabled:opacity-40"
+            className="min-h-11 rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-3 text-sm font-semibold text-strong transition-colors hover:border-brand disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next →
           </button>
@@ -333,12 +305,17 @@ function AbilityDetail({
 
       <div className="mt-5 border-t border-border-subtle pt-5">
         <p className="text-sm font-semibold text-strong">Connections</p>
+        <p className="mt-2 text-sm leading-6 text-muted">These are curriculum relationships. A line does not show what {payload.childName} has mastered or unlock a personal lesson sequence.</p>
         <Connections selected={selected} subject={subject} onSelect={onSelect} />
       </div>
 
       <div className="mt-5 border-t border-border-subtle pt-5">
+        <p className="text-sm font-semibold text-strong">Your question for Homa</p>
+        <p className="mt-2 mb-3 text-sm leading-6 text-body">{question}</p>
         <ProgressChatDoor
+          key={`${childId}:${selected.id}`}
           childId={childId}
+          destination={abilityQuestionHref(childId, selected.id)}
           variant="secondary"
           onOpen={async () => {
             sendAbilitiesExplorerEvent(
@@ -346,31 +323,14 @@ function AbilityDetail({
               childId,
               subject.id,
             );
-            await setAbilityContextAction(childId, selected.id);
+            if (!await setAbilityContextAction(childId, selected.id)) throw new Error("Ability focus unavailable");
           }}
         >
           Ask Homa about this ability
         </ProgressChatDoor>
         <p className="mt-2 text-xs leading-5 text-subtle">
-          Homa will start with {payload.childName}&apos;s progress context.
+          The question opens in chat. You can edit it before sending. Nothing here records progress.
         </p>
-        <button
-          type="button"
-          onClick={() => setPracticeShown((shown) => !shown)}
-          aria-expanded={practiceShown}
-          aria-controls={practiceId}
-          className="mt-4 min-h-11 w-full rounded-pill border border-border-subtle bg-card px-4 py-2 text-sm font-semibold text-strong transition-colors hover:border-brand"
-        >
-          {practiceShown ? "Hide practice idea" : "Show a practice idea"}
-        </button>
-        <div
-          id={practiceId}
-          hidden={!practiceShown}
-          className="mt-3 rounded-lg bg-[var(--accent-sage-soft)] p-4 text-sm leading-6 text-body"
-        >
-          Try a five-minute activity that uses <strong>{selected.name}</strong> in
-          something {payload.childName} already enjoys. This preview does not send or save anything.
-        </div>
       </div>
     </aside>
   );
@@ -378,19 +338,16 @@ function AbilityDetail({
 
 function StatusKey({ childName }: { childName: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border-subtle bg-[var(--surface-raised)] px-4 py-3 text-sm">
+    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-border-subtle py-3 text-sm">
       <span className="font-semibold text-strong">{childName}&apos;s progress</span>
       {(Object.keys(STATUS_META) as AbilitiesExplorerDisplayState[]).map((state) => (
         <span key={state} className="inline-flex items-center gap-2 font-semibold text-muted">
-          <span
-            aria-hidden="true"
-            className={`h-3 w-3 rounded-full border ${statusClass(state)}`}
-          />
+          <StatusDot state={state} />
           {STATUS_META[state].label}
         </span>
       ))}
       <span className="basis-full text-xs leading-5 text-subtle">
-        Quiet dots are still abilities. They have not been marked as current progress yet.
+        Select a dot to see the saved answer, its source and date. Logging time or finishing a worksheet alone does not change an ability.
       </span>
     </div>
   );
@@ -479,6 +436,7 @@ export function AbilitiesExplorer({
   if (!subject || !selected) return null;
 
   const counts = countStates(subject);
+  const ageWithinAxis = payload.ageMonths >= payload.axisMonths[0] && payload.ageMonths < payload.axisMonths[1];
   const ageBandStart = axisX(payload.ageRangeMonths[0], payload.axisMonths);
   const ageBandEnd = axisX(payload.ageRangeMonths[1], payload.axisMonths);
   const nodeById = new Map(subject.nodes.map((node) => [node.id, node]));
@@ -490,7 +448,7 @@ export function AbilitiesExplorer({
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[var(--clay-600)]">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-[var(--clay-600)]">
             {payload.childName}&apos;s learning map
           </p>
           <h2
@@ -500,15 +458,15 @@ export function AbilitiesExplorer({
             Abilities map
           </h2>
         </div>
-        <div className="rounded-pill border border-[rgba(79,180,214,0.32)] bg-[var(--info-soft)] px-4 py-2 text-sm font-semibold text-[var(--sky-600)]">
-          {payload.childName}&apos;s age · {ageLabel(payload.ageRangeMonths[0])} to {ageLabel(payload.ageRangeMonths[1])}
+        <div className="rounded-[var(--homa-radius-control)] border border-[rgba(79,180,214,0.32)] bg-[var(--info-soft)] px-4 py-2 text-sm font-semibold text-[var(--sky-600)]">
+          {payload.childName}&apos;s age · {Math.floor(payload.ageMonths / 12)} {Math.floor(payload.ageMonths / 12) === 1 ? "year" : "years"} {payload.ageMonths % 12} {payload.ageMonths % 12 === 1 ? "month" : "months"}
         </div>
       </div>
 
       <p className="mt-4 max-w-4xl text-base leading-7 text-body">
         <strong className="text-strong">Every dot is one ability.</strong> Left to right
-        shows when an ability is usually introduced. The shaded band shows {payload.childName}&apos;s
-        age range. Up and down only separates dots.
+        shows the middle of each ability&apos;s usual teaching-age window. Up and down only separates dots.
+        {ageWithinAxis ? ` The shaded year contains ${payload.childName}'s chronological age, not an assessed level.` : ` ${payload.childName}'s age is outside this age 4 to age 14 chart, so no age band is shown.`}
       </p>
 
       <div
@@ -572,7 +530,7 @@ export function AbilitiesExplorer({
               )
             }
             onChange={(event) => selectNode(event.target.value)}
-            className="min-h-11 w-full rounded-pill border border-border-subtle bg-card px-3.5 text-sm font-semibold text-strong sm:w-auto sm:max-w-[28rem]"
+            className="min-h-11 w-full rounded-[var(--homa-radius-control)] border border-border-subtle bg-card px-3.5 text-sm font-semibold text-strong sm:w-auto sm:max-w-[28rem]"
           >
             {subject.nodes.map((node) => (
               <option key={node.id} value={node.id}>
@@ -601,9 +559,10 @@ export function AbilitiesExplorer({
             </title>
             <desc id="abilities-graph-description">
               {subject.nodes.length} abilities connected by {subject.edges.length} prerequisite
-              lines. The horizontal axis runs from age 4 to age 14. Green dots are known,
-              gold dots are being worked on now, and quiet gray dots are up next.
+              lines. The horizontal axis runs from age 4 to age 14. Dots distinguish Easily,
+              Getting there, Not observed, Not yet and Different observations. Select an ability to read its evidence.
             </desc>
+            {ageWithinAxis ? <g>
             <rect
               x={ageBandStart}
               y={PLOT_TOP - 12}
@@ -617,7 +576,7 @@ export function AbilitiesExplorer({
               x2={ageBandStart}
               y1={PLOT_TOP - 12}
               y2={PLOT_BOTTOM + 12}
-              stroke="var(--sky-600)"
+              stroke="var(--info)"
               strokeDasharray="7 7"
               strokeOpacity="0.6"
             />
@@ -626,7 +585,7 @@ export function AbilitiesExplorer({
               x2={ageBandEnd}
               y1={PLOT_TOP - 12}
               y2={PLOT_BOTTOM + 12}
-              stroke="var(--sky-600)"
+              stroke="var(--info)"
               strokeDasharray="7 7"
               strokeOpacity="0.6"
             />
@@ -634,12 +593,13 @@ export function AbilitiesExplorer({
               x={(ageBandStart + ageBandEnd) / 2}
               y={PLOT_TOP - 18}
               textAnchor="middle"
-              fill="var(--sky-600)"
+              fill="var(--info)"
               fontSize="14"
               fontWeight="700"
             >
-              {payload.childName}&apos;s age range
+              {payload.childName}&apos;s chronological age
             </text>
+            </g> : null}
 
             {subject.edges.map((edge) => {
               const from = nodeById.get(edge.fromId);
@@ -699,11 +659,12 @@ export function AbilitiesExplorer({
                     stroke={
                       node.state === "working_on_now"
                         ? "var(--gold-ink)"
-                        : node.state === "up_next"
+                        : node.state === "unobserved"
                           ? "var(--stone-500)"
                           : "var(--surface-card)"
                     }
-                    strokeWidth={node.state === "up_next" ? 1.8 : 1.4}
+                    strokeWidth={node.state === "unobserved" ? 1.8 : 1.4}
+                    strokeDasharray={node.state === "conflict" ? "3 2" : undefined}
                   />
                   <title>
                     {`${node.name}, ${STATUS_META[node.state].label}`}
@@ -800,27 +761,21 @@ export function AbilitiesExplorer({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 rounded-lg border border-border-subtle bg-[var(--surface-raised)] p-4 text-sm sm:grid-cols-3">
-        <div>
-          <p className="font-semibold text-strong">Knows</p>
-          <p className="mt-1 text-muted">{counts.knows} marked by a parent answer</p>
-        </div>
-        <div>
-          <p className="font-semibold text-strong">Working on now</p>
-          <p className="mt-1 text-muted">{counts.working_on_now} marked for practice</p>
-        </div>
-        <div>
-          <p className="font-semibold text-strong">Up next</p>
-          <p className="mt-1 text-muted">{counts.up_next} quiet or not there yet</p>
-        </div>
-      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-border-subtle pt-4 text-sm sm:grid-cols-5">
+        {(Object.keys(STATUS_META) as AbilitiesExplorerDisplayState[]).map((state) => (
+          <div key={state}>
+            <dt className="font-semibold text-strong">{STATUS_META[state].label}</dt>
+            <dd className="mt-1 tabular-nums text-muted">{counts[state]}</dd>
+          </div>
+        ))}
+      </dl>
 
       <div className="mt-4 md:hidden">
         <button
           ref={openSelectedRef}
           type="button"
           onClick={() => selectNode(selected.id)}
-          className="min-h-11 w-full rounded-pill bg-[var(--text-strong)] px-4 py-2 text-sm font-bold text-white"
+          className="min-h-11 w-full rounded-[var(--homa-radius-control)] bg-[var(--text-strong)] px-4 py-2 text-sm font-bold text-white"
         >
           Open selected ability
         </button>
@@ -832,7 +787,7 @@ export function AbilitiesExplorer({
           payload={payload}
           subject={subject}
           selected={selected}
-          onSelect={(id) => selectNode(id, true)}
+          onSelect={(id, reason) => selectNode(id, true, reason)}
           onClose={closeDetails}
           mobileOpen={mobileOpen}
         />

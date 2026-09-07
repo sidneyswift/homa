@@ -1,6 +1,14 @@
 # Deeper questions that follow the child's evidence
 
-Implementation and evidence for [#1088](https://github.com/sidneyswift/homa/issues/1088), F09-F10 in the [meeting review](2026-09-05-cofounder-feedback-review.md). The initial implementation is deployed at main `325216fa6fe60a17e732d9ad410720f4eca5dbe2`; full hosted acceptance remains open after the polling failure below. GitHub holds status and ownership.
+## Final released verification
+
+FIXED and verified on `66131afd` after [PR #1126](https://github.com/sidneyswift/homa/pull/1126). The owned-sandbox run `5060c28d-7898-4263-829f-50efd9910866` passed 704 checks: four actual sends, two canonical direct answers, `parent_stopped`, truthful alternative wording, an explicitly unanswered third question, selected-child Progress and reload without a new turn. Root inspected the stopped and selected-Progress screenshots and reviewed the final response. The reloaded Math heading and unchanged canonical signature passed; no separate reload screenshot was captured. [Sanitized receipt](../journeys/evidence/2026-09-06-progress-release/verification.json), [stopped](../journeys/evidence/2026-09-06-progress-release/deeper-stopped.png), [Progress](../journeys/evidence/2026-09-06-progress-release/deeper-selected-progress.png).
+
+[#1088 is closed with this receipt](https://github.com/sidneyswift/homa/issues/1088#issuecomment-5563174949). Family/Auth readbacks are zero; deletion job `bff4d8ae-9306-4e9b-8dbe-6ba48054d2ed` retains canonical provider sweeps and issued-token drain. This does not certify physical touch, installed native or voice. Earlier failed receipts remain failed; all pending-release statements in the historical implementation record below describe their earlier checkpoints, not the current release.
+
+## Historical implementation and gate record
+
+Implementation and evidence for [#1088](https://github.com/sidneyswift/homa/issues/1088), F09-F10 in the [meeting review](2026-09-05-cofounder-feedback-review.md). The initial implementation is deployed at main `325216fa6fe60a17e732d9ad410720f4eca5dbe2`; full hosted acceptance was still open at that checkpoint after the polling failure below. GitHub holds status and ownership.
 
 ## What the request means
 
@@ -8,7 +16,7 @@ Carolyng wanted questions that reveal what her child can currently do, including
 
 The audit established two distinct failures. Returning-family deep links lost the selected child and subject on the way to chat. The chat check-in used the ordinary age warm-up window, so a saved catching or pouring answer could finish the sitting while useful questions remained elsewhere in the bank. The older dedicated deep-dive selector explored more widely but did not refresh stale evidence and automatically rebuilt a plan. Restoring it unchanged would not satisfy this request.
 
-## Current implementation
+## Implementation at the first release
 
 The fleet `progress-check-in` skill owns reading evidence, asking the exact selected question, conservative interpretation, tool sequencing and the explanation at completion. Existing `manage_child_progress` owns the authenticated effect. The new deterministic subject selector uses the reviewed bank and canonical effective evidence, with family/child-scoped skip cooldowns. It probes easier or harder questions, refreshes stale or non-direct controlling observations, excludes fresh answers and bounds the sitting to eight accepted responses including skip and not_sure. Ordinary onboarding keeps its age warm-up selector.
 
@@ -35,20 +43,20 @@ The additive migration records exact terminal metadata and creates adult-owned s
 - Ten bounded production-model answer cases, four real Eve routing cases, eight adaptive cases and two existing onboarding evals ran with disposable local effects. Adaptive cases include the reported motor states, music, easier questions, stale evidence, bank coverage and the sitting limit. The first mixed-evidence finish failed semantic review by calling mixed evidence bank exhaustion. The fleet procedure was corrected, and a single mixed rerun passed exact checks and root semantic review. Both samples remain preserved. These small samples do not establish statistical reliability. The follow-up did not alter the fleet procedure, model inputs or judgment policy, so it adds deterministic failure-path evidence rather than rerunning those model samples.
 - Actual component/hook browser fixtures covered 320px and 390px layouts, reload/retry identity, readiness, draft retention, account wall, unavailable state, answer controls, focus and the exact return URL. Authentication/actions were synthetic at that browser boundary; the real status action has an injected-boundary concurrent-commit and revision-mismatch test, and the database path exercises the actual RLS view and persistence. A second failed delivery after revision recovery retains the browser request pointer and retries the latest revision. An unavailable snapshot followed by a synchronized ordinary-chat reissue also retains that pointer and sends only an explicit selected retry at the new revision. Screenshots are evidence of rendered components, not a full hosted ChatClient journey.
 
-## Final integration gate
+## Historical integration gate
 
 Integration with main `b8b79693` passed the independent technical review, preview deployment, browser and database CI jobs. The first required aggregate failed because the isolation guard did not yet enumerate the new receipt table. The guard now probes both the table and status view, refuses a partial migration, and explicitly labels the pre-migration absent state. Once installed, real JWT probes cover the owning adult, another adult in the same family, another family, and all client write methods. Catalog checks separately prove member SELECT only and no anonymous access.
 
 The updated disposable PostgreSQL contract passed for both relations: owner reads one receipt, partner/outsider read none, anonymous SELECT is denied, and every member write is rejected. Its first new run exposed a test expectation error: PostgreSQL can reject the joined view as non-updatable before evaluating permissions. The corrected assertion accepts that exact view-only SQLSTATE after separately checking revoked write privileges. The REST probe submits only columns actually present in each relation, so an unknown-column error cannot pass as security evidence. Production migration and hosted acceptance remain pending.
 
-## Remaining release evidence
+## Historical remaining release evidence
 
 Fresh review of the recovery correction, final copy and interface gates, integration of newer main, exact-head CI/Vercel checks, the additive migration and production READY attestation precede the hosted acceptance run. That run must show the selected entry, actual visible question and canonical delivery, real answers, durable stop, reload without restart, and the correct child's resulting Progress. A start receipt alone cannot close this issue.
 
 Numeric months-ahead presentation remains #1097. Contextual journal capture remains #1099, fresh next-step advice #1100, and recurring assessment cadence #1107. Native text delivery receives deterministic coverage here; physical native interaction and spoken voice are not certified by these tests.
 
 
-## Hosted verification and polling correction
+## Historical hosted verification and polling correction
 
 PR #1121 merged with required checks and deployed READY as `dpl_5123698ncCY7E497RV12v2DA2ANM` at thankshoma.com. The receipt migration is installed as live version `20260906203800`; RLS and the invoker view's read-only grants were verified.
 

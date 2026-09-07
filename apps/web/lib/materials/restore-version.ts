@@ -18,6 +18,8 @@ import {
 import { buildRenderProvenance } from "./render-provenance";
 import { insertRestoredMaterialCaller, insertRestoredMaterialPinned } from "./restore-record";
 
+import { prepareHandwritingDocument, handwritingFailureNote } from "./handwriting/document";
+
 const RESTORABLE_SINCE = Date.parse("2026-07-29T00:00:00.000Z");
 
 export interface RestoreRow {
@@ -184,9 +186,24 @@ async function restoreWithAccess(input: {
   if (pageBodies.length === 0) {
     return { restored: false, note: "That earlier version is no longer available. Nothing changed." };
   }
-  const rendered = await renderPrintableHtml(
-    wrapPrintableDocument(pageBodies, selected.child_name ?? ""),
-  );
+  const priorGeneration = selected.generation && typeof selected.generation === "object"
+    ? selected.generation as Record<string, unknown> : {};
+  let rendered;
+  let handwriting;
+  try {
+    handwriting = prepareHandwritingDocument(pageBodies.map((body, index) => ({
+      body, fresh: false, carriedMaterialId: selected.id, carriedRows: priorGeneration.handwritingRows, carriedPage: index + 1,
+    })));
+    rendered = await renderPrintableHtml(
+      wrapPrintableDocument(handwriting.bodies, selected.child_name ?? ""),
+      undefined,
+      handwriting.expectations,
+    );
+  } catch (error) {
+    const note = handwritingFailureNote(error);
+    if (note) return { restored: false, note };
+    throw error;
+  }
   const artifacts = await uploadMaterialArtifacts({
     familyId: input.familyId,
     slug: `${printableSlug(selected.title)}-restored`,
@@ -194,7 +211,7 @@ async function restoreWithAccess(input: {
     pageJpegs: rendered.pageJpegs.slice(0, PREVIEW_PAGE_CAP),
   });
   const generation = restoredGeneration({
-    original: selected.generation,
+    original: handwriting.receipts.length ? { ...priorGeneration, handwritingRows: handwriting.receipts, handwritingRender: rendered.handwriting } : selected.generation,
     sourceMaterialId: selected.id,
     artifacts,
     pageCount: rendered.pageCount,

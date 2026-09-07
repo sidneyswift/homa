@@ -1,9 +1,12 @@
+import { parseVerifiedFamilySourceEvidence, type VerifiedFamilySourceEvidence } from "./family-asset-source-evidence-contract";
+
 export const MAX_FAMILY_ASSET_REFERENCES = 5;
 
 export interface FamilyAssetReferenceSnapshot {
   id: string;
   title: string;
   sourceLocator?: string | null;
+  evidence?: VerifiedFamilySourceEvidence[];
 }
 
 export interface FamilyAssetReference extends FamilyAssetReferenceSnapshot {
@@ -39,10 +42,12 @@ export function parseFamilyAssetReferenceSnapshots(
         : typeof row.sourceLocator === "string" && row.sourceLocator.trim().length > 0
           ? row.sourceLocator.trim().slice(0, 160)
           : undefined;
+    const evidence = parseVerifiedFamilySourceEvidence(row.evidence);
     references.push({
       id: row.id,
       title: row.title.trim().slice(0, 180),
       ...(sourceLocator !== undefined ? { sourceLocator } : {}),
+      ...(evidence.length ? { evidence } : {}),
     });
     if (references.length === MAX_FAMILY_ASSET_REFERENCES) break;
   }

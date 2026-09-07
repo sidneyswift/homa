@@ -1,5 +1,5 @@
 ---
-description: Use, and load before calling find_family_assets or get_family_asset, when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use before another skill works from a family source, including "use my curriculum" and "what do we already have about this?" Not for reopening work Homa created in Binder; materials-studio owns that. Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
+description: Use, and load before calling find_family_assets or get_family_asset, when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use for a teaching theme when family context makes a brief owned-resource lookup useful, unless urgency or a simple fresh page makes that detour unhelpful. Use before another skill works from a family source, including "use my curriculum" and "what do we already have about this?" Not for reopening work Homa created in Binder; materials-studio owns that. Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
 metadata:
   homa-related-skills: materials-studio, curriculum-studio, curriculum-mapping, planner
 ---
@@ -45,10 +45,13 @@ saved. Search for it instead of saving the chat copy again.
 ## Find the family's source
 
 1. Call `find_family_assets` with the parent's meaning in plain words. Add exact
-   child, subject, kind, or status filters only when she actually supplied them.
+   child, subject, kind, or status filters only when they narrow the actual request.
+   For useful resources for a child, leave childId off so shared family resources
+   remain candidates; judge returned assignments before choosing. An explicit
+   request to list only that child's assigned files may use the strict filter.
 2. Search results are candidates. Choose the best supported match, then call
    `get_family_asset` on that exact id before you use it or cite it.
-3. On a miss, try one meaningfully different query once. A miss does not prove
+3. When the parent requires a particular source, on a miss try one meaningfully different query once. A miss does not prove
    the family never uploaded it. After the second miss, ask for one identifying
    detail instead of substituting a public source or denying it exists.
 4. When several results remain plausible, show a short choice using titles and
@@ -70,13 +73,16 @@ parent's explicit correction and should be described that way.
 - A processing or attention state does not erase the original. Tell the parent
   what is usable and what Homa could not organize.
 
-If she asks about privacy, be exact: the current original has a hard-to-guess
-public Blob URL until private storage ships. Never call it private.
+Use the authenticated citation link. Current storage supports private originals
+and legacy public originals; do not infer a file's privacy from Library membership.
 
 ## Hand off after retrieval
 
-When the parent explicitly says to use an uploaded or owned source, retrieval
-happens before any plan or printable:
+For a named owned lesson, a next-lessons packet, or a relevant owned teaching
+resource, read `references/owned-lessons.md` before handing off. Targeted reading
+is separate from saving units or mapping a whole curriculum.
+
+When the output will use a family source, retrieval happens before creation:
 
 1. Find the source.
 2. Get the exact source and citation.
@@ -86,7 +92,8 @@ happens before any plan or printable:
    - `planner` for adding or replacing a grounded activity in an existing plan.
 4. Carry the exact asset id into the downstream write, not just into your prose:
    - On the first `create_printable` call, include it in
-     `sourceFamilyAssetIds`. On a revision, omit that field to inherit the
+     `sourceFamilyAssetIds`, with exact `sourceFamilyEvidence` when using pages
+     or a recorded source quote. On a revision, omit both fields to inherit the
      prior sources. Pass an empty array only when the parent deliberately asks
      to remove the source connection.
    - On an `edit_plan` add or replace, include it in
@@ -115,13 +122,15 @@ support the requested step.
 
 ## Stop conditions
 
-- No exact attachment or asset match: ask one short identifying question.
+- No exact match for a required attachment or source: ask one short identifying question.
 - A foreign, arbitrary, or unverified URL: refuse to save it through these
   tools. Ask her to attach or upload it through Homa.
-- The source evidence does not support the claim: say what is known and ask for
-  the missing page or detail.
-- The request is only to create something new and names no family source: route
-  to materials-studio or curriculum-studio without loading this skill.
+- Metadata does not support a lesson claim: use the bounded curriculum reader
+  first. Ask for a missing page only after the original cannot supply it.
+- Optional theme lookup finds no useful source: continue the fresh request;
+  do not ask the parent to inventory her shelf or claim an exhaustive search.
+- A quick fresh page gains nothing from owned-source context: let materials-studio
+  build it without a Library detour.
 - The request is curriculum decomposition or approved automatic Planner
   mapping: load curriculum-mapping. Training export remains a separate
   workflow, never hidden work here.

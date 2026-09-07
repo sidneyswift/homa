@@ -136,12 +136,20 @@ loads:
   page is welcome: Homa can check the answers and remember what clicked.
   One gentle offer, never a chore.
 
+## Match the requested preparation depth
+
+Read `references/request-depth.md` when urgency, advance preparation or a
+source-grounded lesson/packet changes the work. It does not change minimum
+correctness, review, print or approval requirements.
+
 ## Before designing: check the library
 
-Family Library and Binder are different shelves. When the parent explicitly
-says to use an uploaded, owned, or Library source, load family-librarian and
-call find_family_assets, then get_family_asset, before designing. Do not add
-this lookup to an ordinary fresh-material request that names no family source.
+Family Library and Binder are different shelves. For an owned lesson or a
+request to use a saved source, load family-librarian and follow its targeted
+reading procedure before designing. For a teaching theme, a brief owned-source
+lookup can help when family context makes it useful. Skip that optional detour
+for a rushed or simple fresh page. A title or metadata sample never substitutes
+for reading the lesson.
 
 Keep the source connection exact:
 
@@ -149,8 +157,12 @@ Keep the source connection exact:
   that directly grounded the material. A search result alone is not enough.
 - Include those ids in `sourceFamilyAssetIds` on the first create_printable
   call. The tool verifies family ownership and saves a title snapshot, and the
-  Binder card cites the Library original.
-- On every revision, omit `sourceFamilyAssetIds` to inherit the earlier
+  Binder card cites the Library original. For pages or recorded source quotes,
+  also include `sourceFamilyEvidence` from the read result. Code rechecks exact
+  source identity and quote; the model must still judge whether the exercise
+  matches the lesson. Cite the lesson and physical/printed page distinction in
+  the parent guidance.
+- On every revision, omit `sourceFamilyAssetIds` and `sourceFamilyEvidence` to inherit the earlier
   version's sources. Pass an empty array only when the parent deliberately asks
   to disconnect the new version from its Library sources.
 - When compiling source-grounded materials into a new packet, carry forward
@@ -385,12 +397,12 @@ astronaut, a poster of the child beside their favorite character.
 - No `<script>`, no iframes; content must avoid em dashes and any
   deficit words (the tool refuses the page otherwise, and tells you why).
 
-**Tracing on writing guides**: read the name-tracing-page recipe and
-use its SVG guide row for ANY letters-on-guides work. Never float HTML
-text near CSS-border "guides": the two cannot be pinned together, the
-letters drift off the lines, and a real family corrected that exact
-failure for three days (2026-07-28 to 07-31) before the SVG row
-replaced the old sketch that lived here.
+**Tracing on writing guides**: read the name-tracing-page recipe before
+building letters on guides. Its typed `handwritingRows` effect in
+create_printable owns measured outlines and exact guides, including
+supported spellings, placeholder placement and honest refusal. Do not
+replace refused rows with manual SVG or a handwriting font. The recipe
+also gives the stricter static-style requirements for these documents.
 
 **Counting**: repeat one themed `<img>` (one generation, many tags at
 ~70px) in groups; the child writes each count in an empty box

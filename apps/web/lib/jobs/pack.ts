@@ -2,8 +2,9 @@ import {
   blobConfigured,
   uploadMaterialArtifacts,
 } from "../materials/artifact-store";
-import { joinPageBodies, splitPageBodies } from "../materials/page-shell";
+import { joinPageBodies, splitPageBodies, wrapPrintableDocument } from "../materials/page-shell";
 import { renderPrintableHtml } from "../materials/render-page";
+import { prepareHandwritingDocument } from "../materials/handwriting/document";
 import { mapDb } from "../map/db";
 
 /**
@@ -53,10 +54,11 @@ export interface JobMaterialPack {
   pages: number;
 }
 
-interface PackMaterialRow {
+export interface PackMaterialRow {
   id: string;
   title: string;
   html: string;
+  handwriting_rows?: unknown;
 }
 
 /** Every material this job produced, oldest first, which is the order the
@@ -67,7 +69,7 @@ export async function jobPackMaterials(
 ): Promise<PackMaterialRow[]> {
   const sql = mapDb();
   return await sql<PackMaterialRow[]>`
-    select m.id, m.title, m.html
+    select m.id, m.title, m.html, m.generation->'handwritingRows' as handwriting_rows
     from public.agent_job_stage_artifacts a
     join public.materials m
       on m.id = a.material_id and m.family_id = a.family_id
@@ -86,6 +88,19 @@ export async function jobPackMaterials(
  */
 export function packPageBodies(materials: readonly PackMaterialRow[]): string[] {
   return materials.flatMap((material) => splitPageBodies(material.html));
+}
+
+/** Only new guided materials opt into the receipt-aware shell. Ordinary job
+ * packs keep their existing source path. Authenticated carried IDs are local
+ * to the original page, so two materials may both have a row named model. */
+export function prepareJobHandwritingPack(materials: readonly PackMaterialRow[]) {
+  if (!materials.some((material) => material.handwriting_rows != null || /data-homa-handwriting-row\b/i.test(material.html))) return null;
+  return prepareHandwritingDocument(materials.flatMap((material) =>
+    splitPageBodies(material.html).map((body, index) => ({
+      body, fresh: false, carriedRows: material.handwriting_rows,
+      carriedPage: index + 1, carriedMaterialId: material.id,
+    })),
+  ));
 }
 
 /**
@@ -112,7 +127,10 @@ export async function buildJobMaterialPack(
     const pageBodies = packPageBodies(materials);
     if (pageBodies.length === 0) return null;
 
-    const rendered = await renderPrintableHtml(joinPageBodies(pageBodies));
+    const handwriting = prepareJobHandwritingPack(materials);
+    const rendered = handwriting
+      ? await renderPrintableHtml(wrapPrintableDocument(handwriting.bodies, ""), undefined, handwriting.expectations)
+      : await renderPrintableHtml(joinPageBodies(pageBodies));
     const stored = await uploadMaterialArtifacts({
       familyId,
       slug: `job-pack-${jobId}`,

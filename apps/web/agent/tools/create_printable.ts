@@ -18,6 +18,7 @@ import {
   validateAcceptedOfferFulfillmentRecipient,
 } from "../../lib/conversation-continuity/offer-fulfillment";
 import { emitFamilyAssetUsed } from "../../lib/library/family-asset-events";
+import { familySourceEvidenceProposalSchema, MAX_FAMILY_SOURCE_EVIDENCE } from "../../lib/library/family-asset-source-evidence-contract";
 import { resolveMaterialFamilySources } from "../../lib/library/family-asset-provenance";
 import {
   familyAssetReferencesForSurface,
@@ -38,6 +39,7 @@ import {
 import {
   getMaterialCaller,
   getMaterialPinned,
+  getSubjectLessonRevisionMaterialPinned,
   type MaterialSummary,
 } from "../../lib/materials/library";
 import {
@@ -64,6 +66,7 @@ import {
   PREVIEW_PAGE_CAP,
   RendererUnavailableError,
   renderPrintableHtml,
+  inspectLegacyHandwriting,
   SUBJECT_LESSON_RENDER_POLICY,
 } from "../../lib/materials/render-page";
 import {
@@ -90,6 +93,9 @@ import { readSubjectLessonTrustedContext } from "../../lib/subject-lessons/dispa
 import { claimSubjectLessonWorksheetEffectPinned } from "../../lib/subject-lessons/store";
 import { resolveSubjectLessonWorksheetEffect } from "../../lib/subject-lessons/worksheet-effect";
 import { sendHomaSms } from "../../lib/voice/telnyx-api";
+
+import { prepareHandwritingRevision, evaluateHandwritingRevision, type HandwritingRevisionPlan, type LegacyComparisonProof } from "../../lib/materials/handwriting/revision";
+import { HandwritingDocumentError, handwritingRowsSchema, prepareHandwritingDocument, handwritingFailureNote } from "../../lib/materials/handwriting/document";
 
 /**
  * The materials studio's press (MS-2/MS-3, replacing create_worksheet):
@@ -125,10 +131,17 @@ const MAX_PACKET_PAGES = 12;
 /** Stay under the materials.html column's 120k check constraint. */
 const MAX_STORED_HTML_CHARS = 118_000;
 
+export function storedPrintableHtmlLimitNote(storedHtml: string): string | null {
+  return storedHtml.length > MAX_STORED_HTML_CHARS
+    ? "This packet's pages add up past the storage cap for one material. Split it into two volumes and make each its own packet."
+    : null;
+}
+
 const PAGE_BREAK_NOTE =
   "Page-break CSS inside one page's html cannot paginate: every page is an exact letter-size box and overflow is cut. For a multi-page packet, call again with pages (one entry per page: html, pageImageUrl, or fromMaterialId) and each entry gets its own page, preview, and quality check.";
 
 const packetPageInput = z.object({
+  handwritingRows: handwritingRowsSchema,
   html: z
     .string()
     .min(40)
@@ -152,6 +165,7 @@ const packetPageInput = z.object({
 });
 
 export const createPrintableInputSchema = z.object({
+  handwritingRows: handwritingRowsSchema,
   title: z
     .string()
     .trim()
@@ -254,6 +268,11 @@ export const createPrintableInputSchema = z.object({
     .describe(
       "Exact Family Library asset ids returned by get_family_asset that grounded this material. Omit on a revision to inherit its prior sources; pass an empty array only to deliberately clear them.",
     ),
+  sourceFamilyEvidence: z
+    .array(familySourceEvidenceProposalSchema)
+    .max(MAX_FAMILY_SOURCE_EVIDENCE)
+    .optional()
+    .describe("Exact source page or recorded-evidence quotes used for this material. Requires sourceFamilyAssetIds. Copy physical page/hash/extractionVersion from read_family_curriculum, or an exact recorded quote/locator from get_family_asset. Omit both source fields on a revision to inherit verified evidence. This verifies provenance, not whether the lesson adaptation is correct."),
   requestSummary: z
     .string()
     .trim()
@@ -374,6 +393,10 @@ interface ResolvedPage {
    * must actually look at (gh#346).
    */
   fresh: boolean;
+  handwritingRows?: NonNullable<CreatePrintableInput["handwritingRows"]>;
+  carriedRows?: unknown;
+  carriedPage?: number;
+  carriedMaterialId?: string;
 }
 
 /** The packet's stored source: one path's value when uniform, else hybrid. */
@@ -460,6 +483,7 @@ const createPrintable = defineBoundedTool({
     const sourceResolution = await resolveMaterialFamilySources({
       familyId,
       requestedAssetIds: input.sourceFamilyAssetIds,
+      requestedEvidence: input.sourceFamilyEvidence,
       revisesMaterialId: input.revisesId,
     });
     if (!sourceResolution.ok) {
@@ -468,7 +492,9 @@ const createPrintable = defineBoundedTool({
         note:
           sourceResolution.reason === "too-many-sources"
             ? `A material can cite at most ${MAX_FAMILY_ASSET_REFERENCES} Family Library sources. Choose the sources that directly grounded this output.`
-            : "One of those Family Library source ids is not active in this family. Find and open the source again before creating the material.",
+            : sourceResolution.reason === "invalid-source-evidence"
+              ? "The source evidence could not be verified. Reopen the source and copy its exact page or recorded quote. No material was created."
+              : "One of those Family Library source ids is not active in this family. Find and open the source again before creating the material.",
       };
     }
     const familySources = sourceResolution.sources;
@@ -508,6 +534,7 @@ const createPrintable = defineBoundedTool({
         body: inputHtml,
         source: htmlPageSource(inputHtml),
         fresh: true,
+        handwritingRows: input.handwritingRows,
       });
     } else if (typeof input.pageImageUrl === "string") {
       if (!isFamilyArtifactUrl(input.pageImageUrl, familyId)) {
@@ -549,7 +576,7 @@ const createPrintable = defineBoundedTool({
           if (hasPageBreakMarkup(body)) {
             return { created: false, note: `${position}: ${PAGE_BREAK_NOTE}` };
           }
-          resolvedPages.push({ body, source: htmlPageSource(body), fresh: true });
+          resolvedPages.push({ body, source: htmlPageSource(body), fresh: true, handwritingRows: page.handwritingRows });
           continue;
         }
         if (typeof page.pageImageUrl === "string") {
@@ -602,8 +629,8 @@ const createPrintable = defineBoundedTool({
             note: `${position}: "${material.title}" has ${selected.pageCount} page${selected.pageCount === 1 ? "" : "s"}, so there is no page ${page.pageIndex}. Pages count from 1.`,
           };
         }
-        for (const body of selected.bodies) {
-          resolvedPages.push({ body, source: material.source, fresh: false });
+        for (const [offset, body] of selected.bodies.entries()) {
+          resolvedPages.push({ body, source: material.source, fresh: false, carriedMaterialId: material.id, carriedRows: material.handwritingRows, carriedPage: page.pageIndex ?? offset + 1 });
         }
       }
       if (resolvedPages.length > MAX_PACKET_PAGES) {
@@ -620,13 +647,51 @@ const createPrintable = defineBoundedTool({
       }
     }
 
-    const storedHtml = joinPageBodies(resolvedPages.map((page) => page.body));
-    if (storedHtml.length > MAX_STORED_HTML_CHARS) {
-      return {
-        created: false,
-        note: "This packet's pages add up past the storage cap for one material. Split it into two volumes and make each its own packet.",
-      };
+    if (input.handwritingRows?.length && !inputHtml || input.pages?.some((page) => page.handwritingRows?.length && !page.html)) {
+      return { created: false, note: "handwritingRows belongs only to its fresh HTML page, never an image or carried page." };
     }
+    let handwriting: ReturnType<typeof prepareHandwritingDocument>;
+    try {
+      handwriting = prepareHandwritingDocument(resolvedPages, input.recipe === "name-tracing-page");
+    } catch (error) {
+      const note = handwritingFailureNote(error);
+      if (note) return { created: false, note };
+      throw error;
+    }
+    let handwritingRevision: HandwritingRevisionPlan | null = null;
+    let legacyHandwritingProof: LegacyComparisonProof | undefined;
+    try {
+      if (input.revisesId) {
+        // Same caller JWT/protected pinned detail reader as the carry path.
+        // A client supplies an ID, never a family or authoritative receipt.
+        let previous = materialCache.get(input.revisesId) ?? null;
+        if (!materialCache.has(input.revisesId)) {
+          previous = access.mode === "pinned"
+            ? await getMaterialPinned(familyId, input.revisesId)
+            : await getMaterialCaller(access.db, familyId, input.revisesId);
+          if (!previous && access.mode === "pinned" && trustedLesson) {
+            previous = await getSubjectLessonRevisionMaterialPinned(familyId, input.revisesId, trustedLesson);
+          }
+          materialCache.set(input.revisesId, previous);
+        }
+        if (!previous?.html) throw new HandwritingDocumentError("The exact revision source could not be reopened in this family. Keep the original; no replacement was made.");
+        if (handwriting.receipts.length || previous.handwritingRows != null) {
+          handwritingRevision = prepareHandwritingRevision({ source: { ...previous, html: previous.html }, pages: resolvedPages, current: handwriting, allowSizeReduction: Boolean(input.allowSizeReduction) });
+          if (handwritingRevision.legacyTargets.length) legacyHandwritingProof = await inspectLegacyHandwriting(handwritingRevision);
+        }
+      } else if (resolvedPages.some((page) => page.handwritingRows?.some((row) => row.predecessor))) {
+        throw new HandwritingDocumentError("A predecessor reference requires the exact saved revisesId material.");
+      }
+    } catch (error) {
+      const note = handwritingFailureNote(error);
+      if (note) return { created: false, note };
+      return { created: false, note: "The saved revision could not be read. Keep the original and reopen it before trying this correction." };
+    }
+    const handwritingSizeExclusions = handwritingRevision?.legacyTargets.map((row) => ({ page: row.page, guidedRowId: row.nextRowId })) ?? [];
+    resolvedPages.forEach((page, index) => { page.body = handwriting.bodies[index]; });
+    const storedHtml = joinPageBodies(resolvedPages.map((page) => page.body));
+    const storedHtmlLimit = storedPrintableHtmlLimitNote(storedHtml);
+    if (storedHtmlLimit) return { created: false, note: storedHtmlLimit };
 
     const metadataText = [
       input.title,
@@ -637,6 +702,7 @@ const createPrintable = defineBoundedTool({
       ...(input.characters ?? []),
       input.childName,
       input.requestSummary,
+      ...handwriting.receipts.map((row) => row.input.text),
     ]
       .filter(Boolean)
       .join(" ");
@@ -717,9 +783,11 @@ const createPrintable = defineBoundedTool({
     let rendered;
     try {
       rendered = trustedLesson
-        ? await renderPrintableHtml(document, SUBJECT_LESSON_RENDER_POLICY)
-        : await renderPrintableHtml(document);
+        ? await renderPrintableHtml(document, SUBJECT_LESSON_RENDER_POLICY, handwriting.expectations, handwritingSizeExclusions)
+        : await renderPrintableHtml(document, undefined, handwriting.expectations, handwritingSizeExclusions);
     } catch (error) {
+      const handwritingNote = handwritingFailureNote(error);
+      if (handwritingNote) return { created: false, note: handwritingNote };
       if (error instanceof RendererUnavailableError) {
         return { created: false, note: error.message };
       }
@@ -776,13 +844,22 @@ const createPrintable = defineBoundedTool({
     // flag on the record for every created row, so a floor that compared
     // nothing is never mistaken for one that held.
     const freshPageNumbers = new Set(freshGeometry.map((page) => page.page));
+    const revisedGeometry = await revisedGeometryPromise;
     const sizeFloor = evaluateSizeFloor({
-      revised: await revisedGeometryPromise,
+      revised: revisedGeometry,
       imagePage: source === "image",
       next: rendered.pageGeometry,
       freshPages: freshPageNumbers,
     });
-    const sizeFindings = sizeFloor.findings;
+    let handwritingSize: ReturnType<typeof evaluateHandwritingRevision> | null = null;
+    try {
+      if (handwritingRevision) handwritingSize = evaluateHandwritingRevision({ plan: handwritingRevision, current: handwriting, proof: legacyHandwritingProof, previousGeometry: revisedGeometry?.status === "ok" ? revisedGeometry.geometry : [], currentOrdinaryGeometry: rendered.ordinaryHandwritingGeometry ?? [], genericFindings: sizeFloor.findings });
+    } catch (error) {
+      const note = handwritingFailureNote(error);
+      if (note) return { created: false, note };
+      throw error;
+    }
+    const sizeFindings = handwritingSize?.findings ?? sizeFloor.findings;
     if (sizeFindings.length > 0 && !input.allowSizeReduction) {
       // One structured line per refusal, and a stable note prefix, so
       // refusals are countable in agent_tool_calls and the runtime logs.
@@ -942,6 +1019,7 @@ const createPrintable = defineBoundedTool({
       ...(rendered.pageCount > 1 ? { pagePreviewUrls } : {}),
       ...(input.pageRoles ? { pageRoles: input.pageRoles } : {}),
       familySources,
+      ...(handwriting.receipts.length ? { handwritingRows: handwriting.receipts, handwritingRender: rendered.handwriting } : {}),
       input: buildPrintableGenerationInput(
         input,
         input.pages ? "pages" : input.pageImageUrl ? "pageImageUrl" : "html",
@@ -967,7 +1045,9 @@ const createPrintable = defineBoundedTool({
       // parent's words. Code cannot verify consent, so the field names say
       // who claimed it; a flag set by a model that never asked is
       // auditable here rather than invisible.
+      ...(handwritingRevision ? { handwritingSize: { sourceMaterialId: handwritingRevision.sourceMaterialId, sourceHtmlSha256: handwritingRevision.sourceHtmlSha256, comparisons: handwritingSize?.comparisons, omittedGuidedRows: handwritingRevision.omittedGuidedRows, reductionAllowedByModel: handwritingRevision.reductionAllowedByModel, legacyProof: handwritingSize?.legacyProof ?? null } } : {}),
       sizeFloor: {
+        rawFindings: sizeFloor.findings,
         status: sizeFloor.status,
         comparedTo: input.revisesId ?? null,
         findings: sizeFindings,
@@ -1239,6 +1319,12 @@ const createPrintable = defineBoundedTool({
           ? ` ${sizeCheckSkipped}`
           : "";
 
+    const handwritingSizeNote = handwritingSize?.comparisons.some((row) => row.reduced)
+      ? " The declared predecessor comparison records smaller writing bands under the model's explicit size-reduction authorization. Tell the parent what changed."
+      : handwritingSize?.comparisons.length
+        ? " The matched writing-guide cap and small-letter body were preserved. This does not certify unchanged faulty legacy glyph ink."
+        : "";
+
     return {
       created: true,
       done: true,
@@ -1257,6 +1343,7 @@ const createPrintable = defineBoundedTool({
         revisesId: input.revisesId ?? null,
         reviewPassed: review === null ? null : review.pass,
         pageGeometry: rendered.pageGeometry,
+        ...(handwritingSize ? { handwritingSize: { comparisons: handwritingSize.comparisons, sourceMaterialId: input.revisesId, reductionAllowedByModel: Boolean(input.allowSizeReduction) } } : {}),
         sources: familyAssetReferencesForSurface(familySources, {
           siteRoot: siteUrl(),
         }),
@@ -1264,8 +1351,8 @@ const createPrintable = defineBoundedTool({
       review,
       sentByText,
       note: trustedLesson
-        ? `${deliveryNote}${reviewNote}${geometryNoteText}${sizeFloorNoteText}`
-        : `${deliveryNote}${reviewNote}${geometryNoteText}${sizeFloorNoteText} When the parent approves a version, call mark_material_final with this id.`,
+        ? `${deliveryNote}${reviewNote}${geometryNoteText}${sizeFloorNoteText}${handwritingSizeNote}`
+        : `${deliveryNote}${reviewNote}${geometryNoteText}${sizeFloorNoteText}${handwritingSizeNote} When the parent approves a version, call mark_material_final with this id.`,
     };
   },
 });

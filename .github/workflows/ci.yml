@@ -658,6 +658,18 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:material-print:postgres
 
+      - name: Locate and verify Chrome for the handwriting renderer
+        shell: bash
+        run: |
+          chrome_path="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium-browser || command -v chromium)"
+          test -n "$chrome_path" && test -x "$chrome_path"
+          "$chrome_path" --version
+          echo "CHROME_EXECUTABLE_PATH=$chrome_path" >> "$GITHUB_ENV"
+
+      - name: Handwriting caller and protected lesson real-render PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:material-handwriting:postgres
+
       - name: Family PDF cache and processing ownership disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:family-pdf-cache:postgres

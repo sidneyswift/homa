@@ -14,12 +14,14 @@ import type { ChildProgressView, ProgressTopicView } from "./types";
 import {
   ABILITIES_EXPLORER_SUBJECTS,
   type AbilitiesExplorerDisplayState,
+  type AbilitiesExplorerEvidence,
   type AbilitiesExplorerNode,
   type AbilitiesExplorerPayload,
   type AbilitiesExplorerSubject,
   type AbilitiesExplorerSubjectId,
 } from "./abilities-explorer-types";
 import { ageInMonths } from "../child-age";
+import { zonedDateString } from "../time-zone";
 
 const AXIS_MONTHS = [48, 168] as const;
 const SUBJECT_DISPLAY_NAMES: Record<AbilitiesExplorerSubjectId, string> = {
@@ -50,6 +52,8 @@ interface ProgressSignal {
   source: string | null;
   observedAt: string | null;
   conflict: boolean;
+  derivation: AbilitiesExplorerEvidence["derivation"];
+  conflictingAnswers: AbilitiesExplorerEvidence["conflictingAnswers"];
 }
 
 function isExplorerSubject(
@@ -92,8 +96,9 @@ function stateForAnswer(
     case "getting_there":
       return "working_on_now";
     case "not_yet":
+      return "not_yet";
     case null:
-      return "up_next";
+      return "unobserved";
   }
 }
 
@@ -108,6 +113,10 @@ function mapProgressSignals(view: ChildProgressView): Map<string, ProgressSignal
             source: null,
             observedAt: topic.observedAt,
             conflict: true,
+            derivation: null,
+            conflictingAnswers: view.conflicts.find((conflict) => conflict.itemId === topic.itemId)?.adultAnswers.map((answer) => ({
+              answer: answer.answer, derivation: answer.source.derivation, observedAt: answer.observedAt,
+            })) ?? [],
           });
           continue;
         }
@@ -116,6 +125,8 @@ function mapProgressSignals(view: ChildProgressView): Map<string, ProgressSignal
           source: sourceLabel(topic),
           observedAt: topic.observedAt,
           conflict: false,
+          derivation: topic.source?.derivation ?? null,
+          conflictingAnswers: [],
         });
       }
     }
@@ -196,9 +207,11 @@ function buildNode(
     // Vertical position is visual separation only. It deliberately does not
     // encode a second measure, a domain rank, or a child's performance.
     y: 0.08 + stableUnit(catalog.id, "abilities-y") * 0.84,
-    state: stateForAnswer(answer),
+    state: signal?.conflict ? "conflict" : stateForAnswer(answer),
     evidence: {
       answer,
+      derivation: signal?.derivation ?? null,
+      conflictingAnswers: signal?.conflictingAnswers ?? [],
       source: signal?.source ?? null,
       observedAt: signal?.observedAt ?? null,
       conflict: signal?.conflict ?? false,
@@ -244,8 +257,9 @@ function ageRangeFor(ageMonths: number): readonly [number, number] {
 /**
  * Builds the complete, read-only graph and overlays the already validated
  * Progress projection. The catalog has no family or child data, and the
- * overlay only accepts the projection's known item ids, so unknown or stale
- * evidence naturally remains the quiet Up next state.
+ * overlay only accepts the projection's known item ids. Missing observations,
+ * explicit not-yet answers and conflicts remain distinct. Saved evidence keeps
+ * its date and provenance; this view does not decay or infer a score.
  */
 export function buildAbilitiesExplorerPayload(
   view: ChildProgressView,
@@ -253,10 +267,12 @@ export function buildAbilitiesExplorerPayload(
 ): AbilitiesExplorerPayload {
   const signals = mapProgressSignals(view);
   const catalog = catalogNodes();
-  const ageMonths = Math.max(0, ageInMonths(view.birthDate, now));
+  const localDate = zonedDateString(now, view.timeZone);
+  const ageMonths = Math.max(0, ageInMonths(view.birthDate, new Date(`${localDate}T12:00:00.000Z`)));
   return {
     childId: view.childId,
     childName: view.childName,
+    timeZone: view.timeZone,
     ageMonths,
     axisMonths: AXIS_MONTHS,
     ageRangeMonths: ageRangeFor(ageMonths),

@@ -14,10 +14,10 @@ import {
 } from "../../lib/billing/plus-capability";
 import { readFamilyCurriculumSource } from "../../lib/library/family-curriculum-source";
 
-/** Authenticated source reading for the Plus decomposition workflow. */
+/** Authenticated bounded source reading, shared by lesson use and decomposition. */
 export default defineBoundedTool({
   description:
-    "Read the next bounded pages or sections from one ready Family Library curriculum, caching source transcription. Use only after get_family_asset identifies the exact curriculum and after loading curriculum-mapping. This is Homa Plus work. It never creates Library units or changes Planner. Scanned pages have explicit method and coverage; at most one new page is transcribed per call. Continue with nextCursor and honor gaps before claiming a full decomposition.",
+    "Read the next bounded pages or sections from one ready Family Library curriculum, caching source transcription. Use after family-librarian and get_family_asset identify the exact curriculum. Read just the located pages for a lesson or requested packet; curriculum-mapping owns whole-source decomposition. This is Homa Plus work. It never creates Library units or changes Planner. Scanned pages have explicit method and coverage; at most one new page is transcribed per call. Use physical page ordinals, never assume a lesson or printed page number is the cursor. Honor gaps and coverage; a metadata sample is not a lesson read.",
   deadlineMs: TOOL_DEADLINE.fetch,
   repeatable: true,
   inputSchema: z
@@ -32,7 +32,7 @@ export default defineBoundedTool({
         .min(1)
         .max(5_000)
         .default(1)
-        .describe("The next page or section ordinal. Start with 1."),
+        .describe("The physical PDF page or section ordinal, not a lesson number or printed page number. Start at 1 for contents, or jump to a location established by the source."),
     })
     .strict(),
   async execute(input, ctx) {
@@ -63,7 +63,7 @@ export default defineBoundedTool({
         error: result.reason,
         note:
           result.reason === "not-ready"
-            ? "The original stays in Library. Homa can build units from it when its Library status is Ready."
+            ? "The original stays in Library. Homa can read its lesson pages when its Library status is Ready."
             : "Homa could not read that curriculum. Open it in Library and check its status before trying again.",
       };
     }
@@ -80,8 +80,8 @@ export default defineBoundedTool({
       nextCursor: result.page.nextCursor,
       note:
         result.document.coverageNote ?? (result.page.nextCursor === null
-          ? "You reached the end of the readable source. Build the complete preview now, or mark it partial if sourceTruncated is true."
-          : `Continue with cursor ${result.page.nextCursor}. Do not claim a full decomposition yet.`),
+          ? "You reached the end of this readable source. Use only the returned evidence and honor any partial coverage."
+          : `Continue with cursor ${result.page.nextCursor}. Read further only if needed for the requested scope; this does not establish full-book coverage.`),
     };
   },
 });

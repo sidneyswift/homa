@@ -9,6 +9,7 @@ import {
 } from "../library/family-asset-reference";
 import { mapDb } from "../map/db";
 import { subjectLessonsEnabled } from "../subject-lessons/flag";
+import type { SubjectLessonTrustedContext } from "../subject-lessons/dispatch-input";
 import {
   SUBJECT_LESSON_MATERIAL_VALIDITY_SQL,
 } from "../subject-lessons/material-validity";
@@ -56,6 +57,8 @@ export interface MaterialSummary {
   /** Verified Family Library inputs captured when this version was made. */
   sources: FamilyAssetReferenceSnapshot[];
   html?: string;
+  handwritingRows?: unknown;
+  handwritingRender?: unknown;
 }
 
 export interface MaterialFilters {
@@ -88,6 +91,8 @@ interface MaterialDbRow {
   page_preview_urls: string[] | null;
   family_sources: unknown;
   html?: string;
+  handwriting_rows?: unknown;
+  handwriting_render?: unknown;
   subject_lesson_id?: string | null;
 }
 
@@ -163,7 +168,7 @@ function toSummary(row: MaterialDbRow): MaterialSummary {
     pageCount: normalizePageCount(row.page_count),
     pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
     sources: parseFamilyAssetReferenceSnapshots(row.family_sources),
-    ...(row.html !== undefined ? { html: row.html } : {}),
+    ...(row.html !== undefined ? { html: row.html, handwritingRender: row.handwriting_render, handwritingRows: row.handwriting_rows } : {}),
   };
 }
 
@@ -351,7 +356,8 @@ async function getMaterialPinnedLegacy(
            revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
            generation->'pagePreviewUrls' as page_preview_urls,
-           generation->'familySources' as family_sources, html
+           generation->'familySources' as family_sources,
+           generation->'handwritingRows' as handwriting_rows, generation->'handwritingRender' as handwriting_render, html
     from public.materials
     where id = ${materialId} and family_id = ${familyId}
   `;
@@ -370,7 +376,8 @@ async function getMaterialPinnedProtected(
            created_at::text as created_at, html, subject_lesson_id,
            generation->'pageCount' as page_count,
            generation->'pagePreviewUrls' as page_preview_urls,
-           generation->'familySources' as family_sources
+           generation->'familySources' as family_sources,
+           generation->'handwritingRows' as handwriting_rows, generation->'handwritingRender' as handwriting_render
     from public.materials
     where id = ${materialId} and family_id = ${familyId}
       and (
@@ -416,7 +423,7 @@ export async function getMaterialCaller(
 ): Promise<MaterialSummary | null> {
   const { data, error } = await db
     .from("materials")
-    .select(`${SUMMARY_COLUMNS}, html`)
+    .select(`${SUMMARY_COLUMNS}, html, handwriting_rows:generation->handwritingRows, handwriting_render:generation->handwritingRender`)
     .eq("family_id", familyId)
     .eq("id", materialId)
     .maybeSingle();
@@ -432,6 +439,52 @@ export async function getMaterialCaller(
  * on both adapters, including percent, underscore, backslash and star. */
 function literalTitlePattern(title: string): string {
   return title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Internal source inspection for the exact current lesson attempt. This does
+ * not authorize a write: the worksheet effect claim still owns revision eligibility.
+ * A completed effect may replay after Keep supersedes its failed predecessor.
+ * Ordinary caller and pinned reads continue to hide protected drafts/history.
+ */
+export async function getSubjectLessonRevisionMaterialPinned(
+  familyId: string,
+  materialId: string,
+  context: SubjectLessonTrustedContext,
+): Promise<MaterialSummary | null> {
+  if (!subjectLessonsEnabled() || context.familyId !== familyId) return null;
+  const sql = mapDb();
+  const rows = await sql<MaterialDbRow[]>`
+    select material.id, material.title, material.kind, material.status,
+           material.source, material.skill, material.subject, material.curriculum,
+           material.theme, material.characters, material.child_id,
+           material.preview_url, material.pdf_url,
+           material.created_at::text as created_at, material.html,
+           material.generation->'pageCount' as page_count,
+           material.generation->'pagePreviewUrls' as page_preview_urls,
+           material.generation->'familySources' as family_sources,
+           material.generation->'handwritingRows' as handwriting_rows,
+           material.generation->'handwritingRender' as handwriting_render
+    from public.materials material
+    join public.subject_lessons lesson on lesson.id = material.subject_lesson_id
+    join public.children child on child.id = lesson.child_id
+    where material.id = ${materialId}
+      and material.family_id = ${familyId}
+      and child.family_id = ${familyId}
+      and lesson.id = ${context.lessonId}
+      and lesson.child_id = ${context.childId}
+      and lesson.subject_id = ${context.subjectId}
+      and lesson.target_statement = ${context.targetStatement}
+      and lesson.attempt_count = ${context.attempt}
+      and lesson.superseded_at is null
+      and lesson.build_status in ('running', 'ready')
+      and material.child_id = lesson.child_id
+      and material.subject = lesson.subject_id
+      and material.skill = lesson.target_statement
+      and material.kind = 'worksheet'
+      and material.status in ('draft', 'superseded')
+      and material.generation->'review'->'pass' = 'false'::jsonb
+  `;
+  return rows[0] ? toSummary(rows[0]) : null;
 }
 
 async function findMaterialsPinnedLegacy(
