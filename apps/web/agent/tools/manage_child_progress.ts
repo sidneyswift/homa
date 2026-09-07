@@ -69,6 +69,7 @@ const childProgressOperations: ChildProgressToolOperations = {
       childId: input.childId,
       message: context.canonicalInboundText,
       surface: "journal",
+      conversation: { memberUserId: context.memberUserId, runtimeSessionId: context.runtimeSessionId, inboundMessageId: context.inboundMessageId, channel: context.channel },
     });
     const base = {
       familyId: context.familyId,
@@ -125,7 +126,7 @@ const childProgressOperations: ChildProgressToolOperations = {
  */
 export default defineBoundedTool({
   description:
-    "Manage one family's durable child progress evidence and check-ins. Use record_journal_evidence only for a concrete named child's observable capability in the current trusted inbound message. Use start_check_in when the parent asks to take a progress check-in. Every UUID you pass must come from trusted context or a tool result. Never invent quotes, revisions, idempotency keys, scores, or skill items.",
+    "Manage one family's durable child progress evidence and check-ins. For an observable capability report or its contextual clarification, load progress-capture and use record_journal_evidence with the resolved child. The current trusted inbound message remains the only evidence quote. Use start_check_in when the parent asks to take a progress check-in. Every UUID you pass must come from trusted context or a tool result. Never invent quotes, revisions, idempotency keys, scores, or skill items.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: manageChildProgressToolInputSchema,

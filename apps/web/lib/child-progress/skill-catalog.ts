@@ -58,47 +58,25 @@ export const SKILL_CATALOG_BY_ID: ReadonlyMap<string, CatalogSkill> = new Map(
   SKILL_CATALOG.map((skill) => [skill.itemId, skill]),
 );
 
-/**
- * How far below a child's age the catalog still reaches. Confirming a
- * much earlier rung is ordinary corroboration, so the floor is
- * generous; it exists only to keep a 9-year-old's prompt from carrying
- * toddler abilities.
- */
-const CATALOG_MONTHS_BELOW = 60;
-/**
- * How far above. Matches claim-validation's age-plausibility ceiling:
- * showing the model abilities the gate would reject anyway only invites
- * rejected claims.
- */
+/** The validator applies this ceiling separately to each child's actual age. */
 const CATALOG_MONTHS_ABOVE = 24;
-/**
- * Age is bucketed to whole years before scoping so children of the same
- * age share one catalog string, which keeps the prompt cacheable across
- * families instead of minting a unique catalog per child.
- */
-const CATALOG_BUCKET_MONTHS = 12;
 
 /**
- * The catalog as the model reads it: grouped by subject, one line per
- * skill, with the typical age so the model can prefer the rung that
- * actually fits the child instead of the nearest words.
- *
- * Scoped to the child's age band. This is NOT the lexical pre-filtering
- * AGENTS.md warns about: nothing here reads the parent's words, so no
- * phrasing can be filtered out of consideration. It is the same age
- * rule the deterministic gate applies afterwards, moved earlier so the
- * prompt stays affordable (the full catalog is ~1,576 abilities and
- * ~144k characters).
+ * Offer every catalog line the validator could accept for any child in the
+ * authenticated roster. Do not round ages down or remove early abilities:
+ * a parent can confirm an earlier skill at any age. Contextual capture #1099
+ * exposed both the year-bucket upper gap and the oldest-child lower cutoff.
+ * This is exact age eligibility, never language interpretation or a lexical
+ * shortlist. The validator still checks the proposed child's own +24 limit.
  */
-export function renderSkillCatalog(ageMonths?: number): string {
-  const bucket =
-    ageMonths === undefined
-      ? undefined
-      : Math.floor(ageMonths / CATALOG_BUCKET_MONTHS) * CATALOG_BUCKET_MONTHS;
-  const inBand = (skill: CatalogSkill): boolean =>
-    bucket === undefined ||
-    (skill.typicalMonths >= bucket - CATALOG_MONTHS_BELOW &&
-      skill.typicalMonths <= bucket + CATALOG_MONTHS_ABOVE);
+export function renderSkillCatalog(ages?: number | readonly number[]): string {
+  const values = ages === undefined ? undefined : typeof ages === "number" ? [ages] : ages;
+  if (values?.some((age) => !Number.isSafeInteger(age) || age < 0)) {
+    throw new Error("Skill catalog requires actual nonnegative whole-month ages.");
+  }
+  if (values?.length === 0) return "";
+  const ceiling = values === undefined ? undefined : Math.max(...values) + CATALOG_MONTHS_ABOVE;
+  const inBand = (skill: CatalogSkill): boolean => ceiling === undefined || skill.typicalMonths <= ceiling;
   const bySubject = new Map<string, CatalogSkill[]>();
   for (const skill of SKILL_CATALOG.filter(inBand)) {
     const group = bySubject.get(skill.subjectName) ?? [];

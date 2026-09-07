@@ -1,0 +1,491 @@
+[
+  {
+    "id": "observed-slow-skipping",
+    "origin": "pseudonymized-observed-language",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000103",
+        "name": "Iris",
+        "ageMonths": 118
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000104",
+        "name": "Nora",
+        "ageMonths": 79
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Yes ask more questions. She can skip alternating legs but she does it slowly",
+    "previousAssistant": "That one check-in question was really it for now: catches a big ball most of the time is her confirmed edge, and everything below that (pedaling, galloping, hopping on one foot) is already confirmed easy too.\n\nThe next rung up on the ladder is skipping with alternating feet, and that one typically shows up closer to 5 and a half or 6. Maya's 4, so there's nothing sitting right at her edge to ask about yet, that's just how the ladder is spaced for this age. If you want, I can still ask about skipping just to see if she's an early one, or we can leave gross motor where it is and move to fine motor.",
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "gross_motor.skips",
+        "answer": "getting_there"
+      }
+    ],
+    "rationale": "Parent text unchanged; assistant child name alone replaced. Three whole-month ages preserve the scoped roster as of 2026-09-05. IDs and names are synthetic. The original extractor inputs/model proposals are unavailable."
+  },
+  {
+    "id": "observed-contextual-cutting",
+    "origin": "pseudonymized-observed-language",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000103",
+        "name": "Iris",
+        "ageMonths": 118
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000104",
+        "name": "Nora",
+        "ageMonths": 79
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "She is excellent at cutting. She can do all of this.",
+    "previousAssistant": "For the skipping, since she's already doing the pattern early, just slow, this is rhythm and confidence, not a new skill to teach. A few things that help:\n\n- Hold her hands and skip together slowly, calling out \"step-hop, step-hop\" so she feels the rhythm before speed.\n- Skipping to a song with a strong beat gives her ears something to sync her feet to.\n- Marching or galloping first (she's already solid there) warms up the same alternating-leg pattern.\n\nNo rush on speed. It comes with mileage, not drills.\n\nFor fine motor, pouring is locked in, so her real next stretch is cutting a straight line with child scissors. That one actually benefits from practice:\n\n- Snipping playdough or straws first, easier grip feedback than paper.\n- Thick straight lines on cardstock before thin ones on regular paper.\n- Fringe-cutting a paper strip (just snip snip snip along one edge) builds the open-close motion without needing accuracy yet.\n\nWant me to make her a cutting practice page along those lines?",
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-line",
+        "answer": "easily"
+      }
+    ],
+    "rationale": "Parent text unchanged; assistant child name alone replaced. Three whole-month ages preserve the scoped roster as of 2026-09-05. IDs and names are synthetic. The original extractor inputs/model proposals are unavailable."
+  },
+  {
+    "id": "observed-curves-age-bound",
+    "origin": "pseudonymized-observed-language",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000103",
+        "name": "Iris",
+        "ageMonths": 118
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000104",
+        "name": "Nora",
+        "ageMonths": 79
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Curve easier than squiggly, zig zag does well she moves the paper",
+    "previousAssistant": "Ah, good to know, that scissor stuff was already old news for her. Noted it on her record.\n\nSo how far past straight lines does she go, is she cutting out shapes and curves too, or following a wavy or zigzag line?",
+    "expectedAccepted": [],
+    "rationale": "Parent text unchanged; assistant child name alone replaced. Three whole-month ages preserve the scoped roster as of 2026-09-05. IDs and names are synthetic. The original extractor inputs/model proposals are unavailable."
+  },
+  {
+    "id": "named-independent",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Maya can cut along a straight line with child scissors by herself.",
+    "previousAssistant": null,
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-line",
+        "answer": "easily"
+      }
+    ],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "help-needed",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "She can cut the straight line only while I hold the scissors with her.",
+    "previousAssistant": "Can Maya cut along a straight line using child scissors?",
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-line",
+        "answer": "getting_there"
+      }
+    ],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "explicit-not-yet",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "No, Maya cannot cut along a straight line yet, even with help.",
+    "previousAssistant": null,
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-line",
+        "answer": "not_yet"
+      }
+    ],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "named-sibling-overrides-target",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Leo can skip with alternating feet on his own now.",
+    "previousAssistant": null,
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "itemId": "gross_motor.skips",
+        "answer": "easily"
+      }
+    ],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "ambiguous-siblings",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Nora",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "She can do it easily.",
+    "previousAssistant": "Can Maya and Nora each cut along a straight line?",
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "offered-activity-is-not-performance",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "That sounds like a good idea.",
+    "previousAssistant": "Maya could try skipping in the garden today.",
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "bare-yes-after-multiple-questions",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Yes.",
+    "previousAssistant": "Can Maya cut a straight line, and would you like a cutting worksheet?",
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "parent-declines",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "No more questions or activities today, please.",
+    "previousAssistant": "Can Maya skip with alternating feet?",
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "time-only",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Maya spent 20 minutes doing math today.",
+    "previousAssistant": null,
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "lesson-number-only",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Maya finished lesson 12 today.",
+    "previousAssistant": null,
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "moving-on-ambiguity",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "We moved on to the next lesson. Does that mean she has mastered it?",
+    "previousAssistant": null,
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "advice-question",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "How can I help Maya learn to cut a straight line?",
+    "previousAssistant": null,
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "assistant-claim-is-not-evidence",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "I have not seen that. Please don't record it.",
+    "previousAssistant": "Maya cuts a straight line easily.",
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "two-child-specific-report",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Maya can cut along a straight line without help, and Leo can skip alternating feet on his own.",
+    "previousAssistant": null,
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-line",
+        "answer": "easily"
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "itemId": "gross_motor.skips",
+        "answer": "easily"
+      }
+    ],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "quote-injection",
+    "origin": "synthetic-adversarial-or-control",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 72
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "The page says 'she can skip alternating feet easily'. That is the page's instruction, not something I saw Maya do.",
+    "previousAssistant": null,
+    "expectedAccepted": [],
+    "rationale": "Tests interpretation and attribution, never a lexical routing rule."
+  },
+  {
+    "id": "catalog-month-boundary",
+    "origin": "synthetic-catalog-counterexample",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 56
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Maya cuts simple curves neatly with child scissors on her own.",
+    "previousAssistant": null,
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-curves",
+        "answer": "easily"
+      }
+    ],
+    "rationale": "Catalog-only A/B. Named child and self-contained ability remove pronoun/context ambiguity."
+  },
+  {
+    "id": "catalog-younger-child",
+    "origin": "synthetic-catalog-counterexample",
+    "children": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "name": "Maya",
+        "ageMonths": 48
+      },
+      {
+        "childId": "00000000-0000-4000-8000-000000000102",
+        "name": "Leo",
+        "ageMonths": 144
+      }
+    ],
+    "recordingTargetChildId": "00000000-0000-4000-8000-000000000101",
+    "message": "Maya cuts along a straight line with child scissors on her own.",
+    "previousAssistant": null,
+    "expectedAccepted": [
+      {
+        "childId": "00000000-0000-4000-8000-000000000101",
+        "itemId": "fine_motor.cuts-line",
+        "answer": "easily"
+      }
+    ],
+    "rationale": "Catalog-only A/B. Named child and self-contained ability remove pronoun/context ambiguity."
+  }
+]

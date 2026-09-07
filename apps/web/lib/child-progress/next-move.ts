@@ -436,13 +436,34 @@ export type ProgressNextMoveVerification =
       clarification: Extract<ProgressNextMove, { kind: "clarify" }> | null;
     };
 
-export function verifyProgressNextMoveCandidate(input: {
+interface ProgressNextMoveVerificationInput {
   familyId: string;
   view: ChildProgressView;
   ledger: ChildProgressProjectionInput;
   candidate: unknown;
   now: Date;
-}): ProgressNextMoveVerification {
+}
+
+/** Internal producers can use only their bounded, fingerprinted choice set. */
+export function verifyProgressNextMoveCandidate(
+  input: ProgressNextMoveVerificationInput,
+): ProgressNextMoveVerification {
+  return verifyProgressNextMoveWithinScope(input, true);
+}
+
+/** Chat may retrieve a different subject through the canonical reader. The
+ * producer's top-eight prompt budget is not an eligibility limit for that read.
+ * Every target and citation still passes the same canonical evidence checks. */
+export function verifyProgressNextMoveChatCandidate(
+  input: ProgressNextMoveVerificationInput,
+): ProgressNextMoveVerification {
+  return verifyProgressNextMoveWithinScope(input, false);
+}
+
+function verifyProgressNextMoveWithinScope(
+  input: ProgressNextMoveVerificationInput,
+  requireProducerChoice: boolean,
+): ProgressNextMoveVerification {
   const parsed = progressNextMoveCandidateSchema.safeParse(input.candidate);
   if (
     input.ledger.child.id !== input.view.childId ||
@@ -486,12 +507,12 @@ export function verifyProgressNextMoveCandidate(input: {
     return { accepted: false, reason, clarification: stateClarification };
   }
 
-  const allowedTargetIds = new Set(
-    buildProgressNextMoveModelContext(input).allowedTargets.map(
-      (allowedTarget) => allowedTarget.itemId,
-    ),
-  );
-  if (!allowedTargetIds.has(candidate.targetItemId)) {
+  const allowedTargetIds = requireProducerChoice
+    ? new Set(buildProgressNextMoveModelContext(input).allowedTargets.map(
+        (allowedTarget) => allowedTarget.itemId,
+      ))
+    : null;
+  if (allowedTargetIds && !allowedTargetIds.has(candidate.targetItemId)) {
     return {
       accepted: false,
       reason: "target_outside_working_edge",
@@ -519,6 +540,7 @@ export function verifyProgressNextMoveCandidate(input: {
   const targetEvidence = evidenceByItemId.get(candidate.targetItemId);
   const targetIsCurrent =
     targetEvidence !== undefined &&
+    targetEvidence.answer !== "easily" &&
     targetEvidence.derivation !== "unknown" &&
     ageDays(targetEvidence.observedAt, input.now) !== null;
   if (!targetIsCurrent) {

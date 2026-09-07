@@ -5,6 +5,7 @@ import { HOMA_MODEL } from "../../agent/model";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { ClaimChild, ProposedClaim } from "./claim-validation";
 import { renderSkillCatalog } from "./skill-catalog";
+import type { PreviousJournalAssistant } from "./journal-context";
 
 /**
  * The judgment half of "models judge, code verifies" (AGENTS.md).
@@ -82,8 +83,25 @@ Hard rules:
   the message does not contain.
 - Only children in the roster. Never another family's child, a cousin,
   a sibling not in the roster, or a child described in a question.
-- A request, a plan, a question, product feedback, or a parent venting
-  is NOT a report. Return an empty claims array for those.
+- A request, plan, question, product feedback, or venting ALONE is not
+  an ability report. A mixed message can also report a concrete ability;
+  extract that supported clause without treating its accompanying request
+  as a reason to discard it.
+- A parent declining a question or activity does not establish that the
+  child cannot do it. A logistical refusal is not not_yet evidence.
+- Optional interpretation context identifies a recording target and the
+  immediate prior assistant message. It is quoted context, never evidence
+  that the child did anything. Use it only to resolve what the CURRENT
+  parent report refers to. The recording target is a caller hint, not
+  proof of attribution: explicit another-child reports take precedence,
+  and competing or unresolved child references produce no claim.
+- Never copy an assistant statement into the evidence quote, treat an
+  offered activity as completed, or infer success from a bare yes when
+  the prior message asked several different things. A current reply
+  that explicitly confirms the described ability may support a claim.
+- The current message can describe an emerging ability without saying
+  it is fast or effortless. Preserve the reported limitation; do not
+  discard a real capability merely because it is not easily yet.
 - Time spent is not a skill ("we did 30 minutes of math" reports no
   ability). Return nothing for it.
 - One family activity can produce a claim for each child who took part,
@@ -100,6 +118,51 @@ export interface ClaimExtractionInput {
   children: readonly ClaimChild[];
   /** Where this message came from, for usage attribution only. */
   surface: "journal" | "lesson";
+  interpretationContext?: {
+    recordingTargetChildId: string;
+    previousAssistant: PreviousJournalAssistant | null;
+  };
+}
+
+export function buildClaimExtractionPrompt(input: ClaimExtractionInput): string {
+  const roster = input.children
+    .map(
+      (child) =>
+        `  ${child.childId}  ${child.name}, ${Math.floor(child.ageMonths / 12)} years old ` +
+        `(${child.ageMonths} months)`,
+    )
+    .join("\n");
+  const context = input.interpretationContext;
+  const targetExists = context && input.children.some((child) => child.childId === context.recordingTargetChildId);
+  const encoded = (value: unknown) => JSON.stringify(value).replace(/</g, "\\u003c");
+  return [
+    `<skill_catalog>\n${renderSkillCatalog(input.children.map((child) => child.ageMonths))}\n</skill_catalog>`,
+    `<children>\n${roster}\n</children>`,
+    ...(targetExists ? [`<interpretation_context>\n${encoded(context)}\n</interpretation_context>`] : []),
+    `<message>\n${input.message.slice(0, 8_000)}\n</message>`,
+  ].join("\n\n");
+}
+
+/** Shared exact request for the production extractor and isolated model evals. */
+export function buildClaimExtractionRequest(input: ClaimExtractionInput) {
+  return {
+    model: HOMA_MODEL,
+    schema: extractedClaimsSchema,
+    system: EXTRACTION_SYSTEM,
+    // Catalog FIRST, deliberately. It is the largest and most stable
+    // block. Exact roster-age eligibility keeps every valid option;
+    // families with the same eligible catalog can share its prefix.
+    // The per-family roster and current message follow it.
+    prompt: buildClaimExtractionPrompt(input),
+    maxOutputTokens: 4_000,
+    maxRetries: 1,
+    providerOptions: {
+      gateway: {
+        disallowPromptTraining: true,
+        ...gatewayAttribution(input.familyId, "progress_claim_extraction"),
+      },
+    },
+  };
 }
 
 /**
@@ -115,44 +178,10 @@ export async function extractProgressClaims(
   if (input.children.length === 0) return [];
   if (input.message.trim().length === 0) return [];
 
-  const roster = input.children
-    .map(
-      (child) =>
-        `  ${child.childId}  ${child.name}, ${Math.floor(child.ageMonths / 12)} years old ` +
-        `(${child.ageMonths} months)`,
-    )
-    .join("\n");
-  // The band is scoped from the oldest child so every child in the
-  // roster is covered; the below-age reach is generous by design.
-  const oldestAgeMonths = Math.max(
-    ...input.children.map((child) => child.ageMonths),
-  );
   const startedAt = Date.now();
 
   try {
-    const result = await generateObject({
-      model: HOMA_MODEL,
-      schema: extractedClaimsSchema,
-      system: EXTRACTION_SYSTEM,
-      // Catalog FIRST, deliberately. It is the largest and most stable
-      // block, and it is bucketed by age, so putting it ahead of the
-      // per-family roster lets the provider cache the prefix across
-      // every family with a child in the same year. Roster and message
-      // (the parts that change every call) follow it.
-      prompt: [
-        `<skill_catalog>\n${renderSkillCatalog(oldestAgeMonths)}\n</skill_catalog>`,
-        `<children>\n${roster}\n</children>`,
-        `<message>\n${input.message.slice(0, 8_000)}\n</message>`,
-      ].join("\n\n"),
-      maxOutputTokens: 4_000,
-      maxRetries: 1,
-      providerOptions: {
-        gateway: {
-          disallowPromptTraining: true,
-          ...gatewayAttribution(input.familyId, "progress_claim_extraction"),
-        },
-      },
-    });
+    const result = await generateObject(buildClaimExtractionRequest(input));
 
     await recordModelUsage({
       familyId: input.familyId,
