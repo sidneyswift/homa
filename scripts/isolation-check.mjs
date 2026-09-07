@@ -5301,6 +5301,10 @@ await expectReadDenied("conversation_offer_recovery");
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
 await expectEmptyRead("hours_log");
+// Operation receipts include private source text. Anonymous callers have no
+// grants; the authenticated column grants and family RLS run in the disposable
+// Planner/Hours PostgreSQL privacy contract.
+await expectReadDenied("learning_write_operations");
 // Planner learning activities are member-readable and server-write-only.
 // The additive tables may be absent before deploy; once present, all three
 // anonymous probes arm together.
