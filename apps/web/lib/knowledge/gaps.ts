@@ -29,7 +29,7 @@ export interface GapReport {
 }
 
 /**
- * Record a knowledge gap. Deduplicates by topic + query_text to avoid
+ * Record a knowledge gap. Deduplicates open topics within the same family to avoid
  * flooding the table with identical misses.
  */
 export async function logGap(
@@ -40,23 +40,27 @@ export async function logGap(
 ): Promise<string | null> {
   const db = adminDb();
 
-  // Deduplicate: skip if we already have an open gap for this topic
+  // Keep recall provenance within its family. Null denotes fleet-owned gaps.
   const existing = await db<{ id: string }[]>`
     select id::text
     from public.knowledge_gaps
     where topic = ${topic}
+      and family_id is not distinct from ${familyId}::uuid
       and status = 'open'
     limit 1
   `;
 
   if (existing.length > 0) {
     // Bump priority on repeated asks
-    await db`
+    const [updated] = await db<{ id: string }[]>`
       update public.knowledge_gaps
       set research_priority = research_priority + 1
       where id = ${existing[0]!.id}::uuid
+        and family_id is not distinct from ${familyId}::uuid
+        and status = 'open'
+      returning id::text
     `;
-    return existing[0]!.id;
+    return updated?.id ?? null;
   }
 
   const [row] = await db<{ id: string }[]>`

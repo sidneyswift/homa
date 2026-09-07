@@ -3,6 +3,10 @@
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is
 logged here so decisions stay auditable. Newest entries first.
 
+## 2026-09-06 · Keep recall-gap provenance within its originating family
+
+#1128 was found while preparing the meeting-feedback Hours journey. The administrative gap writer deduplicated by topic alone, so another family's miss could increment the first family's record. The writer now requires the same family, including a separate null-origin fleet bucket, at both lookup and update. An ownership or status change returns no recorded ID. Weighted fleet demand still aggregates across origins; this changes no schema, interpretation or research procedure. The required disposable PostgreSQL contract executes the actual writer, including four observed row-lock races, with application credentials removed. The independently reviewed original failed nine assertions; the integrated correction passes all ten test groups. Hosted code/deployment acceptance is tracked on the issue. This records a provenance defect, not evidence of family-visible disclosure.
+
 ## 2026-09-06 · Prepare exact pages before an explicit print handoff
 
 #1105 keeps print interpretation in the existing materials-studio fleet procedure and exact selection/finalization in the existing preparation tool. Shared validated receipts now feed web and native text consumers; activation rechecks the current material before opening a selected PDF or the existing native sheet. The authenticated PDF-selection route uses a bounded worker, and an additive finalization precondition prevents stale approval. Requested copies remain a print-dialog confirmation, never a claim of physical output. The [implementation evidence](plans/2026-09-06-material-print-handoff.md) separates local checks, model evals, publication and device certification. Unattended printing remains #1108.

@@ -56,6 +56,16 @@ The correction gets the filename of the already-loaded external PDF library from
 
 The [compiled-worker receipt](../journeys/evidence/2026-09-06-print-worker-build-contract.json) and [original live failure screenshot](../journeys/evidence/2026-09-06-print-download-production-failure.png) preserve the bounded runtime evidence. Root independently reran the compiled contract after review; all three native workers exited within its five-second verification ceiling.
 
+## Final hosted acceptance
+
+PR #1127 merged as `e639fdb0a5f086cd2d375d57e3e47266af19a203`. Required PR CI 34066267660 and main CI 34066676716 passed. Production deployment `dpl_2qpdgCaWvHv5B6rZ4LAiYkGvKuFW` was READY at that exact commit.
+
+The [final hosted receipt](../journeys/evidence/2026-09-06-print-hosted-receipt.json) records 313 passing checks from one ordinary mobile-web model turn, the deployed card, actual selected PDF and stale-revision refusals. Homa loaded materials-studio, found the exact owned packet and prepared two copies excluding the answer key. The card preparation and PDF GET both returned 200. Root inspected the four mobile screenshots and both pages of the [actual opened PDF](../journeys/evidence/2026-09-06-print-live-selected.pdf). Its 10,595 bytes preserve original pages 1 and 3 with the answer-key image absent. The two-copy preference remains a reminder for the system dialog; the test does not assert it changed system settings.
+
+One earlier post-correction run failed the operator's captured-byte bound after a 200 response; its unrecorded body length leaves that earlier capture unexplained. A separate no-model transport check passed 229 checks. In the final accepted browser journey, the debug network capture was zero bytes while the application successfully created and opened the 10,595-byte Blob. The verifier inspected that exact observed Blob in its creating page, within a 512 KiB and ten-second bound. This was not a replacement PDF or another HTTP request. The earlier failures remain failures.
+
+After adding a new owned revision, both the old card preparation and old selected-PDF URL returned 409. No unexpected email, schedule, event, hours, memory or progress effects were found. Canonical deletion removed the test account and family records with zero remaining counts; both stored fixture artifacts were removed and absence checked. Deletion job `f3bb8793-b272-4008-941e-ece6e54f7cac` and its artifact-denial tombstone remain for provider cleanup and token drain. This verifies mobile-web output delivery, not physical printing or installed-native behavior.
+
 ## Evidence locations
 
 The local integration receipts are under `/tmp/homa-feedback-implementation/1105-*`. The reviewed preparation is retained under `1105-prepared` and `1105-refreshed-bc8f00af`; original failures are preserved. Repository screenshots and release receipts accompany the final PR evidence.

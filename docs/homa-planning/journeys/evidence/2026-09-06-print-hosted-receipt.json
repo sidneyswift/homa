@@ -1,0 +1,1394 @@
+{
+  "runId": "7383540c-dce2-4e70-b319-cccf13f46c44",
+  "origin": "https://thankshoma.com",
+  "operatorAttestedDeploymentSha": "e639fdb0a5f086cd2d375d57e3e47266af19a203",
+  "sourcePinsSha256": "f001398f52c83289318ad5bf5f8dea2c4ba8ac82da40c37224c73365ea52cde8",
+  "operatorSha256": "791194bcc4900df858d0ee99873fc6a1cc704351d89f31156c1ea2f82503af69",
+  "startedAt": "2026-09-06T23:33:13.647Z",
+  "finishedAt": "2026-09-06T23:33:57.740Z",
+  "checks": [
+    {
+      "label": "fixture page 1 byte cap",
+      "passed": true
+    },
+    {
+      "label": "fixture page 2 byte cap",
+      "passed": true
+    },
+    {
+      "label": "fixture page 3 byte cap",
+      "passed": true
+    },
+    {
+      "label": "three-page original PDF byte cap",
+      "passed": true
+    },
+    {
+      "label": "transaction-local SQL statement and lock deadlines read back correctly",
+      "passed": true
+    },
+    {
+      "label": "expected database selected",
+      "passed": true
+    },
+    {
+      "label": "cleanup connection has verified RLS bypass authority",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.users DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.sessions SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege auth.sessions DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.families DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_members SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_members UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.children SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.children INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_billing_subscriptions SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.apple_purchase_interlocks SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.stripe_trial_card_claims SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_jobs UPDATE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.account_deletion_artifact_tombstones SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_messages SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_episodes SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.hours_log SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_schedules SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_schedules DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.model_usage SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.model_usage DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.email_sends SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.email_sends DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_signals DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.knowledge_gaps DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.response_engagement DELETE",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_phones SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials INSERT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_assets SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.materials_studio_runs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_artifact_prefixes SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege storage.objects SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_events SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.planner_learning_activities SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.working_plans SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_jobs SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.family_memories SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.learning_reviews SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.child_progress_evidence SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.progress_check_ins SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.agent_tool_calls SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.conversation_deliveries SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.eve_web_session_owners SELECT",
+      "passed": true
+    },
+    {
+      "label": "preflight privilege public.events SELECT",
+      "passed": true
+    },
+    {
+      "label": "current guarded family cleanup installed",
+      "passed": true
+    },
+    {
+      "label": "reserved signup family is atomically sandboxed",
+      "passed": true
+    },
+    {
+      "label": "reviewed artifact helper source is unchanged",
+      "passed": true
+    },
+    {
+      "label": "reviewed artifact helper source is unchanged",
+      "passed": true
+    },
+    {
+      "label": "reviewed artifact helper source is unchanged",
+      "passed": true
+    },
+    {
+      "label": "reviewed artifact helper source is unchanged",
+      "passed": true
+    },
+    {
+      "label": "current print precondition installed as invoker without obsolete final-first priority",
+      "passed": true
+    },
+    {
+      "label": "unique fixture login did not exist before signup",
+      "passed": true
+    },
+    {
+      "label": "auth-settings: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "Auth mailer autoconfirm is enabled; otherwise signup is refused to avoid confirmation email",
+      "passed": true
+    },
+    {
+      "label": "auth-signup: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "signup returned a real authenticated session",
+      "passed": true
+    },
+    {
+      "label": "auth-identity: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "JWT resolves to this new fixture login",
+      "passed": true
+    },
+    {
+      "label": "create-my-family: HTTP setup is confined to this Supabase project and reviewed endpoint",
+      "passed": true
+    },
+    {
+      "label": "authenticated create_my_family returned a family",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "fixture begins with no children, hours, linked phones, or schedules",
+      "passed": true
+    },
+    {
+      "label": "no unrequested outbound, artifact, job, schedule, memory, review, progress, plan or Hours effect",
+      "passed": true
+    },
+    {
+      "label": "exact full owned material snapshots, with no extra rows or hidden edits",
+      "passed": true
+    },
+    {
+      "label": "known artifact operation",
+      "passed": true
+    },
+    {
+      "label": "artifact setup is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "inspect: artifact worker completed its exact bounded operation",
+      "passed": true
+    },
+    {
+      "label": "known artifact operation",
+      "passed": true
+    },
+    {
+      "label": "artifact setup is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "upload: artifact worker completed its exact bounded operation",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "only the new empty family may receive the one kept fixture",
+      "passed": true
+    },
+    {
+      "label": "WebSocket fence available",
+      "passed": true
+    },
+    {
+      "label": "fresh isolated browser without imported cookies",
+      "passed": true
+    },
+    {
+      "label": "exact navigation",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "sign-in page: hosted route loaded",
+      "passed": true
+    },
+    {
+      "label": "served script inventory is bounded",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "served sign-in reference candidate was readable",
+      "passed": true
+    },
+    {
+      "label": "served source total byte cap",
+      "passed": true
+    },
+    {
+      "label": "exactly one served signInAction identity was found before the one sign-in mutation",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "owned-binder: screenshot belongs to the verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "owned-binder: screenshot contains no password field",
+      "passed": true
+    },
+    {
+      "label": "bounded viewport screenshot",
+      "passed": true
+    },
+    {
+      "label": "exact navigation",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "ordinary chat: hosted route loaded",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "one optional chat beacon excluded",
+      "passed": true
+    },
+    {
+      "label": "bounded hosted read count",
+      "passed": true
+    },
+    {
+      "label": "exact one normal parent print message, no continuation or other model dispatch",
+      "passed": true
+    },
+    {
+      "label": "normal hosted send retains its own cookie",
+      "passed": true
+    },
+    {
+      "label": "actual create-only 202 body/header receipt",
+      "passed": true
+    },
+    {
+      "label": "bounded stream reads for only the real returned session",
+      "passed": true
+    },
+    {
+      "label": "real complete turn boundary",
+      "passed": true
+    },
+    {
+      "label": "only current session optional review",
+      "passed": true
+    },
+    {
+      "label": "one optional background review excluded",
+      "passed": true
+    },
+    {
+      "label": "one optional turn telemetry excluded",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "exact full owned material snapshots, with no extra rows or hidden edits",
+      "passed": true
+    },
+    {
+      "label": "full fixture family unchanged",
+      "passed": true
+    },
+    {
+      "label": "full fixture child unchanged",
+      "passed": true
+    },
+    {
+      "label": "no unrequested outbound, artifact, job, schedule, memory, review, progress, plan or Hours effect",
+      "passed": true
+    },
+    {
+      "label": "canonical read needs one real settled turn",
+      "passed": true
+    },
+    {
+      "label": "exact owned settled runtime session",
+      "passed": true
+    },
+    {
+      "label": "only the owned adult and one hosted turn in canonical messages",
+      "passed": true
+    },
+    {
+      "label": "actual parent prompt and model text saved canonically",
+      "passed": true
+    },
+    {
+      "label": "saved assistant delivery belongs to this exact adult and turn",
+      "passed": true
+    },
+    {
+      "label": "all actual streamed tools have matching terminal canonical trace",
+      "passed": true
+    },
+    {
+      "label": "exact print receipt matches durable tool result",
+      "passed": true
+    },
+    {
+      "label": "bounded observed model ledger, no image generation",
+      "passed": true
+    },
+    {
+      "label": "chat usage belongs to exact hosted session and turn",
+      "passed": true
+    },
+    {
+      "label": "bounded family archive embeddings with no invented session attribution",
+      "passed": true
+    },
+    {
+      "label": "real-chat-print-card: screenshot belongs to the verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "real-chat-print-card: screenshot contains no password field",
+      "passed": true
+    },
+    {
+      "label": "bounded viewport screenshot",
+      "passed": true
+    },
+    {
+      "label": "actual print button re-preparation accepted",
+      "passed": true
+    },
+    {
+      "label": "button retained exact real model receipt",
+      "passed": true
+    },
+    {
+      "label": "button received actual selected PDF",
+      "passed": true
+    },
+    {
+      "label": "actual popup contains this origin application-created Blob",
+      "passed": true
+    },
+    {
+      "label": "actual opened document is a PDF",
+      "passed": true
+    },
+    {
+      "label": "selected response byte bound",
+      "passed": true
+    },
+    {
+      "label": "only requested original pages are present",
+      "passed": true
+    },
+    {
+      "label": "selected page 1 has one fixture image",
+      "passed": true
+    },
+    {
+      "label": "selected page 1 exact original image and order",
+      "passed": true
+    },
+    {
+      "label": "selected page 2 has one fixture image",
+      "passed": true
+    },
+    {
+      "label": "selected page 2 exact original image and order",
+      "passed": true
+    },
+    {
+      "label": "answer-key JPEG bytes do not exist in the selected PDF",
+      "passed": true
+    },
+    {
+      "label": "selected-pdf-open: screenshot belongs to the verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "selected-pdf-open: screenshot contains no password field",
+      "passed": true
+    },
+    {
+      "label": "bounded viewport screenshot",
+      "passed": true
+    },
+    {
+      "label": "malformed page selection refused without PDF bytes",
+      "passed": true
+    },
+    {
+      "label": "model effects validated before synthetic stale revision",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "exact full owned material snapshots, with no extra rows or hidden edits",
+      "passed": true
+    },
+    {
+      "label": "full fixture family unchanged",
+      "passed": true
+    },
+    {
+      "label": "full fixture child unchanged",
+      "passed": true
+    },
+    {
+      "label": "no unrequested outbound, artifact, job, schedule, memory, review, progress, plan or Hours effect",
+      "passed": true
+    },
+    {
+      "label": "canonical read needs one real settled turn",
+      "passed": true
+    },
+    {
+      "label": "exact owned settled runtime session",
+      "passed": true
+    },
+    {
+      "label": "only the owned adult and one hosted turn in canonical messages",
+      "passed": true
+    },
+    {
+      "label": "actual parent prompt and model text saved canonically",
+      "passed": true
+    },
+    {
+      "label": "saved assistant delivery belongs to this exact adult and turn",
+      "passed": true
+    },
+    {
+      "label": "all actual streamed tools have matching terminal canonical trace",
+      "passed": true
+    },
+    {
+      "label": "exact print receipt matches durable tool result",
+      "passed": true
+    },
+    {
+      "label": "bounded observed model ledger, no image generation",
+      "passed": true
+    },
+    {
+      "label": "chat usage belongs to exact hosted session and turn",
+      "passed": true
+    },
+    {
+      "label": "bounded family archive embeddings with no invented session attribution",
+      "passed": true
+    },
+    {
+      "label": "old card cannot prepare after new passing revision",
+      "passed": true
+    },
+    {
+      "label": "real-stale-card-refusal: screenshot belongs to the verified synthetic app session",
+      "passed": true
+    },
+    {
+      "label": "real-stale-card-refusal: screenshot contains no password field",
+      "passed": true
+    },
+    {
+      "label": "bounded viewport screenshot",
+      "passed": true
+    },
+    {
+      "label": "old exact selected-PDF URL also refuses",
+      "passed": true
+    },
+    {
+      "label": "one real model turn and one normal sign-in",
+      "passed": true
+    },
+    {
+      "label": "only the exact five print browser requests",
+      "passed": true
+    },
+    {
+      "label": "no unexpected browser mutation",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "exact full owned material snapshots, with no extra rows or hidden edits",
+      "passed": true
+    },
+    {
+      "label": "full fixture family unchanged",
+      "passed": true
+    },
+    {
+      "label": "full fixture child unchanged",
+      "passed": true
+    },
+    {
+      "label": "canonical read needs one real settled turn",
+      "passed": true
+    },
+    {
+      "label": "exact owned settled runtime session",
+      "passed": true
+    },
+    {
+      "label": "only the owned adult and one hosted turn in canonical messages",
+      "passed": true
+    },
+    {
+      "label": "actual parent prompt and model text saved canonically",
+      "passed": true
+    },
+    {
+      "label": "saved assistant delivery belongs to this exact adult and turn",
+      "passed": true
+    },
+    {
+      "label": "all actual streamed tools have matching terminal canonical trace",
+      "passed": true
+    },
+    {
+      "label": "exact print receipt matches durable tool result",
+      "passed": true
+    },
+    {
+      "label": "bounded observed model ledger, no image generation",
+      "passed": true
+    },
+    {
+      "label": "chat usage belongs to exact hosted session and turn",
+      "passed": true
+    },
+    {
+      "label": "bounded family archive embeddings with no invented session attribution",
+      "passed": true
+    },
+    {
+      "label": "only the one synthetic child remains",
+      "passed": true
+    },
+    {
+      "label": "no unrequested outbound, artifact, job, schedule, memory, review, progress, plan or Hours effect",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "no unrequested outbound, artifact, job, schedule, memory, review, progress, plan or Hours effect",
+      "passed": true
+    },
+    {
+      "label": "exact full owned material snapshots, with no extra rows or hidden edits",
+      "passed": true
+    },
+    {
+      "label": "full fixture family unchanged",
+      "passed": true
+    },
+    {
+      "label": "full fixture child unchanged",
+      "passed": true
+    },
+    {
+      "label": "only the exact new synthetic child is present, or none before setup",
+      "passed": true
+    },
+    {
+      "label": "known artifact operation",
+      "passed": true
+    },
+    {
+      "label": "artifact setup is not interrupted",
+      "passed": true
+    },
+    {
+      "label": "cleanup: artifact worker completed its exact bounded operation",
+      "passed": true
+    },
+    {
+      "label": "cleanup recovered only the exact new fixture login",
+      "passed": true
+    },
+    {
+      "label": "cleanup locked the exact new fixture login before checking memberships",
+      "passed": true
+    },
+    {
+      "label": "cleanup refuses an unexpectedly shared fixture login",
+      "passed": true
+    },
+    {
+      "label": "cleanup family matches this run creation attempt",
+      "passed": true
+    },
+    {
+      "label": "fixture login still has exact run provenance",
+      "passed": true
+    },
+    {
+      "label": "only the newly created sandbox family is eligible for fixture SQL",
+      "passed": true
+    },
+    {
+      "label": "fixture has exactly its one new member",
+      "passed": true
+    },
+    {
+      "label": "fixture-only shortcut requires no billing mirrors, subscription records, purchase attempts, or card claims",
+      "passed": true
+    },
+    {
+      "label": "no unrequested outbound, artifact, job, schedule, memory, review, progress, plan or Hours effect",
+      "passed": true
+    },
+    {
+      "label": "exact full owned material snapshots, with no extra rows or hidden edits",
+      "passed": true
+    },
+    {
+      "label": "full fixture family unchanged",
+      "passed": true
+    },
+    {
+      "label": "full fixture child unchanged",
+      "passed": true
+    },
+    {
+      "label": "only the exact new synthetic child is present, or none before setup",
+      "passed": true
+    },
+    {
+      "label": "new fixture has no inherited artifact prefixes",
+      "passed": true
+    },
+    {
+      "label": "cleanup refuses to hide an unexpected outbound email",
+      "passed": true
+    },
+    {
+      "label": "canonical artifact denial tombstone and waiting cleanup job are retained",
+      "passed": true
+    },
+    {
+      "label": "fixture has no owned Storage objects before Auth deletion",
+      "passed": true
+    },
+    {
+      "label": "fixture login belongs to no remaining family",
+      "passed": true
+    },
+    {
+      "label": "fixture family, children, membership, auth login, sessions, materials, and conversation rows removed",
+      "passed": true
+    }
+  ],
+  "status": "passed",
+  "scope": "One real mobile-web Chat turn finds the owned kept packet and returns an exact print receipt. Actual deployed card re-prepares and opens selected PDF; later owned revision makes the old card refuse.",
+  "notCertified": [
+    "physical printing or system-set copies",
+    "native device",
+    "incremental streaming timing",
+    "existing families",
+    "runtime tool allowlist or small token ceiling",
+    "full provider account deletion lifecycle"
+  ],
+  "canonical": {
+    "messages": 2,
+    "deliveries": 1,
+    "toolCalls": 3,
+    "exactPrintReceipt": true
+  },
+  "printDownloadResponse": {
+    "status": 200,
+    "contentType": "application/pdf",
+    "capturedBytes": 0,
+    "capturedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contentLength": null,
+    "contentEncoding": null
+  },
+  "openedPdf": {
+    "status": 200,
+    "type": "application/pdf",
+    "bytes": 10595,
+    "sha256": "7e2d5e139750b627a308d63335b71799cfa434266544982859c275b572bc383d",
+    "networkCaptureMatches": false
+  },
+  "selectedByteInspection": {
+    "bytes": 10595,
+    "sha256": "7e2d5e139750b627a308d63335b71799cfa434266544982859c275b572bc383d",
+    "prefixHex": "255044462d312e37"
+  },
+  "malformedRefusal": {
+    "status": 400,
+    "type": "application/json",
+    "body": {
+      "ready": false,
+      "note": "These print details are invalid. Prepare the material again."
+    }
+  },
+  "staleRefusal": {
+    "status": 409,
+    "type": "application/json",
+    "body": {
+      "ready": false,
+      "note": "I could not verify this as the current visible version. Show the material again before printing."
+    }
+  },
+  "sideEffects": {
+    "emails": 0,
+    "assets": 0,
+    "studio_runs": 0,
+    "schedules": 0,
+    "phones": 0,
+    "events": 0,
+    "activities": 0,
+    "working_plans": 0,
+    "hours": 0,
+    "jobs": 0,
+    "memories": 0,
+    "reviews": 0,
+    "progress": 0,
+    "checkins": 0
+  },
+  "cleanup": {
+    "status": "family-and-auth-removed",
+    "deletionJobId": "f3bb8793-b272-4008-941e-ece6e54f7cac",
+    "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+    "remaining": {
+      "users": 0,
+      "sessions": 0,
+      "families": 0,
+      "children": 0,
+      "memberships": 0,
+      "materials": 0,
+      "messages": 0
+    }
+  },
+  "deployment": {
+    "id": "dpl_2qpdgCaWvHv5B6rZ4LAiYkGvKuFW",
+    "state": "READY",
+    "pr": 1127,
+    "prCi": 34066267660,
+    "mainCi": 34066676716,
+    "ciConclusion": "success"
+  },
+  "selectedPdf": {
+    "bytes": 10595,
+    "sha256": "7e2d5e139750b627a308d63335b71799cfa434266544982859c275b572bc383d",
+    "originalIndexes": [
+      0,
+      2
+    ],
+    "requestedCopies": 2,
+    "systemCopiesNotSet": true,
+    "popupUrlScheme": "blob"
+  },
+  "toolSequence": [
+    "load_skill",
+    "find_materials",
+    "prepare_material_print"
+  ],
+  "artifactCleanup": {
+    "status": "passed",
+    "deleted": 2,
+    "remaining": 0,
+    "suppressed": 0
+  },
+  "artifacts": {
+    "2026-09-06-print-live-owned-binder.png": "79a12befcd7cf67a3450968da94020a2e4fc739904e09d04eb52ed018fba4bd4",
+    "2026-09-06-print-live-real-chat-print-card.png": "c7d45f3868ce8a0143b13c901e25e8ee13292ce25a3157ed9b5359dfc0e15618",
+    "2026-09-06-print-live-selected-pdf-open.png": "a42e0dc227d9e93d6c9dd2702e81990769fe1af5cc25040480d673c04b339738",
+    "2026-09-06-print-live-real-stale-card-refusal.png": "18856865e886b63d8e56c020f2093cdfeb962ae434ca36bd49af0bf0c26edac6",
+    "2026-09-06-print-live-selected.pdf": "7e2d5e139750b627a308d63335b71799cfa434266544982859c275b572bc383d"
+  },
+  "inspection": "Root inspected all four mobile screenshots and both rendered PDF pages. Original indexes 0 and 2 are preserved, answer-key index 1 excluded. No physical printer or system copy selection was exercised.",
+  "priorFailures": [
+    {
+      "runId": "610a527e",
+      "outcome": "Earlier release card download returned 422 because the compiled worker received numeric module ID 546091."
+    },
+    {
+      "runId": "e9eb305d-a50c-4a5f-b3b9-008b52e6f129",
+      "outcome": "Corrected release returned 200 but operator failed its captured-byte bound. Actual captured length was not retained, so this is not relabeled a pass."
+    }
+  ],
+  "captureBoundary": "In this final run Playwright captured zero network body bytes, while the app opened a 10595-byte Blob. The verifier read that actual observed Blob inside its creating browser page, bounded to 512 KiB and ten seconds. No substituted response, second HTTP fallback or fabricated PDF was used."
+}

@@ -64,7 +64,7 @@ All failures below were escalated September 6. The discovery evidence is histori
 | Web realtime requests cannot reach family tools | Actual request/route replay rejects missing session and sequence | F23, [#1103](https://github.com/sidneyswift/homa/issues/1103) | Bridge FIXED `df9d5860`, F23 live receipt; physical speech unverified |
 | Month preview misses recurring/multi-child calendar conflicts | Active query omits canonical recurrence and child-link expansion | F24, [#1104](https://github.com/sidneyswift/homa/issues/1104) | FIXED `ff3258bf`, F24 live receipt |
 | Late report writer can overwrite a newer score revision | Active claim/write query trace; actual PostgreSQL race reproduction | [#1124](https://github.com/sidneyswift/homa/issues/1124) | Local fix verified, not shipped; escalated September 6, 21:57 UTC |
-| Print tool promises native sheet on channels without a consumer | Active tool/consumer contract trace | F26, [#1105](https://github.com/sidneyswift/homa/issues/1105) | Open; escalated September 6 |
+| Print tool promises native sheet on channels without a consumer | Active tool/consumer contract trace | F26, [#1105](https://github.com/sidneyswift/homa/issues/1105) | FIXED e639fdb0; real card and selected PDF verified |
 
 An issue or merged PR is not a production fix receipt. Each implementation must later record its commit, deployment and live verification. Historical recovery is a separately bounded operation using confirmed source records, never a bulk assumption that every old row is wrong.
 
@@ -97,7 +97,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | F23 | Working voice tools and distinct controls | Bridge FIXED and verified live; physical speech unverified; [#1103](https://github.com/sidneyswift/homa/issues/1103) |
 | F24 | Respect existing calendar facts; longer year planning | Recurring conflict repair FIXED; full-year concept deferred; [#1104](https://github.com/sidneyswift/homa/issues/1104), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
 | F25 | Choose native first value and rollout | Decision / experiment; [#1053](https://github.com/sidneyswift/homa/issues/1053), [#1045](https://github.com/sidneyswift/homa/issues/1045) |
-| F26 | Truthful web/native print handoff | Bounded repair now; larger concept deferred; [#1105](https://github.com/sidneyswift/homa/issues/1105), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
+| F26 | Truthful web/native print handoff | Web repair shipped and verified; physical/native verification and larger concept separate; [#1105](https://github.com/sidneyswift/homa/issues/1105), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
 
 ## Concrete fixes and near-term improvements
 
@@ -189,7 +189,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1095](https://github.com/sidneyswift/homa/issues/1095).
 
-**Implementation under verification:** child-ID aggregation and disambiguated labels preserve separate records in real generated PDFs. The fleet procedure now includes shared time for a selected child unless explicitly excluded. The corrected eight-case model matrix, five routing samples, two final full-menu cases and an actual disposable Eve/SQL route passed. The complete reader passes 15 database groups, including more than 4,000 records and all five saved sources. The [record contract](2026-09-06-hours-record-scope.md) distinguishes source versions and local evidence from pending hosted release verification.
+**FIXED and verified live:** PR #1122 merged as `c3409c107100fccac162ddcd274f902159abf31d`. The F06-F07 release receipt above verifies hosted previews, CSV downloads and the generated state packet. Child-ID aggregation and disambiguated labels preserve separate records in real generated PDFs. The fleet procedure now includes shared time for a selected child unless explicitly excluded. The corrected eight-case model matrix, five routing samples, two final full-menu cases and an actual disposable Eve/SQL route passed. The complete reader passes 15 database groups, including more than 4,000 records and all five saved sources. The [record contract](2026-09-06-hours-record-scope.md) distinguishes original failures, corrected source versions and hosted evidence.
 
 **Expected, P60-85:** count each child's school dates separately, including the sick-sibling example, and export a chosen period; several activities on one day count once.
 
@@ -543,7 +543,7 @@ Month preview contains four weeks. Approval validates children/dates/materials/u
 
 **Acceptance:** web gets a usable current PDF and no native-sheet claim; foreign/stale ID and uncertain answer-key/page-role requests refuse; native canceled/failed/completed states stay distinct; final two-page artifact opens at the expected URL. Physical mobile-web printer output still needs device evidence. Unattended delivery, saved printers and automatic physical printing remain a separate integration/product decision.
 
-**Implementation and live evidence:** PR #1125 deployed as `7df600cd`, with required CI, the additive print precondition and exact production READY verified. The real mobile-web conversation and card prepared two copies with the answer-key page excluded. Its download returned 422. The actual Next bundle passed a numeric module ID to a Node worker that requires a filesystem path. This live failure was escalated September 6 at 23:04:46 UTC and is being corrected in the [current-material print handoff](2026-09-06-material-print-handoff.md) release evidence. Passing source tests or dependency tracing did not prove the deployed worker. Physical printing remains unverified.
+**FIXED and verified live:** PR #1127 merged as `e639fdb0a5f086cd2d375d57e3e47266af19a203`, with required PR/main CI and exact production READY. The deployed mobile-web conversation, real print card and opened two-page PDF passed 313 checks: original pages 1 and 3, answer key excluded, two-copy reminder preserved, and both old card and old download refused after a revision. Root inspected all four screenshots and both actual PDF pages. The [hosted receipt](../journeys/evidence/2026-09-06-print-hosted-receipt.json) preserves the earlier runtime 422 and later capture failure separately. The fixture and two stored artifacts were deleted and absence verified; canonical provider/token drain remains pending. Physical printing and installed-native behavior remain unverified. The [print contract](2026-09-06-material-print-handoff.md) records the implementation boundary.
 
 ## Implementation order and completion evidence
 
