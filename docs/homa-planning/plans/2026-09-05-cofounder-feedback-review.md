@@ -10,6 +10,10 @@ Prepared and reverified September 6, 2026. Owner: Sidney. Review and coordinatio
 
 This document holds intent, evidence and acceptance criteria. GitHub Issues hold live status, priority and ownership. F01-F26 are reading references, not a second tracker. “Implement now” means a bounded authorized slice, not a measured delivery-time promise or a claim that it has shipped.
 
+**Final shipment:** the prepared Hours, contextual progress and materials/map packages merged through [#1130](https://github.com/sidneyswift/homa/pull/1130), [#1131](https://github.com/sidneyswift/homa/pull/1131) and [#1133](https://github.com/sidneyswift/homa/pull/1133), with required checks passing and exact production READY receipts. The missing hour was recovered. Sidney stopped further optional testing, so the named remaining model/hosted/device limits stay open on their issues.
+
+**Subsequent App Store request:** the missing standard EULA link was added to the existing description and version 1.0, build 48, resubmitted with its three subscription-related items. All four now show Waiting for Review. [Original screenshot](../journeys/evidence/2026-09-06-app-review/waiting-for-review.png), [receipt](../journeys/evidence/2026-09-06-app-review/receipt.json), [#1132](https://github.com/sidneyswift/homa/issues/1132).
+
 Each repaired item leads with its current implementation receipt and links to the evidence. Sections labeled audit baseline describe behavior before that repair. The ticket index distinguishes shipped repairs from work still being implemented.
 
 ## Sources and verification standard
@@ -51,15 +55,15 @@ All failures below were escalated September 6. The discovery evidence is histori
 | Failure at discovery | Discovery evidence | Tracking | Repair evidence |
 |---|---|---|---|
 | Recorded-time correction leaves linked Planner duration stale | Real sandbox save: Hours 11, Planner 10 | F01, [#1092](https://github.com/sidneyswift/homa/issues/1092) | FIXED `78f3b4e6`, F01 live receipt |
-| Named book details disappear | Two actual source/tool/row comparisons | F02, [#1093](https://github.com/sidneyswift/homa/issues/1093) | Open; escalated September 6 |
-| Distinct reading time suppressed | Two separate September 3 30-minute activities collided with an existing literature record; at least 60 minutes absent | F03, [#1090](https://github.com/sidneyswift/homa/issues/1090) | Open; escalated September 6 |
+| Named book details disappear | Two actual source/tool/row comparisons | F02, [#1093](https://github.com/sidneyswift/homa/issues/1093) | Prevention deployed `7ce8f66f`; historical title/model acceptance remains open |
+| Distinct reading time suppressed | Two separate September 3 30-minute activities collided with an existing literature record; at least 60 minutes absent | F03, [#1090](https://github.com/sidneyswift/homa/issues/1090) | FIXED `7ce8f66f` plus ordered live migrations; exact +60-minute recovery committed and verified |
 | Child/day aggregation merges equal display names; child totals omit shared records in chat | Actual-function replays and hosted output | F07, [#1095](https://github.com/sidneyswift/homa/issues/1095) | FIXED c3409c10; hosted UI, CSV and packet verified |
 | School-year surfaces use different starts | UI July 1, chat/Progress August 1, compliance configured anniversary; real July data exists | F08, [#1096](https://github.com/sidneyswift/homa/issues/1096) | FIXED `b8b79693`, F08 live receipt |
 | Second language Hours rejected by an old database constraint | First hosted F08 fixture failed with 23514; both production subject constraints lacked `spanish` | [#1120](https://github.com/sidneyswift/homa/issues/1120) | FIXED against deployed `b8b79693` by exact existing migration, live version `20260906195628`; F08 live receipt |
 | Deeper-question intent is lost and chat check-ins stop early | Live navigation, actual responses and selector comparison | F09-F10, [#1088](https://github.com/sidneyswift/homa/issues/1088) | FIXED `66131afd`; four-turn hosted journey and truthful stop summary verified, F09-F10 receipt |
-| Capability follow-ups remain unscored; subsequent advice bypasses verifier | Three actual `no_match` observations, stale cutting evidence, no next-move tool call | F13-F14, [#1099](https://github.com/sidneyswift/homa/issues/1099), [#1100](https://github.com/sidneyswift/homa/issues/1100) | Open; escalated September 6 |
+| Capability follow-ups remain unscored; subsequent advice bypasses verifier | Three actual `no_match` observations, stale cutting evidence, no next-move tool call | F13-F14, [#1099](https://github.com/sidneyswift/homa/issues/1099), [#1100](https://github.com/sidneyswift/homa/issues/1100) | Capture/verifier improvements deployed `68667444`; model routing and incomplete-inventory gaps remain open |
 | Accepted curricula cannot be read; blank scan can be reported as read | Two actual over-cap files and local blank-text PDF replay | F16, [#1089](https://github.com/sidneyswift/homa/issues/1089) | FIXED `78466fe6`, F16 recovery receipt |
-| Name-tracing geometry is wrong | Actual rejected mixed-case output and measured glyph geometry | F19, [#1094](https://github.com/sidneyswift/homa/issues/1094); related #1080/#1066 | Open; escalated September 6 |
+| Name-tracing geometry is wrong | Actual rejected mixed-case output and measured glyph geometry | F19, [#1094](https://github.com/sidneyswift/homa/issues/1094); related #1080/#1066 | Geometry repair deployed `080efd6c`; literal D example and physical/model acceptance remain open |
 | Binder Delete overflows and old revision can return | Three-width layout reproduction; actual deleted chain plus selector replay | F21, [#1091](https://github.com/sidneyswift/homa/issues/1091) | FIXED `1834875f` and `dce9f1c5`, F21 live receipt |
 | Web realtime requests cannot reach family tools | Actual request/route replay rejects missing session and sequence | F23, [#1103](https://github.com/sidneyswift/homa/issues/1103) | Bridge FIXED `df9d5860`, F23 live receipt; physical speech unverified |
 | Month preview misses recurring/multi-child calendar conflicts | Active query omits canonical recurrence and child-link expansion | F24, [#1104](https://github.com/sidneyswift/homa/issues/1104) | FIXED `ff3258bf`, F24 live receipt |
@@ -73,8 +77,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | Ref | Outcome | Authorized scope and tracking |
 |---|---|---|
 | F01 | Edit Day/Week recorded time with consistent linked data | FIXED and verified live; [#1092](https://github.com/sidneyswift/homa/issues/1092) |
-| F02 | Preserve book and lesson identity in notes | Implement now; [#1093](https://github.com/sidneyswift/homa/issues/1093) |
-| F03 | Count distinct work while deduplicating true retries | Implement now; [#1090](https://github.com/sidneyswift/homa/issues/1090) |
+| F02 | Preserve book and lesson identity in notes | Prevention deployed; remaining historical/model evidence explicit; [#1093](https://github.com/sidneyswift/homa/issues/1093) |
+| F03 | Count distinct work while deduplicating true retries | Prevention deployed and exact missing hour recovered; model journey remains unrun; [#1090](https://github.com/sidneyswift/homa/issues/1090) |
 | F04 | Reuse/filter/subtotal family categories | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
 | F05 | Familiar subject display names | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
 | F06 | Child/date-scoped export | Shipped and hosted verified; [#1095](https://github.com/sidneyswift/homa/issues/1095) |
@@ -83,14 +87,14 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | F09 | Start the selected deeper assessment | FIXED and verified live; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
 | F10 | Explore demonstrated ability and stop honestly | FIXED and verified live; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
 | F11 | Restore web months-ahead context | Shipped; partial hosted observation, full journey not claimed; [#1097](https://github.com/sidneyswift/homa/issues/1097) |
-| F12 | Explain map states, evidence and handoff | Implement now; [#1098](https://github.com/sidneyswift/homa/issues/1098) |
-| F13 | Capture contextual ability claims; clarify selectively | Implement now; [#1099](https://github.com/sidneyswift/homa/issues/1099) |
-| F14 | Ground one next step in fresh evidence | Implement now; [#1100](https://github.com/sidneyswift/homa/issues/1100) |
+| F12 | Explain map states, evidence and handoff | Bounded repair deployed; remaining acceptance explicit; [#1098](https://github.com/sidneyswift/homa/issues/1098) |
+| F13 | Capture contextual ability claims; clarify selectively | Context capture deployed; canonical full-model save journey remains unrun; [#1099](https://github.com/sidneyswift/homa/issues/1099) |
+| F14 | Ground one next step in fresh evidence | Fresh-evidence/verifier improvements deployed; known conversational boundaries remain open; [#1100](https://github.com/sidneyswift/homa/issues/1100) |
 | F15 | Periodic reviews or assessment sheets | Decision / experiment; [#1107](https://github.com/sidneyswift/homa/issues/1107) |
 | F16 | Read accepted curriculum files | FIXED and recovered; selected-page coverage explicit; [#1089](https://github.com/sidneyswift/homa/issues/1089) |
-| F17 | Read and use the correct owned lesson | Implement now; [#1101](https://github.com/sidneyswift/homa/issues/1101) |
-| F18 | Connect useful owned resources to a teaching theme | Implement now; [#1102](https://github.com/sidneyswift/homa/issues/1102) |
-| F19 | Correct handwriting geometry and review | Implement now; [#1094](https://github.com/sidneyswift/homa/issues/1094) |
+| F17 | Read and use the correct owned lesson | Bounded repair deployed; remaining acceptance explicit; [#1101](https://github.com/sidneyswift/homa/issues/1101) |
+| F18 | Connect useful owned resources to a teaching theme | Bounded repair deployed; remaining acceptance explicit; [#1102](https://github.com/sidneyswift/homa/issues/1102) |
+| F19 | Correct handwriting geometry and review | Bounded repair deployed; remaining acceptance explicit; [#1094](https://github.com/sidneyswift/homa/issues/1094) |
 | F20 | Respect urgency without sacrificing correctness | Bounded repair now; larger concept deferred; [#1102](https://github.com/sidneyswift/homa/issues/1102), [#1108](https://github.com/sidneyswift/homa/issues/1108) |
 | F21 | Visible, persistent removal from Binder | FIXED and verified live; [#1091](https://github.com/sidneyswift/homa/issues/1091) |
 | F22 | Make actual child scope visible | FIXED and verified live; [#1106](https://github.com/sidneyswift/homa/issues/1106) |
@@ -119,7 +123,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1093](https://github.com/sidneyswift/homa/issues/1093).
 
-**Release update:** the independently reviewed repair is implemented, with integrated database, UI and build checks passing. [Shipping scope, rollout and evidence limits](2026-09-06-hours-identity-context-shipping.md) records the remaining model/hosted limits after Sidney directed shipment without more optional testing. The audit below describes the before state.
+**Release update:** [PR #1130](https://github.com/sidneyswift/homa/pull/1130), merge `7ce8f66f`, is deployed READY. Expansion, context provenance and enforcement are installed in production. The exact two missing reading blocks were recovered, adding 60 minutes; a fresh read verified the existing record graph stayed intact. [Shipping scope, migration/recovery receipts and evidence limits](2026-09-06-hours-identity-context-shipping.md) distinguish the database proof from unrun model and hosted journeys. The audit below describes the before state.
 
 **Expected, P18-20:** retain the supplied book title and lesson detail in the saved note, including when minutes arrive in a later message.
 
@@ -135,7 +139,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1090](https://github.com/sidneyswift/homa/issues/1090).
 
-**Release update:** the independently reviewed repair is implemented, with integrated database, UI and build checks passing. [Shipping scope, rollout and evidence limits](2026-09-06-hours-identity-context-shipping.md) records the remaining model/hosted limits after Sidney directed shipment without more optional testing. The audit below describes the before state.
+**Release update:** [PR #1130](https://github.com/sidneyswift/homa/pull/1130), merge `7ce8f66f`, is deployed READY. Expansion, context provenance and enforcement are installed in production. The exact two missing reading blocks were recovered, adding 60 minutes; a fresh read verified the existing record graph stayed intact. [Shipping scope, migration/recovery receipts and evidence limits](2026-09-06-hours-identity-context-shipping.md) distinguish the database proof from unrun model and hosted journeys. The audit below describes the before state.
 
 **Expected, P23-46:** separate language lessons and separate reading activities count even when subject, day and duration match. Repeating one save should still count once.
 
@@ -302,6 +306,8 @@ Gross motor's chat window is galloping, hopping and catching. Skipping exists an
 
 **Tracking:** [#1098](https://github.com/sidneyswift/homa/issues/1098).
 
+**Deployment receipt:** [PR #1133](https://github.com/sidneyswift/homa/pull/1133), merge `080efd6c`, is deployed READY after required checks passed. [Shipped behavior and explicit evidence limits](2026-09-06-materials-map-shipping.md) distinguish this release from unrun model, owned-lesson and physical-device acceptance.
+
 **September 6 release update:** The integrated map change explains evidence states and source dates, and opens a selected-child/ability question as a visible chat draft. Opening a node writes no progress. [Implementation and verification limits](2026-09-06-materials-map-shipping.md). Required integrated CI and deployment remain pending at this commit; the active-chain paragraphs below preserve the pre-fix audit.
 
 **Expected, R22-36:** understand dots, age band, connections and where the evidence came from; investigate one ability without a founder explaining the screen.
@@ -320,6 +326,8 @@ The [component](../../../apps/web/components/progress/abilities-explorer.tsx) al
 
 **Tracking:** [#1099](https://github.com/sidneyswift/homa/issues/1099).
 
+**Release receipt:** [PR #1131](https://github.com/sidneyswift/homa/pull/1131), merge `68667444`, is deployed READY. [Current behavior, actual model results and remaining gaps](2026-09-06-contextual-progress-shipping.md) separate the shipped improvement from incomplete acceptance. The original failure analysis below is the audit baseline.
+
 **Release update:** contextual capture and its exact provenance/age checks are implemented. [Shipping evidence and remaining limits](2026-09-06-contextual-progress-shipping.md) distinguish historical replay, real database saves and the still-unrun replacement transport-independent model cases. The original audit below describes the before state.
 
 **Expected, R37-59 and R72-116:** brief logs should remain easy. When mastery is genuinely ambiguous, ask one useful question and honor not yet. A lesson number, elapsed time or “we moved on” alone cannot establish mastery.
@@ -335,6 +343,8 @@ The [component](../../../apps/web/components/progress/abilities-explorer.tsx) al
 ### F14. Offer one useful next step from current evidence
 
 **Tracking:** [#1100](https://github.com/sidneyswift/homa/issues/1100).
+
+**Release receipt:** [PR #1131](https://github.com/sidneyswift/homa/pull/1131), merge `68667444`, is deployed READY. [Current behavior, actual model results and remaining gaps](2026-09-06-contextual-progress-shipping.md) separate the shipped improvement from incomplete acceptance. The original failure analysis below is the audit baseline.
 
 **Release update:** scoped evidence reads and chat verification are implemented, and all five evidence-based model cases pass. [Shipping evidence](2026-09-06-contextual-progress-shipping.md) records remaining boundary failures, including incomplete evidence being described as complete. Sidney directed shipment without additional test rounds; #1100 remains open for those behavior gaps. The original audit below describes the before state.
 
@@ -386,6 +396,8 @@ The first original now has Ready metadata and a readable instructional spread at
 
 **Tracking:** [#1101](https://github.com/sidneyswift/homa/issues/1101).
 
+**Deployment receipt:** [PR #1133](https://github.com/sidneyswift/homa/pull/1133), merge `080efd6c`, is deployed READY after required checks passed. [Shipped behavior and explicit evidence limits](2026-09-06-materials-map-shipping.md) distinguish this release from unrun model, owned-lesson and physical-device acceptance.
+
 **September 6 release update:** The integrated fleet procedure resolves the actual owned lesson or next-five packet and reads its physical PDF pages. Exact source quotes and page identities can travel with the generated material. [Implementation and verification limits](2026-09-06-materials-map-shipping.md). Required integrated CI and deployment remain pending at this commit; the active-chain paragraphs below preserve the pre-fix audit.
 
 **Expected, R37-63, R122-143 and R306-318:** “lesson 12” identifies the child's actual curriculum/edition; Homa reads it and produces matching practice or another teaching activity. The parent also asks for the next five lessons and a useful lesson packet with teacher guidance, discussion, hands-on activities and supporting printables. That bounded packet is an operational request, separate from choosing a native first value or scheduling a full year. Completion is not mastery.
@@ -404,6 +416,8 @@ Material source provenance validates identity and inheritance, but a direct-orig
 
 **Tracking:** [#1102](https://github.com/sidneyswift/homa/issues/1102).
 
+**Deployment receipt:** [PR #1133](https://github.com/sidneyswift/homa/pull/1133), merge `080efd6c`, is deployed READY after required checks passed. [Shipped behavior and explicit evidence limits](2026-09-06-materials-map-shipping.md) distinguish this release from unrun model, owned-lesson and physical-device acceptance.
+
 **September 6 release update:** The integrated fleet procedure permits bounded, verified owned-resource lookup for useful themes and skips optional enrichment when the parent needs the requested work now. [Implementation and verification limits](2026-09-06-materials-map-shipping.md). Required integrated CI and deployment remain pending at this commit; the active-chain paragraphs below preserve the pre-fix audit.
 
 **Expected, R170-181:** an apple/letter-A request can surface an owned book, useful curriculum activity and tailored page without the parent supplying a file path.
@@ -419,6 +433,8 @@ Search only sees indexed metadata/embedding content; a useful apple activity lat
 ### F19. Handwriting must fit its guides
 
 **Tracking:** [#1094](https://github.com/sidneyswift/homa/issues/1094).
+
+**Deployment receipt:** [PR #1133](https://github.com/sidneyswift/homa/pull/1133), merge `080efd6c`, is deployed READY after required checks passed. [Shipped behavior and explicit evidence limits](2026-09-06-materials-map-shipping.md) distinguish this release from unrun model, owned-lesson and physical-device acceptance.
 
 **September 6 release update:** The integrated renderer measures supported glyphs against the guides and preserves verified predecessor size and case. Protected lesson revision scope is enforced. The exact reported D artifact remains unidentified. [Implementation and verification limits](2026-09-06-materials-map-shipping.md). Required integrated CI and deployment remain pending at this commit; the active-chain paragraphs below preserve the pre-fix audit.
 
@@ -437,6 +453,8 @@ Search only sees indexed metadata/embedding content; a useful apple activity lat
 ### F20. Respect urgency and preparation depth
 
 **Tracking:** [#1102](https://github.com/sidneyswift/homa/issues/1102), [#1108](https://github.com/sidneyswift/homa/issues/1108).
+
+**Deployment receipt:** [PR #1133](https://github.com/sidneyswift/homa/pull/1133), merge `080efd6c`, is deployed READY after required checks passed. [Shipped behavior and explicit evidence limits](2026-09-06-materials-map-shipping.md) distinguish this release from unrun model, owned-lesson and physical-device acceptance.
 
 **Expected, R175-181 and R318-323:** something useful when rushed, richer source-grounded help when preparing ahead. The spoken two/eight-minute figures are hypothetical, not measured targets.
 
