@@ -460,6 +460,39 @@ export function verifyProgressNextMoveChatCandidate(
   return verifyProgressNextMoveWithinScope(input, false);
 }
 
+/** Certify a scoped stop from the complete ledger, never a bounded prompt slice.
+ * This does not establish mastery of unassessed abilities or authorize practice. */
+export function verifyProgressNextMoveChatStop(input: {
+  familyId: string;
+  childId: string;
+  subjectId: string;
+  view: ChildProgressView;
+  ledger: ChildProgressProjectionInput;
+  now: Date;
+}) {
+  const refuse = (reason: string) => ({ verified: false as const, reason,
+    note: "The complete current record does not support this all-easy stop. Explain this limit without inventing an activity." });
+  if (input.childId !== input.view.childId || input.ledger.child.id !== input.childId || input.ledger.familyId !== input.familyId) return refuse("wrong_child");
+  if (![...SKILL_CATALOG_BY_ID.values()].some(row => row.subjectId === input.subjectId)) return refuse("unknown_subject");
+  const resolved = resolveEffectiveProgressEvidence({childId: input.childId, familyId: input.familyId,
+    evidence: input.ledger.evidence, conflicts: input.ledger.conflicts});
+  if (resolved.openConflicts.some(row => SKILL_CATALOG_BY_ID.get(row.itemId)?.subjectId === input.subjectId)) return refuse("conflicting_evidence");
+  const rows = resolved.effectiveEvidence.filter(row => SKILL_CATALOG_BY_ID.get(row.itemId)?.subjectId === input.subjectId);
+  if (rows.length === 0) return refuse("unknown_evidence");
+  if (rows.some(row => row.derivation === "unknown")) return refuse("unknown_provenance");
+  if (rows.some(row => ageDays(row.observedAt, input.now) === null)) return refuse("stale_evidence");
+  if (rows.some(row => row.answer !== "easily")) return refuse("non_easy_evidence");
+  const evidence = rows.slice(0, 24).map(row => ({itemId: row.itemId,
+    statement: SKILL_CATALOG_BY_ID.get(row.itemId)!.statement,
+    answer: row.answer, observedAt: row.observedAt, derivation: row.derivation, sourceKind: row.source}));
+  return { verified: true as const, stop: {
+    kind: "all_saved_skills_easy" as const, childId: input.childId, childName: safeChildName(input.view.childName),
+    subjectId: input.subjectId, sourceRevision: input.ledger.sourceRevision.toString(),
+    checkedAt: input.now.toISOString(), totalSavedAnswers: rows.length, evidence,
+    omittedEvidence: Math.max(0, rows.length - evidence.length),
+  }, note: "Verified stop. Acknowledge that these saved abilities are already easy, then end the reply. This receipt supports no activity, craft, maintenance practice, harder extension, follow-up question or promise. It does not establish mastery of the whole subject. Nothing was saved or changed." };
+}
+
 function verifyProgressNextMoveWithinScope(
   input: ProgressNextMoveVerificationInput,
   requireProducerChoice: boolean,

@@ -4,9 +4,33 @@ import test from "node:test";
 import { createPrintableInputSchema, buildPrintableGenerationInput, subjectLessonPrintableRestriction, storedPrintableHtmlLimitNote } from "../../../agent/tools/create_printable";
 import { prepareHandwritingDocument } from "./document";
 import { validatePrintableHtml, joinPageBodies } from "../page-shell";
+import { requireDeliveredHandwritingDraft } from "../../../evals/materials-studio/guided-name-delivery";
 
 const html = "<h1>My name</h1><!-- homa:handwriting maya -->";
 const row = { id: "maya", text: "Maya", style: "pale", capHeight: 96 };
+test("guided name eval grades the actual visible draft through failed attempts and revision chains", () => {
+  const draft = (id: string, reviewPassed: boolean, revisesId: string | null = null) => ({
+    name: "create_printable",
+    output: { created: true, material: { id, title: "My name", status: "draft", reviewPassed, revisesId, previewUrl: "https://synthetic.invalid/page.png", pdfUrl: "https://synthetic.invalid/page.pdf" } },
+  });
+  assert.equal(requireDeliveredHandwritingDraft([
+    draft("hidden-scratch", false), draft("delivered", true), draft("later-hidden-scratch", false),
+  ]), "delivered");
+  assert.equal(requireDeliveredHandwritingDraft([
+    draft("original", true), draft("failed-revision", false, "original"), draft("delivered-revision", true, "failed-revision"),
+  ]), "delivered-revision");
+  assert.throws(() => requireDeliveredHandwritingDraft([
+    draft("first-visible", true), draft("unrelated-later-success", true),
+  ]), /found 2 parent-visible material cards/);
+  assert.throws(() => requireDeliveredHandwritingDraft([draft("hidden", false)]), /found 0 parent-visible/);
+  assert.throws(() => requireDeliveredHandwritingDraft([{ name: "create_printable", output: { created: true, material: { id: "incomplete-card" } } }]), /found 0 parent-visible/);
+  const kept = draft("already-approved", true);
+  kept.output.material.status = "final";
+  assert.throws(() => requireDeliveredHandwritingDraft([kept]), /awaiting the parent's approval/);
+  const legacy = draft("", true);
+  assert.throws(() => requireDeliveredHandwritingDraft([legacy]), /persisted draft/);
+});
+
 test("actual tool schema retains typed rows on single pages and fresh packet pages", () => {
   const input = createPrintableInputSchema.parse({ title: "My name", recipe: "name-tracing-page", html, handwritingRows: [row], forgedReceipt: "ignored" });
   assert.deepEqual(input.handwritingRows, [row]);

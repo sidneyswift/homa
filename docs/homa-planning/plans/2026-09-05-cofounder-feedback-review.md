@@ -1,6 +1,6 @@
 # September 5 co-founder feedback: verified journeys and implementation scope
 
-Prepared and reverified September 6, 2026. Owner: Sidney. Review and coordination issue: [#1087](https://github.com/sidneyswift/homa/issues/1087).
+Prepared September 6 and further verified September 7, 2026. Owner: Sidney. Review and coordination issue: [#1087](https://github.com/sidneyswift/homa/issues/1087).
 
 **The requested outcome:** make Homa dependable with the work these families already do. Record each real learning activity, let the parent correct it where she sees it, make progress questions reveal useful evidence, use the curriculum she already owns, and create pages she can teach from.
 
@@ -10,7 +10,7 @@ Prepared and reverified September 6, 2026. Owner: Sidney. Review and coordinatio
 
 This document holds intent, evidence and acceptance criteria. GitHub Issues hold live status, priority and ownership. F01-F26 are reading references, not a second tracker. “Implement now” means a bounded authorized slice, not a measured delivery-time promise or a claim that it has shipped.
 
-**Final shipment:** the prepared Hours, contextual progress and materials/map packages merged through [#1130](https://github.com/sidneyswift/homa/pull/1130), [#1131](https://github.com/sidneyswift/homa/pull/1131) and [#1133](https://github.com/sidneyswift/homa/pull/1133), with required checks passing and exact production READY receipts. The missing hour was recovered. Sidney stopped further optional testing, so the named remaining model/hosted/device limits stay open on their issues.
+**September 6 shipment:** the prepared Hours, contextual progress and materials/map packages merged through [#1130](https://github.com/sidneyswift/homa/pull/1130), [#1131](https://github.com/sidneyswift/homa/pull/1131) and [#1133](https://github.com/sidneyswift/homa/pull/1133), with required checks passing and exact production READY receipts. The missing hour was recovered. Sidney subsequently asked to finish the remaining defined work. September 7 evidence below supersedes the earlier unrun-test limits where explicitly stated.
 
 **Subsequent App Store request:** the missing standard EULA link was added to the existing description and version 1.0, build 48, resubmitted with its three subscription-related items. All four now show Waiting for Review. [Original screenshot](../journeys/evidence/2026-09-06-app-review/waiting-for-review.png), [receipt](../journeys/evidence/2026-09-06-app-review/receipt.json), [#1132](https://github.com/sidneyswift/homa/issues/1132).
 
@@ -77,7 +77,7 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | Ref | Outcome | Authorized scope and tracking |
 |---|---|---|
 | F01 | Edit Day/Week recorded time with consistent linked data | FIXED and verified live; [#1092](https://github.com/sidneyswift/homa/issues/1092) |
-| F02 | Preserve book and lesson identity in notes | Prevention deployed; remaining historical/model evidence explicit; [#1093](https://github.com/sidneyswift/homa/issues/1093) |
+| F02 | Preserve book and lesson identity in notes | Prevention deployed; four verified historical notes repaired September 7; final model acceptance in progress; [#1093](https://github.com/sidneyswift/homa/issues/1093) |
 | F03 | Count distinct work while deduplicating true retries | Prevention deployed and exact missing hour recovered; model journey remains unrun; [#1090](https://github.com/sidneyswift/homa/issues/1090) |
 | F04 | Reuse/filter/subtotal family categories | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
 | F05 | Familiar subject display names | Implement now; [#1035](https://github.com/sidneyswift/homa/issues/1035) |
@@ -86,9 +86,9 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 | F08 | One configured school-year window | FIXED and verified live; [#1096](https://github.com/sidneyswift/homa/issues/1096) |
 | F09 | Start the selected deeper assessment | FIXED and verified live; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
 | F10 | Explore demonstrated ability and stop honestly | FIXED and verified live; [#1088](https://github.com/sidneyswift/homa/issues/1088) |
-| F11 | Restore web months-ahead context | Shipped; partial hosted observation, full journey not claimed; [#1097](https://github.com/sidneyswift/homa/issues/1097) |
+| F11 | Restore web months-ahead context | Shipped and verified in the populated 320/390px hosted journey, including source basis and saved report; [#1097](https://github.com/sidneyswift/homa/issues/1097) |
 | F12 | Explain map states, evidence and handoff | Bounded repair deployed; remaining acceptance explicit; [#1098](https://github.com/sidneyswift/homa/issues/1098) |
-| F13 | Capture contextual ability claims; clarify selectively | Context capture deployed; canonical full-model save journey remains unrun; [#1099](https://github.com/sidneyswift/homa/issues/1099) |
+| F13 | Capture contextual ability claims; clarify selectively | Context capture deployed; September 7 canonical model/database direct, contextual and decline cases passed; [#1099](https://github.com/sidneyswift/homa/issues/1099) |
 | F14 | Ground one next step in fresh evidence | Fresh-evidence/verifier improvements deployed; known conversational boundaries remain open; [#1100](https://github.com/sidneyswift/homa/issues/1100) |
 | F15 | Periodic reviews or assessment sheets | Decision / experiment; [#1107](https://github.com/sidneyswift/homa/issues/1107) |
 | F16 | Read accepted curriculum files | FIXED and recovered; selected-page coverage explicit; [#1089](https://github.com/sidneyswift/homa/issues/1089) |

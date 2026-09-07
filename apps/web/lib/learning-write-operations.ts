@@ -33,6 +33,27 @@ export interface LearningOperationClaim {
   outcome: Record<string, unknown> | null;
 }
 
+/** Candidate matching must not hide an already accepted canonical operation.
+ * This is only a routing hint. The transactional writer still checks ownership,
+ * the complete immutable request, and the current effect before returning it. */
+export async function hasAcceptedLearningWriteOperation(input: {
+  familyId: string;
+  key: string;
+  sourceMessageId: string;
+}): Promise<boolean> {
+  const sql = mapDb();
+  const [row] = await sql<{ accepted: boolean }[]>`
+    select exists (
+      select 1 from public.learning_write_operations
+      where family_id = ${input.familyId}::uuid
+        and operation_key = ${input.key}
+        and source_message_id = ${input.sourceMessageId}::uuid
+        and outcome is not null
+    ) as accepted
+  `;
+  return row?.accepted === true;
+}
+
 /** The operation and its effects share one transaction. A rejected attempt leaves no claim. */
 export async function withLearningWriteOperation<T extends { status: string }>(
   input: LearningOperation,

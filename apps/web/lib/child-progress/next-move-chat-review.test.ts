@@ -10,6 +10,7 @@ import { readCanonicalChildMap } from "../map/canonical-explore";
 import { renderChildProgressAgentContext } from "./agent-context";
 import * as nextMove from "./next-move";
 import * as fixture from "../../evals/progress-next-move/chat-fixture";
+import { focusedSkillContext } from "../../evals/helpers/skill-context";
 
 const require = createRequire(import.meta.url);
 function transpile(source: string) { return ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}}).outputText; }
@@ -32,14 +33,14 @@ test("actual model harness retains a partial tool trace before generation or jud
     let judges = 0;
     const toolModule = {exports: {} as {runChatNextMoveEval(name: string, log: (event: Record<string, unknown>)=>void): Promise<unknown>}};
     runInNewContext(transpile(source), {module:toolModule, exports:toolModule.exports, process:{env:{VERCEL_OIDC_TOKEN:"offline synthetic marker"}, cwd:()=>"/synthetic/apps/web"}, require:(name:string)=>{
-      if(name==="node:fs/promises")return {readFile:async()=>"description: Synthetic procedure"};
+      if(name==="node:fs/promises")return {readFile:async()=>"---\ndescription: Synthetic procedure\n---\nSynthetic skill body"};
       if(name==="node:path")return require(name);
       if(name==="zod")return {z};
       if(name==="ai")return {tool:(value:unknown)=>value, stepCountIs:()=>()=>false,
         generateText:async(options:{tools:{load_skill:{execute(input:unknown):Promise<unknown>}}})=>{
           await options.tools.load_skill.execute({skill:"progress-next-move"});
           if(phase==="generation")throw new Error("Synthetic generation failure");
-          return {text:"Synthetic response",usage:{inputTokens:10,outputTokens:2,totalTokens:12}};
+          return {text:"Synthetic response",steps:[{text:"Earlier streamed response",toolCalls:[]},{text:"Synthetic response",toolCalls:[]}],usage:{inputTokens:10,outputTokens:2,totalTokens:12}};
         }, generateObject:async()=>{judges++;throw new Error("Synthetic judge failure");}};
       if(name==="../../agent/model")return {HOMA_MODEL:"offline-unused"};
       if(name==="../../agent/tools/verify_progress_next_move")return {progressNextMoveVerifyInputSchema:z.object({})};
@@ -48,12 +49,13 @@ test("actual model harness retains a partial tool trace before generation or jud
       if(name==="../../lib/eval-isolation")return {isEvalIsolationActive:()=>true};
       if(name==="../../lib/map/canonical-explore")return {readCanonicalChildMap};
       if(name==="./chat-fixture")return fixture;
+      if(name==="../helpers/skill-context")return {focusedSkillContext};
       throw new Error(`Unexpected offline dependency ${name}`);
     }});
     await assert.rejects(toolModule.exports.runChatNextMoveEval("fresh_motor", event=>events.push(event)), /Synthetic/);
     assert.ok(events.some(event=>Array.isArray(event.calls) && event.calls.some((call:{name?:string})=>call.name==="load_skill")), "retain real attempted calls before rejecting");
     assert.ok(events.some(event=>event.stage===`${phase}_failed`), "record the failing stage");
-    if(phase==="judge")assert.ok(events.some(event=>event.stage==="generated" && event.text==="Synthetic response" && event.usage));
+    if(phase==="judge")assert.ok(events.some(event=>event.stage==="generated" && event.text==="Earlier streamed response\n\nSynthetic response" && event.usage));
     assert.equal(judges,phase==="judge"?1:0);
   }
 });
@@ -67,5 +69,5 @@ test("a selected-subject conflict is excluded from savedAnswers even beside a co
   assert.equal(result.savedAnswers.omitted,0);
   assert.equal(result.savedAnswers.answers.length,1);
   assert.ok(result.savedAnswers.answers.every(answer=>answer.answer==="easily"));
-  assert.ok("comparison" in result && result.comparison.openConflicts===1);
+  assert.ok("comparison" in result && result.comparison?.openConflicts===1);
 });

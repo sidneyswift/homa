@@ -40,8 +40,9 @@ import { createServer as createHttpServer, type Server } from "node:http";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { applyEvalIsolation, describeEvalIsolation } from "../apps/web/lib/eval-isolation";
 import { evalFamilyFixtureSeedSql } from "../apps/web/lib/family-context-eval-fixture";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -428,17 +429,29 @@ async function main(): Promise<number> {
       `[eval-sandbox] ready (blob store ${blob.url}); running ` +
         `${childCommand.command} ${childCommand.args.join(" ")} in apps/web`,
     );
+    // Strip inherited credentials before the command starts. NODE_OPTIONS is
+    // inherited by Node descendants, including pnpm and --exec commands, so
+    // their first and subsequent dotenv loads cannot recover those credentials.
+    const childEnvironment: NodeJS.ProcessEnv = {
+      ...process.env,
+      HOMA_AGENT_JOBS_ENABLED: process.env.HOMA_AGENT_JOBS_ENABLED ?? "true",
+      HOMA_EVAL_DATABASE_URL: databaseUrl,
+      HOMA_EVAL_BLOB_DIR: blobDir,
+      HOMA_EVAL_BLOB_URL: blob.url,
+    };
+    const isolation = applyEvalIsolation(childEnvironment);
+    if (isolation.mode === "scrubbed") {
+      const preload = pathToFileURL(join(WEB_DIR, "lib/eval-isolation-runtime.mjs")).href;
+      childEnvironment.NODE_OPTIONS = [
+        childEnvironment.NODE_OPTIONS,
+        `--import=${JSON.stringify(preload)}`,
+      ].filter(Boolean).join(" ");
+    }
+    console.error(describeEvalIsolation(isolation));
     const exitCode = await new Promise<number>((resolvePromise, rejectPromise) => {
       const child = spawn(childCommand.command, childCommand.args, {
         cwd: WEB_DIR,
-        env: {
-          ...process.env,
-          HOMA_AGENT_JOBS_ENABLED:
-            process.env.HOMA_AGENT_JOBS_ENABLED ?? "true",
-          HOMA_EVAL_DATABASE_URL: databaseUrl,
-          HOMA_EVAL_BLOB_DIR: blobDir,
-          HOMA_EVAL_BLOB_URL: blob.url,
-        },
+        env: childEnvironment,
         stdio: "inherit",
       });
       const forward = (signal: NodeJS.Signals) => () => child.kill(signal);

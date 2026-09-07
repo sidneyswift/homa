@@ -41,7 +41,7 @@ try{
     ["HOMA_EVAL_DATABASE_URL", "postgres://other@127.0.0.1:5432/homa_eval"],
     ["HOMA_EVAL_DATABASE_URL", "postgres://homa_eval@127.0.0.1:5432/other"],
     ["HOMA_EVAL_ISOLATION", "0"], ["HOMA_EVAL_ALLOW_PROD_WRITES", "1"],
-    ["VERCEL", "1"], ["SUPABASE_DB_PASSWORD", "offline-sentinel"],
+    ["VERCEL", "1"],
     ["HOMA_LIVE_PROGRESS_ENABLED", "false"], ["HOMA_CLAIM_EXTRACTION_ENABLED", "false"],
   ];
   for (const [key,value] of rejectedEnvironments) {
@@ -49,6 +49,10 @@ try{
     try {assert.throws(()=>h.assertCaptureSandbox());}
     finally {if(previous===undefined)delete process.env[key];else process.env[key]=previous;}
   }
+  // The process preload prevents credential injection before the guard sees it.
+  process.env.SUPABASE_DB_PASSWORD="offline-sentinel";
+  assert.ok(process.env.SUPABASE_DB_PASSWORD===undefined,"durable credential must stay absent");
+  h.assertCaptureSandbox();
 
   for(const name of ["named","decline","contextual"]){
     const fixture=await h.createCaptureBehaviorFixture(name);let calls=0;

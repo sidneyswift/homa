@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { NextResponse } from "next/server";
 
 import {
   ABILITY_CONTEXT_COOKIE,
@@ -29,4 +30,13 @@ test("ability context cookie drops malformed or oversized values", () => {
     ),
     null,
   );
+});
+
+test("ability context survives the real Next response cookie serializer", () => {
+  const response = NextResponse.next();
+  response.cookies.set(ABILITY_CONTEXT_COOKIE, encodeAbilityContext(value), {
+    httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 300,
+  });
+  const requestCookie = response.headers.get("set-cookie")?.split(";")[0] ?? null;
+  assert.deepEqual(readAbilityContextCookie(requestCookie), value);
 });

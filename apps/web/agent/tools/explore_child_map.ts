@@ -10,8 +10,7 @@ import {
   type AgentAccess,
 } from "../../lib/agent-db";
 import { getChildProgressView } from "../../lib/child-progress/runtime";
-import { readCanonicalChildMap } from "../../lib/map/canonical-explore";
-import type { ExploreChildMapQuery } from "../../lib/map/explore-child-map";
+import { canonicalProgressUnavailable, readCanonicalChildMap, type CanonicalChildMapQuery } from "../../lib/map/canonical-explore";
 
 /**
  * Read-only exploration of one child's learning map: the anchored
@@ -46,6 +45,7 @@ const exploreToolInputSchema = z
     query: z
       .enum([
         "subject_map",
+        "saved_answers",
         "topic",
         "ready_next",
         "bottleneck",
@@ -53,13 +53,13 @@ const exploreToolInputSchema = z
         "search_topics",
       ])
       .describe(
-        "subject_map (needs subjectId): the checklist ladder with the child's answers, canonical comparison and credited evidence, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words.",
+        "saved_answers (needs subjectId): only the child's saved answers, exact dates/provenance, complete counts and scoped conflicts; no unassessed catalog. subject_map (needs subjectId): the checklist ladder with the child's answers, canonical comparison and credited evidence, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words.",
       ),
     childId: z
       .string()
       .uuid()
       .describe("A child id from the family context block."),
-    subjectId: subjectIdSchema.optional(),
+    subjectId: subjectIdSchema.optional().describe("The canonical subject id to read."),
     domainId: subjectIdSchema.optional(),
     topicId: topicIdSchema
       .optional()
@@ -72,6 +72,7 @@ const exploreToolInputSchema = z
 
 const exploreQuerySchema = z.discriminatedUnion("query", [
   z.object({ query: z.literal("subject_map"), subjectId: subjectIdSchema }).strict(),
+  z.object({ query: z.literal("saved_answers"), subjectId: subjectIdSchema }).strict(),
   z.object({ query: z.literal("topic"), topicId: topicIdSchema }).strict(),
   z
     .object({
@@ -100,7 +101,7 @@ const exploreQuerySchema = z.discriminatedUnion("query", [
 
 export default defineBoundedTool({
   description:
-    "Explore one child's learning map, read-only. For interpreting its comparison or evidence, load progress-reading. Use it to answer where a child is, what is missing, what comes next and why; the query values describe themselves. It never records anything; save evidence with manage_child_progress.",
+    "Read one child's canonical evidence or explore the learning map, read-only. progress-reading owns explaining comparisons; progress-next-move owns activity advice from saved evidence. The query selects the exact projection. It never records anything; save evidence with manage_child_progress.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: exploreToolInputSchema,
@@ -125,7 +126,7 @@ export default defineBoundedTool({
     if (!parsedQuery.success) {
       return {
         error: "invalid_query",
-        note: "That query is missing its required fields. subject_map needs subjectId; topic and bottleneck need topicId; teaching_order needs topicIds; search_topics needs searchText.",
+        note: "That query is missing its required fields. saved_answers and subject_map need subjectId; topic and bottleneck need topicId; teaching_order needs topicIds; search_topics needs searchText.",
       };
     }
 
@@ -134,11 +135,11 @@ export default defineBoundedTool({
     if (access.mode === "caller") {
       const child = await access.db.from("children").select("id")
         .eq("id", input.childId).eq("family_id", access.familyId).maybeSingle();
-      if (child.error) return { error: "progress_unavailable", note: "The current Progress reading could not be checked. Try again." };
+      if (child.error) return canonicalProgressUnavailable();
       if (!child.data) return { error: "unknown_child", note: "That child is not available in this family. Use an authenticated child ID." };
     }
     return readCanonicalChildMap(
-      { familyId: access.familyId, childId: input.childId, query: parsedQuery.data as ExploreChildMapQuery },
+      { familyId: access.familyId, childId: input.childId, query: parsedQuery.data as CanonicalChildMapQuery },
       { getView: getChildProgressView },
     );
   },

@@ -4,9 +4,43 @@ import ts from "typescript";
 import { z } from "zod";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readCanonicalChildMap } from "./canonical-explore";
+import { canonicalProgressUnavailable, readCanonicalChildMap } from "./canonical-explore";
 import { comparisonFixture, COMPARISON_CHILD, COMPARISON_FAMILY } from "../child-progress/comparison-fixture";
 import { buildProgressComparison } from "../child-progress/comparison";
+import { NEXT_MOVE_CHILD, NEXT_MOVE_FAMILY, nextMoveChatScenario, nextMoveState } from "../../evals/progress-next-move/chat-fixture";
+
+test("saved evidence projection retains exact incomplete counts and excludes unassessed curriculum",async()=>{
+ const state=nextMoveState(nextMoveChatScenario("incomplete_easy").ledger);
+ const result=await readCanonicalChildMap({familyId:NEXT_MOVE_FAMILY,childId:NEXT_MOVE_CHILD,query:{query:"saved_answers",subjectId:"math"}},{getView:async()=>state.view});
+ assert.ok("coverage" in result && result.coverage);
+ assert.equal(result.coverage,"partial");assert.deepEqual(result.answerCounts,{easily:24,getting_there:0,not_yet:1});
+ assert.equal(result.savedAnswers.total,25);assert.equal(result.savedAnswers.omitted,1);
+ assert.equal(result.savedAnswers.answers.length,24);assert.ok(result.savedAnswers.answers.every(answer=>answer.answer==="easily"));
+ assert.equal(result.childId,NEXT_MOVE_CHILD);assert.equal(result.subjectId,"math");
+ assert.equal("ladder" in result,false);assert.equal("domains" in result,false);assert.equal("comparison" in result,false);
+});
+test("saved evidence keeps selected-subject conflicting dates and derivation without quoting private text",async()=>{
+ const state=nextMoveState(nextMoveChatScenario("conflict_with_easy").ledger);
+ const result=await readCanonicalChildMap({familyId:NEXT_MOVE_FAMILY,childId:NEXT_MOVE_CHILD,query:{query:"saved_answers",subjectId:"fine_motor"}},{getView:async()=>state.view});
+ assert.ok("coverage" in result && result.coverage);
+ assert.equal(result.conflicts.total,1);assert.equal(result.conflicts.items.length,1);assert.equal(result.conflicts.omitted,0);
+ assert.equal(result.conflicts.items[0]!.itemId,"fine_motor.cuts-curves");
+ assert.deepEqual(result.conflicts.items[0]!.answers.map(answer=>({answer:answer.answer,derivation:answer.derivation,observedAt:answer.observedAt})),[
+  {answer:"easily",derivation:"direct",observedAt:"2026-09-04T16:00:00.000Z"},
+  {answer:"not_yet",derivation:"direct",observedAt:"2026-09-04T16:00:00.000Z"},
+ ]);
+ assert.equal(result.savedAnswers.total,1);assert.deepEqual(result.answerCounts,{easily:1,getting_there:0,not_yet:0});
+ assert.ok(!JSON.stringify(result).includes('"quote"'));
+ const other=await readCanonicalChildMap({familyId:NEXT_MOVE_FAMILY,childId:NEXT_MOVE_CHILD,query:{query:"saved_answers",subjectId:"math"}},{getView:async()=>state.view});
+ assert.ok("coverage" in other && other.coverage);assert.equal(other.conflicts.total,0);
+});
+test("evidence-only reads preserve unavailable, unknown and exact subject failures",async()=>{
+ const input={familyId:NEXT_MOVE_FAMILY,childId:NEXT_MOVE_CHILD,query:{query:"saved_answers",subjectId:"fine_motor"} as const};
+ assert.equal((await readCanonicalChildMap(input,{getView:async()=>null})).error,"unknown_child");
+ assert.equal((await readCanonicalChildMap(input,{getView:async()=>{throw new Error("offline");}})).error,"progress_unavailable");
+ const state=nextMoveState(nextMoveChatScenario("fresh_motor").ledger);
+ assert.equal((await readCanonicalChildMap({...input,query:{query:"saved_answers",subjectId:"invented"}},{getView:async()=>state.view})).error,"unknown_subject");
+});
 test("scoped canonical read and exact subject comparison match web receipt", async()=>{
  const view=comparisonFixture([{itemId:"math.comparing-groups-more-or-fewer"}],{ageMonths:24});
  const result=await readCanonicalChildMap({familyId:COMPARISON_FAMILY,childId:COMPARISON_CHILD,query:{query:"subject_map",subjectId:"math"}},{getView:async(f,c)=>{assert.equal(f,COMPARISON_FAMILY);assert.equal(c,COMPARISON_CHILD);return view;}});
@@ -49,7 +83,7 @@ test("actual tool keeps caller RLS child gate and authenticated family binding o
   "zod":{z},"../../lib/agent-tool-deadline":{defineBoundedTool:(definition:unknown)=>definition,TOOL_DEADLINE:{quick:5000}},
   "../../lib/agent-db":{MissingFamilyContextError,resolveAgentAccess:async()=>access},
   "../../lib/child-progress/runtime":{getChildProgressView:async(f:string,c:string)=>{calls++;assert.equal(f,COMPARISON_FAMILY);assert.equal(c,COMPARISON_CHILD);return comparisonFixture();}},
-  "../../lib/map/canonical-explore":{readCanonicalChildMap},
+  "../../lib/map/canonical-explore":{readCanonicalChildMap, canonicalProgressUnavailable},
  };
  const source=readFileSync(new URL("../../agent/tools/explore_child_map.ts",import.meta.url),"utf8");
  const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;

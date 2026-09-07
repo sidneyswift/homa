@@ -5,7 +5,7 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
-import { learningOperationFailure, sourceActivityOrdinalSchema } from "../../lib/learning-write-operations";
+import { hasAcceptedLearningWriteOperation, learningOperationFailure, sourceActivityOrdinalSchema } from "../../lib/learning-write-operations";
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
 import { emitMapEvent } from "../../lib/map/events";
 import {
@@ -47,8 +47,7 @@ const inputSchema = z
     childIds: z
       .array(z.string().uuid())
       .max(12)
-      .optional()
-      .describe("Every participating child id from family context. Omit for genuinely whole-family learning."),
+      .describe("Explicitly choose every participating child id from family context on each call. Repeat the child's id for every separate activity they did. Use an empty array only for genuinely whole-family learning, never as a substitute for a named child."),
     durationMinutes: z
       .number()
       .int()
@@ -133,7 +132,11 @@ export default defineBoundedTool({
             activityDate: input.activityDate,
           }),
         ]);
-        if (logged.length > 0 || scheduled.length > 0) {
+        if ((logged.length > 0 || scheduled.length > 0) && !await hasAcceptedLearningWriteOperation({
+          familyId: access.familyId,
+          key: idempotencyKey,
+          sourceMessageId: trusted.sourceMessageId,
+        })) {
           return {
             recorded: false,
             possibleDuplicate: true,

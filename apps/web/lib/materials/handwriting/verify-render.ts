@@ -64,6 +64,12 @@ export async function verifyHandwritingLayout(page: Page, expected: readonly Han
         if (style.transform !== "none" || style.translate !== "none" || style.rotate !== "none" || style.scale !== "none" || Number(style.zoom) !== 1 || style.perspective !== "none") failures.push(`Row ${row.id} has a transformed ancestor.`);
         if (style.display === "none" || style.visibility !== "visible" || Number(style.opacity) !== 1 || style.filter !== "none" || style.clipPath !== "none" || style.maskImage !== "none" || style.mixBlendMode !== "normal" || style.clip !== "auto" || style.contentVisibility !== "visible" || style.contain.includes("paint") || !["none", ""].includes(style.getPropertyValue("-webkit-box-reflect"))) failures.push(`Row ${row.id} has hidden or altered paint.`);
         if (parent === element && (style.objectFit !== "fill" || !["normal", "none"].includes(style.content) || !["none", ""].includes(style.getPropertyValue("object-view-box")) || [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomLeftRadius, style.borderBottomRightRadius].some((radius) => radius !== "0px") || parseFloat(style.paddingTop) || parseFloat(style.paddingRight) || parseFloat(style.paddingBottom) || parseFloat(style.paddingLeft) || parseFloat(style.borderTopWidth) || parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth) || parseFloat(style.borderLeftWidth))) failures.push(`Row ${row.id} has altered image framing.`);
+        // The image already has exact dimensions and unchanged framing. Its
+        // default overflow:clip cannot crop that same image box. clientHeight
+        // rounds fractional heights, so comparing the image to itself falsely
+        // rejected a 178.25px row as clipped to 178px. Real ancestors still need
+        // their clipping checks, including subpixel crops.
+        if (parent === element) continue;
         const clipLeft = rect.left + parent.clientLeft;
         const clipTop = rect.top + parent.clientTop;
         const clipRight = clipLeft + parent.clientWidth;

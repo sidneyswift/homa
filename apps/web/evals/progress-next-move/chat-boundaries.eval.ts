@@ -9,7 +9,7 @@ export default defineEval({
   async test(t) {
     const blocker = chatNextMoveEvalBlocker();
     if (blocker) { t.skip(blocker); return; }
-    for (const scenario of ["all_easy", "conflict", "conflict_with_easy", "ambiguous_child", "post_save_offer", "read_unavailable", "incomplete_easy"] as const) {
+    for (const scenario of ["all_easy", "conflict", "conflict_with_easy", "ambiguous_child", "post_save_offer", "read_unavailable", "incomplete_easy", "decline"] as const) {
       const result = await runChatNextMoveEval(scenario, event => t.log(JSON.stringify(event)));
       const findings = chatNextMoveFindings(result);
       t.log(JSON.stringify(result));

@@ -60,8 +60,31 @@ either way.
 1. **Use the current parent message as evidence.** Record only what she said
    happened or asked to place on a date. Give every call an exact sourceQuote
    from that message. Never convert a suggestion from Homa into family history.
+   Choose the participating children before the first write. Every activity
+   needs its own explicit childIds array: two sessions for one child repeat
+   that child's id in both calls. An empty array means whole-family learning,
+   not an omitted or uncertain participant. Ask when the audience is unclear.
    Read `references/hours-identity.md` before capture or completion: it owns
    distinct activities, retry identity, existing records, and honest failures.
+   **Resolve a referring phrase before any write.** "That book took 40 minutes"
+   supplies time, but it does not choose between two books mentioned earlier.
+   If several works are plausible, ask which one before calling any writer.
+   A single earlier Homa suggestion is not a verified parent title either;
+   ask the parent to confirm what they actually used.
+   For one unambiguous earlier parent title, first open its saved Planner
+   activity and complete that owned item, if there is one. For a standalone
+   Hours entry, call recall and take the earlier `parent_message` source ID,
+   exact quote, and exact title span into log_hours.workContext. Keep the
+   current duration in sourceQuote. **This includes an earlier message still
+   visible in this conversation.** Seeing its title tells you what the parent
+   means, but it does not supply the canonical message ID needed by the saved
+   receipt. Recall retrieves that ID; it is not a question you need to ask the
+   parent again. In this case workContext cannot be null. For example, recall
+   the visible book title, then pass the returned source.id as
+   workContext.sourceMessageId with its exact quote and title span.
+   Putting a remembered title only in note
+   loses its source and is not a valid substitute. If recall returns no usable
+   parent source, ask for the title instead of guessing or saving a vague row.
 2. **Choose the existing item when there is one.** If she says "we finished
    the worksheet" or names work likely already planned, call open_planner and
    identify one exact row. A stable learningActivity uses its id. A generated
@@ -84,9 +107,10 @@ either way.
    retrying; only retry record_planner_activity with confirmNotDuplicate:
    true when the candidate is genuinely a different lesson, such as two
    distinct named activities in the same subject on the same day.
-4. **Name every participating child.** Use child ids from family context. An
-   empty child list means the whole family, not "I am not sure which child."
-   Ask one short question when the audience is genuinely unclear.
+4. **Check each receipt against the participants you chose in step 1.** Do not
+   tell the parent a row belongs to a child when the returned childIds are empty
+   or different. A wrong saved audience needs the normal correction path,
+   not another capture with a new ordinal.
 5. **Classify the school subject faithfully.** Gymnastics can be PE, piano can
    be music, cooking can be life skills, when the parent presents it as school
    learning. The model makes that judgment; the tool verifies the closed
@@ -97,6 +121,12 @@ either way.
    long?" is useful when compliance time matters and the moment allows it.
 7. **Confirm briefly.** Name what landed, for whom, the date, and whether it is
    planned or finished. Do not make her repeat the list back to you.
+
+For example, after "We read Narnia and Make Way for Ducklings," a later
+"That book took 40 minutes" needs one question: which book? After a parent
+named only Make Way for Ducklings, recall its canonical parent source and log
+the 40 minutes with workContext. An earlier "You could try Narnia" from Homa
+does not establish what the family read.
 
 A completion means the work happened. It does not mean the child mastered a
 skill. Never update ChildProgress merely because a Planner activity was

@@ -1,5 +1,5 @@
 ---
-description: Use when a parent asks what to try next with a child, including when the saved skills are already easy, evidence is incomplete or conflicting, or suggested practice no longer fits. Also use for accepted next-step offers and deciding whether to offer help after a confirmed progress save. Not for asking assessment questions, explaining a score, creating a material, scheduling work, or adding periodic reviews; progress-check-in, progress-reading, materials-studio, and planner own those jobs.
+description: Use when a parent asks what a child should work on or try next, even if the child or subject needs clarification, saved skills are already easy, evidence is incomplete or conflicting, or earlier practice no longer fits. Also use for accepted next-step offers, declining more practice, and deciding whether to offer help after a confirmed progress save. Not for asking assessment questions, explaining a score, creating a material, scheduling work, or adding periodic reviews; progress-check-in, progress-reading, materials-studio, and planner own those jobs.
 metadata:
   homa-tools: explore_child_map, verify_progress_next_move, persist_progress_next_move
   homa-related-skills: progress-check-in, materials-studio, planner
@@ -7,10 +7,29 @@ metadata:
 
 # One verified next move
 
-Choose the right endpoint for this turn: an acknowledgement or optional offer,
-one useful clarification, an honest stop, or one verified activity. An activity
-belongs only after the parent asks for one or accepts an offer. The result is
-not a curriculum, a score explanation, or a list of options.
+Help the parent avoid unnecessary work. A supported stop is as useful as an
+activity. In ordinary chat, follow these decisions in order:
+
+1. **Was help requested or accepted?** A decline ends with an acknowledgement.
+   A save receipt alone allows an optional offer, then end the turn.
+2. **Are child and subject clear?** If either is unclear, ask that one scope
+   question and end the turn. Resolve the child first: "Which child, Maya or
+   Finn?" Do not guess which child "she" means or add the subject question yet.
+3. **Read the canonical subject now.** Call `explore_child_map` with
+   `query: saved_answers`, including when the context already shows a conflict
+   or apparently easy answers. The context is a summary, not this read.
+4. **Choose one endpoint from that read.** For a failed read, relay its
+   parentMessage and end. A conflict needs one clarification. An incomplete
+   inventory with no suitable returned target needs one recent-example or
+   scope question. Stale or unknown evidence needs one update. A complete,
+   fresh, known all-easy inventory goes to the verified-stop endpoint below.
+5. **Only a supported target gets an activity.** Choose and verify one fresh
+   Getting there or Not yet item before sharing the activity.
+
+Once an endpoint says to end, finish the reply there. The September 5 cutting
+report was harmed by supplying more work despite evidence it was unnecessary.
+A clarification ends at its question, without promising that the answer will
+lead to an activity; an easy answer may instead establish a supported stop.
 
 ## Enter at the right moment
 
@@ -36,20 +55,21 @@ Use the subject she named or the one already in the current discussion. If
 there is no clear subject, ask one short scope question instead of scanning
 every child and subject.
 
-In ordinary parent chat, call `explore_child_map` with `query: subject_map`
-for that exact child and subject before choosing an activity. Read its
+In ordinary parent chat, use the canonical read from step 3. Read its
 `savedAnswers`: itemId, statement, answer, observedAt and derivation. The
 family-context summary can omit whole subjects, including music and motor;
 omitted context is not missing evidence. The catalog ladder and a comparison's
 winning basis are not the complete saved-answer inventory.
 
-Check `comparison.openConflicts` before interpreting the saved-answer list.
-Conflicting items are excluded from `savedAnswers`, so a complete list of easy
+Check `conflicts.total` before interpreting the saved-answer list.
+The reader supplies each conflicting item and both dated source answers in
+`conflicts.items`. Conflicting items are excluded from `savedAnswers`, so a complete list of easy
 answers can still sit beside an unresolved conflict. When the selected subject
 has a conflict, ask one useful question about the current ability and stop;
 do not call that subject all-easy or empty.
 
-Respect `savedAnswers.omitted`. Use a returned eligible item when one fits;
+Check `coverage`, `answerCounts` and `savedAnswers.omitted` before reading the
+individual answers. Counts cover the whole saved inventory, not just this slice. Use a returned eligible item when one fits;
 do not infer "all easy" or "nothing saved" from an incomplete list. If the
 returned slice has no suitable target, say it does not establish one and ask
 one useful scope or recent-example question. A failed canonical read is
@@ -75,12 +95,17 @@ call the chat reader or expand its target set.
   Use the existing capture path for a concrete current claim, re-read after
   the confirmed save, or ask one useful clarification if it is still unclear.
 
-When every answer in the complete selected-subject inventory is fresh, known
-and `easily`, say those saved skills are already easy and there is no supported
-practice target here. That is a complete answer to the next-step request:
-stop before proposing to the verifier, and do not substitute unverified
-practice or a harder target after a refusal. Do not ask her to prove those
-answers again. A mixed stale/unknown inventory is not all-easy.
+### Verified stop
+
+When the complete selected-subject inventory is fresh, known and all `easily`,
+call `verify_progress_next_move` with the childId and
+`decision: { kind: all_easy_stop, subjectId }`. It rechecks the complete current ledger. On a verified stop,
+acknowledge those saved abilities and end the reply. For example: "Both saved
+cutting skills are already easy for Maya. I wouldn't add a scissors drill here."
+That is the whole endpoint, including when she explicitly asked what to try next.
+Do not relabel extra practice as crafts, maintenance, enrichment or an optional
+idea. A rejection explains the actual limit; it is not an invitation to improvise.
+The receipt establishes neither whole-subject mastery nor an unassessed extension.
 
 `ask_next` is an assessment question, not an instructional target. A graph
 `ready_next` result is not this verifier's approval for an unassessed extension.
@@ -90,9 +115,9 @@ card. Broader verified next-skill extensions need their own capability.
 ## Choose and verify one candidate
 
 Choose one exact fresh saved `getting_there` or `not_yet` item. Call
-`verify_progress_next_move` before showing the activity. Include:
+`verify_progress_next_move` with the childId and `decision.kind: activity`
+before showing it. The decision contains:
 
-- The authenticated child id.
 - That target's real itemId, never a storage-row id or an invented id.
 - One to three fresh current evidence itemIds in the same subject, including
   the target itself.
@@ -116,9 +141,12 @@ the task fingerprint and saves the stable result.
   with help on unfamiliar words is usable. Keep support warm, never a verdict.
 - Match the exact target. Counting five objects is not comparing groups,
   counting backward, or deciding how many remain after hiding one.
+- State only capabilities with their own saved answer. Working on curves does
+  not establish mastery of straight lines; a prerequisite graph is not evidence.
 - The reason names the saved observation, how it was learned, and its date.
-  Direct means shared directly; inferred means Homa matched it from what was
-  shared. Never present inferred evidence as parent-confirmed. No raw quote
+  Direct means the parent shared the answer directly; inferred means Homa
+  matched it from what was shared. Preserve this distinction in both directions.
+  Say "You shared..." for direct evidence and "Homa matched..." for inferred. Never present inferred evidence as parent-confirmed. No raw quote
   is available unless an actual source read supplies it.
 - Do not turn age, chart credit, or typical teaching windows into readiness.
 
@@ -157,8 +185,7 @@ there, re-read and verify a curves target. Do not keep the straight-line drill.
 **Current strength:** all current saved counting skills in the complete read
 are Easily. More counting is not needed just because a suggestion was requested.
 Comparing groups would be a different skill. Explain the supported stop.
-For the equivalent complete cutting record: "Both saved cutting skills are
-already easy for Maya. I wouldn't add a scissors drill here." End there.
+Use the verified-stop endpoint for that complete record.
 
 **Young child:** a recent direct answer says three-year-old Noor is Getting
 there with counting five objects. One candidate uses five socks on the floor

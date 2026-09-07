@@ -19,6 +19,7 @@ import { createProgressToolContext, manageChildProgressInputSchema, manageChildP
 import { DURABLE_WRITE_ENV_VARS, isEvalIsolationActive } from "../../lib/eval-isolation";
 import { mapDb } from "../../lib/map/db";
 import { zonedDateString } from "../../lib/time-zone";
+import { focusedSkillContext } from "../helpers/skill-context";
 
 export const captureBehaviorCases = {
   named: {
@@ -50,7 +51,7 @@ export function assertCaptureSandbox(): string {
   assert.equal(url.protocol, "postgres:");
   assert.equal(url.pathname, "/homa_eval");
   assert.equal(url.username, "homa_eval");
-  for (const key of DURABLE_WRITE_ENV_VARS) assert.equal(process.env[key], undefined, `Durable production credential must be absent: ${key}`);
+  for (const key of DURABLE_WRITE_ENV_VARS) assert.ok(process.env[key] === undefined, `Durable production credential must be absent: ${key}`);
   assert.equal(process.env.HOMA_LIVE_PROGRESS_ENABLED, "true");
   assert.equal(process.env.HOMA_CLAIM_EXTRACTION_ENABLED, "true");
   return raw;
@@ -154,11 +155,12 @@ export async function runCaptureBehavior(name: CaptureBehaviorCase, signal: Abor
   const fixture=await createCaptureBehaviorFixture(name);
   const skill=await readFile(resolve(process.cwd(),"agent/skills/progress-capture/SKILL.md"),"utf8");
   const laws=await readFile(resolve(process.cwd(),"agent/instructions.md"),"utf8");
+  const skillContext=focusedSkillContext("progress-capture",skill);
   const calls:CaptureCall[]=[];let loaded=false,attempts=0;
   const result=await generateText({model:HOMA_MODEL,maxRetries:0,maxOutputTokens:1200,stopWhen:stepCountIs(4),abortSignal:AbortSignal.any([signal,AbortSignal.timeout(90_000)]),
-    system:[laws,"This is an isolated post-authentication parent conversation. Load progress-capture before responding. The tools below are the available effects; do not simulate an unavailable effect.",JSON.stringify({children:fixture.roster,selectedChildId:fixture.childId})].join("\n\n"),
+    system:[laws,"This is an isolated post-authentication parent conversation. The tools below are the available effects; do not simulate an unavailable effect.",JSON.stringify({children:fixture.roster,selectedChildId:fixture.childId}),skillContext.announcement].join("\n\n"),
     messages:[...(fixture.previous?[{role:"assistant" as const,content:fixture.previous.text}]:[]),{role:"user",content:fixture.scenario.message}],
-    tools:{load_skill:tool({description:"Load a fleet procedure.",inputSchema:z.object({skill:z.literal("progress-capture")}),execute:async input=>{assert.equal(loaded,false);loaded=true;const output={content:skill};calls.push({name:"load_skill",input,output});return output;}}),
+    tools:{load_skill:tool({description:skillContext.loadDescription,inputSchema:z.object({skill:z.literal("progress-capture")}),execute:async input=>{assert.equal(loaded,false);loaded=true;const output=skillContext.body;calls.push({name:"load_skill",input,output});return output;}}),
       manage_child_progress:tool({description:"Record the authenticated current parent report. Only the actual returned result establishes saved evidence.",inputSchema:manageChildProgressToolInputSchema,execute:async input=>{
         const call:CaptureCall={name:"manage_child_progress",input};calls.push(call);
         try{assert.ok(loaded);assert.equal(++attempts,1,"One operation per current report");call.output=await fixture.execute(input);return call.output;}
@@ -166,7 +168,8 @@ export async function runCaptureBehavior(name: CaptureBehaviorCase, signal: Abor
       }})},
   });
   const durable=await fixture.durableReceipt();
-  return {fixture,result,calls,durable};
+  const response=result.steps.map(step=>step.text).filter(text=>text.length>0).join("\n\n");
+  return {fixture,result,response,calls,durable};
 }
 
 /** Tool errors cannot disappear into a later successful model reply. */
