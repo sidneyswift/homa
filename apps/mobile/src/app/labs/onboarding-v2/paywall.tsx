@@ -37,6 +37,12 @@ const FEATURES = ["Every day of the week, not just Monday", "All sixteen subject
  * version showed two static cards with one CTA and no way to tell which
  * plan it charged). The CTA's own fine print now names the selected
  * plan's real terms, never a generic line that could apply to either.
+ *
+ * posture="plain", no mascot: the real Keiki paywall (read directly,
+ * 2026-09-07) has no character on it anywhere, one of exactly four
+ * screens in the whole reference that drop it. Plans sit side by side,
+ * not stacked, the other half of why the old version needed a scroll to
+ * see everything a single Keiki paywall frame shows at once.
  */
 export default function PaywallScreen() {
   const router = useRouter();
@@ -54,10 +60,9 @@ export default function PaywallScreen() {
 
   return (
     <OnboardingStage
-      posture="big"
-      characterState="speaking"
+      posture="plain"
       bubbleKey="paywall"
-      bubble={`Keep building with ${name}. The rest of the week and every subject in the report, unlocked.`}
+      bubble={`Keep building with ${name}`}
       footer={
         <View style={{ gap: v2Space.sm }}>
           <PrimaryButton label="Start free trial" onPress={accept} />
@@ -76,38 +81,40 @@ export default function PaywallScreen() {
           </View>
         ))}
 
-        {(Object.keys(PLANS) as Plan[]).map((key) => {
-          const selected = plan === key;
-          const info = PLANS[key];
-          return (
-            <Pressable
-              key={key}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              onPress={() => setPlan(key)}
-              style={{
-                backgroundColor: selected ? v2Colors.midnight : v2Colors.paper,
-                borderRadius: v2Radii.card,
-                borderCurve: "continuous",
-                borderWidth: selected ? 2 : 1,
-                borderColor: selected ? v2Colors.coral : v2Colors.border,
-                padding: v2Space.lg,
-                gap: v2Space.xs,
-                marginTop: v2Space.sm,
-              }}
-            >
-              <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
-                {info.label}
-              </NativeText>
-              <NativeText style={[v2Type.hero, { color: selected ? v2Colors.onMidnight : v2Colors.ink }]}>
-                {info.price}
-              </NativeText>
-              <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
-                {info.sub}
-              </NativeText>
-            </Pressable>
-          );
-        })}
+        <View style={{ flexDirection: "row", gap: v2Space.sm, marginTop: v2Space.sm }}>
+          {(Object.keys(PLANS) as Plan[]).map((key) => {
+            const selected = plan === key;
+            const info = PLANS[key];
+            return (
+              <Pressable
+                key={key}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                onPress={() => setPlan(key)}
+                style={{
+                  flex: 1,
+                  backgroundColor: selected ? v2Colors.midnight : v2Colors.paper,
+                  borderRadius: v2Radii.card,
+                  borderCurve: "continuous",
+                  borderWidth: selected ? 2 : 1,
+                  borderColor: selected ? v2Colors.coral : v2Colors.border,
+                  padding: v2Space.md,
+                  gap: v2Space.xs,
+                }}
+              >
+                <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
+                  {info.label}
+                </NativeText>
+                <NativeText style={[v2Type.control, { color: selected ? v2Colors.onMidnight : v2Colors.ink }]}>
+                  {info.price}
+                </NativeText>
+                <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
+                  {info.sub}
+                </NativeText>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </OnboardingStage>
   );

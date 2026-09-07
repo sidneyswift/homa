@@ -17,6 +17,7 @@
  * the same shrink-and-dock and grow-in feeling without the measurement
  * plumbing. Close the gap at graduation if the felt difference matters.
  */
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, View, type ViewStyle } from "react-native";
 import Animated, {
@@ -28,19 +29,30 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 import { HomaCharacter } from "../voice/homa-character";
 import type { CharacterState } from "../voice/character-state";
 import { NativeText } from "../../components/ui/semantic";
+import { useOnboardingV2 } from "./state";
 import { v2Colors, v2Radii, v2Space, v2Type } from "./theme";
 
 export const SETTLE = Easing.bezier(0.22, 0.8, 0.28, 1);
 export const SETTLE_MS = 350;
 export const BUBBLE_MS = 240;
 
-export type Posture = "big" | "docked";
+/**
+ * "plain" is a third posture, not a docked/big variant: no mascot, no
+ * speech bubble, just a plain heading. Measured off the real Keiki
+ * reference (12 screens read directly, 2026-09-07): Didi is on-screen for
+ * every conversational or data-collection moment, and gone specifically
+ * for evidence and transactional screens, an outcome chart, science
+ * citations, the account form, the paywall. Use "plain" for that
+ * category; it is not a style choice, it is what the reference actually
+ * does.
+ */
+export type Posture = "big" | "docked" | "plain";
 
 const BIG_SIZE = 132;
 const DOCKED_SIZE = 44;
@@ -170,6 +182,50 @@ function DockedProgressBar({ progress }: { progress: number }) {
   );
 }
 
+/**
+ * The lab's version of the real onboarding walk's floating restart pill
+ * ((onboarding)/_layout.tsx's DevRestartWalk, dev-only there since it
+ * touches a real family's server-side row; this lab has only in-memory
+ * state, so it can stay on unconditionally). Rendered in normal layout
+ * flow, not absolutely positioned: a fixed pixel offset could not clear
+ * all three postures' different header heights at once without
+ * overlapping one of them (found live, 2026-09-07, on the plain-posture
+ * paywall). Taking real space instead means it can never collide.
+ */
+function RestartLabRow({ posture }: { posture: Posture }) {
+  const router = useRouter();
+  const { reset } = useOnboardingV2();
+  // Big posture's SafeAreaView deliberately skips the top edge (the sky
+  // bleeds under the status bar), so this row has no inherited top inset
+  // there the way docked/plain get for free. Add the real inset by hand
+  // only in that case, or the pill renders straight under the status bar.
+  const insets = useSafeAreaInsets();
+  const extraTop = posture === "big" ? insets.top : 0;
+  return (
+    <View style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.sm + extraTop, alignItems: "flex-start" }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Restart the onboarding v2 lab"
+        onPress={() => {
+          reset();
+          router.replace("/labs/onboarding-v2");
+        }}
+        style={{
+          paddingHorizontal: v2Space.sm,
+          paddingVertical: 4,
+          borderRadius: v2Radii.pill,
+          borderWidth: 1,
+          borderColor: v2Colors.border,
+          backgroundColor: v2Colors.paper,
+          opacity: 0.85,
+        }}
+      >
+        <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>↺ restart lab</NativeText>
+      </Pressable>
+    </View>
+  );
+}
+
 export interface OnboardingStageProps {
   posture: Posture;
   /** 0..1, docked posture only. Segmented by phase, never by subject. */
@@ -218,6 +274,7 @@ export function OnboardingStage({
 
   const inner = (
     <>
+      <RestartLabRow posture={posture} />
       {posture === "docked" ? (
         <View style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.sm, gap: v2Space.sm }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -233,24 +290,40 @@ export function OnboardingStage({
             </View>
           </View>
         </View>
+      ) : posture === "plain" && onBack ? (
+        <View style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.sm }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack} hitSlop={12}>
+            <NativeText style={{ color: v2Colors.coral, fontFamily: v2Type.control.fontFamily }}>Back</NativeText>
+          </Pressable>
+        </View>
       ) : null}
 
-      <View
-        style={{
-          paddingHorizontal: v2Space.lg,
-          paddingTop: posture === "big" ? heroPaddingTop : v2Space.md,
-          flexDirection: posture === "docked" ? "row" : "column",
-          alignItems: posture === "docked" ? "flex-start" : "center",
-          gap: v2Space.md,
-        }}
-      >
-        <Mascot posture={posture} characterState={characterState} />
-        <View style={{ flex: posture === "docked" ? 1 : undefined, alignItems: posture === "docked" ? "flex-start" : "center" }}>
-          <Bubble tail={bubbleTail} bubbleKey={bubbleKey}>
-            {bubble}
-          </Bubble>
+      {posture === "plain" ? (
+        <View style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.lg }}>
+          {typeof bubble === "string" ? (
+            <NativeText style={[v2Type.hero, { color: v2Colors.ink, textAlign: "center" }]}>{bubble}</NativeText>
+          ) : (
+            bubble
+          )}
         </View>
-      </View>
+      ) : (
+        <View
+          style={{
+            paddingHorizontal: v2Space.lg,
+            paddingTop: posture === "big" ? heroPaddingTop : v2Space.md,
+            flexDirection: posture === "docked" ? "row" : "column",
+            alignItems: posture === "docked" ? "flex-start" : "center",
+            gap: v2Space.md,
+          }}
+        >
+          <Mascot posture={posture} characterState={characterState} />
+          <View style={{ flex: posture === "docked" ? 1 : undefined, alignItems: posture === "docked" ? "flex-start" : "center" }}>
+            <Bubble tail={bubbleTail} bubbleKey={bubbleKey}>
+              {bubble}
+            </Bubble>
+          </View>
+        </View>
+      )}
 
       <View style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.lg, flex: 1 }}>{children}</View>
     </>

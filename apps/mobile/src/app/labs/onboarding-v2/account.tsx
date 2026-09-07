@@ -2,10 +2,11 @@ import { useRouter } from "expo-router";
 import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
+import { NativeText } from "../../../components/ui/semantic";
 import { OnboardingStage } from "../../../features/onboarding-v2/Stage";
 import { PrimaryButton } from "../../../features/onboarding-v2/controls";
 import { useOnboardingV2 } from "../../../features/onboarding-v2/state";
-import { v2Colors, v2Space } from "../../../features/onboarding-v2/theme";
+import { v2Colors, v2Space, v2Type } from "../../../features/onboarding-v2/theme";
 
 /** Simple leading glyphs, not exact trademark reproductions: this screen
  * never ships, and the gauntlet-loop critique's real point was that three
@@ -58,6 +59,10 @@ function EmailGlyph() {
  * (features/auth). Functionally inert: v2.0 has no backend (state.tsx's
  * own header comment), so every door leads to the same place. Wiring these
  * to real Supabase anonymous-identity linking is v2.1 scope.
+ *
+ * posture="plain", no mascot: the real Keiki account-signup screen (read
+ * directly, 2026-09-07) is a bare form, no character, a plain two-tier
+ * heading instead. Same category as the paywall right after it.
  */
 export default function AccountScreen() {
   const router = useRouter();
@@ -70,14 +75,19 @@ export default function AccountScreen() {
 
   return (
     <OnboardingStage
-      posture="docked"
-      characterState="listening"
+      posture="plain"
       onBack={() => router.back()}
-      progress={0.97}
       bubbleKey="account"
-      bubble={`Save ${name}'s week so it's here tomorrow.`}
+      bubble={
+        <View style={{ gap: v2Space.xs }}>
+          <NativeText style={[v2Type.hero, { color: v2Colors.ink, textAlign: "center" }]}>Last step</NativeText>
+          <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted, textAlign: "center" }]}>
+            {`Save ${name}'s week so it's here tomorrow.`}
+          </NativeText>
+        </View>
+      }
     >
-      <View style={{ gap: v2Space.sm }}>
+      <View style={{ gap: v2Space.sm, paddingTop: v2Space.lg }}>
         <PrimaryButton label="Continue with Apple" icon={<AppleGlyph />} onPress={claim} />
         <PrimaryButton label="Continue with Google" icon={<GoogleGlyph />} onPress={claim} />
         <PrimaryButton label="Continue with email" icon={<EmailGlyph />} onPress={claim} />
