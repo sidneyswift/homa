@@ -576,7 +576,7 @@ export function AbilitiesExplorer({
               x2={ageBandStart}
               y1={PLOT_TOP - 12}
               y2={PLOT_BOTTOM + 12}
-              stroke="var(--sky-600)"
+              stroke="var(--info)"
               strokeDasharray="7 7"
               strokeOpacity="0.6"
             />
@@ -585,7 +585,7 @@ export function AbilitiesExplorer({
               x2={ageBandEnd}
               y1={PLOT_TOP - 12}
               y2={PLOT_BOTTOM + 12}
-              stroke="var(--sky-600)"
+              stroke="var(--info)"
               strokeDasharray="7 7"
               strokeOpacity="0.6"
             />
@@ -593,7 +593,7 @@ export function AbilitiesExplorer({
               x={(ageBandStart + ageBandEnd) / 2}
               y={PLOT_TOP - 18}
               textAnchor="middle"
-              fill="var(--sky-600)"
+              fill="var(--info)"
               fontSize="14"
               fontWeight="700"
             >
