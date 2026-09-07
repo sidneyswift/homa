@@ -1,0 +1,203 @@
+[
+  {
+    "id": "rename",
+    "prompt": "Rename our Foreign language category Portuguese to Brazilian Portuguese. Keep all its existing time.",
+    "text": "Done, renamed to Brazilian Portuguese under Foreign language. All the logged time on that category stays right where it is.",
+    "calls": [
+      {
+        "name": "load_skill",
+        "input": {
+          "skill": "hours-records"
+        },
+        "output": {
+          "loadedSkillBodySha256": "7b9f8ce6fcd7e26f98f8ced05268065cb0c85d3c93e850cc70fc8d1c17bb4cec"
+        }
+      },
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "list",
+          "subject": "spanish"
+        },
+        "output": {
+          "status": "ready",
+          "complete": true,
+          "categories": [
+            {
+              "id": "f54e111b-94bc-4bc0-838f-c0fc61276269",
+              "subject": "spanish",
+              "name": "Portuguese",
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "id": "ea897a2c-39a1-4cf5-b8f0-35139b705610",
+              "subject": "spanish",
+              "name": "Spanish",
+              "subjectLabel": "Foreign language"
+            }
+          ]
+        }
+      },
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "rename",
+          "subject": "spanish",
+          "name": "Brazilian Portuguese",
+          "categoryId": "f54e111b-94bc-4bc0-838f-c0fc61276269",
+          "expectedName": "Portuguese"
+        },
+        "output": {
+          "status": "saved",
+          "category": {
+            "id": "f54e111b-94bc-4bc0-838f-c0fc61276269",
+            "subject": "spanish",
+            "name": "Brazilian Portuguese"
+          }
+        }
+      }
+    ],
+    "judge": {
+      "pass": true,
+      "findings": [
+        "List called before rename with correct subject spanish",
+        "Correct categoryId (f54e111b...) matching Portuguese under Foreign language used for rename",
+        "expectedName correctly set to 'Portuguese' matching the listed current name",
+        "Rename output status is 'saved', confirming a successful receipt before candidate claimed success",
+        "No log_hours or additional Hours-creating calls were made, so no new Hours rows",
+        "Candidate's claim that logged time stays in place is consistent with rename-only operation not touching entries"
+      ],
+      "evidenceQuote": "Done, renamed to Brazilian Portuguese under Foreign language. All the logged time on that category stays right where it is."
+    },
+    "exact": [],
+    "usage": {
+      "inputTokens": 303176,
+      "inputTokenDetails": {
+        "noCacheTokens": 303176,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 427,
+      "outputTokenDetails": {
+        "textTokens": 354,
+        "reasoningTokens": 73
+      },
+      "totalTokens": 303603
+    },
+    "judgeUsage": {
+      "inputTokens": 2800,
+      "inputTokenDetails": {
+        "noCacheTokens": 2800,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 226,
+      "outputTokenDetails": {
+        "textTokens": 226,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3026,
+      "raw": {
+        "input_tokens": 2800,
+        "output_tokens": 226,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  },
+  {
+    "id": "empty-create",
+    "prompt": "Create an unused category called Literature under Language arts so I can log time there later.",
+    "text": "Done, Literature is ready under Language arts, with no time logged there yet. Just tell me when you want to log something to it.",
+    "calls": [
+      {
+        "name": "load_skill",
+        "input": {
+          "skill": "hours-records"
+        },
+        "output": {
+          "loadedSkillBodySha256": "7b9f8ce6fcd7e26f98f8ced05268065cb0c85d3c93e850cc70fc8d1c17bb4cec"
+        }
+      },
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "create",
+          "subject": "reading",
+          "name": "Literature"
+        },
+        "output": {
+          "status": "saved",
+          "category": {
+            "id": "a92d5d1b-05bb-4c40-8349-849db274b090",
+            "subject": "reading",
+            "name": "Literature"
+          }
+        }
+      }
+    ],
+    "judge": {
+      "pass": true,
+      "findings": [
+        "Tool call correctly used manage_hours_categories with action create, subject reading, name Literature",
+        "Output status was saved with correct category details",
+        "No log_hours or planner write calls were made",
+        "Candidate response accurately reports category creation without claiming any time logged, matching the skill's example phrasing"
+      ],
+      "evidenceQuote": "Done, Literature is ready under Language arts, with no time logged there yet."
+    },
+    "exact": [],
+    "usage": {
+      "inputTokens": 226626,
+      "inputTokenDetails": {
+        "noCacheTokens": 226626,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 352,
+      "outputTokenDetails": {
+        "textTokens": 195,
+        "reasoningTokens": 157
+      },
+      "totalTokens": 226978
+    },
+    "judgeUsage": {
+      "inputTokens": 2521,
+      "inputTokenDetails": {
+        "noCacheTokens": 2521,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 140,
+      "outputTokenDetails": {
+        "textTokens": 140,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 2661,
+      "raw": {
+        "input_tokens": 2521,
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  }
+]

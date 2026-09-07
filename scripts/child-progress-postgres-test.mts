@@ -320,6 +320,13 @@ const prerequisiteSql = `
   );
   -- Empty graph relations used by the real fold; the dedicated Hours contract
   -- applies every real migration and checks linked rows and operation receipts.
+  create table public.hours_categories (
+    id uuid primary key default gen_random_uuid(),
+    family_id uuid not null references public.families(id) on delete cascade,
+    subject text not null,
+    name text not null,
+    unique (family_id, subject, name)
+  );
   create table public.learning_write_operations (id uuid primary key default gen_random_uuid(), family_id uuid);
   create table public.planner_learning_activities (id uuid primary key default gen_random_uuid(), family_id uuid);
   create table public.planner_learning_activity_children (family_id uuid);
@@ -1022,6 +1029,13 @@ async function runFamilyFoldCompatibilityAssertions(
         (${stubSourceFamilyId}, 'math', 30, '2026-07-20', 'distinct source activity'),
         (${stubSourceFamilyId}, 'reading', 45, '2026-07-21', 'moves with the fold')
     `;
+    await tx`
+      insert into public.hours_categories (family_id, subject, name)
+      values
+        (${stubDestinationFamilyId}, 'reading', 'Read-aloud'),
+        (${stubSourceFamilyId}, 'reading', 'Read-aloud'),
+        (${stubSourceFamilyId}, 'math', 'Unused practice')
+    `;
     assert.equal(
       await foldStubFamilyIntoTx(
         tx,
@@ -1055,6 +1069,19 @@ async function runFamilyFoldCompatibilityAssertions(
       where family_id = ${stubSourceFamilyId}
     `;
     assert.equal(sourceHours.count, 0);
+    const foldedCategories = await tx<{ subject: string; name: string }[]>`
+      select subject, name from public.hours_categories
+      where family_id = ${stubDestinationFamilyId} order by subject, name
+    `;
+    assert.deepEqual(foldedCategories.map((row) => ({ ...row })), [
+      { subject: "math", name: "Unused practice" },
+      { subject: "reading", name: "Read-aloud" },
+    ]);
+    const [sourceCategories] = await tx<{ count: number }[]>`
+      select count(*)::integer as count from public.hours_categories
+      where family_id = ${stubSourceFamilyId}
+    `;
+    assert.equal(sourceCategories.count, 0);
     const inheritedPrefixes = await tx<Array<{ artifact_family_id: string }>>`
       select artifact_family_id
       from public.family_artifact_prefixes

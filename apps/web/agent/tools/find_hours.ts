@@ -5,11 +5,11 @@ import {
   defineBoundedTool,
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
+import { readHoursCategorySummary } from "../../lib/hours-category-summary";
+import { SUBJECT_LABELS } from "../../lib/hours-view";
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
 import {
   HoursSummaryReadError,
-  readHoursSummaryCaller,
-  readHoursSummaryPinned,
 } from "../../lib/hours-summary-reader";
 
 /**
@@ -45,6 +45,8 @@ const findInput = z.object({
     .enum(HOURS_SUBJECTS)
     .optional()
     .describe("Only this subject. Omit for every subject."),
+  categoryId: z.uuid().optional().describe("Only this saved category. Use an id from manage_hours_categories or a previous Hours receipt; never invent one."),
+  uncategorizedOnly: z.boolean().default(false).describe("Read only entries without a category. Cannot combine with categoryId."),
   limit: z
     .number()
     .int()
@@ -74,9 +76,7 @@ export default defineBoundedTool({
     let record;
     try {
       const now = new Date();
-      record = access.mode === "pinned"
-        ? await readHoursSummaryPinned(access.familyId, input, now)
-        : await readHoursSummaryCaller(access.db, access.familyId, input, now);
+      record = await readHoursCategorySummary(access, input, now);
     } catch (error) {
       return {
         found: null,
@@ -100,7 +100,8 @@ export default defineBoundedTool({
       totalMinutes: record.totalMinutes,
       byChild: record.recordedDaysByChild.map(({ childId, minutes }) => ({ childId, minutes })),
       byEntryScope: record.byEntryScope,
-      bySubject: record.bySubject,
+      bySubject: record.bySubject.map(row => ({ ...row, label: SUBJECT_LABELS[row.subject] })),
+      byCategory: record.byCategory.map(row => ({ ...row, subjectLabel: SUBJECT_LABELS[row.subject] })),
       recordedDays: record.recordedDays,
       recordedDaysByChild: record.recordedDaysByChild,
       firstDay: record.firstDay,

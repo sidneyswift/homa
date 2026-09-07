@@ -577,7 +577,7 @@ function RecordedHours({ entries, showChild, onEdit }: {
             <button type="button" aria-haspopup="dialog" onClick={() => onEdit(entry)}
               aria-label={`Edit ${subjectDisplayLabel(entry)}, ${formatMinutesAsHours(entry.minutes)}, ${entry.childName ?? "whole family"}`}
               className="quiet-action quiet-action--quiet flex min-h-14 w-full flex-wrap items-center justify-start gap-2 px-4 py-3 text-left">
-              <span className="rounded-[var(--homa-radius-control)] px-2 py-1 text-xs font-semibold" style={{ background, color }}>{subjectDisplayLabel(entry)}</span>
+              <span className="min-w-0 max-w-full break-words rounded-[var(--homa-radius-control)] px-2 py-1 text-xs font-semibold" style={{ background, color }}>{subjectDisplayLabel(entry)}</span>
               <span className="text-sm font-semibold">{formatMinutesAsHours(entry.minutes)}</span>
               {showChild ? <span className="text-sm">{entry.childName ?? "Whole family"}</span> : null}
               {entry.note ? <span className="min-w-0 flex-1 basis-32 truncate text-sm">{entry.note}</span> : <span className="flex-1" />}

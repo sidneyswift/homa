@@ -1,0 +1,55 @@
+{
+  "issue": 1035,
+  "date": "2026-09-07",
+  "implementationBranch": "codex/gh-1035-hours-categories",
+  "productionSchema": {
+    "sourceMigration": "20260907120000_hours_categories.sql",
+    "appliedVersion": "20260907140103",
+    "sourceSha256": "cce27eb0bc26f1cce8c059f491323b81b1a0d5efd2b3a85ef3bbd0fa5f847a7a",
+    "verifiedBy": "root coordinator",
+    "existingHoursRows": 348,
+    "catalogRows": 2,
+    "orphanLabels": 0,
+    "rlsEnabled": true,
+    "fkValidated": true,
+    "fkDeferrable": true,
+    "triggersEnabled": true
+  },
+  "checks": {
+    "postgresContractGroups": 9,
+    "browserJourneys": 17,
+    "hoursUnitChecks": 153,
+    "focusedCategoryAndToolChecks": 17,
+    "webTypecheck": "passed",
+    "eveBuild": "passed",
+    "eveStreamDurationChecks": 3
+  },
+  "model": {
+    "initialCases": 5,
+    "originalGateFailures": [
+      "category-total: exact correct subtotal rejected because rubric prescribed unnecessary catalog read",
+      "rename and empty-create: writes correct but skill not loaded"
+    ],
+    "independentAdjudication": "Exact category subtotal from a complete correctly scoped byCategory receipt is valid. Retain catalog-first for rename and ambiguity.",
+    "rerunCases": [
+      "rename",
+      "empty-create"
+    ],
+    "rerun": "both passed with skill loaded first and correct receipts",
+    "remainingCandidateLimitation": "Single model samples, not a guarantee of every phrasing."
+  },
+  "review": {
+    "critic": "hours_categories_critic",
+    "status": "pass",
+    "fixedFindings": [
+      "Concurrent category rename could orphan an in-flight old-client Hours label; added category FK/cascade and key-share lock, exact race passes",
+      "40-Unicode-codepoint categories exceeded former40-UTF16-unit log/voice validators; one shared schema now used",
+      "Old editor and CSV browser assertions corrected for intentional selector/display changes"
+    ]
+  },
+  "limits": [
+    "Production code deployment and hosted authenticated category journey pending root coordinator.",
+    "Browser screenshots use actual components and compiled CSS with synthetic data and locally available DM Sans700 font; no installed-device typography claim.",
+    "Retired build:brand-surfaces command fails on existing print PDF route boundary; not a category change or an active CI gate."
+  ]
+}

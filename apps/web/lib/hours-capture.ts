@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hoursCategoryNameSchema } from "./hours-categories";
 
 import { composeHoursNote, hoursWorkContextSchema } from "./hours-note-context";
 import { HOURS_SOURCES, HOURS_SUBJECTS } from "./hours-model";
@@ -17,7 +18,7 @@ export const hoursCaptureInputSchema = z.object({
   minutes: z.number().int().min(1).max(600),
   happenedOn: z.iso.date().nullish(),
   note: z.string().trim().max(200).nullish(),
-  customLabel: z.string().trim().max(40).nullish(),
+  customLabel: hoursCategoryNameSchema.nullish(),
   source: z.enum(HOURS_SOURCES),
 });
 export type HoursCaptureInput = z.input<typeof hoursCaptureInputSchema>;

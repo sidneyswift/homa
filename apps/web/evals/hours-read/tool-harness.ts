@@ -6,6 +6,7 @@ import ts from "typescript";
 import { z } from "zod";
 
 import * as deadlines from "../../lib/agent-tool-deadline";
+import * as hoursView from "../../lib/hours-view";
 import * as hoursModel from "../../lib/hours-model";
 import * as recordScope from "../../lib/hours-record-scope";
 import * as summary from "../../lib/hours-summary";
@@ -65,6 +66,11 @@ export async function hoursToolForCase(testCase: HoursReadCase): Promise<Capture
       MissingFamilyContextError: class MissingFamilyContextError extends Error {},
       resolveAgentAccess: async () => ({ mode: "pinned", familyId: FAMILY }),
     },
+    "../../lib/hours-view": hoursView,
+    "../../lib/hours-category-summary": { readHoursCategorySummary: async (access: { familyId: string }, input: HoursSummaryRequest, now: Date) => {
+      const base = await syntheticSnapshot(access.familyId, input, now);
+      return { ...base, byCategory: base.bySubject.map(row => ({ ...row, categoryId: null, name: null })), entries: base.entries.map(row => ({ ...row, categoryId: null, customLabel: null })) };
+    } },
     "../../lib/hours-summary-reader": {
       HoursSummaryReadError,
       readHoursSummaryPinned: syntheticSnapshot,

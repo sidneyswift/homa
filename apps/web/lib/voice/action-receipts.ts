@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hoursCategoryNameSchema } from "../hours-categories";
 import type { TransactionSql } from "postgres";
 
 import { HOURS_SUBJECTS } from "../hours-model";
@@ -49,7 +50,7 @@ const familyEventSnapshotSchema = z.object({
 
 const hoursSnapshotSchema = z.object({
   // Legacy receipts without a category only match rows whose category is null.
-  customLabel: z.string().max(40).nullable().optional(),
+  customLabel: hoursCategoryNameSchema.nullable().optional(),
   childId: z.string().uuid().nullable(),
   subject: z.string().min(1).max(80),
   minutes: z.number().int().min(1).max(600),

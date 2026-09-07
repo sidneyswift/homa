@@ -24,17 +24,17 @@ import type { ViewContext } from "./view-context";
  */
 
 export const SUBJECT_LABELS: Record<HoursSubject, string> = {
-  reading: "Reading",
+  reading: "Language arts",
   math: "Math",
   science: "Science",
-  "social studies": "Social studies",
+  "social studies": "History and social studies",
   art: "Art",
   music: "Music",
   PE: "PE",
   "co-op": "Co-op",
   "life skills": "Life skills",
   other: "Other",
-  spanish: "Second language",
+  spanish: "Foreign language",
 };
 
 export const SOURCE_LABELS: Record<HoursSource, string> = {
@@ -80,14 +80,13 @@ export interface HoursEntry {
 
 /**
  * subjectDisplayLabel(entry): string
- * What a parent should actually see for one entry: her own custom label
- * when she has set one (under any subject), otherwise the fixed
- * vocabulary's label. The subject filter chips and "nothing logged for
+ * Shows the parent subject alongside her category when she has set one.
+ * The subject filter chips and "nothing logged for
  * X yet" copy stay on SUBJECT_LABELS directly on purpose: those describe
  * the fixed bucket, not one entry.
  */
 export function subjectDisplayLabel(entry: Pick<HoursEntry, "subject" | "customLabel">): string {
-  if (entry.customLabel) return entry.customLabel;
+  if (entry.customLabel) return `${SUBJECT_LABELS[entry.subject]} · ${entry.customLabel}`;
   return SUBJECT_LABELS[entry.subject];
 }
 
@@ -142,6 +141,7 @@ export function subjectOptions(entries: readonly HoursEntry[]): HoursSubject[] {
 
 export interface HoursFilter {
   subject: HoursSubject | null;
+  category?: string | null;
 }
 
 /** Day and Week use the same recorded-day and child-plus-family scope. */
@@ -162,8 +162,8 @@ export function filterEntries(
   entries: readonly HoursEntry[],
   filter: HoursFilter,
 ): HoursEntry[] {
-  if (!filter.subject) return [...entries];
-  return entries.filter((entry) => entry.subject === filter.subject);
+  return entries.filter((entry) => (!filter.subject || entry.subject === filter.subject)
+    && (filter.category === undefined || entry.customLabel === filter.category));
 }
 
 export interface HoursDayGroup {
