@@ -103,6 +103,7 @@ export function MaterialCard({
               ) : (
                 source.title
               )}
+              {source.sourceLocator ? ` · ${source.sourceLocator}` : null}
             </span>
           ))}
         </p>

@@ -151,12 +151,12 @@ export const RECIPE_REGISTRY: Readonly<Record<RecipeSlug, RecipeRegistryEntry>> 
   "name-tracing-page": {
     anchorId: "name-tracing-page",
     checklist: [
-      { id: "guide-lines", severity: "blocking", check: "Every writing row has three guide lines: a solid top line, a dashed midline centered between them, and a solid baseline." },
-      { id: "letters-on-guides", severity: "blocking", check: "On every row that shows the name (model or trace), the letters sit on the guides: small letters fill midline to baseline, tall letters reach the top line, and descenders drop below the baseline." },
-      { id: "name-fills-row", severity: "blocking", check: "On every row that shows the name, the name (or its repeat on a short-name row) spans most of the row's width at full guide height, never bunched small at the left with a dead right half." },
-      { id: "fade-to-empty", severity: "blocking", check: "After any model row, trace rows come first and at least one empty guide row for writing alone comes last, unless the brief says otherwise." },
-      { id: "trace-style", severity: "advisory", check: "Trace letters are a dotted outline or a pale fill the child writes over; solid dark ink appears only on a model row." },
-      { id: "row-spacing", severity: "advisory", check: "Rows are clearly separated by visible space, never stacked so tight they read as one ruled block." },
+      { id: "guide-lines", severity: "blocking", check: "Each writing row has a solid top guide, a dashed midpoint, a solid baseline, and room below for descenders." },
+      { id: "letters-on-guides", severity: "blocking", check: "Letters meet the appropriate cap, body, baseline and descender bands without clipping, including dots and accents." },
+      { id: "literal-spelling", severity: "blocking", check: "The name keeps the parent's exact spelling, accents and case on every guided row." },
+      { id: "fade-to-empty", severity: "blocking", check: "After any model row, tracing support precedes at least one empty guide row for writing alone, unless the brief says otherwise." },
+      { id: "trace-style", severity: "advisory", check: "Tracing uses dotted outlines or pale fill; solid dark ink is an example, and no starting point or stroke order is invented." },
+      { id: "row-spacing", severity: "advisory", check: "Rows have distinct space and readable full-size lettering; a short name need not stretch across the page." },
     ],
   },
   "narration-page": { anchorId: "narration-page", checklist: [] },

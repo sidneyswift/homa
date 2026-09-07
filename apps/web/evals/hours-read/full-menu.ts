@@ -7,6 +7,8 @@ import { gateway } from "ai";
 import ts from "typescript";
 import { z } from "zod";
 
+import { familySourceEvidenceProposalSchema, MAX_FAMILY_SOURCE_EVIDENCE } from "../../lib/library/family-asset-source-evidence-contract";
+
 interface MenuTool { name: string; description: string; inputSchema: Record<string, unknown>; logicalPath?: string }
 const require = createRequire(import.meta.url);
 
@@ -72,7 +74,7 @@ export async function fullHoursEvalMenu(webRoot: string): Promise<MenuTool[]> {
     };
     const capture: { description?: string; schema?: z.ZodType } = {};
     const expression = `${declarations.join("\n")}\ncapture.description = ${field("description")}; capture.schema = ${field("inputSchema")};`;
-    runInNewContext(ts.transpileModule(expression, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText, { z, capture }, { timeout: 1000 });
+    runInNewContext(ts.transpileModule(expression, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText, { z, capture, familySourceEvidenceProposalSchema, MAX_FAMILY_SOURCE_EVIDENCE }, { timeout: 1000 });
     if (!capture.description || !capture.schema) throw new Error(`Incomplete menu tool ${name}`);
     menu.push({ name, description: capture.description, inputSchema: z.toJSONSchema(capture.schema), logicalPath: `tools/${name}.ts` });
   }

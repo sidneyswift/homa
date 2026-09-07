@@ -1,0 +1,156 @@
+{
+  "evidenceVersion": 1,
+  "sourceRelease": "66131afd64d9faadec76ee12332178bf7527e1e3",
+  "currentMainAtPreparation": "cc9c0e54c71017396448a619b34fdd51ab3d7284",
+  "deeperProgress": {
+    "issue": 1088,
+    "runId": "5060c28d-7898-4263-829f-50efd9910866",
+    "status": "passed",
+    "sourceReceiptSha256": "eff572ae86229ed65254ecb84b6c920e4f8247ee75cfaf9a93bd6de08bdae80b",
+    "rootReviewSha256": "c3a6785974288e8876f46694f80974b36f1026ba0d0caa5dbc0bd0d13ff69a48",
+    "startedAt": "2026-09-06T23:54:57.973Z",
+    "finishedAt": "2026-09-06T23:56:17.089Z",
+    "checks": 704,
+    "canonicalCounts": {
+      "sittings": 1,
+      "requests": 1,
+      "responses": 2,
+      "evidence": 2,
+      "messages": 8,
+      "tool_calls": 5
+    },
+    "terminalReason": "parent_stopped",
+    "acceptedResponseCount": 2,
+    "projectionEvidenceCount": 2,
+    "totalSends": 4,
+    "semanticJudgments": [
+      "The two Easily statements match the two accepted answers.",
+      "By ones or tens preserves the alternative methods and does not claim both.",
+      "The third mental-addition question is explicitly left open without inferring an answer.",
+      "Stopped screenshot shows the selected Avery Math receipt and two saved answers despite ordinary Blair preference.",
+      "Selected Progress screenshot displays both exact dated direct answers for Avery.",
+      "Actual reloaded Math heading and unchanged canonical signature passed; no separate reload screenshot was captured.",
+      "Exact prior stopped request cleared its pointer with four total sends and no additional model turn."
+    ],
+    "finalMessages": [
+      "Stopped there, and everything's saved. We got two solid answers today: Avery makes 10 easily and counts to 100 easily, by ones or tens. That last question about adding and subtracting small numbers in her head is still open for next time.\n\nYou can see the update on her math progress page whenever you want."
+    ],
+    "sideEffects": {
+      "emails": 0,
+      "materials": 0,
+      "assets": 0,
+      "studio_runs": 0,
+      "schedules": 0,
+      "jobs": 0,
+      "phones": 0,
+      "events": 0,
+      "activities": 0,
+      "working_plans": 0,
+      "hours": 0,
+      "reviews": 0,
+      "memories": 0
+    },
+    "reloadProof": "Actual Math heading and unchanged canonical signature passed; no separate reload screenshot. Four total sends, no restart.",
+    "cleanup": {
+      "status": "family-and-auth-removed",
+      "deletionJobId": "bff4d8ae-9306-4e9b-8dbe-6ba48054d2ed",
+      "retainedSafetyMarkers": "Deletion job and artifact-denial tombstone remain for the canonical cleanup worker and token drain.",
+      "remaining": {
+        "users": 0,
+        "sessions": 0,
+        "families": 0,
+        "children": 0,
+        "memberships": 0,
+        "hours": 0,
+        "messages": 0
+      }
+    },
+    "issueClosureComment": "https://github.com/sidneyswift/homa/issues/1088#issuecomment-5563174949"
+  },
+  "comparison": {
+    "issue": 1097,
+    "runId": "229e52d2-d5eb-4290-81be-3d4dc69ab102",
+    "status": "partial-observation-failed-operator",
+    "sourceReceiptSha256": "217155512b4efc50594ce826426dc3ee79405e57ec78fd09071822fb20fc6a18",
+    "startedAt": "2026-09-06T23:56:32.905Z",
+    "finishedAt": "2026-09-06T23:56:50.810Z",
+    "observedByRoot": "Actual owned Gross motor detail displayed About 10 months ahead and September 6, 2025 inferred credited evidence.",
+    "failure": "synthetic-only screenshot without credential fields",
+    "reproducedOperatorCause": "The intended progress-gross_motor-390-basis screenshot label contains an underscore rejected by the old filename regex. No subject-URL defect established.",
+    "unidentifiedBlockedMutationCount": 1,
+    "historicalBlockedMutationIdentity": "Unknown. No URL or body was retained.",
+    "notClaimed": [
+      "completed 320/390 Progress/full-report/reload journey",
+      "hosted model comparison explanation",
+      "concurrent report writer race in production"
+    ],
+    "cleanupAtPreparation": {
+      "status": "family-and-auth-removed",
+      "finishedAt": "2026-09-07T00:09:10.356Z",
+      "sourceReceiptSha256": "5abf479ce6cbf5e2a820e9524e6a34145e9313b337c581d411af1e3ff9835266",
+      "deletionJobId": "b5926464-a4dd-4a59-ba83-241114630bbb",
+      "remaining": {
+        "models": 0,
+        "tools": 0,
+        "owners": 0,
+        "messages": 0,
+        "episodes": 0,
+        "emails": 0,
+        "materials": 0,
+        "assets": 0,
+        "studio_runs": 0,
+        "schedules": 0,
+        "jobs": 0,
+        "phones": 0,
+        "calendar_events": 0,
+        "activities": 0,
+        "working_plans": 0,
+        "hours": 0,
+        "reviews": 0,
+        "memories": 0,
+        "plans": 0,
+        "check_ins": 0,
+        "responses": 0,
+        "operations": 0,
+        "conflicts": 0,
+        "telemetry": 0,
+        "signals": 0,
+        "gaps": 0,
+        "engagement": 0,
+        "prefixes": 0,
+        "children": 0,
+        "evidence": 0,
+        "answers": 0,
+        "reports": 0,
+        "live": 0,
+        "revisions": 0,
+        "snapshots": 0,
+        "auth_users": 0,
+        "auth_sessions": 0,
+        "families": 0,
+        "memberships": 0,
+        "storage_objects": 0
+      },
+      "canonicalCleanup": "canonical-provider-sweeps-and-token-drain-pending",
+      "finalCleanupAfter": "2026-09-07 06:39:06.158772+00"
+    },
+    "followup": "User directed shipping without another hosted test loop; prepared v6 was not executed."
+  },
+  "reportRevision": {
+    "issue": 1124,
+    "releasePR": "https://github.com/sidneyswift/homa/pull/1126",
+    "sourceRelease": "66131afd64d9faadec76ee12332178bf7527e1e3",
+    "localPostgresCases": 45,
+    "boundary": "Actual disposable PostgreSQL revision/claim/source cases, not production concurrent-writer exercise."
+  },
+  "screenshots": {
+    "deeper-stopped.png": "9ee86f2596b7ee943ea2d5a6da6d800fe94afbcc2034b3f6da2a03ef2b7c05f3",
+    "deeper-selected-progress.png": "6090ddee39ce9a6a95fa521968820c04d0caceaa2690842db8c70b1e9eab03bc",
+    "comparison-partial-failure.png": "a4c8b126502276e867889dbf5d2fb876ec7fbff3bb91a29bbd441dea5afeeb2d"
+  },
+  "limits": [
+    "No physical touch, native, voice or physical print certification.",
+    "Canonical deletion jobs retain provider sweeps and issued-token drain; family/Auth removal does not imply these are complete.",
+    "Historical failed runs remain failures."
+  ]
+}

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 
 import chromium from "@sparticuz/chromium";
@@ -8,6 +9,7 @@ import {
   isAllowedPrintableSubresourceUrl,
   SHEET_BODY_CLASS,
   SHEET_PAGE_CLASS,
+  wrapPrintableDocument,
 } from "./page-shell";
 import {
   type PageGeometry,
@@ -16,6 +18,12 @@ import {
 } from "./page-geometry";
 import { rasterizePdfToJpegs } from "./rasterize-pdf";
 import { REVIEW_MAX_PAGES } from "./review-artifact";
+
+import { verifyLegacyHandwritingLayout } from "./handwriting/legacy";
+import type { HandwritingRevisionPlan, LegacyComparisonProof } from "./handwriting/revision";
+
+import { HandwritingDocumentError, type HandwritingExpectation } from "./handwriting/document";
+import { verifyHandwritingLayout, verifyHandwritingPdfPages, type HandwritingPlacement } from "./handwriting/verify-render";
 
 /**
  * HTML to print artifacts, in the app runtime (the materials studio's
@@ -166,6 +174,8 @@ export interface RenderedPrintable {
    * .homa-sheet-body, covering every page regardless of PREVIEW_PAGE_CAP
    * (this is DOM measurement, not rasterization, so it is never capped). */
   pageGeometry: PageGeometry[];
+  ordinaryHandwritingGeometry?: PageGeometry[];
+  handwriting?: { placements: HandwritingPlacement[]; pdfSha256: string; pageCount: number; pageWidthPoints: number; pageHeightPoints: number; status: "verified" };
 }
 
 export interface PrintableRenderPolicy {
@@ -275,9 +285,11 @@ async function screenshotPagesPrintEmulated(
  * imagePageBody (page-shell.ts) uses object-fit: contain, so a
  * letterboxed page image's layout rect overstates what is on the paper.
  */
-async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]> {
+export interface HandwritingSizeExclusion { page: number; legacySvgOrdinal?: number; guidedRowId?: string; }
+
+async function measureSheetGeometry(page: Page, exclusions: readonly HandwritingSizeExclusion[] = []): Promise<SheetBodyMeasurement[]> {
   return page.evaluate(
-    (bodyClass: string, pageClass: string): SheetBodyMeasurement[] => {
+    (bodyClass: string, pageClass: string, omitted: readonly HandwritingSizeExclusion[]): SheetBodyMeasurement[] => {
       // Everything below is written without inner helper functions on
       // purpose: this callback is serialized into the browser, and any
       // bundler running with keepNames (esbuild under tsx, which the
@@ -298,7 +310,9 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
       const TRANSPARENT = /^rgba\([^)]*,\s*0(\.0+)?\)$/;
       const SIDES = ["top", "right", "bottom", "left"];
       const bodies = Array.from(document.querySelectorAll(`.${bodyClass}`));
-      return bodies.map((body) => {
+      return bodies.map((body, pageIndex) => {
+        const excluded = omitted.filter((item) => item.page === pageIndex + 1).map((item) => item.legacySvgOrdinal ? body.querySelectorAll("svg")[item.legacySvgOrdinal - 1] : Array.from(body.querySelectorAll("[data-homa-handwriting-row]")).find((element) => element.getAttribute("data-homa-handwriting-row") === item.guidedRowId));
+        if (excluded.some((element) => !element)) throw new Error("Exact handwriting measurement exclusion is missing.");
         const bodyRect = body.getBoundingClientRect();
         const style = getComputedStyle(body);
         const paddingTop = Number.parseFloat(style.paddingTop) || 0;
@@ -328,7 +342,7 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
               inked = true;
             }
           }
-          if (inked && node.parentElement) {
+          if (inked && node.parentElement && !excluded.some((element) => element?.contains(node))) {
             try {
               const fontSize =
                 Number.parseFloat(getComputedStyle(node.parentElement).fontSize) || 0;
@@ -347,7 +361,9 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
             // Inline svg keeps its lowercase tag name (SVG namespace), so
             // the picture check compares case-insensitively.
             const tag = element.tagName.toUpperCase();
-            if (tag === "IMG") {
+            if (excluded.some((item) => item?.contains(element))) {
+              // Keep its fill/overflow contribution, omit only size signals.
+            } else if (tag === "IMG") {
               const image = element as HTMLImageElement;
               const naturalWidth = image.naturalWidth;
               const naturalHeight = image.naturalHeight;
@@ -374,7 +390,7 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
           } catch {
             signalError = true;
           }
-          let paints = REPLACED_TAGS.indexOf(element.tagName) !== -1;
+          let paints = REPLACED_TAGS.indexOf(element.tagName.toUpperCase()) !== -1;
           let bordered = false;
           // The paint and border walk is inside the same guard as the
           // other signals: an exception here marks the page instead of
@@ -417,7 +433,7 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
                 paints = paints || bordered;
               }
             }
-            if (bordered) {
+            if (bordered && !excluded.some((item) => item?.contains(element))) {
               const area = rect.width * rect.height;
               if (area > largestBoxArea) {
                 largestBoxArea = area;
@@ -452,6 +468,7 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
     },
     SHEET_BODY_CLASS,
     SHEET_PAGE_CLASS,
+    [...exclusions],
   );
 }
 
@@ -464,11 +481,23 @@ async function measureSheetGeometry(page: Page): Promise<SheetBodyMeasurement[]>
 export async function renderPrintableHtml(
   html: string,
   policy?: PrintableRenderPolicy,
+  handwriting: readonly HandwritingExpectation[] = [],
+  sizeExclusions: readonly HandwritingSizeExclusion[] = [],
 ): Promise<RenderedPrintable> {
+  if (!handwriting.length && /data-homa-handwriting-row\b/i.test(html)) {
+    throw new HandwritingDocumentError("Guided handwriting needs its stored server receipts before rerendering. Use the verified individual PDFs when a combined pack cannot carry those receipts.");
+  }
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
     await page.setViewport({ ...LETTER_PX, deviceScaleFactor: 2 });
+    if (handwriting.length) {
+      // Guided rows need a stable print document. Executable or animated
+      // mixed packets are refused by verification, never silently rewritten.
+      await page.setJavaScriptEnabled(false);
+      await page.emulateMediaType("print");
+    }
+    const composedImages = new Set(handwriting.map((row) => row.src));
 
     // The egress wall (F11 / render-path exfiltration). The page HTML is
     // model-authored, so an injected model could point an <img>/<link>/CSS
@@ -482,10 +511,10 @@ export async function renderPrintableHtml(
     await page.setRequestInterception(true);
     page.on("request", (request) => {
       const url = request.url();
-      const allowed = isPrintableRequestAllowed(
+      const allowed = (request.resourceType() === "image" && composedImages.has(url)) || isPrintableRequestAllowed(
         request.resourceType(),
         url,
-        policy,
+        handwriting.length ? { blockImageResources: policy?.blockImageResources ?? false, blockNavigationRequests: true } : policy,
         request.isNavigationRequest(),
       );
       if (allowed) {
@@ -528,16 +557,23 @@ export async function renderPrintableHtml(
     // Measured while the document is laid out and settled, same moment
     // the fallback screenshots would capture it: geometry facts about
     // pages the model composed blind, fed back so it stops guessing.
+    const handwritingPlacements = handwriting.length ? await verifyHandwritingLayout(page, handwriting) : [];
     const pageGeometry = summarizePageGeometry(await measureSheetGeometry(page));
+    const ordinaryHandwritingGeometry = sizeExclusions.length ? summarizePageGeometry(await measureSheetGeometry(page, sizeExclusions)) : undefined;
 
     const pdf = Buffer.from(
       await page.pdf({
         format: "letter",
+        scale: 1,
         printBackground: true,
         margin: { top: 0, right: 0, bottom: 0, left: 0 },
         timeout: RENDER_TIMEOUT_MS,
       }),
     );
+
+    const handwritingPdf = handwriting.length
+      ? await verifyHandwritingPdfPages(pdf, pageGeometry.length)
+      : null;
 
     // The previews the reviewer and the parent see come from the PDF
     // bytes themselves, never from the live page: Chromium's screen and
@@ -559,6 +595,7 @@ export async function renderPrintableHtml(
         throw new Error("PDF rasterization produced zero pages");
       }
     } catch (error) {
+      if (handwriting.length) throw new HandwritingDocumentError("The printed handwriting could not be checked from its PDF. Nothing was created.");
       console.error(
         "printable preview raster failed; falling back to print-emulated screenshots (previews may not match the shipped PDF):",
         error instanceof Error ? error.message : "unknown",
@@ -575,10 +612,44 @@ export async function renderPrintableHtml(
       renderer,
       rendererVersion,
       pageGeometry,
+      ...(ordinaryHandwritingGeometry ? { ordinaryHandwritingGeometry } : {}),
+      ...(handwritingPdf ? { handwriting: { ...handwritingPdf, placements: handwritingPlacements, pdfSha256: createHash("sha256").update(pdf).digest("hex") } } : {}),
     };
   } finally {
     await page.close().catch(() => {
       // A page that will not close is abandoned with its browser.
     });
   }
+}
+
+/** A bounded no-network replay of the exact saved source, solely for a
+ * declared legacy guide conversion. Never a substitute for original PDF ink. */
+export async function inspectLegacyHandwriting(plan: HandwritingRevisionPlan): Promise<LegacyComparisonProof> {
+  if (!plan.legacyTargets.length || plan.legacyTargets.length > 24) throw new HandwritingDocumentError("Select a bounded set of exact legacy rows.");
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => { controller.abort(); void page.close().catch(() => undefined); }, 15_000);
+  let blocked = false;
+  try {
+    await page.setViewport({ ...LETTER_PX, deviceScaleFactor: 2 });
+    await page.setJavaScriptEnabled(false);
+    await page.emulateMediaType("print");
+    await page.setOfflineMode(true);
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      if (request.url().startsWith("data:") || request.url() === "about:blank") void request.continue().catch(() => undefined);
+      else { blocked = true; void request.abort().catch(() => undefined); }
+    });
+    await page.setContent(wrapPrintableDocument(plan.sourceBodies, ""), { waitUntil: "load", timeout: 10_000 });
+    await page.evaluate(() => document.fonts.ready);
+    const rows = await verifyLegacyHandwritingLayout(page, plan.legacyTargets);
+    const originalGeometry = summarizePageGeometry(await measureSheetGeometry(page));
+    const ordinaryGeometry = summarizePageGeometry(await measureSheetGeometry(page, plan.legacyTargets.map((row) => ({ page: row.page, legacySvgOrdinal: row.svgOrdinal }))));
+    if (blocked || controller.signal.aborted) throw new HandwritingDocumentError("The old page needs unsaved network resources or its comparison expired.");
+    return { sourceHtmlSha256: plan.sourceHtmlSha256, rows, originalGeometry, ordinaryGeometry };
+  } catch (error) {
+    if (error instanceof HandwritingDocumentError) throw error;
+    throw new HandwritingDocumentError("The exact old page could not be inspected within the bounded offline comparison. No size exception was made.", { cause: error });
+  } finally { clearTimeout(timeout); await page.close().catch(() => undefined); }
 }

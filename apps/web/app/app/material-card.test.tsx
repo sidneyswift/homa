@@ -113,6 +113,7 @@ describe("MaterialCard", () => {
             {
               id: "10000000-0000-4000-8000-000000000001",
               title: "Mammal study guide",
+              sourceLocator: "PDF page 21",
               libraryUrl:
                 "/app/library?asset=10000000-0000-4000-8000-000000000001",
             },
@@ -122,6 +123,7 @@ describe("MaterialCard", () => {
     );
     assert.match(html, /Made from/u);
     assert.match(html, /Mammal study guide/u);
+    assert.match(html, / · PDF page 21/u);
     assert.match(html, /\/app\/library\?asset=/u);
   });
 });

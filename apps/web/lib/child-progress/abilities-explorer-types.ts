@@ -1,4 +1,4 @@
-import type { ProgressEvidenceAnswer } from "./types";
+import type { ProgressEvidenceAnswer, ProgressEvidenceDerivation } from "./types";
 
 export const ABILITIES_EXPLORER_SUBJECTS = [
   "math",
@@ -12,14 +12,23 @@ export type AbilitiesExplorerSubjectId =
 export type AbilitiesExplorerDisplayState =
   | "knows"
   | "working_on_now"
-  | "up_next";
+  | "unobserved"
+  | "not_yet"
+  | "conflict";
 
 export interface AbilitiesExplorerEvidence {
   answer: ProgressEvidenceAnswer | null;
+  derivation: ProgressEvidenceDerivation | null;
   source: string | null;
   observedAt: string | null;
   /** True when the map has two unresolved parent answers for this ability. */
   conflict: boolean;
+  /** Each saved observation stays separate while the conflict is unresolved. */
+  conflictingAnswers: readonly {
+    answer: ProgressEvidenceAnswer;
+    derivation: ProgressEvidenceDerivation;
+    observedAt: string;
+  }[];
 }
 
 export interface AbilitiesExplorerNode {
@@ -54,11 +63,13 @@ export interface AbilitiesExplorerSubject {
 export interface AbilitiesExplorerPayload {
   childId: string;
   childName: string;
+  /** Authenticated projection time zone for age and evidence dates. */
+  timeZone: string;
   /** Current age in months, used only for the display band. */
   ageMonths: number;
   /** The one shared curriculum axis. */
   axisMonths: readonly [number, number];
-  /** The child's current one-year curriculum window. */
+  /** One-year plotting window, clamped to the axis. Hide when age is outside it. */
   ageRangeMonths: readonly [number, number];
   subjects: readonly AbilitiesExplorerSubject[];
 }

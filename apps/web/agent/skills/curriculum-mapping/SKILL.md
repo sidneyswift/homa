@@ -1,5 +1,5 @@
 ---
-description: Use after loading family-librarian when a parent wants Homa to break her ready Family Library curriculum into weeks, lessons, days, chapters, or units, or map those units onto an existing Planner. Load both skills for this Homa Plus workflow. Not for merely finding, opening, downloading, or citing the original; family-librarian owns those base Library actions. Not for authoring a new curriculum; curriculum-studio owns creation.
+description: Use after loading family-librarian when a parent wants a reviewable decomposition of her ready Family Library curriculum into saved weeks, lessons, days, chapters, or units, or wants to map those units onto an existing Planner. Load both skills for this Homa Plus workflow. Not for teaching or making practice from one owned lesson or the next few lessons without saving units; family-librarian reads those pages and materials-studio creates the requested work. Not for merely finding, opening, downloading, or citing the original; family-librarian owns those base Library actions. Not for authoring a new curriculum; curriculum-studio owns creation.
 metadata:
   homa-tools: find_family_assets, get_family_asset, read_family_curriculum, open_planner, preview_curriculum_mapping, approve_curriculum_mapping
   homa-related-skills: family-librarian, planner, curriculum-studio

@@ -1,122 +1,100 @@
 # Name tracing page
 
-Golden anchor: pass `anchorIds: ["name-tracing-page"]` to generate_image
-so the output matches the Homa name tracing bar (seven evenly spaced
-three-line guide rows with a centered dashed midline, three
-dotted-outline name rows fading to two pale-fill rows then two empty
-rows, letters pinned to the baseline with descenders dropping below it,
-one green starting dot on the first row only, one short warm header and
-corner-only motifs). Write your own prompt with your own content; the
-anchor sets the visual bar, not the specifics.
+Use for a whole name or short word on writing guides. Individual letters
+in curriculum formation boxes belong to `letter-number-formation-practice`.
+Read the family's source when she names one; do not imply this profile is
+that curriculum's official handwriting or a stroke-order lesson.
 
-The child's own name (or a loved word) repeated down the page on real
-three-line writing guides, traced letters fading to empty lines. The
-single most requested first handwriting page, and the format a
-co-founder family corrected for three days straight (2026-07-28 to
-07-31, twenty drafts, none approved) before this recipe existed. Every
-law below is a correction a real parent actually sent.
+## Build from the exact spelling
 
-Great for: ages 3-6, first name writing, "practice writing her name,"
-Spanish or English, any word the child loves enough to write.
+Keep the parent's spelling and case. For a correction, preserve the rest
+of the page and its original sources. The tool supports A-Z, a-z, space,
+straight apostrophe, hyphen, and À à È è, supplied as exact NFC text.
+It refuses other characters and decomposed spellings. Never remove an
+accent, substitute a letter, capitalize a name, or draw a manual tracing
+row to bypass that refusal. Explain the limit and offer a different
+activity that keeps her child's name intact; ask before changing the task.
 
-Always html path. Guide geometry and letter placement must be exact,
-and the parent will judge them against store-bought sheets.
+Use `create_printable` with `recipe: "name-tracing-page"` and fresh HTML.
+Put a `handwritingRows` array beside that HTML, including inside a `pages`
+entry. For each declared ID, place exactly one comment:
+`<!-- homa:handwriting row-id -->`. Fresh IDs must be unique across the packet. Saved rows keep their original
+IDs and are identified by page when they are carried. The tool creates the outlines, guides and receipt.
+Do not copy its expanded markup back as fresh HTML.
 
-## The guide row (binding): one SVG per line, one coordinate system
+Each row declares:
 
-Letters must sit ON the guides. HTML text floated near CSS border
-"guides" cannot be pinned: font metrics move the baseline and the
-letters float in the middle of the box, which is precisely the failure
-the family corrected for three days. An SVG row puts the three lines
-AND the name in one coordinate system, so the baseline is a number, not
-a hope.
+- `text`: the literal name or word. Independent rows require `""`.
+- `style`: `model` for a dark example, `dotted` for dotted outlines,
+  `pale` for tracing over pale letters, or `independent` for empty guides.
+- `capHeight`: top guide to baseline, 64 through 128 CSS px. There are
+  96 CSS px to a printed inch. The complete row is 1.9375 times this
+  height to leave room for accents and descenders.
+- `width`: 240 through 700 CSS px, default 700.
 
-```html
-<style>
-  .name-row { margin-bottom: 26px; }
-  .name-row svg { display: block; width: 100%; height: 132px; }
-</style>
-<div class="name-row"><svg viewBox="0 0 700 132" preserveAspectRatio="none">
-  <line x1="0" y1="2"   x2="700" y2="2"   stroke="#3a3a3a" stroke-width="3"/>
-  <line x1="0" y1="66"  x2="700" y2="66"  stroke="#9b9b9b" stroke-width="2" stroke-dasharray="7,6"/>
-  <line x1="0" y1="130" x2="700" y2="130" stroke="#3a3a3a" stroke-width="3"/>
-  <circle cx="8" cy="9" r="6" fill="#4f9d5e"/>
-  <text x="16" y="129" font-family="Fredoka, sans-serif" font-size="174"
-    fill="none" stroke="var(--homa-control-boundary)" stroke-width="2.5" stroke-dasharray="5,5">Amalia</text>
-</svg></div>
-```
+Choose the amount of practice and support from this child's evidence.
+A model followed by dotted or pale support and an empty row is one useful
+progression, not a fixed worksheet. Dots follow the outline; they do not
+show where to start or which stroke comes next. Do not add starting dots,
+arrows, or claims of stroke order to this profile.
 
-- Top line and baseline solid, midline dashed and EXACTLY centered
-  (y=66 of 132; a midline near the bottom was a real correction). The
-  midline is why the format works: it tells the child where R and B
-  break, where round letters live, where tall letters pass through.
-- Text `y` pins the letters to the baseline (baseline minus 1). Size
-  the font so round letters (a, o, e) fill midline to baseline and
-  ascenders touch the top line; 174px inside a 132px row is right for
-  Fredoka. Descenders (y, g, p) drop below the baseline; that is
-  correct handwriting, never a defect.
-- The starting dot marks the first stroke's start on the FIRST trace
-  row only.
+For example, one row in the array can be
+`{ "id": "amalia-pale", "text": "Amalia", "style": "pale", "capHeight": 96, "width": 700 }`.
+Its HTML location is `<!-- homa:handwriting amalia-pale -->`.
+The model still designs the title, directions, page rhythm and any art.
+If you generate art, pass `anchorIds: ["name-tracing-page"]` for the
+format reference, keeping the child's actual spelling and the measured
+rows authoritative when the reference differs.
 
-## Trace typography (binding)
+## Fit the practice to the paper
 
-- The name is something the child FILLS IN, never a solid dark word she
-  scribbles over (verbatim parent correction). Two allowed styles:
-  dotted outline (`fill="none" stroke="var(--homa-control-boundary)" stroke-width="2.5"
-  stroke-dasharray="5,5"`, the store-bought look) or pale solid fill
-  (`fill="#c9c2b8"`, no darker). Solid dark ink is for the model row
-  only, if the page has one.
-- The name fills the line's width: tune `font-size` and letter spacing
-  so the name spans most of the row, never bunched small at the left
-  with a dead right half (a real correction). A short name may repeat
-  twice on one line ONLY if both stay guide-height; smaller-but-more
-  loses to bigger-but-fewer every time.
+Budget the complete row height, spacing, title and directions inside the
+printable shell. Give rows distinct space. A 96 px cap height makes a
+186 px row, so seven such rows cannot fit on one letter page. Use fewer
+rows or another page instead of squeezing the name. For a short name,
+you may repeat the exact spelling separated by a space when the whole
+literal row fits, or choose a shorter writing row. Do not spread glyphs
+with CSS, compress them horizontally, or shrink them to fill space.
 
-## Page structure
+Keep row containers at their declared size, with no transforms, masks,
+clipping or animation. Use inline, locally inspectable styles and the
+existing shell's page size and margins. External stylesheets and executable
+markup cannot be proved stable on guided documents, including carried
+pages in a mixed packet; the tool refuses instead of changing those pages.
+An image used for decoration remains a family-authorized image under the
+usual material rules. It does not replace the measured writing rows.
 
-- Separate, clearly spaced line groups (verbatim parent praise for the
-  store-bought sheet): one SVG row per line, at least 24px between
-  rows. Never stack rows so tight they read as one ruled block.
-- Fade the support down the page: two or three dotted trace rows, then
-  one or two pale-fill rows, then one or two EMPTY guide rows for
-  writing alone. The empty rows are the point of the page.
-- Row height by age: 126-140px for ages 3-5, 96-110px for 6-7. Fill
-  the printable area with rows per the scale-to-fill law; the page is
-  guide rows, not decoration, and a decorative border never steals
-  width from the writing lines.
-- Header: one short line, warm, the child's name spelled exactly as
-  the family spells it ("Traza tu nombre, Amalia"). Nothing else
-  competes with the rows.
+On refusal, fix the specific layout problem while keeping spelling and
+guide height. The existing two-strike stop rule still applies. The tool
+has no fallback handwriting font. A fit refusal is not permission to set
+`allowSizeReduction`; the parent's actual request controls that flag.
 
-## The reviewer's checklist
+For a one-page packet correction, carry every untouched page through
+`fromMaterialId` plus its 1-based `pageIndex`. Declare rows only beside
+fresh HTML. The tool validates saved guided rows against their server
+receipts and preserves carried HTML. Carried rows keep their original IDs and HTML, even when two saved
+materials used the same local row IDs.
 
-create_printable reads this block when you pass
-`recipe: "name-tracing-page"` and asks the quality check to answer every
-item against the rendered page; a blocking no holds the page back as
-`Checklist (<id>)`. Each item is one of the corrections above, asked as
-a question the picture can settle.
+Read the actual PDF preview after rendering. The exact check proves the
+pinned outline geometry and printed bounds; it does not prove that the
+practice is comfortable for this child or that a home printer used 100%
+scale. The normal draft, critique, revision and parent-approval loop stays.
 
 ```homa-checklist
-- blocking guide-lines: Every writing row has three guide lines: a solid top line, a dashed midline centered between them, and a solid baseline.
-- blocking letters-on-guides: On every row that shows the name (model or trace), the letters sit on the guides: small letters fill midline to baseline, tall letters reach the top line, and descenders drop below the baseline.
-- blocking name-fills-row: On every row that shows the name, the name (or its repeat on a short-name row) spans most of the row's width at full guide height, never bunched small at the left with a dead right half.
-- blocking fade-to-empty: After any model row, trace rows come first and at least one empty guide row for writing alone comes last, unless the brief says otherwise.
-- advisory trace-style: Trace letters are a dotted outline or a pale fill the child writes over; solid dark ink appears only on a model row.
-- advisory row-spacing: Rows are clearly separated by visible space, never stacked so tight they read as one ruled block.
+- blocking guide-lines: Each writing row has a solid top guide, a dashed midpoint, a solid baseline, and room below for descenders.
+- blocking letters-on-guides: Letters meet the appropriate cap, body, baseline and descender bands without clipping, including dots and accents.
+- blocking literal-spelling: The name keeps the parent's exact spelling, accents and case on every guided row.
+- blocking fade-to-empty: After any model row, tracing support precedes at least one empty guide row for writing alone, unless the brief says otherwise.
+- advisory trace-style: Tracing uses dotted outlines or pale fill; solid dark ink is an example, and no starting point or stroke order is invented.
+- advisory row-spacing: Rows have distinct space and readable full-size lettering; a short name need not stretch across the page.
 ```
 
-## What not to do (each one a sent correction)
+## Preserve the predecessor's physical writing size
 
-- HTML text near CSS-border guides: decoupled, unpinnable, the
-  three-day bug. Use the SVG row.
-- A solid dark name to trace over.
-- Single baseline-only lines with no midline.
-- Letters floating small inside oversized boxes or guides.
-- Rebuilding the row with flex, tables, or grid to "spread letters":
-  the SVG row already owns spacing.
-- Uneven or cramped gaps between rows (5px is cramped; 24px or more).
+For a revision, reopen the exact material with `find_materials(materialId, pageIndex)` before composing. `revisesId` identifies the authenticated predecessor. Select the old row through each replacement declaration's `predecessor`; its size comes from the saved server/print receipt, never a guessed font-size or a matching title.
 
-Letter-by-letter formation practice in curriculum boxes (Handwriting
-Without Tears style) is a different page: letter-number-formation-
-practice owns that geometry. This recipe is the whole name on writing
-guides.
+- A guided predecessor uses `{ "kind": "guided", "page": 1, "rowId": "practice" }`. Retain its measured cap, small-letter body and descender bands. You can move the replacement to another page; identify its original page/row. Carry unchanged pages normally. Every old guided row must remain accounted for. A renamed ID or more pages does not establish preservation.
+- An old SVG uses `{ "kind": "legacy-svg", "page": 1, "svgOrdinal": 2 }`, counting all SVG elements within the saved page body from 1. This route accepts only the exact static three-guide Fredoka structure with verified embedded font bytes and an offline replay matching the saved size signals. Replace only the selected SVG bytes with the declared placeholder; keep all surrounding HTML unchanged. The target is the original guide spacing, not faulty glyph ink or nominal font-size. The known 2/66/130 guides require cap128/body64 and the complete248px row frame. A new fetch of Google Fonts is not historical font evidence.
+- If a legacy row's source/font/layout cannot be verified, or the full frame will not fit without rearranging that legacy page, explain that specific limit and preserve the original. Do not relabel it as a new page, switch recipes to escape comparison, add giant text to satisfy a maximum, or set `allowSizeReduction` to get past a refusal. The current exact conversion does not certify legacy multi-page rearrangement.
+
+For guided revisions that need more space, move rows to another page at their original band sizes. Fewer repetitions or smaller letters require the parent's actual requested/accepted change and the existing explicit size-reduction authorization. Report any authorized reduction from the returned comparison. Code verifies correspondence and dimensions; the model owns the interpretation of the parent's request. The ordinary picture/text/box floor continues to apply.

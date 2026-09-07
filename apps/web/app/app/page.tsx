@@ -7,6 +7,8 @@ import { firstWeekAdjustmentDraft } from "../../lib/activation/first-week-handof
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
 import { ASSESSMENT_PENDING_COOKIE, assessmentActionFromHeader, assessmentActionFromQuery, assessmentActionHref, resolveAssessmentAction } from "../../lib/child-progress/assessment-intent";
+import { abilityQuestionDraft } from "../../lib/child-progress/ability-question-draft";
+import { ABILITY_QUESTION_DRAFT } from "../../lib/child-progress/ability-question";
 import { materialRevisionDraft } from "../../lib/material-revision-handoff";
 import { plannerActivityHelpDraft } from "../../lib/planner-activity-help";
 import { getSlashMenuSkills } from "../../lib/slash-skills";
@@ -50,6 +52,7 @@ export default async function ChatPage({
     draft?: string;
     child?: string;
     subject?: string;
+    ability?: string;
     check?: string;
     plan?: string;
     material?: string;
@@ -63,7 +66,8 @@ export default async function ChatPage({
   const app = await getAppData();
   const query = await searchParams;
   const pendingAction = assessmentActionFromHeader((await cookies()).get(ASSESSMENT_PENDING_COOKIE)?.value ?? null);
-  const selectedAction = query.assessment !== undefined
+  const isAbilityQuestion = query.draft === ABILITY_QUESTION_DRAFT;
+  const selectedAction = isAbilityQuestion ? null : query.assessment !== undefined
     ? assessmentActionFromQuery(query, pendingAction?.requestId ?? "") : pendingAction;
   if (query.assessment && selectedAction && !query.request) redirect(assessmentActionHref(selectedAction));
   const initialAssessment = selectedAction && app ? resolveAssessmentAction(selectedAction, app.children) : null;
@@ -85,7 +89,10 @@ export default async function ChatPage({
         ? { ...materialRevisionCandidate, materialId: material.id }
         : undefined)
     : undefined;
-  const initialDraft = plannerActivityHelpDraft({
+  const selectedAbilityQuestion = abilityQuestionDraft({
+    draft, childId: query.child, abilityId: query.ability, children: app?.children ?? [],
+  });
+  const initialDraft = selectedAbilityQuestion ?? plannerActivityHelpDraft({
     draft,
     childId: query.child,
     subjectId: query.subject,
@@ -130,9 +137,13 @@ export default async function ChatPage({
       : null;
 
   return (
+    <>
+    {draft === ABILITY_QUESTION_DRAFT && !selectedAbilityQuestion ? (
+      <p role="alert" className="px-4 py-3 text-sm text-muted">This ability question is unavailable. Open the ability again from Progress.</p>
+    ) : null}
     <ChatClient
       initialAssessment={initialAssessment}
-      assessmentUnavailable={Boolean(query.assessment || pendingAction) && !initialAssessment}
+      assessmentUnavailable={!isAbilityQuestion && Boolean(query.assessment || pendingAction) && !initialAssessment}
       wall={wall}
       serverHistory={serverHistory}
       storageKey={`homa-chat-${userId}`}
@@ -159,5 +170,6 @@ export default async function ChatPage({
       initialWorkingPlanId={workingPlanResume?.workingPlanId}
       initialMaterialId={materialRevision?.materialId}
     />
+    </>
   );
 }

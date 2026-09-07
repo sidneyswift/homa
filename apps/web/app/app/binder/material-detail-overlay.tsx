@@ -274,11 +274,11 @@ export function MaterialDetailOverlay({
                     href={source.libraryUrl}
                     className="font-semibold text-[color:var(--homa-ink)] underline decoration-[var(--homa-control-boundary)] underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
                   >
-                    {source.title}
+                    {source.title}{source.sourceLocator ? ` · ${source.sourceLocator}` : null}
                   </a>
                 ) : (
                   <span key={source.id} className="font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
-                    {source.title}
+                    {source.title}{source.sourceLocator ? ` · ${source.sourceLocator}` : null}
                   </span>
                 ),
               )}
