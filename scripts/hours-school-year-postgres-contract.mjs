@@ -68,15 +68,21 @@ export async function runHoursSchoolYearReadContract(sql) {
   };
   async function serve(request, response) {
     try {
-      if (request.method === 'POST' && request.url === '/rest/v1/rpc/read_hours_summary') {
+      if (request.method === 'POST' && ['/rest/v1/rpc/read_hours_summary', '/rest/v1/rpc/read_hours_category_summary'].includes(request.url)) {
         const user = tokens.get(request.headers.authorization?.replace(/^Bearer /u, ''));
         assert(user, "RPC requires this run's caller token");
         let body = ''; for await (const chunk of request) { body += chunk.toString(); assert(body.length < 4096); }
         const args = JSON.parse(body);
-        assert.deepEqual(Object.keys(args).sort(), ['target_family_id','requested_period','target_child_id','include_shared','from_on','through_on','target_subject','entry_limit','reference_at'].sort());
-        requests.push({ table: 'rpc/read_hours_summary', user });
+        const withCategories = request.url === '/rest/v1/rpc/read_hours_category_summary';
+        assert.deepEqual(Object.keys(args).sort(), ['target_family_id','requested_period','target_child_id','include_shared','from_on','through_on','target_subject','entry_limit','reference_at', ...(withCategories ? ['target_category_id', 'uncategorized_only'] : [])].sort());
+        requests.push({ table: withCategories ? 'rpc/read_hours_category_summary' : 'rpc/read_hours_summary', user });
         if (policy.failHours) { response.writeHead(503, { 'content-type': 'application/json' }); response.end(JSON.stringify({code:'XX000',message:'Synthetic summary read failure'})); return; }
-        const rows = await asCaller(user, tx => tx`select public.read_hours_summary(
+        const rows = await asCaller(user, tx => withCategories ? tx`select public.read_hours_category_summary(
+          ${args.target_family_id}::uuid, ${args.requested_period}::text, ${args.target_child_id}::uuid,
+          ${args.include_shared}::boolean, ${args.from_on}::text, ${args.through_on}::text,
+          ${args.target_subject}::text, ${args.entry_limit}::integer, ${args.reference_at}::timestamptz,
+          ${args.target_category_id}::uuid, ${args.uncategorized_only}::boolean
+        ) as record` : tx`select public.read_hours_summary(
           ${args.target_family_id}::uuid, ${args.requested_period}::text, ${args.target_child_id}::uuid,
           ${args.include_shared}::boolean, ${args.from_on}::text, ${args.through_on}::text,
           ${args.target_subject}::text, ${args.entry_limit}::integer, ${args.reference_at}::timestamptz
@@ -173,8 +179,8 @@ export async function runHoursSchoolYearReadContract(sql) {
       const request = new Request(input, init);
       const url = new URL(request.url);
       assert.equal(url.origin, origin);
-      assert(request.method === 'GET' || (request.method === 'POST' && url.pathname === '/rest/v1/rpc/read_hours_summary'));
-      assert(['/rest/v1/hours_log', '/rest/v1/families', '/rest/v1/children', '/rest/v1/rpc/read_hours_summary'].includes(url.pathname));
+      assert(request.method === 'GET' || (request.method === 'POST' && ['/rest/v1/rpc/read_hours_summary', '/rest/v1/rpc/read_hours_category_summary'].includes(url.pathname)));
+      assert(['/rest/v1/hours_log', '/rest/v1/families', '/rest/v1/children', '/rest/v1/rpc/read_hours_summary', '/rest/v1/rpc/read_hours_category_summary'].includes(url.pathname));
       return fetch(request, { signal: AbortSignal.any([request.signal, AbortSignal.timeout(7000)]), redirect: 'error' });
     };
     const client = token => createClient(origin, 'local-fixture-key', {
@@ -238,12 +244,13 @@ export async function runHoursSchoolYearReadContract(sql) {
     await test('configured caller/pinned totals, actual family setting and future exclusion', async () => {
       for (const mode of ['caller', 'pinned']) {
         const result = await execute(mode);
+        assert.equal(result.complete, true, `${mode}: actual tool read must succeed before checking totals`);
         assert.equal(result.since, today);
         assert.equal(result.through, today);
         assert.equal(result.totalMinutes, 23);
         assert.equal(result.complete, true);
       }
-      assert(requests.some(request => request.table === 'rpc/read_hours_summary'));
+      assert(requests.some(request => request.table === 'rpc/read_hours_category_summary'));
     });
     await test('real RLS refuses the other family while pinned reader retains exact family predicate', async () => {
       callerToken = tokenB;

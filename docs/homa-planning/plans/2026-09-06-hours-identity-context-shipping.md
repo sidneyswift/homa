@@ -51,6 +51,8 @@ The recovery template SHA-256 was `108f2dfb546872a739f50102dc0469f939e727e6ce3b6
 
 ### What this changes for the next Hours change
 
+- 2026-09-07, second CI fixture discovery: the school-year reader's loopback Supabase adapter allowed only the old summary RPC, so it refused the real tool's new category-summary read. Extend that adapter to both exact read signatures and run its owning Planner PostgreSQL suite; retain the real RPC, RLS, clock and reader validation in the test. The complete owning Planner PostgreSQL suite passed, including all nine school-year reader groups and the context/privacy contracts.
+
 - 2026-09-07, CI discovery: the ChildProgress harness creates a partial schema and calls the actual family fold. Its fixture lacked the new category relation, causing PostgreSQL `42P01` in job `101771654513`. Add the minimal relation and a category carry/deduplication assertion to that harness; production schema and code remain unchanged. The complete ChildProgress PostgreSQL integration then passed, including its deeper-progress and 45 report-narrative checks.
 
 - Preserve category relationships at the database boundary because chat, Planner and older clients all write Hours.
