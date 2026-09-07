@@ -30,6 +30,7 @@ export default function HelloScreen() {
     <OnboardingStage
       posture="big"
       characterState="speaking"
+      heroPaddingTop={160}
       bubbleKey={`hello-${bubbleIndex}`}
       bubble={BUBBLES[bubbleIndex]}
       scroll={false}

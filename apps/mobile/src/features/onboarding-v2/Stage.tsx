@@ -182,6 +182,14 @@ export interface OnboardingStageProps {
    * waiting on an answer, "thinking" while something is being built,
    * "speaking" for a payoff beat she's narrating. Defaults to "idle". */
   characterState?: CharacterState;
+  /** Big posture only: extra top offset that centers the mascot+bubble
+   * cluster lower on screen, matching the reference's low-content greeting
+   * moments (bubble top ~30% down, character centered ~45%) instead of
+   * pinning it under the status bar. Only safe when there's little else
+   * below it to compete for space: Hello and the closing screen opt in
+   * explicitly. Content-heavy big screens (a report, a paywall's pricing
+   * cards) keep the default, or their cards get pushed into the footer. */
+  heroPaddingTop?: number;
   children?: React.ReactNode;
   footer?: React.ReactNode;
   scroll?: boolean;
@@ -196,6 +204,7 @@ export function OnboardingStage({
   bubbleKey,
   onBack,
   characterState = "idle",
+  heroPaddingTop = 32,
   children,
   footer,
   scroll = true,
@@ -229,7 +238,7 @@ export function OnboardingStage({
       <View
         style={{
           paddingHorizontal: v2Space.lg,
-          paddingTop: posture === "big" ? 32 : v2Space.md,
+          paddingTop: posture === "big" ? heroPaddingTop : v2Space.md,
           flexDirection: posture === "docked" ? "row" : "column",
           alignItems: posture === "docked" ? "flex-start" : "center",
           gap: v2Space.md,

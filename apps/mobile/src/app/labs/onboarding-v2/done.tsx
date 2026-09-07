@@ -19,6 +19,7 @@ export default function DoneScreen() {
     <OnboardingStage
       posture="big"
       characterState="speaking"
+      heroPaddingTop={160}
       bubbleKey="done"
       bubble={bubble}
       footer={
