@@ -10,6 +10,7 @@ import {
   type NativeAccessibilityJourney,
   type NativeAccessibilitySurface,
 } from "../apps/mobile/src/lib/accessibility/acceptance-manifest";
+import { FORBIDDEN_PRODUCT_SOURCE_SEGMENTS } from "../apps/mobile/scripts/mobile-production-bundle-check.mjs";
 
 const REPO_ROOT = process.cwd();
 const MOBILE_SOURCE_ROOT = "apps/mobile/src";
@@ -121,6 +122,19 @@ function normalized(path: string): string {
 
 function repoRelative(path: string): string {
   return normalized(relative(REPO_ROOT, path));
+}
+
+/** Mirrors mobile-production-bundle-check.mjs's own guard: a lab, fixture,
+ * or prototype source can never enter a real OTA bundle, so it has no
+ * business in the accessibility audit either. One shared segment set keeps
+ * both guards agreeing on what "excluded by construction" means. */
+function isForbiddenPrototypeSource(repoRelativePath: string): boolean {
+  const segments = repoRelativePath.split("/");
+  const sourceIndex = segments.indexOf("src");
+  if (sourceIndex < 0) return false;
+  return segments
+    .slice(sourceIndex + 1)
+    .some((segment) => FORBIDDEN_PRODUCT_SOURCE_SEGMENTS.has(segment.toLowerCase()));
 }
 
 function* walkSourceFiles(root: string): Generator<string> {
@@ -460,7 +474,8 @@ function readPackageManifest(path: string): PackageManifest {
 function main(): void {
   const appFiles = [...walkSourceFiles(resolve(REPO_ROOT, MOBILE_APP_ROOT))]
     .filter((file) => file.endsWith(".tsx"))
-    .map(repoRelative);
+    .map(repoRelative)
+    .filter((file) => !isForbiddenPrototypeSource(file));
   const surfaceFailures = findSurfaceRegistryViolations(appFiles, nativeAccessibilitySurfaces);
   const excluded = new Set(
     nativeAccessibilitySurfaces
@@ -471,7 +486,7 @@ function main(): void {
   const discoveredHandoffs: DiscoveredHandoff[] = [];
   for (const absoluteFile of walkSourceFiles(resolve(REPO_ROOT, MOBILE_SOURCE_ROOT))) {
     const file = repoRelative(absoluteFile);
-    if (excluded.has(file)) continue;
+    if (excluded.has(file) || isForbiddenPrototypeSource(file)) continue;
     const scan = scanAccessibilitySource(file, readFileSync(absoluteFile, "utf8"));
     sourceViolations.push(...scan.violations);
     discoveredHandoffs.push(...scan.handoffs);
