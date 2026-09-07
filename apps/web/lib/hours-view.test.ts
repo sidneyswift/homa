@@ -107,7 +107,7 @@ describe("subjectDisplayLabel", () => {
   it("shows her own word for an other entry once she has set one", () => {
     assert.equal(
       subjectDisplayLabel({ subject: "other", customLabel: "Portuguese" }),
-      "Portuguese",
+      "Other · Portuguese",
     );
   });
 
@@ -118,7 +118,7 @@ describe("subjectDisplayLabel", () => {
   it("shows her own word for a custom category under a real subject too", () => {
     assert.equal(
       subjectDisplayLabel({ subject: "reading", customLabel: "Literature journal" }),
-      "Literature journal",
+      "Language arts · Literature journal",
     );
   });
 

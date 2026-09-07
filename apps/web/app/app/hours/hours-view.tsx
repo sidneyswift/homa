@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { categorySubtotals } from "../../../lib/hours-categories";
+import { HoursCategoryManager, useHoursCategories, CATEGORY_FIELD } from "./hours-categories-panel";
 import { resolveHoursWindow } from "../../../lib/hours-summary";
 import { zonedDateString } from "../../../lib/time-zone";
 
@@ -103,7 +105,7 @@ function EntryRow({
   return (
     <li className="quiet-frame quiet-frame--paper flex flex-wrap items-center gap-2.5 px-3.5 py-2.5">
       <span
-        className="rounded-[var(--homa-radius-control)] px-2.5 py-1 text-[0.68rem] font-bold"
+        className="min-w-0 max-w-full break-words rounded-[var(--homa-radius-control)] px-2.5 py-1 text-[0.68rem] font-bold"
         style={{ background: bg, color: ink }}
       >
         {subjectDisplayLabel(entry)}
@@ -157,6 +159,7 @@ export function HoursView({
    * of its views, so the standalone heading stays hidden there. */
   embedded?: boolean;
 }) {
+  const catalog = useHoursCategories();
   const [filter, setFilter] = useState<HoursFilter>({ subject: null });
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -166,7 +169,8 @@ export function HoursView({
   const schoolStartLabel = schoolWindow.from === null ? null : new Intl.DateTimeFormat("en-US", {
     timeZone: "UTC", year: "numeric", month: "short", day: "numeric",
   }).format(new Date(`${schoolWindow.from}T00:00:00Z`));
-  const subjects = useMemo(() => subjectOptions(entries), [entries]);
+  const subjects = useMemo(() => [...new Set([...subjectOptions(entries), ...catalog.categories.map(row => row.subject)])], [entries, catalog.categories]);
+  const categoryRows = categorySubtotals(entries, catalog.categories).filter(row => !filter.subject || row.subject === filter.subject);
   const filtered = useMemo(() => filterEntries(entries, filter), [entries, filter]);
   const groups = useMemo(
     () => groupEntriesByDay(filtered, timeZone, now),
@@ -240,7 +244,7 @@ export function HoursView({
 
       {!embedded && totalsGrid ? <div className="mt-6">{totalsGrid}</div> : null}
 
-      {subjects.length > 1 ? (
+      {subjects.length > 0 ? (
         <div
           className="mt-6 flex flex-wrap items-center gap-2"
           role="group"
@@ -271,6 +275,24 @@ export function HoursView({
         </div>
       ) : null}
 
+      <div className="mt-4">
+        {catalog.error ? <p role="alert" className="text-sm">{catalog.error} <button type="button" className="min-h-11 underline" onClick={catalog.reload}>Reload categories</button></p> : !catalog.loaded ? <p role="status" className="text-sm">Loading categories…</p> : <HoursCategoryManager categories={catalog.categories} onSaved={() => { setFilter({ subject: null }); catalog.reload(); }} />}
+        {filter.subject ? <label className="mt-4 block text-sm font-semibold">Filter by category
+          <select aria-label="Filter by category" className={CATEGORY_FIELD} value={filter.category === undefined ? "all" : JSON.stringify(filter.category)} onChange={event => setFilter({ ...filter, category: event.target.value === "all" ? undefined : JSON.parse(event.target.value) })}>
+            <option value="all">All categories</option><option value="null">Uncategorized</option>
+            {categoryRows.filter(row => row.name !== "").map(row => <option key={row.id} value={JSON.stringify(row.name)}>{row.name}</option>)}
+          </select>
+        </label> : null}
+        {entriesComplete && categoryRows.length > 0 ? <details className="mt-4 border-b border-[var(--homa-control-boundary)]">
+          <summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold">Category totals, all recorded dates</summary>
+          <p className="mb-3 text-sm">Shared entries count once in this record. Category and uncategorized time add up to each subject total.</p>
+          {subjects.filter(subject => !filter.subject || subject === filter.subject).map(subject => <section key={subject} className="pb-4">
+            <h3 className="flex justify-between gap-3 text-sm font-semibold"><span>{SUBJECT_LABELS[subject]}</span><span>{formatMinutesAsHours(categoryRows.filter(row => row.subject === subject).reduce((sum,row) => sum+row.minutes,0))}</span></h3>
+            <dl>{categoryRows.filter(row => row.subject === subject).map(row => <div key={row.id} className="flex justify-between gap-3 py-1 text-sm"><dt className="min-w-0 break-words">{row.name || "Uncategorized"}</dt><dd className="shrink-0">{formatMinutesAsHours(row.minutes)}</dd></div>)}</dl>
+          </section>)}
+        </details> : null}
+      </div>
+
       {entries.length === 0 && !entriesComplete ? null : entries.length === 0 ? (
         <QuietFrame className="mt-8 border-dashed p-8 text-center">
           <p className={`font-display text-lg font-semibold ${INK}`}>Nothing logged yet.</p>
@@ -279,11 +301,11 @@ export function HoursView({
           </p>
         </QuietFrame>
       ) : groups.length === 0 && !entriesComplete ? (
-        <p className={`mt-8 text-sm ${MUTED}`}>None of the loaded records match this subject.</p>
+        <p className={`mt-8 text-sm ${MUTED}`}>None of the loaded records match these filters.</p>
       ) : groups.length === 0 ? (
         <p className={`quiet-frame quiet-frame--paper mt-8 border-dashed p-6 text-center text-sm ${MUTED}`}>
           {filter.subject
-            ? `Nothing logged for ${SUBJECT_LABELS[filter.subject].toLowerCase()} yet.`
+            ? `Nothing logged for ${filter.category ?? (filter.category === null ? "uncategorized time" : SUBJECT_LABELS[filter.subject].toLowerCase())} yet.`
             : "Nothing logged yet."}
         </p>
       ) : (

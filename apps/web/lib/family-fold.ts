@@ -260,7 +260,13 @@ async function moveLockedFamilyDataIntoTx(
   await tx`update public.planner_learning_activities set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
   await tx`update public.planner_learning_activity_children set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
   await tx`update public.planner_learning_activity_hours set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
+  await tx`select id from public.hours_categories where family_id=${sourceFamilyId} order by id for update`;
+  // Carry unused categories too; exact duplicates reuse the destination identity.
+  await tx`insert into public.hours_categories(family_id,subject,name)
+    select ${destinationFamilyId},subject,name from public.hours_categories where family_id=${sourceFamilyId}
+    on conflict(family_id,subject,name) do nothing`;
   await tx`update public.hours_log set family_id = ${destinationFamilyId} where family_id = ${sourceFamilyId}`;
+  await tx`delete from public.hours_categories where family_id=${sourceFamilyId}`;
 
   await tx`
     update public.family_skills source

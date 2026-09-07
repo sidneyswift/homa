@@ -122,7 +122,7 @@ for (const width of [320, 390, 1280]) {
     const entries = await download(page, "Download time entries");
     expect(entries.name).toBe("homa-school-hours.csv");
     expect(entries.text.trimEnd().split("\r\n")).toHaveLength(3);
-    expect(entries.text).toContain('"Reading","Narnia","20"');
+    expect(entries.text).toContain('"Language arts","Narnia","20"');
     expect(entries.text).toContain('Chapter ""one"" 📖');
     expect(entries.text).not.toContain('"old"');
     expect(entries.text).not.toContain('"future"');
