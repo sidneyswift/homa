@@ -50,10 +50,10 @@ different variant); "video-only" marks screens the montage did not show.
    account".
 
 ### Persona intro (video-only, no chrome, mascot alone on flat purple)
-5. Bubble: **"Hi, I'm Didi."** — the mascot names itself before asking
+5. Bubble: **"Hi, I'm Didi."** The mascot names itself before asking
    anything.
-6. Bubble swap: **"Tell me about your kiddo — I'll do the rest."**
-7. Bubble swap: **"Just between us, promise."** — privacy reassurance.
+6. Bubble swap: **"Tell me about your kiddo. I'll do the rest."**
+7. Bubble swap: **"Just between us, promise."** A privacy reassurance.
    First "Continue" button appears here, pinned bottom.
 8. Transition: mascot visibly shrinks and docks to the top-left corner.
    A progress bar appears at the top of the screen for the first time.
@@ -116,7 +116,7 @@ different variant); "video-only" marks screens the montage did not show.
 22. **Homeschooling, binary (video-only)**: bubble "Is Daniel being
     homeschooled?", segmented No/Yes control. Selecting Yes immediately
     reveals a bonus stat banner beneath it: "Homeschoolers using Keiki
-    report a 34% increase in curriculum learning" — the reward for a
+    report a 34% increase in curriculum learning". The reward for a
     Yes appears inline, not as a separate screen.
 23. **Credibility interstitial (video-only)**: "Science-backed
     activities", a badge/seal icon, short supporting copy.
@@ -141,10 +141,10 @@ different variant); "video-only" marks screens the montage did not show.
     requests...").
 28. **Stat interstitial**: "Screen time you can feel good about", bar
     chart, "Kids stay focused 3x longer and learn 3.5x more with Keiki
-    than with other apps", "Start personalization" primary — this is
+    than with other apps", "Start personalization" primary. This is
     the button that actually kicks off the next screen.
 
-### The "Personalizing" screen — one screen, three sequential fills
+### The "Personalizing" screen: one screen, three sequential fills
 29. Header "Personalizing Keiki for Daniel...", a small illustrated
     tablet-and-plant icon with the mascot beside it.
     - Row 1 **Goals**: 0→100%, caption cycles through the specific goal
@@ -158,7 +158,7 @@ different variant); "video-only" marks screens the montage did not show.
     - Static-montage variant of this same screen shows a green
       checkmark instead of a percentage once a row completes; the video
       shows a small green dot/check icon rather than a full checkmark
-      circle — same idea, different render, not worth reconciling
+      circle. Same idea, different render, not worth reconciling
       further.
 
 ### Payoff
@@ -175,7 +175,7 @@ different variant); "video-only" marks screens the montage did not show.
     "Have an account? Sign in" link. (Montage's version of this screen
     is headed "Create Account" instead, same fields.)
 
-### Paywall — three screens, not one
+### Paywall: three screens, not one
 33. **Personified trial intro**: mascot holds a small heart, "I'd love
     for Daniel to enjoy Keiki, 7 days free", "No payment due now", "Try
     for $0.00" primary. A native App Store review-request modal
