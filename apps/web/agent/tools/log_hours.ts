@@ -6,16 +6,18 @@ import { resolveAgentAccess } from "../../lib/agent-db";
 import { recordHoursPinned } from "../../lib/agent-pinned";
 import { hoursCaptureDisplayFields, hoursCaptureKey, hoursCaptureResultSchema } from "../../lib/hours-capture";
 import { composeHoursNote, hoursWorkContextSchema } from "../../lib/hours-note-context";
+import { verifyHoursNoteGrounding } from "../../lib/hours-note-grounding";
 import { HOURS_SUBJECTS } from "../../lib/hours-model";
-import { learningMutationUuid, learningOperationFailure, sourceActivityOrdinalSchema } from "../../lib/learning-write-operations";
+import { hasAcceptedLearningWriteOperation, learningMutationUuid, learningOperationFailure, sourceActivityOrdinalSchema } from "../../lib/learning-write-operations";
 import { plannerHoursSourceForChannel, verifyPlannerSourceQuote } from "../../lib/planner-learning-activities";
 import { plannerLearningToolContext } from "../../lib/planner-learning-tool-context";
 import { effectiveTimeZone, zonedDateString } from "../../lib/time-zone";
+import { modelUsageChannelFromAttributes } from "../../lib/model-usage";
 import { armVoiceActionThenMutate, recordVoiceAction, voiceToolReceiptContext } from "../../lib/voice/action-receipts";
 
 const logInput = z.object({
   sourceActivityOrdinal: sourceActivityOrdinalSchema,
-  workContext: hoursWorkContextSchema.optional().describe("Separately verified earlier named work when the current duration refers back. Resolve it with recall, or ask if ambiguous. Current sourceQuote still comes from this message."),
+  workContext: hoursWorkContextSchema.nullable().describe("Choose explicitly: provide the verified earlier parent source when this duration refers back to a book or named work, including an earlier message still visible in this conversation. Recall is needed for its canonical source ID even when you already know the title. Ask before writing if ambiguous. Use null only when no earlier named-work context is needed. A title placed only in note does not supply provenance. Current sourceQuote still comes from this message."),
   sourceQuote: z.string().trim().min(1).max(1000).describe("An exact span from the current parent message supporting this distinct activity."),
   minutes: z
     .number()
@@ -37,7 +39,7 @@ const logInput = z.object({
     .string()
     .max(200)
     .optional()
-    .describe("The parent's own words for the audit trail, e.g. 'about 45 min of math after breakfast'."),
+    .describe("Faithful detail for the audit trail. An earlier book/work title belongs in verified workContext, not only in this free-text note. If the reference is ambiguous, ask before writing."),
   customLabel: z
     .string()
     .max(40)
@@ -58,7 +60,22 @@ export default defineBoundedTool({
       const access = await resolveAgentAccess(attributes);
       const trusted = plannerLearningToolContext(attributes);
       if (!trusted) return { logged: false, note: "Homa could not verify a current parent message. Nothing was recorded." };
-      const sourceQuote = verifyPlannerSourceQuote({ canonicalInboundText: trusted.canonicalInboundText, sourceQuote: input.sourceQuote });
+      let sourceQuote: string;
+      try {
+        sourceQuote = verifyPlannerSourceQuote({ canonicalInboundText: trusted.canonicalInboundText, sourceQuote: input.sourceQuote });
+      } catch {
+        return { logged: false, reason: "invalid_source_quote",
+          note: "Nothing was saved or attempted. sourceQuote must appear exactly in the authenticated current parent message. Do not combine earlier and current messages. For an earlier title, recall its parent source and provide workContext separately, keeping the current quote and the same activity ordinal." };
+      }
+      const note = input.workContext ? composeHoursNote({ title: input.workContext.workTitle, note: input.note, sourceQuote }).text : input.note?.trim() || null;
+      const acceptedReplay=note&&trusted.canonicalInboundText!==note
+        ? await hasAcceptedLearningWriteOperation({familyId:access.familyId,key:hoursCaptureKey(trusted.sourceMessageId,input.sourceActivityOrdinal),sourceMessageId:trusted.sourceMessageId}) : false;
+      const noteGrounding=acceptedReplay?{supported:true}:await verifyHoursNoteGrounding({familyId:access.familyId,
+        memberUserId:typeof attributes?.memberUserId==="string"?attributes.memberUserId:null,
+        sourceMessageId:trusted.sourceMessageId,canonicalInboundText:trusted.canonicalInboundText,
+        note,workContext:input.workContext,channel:modelUsageChannelFromAttributes(attributes)});
+      if(!noteGrounding.supported)return {logged:false,reason:noteGrounding.reason,
+        note:"Nothing was saved. The note needs its parent-message evidence. For an earlier book or work title, call recall and provide workContext with its exact parent source. If the reference is ambiguous, ask which work; do not omit the requested title or guess it."};
       const receiptContext = voiceToolReceiptContext({ familyId: access.familyId, attributes,
         runtimeSessionId: ctx.session.id, turnId: ctx.session.turn.id });
       if (access.mode === "pinned") {
@@ -71,7 +88,6 @@ export default defineBoundedTool({
       const operationKey = hoursCaptureKey(trusted.sourceMessageId, input.sourceActivityOrdinal);
       const entryId = learningMutationUuid(operationKey, "hours");
       const customLabel = input.customLabel?.trim() || null;
-      const note = input.workContext ? composeHoursNote({ title: input.workContext.workTitle, note: input.note, sourceQuote }).text : input.note?.trim() || null;
       // Voice needs an exact compensator before the write. The RPC verifies this
       // date against its atomic resolution; a concurrent zone change refuses.
       let expectedDate: string | null = null;

@@ -180,6 +180,16 @@ function prioritizedCheckIns(
 }
 
 function progressViewData(view: ChildProgressView) {
+  // The ambient summary carries observations, not unsolicited assessment
+  // targets. The full catalog remains available through canonical map tools;
+  // an active check-in's actual question is carried separately above.
+  const evidenceSubjects = view.subjects.map(subject => ({
+    ...subject,
+    domains: subject.domains.map(domain => ({
+      ...domain,
+      topics: domain.topics.filter(topic => topic.state !== "ask_next"),
+    })).filter(domain => domain.topics.length > 0),
+  })).filter(subject => subject.domains.length > 0);
   return {
     childId: view.childId,
     projectedAt: view.projectedAt,
@@ -187,9 +197,10 @@ function progressViewData(view: ChildProgressView) {
       const comparison = buildProgressComparison(view, score.subjectId);
       return comparison.status === "measured" ? comparison : { subjectId: comparison.subjectId, status: comparison.status };
     }),
-    omittedSubjectDetails: Math.max(0, view.subjects.length - MAX_SUBJECTS_PER_CHILD),
+    subjectDetails: "saved_evidence_and_conflicts_only",
+    omittedSubjectDetails: Math.max(0, evidenceSubjects.length - MAX_SUBJECTS_PER_CHILD),
     childName: bounded(view.childName),
-    subjects: view.subjects
+    subjects: evidenceSubjects
       .slice(0, MAX_SUBJECTS_PER_CHILD)
       .map((subject) => ({
         name: bounded(subject.displayName),

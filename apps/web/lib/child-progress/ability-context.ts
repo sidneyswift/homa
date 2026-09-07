@@ -8,7 +8,9 @@ export interface AbilityContextCookieValue {
 }
 
 export function encodeAbilityContext(value: AbilityContextCookieValue): string {
-  return encodeURIComponent(`${value.childId}|${value.abilityId}`);
+  // Next encodes cookie values when serializing Set-Cookie. Encoding here too
+  // turns the separator into %257C, which the Eve request parser cannot read.
+  return `${value.childId}|${value.abilityId}`;
 }
 
 export function readAbilityContextCookie(

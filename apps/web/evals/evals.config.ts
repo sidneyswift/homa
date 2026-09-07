@@ -7,11 +7,10 @@ import {
 import { EVAL_FAMILY_FIXTURE_FLAG } from "../lib/family-context-eval-fixture";
 
 /**
- * The eval host loads apps/web/.env.local before this file runs and boots
- * the agent in-process after it, so this is the one moment the run's
- * production credentials can be taken away (lib/eval-isolation.ts, the
- * 2026-07-25 contamination finding). Model gateway credentials survive;
- * durable-write credentials do not. `pnpm eval:sandbox` supplies a
+ * Eve discovers this file at evals/evals.config.ts after its first dotenv
+ * load. Install the credential barrier before the server's second load
+ * (#1143, lib/eval-isolation.ts). Model gateway credentials survive;
+ * durable-write credentials cannot be restored. `pnpm eval:sandbox` supplies a
  * disposable Postgres for full-fidelity tool writes;
  * HOMA_EVAL_ALLOW_PROD_WRITES=1 is the loud opt-out.
  */

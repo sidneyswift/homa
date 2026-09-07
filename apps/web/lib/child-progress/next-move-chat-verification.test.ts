@@ -18,7 +18,7 @@ function executeActualTool(ledger: ReturnType<typeof nextMoveLedger>) {
   const script = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   let reads = 0;
   const required = createRequire(import.meta.url);
-  const toolModule = { exports: {} as { default: { execute(input: unknown, ctx: unknown): Promise<Record<string, unknown>> } } };
+  const toolModule = { exports: {} as { default: { inputSchema: {parse(input: unknown): unknown}; execute(input: unknown, ctx: unknown): Promise<Record<string, unknown>> } } };
   class FixedDate extends Date { constructor() { super(NEXT_MOVE_NOW); } }
   runInNewContext(script, { exports: toolModule.exports, module: toolModule, Date: FixedDate, require: (name: string) => {
     if (name === "../../lib/agent-tool-deadline") return { defineBoundedTool: (value: unknown) => value, TOOL_DEADLINE: { fetch: 100 } };
@@ -33,10 +33,62 @@ function executeActualTool(ledger: ReturnType<typeof nextMoveLedger>) {
     if (name === "zod") return required(name);
     throw new Error(`Unexpected dependency: ${name}`);
   } });
-  return { run: (candidate: unknown) => toolModule.exports.default.execute(candidate, { session: { auth: { current: { attributes: { familyId: NEXT_MOVE_FAMILY } } } } }), reads: () => reads };
+  return { run: (candidate: Record<string, unknown>) => {
+    const {childId, ...decision} = candidate;
+    return toolModule.exports.default.execute(toolModule.exports.default.inputSchema.parse({childId, decision: {kind: "activity", ...decision}}),
+      { session: { auth: { current: { attributes: { familyId: NEXT_MOVE_FAMILY } } } } });
+  }, reads: () => reads };
 }
 
 describe("Scoped canonical chat next move", () => {
+  it("certifies a stop from the complete scoped ledger without claiming a move or changing state", async () => {
+    const {ledger} = nextMoveChatScenario("all_easy");
+    ledger.evidence.push(nextMoveEvidence(MUSIC_ITEM, {observedAt: "2026-07-07T16:00:00.000Z"}));
+    const before = structuredClone(ledger);
+    const tool = executeActualTool(ledger);
+    const result = await tool.run({kind: "all_easy_stop", childId: NEXT_MOVE_CHILD, subjectId: "fine_motor"});
+    assert.equal(result.verified, true);
+    assert.equal(result.nextMove, undefined);
+    const stop = result.stop as {sourceRevision: string; totalSavedAnswers: number; evidence: {itemId: string; derivation: string}[]};
+    assert.equal(stop.sourceRevision, "7");
+    assert.equal(stop.totalSavedAnswers, 2);
+    assert.deepEqual(stop.evidence.map(row => row.itemId).sort(), [CUT_CURVES, CUT_LINE].sort());
+    assert.ok(stop.evidence.every(row => row.derivation === "direct"));
+    assert.equal(tool.reads(), 1);
+    assert.deepEqual(ledger, before);
+  });
+
+  it("refuses a stop for an omitted non-easy answer, conflict, unknown scope or missing evidence", async () => {
+    for (const [scenario, subjectId, reason] of [
+      ["incomplete_easy", "math", "non_easy_evidence"],
+      ["conflict_with_easy", "fine_motor", "conflicting_evidence"],
+      ["all_easy", "invented", "unknown_subject"],
+      ["all_easy", "music", "unknown_evidence"],
+    ] as const) {
+      const tool = executeActualTool(nextMoveChatScenario(scenario).ledger);
+      const result = await tool.run({kind: "all_easy_stop", childId: NEXT_MOVE_CHILD, subjectId});
+      assert.equal(result.verified, false);
+      assert.equal(result.reason, reason);
+    }
+    const foreign = await executeActualTool(nextMoveChatScenario("all_easy").ledger).run({kind:"all_easy_stop", childId:NEXT_MOVE_OTHER_CHILD, subjectId:"fine_motor"});
+    assert.equal(foreign.verified, false);
+  });
+
+  it("requires every scoped answer to be fresh and known, including exact 30-day and future boundaries", () => {
+    for (const [override, accepted] of [
+      [{derivation: "unknown" as const}, false],
+      [{observedAt: "2026-08-06T15:59:59.999Z"}, false],
+      [{observedAt: "2026-08-06T16:00:00.000Z"}, true],
+      [{observedAt: "2026-09-05T16:00:00.001Z"}, false],
+    ] as const) {
+      const ledger = nextMoveLedger([nextMoveEvidence(CUT_CURVES, {answer:"easily"}), nextMoveEvidence(CUT_LINE, {answer:"easily", ...override})]);
+      const result = nextMove.verifyProgressNextMoveChatStop({...nextMoveState(ledger), childId:NEXT_MOVE_CHILD, subjectId:"fine_motor"});
+      assert.equal(result.verified, accepted);
+    }
+    const state = nextMoveState(nextMoveChatScenario("all_easy").ledger);
+    assert.equal(nextMove.verifyProgressNextMoveChatStop({...state, familyId:NEXT_MOVE_OTHER_CHILD, childId:NEXT_MOVE_CHILD, subjectId:"fine_motor"}).verified, false);
+  });
+
   for (const itemId of [CUT_CURVES, MUSIC_ITEM]) it(`reads and verifies ${itemId} outside the summary and producer budget`, async () => {
     const ledger = crowdedNextMoveLedger(), state = nextMoveState(ledger);
     const before = JSON.stringify(ledger, (_, v) => typeof v === "bigint" ? v.toString() : v);

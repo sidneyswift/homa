@@ -3,6 +3,7 @@ import { MAP_SUBJECTS } from "@homa/core";
 import { SKILL_CATALOG } from "../../lib/child-progress/skill-catalog";
 import { buildChildProgressView } from "../../lib/child-progress/projection";
 import type { ChildProgressProjectionInput, StoredProgressEvidence } from "../../lib/child-progress/repository";
+import { JOURNAL_HOURS_PROGRESS_NOTE, manageChildProgressResultSchema } from "../../lib/child-progress/tool-result-contract";
 
 export const NEXT_MOVE_FAMILY = "11111111-1111-4111-8111-111111111111";
 export const NEXT_MOVE_CHILD = "22222222-2222-4222-8222-222222222222";
@@ -33,6 +34,20 @@ export function nextMoveState(ledger: ChildProgressProjectionInput) {
   return { familyId: NEXT_MOVE_FAMILY, ledger, view: buildChildProgressView({ ...ledger, now: NEXT_MOVE_NOW }), now: NEXT_MOVE_NOW };
 }
 
+/** Synthetic prior save in the real progress_update result shape. Capture and
+ * durable writes are verified by the separate progress-capture harness. */
+export function postSaveProgressReceipt() {
+  const state = nextMoveState(nextMoveChatScenario("post_save_offer").ledger);
+  const topic = state.view.subjects.flatMap(subject => subject.domains)
+    .flatMap(domain => domain.topics).find(item => item.itemId === CUT_CURVES)!;
+  return manageChildProgressResultSchema.parse({
+    kind: "progress_update", label: "Progress updated", childName: state.view.childName,
+    note: JOURNAL_HOURS_PROGRESS_NOTE,
+    affectedTopics: [topic.statement], undoAvailable: true,
+    undoToken: "55555555-5555-4555-8555-555555555555",
+  });
+}
+
 export function crowdedNextMoveLedger() {
   const math = MAP_SUBJECTS.find(subject => subject.id === "math")!.items.slice(0, 8)
     .map(item => nextMoveEvidence(item.id, { answer: "not_yet" }));
@@ -52,12 +67,16 @@ export function cuttingCandidate(itemId = CUT_CURVES) {
 
 export const NEXT_MOVE_CHAT_CASES = [
   "fresh_motor", "fresh_music", "stale_cutting", "unknown_cutting", "corrected_cutting",
-  "all_easy", "conflict", "conflict_with_easy", "ambiguous_child", "post_save_offer", "read_unavailable", "incomplete_easy",
+  "all_easy", "conflict", "conflict_with_easy", "ambiguous_child", "post_save_offer", "read_unavailable", "incomplete_easy", "decline",
 ] as const;
 export type NextMoveChatCase = typeof NEXT_MOVE_CHAT_CASES[number];
 
 export function nextMoveChatScenario(name: NextMoveChatCase) {
   let ledger = crowdedNextMoveLedger();
+  if (name === "post_save_offer") ledger = nextMoveLedger([nextMoveEvidence(CUT_CURVES, {
+    observedAt: NEXT_MOVE_NOW.toISOString(), createdAt: NEXT_MOVE_NOW.toISOString(),
+    source: "conversation", derivation: "inferred",
+  })]);
   if (name === "stale_cutting" || name === "unknown_cutting") ledger = nextMoveLedger([nextMoveEvidence(CUT_LINE, {
     observedAt: name === "stale_cutting" ? "2026-07-07T16:00:00.000Z" : "2026-09-04T16:00:00.000Z",
     derivation: "unknown",
@@ -93,6 +112,7 @@ export function nextMoveChatScenario(name: NextMoveChatCase) {
     post_save_offer: "Yes, that is the progress update I wanted to save about Maya using scissors today.",
     read_unavailable: "What should Maya try next with cutting?",
     incomplete_easy: "What should Maya try next in math?",
+    decline: "No, thanks. Maya has done enough today. Please leave it there, no more practice or questions.",
   };
   return { name, ledger, prompt: prompts[name], subjectId: name === "fresh_music" ? "music" : name === "incomplete_easy" ? "math" : "fine_motor",
     expectedTarget: name === "fresh_music" ? MUSIC_ITEM : CUT_CURVES,

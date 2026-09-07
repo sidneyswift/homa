@@ -20,6 +20,22 @@ test("guided rows pass the actual print renderer and hostile framing fails befor
     assert.equal(good.handwriting?.placements[0].guideHeightPoints, 72);
     assert.equal(good.handwriting?.placements[0].width, 700);
     assert.equal(good.handwriting?.placements[0].height, 186);
+    await t.test("fractional image heights retain exact physical size without false self-clipping", async () => {
+      const fractional = prepareHandwritingDocument([{ body: "<!-- homa:handwriting larger --><!-- homa:handwriting smaller -->", fresh: true, handwritingRows: [
+        { id: "larger", text: "Maya", style: "dotted", capHeight: 92, width: 480 },
+        { id: "smaller", text: "Maya", style: "pale", capHeight: 78, width: 480 },
+      ] }]);
+      const printed = await renderPrintableHtml(wrapPrintableDocument(fractional.bodies, ""), SUBJECT_LESSON_RENDER_POLICY, fractional.expectations);
+      assert.equal(printed.pageCount, 1);
+      assert.deepEqual(printed.handwriting?.placements.map(({ height, guideHeightPoints }) => ({ height, guideHeightPoints })), [
+        { height: 178.25, guideHeightPoints: 69 },
+        { height: 151.125, guideHeightPoints: 58.5 },
+      ]);
+      const cropped = prepareHandwritingDocument([{ body: '<div style="height:178px;overflow:hidden"><!-- homa:handwriting larger --></div>', fresh: true, handwritingRows: [
+        { id: "larger", text: "Maya", style: "dotted", capHeight: 92, width: 480 },
+      ] }]);
+      await assert.rejects(renderPrintableHtml(wrapPrintableDocument(cropped.bodies, ""), SUBJECT_LESSON_RENDER_POLICY, cropped.expectations), /clipped by its container/);
+    });
     const cases = [
       ["ancestor scale", `<div style="transform:scale(.8)">${body}</div>`],
       ["print-only scale", `<style>@media print { img { width:350px !important; height:93px !important; } }</style>${body}`],

@@ -9,16 +9,13 @@
  * PDFs into the production Blob store (observed 2026-07-25 during the
  * PR #144 routing-eval investigation).
  *
- * The eval host executes evals.config.ts after the env files load and
- * before the in-process agent server boots, and it never re-reads env
- * files mid-run (no reload, no child spawn in the eval path). That makes
- * the config the one place that can take credentials away from the whole
- * run, and credential absence is the strongest isolation there is: code
- * without a password cannot write to production, including code written
- * after this file. applyEvalIsolation deletes the durable-write
- * credentials and leaves the model gateway (AI_GATEWAY_API_KEY,
- * VERCEL_OIDC_TOKEN) and the read-only research APIs untouched, so eval
- * turns still reach the real model.
+ * The eval host executes evals/evals.config.ts after the first dotenv load.
+ * Eve 0.19 reloads those files when its in-process development server starts,
+ * so deleting credentials once is insufficient (#1143). The config installs
+ * a process-lifetime barrier against restoring the exact durable credential
+ * names. eval:sandbox also scrubs the environment before spawning and installs
+ * that barrier with a Node preload, before any child application code runs.
+ * Model OIDC authentication and read-only research APIs remain available.
  *
  * Two in-code layers back the scrub up, both keyed on the isolation flag
  * this module sets:
@@ -36,6 +33,13 @@
  * fixture: a deployed runtime never has its environment edited.
  */
 
+import {
+  DURABLE_WRITE_ENV_VARS,
+  installEvalIsolationBarrier,
+} from "./eval-isolation-runtime.mjs";
+
+export { DURABLE_WRITE_ENV_VARS };
+
 /** Set to "1" by applyEvalIsolation; consumed by the in-code guards. */
 export const EVAL_ISOLATION_FLAG = "HOMA_EVAL_ISOLATION";
 
@@ -47,35 +51,6 @@ export const EVAL_ALLOW_PROD_WRITES_FLAG = "HOMA_EVAL_ALLOW_PROD_WRITES";
  * scripts/eval-sandbox.mts. lib/map/db.ts honors it off Vercel only.
  */
 export const EVAL_DATABASE_URL_VAR = "HOMA_EVAL_DATABASE_URL";
-
-/**
- * Credentials whose presence lets an eval run change durable production
- * state. The model gateway pair (AI_GATEWAY_API_KEY, VERCEL_OIDC_TOKEN)
- * and the read-only research keys (SerpAPI, Firecrawl, TwelveLabs) stay:
- * evals need the real model, and reads spend quota, not truth.
- */
-export const DURABLE_WRITE_ENV_VARS = [
-  // Direct Postgres to the production pooler (lib/map/db.ts): telemetry,
-  // memories, materials records, everything mapDb touches.
-  "SUPABASE_DB_PASSWORD",
-  // Supabase Storage administration: adult avatar deletion.
-  "SUPABASE_SECRET_KEY",
-  // Vercel Blob: PDFs, page previews, generated images.
-  "BLOB_READ_WRITE_TOKEN",
-  // Private family originals and lesson recordings.
-  "HOMA_FAMILY_READ_WRITE_TOKEN",
-  "HOMA_LESSON_READ_WRITE_TOKEN",
-  // Outbound email.
-  "RESEND_API_KEY",
-  // SMS and voice.
-  "TELNYX_API_KEY",
-  // Billing.
-  "STRIPE_TEST_SECRET_KEY",
-  "STRIPE_LIVE_SECRET_KEY",
-  "STRIPE_WEBHOOK_SECRET",
-  // Physical mail.
-  "HANDWRYTTEN_API_KEY",
-] as const;
 
 export type EvalIsolationMode =
   /** Durable-write credentials removed; writes fail closed or land in the sandbox. */
@@ -118,8 +93,9 @@ export function isEvalIsolationActive(
 
 /**
  * Remove durable-write credentials from the eval run's environment.
- * Mutates the record it is given (evals.config.ts passes process.env)
- * and returns a summary for the one log line the eval host prints.
+ * Mutates the record it is given. For process.env, also prevents later dotenv
+ * reloads from restoring the credentials. Plain records remain pure fixtures
+ * or child environment preparation; the child installs its own preload.
  */
 export function applyEvalIsolation(
   environment: Record<string, string | undefined>,
@@ -149,6 +125,7 @@ export function applyEvalIsolation(
     }
   }
   environment[EVAL_ISOLATION_FLAG] = "1";
+  if (environment === process.env) installEvalIsolationBarrier();
 
   return {
     mode: "scrubbed",

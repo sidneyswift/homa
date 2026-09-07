@@ -1,5 +1,11 @@
 # Explain the saved months-ahead comparison
 
+## September 7 hosted completion
+
+The complete authenticated synthetic-family journey passed on production deployment `dpl_4JHCAJvgemcZZx6ZZ9QDd16KJQmP`, READY at commit `2ba7ea590258ebb17f3b5788834cebfb6e6379f6`. At 320px and 390px, 626 checks and 20 screenshots cover selected-child Progress, the about-10-month gross-motor comparison with its older inferred credited answer, the at-least-16-month Math cap, Language without a fabricated number, the saved full report and reloads of both routes. Root inspected the receipt and a rendered mobile detail screen. The earlier eight behavioral cases, seven judge calibrations and corrected full-fleet routing checks below remain the model evidence; this hosted run made no model call.
+
+The three synthetic accounts used across Progress and map verification were removed with their family records; no unexpected model or outbound effect was observed. Canonical deletion jobs and artifact-denial tombstones remain for the normal cleanup worker and token drain. The separate map cookie defect belongs to #1098 and does not invalidate these comparison checks. Physical-phone touch testing and co-founder usability feedback are not claimed.
+
 Issue [#1097](https://github.com/sidneyswift/homa/issues/1097), F11 in the [meeting review](2026-09-05-cofounder-feedback-review.md). Sidney clarified that “months back” meant a child being “15 months ahead” of national benchmarks. The requested surface is mobile web. Native keeps its existing qualitative presentation.
 
 ## Current release and bounded hosted evidence

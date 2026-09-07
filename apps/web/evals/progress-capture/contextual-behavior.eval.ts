@@ -8,7 +8,7 @@ export default defineEval({
   timeoutMs: 180_000,
   async test(t) {
     const run = await runCaptureBehavior("contextual", t.signal);
-    t.log(JSON.stringify({phase:"settled-model-and-real-sql-before-assertions",response:run.result.text,tools:run.calls,durable:run.durable,usage:run.result.usage}));
+    t.log(JSON.stringify({phase:"settled-model-and-real-sql-before-assertions",response:run.response,tools:run.calls,durable:run.durable,usage:run.result.usage}));
     assertCaptureBehavior(run);
   },
 });

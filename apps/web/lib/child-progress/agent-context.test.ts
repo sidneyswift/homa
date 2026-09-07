@@ -12,6 +12,7 @@ import type {
   ChildProgressView,
   ProgressCheckInRecord,
 } from "./types";
+import { nextMoveChatScenario, nextMoveState } from "../../evals/progress-next-move/chat-fixture";
 
 const FAMILY_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const CHILD_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -80,6 +81,15 @@ function view(
 }
 
 describe("bounded child progress agent context", () => {
+  it("keeps saved observations in ambient context without presenting unassessed catalog items as targets", () => {
+    const state=nextMoveState(nextMoveChatScenario("all_easy").ledger);
+    const original=JSON.stringify(state.view);
+    assert.ok(original.includes("fine_motor.fiddly-builds"),"The canonical catalog must still contain the unassessed item");
+    const rendered=renderChildProgressAgentContext({views:[state.view],checkIns:[]});
+    assert.ok(rendered.includes("fine_motor.cuts-line"));assert.ok(rendered.includes("fine_motor.cuts-curves"));
+    assert.ok(!rendered.includes("fine_motor.fiddly-builds"));assert.ok(!rendered.includes('"ask_next"'));
+    assert.equal(JSON.stringify(state.view),original,"Do not mutate the canonical view used by assessment or maps");
+  });
   it("does not query or inject progress context while the flag is off", async () => {
     const previous = process.env.HOMA_LIVE_PROGRESS_ENABLED;
     try {

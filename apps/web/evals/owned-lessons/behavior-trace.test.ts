@@ -24,14 +24,14 @@ test("actual controlled eval preserves failed generation and pre-judge assertion
         export async function generateText(options) {
           await options.tools.send_followup_email.execute({synthetic: true});
           if (fixture.mode === 'generation-failed') throw new Error('Synthetic aborted generation');
-          return {text: 'No page was made.', usage: {inputTokens: 5, outputTokens: 3, totalTokens: 8}};
+          return {text: 'No page was made.', steps: [{text: 'Earlier emitted text.'}, {text: 'No page was made.'}], usage: {inputTokens: 5, outputTokens: 3, totalTokens: 8}};
         }
         export async function generateObject() { fixture.judgeCalls++; throw new Error('Judge must not run'); }`,
       "agent/model": "export const HOMA_MODEL = 'synthetic-no-model';",
       "agent/tools/create_printable": "export const createPrintableInputSchema = {parse: value => value};",
       "lib/eval-isolation": "export const isEvalIsolationActive = () => true;",
       "lib/library/family-asset-provenance": "export async function resolveMaterialFamilySources() { throw new Error('No source access expected'); }",
-      "hours-read/full-menu": `export async function fullHoursEvalMenu() { return ['load_skill','read_file','find_family_assets','get_family_asset','read_family_curriculum','create_printable','send_followup_email'].map(name => ({name, description: 'Synthetic trace test.', inputSchema: {type: 'object', properties: {}}})); }`,
+      "hours-read/full-menu": `export async function fullHoursEvalMenu() { return ['load_skill','read_file','find_family_assets','get_family_asset','read_family_curriculum','get_children','create_printable','send_followup_email'].map(name => ({name, description: 'Synthetic trace test.', inputSchema: {type: 'object', properties: {}}})); }`,
     };
     const built = await esbuild.build({entryPoints: [fileURLToPath(new URL("./behavior.eval.ts", import.meta.url))], bundle: true,
       write: false, platform: "node", format: "cjs", packages: "external", plugins: [{name: "no-effect-trace-fixture", setup(build: {
@@ -49,6 +49,12 @@ test("actual controlled eval preserves failed generation and pre-judge assertion
       const mod = {exports: {}};
       const runtime = {cwd: () => root, env: {VERCEL_OIDC_TOKEN: "synthetic-no-network", HOMA_OWNED_LESSON_CASE: "urgent-fresh"}};
       new Script(`(function(require,module,exports,fixture,process){${built.outputFiles[0].text}\n})`).runInThisContext()(require, mod, mod.exports, fixture, runtime);
+      const evidenceContains = (mod.exports as {ownedLessonEvidenceContains(value:unknown, quote:string):boolean}).ownedLessonEvidenceContains;
+      const candidate = {response: "No PDF was delivered.", proposedMaterials: [{input: {pages: [{html: '<p>Count "three".\nThen compare.</p>'}]}}]};
+      assert.equal(evidenceContains(candidate, 'Count "three".\nThen compare.'), true);
+      assert.equal(evidenceContains(candidate, 'Count \\"three\\".'), false);
+      assert.equal(evidenceContains(candidate, "All answers were correct."), false);
+      assert.equal(evidenceContains(candidate, ""), false);
       const run = (mod.exports as {default: {test(t: {skip(note: string): never; log(value: string): void}): Promise<void>}}).default;
       const logs: Record<string, unknown>[] = [];
       await assert.rejects(run.test({skip: note => {throw new Error(note);}, log: value => logs.push(JSON.parse(value))}),
@@ -61,7 +67,10 @@ test("actual controlled eval preserves failed generation and pre-judge assertion
       assert.equal(calls[0].name, "send_followup_email");
       assert.deepEqual(calls[0].input, {synthetic: true});
       assert.deepEqual(calls[0].output, {accepted: false, note: "Unavailable in this isolated draft evaluation."});
-      if (mode === "assertion-failed") assert.deepEqual(logs[0].usage, {inputTokens: 5, outputTokens: 3, totalTokens: 8});
+      if (mode === "assertion-failed") {
+        assert.deepEqual(logs[0].usage, {inputTokens: 5, outputTokens: 3, totalTokens: 8});
+        assert.equal(logs[0].response, "Earlier emitted text.\n\nNo page was made.");
+      }
     }
   } finally {
     await rm(root, {recursive: true, force: true});
