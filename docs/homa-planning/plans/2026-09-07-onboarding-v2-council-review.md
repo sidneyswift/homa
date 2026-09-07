@@ -1,5 +1,21 @@
 <!-- Provenance: produced 2026-09-07 by a multi-agent council workflow (12 expert lenses plus 3 gap lenses named by a completeness critic; one fact-and-law auditor per lens; a chair wrote the tensions memo; a synthesizer wrote this document). Inputs: the v2 design brief presented to the founder that day and docs/homa-planning/plans/2026-09-07-keiki-onboarding-reference-analysis.md. Council findings are advice under review, not decisions; founder rulings live in journeys/10-reconciliation.md. -->
 
+> **Correction after live verification (2026-09-07, later the same day).** The
+> design brief this council reviewed stated that the live mobile walk "never
+> asks the 16-subject questionnaire and never produces a report." That is
+> wrong for the current TestFlight build. Walking it against production, the
+> making screen runs the ladder during the draw: "While I draw, tell me about
+> Maya. Every answer builds Maya's progress report", then "Math, 1 of 16", the
+> four chips (Easily, Getting there, Not yet, Not sure), a sixteen-segment
+> progress row, and "You can stop whenever you like." Findings that assume
+> mobile has no in-flow ladder, notably tension 3 ("kick the job at the
+> subject boundary and run the rest under the draw") and any "port the web
+> questionnaire to mobile" framing, describe refinements of what v1 already
+> does, not new capability. Two other live observations from the same walk:
+> the AI-processing consent card appears only after the making job has run
+> (gh#1136, confirmed), and the "Loading questions" card briefly overlaps the
+> last feature card's artwork on the making screen (filed separately).
+
 # Homa mobile onboarding v2: council synthesis
 
 Date: 2026-09-07. Source: 157 findings from 15 lenses (mom-new, mom-veteran, growth, assessment, native-ux, architecture, legal-privacy, voice-brand, edge-cases, retention-day2, competitive, data-strategy, materials-studio delivery owner, design-contract steward, eve context engineer), each fact-checked and law-checked; zero findings refuted; chair's tensions memo. Written for the founder. Keiki's visual direction and the account-last bet are taken as decided and improved, never relitigated.
