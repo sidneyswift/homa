@@ -306,8 +306,7 @@ const prerequisiteSql = `
     content text,
     source text
   );
-  -- Mirrors migrations #37 + 20260725193000: the fold's guarded hours
-  -- move reads the block columns and relies on this unique index.
+  -- The fold preserves distinct record ids, even when block values match.
   create table public.hours_log (
     id uuid primary key default gen_random_uuid(),
     family_id uuid,
@@ -319,11 +318,12 @@ const prerequisiteSql = `
     note text,
     created_at timestamptz not null default now()
   );
-  create unique index hours_log_block_unique_idx
-    on public.hours_log (
-      family_id, subject, minutes, happened_on,
-      coalesce(child_id, '00000000-0000-0000-0000-000000000000'::uuid)
-    );
+  -- Empty graph relations used by the real fold; the dedicated Hours contract
+  -- applies every real migration and checks linked rows and operation receipts.
+  create table public.learning_write_operations (id uuid primary key default gen_random_uuid(), family_id uuid);
+  create table public.planner_learning_activities (id uuid primary key default gen_random_uuid(), family_id uuid);
+  create table public.planner_learning_activity_children (family_id uuid);
+  create table public.planner_learning_activity_hours (family_id uuid);
   create table public.call_transcripts (
     id uuid primary key default gen_random_uuid(),
     family_id uuid
@@ -1014,14 +1014,12 @@ async function runFamilyFoldCompatibilityAssertions(
         and revision.child_id = live.child_id
         and revision.family_id = live.family_id
     `;
-    // Fold under hours_log_block_unique_idx (issue #215): a source
-    // block the destination already has is dropped, everything else
-    // moves, and nothing is left on the retiring family.
+    // Equal-shaped records remain distinct during the family fold.
     await tx`
       insert into public.hours_log (family_id, subject, minutes, happened_on, note)
       values
         (${stubDestinationFamilyId}, 'math', 30, '2026-07-20', 'destination original'),
-        (${stubSourceFamilyId}, 'math', 30, '2026-07-20', 'source copy, dropped on fold'),
+        (${stubSourceFamilyId}, 'math', 30, '2026-07-20', 'distinct source activity'),
         (${stubSourceFamilyId}, 'reading', 45, '2026-07-21', 'moves with the fold')
     `;
     assert.equal(
@@ -1042,12 +1040,13 @@ async function runFamilyFoldCompatibilityAssertions(
     >`
       select subject, minutes, note from public.hours_log
       where family_id = ${stubDestinationFamilyId}
-      order by subject
+      order by subject, note
     `;
     assert.deepEqual(
       foldedHours.map((row) => ({ ...row })),
       [
         { subject: "math", minutes: 30, note: "destination original" },
+        { subject: "math", minutes: 30, note: "distinct source activity" },
         { subject: "reading", minutes: 45, note: "moves with the fold" },
       ],
     );

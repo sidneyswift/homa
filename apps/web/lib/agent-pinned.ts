@@ -1,11 +1,11 @@
 import { MAP_INTERESTS_CAP } from "@homa/core";
 
 import { ageInMonths } from "./child-age";
+import { captureHoursPinned, hoursCaptureDisplayFields, type HoursCaptureInput } from "./hours-capture";
 import { embedText } from "./learning/embeddings";
-import { isHoursSubject, type HoursSource } from "./hours-model";
 import { mapDb } from "./map/db";
 import { emitMapEvent } from "./map/events";
-import { effectiveTimeZone, zonedDateString } from "./time-zone";
+import { effectiveTimeZone } from "./time-zone";
 
 /**
  * Family-pinned tool operations for sessions with no caller JWT (the SMS
@@ -136,149 +136,28 @@ export async function forgetMemoryPinned(
   return { deleted: true, forgot: matches[0].content };
 }
 
-/** The shared server-side hours write (voice webhook + SMS tool path):
- * subject validation, in-family child resolution, the double-log guard,
- * the insert, and the event. */
-export async function recordHoursPinned(input: {
-  familyId: string;
-  minutes: number;
-  subject: string;
-  source: HoursSource;
-  childId?: string | null;
-  childName?: string | null;
-  happenedOn?: string | null;
-  note?: string | null;
-  customLabel?: string | null;
-}): Promise<{
-  logged: boolean;
-  note: string;
-  weekMinutesForSubject?: number;
-  entryId?: string;
-  inserted?: boolean;
-}> {
-  if (!Number.isFinite(input.minutes) || input.minutes < 1 || input.minutes > 600) {
-    return {
-      logged: false,
-      note: "Minutes must be between 1 and 600. If the parent was vague, ask about how long it really was, then retry.",
-    };
-  }
-  if (!isHoursSubject(input.subject)) {
-    return {
-      logged: false,
-      note: "That subject is not one of the record's subjects. Use one of: reading, math, science, social studies, art, music, PE, co-op, life skills, other.",
-    };
-  }
-
-  const sql = mapDb();
-  let childId: string | null = null;
-  if (input.childId) {
-    const rows = await sql<{ id: string }[]>`
-      select id from public.children where id = ${input.childId} and family_id = ${input.familyId}
-    `;
-    childId = rows[0]?.id ?? null;
-    if (!childId) {
-      return {
-        logged: false,
-        note: "That child id is not in this family. Use an id from the family context block, or leave the child off for family-wide time.",
-      };
-    }
-  } else if (input.childName?.trim()) {
-    const rows = await sql<{ id: string }[]>`
-      select id from public.children
-      where family_id = ${input.familyId}
-        and lower(name) = ${input.childName.trim().toLowerCase()}
-    `;
-    childId = rows[0]?.id ?? null;
-    if (!childId) {
-      return {
-        logged: false,
-        note: "That child name is not in this family. Use the name exactly as the family context shows it, or leave the child off for family-wide time.",
-      };
+/** Canonical source-backed Hours capture for authenticated family-pinned channels. */
+export async function recordHoursPinned(input: HoursCaptureInput) {
+  const result = await captureHoursPinned(input);
+  if (result.inserted && result.entry) {
+    if (input.source === "call") {
+      await emitMapEvent("voice.hours_logged", { family_id: input.familyId,
+        ...(result.entry.childId ? { child_id: result.entry.childId } : {}),
+        subject: result.entry.subject, minutes: result.entry.minutes });
+    } else {
+      await emitMapEvent("chat.hours_logged", { subject: result.entry.subject, minutes: result.entry.minutes,
+        channel: input.source === "chat" ? "web" : input.source }, { familyId: input.familyId });
     }
   }
-
-  let happenedOn = input.happenedOn ?? null;
-  if (!happenedOn) {
-    const rows = await sql<{ time_zone: string | null }[]>`
-      select time_zone from public.families where id = ${input.familyId}
-    `;
-    happenedOn = zonedDateString(new Date(), effectiveTimeZone(rows[0]?.time_zone));
-  }
-  const customLabel = input.customLabel?.trim().slice(0, 40) || null;
-  const dupe = await sql<{ id: string }[]>`
-    select id from public.hours_log
-    where family_id = ${input.familyId}
-      and subject = ${input.subject} and minutes = ${Math.round(input.minutes)}
-      and happened_on = ${happenedOn}
-      and child_id is not distinct from ${childId}
-      and custom_label is not distinct from ${customLabel}
-    limit 1
-  `;
-  if (dupe[0]) {
-    return {
-      logged: true,
-      entryId: dupe[0].id,
-      inserted: false,
-      note: "That block is already on the record for that day; nothing added twice.",
-    };
-  }
-
-  const inserted = await sql<{ id: string }[]>`
-    insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note, custom_label)
-    values (${input.familyId}, ${childId}, ${input.subject}, ${Math.round(input.minutes)},
-            ${happenedOn}, ${input.source}, ${input.note?.trim().slice(0, 200) || null}, ${customLabel})
-    on conflict do nothing
-    returning id
-  `;
-  if (inserted.length === 0) {
-    // A concurrent identical call won hours_log_block_unique_idx after
-    // this one's guard SELECT ran; same outcome as the guard, and no
-    // event for a row that never landed.
-    return { logged: true, inserted: false, note: "That block is already on the record for that day; nothing added twice." };
-  }
-
-  if (input.source === "call") {
-    await emitMapEvent("voice.hours_logged", {
-      family_id: input.familyId,
-      ...(childId ? { child_id: childId } : {}),
-      subject: input.subject,
-      minutes: Math.round(input.minutes),
-    });
-  } else {
-    await emitMapEvent(
-      "chat.hours_logged",
-      {
-        subject: input.subject,
-        minutes: Math.round(input.minutes),
-        // hours_log rows say "chat" for web sessions; the event registry
-        // names the same surface "web".
-        channel: input.source === "chat" ? "web" : input.source,
-      },
-      {
-        familyId: input.familyId,
-      },
-    );
-  }
-
-  const weekAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const week = await sql<{ total: string | null }[]>`
-    select sum(minutes)::text as total from public.hours_log
-    where family_id = ${input.familyId} and subject = ${input.subject}
-      and happened_on >= ${weekAgo}
-  `;
-  return {
-    logged: true,
-    entryId: inserted[0].id,
-    inserted: true,
-    note: "On the record.",
-    weekMinutesForSubject: Number(week[0]?.total ?? 0),
-  };
+  return { ...result, ...hoursCaptureDisplayFields(result),
+    note: result.logged ? "On the record." : "That entry was removed. Nothing was recreated." };
 }
 
 export interface PinnedRecallHit {
   when: string;
   where: string;
   snippet: string;
+  source?: { kind: "parent_message"; id: string };
 }
 
 function dayLabel(iso: string | null, timeZone: string): string {
@@ -345,8 +224,8 @@ export async function recallPinned(input: {
   }
 
   if (input.scope === "chats" || input.scope === "all") {
-    const rows = await sql<{ role: string; content: string; channel: string; created_at: string }[]>`
-      select role, content, channel, created_at::text as created_at
+    const rows = await sql<{ id: string; role: string; content: string; channel: string; created_at: string }[]>`
+      select id, role, content, channel, created_at::text as created_at
       from public.conversation_messages
       where family_id = ${input.familyId}
         and visibility = 'family'
@@ -404,6 +283,7 @@ export async function recallPinned(input: {
         when: dayLabel(row.created_at, timeZone),
         where: `${row.channel === "sms" ? "text message" : "chat"} (${row.role === "user" ? "the parent" : "Homa"})`,
         snippet: row.content.slice(0, 480),
+        ...(row.role === "user" ? { source: { kind: "parent_message" as const, id: row.id } } : {}),
       });
     }
   }
@@ -451,10 +331,10 @@ export async function recallPinned(input: {
     const queryEmbedding = await embedText(input.query, { familyId: input.familyId });
     if (queryEmbedding) {
       const rows = await sql<
-        { source: string; happened_at: string | null; label: string; content: string }[]
+        { source: string; source_id: string; source_role: string | null; happened_at: string | null; label: string; content: string }[]
       >`
         select * from (
-          select 'memories' as source, m.created_at::text as happened_at,
+          select 'memories' as source, m.id as source_id, null::text as source_role, m.created_at::text as happened_at,
                  case when m.superseded_at is not null then 'saved memory, older note that was later corrected'
                       when m.kind = 'what_works' then 'saved memory (what works)'
                       else 'saved memory' end as label,
@@ -464,7 +344,7 @@ export async function recallPinned(input: {
           where m.family_id = ${input.familyId} and m.embedding is not null
             and ${wantMemories}::boolean
           union all
-          select 'chats', c.created_at::text,
+          select 'chats', c.id, c.role, c.created_at::text,
                  (case when c.channel = 'sms' then 'text message' else 'chat' end)
                    || ' (' || (case when c.role = 'user' then 'the parent' else 'Homa' end) || ')',
                  c.content,
@@ -515,7 +395,7 @@ export async function recallPinned(input: {
               )
             )
           union all
-          select 'calls', t.started_at::text,
+          select 'calls', t.id, null::text, t.started_at::text,
                  case when t.line = 'curriculum' then 'phone call (report review)' else 'phone call' end,
                  left(t.transcript_text, 480),
                  (t.embedding <=> ${queryEmbedding}::extensions.vector(1536))
@@ -539,7 +419,8 @@ export async function recallPinned(input: {
         const snippet = row.content.slice(0, 480);
         if (seen.has(snippet.slice(0, 80))) continue;
         seen.add(snippet.slice(0, 80));
-        hits.push({ when: dayLabel(row.happened_at, timeZone), where: row.label, snippet });
+        hits.push({ when: dayLabel(row.happened_at, timeZone), where: row.label, snippet,
+          ...(row.source === "chats" && row.source_role === "user" ? { source: { kind: "parent_message" as const, id: row.source_id } } : {}) });
       }
     }
   }

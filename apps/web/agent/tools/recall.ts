@@ -28,6 +28,7 @@ interface RecallHit {
   when: string;
   where: string;
   snippet: string;
+  source?: { kind: "parent_message"; id: string };
 }
 
 function snippetAround(text: string, query: string): string {
@@ -188,6 +189,7 @@ export default defineBoundedTool({
           when: dayOf(row.created_at, timeZone),
           where: `${row.channel === "sms" ? "text message" : "chat"} (${speaker})`,
           snippet: snippetAround(row.content ?? "", input.query),
+          ...(row.role === "user" ? { source: { kind: "parent_message" as const, id: row.id } } : {}),
         });
       }
     }
@@ -236,7 +238,7 @@ export default defineBoundedTool({
             ? null
             : [SEMANTIC_SOURCE_BY_SCOPE[input.scope]];
         const semantic = await db
-          .rpc("recall_semantic", {
+          .rpc("recall_semantic_v2", {
             query_embedding: queryEmbedding,
             match_limit: input.limit,
             scopes,
@@ -250,6 +252,8 @@ export default defineBoundedTool({
         const seen = new Set(hits.map((hit) => hit.snippet.slice(0, 80)));
         for (const row of (semantic ?? []) as {
           source: string;
+          source_id: string;
+          source_role: string | null;
           happened_at: string | null;
           label: string;
           content: string;
@@ -263,7 +267,8 @@ export default defineBoundedTool({
               : (row.content ?? "").slice(0, MAX_SNIPPET);
           if (seen.has(snippet.slice(0, 80))) continue;
           seen.add(snippet.slice(0, 80));
-          hits.push({ when: dayOf(row.happened_at, timeZone), where: row.label, snippet });
+          hits.push({ when: dayOf(row.happened_at, timeZone), where: row.label, snippet,
+            ...(row.source === "chat" && row.source_role === "user" ? { source: { kind: "parent_message" as const, id: row.source_id } } : {}) });
         }
       }
     }

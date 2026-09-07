@@ -39,7 +39,7 @@ const pinnedSource = readFileSync(
   "utf8",
 );
 
-/** The newest migration that defines recall_semantic. */
+/** The newest migration that defines the caller-scoped recall_semantic_v2. */
 function latestRecallSemanticMigration(): string {
   const dir = path.join(repoRoot, "supabase", "migrations");
   const files = readdirSync(dir)
@@ -51,11 +51,11 @@ function latestRecallSemanticMigration(): string {
   // gh#382, which is exactly the kind of false alarm that gets a guard
   // deleted rather than trusted).
   const defining = files.filter((name) =>
-    /create (or replace )?function public\.recall_semantic\(/u.test(
+    /create (or replace )?function public\.recall_semantic_v2\(/u.test(
       readFileSync(path.join(dir, name), "utf8"),
     ),
   );
-  assert.ok(defining.length > 0, "no migration defines recall_semantic");
+  assert.ok(defining.length > 0, "no migration defines recall_semantic_v2");
   return readFileSync(path.join(dir, defining[defining.length - 1]), "utf8");
 }
 
@@ -63,7 +63,7 @@ describe("recall semantic scope contract", () => {
   it("passes a scopes argument the migration actually declares", () => {
     assert.match(
       recallSource,
-      /rpc\("recall_semantic", \{[\s\S]*?scopes,/u,
+      /rpc\("recall_semantic_v2", \{[\s\S]*?scopes,/u,
       "recall.ts must send scopes to the RPC",
     );
     assert.match(

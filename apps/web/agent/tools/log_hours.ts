@@ -1,32 +1,22 @@
-import { randomUUID } from "node:crypto";
-
 import { emitEvent } from "@homa/core";
 import { z } from "zod";
 
-import {
-  defineBoundedTool,
-  TOOL_DEADLINE,
-} from "../../lib/agent-tool-deadline";
-import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { defineBoundedTool, TOOL_DEADLINE } from "../../lib/agent-tool-deadline";
+import { resolveAgentAccess } from "../../lib/agent-db";
 import { recordHoursPinned } from "../../lib/agent-pinned";
-import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours-model";
+import { hoursCaptureDisplayFields, hoursCaptureKey, hoursCaptureResultSchema } from "../../lib/hours-capture";
+import { composeHoursNote, hoursWorkContextSchema } from "../../lib/hours-note-context";
+import { HOURS_SUBJECTS } from "../../lib/hours-model";
+import { learningMutationUuid, learningOperationFailure, sourceActivityOrdinalSchema } from "../../lib/learning-write-operations";
+import { plannerHoursSourceForChannel, verifyPlannerSourceQuote } from "../../lib/planner-learning-activities";
+import { plannerLearningToolContext } from "../../lib/planner-learning-tool-context";
 import { effectiveTimeZone, zonedDateString } from "../../lib/time-zone";
-import {
-  armVoiceActionThenMutate,
-  recordVoiceAction,
-  voiceToolReceiptContext,
-} from "../../lib/voice/action-receipts";
-
-/**
- * Capture-time school hours (M3-05 slice; lab evidence in build-log
- * 2026-07-09 midday: hours structured at the moment they are mentioned
- * survive to the compliance report; hours left in prose do not). The
- * model supplies the block; the family comes from session auth; the
- * child id only works inside the caller's own RLS view, and the insert
- * policy re-checks child coherence at the database.
- */
+import { armVoiceActionThenMutate, recordVoiceAction, voiceToolReceiptContext } from "../../lib/voice/action-receipts";
 
 const logInput = z.object({
+  sourceActivityOrdinal: sourceActivityOrdinalSchema,
+  workContext: hoursWorkContextSchema.optional().describe("Separately verified earlier named work when the current duration refers back. Resolve it with recall, or ask if ambiguous. Current sourceQuote still comes from this message."),
+  sourceQuote: z.string().trim().min(1).max(1000).describe("An exact span from the current parent message supporting this distinct activity."),
   minutes: z
     .number()
     .int()
@@ -42,7 +32,7 @@ const logInput = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional()
-    .describe("The date it happened, YYYY-MM-DD. Omit for today. Use the context block's date when the parent says 'yesterday' etc."),
+    .describe("The date it happened, YYYY-MM-DD. Omit for the canonical parent message date in the family time zone. Use the context block's date when the parent says 'yesterday' etc."),
   note: z
     .string()
     .max(200)
@@ -58,206 +48,82 @@ const logInput = z.object({
 });
 
 export default defineBoundedTool({
-  description:
-    "Log a block of school time to the family's hours record the moment the parent mentions one ('we did 45 minutes of math'). These rows are the family's compliance evidence, so log every real mention exactly once. School time only: movies, errands, and waiting rooms never count. When the duration is vague ('most of the morning'), ask one short 'about how long?' first.",
+  description: "Load the planner skill before calling. Record one distinct block of school time with the current parent message's source ordinal and exact quote. Use an existing Planner activity's completion path when it owns this learning. Minutes must come from the parent. The result states whether a row was inserted, already exists, was removed, or could not be saved.",
   deadlineMs: TOOL_DEADLINE.quick,
-  repeatable: false,
+  repeatable: true,
   inputSchema: logInput,
   async execute(input, ctx) {
-    let access;
     try {
-      access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
-    } catch (error) {
-      if (error instanceof MissingFamilyContextError) {
-        return { logged: false, note: error.message };
+      const attributes = ctx.session.auth.current?.attributes;
+      const access = await resolveAgentAccess(attributes);
+      const trusted = plannerLearningToolContext(attributes);
+      if (!trusted) return { logged: false, note: "Homa could not verify a current parent message. Nothing was recorded." };
+      const sourceQuote = verifyPlannerSourceQuote({ canonicalInboundText: trusted.canonicalInboundText, sourceQuote: input.sourceQuote });
+      const receiptContext = voiceToolReceiptContext({ familyId: access.familyId, attributes,
+        runtimeSessionId: ctx.session.id, turnId: ctx.session.turn.id });
+      if (access.mode === "pinned") {
+        if (receiptContext) return { logged: false, note: "This Voice session expired. Nothing changed. Start a fresh Voice session." };
+        return await recordHoursPinned({ ...input, familyId: access.familyId, sourceMessageId: trusted.sourceMessageId,
+          sourceQuote, source: plannerHoursSourceForChannel(trusted.sourceChannel),
+          memberUserId: typeof attributes?.memberUserId === "string" ? attributes.memberUserId : null });
       }
-      throw error;
-    }
-
-    const receiptContext = voiceToolReceiptContext({
-      familyId: access.familyId,
-      attributes: ctx.session.auth.current?.attributes,
-      runtimeSessionId: ctx.session.id,
-      turnId: ctx.session.turn.id,
-    });
-
-    if (access.mode === "pinned") {
+      const { db, familyId } = access;
+      const operationKey = hoursCaptureKey(trusted.sourceMessageId, input.sourceActivityOrdinal);
+      const entryId = learningMutationUuid(operationKey, "hours");
+      const customLabel = input.customLabel?.trim() || null;
+      const note = input.workContext ? composeHoursNote({ title: input.workContext.workTitle, note: input.note, sourceQuote }).text : input.note?.trim() || null;
+      // Voice needs an exact compensator before the write. The RPC verifies this
+      // date against its atomic resolution; a concurrent zone change refuses.
+      let expectedDate: string | null = null;
       if (receiptContext) {
-        return {
-          logged: false,
-          note: "Homa could not guarantee an atomic Voice receipt on this expired session. Nothing changed. Start a fresh Voice session and try once more.",
-        };
+        const { data: prior, error: priorError } = await db.from("learning_write_operations")
+          .select("resolved_date").eq("family_id", familyId).eq("operation_key", operationKey).maybeSingle();
+        if (priorError) throw new Error("Hours operation context unavailable");
+        expectedDate = prior?.resolved_date ?? input.happenedOn ?? null;
+        if (!expectedDate) {
+          const [sourceRead, familyRead] = await Promise.all([
+            db.from("conversation_messages").select("created_at").eq("family_id", familyId).eq("id", trusted.sourceMessageId).eq("role", "user").single(),
+            db.from("families").select("time_zone").eq("id", familyId).single(),
+          ]);
+          if (sourceRead.error || familyRead.error) throw new Error("Hours source date unavailable");
+          expectedDate = zonedDateString(new Date(sourceRead.data.created_at), effectiveTimeZone(familyRead.data.time_zone));
+        }
       }
-      const pinnedChannel = (ctx.session.auth.current?.attributes as { channel?: string })
-        ?.channel;
-      const result = await recordHoursPinned({
-        familyId: access.familyId,
-        minutes: input.minutes,
-        subject: input.subject,
-        // A web session that fell back to pinned (expired browser token)
-        // still logs as chat, the same label its caller path writes.
-        source:
-          pinnedChannel === "email" || pinnedChannel === "dispatch"
-            ? pinnedChannel
-            : pinnedChannel === "web"
-              ? "chat"
-              : "sms",
-        childId: input.childId ?? null,
-        happenedOn: input.happenedOn ?? null,
-        note: input.note ?? null,
-        customLabel: input.customLabel ?? null,
-      });
-      if (!result.logged) return result;
-      return {
-            ...result,
-            done: true,
-            subject: input.subject,
-            minutes: input.minutes,
-            note: "On the record. Mention it in one short natural aside; the running week total is there if it fits naturally.",
-          };
-    }
-
-    const { db, familyId } = access;
-
-    let happenedOn = input.happenedOn ?? null;
-    if (!happenedOn) {
-      const { data: family } = await db
-        .from("families")
-        .select("time_zone")
-        .eq("id", familyId)
-        .maybeSingle();
-      happenedOn = zonedDateString(new Date(), effectiveTimeZone(family?.time_zone));
-    }
-
-    const customLabel = input.customLabel?.trim() || null;
-
-    // Double-log guard: the same block mentioned twice in one chat must
-    // not become two compliance rows. A distinct customLabel (her own
-    // name for the block) makes two same-subject/duration/day blocks
-    // distinguishable, so it is part of the match key too.
-    const { data: existing } = await db
-      .from("hours_log")
-      .select("id")
-      .eq("family_id", familyId)
-      .eq("subject", input.subject)
-      .eq("minutes", input.minutes)
-      .eq("happened_on", happenedOn)
-      .filter("child_id", input.childId ? "eq" : "is", input.childId ?? null)
-      .filter("custom_label", customLabel ? "eq" : "is", customLabel)
-      .limit(1);
-    if (existing && existing.length > 0) {
-      return {
-        logged: true,
-        done: true,
-        note: "That block is already on the record for that day; nothing added twice.",
+      const mutate = async () => {
+        const { data, error } = await db.rpc("record_hours_operation_v2", {
+          source_message: trusted.sourceMessageId, activity_ordinal: input.sourceActivityOrdinal, source_quote: sourceQuote,
+          target_child: input.childId ?? null, target_subject: input.subject, target_minutes: input.minutes,
+          requested_date: input.happenedOn ?? null, target_note: note, target_label: customLabel, expected_resolved_date: expectedDate, work_context: input.workContext ?? null,
+        }).abortSignal(AbortSignal.timeout(15_000));
+        if (error) throw new Error("Hours capture did not commit", { cause: error.code });
+        return hoursCaptureResultSchema.parse(data);
       };
-    }
-
-    const entryId = randomUUID();
-    const mutate = async () => await db
-      .from("hours_log")
-      .insert({
-        id: entryId,
-        family_id: familyId,
-        child_id: input.childId ?? null,
-        subject: input.subject,
-        minutes: input.minutes,
-        happened_on: happenedOn,
-        source: "chat",
-        note: input.note ?? null,
-        custom_label: customLabel,
-      })
-      .select("id")
-      .single();
-    const armed = receiptContext
-      ? await armVoiceActionThenMutate({
-          familyId: receiptContext.familyId,
-          record: () => recordVoiceAction({
-            ...receiptContext,
-            objectKind: "hours_entry",
-            objectId: entryId,
-            effect: "hours.logged",
-            namedEffect: `the ${input.minutes}-minute ${input.subject} entry in Hours`,
-            undoCapability: "exact_delete",
-            payload: {
-              effect: "hours.logged",
-              after: {
-                childId: input.childId ?? null,
-                subject: input.subject,
-                customLabel,
-                minutes: input.minutes,
-                happenedOn,
-                source: "chat",
-                note: input.note ?? null,
-              },
-            },
-          }),
-          mutate,
-          replay: async () => await db
-            .from("hours_log")
-            .select("id")
-            .eq("id", entryId)
-            .eq("family_id", familyId)
-            .single(),
-          succeeded: (result) => !result.error && Boolean(result.data?.id),
-        })
-      : { actionReceipt: null, result: await mutate(), replayed: false };
-    const { error: insertError } = armed.result;
-    if (insertError) {
-      // 23505 from hours_log_block_unique_idx: a concurrent identical
-      // call won the insert after this one's guard SELECT ran; losing
-      // that race is the same outcome as the guard above.
-      if (insertError.code === "23505") {
-        return {
-          logged: true,
-          done: true,
-          note: "That block is already on the record for that day; nothing added twice.",
-        };
+      const armed = receiptContext ? await armVoiceActionThenMutate({
+        familyId,
+        record: () => recordVoiceAction({ ...receiptContext, objectKind: "hours_entry", objectId: entryId,
+          effect: "hours.logged", namedEffect: `the ${input.minutes}-minute ${input.subject} entry in Hours`, undoCapability: "exact_delete",
+          payload: { effect: "hours.logged", after: { childId: input.childId ?? null, subject: input.subject, customLabel,
+            minutes: input.minutes, happenedOn: expectedDate!, source: "chat", note } } }),
+        mutate,
+        replay: mutate,
+        succeeded: (result) => result.inserted && result.logged,
+      }) : { result: await mutate(), actionReceipt: null };
+      const result = armed.result;
+      const caller = attributes as { supabaseAccessToken?: string } | undefined;
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if (result.inserted && result.entry && url && key && caller?.supabaseAccessToken) {
+        await emitEvent({ supabaseUrl: url, supabaseKey: key, accessToken: caller.supabaseAccessToken, familyId },
+          "chat.hours_logged", { subject: result.entry.subject, minutes: result.entry.minutes, channel: "web" });
       }
-      return { logged: false, note: `Could not log it: ${insertError.message}` };
+      return { ...result, ...hoursCaptureDisplayFields(result),
+        ...(armed.actionReceipt?.lifecycleStatus === "committed" ? { actionReceipt: armed.actionReceipt } : {}),
+        note: result.logged ? (result.inserted ? "On the record." : "That activity is already recorded. These are its current details.")
+          : "That entry was removed after it was recorded. Nothing was recreated." };
+    } catch (error) {
+      const failure = learningOperationFailure(error);
+      if (failure) return { logged: false, ...failure };
+      return { logged: false, note: "Homa could not save that time. No new entry was confirmed. Open Hours to check the record before trying again." };
     }
-
-    const weekAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
-    const { data: weekRows } = await db
-      .from("hours_log")
-      .select("minutes")
-      .eq("family_id", familyId)
-      .eq("subject", input.subject)
-      .gte("happened_on", weekAgo);
-    const weekMinutes = (weekRows ?? []).reduce((total, row) => total + row.minutes, 0);
-
-    const attributes = ctx.session.auth.current?.attributes as
-      | { supabaseAccessToken?: string; familyId?: string; channel?: string }
-      | undefined;
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    if (url && key && attributes?.supabaseAccessToken && attributes.familyId) {
-      await emitEvent(
-        {
-          supabaseUrl: url,
-          supabaseKey: key,
-          accessToken: attributes.supabaseAccessToken,
-          familyId: attributes.familyId,
-        },
-        "chat.hours_logged",
-        {
-          subject: input.subject as HoursSubject,
-          minutes: input.minutes,
-          channel: attributes.channel === "sms" ? "sms" : "web",
-        },
-      );
-    }
-
-    return {
-      logged: true,
-      done: true,
-      subject: input.subject,
-      minutes: input.minutes,
-      weekMinutesForSubject: weekMinutes,
-      ...(armed.actionReceipt ? { actionReceipt: armed.actionReceipt } : {}),
-      note: "On the record. Mention it in one short natural aside; the running week total is there if it fits naturally.",
-    };
   },
 });

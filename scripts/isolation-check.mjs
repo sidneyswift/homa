@@ -2774,7 +2774,20 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B memory fixture",
     );
-    const hoursLogBId = await insertFixtureRow(
+    const [hoursIdentitySchema] = await sql`select to_regclass('public.learning_write_operations') is not null as ready`;
+    let hoursLogBId;
+    if (hoursIdentitySchema.ready) {
+      const [source] = await sql`insert into public.conversation_messages(family_id,member_user_id,session_id,sequence,channel,role,visibility,content)
+        values(${familyBId},${familyBUser.userId},${`isolation-hours:${suffix}`},1,'web','user','family','We did 45 minutes of math.') returning id`;
+      const capture = await jsonResponse(await restAs(familyBUser.accessToken, "rpc/record_hours_operation", {
+        method: "POST", body: JSON.stringify({ source_message: source.id, activity_ordinal: 1,
+          source_quote: "45 minutes of math", target_child: childBId, target_subject: "math", target_minutes: 45,
+          requested_date: "2026-01-01", target_note: "Isolation check hours fixture.", target_label: null }),
+      }), "create source-identified Family B Hours fixture");
+      if (!capture.logged || !capture.inserted || !capture.entry?.id) throw new Error("Hours identity fixture missing exact receipt");
+      hoursLogBId = capture.entry.id;
+    } else {
+      hoursLogBId = await insertFixtureRow(
       familyBUser,
       "hours_log",
       {
@@ -2786,6 +2799,7 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B hours_log fixture",
     );
+    }
     // family_events and plan_activity_schedule (issue #176, CG-03) are
     // brand-new tables from this same change, deliberately not yet
     // applied to production; the fixture rows only get created once the
@@ -5287,6 +5301,10 @@ await expectReadDenied("conversation_offer_recovery");
 await expectEmptyRead("learning_reviews");
 // Capture-time hours record (migration #37): family-scoped, members only.
 await expectEmptyRead("hours_log");
+// Operation receipts include private source text. Anonymous callers have no
+// grants; the authenticated column grants and family RLS run in the disposable
+// Planner/Hours PostgreSQL privacy contract.
+await expectReadDenied("learning_write_operations");
 // Planner learning activities are member-readable and server-write-only.
 // The additive tables may be absent before deploy; once present, all three
 // anonymous probes arm together.

@@ -119,6 +119,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 **Tracking:** [#1093](https://github.com/sidneyswift/homa/issues/1093).
 
+**Release update:** the independently reviewed repair is implemented, with integrated database, UI and build checks passing. [Shipping scope, rollout and evidence limits](2026-09-06-hours-identity-context-shipping.md) records the remaining model/hosted limits after Sidney directed shipment without more optional testing. The audit below describes the before state.
+
 **Expected, P18-20:** retain the supplied book title and lesson detail in the saved note, including when minutes arrive in a later message.
 
 **Live evidence:** September 1's earlier message identified *Make Way for Ducklings*, but the later 40-minute Hours note did not retain the book title. On September 4, the Planner title identified the Narnia reading while the linked Hours note used only the current source-quote fragment. These are separate mechanisms; they are not attributed to one summarizer without evidence.
@@ -132,6 +134,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 ### F03. Count distinct activities and deduplicate real retries
 
 **Tracking:** [#1090](https://github.com/sidneyswift/homa/issues/1090).
+
+**Release update:** the independently reviewed repair is implemented, with integrated database, UI and build checks passing. [Shipping scope, rollout and evidence limits](2026-09-06-hours-identity-context-shipping.md) records the remaining model/hosted limits after Sidney directed shipment without more optional testing. The audit below describes the before state.
 
 **Expected, P23-46:** separate language lessons and separate reading activities count even when subject, day and duration match. Repeating one save should still count once.
 

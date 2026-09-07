@@ -1,3 +1,4 @@
+import { installHoursPostgresFixture } from "./hours-postgres-fixture.mjs";
 import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
 import { readFileSync, realpathSync } from 'node:fs';
@@ -13,6 +14,7 @@ import vm from 'node:vm';
  * Imported by the existing CI Planner PostgreSQL harness; direct execution
  * is deliberately a no-op. The owning eval:sandbox removes the cluster. */
 export async function runHoursSchoolYearReadContract(sql) {
+  await installHoursPostgresFixture(sql);
   const endpoint = new URL(process.env.HOMA_EVAL_DATABASE_URL ?? 'https://missing.invalid');
   assert(['postgres:', 'postgresql:'].includes(endpoint.protocol));
   assert.equal(endpoint.hostname, '127.0.0.1');
@@ -153,7 +155,7 @@ export async function runHoursSchoolYearReadContract(sql) {
       (${familyA}, ${userA}, 'parent'), (${familyB}, ${userB}, 'parent')`;
     await sql`insert into public.children (id, family_id, name, birth_month) values
       (${childA}, ${familyA}, 'Avery', '2020-01-01'), (${childB}, ${familyB}, 'Blair', '2020-01-01')`;
-    await sql`insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note) values
+    await sql`insert into homa_test_fixture.hours_log (family_id, child_id, subject, minutes, happened_on, source, note) values
       (${familyA}, ${childA}, 'spanish', 5, '2026-09-01', 'chat', 'Old synthetic record'),
       (${familyA}, ${childA}, 'spanish', 10, '2026-09-09', 'chat', 'Prior synthetic record'),
       (${familyA}, ${childA}, 'spanish', 20, '2026-09-10', 'chat', 'Today synthetic record'),
@@ -332,7 +334,7 @@ export async function runHoursSchoolYearReadContract(sql) {
     });
     await test('3001 rows yield complete chat and CSV records while capped Progress refuses a partial total', async () => {
       await sql`delete from public.hours_log where family_id = ${familyA}`;
-      await sql`insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note, custom_label)
+      await sql`insert into homa_test_fixture.hours_log (family_id, child_id, subject, minutes, happened_on, source, note, custom_label)
         select ${familyA}, ${childA}, 'spanish', 1, '2026-09-10'::date, 'chat', 'Synthetic bounded row ' || i, 'Bounded row ' || i
         from generate_series(1, 3001) i`;
       const caller = await hours.getHoursLogForFamily(familyA); assert.equal(caller.rows.length, 3000); assert.equal(caller.complete, false);
@@ -350,7 +352,7 @@ export async function runHoursSchoolYearReadContract(sql) {
       await sql`delete from public.hours_log where family_id = ${familyA} and note = 'Synthetic bounded row 3001'`;
       assert.equal((await hours.getHoursLogForFamily(familyA)).complete, true);
       assert.equal((await pinned.readHoursSummaryPinned(familyA, { period: 'all' }, new Date(instant))).entryCount, 3000);
-      await sql`insert into public.hours_log (family_id, child_id, subject, minutes, happened_on, source, note, custom_label)
+      await sql`insert into homa_test_fixture.hours_log (family_id, child_id, subject, minutes, happened_on, source, note, custom_label)
         select ${familyA}, ${childA}, 'spanish', 1, '2026-09-10'::date, 'chat', 'Synthetic pack row ' || i, 'Pack row ' || i
         from generate_series(1, 7001) i`;
       const records = await pack.getStatePackRecords(familyA, today, today);

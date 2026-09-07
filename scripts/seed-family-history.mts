@@ -128,17 +128,18 @@ values (${sqlString(childId)}, ${sqlString(familyId)}, ${sqlString(CHILD_NAMES[i
     });
   }
 
-  const hoursValues = history.hours
-    .map((row) => {
+  // Fixture provenance is explicit and independent for every synthetic entry.
+  const fixtureHours = history.hours.map((row) => ({ row, id: randomUUID(), operationId: randomUUID() }));
+  if (fixtureHours.length > 0) {
+    const claims = fixtureHours.map(({ row, id, operationId }) =>
+      `(${sqlString(operationId)}, ${sqlString(familyId)}, ${sqlString(`synthetic-history:${id}`)}, jsonb_build_object('fixtureHoursId', ${sqlString(id)}::text), array[${sqlString(id)}::uuid], date ${sqlString(row.happenedOn)})`).join(",\n");
+    statements.push(`insert into public.learning_write_operations(id,family_id,operation_key,request,expected_hours_ids,resolved_date) values ${claims};`);
+    const hoursValues = fixtureHours.map(({ row, id, operationId }) => {
       const childId = row.childIndex === null ? null : childIds[row.childIndex];
-      return `  (${sqlString(familyId)}, ${sqlNullableUuid(childId)}, ${sqlString(row.subject)}, ${row.minutes}, date ${sqlString(row.happenedOn)}, ${sqlString(row.source)}, ${sqlString(row.note)}, (date ${sqlString(row.happenedOn)} + time '17:30')::timestamptz)`;
-    })
-    .join(",\n");
-  if (hoursValues) {
-    statements.push(`insert into public.hours_log
-  (family_id, child_id, subject, minutes, happened_on, source, note, created_at)
-values
-${hoursValues};`);
+      return `(${sqlString(id)}, ${sqlString(familyId)}, ${sqlNullableUuid(childId)}, ${sqlString(row.subject)}, ${row.minutes}, date ${sqlString(row.happenedOn)}, ${sqlString(row.source)}, ${sqlString(row.note)}, (date ${sqlString(row.happenedOn)} + time '17:30')::timestamptz, ${sqlString(operationId)})`;
+    }).join(",\n");
+    statements.push(`insert into public.hours_log(id,family_id,child_id,subject,minutes,happened_on,source,note,created_at,capture_operation_id) values ${hoursValues};`);
+    statements.push(`update public.learning_write_operations set outcome=jsonb_build_object('hoursEntryIds',to_jsonb(expected_hours_ids)) where id in (${fixtureHours.map(({ operationId }) => sqlString(operationId)).join(",")});`);
   }
 
   const memoryValues = history.memories
@@ -167,7 +168,7 @@ ${memoryValues};`);
     `memories     ${history.memories.length}`,
   ].join("\n  ");
 
-  return { sql: statements.join("\n\n"), familyId, summary };
+  return { sql: ["begin;", ...statements, "commit;"].join("\n\n"), familyId, summary };
 }
 
 async function main(): Promise<void> {
