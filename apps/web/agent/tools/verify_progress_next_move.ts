@@ -11,10 +11,10 @@ import {
 import { loadProgressNextMoveSnapshot } from "../../lib/child-progress/next-move-snapshot";
 import {
   progressNextMoveCandidateSchema,
-  verifyProgressNextMoveCandidate,
+  verifyProgressNextMoveChatCandidate,
 } from "../../lib/child-progress/next-move";
 
-const inputSchema = z
+export const progressNextMoveVerifyInputSchema = z
   .object({
     childId: z
       .string()
@@ -24,12 +24,12 @@ const inputSchema = z
       .string()
       .min(1)
       .max(160)
-      .describe("One fresh current evidence item id from Progress context."),
+      .describe("One fresh current non-easy evidence item id from a canonical explore_child_map subject_map read."),
     evidenceItemIds: z
       .array(z.string().min(1).max(160))
       .min(1)
       .max(3)
-      .describe("One to three current evidence itemId values from that same child's Progress context, including the target itemId."),
+      .describe("One to three fresh savedAnswers itemId values from the same child's canonical subject_map read, including the target itemId. Preserve each answer's date and derivation."),
     minutes: z
       .union([z.literal(5), z.literal(10), z.literal(15)])
       .describe("The small amount of time the activity should take."),
@@ -48,10 +48,10 @@ const inputSchema = z
 
 export default defineBoundedTool({
   description:
-    "Verify one proposed next activity against a child's fresh canonical Progress state before showing it. Use only after loading the progress-next-move skill. This read-only tool re-scopes the child to the authenticated family, verifies every evidence item, accepts only a fresh current catalog target cited in the evidence, and refuses conflicts, stale evidence, unknown provenance, or cross-subject grounding. An ask_next topic is an assessment question, never an instructional target. The tool never saves, schedules, purchases, creates, or sends anything. If it returns a clarification, ask that one question and stop.",
+    "Verify one proposed next activity against a child's fresh canonical Progress state before showing it. Use only after loading progress-next-move and reading the selected child and subject with explore_child_map subject_map. This read-only tool re-scopes the child to the authenticated family, verifies every evidence item, accepts only a fresh current catalog target cited in the evidence, and refuses conflicts, stale evidence, unknown provenance, or cross-subject grounding. An ask_next topic is an assessment question, never an instructional target. The tool never saves, schedules, purchases, creates, or sends anything. If it returns a clarification, ask that one question and stop.",
   deadlineMs: TOOL_DEADLINE.fetch,
   repeatable: true,
-  inputSchema,
+  inputSchema: progressNextMoveVerifyInputSchema,
   async execute(input, ctx) {
     let familyId: string;
     try {
@@ -77,7 +77,7 @@ export default defineBoundedTool({
       };
     }
     const candidate = progressNextMoveCandidateSchema.parse(input);
-    const result = verifyProgressNextMoveCandidate({
+    const result = verifyProgressNextMoveChatCandidate({
       familyId,
       view: snapshot.view,
       ledger: snapshot.ledger,

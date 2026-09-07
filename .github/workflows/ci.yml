@@ -598,6 +598,14 @@ jobs:
         timeout-minutes: 10
         run: pnpm child-progress:e2e
 
+      - name: Journal context privacy disposable PostgreSQL contract
+        timeout-minutes: 10
+        run: pnpm test:journal-context:postgres
+
+      - name: Progress capture behavior harness disposable PostgreSQL contract
+        timeout-minutes: 10
+        run: pnpm test:progress-capture-behavior:postgres
+
       - name: Deeper Progress canonical delivery disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:deeper-progress-delivery:postgres

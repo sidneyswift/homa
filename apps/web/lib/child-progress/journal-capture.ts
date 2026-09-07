@@ -1,6 +1,7 @@
 import { ageInMonths } from "@homa/core";
 
 import { mapDb } from "../map/db";
+import { effectiveTimeZone, zonedDateString } from "../time-zone";
 import { extractProgressClaims } from "./claim-extraction";
 import {
   validateProposedClaims,
@@ -8,6 +9,7 @@ import {
   type ValidatedClaim,
 } from "./claim-validation";
 import { claimExtractionEnabled } from "./claim-extraction-flag";
+import { loadJournalConversationContext, type JournalContextRequest } from "./journal-context";
 
 /**
  * The seam between judgment and verification (AGENTS.md "Models judge,
@@ -31,6 +33,8 @@ export interface JournalCaptureContext {
   childId: string;
   message: string;
   surface: "journal" | "lesson";
+  /** Authenticated runtime provenance, never model-authored context text. */
+  conversation?: Omit<JournalContextRequest, "familyId" | "message">;
 }
 
 export interface JournalCaptureResult {
@@ -45,29 +49,35 @@ export interface JournalCaptureResult {
   childIds: string[];
 }
 
-async function loadFamilyChildren(
+export async function loadJournalFamilyChildren(
   familyId: string,
+  options: { database?: ReturnType<typeof mapDb>; now?: Date } = {},
 ): Promise<ClaimChild[]> {
-  const sql = mapDb();
+  const sql = options.database ?? mapDb();
   // to_char in SQL, matching every other birth_month read in this
   // codebase: the column is a DATE, so the driver hands back a Date
   // object and ageInMonths (which splits a string) throws on it.
   const rows = await sql<
-    { id: string; name: string; birth_date: string | null }[]
+    { id: string; name: string; birth_date: string | null; time_zone: string | null }[]
   >`
-    select id, name, to_char(birth_month, 'YYYY-MM-DD') as birth_date
-    from public.children
-    where family_id = ${familyId}
-    order by created_at
+    select child.id, child.name, to_char(child.birth_month, 'YYYY-MM-DD') as birth_date,
+           family.time_zone
+    from public.children child
+    join public.families family on family.id = child.family_id
+    where child.family_id = ${familyId}
+    order by child.created_at
   `;
-  const now = new Date();
+  const now = options.now ?? new Date();
   return rows.flatMap((row) => {
     if (!row.birth_date) return [];
     return [
       {
         childId: row.id,
         name: row.name,
-        ageMonths: ageInMonths(row.birth_date, now),
+        // Match the canonical Progress projector's family-local date at UTC noon.
+        ageMonths: ageInMonths(row.birth_date, new Date(
+          `${zonedDateString(now, effectiveTimeZone(row.time_zone))}T12:00:00.000Z`,
+        )),
       },
     ];
   });
@@ -85,19 +95,23 @@ export async function captureJournalClaims(
     return { claims: [], childIds: [] };
   }
   try {
-    const children = await loadFamilyChildren(context.familyId);
-    if (children.length === 0) {
+    const children = await loadJournalFamilyChildren(context.familyId);
+    if (children.length === 0 || !children.some((child) => child.childId === context.childId)) {
       return { claims: [], childIds: [] };
     }
     // The whole roster goes to the model even though the caller named
     // one child: a family recap ("we all did the states hunt") has to
     // be able to produce a claim per child, and the caller fans out
     // from childIds below.
+    const previousAssistant = context.surface === "journal" && context.conversation
+      ? await loadJournalConversationContext({ ...context.conversation, familyId: context.familyId, message: context.message })
+      : null;
     const proposed = await extractProgressClaims({
       familyId: context.familyId,
       message: context.message,
       children,
       surface: context.surface,
+      ...(context.surface === "journal" ? { interpretationContext: { recordingTargetChildId: context.childId, previousAssistant } } : {}),
     });
     const { accepted } = validateProposedClaims({
       message: context.message,

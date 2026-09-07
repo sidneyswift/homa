@@ -315,6 +315,8 @@ The [component](../../../apps/web/components/progress/abilities-explorer.tsx) al
 
 **Tracking:** [#1099](https://github.com/sidneyswift/homa/issues/1099).
 
+**Release update:** contextual capture and its exact provenance/age checks are implemented. [Shipping evidence and remaining limits](2026-09-06-contextual-progress-shipping.md) distinguish historical replay, real database saves and the still-unrun replacement transport-independent model cases. The original audit below describes the before state.
+
 **Expected, R37-59 and R72-116:** brief logs should remain easy. When mastery is genuinely ambiguous, ask one useful question and honor not yet. A lesson number, elapsed time or “we moved on” alone cannot establish mastery.
 
 **Active chain:** [Planner skill](../../../apps/web/agent/skills/planner/SKILL.md) logs actual work and explicitly separates completion from mastery. [Always-on instructions](../../../apps/web/agent/instructions.md) route separately reported observable capabilities to `manage_child_progress`. That tool takes authenticated canonical inbound text, then [journal-capture.ts](../../../apps/web/lib/child-progress/journal-capture.ts) loads the family roster, asks the model for claims, and validates them. The extractor excludes plans, requests and time-only reports. [Claim validation](../../../apps/web/lib/child-progress/claim-validation.ts) checks real catalog/child IDs, actual quote, age plausibility and confidence. The [progress service](../../../apps/web/lib/child-progress/progress-service.ts) transaction writes accepted evidence and refreshes derived progress; no accepted claim instead writes an unscored `child_observations` row and returns `no_match`. A friendly “noted” receipt is not a score update.
@@ -328,6 +330,8 @@ The [component](../../../apps/web/components/progress/abilities-explorer.tsx) al
 ### F14. Offer one useful next step from current evidence
 
 **Tracking:** [#1100](https://github.com/sidneyswift/homa/issues/1100).
+
+**Release update:** scoped evidence reads and chat verification are implemented, and all five evidence-based model cases pass. [Shipping evidence](2026-09-06-contextual-progress-shipping.md) records remaining boundary failures, including incomplete evidence being described as complete. Sidney directed shipment without additional test rounds; #1100 remains open for those behavior gaps. The original audit below describes the before state.
 
 **Expected, R92-120:** after saving progress, offer optional help that fits what the child can currently do. Avoid suggesting cutting drills the parent already says are easy.
 

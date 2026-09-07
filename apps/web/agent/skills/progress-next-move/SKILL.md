@@ -1,165 +1,171 @@
 ---
-description: Use when a parent asks what one useful thing to try next with a child, asks what to work on next from Progress evidence, or wants one small activity for today grounded in what Homa already knows. Not for creating a worksheet or lesson artifact; materials-studio owns that. Not for putting work on a date; planner owns scheduling.
+description: Use when a parent asks what to try next with a child, including when the saved skills are already easy, evidence is incomplete or conflicting, or suggested practice no longer fits. Also use for accepted next-step offers and deciding whether to offer help after a confirmed progress save. Not for asking assessment questions, explaining a score, creating a material, scheduling work, or adding periodic reviews; progress-check-in, progress-reading, materials-studio, and planner own those jobs.
 metadata:
-  homa-tools: verify_progress_next_move, persist_progress_next_move
-  homa-related-skills: materials-studio, planner
+  homa-tools: explore_child_map, verify_progress_next_move, persist_progress_next_move
+  homa-related-skills: progress-check-in, materials-studio, planner
 ---
 
 # One verified next move
 
-Give the parent one small thing that fits this child today. The useful result is
-not a curriculum, a score explanation, or a list of options. It is one grounded
-move she can understand, edit, and choose.
+Choose the right endpoint for this turn: an acknowledgement or optional offer,
+one useful clarification, an honest stop, or one verified activity. An activity
+belongs only after the parent asks for one or accepts an offer. The result is
+not a curriculum, a score explanation, or a list of options.
 
-## Inputs and evidence order
+## Enter at the right moment
 
-Use the fresh Progress data in family context. For one child, read:
+An explicit request for next-step help can proceed now. Confirming a progress
+save accepts that save, not an activity. Unless the parent already asked for
+an activity or accepted an earlier offer, acknowledge the actual saved receipt
+or ask "Want one idea to build on that?" and end the turn before reading targets
+or calling the verifier. Skip the offer when she declines, is wrapping up,
+or just wants a record saved. Acknowledging a log is not permission to quiz
+every child or add work to the week.
 
-1. Open conflicts.
-2. Current evidence items, including answer, derivation, source, and date.
-Never use a sibling as evidence. Never turn age, a score, or a generic
-developmental expectation into proof about this child.
+A statement such as "we're moving on" is not proof of mastery. Follow the
+existing evidence-capture procedure for saving observations; this skill does
+not interpret a transition as an answer or claim a save without a receipt.
+Periodic review timing is a separate product decision, not a reason to start
+check-ins, enroll reminders, or promise a monthly review here.
 
-`ask_next` means the next unanswered assessment question. It does not mean the
-child is ready to learn that item. Never use it as an instructional target or
-as evidence of readiness.
+## Read one child's current evidence
+
+Resolve the child from authenticated context and the parent's request. Never
+use a sibling as evidence. If more than one child could fit, ask which child.
+Use the subject she named or the one already in the current discussion. If
+there is no clear subject, ask one short scope question instead of scanning
+every child and subject.
+
+In ordinary parent chat, call `explore_child_map` with `query: subject_map`
+for that exact child and subject before choosing an activity. Read its
+`savedAnswers`: itemId, statement, answer, observedAt and derivation. The
+family-context summary can omit whole subjects, including music and motor;
+omitted context is not missing evidence. The catalog ladder and a comparison's
+winning basis are not the complete saved-answer inventory.
+
+Check `comparison.openConflicts` before interpreting the saved-answer list.
+Conflicting items are excluded from `savedAnswers`, so a complete list of easy
+answers can still sit beside an unresolved conflict. When the selected subject
+has a conflict, ask one useful question about the current ability and stop;
+do not call that subject all-easy or empty.
+
+Respect `savedAnswers.omitted`. Use a returned eligible item when one fits;
+do not infer "all easy" or "nothing saved" from an incomplete list. If the
+returned slice has no suitable target, say it does not establish one and ask
+one useful scope or recent-example question. A failed canonical read is
+unavailable, not an empty record: explain that the read could not be checked
+and stop rather than falling back to remembered levels.
+
+For a trusted internal `progress_next_move` task, its bounded task context is
+already the exact child, allowed target set and eligible evidence. Use that
+context and its fingerprinted persistence procedure below. Its eligible evidence
+already passed the time and provenance checks; persistence rechecks them. Do not
+call the chat reader or expand its target set.
 
 ## Stop before proposing
 
-Do not offer instructional advice when the current state cannot support it.
+- A conflict returned by the verifier needs its one clarification first.
+- No saved evidence needs one recent concrete observation.
+- Evidence over 30 days old needs an update. The verifier owns the exact
+  freshness boundary; a recent calculation date does not refresh an answer.
+- Unknown derivation needs confirmation. A source label such as "check-in"
+  does not establish that the answer was direct.
+- A current parent correction that this activity is already easy is a floor.
+  Do not repeat the drill because an older saved answer says Getting there.
+  Use the existing capture path for a concrete current claim, re-read after
+  the confirmed save, or ask one useful clarification if it is still unclear.
 
-- An open conflict means confirm the differing answers first. Do not average
-  them or choose one.
-- No saved evidence means ask for one recent concrete observation.
-- Evidence older than the verifier's freshness window means ask what has
-  changed lately.
-- Evidence whose derivation is unknown means confirm what happened before
-  building advice on it.
-- If the parent has not identified a child and more than one child could fit,
-  ask one short child question.
+When every answer in the complete selected-subject inventory is fresh, known
+and `easily`, say those saved skills are already easy and there is no supported
+practice target here. That is a complete answer to the next-step request:
+stop before proposing to the verifier, and do not substitute unverified
+practice or a harder target after a refusal. Do not ask her to prove those
+answers again. A mixed stale/unknown inventory is not all-easy.
 
-The verifier re-checks all four data stops. Its clarification is the truth.
+`ask_next` is an assessment question, not an instructional target. A graph
+`ready_next` result is not this verifier's approval for an unassessed extension.
+Do not manufacture a different skill or practice already-easy work to fill a
+card. Broader verified next-skill extensions need their own capability.
 
-If every fresh evidenced item is `easily`, stop. Do not manufacture practice
-or disguise a different skill as an extension. A future graph-ready capability
-will own verified next-skill targets.
+## Choose and verify one candidate
 
-## Choose one candidate
+Choose one exact fresh saved `getting_there` or `not_yet` item. Call
+`verify_progress_next_move` before showing the activity. Include:
 
-When the state is eligible, propose exactly one candidate and call
-`verify_progress_next_move` before showing it.
+- The authenticated child id.
+- That target's real itemId, never a storage-row id or an invented id.
+- One to three fresh current evidence itemIds in the same subject, including
+  the target itself.
+- Five, ten, or fifteen minutes, one concrete activity, and one short reason.
 
-The candidate must include:
-
-- One child id from the authenticated family context.
-- One target item id. It must be a fresh current evidenced item.
-- One to three fresh current evidence item ids that explain the fit. The
-  target item id must be included.
-- Use the evidence `itemId` values. Do not use storage-row ids or invent an id.
-- Five, ten, or fifteen minutes.
-- One concrete activity and one short reason.
-
-For an authenticated internal `progress_next_move` task, call
-`persist_progress_next_move` exactly once with the candidate or an honest stop.
-That tool re-verifies the task fingerprint and saves the stable result. In an
-ordinary parent conversation, call `verify_progress_next_move` and share its
-read-only result instead.
+The tool re-reads the canonical ledger. Its rejection or clarification wins
+over earlier context. Ordinary chat is read-only. For a trusted internal
+`progress_next_move` task, call `persist_progress_next_move` exactly once with
+one candidate from its allowed set or an honest stop instead; it re-verifies
+the task fingerprint and saves the stable result.
 
 ### Activity quality
 
-- Small enough to try today. Five to fifteen minutes is a ceiling, not a goal.
-- Prefer talking, moving, reading together, ordinary paper, household objects,
-  or going outside. Do not send her shopping.
-- Judge physical and sensory safety for this child's age and the activity as a
-  whole. Avoid choking-sized objects for young children, unsupervised water,
-  heat, climbing, allergen-dependent food, or assumptions about mobility or
-  sensory tolerance. When safe fit is unclear, stop.
-- Make the observable action clear. "Read together" is vague. "Let Maya read
-  one page, then ask her to point to the sentence that surprised her" is usable.
-- Keep support warm. Describe what to try and what to notice, never what the
-  child should already know.
-- One move only. Do not append alternatives, a sequence, or a bonus challenge.
-- Choose one exact ordinary-material setup. Do not hand the parent a menu of
-  interchangeable objects; making that choice is Homa's work.
-- The reason names the saved observation in parent language. Do not mention
-  scores, months ahead, confidence percentages, or internal system terms.
-- Match the target's meaning exactly. Practicing counting is counting;
-  comparing groups is a different skill and needs its own verified target.
-- Say “you shared” for direct evidence. Say “Homa matched” for inferred
-  evidence. Never make an inference sound parent-confirmed.
+- One small activity, not a sequence, alternatives, or a bonus challenge.
+- Choose one ordinary setup the family can use today without shopping: talk,
+  movement, reading together, ordinary paper, household objects, or outdoors.
+- Judge safety for this child and activity. Avoid choking-sized objects for
+  young children, unsupervised water, heat, climbing, allergen-dependent food,
+  or assumptions about mobility or sensory tolerance. Stop if safe fit is unclear.
+- Make the observable action clear. "Read together" is vague; reading one page
+  with help on unfamiliar words is usable. Keep support warm, never a verdict.
+- Match the exact target. Counting five objects is not comparing groups,
+  counting backward, or deciding how many remain after hiding one.
+- The reason names the saved observation, how it was learned, and its date.
+  Direct means shared directly; inferred means Homa matched it from what was
+  shared. Never present inferred evidence as parent-confirmed. No raw quote
+  is available unless an actual source read supplies it.
+- Do not turn age, chart credit, or typical teaching windows into readiness.
 
-The model chooses the activity. Code verifies identity, catalog membership,
-fresh provenance, conflicts, and the allowed working edge. A plausible activity
-with a rejected id is still rejected.
+The model judges activity fit and safety. Code verifies identity, catalog
+membership, fresh provenance, conflicts and cited evidence. A plausible
+activity with a rejected id remains rejected.
 
 ## After verification
 
-If the tool returns a verified move, share only that activity and its short
-reason. The parent decides whether to use it. Do not schedule it, save it to a
-plan, create a material, purchase anything, or message anyone.
+Only after accepted verification, share the activity and its brief reason.
+Use the returned evidence receipt in the parent-facing reason, including its
+observation date and whether the parent shared the answer directly or Homa
+matched it from their words. Putting provenance only in a tool input leaves
+the parent unable to check the recommendation. For example: "Homa matched
+curved cutting as Getting there from your September 4 correction." Do not
+call that a directly confirmed answer.
 
-If she wants it changed, adjust it in conversation and verify the revised
-candidate again. If she then explicitly asks for a printable, load
-`materials-studio`. If she explicitly asks to put approved work on a date, load
-`planner`, read the plan first, and follow its confirmation rules.
+Do not schedule, save to a plan, create a material, buy anything, or message
+anyone. A separate request
+for a printable goes to `materials-studio`; scheduling approved work goes to
+`planner` and its read-first confirmation procedure.
 
-If the tool returns a clarification, ask that one question and stop. If it
-returns no move, say the evidence is not strong enough for a useful suggestion
-yet and ask for one recent example. Never repair ids from memory or call the
-tool repeatedly with guesses.
+If she changes the activity, verify the revised candidate again. If the tool
+returns a clarification, ask that one question and stop. Other rejections mean
+no verified activity: explain the specific limit without repairing ids from
+memory or repeatedly guessing. An all-easy stop is not weak evidence.
 
 ## Examples
 
-### Verified practice at the working edge
+**Stale cutting:** the selected subject has July 7 straight-line cutting,
+Getting there, with unknown derivation. It is now September 5. Do not suggest
+cutting strips or curves from that record. Ask what cutting looks like now.
+If a later confirmed save makes straight lines Easily and curves Getting
+there, re-read and verify a curves target. Do not keep the straight-line drill.
 
-Progress says Maya read a short early reader with some help. A good candidate
-targets that same verified reading skill with a ten-minute shared page: Maya
-reads until she wants help, the parent supplies the word, and Maya rereads the
-whole sentence. The reason points to the saved observation that she is already
-reading connected text with support.
+**Current strength:** all current saved counting skills in the complete read
+are Easily. More counting is not needed just because a suggestion was requested.
+Comparing groups would be a different skill. Explain the supported stop.
+For the equivalent complete cutting record: "Both saved cutting skills are
+already easy for Maya. I wouldn't add a scissors drill here." End there.
 
-### Current strength
+**Young child:** a recent direct answer says three-year-old Noor is Getting
+there with counting five objects. One candidate uses five socks on the floor
+with an adult beside her, moving each into a basket while saying one number.
+Stop after the five. Coins, beads, buttons and loose caps are not a safe shortcut.
 
-Progress says Finn counts twenty objects independently and all other fresh
-items are also `easily`. Return no move. Comparing groups would be a different
-skill, and more counting would be work invented only because the card exists.
-
-### Safe practice for a young child
-
-Progress says three-year-old Noor is beginning to count up to five objects.
-Use five socks on the floor with an adult beside her. Let Noor move each object
-into a basket while saying one number. Stop when she has counted the five
-objects. Never
-suggest coins, beads, buttons, loose caps, or other choking-size counters for a
-young child, even when they make the counting instruction shorter.
-
-### Exact skill, not a nearby challenge
-
-Progress says Maya is getting there with counting up to five objects. Put five
-spoons on the table and let her touch each spoon once while saying the numbers
-from one to five. Stop there. Counting backward, hiding an object, comparing
-groups, or asking how many remain would add a different skill that current
-evidence has not verified.
-
-### Conflict
-
-Two adults gave different answers for the same reading skill. Do not suggest a
-reading activity. Use the verifier's clarification and let the parent confirm
-what fits today.
-
-### Stale or missing provenance
-
-The only answer is old, or Homa cannot verify how it was matched. Do not dress
-it up as current knowledge. Ask for one fresh example, then return after it is
-saved and visible in Progress.
-
-## Final check
-
-Before responding, verify:
-
-- one child, one target, one move;
-- every evidence item id came from current Progress context;
-- the verifier accepted the candidate;
-- the move can happen today without a purchase or hidden side effect;
-- the reason is about an observation, not a verdict on the child;
-- nothing was scheduled, saved, sent, or created without a separate request.
+Before responding, check the endpoint: an unaccepted offer contains no
+activity; a clarification or supported stop adds no practice. Only an activity
+needs one child, one exact target, one move and accepted verification. Preserve
+faithful evidence dates and provenance, with no unrequested effects.
