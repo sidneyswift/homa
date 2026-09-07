@@ -721,6 +721,9 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:planner-learning-log:postgres
 
+      - name: Hours categories PostgreSQL
+        run: pnpm test:hours-categories:postgres
+
   # Guard shard 3 of 3: the acceptance E2Es and the two secret-needing
   # database checks, the three longest steps in the roster (each 24-50s),
   # so they share a runner instead of tailing another shard.

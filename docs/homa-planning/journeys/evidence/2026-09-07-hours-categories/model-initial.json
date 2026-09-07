@@ -1,0 +1,653 @@
+[
+  {
+    "id": "category-total",
+    "prompt": "How much Portuguese time is recorded for Avery on September 6, 2026? Include family time only if it was Portuguese.",
+    "text": "For September 6, 2026, Avery has 30 minutes recorded specifically under the Portuguese category (foreign language). That day also had 30 minutes logged as Spanish and a separate 10-minute whole-family foreign language entry with no category, so those don't count as Portuguese.\n\nSo: **30 minutes of Portuguese** for Avery on that date.",
+    "calls": [
+      {
+        "name": "load_skill",
+        "input": {
+          "skill": "hours-records"
+        },
+        "output": {
+          "loadedSkillBodySha256": "fbe86054ca7c735dd856a3f51c9f0bd5cd6ff2dc7d8ecfc326e3bc54fddb5dce"
+        }
+      },
+      {
+        "name": "find_hours",
+        "input": {
+          "period": "all",
+          "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+          "includeShared": true,
+          "from": "2026-09-06",
+          "through": "2026-09-06",
+          "uncategorizedOnly": false,
+          "limit": 20
+        },
+        "output": {
+          "found": 3,
+          "complete": true,
+          "requestedPeriod": "all",
+          "period": "custom",
+          "periodLabel": "Selected dates",
+          "since": "2026-09-06",
+          "through": "2026-09-06",
+          "schoolYearSettingHref": null,
+          "includeShared": true,
+          "totalMinutes": 70,
+          "byChild": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "minutes": 70
+            }
+          ],
+          "byEntryScope": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "minutes": 60
+            },
+            {
+              "childId": null,
+              "minutes": 10
+            }
+          ],
+          "bySubject": [
+            {
+              "subject": "spanish",
+              "minutes": 70,
+              "label": "Foreign language"
+            }
+          ],
+          "byCategory": [
+            {
+              "subject": "spanish",
+              "categoryId": null,
+              "name": null,
+              "minutes": 10,
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "subject": "spanish",
+              "categoryId": "250824fe-4357-474d-8d31-604dc5acbc95",
+              "name": "Portuguese",
+              "minutes": 30,
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "subject": "spanish",
+              "categoryId": "a804ccde-3d68-42de-a9b9-f577aa20787c",
+              "name": "Spanish",
+              "minutes": 30,
+              "subjectLabel": "Foreign language"
+            }
+          ],
+          "recordedDays": 1,
+          "recordedDaysByChild": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "childName": "Avery",
+              "recordedDays": 1,
+              "minutes": 70
+            }
+          ],
+          "firstDay": "2026-09-06",
+          "lastDay": "2026-09-06",
+          "entries": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "subject": "spanish",
+              "minutes": 30,
+              "happenedOn": "2026-09-06",
+              "source": "chat",
+              "note": null,
+              "noteTruncated": false,
+              "categoryId": "250824fe-4357-474d-8d31-604dc5acbc95",
+              "customLabel": "Portuguese"
+            },
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "subject": "spanish",
+              "minutes": 30,
+              "happenedOn": "2026-09-06",
+              "source": "chat",
+              "note": null,
+              "noteTruncated": false,
+              "categoryId": "a804ccde-3d68-42de-a9b9-f577aa20787c",
+              "customLabel": "Spanish"
+            },
+            {
+              "childId": null,
+              "subject": "spanish",
+              "minutes": 10,
+              "happenedOn": "2026-09-06",
+              "source": "chat",
+              "note": null,
+              "noteTruncated": false,
+              "categoryId": null,
+              "customLabel": null
+            }
+          ],
+          "note": "Recorded learning days mean dates with timed entries, not an attendance or absence judgment. byChild gives each child's total including shared time when requested. byEntryScope is raw entry attribution, with null for whole-family entries. Shared rows count once in totalMinutes and toward each child's record when included; do not add the child totals to calculate family time. These are her real rows. Growth framing only: never call a total behind, and never compare one child to another."
+        }
+      }
+    ],
+    "judge": {
+      "pass": false,
+      "findings": [
+        "Correct final answer of 30 minutes Portuguese is given, matching the rubric's expected value.",
+        "However, the rubric requires the assistant to list categories via manage_hours_categories and select the Portuguese category id before reading entries; no manage_hours_categories call was made at all.",
+        "The find_hours call did not include a categoryId parameter for Portuguese; instead it queried the whole subject and derived the subtotal from byCategory, bypassing the required category-id selection step.",
+        "While the skill file does note byCategory subtotals are an acceptable path for category subtotals, the rubric explicitly specifies the list-then-select-id workflow, which was not followed."
+      ],
+      "evidenceQuote": "For September 6, 2026, Avery has 30 minutes recorded specifically under the Portuguese category (foreign language)."
+    },
+    "exact": [],
+    "usage": {
+      "inputTokens": 227606,
+      "inputTokenDetails": {
+        "noCacheTokens": 227606,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 628,
+      "outputTokenDetails": {
+        "textTokens": 339,
+        "reasoningTokens": 289
+      },
+      "totalTokens": 228234
+    },
+    "judgeUsage": {
+      "inputTokens": 3506,
+      "inputTokenDetails": {
+        "noCacheTokens": 3506,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1050,
+      "outputTokenDetails": {
+        "textTokens": 281,
+        "reasoningTokens": 769
+      },
+      "totalTokens": 4556,
+      "raw": {
+        "input_tokens": 3506,
+        "output_tokens": 1050,
+        "output_tokens_details": {
+          "thinking_tokens": 769
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  },
+  {
+    "id": "subject-subtotals",
+    "prompt": "Break down Avery's foreign-language time on September 6, 2026 by category, including shared time. What is the total?",
+    "text": "For September 6, 2026, Avery's foreign language time breaks down as:\n\n- **Portuguese**: 30 min\n- **Spanish**: 30 min\n- **Uncategorized** (that's the shared, whole-family entry): 10 min\n\n**Total: 70 minutes** of foreign language that day.",
+    "calls": [
+      {
+        "name": "load_skill",
+        "input": {
+          "skill": "hours-records"
+        },
+        "output": {
+          "loadedSkillBodySha256": "fbe86054ca7c735dd856a3f51c9f0bd5cd6ff2dc7d8ecfc326e3bc54fddb5dce"
+        }
+      },
+      {
+        "name": "find_hours",
+        "input": {
+          "period": "week",
+          "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+          "includeShared": true,
+          "from": "2026-09-06",
+          "through": "2026-09-06",
+          "subject": "spanish",
+          "uncategorizedOnly": false,
+          "limit": 20
+        },
+        "output": {
+          "found": 3,
+          "complete": true,
+          "requestedPeriod": "week",
+          "period": "custom",
+          "periodLabel": "Selected dates",
+          "since": "2026-09-06",
+          "through": "2026-09-06",
+          "schoolYearSettingHref": null,
+          "includeShared": true,
+          "totalMinutes": 70,
+          "byChild": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "minutes": 70
+            }
+          ],
+          "byEntryScope": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "minutes": 60
+            },
+            {
+              "childId": null,
+              "minutes": 10
+            }
+          ],
+          "bySubject": [
+            {
+              "subject": "spanish",
+              "minutes": 70,
+              "label": "Foreign language"
+            }
+          ],
+          "byCategory": [
+            {
+              "subject": "spanish",
+              "categoryId": null,
+              "name": null,
+              "minutes": 10,
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "subject": "spanish",
+              "categoryId": "250824fe-4357-474d-8d31-604dc5acbc95",
+              "name": "Portuguese",
+              "minutes": 30,
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "subject": "spanish",
+              "categoryId": "a804ccde-3d68-42de-a9b9-f577aa20787c",
+              "name": "Spanish",
+              "minutes": 30,
+              "subjectLabel": "Foreign language"
+            }
+          ],
+          "recordedDays": 1,
+          "recordedDaysByChild": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "childName": "Avery",
+              "recordedDays": 1,
+              "minutes": 70
+            }
+          ],
+          "firstDay": "2026-09-06",
+          "lastDay": "2026-09-06",
+          "entries": [
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "subject": "spanish",
+              "minutes": 30,
+              "happenedOn": "2026-09-06",
+              "source": "chat",
+              "note": null,
+              "noteTruncated": false,
+              "categoryId": "250824fe-4357-474d-8d31-604dc5acbc95",
+              "customLabel": "Portuguese"
+            },
+            {
+              "childId": "522d28ec-a120-477b-a209-78563c3d7180",
+              "subject": "spanish",
+              "minutes": 30,
+              "happenedOn": "2026-09-06",
+              "source": "chat",
+              "note": null,
+              "noteTruncated": false,
+              "categoryId": "a804ccde-3d68-42de-a9b9-f577aa20787c",
+              "customLabel": "Spanish"
+            },
+            {
+              "childId": null,
+              "subject": "spanish",
+              "minutes": 10,
+              "happenedOn": "2026-09-06",
+              "source": "chat",
+              "note": null,
+              "noteTruncated": false,
+              "categoryId": null,
+              "customLabel": null
+            }
+          ],
+          "note": "Recorded learning days mean dates with timed entries, not an attendance or absence judgment. byChild gives each child's total including shared time when requested. byEntryScope is raw entry attribution, with null for whole-family entries. Shared rows count once in totalMinutes and toward each child's record when included; do not add the child totals to calculate family time. These are her real rows. Growth framing only: never call a total behind, and never compare one child to another."
+        }
+      }
+    ],
+    "judge": {
+      "pass": true,
+      "findings": [],
+      "evidenceQuote": "- **Portuguese**: 30 min\n- **Spanish**: 30 min\n- **Uncategorized** (that's the shared, whole-family entry): 10 min\n\n**Total: 70 minutes** of foreign language that day."
+    },
+    "exact": [],
+    "usage": {
+      "inputTokens": 227236,
+      "inputTokenDetails": {
+        "noCacheTokens": 227236,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 364,
+      "outputTokenDetails": {
+        "textTokens": 325,
+        "reasoningTokens": 39
+      },
+      "totalTokens": 227600
+    },
+    "judgeUsage": {
+      "inputTokens": 3498,
+      "inputTokenDetails": {
+        "noCacheTokens": 3498,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 105,
+      "outputTokenDetails": {
+        "textTokens": 105,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3603,
+      "raw": {
+        "input_tokens": 3498,
+        "output_tokens": 105,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  },
+  {
+    "id": "rename",
+    "prompt": "Rename our Foreign language category Portuguese to Brazilian Portuguese. Keep all its existing time.",
+    "text": "Done, renamed to Brazilian Portuguese. All the time already logged under it stays exactly as it was, just relabeled.",
+    "calls": [
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "list",
+          "subject": "spanish"
+        },
+        "output": {
+          "status": "ready",
+          "complete": true,
+          "categories": [
+            {
+              "id": "250824fe-4357-474d-8d31-604dc5acbc95",
+              "subject": "spanish",
+              "name": "Portuguese",
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "id": "a804ccde-3d68-42de-a9b9-f577aa20787c",
+              "subject": "spanish",
+              "name": "Spanish",
+              "subjectLabel": "Foreign language"
+            }
+          ]
+        }
+      },
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "rename",
+          "subject": "spanish",
+          "name": "Brazilian Portuguese",
+          "categoryId": "250824fe-4357-474d-8d31-604dc5acbc95",
+          "expectedName": "Portuguese"
+        },
+        "output": {
+          "status": "saved",
+          "category": {
+            "id": "250824fe-4357-474d-8d31-604dc5acbc95",
+            "subject": "spanish",
+            "name": "Brazilian Portuguese"
+          }
+        }
+      }
+    ],
+    "judge": {
+      "pass": true,
+      "findings": [
+        "List call was made first, correctly identifying the category with id 250824fe-4357-474d-8d31-604dc5acbc95 named 'Portuguese'",
+        "Rename call used the correct categoryId and expectedName='Portuguese' matching the current name",
+        "Rename call output status was 'saved' with confirmed category name 'Brazilian Portuguese', constituting a valid saved receipt",
+        "Candidate reported success only after this saved receipt was returned",
+        "No Hours-row-creating calls were made; only list and rename actions were used, satisfying 'No new Hours rows'",
+        "Candidate's claim that 'all the time already logged under it stays exactly as it was' is consistent with the rename action not touching any time/hours data"
+      ],
+      "evidenceQuote": "Done, renamed to Brazilian Portuguese. All the time already logged under it stays exactly as it was, just relabeled."
+    },
+    "exact": [
+      "Hours procedure never loaded"
+    ],
+    "usage": {
+      "inputTokens": 223314,
+      "inputTokenDetails": {
+        "noCacheTokens": 223314,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 393,
+      "outputTokenDetails": {
+        "textTokens": 307,
+        "reasoningTokens": 86
+      },
+      "totalTokens": 223707
+    },
+    "judgeUsage": {
+      "inputTokens": 863,
+      "inputTokenDetails": {
+        "noCacheTokens": 863,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 296,
+      "outputTokenDetails": {
+        "textTokens": 296,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 1159,
+      "raw": {
+        "input_tokens": 863,
+        "output_tokens": 296,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  },
+  {
+    "id": "empty-create",
+    "prompt": "Create an unused category called Literature under Language arts so I can log time there later.",
+    "text": "Done. Homa files language arts under \"reading\" as the parent subject, so I created \"Literature\" there. It's ready and empty, just log time to it whenever you want.",
+    "calls": [
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "create",
+          "subject": "reading",
+          "name": "Literature"
+        },
+        "output": {
+          "status": "saved",
+          "category": {
+            "id": "68bb8054-282b-4a7b-9785-702f9f4a1353",
+            "subject": "reading",
+            "name": "Literature"
+          }
+        }
+      }
+    ],
+    "judge": {
+      "pass": true,
+      "findings": [
+        "Tool call created category 'Literature' under subject 'reading' as required, with status 'saved' returned.",
+        "Only one call was made (manage_hours_categories create); no log_hours or planner write calls were made.",
+        "Candidate's response accurately reports the saved category without claiming any time was logged, only noting it's ready for future logging."
+      ],
+      "evidenceQuote": "It's ready and empty, just log time to it whenever you want."
+    },
+    "exact": [
+      "Hours procedure never loaded"
+    ],
+    "usage": {
+      "inputTokens": 148669,
+      "inputTokenDetails": {
+        "noCacheTokens": 148669,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 395,
+      "outputTokenDetails": {
+        "textTokens": 153,
+        "reasoningTokens": 242
+      },
+      "totalTokens": 149064
+    },
+    "judgeUsage": {
+      "inputTokens": 607,
+      "inputTokenDetails": {
+        "noCacheTokens": 607,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 255,
+      "outputTokenDetails": {
+        "textTokens": 149,
+        "reasoningTokens": 106
+      },
+      "totalTokens": 862,
+      "raw": {
+        "input_tokens": 607,
+        "output_tokens": 255,
+        "output_tokens_details": {
+          "thinking_tokens": 106
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  },
+  {
+    "id": "negative-no-write",
+    "prompt": "Do I need a separate Portuguese category, or can I just keep it under Foreign language? I am only asking for advice, please do not change anything.",
+    "text": "You're already set up for this, actually. The subject list itself is fixed, \"Foreign language\" is the only bucket (it's internally called \"spanish\" but covers any language), so there's no way to make Portuguese its own top-level subject. But you don't need one: I see you already have a \"Brazilian Portuguese\" category sitting right under Foreign language, alongside \"Spanish.\"\n\nSo just keep logging Portuguese time under Foreign language with that category. It'll subtotal separately from Spanish when you want to see them apart, but both roll up into one Foreign language total for your records. Nothing to change, you already did the right thing.",
+    "calls": [
+      {
+        "name": "load_skill",
+        "input": {
+          "skill": "hours-records"
+        },
+        "output": {
+          "loadedSkillBodySha256": "fbe86054ca7c735dd856a3f51c9f0bd5cd6ff2dc7d8ecfc326e3bc54fddb5dce"
+        }
+      },
+      {
+        "name": "manage_hours_categories",
+        "input": {
+          "action": "list",
+          "subject": "spanish"
+        },
+        "output": {
+          "status": "ready",
+          "complete": true,
+          "categories": [
+            {
+              "id": "250824fe-4357-474d-8d31-604dc5acbc95",
+              "subject": "spanish",
+              "name": "Brazilian Portuguese",
+              "subjectLabel": "Foreign language"
+            },
+            {
+              "id": "a804ccde-3d68-42de-a9b9-f577aa20787c",
+              "subject": "spanish",
+              "name": "Spanish",
+              "subjectLabel": "Foreign language"
+            }
+          ]
+        }
+      }
+    ],
+    "judge": {
+      "pass": true,
+      "findings": [
+        "Candidate correctly explains that a separate top-level Portuguese category isn't possible/needed and that parent subject remains 'Foreign language'",
+        "Correctly identifies that a 'Brazilian Portuguese' category already exists under Foreign language, satisfying the advisory-only request",
+        "Only a 'list' call was made to manage_hours_categories (read-only); no create, rename, or Hours write actions were performed",
+        "No progress or skill claims were made; the response only discusses bookkeeping/categorization, consistent with the rubric"
+      ],
+      "evidenceQuote": "So just keep logging Portuguese time under Foreign language with that category. It'll subtotal separately from Spanish when you want to see them apart, but both roll up into one Foreign language total for your records. Nothing to change, you already did the right thing."
+    },
+    "exact": [],
+    "usage": {
+      "inputTokens": 227598,
+      "inputTokenDetails": {
+        "noCacheTokens": 227598,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1220,
+      "outputTokenDetails": {
+        "textTokens": 330,
+        "reasoningTokens": 890
+      },
+      "totalTokens": 228818
+    },
+    "judgeUsage": {
+      "inputTokens": 2670,
+      "inputTokenDetails": {
+        "noCacheTokens": 2670,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 273,
+      "outputTokenDetails": {
+        "textTokens": 273,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 2943,
+      "raw": {
+        "input_tokens": 2670,
+        "output_tokens": 273,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "service_tier": "standard",
+        "inference_geo": "global"
+      }
+    }
+  }
+]

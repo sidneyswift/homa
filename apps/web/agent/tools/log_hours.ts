@@ -1,5 +1,6 @@
 import { emitEvent } from "@homa/core";
 import { z } from "zod";
+import { hoursCategoryNameSchema } from "../../lib/hours-categories";
 
 import { defineBoundedTool, TOOL_DEADLINE } from "../../lib/agent-tool-deadline";
 import { resolveAgentAccess } from "../../lib/agent-db";
@@ -38,9 +39,7 @@ const logInput = z.object({
     .max(200)
     .optional()
     .describe("The parent's own words for the audit trail, e.g. 'about 45 min of math after breakfast'."),
-  customLabel: z
-    .string()
-    .max(40)
+  customLabel: hoursCategoryNameSchema
     .optional()
     .describe(
       "Her own name for this block when the fixed subject list is too coarse to tell two blocks apart, e.g. subject 'reading' with customLabel 'Literature journal' alongside a separate independent-reading block. Only set this when the parent actually names the activity; never invent one.",

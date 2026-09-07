@@ -127,7 +127,8 @@ test("320px: failure keeps values, pending blocks dismissal and shared deletion 
   await dialog.getByRole("spinbutton", { name: "Minutes", exact: true }).fill("19");
   await dialog.locator("summary").filter({ hasText: "Category and note for Avery" }).click();
   await dialog.getByRole("textbox", { name: "Note for Avery", exact: true }).fill("Unsaved note to keep when I go back");
-  await dialog.getByRole("textbox", { name: "Category (optional)", exact: true }).fill("club");
+  await dialog.getByRole("combobox", { name: "Category (optional)", exact: true }).selectOption("new");
+  await dialog.getByRole("textbox", { name: "New category name", exact: true }).fill("club");
   await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
   await expect(dialog.getByRole("button")).toHaveCount(2);
   await expect(dialog.getByRole("button", { name: "Save changes", exact: true })).toHaveCount(0);
@@ -142,7 +143,7 @@ test("320px: failure keeps values, pending blocks dismissal and shared deletion 
   expect(await page.evaluate(() => window.hoursEditorFixture.calls.filter((row) => row.kind === "delete").length)).toBe(0);
   await expect(dialog.getByRole("spinbutton", { name: "Minutes", exact: true })).toHaveValue("19");
   await expect(dialog.getByRole("textbox", { name: "Note for Avery", exact: true })).toHaveValue("Unsaved note to keep when I go back");
-  await expect(dialog.getByRole("textbox", { name: "Category (optional)", exact: true })).toHaveValue("club");
+  await expect(dialog.getByRole("textbox", { name: "New category name", exact: true })).toHaveValue("club");
   await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
   await dialog.getByRole("button", { name: "Delete recorded time", exact: true }).click();
   await expect(dialog).toHaveCount(0);
@@ -245,5 +246,45 @@ test("standalone deletion identifies the recorded date and keeps the irreversibl
   await dialog.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(dialog.getByRole("alert")).toContainText("Close this editor and reopen the time record to check before trying again.");
   await expect(dialog.getByRole("spinbutton", { name: "Minutes", exact: true })).toHaveValue("10");
+  await page.close();
+});
+
+
+test("categories: create unused, reuse, rename and reconcile totals at phone widths", async () => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(origin + route("hours"));
+  await page.getByText("Manage categories", { exact: true }).click();
+  await page.getByLabel("Category name", { exact: true }).fill("Future practice");
+  await page.getByRole("button", { name: "Save category", exact: true }).click();
+  await expect(page.getByText("Category saved.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Language arts", exact: true }).click();
+  await page.getByLabel("Filter by category", { exact: true }).selectOption(JSON.stringify("Future practice"));
+  await expect(page.getByText("Nothing logged for Future practice yet.")).toBeVisible();
+  await page.getByText("Category totals, all recorded dates", { exact: true }).click();
+  await expect(page.locator("dl").filter({ hasText: "Future practice" })).toContainText("0m");
+  await page.getByRole("button", { name: "Math", exact: true }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).first().click();
+  const dialog = page.getByRole("dialog");
+  await dialog.locator("summary").filter({ hasText: "Category and note" }).first().click();
+  await dialog.getByLabel("Category (optional)", { exact: true }).selectOption(JSON.stringify("Math club"));
+  await dialog.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await page.getByLabel("Parent subject", { exact: true }).selectOption("math");
+  await page.getByLabel("Category to manage", { exact: true }).selectOption("e0000000-0000-4000-8000-000000000001");
+  await page.getByLabel("New category name", { exact: true }).fill("Hands-on math");
+  await page.getByRole("button", { name: "Rename category", exact: true }).click();
+  await expect(page.getByText("Category saved.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Math", exact: true }).click();
+  await page.getByLabel("Filter by category", { exact: true }).selectOption(JSON.stringify("Hands-on math"));
+  await expect(page.locator("li").filter({ hasText: "Math · Hands-on math" })).toHaveCount(1);
+  const totals = page.locator("section").filter({ has: page.getByRole("heading", { name: "Math 20m" }) });
+  await expect(totals).toContainText("Hands-on math10m");
+  await expect(totals).toContainText("Uncategorized10m");
+  await page.getByText("Manage categories", { exact: true }).click();
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    if (screenshots) await page.screenshot({ path: resolve(screenshots, `1035-categories-${width}.png`), fullPage: true });
+  }
   await page.close();
 });
