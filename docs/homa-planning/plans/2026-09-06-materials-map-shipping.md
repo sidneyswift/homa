@@ -23,3 +23,7 @@ The exact reported D page remains unidentified. No physical printing is claimed.
 The reviewed 60-path composition began at cc9c0e54 and was applied after the contextual-progress merge 68667444. Current package commands were preserved, including the new progress checks. The two earlier source overlaps preserve both the literal Binder title matcher and protected lesson reader, and both the Binder routing boundary and optional owned-resource procedure. No new migration or dependency is introduced.
 
 Pre-push fleet-skill, tool-deadline and Eve deployment checks are required. PR checks, exact production READY and a deployment probe will be recorded on the issues. The dated audit below each meeting item remains historical cause evidence, not a claim that its old pipeline is still active.
+
+## Production receipt, September 6
+
+[PR #1133](https://github.com/sidneyswift/homa/pull/1133) merged as `080efd6c9306ad82b84baa791a255685f8c06d29`. Exact-head required CI `34069563048` and Vercel passed. Production deployment `dpl_CQ2ZgwkwDEPKcSe8eQ2QPdrQM96m` reached READY and was verified on `thankshoma.com`; root/sign-in returned HTTP 200 and the protected app returned its expected sign-in redirect. The original CI color-token failure was corrected to the existing information token and the required checks reran successfully. These are release and basic availability receipts; the model, owned-lesson, physical printing and parent-usability limits above remain explicit on the linked issues.

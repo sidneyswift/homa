@@ -25,3 +25,11 @@ No new paid Hours model eval or final hosted capture journey is claimed. The ini
 Do not put enforcement ahead of compatible code or recreate the coarse index on rollback. The legacy phone writer without canonical per-call identity returns an honest no-write response. The revision-checked web editor remains supported. No broad backfill is included; the separately authorized exact historical recovery retains its own source and transaction review.
 
 Production migration receipts, deployment and remaining follow-ups live on #1090 and #1093. This document records verified boundaries and does not substitute for issue status.
+
+## Production receipt, September 6
+
+[PR #1130](https://github.com/sidneyswift/homa/pull/1130) merged as `7ce8f66f57285a137029d38b239fc4172d7f7919` after required CI run `34069083033` and Vercel passed. Exact production deployment `dpl_4k3TW9esV8WVK6YZHNjWuV3NotXK` reached READY before enforcement. Live migration versions are `20260907000650` (operation expansion), `20260907000700` (context provenance), and `20260907002838` (enforcement). The capture and immutable-identity triggers are enabled, and the obsolete coarse unique index is absent.
+
+The separately reviewed recovery committed two missing 30-minute entries, two immutable receipts and one link to the already-completed activity. September 3 reading changed from 35 to 95 minutes. No new activity was created. Only the target’s duration, false already-counted note and update timestamp changed; original completion and source history remained intact. A fresh post-commit inspection confirmed identical full-row fingerprints for all preexisting Hours, other activities, participants, old links/receipts, canonical sources and family membership. Sibling activity and Hours rows matched exactly. Raw family evidence remains private and outside Git.
+
+The recovery template SHA-256 was `108f2dfb546872a739f50102dc0469f939e727e6ce3b6e7b20ce5e5170338372`; the reviewed execution SHA-256 was `f6c591fc659ee9d5c48e564430e6599f5dd17b7087cfd26397ca081364de6d89`. The inspection and post-commit digests were `0a20d73f406aaa4aae200afb4a5b114412c251c841c5f4412a7a7ce4c6b8970f` and `3ac4c8409b1bb8b44666ce7ad46c378c1f85fc662de269beb981dce67db09b02`. This certifies that exact recovery and database safeguards, not an unrun full conversational journey or a broad historical backfill.

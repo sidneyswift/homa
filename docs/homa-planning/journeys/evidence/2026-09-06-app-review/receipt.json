@@ -1,0 +1,22 @@
+{
+  "appId": "6790637746",
+  "appName": "Homa: Homeschool Lessons",
+  "version": "1.0",
+  "build": "1.0.0 (48)",
+  "submissionId": "6fcc1a03-36c6-4a60-9401-08b6b724b878",
+  "observedAt": "2026-09-07T00:34:00Z",
+  "observedTimePrecision": "minute",
+  "status": "Waiting for Review",
+  "items": [
+    "Homa Monthly",
+    "Homa Annual",
+    "iOS App 1.0",
+    "Homa Membership"
+  ],
+  "correction": "Appended Apple Standard EULA link to English (U.S.) Description",
+  "eulaUrl": "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+  "evidence": "Native accessibility tree and original screen capture after resubmission",
+  "screenshotSha256": "bdf59a966419696d7591329d73defd077ac3baafd9f3f07a7820e0f326f117e9",
+  "newBinaryUploaded": false,
+  "approved": false
+}
