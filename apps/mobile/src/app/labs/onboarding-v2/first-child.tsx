@@ -1,117 +1,160 @@
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { useState } from "react";
+import { Keyboard, Pressable, View } from "react-native";
 
 import { OnboardingStage } from "../../../features/onboarding-v2/Stage";
-import { Chip, PrimaryButton, TextField } from "../../../features/onboarding-v2/controls";
-import { useOnboardingV2 } from "../../../features/onboarding-v2/state";
-import { v2Colors, v2Space, v2Type } from "../../../features/onboarding-v2/theme";
+import { PrimaryButton, TextField } from "../../../features/onboarding-v2/controls";
+import { SelectField } from "../../../features/onboarding-v2/SelectField";
+import { useOnboardingV2, type V2Kid } from "../../../features/onboarding-v2/state";
+import { v2Colors, v2Radii, v2Space, v2Type } from "../../../features/onboarding-v2/theme";
 import { NativeText } from "../../../components/ui/semantic";
-import { LegalLine } from "../../../features/auth/legal-line";
 
 const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 const CAP = 5;
+const MONTH_OPTIONS = MONTHS.map((label, index) => ({ label, value: index + 1 }));
 
-/**
- * "Who's learning at home?" First question of the walk, per the council
- * review's reordered Section 3 (a child exists by bubble three, not
- * bubble ten). This add is the trust moment: in the real v2.1 build it is
- * where the anonymous account is minted and AI-processing consent is
- * recorded (an affirmative tap in Homa's voice, not a checkbox screen).
- * This lab has no backend, so LegalLine renders here as the honest
- * preview of that moment without a real consent write behind it.
- */
+/** Client-only lab: the save actions keep details in the lab provider. */
 export default function FirstChildScreen() {
   const router = useRouter();
-  const { state, addKid } = useOnboardingV2();
+  const { state, addKid, update } = useOnboardingV2();
+  const [showForm, setShowForm] = useState(state.kids.length === 0);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const currentYear = new Date().getFullYear();
-  const years = useMemo(() => Array.from({ length: 18 }, (_, i) => currentYear - i), [currentYear]);
   const [month, setMonth] = useState<number | null>(null);
   const [year, setYear] = useState<number | null>(null);
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const years = Array.from({ length: 18 }, (_, index) => ({ label: String(currentYear - index), value: currentYear - index }));
+  const futureBirth = year === currentYear && month !== null && month > today.getMonth() + 1;
+  const hasDraft = name.trim().length > 0 || month !== null || year !== null;
+  const canSave = name.trim().length > 0 && month !== null && year !== null && !futureBirth;
+  const savesDraft = showForm && hasDraft;
+  const canContinue = savesDraft ? canSave : state.kids.length > 0;
+  const countAfterSave = state.kids.length + (savesDraft && !editingId ? 1 : 0);
+  const canAddAnother = (!showForm || canSave) && countAfterSave < CAP;
 
-  const canAdd = name.trim().length > 0 && month !== null && year !== null;
-  const canContinue = state.kids.length > 0;
-
-  function addAndClear() {
-    if (!canAdd || month === null || year === null) return;
-    addKid({ name: name.trim(), birthMonth: month, birthYear: year });
+  function clearForm() {
     setName("");
     setMonth(null);
     setYear(null);
+    setEditingId(null);
+  }
+
+  function saveDraft() {
+    if (!canSave || month === null || year === null) return;
+    const kid = { name: name.trim(), birthMonth: month, birthYear: year };
+    if (editingId) {
+      update("kids", state.kids.map((existing) => existing.id === editingId ? { ...existing, ...kid } : existing));
+    } else if (state.kids.length < CAP) {
+      addKid(kid);
+    }
+    clearForm();
+  }
+
+  function continueWithChildren() {
+    if (!canContinue) return;
+    if (savesDraft) saveDraft();
+    setShowForm(false);
+    Keyboard.dismiss();
+    router.push("/labs/onboarding-v2/relationship");
+  }
+
+  function addAnother() {
+    if (!canAddAnother) return;
+    if (savesDraft) saveDraft();
+    else clearForm();
+    Keyboard.dismiss();
+    setShowForm(true);
+  }
+
+  function editKid(kid: V2Kid) {
+    setEditingId(kid.id);
+    setName(kid.name);
+    setMonth(kid.birthMonth);
+    setYear(kid.birthYear);
+    setShowForm(true);
   }
 
   return (
     <OnboardingStage
       posture="docked"
+      compact
+      showLabControls={false}
+      progressLabel={state.familyName ? `The ${state.familyName} family` : "Your family"}
       characterState="listening"
       onBack={() => router.back()}
-      progress={0.05}
+      bubbleTail="left"
       bubbleKey="first-child"
-      bubble="Who's learning at home?"
+      bubble="Let's add your children."
+      footer={
+        <View style={{ gap: v2Space.sm }}>
+          {countAfterSave < CAP ? (
+            <Pressable accessibilityRole="button" accessibilityState={{ disabled: !canAddAnother }} disabled={!canAddAnother}
+              onPress={addAnother} style={{ minHeight: 44, justifyContent: "center", alignItems: "center" }}>
+              <NativeText style={[v2Type.control, { color: canAddAnother ? v2Colors.coral : v2Colors.inkMuted }]}>
+                {savesDraft ? "+ Save and add another" : "+ Add another child"}
+              </NativeText>
+            </Pressable>
+          ) : null}
+          <PrimaryButton label={savesDraft ? "Save and continue" : "Continue"} onPress={continueWithChildren} disabled={!canContinue} />
+        </View>
+      }
     >
       <View style={{ gap: v2Space.lg }}>
         {state.kids.length > 0 ? (
           <View style={{ gap: v2Space.sm }}>
             {state.kids.map((kid) => (
-              <View
-                key={kid.id}
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  backgroundColor: v2Colors.paper,
-                  borderRadius: v2Space.sm,
-                  borderWidth: 1,
-                  borderColor: v2Colors.border,
-                  paddingHorizontal: v2Space.md,
-                  paddingVertical: v2Space.sm,
-                }}
-              >
-                <NativeText style={[v2Type.chip, { color: v2Colors.ink }]}>{kid.name}</NativeText>
-                <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>
-                  {MONTHS[kid.birthMonth - 1]} {kid.birthYear}
-                </NativeText>
+              <View key={kid.id} style={{ flexDirection: "row", alignItems: "center", gap: v2Space.sm,
+                borderRadius: v2Radii.control, backgroundColor: v2Colors.paper,
+                paddingHorizontal: v2Space.md, paddingVertical: v2Space.sm }}>
+                <View style={{ flex: 1 }}>
+                  <NativeText style={[v2Type.chip, { color: v2Colors.ink }]}>{kid.name}</NativeText>
+                  <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>
+                    {MONTHS[kid.birthMonth - 1]} {kid.birthYear}
+                  </NativeText>
+                </View>
+                <Pressable accessibilityRole="button" accessibilityLabel={`Edit ${kid.name}`}
+                  disabled={showForm && hasDraft} accessibilityState={{ disabled: showForm && hasDraft }}
+                  onPress={() => editKid(kid)} style={{ minHeight: 44, minWidth: 44, justifyContent: "center", alignItems: "center" }}>
+                  <NativeText style={[v2Type.caption, { color: showForm && hasDraft ? v2Colors.inkMuted : v2Colors.coral }]}>Edit</NativeText>
+                </Pressable>
               </View>
             ))}
           </View>
         ) : null}
 
-        {state.kids.length < CAP ? (
-          <View style={{ gap: v2Space.md }}>
-            <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>
-              First name is enough. It goes on their worksheet.
-            </NativeText>
-            <TextField value={name} onChangeText={setName} placeholder="Your child's name, e.g. Maya" />
-
-            <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>Birth month and year</NativeText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: v2Space.sm }}>
-              {MONTHS.map((label, index) => (
-                <Chip key={label} label={label} selected={month === index + 1} onPress={() => setMonth(index + 1)} role="radio" />
-              ))}
-            </ScrollView>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: v2Space.sm }}>
-              {years.map((y) => (
-                <Chip key={y} label={String(y)} selected={year === y} onPress={() => setYear(y)} role="radio" />
-              ))}
-            </ScrollView>
-
-            <PrimaryButton label="Add" onPress={addAndClear} disabled={!canAdd} />
-            <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted, textAlign: "center" }]}>
-              Up to five, and you can add more later.
-            </NativeText>
+        {showForm ? (
+          <View style={{ gap: v2Space.lg }}>
+            <View style={{ gap: v2Space.sm }}>
+              <NativeText style={[v2Type.chip, { color: v2Colors.ink }]}>Child&apos;s first name</NativeText>
+              <TextField value={name} onChangeText={setName} placeholder="e.g. Maya" accessibilityLabel="Child's first name" />
+            </View>
+            <View style={{ gap: v2Space.sm }}>
+              <NativeText style={[v2Type.chip, { color: v2Colors.ink }]}>Birth month and year</NativeText>
+              <View style={{ flexDirection: "row", gap: v2Space.sm }}>
+                <SelectField label="Month" value={month} options={MONTH_OPTIONS} onSelect={setMonth} />
+                <SelectField label="Year" value={year} options={years} onSelect={setYear} />
+              </View>
+              {futureBirth ? (
+                <NativeText accessibilityLiveRegion="polite" style={[v2Type.caption, { color: v2Colors.danger }]}>
+                  That birth date is in the future. Check the month and year.
+                </NativeText>
+              ) : null}
+            </View>
+            {state.kids.length > 0 ? (
+              <Pressable accessibilityRole="button" onPress={() => { clearForm(); setShowForm(false); Keyboard.dismiss(); }}
+                style={{ minHeight: 44, justifyContent: "center" }}>
+                <NativeText style={[v2Type.caption, { color: v2Colors.coral, textAlign: "center" }]}>
+                  {editingId ? "Cancel changes" : "Cancel new child"}
+                </NativeText>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
-        <LegalLine />
-
-        <PrimaryButton
-          label="That's everyone"
-          onPress={() => router.push("/labs/onboarding-v2/about-you")}
-          disabled={!canContinue}
-        />
       </View>
     </OnboardingStage>
   );

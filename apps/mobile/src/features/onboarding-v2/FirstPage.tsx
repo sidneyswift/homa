@@ -1,5 +1,5 @@
 /**
- * Monday's page, sample-stamped. No archived first-making preview exists
+ * The first page, sample-stamped. No archived first-making preview exists
  * anywhere in this repo to stand in here (confirmed by research before
  * writing this file), and a photoreal fake risks being read as a real
  * generated page. This is a plainly illustrated mock instead: honest
@@ -13,7 +13,7 @@ import { View } from "react-native";
 import { NativeText } from "../../components/ui/semantic";
 import { v2Colors, v2Radii, v2Space, v2Type } from "./theme";
 
-export function MondayPage({ childName, subjectName }: { childName: string; subjectName: string }) {
+export function FirstPage({ subjectName }: { subjectName: string }) {
   return (
     <View
       style={{
@@ -35,7 +35,7 @@ export function MondayPage({ childName, subjectName }: { childName: string; subj
           paddingVertical: 4,
         }}
       >
-        <NativeText style={[v2Type.caption, { color: v2Colors.coral, fontSize: 12 }]}>Sample page, not the real one</NativeText>
+        <NativeText style={[v2Type.caption, { color: v2Colors.coral, fontSize: 12 }]}>Sample lesson</NativeText>
       </View>
 
       <View style={{ alignItems: "center", paddingVertical: v2Space.md }}>
@@ -56,8 +56,7 @@ export function MondayPage({ childName, subjectName }: { childName: string; subj
         </Svg>
       </View>
 
-      <NativeText style={[v2Type.hero, { color: v2Colors.ink }]}>{`Made for ${childName}. Nobody else.`}</NativeText>
-      <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>{subjectName}</NativeText>
+      <NativeText style={[v2Type.hero, { color: v2Colors.ink }]}>{subjectName}</NativeText>
     </View>
   );
 }

@@ -1,4 +1,6 @@
+import { requireOptionalNativeModule } from "expo";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 
 import { OnboardingV2Provider } from "../../../features/onboarding-v2/state";
 
@@ -15,6 +17,15 @@ import { OnboardingV2Provider } from "../../../features/onboarding-v2/state";
  * with one of them.
  */
 export default function OnboardingV2Layout() {
+  useEffect(() => {
+    if (!__DEV__) return;
+    // Keep review screens clear; the simulator's keyboard shortcut still opens the dev menu.
+    const preferences = requireOptionalNativeModule<{
+      setPreferencesAsync: (value: { showFloatingActionButton: boolean }) => Promise<void>;
+    }>("DevMenuPreferences");
+    void preferences?.setPreferencesAsync({ showFloatingActionButton: false }).catch(() => {});
+  }, []);
+
   return (
     <OnboardingV2Provider>
       <Stack screenOptions={{ headerShown: false, animation: "slide_from_right" }} />

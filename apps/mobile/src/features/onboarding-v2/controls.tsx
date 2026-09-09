@@ -44,6 +44,7 @@ export function PrimaryButton({
   disabled = false,
   busy = false,
   icon,
+  variant = "primary",
 }: {
   label: string;
   onPress: () => void;
@@ -51,6 +52,7 @@ export function PrimaryButton({
   busy?: boolean;
   /** Optional leading glyph, e.g. an SSO provider mark. */
   icon?: React.ReactNode;
+  variant?: "primary" | "secondary";
 }) {
   const press = usePressScale();
   const unavailable = disabled || busy;
@@ -71,7 +73,9 @@ export function PrimaryButton({
           minHeight: 52,
           borderRadius: v2Radii.control,
           borderCurve: "continuous",
-          backgroundColor: unavailable ? v2Colors.border : v2Colors.midnight,
+          backgroundColor: unavailable ? v2Colors.border : variant === "secondary" ? v2Colors.paper : v2Colors.midnight,
+          borderWidth: variant === "secondary" ? 1.5 : 0,
+          borderColor: v2Colors.border,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
@@ -80,7 +84,7 @@ export function PrimaryButton({
         }}
       >
         {icon}
-        <NativeText style={[v2Type.control, { color: unavailable ? v2Colors.inkMuted : v2Colors.onMidnight }]}>
+        <NativeText style={[v2Type.control, { color: unavailable ? v2Colors.inkMuted : variant === "secondary" ? v2Colors.ink : v2Colors.onMidnight }]}>
           {busy ? "…" : label}
         </NativeText>
       </Pressable>
@@ -88,10 +92,11 @@ export function PrimaryButton({
   );
 }
 
-export function TextLink({ label, onPress }: { label: string; onPress: () => void }) {
+export function TextLink({ label, onPress, disabled = false }: { label: string; onPress: () => void; disabled?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} hitSlop={8}>
-      <NativeText style={[v2Type.caption, { color: v2Colors.coral, textAlign: "center" }]}>{label}</NativeText>
+    <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
+      style={{ minHeight: 44, minWidth: 44, justifyContent: "center" }}>
+      <NativeText style={[v2Type.caption, { color: disabled ? v2Colors.inkMuted : v2Colors.coral, textAlign: "center" }]}>{label}</NativeText>
     </Pressable>
   );
 }
@@ -112,6 +117,7 @@ export function Chip({
     <Animated.View style={press.style}>
       <Pressable
         accessibilityRole={role}
+        accessibilityLabel={label}
         accessibilityState={{ selected, checked: selected }}
         onPress={() => {
           hapticTick();
@@ -142,23 +148,39 @@ export function ChipRow({ children }: { children: React.ReactNode }) {
   return <View style={{ flexDirection: "row", flexWrap: "wrap", gap: v2Space.sm }}>{children}</View>;
 }
 
-/** Vertical radio list, per the council review's native-ux finding: the
- * ladder needs 44pt rows at Dynamic Type XL, not a horizontal chip row. */
-export function RadioRow({
-  label,
-  selected,
-  onPress,
-}: {
+interface ChoiceRowProps {
   label: string;
   selected: boolean;
   onPress: () => void;
-}) {
+  accessory?: React.ReactNode;
+  disabled?: boolean;
+}
+
+export function RadioRow(props: ChoiceRowProps) {
+  return <ChoiceRow {...props} role="radio" />;
+}
+
+export function CheckboxRow(props: ChoiceRowProps) {
+  return <ChoiceRow {...props} role="checkbox" />;
+}
+
+/** Shared appearance, with the correct selection semantics for each form. */
+function ChoiceRow({
+  label,
+  selected,
+  onPress,
+  accessory,
+  role,
+  disabled = false,
+}: ChoiceRowProps & { role: "radio" | "checkbox" }) {
   const press = usePressScale();
   return (
     <Animated.View style={press.style}>
       <Pressable
-        accessibilityRole="radio"
-        accessibilityState={{ selected, checked: selected }}
+        accessibilityRole={role}
+        accessibilityLabel={label}
+        accessibilityState={{ selected, checked: selected, disabled }}
+        disabled={disabled}
         onPress={() => {
           hapticTick();
           onPress();
@@ -169,14 +191,20 @@ export function RadioRow({
           minHeight: 52,
           paddingHorizontal: v2Space.md,
           borderRadius: v2Radii.control,
+          paddingVertical: v2Space.sm,
           borderCurve: "continuous",
           borderWidth: 1.5,
           borderColor: selected ? v2Colors.coral : v2Colors.border,
           backgroundColor: selected ? v2Colors.midnight : v2Colors.paper,
-          justifyContent: "center",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: v2Space.sm,
         }}
       >
-        <NativeText style={[v2Type.chip, { color: selected ? v2Colors.onMidnight : v2Colors.ink }]}>{label}</NativeText>
+        <NativeText style={[v2Type.chip, { flex: 1, color: selected ? v2Colors.onMidnight : disabled ? v2Colors.inkMuted : v2Colors.ink }]}>{label}</NativeText>
+        {selected ? <NativeText accessible={false} style={[v2Type.chip, { color: v2Colors.onMidnight }]}>✓</NativeText> : null}
+        {accessory}
       </Pressable>
     </Animated.View>
   );
@@ -190,6 +218,8 @@ export function TextField({
   keyboardType,
   returnKeyType = "done",
   onSubmitEditing,
+  accessibilityLabel,
+  accessibilityHint,
 }: {
   value: string;
   onChangeText: (text: string) => void;
@@ -198,9 +228,13 @@ export function TextField({
   keyboardType?: "default" | "numeric";
   returnKeyType?: "done" | "next";
   onSubmitEditing?: () => void;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }) {
   return (
     <TextInput
+      accessibilityLabel={accessibilityLabel ?? placeholder}
+      accessibilityHint={accessibilityHint}
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
@@ -225,38 +259,46 @@ export function TextField({
   );
 }
 
-/** A minimal tag input: type, press return or the Add button, get a chip. */
-export function TagInput({
-  tags,
-  onChange,
-  placeholder,
-}: {
+/** A typed draft is included by both Add and the screen's Continue action. */
+export function includePendingTag(tags: string[], draft: string): string[] {
+  const value = draft.trim();
+  return value && !tags.includes(value) ? [...tags, value] : tags;
+}
+
+export function TagInput({ tags, onChange, draft, onDraftChange, placeholder, label }: {
   tags: string[];
   onChange: (tags: string[]) => void;
+  draft: string;
+  onDraftChange: (draft: string) => void;
   placeholder: string;
+  label: string;
 }) {
-  const [draft, setDraft] = useState("");
   const commit = () => {
-    const trimmed = draft.trim();
-    if (trimmed.length > 0 && !tags.includes(trimmed)) onChange([...tags, trimmed]);
-    setDraft("");
+    onChange(includePendingTag(tags, draft));
+    onDraftChange("");
   };
   return (
     <View style={{ gap: v2Space.sm }}>
+      <NativeText style={[v2Type.chip, { color: v2Colors.ink }]}>{label}</NativeText>
       {tags.length > 0 ? (
         <ChipRow>
           {tags.map((tag) => (
-            <Chip key={tag} label={`${tag} ×`} selected onPress={() => onChange(tags.filter((t) => t !== tag))} />
+            <Pressable key={tag} accessibilityRole="button" accessibilityLabel={`Remove ${tag}`}
+              onPress={() => onChange(tags.filter((value) => value !== tag))}
+              style={{ minHeight: 44, paddingHorizontal: v2Space.md, justifyContent: "center",
+                borderRadius: v2Radii.chip, backgroundColor: v2Colors.midnight }}>
+              <NativeText style={[v2Type.chip, { color: v2Colors.onMidnight }]}>{tag} ×</NativeText>
+            </Pressable>
           ))}
         </ChipRow>
       ) : null}
-      <TextField
-        value={draft}
-        onChangeText={setDraft}
-        placeholder={placeholder}
-        returnKeyType="done"
-        onSubmitEditing={commit}
-      />
+      <View style={{ flexDirection: "row", gap: v2Space.sm, alignItems: "center" }}>
+        <View style={{ flex: 1 }}>
+          <TextField value={draft} onChangeText={onDraftChange} placeholder={placeholder}
+            accessibilityLabel={label} onSubmitEditing={commit} />
+        </View>
+        <TextLink label="Add" onPress={commit} disabled={!draft.trim()} />
+      </View>
     </View>
   );
 }

@@ -19,7 +19,7 @@
  */
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, View, type ViewStyle } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View, type ViewStyle } from "react-native";
 import Animated, {
   Easing,
   FadeIn,
@@ -174,6 +174,7 @@ export function Mascot({
   characterState = "idle",
   entrance = false,
   gesture,
+  compact = false,
 }: {
   posture: Posture;
   characterState?: CharacterState;
@@ -181,6 +182,7 @@ export function Mascot({
   /** A temporary arm accessory for one specific beat, never a standing
    * pose (see WaveArm's own docstring). Undefined/falsy: no arm at all. */
   gesture?: MascotGesture | null;
+  compact?: boolean;
 }) {
   const reducedMotion = useReducedMotion();
   const postureScale = useSharedValue(posture === "big" ? 1 : DOCKED_SIZE / BIG_SIZE);
@@ -206,11 +208,14 @@ export function Mascot({
     transform: [{ scale: postureScale.value * entranceScale.value }],
   }));
 
+  const size = compact && posture === "docked" ? DOCKED_SIZE : BIG_SIZE;
   return (
-    <Animated.View style={style}>
-      <HomaCharacter state={characterState} size={BIG_SIZE} act={null} />
-      <WaveArm size={BIG_SIZE} play={gesture === "wave"} />
-    </Animated.View>
+    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <Animated.View style={[{ width: BIG_SIZE, height: BIG_SIZE }, style]}>
+        <HomaCharacter state={characterState} size={BIG_SIZE} act={null} />
+        <WaveArm size={BIG_SIZE} play={gesture === "wave"} />
+      </Animated.View>
+    </View>
   );
 }
 
@@ -260,7 +265,7 @@ export function Bubble({
           styles.tail,
           tail === "up"
             ? { top: -7, left: 28, borderColor: v2Colors.border, borderBottomWidth: 0, borderRightWidth: 0 }
-            : { left: -7, top: 18, borderColor: v2Colors.border, borderTopWidth: 0, borderLeftWidth: 0 },
+            : { left: -7, top: "50%", marginTop: -7, borderColor: v2Colors.border, borderTopWidth: 0, borderRightWidth: 0 },
         ]}
       />
     </Animated.View>
@@ -375,6 +380,11 @@ export interface OnboardingStageProps {
   children?: React.ReactNode;
   footer?: React.ReactNode;
   scroll?: boolean;
+  /** Compact form layout: reserve the mascot's visible size and keep the footer above the keyboard. */
+  compact?: boolean;
+  /** Name the current phase without presenting an estimated completion percentage. */
+  progressLabel?: string;
+  showLabControls?: boolean;
 }
 
 /** The composed screen shell. Every onboarding v2 route renders this once. */
@@ -382,7 +392,7 @@ export function OnboardingStage({
   posture,
   progress = 0,
   bubble,
-  bubbleTail = "up",
+  bubbleTail = posture === "docked" ? "left" : "up",
   bubbleKey,
   onBack,
   characterState = "idle",
@@ -392,6 +402,9 @@ export function OnboardingStage({
   children,
   footer,
   scroll = true,
+  compact = posture !== "big",
+  progressLabel,
+  showLabControls = false,
 }: OnboardingStageProps) {
   // The footer is a fixed sibling below the ScrollView, not inside it, so
   // tall content plus a tall footer (a multi-line paywall, say) can leave
@@ -402,7 +415,7 @@ export function OnboardingStage({
 
   const inner = (
     <>
-      <RestartLabRow posture={posture} />
+      {showLabControls ? <RestartLabRow posture={posture} /> : null}
       {posture === "docked" ? (
         <View style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.sm, gap: v2Space.sm }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -414,7 +427,9 @@ export function OnboardingStage({
               <View style={{ width: 40 }} />
             )}
             <View style={{ flex: 1, marginLeft: v2Space.md }}>
-              <DockedProgressBar progress={progress} />
+              {progressLabel ? (
+                <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted, textAlign: "right" }]}>{progressLabel}</NativeText>
+              ) : <DockedProgressBar progress={progress} />}
             </View>
           </View>
         </View>
@@ -440,11 +455,11 @@ export function OnboardingStage({
             paddingHorizontal: v2Space.lg,
             paddingTop: posture === "big" ? heroPaddingTop : v2Space.md,
             flexDirection: posture === "docked" ? "row" : "column",
-            alignItems: posture === "docked" ? "flex-start" : "center",
+            alignItems: posture === "docked" && !compact ? "flex-start" : "center",
             gap: v2Space.md,
           }}
         >
-          <Mascot posture={posture} characterState={characterState} entrance={entrance} gesture={gesture} />
+          <Mascot posture={posture} characterState={characterState} entrance={entrance} gesture={gesture} compact={compact} />
           <View style={{ flex: posture === "docked" ? 1 : undefined, alignItems: posture === "docked" ? "flex-start" : "center" }}>
             <Bubble tail={bubbleTail} bubbleKey={bubbleKey}>
               {bubble}
@@ -460,24 +475,27 @@ export function OnboardingStage({
   return (
     <SafeAreaView edges={posture === "big" ? ["bottom"] : ["top", "bottom"]} style={{ flex: 1, backgroundColor: v2Colors.page }}>
       {posture === "big" ? <Sky height={260} /> : null}
-      {scroll ? (
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: v2Space.xl + footerHeight }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {inner}
-        </ScrollView>
-      ) : (
-        <View style={{ flex: 1 }}>{inner}</View>
-      )}
-      {footer ? (
-        <View
-          onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
-          style={{ paddingHorizontal: v2Space.lg, paddingBottom: v2Space.md }}
-        >
-          {footer}
-        </View>
-      ) : null}
+      <KeyboardAvoidingView enabled={compact} behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        {scroll ? (
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: compact ? v2Space.lg : v2Space.xl + footerHeight }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+          >
+            {inner}
+          </ScrollView>
+        ) : (
+          <View style={{ flex: 1 }}>{inner}</View>
+        )}
+        {footer ? (
+          <View
+            onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
+            style={{ paddingHorizontal: v2Space.lg, paddingTop: v2Space.sm, paddingBottom: v2Space.md }}
+          >
+            {footer}
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

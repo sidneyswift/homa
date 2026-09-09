@@ -7,11 +7,11 @@ import { useOnboardingV2, type SchoolDay } from "../../../features/onboarding-v2
 import { v2Space } from "../../../features/onboarding-v2/theme";
 
 const DAYS: { value: SchoolDay; label: string }[] = [
-  { value: 1, label: "Mon" },
-  { value: 2, label: "Tue" },
-  { value: 3, label: "Wed" },
-  { value: 4, label: "Thu" },
-  { value: 5, label: "Fri" },
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
 ];
 
 export default function SchoolDaysScreen() {
@@ -29,9 +29,10 @@ export default function SchoolDaysScreen() {
       posture="docked"
       characterState="listening"
       onBack={() => router.back()}
-      progress={0.8}
+      progressLabel="Your week"
       bubbleKey="school-days"
-      bubble="Which days do you homeschool?"
+      bubble="Which days should I plan lessons for?"
+      footer={<PrimaryButton label="Create my plan" onPress={() => router.push("/labs/onboarding-v2/building")} disabled={state.schoolDays.length === 0} />}
     >
       <View style={{ gap: v2Space.lg }}>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: v2Space.sm }}>
@@ -44,11 +45,7 @@ export default function SchoolDaysScreen() {
             />
           ))}
         </View>
-        <PrimaryButton
-          label="Continue"
-          onPress={() => router.push("/labs/onboarding-v2/building")}
-          disabled={state.schoolDays.length === 0}
-        />
+
       </View>
     </OnboardingStage>
   );

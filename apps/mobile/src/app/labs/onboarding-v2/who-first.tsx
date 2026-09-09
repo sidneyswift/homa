@@ -2,47 +2,28 @@ import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { OnboardingStage } from "../../../features/onboarding-v2/Stage";
-import { Chip, PrimaryButton } from "../../../features/onboarding-v2/controls";
+import { RadioRow, PrimaryButton } from "../../../features/onboarding-v2/controls";
 import { useOnboardingV2, ageInMonthsFromParts } from "../../../features/onboarding-v2/state";
-import { NativeText } from "../../../components/ui/semantic";
-import { v2Colors, v2Space, v2Type } from "../../../features/onboarding-v2/theme";
+import { v2Space } from "../../../features/onboarding-v2/theme";
 
-/** Only reached when there is more than one kid. Entry order, no default
- * highlight, no "why": the council review's edge-cases finding warns a
- * ranked or reasoned choice reads as comparing siblings. */
-export default function WhoFirstScreen() {
+function ageLabel(months: number): string {
+  const years = Math.floor(months / 12);
+  return years === 0 ? `${months} month${months === 1 ? "" : "s"} old` : `${years} year${years === 1 ? "" : "s"} old`;
+}
+
+export default function Screen() {
   const router = useRouter();
   const { state, update } = useOnboardingV2();
-
   return (
-    <OnboardingStage
-      posture="docked"
-      characterState="listening"
-      onBack={() => router.back()}
-      progress={0.34}
-      bubbleKey="who-first"
-      bubble="Everyone gets a turn. Who's first?"
+    <OnboardingStage posture="docked" characterState="listening" onBack={() => router.back()}
+      progressLabel="Your children" bubbleKey="who-first" bubble="Which child should we plan for first?"
+      footer={<PrimaryButton label="Continue" onPress={() => router.push("/labs/onboarding-v2/loving")} disabled={state.firstChildId === null} />}
     >
-      <View style={{ gap: v2Space.lg }}>
-        <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>
-          {"I'll map one now, the others after."}
-        </NativeText>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: v2Space.sm }}>
-          {state.kids.map((kid) => (
-            <Chip
-              key={kid.id}
-              label={`${kid.name}, ${Math.floor(ageInMonthsFromParts(kid.birthMonth, kid.birthYear) / 12)}`}
-              selected={state.firstChildId === kid.id}
-              role="radio"
-              onPress={() => update("firstChildId", kid.id)}
-            />
-          ))}
-        </View>
-        <PrimaryButton
-          label="Continue"
-          onPress={() => router.push("/labs/onboarding-v2/loving")}
-          disabled={state.firstChildId === null}
-        />
+      <View style={{ gap: v2Space.sm }}>
+        {state.kids.map((kid) => (
+          <RadioRow key={kid.id}
+            label={`${kid.name}, ${ageLabel(ageInMonthsFromParts(kid.birthMonth, kid.birthYear))}`} selected={state.firstChildId === kid.id} onPress={() => update("firstChildId", kid.id)} />
+        ))}
       </View>
     </OnboardingStage>
   );

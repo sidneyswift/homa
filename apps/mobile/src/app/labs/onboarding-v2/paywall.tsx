@@ -5,50 +5,37 @@ import { Pressable, View } from "react-native";
 import { NativeText } from "../../../components/ui/semantic";
 import { OnboardingStage } from "../../../features/onboarding-v2/Stage";
 import { PrimaryButton, TextLink } from "../../../features/onboarding-v2/controls";
-import { useOnboardingV2 } from "../../../features/onboarding-v2/state";
 import { v2Colors, v2Radii, v2Space, v2Type } from "../../../features/onboarding-v2/theme";
 
 type Plan = "yearly" | "monthly";
 
-const PLANS: Record<Plan, { label: string; price: string; sub: string; fineprint: string }> = {
+const PLANS: Record<Plan, { label: string; price: string; sub: string; trialDays: number; priceLabel: string }> = {
   yearly: {
     label: "Yearly",
     price: "$99.99/yr",
     sub: "About $8.33 a month.",
-    fineprint: "14 days free, then $99.99 a year. Cancel anytime.",
+    trialDays: 14,
+    priceLabel: "$99.99 a year",
   },
   monthly: {
     label: "Monthly",
     price: "$9.99/mo",
     sub: "Billed every month.",
-    fineprint: "7 days free, then $9.99 a month. Cancel anytime.",
+    trialDays: 7,
+    priceLabel: "$9.99 a month",
   },
 };
 
-const FEATURES = ["Every day of the week, not just Monday", "All sixteen subjects in the report, not four", "A new week planned automatically, every week"];
+const COMPARE_ROWS: { label: string; free: string; membership: string }[] = [
+  { label: "Days planned", free: "1 day", membership: "7 days" },
+  { label: "Subjects in report", free: "Up to 4", membership: "Up to 16" },
+];
 
-/**
- * Real ruled pricing (2026-09-01 iOS pivot): $9.99/mo or $99.99/yr. No
- * testimonials or "Most popular" badge: neither is supportable pre-launch
- * (docs/homa-planning, paywall claims ruling). Charge terms sit right next
- * to the button per ROSCA and California's automatic-renewal law.
- *
- * Both plans are real, tappable choices (gauntlet-loop finding: the prior
- * version showed two static cards with one CTA and no way to tell which
- * plan it charged). The CTA's own fine print now names the selected
- * plan's real terms, never a generic line that could apply to either.
- *
- * posture="plain", no mascot: the real Keiki paywall (read directly,
- * 2026-09-07) has no character on it anywhere, one of exactly four
- * screens in the whole reference that drop it. Plans sit side by side,
- * not stacked, the other half of why the old version needed a scroll to
- * see everything a single Keiki paywall frame shows at once.
- */
+/** Existing lab prices and trial lengths. Account linking and purchases remain v2.1 work. */
 export default function PaywallScreen() {
   const router = useRouter();
-  const { firstChild } = useOnboardingV2();
-  const name = firstChild?.name ?? "your kid";
   const [plan, setPlan] = useState<Plan>("yearly");
+  const info = PLANS[plan];
 
   function accept() {
     router.push({ pathname: "/labs/onboarding-v2/done", params: { outcome: "trial" } });
@@ -62,34 +49,71 @@ export default function PaywallScreen() {
     <OnboardingStage
       posture="plain"
       bubbleKey="paywall"
-      bubble={`Keep building with ${name}`}
+      onBack={() => router.back()}
+      bubble="Choose your plan"
       footer={
-        <View style={{ gap: v2Space.sm }}>
-          <PrimaryButton label="Start free trial" onPress={accept} />
+        <View style={{ gap: v2Space.xs }}>
           <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted, textAlign: "center" }]}>
-            {PLANS[plan].fineprint}
+            {`${info.trialDays} days free, then ${info.priceLabel}. Renews automatically. Cancel before the trial ends to avoid a charge.`}
           </NativeText>
-          <TextLink label="Not now" onPress={decline} />
+          <PrimaryButton label={`Start ${info.trialDays}-day free trial`} onPress={accept} />
+          <TextLink label="Continue free" onPress={decline} />
         </View>
       }
     >
-      <View style={{ gap: v2Space.sm, paddingTop: v2Space.md }}>
-        {FEATURES.map((feature) => (
-          <View key={feature} style={{ flexDirection: "row", gap: v2Space.sm, alignItems: "flex-start" }}>
-            <NativeText style={[v2Type.chip, { color: v2Colors.coral }]}>✓</NativeText>
-            <NativeText style={[v2Type.chip, { color: v2Colors.ink, flex: 1 }]}>{feature}</NativeText>
+      <View style={{ gap: v2Space.md, paddingTop: v2Space.md }}>
+        <View
+          style={{
+            borderRadius: v2Radii.control,
+            borderCurve: "continuous",
+            borderWidth: 1,
+            borderColor: v2Colors.border,
+            overflow: "hidden",
+            backgroundColor: v2Colors.paper,
+          }}
+        >
+          <View style={{ flexDirection: "row", paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: v2Colors.border }}>
+            <View style={{ flex: 1.4 }} />
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>Free</NativeText>
+            </View>
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <NativeText style={[v2Type.caption, { color: v2Colors.coral }]}>Membership</NativeText>
+            </View>
           </View>
-        ))}
+          {COMPARE_ROWS.map((row, index) => (
+            <View
+              key={row.label}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 6,
+                borderBottomWidth: index < COMPARE_ROWS.length - 1 ? 1 : 0,
+                borderBottomColor: v2Colors.border,
+              }}
+            >
+              <View style={{ flex: 1.4, paddingLeft: v2Space.sm }}>
+                <NativeText style={[v2Type.caption, { color: v2Colors.ink }]}>{row.label}</NativeText>
+              </View>
+              <View style={{ flex: 1, alignItems: "center" }}>
+                <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted }]}>{row.free}</NativeText>
+              </View>
+              <View style={{ flex: 1, alignItems: "center" }}>
+                <NativeText style={[v2Type.chip, { color: v2Colors.ink }]}>{row.membership}</NativeText>
+              </View>
+            </View>
+          ))}
+        </View>
 
-        <View style={{ flexDirection: "row", gap: v2Space.sm, marginTop: v2Space.sm }}>
+        <View style={{ flexDirection: "row", gap: v2Space.sm }}>
           {(Object.keys(PLANS) as Plan[]).map((key) => {
             const selected = plan === key;
-            const info = PLANS[key];
+            const planInfo = PLANS[key];
             return (
               <Pressable
                 key={key}
                 accessibilityRole="radio"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, checked: selected }}
                 onPress={() => setPlan(key)}
                 style={{
                   flex: 1,
@@ -103,13 +127,16 @@ export default function PaywallScreen() {
                 }}
               >
                 <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
-                  {info.label}
+                  {`${planInfo.label}${selected ? " ✓" : ""}`}
                 </NativeText>
                 <NativeText style={[v2Type.control, { color: selected ? v2Colors.onMidnight : v2Colors.ink }]}>
-                  {info.price}
+                  {planInfo.price}
                 </NativeText>
                 <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
-                  {info.sub}
+                  {planInfo.sub}
+                </NativeText>
+                <NativeText style={[v2Type.caption, { color: selected ? v2Colors.onMidnight : v2Colors.inkMuted }]}>
+                  {`${planInfo.trialDays} days free`}
                 </NativeText>
               </Pressable>
             );

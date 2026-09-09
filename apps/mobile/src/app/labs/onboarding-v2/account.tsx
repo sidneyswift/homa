@@ -3,6 +3,7 @@ import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 import { NativeText } from "../../../components/ui/semantic";
+import { LegalLine } from "../../../features/auth/legal-line";
 import { OnboardingStage } from "../../../features/onboarding-v2/Stage";
 import { PrimaryButton } from "../../../features/onboarding-v2/controls";
 import { useOnboardingV2 } from "../../../features/onboarding-v2/state";
@@ -43,13 +44,13 @@ function EmailGlyph() {
     <Svg width={18} height={18} viewBox="0 0 24 24">
       <Path
         fill="none"
-        stroke={v2Colors.onMidnight}
+        stroke={v2Colors.ink}
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3 6h18v12H3z"
       />
-      <Path fill="none" stroke={v2Colors.onMidnight} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" d="m3 7 9 6 9-6" />
+      <Path fill="none" stroke={v2Colors.ink} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" d="m3 7 9 6 9-6" />
     </Svg>
   );
 }
@@ -67,7 +68,7 @@ function EmailGlyph() {
 export default function AccountScreen() {
   const router = useRouter();
   const { firstChild } = useOnboardingV2();
-  const name = firstChild?.name ?? "your kid";
+  const name = firstChild?.name ?? "your child";
 
   function claim() {
     router.push("/labs/onboarding-v2/paywall");
@@ -80,17 +81,18 @@ export default function AccountScreen() {
       bubbleKey="account"
       bubble={
         <View style={{ gap: v2Space.xs }}>
-          <NativeText style={[v2Type.hero, { color: v2Colors.ink, textAlign: "center" }]}>Last step</NativeText>
+          <NativeText style={[v2Type.hero, { color: v2Colors.ink, textAlign: "center" }]}>Create your account</NativeText>
           <NativeText style={[v2Type.caption, { color: v2Colors.inkMuted, textAlign: "center" }]}>
-            {`Save ${name}'s week so it's here tomorrow.`}
+            {`Keep ${name}'s report and lesson plan together.`}
           </NativeText>
         </View>
       }
     >
       <View style={{ gap: v2Space.sm, paddingTop: v2Space.lg }}>
         <PrimaryButton label="Continue with Apple" icon={<AppleGlyph />} onPress={claim} />
-        <PrimaryButton label="Continue with Google" icon={<GoogleGlyph />} onPress={claim} />
-        <PrimaryButton label="Continue with email" icon={<EmailGlyph />} onPress={claim} />
+        <PrimaryButton variant="secondary" label="Continue with Google" icon={<GoogleGlyph />} onPress={claim} />
+        <PrimaryButton variant="secondary" label="Continue with email" icon={<EmailGlyph />} onPress={claim} />
+        <LegalLine />
       </View>
     </OnboardingStage>
   );

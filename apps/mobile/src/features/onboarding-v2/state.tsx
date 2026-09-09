@@ -17,6 +17,8 @@ import {
 } from "react";
 import type { MapAnswer } from "@homa/core";
 
+import { withChildInterests } from "./interest-options";
+
 export type Relationship = "Mom" | "Dad" | "Grandparent" | "Someone else";
 export type HomeschoolStatus = "already" | "starting" | "exploring";
 export type HardestNow =
@@ -35,6 +37,7 @@ export interface V2Kid {
   name: string;
   birthMonth: number; // 1-12
   birthYear: number;
+  interests?: string[];
 }
 
 /** One answered ladder item, in the shape @homa/core's scoreMap expects. */
@@ -47,15 +50,17 @@ export interface V2State {
   // "You and your kids"
   kids: V2Kid[];
   parentName: string;
+  parentLastName: string;
+  /** Defaults to the parent's last name; the UI adds "The" and "family". */
+  familyName: string;
   relationship: Relationship | null;
   usState: string | null; // two-letter, or null for "outside the US"
   homeschoolStatus: HomeschoolStatus | null;
-  hardestNow: HardestNow | null;
+  hardestNow: HardestNow[];
   // Curriculum and the first child
   curriculumTags: string[];
   curriculumStatus: "have-it" | "still-looking" | "building-own" | null;
   firstChildId: string | null;
-  loving: string[];
   startWithSubjectId: string | null;
   lessonMinutes: LessonMinutes | null;
   // Questionnaire
@@ -71,14 +76,15 @@ export interface V2State {
 const INITIAL_STATE: V2State = {
   kids: [],
   parentName: "",
+  parentLastName: "",
+  familyName: "",
   relationship: null,
   usState: null,
   homeschoolStatus: null,
-  hardestNow: null,
+  hardestNow: [],
   curriculumTags: [],
   curriculumStatus: null,
   firstChildId: null,
-  loving: [],
   startWithSubjectId: null,
   lessonMinutes: null,
   answers: {},
@@ -93,6 +99,7 @@ interface V2ContextValue {
   update: <K extends keyof V2State>(key: K, value: V2State[K]) => void;
   addKid: (kid: Omit<V2Kid, "id">) => string;
   setAnswer: (itemId: string, answer: MapAnswer) => void;
+  setChildInterests: (childId: string, interests: string[]) => void;
   firstChild: V2Kid | null;
   reset: () => void;
 }
@@ -131,14 +138,18 @@ export function OnboardingV2Provider({ children }: { children: ReactNode }) {
 
   const reset = useCallback(() => setState(INITIAL_STATE), []);
 
+  const setChildInterests = useCallback((childId: string, interests: string[]) => {
+    setState((prev) => ({ ...prev, kids: withChildInterests(prev.kids, childId, interests) }));
+  }, []);
+
   const firstChild = useMemo(
     () => state.kids.find((kid) => kid.id === state.firstChildId) ?? state.kids[0] ?? null,
     [state.kids, state.firstChildId],
   );
 
   const value = useMemo(
-    () => ({ state, update, addKid, setAnswer, firstChild, reset }),
-    [state, update, addKid, setAnswer, firstChild, reset],
+    () => ({ state, update, addKid, setAnswer, setChildInterests, firstChild, reset }),
+    [state, update, addKid, setAnswer, setChildInterests, firstChild, reset],
   );
 
   return <V2Context.Provider value={value}>{children}</V2Context.Provider>;
