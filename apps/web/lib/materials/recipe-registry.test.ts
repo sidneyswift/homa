@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -18,23 +18,37 @@ import { RECIPE_REGISTRY, RECIPE_SLUGS } from "./recipes.generated";
  */
 
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
-const RECIPES_DIR = "apps/web/agent/skills/materials-studio/references/recipes";
+const SKILLS_ROOT = "apps/web/agent/skills";
 const BUILDER = "scripts/build-recipe-registry.mts";
-const recipesDir = path.join(repoRoot, RECIPES_DIR);
 const skillMd = readFileSync(
   path.join(repoRoot, "apps/web/agent/skills/materials-studio/SKILL.md"),
   "utf8",
 );
 
-describe("recipe registry", () => {
-  it("lists exactly the recipe files on disk, sorted", () => {
+/** Independent re-derivation of the builder's own discovery, deliberately
+ * not imported from it: this test's whole job is catching drift between
+ * what the builder produced and what is actually on disk right now. */
+function recipeSlugsOnDisk(): string[] {
+  const skillsRoot = path.join(repoRoot, SKILLS_ROOT);
+  const packages = readdirSync(skillsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+  const slugs: string[] = [];
+  for (const packageName of packages) {
+    const dir = path.join(skillsRoot, packageName, "references", "recipes");
+    if (!existsSync(dir)) continue;
     // Same rule as the builder: plain kebab-case slugs only; `.variants.md`
     // siblings are a recipe's worked material, not a selectable format.
-    const onDisk = readdirSync(recipesDir)
-      .filter((name) => /^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name))
-      .map((name) => name.slice(0, -3))
-      .sort();
-    assert.deepEqual([...RECIPE_SLUGS], onDisk);
+    for (const name of readdirSync(dir)) {
+      if (/^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name)) slugs.push(name.slice(0, -3));
+    }
+  }
+  return slugs.sort();
+}
+
+describe("recipe registry", () => {
+  it("lists exactly the recipe files on disk across every skill, sorted", () => {
+    assert.deepEqual([...RECIPE_SLUGS], recipeSlugsOnDisk());
   });
 
   it("has a registry entry for every slug and no extras", () => {
