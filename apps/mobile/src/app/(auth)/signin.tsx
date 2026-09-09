@@ -158,14 +158,10 @@ export default function SignInScreen() {
             <NativeText role="display" tone="strong" style={{ fontSize: 32, lineHeight: 40 }}>
               {"Hi, I'm Homa."}
             </NativeText>
-            {/* Founder direction 2026-09-03, iterated live against the
-                simulator render on hello.tsx before the merge: names the
-                full range (a worksheet alone undersold it). The national-
-                benchmark and state-hours claims are real, existing
-                capabilities (progress reports, teaching-hours logging),
-                not new ones invented for this line. */}
+            {/* Founder direction 2026-09-09: the short promise belongs
+                at sign-in; the benefits belong in the new-parent intro. */}
             <NativeText role="body" tone="strong">
-              {"I make custom printable lessons for your kids, track their progress across national benchmarks, and help save and submit hours to your state."}
+              {"Homeschool, handled."}
             </NativeText>
           </View>
 

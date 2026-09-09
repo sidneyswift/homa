@@ -1,6 +1,6 @@
 /**
- * Regenerates apps/web/lib/materials/recipes.generated.ts from the recipe
- * files under apps/web/agent/skills/materials-studio/references/recipes.
+ * Regenerates apps/web/lib/materials/recipes.generated.ts from every recipe
+ * file under apps/web/agent/skills/<any package>/references/recipes/.
  *
  * Why a generated mirror instead of reading the recipes at runtime: the
  * deployed eve function is a nitro bundle that carries no source tree
@@ -10,6 +10,15 @@
  * closed enum for create_printable's `recipe` input and the checklists
  * become the reviewer's structural spec, both resolved in code from the
  * slug the model passes. Nothing here is model-supplied.
+ *
+ * Recipes are a fleet-wide concept create_printable consumes, not one
+ * skill's private property (2026-09-07, generalized off materials-studio
+ * alone when lesson-studio needed its own recipe directory): any skill
+ * package may carry a references/recipes/ directory, discovered here by
+ * scanning every skill package under apps/web/agent/skills/ for one,
+ * never a hand-maintained list of packages. A slug must stay unique across
+ * every discovered directory, since create_printable's `recipe` enum is
+ * one flat namespace regardless of which skill's folder a recipe lives in.
  *
  * The recipe markdown stays the only place anyone edits a checklist or
  * an anchor mention (filesystem-first fleet skills, founder ruling
@@ -26,7 +35,7 @@
  *   node --experimental-strip-types scripts/build-recipe-registry.mts
  *   node --experimental-strip-types scripts/build-recipe-registry.mts --check
  */
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -38,51 +47,81 @@ import {
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
-export const RECIPES_DIR =
-  "apps/web/agent/skills/materials-studio/references/recipes";
+export const SKILLS_ROOT = "apps/web/agent/skills";
 export const OUT = "apps/web/lib/materials/recipes.generated.ts";
 
 export interface RecipeSourceEntry {
   slug: string;
+  /** The skill package whose references/recipes/ directory this recipe
+   * file was discovered in, for duplicate-slug and drift error messages. */
+  packageName: string;
   anchorId: string | null;
   checklist: RecipeChecklistItem[];
 }
 
-/** Every recipe on disk, sorted by slug, with its parsed declarations.
- * Throws on the first recipe with a grammar problem, naming every line. */
-export function readRecipeSources(root: string = repoRoot): RecipeSourceEntry[] {
-  const dir = path.join(root, RECIPES_DIR);
-  // A recipe is `<slug>.md` with a plain kebab-case slug. Sibling files such
-  // as `<slug>.variants.md` hold a recipe's long worked material and are
-  // loaded by the recipe itself; they are not formats Homa can pick, so they
-  // never become RECIPE_SLUGS (which feeds create_printable's `recipe` enum).
-  const files = readdirSync(dir)
-    .filter((name) => /^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name))
+/** Every skill package directory that currently ships a
+ * references/recipes/ subdirectory, sorted by package name so discovery
+ * order never depends on the filesystem's own directory-listing order. */
+function discoverRecipeDirs(root: string): { packageName: string; relDir: string }[] {
+  const skillsRoot = path.join(root, SKILLS_ROOT);
+  const packages = readdirSync(skillsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
     .sort();
-  if (files.length === 0) {
-    throw new Error(`No recipe .md files found in ${RECIPES_DIR}`);
+  const dirs: { packageName: string; relDir: string }[] = [];
+  for (const packageName of packages) {
+    const relDir = path.join(SKILLS_ROOT, packageName, "references", "recipes");
+    if (existsSync(path.join(root, relDir))) dirs.push({ packageName, relDir });
+  }
+  return dirs;
+}
+
+/** Every recipe on disk across every skill package, sorted by slug, with
+ * its parsed declarations. Throws on the first grammar problem or the
+ * first cross-package slug collision, naming every line. */
+export function readRecipeSources(root: string = repoRoot): RecipeSourceEntry[] {
+  const recipeDirs = discoverRecipeDirs(root);
+  if (recipeDirs.length === 0) {
+    throw new Error(`No recipe directories found under ${SKILLS_ROOT}/*/references/recipes`);
   }
   const problems: string[] = [];
-  const entries: RecipeSourceEntry[] = [];
-  for (const file of files) {
-    const slug = file.slice(0, -3);
-    const markdown = readFileSync(path.join(dir, file), "utf8");
-    const parsed = parseRecipeChecklist(markdown);
-    for (const problem of parsed.problems) {
-      problems.push(`${RECIPES_DIR}/${file}: ${problem}`);
+  const bySlug = new Map<string, RecipeSourceEntry>();
+  for (const { packageName, relDir } of recipeDirs) {
+    const dir = path.join(root, relDir);
+    // A recipe is `<slug>.md` with a plain kebab-case slug. Sibling files
+    // such as `<slug>.variants.md` hold a recipe's long worked material and
+    // are loaded by the recipe itself; they are not formats Homa can pick,
+    // so they never become RECIPE_SLUGS (which feeds create_printable's
+    // `recipe` enum).
+    const files = readdirSync(dir)
+      .filter((name) => /^[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name))
+      .sort();
+    for (const file of files) {
+      const slug = file.slice(0, -3);
+      const markdown = readFileSync(path.join(dir, file), "utf8");
+      const parsed = parseRecipeChecklist(markdown);
+      for (const problem of parsed.problems) {
+        problems.push(`${relDir}/${file}: ${problem}`);
+      }
+      const existing = bySlug.get(slug);
+      if (existing) {
+        problems.push(
+          `Recipe slug "${slug}" is defined in both ${existing.packageName} and ${packageName}; recipe slugs must be unique across the fleet.`,
+        );
+        continue;
+      }
+      bySlug.set(slug, {
+        slug,
+        packageName,
+        anchorId: parseRecipeAnchorId(markdown),
+        checklist: parsed.items,
+      });
     }
-    entries.push({
-      slug,
-      anchorId: parseRecipeAnchorId(markdown),
-      checklist: parsed.items,
-    });
   }
   if (problems.length > 0) {
-    throw new Error(
-      `Recipe checklist grammar problems:\n${problems.map((line) => `  ${line}`).join("\n")}`,
-    );
+    throw new Error(`Recipe registry problems:\n${problems.map((line) => `  ${line}`).join("\n")}`);
   }
-  return entries;
+  return [...bySlug.values()].sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
 /**
@@ -92,8 +131,8 @@ export function readRecipeSources(root: string = repoRoot): RecipeSourceEntry[] 
 export function renderRegistryModule(entries: readonly RecipeSourceEntry[]): string {
   const lines: string[] = [
     "// GENERATED by scripts/build-recipe-registry.mts. Do not edit by hand.",
-    "// Mirrors the recipe files under",
-    `//   ${RECIPES_DIR}`,
+    "// Mirrors every recipe file found under",
+    `//   ${SKILLS_ROOT}/*/references/recipes/`,
     "// by slug: the anchor each one tells Homa to pass to generate_image, and",
     "// the reviewer checklist each declares in its homa-checklist block.",
     "// Inlined as source because the deployed eve function bundle carries no",
@@ -144,7 +183,8 @@ function main(): void {
   const generated = renderRegistryModule(entries);
   const outPath = path.join(repoRoot, OUT);
   const withChecklists = entries.filter((entry) => entry.checklist.length > 0).length;
-  const summary = `${entries.length} recipe(s), ${withChecklists} with a checklist`;
+  const packageCount = new Set(entries.map((entry) => entry.packageName)).size;
+  const summary = `${entries.length} recipe(s) across ${packageCount} skill(s), ${withChecklists} with a checklist`;
 
   if (process.argv.includes("--check")) {
     let onDisk = "";
@@ -155,18 +195,18 @@ function main(): void {
     }
     if (onDisk !== generated) {
       console.error(
-        `${OUT} is stale: it no longer matches ${RECIPES_DIR}.\n` +
+        `${OUT} is stale: it no longer matches ${SKILLS_ROOT}/*/references/recipes.\n` +
           "create_printable would advertise outdated recipe slugs or review against an outdated checklist.\n" +
           "Run: pnpm build:recipe-registry",
       );
       process.exit(1);
     }
-    console.log(`${OUT} matches ${RECIPES_DIR} (${summary}).`);
+    console.log(`${OUT} matches ${SKILLS_ROOT}/*/references/recipes (${summary}).`);
     return;
   }
 
   writeFileSync(outPath, generated, "utf8");
-  console.log(`Wrote ${OUT} from ${RECIPES_DIR} (${summary}).`);
+  console.log(`Wrote ${OUT} from ${SKILLS_ROOT}/*/references/recipes (${summary}).`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

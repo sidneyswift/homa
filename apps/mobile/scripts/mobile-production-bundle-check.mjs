@@ -16,7 +16,7 @@ const FORBIDDEN_SECRET_NAMES = [
   "VERCEL_OIDC_TOKEN",
   "VERCEL_TOKEN",
 ];
-const FORBIDDEN_PRODUCT_SOURCE_SEGMENTS = new Set(["fixture", "fixtures", "lab", "labs", "prototype", "prototypes"]);
+export const FORBIDDEN_PRODUCT_SOURCE_SEGMENTS = new Set(["fixture", "fixtures", "lab", "labs", "prototype", "prototypes"]);
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
