@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -6,6 +7,15 @@ import {
   containsAndroidPublicReleaseCommand,
   readPlatformDisposition,
 } from "./android-release-guard.mjs";
+
+test("the audited CI workflow loses its exception when its commands change", () => {
+  const workflow = readFileSync(new URL("../../../.github/workflows/ci.yml", import.meta.url), "utf8");
+  assert.equal(containsAndroidPublicReleaseCommand(workflow), false);
+  assert.equal(containsAndroidPublicReleaseCommand(`${workflow}\n# Requires a fresh audit.\n`), true);
+  const releaseCommand = workflow.replace('"$chrome_path" --version', "eas submit --platform android --latest");
+  assert.notEqual(releaseCommand, workflow);
+  assert.equal(containsAndroidPublicReleaseCommand(releaseCommand), true);
+});
 
 test("the founder-owned disposition permits only iOS public builds", () => {
   const disposition = readPlatformDisposition();
