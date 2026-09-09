@@ -155,6 +155,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 
 ### F04. Reusable categories under stable subjects
 
+**September 7 implementation update:** category creation/reuse/rename, unused choices, mobile-web filtering/subtotals and complete scoped chat category reads are implemented and independently reviewed. The additive production schema is applied, with 348 existing Hours rows preserved and no orphan labels. Code deployment and hosted acceptance remain pending. [Evidence and limits](../journeys/evidence/2026-09-07-hours-categories/receipt.json). The active-chain paragraph below describes the audit baseline.
+
 **Tracking:** [#1035](https://github.com/sidneyswift/homa/issues/1035).
 
 **Expected, P23-57:** choose reusable labels such as Portuguese/Spanish or independent/curriculum reading, then filter and subtotal them without losing the parent subject.
@@ -166,6 +168,8 @@ An issue or merged PR is not a production fix receipt. Each implementation must 
 **Acceptance:** repeated choice and rename, two same-duration languages, unlabeled entries, category totals plus unlabeled equal parent total, no cross-family access, empty/long/duplicate labels and CSV round-trip. Time remains bookkeeping, not mastery. Reuse #1035; #1059 records partial custom-label support.
 
 ### F05. Use curriculum-familiar subject names
+
+**September 7 implementation update:** Language arts, History and social studies, and Foreign language now share the existing Hours display helper across selectors, entry parent/category labels, totals, chat receipts and CSV. Canonical ids and progress scoring are unchanged. The complete browser suite verifies the new CSV values; deployment is pending with F04.
 
 **Tracking:** [#1035](https://github.com/sidneyswift/homa/issues/1035).
 

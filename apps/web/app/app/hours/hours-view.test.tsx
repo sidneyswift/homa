@@ -165,7 +165,7 @@ describe("HoursView", () => {
       entry({ id: "a", subject: "reading", minutes: 30, note: "About 30 min of phonics" }),
     ]);
     assert.match(html, />Today<\/h2>/);
-    assert.match(html, />Reading<\/span>/);
+    assert.match(html, />Language arts<\/span>/);
     assert.match(html, />30m<\/span>/);
     assert.match(html, /About 30 min of phonics/);
     assert.match(html, /quiet-action quiet-action--quiet/);
@@ -199,9 +199,9 @@ describe("HoursView", () => {
     assert.match(multiHtml, /text-xs font-semibold text-\[color:color-mix\(in_srgb,var\(--homa-ink\)_52%,var\(--homa-canvas\)\)\]">Whole family</);
   });
 
-  it("only shows the subject filter chips when more than one subject is present", () => {
+  it("keeps subject filtering available for categories even with one subject", () => {
     const oneSubject = renderView([entry({ subject: "math" })]);
-    assert.doesNotMatch(oneSubject, /Filter by subject/);
+    assert.match(oneSubject, /Filter by subject/);
 
     const twoSubjects = renderView([
       entry({ id: "a", subject: "math" }),
@@ -209,7 +209,7 @@ describe("HoursView", () => {
     ]);
     assert.match(twoSubjects, /aria-label="Filter by subject"/);
     assert.match(twoSubjects, /aria-pressed="true"[^>]*>\s*All\s*<\/button>/);
-    assert.match(twoSubjects, />Reading<\/button>/);
+    assert.match(twoSubjects, />Language arts<\/button>/);
     assert.match(twoSubjects, />Math<\/button>/);
   });
 });

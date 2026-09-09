@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 
 import evals from "./behavior.eval";
 import routing from "./routing.eval";
+import { HOURS_ROUTING_CASES } from "./routing-fixtures";
 import { exactFindings, semanticFindings } from "./behavior-harness";
 import { HOURS_READ_CASES, FAMILY } from "./fixtures";
 import { fullHoursEvalMenu } from "./full-menu";
@@ -23,7 +25,7 @@ for (const testCase of HOURS_READ_CASES) {
 test("installed Eve accepts all eight eval definitions", () => {
   assert.equal(evals.length, 8);
   for (const item of [...evals, ...routing]) assert.equal(item._tag, "EveEval");
-  assert.equal(routing.length, 5);
+  assert.equal(routing.length, HOURS_ROUTING_CASES.length);
 });
 test("semantic evidence is an exact response quote", () => {
   assert.deepEqual(semanticFindings("155 recorded minutes.", { pass: true, findings: [], evidenceQuote: "155 recorded minutes.", reason: "Exact total." }), []);
@@ -36,9 +38,11 @@ test("exact checker catches wrong shared argument and state-record routing", () 
 
 test("full neutral web menu includes all compiled, framework, and five dynamic tool schemas", async () => {
   const menu = await fullHoursEvalMenu(process.cwd());
-  assert.equal(menu.length, 93);
+  const compiled = JSON.parse(await readFile(".eve/compile/compiled-agent-manifest.json", "utf8")) as { tools: Array<{ name: string }> };
+  assert.equal(new Set(menu.map(item => item.name)).size, menu.length);
+  for (const entry of compiled.tools) assert.ok(menu.some(item => item.name === entry.name));
   assert.ok(menu.every(item => item.inputSchema && item.inputSchema.type));
-  for (const name of ["find_hours", "load_skill", "log_hours", "create_printable", "generate_image", "ask_user_questions", "start_checklist"]) assert.ok(menu.some(t => t.name === name));
+  for (const name of ["find_hours", "manage_hours_categories", "load_skill", "log_hours", "create_printable", "generate_image", "ask_user_questions", "start_checklist"]) assert.ok(menu.some(t => t.name === name));
   assert.equal(menu.some(t => t.name === "start_first_making"), false);
 });
 

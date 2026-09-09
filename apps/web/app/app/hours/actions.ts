@@ -1,5 +1,8 @@
 "use server";
 
+import { getAppShellData } from "../../../lib/app-data";
+import { readHoursCategories, saveHoursCategory } from "../../../lib/hours-categories-server";
+import type { SaveHoursCategory } from "../../../lib/hours-categories";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -77,4 +80,28 @@ export async function deleteHoursEntryAction(entryId: string, revision: string):
   } catch {
     return { error: "The deletion couldn't be confirmed. Check your connection. Close this editor and reopen the time record." };
   }
+}
+
+export async function getHoursCategoriesAction() {
+  try {
+    const data = await getAppShellData();
+    if (!data) return { categories: null, error: "Sign in to load your categories." };
+    const db = await createSupabaseServerClient();
+    return { categories: await readHoursCategories({ mode: "caller", db, familyId: data.family.id }), error: null };
+  } catch { return { categories: null, error: "Categories couldn't load. Try again." }; }
+}
+
+export async function saveHoursCategoryAction(input: SaveHoursCategory) {
+  try {
+    const data = await getAppShellData();
+    if (!data) return { error: "Sign in to save your category." };
+    const db = await createSupabaseServerClient();
+    const result = await saveHoursCategory({ mode: "caller", db, familyId: data.family.id }, input);
+    if (result.status !== "saved") return { error: result.status === "duplicate"
+      ? "That category already exists under this subject. Choose a different name."
+      : result.status === "conflict" ? "This category changed. Reload it before renaming."
+      : "The category couldn't save. Check its name and try again." };
+    revalidatePath("/app/planner"); revalidatePath("/app/hours");
+    return { error: null, category: result.category };
+  } catch { return { error: "The change couldn't be confirmed. Reload categories to check before trying again." }; }
 }

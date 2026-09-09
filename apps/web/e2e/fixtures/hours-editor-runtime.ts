@@ -1,3 +1,4 @@
+import type { HoursCategory, SaveHoursCategory } from "../../lib/hours-categories";
 import type { HoursEditContext } from "../../lib/hours-edit";
 import type { HoursEntry } from "../../lib/hours-view";
 import type { PlannerLearningActivity } from "../../lib/planner-learning-activities";
@@ -106,3 +107,16 @@ export const deleteFamilyEventOccurrenceAction = deletePlannerLearningActivityAc
 export const deleteFamilyEventAction = deletePlannerLearningActivityAction;
 export const moveFamilyEventOccurrenceAction = deletePlannerLearningActivityAction;
 export const updateFamilyEventAction = deletePlannerLearningActivityAction;
+
+let categories: HoursCategory[] = [{ id: "e0000000-0000-4000-8000-000000000001", subject: "math", name: "Math club" }];
+export async function getHoursCategoriesAction() { return fixture.mode === "loadFailure" ? { categories: null, error: "Categories couldn't load. Try again." } : { categories, error: null }; }
+export async function saveHoursCategoryAction(input: SaveHoursCategory) {
+  const error = await waitForMutation(); if (error) return { error };
+  const current = categories.find(row => row.id === input.categoryId);
+  const category: HoursCategory = { id: current?.id ?? crypto.randomUUID(), subject: input.subject, name: input.name.trim() };
+  if (current) {
+    entries = entries.map(row => row.subject === current.subject && row.customLabel === current.name ? { ...row, customLabel: category.name } : row);
+    categories = categories.map(row => row.id === current.id ? category : row);
+  } else categories = [...categories, category];
+  fixture.refresh(); return { error: null, category };
+}

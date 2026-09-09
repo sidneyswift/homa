@@ -3,7 +3,8 @@
 import { useEffect, useId, useRef, useState, useTransition, type Ref } from "react";
 import { useRouter } from "next/navigation";
 
-import { HOURS_SUBJECTS } from "../../../lib/hours-model";
+import { useHoursCategories } from "./hours-categories-panel";
+import { HOURS_SUBJECTS, type HoursSubject } from "../../../lib/hours-model";
 import { hoursNoteCharacterCount, recordedTimeAudience, type HoursEditContext } from "../../../lib/hours-edit";
 import { SUBJECT_LABELS, type HoursEntry } from "../../../lib/hours-view";
 import { Icon } from "../../../components/design/Icon";
@@ -35,6 +36,10 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
   onDeleteRequest?: () => void;
 }) {
   const { entry } = context;
+  const catalog = useHoursCategories();
+  const [subject, setSubject] = useState<HoursSubject>(entry.subject);
+  const [category, setCategory] = useState(entry.customLabel ?? "");
+  const [newCategory, setNewCategory] = useState(false);
   const audience = recordedTimeAudience(context);
   const [note, setNote] = useState(entry.note ?? "");
   const noteCount = hoursNoteCharacterCount(note);
@@ -53,7 +58,7 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
           onFocus={(event) => event.target.scrollIntoView({ block: "nearest" })}>
           <label className="flex flex-col gap-1.5 text-sm font-semibold">
             Subject
-            <select name="subject" defaultValue={entry.subject} className={FIELD_CLASS}>
+            <select name="subject" value={subject} onChange={event => { setSubject(event.target.value as HoursSubject); setCategory(""); setNewCategory(false); }} className={FIELD_CLASS}>
               {HOURS_SUBJECTS.map((subject) => <option key={subject} value={subject}>{SUBJECT_LABELS[subject]}</option>)}
             </select>
           </label>
@@ -66,9 +71,18 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
             <p className="mb-3 text-sm">{entry.childName ? `These belong only to ${entry.childName}'s time record.` : "These belong to this whole-family time record."}</p>
             <label className="flex flex-col gap-1.5 text-sm font-semibold">
               Category (optional)
-              <input name="customLabel" defaultValue={entry.customLabel ?? ""} aria-describedby={categoryHintId} className={FIELD_CLASS} />
+              <select aria-label="Category (optional)" value={newCategory ? "new" : JSON.stringify(category)} onChange={event => {
+                setNewCategory(event.target.value === "new"); setCategory(event.target.value === "new" ? "" : JSON.parse(event.target.value));
+              }} aria-describedby={categoryHintId} className={FIELD_CLASS}>
+                <option value={'""'}>No category</option>
+                {Array.from(new Set([...(category && !newCategory ? [category] : []), ...catalog.categories.filter(row => row.subject === subject).map(row => row.name)])).map(name => <option key={name} value={JSON.stringify(name)}>{name}</option>)}
+                <option value="new">Create a category</option>
+              </select>
+              {newCategory ? <input aria-label="New category name" value={category} onChange={event => setCategory(event.target.value)} className={FIELD_CLASS} /> : null}
+              <input name="customLabel" type="hidden" value={category} />
             </label>
-            <p id={categoryHintId} className="mt-1 text-sm">A label such as Math club or Piano lesson. Up to 40 characters.</p>
+            {catalog.error ? <p role="alert" className="mt-1 text-sm">{catalog.error} <button type="button" className="min-h-11 underline" onClick={catalog.reload}>Reload categories</button></p> : !catalog.loaded ? <p role="status" className="mt-1 text-sm">Loading saved categories…</p> : null}
+            <p id={categoryHintId} className="mt-1 text-sm">Choose a saved category or create a new one. Up to 40 characters.</p>
             <label className="mt-3 flex flex-col gap-1.5 text-sm font-semibold">
               Note for {annotationOwner}
               <textarea name="note" value={note} onChange={(event) => setNote(event.target.value)} rows={4}
@@ -83,7 +97,7 @@ export function HoursEntryForm({ context, pending, error, errorRef, onSave, onCl
         </details> : null}
         <p className="mt-2 text-sm">{SOURCE_EXPLANATIONS[entry.source] ?? "Saved in School hours."}</p>
         {onDeleteRequest ? <div className="mt-4 border-t border-[var(--homa-control-boundary)] py-3">
-          <p className="mb-2 text-sm">Deleting recorded time removes the categories and notes for {audience} too.</p>
+          <p className="mb-2 text-sm">Deleting recorded time removes its notes and category assignment for {audience}. Saved categories stay available.</p>
           <QuietAction kind="quiet" disabled={pending !== null} onClick={onDeleteRequest}>Delete recorded time</QuietAction>
         </div> : null}
       </div>
