@@ -1,4 +1,4 @@
-import { LiveVoiceConversation, waitForLiveIce, type ActiveObjectReference, type LiveCaption } from "@homa/core";
+import { LiveSessionDiagnostics, LiveVoiceConversation, waitForLiveIce, type ActiveObjectReference, type LiveCaption } from "@homa/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { EveMessage } from "eve/react";
 import { AppState } from "react-native";
@@ -63,9 +63,7 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
   const activeObjectRef = useRef(activeObject);
   const connectionRef = useRef<Connection | null>(null);
   const logicalSessionRef = useRef<LiveVoiceConversation | null>(null);
-  const statusRef = useRef(status);
-  const resumeOnForegroundRef = useRef(false);
-  const changeStatus = useCallback((next: VoiceStatus) => { statusRef.current = next; setStatus(next); }, []);
+  const changeStatus = useCallback((next: VoiceStatus) => { setStatus(next); }, []);
   useEffect(() => { activeObjectRef.current = activeObject; }, [activeObject]);
 
   const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
@@ -81,7 +79,6 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
   const end = useCallback(() => {
     const current = connectionRef.current;
     connectionRef.current = null;
-    resumeOnForegroundRef.current = false;
     void current?.stop();
     setMuted(false);
     setPauseReason(null);
@@ -104,6 +101,7 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
     let audioTimer: ReturnType<typeof setInterval> | undefined;
     let closeResolve: (() => void) | undefined;
     let stopping: Promise<void> | undefined;
+    const diagnostics = new LiveSessionDiagnostics();
     const id = `voice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     const conversation = resume && logicalSessionRef.current ? logicalSessionRef.current : new LiveVoiceConversation(id, {
       fetch: authenticatedFetch,
@@ -138,7 +136,7 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
     };
     const connection: Connection = {
       conversation, ready: false, working: false,
-      send: (event) => { if (!cancelled && channel?.readyState === "open") channel.send(JSON.stringify(event)); },
+      send: (event) => { if (!cancelled && channel?.readyState === "open") { channel.send(JSON.stringify(event)); diagnostics.sent(event); } },
       stop: () => {
         if (stopping) return stopping;
         cancelled = true;
@@ -149,14 +147,18 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
         stopping = (async () => {
           // Stop local playback immediately; keep data alive for final usage.
           peer?.getReceivers().forEach((receiver) => { if (receiver.track) receiver.track.enabled = false; });
-          if (connection.ready && channel?.readyState === "open") {
+          if (connection.ready && !diagnostics.snapshot().finalized && channel?.readyState === "open") {
             await new Promise<void>((resolve) => {
-              const timeout = setTimeout(resolve, 1_500);
+              const timeout = setTimeout(resolve, 5_000);
               closeResolve = () => { clearTimeout(timeout); resolve(); };
-              channel!.send(JSON.stringify({ type: "session.close" }));
+              try { channel!.send(JSON.stringify({ type: "session.close" })); }
+              catch { closeResolve?.(); }
             });
           }
-          await release();
+          if (!diagnostics.snapshot().finalized) {
+            await release();
+          }
+          console.info("Live session diagnostics", JSON.stringify(diagnostics.snapshot()));
           channel?.close();
           peer?.close();
           await finished;
@@ -182,9 +184,12 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
         peer = new RTCPeerConnection();
         stream.getTracks().forEach((track) => peer!.addTrack(track, stream!));
         channel = peer.createDataChannel("oai-events");
+        channel.onclose = () => fail("Our voice connection ended. Please start a new conversation.");
+        channel.onerror = () => fail("Our voice connection was interrupted. Please start a new conversation.");
         channel.onmessage = ({ data }: { data: string }) => {
           try {
             const event = JSON.parse(data);
+            diagnostics.receive(event);
             if (event.type === "session.closed") {
               closeResolve?.();
               if (!cancelled) fail("The voice conversation ended. You can start another when you are ready.");
@@ -197,7 +202,7 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
               changeStatus("listening");
             }
             conversation.receive(event);
-            if (event.type === "error") fail("I could not complete the voice connection. Please try again.");
+            if (event.type === "error" && !connection.ready) fail("I could not complete the voice connection. Please try again.");
           } catch { /* Ignore malformed provider events. */ }
         };
         peer.onconnectionstatechange = () => {
@@ -237,17 +242,16 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
     })();
   }, [authenticatedFetch, changeStatus]);
 
-  const pause = useCallback((reason: string, resumeOnForeground: boolean) => {
+  const pause = useCallback((reason: string) => {
     if (!connectionRef.current) return;
     const current = connectionRef.current;
     connectionRef.current = null;
-    resumeOnForegroundRef.current = resumeOnForeground;
     void current.stop();
     setMuted(false);
     setPauseReason(reason);
     changeStatus("paused");
   }, [changeStatus]);
-  const resume = useCallback(() => { resumeOnForegroundRef.current = false; connect(true); }, [connect]);
+  const resume = useCallback(() => { connect(true); }, [connect]);
   const toggleMute = useCallback(() => {
     const stream = connectionRef.current?.stream;
     if (!stream) return;
@@ -257,11 +261,10 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
   }, [muted]);
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
-      if (nextState !== "active") { pause("Voice paused while Homa is in the background.", true); return; }
-      if (resumeOnForegroundRef.current && statusRef.current === "paused") resume();
+      if (nextState !== "active") pause("Voice paused while Homa is in the background. Tap resume when you are ready.");
     });
     return () => subscription.remove();
-  }, [pause, resume]);
+  }, [pause]);
   useEffect(() => end, [end]);
   const sendText = useCallback((message: string) => connectionRef.current?.ready ? connectionRef.current.conversation.sendText(message) : false, []);
   const announceResult = useCallback((message: string) => { if (connectionRef.current?.ready) connectionRef.current.conversation.say(message); }, []);
@@ -275,6 +278,6 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
     lastAssistantText: turns.slice().reverse().find((row) => row.role === "assistant")?.text ?? null,
     failed: status === "failed", recovering: false, speaking: status === "speaking", handoffReady: status === "listening",
     start: () => connect(false), end, retry: () => connect(true), sendText, announceResult, toggleMute,
-    pauseForMicrophoneOwner: (reason: string) => pause(reason, false), resume,
+    pauseForMicrophoneOwner: (reason: string) => pause(reason), resume,
   };
 }

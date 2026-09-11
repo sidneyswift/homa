@@ -1,6 +1,6 @@
 "use client";
 
-import { LiveVoiceConversation, waitForLiveIce } from "@homa/core";
+import { LiveSessionDiagnostics, LiveVoiceConversation, waitForLiveIce } from "@homa/core";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../components/design/Icon";
 import { QuietAction } from "../../components/design/QuietAction";
@@ -55,11 +55,12 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
     let startTimer: ReturnType<typeof setTimeout> | undefined;
     let closeResolve: (() => void) | undefined;
     let stopping: Promise<void> | undefined;
+    const diagnostics = new LiveSessionDiagnostics();
     const audio = new Audio();
     audio.autoplay = true;
     const session = new LiveVoiceConversation(`voice-${crypto.randomUUID()}`, {
       fetch: (path, init) => fetch(path, init),
-      send: (event) => { if (channel?.readyState === "open") channel.send(JSON.stringify(event)); },
+      send: (event) => { if (channel?.readyState === "open") { channel.send(JSON.stringify(event)); diagnostics.sent(event); } },
       onCaption: (line) => callbacksRef.current.onTurn(line),
       onEffects: (output, context) => {
         const display = webVoiceOutputForDisplay(output as VoiceHomaBridgeOutput);
@@ -91,14 +92,18 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
       callbacksRef.current.onActiveChange(false);
       setCapturing(false);
       stopping = (async () => {
-        if (started && channel?.readyState === "open") {
+        if (started && !diagnostics.snapshot().finalized && channel?.readyState === "open") {
           await new Promise<void>((resolve) => {
-            const timeout = setTimeout(resolve, 1_500);
+            const timeout = setTimeout(resolve, 5_000);
             closeResolve = () => { clearTimeout(timeout); resolve(); };
-            channel!.send(JSON.stringify({ type: "session.close" }));
+            try { channel!.send(JSON.stringify({ type: "session.close" })); }
+              catch { closeResolve?.(); }
           });
         }
-        await release();
+        if (!diagnostics.snapshot().finalized) {
+          await release();
+        }
+        console.info("Live session diagnostics", JSON.stringify(diagnostics.snapshot()));
         channel?.close();
         peer?.close();
         audio.srcObject = null;
@@ -125,9 +130,12 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
           if (peer?.connectionState === "failed" || peer?.connectionState === "disconnected") fail("Our voice connection ended. Please start a new conversation.");
         };
         channel = peer.createDataChannel("oai-events");
+        channel.onclose = () => fail("Our voice connection ended. Please start a new conversation.");
+        channel.onerror = () => fail("Our voice connection was interrupted. Please start a new conversation.");
         channel.onmessage = ({ data }) => {
           try {
             const event = JSON.parse(data);
+            diagnostics.receive(event);
             if (event.type === "session.closed") {
               closeResolve?.();
               if (!cancelled) fail("The voice conversation ended. You can start another when you are ready.");
@@ -142,7 +150,7 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
               callbacksRef.current.onAnnouncementChange((text) => session.say(text));
             }
             session.receive(event);
-            if (event.type === "error") fail("I could not complete the voice connection. Please try again.");
+            if (event.type === "error" && !started) fail("I could not complete the voice connection. Please try again.");
           } catch { /* Unknown provider events cannot crash the chat. */ }
         };
         await peer.setLocalDescription(await peer.createOffer());
