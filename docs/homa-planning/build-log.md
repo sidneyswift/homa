@@ -12552,3 +12552,33 @@ Test users deleted from homa-prod (0 remain). Typecheck, build, lints green.
   any eve version change.
 - `docs/homa-planning/runbooks/eve-version-bump.md`: the procedure for
   bumping the pinned eve version safely.
+
+
+## 2026-09-11: GPT Live with Gleam for web and native voice (gh#1148)
+
+Founder direction: use the GPT Live 1 API with Gleam in both apps. The new
+server-owned Live session configuration follows `voice-live-gleam` in the
+founder-ruling register. Web and native share transcript and delegation handling;
+Eve still owns family capabilities and their authenticated effects. Older mobile
+builds retain their Realtime endpoint until the new client reaches them.
+
+Implementation validation: a synthetic WebRTC provider probe started
+`gpt-live-1` with `audio.output.voice=gleam`, received "Hello." and 4,072 audio
+bytes, and observed `session.closed` without API errors. No microphone or family
+data was used. This is provider compatibility evidence, not a physical-device
+conversation or production release claim. Current rollout status and remaining
+checks live on gh#1148.
+
+The actual web VoiceMode and session route also passed an isolated browser test
+against OpenAI with generated silence: greeting received, caption saved, panel
+closed, authenticated hangup returned 200, and no browser errors or notices.
+Focused validation passed 121 voice/persona tests, 161 native voice tests,
+286 continuity tests, web/mobile/core typechecks, and relevant lint. The iOS
+fingerprint stayed `bc62e95f737ecb7dec5083286e8dc4f08813b7b1`, matching FINISHED
+production build 48. This establishes OTA compatibility, not phone installation.
+
+Reconnect retains the Homa agent session but does not forward earlier transcript
+text into the new Live audio session. The voice asks for clarification if needed.
+The documentation audit retains its pre-existing failures; comparison with the
+unchanged main checkout found only the isolated checkout missing its private
+`.env.local` file as an additional finding. No private environment file was copied.
