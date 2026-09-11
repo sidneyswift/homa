@@ -125,8 +125,9 @@ test("assistant persistence waits for earlier unsealed user text", async () => {
   await tick();
   assert.equal(f.saves.length, 0);
   f.delegate("d1", 40); await tick();
-  assert.deepEqual(f.saves.map((s) => s.sequence), [0, 1]);
+  assert.deepEqual(f.saves.map((s) => s.sequence), [0]);
   await f.conversation.finish();
+  assert.deepEqual(f.saves.map((s) => s.sequence), [0, 1]);
 });
 
 test("failed transcript persistence is visible and retryable", async () => {
@@ -182,4 +183,78 @@ test("surface-specific verified output is also the spoken reply", async () => {
   conversation.sendText("Open my report"); await tick();
   assert.equal(sent[0].content, "Use Open report in our chat.");
   await conversation.finish();
+});
+
+test("ordinary replies divide subsequent parent speech into stable bubbles", async () => {
+  const f = fixture();
+  f.fragment("Hello.", 100, 500);
+  f.fragment("How are you?", 700, 1200, "output");
+  f.fragment("Good thanks.", 1600, 2200);
+  f.fragment("Glad to hear it.", 2500, 3100, "output");
+  f.fragment("Could you make a maze?", 3500, 4400);
+  assert.deepEqual([...f.captions.values()], ["Hello.", "How are you?", "Good thanks.", "Glad to hear it.", "Could you make a maze?"]);
+  f.delegate("maze", 4500); await tick();
+  assert.equal(f.calls[0].sourceText, "Could you make a maze?");
+  assert.equal(f.calls[0].sourceSequence, 4);
+  await f.conversation.finish();
+  assert.deepEqual(f.saves.map(s => s.content), [...f.captions.values()]);
+});
+
+test("overlapping acknowledgments preserve the ongoing request and late fragments", async () => {
+  const f = fixture();
+  f.fragment("Make a", 100, 500);
+  f.fragment("Mm-hmm", 300, 600, "output");
+  f.fragment(" maze", 550, 900);
+  f.fragment(" please", 900, 1200);
+  f.fragment("Sure.", 1500, 1900, "output");
+  f.fragment("For Avery.", 2200, 2800);
+  f.fragment(" today.", 1200, 1400);
+  assert.deepEqual([...f.captions.values()], ["Make a maze please today.", "Mm-hmm", "Sure.", "For Avery."]);
+  assert.equal(f.calls.length, 0);
+  await f.conversation.finish();
+});
+
+test("assistant acknowledgment does not consume a request before delegation", async () => {
+  const f = fixture();
+  f.fragment("Make a maze.", 100, 700);
+  f.fragment("Sure, I'll do that.", 1000, 1500, "output");
+  f.delegate("maze", 1600); await tick();
+  assert.equal(f.calls[0].sourceText, "Make a maze.");
+  f.delegate("duplicate-intent", 1700); await tick();
+  assert.equal(f.calls.length, 1);
+  await f.conversation.finish();
+});
+
+test("queued delegation captures source before later conversation begins", async () => {
+  let release!: () => void;
+  const f = fixture({ hold: new Promise<void>(resolve => { release = resolve; }) });
+  f.fragment("Make a maze.", 100, 700); f.delegate("first", 800); await tick();
+  f.fragment("Check my planner.", 1000, 1500); f.delegate("second", 1600); await tick();
+  f.fragment("Sure, let me look.", 1800, 2300, "output");
+  f.fragment("Thanks. How are you?", 2500, 3300);
+  release(); await tick(); await tick();
+  assert.deepEqual(f.calls.map(call => call.sourceText), ["Make a maze.", "Check my planner."]);
+  assert.deepEqual(f.calls[1].homaSessionState, { id: "continued" });
+  await f.conversation.finish();
+});
+
+test("old transcript delivery after delegation cannot become new permission", async () => {
+  const f = fixture();
+  f.fragment("Log reading.", 100, 700); f.delegate("first", 800); await tick();
+  f.fragment(" please", 700, 750); f.delegate("second", 900); await tick();
+  assert.equal(f.calls.length, 1);
+  f.fragment("Log art.", 1000, 1500); f.delegate("third", 1600); await tick();
+  assert.equal(f.calls[1].sourceText, "Log art.");
+  await f.conversation.finish();
+});
+
+test("late assistant delivery separates parent utterances already on screen", async () => {
+  const f = fixture();
+  f.fragment("Hello.", 100, 500);
+  f.fragment("I'm well.", 2000, 2500);
+  f.fragment("How are you?", 800, 1500, "output");
+  assert.deepEqual([...f.captions.values()], ["Hello.", "How are you?", "I'm well."]);
+  f.fragment(" Thanks.", 2500, 2900);
+  assert.equal(f.captions.get(2), "I'm well. Thanks.");
+  await f.conversation.finish();
 });
