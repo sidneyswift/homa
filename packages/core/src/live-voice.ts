@@ -27,6 +27,8 @@ interface Dependencies {
   activeObject?: () => unknown;
   transcriptDelayMs?: number;
 }
+// Presentation only: a short acknowledgment must not split a parent mid-thought.
+const PARENT_CAPTION_GAP_MS = 1_000;
 const failure = (): LiveBridgeOutput => ({ ok: false, spokenReply: "I could not confirm that request. Please check the chat before trying it again.", effects: [] });
 
 /** Each append is capped below the documented 500-token limit even for
@@ -85,7 +87,7 @@ export class LiveVoiceConversation {
         .flatMap((row) => row.fragments)
         .filter((part) => part.start >= lastEnd && part.end <= start)
         .sort((a, b) => b.end - a.end)[0];
-      if (!reply) return current;
+      if (!reply || (role === "user" && start - lastEnd < PARENT_CAPTION_GAP_MS)) return current;
       from = reply.end;
       current.until = from;
     } else {
@@ -108,6 +110,8 @@ export class LiveVoiceConversation {
       // A reply arriving late may sit between two already visible utterances.
       // Revise only unfrozen captions; overlapping speech stays together.
       if (!before.length || !after.length || before.length + after.length !== row.fragments.length) continue;
+      if (row.role === "user" && Math.min(...after.map((part) => part.start))
+        - Math.max(...before.map((part) => part.end)) < PARENT_CAPTION_GAP_MS) continue;
       row.fragments = before;
       row.until = reply.end;
       this.publish(row);

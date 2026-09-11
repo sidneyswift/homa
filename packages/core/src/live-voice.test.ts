@@ -259,3 +259,21 @@ test("late assistant delivery separates parent utterances already on screen", as
   assert.equal(f.captions.get(2), "I'm well. Thanks.");
   await f.conversation.finish();
 });
+
+test("a brief reply between words does not split the parent's sentence", async () => {
+  const f = fixture();
+  f.fragment("How are", 100, 500);
+  f.fragment("I'm good!", 550, 800, "output");
+  f.fragment(" you?", 900, 1200);
+  assert.deepEqual([...f.captions.values()], ["How are you?", "I'm good!"]);
+  await f.conversation.finish();
+});
+
+test("late brief acknowledgment cannot divide a continuing request", async () => {
+  const f = fixture();
+  f.fragment("Make a", 100, 500); f.fragment(" maze.", 900, 1200);
+  f.fragment("Okay", 550, 800, "output");
+  f.delegate("maze", 1300); await tick();
+  assert.equal(f.calls[0].sourceText, "Make a maze.");
+  await f.conversation.finish();
+});

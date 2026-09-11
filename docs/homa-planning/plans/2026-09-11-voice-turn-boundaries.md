@@ -28,6 +28,9 @@ rows alone does not prove all intermittent audio silence is resolved.
 
 Caption rows now use session timeline intervals for each speaker independently.
 A non-overlapping reply separates later speech; overlap stays in the ongoing row.
+Parent grouping also requires a one-second gap between their fragments, keeping
+brief acknowledgments from splitting the tail of a sentence. This is a display
+heuristic, never a semantic turn-completion or action trigger.
 Late fragments can revise an unfrozen earlier row, including splitting two
 utterances when their intervening reply arrives late. Display boundaries never
 start work. After delegation freezes a source, late older fragments remain
