@@ -110,6 +110,7 @@ describe("voice Homa bridge", () => {
     assert.equal(output.sessionId, "eve-1");
     assert.equal(output.sessionState?.continuationToken, "continue-1");
     assert.equal(output.ok, true);
+    assert.equal(output.needsReply, false);
   });
 
   it("accepts only bounded Eve continuation state", () => {
@@ -167,6 +168,7 @@ describe("voice Homa bridge", () => {
         },
       });
       assert.doesNotMatch(result.spokenReply, /Done\.|on the screen|Nothing changed/u);
+      assert.equal(result.needsReply, scenario.status === "waiting");
       if (scenario.status === "failed") assert.equal(result.effects.length, 1);
     });
   }
@@ -184,5 +186,22 @@ describe("voice Homa bridge", () => {
       },
     });
     assert.equal(result.spokenReply, "Which child is this for?");
+    assert.equal(result.needsReply, true);
   });
+});
+
+it("failed question effects do not request another parent answer", async () => {
+  for (const status of ["completed", "failed"] as const) {
+    const result = await askHomaFromVoice({
+      host: "https://example.test", accessToken: "token", message: "Make it",
+      sourceMessageId: "11111111-1111-4111-8111-111111111111",
+    }, {
+      async run() {
+        return { status, message: "That step failed.", events: [toolResult({
+          callId: "question", toolName: "ask_user_questions", output: { asked: false, questions: [] },
+        })], sessionId: "eve-one", sessionState: { streamIndex: 1 } };
+      },
+    });
+    assert.equal(result.needsReply, false);
+  }
 });

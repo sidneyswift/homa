@@ -31,6 +31,7 @@ export interface VoiceHomaBridgeOutput {
   ok: boolean;
   spokenReply: string;
   effects: VoiceHomaEffect[];
+  needsReply?: boolean;
   sessionId?: string;
   sessionState?: SessionState;
 }
@@ -175,6 +176,11 @@ export async function askHomaFromVoice(
       ok: result.status !== "failed",
       spokenReply,
       effects,
+      needsReply: result.status === "waiting" || (result.status === "completed" && effects.some((effect) => {
+        if (effect.toolName !== "ask_user_questions") return false;
+        const question = effect.output as { asked?: unknown; questions?: unknown } | null;
+        return question?.asked === true && Array.isArray(question.questions) && question.questions.length > 0;
+      })),
       sessionId: result.sessionId,
       sessionState: result.sessionState,
     };

@@ -10,12 +10,13 @@ export interface LiveCaption {
   sequence: number;
 }
 interface Fragment { text: string; start: number; end: number }
-interface Row extends LiveCaption { fragments: Fragment[]; sealed: boolean }
+interface Row extends LiveCaption { fragments: Fragment[]; sealed: boolean; generation: number; from: number; until: number }
 export interface LiveBridgeOutput {
   ok: boolean;
   spokenReply: string;
   effects: unknown[];
   sessionState?: unknown;
+  needsReply?: boolean;
 }
 interface Dependencies {
   fetch: (path: string, init?: RequestInit) => Promise<Response>;
@@ -27,6 +28,8 @@ interface Dependencies {
   activeObject?: () => unknown;
   transcriptDelayMs?: number;
 }
+// Presentation only: a short acknowledgment must not split a parent mid-thought.
+const PARENT_CAPTION_GAP_MS = 1_000;
 const failure = (): LiveBridgeOutput => ({ ok: false, spokenReply: "I could not confirm that request. Please check the chat before trying it again.", effects: [] });
 
 /** Each append is capped below the documented 500-token limit even for
@@ -64,6 +67,7 @@ export class LiveVoiceConversation {
   private eventNumber = 0;
   private generation = 0;
   private greeted = false;
+  private sourceOffset = -1;
 
   constructor(readonly sessionId: string, private readonly deps: Dependencies) {}
 
@@ -71,12 +75,51 @@ export class LiveVoiceConversation {
     if (!this.ended) this.deps.send({ ...event, event_id: `${this.sessionId}-${this.eventNumber++}` });
   }
 
-  private row(role: Row["role"]): Row {
-    const current = this.rows.slice().reverse().find((row) => row.role === role && !row.sealed);
-    if (current) return current;
-    const row: Row = { role, text: "", fragments: [], sealed: false, sessionId: this.sessionId, sequence: this.rows.length };
+  private row(role: Row["role"], start = 0, end = start): Row {
+    const rows = this.rows.filter((row) => row.role === role && row.generation === this.generation);
+    const current = rows.filter((row) => !row.sealed && row.from <= start && start < row.until)
+      .sort((a, b) => b.from - a.from)[0];
+    let from = start;
+    if (current) {
+      const lastEnd = Math.max(...current.fragments.map((part) => part.end));
+      // Only a completed, non-overlapping exchange divides a caption. A
+      // backchannel during ongoing speech leaves both speakers' rows open.
+      const reply = this.rows.filter((row) => row.role !== role && row.generation === this.generation)
+        .flatMap((row) => row.fragments)
+        .filter((part) => part.start >= lastEnd && part.end <= start)
+        .sort((a, b) => b.end - a.end)[0];
+      if (!reply || (role === "user" && start - lastEnd < PARENT_CAPTION_GAP_MS)) return current;
+      from = reply.end;
+      current.until = from;
+    } else {
+      // Earlier transcript delivery can precede the first fragment we saw.
+      const first = rows[0];
+      if (first && !first.sealed && end <= first.from) { first.from = start; return first; }
+    }
+    const row: Row = { role, text: "", fragments: [], sealed: false,
+      generation: this.generation, from, until: Infinity,
+      sessionId: this.sessionId, sequence: this.rows.length };
     this.rows.push(row);
     return row;
+  }
+
+  private splitForLateReply(role: Row["role"], reply: Fragment) {
+    for (const row of [...this.rows]) {
+      if (row.sealed || row.role === role || row.generation !== this.generation) continue;
+      const before = row.fragments.filter((part) => part.end <= reply.start);
+      const after = row.fragments.filter((part) => part.start >= reply.end);
+      // A reply arriving late may sit between two already visible utterances.
+      // Revise only unfrozen captions; overlapping speech stays together.
+      if (!before.length || !after.length || before.length + after.length !== row.fragments.length) continue;
+      if (row.role === "user" && Math.min(...after.map((part) => part.start))
+        - Math.max(...before.map((part) => part.end)) < PARENT_CAPTION_GAP_MS) continue;
+      row.fragments = before;
+      row.until = reply.end;
+      this.publish(row);
+      const next = this.row(row.role, after[0].start, after[0].end);
+      next.fragments.push(...after);
+      this.publish(next);
+    }
   }
 
   private publish(row: Row) {
@@ -128,14 +171,12 @@ export class LiveVoiceConversation {
       if (typeof event.delta !== "string" || typeof event.start_ms !== "number" || typeof event.end_ms !== "number"
         || !Number.isFinite(event.start_ms) || !Number.isFinite(event.end_ms) || event.start_ms < 0 || event.end_ms < event.start_ms) return;
       const role = event.type === "session.input_transcript.delta" ? "user" : "assistant";
-      // A speaking change is a caption boundary, never permission to act.
-      if (role === "user") {
-        const assistant = this.rows.slice().reverse().find((row) => row.role === "assistant" && !row.sealed);
-        if (assistant) this.seal(assistant);
-      }
-      const row = this.row(role);
-      row.fragments.push({ text: event.delta, start: event.start_ms, end: event.end_ms });
+      const row = this.row(role, event.start_ms, event.end_ms);
+      const fragment = { text: event.delta, start: event.start_ms, end: event.end_ms };
+      row.fragments.push(fragment);
       this.publish(row);
+      this.splitForLateReply(role, fragment);
+      if (role === "user" && event.start_ms <= this.sourceOffset) this.seal(row);
       return;
     }
     if (event.type === "session.delegation.created") {
@@ -149,25 +190,35 @@ export class LiveVoiceConversation {
       // Allow bounded delivery skew. The timestamp cutoff, not this delay,
       // decides which words belong to the request. Later words remain pending.
       const ready = new Promise<void>((resolve) => setTimeout(resolve, this.deps.transcriptDelayMs ?? 350));
-      const job = this.queue.then(async () => {
-        await ready;
+      // Capture the source after delivery skew, independently of a slow
+      // earlier backend job. Later conversation cannot replace this request.
+      const captured = ready.then(() => {
         if (this.ended || generation !== this.generation) return;
-        const row = this.rows.slice().reverse().find((item) => item.role === "user" && !item.sealed);
-        let source: Row | undefined;
-        if (row) {
-          const included = row.fragments.filter((fragment) => fragment.start <= offset);
-          const later = row.fragments.filter((fragment) => fragment.start > offset);
-          if (included.length) {
-            row.fragments = included;
-            this.publish(row);
-            this.seal(row);
-            source = row;
-            if (later.length) { const next = this.row("user"); next.fragments = later; this.publish(next); }
-          }
+        const row = this.rows.filter((item) => item.role === "user" && !item.sealed
+          && item.generation === generation
+          && item.fragments.some((part) => part.start > this.sourceOffset && part.start <= offset))
+          .sort((a, b) => b.from - a.from)[0];
+        if (!row) return;
+        const included = row.fragments.filter((part) => part.start <= offset);
+        const later = row.fragments.filter((part) => part.start > offset);
+        row.fragments = included;
+        this.publish(row);
+        // Older caption rows remain history, never fresh permission to act.
+        for (const prior of this.rows) {
+          if (prior.generation === generation && prior.sequence <= row.sequence
+            && prior.fragments.every((part) => part.start <= offset)) this.seal(prior);
         }
+        this.sourceOffset = Math.max(this.sourceOffset, offset);
+        if (later.length) {
+          const next = this.row("user", later[0].start, later[0].end);
+          next.fragments = later; this.publish(next);
+        }
+        return row;
+      });
+      const job = this.queue.then(async () => {
+        const source = await captured;
+        if (this.ended || generation !== this.generation) return;
         if (!source) {
-          // Without new source words, refuse rather than replay an old action
-          // or describe an unrelated previous result as current.
           const output = failure();
           this.say(output.spokenReply, id);
           return;
@@ -207,7 +258,13 @@ export class LiveVoiceConversation {
       // Every terminal outcome reaches the chat, including an ambiguous
       // transport failure and a result arriving after the microphone closes.
       const display = this.deps.onEffects(result, context) ?? result;
-      if (generation === this.generation) this.say(display.spokenReply, delegationId);
+      if (generation === this.generation) {
+        if (result.needsReply === true) this.send({
+          type: "session.instructions.append", delegation_id: delegationId,
+          content: "The backend is waiting for the parent's answer to its question. It cannot hear this call. Ask the supplied question, listen to the answer, then create a NEW client delegation so the backend receives that answer and continues. A brief choice is enough. Do not just acknowledge the answer or wait silently: the backend is not running until you delegate again.",
+        });
+        this.say(display.spokenReply, delegationId);
+      }
     }
     finally { this.pendingWork--; this.deps.onWorking(this.pendingWork > 0, context); }
   }
@@ -237,7 +294,7 @@ export class LiveVoiceConversation {
     await this.saves;
     return this.unsaved.size === 0;
   }
-  resume() { this.ended = false; this.seen.clear(); }
+  resume() { this.ended = false; this.sourceOffset = -1; this.seen.clear(); }
   async retrySave(): Promise<boolean> { await this.saves; await this.savePending(); return this.unsaved.size === 0; }
 }
 
