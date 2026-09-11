@@ -10,7 +10,7 @@ import {
   parseAskHomaInput,
 } from "../../../../../lib/voice/realtime-tools";
 import { resolveActiveObject } from "../../../../../lib/voice/active-object";
-import { canonicalVoiceSessionId, validVoiceSequence, validVoiceSessionId } from "../../../../../lib/voice/source-turn";
+import { canonicalVoiceSessionId, parseVoiceSourceContext, renderVoiceSourceContext, validVoiceSequence, validVoiceSessionId } from "../../../../../lib/voice/source-turn";
 
 /**
  * POST /api/voice/realtime/tool: hands one spoken request to the full Homa
@@ -46,6 +46,7 @@ interface ToolCallBody {
    * argument. Older app builds omit it and safely fall back to args.request. */
   sourceText?: unknown;
   sourceSequence?: unknown;
+  sourceContext?: unknown;
   homaSessionState?: unknown;
   /** A visible-object pointer only. The server derives familyId from auth,
    * then re-resolves this id inside that family before Eve sees it. */
@@ -115,6 +116,8 @@ export async function POST(request: Request): Promise<Response> {
   }
   const sessionId = canonicalVoiceSessionId(familyId, userId, body.sessionId);
   const sourceSequence = body.sourceSequence;
+  const sourceContext = parseVoiceSourceContext(body.sourceContext, sourceSequence);
+  if (sourceContext === null) return Response.json({ ok: false, reason: "bad-source-context" }, { status: 400 });
   let activeObjectContext: string | undefined;
   if (body.activeObject !== undefined && body.activeObject !== null) {
     const activeObject = await resolveActiveObject(familyId, body.activeObject);
@@ -133,6 +136,16 @@ export async function POST(request: Request): Promise<Response> {
   }
   let sourceMessageId: string;
   try {
+    // Save context under the same authenticated adult/session before the
+    // backend starts, so the handoff cannot race caption persistence.
+    for (const row of sourceContext) {
+      const receipt = await persistCanonicalMessage({
+        attributes: { familyId, memberUserId: userId }, sessionId, channel: "web",
+        sequence: row.sequence, role: row.role, content: row.text,
+        turnId: `${sessionId}:${row.sequence}`, modality: "voice",
+      });
+      if (!receipt) throw new Error("voice context was not saved");
+    }
     const persisted = await persistCanonicalMessage({
       attributes: { familyId, memberUserId: userId },
       sessionId,
@@ -163,6 +176,7 @@ export async function POST(request: Request): Promise<Response> {
     host: new URL(request.url).origin,
     accessToken,
     message: sourceText,
+    sourceContext: renderVoiceSourceContext(sourceContext),
     sourceMessageId,
     activeObjectContext,
     sessionState: parseVoiceHomaSessionState(body.homaSessionState),

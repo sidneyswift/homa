@@ -68,6 +68,8 @@ export class LiveVoiceConversation {
   private generation = 0;
   private greeted = false;
   private sourceOffset = -1;
+  private requestVersion = 0;
+  private pendingSpeechTimer?: ReturnType<typeof setTimeout>;
 
   constructor(readonly sessionId: string, private readonly deps: Dependencies) {}
 
@@ -177,6 +179,17 @@ export class LiveVoiceConversation {
       this.publish(row);
       this.splitForLateReply(role, fragment);
       if (role === "user" && event.start_ms <= this.sourceOffset) this.seal(row);
+      if (role === "user" && this.pendingWork > 0 && event.start_ms > this.sourceOffset) {
+        if (this.pendingSpeechTimer) clearTimeout(this.pendingSpeechTimer);
+        const generation = this.generation;
+        // This pause schedules guidance, never permission or a guessed turn.
+        // Live still judges intent and decides whether to delegate.
+        this.pendingSpeechTimer = setTimeout(() => {
+          if (this.ended || generation !== this.generation || this.pendingWork === 0) return;
+          this.send({ type: "session.instructions.append", delegation_id: null,
+            content: "The parent spoke while the backend was working. If their new speech changes or cancels the task, create a NEW client delegation with that update as soon as their request is clear. The backend cannot hear the call. Merely acknowledging the update does not deliver it. For small talk, respond normally without delegating. Do not claim a change took effect before its backend result." });
+        }, this.deps.transcriptDelayMs ?? 900);
+      }
       return;
     }
     if (event.type === "session.delegation.created") {
@@ -213,7 +226,14 @@ export class LiveVoiceConversation {
           const next = this.row("user", later[0].start, later[0].end);
           next.fragments = later; this.publish(next);
         }
-        return row;
+        const sourceContext = this.rows.filter((prior) => prior.generation === generation
+          && prior.sequence < row.sequence && prior.sealed && prior.text.trim()
+          && prior.fragments.every((part) => part.start <= offset))
+          .slice(-20).map(({ role, sequence, text }) => ({ role, sequence, text }));
+        // Context is reference data, not another request. Keep the newest
+        // whole rows within the server budget; never truncate a parent's words.
+        while (sourceContext.reduce((total, item) => total + item.text.length, 0) > 6_000) sourceContext.shift();
+        return { row, sourceContext, version: ++this.requestVersion };
       });
       const job = this.queue.then(async () => {
         const source = await captured;
@@ -223,7 +243,7 @@ export class LiveVoiceConversation {
           this.say(output.spokenReply, id);
           return;
         }
-        await this.run(source, id, activeObject);
+        await this.run(source.row, id, activeObject, source.sourceContext, source.version);
       });
       this.delegations.set(id, job);
       this.queue = job.catch(() => this.deps.onError("The voice request could not finish. Please check the chat."));
@@ -231,7 +251,7 @@ export class LiveVoiceConversation {
     if (event.type === "error") this.deps.onError("The voice connection could not complete that step. Check the chat for your result; you can keep talking.");
   }
 
-  private async run(source: Row, delegationId: string | null, activeObject: unknown) {
+  private async run(source: Row, delegationId: string | null, activeObject: unknown, sourceContext: Pick<LiveCaption, "role" | "sequence" | "text">[] = [], version = this.requestVersion) {
     if (!source.text.trim() || source.text.length > 8_000) { this.say("Please ask that again in a shorter request.", delegationId); return; }
     const generation = this.generation;
     this.pendingWork++;
@@ -243,7 +263,7 @@ export class LiveVoiceConversation {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: "ask_homa", args: { request: source.text }, sourceText: source.text,
             sourceSequence: source.sequence, sessionId: this.sessionId, homaSessionState: this.sessionState,
-            activeObject }),
+            activeObject, sourceContext }),
           signal: AbortSignal.timeout(295_000),
         });
         const body = await response.json();
@@ -258,10 +278,19 @@ export class LiveVoiceConversation {
       // Every terminal outcome reaches the chat, including an ambiguous
       // transport failure and a result arriving after the microphone closes.
       const display = this.deps.onEffects(result, context) ?? result;
-      if (generation === this.generation) {
+      if (generation === this.generation && version < this.requestVersion) {
+        // A newer request may correct or cancel this work. Keep exact effects
+        // in chat, but do not announce the older answer as the current result.
+        this.send({ type: "session.thinking.append", delegation_id: delegationId,
+          content: "An earlier backend request finished. A newer request is queued and still needs its own result. The earlier result is visible in chat. Do not announce it as the answer to the newer request, and do not claim a correction or cancellation has taken effect yet." });
+      } else if (generation === this.generation) {
         if (result.needsReply === true) this.send({
           type: "session.instructions.append", delegation_id: delegationId,
           content: "The backend is waiting for the parent's answer to its question. It cannot hear this call. Ask the supplied question, listen to the answer, then create a NEW client delegation so the backend receives that answer and continues. A brief choice is enough. Do not just acknowledge the answer or wait silently: the backend is not running until you delegate again.",
+        });
+        else this.send({
+          type: "session.instructions.append", delegation_id: delegationId,
+          content: "The backend has now returned the final result for the most recent request. Earlier notices that this request was queued or waiting are no longer current. Give the supplied result its spoken handoff now at a natural pause. Preserve failures and qualifications; say ready only if the result confirms it. Then continue the conversation normally.",
         });
         this.say(display.spokenReply, delegationId);
       }
@@ -283,12 +312,14 @@ export class LiveVoiceConversation {
     this.seal(row);
     const generation = this.generation;
     const activeObject = this.deps.activeObject?.();
-    this.queue = this.queue.then(async () => { if (!this.ended && generation === this.generation) await this.run(row, null, activeObject); });
+    const version = ++this.requestVersion;
+    this.queue = this.queue.then(async () => { if (!this.ended && generation === this.generation) await this.run(row, null, activeObject, [], version); });
     return true;
   }
 
   async finish(): Promise<boolean> {
     this.ended = true;
+    if (this.pendingSpeechTimer) clearTimeout(this.pendingSpeechTimer);
     this.generation++;
     for (const row of this.rows) this.seal(row);
     await this.saves;

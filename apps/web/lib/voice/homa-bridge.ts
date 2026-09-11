@@ -51,6 +51,7 @@ export interface VoiceHomaTurnRunner {
     message: string;
     sourceMessageId: string;
     activeObjectContext?: string;
+    sourceContext?: string;
     sessionState?: SessionState;
     signal: AbortSignal;
   }): Promise<VoiceHomaTurnResult>;
@@ -79,6 +80,7 @@ function defaultRunner(): VoiceHomaTurnRunner {
       const session = client.session(input.sessionState);
       const response = await session.send({
         message: input.message,
+        clientContext: input.sourceContext,
         signal: input.signal,
       });
       return { ...(await response.result()), sessionState: session.state };
@@ -145,6 +147,7 @@ export async function askHomaFromVoice(
     message: string;
     sourceMessageId: string;
     activeObjectContext?: string;
+    sourceContext?: string;
     sessionState?: SessionState;
   },
   runner: VoiceHomaTurnRunner = defaultRunner(),
@@ -167,6 +170,7 @@ export async function askHomaFromVoice(
       message,
       sourceMessageId: input.sourceMessageId,
       activeObjectContext: input.activeObjectContext,
+      sourceContext: input.sourceContext,
       sessionState: input.sessionState,
       signal: controller.signal,
     });
