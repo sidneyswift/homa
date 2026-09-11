@@ -885,7 +885,9 @@ export function ChatClient({
     });
     if (line.role === "user") {
       if (line.sessionId !== undefined && line.sequence !== undefined) {
-        latestVoiceUserRef.current.set(line.sessionId, line.sequence);
+        latestVoiceUserRef.current.set(line.sessionId, Math.max(
+          latestVoiceUserRef.current.get(line.sessionId) ?? -1, line.sequence,
+        ));
       }
       setVoiceAnswerSource((current) =>
         current !== null && current.sessionId === line.sessionId &&
