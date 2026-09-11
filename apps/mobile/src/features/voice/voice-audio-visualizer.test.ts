@@ -17,9 +17,9 @@ const characterSource = readFileSync(
 const auraSource = readFileSync(new URL("./aura.tsx", import.meta.url), "utf8");
 
 describe("native voice audio visualizer", () => {
-  it("meters the remote WebRTC stream only while Homa is speaking", () => {
-    assert.match(sessionSource, /peer\.getStats\(\)/u);
-    assert.match(sessionSource, /status !== "speaking"/u);
+  it("derives speaking from received audio without waiting for a Realtime response event", () => {
+    assert.match(sessionSource, /peer!\.getStats\(\)/u);
+    assert.match(sessionSource, /visualLevel > 0 \? "speaking"/u);
     assert.match(sessionSource, /assistantAudioLevel: number \| null/u);
   });
 

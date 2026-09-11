@@ -1,55 +1,15 @@
-import type { ActiveObjectReference } from "@homa/core";
+import { LiveVoiceConversation, waitForLiveIce, type ActiveObjectReference, type LiveCaption } from "@homa/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { EveMessage } from "eve/react";
 import { AppState } from "react-native";
-import {
-  mediaDevices,
-  RTCPeerConnection,
-  RTCSessionDescription,
-  type MediaStream,
-} from "react-native-webrtc";
-
+import { mediaDevices, RTCPeerConnection, RTCSessionDescription, type MediaStream } from "react-native-webrtc";
 import { prepareVoiceAudioForConversation } from "../../../modules/homa-voice-audio";
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
-import {
-  applyRealtimeTranscriptEvent,
-  sourceTurnFromRealtimeEvent,
-} from "./realtime-transcript";
-import {
-  appendUniqueVoiceToolEffects,
-  messagesFromVoiceToolEffects,
-  openingResponseCreateEvent,
-  parseVoiceToolBridgeOutput,
-  spokenReplyResponseCreateEvent,
-  type VoiceHomaSessionState,
-  type VoiceToolEffect,
-} from "./realtime-tool-effects";
-import {
-  readRemoteAudioLevel,
-  smoothVoiceLevel,
-  visualVoiceLevel,
-  type AudioEnergySample,
-} from "./remote-audio-level";
-import { settledTurns, type VoiceTurn } from "./voice-transcript";
+import { appendUniqueVoiceToolEffects, messagesFromVoiceToolEffects, parseVoiceToolBridgeOutput, type VoiceToolEffect } from "./realtime-tool-effects";
+import { readRemoteAudioLevel, smoothVoiceLevel, visualVoiceLevel, type AudioEnergySample } from "./remote-audio-level";
 
-/** The client secret is scoped and short lived. It is safe to use only for
- * the OpenAI WebRTC offer, never as a general OpenAI credential. */
-interface RealtimeTokenResponse {
-  token?: unknown;
-  tools?: unknown;
-  reason?: unknown;
-}
-
-type VoiceStatus =
-  | "idle"
-  | "connecting"
-  | "listening"
-  | "working"
-  | "speaking"
-  | "paused"
-  | "failed";
-
+type VoiceStatus = "idle" | "connecting" | "listening" | "working" | "speaking" | "paused" | "failed";
 export interface VoiceSession {
   messages: readonly EveMessage[];
   status: VoiceStatus;
@@ -74,491 +34,247 @@ export interface VoiceSession {
   pauseForMicrophoneOwner: (reason: string) => void;
   resume: () => void;
 }
-
 const REASONS: Record<string, string> = {
   "no-session": "Your session expired. Sign in again and we can talk.",
-  "no-family": "I could not find your family account.",
   walled: "Talking out loud comes with a paid plan.",
   "not-included": "Voice is not part of your plan yet.",
   "rate-limited": "We have talked a lot today. Let's pick this up tomorrow.",
   "not-configured": "My voice is not set up right now.",
 };
-
-function apiUrl(path: string): string {
-  return `${env.apiUrl.replace(/\/+$/, "")}${path}`;
+interface Connection {
+  stream?: MediaStream;
+  conversation: LiveVoiceConversation;
+  stop: () => Promise<void>;
+  ready: boolean;
+  send: (event: Record<string, unknown>) => void;
+  working: boolean;
 }
 
-function sessionId(): string {
-  return `voice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function lastText(turns: readonly VoiceTurn[], role: "user" | "assistant"): string | null {
-  for (let index = turns.length - 1; index >= 0; index -= 1) {
-    const turn = turns[index];
-    if (turn.role === role && turn.text.length > 0) return turn.text;
-  }
-  return null;
-}
-
-/**
- * Native gpt-realtime-2.1 session. WebRTC owns microphone capture and remote
- * audio playback. The data channel carries only model events and guarded tool
- * calls, while every transcript line is persisted through Homa's server.
- */
-export function useVoiceSession(
-  activeObject: ActiveObjectReference | null = null,
-): VoiceSession {
+/** Native Live media stays on WebRTC. Shared protocol handling keeps exact
+ * transcript source identities and delegates to the authenticated Homa agent. */
+export function useVoiceSession(activeObject: ActiveObjectReference | null = null): VoiceSession {
   const [status, setStatus] = useState<VoiceStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
   const [pauseReason, setPauseReason] = useState<string | null>(null);
   const [assistantAudioLevel, setAssistantAudioLevel] = useState<number | null>(null);
-  const [turns, setTurns] = useState<readonly VoiceTurn[]>([]);
+  const [turns, setTurns] = useState<LiveCaption[]>([]);
   const [toolEffects, setToolEffects] = useState<readonly VoiceToolEffect[]>([]);
-  const peerRef = useRef<RTCPeerConnection | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const channelRef = useRef<ReturnType<RTCPeerConnection["createDataChannel"]> | null>(null);
-  const turnsRef = useRef<readonly VoiceTurn[]>([]);
-  const cursorRef = useRef(0);
-  const sessionIdRef = useRef<string | null>(null);
-  const closedRef = useRef(false);
-  const homaSessionStateRef = useRef<VoiceHomaSessionState | undefined>(undefined);
-  const pendingTextRef = useRef<{ text: string; sequence: number } | null>(null);
-  const activeObjectRef = useRef<ActiveObjectReference | null>(activeObject);
-  const statusRef = useRef<VoiceStatus>(status);
-  const connectingRef = useRef(false);
-  const connectionAttemptRef = useRef(0);
+  const activeObjectRef = useRef(activeObject);
+  const connectionRef = useRef<Connection | null>(null);
+  const logicalSessionRef = useRef<LiveVoiceConversation | null>(null);
+  const statusRef = useRef(status);
   const resumeOnForegroundRef = useRef(false);
-  const openingResponseRequestedRef = useRef(false);
-
-  useEffect(() => {
-    activeObjectRef.current = activeObject;
-  }, [activeObject]);
-
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
-
-  useEffect(() => {
-    if (status !== "speaking") return;
-
-    const peer = peerRef.current;
-    if (!peer) return;
-    let cancelled = false;
-    let polling = false;
-    let previousEnergy: AudioEnergySample | null = null;
-
-    const sample = async () => {
-      if (cancelled || polling) return;
-      polling = true;
-      try {
-        const report = await peer.getStats();
-        if (cancelled) return;
-        const reading = readRemoteAudioLevel(report, previousEnergy);
-        previousEnergy = reading.energy;
-        if (reading.level === null) return;
-        const visualLevel = visualVoiceLevel(reading.level);
-        setAssistantAudioLevel((current) =>
-          smoothVoiceLevel(current ?? 0, visualLevel),
-        );
-      } catch {
-        // Some WebRTC builds omit audio stats. The aura keeps its calm
-        // speaking fallback instead of interrupting the conversation.
-      } finally {
-        polling = false;
-      }
-    };
-
-    void sample();
-    const interval = setInterval(() => void sample(), 80);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [status]);
+  const changeStatus = useCallback((next: VoiceStatus) => { statusRef.current = next; setStatus(next); }, []);
+  useEffect(() => { activeObjectRef.current = activeObject; }, [activeObject]);
 
   const authenticatedFetch = useCallback(async (path: string, init: RequestInit = {}) => {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) throw new Error("no-session");
-    return fetch(apiUrl(path), {
+    return fetch(`${env.apiUrl.replace(/\/+$/, "")}${path}`, {
       ...init,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...EVE_CHANNEL_HEADER,
-        ...(init.headers ?? {}),
-      },
+      headers: { Authorization: `Bearer ${token}`, ...EVE_CHANNEL_HEADER, ...(init.headers ?? {}) },
     });
-  }, []);
-
-  const persistSettledTurns = useCallback(
-    (finished: boolean) => {
-      const { cursor, lines } = settledTurns(turnsRef.current, cursorRef.current, finished);
-      cursorRef.current = cursor;
-      if (lines.length === 0) return;
-      sessionIdRef.current ??= sessionId();
-      for (const { sequence, line } of lines) {
-        void authenticatedFetch("/api/voice/realtime/turn", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sessionId: sessionIdRef.current,
-            sequence,
-            role: line.role,
-            content: line.text,
-          }),
-        }).catch(() => {
-          // The live audio conversation remains useful if one ledger write
-          // is lost. The server records the failure without interrupting her.
-        });
-      }
-    },
-    [authenticatedFetch],
-  );
-
-  const acceptEvent = useCallback(
-    (event: unknown) => {
-      const next = applyRealtimeTranscriptEvent(turnsRef.current, event);
-      if (next !== turnsRef.current) {
-        turnsRef.current = next;
-        setTurns(next);
-        persistSettledTurns(false);
-      }
-      pendingTextRef.current = sourceTurnFromRealtimeEvent(
-        next,
-        event,
-        pendingTextRef.current,
-      );
-      if (typeof event !== "object" || event === null) return;
-      const type = (event as { type?: unknown }).type;
-      if (type === "output_audio_buffer.started") {
-        setAssistantAudioLevel(null);
-        setStatus("speaking");
-      }
-      if (type === "output_audio_buffer.stopped") setStatus("listening");
-    },
-    [persistSettledTurns],
-  );
-
-  const closeTransport = useCallback(() => {
-    channelRef.current?.close();
-    channelRef.current = null;
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-    peerRef.current?.close();
-    peerRef.current = null;
   }, []);
 
   const end = useCallback(() => {
-    if (closedRef.current && statusRef.current === "idle") return;
-    closedRef.current = true;
+    const current = connectionRef.current;
+    connectionRef.current = null;
     resumeOnForegroundRef.current = false;
-    connectionAttemptRef.current += 1;
-    connectingRef.current = false;
-    persistSettledTurns(true);
-    closeTransport();
+    void current?.stop();
     setMuted(false);
     setPauseReason(null);
-    setError(null);
-    setStatus("idle");
-  }, [closeTransport, persistSettledTurns]);
+    changeStatus("idle");
+  }, [changeStatus]);
 
-  const executeTool = useCallback(
-    async (event: { name?: unknown; arguments?: unknown; call_id?: unknown }) => {
-      const channel = channelRef.current;
-      if (!channel || typeof event.name !== "string" || typeof event.call_id !== "string") return;
-      let args: unknown = {};
+  const connect = useCallback((resume: boolean) => {
+    if (connectionRef.current) return;
+    if (!resume) { setTurns([]); setToolEffects([]); }
+    setError(null);
+    setPauseReason(null);
+    setMuted(false);
+    changeStatus("connecting");
+    let cancelled = false;
+    let peer: RTCPeerConnection | undefined;
+    let stream: MediaStream | undefined;
+    let channel: ReturnType<RTCPeerConnection["createDataChannel"]> | undefined;
+    let handle: { sessionId: string; closeToken: string } | undefined;
+    let startTimer: ReturnType<typeof setTimeout> | undefined;
+    let audioTimer: ReturnType<typeof setInterval> | undefined;
+    let closeResolve: (() => void) | undefined;
+    let stopping: Promise<void> | undefined;
+    const id = `voice-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    const conversation = resume && logicalSessionRef.current ? logicalSessionRef.current : new LiveVoiceConversation(id, {
+      fetch: authenticatedFetch,
+      send: (event) => connectionRef.current?.send(event),
+      onCaption: (caption) => setTurns((current) => {
+        const exists = current.some((row) => row.sessionId === caption.sessionId && row.sequence === caption.sequence);
+        return exists ? current.map((row) => row.sessionId === caption.sessionId && row.sequence === caption.sequence ? caption : row) : [...current, caption];
+      }),
+      onEffects: (value) => {
+        const output = parseVoiceToolBridgeOutput(value);
+        if (output) setToolEffects((current) => appendUniqueVoiceToolEffects(current, output.effects));
+      },
+      onError: (message) => setError(message),
+      onWorking: (value) => {
+        const current = connectionRef.current;
+        if (current) { current.working = value; if (current.ready) changeStatus(value ? "working" : "listening"); }
+      },
+      activeObject: () => activeObjectRef.current,
+    });
+    logicalSessionRef.current = conversation;
+    if (resume) conversation.resume();
+    const release = async () => {
+      if (!handle) return;
+      const current = handle;
+      handle = undefined;
       try {
-        args = typeof event.arguments === "string" ? JSON.parse(event.arguments) : {};
-      } catch {
-        args = {};
-      }
-      setStatus("working");
-      try {
-        const pendingText = pendingTextRef.current;
-        const response = await authenticatedFetch("/api/voice/realtime/tool", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: event.name,
-            args,
-            sessionId: sessionIdRef.current ?? "voice",
-            sourceText: pendingText?.text ?? null,
-            sourceSequence: pendingText?.sequence ?? null,
-            homaSessionState: homaSessionStateRef.current,
-            activeObject: activeObjectRef.current,
-          }),
+        const result = await authenticatedFetch("/api/voice/live/session", {
+          method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify(current), signal: AbortSignal.timeout(12_000),
         });
-        const body = (await response.json().catch(() => null)) as
-          | { output?: unknown }
-          | null;
-        const output = parseVoiceToolBridgeOutput(body?.output) ?? {
-          ok: false,
-          spokenReply: "That did not go through just now. Nothing changed.",
-          effects: [],
-        };
-        setToolEffects((current) =>
-          appendUniqueVoiceToolEffects(current, output.effects),
-        );
-        homaSessionStateRef.current = output.sessionState;
-        pendingTextRef.current = null;
-        channel.send(
-          JSON.stringify({
-            type: "conversation.item.create",
-            item: {
-              type: "function_call_output",
-              call_id: event.call_id,
-              output: JSON.stringify(output),
-            },
-          }),
-        );
-        channel.send(JSON.stringify(spokenReplyResponseCreateEvent()));
-      } catch {
-        pendingTextRef.current = null;
-        channel.send(
-          JSON.stringify({
-            type: "conversation.item.create",
-            item: {
-              type: "function_call_output",
-              call_id: event.call_id,
-              output: JSON.stringify({
-                ok: false,
-                spokenReply: "That did not go through just now. Nothing changed.",
-                effects: [],
-              }),
-            },
-          }),
-        );
-        channel.send(JSON.stringify(spokenReplyResponseCreateEvent()));
-      }
-    },
-    [authenticatedFetch],
-  );
-
-  const connect = useCallback((preserveLogicalSession: boolean) => {
-    if (connectingRef.current) return;
-    if (["listening", "working", "speaking"].includes(statusRef.current)) return;
-    connectingRef.current = true;
-    const attempt = connectionAttemptRef.current + 1;
-    connectionAttemptRef.current = attempt;
-    closedRef.current = false;
-    closeTransport();
-    if (!preserveLogicalSession || !sessionIdRef.current) {
-      cursorRef.current = 0;
-      sessionIdRef.current = sessionId();
-      turnsRef.current = [];
-      setTurns([]);
-      setToolEffects([]);
-      homaSessionStateRef.current = undefined;
-      pendingTextRef.current = null;
-      openingResponseRequestedRef.current = false;
-    }
-    setError(null);
-    setPauseReason(null);
-    setMuted(false);
-    setStatus("connecting");
-
+        if (!result.ok) setError("Voice closed, but its final shutdown could not be confirmed.");
+      } catch { setError("Voice closed, but its final shutdown could not be confirmed."); }
+    };
+    const connection: Connection = {
+      conversation, ready: false, working: false,
+      send: (event) => { if (!cancelled && channel?.readyState === "open") channel.send(JSON.stringify(event)); },
+      stop: () => {
+        if (stopping) return stopping;
+        cancelled = true;
+        const finished = conversation.finish();
+        stream?.getTracks().forEach((track) => track.stop());
+        if (startTimer) clearTimeout(startTimer);
+        if (audioTimer) clearInterval(audioTimer);
+        stopping = (async () => {
+          // Stop local playback immediately; keep data alive for final usage.
+          peer?.getReceivers().forEach((receiver) => { if (receiver.track) receiver.track.enabled = false; });
+          if (connection.ready && channel?.readyState === "open") {
+            await new Promise<void>((resolve) => {
+              const timeout = setTimeout(resolve, 1_500);
+              closeResolve = () => { clearTimeout(timeout); resolve(); };
+              channel!.send(JSON.stringify({ type: "session.close" }));
+            });
+          }
+          await release();
+          channel?.close();
+          peer?.close();
+          await finished;
+        })();
+        return stopping;
+      },
+    };
+    connectionRef.current = connection;
+    const fail = (message: string) => {
+      if (cancelled) return;
+      if (connectionRef.current === connection) connectionRef.current = null;
+      setError(message);
+      changeStatus("failed");
+      void connection.stop();
+    };
     void (async () => {
       try {
-        const tokenResponse = await authenticatedFetch("/api/voice/realtime/token", {
-          method: "POST",
-        });
-        const tokenBody = (await tokenResponse.json().catch(() => null)) as RealtimeTokenResponse | null;
-        if (!tokenResponse.ok || typeof tokenBody?.token !== "string") {
-          const reason = typeof tokenBody?.reason === "string" ? tokenBody.reason : "";
-          throw new Error(REASONS[reason] ?? "I could not start listening just now.");
-        }
-
         await prepareVoiceAudioForConversation();
-        const stream = await mediaDevices.getUserMedia({ audio: true, video: false });
-        if (closedRef.current || connectionAttemptRef.current !== attempt) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-        streamRef.current = stream;
-        const peer = new RTCPeerConnection();
-        peerRef.current = peer;
-        stream.getTracks().forEach((track) => peer.addTrack(track, stream));
-        const channel = peer.createDataChannel("oai-events");
-        channelRef.current = channel;
-        channel.onopen = () => {
-          if (connectionAttemptRef.current !== attempt) return;
-          channel.send(JSON.stringify({ type: "session.update", session: { tools: tokenBody.tools ?? [] } }));
-          if (!openingResponseRequestedRef.current) {
-            openingResponseRequestedRef.current = true;
-            channel.send(JSON.stringify(openingResponseCreateEvent()));
-          }
-          setStatus("listening");
-        };
+        if (cancelled) return;
+        stream = await mediaDevices.getUserMedia({ audio: true, video: false });
+        connection.stream = stream;
+        if (cancelled) { stream.getTracks().forEach((track) => track.stop()); return; }
+        peer = new RTCPeerConnection();
+        stream.getTracks().forEach((track) => peer!.addTrack(track, stream!));
+        channel = peer.createDataChannel("oai-events");
         channel.onmessage = ({ data }: { data: string }) => {
-          if (connectionAttemptRef.current !== attempt) return;
           try {
-            const event = JSON.parse(data as string) as { type?: string; name?: unknown; arguments?: unknown; call_id?: unknown };
-            acceptEvent(event);
-            if (event.type === "response.function_call_arguments.done") {
-              void executeTool(event);
+            const event = JSON.parse(data);
+            if (event.type === "session.closed") {
+              closeResolve?.();
+              if (!cancelled) fail("The voice conversation ended. You can start another when you are ready.");
+              return;
             }
-          } catch {
-            // A malformed model event cannot become a client crash.
-          }
+            if (cancelled) return;
+            if (event.type === "session.started") {
+              connection.ready = true;
+              if (startTimer) clearTimeout(startTimer);
+              changeStatus("listening");
+            }
+            conversation.receive(event);
+            if (event.type === "error") fail("I could not complete the voice connection. Please try again.");
+          } catch { /* Ignore malformed provider events. */ }
         };
         peer.onconnectionstatechange = () => {
-          if (connectionAttemptRef.current !== attempt) return;
-          if (peer.connectionState === "failed" || peer.connectionState === "disconnected") {
-            closeTransport();
-            setError("Something interrupted us. Worth trying again.");
-            setStatus("failed");
-          }
+          if (peer?.connectionState === "failed" || peer?.connectionState === "disconnected") fail("Something interrupted our connection. Please try again.");
         };
         const offer = await peer.createOffer({ offerToReceiveAudio: true });
         await peer.setLocalDescription(offer);
-        const answer = await fetch("https://api.openai.com/v1/realtime/calls", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${tokenBody.token}`,
-            "Content-Type": "application/sdp",
-          },
-          body: offer.sdp ?? "",
+        await waitForLiveIce(() => peer?.iceGatheringState === "complete" || cancelled);
+        if (cancelled) return;
+        const response = await authenticatedFetch("/api/voice/live/session", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sdp: peer.localDescription?.sdp }), signal: AbortSignal.timeout(40_000),
         });
-        if (!answer.ok) throw new Error("I could not connect our call just now.");
-        await peer.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: await answer.text() }));
-      } catch (caught) {
-        if (closedRef.current || connectionAttemptRef.current !== attempt) return;
-        const message = caught instanceof Error ? caught.message : "I could not start listening just now.";
-        setError(message === "no-session" ? REASONS[message] : message);
-        setStatus("failed");
-        closeTransport();
-      } finally {
-        if (connectionAttemptRef.current === attempt) connectingRef.current = false;
-      }
+        const body = await response.json();
+        if (!response.ok || typeof body.sdp !== "string" || typeof body.sessionId !== "string" || typeof body.closeToken !== "string") throw new Error(REASONS[body.reason] ?? "I could not connect our call just now.");
+        handle = { sessionId: body.sessionId, closeToken: body.closeToken };
+        if (cancelled) { await release(); return; }
+        startTimer = setTimeout(() => fail("Voice took too long to connect. Please try again."), 20_000);
+        await peer.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: body.sdp }));
+        if (cancelled) { peer.close(); return; }
+        let polling = false;
+        let previousEnergy: AudioEnergySample | null = null;
+        audioTimer = setInterval(() => {
+          if (polling || cancelled || !connection.ready) return;
+          polling = true;
+          void peer!.getStats().then((report) => {
+            if (cancelled) return;
+            const reading = readRemoteAudioLevel(report, previousEnergy);
+            previousEnergy = reading.energy;
+            if (reading.level === null) return;
+            const visualLevel = visualVoiceLevel(reading.level);
+            setAssistantAudioLevel((current) => smoothVoiceLevel(current ?? 0, visualLevel));
+            changeStatus(visualLevel > 0 ? "speaking" : connection.working ? "working" : "listening");
+          }).catch(() => {}).finally(() => { polling = false; });
+        }, 80);
+      } catch (cause) { fail(cause instanceof Error ? (REASONS[cause.message] ?? cause.message) : "I could not start listening just now."); }
     })();
-  }, [acceptEvent, authenticatedFetch, closeTransport, executeTool]);
-
-  const start = useCallback(() => connect(false), [connect]);
-  const retry = useCallback(() => connect(true), [connect]);
+  }, [authenticatedFetch, changeStatus]);
 
   const pause = useCallback((reason: string, resumeOnForeground: boolean) => {
-    if (!["connecting", "listening", "working", "speaking", "failed"].includes(statusRef.current)) return;
+    if (!connectionRef.current) return;
+    const current = connectionRef.current;
+    connectionRef.current = null;
     resumeOnForegroundRef.current = resumeOnForeground;
-    connectionAttemptRef.current += 1;
-    connectingRef.current = false;
-    persistSettledTurns(true);
-    closeTransport();
+    void current.stop();
     setMuted(false);
-    setError(null);
     setPauseReason(reason);
-    setStatus("paused");
-  }, [closeTransport, persistSettledTurns]);
-
-  const pauseForMicrophoneOwner = useCallback((reason: string) => {
-    pause(reason, false);
-  }, [pause]);
-
-  const resume = useCallback(() => {
-    resumeOnForegroundRef.current = false;
-    connect(true);
-  }, [connect]);
-
+    changeStatus("paused");
+  }, [changeStatus]);
+  const resume = useCallback(() => { resumeOnForegroundRef.current = false; connect(true); }, [connect]);
   const toggleMute = useCallback(() => {
-    const stream = streamRef.current;
-    if (!stream || !["listening", "working", "speaking"].includes(statusRef.current)) return;
-    const nextMuted = !muted;
-    stream.getAudioTracks().forEach((track) => {
-      track.enabled = !nextMuted;
-    });
-    setMuted(nextMuted);
+    const stream = connectionRef.current?.stream;
+    if (!stream) return;
+    const next = !muted;
+    stream.getAudioTracks().forEach((track) => { track.enabled = !next; });
+    setMuted(next);
   }, [muted]);
-
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
-      if (nextState !== "active") {
-        if (["connecting", "listening", "working", "speaking"].includes(statusRef.current)) {
-          pause("Voice paused while Homa is in the background.", true);
-        }
-        return;
-      }
-      if (resumeOnForegroundRef.current && statusRef.current === "paused") {
-        resumeOnForegroundRef.current = false;
-        connect(true);
-      }
+      if (nextState !== "active") { pause("Voice paused while Homa is in the background.", true); return; }
+      if (resumeOnForegroundRef.current && statusRef.current === "paused") resume();
     });
     return () => subscription.remove();
-  }, [connect, pause]);
-
+  }, [pause, resume]);
   useEffect(() => end, [end]);
-
-  const sendText = useCallback((message: string) => {
-    const text = message.trim();
-    const channel = channelRef.current;
-    if (!channel || text.length === 0) return false;
-    try {
-      channel.send(
-        JSON.stringify({
-          type: "conversation.item.create",
-          item: {
-            type: "message",
-            role: "user",
-            content: [{ type: "input_text", text }],
-          },
-        }),
-      );
-      channel.send(JSON.stringify({ type: "response.create" }));
-      pendingTextRef.current = { text, sequence: turnsRef.current.length };
-      setStatus("working");
-      return true;
-    } catch {
-      return false;
-    }
-  }, []);
-
-  const announceResult = useCallback((message: string) => {
-    const text = message.trim();
-    const channel = channelRef.current;
-    if (!channel || text.length === 0) return;
-    channel.send(
-      JSON.stringify({
-        type: "response.create",
-        response: {
-          instructions: `Say exactly this sentence and nothing else: ${JSON.stringify(text)}`,
-          tools: [],
-          tool_choice: "none",
-        },
-      }),
-    );
-  }, []);
-
-  const turnActive =
-    status === "connecting" ||
-    status === "listening" ||
-    status === "working" ||
-    status === "speaking";
+  const sendText = useCallback((message: string) => connectionRef.current?.ready ? connectionRef.current.conversation.sendText(message) : false, []);
+  const announceResult = useCallback((message: string) => { if (connectionRef.current?.ready) connectionRef.current.conversation.say(message); }, []);
+  const turnActive = ["connecting", "listening", "working", "speaking"].includes(status);
   return {
-    messages: messagesFromVoiceToolEffects(toolEffects),
-    status,
+    messages: messagesFromVoiceToolEffects(toolEffects), status,
     assistantAudioLevel: status === "speaking" ? assistantAudioLevel : null,
-    turnActive,
-    muted,
-    pauseReason,
-    assistantTextStreaming: status === "speaking",
-    busyDetail:
-      status === "connecting"
-        ? "getting ready"
-        : status === "working"
-          ? "working on that"
-          : error,
-    lastUserText: lastText(turns, "user"),
-    lastAssistantText: lastText(turns, "assistant"),
-    failed: status === "failed",
-    recovering: false,
-    speaking: status === "speaking",
-    handoffReady: status === "listening",
-    start,
-    end,
-    retry,
-    sendText,
-    announceResult,
-    toggleMute,
-    pauseForMicrophoneOwner,
-    resume,
+    turnActive, muted, pauseReason, assistantTextStreaming: status === "speaking",
+    busyDetail: error ?? (status === "connecting" ? "getting ready" : status === "working" ? "working on that" : null),
+    lastUserText: turns.slice().reverse().find((row) => row.role === "user")?.text ?? null,
+    lastAssistantText: turns.slice().reverse().find((row) => row.role === "assistant")?.text ?? null,
+    failed: status === "failed", recovering: false, speaking: status === "speaking", handoffReady: status === "listening",
+    start: () => connect(false), end, retry: () => connect(true), sendText, announceResult, toggleMute,
+    pauseForMicrophoneOwner: (reason: string) => pause(reason, false), resume,
   };
 }

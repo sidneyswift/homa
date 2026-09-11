@@ -46,15 +46,7 @@ describe("voice-first app opening", () => {
   });
 
   it("asks Homa to speak once per logical conversation, not once per reconnect", () => {
-    assert.match(
-      voiceSessionSource,
-      /if \(!preserveLogicalSession \|\| !sessionIdRef\.current\)[\s\S]*openingResponseRequestedRef\.current = false;/u,
-      "only a new logical conversation may reset the opening turn",
-    );
-    assert.match(
-      voiceSessionSource,
-      /if \(!openingResponseRequestedRef\.current\) \{\s+openingResponseRequestedRef\.current = true;\s+channel\.send\(JSON\.stringify\(openingResponseCreateEvent\(\)\)\);/u,
-      "the open data channel must request exactly one opening response",
-    );
+    assert.match(voiceSessionSource, /resume && logicalSessionRef\.current \? logicalSessionRef\.current/u);
+    assert.match(voiceSessionSource, /if \(resume\) conversation\.resume\(\)/u);
   });
 });

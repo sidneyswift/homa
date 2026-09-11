@@ -203,7 +203,7 @@ describe("native lesson recorder safety contract", () => {
       voiceScreenSource,
       /session\.lastAssistantText === pending\.assistantTextBefore[\s\S]*?forgetTrackedLessonReview/u,
     );
-    assert.match(voiceSessionSource, /if \(!channel \|\| text\.length === 0\) return false/u);
+    assert.match(voiceSessionSource, /connectionRef\.current\?\.ready \? connectionRef\.current\.conversation\.sendText\(message\) : false/u);
     assert.match(activeObjectSource, /reference\.kind === "recording"/u);
     assert.match(
       activeObjectSource,
@@ -231,6 +231,6 @@ describe("native lesson recorder safety contract", () => {
 
   it("resumes the existing Voice context instead of starting a new conversation", () => {
     assert.match(voiceSessionSource, /const resume = useCallback\(\(\) => \{[\s\S]*?connect\(true\)/u);
-    assert.match(voiceSessionSource, /if \(!preserveLogicalSession \|\| !sessionIdRef\.current\) \{/u);
+    assert.match(voiceSessionSource, /resume && logicalSessionRef\.current \? logicalSessionRef\.current/u);
   });
 });
