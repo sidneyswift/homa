@@ -41,10 +41,12 @@ import {
   NO_STYLES_SUMMARY,
 } from "./detail-card";
 import { VoiceMode } from "./voice-mode";
+import { VoiceResultHandoff } from "./voice-result-handoff";
 import { VoiceModeButton } from "./voice-mode-button";
 import { spokenTurnMessage, type VoiceTranscriptLine } from "./voice-transcript";
 import {
   appendVoiceEffects,
+  appendVoiceWork,
   isVoiceEffectMessage,
   voiceEffectMessageId,
   type VoiceEffectContext,
@@ -848,6 +850,8 @@ export function ChatClient({
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
   const [voiceActive, setVoiceActive] = useState(false);
+  const [voiceWork, setVoiceWork] = useState<ReadonlySet<string>>(() => new Set());
+  const voiceHandoffRef = useRef(new VoiceResultHandoff());
   const [voiceAnswerSource, setVoiceAnswerSource] = useState<VoiceEffectContext | null>(null);
   const handledVoiceEffectsRef = useRef(new Set<string>());
   const latestVoiceUserRef = useRef(new Map<string, number>());
@@ -896,6 +900,7 @@ export function ChatClient({
     generation: number,
   ) => {
     setSpoken((current) => appendVoiceEffects(current, output, context, currentTimeMs()));
+    voiceHandoffRef.current.complete(generation, context, output);
     if (generation === voiceGenerationRef.current &&
         (latestVoiceUserRef.current.get(context.sessionId) ?? -1) <= context.sourceSequence) {
       setVoiceAnswerSource(context);
@@ -909,6 +914,16 @@ export function ChatClient({
     const additions = appendVoiceEffects([], { ...output, effects: unseen }, context, currentTimeMs());
     const planner = latestPlannerOpen(additions.map((entry) => entry.message));
     if (planner && generation === voiceGenerationRef.current) setPlannerCanvas(planner.signal);
+  }, []);
+  const receiveVoiceWork = useCallback((working: boolean, context: VoiceEffectContext) => {
+    const id = voiceEffectMessageId(context);
+    if (working) setSpoken((current) => appendVoiceWork(current, context, currentTimeMs()));
+    setVoiceWork((current) => {
+      const next = new Set(current);
+      if (working) next.add(id);
+      else next.delete(id);
+      return next;
+    });
   }, []);
   useEffect(() => {
     if (!focusChildName) return;
@@ -2439,6 +2454,8 @@ export function ChatClient({
                   : null;
               const messageView = isVoiceEffectMessage(item.message) ? (
                 <VoiceEffectsView
+                  working={voiceWork.has(item.message.id)}
+                  voiceActive={voiceActive}
                   message={item.message}
                   currentRequest={voiceAnswerSource !== null &&
                     currentVoiceEffectId === item.message.id &&
@@ -3042,6 +3059,11 @@ export function ChatClient({
               <VoiceMode
                 key={voiceGeneration}
                 onTurn={appendSpokenTurn}
+                onWorking={receiveVoiceWork}
+                onAnnouncementChange={(say) => {
+                  if (say) voiceHandoffRef.current.attach(voiceGeneration, say);
+                  else voiceHandoffRef.current.detach(voiceGeneration);
+                }}
                 onEffects={(output, context) => receiveVoiceEffects(output, context, voiceGeneration)}
                 onNotice={(message) => {
                   if (voiceGeneration === voiceGenerationRef.current) setVoiceNotice(message);

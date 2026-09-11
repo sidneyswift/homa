@@ -214,7 +214,7 @@ test("public metadata and authentication entry points require public rollback pr
 
 test("every route handler has matching independent fail-closed boundary reviews", () => {
   const routeHandlers = git("ls-files", "--", "apps/web/app/**/route.ts").split("\n").filter(Boolean).sort(stableCompare);
-  assert.equal(routeHandlers.length, 119);
+  assert.equal(routeHandlers.length, 121);
   assert.deepEqual(Object.keys(reviewedWebRouteHandlerBoundaries).sort(stableCompare), routeHandlers);
   assert.deepEqual(Object.keys(validatedWebRouteHandlerBoundaries).sort(stableCompare), routeHandlers);
 
@@ -230,7 +230,7 @@ test("every route handler has matching independent fail-closed boundary reviews"
   }
   assert.deepEqual(Object.fromEntries(counts), {
     operator: 2,
-    family: 88,
+    family: 90,
     provider: 10,
     developer: 2,
     "developer-family": 1,

@@ -9,12 +9,14 @@ import type { VoiceHomaBridgeOutput } from "../../lib/voice/homa-bridge";
 import { webVoiceOutputForDisplay } from "./voice-effects";
 import type { VoiceTranscriptLine } from "./voice-transcript";
 
-export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange }: {
+export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange }: {
   onTurn: (line: VoiceTranscriptLine) => void;
   onClose: () => void;
   onEffects: (output: VoiceHomaBridgeOutput, context: { sessionId: string; sourceSequence: number }) => void;
   onNotice: (message: string) => void;
   onActiveChange: (active: boolean) => void;
+  onWorking: (working: boolean, context: { sessionId: string; sourceSequence: number }) => void;
+  onAnnouncementChange: (say: ((text: string) => void) | null) => void;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [ended, setEnded] = useState(false);
@@ -24,8 +26,8 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
   const [isPlaying, setPlaying] = useState(false);
   const sessionRef = useRef<LiveVoiceConversation | null>(null);
   const stopRef = useRef<() => Promise<void>>(async () => {});
-  const callbacksRef = useRef({ onTurn, onClose, onEffects, onNotice, onActiveChange });
-  useEffect(() => { callbacksRef.current = { onTurn, onClose, onEffects, onNotice, onActiveChange }; });
+  const callbacksRef = useRef({ onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange });
+  useEffect(() => { callbacksRef.current = { onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange }; });
 
   const leave = async () => {
     setEnded(true);
@@ -64,7 +66,7 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
         callbacksRef.current.onEffects(display, context);
         return display;
       },
-      onWorking() {},
+      onWorking: (working, context) => callbacksRef.current.onWorking(working, context),
       onError: (message) => { setError(message); callbacksRef.current.onNotice(message); },
     });
     sessionRef.current = session;
@@ -80,6 +82,7 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
     const stop = () => {
       if (stopping) return stopping;
       cancelled = true;
+      callbacksRef.current.onAnnouncementChange(null);
       const finished = session.finish();
       stream?.getTracks().forEach((track) => track.stop());
       audio.pause();
@@ -136,6 +139,7 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
               if (startTimer) clearTimeout(startTimer);
               setCapturing(true);
               callbacksRef.current.onActiveChange(true);
+              callbacksRef.current.onAnnouncementChange((text) => session.say(text));
             }
             session.receive(event);
             if (event.type === "error") fail("I could not complete the voice connection. Please try again.");

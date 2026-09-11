@@ -4,7 +4,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import type { VoiceHomaBridgeOutput, VoiceHomaEffect } from "../../lib/voice/homa-bridge";
 import { selectParentVisibleMaterialMessageParts } from "./material-message-parts";
-import { appendVoiceEffects, voiceEffectPresentation, webVoiceOutputForDisplay } from "./voice-effects";
+import { appendVoiceEffects, appendVoiceWork, voiceEffectPresentation, webVoiceOutputForDisplay } from "./voice-effects";
+import { VoiceWorkStatus } from "./voice-work-status";
 import { VoiceEffectsView } from "./voice-effects-view";
 import { spokenTurnMessage } from "./voice-transcript";
 
@@ -34,6 +35,32 @@ function view(effects: VoiceHomaEffect[], canAnswerOutLoud = true, currentReques
 }
 
 describe("web voice effect rendering", () => {
+  it("holds a real request's place and resolves it without moving the result", () => {
+    const pending = appendVoiceWork([], context, 10);
+    assert.equal(appendVoiceWork(pending, context, 20).length, 1);
+    const complete = appendVoiceEffects(pending, output([hours]), context, 30);
+    assert.equal(complete.length, 1);
+    assert.equal(complete[0].at, 10);
+    assert.equal(complete[0].message.id, pending[0].message.id);
+    assert.equal(complete[0].message.parts[0].type, "dynamic-tool");
+  });
+
+  it("replaces pending work with an honest ambiguous failure even without a receipt", () => {
+    const pending = appendVoiceWork([], context, 10);
+    const failed = appendVoiceEffects(pending, {
+      ok: false, spokenReply: "I could not confirm that request. Please check the chat before trying it again.", effects: [],
+    }, context, 30);
+    assert.equal(failed.length, 1);
+    assert.equal(failed[0].at, 10);
+    assert.match(JSON.stringify(failed[0].message.parts), /could not confirm/);
+  });
+
+  it("explains that work continues after voice ends without claiming completion", () => {
+    const markup = renderToStaticMarkup(<VoiceWorkStatus voiceActive={false} />);
+    assert.match(markup, /still running/);
+    assert.doesNotMatch(markup, /ready|percent|spinner/);
+    assert.match(renderToStaticMarkup(<VoiceWorkStatus voiceActive />), /keep talking/);
+  });
   it("projects a successful report control without changing receipts or continuation state", () => {
     const original: VoiceHomaBridgeOutput = {
       ...output([hours, { callId: "report", toolName: "open_progress_report", output: {
