@@ -23,7 +23,7 @@ interface Dependencies {
   onCaption: (caption: LiveCaption) => void;
   onEffects: (output: LiveBridgeOutput, context: { sessionId: string; sourceSequence: number }) => LiveBridgeOutput | void;
   onError: (message: string) => void;
-  onWorking: (working: boolean) => void;
+  onWorking: (working: boolean, context: { sessionId: string; sourceSequence: number }) => void;
   activeObject?: () => unknown;
   transcriptDelayMs?: number;
 }
@@ -184,7 +184,8 @@ export class LiveVoiceConversation {
     if (!source.text.trim() || source.text.length > 8_000) { this.say("Please ask that again in a shorter request.", delegationId); return; }
     const generation = this.generation;
     this.pendingWork++;
-    this.deps.onWorking(true);
+    const context = { sessionId: this.sessionId, sourceSequence: source.sequence };
+    this.deps.onWorking(true, context);
     const output = (async (): Promise<LiveBridgeOutput> => {
       try {
         const response = await this.deps.fetch("/api/voice/realtime/tool", {
@@ -198,11 +199,17 @@ export class LiveVoiceConversation {
         const result = body?.output;
         if (!response.ok || typeof result?.ok !== "boolean" || typeof result?.spokenReply !== "string" || !Array.isArray(result?.effects)) return failure();
         this.sessionState = result.sessionState;
-        return this.deps.onEffects(result, { sessionId: this.sessionId, sourceSequence: source.sequence }) ?? result;
+        return result;
       } catch { return failure(); }
     })();
-    try { const result = await output; if (generation === this.generation) this.say(result.spokenReply, delegationId); }
-    finally { this.pendingWork--; this.deps.onWorking(this.pendingWork > 0); }
+    try {
+      const result = await output;
+      // Every terminal outcome reaches the chat, including an ambiguous
+      // transport failure and a result arriving after the microphone closes.
+      const display = this.deps.onEffects(result, context) ?? result;
+      if (generation === this.generation) this.say(display.spokenReply, delegationId);
+    }
+    finally { this.pendingWork--; this.deps.onWorking(this.pendingWork > 0, context); }
   }
 
   say(text: string, delegationId: string | null = null) {

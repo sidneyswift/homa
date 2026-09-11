@@ -37,6 +37,19 @@ export function isVoiceEffectMessage(message: EveMessage): boolean {
   return message.id.startsWith(PREFIX);
 }
 
+/** Reserve the result's position when real work begins. The chat owns this
+ * entry so ending a microphone session cannot hide an in-flight request. */
+export function appendVoiceWork(
+  current: readonly ArchivedMessage[], context: VoiceEffectContext, at: number,
+): ArchivedMessage[] {
+  const id = voiceEffectMessageId(context);
+  if (current.some((entry) => entry.message.id === id)) return [...current];
+  return [...current, {
+    at, message: { id, role: "assistant", parts: [] },
+    sessionId: context.sessionId, channel: "web", modality: "voice",
+  }];
+}
+
 /** A source turn's receipts stay together so the ordinary material renderer
  * can select the final visible revision. Replayed call ids are immutable. */
 export function appendVoiceEffects(
@@ -62,6 +75,9 @@ export function appendVoiceEffects(
       input: {},
       output: effect.output,
     });
+  }
+  if (parts.length === 0 && output.spokenReply.trim()) {
+    parts.push({ type: "text", text: output.spokenReply });
   }
   if (parts.length === (existing?.message.parts.length ?? 0)) return [...current];
   const entry: ArchivedMessage = {

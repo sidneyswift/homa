@@ -9,8 +9,12 @@ function fixture(options: { failedSave?: boolean; failedTool?: boolean; hold?: P
   const sent: Record<string, unknown>[] = [];
   const captions = new Map<number, string>();
   const errors: string[] = [];
+  const working: { active: boolean; sessionId: string; sourceSequence: number }[] = [];
+  const effects: unknown[] = [];
   const conversation = new LiveVoiceConversation("voice-fixture", {
-    transcriptDelayMs: 0, send: (event) => sent.push(event), onWorking() {}, onEffects() {},
+    transcriptDelayMs: 0, send: (event) => sent.push(event),
+    onWorking: (active, context) => working.push({ active, ...context }),
+    onEffects: (output) => { effects.push(output); },
     onError: (message) => errors.push(message), onCaption: (row) => captions.set(row.sequence, row.text),
     fetch: async (path, init) => {
       const body = JSON.parse(String(init?.body));
@@ -24,7 +28,7 @@ function fixture(options: { failedSave?: boolean; failedTool?: boolean; hold?: P
   let event = 0;
   const fragment = (text: string, start: number, end: number, role = "input") => conversation.receive({ type: `session.${role}_transcript.delta`, event_id: `e${event++}`, delta: text, start_ms: start, end_ms: end });
   const delegate = (id: string, offset: number) => conversation.receive({ type: "session.delegation.created", delegation: { id, target: "client" }, offset_ms: offset });
-  return { conversation, fragment, delegate, calls, saves, sent, captions, errors };
+  return { conversation, fragment, delegate, calls, saves, sent, captions, errors, working, effects };
 }
 
 test("captions preserve whitespace and overlap without starting work", async () => {
@@ -70,6 +74,8 @@ test("duplicate delegations and ambiguous bridge failures never retry effects", 
   await tick();
   assert.equal(f.calls.length, 1);
   assert.match(String(f.sent[0]?.content), /could not confirm/);
+  assert.equal(f.effects.length, 1);
+  assert.deepEqual(f.working.map((event) => event.active), [true, false]);
   await f.conversation.finish();
 });
 
@@ -89,6 +95,28 @@ test("ending cancels queued delegations and suppresses late speech, not complete
   release(); await tick();
   assert.equal(f.calls.length, 1);
   assert.equal(f.sent.length, 0);
+  assert.equal(f.effects.length, 1);
+  assert.deepEqual(f.working, [
+    { active: true, sessionId: "voice-fixture", sourceSequence: 0 },
+    { active: false, sessionId: "voice-fixture", sourceSequence: 0 },
+  ]);
+});
+
+test("delayed completion reaches chat and voice once while the call stays open", async () => {
+  let release!: () => void;
+  const f = fixture({ hold: new Promise<void>((resolve) => { release = resolve; }) });
+  f.fragment("Make a worksheet.", 0, 10); f.delegate("d1", 20); await tick();
+  assert.deepEqual(f.working.map((event) => event.active), [true]);
+  assert.equal(f.effects.length, 0);
+  assert.equal(f.sent.length, 0);
+  f.fragment("Thank you.", 30, 40);
+  release(); await tick();
+  assert.equal(f.effects.length, 1);
+  assert.equal(f.sent.length, 1);
+  assert.equal(f.sent[0].delegation_id, "d1");
+  assert.equal(f.sent[0].content, "Saved once.");
+  assert.deepEqual(f.working.map((event) => event.active), [true, false]);
+  await f.conversation.finish();
 });
 
 test("assistant persistence waits for earlier unsealed user text", async () => {

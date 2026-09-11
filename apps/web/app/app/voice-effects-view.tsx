@@ -8,11 +8,14 @@ import { latestChecklistRequest, latestReportReveal } from "./onboarding-cards";
 import type { PlannerOpenSignal } from "./planner-canvas";
 import { latestReportOpen } from "./report-open";
 import { voiceEffectPresentation } from "./voice-effects";
+import { VoiceWorkStatus } from "./voice-work-status";
 
 /** Receipts use the normal chat renderer. Form saves and navigation have their
  * own authenticated paths; choice answers remain in the spoken conversation. */
 export function VoiceEffectsView({
   message,
+  working = false,
+  voiceActive = false,
   currentRequest,
   canAnswerOutLoud,
   timeZone,
@@ -23,6 +26,8 @@ export function VoiceEffectsView({
   onOpenReport,
 }: {
   message: EveMessage;
+  working?: boolean;
+  voiceActive?: boolean;
   currentRequest: boolean;
   canAnswerOutLoud: boolean;
   timeZone: string;
@@ -38,8 +43,12 @@ export function VoiceEffectsView({
   const checklist = latestChecklistRequest(messages);
   const report = latestReportReveal(messages);
   const reportOpen = latestReportOpen(messages);
+  if (working) return <div role="status" aria-live="polite"><VoiceWorkStatus voiceActive={voiceActive} /></div>;
   return (
-    <div className="flex flex-col gap-3">
+    <div role="status" aria-live="polite" className="flex flex-col gap-3">
+      {message.parts.every((part) => part.type === "text") ? (
+        <p className="text-sm text-muted">Update from your request</p>
+      ) : null}
       <MessageView
         message={presentation.message}
         timeZone={timeZone}
