@@ -21,7 +21,7 @@ interface Dependencies {
   fetch: (path: string, init?: RequestInit) => Promise<Response>;
   send: (event: Record<string, unknown>) => void;
   onCaption: (caption: LiveCaption) => void;
-  onEffects: (output: LiveBridgeOutput, context: { sessionId: string; sourceSequence: number }) => void;
+  onEffects: (output: LiveBridgeOutput, context: { sessionId: string; sourceSequence: number }) => LiveBridgeOutput | void;
   onError: (message: string) => void;
   onWorking: (working: boolean) => void;
   activeObject?: () => unknown;
@@ -198,8 +198,7 @@ export class LiveVoiceConversation {
         const result = body?.output;
         if (!response.ok || typeof result?.ok !== "boolean" || typeof result?.spokenReply !== "string" || !Array.isArray(result?.effects)) return failure();
         this.sessionState = result.sessionState;
-        this.deps.onEffects(result, { sessionId: this.sessionId, sourceSequence: source.sequence });
-        return result;
+        return this.deps.onEffects(result, { sessionId: this.sessionId, sourceSequence: source.sequence }) ?? result;
       } catch { return failure(); }
     })();
     try { const result = await output; if (generation === this.generation) this.say(result.spokenReply, delegationId); }

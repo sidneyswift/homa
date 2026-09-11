@@ -141,3 +141,17 @@ test("resume preserves backend context and does not greet or replay queued work"
   assert.equal(f.sent.filter((event) => event.type === "session.instructions.append").length, 1);
   await f.conversation.finish();
 });
+
+test("surface-specific verified output is also the spoken reply", async () => {
+  const sent: Record<string, unknown>[] = [];
+  const conversation = new LiveVoiceConversation("voice-report", {
+    send: (event) => sent.push(event), onCaption() {}, onError() {}, onWorking() {},
+    onEffects: (output) => ({ ...output, spokenReply: "Use Open report in our chat." }),
+    fetch: async (path) => Response.json(path.endsWith("/turn") ? { ok: true } : {
+      output: { ok: true, spokenReply: "Your report is open.", effects: [] },
+    }),
+  });
+  conversation.sendText("Open my report"); await tick();
+  assert.equal(sent[0].content, "Use Open report in our chat.");
+  await conversation.finish();
+});

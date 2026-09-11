@@ -59,7 +59,11 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
       fetch: (path, init) => fetch(path, init),
       send: (event) => { if (channel?.readyState === "open") channel.send(JSON.stringify(event)); },
       onCaption: (line) => callbacksRef.current.onTurn(line),
-      onEffects: (output, context) => callbacksRef.current.onEffects(webVoiceOutputForDisplay(output as VoiceHomaBridgeOutput), context),
+      onEffects: (output, context) => {
+        const display = webVoiceOutputForDisplay(output as VoiceHomaBridgeOutput);
+        callbacksRef.current.onEffects(display, context);
+        return display;
+      },
       onWorking() {},
       onError: (message) => { setError(message); callbacksRef.current.onNotice(message); },
     });

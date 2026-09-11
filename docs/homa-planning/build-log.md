@@ -12572,7 +12572,7 @@ checks live on gh#1148.
 The actual web VoiceMode and session route also passed an isolated browser test
 against OpenAI with generated silence: greeting received, caption saved, panel
 closed, authenticated hangup returned 200, and no browser errors or notices.
-Focused validation passed 121 voice/persona tests, 161 native voice tests,
+Focused validation passed 122 voice/persona tests, 162 native voice tests,
 286 continuity tests, web/mobile/core typechecks, and relevant lint. The iOS
 fingerprint stayed `bc62e95f737ecb7dec5083286e8dc4f08813b7b1`, matching FINISHED
 production build 48. This establishes OTA compatibility, not phone installation.
@@ -12582,3 +12582,8 @@ text into the new Live audio session. The voice asks for clarification if needed
 The documentation audit retains its pre-existing failures; comparison with the
 unchanged main checkout found only the isolated checkout missing its private
 `.env.local` file as an additional finding. No private environment file was copied.
+
+A synthetic spoken delegation through the actual web controller dispatched exactly
+once, relayed the stub backend result with Gleam, saved all caption groups, and
+closed with hangup 200 and no notices or browser errors. This caught and fixed
+the browser fetch binding and tightened spoken-result fidelity before release.
