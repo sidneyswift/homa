@@ -88,7 +88,7 @@ for (const native of [false, true]) {
     await new Promise((resolve) => setTimeout(resolve, 10));
     assert.equal(f.stopped(), true);
     assert.equal(f.peerClosed(), true);
-    assert.match(JSON.stringify(f.logs), /"finalized":true/);
+    assert.match(String(f.logs), /"finalized":true/);
   });
   for (const kind of ["onclose", "onerror"] as const) {
     test(`${label}: ${kind} ends a misleading listening state`, async () => {

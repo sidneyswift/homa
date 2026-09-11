@@ -157,7 +157,7 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
           if (!diagnostics.snapshot().finalized) {
             await release();
           }
-          console.info("Live session diagnostics", diagnostics.snapshot());
+          console.info("Live session diagnostics", JSON.stringify(diagnostics.snapshot()));
           channel?.close();
           peer?.close();
           await finished;
