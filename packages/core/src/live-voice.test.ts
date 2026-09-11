@@ -73,7 +73,7 @@ test("duplicate delegations and ambiguous bridge failures never retry effects", 
   f.delegate("d1", 20); f.delegate("d1", 20);
   await tick();
   assert.equal(f.calls.length, 1);
-  assert.match(String(f.sent[0]?.content), /could not confirm/);
+  assert.match(String(f.sent.find((event) => event.type === "session.commentary.append")?.content), /could not confirm/);
   assert.equal(f.effects.length, 1);
   assert.deepEqual(f.working.map((event) => event.active), [true, false]);
   await f.conversation.finish();
@@ -112,9 +112,10 @@ test("delayed completion reaches chat and voice once while the call stays open",
   f.fragment("Thank you.", 30, 40);
   release(); await tick();
   assert.equal(f.effects.length, 1);
-  assert.equal(f.sent.length, 1);
-  assert.equal(f.sent[0].delegation_id, "d1");
-  assert.equal(f.sent[0].content, "Saved once.");
+  const commentary = f.sent.filter((event) => event.type === "session.commentary.append");
+  assert.equal(commentary.length, 1);
+  assert.equal(commentary[0].delegation_id, "d1");
+  assert.equal(commentary[0].content, "Saved once.");
   assert.deepEqual(f.working.map((event) => event.active), [true, false]);
   await f.conversation.finish();
 });
@@ -143,8 +144,8 @@ test("typed starters use the same authenticated bridge without Realtime commands
   const f = fixture();
   assert.equal(f.conversation.sendText("Make a maze"), true); await tick();
   assert.equal(f.calls[0].sourceText, "Make a maze");
-  assert.equal(f.sent[0].type, "session.commentary.append");
-  assert.equal(f.sent[0].delegation_id, null);
+  assert.equal(f.sent.at(-1)?.type, "session.commentary.append");
+  assert.equal(f.sent.at(-1)?.delegation_id, null);
   await f.conversation.finish();
   assert.equal(f.conversation.sendText("Save twice"), false);
 });
@@ -167,7 +168,7 @@ test("resume preserves backend context and does not greet or replay queued work"
   f.fragment("What about tomorrow?", 0, 10); f.delegate("d2", 20); await tick();
   assert.deepEqual(f.calls[1].homaSessionState, { id: "continued" });
   assert.notEqual(f.calls[0].sourceSequence, f.calls[1].sourceSequence);
-  assert.equal(f.sent.filter((event) => event.type === "session.instructions.append").length, 1);
+  assert.equal(f.sent.filter((event) => String(event.content).startsWith("Greet the parent")).length, 1);
   await f.conversation.finish();
 });
 
@@ -181,7 +182,7 @@ test("surface-specific verified output is also the spoken reply", async () => {
     }),
   });
   conversation.sendText("Open my report"); await tick();
-  assert.equal(sent[0].content, "Use Open report in our chat.");
+  assert.equal(sent.find((event) => event.type === "session.commentary.append")?.content, "Use Open report in our chat.");
   await conversation.finish();
 });
 

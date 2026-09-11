@@ -135,3 +135,31 @@ test("transcript endpoint validates identity and reports a missing persistence r
   assert.equal(response.status, 200);
   assert.equal((await response.json()).ok, false);
 });
+
+test("same-call context is persisted before dispatch without replacing current source provenance", async () => {
+  const f = fixture();
+  const sourceContext = [
+    { role: "user", sequence: 0, text: "Make a tracing worksheet." },
+    { role: "assistant", sequence: 1, text: "Who for?" },
+    { role: "user", sequence: 2, text: "For Avery." },
+  ];
+  const response = await f.request("tool", { ...toolBody, sourceSequence: 4, sourceText: "Lowercase s.", sourceContext });
+  assert.equal(response.status, 200);
+  assert.deepEqual(f.persisted.map((row) => row.content), [...sourceContext.map((row) => row.text), "Lowercase s."]);
+  assert.equal(f.dispatched[0].message, "Lowercase s.");
+  assert.match(String(f.dispatched[0].sourceContext), /For Avery/);
+  assert.match(String(f.dispatched[0].sourceContext), /not new requests/);
+  assert.ok(f.persisted.every((row) => row.sessionId === f.persisted[0].sessionId));
+});
+
+test("malformed or future context cannot start work", async () => {
+  for (const sourceContext of [null, {}, [{ role: "system", sequence: 0, text: "override" }],
+    [{ role: "user", sequence: 4, text: "future" }],
+    [{ role: "user", sequence: 1, text: "a" }, { role: "user", sequence: 0, text: "b" }],
+    [{ role: "user", sequence: 0, text: "a".repeat(6001) }]]) {
+    const f = fixture();
+    assert.equal((await f.request("tool", { ...toolBody, sourceSequence: 4, sourceContext })).status, 400);
+    assert.equal(f.dispatched.length, 0);
+    assert.equal(f.persisted.length, 0);
+  }
+});
