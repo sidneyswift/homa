@@ -4,10 +4,10 @@ export function percentile(values, fraction) {
 }
 export function summarize(runs) {
   const gaps = runs.flatMap((run) => run.responseGapsMs ?? []);
-  return { samples: runs.length, passed: runs.filter((run) => run.grade?.pass === true && !run.harnessError).length,
-    failed: runs.filter((run) => run.grade?.pass === false && !run.harnessError).length,
+  return { samples: runs.length, passed: runs.filter((run) => run.grade?.pass === true && !run.harnessError && !run.scenarioFailure).length,
+    failed: runs.filter((run) => (run.grade?.pass === false || run.scenarioFailure) && !run.harnessError).length,
     harnessFailures: runs.filter((run) => run.harnessError).length,
-    ungraded: runs.filter((run) => !run.grade && !run.harnessError).length,
+    ungraded: runs.filter((run) => !run.grade && !run.harnessError && !run.scenarioFailure).length,
     responseLatencyMs: { samples: gaps.length, p50: percentile(gaps, .5), p90: percentile(gaps, .9) },
     physicalPlayback: "unverified", backend: "disposable fixture, not production Eve tools" };
 }

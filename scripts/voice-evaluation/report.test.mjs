@@ -7,3 +7,8 @@ test('failed and ungraded calls cannot disappear into a passing average', () => 
   assert.equal(result.passed,1); assert.equal(result.failed,1); assert.equal(result.harnessFailures,1); assert.equal(result.ungraded,1);
   assert.equal(result.physicalPlayback,'unverified');
 });
+
+test('a missing response is a scenario failure even if a grader praises another part', () => {
+  const result=summarize([{scenarioFailure:'no second delegation',grade:{pass:true}}]);
+  assert.equal(result.passed,0);assert.equal(result.failed,1);assert.equal(result.harnessFailures,0);assert.equal(result.ungraded,0);
+});

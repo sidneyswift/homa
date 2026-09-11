@@ -7,6 +7,7 @@ const originalFetch=window.fetch.bind(window);
 window.fetch=(input,init)=>originalFetch(input,{...init,headers:{...init?.headers,'x-evaluation-token':token}});
 const post=async(path:string,body:unknown)=>{const response=await fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});if(!response.ok)throw Error(`Lab request failed: ${path}`);return response.json();};
 const pause=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
+class ScenarioFailure extends Error {}
 let active=false;
 let lastOutput=0;
 let lastInputEnd=0;
@@ -15,7 +16,7 @@ let resultCount=0;
 let noise=false;
 let speechContext:AudioContext|null=null;
 let speechTarget:MediaStreamAudioDestinationNode|null=null;
-let observed:{captions:{role:string;text:string;sequence:number;at:number}[];responseGapsMs:number[];playbackStarted:boolean;audioSeconds:number;diagnostics:unknown[];harnessError?:string};
+let observed:{captions:{role:string;text:string;sequence:number;at:number}[];responseGapsMs:number[];playbackStarted:boolean;audioSeconds:number;diagnostics:unknown[];harnessError?:string;scenarioFailure?:string};
 const logs=console.info.bind(console);
 console.info=(...values)=>{logs(...values);if(values[0]==='Live session diagnostics')observed?.diagnostics.push(JSON.parse(String(values[1])));};
 const originalPlay=HTMLMediaElement.prototype.play;
@@ -44,7 +45,7 @@ async function speak(text:string){
   const source=speechContext!.createBufferSource();source.buffer=buffer;source.connect(speechTarget!);source.start();
   await new Promise<void>(resolve=>{source.onended=()=>resolve();});lastInputEnd=Date.now();awaitingOutput=true;
 }
-async function until(check:()=>boolean,ms=35000){const deadline=Date.now()+ms;while(!check()){if(Date.now()>deadline)throw Error('Scenario timed out waiting for voice or backend');await pause(100);}}
+async function until(check:()=>boolean,ms=35000){const deadline=Date.now()+ms;while(!check()){if(Date.now()>deadline)throw new ScenarioFailure('Scenario timed out waiting for voice or backend');await pause(100);}}
 function App(){
  const [open,setOpen]=React.useState(false);const [busy,setBusy]=React.useState(false);const [status,setStatus]=React.useState('Choose a synthetic scenario.');
  const [scenario,setScenario]=React.useState('clarification');const [variant,setVariant]=React.useState('current');const [independent,setIndependent]=React.useState(false);const [withNoise,setNoise]=React.useState(false);
@@ -68,12 +69,12 @@ function App(){
    if(scenario==='unauthorized')await pause(10000);
    else await until(()=>resultCount>=(scenario==='completion'?1:fixture.utterances.length),55000);
    await pause(14000);
-   if(!observed.playbackStarted||observed.audioSeconds===0)throw Error('No browser audio playback evidence');
-  }catch(error){observed.harnessError=error instanceof Error?error.message:String(error);}
+   if(!observed.playbackStarted||observed.audioSeconds===0)throw new ScenarioFailure('No browser audio playback evidence');
+  }catch(error){if(error instanceof ScenarioFailure)observed.scenarioFailure=error.message;else observed.harnessError=error instanceof Error?error.message:String(error);}
   finally{
    clearTimeout(deadline);stop();setStatus('Closing call and grading');await pause(6500);
    await speechContext?.close();speechContext=null;speechTarget=null;
-   try{const result=await post('/report',observed);setReport(JSON.stringify(result,null,2));setStatus(observed.harnessError??'Scenario complete');}
+   try{const result=await post('/report',observed);setReport(JSON.stringify(result,null,2));setStatus(observed.harnessError??observed.scenarioFailure??'Scenario complete');}
    catch(error){setStatus(`Report failed: ${error}`);}
    setBusy(false);
   }
