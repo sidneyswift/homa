@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { LiveVoiceConversation, liveCommentary } from "./live-voice";
+import { LiveSessionDiagnostics, LiveVoiceConversation, liveCommentary } from "./live-voice";
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 15));
 function fixture(options: { failedSave?: boolean; failedTool?: boolean; needsReply?: boolean; hold?: Promise<void> } = {}) {
@@ -291,4 +291,49 @@ test("backend waiting state requests a new delegation without running work itsel
   f.delegate("answer", 1900); await tick();
   assert.equal(f.calls[1].sourceText, "An activity schedule.");
   await f.conversation.finish();
+});
+
+
+test("Live append receipts match both command ID and event type without claiming playback", () => {
+  const d = new LiveSessionDiagnostics();
+  d.sent({ type: "session.commentary.append", event_id: "result" });
+  d.receive({ type: "session.thinking.appended", client_event_id: "result" });
+  assert.equal(d.snapshot().unconfirmed, 1);
+  d.receive({ type: "session.commentary.appended", client_event_id: "other" });
+  assert.equal(d.snapshot().unconfirmed, 1);
+  d.receive({ type: "session.commentary.appended", client_event_id: "result" });
+  d.receive({ type: "session.commentary.appended", client_event_id: "result" });
+  assert.equal(d.snapshot().acknowledged, 1);
+  assert.equal(d.snapshot().unconfirmed, 0);
+  assert.equal(d.snapshot().finalized, false);
+});
+
+test("Live errors reject only their command; null codes and missing IDs remain nonterminal", async () => {
+  const d = new LiveSessionDiagnostics();
+  d.sent({ type: "session.instructions.append", event_id: "a" });
+  d.sent({ type: "session.commentary.append", event_id: "b" });
+  d.receive({ type: "error", error: { code: null, client_event_id: "a" } });
+  d.receive({ type: "error", error: { code: null } });
+  assert.equal(d.snapshot().rejected, 1);
+  assert.equal(d.snapshot().unconfirmed, 1);
+  assert.equal(d.snapshot().finalized, false);
+  const f = fixture();
+  f.conversation.receive({ type: "error", error: { code: null } });
+  f.fragment("Make a maze", 1, 10); f.delegate("after-error", 11); await tick();
+  assert.equal(f.calls.length, 1);
+  assert.equal(f.errors.length, 1);
+  assert.doesNotMatch(f.errors[0], /restart/i);
+  await f.conversation.finish();
+});
+
+test("duration snapshots are never summed and transport loss does not imply final usage", () => {
+  const d = new LiveSessionDiagnostics();
+  for (const seconds of [12, 15, 15, 10, -1, NaN]) d.receive({ type: "session.usage.updated", usage: { seconds } });
+  assert.equal(d.snapshot().seconds, 15);
+  assert.equal(d.snapshot().finalized, false);
+  d.receive({ type: "session.closed", reason: "connection_lost", usage: { seconds: 17 } });
+  d.receive({ type: "session.closed", reason: "close_requested", usage: { seconds: 99 } });
+  assert.equal(d.snapshot().seconds, 17);
+  assert.equal(d.snapshot().reason, "connection_lost");
+  assert.equal(d.snapshot().finalized, true);
 });

@@ -181,7 +181,7 @@ export class LiveVoiceConversation {
     }
     if (event.type === "session.delegation.created") {
       const delegation = event.delegation as { id?: unknown; target?: unknown } | undefined;
-      if (delegation?.target !== "client" || typeof delegation.id !== "string" || typeof event.offset_ms !== "number" || !Number.isFinite(event.offset_ms)) return;
+      if (delegation?.target !== "client" || typeof delegation.id !== "string" || typeof event.offset_ms !== "number" || !Number.isFinite(event.offset_ms) || event.offset_ms < 0) return;
       const id = delegation.id;
       if (this.delegations.has(id)) return;
       const offset = event.offset_ms;
@@ -228,7 +228,7 @@ export class LiveVoiceConversation {
       this.delegations.set(id, job);
       this.queue = job.catch(() => this.deps.onError("The voice request could not finish. Please check the chat."));
     }
-    if (event.type === "error") this.deps.onError("The voice connection could not complete that step. Please restart the conversation.");
+    if (event.type === "error") this.deps.onError("The voice connection could not complete that step. Check the chat for your result; you can keep talking.");
   }
 
   private async run(source: Row, delegationId: string | null, activeObject: unknown) {
@@ -304,5 +304,53 @@ export async function waitForLiveIce(complete: () => boolean): Promise<void> {
   while (!complete()) {
     if (Date.now() >= deadline) throw new Error("Voice connection setup timed out.");
     await new Promise<void>((resolve) => setTimeout(resolve, 50));
+  }
+}
+
+/** Protocol receipts contain no conversation content. Acceptance is not playback.
+ * Retain cumulative duration once, and distinguish it from final usage. */
+export class LiveSessionDiagnostics {
+  private pending = new Map<string, string>();
+  private acknowledged = 0;
+  private rejected = 0;
+  private seconds: number | null = null;
+  private finalized = false;
+  private finalUsageConfirmed = false;
+  private reason: string | null = null;
+
+  sent(event: Record<string, unknown>) {
+    if (typeof event.event_id !== "string" || typeof event.type !== "string") return;
+    if (["session.instructions.append", "session.thinking.append", "session.commentary.append"].includes(event.type)) {
+      this.pending.set(event.event_id, `${event.type}ed`);
+    }
+  }
+
+  receive(value: unknown) {
+    if (!value || typeof value !== "object" || this.finalized) return;
+    const event = value as Record<string, unknown>;
+    if (typeof event.client_event_id === "string" && this.pending.get(event.client_event_id) === event.type) {
+      this.pending.delete(event.client_event_id);
+      this.acknowledged++;
+    }
+    if (event.type === "error") {
+      const error = event.error as { client_event_id?: unknown } | undefined;
+      if (typeof error?.client_event_id === "string" && this.pending.delete(error.client_event_id)) this.rejected++;
+    }
+    if (event.type === "session.usage.updated" || event.type === "session.closed") {
+      const usage = event.usage as { seconds?: unknown } | undefined;
+      if (typeof usage?.seconds === "number" && Number.isFinite(usage.seconds) && usage.seconds >= 0) {
+        this.seconds = event.type === "session.closed" ? usage.seconds : Math.max(this.seconds ?? 0, usage.seconds);
+        if (event.type === "session.closed") this.finalUsageConfirmed = true;
+      }
+    }
+    if (event.type === "session.closed") {
+      this.finalized = true;
+      this.reason = typeof event.reason === "string" ? event.reason : null;
+    }
+  }
+
+  snapshot() {
+    return { seconds: this.seconds, finalized: this.finalized, finalUsageConfirmed: this.finalUsageConfirmed, reason: this.reason,
+      acknowledged: this.acknowledged, rejected: this.rejected, unconfirmed: this.pending.size };
   }
 }
