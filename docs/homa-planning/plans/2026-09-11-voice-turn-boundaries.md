@@ -12,8 +12,8 @@ a backend delegation. Normal assistant replies could never divide subsequent
 parent speech. The screenshot's growing earlier bubble follows directly.
 
 Confirmed: delegation source selection used to wait behind a running backend
-request. Later speech could replace the intended unsealed source before the
-queued request ran. Capturing the immutable source promptly removes that race.
+request. A typed request could seal the queued spoken source, allowing later
+speech to replace it before the queued request ran. Capturing the immutable source promptly removes that race.
 
 Suspected contributor to silence: the Live prompt globally said to speak only
 the backend-supplied answer while also allowing casual conversation. The revised

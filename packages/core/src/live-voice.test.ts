@@ -230,10 +230,11 @@ test("queued delegation captures source before later conversation begins", async
   const f = fixture({ hold: new Promise<void>(resolve => { release = resolve; }) });
   f.fragment("Make a maze.", 100, 700); f.delegate("first", 800); await tick();
   f.fragment("Check my planner.", 1000, 1500); f.delegate("second", 1600); await tick();
+  f.conversation.sendText("Create a checklist.");
   f.fragment("Sure, let me look.", 1800, 2300, "output");
   f.fragment("Thanks. How are you?", 2500, 3300);
   release(); await tick(); await tick();
-  assert.deepEqual(f.calls.map(call => call.sourceText), ["Make a maze.", "Check my planner."]);
+  assert.deepEqual(f.calls.map(call => call.sourceText), ["Make a maze.", "Check my planner.", "Create a checklist."]);
   assert.deepEqual(f.calls[1].homaSessionState, { id: "continued" });
   await f.conversation.finish();
 });
