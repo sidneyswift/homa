@@ -16,6 +16,7 @@ export interface LiveBridgeOutput {
   spokenReply: string;
   effects: unknown[];
   sessionState?: unknown;
+  needsReply?: boolean;
 }
 interface Dependencies {
   fetch: (path: string, init?: RequestInit) => Promise<Response>;
@@ -257,7 +258,13 @@ export class LiveVoiceConversation {
       // Every terminal outcome reaches the chat, including an ambiguous
       // transport failure and a result arriving after the microphone closes.
       const display = this.deps.onEffects(result, context) ?? result;
-      if (generation === this.generation) this.say(display.spokenReply, delegationId);
+      if (generation === this.generation) {
+        if (result.needsReply === true) this.send({
+          type: "session.instructions.append", delegation_id: delegationId,
+          content: "The backend is waiting for the parent's answer to its question. It cannot hear this call. Ask the supplied question, listen to the answer, then create a NEW client delegation so the backend receives that answer and continues. A brief choice is enough. Do not just acknowledge the answer or wait silently: the backend is not running until you delegate again.",
+        });
+        this.say(display.spokenReply, delegationId);
+      }
     }
     finally { this.pendingWork--; this.deps.onWorking(this.pendingWork > 0, context); }
   }

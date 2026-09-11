@@ -20,9 +20,19 @@ the backend-supplied answer while also allowing casual conversation. The revised
 instruction applies waiting to that task and explicitly continues conversational
 replies and delegates short answers to backend clarification questions.
 
-Separate possibility: audio transport or model behavior can stall while captions
-continue. A screenshot does not establish that mechanism, and fixing caption
-rows alone does not prove all intermittent audio silence is resolved.
+Reproduced independently: the synthetic browser flow asked a backend clarification
+question, heard "an activity schedule, please, for the morning", acknowledged
+"Mhm, got it", then made no second backend request. The broader startup prompt
+alone did not repair this. The backend bridge was dropping its waiting/question
+state before returning the result to voice mode.
+
+The bridge now returns `needsReply` for a waiting result or a confirmed question
+card. Voice mode supplies an application-authored handoff instruction with that
+result: the backend cannot hear the call, so the answer needs a new delegation.
+The same synthetic answer then reached the backend exactly and returned the next
+result. Failed and ordinary results do not trigger that instruction. Captions
+alone still cannot execute tools. Other intermittent audio transport failures
+remain a separate possibility; this does not certify all physical-device audio.
 
 ## Implementation
 

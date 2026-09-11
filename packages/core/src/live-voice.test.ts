@@ -3,7 +3,7 @@ import test from "node:test";
 import { LiveVoiceConversation, liveCommentary } from "./live-voice";
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 15));
-function fixture(options: { failedSave?: boolean; failedTool?: boolean; hold?: Promise<void> } = {}) {
+function fixture(options: { failedSave?: boolean; failedTool?: boolean; needsReply?: boolean; hold?: Promise<void> } = {}) {
   const calls: Record<string, unknown>[] = [];
   const saves: Record<string, unknown>[] = [];
   const sent: Record<string, unknown>[] = [];
@@ -22,7 +22,7 @@ function fixture(options: { failedSave?: boolean; failedTool?: boolean; hold?: P
       calls.push(body);
       await options.hold;
       if (options.failedTool) throw new Error("ambiguous timeout");
-      return Response.json({ output: { ok: true, spokenReply: "Saved once.", effects: [], sessionState: { id: "continued" } } });
+      return Response.json({ output: { ok: true, spokenReply: "Saved once.", effects: [], needsReply: options.needsReply, sessionState: { id: "continued" } } });
     },
   });
   let event = 0;
@@ -275,5 +275,20 @@ test("late brief acknowledgment cannot divide a continuing request", async () =>
   f.fragment("Okay", 550, 800, "output");
   f.delegate("maze", 1300); await tick();
   assert.equal(f.calls[0].sourceText, "Make a maze.");
+  await f.conversation.finish();
+});
+
+
+test("backend waiting state requests a new delegation without running work itself", async () => {
+  const f = fixture({ needsReply: true });
+  f.fragment("Make a plan.", 100, 500); f.delegate("first", 600); await tick();
+  assert.equal(f.sent[0].type, "session.instructions.append");
+  assert.equal(f.sent[0].delegation_id, "first");
+  assert.match(String(f.sent[0].content), /NEW client delegation/);
+  assert.equal(f.sent[1].type, "session.commentary.append");
+  f.fragment("An activity schedule.", 1000, 1800); await tick();
+  assert.equal(f.calls.length, 1);
+  f.delegate("answer", 1900); await tick();
+  assert.equal(f.calls[1].sourceText, "An activity schedule.");
   await f.conversation.finish();
 });
