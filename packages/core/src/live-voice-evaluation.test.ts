@@ -3,13 +3,13 @@ import test from "node:test";
 import { LiveVoiceConversation } from "./live-voice";
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 20));
-function harness() {
+function harness(guidanceDelayMs = 0) {
   const requests: Record<string, unknown>[] = [];
   const spoken: Record<string, unknown>[] = [];
   const effects: unknown[] = [];
   const releases: (() => void)[] = [];
   const conversation = new LiveVoiceConversation("evaluation", {
-    transcriptDelayMs: 0, send: (event) => spoken.push(event),
+    transcriptDelayMs: 0, guidanceDelayMs, send: (event) => spoken.push(event),
     onCaption() {}, onError() {}, onWorking() {}, onEffects: (result) => { effects.push(result); },
     fetch: async (path, init) => {
       if (path.endsWith("/turn")) return Response.json({ ok: true });
@@ -77,4 +77,14 @@ test("speech during work prompts intent-aware delegation, never dispatches by ca
   assert.ok(f.spoken.some((event) => event.type === "session.instructions.append" && String(event.content).includes("Merely acknowledging")));
   f.delegate(2100); await tick(); f.releases.shift()!(); await tick(); f.releases.shift()!(); await tick();
   await f.conversation.finish();
+});
+
+
+test("an update already delegated does not receive another delegation reminder", async () => {
+  const f = harness(60);
+  f.fragment("input", "Make uppercase S.", 0, 800); f.delegate(900); await tick();
+  f.fragment("input", "Actually, lowercase s.", 1200, 2000); f.delegate(2100);
+  await new Promise<void>((resolve) => setTimeout(resolve, 90));
+  assert.equal(f.spoken.some((event) => String(event.content).includes("Merely acknowledging")), false);
+  f.releases.shift()!(); await tick(); f.releases.shift()!(); await tick(); await f.conversation.finish();
 });

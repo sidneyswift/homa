@@ -27,6 +27,7 @@ interface Dependencies {
   onWorking: (working: boolean, context: { sessionId: string; sourceSequence: number }) => void;
   activeObject?: () => unknown;
   transcriptDelayMs?: number;
+  guidanceDelayMs?: number;
 }
 // Presentation only: a short acknowledgment must not split a parent mid-thought.
 const PARENT_CAPTION_GAP_MS = 1_000;
@@ -182,13 +183,14 @@ export class LiveVoiceConversation {
       if (role === "user" && this.pendingWork > 0 && event.start_ms > this.sourceOffset) {
         if (this.pendingSpeechTimer) clearTimeout(this.pendingSpeechTimer);
         const generation = this.generation;
+        const speechStart = event.start_ms;
         // This pause schedules guidance, never permission or a guessed turn.
         // Live still judges intent and decides whether to delegate.
         this.pendingSpeechTimer = setTimeout(() => {
-          if (this.ended || generation !== this.generation || this.pendingWork === 0) return;
+          if (this.ended || generation !== this.generation || this.pendingWork === 0 || speechStart <= this.sourceOffset) return;
           this.send({ type: "session.instructions.append", delegation_id: null,
             content: "The parent spoke while the backend was working. If their new speech changes or cancels the task, create a NEW client delegation with that update as soon as their request is clear. The backend cannot hear the call. Merely acknowledging the update does not deliver it. For small talk, respond normally without delegating. Do not claim a change took effect before its backend result." });
-        }, this.deps.transcriptDelayMs ?? 900);
+        }, this.deps.guidanceDelayMs ?? 900);
       }
       return;
     }
