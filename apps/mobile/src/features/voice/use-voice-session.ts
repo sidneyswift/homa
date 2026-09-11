@@ -151,7 +151,8 @@ export function useVoiceSession(activeObject: ActiveObjectReference | null = nul
             await new Promise<void>((resolve) => {
               const timeout = setTimeout(resolve, 5_000);
               closeResolve = () => { clearTimeout(timeout); resolve(); };
-              channel!.send(JSON.stringify({ type: "session.close" }));
+              try { channel!.send(JSON.stringify({ type: "session.close" })); }
+              catch { closeResolve?.(); }
             });
           }
           if (!diagnostics.snapshot().finalized) {

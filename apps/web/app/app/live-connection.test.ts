@@ -94,7 +94,8 @@ for (const native of [false, true]) {
     test(`${label}: ${kind} ends a misleading listening state`, async () => {
       const f = await mount(native);
       f.receive({ type: "session.started" });
-      f.channel[kind]?.();
+      if (kind === "onclose") f.channel.close();
+      else { f.channel.send = () => { throw new Error("transport unavailable"); }; f.channel.onerror?.(); }
       await new Promise((resolve) => setTimeout(resolve, 10));
       assert.equal(f.stopped(), true);
       assert.equal(f.peerClosed(), true);
