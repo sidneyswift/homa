@@ -1,10 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import dynamic from "next/dynamic";
+import { useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
 import { ConversationControlsPreview } from "./conversation-controls-preview";
 import styles from "./voice-workspace-preview.module.css";
+
+const HomaCharacter = dynamic(() => import("./homa-character"), { ssr: false, loading: () => <Logo variant="mark" size={144} /> });
 
 const statesToDesign = [
   ["listening", "Listening", "Voice just started"],
@@ -18,6 +21,7 @@ const statesToDesign = [
 ] as const;
 
 export function VoiceWorkspacePreview() {
+  const [characterPaused, setCharacterPaused] = useState(false);
   const stateDialog = useRef<HTMLDialogElement>(null);
   const stateButton = useRef<HTMLButtonElement>(null);
 
@@ -25,7 +29,7 @@ export function VoiceWorkspacePreview() {
     <div className={styles.preview}>
       <main className={styles.screen}>
         <div className={styles.stage}>
-          <Logo variant="mark" size={64} />
+          <div className={styles.characterStage}><HomaCharacter paused={characterPaused} /></div>
         </div>
       </main>
       <ConversationControlsPreview />
@@ -35,6 +39,7 @@ export function VoiceWorkspacePreview() {
           <h2 id="state-title">States to design</h2>
           <button onClick={() => stateDialog.current?.close()}>Close</button>
         </div>
+        <button className={styles.characterPause} aria-pressed={characterPaused} onClick={() => setCharacterPaused(paused => !paused)}>{characterPaused ? "Resume character motion" : "Pause character motion"}</button>
         <ul className={styles.stateList}>
           {statesToDesign.map(([name, label, description]) => (
             <li key={name}>
