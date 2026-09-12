@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { createBoundedAuthUserFetch } from "./auth-user-fetch";
 import { readEveAuthentication } from "./eve-authentication";
 import { readEveMembership } from "./eve-membership";
 import { createSupabaseRequestClient } from "./supabase/server";
@@ -59,11 +60,18 @@ export async function resolveApiFamily(
     const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return null;
     supabase = createClient(url, key, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+        ...(options.transientAuthErrors === "throw"
+          ? { fetch: createBoundedAuthUserFetch(url, { signal: request.signal }) }
+          : {}),
+      },
       auth: { persistSession: false, autoRefreshToken: false },
     });
   } else {
-    supabase = createSupabaseRequestClient(request);
+    supabase = createSupabaseRequestClient(request, options.transientAuthErrors === "throw"
+      ? { fetch: createBoundedAuthUserFetch(process.env.NEXT_PUBLIC_SUPABASE_URL!, { signal: request.signal }) }
+      : undefined);
   }
   const readUser = () => supabase.auth.getUser(token);
   const { data, error } = options.transientAuthErrors === "throw"

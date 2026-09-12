@@ -121,7 +121,7 @@ test("binding classifies real SDK Auth 504 and network errors before any members
       const body = await response.json();
       assert.equal(body.code, "auth_service_unavailable");
       assert.doesNotMatch(JSON.stringify(body), /private|Invalid token/);
-      assert.deepEqual(backend.paths.slice(before), ["/auth/v1/user"], "No membership read or Auth retry is allowed");
+      assert.deepEqual(backend.paths.slice(before), Array(status === 429 ? 1 : 2).fill("/auth/v1/user"), "Only bounded transient Auth GET retries are allowed before admission");
     }
   }
   const records = logs.map(row => JSON.parse(row[1] as string));
@@ -141,7 +141,7 @@ test("API Auth failure response changes are opt-in for both bearer and cookie ca
       EveAuthServiceUnavailableError,
     );
   }
-  assert.deepEqual(backend.paths, Array(4).fill("/auth/v1/user"));
+  assert.deepEqual(backend.paths, Array(6).fill("/auth/v1/user"));
 });
 
 test("other API family callers retain null on timeout while chat can opt in and recover", async (t) => {

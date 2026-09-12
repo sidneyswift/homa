@@ -3,6 +3,7 @@ import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
 import { measureChatPreparation } from "../../lib/observability/chat-preparation";
+import { createBoundedAuthUserFetch } from "../../lib/auth-user-fetch";
 import { readEveAuthentication } from "../../lib/eve-authentication";
 import { readEveMembership } from "../../lib/eve-membership";
 import { familyAccountGate } from "../../lib/billing/wall";
@@ -104,7 +105,10 @@ function supabaseAuth(): AuthFn<Request> {
     if (!url || !key) return null;
 
     const supabase = createClient(url, key, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+        fetch: createBoundedAuthUserFetch(url, { signal: request.signal }),
+      },
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
