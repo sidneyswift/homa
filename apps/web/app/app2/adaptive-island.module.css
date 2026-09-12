@@ -17,7 +17,7 @@
   scrollbar-width: none;
 }
 
-.view { position: relative; }
+.view { position: relative; width: max-content; max-width: calc(var(--island-max-width) - 18px); }
 .view[data-active="false"] {
   position: absolute;
   top: 8px;
@@ -30,7 +30,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .surface { transform: translate(-50%, var(--island-y)) !important; }
+  .surface { transform: translate(-50%, var(--island-y)) !important; width: var(--island-target-width) !important; height: var(--island-target-height) !important; }
   .surface * { transform: none !important; }
   .view[data-active="true"] { opacity: 1 !important; }
   .view[data-active="false"] { visibility: hidden; }

@@ -1,8 +1,8 @@
 "use client";
 
 import { motion as contract } from "@homa/design/motion";
-import { LayoutGroup, MotionConfig, motion, type HTMLMotionProps } from "motion/react";
-import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { MotionConfig, motion, type HTMLMotionProps } from "motion/react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from "react";
 
 import { fitIsland, resolveIslandPlacement, type IslandPlacement as Placement } from "./island-geometry";
 import styles from "./adaptive-island.module.css";
@@ -22,18 +22,19 @@ function useLiveReducedMotion() {
 
 interface AdaptiveIslandProps extends HTMLMotionProps<"form"> {
   size: "content" | "fill";
+  view: string;
   placement?: Placement | "auto";
   regionRef?: RefObject<HTMLElement | null>;
 }
 
 /** Presentation only. Activity state, editable drafts and audio ownership stay with the caller. */
-export function AdaptiveIsland({ children, size, placement = "auto", regionRef, className, ...props }: AdaptiveIslandProps) {
+export function AdaptiveIsland({ children, size, view, placement = "auto", regionRef, className, ...props }: AdaptiveIslandProps) {
   const host = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLFormElement>(null);
   const previousPlacement = useRef<Placement | undefined>(undefined);
-  const [geometry, setGeometry] = useState({ placement: "center" as Placement, offsetX: 0, offsetY: 0, maxWidth: 780, maxHeight: 10000 });
+  const [geometry, setGeometry] = useState({ placement: "center" as Placement, offsetX: 0, offsetY: 0, maxWidth: 780, shellMaxWidth: 780, maxHeight: 10000 });
   const reducedMotion = useLiveReducedMotion();
-  const groupId = useId();
+  const [dimensions, setDimensions] = useState({ width: 214, height: 62 });
 
   useLayoutEffect(() => {
     const element = host.current;
@@ -54,10 +55,16 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
       ) : placement;
       previousPlacement.current = resolved;
       const origin = resolved === "top" ? 0 : resolved === "bottom" ? 1 : 0.5;
-      // Keyboard changes affect available space, not which edge of this host is anchored.
+      const content = form.querySelector<HTMLElement>('[data-active="true"]');
+      const css = getComputedStyle(form);
+      const insetX = parseFloat(css.paddingLeft) + parseFloat(css.paddingRight) + parseFloat(css.borderLeftWidth) + parseFloat(css.borderRightWidth);
+      const insetY = parseFloat(css.paddingTop) + parseFloat(css.paddingBottom) + parseFloat(css.borderTopWidth) + parseFloat(css.borderBottomWidth);
+      const targetWidth = size === "fill" ? anchor.width : (content?.offsetWidth ?? 196) + insetX;
+      const targetHeight = (content?.offsetHeight ?? 44) + insetY;
+      // Measure natural content, never the spring's intermediate shell dimensions.
       const fitted = fitIsland({
         x: anchor.left + anchor.width / 2, y: anchor.top + anchor.height * origin,
-        width: form.offsetWidth, height: form.offsetHeight, origin,
+        width: targetWidth, height: targetHeight, origin,
         bounds: {
           left: Math.max(regionBounds?.left ?? viewportLeft, viewportLeft),
           top: Math.max(regionBounds?.top ?? viewportTop, viewportTop),
@@ -65,13 +72,16 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
           bottom: Math.min(regionBounds?.bottom ?? viewportBottom, viewportBottom),
         },
       });
-      const next = { ...fitted, maxWidth: Math.min(anchor.width, fitted.maxWidth), placement: resolved };
+      const nextDimensions = { width: Math.min(targetWidth, anchor.width, fitted.maxWidth), height: Math.min(targetHeight, fitted.maxHeight) };
+      setDimensions(current => current.width === nextDimensions.width && current.height === nextDimensions.height ? current : nextDimensions);
+      const next = { ...fitted, shellMaxWidth: fitted.maxWidth, maxWidth: Math.min(anchor.width, fitted.maxWidth), placement: resolved };
       setGeometry(current => Object.keys(next).every(key => current[key as keyof typeof next] === next[key as keyof typeof next]) ? current : next);
     };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(element);
     observer.observe(form);
+    form.querySelectorAll<HTMLElement>("[data-active]").forEach(view => observer.observe(view));
     if (region) observer.observe(region);
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
@@ -84,7 +94,7 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
       window.visualViewport?.removeEventListener("resize", update);
       window.visualViewport?.removeEventListener("scroll", update);
     };
-  }, [placement, regionRef, size]);
+  }, [placement, regionRef, size, view]);
 
   const resolved = geometry.placement;
   const origin = resolved === "top" ? 0 : resolved === "bottom" ? 1 : 0.5;
@@ -95,20 +105,22 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
       <MotionConfig reducedMotion="never" transition={{
         duration: reducedMotion ? 0 : contract.durations.base / 1000,
         ease,
-        layout: reducedMotion ? { duration: 0 } : islandSpring,
+        width: reducedMotion ? { duration: 0 } : islandSpring,
+        height: reducedMotion ? { duration: 0 } : islandSpring,
       }}>
-        <LayoutGroup id={groupId}>
+
           <motion.form
             {...props}
             ref={surface}
-            layoutScroll
-            layout
             initial={false}
+            animate={dimensions}
             className={`${styles.surface} ${className ?? ""}`}
             style={{
               ...props.style,
-              width: size === "fill" ? "100%" : "max-content",
-              maxWidth: geometry.maxWidth,
+              "--island-max-width": `${geometry.maxWidth}px`,
+              "--island-target-width": `${dimensions.width}px`,
+              "--island-target-height": `${dimensions.height}px`,
+              maxWidth: geometry.shellMaxWidth,
               maxHeight: geometry.maxHeight,
               left: `calc(50% + ${geometry.offsetX}px)`,
               top: `calc(${origin * 100}% + ${geometry.offsetY}px)`,
@@ -117,14 +129,14 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
               y: `${-origin * 100}%`,
               originX: 0.5,
               originY: origin,
-              // Numeric styles let Motion correct the pill and shadow during transforms.
+              // Only the shell dimensions spring; text and icons are never scaled.
               borderRadius: 999,
               boxShadow: "0 8px 24px rgba(32, 36, 43, 0.08)",
             } as CSSProperties}
           >
             {children}
           </motion.form>
-        </LayoutGroup>
+
       </MotionConfig>
     </div>
   );
@@ -157,8 +169,6 @@ export function IslandView({ active, children, className, id }: {
     <motion.div
       ref={view}
       id={id}
-      layout="position"
-      layoutScroll
       initial={false}
       animate={{ opacity: active ? 1 : 0 }}
       transition={{ opacity: { duration: reducedMotion ? 0 : active ? 0.18 : 0.08, delay: reducedMotion || !active ? 0 : 0.09 } }}
