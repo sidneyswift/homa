@@ -1,3 +1,4 @@
+import { createBoundedChildrenReadFetch } from "./children-read-fetch";
 import { createSupabaseServerClient } from "./supabase/server";
 
 /**
@@ -181,12 +182,15 @@ export async function getMyFamilyHomeschool(familyId: string): Promise<FamilyHom
 }
 
 export async function getMyChildren(familyId: string): Promise<ChildRecord[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({
+    fetch: createBoundedChildrenReadFetch(process.env.NEXT_PUBLIC_SUPABASE_URL!, familyId),
+  });
   const { data, error } = await supabase
     .from("children")
     .select("id, family_id, name, birth_month, profile, avatar_url")
     .eq("family_id", familyId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .retry(false);
   if (error) throw new Error(`children read failed: ${error.message}`);
   return (data ?? []) as ChildRecord[];
 }
