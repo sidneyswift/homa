@@ -63,13 +63,13 @@ export function ConversationControlsPreview() {
             </div>
           </div>
           <div className={styles.modeSelector} role="group" aria-label="Conversation view">
-            <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
             <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
             <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} data-pointer-focus={pointerFocus} onBlur={() => setPointerFocus(false)} onKeyDown={() => setPointerFocus(false)} onClick={(event) => {
               setPointerFocus(event.detail > 0);
               voiceButton.current?.focus({ preventScroll: true });
               setKeyboardVisible(false);
             }}>Voice</button>
+            <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
           </div>
           <div className={styles.composerActions} hidden={!keyboardVisible}>
             {keyboardVisible && <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></button>}
