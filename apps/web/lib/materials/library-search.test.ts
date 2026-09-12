@@ -46,5 +46,27 @@ test("actual tool schema bounds title and both access modes pass it without gues
     assert.equal(reads.length, 2, "kept miss retains the existing unfinalized check");
     assert.ok(reads.every((r) => r.family === "owned-family" && r.filters.title === "Letter Sounds Workbook" && r.filters.subject === undefined && r.filters.theme === undefined));
     assert.ok(!result.note.includes("Design fresh"));
+    reads.length = 0;
+    const titleOnly = tool.inputSchema.parse({
+      title: "Codex verification: shapes", materialId: null, pageIndex: null,
+      childId: null, kind: null, subject: null, theme: null, character: null,
+      status: "any", limit: null,
+    });
+    await tool.execute(titleOnly, { session: { auth: { current: { attributes: {} } } } });
+    assert.equal(reads.length, 1, "absent material ID selects title search, never direct lookup");
+    assert.equal(reads[0].family, "owned-family");
+    assert.equal(reads[0].filters.title, "Codex verification: shapes");
+    for (const field of ["childId", "kind", "subject", "theme", "character"]) {
+      assert.equal(reads[0].filters[field], undefined, field);
+    }
+    assert.equal(reads[0].filters.limit, 6);
+    assert.equal(reads[0].filters.status, "any");
+    reads.length = 0;
+    await tool.execute(titleOnly, { session: { auth: { current: { attributes: { channel: "subject_lesson" } } } } });
+    assert.equal(reads.length, 1);
+    assert.equal(reads[0].filters.status, "final", "subject lessons cannot search drafts");
+    for (const invalid of [{ materialId: "not-an-id" }, { limit: 13 }, { pageIndex: 0 }]) {
+      assert.equal(tool.inputSchema.safeParse(invalid).success, false);
+    }
   }
 });
