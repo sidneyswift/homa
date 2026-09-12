@@ -37,7 +37,8 @@ export function classifyGeneratedWebRouteBoundary(path: string): GeneratedWebRou
   const first = parts.filter((segment) => !isUrlNeutralSegment(segment))[0] ?? "";
   if (first === "app") return "family";
   if (first === "admin") return "operator";
-  if (first === "dev") return "developer";
+  // #1158: /app2 is server-gated to local development.
+  if (first === "dev" || first === "app2") return "developer";
   return "public";
 }
 

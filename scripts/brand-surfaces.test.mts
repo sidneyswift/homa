@@ -516,6 +516,8 @@ test("web route reachability follows the structural proxy boundary", () => {
 test("route groups and slots stay neutral while interceptors fail closed", () => {
   const fixtures = new Map<string, ReturnType<typeof classifyGeneratedWebRouteBoundary>>([
     ["apps/web/app/(marketing)/page.tsx", "public"],
+    ["apps/web/app/app2/page.tsx", "developer"],
+    ["apps/web/app/app20/page.tsx", "public"],
     ["apps/web/app/(shell)/app/page.tsx", "family"],
     ["apps/web/app/@modal/app/page.tsx", "family"],
     ["apps/web/app/@modal/(.)app/page.tsx", "intercept-unresolved"],
