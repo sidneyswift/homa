@@ -8,8 +8,8 @@
  */
 export const HOMA_MODEL = "openai/gpt-6-astra";
 
-/** Shared turn and background-call effort, selected by the founder in #1159. */
-export const HOMA_REASONING = "low" as const;
+/** Shared turn and background-call effort, selected by the founder in #1161. */
+export const HOMA_REASONING = "medium" as const;
 
 /** Explicit specialist overrides keep their own provider-default reasoning. */
 export function homaModelSettings(model: string = HOMA_MODEL) {

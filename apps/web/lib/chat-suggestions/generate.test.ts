@@ -104,7 +104,7 @@ describe("prompt suggestion generation", () => {
       reasoning: "none",
       maxOutputTokens: 1_024,
     });
-    assert.equal({ ...PROMPT_SUGGESTION_PRODUCER_SETTINGS, ...homaModelSettings(HOMA_MODEL) }.reasoning, "low");
+    assert.equal({ ...PROMPT_SUGGESTION_PRODUCER_SETTINGS, ...homaModelSettings(HOMA_MODEL) }.reasoning, "medium");
     assert.equal({ ...PROMPT_SUGGESTION_PRODUCER_SETTINGS, ...homaModelSettings("test/specialist") }.reasoning, "none");
     for (const source of [GENERATOR_SOURCE, LIVE_EVAL_SOURCE]) {
       assert.equal(
