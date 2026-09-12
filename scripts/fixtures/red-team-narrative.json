@@ -1,5 +1,5 @@
 {
-  "promptVersion": "2026.09.06a",
+  "promptVersion": "2026.09.12a",
   "narrative": {
     "note": "Thanks for sharing what you are seeing at home.",
     "subjects": {
@@ -21,14 +21,19 @@
       "spanish": "Try understanding common everyday words in that language (water, milk, more)."
     },
     "drawers": {
-      "math": "Try this: count the stairs together, touching each one.",
-      "phonics": "Try this: play sound i-spy naming a starting sound.",
-      "language": "Try this: tell someone what happened at the park.",
-      "science": "Try this: guess sink or float before dropping each item in. Use bowl of water and five small things.",
-      "art": "Try this: draw how a song feels with fast scribbles or soft colors.",
-      "gross_motor": "Try this: race down the hallway as different animals.",
-      "self_care": "Try this: button an old shirt around a cushion against the timer. Use old shirt with buttons.",
-      "computer_science": "Try this: give you exact step-by-step instructions to follow across the room."
+      "math": "Try this: count 5 toy trucks together. Use 5 toy trucks.",
+      "literacy": "Try this: wonder aloud what the words on a cereal box say. Use a cereal box.",
+      "phonics": "Try this: clap the beats in the word banana together.",
+      "writing": "Try this: draw a truck with a crayon held between fingers. Use a crayon and paper.",
+      "language": "Try this: talk together about something that happened earlier today.",
+      "art": "Try this: name colors together while painting. Use paints and paper.",
+      "music": "Try this: clap along to a steady beat together.",
+      "gross_motor": "Try this: gallop together with one foot leading.",
+      "fine_motor": "Try this: string large beads onto a lace together. Use large beads and a lace.",
+      "self_care": "Try this: offer a daytime toilet sit.",
+      "executive_function": "Try this: practice a short wait for a turn during a clapping game.",
+      "computer_science": "Try this: play robot parent by following exact spoken steps across the room.",
+      "spanish": "Try this: use the word for water in your chosen language when offering a drink. Use water."
     }
   },
   "gateContext": {

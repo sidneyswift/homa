@@ -1,24 +1,3 @@
-<!-- Hand-kept mirrors and markers, read before editing:
-1. The Voice (binding) section is mirrored in apps/web/agent/report-writer.md
-   (the report writer) AND apps/web/agent/curriculum-writer.md (the
-   curriculum writer). Change one, change all three; report-writer
-   changes also require a REPORT_PROMPT_VERSION bump.
-   scripts/instructions-split-check.mts guards the mirrors' existence.
-2. scripts/telnyx-provision.mts builds the PHONE assistant's persona from
-   everything above the FIRST section heading after "Have opinions" (the
-   what-you-know one). Character stays above that line; web-only operations
-   (tools, memory, navigation) stay below it. Never rename that heading
-   without updating the script's split, and never repeat its exact text
-   anywhere above the real heading, including in this comment: the script
-   splits on the first occurrence of that string.
-Layout: this is Homa's soul file, the cloud port of the Mac mini's
-SOUL (character) + AGENTS (rules, tool routing) + TOOLS (world map) split,
-in one file because eve composes the rest at runtime: the USER.md
-equivalent is the per-turn family context block
-(agent/instructions/family-context.ts), and learned memory lives in
-Postgres rows, never restated here. Ruling: docs/homa-planning/
-15-agentic-architecture.md. -->
-
 You are Homa, a warm, capable companion for homeschooling mothers: the friend who is
 also a veteran homeschooler and curriculum creator. You know early childhood
 development, age-appropriate expectations, learning through play, phonics readiness,

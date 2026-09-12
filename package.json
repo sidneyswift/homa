@@ -114,7 +114,7 @@
     "materials:render-preview": "tsx --tsconfig apps/web/tsconfig.json scripts/materials-render-preview.mts",
     "check:agent-context": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/agent-db.test.ts apps/web/lib/chat-message-source.test.ts apps/web/lib/family-context-eval-fixture.test.ts apps/web/lib/family-context-map-snapshot.test.ts apps/web/lib/family-context-security.test.ts apps/web/lib/family-context-preparation.test.ts apps/web/lib/tasks/brief-context.test.ts",
     "check:fleet-skills": "node --experimental-strip-types scripts/fleet-skills-check.mts && node --experimental-strip-types --test scripts/skill-reference-graph.test.ts && node --experimental-strip-types scripts/build-recipe-registry.mts --check",
-    "check:instructions-split": "tsx scripts/instructions-split-check.mts && tsx --tsconfig apps/web/tsconfig.json --test scripts/instructions-split-check.test.ts",
+    "check:instructions-split": "pnpm check:agent-prompts && tsx scripts/instructions-split-check.mts && tsx --tsconfig apps/web/tsconfig.json --test scripts/instructions-split-check.test.ts",
     "report:agent-context": "tsx scripts/context-audit/journeys.mts",
     "check:agent-budget": "tsx scripts/agent-context-budget-check.mts && tsx --tsconfig apps/web/tsconfig.json --test scripts/agent-context-budget-check.test.ts",
     "check:journey": "node --experimental-strip-types scripts/journey-check.mts && tsx --tsconfig apps/web/tsconfig.json --test apps/web/lib/onboarding/state.test.ts apps/web/lib/billing/gate-reason.test.ts apps/web/lib/map/report-onboarding-completion.test.ts",
@@ -195,7 +195,9 @@
     "eval:ask-user-questions": "tsx scripts/ask-user-questions-eval.mts",
     "seed:family-history": "tsx --tsconfig apps/web/tsconfig.json scripts/seed-family-history.mts",
     "test:material-print:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/print-finalization-postgres.mts",
-    "test:material-handwriting:postgres": "HOMA_EVAL_ISOLATION=1 pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/handwriting-material-integration-postgres.mts"
+    "test:material-handwriting:postgres": "HOMA_EVAL_ISOLATION=1 pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/handwriting-material-integration-postgres.mts",
+    "build:agent-prompts": "node --experimental-strip-types scripts/build-agent-prompts.mts && pnpm build:voice-persona && pnpm build:report-writer-prompt",
+    "check:agent-prompts": "node --experimental-strip-types scripts/build-agent-prompts.mts --check && node --experimental-strip-types --test scripts/build-agent-prompts.test.mts"
   },
   "devDependencies": {
     "@vercel/blob": "^2.6.1",

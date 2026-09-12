@@ -8,9 +8,9 @@
  * carry the /agent source tree, so a process.cwd() read can become the
  * same ENOENT class as issue #495.
  *
- * report-writer.md stays the only place anyone edits the prompt. This
- * script is the only writer of the generated module. Re-run after any
- * prompt edit:  pnpm build:report-writer-prompt
+ * Edit prompt-sources/report.md or prompt-sources/voice-rules.md, then
+ * run pnpm build:agent-prompts. That renders report-writer.md before this
+ * script packages its exact text into the generated module.
  *
  * A stale mirror would ship outdated report voice rules silently, so
  * --check does the same comparison without writing and fails loudly.

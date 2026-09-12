@@ -3,9 +3,9 @@
  *
  * scripts/telnyx-provision.mts builds the PHONE assistant's persona from
  * everything above the FIRST occurrence of the split heading, then strips
- * exactly one HTML comment block (a non-global regex). Until now the only
- * protection on that load-bearing string was a prose warning in the file's
- * header comment. This check makes the invariants executable:
+ * exactly one HTML comment block (a non-global regex). This structural
+ * check protects the split; check:agent-prompts separately rejects all
+ * comments in the generated chat, report, and curriculum prompts:
  *
  * 1. The split heading occurs exactly once in instructions.md.
  * 2. "## Have opinions" (the persona's last section) precedes it.
@@ -15,10 +15,8 @@
  * 4. The same heading literal appears in scripts/telnyx-provision.mts,
  *    so renaming it in one place fails here with a pointer to the other.
  * 5. The Voice (binding) section exists in instructions.md and both of
- *    its hand-kept mirrors (report-writer.md, curriculum-writer.md).
- *    Existence only: the mirrors are adapted, not verbatim, and wording
- *    changes are gated separately (founder read-aloud plus
- *    REPORT_PROMPT_VERSION).
+ *    generated writer prompts (report-writer.md, curriculum-writer.md).
+ *    check:agent-prompts verifies their shared boundaries and source parity.
  *
  * Usage: tsx scripts/instructions-split-check.mts
  * Unit tests: scripts/instructions-split-check.test.ts
