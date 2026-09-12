@@ -2,6 +2,7 @@ import { extractBearerToken, localDev, vercelOidc, type AuthFn } from "eve/chann
 import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
+import { measureChatPreparation } from "../../lib/observability/chat-preparation";
 import { familyAccountGate } from "../../lib/billing/wall";
 import {
   messageSourceContext,
@@ -105,7 +106,7 @@ function supabaseAuth(): AuthFn<Request> {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: userData, error } = await supabase.auth.getUser(token);
+    const { data: userData, error } = await measureChatPreparation("authenticate", () => supabase.auth.getUser(token));
     if (error || !userData.user) return null;
 
     // The caller's OWN membership row (user_id filter matters since
@@ -123,7 +124,7 @@ function supabaseAuth(): AuthFn<Request> {
     // a retired household while the page rendered the live one, with
     // nothing anywhere reporting a mismatch. The `!inner` matters, since
     // a filter on a plain embed narrows the embed rather than the parent.
-    const { data: membership, error: membershipError } = await supabase
+    const { data: membership, error: membershipError } = await measureChatPreparation("membership", async () => await supabase
       .from("family_members")
       .select(
         "family_id, display_name, created_at, families!inner(profile_completed_at, context, status)",
@@ -132,7 +133,7 @@ function supabaseAuth(): AuthFn<Request> {
       .neq("families.status", "deleted")
       .order("created_at", { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .maybeSingle());
     if (membershipError) {
       console.error(
         "eve channel: membership lookup failed:",
@@ -321,7 +322,7 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
     // family context loads; the note below only shapes how Homa says
     // it. familyAccountGate fails open on read errors and is a no-op
     // while HOMA_SIGNUP_PAYWALL_ENABLED is dark.
-    const accountGate = await familyAccountGate(familyId);
+    const accountGate = await measureChatPreparation("account_gate", () => familyAccountGate(familyId), ctx.eve.sessionId ?? undefined);
     // Mobile-only exemption (gh#305, founder ruling 2026-07-28, "phone
     // app only"): a walled family still mid-onboarding on the iOS app
     // keeps the conversation, so the paywall arrives after she has met
@@ -416,7 +417,7 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
     }
 
     try {
-      const continuity = await resolveInboundContinuity({
+      const continuity = await measureChatPreparation("inbound_continuity", () => resolveInboundContinuity({
         familyId,
         memberUserId:
           typeof memberUserId === "string" ? memberUserId : null,
@@ -427,7 +428,7 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
         providerReplyTo: null,
         destinationKey: auth.principalId,
         text,
-      });
+      }), ctx.eve.sessionId ?? undefined);
       const continuityAttributes = resolvedContinuityAttributes(continuity, {
         memberUserId:
           typeof memberUserId === "string" ? memberUserId : null,
