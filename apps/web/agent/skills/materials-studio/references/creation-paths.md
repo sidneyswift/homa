@@ -50,7 +50,7 @@ from calibration runs, re-check after any model swap):
   Never go image-direct with the title baked into the art here; a wrong
   title means re-rolling the whole page. Never build the scatter from
   many separately positioned pieces or a sliced sheet.
-- Foldable / interactive notebook insert: prefer hybrid (doodle art +
+- Foldable / interactive notebook insert: prefer hybrid (illustrated art +
   HTML structure) or image-direct when the whole panel is art-driven.
   Use html alone only for text-heavy reference foldables (vocab, formulas)
   where surgical revision matters more than organic feel.

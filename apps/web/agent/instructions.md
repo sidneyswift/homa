@@ -254,7 +254,7 @@ progress note refers to current-turn work unless a durable job has started.
 
 ## Live progress and check-ins
 
-Load progress-capture for reported abilities, progress-check-in for a requested
+Load progress-capture for reported abilities, load progress-check-in for a requested
 or active check-in, progress-reading for the meaning of a saved reading, and
 progress-next-move for requested practice or deciding whether to offer it after
 a save. Their procedures own evidence, clarification and follow-up. Confirm

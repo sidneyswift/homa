@@ -14,7 +14,7 @@ The unused detached checkout is reused for codex/gh-1167-astra-context. Its form
 
 ## Reviewed changes and measurements
 
-The materials, planner, onboarding and inquiry roots now route to supporting references. All 19 newly extracted fleet references preserve their original procedure text; the 69 recipe files are unchanged. Voice examples, material approval, tenant boundaries and durable state remain authoritative. Background promises now require a confirmed durable job or schedule receipt.
+The materials, planner, onboarding and inquiry roots now route to supporting references. The 19 newly extracted fleet references preserve their original procedures; one retired brand-style term is updated to pass the current brand contract; the 69 recipe files are unchanged. Voice examples, material approval, tenant boundaries and durable state remain authoritative. Background promises now require a confirmed durable job or schedule receipt.
 
 | Authored file | Before bytes | After bytes |
 | --- | ---: | ---: |
@@ -49,3 +49,9 @@ The frozen July documentation reconciliation check fails on unchanged main for e
 During the broad Astra evaluation, unchanged progress tool code rejected declared optional keys retained as undefined by the provider. gh#1169 records the suspected live failure and narrow repair: normalize only absent declared fields before the existing strict command validator. Thirty progress boundary tests pass, including supplied unrelated fields, unknown identity, malformed IDs and missing required fields. Live verification remains required before closing the incident.
 
 The complete material suite passes 546 tests and the complete onboarding suite passes 188 tests. Relocated contract tests require the root to point at the exact supporting reference before checking its original quality assertions. Admin package inspection includes supporting guidance for tool mappings and coverage while continuing to display the root separately.
+
+## Integration validation
+
+The concurrent chat-preparation change (#1168, main 549c40be) is integrated. Independent reads stay parallel; onboarding receives the authenticated attributes and selects guidance inside the existing read. A failed onboarding read supplies full stage guidance only for onboarding-mode sessions. The progress suite passes 588 tests after integration.
+
+The exploratory 89-case Eve run exhausted the local Node heap before producing a final verdict report. It is not counted as passing. Smaller focused batches on the combined revision replace that unverifiable run.
