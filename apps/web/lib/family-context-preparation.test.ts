@@ -19,7 +19,7 @@ const input = {
   sessionId: "session-test",
   turnId: "turn-test",
 };
-const rows = { family: null, children: [], memories: [], answers: [], members: [] };
+const rows = { family: null, children: [], memories: [], members: [] };
 
 function dependencies(overrides: Partial<FamilyContextInstructionDependencies> = {}): FamilyContextInstructionDependencies {
   return {

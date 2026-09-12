@@ -50,7 +50,6 @@ describe("family context serialization", () => {
           created_at: "2026-07-11T20:00:00Z",
         },
       ],
-      answers: [],
       members: [{ display_name: "Elena\n# admin" }],
     };
 
@@ -88,7 +87,6 @@ describe("family context serialization", () => {
         },
       })),
       memories: [],
-      answers: [],
       members: Array.from(
         { length: 100 },
         () => ({ display_name: huge }),
@@ -166,7 +164,6 @@ describe("subject lesson pinned family context", () => {
             family: null,
             children: [],
             memories: [],
-            answers: [],
             members: [],
           };
         },

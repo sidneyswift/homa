@@ -143,7 +143,6 @@ export function evalFamilyFixtureRows(): FamilyContextRows {
         created_at: "2026-07-01T12:10:00.000Z",
       },
     ],
-    answers: [],
     members: [{ display_name: EVAL_FIXTURE_PARENT_NAME }],
   };
 }
