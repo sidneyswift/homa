@@ -59,8 +59,7 @@
 }
 .settingsComposer { width: fit-content; max-width: 100%; padding: 8px; }
 .settingsView[hidden] { display: none; }
-.settingsHeader { display: flex; justify-content: space-between; align-items: center; padding-left: 12px; font-size: 14px; font-weight: 500; }
-.settingsControls { display: flex; align-items: center; gap: 8px; }
+.settingsControls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
 .preview .settingsControls button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px; border: 0; background: transparent; font-size: 14px; white-space: nowrap; }
 .preview .settingsControls button:hover { background: var(--homa-canvas); }
 @media (max-width: 600px) {

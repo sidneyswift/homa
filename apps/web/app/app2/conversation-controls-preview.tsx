@@ -76,11 +76,8 @@ export function ConversationControlsPreview() {
           </div>
         </div>
         <div className={styles.settingsView} id="preview-audio-settings" hidden={!settingsOpen}>
-          <div className={styles.settingsHeader}>
-            <span>Settings</span>
-            <button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} onClick={closeSettings}><Icon name="back" size={20} /></button>
-          </div>
           <div className={styles.settingsControls}>
+            <button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} onClick={closeSettings}><Icon name="back" size={20} /></button>
             <button type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
               <Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span>Mic</span>
             </button>
