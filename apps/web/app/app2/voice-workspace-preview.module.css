@@ -46,19 +46,22 @@
 .inputArea { min-width: 0; flex: 1; min-height: 64px; padding: 0 8px; }
 .composerActions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
 .actionSpacer { flex: 1; }
-.preview .iconButton { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 1px solid var(--preview-boundary); border-radius: 50%; background: var(--homa-paper); }
+.preview .iconButton { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--homa-radius-control); background: transparent; }
 .preview .iconButton:disabled { cursor: default; opacity: .5; }
-.preview .sendButton { background: var(--homa-midnight-action); color: var(--homa-floating); }
 .compactComposer { width: fit-content; max-width: 100%; padding: 8px; }
 .compactComposer .composerActions { margin-top: 0; }
-.preview .typeButton { font-size: 16px; font-weight: 500; }
-.preview .iconButton[aria-pressed="true"] { background: var(--homa-midnight-action); border-color: var(--homa-midnight-action); color: var(--homa-floating); }
-.preview .iconButton[aria-pressed="false"] { border-color: var(--homa-control-boundary); }
-.preview .iconButton:hover:not(:disabled) { border-color: var(--homa-midnight-action); }
-@media (forced-colors: active) {
-  .preview .iconButton[aria-pressed="true"] { border: 3px double ButtonText; }
-  .preview .iconButton[aria-pressed="false"] { border: 1px solid ButtonText; }
-}
+.modeSelector { display: flex; align-items: center; gap: 8px; }
+.preview .modeButton { position: relative; min-width: 64px; padding: 8px 12px; border: 0; background: transparent; font-size: 16px; font-weight: 500; }
+.modeButton[aria-pressed="true"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 2px; background: currentColor; }
+.audioSettings { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 8px; }
+.preview .audioSetting { display: inline-flex; align-items: center; gap: 8px; padding: 8px; border: 0; background: transparent; color: var(--homa-muted-ink); font-size: 13px; white-space: nowrap; }
+.preview .audioSetting:hover { color: var(--homa-ink); }
+.audioOptions { position: relative; }
+.audioOptions summary { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--homa-radius-control); color: var(--homa-muted-ink); cursor: pointer; list-style: none; }
+.audioOptions summary::-webkit-details-marker { display: none; }
+.audioOptions summary:focus-visible { outline: 2px solid var(--homa-midnight-action); outline-offset: 3px; }
+.audioOptionsPanel { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 2; padding: 4px; min-width: 128px; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-control); background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
+.preview .audioOptionsPanel button { width: 100%; border: 0; font-size: 13px; white-space: nowrap; }
 @media (max-width: 600px) {
   .composerDock { padding-left: 16px; padding-right: 16px; }
 }
