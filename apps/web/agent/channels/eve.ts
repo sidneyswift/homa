@@ -3,6 +3,7 @@ import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
 import { measureChatPreparation } from "../../lib/observability/chat-preparation";
+import { readEveMembership } from "../../lib/eve-membership";
 import { familyAccountGate } from "../../lib/billing/wall";
 import {
   messageSourceContext,
@@ -124,7 +125,7 @@ function supabaseAuth(): AuthFn<Request> {
     // a retired household while the page rendered the live one, with
     // nothing anywhere reporting a mismatch. The `!inner` matters, since
     // a filter on a plain embed narrows the embed rather than the parent.
-    const { data: membership, error: membershipError } = await measureChatPreparation("membership", async () => await supabase
+    const { data: membership, error: membershipError } = await readEveMembership(() => supabase
       .from("family_members")
       .select(
         "family_id, display_name, created_at, families!inner(profile_completed_at, context, status)",
