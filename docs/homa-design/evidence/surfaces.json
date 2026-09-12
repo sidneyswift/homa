@@ -3,7 +3,7 @@
   "designEra": "quiet-authority-v1",
   "baselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
   "baselineSourceCommitTimestamp": "2026-08-02T23:30:27-04:00",
-  "ownedInputFingerprint": "a5f9ec16fb522af62d5282dd805efcc499707c2f11a92454c393ecf48065c6f6",
+  "ownedInputFingerprint": "dc94fbfaf53aad6b0aabc37573c83684c558956e2f61e41c5ee10cfc91a38d48",
   "androidDisposition": {
     "status": "intentionally-unreleased",
     "rulingSource": "docs/homa-planning/journeys/10-reconciliation.md#unified-cross-platform-billing and docs/homa-planning/plans/2026-08-01-unified-cross-platform-billing.md",
@@ -100698,7 +100698,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "674d310b821bb89e836efba23f7d6b27647504e5ab2cd077270798d39ca9a6d0",
+        "fixtureChecksum": "b58675a24f4731297f2e17a28e05729fabc8e9d933b5b23f5d8a0e10d77ff925",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -100733,7 +100733,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "674d310b821bb89e836efba23f7d6b27647504e5ab2cd077270798d39ca9a6d0"
+        "b58675a24f4731297f2e17a28e05729fabc8e9d933b5b23f5d8a0e10d77ff925"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -100752,8 +100752,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "3a5174c4828421c0225fa723e0d8b7a29a1222a9",
-        "sourceCommitTimestamp": "2026-09-12T00:24:34-04:00",
+        "sourceCommitSha": "fdb11ec261b27c41022b318efeb4e50ec297feaf",
+        "sourceCommitTimestamp": "2026-09-12T00:39:12-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
@@ -100949,7 +100949,7 @@
         "grayscale-when-applicable"
       ],
       "baseline": {
-        "fixtureChecksum": "df136c0bd5cdbe27032d57b83553553b1e3efc1c9a91bb8526f4db47de8505e3",
+        "fixtureChecksum": "0164cf1246a67ad5742f264789b4c8cb1032e52ed86f033808f797c3d78549b6",
         "renderPath": null,
         "interactionRecordingPath": null
       },
@@ -100984,7 +100984,7 @@
       },
       "legacySignatures": [],
       "currentAssetHashes": [
-        "df136c0bd5cdbe27032d57b83553553b1e3efc1c9a91bb8526f4db47de8505e3"
+        "0164cf1246a67ad5742f264789b4c8cb1032e52ed86f033808f797c3d78549b6"
       ],
       "disposition": "replace-active",
       "featureFlags": [],
@@ -101003,8 +101003,8 @@
         "contractVersion": "@homa/design:quiet-authority-v1",
         "harnessVersion": "brand-surfaces-v1",
         "observedAt": null,
-        "sourceCommitSha": "3a5174c4828421c0225fa723e0d8b7a29a1222a9",
-        "sourceCommitTimestamp": "2026-09-12T00:24:34-04:00",
+        "sourceCommitSha": "fdb11ec261b27c41022b318efeb4e50ec297feaf",
+        "sourceCommitTimestamp": "2026-09-12T00:39:12-04:00",
         "environment": "git-source-commit",
         "clientRuntimeFingerprint": null,
         "pixels": null,
