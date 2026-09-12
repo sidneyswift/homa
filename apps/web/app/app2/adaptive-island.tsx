@@ -32,7 +32,7 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
   const host = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLFormElement>(null);
   const previousPlacement = useRef<Placement | undefined>(undefined);
-  const [geometry, setGeometry] = useState({ placement: "center" as Placement, offsetX: 0, offsetY: 0, maxWidth: 780, shellMaxWidth: 780, maxHeight: 10000 });
+  const [geometry, setGeometry] = useState({ placement: "center" as Placement, offsetX: 0, offsetY: 0, maxWidth: 780, shellMaxWidth: 780, shellMaxHeight: 10000, maxHeight: 10000 });
   const reducedMotion = useLiveReducedMotion();
   const [dimensions, setDimensions] = useState({ width: 214, height: 62 });
 
@@ -62,19 +62,24 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
       const targetWidth = size === "fill" ? anchor.width : (content?.offsetWidth ?? 196) + insetX;
       const targetHeight = (content?.offsetHeight ?? 44) + insetY;
       // Measure natural content, never the spring's intermediate shell dimensions.
+      const bounds = {
+        left: Math.max(regionBounds?.left ?? viewportLeft, viewportLeft),
+        top: Math.max(regionBounds?.top ?? viewportTop, viewportTop),
+        right: Math.min(regionBounds?.right ?? viewportRight, viewportRight),
+        bottom: Math.min(regionBounds?.bottom ?? viewportBottom, viewportBottom),
+      };
       const fitted = fitIsland({
         x: anchor.left + anchor.width / 2, y: anchor.top + anchor.height * origin,
-        width: targetWidth, height: targetHeight, origin,
-        bounds: {
-          left: Math.max(regionBounds?.left ?? viewportLeft, viewportLeft),
-          top: Math.max(regionBounds?.top ?? viewportTop, viewportTop),
-          right: Math.min(regionBounds?.right ?? viewportRight, viewportRight),
-          bottom: Math.min(regionBounds?.bottom ?? viewportBottom, viewportBottom),
-        },
+        width: targetWidth, height: targetHeight, origin, bounds,
       });
+      // Overshoot may use only the room around the fitted anchor, never cross a region edge.
+      const centerX = anchor.left + anchor.width / 2 + fitted.offsetX;
+      const originY = anchor.top + anchor.height * origin + fitted.offsetY;
+      const shellMaxWidth = Math.max(0, 2 * Math.min(centerX - bounds.left, bounds.right - centerX));
+      const shellMaxHeight = Math.max(0, origin === 0 ? bounds.bottom - originY : origin === 1 ? originY - bounds.top : 2 * Math.min(originY - bounds.top, bounds.bottom - originY));
       const nextDimensions = { width: Math.min(targetWidth, anchor.width, fitted.maxWidth), height: Math.min(targetHeight, fitted.maxHeight) };
       setDimensions(current => current.width === nextDimensions.width && current.height === nextDimensions.height ? current : nextDimensions);
-      const next = { ...fitted, shellMaxWidth: fitted.maxWidth, maxWidth: Math.min(anchor.width, fitted.maxWidth), placement: resolved };
+      const next = { ...fitted, shellMaxWidth, shellMaxHeight, maxWidth: Math.min(anchor.width, fitted.maxWidth), placement: resolved };
       setGeometry(current => Object.keys(next).every(key => current[key as keyof typeof next] === next[key as keyof typeof next]) ? current : next);
     };
     update();
@@ -121,7 +126,7 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
               "--island-target-width": `${dimensions.width}px`,
               "--island-target-height": `${dimensions.height}px`,
               maxWidth: geometry.shellMaxWidth,
-              maxHeight: geometry.maxHeight,
+              maxHeight: geometry.shellMaxHeight,
               left: `calc(50% + ${geometry.offsetX}px)`,
               top: `calc(${origin * 100}% + ${geometry.offsetY}px)`,
               "--island-y": `${-origin * 100}%`,
