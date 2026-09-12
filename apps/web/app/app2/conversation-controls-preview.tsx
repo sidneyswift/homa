@@ -85,7 +85,7 @@ export function ConversationControlsPreview() {
         </IslandView>
         <IslandView active={settingsOpen} className={styles.settingsView} id="preview-audio-settings">
           <motion.div className={styles.settingsControls}>
-            <motion.button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} data-pointer-focus={pointerFocus === "back"} onBlur={() => setPointerFocus(null)} onClick={(event) => closeSettings(event.detail > 0)}><Icon name="back" size={20} /></motion.button>
+            <motion.button className={styles.iconButton} type="button" aria-label="Close audio settings" ref={backButton} data-pointer-focus={pointerFocus === "back"} onBlur={() => setPointerFocus(null)} onClick={(event) => closeSettings(event.detail > 0)}><Icon name="close" size={20} /></motion.button>
             <motion.button type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
               <Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span>Mic</span>
             </motion.button>
