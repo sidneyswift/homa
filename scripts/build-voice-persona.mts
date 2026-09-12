@@ -17,9 +17,9 @@
  * no use for. That heading is load-bearing and already guarded by
  * scripts/instructions-split-check.mts.
  *
- * instructions.md stays the only place anyone edits Homa's voice. This
- * script is the only writer of the generated module. Re-run after any
- * instructions.md edit:  pnpm build:voice-persona
+ * Edit prompt-sources/chat.md or prompt-sources/voice-rules.md, then
+ * run pnpm build:agent-prompts. That renders instructions.md before this
+ * script packages its persona slice into the generated module.
  *
  * A stale mirror would ship an outdated persona silently, so --check does
  * the same comparison without writing and fails loudly.
