@@ -9,7 +9,7 @@ import styles from "./voice-workspace-preview.module.css";
 
 /** Local design controls only. View changes never acquire audio resources. */
 export function ConversationControlsPreview() {
-  const [pointerFocus, setPointerFocus] = useState(false);
+  const [pointerFocus, setPointerFocus] = useState<"voice" | "settings" | "back" | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -20,14 +20,16 @@ export function ConversationControlsPreview() {
   const settingsButton = useRef<HTMLButtonElement>(null);
   const backButton = useRef<HTMLButtonElement>(null);
 
-  function openSettings() {
+  function openSettings(fromPointer = false) {
     flushSync(() => setSettingsOpen(true));
     backButton.current?.focus({ preventScroll: true });
+    setPointerFocus(fromPointer ? "back" : null);
   }
 
-  function closeSettings() {
+  function closeSettings(fromPointer = false) {
     flushSync(() => setSettingsOpen(false));
     settingsButton.current?.focus({ preventScroll: true });
+    setPointerFocus(fromPointer ? "settings" : null);
   }
 
   function showKeyboard() {
@@ -49,6 +51,7 @@ export function ConversationControlsPreview() {
         className={`${styles.composer} ${settingsOpen ? styles.settingsComposer : keyboardVisible ? "" : styles.compactComposer}`}
         aria-label={settingsOpen ? "Audio settings" : keyboardVisible ? "Chat input" : "Voice controls"}
         onKeyDown={(event) => {
+          setPointerFocus(null);
           if (settingsOpen && event.key === "Escape") {
             event.preventDefault();
             closeSettings();
@@ -65,12 +68,12 @@ export function ConversationControlsPreview() {
           </div>
           <div className={styles.modeSelector} role="group" aria-label="Conversation view">
             <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
-            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} data-pointer-focus={pointerFocus} onBlur={() => setPointerFocus(false)} onKeyDown={() => setPointerFocus(false)} onClick={(event) => {
-              setPointerFocus(event.detail > 0);
+            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} data-pointer-focus={pointerFocus === "voice"} onBlur={() => setPointerFocus(null)} onClick={(event) => {
               voiceButton.current?.focus({ preventScroll: true });
+              setPointerFocus(event.detail > 0 ? "voice" : null);
               setKeyboardVisible(false);
             }}>Voice</button>
-            <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
+            <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} data-pointer-focus={pointerFocus === "settings"} onBlur={() => setPointerFocus(null)} onClick={(event) => openSettings(event.detail > 0)}><Icon name="settings" size={20} /></button>
           </div>
           <div className={styles.composerActions} hidden={!keyboardVisible}>
             {keyboardVisible && <button className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></button>}
@@ -78,7 +81,7 @@ export function ConversationControlsPreview() {
         </div>
         <div className={styles.settingsView} id="preview-audio-settings" hidden={!settingsOpen}>
           <div className={styles.settingsControls}>
-            <button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} onClick={closeSettings}><Icon name="back" size={20} /></button>
+            <button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} data-pointer-focus={pointerFocus === "back"} onBlur={() => setPointerFocus(null)} onClick={(event) => closeSettings(event.detail > 0)}><Icon name="back" size={20} /></button>
             <button type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
               <Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span>Mic</span>
             </button>

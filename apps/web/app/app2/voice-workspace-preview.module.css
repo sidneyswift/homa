@@ -40,9 +40,10 @@
 
 .composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
 .composer { --island-radius: 999px; max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--island-radius); padding: 8px; font-size: 16px; font-weight: 400; line-height: 24px; background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
+.preview .composer button:focus-visible { outline-offset: -3px; }
 .preview .composer button { border-radius: var(--island-radius); font: inherit; }
 .preview .composer button:enabled:hover { background: var(--homa-canvas); }
-.preview .composer .modeButton[data-pointer-focus="true"]:focus-visible { outline: none; }
+.preview .composer button[data-pointer-focus="true"]:focus-visible { outline: none; }
 .composer .inputArea input { min-height: 44px; font: inherit; }
 .composer:has(input:focus-visible) { border-color: var(--homa-control-boundary); }
 .conversationView { display: grid; grid-template-columns: auto; grid-template-areas: "modes"; column-gap: 4px; }
@@ -63,9 +64,11 @@
 /* #1158: founder-requested black selection for the local island preview. */
 .preview .composer .modeButton[aria-pressed="true"] { background: #000; color: var(--homa-floating); }
 .preview .composer .modeButton[aria-pressed="true"]:hover { background: color-mix(in srgb, #000 88%, var(--homa-floating)); }
+.preview .composer .modeButton[aria-pressed="true"]:focus-visible { outline-color: var(--homa-floating); }
 @media (forced-colors: active) {
+  .preview .composer .modeButton[aria-pressed="true"]:focus-visible { outline-color: Highlight; }
   .preview .modeButton[aria-pressed="true"] { border: 1px solid ButtonText; }
-  .preview .composer .modeButton[data-pointer-focus="true"]:focus-visible { outline: 2px solid Highlight; outline-offset: 3px; }
+  .preview .composer button[data-pointer-focus="true"]:focus-visible { outline: 2px solid Highlight; outline-offset: -3px; }
 }
 .settingsComposer { width: fit-content; max-width: 100%; }
 .settingsView[hidden] { display: none; }
