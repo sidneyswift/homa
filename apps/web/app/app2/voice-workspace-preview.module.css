@@ -62,7 +62,6 @@
 .preview .modeButton { position: relative; min-width: 72px; border: 0; background: transparent; }
 .preview .modeButton, .preview .settingsControls button:not(.iconButton) { padding: 8px 16px; }
 .preview .composer .modeButton[aria-pressed="true"] { background: var(--homa-canvas); color: var(--homa-ink); }
-.preview .composer .modeButton[aria-pressed="true"]:hover { background: color-mix(in srgb, var(--homa-ink) 6%, var(--homa-canvas)); }
 @media (forced-colors: active) {
   .preview .composer .modeButton[aria-pressed="true"]:focus-visible { outline-color: Highlight; }
   .preview .modeButton[aria-pressed="true"] { border: 1px solid ButtonText; }
