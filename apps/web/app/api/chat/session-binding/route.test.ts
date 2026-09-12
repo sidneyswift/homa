@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { EveAuthServiceUnavailableError } from "../../../../lib/eve-authentication";
 import { EveMembershipUnavailableError } from "../../../../lib/eve-membership";
 import { GET } from "./route";
 
@@ -20,8 +21,10 @@ function mockMembershipBackend(t: TestContext) {
     else process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = previousKey;
   });
   t.mock.method(console, "info", () => {});
+  t.mock.method(console, "error", () => {});
   const state = {
     userStatus: 200,
+    userFetchError: null as Error | null,
     membershipStatus: 504,
     familyId: FAMILY_ID as string | null,
     paths: [] as string[],
@@ -31,6 +34,7 @@ function mockMembershipBackend(t: TestContext) {
     assert.equal(url.origin, "https://homa-auth.test");
     state.paths.push(url.pathname);
     if (url.pathname === "/auth/v1/user") {
+      if (state.userFetchError) throw state.userFetchError;
       return state.userStatus === 200
         ? Response.json({ id: USER_ID, aud: "authenticated" })
         : Response.json({ code: "bad_jwt", message: "Invalid token" }, { status: state.userStatus });
@@ -81,9 +85,15 @@ test("binding returns a retryable 503 for a membership timeout on bearer and coo
 
 test("binding keeps invalid credentials and absent or denied memberships as 401", async (t) => {
   const backend = mockMembershipBackend(t);
-  backend.userStatus = 401;
-  assert.equal((await GET(request())).status, 401);
-  assert.deepEqual(backend.paths, ["/auth/v1/user"]);
+  for (const transport of ["bearer", "cookie"] as const) {
+    for (const status of [401, 403]) {
+      backend.userStatus = status;
+      const response = await GET(request(transport));
+      assert.equal(response.status, 401);
+      assert.equal(response.headers.has("retry-after"), false);
+    }
+  }
+  assert.deepEqual(backend.paths, Array(4).fill("/auth/v1/user"));
   backend.userStatus = 200;
   backend.membershipStatus = 200;
   backend.familyId = null;
@@ -92,6 +102,46 @@ test("binding keeps invalid credentials and absent or denied memberships as 401"
     backend.membershipStatus = status;
     assert.equal((await GET(request())).status, 401);
   }
+});
+
+test("binding classifies real SDK Auth 504 and network errors before any membership lookup", async (t) => {
+  const backend = mockMembershipBackend(t);
+  const logs: unknown[][] = [];
+  t.mock.method(console, "info", (...args: unknown[]) => { logs.push(args); });
+  for (const transport of ["bearer", "cookie"] as const) {
+    for (const status of [504, 503, 429, 0]) {
+      backend.userStatus = status;
+      backend.userFetchError = status === 0 ? new TypeError("private network failure") : null;
+      const before = backend.paths.length;
+      const response = await GET(request(transport));
+      assert.equal(response.status, 503);
+      assert.equal(response.headers.get("retry-after"), "1");
+      assert.equal(response.headers.get("cache-control"), "no-store");
+      assert.equal(response.headers.has("www-authenticate"), false);
+      const body = await response.json();
+      assert.equal(body.code, "auth_service_unavailable");
+      assert.doesNotMatch(JSON.stringify(body), /private|Invalid token/);
+      assert.deepEqual(backend.paths.slice(before), ["/auth/v1/user"], "No membership read or Auth retry is allowed");
+    }
+  }
+  const records = logs.map(row => JSON.parse(row[1] as string));
+  assert.equal(records.length, 16);
+  assert.ok(records.filter(row => row.stage === "binding_authenticate").every(row => row.outcome === "error"));
+  assert.ok(records.filter(row => row.stage === "binding_total").every(row => row.statusCode === 503));
+  assert.doesNotMatch(JSON.stringify(logs), /synthetic-token|private|11111111|22222222/);
+});
+
+test("API Auth failure response changes are opt-in for both bearer and cookie callers", async (t) => {
+  const backend = mockMembershipBackend(t);
+  backend.userStatus = 504;
+  for (const transport of ["bearer", "cookie"] as const) {
+    assert.equal(await resolveApiFamily(request(transport)), null);
+    await assert.rejects(
+      resolveApiFamily(request(transport), { transientAuthErrors: "throw" }),
+      EveAuthServiceUnavailableError,
+    );
+  }
+  assert.deepEqual(backend.paths, Array(4).fill("/auth/v1/user"));
 });
 
 test("other API family callers retain null on timeout while chat can opt in and recover", async (t) => {

@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { readEveAuthentication } from "./eve-authentication";
 import { readEveMembership } from "./eve-membership";
 import { createSupabaseRequestClient } from "./supabase/server";
 import { measureChatPreparation } from "./observability/chat-preparation";
@@ -36,20 +37,24 @@ export function requestAuthTransport(request: Request): RequestAuthTransport {
  * Returns the caller's RLS-scoped client, user id, and family id, or
  * null when the request carries no valid session or the user has no
  * family yet. Existing callers retain the non-throwing membership lookup.
- * Chat may opt into structured service errors for temporary membership
+ * Chat may opt into structured service errors for temporary Auth or membership
  * failures so a backend outage does not look like an expired login.
  */
 export async function resolveApiFamily(
   request: Request,
-  options: { transientMembershipErrors?: "throw"; traceChatBinding?: boolean } = {},
+  options: {
+    transientAuthErrors?: "throw";
+    transientMembershipErrors?: "throw";
+    traceChatBinding?: boolean;
+  } = {},
 ): Promise<ApiFamilyAuth | null> {
   let supabase: SupabaseClient;
-  let userId: string;
+  let token: string | undefined;
 
   const transport = requestAuthTransport(request);
   if (transport.kind === "invalid") return null;
   if (transport.kind === "bearer") {
-    const token = transport.token;
+    token = transport.token;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return null;
@@ -57,19 +62,17 @@ export async function resolveApiFamily(
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data, error } = options.traceChatBinding
-      ? await measureChatPreparation("binding_authenticate", () => supabase.auth.getUser(token))
-      : await supabase.auth.getUser(token);
-    if (error || !data.user) return null;
-    userId = data.user.id;
   } else {
     supabase = createSupabaseRequestClient(request);
-    const { data } = options.traceChatBinding
-      ? await measureChatPreparation("binding_authenticate", () => supabase.auth.getUser())
-      : await supabase.auth.getUser();
-    if (!data.user) return null;
-    userId = data.user.id;
   }
+  const readUser = () => supabase.auth.getUser(token);
+  const { data, error } = options.transientAuthErrors === "throw"
+    ? await readEveAuthentication(readUser, options.traceChatBinding ? "binding_authenticate" : undefined)
+    : options.traceChatBinding
+      ? await measureChatPreparation("binding_authenticate", readUser)
+      : await readUser();
+  if (error || !data.user) return null;
+  const userId = data.user.id;
 
   const readMembership = () => supabase
     .from("family_members")

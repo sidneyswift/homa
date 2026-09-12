@@ -43,7 +43,7 @@ export const MAX_MEMORIES_PER_EXTRACTION = 5;
 /** Below this many transcript characters there is nothing to learn. */
 export const MIN_TEXT_CHARS_FOR_EXTRACTION = 200;
 
-const extractionSchema = z.object({
+export const memoryExtractionSchema = z.object({
   memories: z
     .array(
       z.object({
@@ -56,8 +56,8 @@ const extractionSchema = z.object({
         childName: z
           .string()
           .max(60)
-          .optional()
-          .describe("Exactly one child's name from the family context, only when the fact is about that child."),
+          .nullable()
+          .describe("Exactly one child's name from the family context when the fact is about that child, otherwise null."),
       }),
     )
     .max(MAX_MEMORIES_PER_EXTRACTION)
@@ -108,7 +108,7 @@ export async function extractMemoriesFromText(input: {
       `The conversation to review (${input.conversationLabel}):`,
       `<conversation>${input.text.slice(0, 24000)}</conversation>`,
     ].join("\n"),
-    schema: extractionSchema,
+    schema: memoryExtractionSchema,
     // Sonnet 5 thinks before answering and that reasoning is charged to
     // the SAME output budget: compaction, an easier task than this one,
     // was observed burning 2,414 thinking tokens against a 24,000 char
