@@ -7,15 +7,28 @@ import { renderChildProgressAgentContext, loadChildProgressAgentContext } from "
 import { comparisonFixture, COMPARISON_CHILD, COMPARISON_FAMILY } from "./child-progress/comparison-fixture";
 import { buildProgressComparison } from "./child-progress/comparison";
 const parse = (text: string) => JSON.parse(text.slice(text.indexOf("{",text.indexOf("\n\n"))));
-test("compatibility answers can no longer override canonical comparison authority",()=>{
- const view=comparisonFixture();
- const rows:FamilyContextRows={family:{name:"Synthetic",us_state:null,parent_display_name:null},children:[{id:COMPARISON_CHILD,name:"Maya",birth_month:view.birthDate,profile:null}],memories:[],members:[],answers:[{child_id:COMPARISON_CHILD,question_id:"gross_motor.skips",answer:"easily"}]};
- const family=renderFamilyContext(rows);
- assert.doesNotMatch(family,/chart reads|16 months ahead|\+20/u);
- assert.match(parse(family).mapSnapshot,/canonical Progress/u);
- const context=parse(renderChildProgressAgentContext({checkIns:[],views:[view]}));
- assert.deepEqual(context.liveProgress[0].comparisons.find((c:{subjectId:string})=>c.subjectId==="gross_motor"),buildProgressComparison(view,"gross_motor"));
- assert.equal(context.liveProgress[0].comparisons.find((c:{subjectId:string})=>c.subjectId==="gross_motor").monthsAhead,10);
+test("compatibility answers can no longer override canonical comparison authority", (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-09-12T12:00:00Z") });
+  const view = comparisonFixture();
+  const rows: FamilyContextRows = {
+    family: { name: "Synthetic", us_state: null, parent_display_name: null },
+    children: [{ id: COMPARISON_CHILD, name: "Maya", birth_month: view.birthDate, profile: null }],
+    memories: [],
+    members: [],
+  };
+  const legacyRows = {
+    ...rows,
+    get answers() {
+      return assert.fail("Family context must not read legacy compatibility answers");
+    },
+  };
+  const family = renderFamilyContext(rows);
+  assert.equal(renderFamilyContext(legacyRows), family);
+  assert.doesNotMatch(family, /chart reads|16 months ahead|\+20/u);
+  assert.match(parse(family).mapSnapshot, /canonical Progress/u);
+  const context = parse(renderChildProgressAgentContext({ checkIns: [], views: [view] }));
+  assert.deepEqual(context.liveProgress[0].comparisons.find((c: { subjectId: string }) => c.subjectId === "gross_motor"), buildProgressComparison(view, "gross_motor"));
+  assert.equal(context.liveProgress[0].comparisons.find((c: { subjectId: string }) => c.subjectId === "gross_motor").monthsAhead, 10);
 });
 test("unread and failed child views are explicit, not no evidence",async()=>{
  const ids=Array.from({length:10},(_,i)=>`child-${i}`);

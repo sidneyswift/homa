@@ -20,7 +20,6 @@ import { loadRecentCallsContext } from "../../lib/voice/recent-calls";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
-  type ChildAnswerRow,
   type ChildRow,
   type FamilyContextRows,
   type MemberRow,
@@ -68,7 +67,7 @@ const FAMILY_CONTEXT_UNAVAILABLE =
 async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRows> {
   const { db, familyId } = createCallerDbClient(attributes);
 
-  const [familyResult, childrenResult, memoriesResult, answersResult, membersResult] =
+  const [familyResult, childrenResult, memoriesResult, membersResult] =
     await Promise.all([
       db
         .from("families")
@@ -88,12 +87,6 @@ async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRow
         .in("kind", ["fact", "what_works"])
         .order("created_at", { ascending: true })
         .limit(200),
-      // The map snapshot's raw material. RLS already walls these rows to
-      // the caller's own children; the inner-join filter is the usual belt.
-      db
-        .from("child_answers")
-        .select("child_id, question_id, answer, children!inner()")
-        .eq("children.family_id", familyId),
       // The family roster (multi-parent v0): readable under the caller's
       // token since migration #49 widened the membership SELECT policy.
       db
@@ -107,7 +100,6 @@ async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRow
     familyResult.error ||
     childrenResult.error ||
     memoriesResult.error ||
-    answersResult.error ||
     membersResult.error
   ) {
     throw new Error("family context load failed under caller token");
@@ -116,7 +108,6 @@ async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRow
     family: familyResult.data,
     children: (childrenResult.data ?? []) as ChildRow[],
     memories: (memoriesResult.data ?? []) as MemoryRow[],
-    answers: (answersResult.data ?? []) as unknown as ChildAnswerRow[],
     members: (membersResult.data ?? []) as MemberRow[],
   };
 }

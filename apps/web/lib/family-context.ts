@@ -1,5 +1,3 @@
-import type { MapAnswer } from "@homa/core";
-
 import {
   FAMILY_MEMORY_CHAR_BUDGET,
   formatMemoriesForContext,
@@ -42,14 +40,6 @@ export interface ChildRow {
   avatar_url?: string | null;
 }
 
-/** One raw checklist/observation answer; scoring happens at render time
- * with the same deterministic scorer the report uses. */
-export interface ChildAnswerRow {
-  child_id: string;
-  question_id: string;
-  answer: MapAnswer;
-}
-
 export interface MemberRow {
   /** Server-side identity only, used to identify the authenticated adult.
    * It is never rendered into the family context JSON. */
@@ -63,9 +53,6 @@ export interface FamilyContextRows {
   family: FamilyRow | null;
   children: ChildRow[];
   memories: MemoryRow[];
-  /** Every child's map answers (the 2026-07-10 counting-page lesson: the
-   * checklist knew the child's level and the agent could not see it). */
-  answers: ChildAnswerRow[];
   /** The family's adults, oldest membership first (multi-parent v0), so
    * a two-parent family renders both names instead of one. */
   members: MemberRow[];
@@ -100,7 +87,7 @@ export async function loadFamilyContextPinned(
   familyId: string,
 ): Promise<FamilyContextRows> {
   const sql = mapDb();
-  const [families, children, memories, answers, members] = await Promise.all([
+  const [families, children, memories, members] = await Promise.all([
     sql<FamilyRow[]>`
       select name, us_state, parent_display_name, time_zone
       from public.families where id = ${familyId}
@@ -122,19 +109,13 @@ export async function loadFamilyContextPinned(
       order by created_at desc
       limit 200
     `,
-    sql<ChildAnswerRow[]>`
-      select a.child_id, a.question_id, a.answer
-      from public.child_answers a
-      join public.children c on c.id = a.child_id
-      where c.family_id = ${familyId}
-    `,
     sql<MemberRow[]>`
       select user_id, display_name from public.family_members
       where family_id = ${familyId}
       order by created_at
     `,
   ]);
-  return { family: families[0] ?? null, children, memories, answers, members };
+  return { family: families[0] ?? null, children, memories, members };
 }
 
 export interface RenderFamilyContextOptions {

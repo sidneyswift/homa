@@ -95,7 +95,6 @@ function createFakeFamilyContext(seed: FakeFamilySeed): FamilyContextRows {
       avatar_url: null,
     })),
     memories: [],
-    answers: [],
     members: [{ display_name: seed.parentName }],
   };
 }
