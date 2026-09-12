@@ -8,6 +8,15 @@ index 4ce60b0097e49f5fee42a641333bac2132eb8687..595e390e66cf1b35022cea5dbc3becff
  `);for(;a!==-1;){let e=r.slice(0,a).trim();r=r.slice(a+1),e.length>0&&(yield JSON.parse(e)),a=r.indexOf(`
  `)}}let e=r.trim();e.length>0&&(yield JSON.parse(e))}finally{i||await t.cancel().catch(()=>{}),t.releaseLock()}}export{isStreamDisconnectError,readNdjsonStream};
 \ No newline at end of file
+diff --git a/dist/src/harness/emission.js b/dist/src/harness/emission.js
+index b23de911cd0a956216bdb96e29ebcc0487a3272e..98048a2eccbf3b759d4f83eb874f5ee77c9f784f 100644
+--- a/dist/src/harness/emission.js
++++ b/dist/src/harness/emission.js
+@@ -1 +1 @@
+-import{toError}from"#shared/errors.js";import{createActionResultEvent,createActionsRequestedEvent,createMessageAppendedEvent,createMessageCompletedEvent,createMessageReceivedEvent,createReasoningAppendedEvent,createReasoningCompletedEvent,createSessionCompletedEvent,createSessionFailedEvent,createSessionStartedEvent,createSessionWaitingEvent,createStepFailedEvent,createStepStartedEvent,createTurnCompletedEvent,createTurnFailedEvent,createTurnStartedEvent}from"#protocol/message.js";import{contextStorage}from"#context/container.js";import{createRuntimeActionRequestFromToolCall,resolveToolCallInputObject}from"#harness/runtime-actions.js";import{isAuthorizationSignal,isPendingAuthorizationToolOutput}from"#harness/authorization.js";import{hasEmptyDeliverySentinel}from"#shared/empty-delivery.js";import{createRuntimeToolResultFromStepResult,createRuntimeToolResultFromToolError,createToolResultMessagePartFromToolError}from"#harness/action-result-helpers.js";import{readToolInterrupt}from"#harness/tool-interrupts.js";import{createProviderStreamActionBatch}from"#harness/stream-actions.js";const HARNESS_EMISSION_STATE_KEY=`eve.harness.emission`,DEFAULT_EMISSION_STATE={sessionStarted:!1,sequence:0,stepIndex:0,turnId:``};function getHarnessEmissionState(e){return e?.[HARNESS_EMISSION_STATE_KEY]??DEFAULT_EMISSION_STATE}function isHarnessBetweenTurns(e){return getHarnessEmissionState(e.state).turnId===``}function setHarnessEmissionState(e,t){return{...e,state:{...e.state,[HARNESS_EMISSION_STATE_KEY]:t}}}async function emitTurnPreamble(e,t,n,r){let i=`turn_${n.sequence}`;return n.sessionStarted||await e(createSessionStartedEvent({runtime:r})),await e(createTurnStartedEvent({sequence:n.sequence,turnId:i})),t.message!==void 0&&await e(createMessageReceivedEvent({message:t.message,sequence:n.sequence,turnId:i})),{sessionStarted:!0,sequence:n.sequence,stepIndex:0,turnId:i}}async function emitStepStarted(e,t,n){await e(createStepStartedEvent({sequence:t.sequence,stepIndex:t.stepIndex,turnId:t.turnId}),n)}async function emitStepAndTurnFailed(e,t,n){await e(createStepFailedEvent({...n,sequence:t.sequence,stepIndex:t.stepIndex,turnId:t.turnId})),await e(createTurnFailedEvent({...n,sequence:t.sequence,turnId:t.turnId}))}async function emitFailedStep(e,t,n){await emitStepAndTurnFailed(e,t,n),await e(createSessionFailedEvent(n))}async function emitRecoverableFailedTurn(e,t,n){return await emitStepAndTurnFailed(e,t,n),await e(createSessionWaitingEvent()),{sessionStarted:t.sessionStarted,sequence:t.sequence+1,stepIndex:0,turnId:``}}function advanceStep(e){return{...e,stepIndex:e.stepIndex+1}}async function emitTurnEpilogue(e,t,n){return await e(createTurnCompletedEvent({sequence:t.sequence,turnId:t.turnId})),n===`conversation`?await e(createSessionWaitingEvent()):await e(createSessionCompletedEvent()),{sessionStarted:t.sessionStarted,sequence:t.sequence+1,stepIndex:0,turnId:``}}function normalizeAssistantStepFinishReason(e){switch(e){case`content-filter`:case`error`:case`length`:case`stop`:case`tool-calls`:return e;default:return`other`}}async function emitStreamContent(a,o,s,c){let l=``,u=``,d=`stop`,f,p=new Set,m=new Set,h=new Set,g=new Set,_=createProviderStreamActionBatch({emitFn:a,state:o}),v=new Set,y=[],b=[],x=[],flushCurrentMessage=async()=>{u.length!==0&&(await a(createMessageCompletedEvent({finishReason:`tool-calls`,message:u,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),u=``)},emitActionRequest=async e=>{m.has(e.callId)||(u.trim().length>0&&await flushCurrentMessage(),m.add(e.callId),await a(createActionsRequestedEvent({actions:[e],sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})))},collectProviderToolCall=async e=>{g.has(e.toolCallId)||(g.add(e.toolCallId),!m.has(e.toolCallId)&&(m.add(e.toolCallId),u.trim().length>0&&await flushCurrentMessage(),_.observe({callId:e.toolCallId,input:resolveToolCallInputObject(e.input,{callId:e.toolCallId,toolName:e.toolName}),kind:`tool-call`,toolName:e.toolName})))},emitActionResult=async e=>{h.has(e.callId)||(h.add(e.callId),await a(createActionResultEvent({result:e,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})))},emitToolCall=async e=>{if(!(c===void 0||e.invalid===!0||c.excludedActionToolNames.has(e.toolName)))try{await emitActionRequest(createRuntimeActionRequestFromToolCall({toolCall:e,tools:c.tools}))}catch(e){if(e instanceof TypeError)return;throw e}};for await(let t of s)if(f===void 0)switch(t.type){case`reasoning-delta`:await _.flush(),l+=t.text,await a(createReasoningAppendedEvent({reasoningDelta:t.text,reasoningSoFar:l,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId}));break;case`text-delta`:await _.flush(),l.trim().length>0&&(await a(createReasoningCompletedEvent({reasoning:l,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),l=``),u+=t.text,await a(createMessageAppendedEvent({messageDelta:t.text,messageSoFar:u,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId}));break;case`tool-call`:{let e=t;p.add(e.toolCallId),e.providerExecuted===!0?await collectProviderToolCall(e):(await _.flush(),await emitToolCall(e));break}case`tool-result`:{let e=t;if(e.preliminary===!0)break;if(e.providerExecuted===!0){await collectProviderToolCall({input:`input`in e?e.input:void 0,toolCallId:e.toolCallId,toolName:e.toolName}),await _.flush(),await emitActionResult(createRuntimeToolResultFromStepResult(e));break}if(p.has(t.toolCallId)){if(isInlineAuthorizationToolResult(e))break;m.has(t.toolCallId)&&(await emitActionResult(createRuntimeToolResultFromStepResult(e)),v.add(t.toolCallId));break}if(await _.flush(),await flushCurrentMessage(),isInlineAuthorizationToolResult(e)){v.add(t.toolCallId),y.push(e);break}await emitActionResult(createRuntimeToolResultFromStepResult(e)),v.add(t.toolCallId);let n=e.output;b.push({type:`tool-result`,toolCallId:e.toolCallId,toolName:e.toolName,output:typeof n==`string`?{type:`text`,value:n}:{type:`json`,value:n??null}});break}case`tool-error`:{let e=t;e.providerExecuted===!0?(await collectProviderToolCall(e),await _.flush(),await emitActionResult(createRuntimeToolResultFromToolError(e))):m.has(e.toolCallId)&&(await emitActionResult(createRuntimeToolResultFromToolError(e)),v.add(e.toolCallId),x.push(createToolResultMessagePartFromToolError(e)));break}case`finish-step`:d=normalizeAssistantStepFinishReason(t.finishReason),await _.flush();break;case`error`:f=toError(t.error);break;default:break}if(await _.flush(),f!==void 0)throw f;return l.trim().length>0&&await a(createReasoningCompletedEvent({reasoning:l,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),d!==`tool-calls`&&hasEmptyDeliverySentinel(u)?await a(createMessageCompletedEvent({finishReason:d,message:null,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})):u.trim().length>0&&await a(createMessageCompletedEvent({finishReason:d,message:u,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),{emittedActionCallIds:m,handledInlineToolResultCallIds:v,inlineAuthorizationResults:y,inlineToolResultParts:b,trailingInlineToolResultParts:x}}function isInlineAuthorizationToolResult(e){if(isPendingAuthorizationToolOutput(e.output))return!0;let t=contextStorage.getStore();if(t===void 0)return!1;let n=readToolInterrupt(t,e.toolCallId);return n!==void 0&&isAuthorizationSignal(n)}export{advanceStep,emitFailedStep,emitRecoverableFailedTurn,emitStepStarted,emitStreamContent,emitTurnEpilogue,emitTurnPreamble,getHarnessEmissionState,isHarnessBetweenTurns,normalizeAssistantStepFinishReason,setHarnessEmissionState};
+\ No newline at end of file
++import{createOrderedStreamEmitter}from"#harness/ordered-stream-emitter.js";import{interruptStreamOnFailure}from"#harness/interruptible-stream.js";import{toError}from"#shared/errors.js";import{createActionResultEvent,createActionsRequestedEvent,createMessageAppendedEvent,createMessageCompletedEvent,createMessageReceivedEvent,createReasoningAppendedEvent,createReasoningCompletedEvent,createSessionCompletedEvent,createSessionFailedEvent,createSessionStartedEvent,createSessionWaitingEvent,createStepFailedEvent,createStepStartedEvent,createTurnCompletedEvent,createTurnFailedEvent,createTurnStartedEvent}from"#protocol/message.js";import{contextStorage}from"#context/container.js";import{createRuntimeActionRequestFromToolCall,resolveToolCallInputObject}from"#harness/runtime-actions.js";import{isAuthorizationSignal,isPendingAuthorizationToolOutput}from"#harness/authorization.js";import{hasEmptyDeliverySentinel}from"#shared/empty-delivery.js";import{createRuntimeToolResultFromStepResult,createRuntimeToolResultFromToolError,createToolResultMessagePartFromToolError}from"#harness/action-result-helpers.js";import{readToolInterrupt}from"#harness/tool-interrupts.js";import{createProviderStreamActionBatch}from"#harness/stream-actions.js";const HARNESS_EMISSION_STATE_KEY=`eve.harness.emission`,DEFAULT_EMISSION_STATE={sessionStarted:!1,sequence:0,stepIndex:0,turnId:``};function getHarnessEmissionState(e){return e?.[HARNESS_EMISSION_STATE_KEY]??DEFAULT_EMISSION_STATE}function isHarnessBetweenTurns(e){return getHarnessEmissionState(e.state).turnId===``}function setHarnessEmissionState(e,t){return{...e,state:{...e.state,[HARNESS_EMISSION_STATE_KEY]:t}}}async function emitTurnPreamble(e,t,n,r){let i=`turn_${n.sequence}`;return n.sessionStarted||await e(createSessionStartedEvent({runtime:r})),await e(createTurnStartedEvent({sequence:n.sequence,turnId:i})),t.message!==void 0&&await e(createMessageReceivedEvent({message:t.message,sequence:n.sequence,turnId:i})),{sessionStarted:!0,sequence:n.sequence,stepIndex:0,turnId:i}}async function emitStepStarted(e,t,n){await e(createStepStartedEvent({sequence:t.sequence,stepIndex:t.stepIndex,turnId:t.turnId}),n)}async function emitStepAndTurnFailed(e,t,n){await e(createStepFailedEvent({...n,sequence:t.sequence,stepIndex:t.stepIndex,turnId:t.turnId})),await e(createTurnFailedEvent({...n,sequence:t.sequence,turnId:t.turnId}))}async function emitFailedStep(e,t,n){await emitStepAndTurnFailed(e,t,n),await e(createSessionFailedEvent(n))}async function emitRecoverableFailedTurn(e,t,n){return await emitStepAndTurnFailed(e,t,n),await e(createSessionWaitingEvent()),{sessionStarted:t.sessionStarted,sequence:t.sequence+1,stepIndex:0,turnId:``}}function advanceStep(e){return{...e,stepIndex:e.stepIndex+1}}async function emitTurnEpilogue(e,t,n){return await e(createTurnCompletedEvent({sequence:t.sequence,turnId:t.turnId})),n===`conversation`?await e(createSessionWaitingEvent()):await e(createSessionCompletedEvent()),{sessionStarted:t.sessionStarted,sequence:t.sequence+1,stepIndex:0,turnId:``}}function normalizeAssistantStepFinishReason(e){switch(e){case`content-filter`:case`error`:case`length`:case`stop`:case`tool-calls`:return e;default:return`other`}}async function emitStreamContent(a,o,s,c){let e=createOrderedStreamEmitter(a),b=createProviderStreamActionBatch({emitFn:e.emit,state:o});try{return await consumeStreamContent(e.emit,o,interruptStreamOnFailure(s,e.failureSignal),b,c)}finally{try{await b.cancel()}finally{await e.closeAndDrain()}}}async function consumeStreamContent(a,o,s,_,c){let l=``,u=``,d=`stop`,f,p=new Set,m=new Set,h=new Set,g=new Set,v=new Set,y=[],b=[],x=[],flushCurrentMessage=async()=>{u.length!==0&&(await a(createMessageCompletedEvent({finishReason:`tool-calls`,message:u,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),u=``)},emitActionRequest=async e=>{m.has(e.callId)||(u.trim().length>0&&await flushCurrentMessage(),m.add(e.callId),await a(createActionsRequestedEvent({actions:[e],sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})))},collectProviderToolCall=async e=>{g.has(e.toolCallId)||(g.add(e.toolCallId),!m.has(e.toolCallId)&&(m.add(e.toolCallId),u.trim().length>0&&await flushCurrentMessage(),_.observe({callId:e.toolCallId,input:resolveToolCallInputObject(e.input,{callId:e.toolCallId,toolName:e.toolName}),kind:`tool-call`,toolName:e.toolName})))},emitActionResult=async e=>{h.has(e.callId)||(h.add(e.callId),await a(createActionResultEvent({result:e,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})))},emitToolCall=async e=>{if(!(c===void 0||e.invalid===!0||c.excludedActionToolNames.has(e.toolName)))try{await emitActionRequest(createRuntimeActionRequestFromToolCall({toolCall:e,tools:c.tools}))}catch(e){if(e instanceof TypeError)return;throw e}};for await(let t of s)if(f===void 0)switch(t.type){case`reasoning-delta`:await _.flush(),l+=t.text,await a(createReasoningAppendedEvent({reasoningDelta:t.text,reasoningSoFar:l,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId}));break;case`text-delta`:await _.flush(),l.trim().length>0&&(await a(createReasoningCompletedEvent({reasoning:l,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),l=``),u+=t.text,await a(createMessageAppendedEvent({messageDelta:t.text,messageSoFar:u,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId}));break;case`tool-call`:{let e=t;p.add(e.toolCallId),e.providerExecuted===!0?await collectProviderToolCall(e):(await _.flush(),await emitToolCall(e));break}case`tool-result`:{let e=t;if(e.preliminary===!0)break;if(e.providerExecuted===!0){await collectProviderToolCall({input:`input`in e?e.input:void 0,toolCallId:e.toolCallId,toolName:e.toolName}),await _.flush(),await emitActionResult(createRuntimeToolResultFromStepResult(e));break}if(p.has(t.toolCallId)){if(isInlineAuthorizationToolResult(e))break;m.has(t.toolCallId)&&(await emitActionResult(createRuntimeToolResultFromStepResult(e)),v.add(t.toolCallId));break}if(await _.flush(),await flushCurrentMessage(),isInlineAuthorizationToolResult(e)){v.add(t.toolCallId),y.push(e);break}await emitActionResult(createRuntimeToolResultFromStepResult(e)),v.add(t.toolCallId);let n=e.output;b.push({type:`tool-result`,toolCallId:e.toolCallId,toolName:e.toolName,output:typeof n==`string`?{type:`text`,value:n}:{type:`json`,value:n??null}});break}case`tool-error`:{let e=t;e.providerExecuted===!0?(await collectProviderToolCall(e),await _.flush(),await emitActionResult(createRuntimeToolResultFromToolError(e))):m.has(e.toolCallId)&&(await emitActionResult(createRuntimeToolResultFromToolError(e)),v.add(e.toolCallId),x.push(createToolResultMessagePartFromToolError(e)));break}case`finish-step`:d=normalizeAssistantStepFinishReason(t.finishReason),await _.flush();break;case`error`:f=toError(t.error);break;default:break}if(await _.flush(),f!==void 0)throw f;return l.trim().length>0&&await a(createReasoningCompletedEvent({reasoning:l,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),d!==`tool-calls`&&hasEmptyDeliverySentinel(u)?await a(createMessageCompletedEvent({finishReason:d,message:null,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})):u.trim().length>0&&await a(createMessageCompletedEvent({finishReason:d,message:u,sequence:o.sequence,stepIndex:o.stepIndex,turnId:o.turnId})),{emittedActionCallIds:m,handledInlineToolResultCallIds:v,inlineAuthorizationResults:y,inlineToolResultParts:b,trailingInlineToolResultParts:x}}function isInlineAuthorizationToolResult(e){if(isPendingAuthorizationToolOutput(e.output))return!0;let t=contextStorage.getStore();if(t===void 0)return!1;let n=readToolInterrupt(t,e.toolCallId);return n!==void 0&&isAuthorizationSignal(n)}export{advanceStep,emitFailedStep,emitRecoverableFailedTurn,emitStepStarted,emitStreamContent,emitTurnEpilogue,emitTurnPreamble,getHarnessEmissionState,isHarnessBetweenTurns,normalizeAssistantStepFinishReason,setHarnessEmissionState};
+\ No newline at end of file
 diff --git a/dist/src/harness/empty-delivery-guard.d.ts b/dist/src/harness/empty-delivery-guard.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..845161c4144b279c4c0f73ccb5b1f7d0f1b0958e
@@ -38,6 +47,306 @@ index 0000000000000000000000000000000000000000..41872bdb68f9db0ebfb5ceff4d73fb7a
 +function isUnbackedEmptyDelivery(result,promptMessages){if(result.toolCalls.length>0)return!1;let text=resolveAssistantStepText(result.response.messages,result.text);return hasEmptyDeliverySentinel(text)&&!turnHasActionAfterLastUser(promptMessages)}
 +
 +export{isUnbackedEmptyDelivery,turnHasActionAfterLastUser};
+diff --git a/dist/src/harness/interruptible-stream.js b/dist/src/harness/interruptible-stream.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..af3a005ea9d086de2e43c342d8f5c90536d67f13
+--- /dev/null
++++ b/dist/src/harness/interruptible-stream.js
+@@ -0,0 +1,47 @@
++export async function* interruptStreamOnFailure(stream, failureSignal) {
++    const iterator = stream[Symbol.asyncIterator]();
++    let completed = false;
++    try {
++        while(true){
++            const result = await nextOrFailure(iterator, failureSignal);
++            if (result.done) {
++                completed = true;
++                return;
++            }
++            yield result.value;
++        }
++    } finally{
++        if (!completed && iterator.return !== undefined) {
++            try {
++                const closing = iterator.return();
++                void Promise.resolve(closing).catch(()=>{});
++            } catch  {}
++        }
++    }
++}
++function nextOrFailure(iterator, failureSignal) {
++    if (failureSignal.aborted) return Promise.reject(failureSignal.reason);
++    return new Promise((resolve, reject)=>{
++        const onFailure = ()=>{
++            reject(failureSignal.reason);
++        };
++        failureSignal.addEventListener("abort", onFailure, {
++            once: true
++        });
++        let next;
++        try {
++            next = iterator.next();
++        } catch (error) {
++            failureSignal.removeEventListener("abort", onFailure);
++            reject(error);
++            return;
++        }
++        next.then((result)=>{
++            failureSignal.removeEventListener("abort", onFailure);
++            resolve(result);
++        }, (error)=>{
++            failureSignal.removeEventListener("abort", onFailure);
++            reject(error);
++        });
++    });
++}
+diff --git a/dist/src/harness/ordered-stream-emitter.js b/dist/src/harness/ordered-stream-emitter.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..5df2284317bf5a70361b6836c185227a8c63b2ed
+--- /dev/null
++++ b/dist/src/harness/ordered-stream-emitter.js
+@@ -0,0 +1,163 @@
++const MAX_PENDING_EVENTS = 64;
++const MAX_PENDING_DELTA_CHARACTERS = 64 * 1024;
++export function createOrderedStreamEmitter(emitFn, options = {}) {
++    const maxPendingEvents = options.maxPendingEvents ?? MAX_PENDING_EVENTS;
++    if (!Number.isInteger(maxPendingEvents) || maxPendingEvents < 1) {
++        throw new RangeError("maxPendingEvents must be a positive integer.");
++    }
++    const pending = [];
++    const capacityWaiters = new Set();
++    const idleWaiters = new Set();
++    let closeRequested = false;
++    let pendingDeltaCharacters = 0;
++    let pendingSourceEvents = 0;
++    let failure;
++    let failed = false;
++    let pumping = false;
++    const failureController = new AbortController();
++    const throwIfFailed = ()=>{
++        if (failed) throw failure;
++    };
++    const settleIdleWaiters = ()=>{
++        for (const resolve of idleWaiters)resolve();
++        idleWaiters.clear();
++    };
++    const hasCapacity = ()=>pendingSourceEvents < maxPendingEvents && pendingDeltaCharacters < MAX_PENDING_DELTA_CHARACTERS;
++    const settleCapacityWaiters = ()=>{
++        if (!hasCapacity()) return;
++        for (const resolve of capacityWaiters)resolve();
++        capacityWaiters.clear();
++    };
++    const pump = async ()=>{
++        if (pumping || failed) return;
++        pumping = true;
++        while(pending.length > 0){
++            const next = pending.shift();
++            if (next === undefined) break;
++            pendingDeltaCharacters -= next.deltaCharacters;
++            pendingSourceEvents -= next.sourceEvents;
++            settleCapacityWaiters();
++            try {
++                await emitFn(materializeEvent(next), next.messages);
++            } catch (error) {
++                if (!failed) {
++                    failure = error;
++                    failed = true;
++                    failureController.abort(error);
++                }
++                pending.length = 0;
++                pendingDeltaCharacters = 0;
++                pendingSourceEvents = 0;
++                settleCapacityWaiters();
++                break;
++            }
++        }
++        pumping = false;
++        settleIdleWaiters();
++    };
++    const waitForIdle = async ()=>{
++        if (!pumping && pending.length === 0) {
++            throwIfFailed();
++            return;
++        }
++        await new Promise((resolve)=>{
++            idleWaiters.add(resolve);
++        });
++        throwIfFailed();
++    };
++    const waitForCapacity = async ()=>{
++        if (hasCapacity()) return;
++        await new Promise((resolve)=>{
++            capacityWaiters.add(resolve);
++        });
++        throwIfFailed();
++    };
++    return {
++        async closeAndDrain () {
++            closeRequested = true;
++            void pump();
++            await waitForIdle();
++        },
++        async emit (event, messages) {
++            throwIfFailed();
++            if (closeRequested) {
++                throw new TypeError("Cannot emit after the ordered stream emitter has closed.");
++            }
++            const lastIndex = pending.length - 1;
++            const last = pending[lastIndex];
++            const delta = appendDelta(event);
++            if (last === undefined || !mergeAdjacentAppends(last, event, messages)) {
++                pending.push({
++                    deltaCharacters: delta?.length ?? 0,
++                    event,
++                    messages,
++                    sourceEvents: 1
++                });
++            } else {
++                last.deltaCharacters += delta?.length ?? 0;
++                last.sourceEvents += 1;
++            }
++            pendingDeltaCharacters += delta?.length ?? 0;
++            pendingSourceEvents += 1;
++            void pump();
++            if (pendingSourceEvents >= maxPendingEvents || pendingDeltaCharacters >= MAX_PENDING_DELTA_CHARACTERS) {
++                await waitForCapacity();
++            }
++            throwIfFailed();
++        },
++        failureSignal: failureController.signal
++    };
++}
++function mergeAdjacentAppends(left, right, messages) {
++    if (left.event.type === "message.appended" && right.type === "message.appended") {
++        if (!sameCoordinates(left.event, right)) return false;
++        left.deltaParts ??= [
++            left.event.data.messageDelta
++        ];
++        left.deltaParts.push(right.data.messageDelta);
++        left.event = right;
++        left.messages = messages;
++        return true;
++    }
++    if (left.event.type === "reasoning.appended" && right.type === "reasoning.appended") {
++        if (!sameCoordinates(left.event, right)) return false;
++        left.deltaParts ??= [
++            left.event.data.reasoningDelta
++        ];
++        left.deltaParts.push(right.data.reasoningDelta);
++        left.event = right;
++        left.messages = messages;
++        return true;
++    }
++    return false;
++}
++function appendDelta(event) {
++    if (event.type === "message.appended") return event.data.messageDelta;
++    if (event.type === "reasoning.appended") return event.data.reasoningDelta;
++    return undefined;
++}
++function materializeEvent(emission) {
++    if (emission.deltaParts === undefined) return emission.event;
++    if (emission.event.type === "message.appended") {
++        return {
++            ...emission.event,
++            data: {
++                ...emission.event.data,
++                messageDelta: emission.deltaParts.join("")
++            }
++        };
++    }
++    if (emission.event.type === "reasoning.appended") {
++        return {
++            ...emission.event,
++            data: {
++                ...emission.event.data,
++                reasoningDelta: emission.deltaParts.join("")
++            }
++        };
++    }
++    return emission.event;
++}
++function sameCoordinates(left, right) {
++    return left.data.sequence === right.data.sequence && left.data.stepIndex === right.data.stepIndex && left.data.turnId === right.data.turnId;
++}
+diff --git a/dist/src/harness/stream-actions.js b/dist/src/harness/stream-actions.js
+index 09a6f9f44bafd8ada7773bf77a2b49d39fca19a5..64b49e76493c5298d2fbe97de6ab7254f1d4cea7 100644
+--- a/dist/src/harness/stream-actions.js
++++ b/dist/src/harness/stream-actions.js
+@@ -1 +1,71 @@
+-import{createActionsRequestedEvent}from"#protocol/message.js";function createProviderStreamActionBatch(t){let n=new Map,r=Promise.resolve(),i,a,o,emitPendingActions=async()=>{if(n.size===0)return;let r=[...n.values()];n.clear(),await t.emitFn(createActionsRequestedEvent({actions:r,sequence:t.state.sequence,stepIndex:t.state.stepIndex,turnId:t.state.turnId}))},scheduleFlush=()=>{if(a!==void 0)return;let e,t=new Promise(t=>{e=t});o=e,a=setTimeout(()=>{a=void 0,o=void 0,e?.()},0),r=r.then(()=>t).then(emitPendingActions).catch(e=>{i??=e})};return{observe(e){n.set(e.callId,e),scheduleFlush()},async flush(){if(a!==void 0){clearTimeout(a),a=void 0;let e=o;o=void 0,e?.()}if(await r,i!==void 0)throw i;await emitPendingActions()}}}export{createProviderStreamActionBatch};
+\ No newline at end of file
++import { createActionsRequestedEvent } from "#protocol/message.js";
++export function createProviderStreamActionBatch(input) {
++    const pendingActions = new Map();
++    let actionFlush = Promise.resolve();
++    let actionFlushError;
++    let actionFlushTimer;
++    let cancelled = false;
++    let resolveActionFlushTimer;
++    const emitPendingActions = async ()=>{
++        if (cancelled) {
++            pendingActions.clear();
++            return;
++        }
++        if (pendingActions.size === 0) return;
++        const actions = [
++            ...pendingActions.values()
++        ];
++        pendingActions.clear();
++        await input.emitFn(createActionsRequestedEvent({
++            actions,
++            sequence: input.state.sequence,
++            stepIndex: input.state.stepIndex,
++            turnId: input.state.turnId
++        }));
++    };
++    const scheduleFlush = ()=>{
++        if (cancelled) return;
++        if (actionFlushTimer !== undefined) return;
++        let resolveTimer;
++        const timerElapsed = new Promise((resolve)=>{
++            resolveTimer = resolve;
++        });
++        resolveActionFlushTimer = resolveTimer;
++        actionFlushTimer = setTimeout(()=>{
++            actionFlushTimer = undefined;
++            resolveActionFlushTimer = undefined;
++            resolveTimer?.();
++        }, 0);
++        actionFlush = actionFlush.then(()=>timerElapsed).then(emitPendingActions).catch((error)=>{
++            actionFlushError ??= error;
++        });
++    };
++    const releaseFlushTimer = ()=>{
++        if (actionFlushTimer === undefined) return;
++        clearTimeout(actionFlushTimer);
++        actionFlushTimer = undefined;
++        const resolveTimer = resolveActionFlushTimer;
++        resolveActionFlushTimer = undefined;
++        resolveTimer?.();
++    };
++    return {
++        async cancel () {
++            cancelled = true;
++            pendingActions.clear();
++            releaseFlushTimer();
++            await actionFlush;
++        },
++        observe (action) {
++            if (cancelled) return;
++            pendingActions.set(action.callId, action);
++            scheduleFlush();
++        },
++        async flush () {
++            if (cancelled) return;
++            releaseFlushTimer();
++            await actionFlush;
++            if (actionFlushError !== undefined) throw actionFlushError;
++            await emitPendingActions();
++        }
++    };
++}
 diff --git a/dist/src/harness/tool-loop.js b/dist/src/harness/tool-loop.js
 index 4ec2faa812adb50dba907a8d7dbead67a0bfdee0..b2be40724f0e0d008289a48e0ce27b81ca7a4b84 100644
 --- a/dist/src/harness/tool-loop.js

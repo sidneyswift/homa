@@ -433,6 +433,9 @@ jobs:
       - name: Agent context checks (chart parity, injection escaping)
         run: pnpm check:agent-context
 
+      - name: Eve ordered-stream and empty-delivery regressions
+        run: pnpm check:eve-ordered-stream && pnpm check:eve-empty-delivery
+
       - name: Agent context budget ratchet (always-on bytes per component)
         run: pnpm check:agent-budget
 
