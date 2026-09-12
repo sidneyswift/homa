@@ -27,14 +27,14 @@ describe("ChatClient session-fork fix (GH #170)", () => {
   it("folds recovering into the send-line-occupied decision for a plain composer send", () => {
     assert.match(
       source,
-      /busy: isSendLineOccupied\(\{[\s\S]*?busy,[\s\S]*?recovering:\s+recovering \|\|\s+restoringBoundSession \|\|\s+bindingSyncFailure \|\|\s+authorizationParked,[\s\S]*?\}\)/u,
+      /busy: isSendLineOccupied\(\{[\s\S]*?busy,[\s\S]*?recovering:\s+recovering \|\|\s+restoringBoundSession \|\|\s+bindingSyncFailure \|\|\s+authorizationParked \|\|\s+preparingSendRef\.current,[\s\S]*?\}\)/u,
     );
   });
 
   it("folds recovering into the same gate for the attachment send path", () => {
     assert.match(
       source,
-      /if \(\s*isSendLineOccupied\(\{[\s\S]*?busy,[\s\S]*?recovering:\s+recovering \|\|\s+restoringBoundSession \|\|\s+bindingSyncFailure \|\|\s+authorizationParked,[\s\S]*?\}\) \|\| preparingAttachments\s*\)/u,
+      /if \(\s*isSendLineOccupied\(\{[\s\S]*?busy,[\s\S]*?recovering:\s+recovering \|\|\s+restoringBoundSession \|\|\s+bindingSyncFailure \|\|\s+authorizationParked \|\|\s+preparingSendRef\.current,[\s\S]*?\}\) \|\| preparingAttachments\s*\)/u,
     );
   });
 

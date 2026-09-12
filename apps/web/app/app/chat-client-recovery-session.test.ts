@@ -52,7 +52,7 @@ describe("ChatClient recovered-session reattachment (GH #493 / #702)", () => {
     const reconcileAt = sendAcrossTabs.indexOf(
       "restoreServerBoundEveSession({",
     );
-    const sendAt = sendAcrossTabs.indexOf("await agentSend(input)");
+    const sendAt = sendAcrossTabs.indexOf("agentSend(input)");
 
     assert.ok(reconcileAt >= 0);
     assert.ok(sendAt > reconcileAt);
