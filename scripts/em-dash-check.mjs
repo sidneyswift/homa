@@ -102,7 +102,11 @@ const LINE_ALLOWLIST = new Map([
   ["docs/superpowers/plans/2026-07-12-socials-starter-pack.md", ['rg "—|HOMA"']],
   // pnpm's patch must quote Eve's full one-line minified harness on both diff
   // sides. This phrase is upstream log punctuation, not Homa-authored prose.
-  ["patches/eve@0.19.0.patch", ["model call failed — parking session"]],
+  ["patches/eve@0.19.0.patch", [
+    "model call failed — parking session",
+    // The inline-step patch also quotes this unchanged upstream failure log.
+    "workflow loop threw \u2014 emitting terminal session.failed",
+  ]],
 ]);
 
 function isExcludedPath(relPath) {

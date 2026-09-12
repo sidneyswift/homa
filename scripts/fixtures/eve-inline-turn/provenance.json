@@ -1,0 +1,173 @@
+{
+  "sourceVersion": "0.19.0",
+  "upstreamTemplate": "e219a6a71d2bf619241084a7f02d2fd838cb14db",
+  "files": [
+    {
+      "relative": "dist/src/execution/inline-turn.js",
+      "beforeSha256": null,
+      "afterSha256": "15e167b0ba15dc110c2f3219761a2fd943a9f42bc274629a965d625882298d84"
+    },
+    {
+      "relative": "dist/src/execution/accepted-delivery-deployment.js",
+      "beforeSha256": null,
+      "afterSha256": "b7bf2416a88c4b66706c802ada495ba5a3df3e5959a334bf9c507d57e55bfd62"
+    },
+    {
+      "relative": "dist/src/execution/turn-dispatch.js",
+      "beforeSha256": "402aa1ac0c07de7602caf6d5f68b92d376f18d0168ba7e59e722b77a609dc21d",
+      "afterSha256": "a4086b5a6235fe971868e17923e29099a725da29347958ff106736bb16db4e56"
+    },
+    {
+      "relative": "dist/src/execution/workflow-steps.js",
+      "beforeSha256": "a8a6bbe30679e0e3651185873bc8459a8303ba56cfbfda09e58a871849551cc9",
+      "afterSha256": "5db757cc338a41b7a7625283ac4265403f9b521fac60b5613fb73212318f1c62"
+    },
+    {
+      "relative": "dist/src/execution/workflow-runtime.js",
+      "beforeSha256": "a97ef267e89fbb9c9ccec96576f1139946ba60a201ab0db3a819b1e304c978c7",
+      "afterSha256": "ebaf133d272d1c91bf7ce3cfb381ca0308d019353d982d09c6ef57b67be476bd"
+    },
+    {
+      "relative": "dist/src/execution/workflow-entry.js",
+      "beforeSha256": "e6eb931b37c071b0b90893962f037804c10173ed1162980bbf54548056ea6192",
+      "afterSha256": "1038e9899f88aa1396473185649e5a8bd001350c31efa01d2dafe7e1623bf973"
+    },
+    {
+      "relative": "dist/src/harness/messages.js",
+      "beforeSha256": "33bbc8003cac0bcdb0372c5f5a455cf38726a6a9a4aa13ca1a608a455f13824e",
+      "afterSha256": "f2bc09543c70e89c1088bd83a81986b7c243f2a5806075b7facc68066a7a531a"
+    },
+    {
+      "relative": "dist/src/execution/durable-session-migrations/turn-workflow-v1-to-v2.js",
+      "beforeSha256": null,
+      "afterSha256": "2e78b858ab934a38a627a7117027267c7968da861a18efa1f0f0839f6aeda888"
+    },
+    {
+      "relative": "dist/src/execution/durable-session-migrations/turn-workflow.js",
+      "beforeSha256": "8d646bba1502a5536a865a7d6e2bdb1cd5266852795423b4029436f87f4cee5a",
+      "afterSha256": "e0735c6877cce47eb14c2df429f4b253952e39e5476991b76673f97b8d4cadaf"
+    },
+    {
+      "relative": "dist/src/execution/turn-workflow.js",
+      "beforeSha256": "6595609fc572077defea731b88a12fd76cec8643d5c3dc56e2fd14bb5a7c231b",
+      "afterSha256": "11de76b44943ce1907c130d2bc5c40b6c206a0ee2a8ac583021c0b88a02f6f71"
+    },
+    {
+      "relative": "dist/src/execution/accepted-delivery-deployment.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "43d9cced70b550ab0b324936f034d06d0cf54ed0d0eea211069a70c12c60cb26"
+    },
+    {
+      "relative": "dist/src/execution/inline-turn.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "58ad2b6f30cb6f6ed52e91c37187a8ce55fbba0c3a737dc5d25efa6cdf9f97de"
+    },
+    {
+      "relative": "dist/src/execution/durable-session-migrations/turn-workflow-v1-to-v2.d.ts",
+      "beforeSha256": null,
+      "afterSha256": "0085a2678157287526100e751f84d95db63dad958a1e5c7081f833c8d2834fb6"
+    },
+    {
+      "relative": "dist/src/channel/types.d.ts",
+      "beforeSha256": "619505d0fe06610d054585822d8b0ecc036f15f31aab1ce47ed3d61b77e8738a",
+      "afterSha256": "50433ea4a7f4489c32fca33d8072bcd303b509a337c78c445a4608f4adf3fa49"
+    },
+    {
+      "relative": "dist/src/execution/workflow-entry.d.ts",
+      "beforeSha256": "f8d699ad08e3e467bb90b7b32f410be4653ac958e8d57b00a2bede5c005611d9",
+      "afterSha256": "b9a709faf74083213b09c85262892149ee02a0be6b69eefa891b86d6ee4718fb"
+    },
+    {
+      "relative": "dist/src/execution/durable-session-migrations/turn-workflow.d.ts",
+      "beforeSha256": "4ad65286bcf992185d235c74d2e49323d539180ae4c491068ed8b54474d8bf03",
+      "afterSha256": "741dc0410046852c7fc979806966ae016a7c8a75dc9746c48b17ff8686edc92a"
+    },
+    {
+      "relative": "dist/src/execution/workflow-steps.d.ts",
+      "beforeSha256": "46cc47fb9c92cf80ac3b67e885bb062bb44f8884b026b8da7549bb67e6deacb4",
+      "afterSha256": "05c0461fdaa4d08dad1a2c7b65eeaaa4650d3bd556c863739e4786d81293a33a"
+    },
+    {
+      "relative": "dist/src/execution/workflow-runtime.d.ts",
+      "beforeSha256": "43e241d18f1d9f485f50cdab1871a4182a00d6a28c158f22f6ebeb8d1adcb69c",
+      "afterSha256": "fd44bb7448afbaea1be1c809c8aede5ad4af55d039623dab610750b64456c9f7"
+    },
+    {
+      "relative": "dist/src/harness/messages.d.ts",
+      "beforeSha256": "23307d8a8e5d536a7668bb9acc3e7fa5e2486e51145277bb8b2ad5534977b856",
+      "afterSha256": "abc37e0f242e5a3f79a516eb651f57ae70185fd3ee3fcd2aca29376edaf3f57d"
+    }
+  ],
+  "protectedFiles": [
+    {
+      "relative": "dist/src/harness/tool-loop.js",
+      "sha256": "4185eee93d9c809909bd54531d2827659b3c6554e2fa23ad485e05c691d19229"
+    },
+    {
+      "relative": "dist/src/harness/ordered-stream-emitter.js",
+      "sha256": "019b65d3b5bc664df185823723ab15cc2a1a3b5a528127d95136cf5166aee6a4"
+    },
+    {
+      "relative": "dist/src/protocol/message.js",
+      "sha256": "7bebf7f762be2fc50fcebe57af57b46ed19318aaa37d6d80d91263412bde7fbe"
+    },
+    {
+      "relative": "dist/src/public/channels/eve.js",
+      "sha256": "632f1f60681a5353a8fbff858f9217f709d685f21db50b8eb8f1b1d80c814014"
+    },
+    {
+      "relative": "dist/src/execution/turn-control-receiver.js",
+      "sha256": "c0ae72e1c79d1f63f256bbbd37cde333925f4188bf423671cca285d2b83bce10"
+    },
+    {
+      "relative": "dist/src/execution/session-delivery-hook.js",
+      "sha256": "89ef4ead0f19261c79c9cc55c89f33f410b42b2a8d57d2cc1961a04e29420f94"
+    },
+    {
+      "relative": "dist/src/execution/turn-execution-cursor.js",
+      "sha256": "fd20a45a83c158465bc1f2dec6f1539978e1be06e7e8d4f84fc560bd224bd85d"
+    },
+    {
+      "relative": "dist/src/execution/durable-session-store.js",
+      "sha256": "2675bfeed27b16bc120afb8a1753075592e9e4e625ccdccc4098cc79191112b2"
+    }
+  ],
+  "originalPatchSections": [
+    {
+      "header": "diff --git a/dist/src/client/ndjson.js b/dist/src/client/ndjson.js",
+      "sha256": "d75f4d5b77df6706849d7aebd430097ae27c35ef267c6877533293a917636ff4"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/emission.js b/dist/src/harness/emission.js",
+      "sha256": "01f6249dd52fcd47caac3edba0a1e7238bf2bafc395261499f2c407542447ef1"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/empty-delivery-guard.d.ts b/dist/src/harness/empty-delivery-guard.d.ts",
+      "sha256": "f5ff97c345d7618047f595cd85f58cb8fe6f66a789e37b42591e1e3064d2ebcf"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/empty-delivery-guard.js b/dist/src/harness/empty-delivery-guard.js",
+      "sha256": "468d728286f74712de0064b84997f4b35c14d73f23a7b7ba75676ebfed8b09d9"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/interruptible-stream.js b/dist/src/harness/interruptible-stream.js",
+      "sha256": "be5d14fe184d47a2141f2d71525785274eb71a0e44536d7e7bbe3039280c0379"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/ordered-stream-emitter.js b/dist/src/harness/ordered-stream-emitter.js",
+      "sha256": "c040a7958a46986bdfaf778a2e012f94748033fcc20cc363b66135bc3fd15b18"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/stream-actions.js b/dist/src/harness/stream-actions.js",
+      "sha256": "480c773ff27a75515b96557826e08cede8e1615e4cd3dab25c3f12e8d0bf3fb2"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/tool-loop.js b/dist/src/harness/tool-loop.js",
+      "sha256": "cce6fb7ea9efbb56fb185c90d92bab4c22b726aede3907779d9c8183a0123789"
+    },
+    {
+      "header": "diff --git a/dist/src/internal/workflow-bundle/eve-service-route-output.js b/dist/src/internal/workflow-bundle/eve-service-route-output.js",
+      "sha256": "991c26067b03d8a3a16d34ed8603d0c9fa8d188f8585f876db0ac3f172357e52"
+    }
+  ]
+}
