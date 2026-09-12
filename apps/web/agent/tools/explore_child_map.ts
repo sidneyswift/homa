@@ -53,20 +53,20 @@ const exploreToolInputSchema = z
         "search_topics",
       ])
       .describe(
-        "subject_map (needs subjectId): the checklist ladder with the child's answers, canonical comparison and credited evidence, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words.",
+        "subject_map (needs subjectId): the checklist ladder with the child's answers, canonical comparison and credited evidence, and skill-line domains. topic (needs topicId): one skill in depth with prerequisites and what it unlocks. ready_next (optional subjectId, domainId, limit): skills whose prerequisites the child has confirmed, best first. bottleneck (needs topicId): the earliest unconfirmed prerequisite before a target skill. teaching_order (needs topicIds): sort chosen topics prerequisites-first. search_topics (needs searchText, optional subjectId, limit): find real topic and checklist ids by words. Set fields unused by the selected query to null; never invent stand-in values.",
       ),
     childId: z
       .string()
       .uuid()
       .describe("A child id from the family context block."),
-    subjectId: subjectIdSchema.optional(),
-    domainId: subjectIdSchema.optional(),
+    subjectId: subjectIdSchema.nullable().optional(),
+    domainId: subjectIdSchema.nullable().optional(),
     topicId: topicIdSchema
-      .optional()
+      .nullable().optional()
       .describe("A real topic id from a prior result or search_topics; never guessed."),
-    topicIds: z.array(topicIdSchema).min(1).max(12).optional(),
-    searchText: z.string().trim().min(2).max(120).optional(),
-    limit: z.number().int().min(1).max(10).optional(),
+    topicIds: z.array(topicIdSchema).min(1).max(12).nullable().optional(),
+    searchText: z.string().trim().min(2).max(120).nullable().optional(),
+    limit: z.number().int().min(1).max(10).nullable().optional(),
   })
   .strict();
 
@@ -98,6 +98,15 @@ const exploreQuerySchema = z.discriminatedUnion("query", [
     .strict(),
 ]);
 
+/** Normalize only declared absent fields; strict query validation still rejects
+ * supplied unrelated fields and unknown keys (#1169). */
+export function parseExploreChildMapQuery(input: Record<string, unknown>) {
+  return exploreQuerySchema.safeParse(Object.fromEntries(Object.entries(input).filter(
+    ([key, value]) => key !== "childId" &&
+      ((value !== undefined && value !== null) || !Object.hasOwn(exploreToolInputSchema.shape, key)),
+  )));
+}
+
 export default defineBoundedTool({
   description:
     "Explore one child's learning map, read-only. For interpreting its comparison or evidence, load progress-reading. Use it to answer where a child is, what is missing, what comes next and why; the query values describe themselves. It never records anything; save evidence with manage_child_progress.",
@@ -115,13 +124,7 @@ export default defineBoundedTool({
       throw error;
     }
 
-    const parsedQuery = exploreQuerySchema.safeParse(
-      Object.fromEntries(
-        Object.entries(input).filter(
-          ([key, value]) => key !== "childId" && value !== undefined,
-        ),
-      ),
-    );
+    const parsedQuery = parseExploreChildMapQuery(input);
     if (!parsedQuery.success) {
       return {
         error: "invalid_query",

@@ -54,11 +54,18 @@ test("actual tool keeps caller RLS child gate and authenticated family binding o
  const source=readFileSync(new URL("../../agent/tools/explore_child_map.ts",import.meta.url),"utf8");
  const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
  const mod={exports:{}};vm.runInNewContext(code,{module:mod,exports:mod.exports,require:(name:string)=>{assert.ok(name in imports,name);return imports[name];}},{filename:"actual explore_child_map.ts"});
- const definition=mod.exports as {default:{execute(input:unknown,ctx:unknown):Promise<Record<string,unknown>>}};
+ const definition=mod.exports as {default:{inputSchema:z.ZodType;execute(input:unknown,ctx:unknown):Promise<Record<string,unknown>>}};
  const input={childId:COMPARISON_CHILD,query:"subject_map",subjectId:"gross_motor"};const ctx={session:{auth:{current:{attributes:{}}}}};
  const success=await definition.default.execute(input,ctx);assert.ok(success.comparison);assert.equal(calls,1);
  assert.deepEqual(filters,[["id",COMPARISON_CHILD],["family_id",COMPARISON_FAMILY]]);
  row={data:null,error:null};assert.equal((await definition.default.execute(input,ctx)).error,"unknown_child");assert.equal(calls,1);
  row={data:null,error:{message:"unavailable"}};assert.equal((await definition.default.execute(input,ctx)).error,"progress_unavailable");assert.equal(calls,1);
  access={mode:"pinned",familyId:COMPARISON_FAMILY};assert.ok((await definition.default.execute(input,ctx)).comparison);assert.equal(calls,2);
+ const absent={...input,domainId:null,topicId:null,topicIds:null,searchText:null,limit:null};
+ assert.ok((await definition.default.execute(definition.default.inputSchema.parse(absent),ctx)).comparison);
+ assert.equal(calls,3);
+ for(const invalid of [{...absent,topicId:"gross_motor.gallops"},{...absent,familyId:null},{...absent,subjectId:null}]) {
+  assert.equal((await definition.default.execute(invalid,ctx)).error,"invalid_query");
+ }
+ assert.equal(calls,3,"invalid query fields never reach the canonical family read");
 });
