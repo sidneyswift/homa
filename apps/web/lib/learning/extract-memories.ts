@@ -4,7 +4,7 @@ import path from "node:path";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { MEMORY_ENTRY_MAX_CHARS } from "../agent-memory";
 import { loadFamilyContextPinned, renderFamilyContext } from "../family-context";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
@@ -99,7 +99,7 @@ export async function extractMemoriesFromText(input: {
   const context = await loadFamilyContextPinned(input.familyId);
 
   const result = await generateObject({
-    model,
+    ...homaModelSettings(model),
     system: extractorPrompt(),
     prompt: [
       `The family context as Homa currently knows it (existing memories included; never duplicate them):`,

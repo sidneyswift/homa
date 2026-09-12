@@ -28,7 +28,7 @@ import {
   UnsupportedModelVersionError,
 } from "../apps/web/node_modules/ai/dist/index.js";
 
-import { HOMA_MODEL } from "../apps/web/agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../apps/web/agent/model";
 import {
   PROMPT_SUGGESTION_FALLBACK,
   promptSuggestionListSchema,
@@ -713,8 +713,8 @@ async function produceSuggestions(
 ): Promise<ProducedSuggestionBatch> {
   try {
     const result = await generateText({
-      model,
       ...PROMPT_SUGGESTION_PRODUCER_SETTINGS,
+      ...homaModelSettings(model),
       system: productionPrompt,
       prompt: renderProductionInput(fixture),
       output: Output.object({

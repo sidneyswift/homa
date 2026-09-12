@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import {
   FAMILY_MEMORY_CHAR_BUDGET,
   MEMORY_COMPACTION_TRIGGER_RATIO,
@@ -388,7 +388,7 @@ export async function proposeCompaction(
     .join("\n");
 
   return generateObject({
-    model: compactionModel(),
+    ...homaModelSettings(compactionModel()),
     system: compactorPrompt(),
     prompt: [
       "This family's saved memories, numbered. Return merges and splits.",

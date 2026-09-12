@@ -50,6 +50,16 @@ export type ModelRates = Record<string, ModelRate[]>;
  * unpriced.
  */
 export const MODEL_RATES: ModelRates = {
+  // Gateway catalog verified 2026-09-12. Base rates below 272,001 input tokens;
+  // this fallback remains an estimate and understates long-context requests.
+  "openai/gpt-6-astra": [
+    {
+      inputUsdPerMTok: 10,
+      outputUsdPerMTok: 50,
+      cacheReadUsdPerMTok: 1,
+      cacheWriteUsdPerMTok: 12.5,
+    },
+  ],
   "anthropic/claude-sonnet-5": [
     {
       inputUsdPerMTok: 2,
