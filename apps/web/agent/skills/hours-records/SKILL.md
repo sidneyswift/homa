@@ -1,6 +1,6 @@
 ---
 name: hours-records
-description: Use first, before reading or answering, when a parent asks to read or total recorded school time, find logged hours, understand a child's Hours record, count dates with timed entries, or create, reuse, rename, filter or subtotal Hours categories. Not for recording newly reported work or changing Planner activities; planner owns those. Not for state requirements, attendance packets, filing forms, or legal attendance judgments; state-records owns that paperwork.
+description: Use to read, total or explain recorded school time and manage Hours categories. New activity logs and Planner changes belong to planner; state paperwork and attendance judgments to state-records.
 metadata:
   homa-tools: find_hours, manage_hours_categories
 ---

@@ -133,7 +133,8 @@ Rules that hold from the first turn:
 const ONBOARDING_SKILL_PRELOADED_HEADER = `
 ### The onboarding skill (already loaded)
 
-The full onboarding skill follows. It is already in your context, so
+The onboarding skill router and shared boundaries follow. Authenticated family
+context adds the current stage. This root is already in your context, so
 never call load_skill for "onboarding"; loading it again buys nothing
 and costs the parent a silent wait.
 `.trim();

@@ -68,6 +68,23 @@ test("one failed context read preserves every successful block and the progress 
   assert.ok(result!.endsWith("onboarding\n\ncalls\n\ncontinuity"));
 });
 
+test("onboarding guidance receives authenticated focus and falls back only in onboarding mode", async () => {
+  const attributes = { ...input.attributes, viewChildId: "known-child" };
+  const loaders = dependencies({
+    loadOnboardingContext: async (familyId, receivedAttributes) => {
+      assert.equal(familyId, input.attributes.familyId);
+      assert.equal(receivedAttributes?.viewChildId, "known-child");
+      throw new Error("state unavailable");
+    },
+  });
+  const web = await resolveFamilyContextInstructionMarkdown({ ...input, attributes }, loaders);
+  assert.match(web!, /Onboarding stage guidance \(already loaded\)/);
+  assert.ok(web!.startsWith("family\n\nprogress\n\n"));
+  assert.ok(web!.endsWith("calls\n\ncontinuity"));
+  const sms = await resolveFamilyContextInstructionMarkdown({ ...input, attributes: { ...attributes, channel: "sms" } }, loaders);
+  assert.doesNotMatch(sms!, /Onboarding stage guidance/);
+});
+
 test("admission-provided continuity avoids another read and normal turns skip onboarding", async () => {
   const result = await resolveFamilyContextInstructionMarkdown({
     ...input,

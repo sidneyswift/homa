@@ -9,6 +9,7 @@ import {
   manageChildProgressInputSchema,
   manageChildProgressResultSchema,
   manageChildProgressToolInputSchema,
+  parseManageChildProgressCommand,
   progressOperationIdempotencyKey,
 } from "./tool-contract";
 import {
@@ -56,6 +57,28 @@ function throwingOperations(
 }
 
 describe("trusted progress command schema", () => {
+  it("accepts provider-restored absent fields without dropping supplied or unknown fields", () => {
+    const absent = Object.fromEntries(Object.keys(manageChildProgressToolInputSchema.shape)
+      .map((key) => [key, undefined]));
+    const command = { action: "record_journal_evidence", childId: CHILD_ID };
+    const transported = manageChildProgressToolInputSchema.parse({ ...absent, ...command });
+    assert.equal(manageChildProgressInputSchema.safeParse(transported).success, false);
+    assert.deepEqual(parseManageChildProgressCommand(transported), command);
+    const nullFields = Object.fromEntries(Object.keys(absent).map((key) => [key, null]));
+    assert.deepEqual(parseManageChildProgressCommand(
+      manageChildProgressToolInputSchema.parse({ ...nullFields, ...command })), command);
+    for (const supplied of [
+      { ...transported, purpose: "whole_map_refresh" },
+      { ...transported, familyId: null },
+      { ...transported, childId: null },
+      { ...transported, familyId: undefined },
+      { ...transported, familyId: FAMILY_ID },
+      { ...transported, childId: undefined },
+      { ...transported, childId: "invalid" },
+      { ...absent, action: "start_check_in", childId: CHILD_ID, purpose: "subject_deep_dive" },
+    ]) assert.throws(() => parseManageChildProgressCommand(supplied));
+  });
+
   it("publishes a provider-compatible top-level object schema", () => {
     const jsonSchema = z.toJSONSchema(
       manageChildProgressToolInputSchema,

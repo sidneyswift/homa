@@ -18,7 +18,11 @@ export default HOURS_ROUTING_CASES.map((testCase) => defineEval({
         : call.input.skill !== "hours-records"),
     ));
     if (testCase.skill === "hours-records") {
-      t.calledTool("find_hours");
+      // Category edits use their own catalog, not a time-total query.
+      if (testCase.id.startsWith("category-")) {
+        t.calledTool("manage_hours_categories");
+        t.notCalledTool("log_hours");
+      } else t.calledTool("find_hours");
       t.notCalledTool("open_state_records");
     }
   },

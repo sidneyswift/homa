@@ -75,6 +75,7 @@ export function parseSkillPackage(
   raw: string,
   filesOnDisk: readonly string[],
   toolNames: readonly string[] = [],
+  referenceDocuments: readonly string[] = [],
 ): ParsedSkillPackage {
   let description = "";
   let body = raw;
@@ -86,6 +87,9 @@ export function parseSkillPackage(
   }
 
   const lines = body.split("\n");
+  // The console displays the root verbatim, but inspection includes the
+  // supporting guidance that the root now loads on demand (#1167).
+  const analysisLines = [body, ...referenceDocuments].join("\n\n").split("\n");
   const sections: string[] = [];
   const citations: SkillReferenceCitation[] = [];
   const onDisk = new Set(filesOnDisk);
@@ -96,7 +100,7 @@ export function parseSkillPackage(
   );
   let currentSection: string | null = null;
 
-  for (const [index, line] of lines.entries()) {
+  for (const [index, line] of analysisLines.entries()) {
     const heading = line.match(/^## (.+)$/);
     if (heading) {
       currentSection = heading[1].trim();
@@ -113,7 +117,7 @@ export function parseSkillPackage(
       citations.push({
         file,
         section: currentSection,
-        excerpt: excerptAfter(lines, index),
+        excerpt: excerptAfter(analysisLines, index),
         present: onDisk.has(file),
       });
     }

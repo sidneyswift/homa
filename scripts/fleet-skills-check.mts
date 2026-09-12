@@ -13,6 +13,8 @@ import { lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { recipeTableSlugs, unreachableSkillReferences } from "./skill-reference-graph.ts";
+
 import { BUILT_IN_SKILLS } from "../apps/web/lib/slash-skills.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,6 +25,14 @@ const toolsRoot = path.join(repoRoot, "apps/web/agent/tools");
 // (2026-07-20); the byte caps below remain binding.
 const MAX_FILE_BYTES = 512 * 1024;
 const MAX_PACKAGE_BYTES = 2 * 1024 * 1024;
+// #1167: package storage caps do not protect the always-advertised descriptions
+// or the commonly loaded roots. Keep reviewed headroom after the workflow split.
+const MAX_DESCRIPTION_BYTES = 640;
+const ROOT_BUDGETS: Record<string, number> = {
+  "materials-studio": 4_000,
+  planner: 4_000,
+  onboarding: 10_000,
+};
 const EM_DASH = "\u2014";
 // Zero-width and bidi-control formatting characters plus C0/C1 controls
 // (tab and newline excluded; they are normal markdown content).
@@ -145,8 +155,8 @@ function parseFrontmatter(content: string): Frontmatter | null {
 /** A skill body that names a file the package does not ship fails only at
  * runtime, silently, as a degraded build with no error surfaced. These
  * four checks close that hole: concrete /workspace/skills/ paths must
- * resolve, every references/ file must be mentioned by the body (no
- * orphans), every "Recipe file" table cell must name a shipped recipe,
+ * resolve, every references/ file must be reachable from the root (no
+ * orphan cycles), every "Recipe file" table in any file must name a shipped recipe,
  * and every anchorIds mention must resolve against the anchor registry
  * (the SKILL.md anchor table was deleted 2026-07-25; generate_image's
  * schema menu is the canonical list, and recipes keep per-recipe
@@ -209,38 +219,21 @@ function checkReferenceIntegrity(
     }
   }
 
-  const referenceFiles = files.filter((file) => file.relativePath.startsWith("references/"));
-  for (const file of referenceFiles) {
-    const slug = path.basename(file.relativePath).replace(/\.[^.]+$/, "");
-    if (!skillMdContent.includes(slug)) {
-      fail(
-        `${packageName}: references/ ships ${file.relativePath} but SKILL.md never mentions "${slug}" (orphan reference)`,
-      );
-    }
+  const documents = new Map(files
+    .filter((file) => TEXT_FILE_EXTENSION.test(file.relativePath))
+    .map((file) => [file.relativePath, readFileSync(file.absolutePath, "utf8")]));
+  documents.set("SKILL.md", skillMdContent);
+  for (const orphan of unreachableSkillReferences(documents)) {
+    fail(`${packageName}: ${orphan} is unreachable from SKILL.md (orphan reference)`);
   }
-
-  const lines = skillMdContent.split("\n");
-  let inRecipeTable = false;
-  for (const line of lines) {
-    if (/^\|.*\|\s*$/.test(line) && /\|\s*Recipe file\s*\|/i.test(line)) {
-      inRecipeTable = true;
-      continue;
-    }
-    if (!inRecipeTable) continue;
-    if (!/^\|.*\|\s*$/.test(line)) {
-      inRecipeTable = false;
-      continue;
-    }
-    const cells = line.split("|").map((cell) => cell.trim()).filter(Boolean);
-    const slug = cells[cells.length - 1];
-    if (!slug || /^[-\s]+$/.test(slug)) continue;
-    const recipePath = path.join(skillsRoot, packageName, "references/recipes", `${slug}.md`);
-    try {
-      statSync(recipePath);
-    } catch {
-      fail(
-        `${packageName}: SKILL.md recipe-file table names "${slug}" but references/recipes/${slug}.md does not ship`,
-      );
+  for (const [source, content] of documents) {
+    for (const slug of recipeTableSlugs(content)) {
+      const recipePath = path.join(skillsRoot, packageName, "references/recipes", `${slug}.md`);
+      try {
+        if (!statSync(recipePath).isFile()) throw new Error("not a file");
+      } catch {
+        fail(`${packageName}: ${source} recipe-file table names "${slug}" but references/recipes/${slug}.md does not ship`);
+      }
     }
   }
 }
@@ -281,6 +274,10 @@ function checkPackage(packageName: string, toolNames: Set<string>, packageNames:
   }
 
   const content = readFileSync(skillMdPath, "utf8");
+  const rootBudget = ROOT_BUDGETS[packageName];
+  if (rootBudget !== undefined && Buffer.byteLength(content) > rootBudget) {
+    fail(`${packageName}: SKILL.md exceeds its ${rootBudget}-byte router budget; move workflow details into reachable references`);
+  }
   const frontmatter = parseFrontmatter(content);
   if (!frontmatter) {
     fail(`${packageName}: SKILL.md has no valid frontmatter block`);
@@ -289,6 +286,10 @@ function checkPackage(packageName: string, toolNames: Set<string>, packageNames:
   if (!frontmatter.description || frontmatter.description.length === 0) {
     fail(`${packageName}: frontmatter description is empty`);
     return null;
+  }
+
+  if (Buffer.byteLength(frontmatter.description) > MAX_DESCRIPTION_BYTES) {
+    fail(`${packageName}: description exceeds ${MAX_DESCRIPTION_BYTES} bytes; keep the trigger and nearest routing boundary`);
   }
 
   for (const [metadataKey, resolveAgainst, resolveLabel] of [

@@ -2,9 +2,9 @@
 
 ## Project overview
 
-Homa is a multi-tenant AI homeschool assistant built as a pnpm and Turborepo monorepo. The web product and eve agent share one Next.js deployment, durable state lives in Supabase Postgres, and billing uses Stripe. The July 13, 2026 conference remains the fixed launch deadline. Do not infer production state from repository presence alone; use the reconciliation production evidence and a fresh deployment probe.
+Homa is a multi-tenant AI homeschool assistant built as a pnpm and Turborepo monorepo. The web product and eve agent share one Next.js deployment, durable state lives in Supabase Postgres, and billing uses Stripe. The July 13, 2026 conference was the cohort-one launch milestone; current deadlines live on the owning issue. Do not infer production state from repository presence alone; use the reconciliation production evidence and a fresh deployment probe.
 
-**Read next, in order:** [`BUILD.md`](BUILD.md) (the engineering entry point: reading order, build phases, non-negotiable laws) → [`docs/homa-planning/13-mr-prd.md`](docs/homa-planning/13-mr-prd.md) (the product contract). For the repo's file-by-file layout, see [`README.md`](README.md)'s Repo map.
+Read documentation for the task: `BUILD.md` for engineering boundaries and verification, `docs/homa-planning/13-mr-prd.md` plus the founder-ruling index for product behavior, and `README.md` when locating unfamiliar code. A mechanical edit does not require reading the entire product contract.
 
 ## Co-founder Slack: feedback and references
 
@@ -56,53 +56,14 @@ records the research comparison behind this rule.
 
 ### Models judge, code verifies (binding, founder ruling 2026-07-21)
 
-Whenever a capability has to turn human language into structured data,
-**a model makes the judgment and deterministic code verifies the result.**
-Never write pattern matching (regex, keyword lists, token-overlap scores,
-alias tables) to decide what a sentence *means*. That is a judgment call,
-and hand-written patterns are bad at it in a way that is invisible until
-you measure.
+A model interprets human language; deterministic code verifies its structured
+proposal against real catalogs, authenticated family ownership, exact source
+quotes and domain constraints. Keep scoring, ledgers and tenancy deterministic.
+Do not replace interpretation with keyword rules or lexical shortlists.
 
-The split, precisely:
-
-| The model decides | Code decides |
-|---|---|
-| Which skill a sentence describes, which child it is about, how strong the claim is, whether a message reports anything at all | Whether that skill exists, whether the child is in this family, whether the quote really appears in the message, whether the claim is age-plausible, what number the answer produces, idempotency, tenancy, rate limits |
-
-A model proposes; it never has authority. Its output is a **structured
-object validated by a schema** whose fields are enums and ids drawn from
-real catalogs, plus a verbatim quote the code re-checks against the
-source text. If any check fails, the claim is dropped, never softened.
-The scorer, the ledger, and every tenancy rule stay exactly as
-deterministic as before.
-
-Corollaries, each learned from a production failure:
-
-- **Do not pre-filter the model's options with the pattern matcher you
-  are replacing.** Pass the whole catalog; a lexical shortlist
-  reintroduces the exact recall failure.
-- **Verify provenance, not phrasing.** A verbatim-quote check is a real
-  guarantee; a token-overlap score is a guess wearing a number.
-- **Measure the judgment layer against real production language** and
-  ratchet the number. Deterministic tests below the judgment prove
-  nothing about whether signal ever arrives.
-- **A deterministic component that reliably produces nothing is not the
-  safe choice.** Silence is the failure mode least likely to page anyone.
-- **A per-item rule belongs in the validator, not the transport schema.**
-  Schemas parse permissively; validators reject one proposal and let the
-  rest through.
-
-Two narrow exceptions: exact string work that is verification rather than
-interpretation stays deterministic and lexical, and a security floor is
-not a capability (a deny-list like `scanMemoryContent` may stay
-deterministic because it backstops a structural control, never stands in
-for a capability, and a model judging attacker-controlled text would sit
-inside the blast radius of the thing it judges).
-
-The full ruling text, the journal-matcher and memory-guardrail failures
-that made it law, and the eval evidence live in
-`docs/homa-planning/models-judge-code-verifies.md`. Read it before
-building or reviewing any language-to-structured-data capability.
+When building or reviewing language-to-structured-data behavior, read
+`docs/homa-planning/models-judge-code-verifies.md` for the full ruling,
+per-item validation requirements, provenance rules, exceptions and eval evidence.
 
 ### Required decision sequence
 
@@ -149,9 +110,9 @@ building or reviewing any language-to-structured-data capability.
 - A skill description is a routing instruction, not a label. Write
   `Use when...` and name the intent that should load it. Keep the body
   self-contained for future Homa with no memory of the originating session.
-- Put the full procedure in the skill: inputs/evidence, decision rules,
-  ordered tool calls, examples, quality checks, stop conditions, and what not
-  to do. Skills may call existing tools; loading a skill never grants a new
+- Put the full procedure in the skill package. Keep SKILL.md as a concise
+  router to relevant references for evidence, decision rules, tool sequencing,
+  examples, quality checks and stop conditions. Skills may call existing tools; loading a skill never grants a new
   execution ability.
 - Prefer improving an existing overlapping skill over creating a duplicate.
   Do not codify a one-off before the procedure has proved repeatable.

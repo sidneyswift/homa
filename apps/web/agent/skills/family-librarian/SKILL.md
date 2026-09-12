@@ -1,5 +1,5 @@
 ---
-description: Use, and load before calling find_family_assets or get_family_asset, when a parent wants Homa to save, find, reopen, edit, remove, cite, or use a worksheet, book, curriculum, photo, or other resource their family owns or uploaded. Also use for a teaching theme when family context makes a brief owned-resource lookup useful, unless urgency or a simple fresh page makes that detour unhelpful. Use before another skill works from a family source, including "use my curriculum" and "what do we already have about this?" Not for reopening work Homa created in Binder; materials-studio owns that. Not for authoring a new printable or curriculum; materials-studio and curriculum-studio own creation after the family source is retrieved.
+description: Use to save, find, open, edit, delete, cite, or teach from family-owned or uploaded resources. Retrieve required family sources before another skill uses them. Homa-made Binder materials belong to materials-studio; curriculum decomposition to curriculum-mapping.
 metadata:
   homa-related-skills: materials-studio, curriculum-studio, curriculum-mapping, planner
 ---

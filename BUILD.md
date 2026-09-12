@@ -2,7 +2,7 @@
 
 Homa is in execution. This file contains the stable build contract for agents. It does not duplicate a volatile feature checklist or claim that repository code is deployed.
 
-The fixed near-term deadline is July 13, 2026, when Alessa demonstrates Homa at a homeschool conference. The public site and onboarding entry points must remain usable on a phone. A route returning HTTP 200 does not prove that signup, storage, email, billing, voice, or agent behavior works end to end.
+The July 13, 2026 conference was the cohort-one launch milestone. Current deadlines and acceptance criteria live on the owning GitHub issue. The public site and onboarding entry points must remain usable on a phone. A route returning HTTP 200 does not prove that signup, storage, email, billing, voice, or agent behavior works end to end.
 
 ## Authority and evidence
 
@@ -22,14 +22,23 @@ Current evidence lives in `docs/homa-planning/reconciliation/`:
 
 The latest recorded production baseline is a snapshot, not a standing guarantee. Refresh it whenever a completion claim depends on current production state.
 
-## Read before changing product code
+## Read what the change needs
 
-1. `AGENTS.md` for commands, boundaries, copy rules, and deployment discipline.
-2. `docs/homa-planning/13-mr-prd.md` for the product contract and its reconciliation status.
-3. `docs/homa-planning/journeys/10-reconciliation.md` §5 for founder rulings and later supersessions.
-4. The named backlog ticket and its current implementation plan, if one exists.
-5. The code, tests, configuration, and migrations that currently own the behavior.
-6. `docs/homa-design/SKILL.md`, then `docs/homa-design/doctrine.md` and `docs/homa-design/readme.md`, for UI or copy work.
+- Product behavior: `docs/homa-planning/13-mr-prd.md` and the relevant founder
+  rulings in `docs/homa-planning/journeys/10-reconciliation.md` section 5.
+- Agent capabilities: `docs/homa-planning/15-agentic-architecture.md` and the
+  existing fleet skill and deterministic tools that own the effect.
+- UI or copy: `docs/homa-design/SKILL.md`, then its task-relevant doctrine.
+- Release or migrations: the relevant rollout and deployment runbook.
+- Every implementation: the owning issue/spec and the affected code and tests.
+
+Keep universal security boundaries in AGENTS.md. Do not read unrelated
+architecture, product history or release procedures for a mechanical edit.
+The local eval sandbox uses disposable fixtures and strips production-write
+credentials. Run affected checks, fix failures caused by the change, and rerun
+those checks without seeking approval at each step. Completion means the scoped
+checks pass and the requested delivery is verified; local success alone does
+not establish production behavior.
 
 Historical phase narratives and shipped-work notes live in `docs/homa-planning/build-log.md` and dated plans. They are evidence of what was decided or observed at that time, not a substitute for current repository or production verification.
 

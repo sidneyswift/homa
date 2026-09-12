@@ -1,5 +1,5 @@
 ---
-description: Use when a parent asks Homa to build a whole multi-week curriculum or program for a child, a full reading program, a term of math, a unit that runs for weeks, "learn everything about this curriculum and build one", a 12 or 36 week plan. Not for a single worksheet or one-page activity (that is materials-studio). This skill runs the build as a finite background job the parent can leave and come back to, never all at once in one reply.
+description: Use to build a new multi-week curriculum or program after confirming its scope. Uses a finite background job. Single pages and short themed packets belong to materials-studio; scheduling existing lessons belongs to planner.
 metadata:
   homa-related-skills: materials-studio
 ---

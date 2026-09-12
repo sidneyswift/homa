@@ -241,7 +241,11 @@ describe("the real corpus and the real skill package", () => {
   it("every alias target resolves to a shipped recipe or registry entry", async () => {
     const skill = await readFile(skillPath, "utf8");
     const registry = parseRegistrySlugs(await readFile(registryPath, "utf8"));
-    const sections = [...skill.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
+    const referenceDir = path.join(path.dirname(skillPath), "references");
+    const referenceNames = (await readdir(referenceDir))
+      .filter((name) => /^[a-z0-9-]+\.md$/.test(name)).sort();
+    const guidance = await Promise.all(referenceNames.map((name) => readFile(path.join(referenceDir, name), "utf8")));
+    const sections = [...[skill, ...guidance].join("\n").matchAll(/^## (.+)$/gm)].map((match) => match[1]);
     // Recipes ship as sibling files now, not SKILL.md sections.
     const recipeFiles = await readdir(
       path.join(path.dirname(skillPath), "references", "recipes"),
@@ -257,7 +261,7 @@ describe("the real corpus and the real skill package", () => {
         shippedSlugs.some((slug) => slug === target || slug.includes(target));
       assert.ok(
         hit,
-        `alias target "${target}" matches no shipped recipe, SKILL.md section, or registry slug`,
+        `alias target "${target}" matches no shipped recipe, guidance section, or registry slug`,
       );
     }
   });

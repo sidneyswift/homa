@@ -700,7 +700,11 @@ export async function readSkillPackage(): Promise<SkillPackageView | null> {
   }
   const referenceImages = await listSkillReferenceImages();
   const toolNames = await listAgentToolNames();
-  const parsed = parseSkillPackage(raw, referenceImages, toolNames);
+  const referenceNames = (await readdir(path.join(skillDir(), "references")))
+    .filter((name) => /^[a-z0-9-]+\.md$/.test(name)).sort();
+  const referenceDocuments = await Promise.all(referenceNames.map((name) =>
+    readFile(path.join(skillDir(), "references", name), "utf8")));
+  const parsed = parseSkillPackage(raw, referenceImages, toolNames, referenceDocuments);
   const recipes = await listSkillRecipeSlugs();
   const subjects = await listReferenceDocSlugs("subjects");
   const approaches = await listReferenceDocSlugs("approaches");

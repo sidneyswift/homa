@@ -32,6 +32,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { renderOnboardingStageGuidance } from "../apps/web/lib/onboarding/stage-guidance";
+
 import { EMAIL_MODE_MARKDOWN } from "../apps/web/agent/instructions/email-mode";
 import { IOS_MODE_MARKDOWN } from "../apps/web/agent/instructions/ios-mode";
 import { RESEARCH_MODE_MARKDOWN } from "../apps/web/agent/instructions/research-mode";
@@ -63,8 +65,11 @@ const repoRoot = path.resolve(
  * deletion candidates. Anything above 25,600 should shrink prose or split,
  * not ratchet again.
  */
+// #1167: root budgets fall after workflow extraction. The automatic stage
+// block has its own budget, including the failure fallback, so moving text
+// cannot hide it from measurement.
 export const CONTEXT_BUDGETS: Record<string, number> = {
-  "instructions.md": 25_600,
+  "instructions.md": 22_500,
   "family-context (eval fixture render)": 3_000,
   "sms-mode (largest branch)": 4_600,
   "email-mode": 450,
@@ -80,7 +85,8 @@ export const CONTEXT_BUDGETS: Record<string, number> = {
   // remainder is one fact or one scar per sentence, not padding. Next
   // pass that touches this file should look for split-worthy sections
   // before raising this further.
-  "onboarding-mode (preloaded skill body)": 32_000,
+  "onboarding-mode (preloaded skill body)": 14_500,
+  "onboarding-stage (all-stage fallback)": 21_000,
 };
 
 /**
@@ -137,6 +143,7 @@ export function measureComponents(): MeasuredComponent[] {
     rawSkill,
   );
   return [
+    { name: "onboarding-stage (all-stage fallback)", bytes: Buffer.byteLength(renderOnboardingStageGuidance(null), "utf8") },
     {
       name: "instructions.md",
       bytes: readFileSync(

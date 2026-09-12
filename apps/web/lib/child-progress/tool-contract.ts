@@ -61,10 +61,10 @@ export const manageChildProgressToolInputSchema = z
         "mark_observation_used",
       ])
       .describe(
-        "start_check_in needs childId + purpose (+ subjectId for subject_deep_dive). respond_check_in needs checkInId + answer. pause_check_in needs checkInId + reason; resume_check_in, stop_check_in, and takeover_check_in need checkInId. record_journal_evidence needs childId. resolve_conflict needs conflictId. undo_progress_update needs operationId. mark_observation_used needs observationId.",
+        "start_check_in needs childId + purpose (+ subjectId for subject_deep_dive). respond_check_in needs checkInId + answer. pause_check_in needs checkInId + reason; resume_check_in, stop_check_in, and takeover_check_in need checkInId. record_journal_evidence needs childId. resolve_conflict needs conflictId. undo_progress_update needs operationId. mark_observation_used needs observationId. Set every field not used by the selected action to null; never invent stand-in values.",
       ),
     childId: childIdSchema
-      .optional()
+      .nullable().optional()
       .describe("A child id from the family context block."),
     purpose: z
       .enum([
@@ -72,23 +72,23 @@ export const manageChildProgressToolInputSchema = z
         "subject_deep_dive",
         "age_refresh",
       ])
-      .optional()
+      .nullable().optional()
       .describe("Why this check-in is starting; subject_deep_dive also takes subjectId."),
-    subjectId: subjectIdSchema.optional(),
+    subjectId: subjectIdSchema.nullable().optional(),
     checkInId: uuidSchema
-      .optional()
+      .nullable().optional()
       .describe("A saved check-in UUID from trusted context or a prior tool result."),
     answer: progressResponseAnswerSchema
-      .optional()
+      .nullable().optional()
       .describe("The parent's reply to the current check-in question, translated faithfully."),
-    reason: z.enum(["topic_change", "explicit_stop"]).optional()
-      .describe("Only for pause_check_in. Omit reason for stop_check_in and every other action; stop_check_in needs only action and checkInId."),
-    conflictId: uuidSchema.optional(),
+    reason: z.enum(["topic_change", "explicit_stop"]).nullable().optional()
+      .describe("Only for pause_check_in. Use null or omit reason for stop_check_in and every other action; stop_check_in needs only action and checkInId."),
+    conflictId: uuidSchema.nullable().optional(),
     operationId: uuidSchema
-      .optional()
+      .nullable().optional()
       .describe("The operation UUID to undo, from the tool result that reported it."),
     observationId: uuidSchema
-      .optional()
+      .nullable().optional()
       .describe("A saved observation UUID that appears in trusted context."),
   })
   .strict();
@@ -188,6 +188,17 @@ export const manageChildProgressInputSchema = z
 export type ManageChildProgressInput = z.infer<
   typeof manageChildProgressInputSchema
 >;
+
+/** Providers can retain declared optional keys with null or undefined values. Remove
+ * only those absent transport fields before strict action validation (#1169).
+ * Unknown keys and supplied values still reach the validator and fail closed. */
+export function parseManageChildProgressCommand(input: unknown): ManageChildProgressInput {
+  const normalized = input !== null && typeof input === "object" && !Array.isArray(input)
+    ? Object.fromEntries(Object.entries(input).filter(([key, value]) =>
+      (value !== undefined && value !== null) || !Object.hasOwn(manageChildProgressToolInputSchema.shape, key)))
+    : input;
+  return manageChildProgressInputSchema.parse(normalized);
+}
 
 interface ProgressToolAuthAttributes {
   selectedAssessment?: unknown;

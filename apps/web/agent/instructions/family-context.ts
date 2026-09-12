@@ -35,6 +35,8 @@ import {
   withToolDeadline,
 } from "../../lib/agent-tool-deadline";
 import { loadFamilyChecklistStates } from "../../lib/onboarding/checklist-state";
+import { isOnboardingModeSession } from "../../lib/onboarding/onboarding-mode";
+import { renderOnboardingStageGuidance } from "../../lib/onboarding/stage-guidance";
 import { renderOnboardingContext } from "../../lib/onboarding/context-line";
 import { loadOnboardingState } from "../../lib/onboarding/store";
 import { measureChatPreparation } from "../../lib/observability/chat-preparation";
@@ -141,6 +143,8 @@ interface FamilyContextInstructionAttributes {
   /** Stamped by the eve channel's auth walk from the family row, never
    *  by the client (plans/2026-07-21-chat-first-onboarding.md §2.2). */
   onboardingActive?: string;
+  evalFamilyFixture?: string;
+  evalOnboardingMode?: string;
   episodeId?: string;
   continuityContext?: string;
   taskKind?: string;
@@ -163,7 +167,7 @@ export interface FamilyContextInstructionDependencies {
   loadContinuityContext: typeof loadContinuityContext;
   loadRecentCallsContext: typeof loadRecentCallsContext;
   recordContextSnapshot: typeof recordContextSnapshot;
-  loadOnboardingContext?: (familyId: string) => Promise<string>;
+  loadOnboardingContext?: (familyId: string, attributes?: FamilyContextInstructionAttributes) => Promise<string>;
 }
 
 export interface FamilyContextInstructionInput {
@@ -206,12 +210,18 @@ const FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES =
     loadContinuityContext,
     loadRecentCallsContext,
     recordContextSnapshot,
-    loadOnboardingContext: async (familyId) => {
+    loadOnboardingContext: async (familyId, attributes?: FamilyContextInstructionAttributes) => {
       const [state, children] = await Promise.all([
         loadOnboardingState(familyId),
         loadFamilyChecklistStates(familyId),
       ]);
-      return renderOnboardingContext({ record: state?.record ?? null, children }) ?? "";
+      const onboardingInput = { record: state?.record ?? null, children };
+      return [
+        renderOnboardingContext(onboardingInput),
+        isOnboardingModeSession(attributes)
+          ? renderOnboardingStageGuidance(onboardingInput, attributes?.viewChildId)
+          : null,
+      ].filter(Boolean).join("\n\n");
     },
   } satisfies FamilyContextInstructionDependencies;
 
@@ -343,7 +353,8 @@ export async function resolveFamilyContextInstructionMarkdown(
           : progressUnavailable,
         familyId && attributes?.onboardingActive === "true"
           ? optionalContext("onboarding", () =>
-              (dependencies.loadOnboardingContext ?? FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES.loadOnboardingContext)(familyId))
+              (dependencies.loadOnboardingContext ?? FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES.loadOnboardingContext)(familyId, attributes),
+              isOnboardingModeSession(attributes) ? renderOnboardingStageGuidance(null) : "")
           : "",
         attributes?.continuityContext || (familyId
           ? optionalContext("continuity", () => dependencies.loadContinuityContext({

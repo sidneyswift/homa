@@ -15,8 +15,10 @@ export default defineEval({
   description:
     "A settled family's ordinary question does not load the onboarding skill.",
   async test(t) {
-    await t.send("We had a rough morning with reading. What should I try tomorrow?");
+    const turn = await t.send("We had a rough morning with reading. What should I try tomorrow?");
     t.succeeded();
-    t.notCalledTool("load_skill");
+    t.eventsSatisfy("does not restart onboarding for a settled family", () =>
+      turn.toolCalls.every((call) => !(call.name === "load_skill" && call.input.skill === "onboarding")));
+    t.notCalledTool("ask_for_details");
   },
 });
