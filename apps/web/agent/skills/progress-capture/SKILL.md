@@ -1,5 +1,5 @@
 ---
-description: Use when a parent reports what a child can or cannot do, corrects an ability report, or answers a contextual clarification about that ability. Not for time-only or lesson-number logs, finding ability through a formal check-in, explaining Progress, or choosing practice; planner, progress-check-in, the read tools, and progress-next-move own those jobs.
+description: Use when a parent reports or corrects a child's ability, including contextual clarification replies. Activity-only logs belong to planner; formal questions to progress-check-in; explanations to progress-reading; practice advice to progress-next-move.
 metadata:
   homa-tools: manage_child_progress, explore_child_map
   homa-related-skills: planner, progress-check-in, progress-next-move

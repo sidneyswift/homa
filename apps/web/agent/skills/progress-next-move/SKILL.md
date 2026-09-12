@@ -1,5 +1,5 @@
 ---
-description: Use when a parent asks what to try next with a child, including when the saved skills are already easy, evidence is incomplete or conflicting, or suggested practice no longer fits. Also use for accepted next-step offers and deciding whether to offer help after a confirmed progress save. Not for asking assessment questions, explaining a score, creating a material, scheduling work, or adding periodic reviews; progress-check-in, progress-reading, materials-studio, and planner own those jobs.
+description: Use for requested or accepted next-step learning advice, difficulty corrections, and deciding whether to offer help after a progress save. Explaining scores, asking check-in questions, making materials and scheduling belong to their respective skills.
 metadata:
   homa-tools: explore_child_map, verify_progress_next_move, persist_progress_next_move
   homa-related-skills: progress-check-in, materials-studio, planner

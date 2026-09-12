@@ -35,6 +35,8 @@ import {
   withToolDeadline,
 } from "../../lib/agent-tool-deadline";
 import { loadFamilyChecklistStates } from "../../lib/onboarding/checklist-state";
+import { isOnboardingModeSession } from "../../lib/onboarding/onboarding-mode";
+import { renderOnboardingStageGuidance } from "../../lib/onboarding/stage-guidance";
 import { renderOnboardingContext } from "../../lib/onboarding/context-line";
 import { loadOnboardingState } from "../../lib/onboarding/store";
 import { recordContextSnapshot } from "../../lib/observability/agent-trace";
@@ -140,6 +142,8 @@ interface FamilyContextInstructionAttributes {
   /** Stamped by the eve channel's auth walk from the family row, never
    *  by the client (plans/2026-07-21-chat-first-onboarding.md §2.2). */
   onboardingActive?: string;
+  evalFamilyFixture?: string;
+  evalOnboardingMode?: string;
   episodeId?: string;
   continuityContext?: string;
   taskKind?: string;
@@ -333,15 +337,20 @@ export async function resolveFamilyContextInstructionMarkdown(
           loadOnboardingState(attributes.familyId),
           loadFamilyChecklistStates(attributes.familyId),
         ]);
-        onboardingContext =
-          renderOnboardingContext({
-            record: state?.record ?? null,
-            children,
-          }) ?? "";
+        const onboardingInput = { record: state?.record ?? null, children };
+        onboardingContext = [
+          renderOnboardingContext(onboardingInput),
+          isOnboardingModeSession(attributes)
+            ? renderOnboardingStageGuidance(onboardingInput, attributes.viewChildId)
+            : null,
+        ].filter(Boolean).join("\n\n");
       } catch (error) {
         // Family context is the reliable floor here too. Losing the
         // onboarding line costs Homa some tact; it must never cost her
         // the family.
+        if (isOnboardingModeSession(attributes)) {
+          onboardingContext = renderOnboardingStageGuidance(null);
+        }
         console.error(
           "family context: onboarding state load failed:",
           error instanceof Error ? error.message : "unknown",
