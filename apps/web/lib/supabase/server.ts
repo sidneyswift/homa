@@ -6,13 +6,14 @@ import { cookies } from "next/headers";
  * Reads the session from request cookies. Writes are attempted but tolerated
  * to fail inside Server Components (the proxy owns cookie refresh there).
  */
-export async function createSupabaseServerClient() {
+export async function createSupabaseServerClient(options?: { fetch?: typeof fetch }) {
   const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
+      ...(options?.fetch ? { global: { fetch: options.fetch } } : {}),
       cookies: {
         getAll() {
           return cookieStore.getAll();
