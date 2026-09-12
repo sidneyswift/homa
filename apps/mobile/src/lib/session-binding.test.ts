@@ -106,7 +106,7 @@ describe("mobile session binding restoration", () => {
       new URL("../../../web/app/api/chat/session-binding/route.ts", import.meta.url),
       "utf8",
     );
-    assert.match(source, /resolveApiFamily\(request\)/u);
+    assert.match(source, /resolveApiFamily\(request(?:,|\))/u);
     assert.doesNotMatch(source, /requireFamilyWithActor/u);
   });
 

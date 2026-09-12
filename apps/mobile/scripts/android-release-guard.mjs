@@ -19,6 +19,9 @@ const SHELL_DYNAMIC_WORD = /[$*?]/u;
 const SHELL_ASSIGNMENT = /^[a-z_][a-z0-9_]*=/iu;
 const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until|sudo|nohup|time)$/u;
 const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
+  // .github/workflows/ci.yml, reviewed end to end on 2026-09-12 for GH #1171.
+  // Only adds offline ordered-stream and empty-delivery regression checks.
+  "7809ad2461c868c7e6f6a24de2df7c3e4539fe29c4e6db38ae623a78ca81befc",
   // .github/workflows/ci.yml, reviewed end to end on 2026-09-09.
   // Its dynamic Chrome executable runs --version for the handwriting test.
   // The mobile lane only tests and exports JavaScript; no EAS build/submit
