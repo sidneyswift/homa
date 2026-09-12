@@ -36,16 +36,16 @@ const findInput = z.object({
     ),
   childId: z
     .uuid()
-    .optional()
+    .nullish().transform(value => value ?? undefined)
     .describe("This child's own hours plus shared whole-family time by default. Use an id from the family context block. Omit for the whole family."),
   includeShared: z.boolean().default(true).describe("Include shared whole-family entries in each selected child's record. Selecting one child still includes their shared time. Set false only for an explicit request to exclude shared whole-family entries."),
-  from: z.string().optional().describe("Inclusive YYYY-MM-DD start for an explicit requested range, overriding the period's start. Omit to use the chosen period."),
-  through: z.string().optional().describe("Inclusive YYYY-MM-DD end for an explicit requested range. Omit for family-local today."),
+  from: z.string().nullish().transform(value => value ?? undefined).describe("Inclusive YYYY-MM-DD start for an explicit requested range, overriding the period's start. Omit to use the chosen period."),
+  through: z.string().nullish().transform(value => value ?? undefined).describe("Inclusive YYYY-MM-DD end for an explicit requested range. Omit for family-local today."),
   subject: z
     .enum(HOURS_SUBJECTS)
-    .optional()
+    .nullish().transform(value => value ?? undefined)
     .describe("Only this subject. Omit for every subject."),
-  categoryId: z.uuid().optional().describe("Only this saved category. Use an id from manage_hours_categories or a previous Hours receipt; never invent one."),
+  categoryId: z.uuid().nullish().transform(value => value ?? undefined).describe("Only this saved category. Use an id from manage_hours_categories or a previous Hours receipt; never invent one."),
   uncategorizedOnly: z.boolean().default(false).describe("Read only entries without a category. Cannot combine with categoryId."),
   limit: z
     .number()
@@ -82,7 +82,7 @@ export default defineBoundedTool({
         found: null,
         complete: false,
         note: error instanceof HoursSummaryReadError && error.reason === "invalid"
-          ? "The requested child or date range is invalid. Use an owned child and valid inclusive calendar dates; do not report a total."
+          ? "The requested child, date range, or category filter is invalid. Use an owned child, valid inclusive calendar dates, and a saved category matching the subject only when that filter was requested. Otherwise omit categoryId. Do not report a total."
           : "Could not read the complete Hours record just now. Do not report a total or claim no entries match.",
       };
     }
