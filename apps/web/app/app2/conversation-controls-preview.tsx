@@ -63,7 +63,7 @@ export function ConversationControlsPreview() {
         onSubmit={(event) => event.preventDefault()}
       >
         <IslandView active={!settingsOpen} className={`${styles.conversationView} ${keyboardVisible ? styles.expandedView : ""}`}>
-          <motion.div layout="position" initial={false} animate={{ opacity: keyboardVisible ? 1 : 0 }} className={styles.inputRow} hidden={!keyboardVisible}>
+          <motion.div initial={false} animate={{ opacity: keyboardVisible ? 1 : 0 }} transition={{ opacity: { duration: 0.18, delay: keyboardVisible ? 0.38 : 0 } }} className={styles.inputRow} hidden={!keyboardVisible}>
             {keyboardVisible && <motion.button layout="position" className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></motion.button>}
             <div className={styles.inputArea} ref={inputArea} id="preview-chat-input">
               <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
@@ -78,7 +78,7 @@ export function ConversationControlsPreview() {
             }}>Voice</motion.button>
             <motion.button layout="position" className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} data-pointer-focus={pointerFocus === "settings"} onBlur={() => setPointerFocus(null)} onClick={(event) => openSettings(event.detail > 0)}><Icon name="settings" size={20} /></motion.button>
           </motion.div>
-          <motion.div layout="position" className={styles.composerActions} hidden={!keyboardVisible}>
+          <motion.div className={styles.composerActions} hidden={!keyboardVisible}>
             {keyboardVisible && <motion.button layout="position" className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></motion.button>}
           </motion.div>
         </IslandView>

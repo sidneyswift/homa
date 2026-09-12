@@ -9,7 +9,7 @@ import styles from "./adaptive-island.module.css";
 
 const ease = contract.easeOut.match(/[\d.]+/g)!.map(Number) as [number, number, number, number];
 // #1158: founder-requested slower spring experiment, scoped to the local island.
-const islandSpring = { type: "spring", stiffness: 180, damping: 22, mass: 1.2 } as const;
+const islandSpring = { type: "spring", stiffness: 180, damping: 25, mass: 1.6 } as const;
 const reducedQuery = "(prefers-reduced-motion: reduce)";
 function subscribeToReducedMotion(notify: () => void) {
   const media = window.matchMedia(reducedQuery);
@@ -91,7 +91,8 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
 
   return (
     <div ref={host} className={styles.host} data-island-placement={resolved}>
-      <MotionConfig reducedMotion={reducedMotion ? "always" : "never"} transition={{
+      {/* The live subscription and CSS own reduced motion, including hydration and preference changes. */}
+      <MotionConfig reducedMotion="never" transition={{
         duration: reducedMotion ? 0 : contract.durations.base / 1000,
         ease,
         layout: reducedMotion ? { duration: 0 } : islandSpring,
@@ -101,7 +102,7 @@ export function AdaptiveIsland({ children, size, placement = "auto", regionRef, 
             {...props}
             ref={surface}
             layoutScroll
-            layout={!reducedMotion}
+            layout
             initial={false}
             className={`${styles.surface} ${className ?? ""}`}
             style={{
@@ -160,7 +161,7 @@ export function IslandView({ active, children, className, id }: {
       layoutScroll
       initial={false}
       animate={{ opacity: active ? 1 : 0 }}
-      transition={{ opacity: { duration: reducedMotion ? 0 : contract.durations.base / 1000 } }}
+      transition={{ opacity: { duration: reducedMotion ? 0 : active ? 0.18 : 0.08, delay: reducedMotion || !active ? 0 : 0.09 } }}
       data-active={active}
       aria-hidden={!active}
       inert={!active}
