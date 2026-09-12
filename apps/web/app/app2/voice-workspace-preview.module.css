@@ -19,49 +19,19 @@
 }
 .preview button:hover { border-color: var(--homa-control-boundary); }
 .preview button:focus-visible { outline: 2px solid var(--homa-midnight-action); outline-offset: 3px; }
-.preview button[aria-pressed="true"], .preview .primary {
-  background: var(--homa-midnight-action);
-  color: var(--homa-floating);
-  border-color: var(--homa-midnight-action);
-}
 .preview .devButton { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10; font-size: 12px; padding: 10px 12px; color: var(--homa-muted-ink); }
 .screen { min-height: 100svh; display: flex; padding: 64px 24px; }
 .stage { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 40px 0; }
-.identity { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 600px; width: 100%; }
-.character { width: 120px; height: 120px; display: grid; place-items: center; position: relative; isolation: isolate; flex-shrink: 0; }
-.character::before { content: ""; position: absolute; inset: -12px; z-index: -1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--homa-visual-coral) 24%, transparent), color-mix(in srgb, var(--homa-visual-coral) 10%, transparent) 42%, transparent 70%); opacity: 0; }
-.identity[data-speaking="true"] .character::before { opacity: .65; animation: voice-halo var(--homa-motion-slow) var(--homa-motion-ease-in-out) infinite alternate; }
-@keyframes voice-halo { from { opacity: .55; transform: scale(.98); } to { opacity: .85; transform: scale(1.02); } }
-.status { font-size: 14px; color: var(--homa-muted-ink); margin: 12px 0 0; }
-.utterance { font-size: clamp(20px, 3vw, 28px); line-height: 1.4; letter-spacing: -.02em; margin: 20px 0 0; max-width: 560px; text-wrap: balance; }
-.card { width: min(100%, 420px); border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-card); padding: 20px; }
-.card .meta { font-size: 13px; margin: 0 0 8px; }
-.card h2 { font-size: 18px; font-weight: 700; line-height: 1.4; margin: 0 0 8px; }
-.card p { margin: 0; font-size: 14px; color: var(--homa-muted-ink); }
-.card button { margin-top: 20px; width: 100%; }
-.progress { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 16px; }
-.progress i { width: 8px; height: 8px; border-radius: 50%; background: var(--homa-visual-coral); }
-.screen[data-state="text"] .character { width: 56px; height: 56px; }
 .dialog { width: min(420px, calc(100% - 32px)); max-height: calc(100svh - 48px); overflow: auto; margin: auto; background: var(--homa-floating); color: var(--homa-ink); border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-card); padding: 24px; }
 .dialog::backdrop { background: color-mix(in srgb, var(--homa-ink) 14%, transparent); }
 .dialogHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .dialogHeader h2 { font-size: 20px; margin: 0; }
 .dialogHeader button { font-size: 13px; }
-.stateList { display: grid; gap: 8px; }
-.stateList button { text-align: left; }
+.stateList { display: grid; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.stateList li { text-align: left; padding: 12px 16px; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-control); }
 .stateList small { display: block; font-size: 13px; font-weight: 400; }
 .note { font-size: 12px; color: var(--homa-muted-ink); margin: 16px 0 0; }
-.paper h3 { font: 600 28px/1.1 var(--font-eb-garamond), serif; margin: 24px 0; }
-.paper p { font-size: 14px; }
-.tracing { font: 600 56px/1.8 var(--font-eb-garamond), serif; word-spacing: 16px; color: var(--homa-floating); -webkit-text-stroke: 1px var(--homa-control-boundary); border-bottom: 1px solid var(--preview-boundary); }
 @media (max-width: 600px) {
   .screen { padding: 64px 20px; }
-  .stage { padding: 32px 0; gap: 20px; }
-  .utterance { font-size: 22px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .character::before { animation: none !important; transform: none !important; }
-}
-@media (forced-colors: active) {
-  .preview button[aria-pressed="true"] { outline: 2px solid Highlight; }
+  .stage { padding: 32px 0; }
 }
