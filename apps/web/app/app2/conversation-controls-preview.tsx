@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import { Icon } from "../../components/design/Icon";
@@ -9,37 +9,25 @@ import styles from "./voice-workspace-preview.module.css";
 
 /** Local design controls only. View changes never acquire audio resources. */
 export function ConversationControlsPreview() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [microphoneOn, setMicrophoneOn] = useState(true);
   const [speakerOn, setSpeakerOn] = useState(true);
   const inputArea = useRef<HTMLDivElement>(null);
   const voiceButton = useRef<HTMLButtonElement>(null);
-  const audioOptions = useRef<HTMLDetailsElement>(null);
+  const settingsButton = useRef<HTMLButtonElement>(null);
+  const backButton = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    function closeOutside(event: Event) {
-      const options = audioOptions.current;
-      if (options?.open && event.target instanceof Node && !options.contains(event.target)) {
-        if (event.type === "pointerdown" && options.contains(document.activeElement)) {
-          options.querySelector("summary")?.focus({ preventScroll: true });
-          // A click on blank canvas may move focus to body after pointerdown.
-          requestAnimationFrame(() => {
-            if (options.isConnected && !options.open && document.activeElement === document.body) {
-              options.querySelector("summary")?.focus({ preventScroll: true });
-            }
-          });
-        }
-        options.open = false;
-      }
-    }
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("focusin", closeOutside);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("focusin", closeOutside);
-    };
-  }, []);
+  function openSettings() {
+    flushSync(() => setSettingsOpen(true));
+    backButton.current?.focus({ preventScroll: true });
+  }
+
+  function closeSettings() {
+    flushSync(() => setSettingsOpen(false));
+    settingsButton.current?.focus({ preventScroll: true });
+  }
 
   function showKeyboard() {
     // Focus stays within the initiating gesture, including on mobile browsers.
@@ -50,50 +38,57 @@ export function ConversationControlsPreview() {
   function endVoice() {
     setMicrophoneOn(false);
     setSpeakerOn(false);
-    if (audioOptions.current) audioOptions.current.open = false;
+    setSettingsOpen(false);
     showKeyboard();
   }
 
   return (
     <div className={styles.composerDock}>
       <form
-        className={`${styles.composer} ${keyboardVisible ? "" : styles.compactComposer}`}
-        aria-label={keyboardVisible ? "Chat input" : "Voice controls"}
+        className={`${styles.composer} ${settingsOpen ? styles.settingsComposer : keyboardVisible ? "" : styles.compactComposer}`}
+        aria-label={settingsOpen ? "Audio settings" : keyboardVisible ? "Chat input" : "Voice controls"}
+        onKeyDown={(event) => {
+          if (settingsOpen && event.key === "Escape") {
+            event.preventDefault();
+            closeSettings();
+          }
+        }}
         onSubmit={(event) => event.preventDefault()}
       >
-        <div className={styles.inputRow} hidden={!keyboardVisible}>
-          <div className={styles.inputArea} ref={inputArea} id="preview-chat-input">
-            <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
-          </div>
-          <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></button>
-        </div>
-        <div className={styles.composerActions}>
-          <div className={styles.modeSelector} role="group" aria-label="Conversation view">
-            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} onClick={() => {
-              voiceButton.current?.focus({ preventScroll: true });
-              setKeyboardVisible(false);
-            }}>Voice</button>
-            <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
-          </div>
-          {keyboardVisible && <span className={styles.actionSpacer} />}
-          <details className={styles.audioOptions} ref={audioOptions} onKeyDown={(event) => {
-            if (event.key === "Escape" && audioOptions.current?.open) {
-              audioOptions.current.open = false;
-              audioOptions.current.querySelector("summary")?.focus();
-            }
-          }}>
-            <summary aria-label="Settings" title="Settings"><Icon name="settings" size={20} /></summary>
-            <div className={styles.audioOptionsPanel} role="group" aria-label="Audio settings">
-              <button type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
-                <Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span>Mic</span>
-              </button>
-              <button type="button" aria-pressed={speakerOn} onClick={() => setSpeakerOn((on) => !on)}>
-                <Icon name={speakerOn ? "volume" : "volume_muted"} size={20} /><span>Sound</span>
-              </button>
-              <button className={styles.endVoice} type="button" onClick={endVoice}>End voice</button>
+        <div hidden={settingsOpen}>
+          <div className={styles.inputRow} hidden={!keyboardVisible}>
+            <div className={styles.inputArea} ref={inputArea} id="preview-chat-input">
+              <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
             </div>
-          </details>
-          {keyboardVisible && <button className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></button>}
+            <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></button>
+          </div>
+          <div className={styles.composerActions}>
+            <div className={styles.modeSelector} role="group" aria-label="Conversation view">
+              <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} onClick={() => {
+                voiceButton.current?.focus({ preventScroll: true });
+                setKeyboardVisible(false);
+              }}>Voice</button>
+              <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
+            </div>
+            {keyboardVisible && <span className={styles.actionSpacer} />}
+            <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
+            {keyboardVisible && <button className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></button>}
+          </div>
+        </div>
+        <div className={styles.settingsView} id="preview-audio-settings" hidden={!settingsOpen}>
+          <div className={styles.settingsHeader}>
+            <span>Settings</span>
+            <button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} onClick={closeSettings}><Icon name="back" size={20} /></button>
+          </div>
+          <div className={styles.settingsControls}>
+            <button type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
+              <Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span>Mic</span>
+            </button>
+            <button type="button" aria-pressed={speakerOn} onClick={() => setSpeakerOn((on) => !on)}>
+              <Icon name={speakerOn ? "volume" : "volume_muted"} size={20} /><span>Sound</span>
+            </button>
+            <button type="button" onClick={endVoice}>End voice</button>
+          </div>
         </div>
       </form>
     </div>
