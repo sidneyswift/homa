@@ -4,6 +4,7 @@ import type { TransactionSql } from "postgres";
 import { mapDb } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import { isHiddenDirective } from "../onboarding/directives";
+import { measureChatPreparation } from "../observability/chat-preparation";
 import {
   hashContinuityKey,
   resolveInboundTurn,
@@ -462,7 +463,7 @@ export async function persistCanonicalMessage(
   if (!familyId || content.length === 0) return null;
 
   const memberUserId = attrs.memberUserId ?? null;
-  const episodeId = await episodeForRuntimeSession(
+  const resolveEpisode = () => episodeForRuntimeSession(
     familyId,
     memberUserId,
     input.channel,
@@ -472,6 +473,10 @@ export async function persistCanonicalMessage(
     input.role === "assistant" || typeof attrs.episodeId === "string",
     true,
   );
+  const timing = { turnId: input.turnId, role: input.role, sequence: input.sequence };
+  const episodeId = input.role === "user"
+    ? await measureChatPreparation("canonical_episode", resolveEpisode, input.sessionId, timing)
+    : await resolveEpisode();
   const providerMessageId = providerMessageIdForRole(
     input.role,
     input.providerMessageId ?? attrs.providerMessageId,
@@ -484,7 +489,7 @@ export async function persistCanonicalMessage(
     content,
   });
   const modality = input.modality === "voice" ? "voice" : "text";
-  const persisted = await sql.begin(async (tx) => {
+  const persistTransaction = () => sql.begin(async (tx) => {
     const duplicate = providerMessageId
       ? (
           await tx<{ id: string; episode_id: string | null; content: string }[]>`
@@ -617,6 +622,9 @@ export async function persistCanonicalMessage(
       content: storedMessage.content,
     };
   });
+  const persisted = input.role === "user"
+    ? await measureChatPreparation("canonical_transaction", persistTransaction, input.sessionId, timing)
+    : await persistTransaction();
   if (input.channel !== "dispatch") {
     await emitClaimedReplyResolvedEvent({
       replyClaimed: persisted.replyClaimed,

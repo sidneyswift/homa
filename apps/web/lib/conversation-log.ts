@@ -8,6 +8,7 @@ import {
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
 import { isHiddenDirective } from "./onboarding/directives";
+import { measureChatPreparation, type ChatPreparationTrace } from "./observability/chat-preparation";
 
 /**
  * Writes one conversation message row for the persist-conversation hook
@@ -37,7 +38,10 @@ export interface PersistConversationMessageDependencies {
   persistCanonical(
     input: PersistCanonicalMessageInput,
   ): ReturnType<typeof persistCanonicalMessage>;
-  embed(text: string, attribution: { familyId: string }): Promise<string | null>;
+  embed(text: string, attribution: {
+    familyId: string;
+    preparationTrace?: ChatPreparationTrace;
+  }): Promise<string | null>;
   /** sourceContent guards a replayed/delayed embedding write: the row's
    *  content may have moved on (a later terminal replacement) by the time
    *  this resolves, and a vector for text the row no longer holds must
@@ -102,7 +106,7 @@ export async function persistConversationMessage(
 > {
   const familyId = (input.attributes as { familyId?: string } | undefined)
     ?.familyId;
-  return persistConversationMessageWithDependencies(
+  const persist = () => persistConversationMessageWithDependencies(
     input,
     dependencies ?? {
       resolveInbound: resolveInboundContinuity,
@@ -120,6 +124,11 @@ export async function persistConversationMessage(
       },
     },
   );
+  return input.role === "user"
+    ? measureChatPreparation("user_persistence", persist, input.sessionId, {
+        role: input.role, turnId: input.turnId, sequence: input.sequence,
+      })
+    : persist();
 }
 
 async function persistConversationMessageWithDependencies(
@@ -176,8 +185,12 @@ async function persistConversationMessageWithDependencies(
   const isTerminalAssistantStop =
     input.role === "assistant" && input.finishReason === "stop";
 
-  // Best-effort semantic index (about 200-400ms per message inside the
-  // hook, after the user already has their streamed text). Null means
+  const trace: ChatPreparationTrace | undefined = input.role === "user"
+    ? { sessionId: input.sessionId, turnId: input.turnId, role: input.role, sequence: input.sequence }
+    : undefined;
+
+  // Best-effort semantic index, awaited before canonical persistence on
+  // both user and assistant messages. Null means
   // this row is findable by FTS only, never a failed write.
   //
   // A hidden onboarding directive is skipped: it is the app talking, so
@@ -186,9 +199,13 @@ async function persistConversationMessageWithDependencies(
   // call on a string nobody will ever look for.
   const embedding = isHiddenDirective(content)
     ? null
-    : await dependencies.embed(content, { familyId });
+    : trace
+      ? await measureChatPreparation("embedding_total", () => dependencies.embed(content, {
+          familyId, preparationTrace: trace,
+        }), input.sessionId, trace)
+      : await dependencies.embed(content, { familyId });
 
-  const persisted = await dependencies.persistCanonical({
+  const persistCanonical = () => dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },
     sessionId: input.sessionId,
     channel,
@@ -206,13 +223,21 @@ async function persistConversationMessageWithDependencies(
         ? isTerminalAssistantStop
         : undefined,
   });
+  const persisted = trace
+    ? await measureChatPreparation("canonical_persistence", persistCanonical, input.sessionId, trace)
+    : await persistCanonical();
   if (persisted && embedding) {
-    await dependencies.saveEmbedding(
+    const saveEmbedding = () => dependencies.saveEmbedding(
       persisted.id,
       embedding,
       content,
       isTerminalAssistantStop,
     );
+    if (trace) {
+      await measureChatPreparation("embedding_update", saveEmbedding, input.sessionId, trace);
+    } else {
+      await saveEmbedding();
+    }
   }
   return persisted;
 }

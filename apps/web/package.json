@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build && node ../../scripts/chromium-tracing-check.mjs && node ../../scripts/material-print-build-contract.mjs",
     "start": "next start",
-    "test:chat-two-tab": "playwright test e2e/chat-storage-two-tab.spec.ts --workers=1",
+    "test:chat-two-tab": "playwright test --config e2e/chat-storage-two-tab.config.ts",
     "lint": "eslint --cache --cache-location .next/cache/eslint/.eslintcache --cache-strategy content",
     "typecheck": "tsc --noEmit"
   },

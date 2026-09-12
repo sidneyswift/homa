@@ -1,5 +1,7 @@
 import type { HandleMessageStreamEvent, SessionState } from "eve/client";
 
+import { recordChatPreparationTiming } from "../../lib/observability/chat-preparation";
+
 export interface SessionEventCache {
   events?: readonly HandleMessageStreamEvent[];
   session?: SessionState;
@@ -11,10 +13,35 @@ export interface SessionEventCache {
 export async function withChatTurnLock<T>(
   storageKey: string,
   operation: () => Promise<T>,
+  source?: "send" | "restore",
 ): Promise<T> {
-  const locks = globalThis.navigator?.locks;
-  if (!locks) return await operation();
-  return await locks.request(`homa-chat-turn:${storageKey}`, operation);
+  const startedAtMs = Date.now();
+  const startedAt = performance.now();
+  let acquired = false;
+  const recordWait = (outcome: "ok" | "error") => {
+    recordChatPreparationTiming(
+      "session_lock_wait",
+      startedAtMs,
+      performance.now() - startedAt,
+      outcome,
+      undefined,
+      source ? { source } : undefined,
+    );
+  };
+  const afterAcquisition = () => {
+    acquired = true;
+    recordWait("ok");
+    return operation();
+  };
+  try {
+    const locks = globalThis.navigator?.locks;
+    if (!locks) return await afterAcquisition();
+    return await locks.request(`homa-chat-turn:${storageKey}`, afterAcquisition);
+  } catch (error) {
+    // A failed operation after acquisition is not a failed lock request.
+    if (!acquired) recordWait("error");
+    throw error;
+  }
 }
 
 /** True when the completed cursor saved by another tab supersedes this tab. */

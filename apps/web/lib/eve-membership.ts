@@ -26,8 +26,9 @@ export class EveMembershipUnavailableError extends Error {
 /** Keep backend outages distinct from denied access without retrying a send. */
 export async function readEveMembership<T extends MembershipReadResult>(
   read: () => PromiseLike<T>,
+  stage: "membership" | "binding_membership" = "membership",
 ): Promise<T> {
-  return await measureChatPreparation("membership", async () => {
+  return await measureChatPreparation(stage, async () => {
     const result = await read();
     if (
       result.error &&

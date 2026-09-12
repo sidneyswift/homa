@@ -22,6 +22,15 @@ const cacheModule = ts.transpileModule(cacheSource, {
     target: ts.ScriptTarget.ES2022,
   },
 }).outputText;
+const timingModule = ts.transpileModule(
+  readFileSync(resolve(process.cwd(), "lib/observability/chat-preparation.ts"), "utf8"),
+  {
+    compilerOptions: {
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2022,
+    },
+  },
+).outputText;
 
 let browser: Browser;
 let server: Server;
@@ -54,6 +63,17 @@ test.beforeAll(async () => {
     if (request.url === "/chat-session-cache.js") {
       response.writeHead(200, { "content-type": "text/javascript" });
       response.end(cacheModule);
+      return;
+    }
+    // Transpilation keeps this relative ESM import; serve the real helper.
+    if (request.url === "/lib/observability/chat-preparation") {
+      response.writeHead(200, { "content-type": "text/javascript" });
+      response.end(timingModule);
+      return;
+    }
+    if (request.url !== "/") {
+      response.writeHead(404);
+      response.end();
       return;
     }
     response.writeHead(200, { "content-type": "text/html" });
