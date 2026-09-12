@@ -41,13 +41,14 @@
 .composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
 .composer { max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-frame); padding: 16px 12px 12px; background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
 .composer:has(input:focus-visible) { border-color: var(--homa-control-boundary); }
-.conversationView { display: grid; grid-template-columns: auto auto; grid-template-areas: "modes actions"; column-gap: 8px; }
+.conversationView { display: grid; grid-template-columns: auto; grid-template-areas: "modes"; column-gap: 8px; }
 .conversationView[hidden] { display: none; }
 .expandedView { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "input modes" "actions actions"; }
 .inputRow { grid-area: input; min-width: 0; display: flex; align-items: flex-start; gap: 8px; }
 .inputRow[hidden] { display: none; }
 .inputArea { min-width: 0; flex: 1; min-height: 64px; padding: 0 8px; }
 .composerActions { grid-area: actions; display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.composerActions[hidden] { display: none; }
 .actionSpacer { flex: 1; }
 .preview .iconButton { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--homa-radius-control); background: transparent; }
 .preview .iconButton:disabled { cursor: default; opacity: .5; }
