@@ -34,7 +34,7 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
   const previousPlacement = useRef<Placement | undefined>(undefined);
   const [geometry, setGeometry] = useState({ placement: "center" as Placement, offsetX: 0, offsetY: 0, maxWidth: 780, shellMaxWidth: 780, shellMaxHeight: 10000, maxHeight: 10000 });
   const reducedMotion = useLiveReducedMotion();
-  const [dimensions, setDimensions] = useState({ width: 214, height: 62 });
+  const [dimensions, setDimensions] = useState({ width: 214, height: 62, minimumWidth: 0 });
 
   useLayoutEffect(() => {
     const element = host.current;
@@ -78,7 +78,11 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
       const shellMaxWidth = Math.max(0, 2 * Math.min(centerX - bounds.left, bounds.right - centerX));
       const shellMaxHeight = Math.max(0, origin === 0 ? bounds.bottom - originY : origin === 1 ? originY - bounds.top : 2 * Math.min(originY - bounds.top, bounds.bottom - originY));
       const nextDimensions = { width: Math.min(targetWidth, anchor.width, fitted.maxWidth), height: Math.min(targetHeight, fitted.maxHeight) };
-      setDimensions(current => current.width === nextDimensions.width && current.height === nextDimensions.height ? current : nextDimensions);
+      setDimensions(current => current.width === nextDimensions.width && current.height === nextDimensions.height ? current : {
+        ...nextDimensions,
+        // Keep the smaller endpoint as a floor: expansion can spring, contraction cannot crush controls.
+        minimumWidth: Math.min(form.getBoundingClientRect().width, nextDimensions.width),
+      });
       const next = { ...fitted, shellMaxWidth, shellMaxHeight, maxWidth: Math.min(anchor.width, fitted.maxWidth), placement: resolved };
       setGeometry(current => Object.keys(next).every(key => current[key as keyof typeof next] === next[key as keyof typeof next]) ? current : next);
     };
@@ -118,13 +122,14 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
             {...props}
             ref={surface}
             initial={false}
-            animate={dimensions}
+            animate={{ width: dimensions.width, height: dimensions.height }}
             className={`${styles.surface} ${className ?? ""}`}
             style={{
               ...props.style,
               "--island-max-width": `${geometry.maxWidth}px`,
               "--island-target-width": `${dimensions.width}px`,
               "--island-target-height": `${dimensions.height}px`,
+              minWidth: Math.min(dimensions.minimumWidth, geometry.shellMaxWidth),
               maxWidth: geometry.shellMaxWidth,
               maxHeight: geometry.shellMaxHeight,
               left: `calc(50% + ${geometry.offsetX}px)`,
