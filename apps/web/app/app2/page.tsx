@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 
+import { getPaidAppShellData } from "../../lib/app-data";
 import { VoiceWorkspacePreview } from "./voice-workspace-preview";
 
 export const metadata: Metadata = {
@@ -10,8 +11,13 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#FFFFFF" };
 
-export default function App2Page() {
+export default async function App2Page() {
   // #1158: a local design surface until the product behavior is designed.
   if (process.env.NODE_ENV !== "development") notFound();
-  return <VoiceWorkspacePreview />;
+  const app = await getPaidAppShellData();
+  return <VoiceWorkspacePreview family={app ? {
+    id: app.family.id,
+    timeZone: app.family.time_zone ?? "America/New_York",
+    children: app.children.map(child => ({ id: child.id, name: child.name })),
+  } : null} />;
 }

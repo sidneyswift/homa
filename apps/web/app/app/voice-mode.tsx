@@ -1,7 +1,7 @@
 "use client";
 
 import { LiveSessionDiagnostics, LiveVoiceConversation, waitForLiveIce } from "@homa/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type ComponentType, type Ref } from "react";
 import { Icon } from "../../components/design/Icon";
 import { QuietAction } from "../../components/design/QuietAction";
 import { QuietFrame } from "../../components/design/QuietFrame";
@@ -9,7 +9,26 @@ import type { VoiceHomaBridgeOutput } from "../../lib/voice/homa-bridge";
 import { webVoiceOutputForDisplay } from "./voice-effects";
 import type { VoiceTranscriptLine } from "./voice-transcript";
 
-export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange }: {
+export interface VoiceModeHandle {
+  end: () => Promise<void>;
+  sendText: (text: string) => boolean;
+}
+
+export interface VoiceModePresentation {
+  error: string | null;
+  ended: boolean;
+  saving: boolean;
+  saveFailed: boolean;
+  connecting: boolean;
+  isCapturing: boolean;
+  isPlaying: boolean;
+  microphoneOn: boolean;
+  speakerOn: boolean;
+  end: () => Promise<void>;
+  retrySave: () => Promise<void>;
+}
+
+export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange, microphoneOn = true, speakerOn = true, controlsRef, presentation: Presentation }: {
   onTurn: (line: VoiceTranscriptLine) => void;
   onClose: () => void;
   onEffects: (output: VoiceHomaBridgeOutput, context: { sessionId: string; sourceSequence: number }) => void;
@@ -17,6 +36,10 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
   onActiveChange: (active: boolean) => void;
   onWorking: (working: boolean, context: { sessionId: string; sourceSequence: number }) => void;
   onAnnouncementChange: (say: ((text: string) => void) | null) => void;
+  microphoneOn?: boolean;
+  speakerOn?: boolean;
+  controlsRef?: Ref<VoiceModeHandle>;
+  presentation?: ComponentType<VoiceModePresentation>;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [ended, setEnded] = useState(false);
@@ -25,6 +48,14 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
   const [isCapturing, setCapturing] = useState(false);
   const [isPlaying, setPlaying] = useState(false);
   const sessionRef = useRef<LiveVoiceConversation | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioPreferences = useRef({ microphoneOn, speakerOn });
+  useEffect(() => {
+    audioPreferences.current = { microphoneOn, speakerOn };
+    streamRef.current?.getAudioTracks().forEach(track => { track.enabled = microphoneOn; });
+    if (audioRef.current) audioRef.current.muted = !speakerOn;
+  }, [microphoneOn, speakerOn]);
   const stopRef = useRef<() => Promise<void>>(async () => {});
   const callbacksRef = useRef({ onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange });
   useEffect(() => { callbacksRef.current = { onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange }; });
@@ -44,6 +75,11 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
     setSaving(false);
   };
 
+  useImperativeHandle(controlsRef, () => ({
+    end: leave,
+    sendText: text => !ended && isCapturing && sessionRef.current?.sendText(text) === true,
+  }));
+
   useEffect(() => {
     let cancelled = false;
     let started = false;
@@ -57,7 +93,9 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
     let stopping: Promise<void> | undefined;
     const diagnostics = new LiveSessionDiagnostics();
     const audio = new Audio();
+    audioRef.current = audio;
     audio.autoplay = true;
+    audio.muted = !audioPreferences.current.speakerOn;
     const session = new LiveVoiceConversation(`voice-${crypto.randomUUID()}`, {
       fetch: (path, init) => fetch(path, init),
       send: (event) => { if (channel?.readyState === "open") { channel.send(JSON.stringify(event)); diagnostics.sent(event); } },
@@ -123,6 +161,8 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
       try {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         if (cancelled) { stream.getTracks().forEach((track) => track.stop()); return; }
+        streamRef.current = stream;
+        stream.getAudioTracks().forEach(track => { track.enabled = audioPreferences.current.microphoneOn; });
         peer = new RTCPeerConnection();
         stream.getTracks().forEach((track) => peer!.addTrack(track, stream!));
         peer.ontrack = ({ streams }) => { if (cancelled) return; audio.srcObject = streams[0]; void audio.play().catch(() => fail("Tap to allow audio, then start a new conversation.")); };
@@ -161,7 +201,16 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
           body: JSON.stringify({ sdp: peer.localDescription?.sdp }), signal: AbortSignal.timeout(40_000),
         });
         const body = await response.json();
-        if (!response.ok || typeof body.sdp !== "string" || typeof body.sessionId !== "string" || typeof body.closeToken !== "string") throw new Error("Voice could not connect. Check your plan and connection, then try again.");
+        if (!response.ok || typeof body.sdp !== "string" || typeof body.sessionId !== "string" || typeof body.closeToken !== "string") {
+          const messages: Record<string, string> = {
+            "no-session": "Sign in to Homa on this browser before starting voice.",
+            "walled": "Your account needs an active plan to start voice.",
+            "not-included": "Voice is not included in your current plan.",
+            "rate-limited": "You have reached today's voice session limit. Please try again tomorrow.",
+            "not-configured": "Voice is not configured on this server yet.",
+          };
+          throw new Error(messages[body.reason] ?? "Voice could not connect. Check your connection, then try again.");
+        }
         handle = { sessionId: body.sessionId, closeToken: body.closeToken };
         if (cancelled) { await release(); return; }
         startTimer = setTimeout(() => fail("Voice took too long to connect. Please try again."), 20_000);
@@ -187,6 +236,10 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
   }, []);
 
   const connecting = !ended && error === null && !isCapturing;
+
+  if (Presentation) {
+    return <Presentation error={error} ended={ended} saving={saving} saveFailed={saveFailed} connecting={connecting} isCapturing={isCapturing} isPlaying={isPlaying && speakerOn} microphoneOn={microphoneOn} speakerOn={speakerOn} end={leave} retrySave={retrySave} />;
+  }
 
   return (
     <QuietFrame

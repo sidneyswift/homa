@@ -20,7 +20,13 @@ const statesToDesign = [
   ["ended", "Conversation ended", "Start again when you want"],
 ] as const;
 
-export function VoiceWorkspacePreview() {
+export interface App2Family {
+  id: string;
+  timeZone: string;
+  children: Array<{ id: string; name: string }>;
+}
+
+export function VoiceWorkspacePreview({ family }: { family: App2Family | null }) {
   const [characterPaused, setCharacterPaused] = useState(false);
   const stateDialog = useRef<HTMLDialogElement>(null);
   const stateButton = useRef<HTMLButtonElement>(null);
@@ -32,7 +38,7 @@ export function VoiceWorkspacePreview() {
           <div className={styles.characterStage}><HomaCharacter paused={characterPaused} /></div>
         </div>
       </main>
-      <ConversationControlsPreview />
+      <ConversationControlsPreview family={family} />
       <button className={styles.devButton} ref={stateButton} aria-haspopup="dialog" onClick={() => stateDialog.current?.showModal()}>Dev mode</button>
       <dialog className={styles.dialog} ref={stateDialog} aria-labelledby="state-title" aria-describedby="state-note" onClose={() => stateButton.current?.focus()}>
         <div className={styles.dialogHeader}>
@@ -47,7 +53,7 @@ export function VoiceWorkspacePreview() {
             </li>
           ))}
         </ul>
-        <p className={styles.note} id="state-note">The list is a reference for future designs. The dock and composer are interactive layout previews: audio controls change only the preview. No microphone, audio, sending, or attachments are connected.</p>
+        <p className={styles.note} id="state-note">The list is a reference for future designs. Voice connects to your Homa account and saves the conversation. You can type in the same voice session without muting your mic. Attachments are not connected yet. Character movement is still a design study.</p>
       </dialog>
     </div>
   );

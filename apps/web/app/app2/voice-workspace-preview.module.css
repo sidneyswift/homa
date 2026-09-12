@@ -33,6 +33,14 @@
 .stateList li { text-align: left; padding: 12px 16px; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-control); }
 .stateList small { display: block; font-size: 13px; font-weight: 400; }
 .note { font-size: 12px; color: var(--homa-muted-ink); margin: 16px 0 0; }
+.voiceNotice { max-width: 780px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; text-align: center; font-size: 14px; color: var(--homa-muted-ink); }
+.voiceNotice:empty { display: none; }
+.voiceNotice a { text-decoration: underline; }
+.voiceConversation { max-width: 780px; margin: 0 auto 16px; }
+.voiceConversation summary { cursor: pointer; color: var(--homa-muted-ink); font-size: 14px; }
+.voiceConversationBody { max-height: 40svh; overflow-y: auto; overflow-wrap: anywhere; padding: 12px 0; }
+.voiceConversationBody > p { margin: 0 0 16px; }
+.preview .settingsControls button:disabled { opacity: .5; cursor: default; }
 @media (max-width: 600px) {
   .screen { padding: 64px 20px; }
   .stage { padding: 32px 0; }
