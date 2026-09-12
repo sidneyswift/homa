@@ -1,8 +1,40 @@
-# Inline first-step preview experiment
+# Chat latency preview experiments
 
 Owner and status: [#1171](https://github.com/sidneyswift/homa/issues/1171).
 This change is a disabled protected-preview candidate. It does not change
 production execution, enable an experiment, or establish a latency improvement.
+
+## Separate Priority arm
+
+The agent configuration requests Gateway `serviceTier: "priority"` only when
+`VERCEL_ENV=preview` and literal `HOMA_PREVIEW_ASTRA_PRIORITY=1` are both present
+at build time. Otherwise `modelOptions` remains absent, preserving the current
+provider default, including production builds even when that flag is set.
+The model stays Astra medium, with the same automatic tool selection, full tool
+surface, Gateway Parallel search, prompt, caching and provider fallback.
+
+Eve 0.19 captures provider options while compiling `agent.ts` into its manifest.
+This string-model configuration is not reevaluated from runtime environment
+values. Set the flag for the intended preview build; changing a runtime setting
+cannot toggle a previously built deployment. Never promote the Priority preview
+artifact directly to production. A normal production build excludes the tier.
+
+Priority is a separate hosted arm after inline correctness is established.
+Compare otherwise identical protected previews, with the same inline setting in
+both arms, changing only the requested provider tier. Use the existing synthetic
+fixture procedure and record the actual applied tier, provider, per-step token
+and cache usage, cost, failures and first useful rendered answer. No new direct
+provider batch is part of this experiment, and no speed or reliability claim is
+made by adding the disabled gate.
+
+Run `node --test scripts/astra-preview-priority.test.mjs` for the focused guard.
+It compiles the actual agent configuration with the installed Eve compiler in
+fresh, credential-free processes with network access blocked, and checks
+default, preview, production and development settings. It also verifies model,
+reasoning, search, auto-cache behavior and build-time capture. The earlier
+offline full-manifest comparison preserved every compiled tool, skill, hook,
+channel and instruction across enabled and disabled arms. Normal Eve build,
+stream-duration, typecheck and lint checks still apply before pushing.
 
 ## Hypothesis and bounded change
 

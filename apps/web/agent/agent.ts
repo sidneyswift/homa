@@ -10,6 +10,14 @@ export default defineAgent({
   // (session-rotation design).
   model: HOMA_MODEL,
   reasoning: HOMA_REASONING,
+  ...(process.env.VERCEL_ENV === "preview" &&
+  process.env.HOMA_PREVIEW_ASTRA_PRIORITY === "1"
+    ? {
+        modelOptions: {
+          providerOptions: { gateway: { serviceTier: "priority" } },
+        },
+      }
+    : {}),
   // GPT-6 Astra exposes a 1,050,000-token context window. Pin it here so
   // eve build does not depend on a live Gateway model-catalog fetch to
   // compile the compaction trigger.
