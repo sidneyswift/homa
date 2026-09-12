@@ -1,11 +1,10 @@
 import { defineDynamic, defineInstructions } from "eve/instructions";
 
 import {
-  createCallerDbClient,
   isPinnedAgentChannel,
   MissingFamilyContextError,
 } from "../../lib/agent-db";
-import { type MemoryRow } from "../../lib/agent-memory";
+import { loadCallerFamilyContext } from "../../lib/family-context-caller";
 import {
   getChildProgressView,
   listActiveFamilyProgressCheckIns,
@@ -20,9 +19,7 @@ import { loadRecentCallsContext } from "../../lib/voice/recent-calls";
 import {
   loadFamilyContextPinned,
   renderFamilyContext,
-  type ChildRow,
   type FamilyContextRows,
-  type MemberRow,
 } from "../../lib/family-context";
 import {
   evalFamilyFixtureRows,
@@ -38,7 +35,7 @@ import { isOnboardingModeSession } from "../../lib/onboarding/onboarding-mode";
 import { renderOnboardingStageGuidance } from "../../lib/onboarding/stage-guidance";
 import { renderOnboardingContext } from "../../lib/onboarding/context-line";
 import { loadOnboardingState } from "../../lib/onboarding/store";
-import { measureChatPreparation } from "../../lib/observability/chat-preparation";
+import { markChatPreparation, measureChatPreparation, type ChatPreparationTrace } from "../../lib/observability/chat-preparation";
 import { recordContextSnapshot } from "../../lib/observability/agent-trace";
 import { isSlimMorningBriefDispatchContext } from "../../lib/tasks/brief-context";
 
@@ -63,54 +60,6 @@ const FAMILY_CONTEXT_UNAVAILABLE =
  *            that family. Interim until the M1-02 SET LOCAL role lands;
  *            familyId never comes from the model on either path.
  */
-
-async function loadViaCallerToken(attributes: unknown): Promise<FamilyContextRows> {
-  const { db, familyId } = createCallerDbClient(attributes);
-
-  const [familyResult, childrenResult, memoriesResult, membersResult] =
-    await Promise.all([
-      db
-        .from("families")
-        .select("name, us_state, parent_display_name, time_zone")
-        .eq("id", familyId)
-        .maybeSingle(),
-      db
-        .from("children")
-        .select("id, name, birth_month, profile, avatar_url")
-        .eq("family_id", familyId)
-        .order("created_at", { ascending: true }),
-      db
-        .from("family_memories")
-        .select("id, child_id, kind, content, source, created_at")
-        .eq("family_id", familyId)
-        .is("superseded_at", null)
-        .in("kind", ["fact", "what_works"])
-        .order("created_at", { ascending: true })
-        .limit(200),
-      // The family roster (multi-parent v0): readable under the caller's
-      // token since migration #49 widened the membership SELECT policy.
-      db
-        .from("family_members")
-        .select("display_name")
-        .eq("family_id", familyId)
-        .order("created_at", { ascending: true }),
-    ]);
-
-  if (
-    familyResult.error ||
-    childrenResult.error ||
-    memoriesResult.error ||
-    membersResult.error
-  ) {
-    throw new Error("family context load failed under caller token");
-  }
-  return {
-    family: familyResult.data,
-    children: (childrenResult.data ?? []) as ChildRow[],
-    memories: (memoriesResult.data ?? []) as MemoryRow[],
-    members: (membersResult.data ?? []) as MemberRow[],
-  };
-}
 
 interface FamilyContextInstructionAttributes {
   channel?: string;
@@ -151,6 +100,7 @@ interface ProgressContextInput {
 export interface FamilyContextInstructionDependencies {
   loadCallerFamilyContext(
     attributes: FamilyContextInstructionAttributes,
+    trace?: Pick<ChatPreparationTrace, "sessionId" | "turnId">,
   ): Promise<FamilyContextRows>;
   loadPinnedFamilyContext(familyId: string): Promise<FamilyContextRows>;
   renderFamilyContext: typeof renderFamilyContext;
@@ -187,7 +137,7 @@ The task message contains the complete bounded context for exactly one authentic
 
 const FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES =
   {
-    loadCallerFamilyContext: loadViaCallerToken,
+    loadCallerFamilyContext,
     loadPinnedFamilyContext: loadFamilyContextPinned,
     renderFamilyContext,
     loadProgressContext: async ({ familyId, childIds }) =>
@@ -279,7 +229,10 @@ export async function resolveFamilyContextInstructionMarkdown(
     const familyId = attributes?.familyId;
     let rows: FamilyContextRows;
     if (attributes?.supabaseAccessToken) {
-      rows = await measureChatPreparation("family_rows", () => dependencies.loadCallerFamilyContext(attributes), input.sessionId);
+      rows = await measureChatPreparation("family_rows", () => dependencies.loadCallerFamilyContext(attributes, {
+        sessionId: input.sessionId,
+        turnId: input.turnId ?? undefined,
+      }), input.sessionId);
     } else if (
       familyId &&
       isPinnedAgentChannel(attributes.channel)
@@ -407,6 +360,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       "family context load failed:",
       error instanceof Error ? error.message : "unknown",
     );
+    markChatPreparation("family_context_degraded", input.sessionId, { turnId: input.turnId ?? undefined });
     return FAMILY_CONTEXT_UNAVAILABLE;
   }
 }

@@ -10,6 +10,8 @@ export type ChatPreparationStage =
   | "continuity"
   | "recent_calls"
   | "family_context_total"
+  | "family_context_recovered"
+  | "family_context_degraded"
   | "session_binding"
   | "session_lock_wait"
   | "binding_authenticate"
