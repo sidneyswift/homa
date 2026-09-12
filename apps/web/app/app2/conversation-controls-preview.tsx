@@ -55,21 +55,21 @@ export function ConversationControlsPreview() {
         }}
         onSubmit={(event) => event.preventDefault()}
       >
-        <div hidden={settingsOpen}>
+        <div className={`${styles.conversationView} ${keyboardVisible ? styles.expandedView : ""}`} hidden={settingsOpen}>
           <div className={styles.inputRow} hidden={!keyboardVisible}>
             <div className={styles.inputArea} ref={inputArea} id="preview-chat-input">
               <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
             </div>
-            <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></button>
+          </div>
+          <div className={styles.modeSelector} role="group" aria-label="Conversation view">
+            <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
+            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} onClick={() => {
+              voiceButton.current?.focus({ preventScroll: true });
+              setKeyboardVisible(false);
+            }}>Voice</button>
           </div>
           <div className={styles.composerActions}>
-            <div className={styles.modeSelector} role="group" aria-label="Conversation view">
-              <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
-              <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} onClick={() => {
-                voiceButton.current?.focus({ preventScroll: true });
-                setKeyboardVisible(false);
-              }}>Voice</button>
-            </div>
+            {keyboardVisible && <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></button>}
             {keyboardVisible && <span className={styles.actionSpacer} />}
             <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
             {keyboardVisible && <button className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></button>}
