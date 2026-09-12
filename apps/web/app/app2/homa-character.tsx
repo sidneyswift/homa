@@ -62,7 +62,7 @@ function CharacterModel({ moving }: { moving: boolean }) {
     const outline = SVGLoader.createShapes(svg.paths[0])[0];
     return new Shape(outline.getPoints(64).map(point => new Vector2(point.x - 24, 24.8 - point.y)));
   }, []);
-  const extrusion = useMemo(() => ({ depth: 10, bevelEnabled: true, bevelThickness: 1.5, bevelSize: 1.25, bevelSegments: 6, curveSegments: 32, steps: 1 }), []);
+  const extrusion = useMemo(() => ({ depth: 18, bevelEnabled: true, bevelThickness: 1.5, bevelSize: 1.25, bevelSegments: 6, curveSegments: 32, steps: 1 }), []);
 
   useEffect(() => { invalidate(); }, [moving, invalidate]);
   useFrame((_, delta) => {
@@ -70,13 +70,20 @@ function CharacterModel({ moving }: { moving: boolean }) {
     const t = moving ? time.current : 0;
     if (!body.current) return;
     body.current.position.y = moving ? Math.sin(t * 1.15) * 0.55 : 0;
-    body.current.rotation.set(0.035 + Math.sin(t * 0.65) * 0.018, -0.3 + Math.sin(t * 0.42) * 0.055, -0.018 + Math.sin(t * 0.78) * 0.012);
+    // Mostly face forward. Each occasional glance eases out and back to rest.
+    const lookCycle = t % 24;
+    const turn = lookCycle >= 6 && lookCycle < 9.6
+      ? -0.2 * Math.sin((lookCycle - 6) / 3.6 * Math.PI) ** 2
+      : lookCycle >= 16 && lookCycle < 20
+        ? 0.18 * Math.sin((lookCycle - 16) / 4 * Math.PI) ** 2
+        : 0;
+    body.current.rotation.set(0, turn, 0);
 
     // Short, irregularly spaced blinks; the rest of the face never changes size.
     const cycle = t % 17;
     const blinkTime = [3.2, 8.1, 14.3].find(start => cycle >= start && cycle < start + 0.22);
     const blink = blinkTime === undefined || !moving ? 1 : Math.max(0.055, 1 - Math.sin((cycle - blinkTime) / 0.22 * Math.PI));
-    const glance = moving ? Math.sin(t * 0.47) * 0.65 : 0;
+    const glance = turn * 3;
     EYES.forEach((eye, index) => {
       const eyeGroup = eyes.current[index];
       const pupilGroup = pupils.current[index];
@@ -86,13 +93,13 @@ function CharacterModel({ moving }: { moving: boolean }) {
   });
 
   return (
-    <group ref={body} rotation={[0.035, -0.3, -0.018]}>
-      <mesh position={[0, 0, -5]}>
+    <group ref={body}>
+      <mesh position={[0, 0, -9]}>
         <extrudeGeometry args={[shape, extrusion]} />
         <meshPhysicalMaterial color={colorTokens.visualCoral} roughness={0.43} metalness={0} clearcoat={0.24} clearcoatRoughness={0.5} toneMapped={false} />
       </mesh>
       {EYES.map((eye, index) => (
-        <group key={eye.cx} position={[eye.cx - 24, 24.8 - eye.cy, 6.6]} ref={element => { eyes.current[index] = element; }}>
+        <group key={eye.cx} position={[eye.cx - 24, 24.8 - eye.cy, 10.6]} ref={element => { eyes.current[index] = element; }}>
           <mesh scale={[1, 1, 0.085]}>
             <sphereGeometry args={[eye.r, 40, 24]} />
             <meshStandardMaterial color={colorTokens.paper} roughness={0.72} />
