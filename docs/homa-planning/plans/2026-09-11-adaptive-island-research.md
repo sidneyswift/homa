@@ -1,6 +1,6 @@
 # Adaptive island: research and design questions
 
-Status: research and proposed architecture, with the interaction decisions below accepted on 2026-09-12. Visual design and implementation remain unapproved.
+Status: research reference with accepted local preview decisions. On 2026-09-12 the founder approved adding motion to the existing Text, Voice, and Settings layouts in `/app2`. Real audio and additional activity views remain outside this implementation.
 
 Owner and tracker: [#1158](https://github.com/sidneyswift/homa/issues/1158). Research date: 2026-09-11. Repository observations below use Homa commit `9d7f0d074d0e52c1546163e1aa10f68277c13a53`. No app behavior, dependency, recording permission, or production setting changed during this research.
 
@@ -338,4 +338,18 @@ Build a reusable adaptive presentation shell whose placement resolves from a sta
 - Proposed defaults are labeled throughout. Record accepted decisions with date and tracker evidence; remove superseded recommendations rather than letting contradictory guidance accumulate.
 - Review prompts, in priority order: **While recording and typing, keep… visible; the initial host should…; motion comparison may…; next approved prototype scope is…**. These are a reply template, not decisions already made. Keyboard/audio independence is already accepted above.
 
-Current outcome: research reference prepared; `/app2` remains unchanged. The remaining unknowns are design and integration questions, not claims that production is broken.
+## 13. First local motion implementation, 2026-09-12
+
+The founder approved the existing compact Voice dock, single-row Text composer, and inline Settings view before requesting the dynamic island implementation. The selected mode now uses the neutral canvas fill, dark ink, and no additional selected hover highlight. Earlier black selection screenshots are historical.
+
+Implementation: [AdaptiveIsland](../../../apps/web/app/app2/adaptive-island.tsx), [geometry](../../../apps/web/app/app2/island-geometry.ts), and the [conversation preview](../../../apps/web/app/app2/conversation-controls-preview.tsx). Motion 13.2.0 is used through its React API. This is an original implementation informed by the references, with no copied third-party component code.
+
+- One persistent form changes size using transform-based layout animation. The contract supplies 320ms ease-out geometry and 120ms opacity; this is a bounded tween, not a physics spring or a claim of velocity continuity.
+- Child layout correction keeps button and text proportions stable. Both view containers stay mounted. Inactive views are inert, hidden from accessibility, excluded from target sizing, and clipped to prevent invisible scroll overflow. The original input instance and its draft remain in place.
+- A stationary host determines top, center, or bottom growth, with an explicit host override and optional region. A neutral band prevents placement chatter. Viewport/region intersection constrains dimensions, and VisualViewport changes adjust collision offsets without moving the original host.
+- Reduced Motion uses a live media-query subscription, zero durations, and immediate CSS endpoints, including when the preference changes during motion. The installed library's snapshot-only preference hook is deliberately not relied upon.
+- Presentation changes never acquire audio resources or change microphone/speaker state. Existing explicit audio buttons still change only local preview state.
+
+Verified in the local in-app browser: intermediate shell widths; unchanged control dimensions during contraction; draft and caret preservation through Settings, Voice and Text; independent mic/speaker state preservation; keyboard skipping inactive controls; repeated mode switching with one active view and one input; 320px viewport without page overflow; bottom-anchored upward growth for wrapped Settings; and no invisible scroll area after collapsing Settings. Geometry tests cover region-relative placement, boundary jitter, fixed anchors, keyboard obstruction, and oversized content.
+
+Limits: these checks are not a physical iPhone keyboard test, a live OS Reduced Motion toggle test, a frame-rate profile, or an instrumented mid-flight velocity test. Placement fixtures at the top and center are covered mathematically, not by a rendered multi-host gallery. Real audio, recording, generated results and unapproved states remain separate work. The user is reviewing motion feel in the local prototype; no production release is implied.

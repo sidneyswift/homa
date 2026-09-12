@@ -52,6 +52,9 @@
 .expandedView::-webkit-scrollbar { display: none; }
 .inputRow { grid-area: input; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .inputRow[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .inputRow:not([hidden]) { opacity: 1 !important; }
+}
 .inputArea { min-width: 0; flex: 1; min-height: 44px; }
 .composerActions { grid-area: actions; display: flex; align-items: center; }
 .composerActions[hidden] { display: none; }

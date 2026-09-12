@@ -1,10 +1,12 @@
 "use client";
 
+import { motion } from "motion/react";
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import { Icon } from "../../components/design/Icon";
 import { SlashComposer } from "../app/slash-composer";
+import { AdaptiveIsland, IslandView } from "./adaptive-island";
 import styles from "./voice-workspace-preview.module.css";
 
 /** Local design controls only. View changes never acquire audio resources. */
@@ -47,7 +49,8 @@ export function ConversationControlsPreview() {
 
   return (
     <div className={styles.composerDock}>
-      <form
+      <AdaptiveIsland
+        size={!settingsOpen && keyboardVisible ? "fill" : "content"}
         className={`${styles.composer} ${settingsOpen ? styles.settingsComposer : keyboardVisible ? "" : styles.compactComposer}`}
         aria-label={settingsOpen ? "Audio settings" : keyboardVisible ? "Chat input" : "Voice controls"}
         onKeyDown={(event) => {
@@ -59,39 +62,39 @@ export function ConversationControlsPreview() {
         }}
         onSubmit={(event) => event.preventDefault()}
       >
-        <div className={`${styles.conversationView} ${keyboardVisible ? styles.expandedView : ""}`} hidden={settingsOpen}>
-          <div className={styles.inputRow} hidden={!keyboardVisible}>
-            {keyboardVisible && <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></button>}
+        <IslandView active={!settingsOpen} className={`${styles.conversationView} ${keyboardVisible ? styles.expandedView : ""}`}>
+          <motion.div layout="position" initial={false} animate={{ opacity: keyboardVisible ? 1 : 0 }} className={styles.inputRow} hidden={!keyboardVisible}>
+            {keyboardVisible && <motion.button layout="position" className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={20} /></motion.button>}
             <div className={styles.inputArea} ref={inputArea} id="preview-chat-input">
               <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
             </div>
-          </div>
-          <div className={styles.modeSelector} role="group" aria-label="Conversation view">
-            <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
-            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} data-pointer-focus={pointerFocus === "voice"} onBlur={() => setPointerFocus(null)} onClick={(event) => {
+          </motion.div>
+          <motion.div layout="position" className={styles.modeSelector} role="group" aria-label="Conversation view">
+            <motion.button layout="position" type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</motion.button>
+            <motion.button layout="position" type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} data-pointer-focus={pointerFocus === "voice"} onBlur={() => setPointerFocus(null)} onClick={(event) => {
               voiceButton.current?.focus({ preventScroll: true });
               setPointerFocus(event.detail > 0 ? "voice" : null);
               setKeyboardVisible(false);
-            }}>Voice</button>
-            <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} data-pointer-focus={pointerFocus === "settings"} onBlur={() => setPointerFocus(null)} onClick={(event) => openSettings(event.detail > 0)}><Icon name="settings" size={20} /></button>
-          </div>
-          <div className={styles.composerActions} hidden={!keyboardVisible}>
-            {keyboardVisible && <button className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></button>}
-          </div>
-        </div>
-        <div className={styles.settingsView} id="preview-audio-settings" hidden={!settingsOpen}>
-          <div className={styles.settingsControls}>
-            <button className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} data-pointer-focus={pointerFocus === "back"} onBlur={() => setPointerFocus(null)} onClick={(event) => closeSettings(event.detail > 0)}><Icon name="back" size={20} /></button>
-            <button type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
+            }}>Voice</motion.button>
+            <motion.button layout="position" className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} data-pointer-focus={pointerFocus === "settings"} onBlur={() => setPointerFocus(null)} onClick={(event) => openSettings(event.detail > 0)}><Icon name="settings" size={20} /></motion.button>
+          </motion.div>
+          <motion.div layout="position" className={styles.composerActions} hidden={!keyboardVisible}>
+            {keyboardVisible && <motion.button layout="position" className={styles.iconButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={20} /></motion.button>}
+          </motion.div>
+        </IslandView>
+        <IslandView active={settingsOpen} className={styles.settingsView} id="preview-audio-settings">
+          <motion.div layout="position" className={styles.settingsControls}>
+            <motion.button layout="position" className={styles.iconButton} type="button" aria-label="Back to conversation controls" ref={backButton} data-pointer-focus={pointerFocus === "back"} onBlur={() => setPointerFocus(null)} onClick={(event) => closeSettings(event.detail > 0)}><Icon name="back" size={20} /></motion.button>
+            <motion.button layout="position" type="button" aria-pressed={microphoneOn} onClick={() => setMicrophoneOn((on) => !on)}>
               <Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span>Mic</span>
-            </button>
-            <button type="button" aria-pressed={speakerOn} onClick={() => setSpeakerOn((on) => !on)}>
+            </motion.button>
+            <motion.button layout="position" type="button" aria-pressed={speakerOn} onClick={() => setSpeakerOn((on) => !on)}>
               <Icon name={speakerOn ? "volume" : "volume_muted"} size={20} /><span>Sound</span>
-            </button>
-            <button type="button" onClick={endVoice}>End voice</button>
-          </div>
-        </div>
-      </form>
+            </motion.button>
+            <motion.button layout="position" type="button" onClick={endVoice}>End voice</motion.button>
+          </motion.div>
+        </IslandView>
+      </AdaptiveIsland>
     </div>
   );
 }
