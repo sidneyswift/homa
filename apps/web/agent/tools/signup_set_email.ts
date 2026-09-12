@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { agentEmailSchema } from "../../lib/agent-email-schema";
 import {
   defineBoundedTool,
   TOOL_DEADLINE,
@@ -19,7 +20,7 @@ export default defineBoundedTool({
   deadlineMs: TOOL_DEADLINE.fetch,
   repeatable: false,
   inputSchema: z.object({
-    email: z.string().email().max(254),
+    email: agentEmailSchema.max(254).describe("The email address the parent provided for the report."),
   }),
   async execute(input, ctx) {
     const session = await resolveSignupSession(ctx.session.auth.current?.attributes);

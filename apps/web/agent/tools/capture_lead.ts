@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { normalizeUsPhoneE164 } from "@homa/core";
 
+import { agentEmailSchema } from "../../lib/agent-email-schema";
 import {
   defineBoundedTool,
   TOOL_DEADLINE,
@@ -25,9 +26,7 @@ const captureInput = z.object({
     .max(120)
     .optional()
     .describe("Her first name, exactly as she gave it."),
-  email: z
-    .string()
-    .email()
+  email: agentEmailSchema
     .max(254)
     .optional()
     .describe("Her email, only when she volunteered it for signup or follow-up."),
