@@ -4,6 +4,48 @@ Owner and status: [#1171](https://github.com/sidneyswift/homa/issues/1171).
 This change is a disabled protected-preview candidate. It does not change
 production execution, enable an experiment, or establish a latency improvement.
 
+## Separate chat-open warmup arm
+
+The September 12 hosted screen's first standard admission request reported a
+2.47-second cold start in `/eve/__server`. Its first parent Workflow request
+separately reported a 2.57-second cold start. These are platform observations,
+not additive guaranteed savings. The initial Priority admission also reported
+a 2.40-second cold start. Exact requests and comparison results are recorded on
+[#1171](https://github.com/sidneyswift/homa/issues/1171#issuecomment-5649430214).
+
+This arm makes one bounded GET to the existing `/eve/v1/health` when chat mounts.
+The installed generated handler loads the same admission entry without creating
+a session, running authentication, dispatching a Workflow or calling a model.
+Production GET returned 200 ready JSON. Local network-blocked handler probes
+confirmed no external effects. A publicly routed Workflow health endpoint was
+not established; both tested paths returned 404, so this experiment does not
+warm the separate Workflow function or add a new route.
+
+The server page enables the component only with `VERCEL_ENV=preview`, literal
+`HOMA_PREVIEW_CHAT_WARMUP=1`, a present family and verified claims matching
+`HOMA_PREVIEW_CHAT_WARMUP_USER_ID` exactly. The flag and fixture ID are deployment
+environment values, not public variables or client-selected inputs. Production
+remains excluded even with the flag set. Use a designated synthetic account.
+
+The request retains same-origin cookies for existing preview protection, bypasses
+the browser cache, rejects redirects and has no body or custom headers. It has a
+ten-second deadline, cancels on unmount and never retries. No request is made by
+an effect canceled before its deferred start, including React's development
+setup/cleanup/setup check. No Send or conversation code awaits the request.
+
+Compare matched source previews with inline and Priority both disabled, changing
+only this warmup gate and the corresponding synthetic account. Include immediate
+sends and measured time spent entering the prompt. Do not wait for health before
+Send or silently exclude users who send before warmup completes. Record actual
+platform cold/warm state rather than assuming a new tab or deployment is cold.
+Instance reuse and a hosted latency improvement remain unverified.
+
+The six focused lifecycle and eligibility checks run in `pnpm check:chat-ui`.
+The September 12 implementation passed 329 chat checks, the existing two-tab
+browser check, web typecheck and lint with five preexisting warnings. Independent
+review accepted the final lifecycle correction. These are implementation checks,
+not acceptance evidence for the five-second target.
+
 ## Separate Priority arm
 
 The agent configuration requests Gateway `serviceTier: "priority"` only when
@@ -110,9 +152,12 @@ client and native-fingerprint checks before any eventual main-branch release.
 ## Hosted measurement and acceptance
 
 The user target remains 19 of 20 representative hosted synthetic turns with
-Send-to-first-useful-visible-answer at or below five seconds. Failures and
-timeouts are misses. Headers, reasoning, status notes, skill loads and tool calls
-do not count as a useful answer. Keep Astra medium and normal tools, and do not
+Send-to-first-visible-streaming-answer at or below five seconds, including app
+overhead and hidden reasoning. Report first useful visible instruction as a
+separate stricter measure; a lone word or title may pass first text without
+proving usefulness. Failures and timeouts are misses. Headers, reasoning, status
+notes, skill loads and tool calls do not count as answer text. Keep Astra medium
+and normal tools, and do not
 change the prompt after seeing a result. Read/advice/planning prompts cover the
 existing frozen acceptance set, including fresh and returning conversations.
 

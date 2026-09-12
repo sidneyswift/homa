@@ -6,6 +6,7 @@ import { getAppData } from "../../lib/app-data";
 import { firstWeekAdjustmentDraft } from "../../lib/activation/first-week-handoff";
 import { familyWallCheckout } from "../../lib/billing/wall";
 import { fetchChatHistory } from "../../lib/chat-history";
+import { chatOpenWarmupEnabled } from "../../lib/chat-open-warmup";
 import { ASSESSMENT_PENDING_COOKIE, assessmentActionFromHeader, assessmentActionFromQuery, assessmentActionHref, resolveAssessmentAction } from "../../lib/child-progress/assessment-intent";
 import { abilityQuestionDraft } from "../../lib/child-progress/ability-question-draft";
 import { ABILITY_QUESTION_DRAFT } from "../../lib/child-progress/ability-question";
@@ -18,6 +19,7 @@ import { parseViewContext, VIEW_CONTEXT_COOKIE } from "../../lib/view-context";
 import { resolveActiveMaterialCaller } from "../../lib/voice/active-material";
 import { workingPlanResumeDraft } from "../../lib/working-plan-resume";
 import { ChatClient } from "./chat-client";
+import { ChatOpenWarmup } from "./chat-open-warmup";
 
 /**
  * /app: talk to Homa, the app's default landing (founder ask 2026-07-09:
@@ -138,6 +140,13 @@ export default async function ChatPage({
 
   return (
     <>
+    {chatOpenWarmupEnabled({
+      environment: process.env.VERCEL_ENV,
+      flag: process.env.HOMA_PREVIEW_CHAT_WARMUP,
+      fixtureUserId: process.env.HOMA_PREVIEW_CHAT_WARMUP_USER_ID,
+      userId,
+      hasFamily: Boolean(app),
+    }) ? <ChatOpenWarmup key={userId} /> : null}
     {draft === ABILITY_QUESTION_DRAFT && !selectedAbilityQuestion ? (
       <p role="alert" className="px-4 py-3 text-sm text-muted">This ability question is unavailable. Open the ability again from Progress.</p>
     ) : null}
