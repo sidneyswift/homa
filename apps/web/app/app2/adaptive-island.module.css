@@ -23,11 +23,14 @@
   top: 8px;
   left: 8px;
   width: var(--island-view-width, max-content);
-  max-width: calc(100% - 16px);
+  /* Preserve the outgoing row layout while the shell contracts around it. */
+  max-width: none;
   max-height: calc(100% - 16px);
   overflow: clip;
   pointer-events: none;
 }
+
+.view[data-visible="false"] { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .surface { transform: translate(-50%, var(--island-y)) !important; width: var(--island-target-width) !important; height: var(--island-target-height) !important; }

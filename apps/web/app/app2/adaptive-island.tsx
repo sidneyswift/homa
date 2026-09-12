@@ -160,11 +160,13 @@ export function IslandView({ active, children, className, id }: {
   id?: string;
 }) {
   const view = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(active);
   const reducedMotion = useLiveReducedMotion();
 
   useLayoutEffect(() => {
     const element = view.current;
     if (!element || !active) return;
+    setVisible(true);
     const rememberWidth = () => {
       // The outgoing view keeps its own width and never contributes to target measurement.
       element.style.setProperty("--island-view-width", `${element.offsetWidth}px`);
@@ -182,7 +184,9 @@ export function IslandView({ active, children, className, id }: {
       initial={false}
       animate={{ opacity: active ? 1 : 0 }}
       transition={{ opacity: { duration: reducedMotion ? 0 : active ? 0.18 : 0.08, delay: reducedMotion || !active ? 0 : 0.09 } }}
+      onAnimationComplete={() => { if (!active) setVisible(false); }}
       data-active={active}
+      data-visible={active || visible}
       aria-hidden={!active}
       inert={!active}
       className={`${styles.view} ${className ?? ""}`}

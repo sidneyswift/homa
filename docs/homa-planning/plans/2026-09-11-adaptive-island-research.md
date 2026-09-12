@@ -377,3 +377,7 @@ Fresh-page browser samples verify a stable Settings width target, shell overshoo
 ### Contraction content floor, 2026-09-12
 
 The founder noticed the settings gear crossing the dock during contraction. Browser samples showed the icon stayed 20px while shell undershoot reduced width to about 196px and put the settings button 10px beyond the edge. A per-transition minimum width now uses the smaller of the current rendered width and target width, capped to available region space. Expansion can overshoot; contraction cannot shrink below its destination content width. The floor updates only with a new size target, not on each spring frame. Repeated browser samples now keep the gear 20px and the button at least 8px inside the shell.
+
+### Stable outgoing row, 2026-09-12
+
+The founder reported Sound flashing when closing Settings. The inactive view's width cap followed the contracting shell, allowing the outgoing flex row to wrap during its short fade. The outgoing view now retains its measured width. When its exit animation finishes it becomes display:none, while its React contents and draft remain mounted. This also removes invisible scroll overflow. Sampled keyboard-dismissal frames show constant outgoing width and Sound row position, monotonically decreasing opacity, then display:none; pointer dismissal uses the same exit path.
