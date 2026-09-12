@@ -20,7 +20,7 @@ The materials, planner, onboarding and inquiry roots now route to supporting ref
 | --- | ---: | ---: |
 | Main agent instructions | 24,432 | 21,639 |
 | Materials root | 54,988 | 3,064 |
-| Planner root | 19,164 | 3,399 |
+| Planner root | 19,164 | 3,412 |
 | Onboarding root | 27,817 | 9,566 |
 | Reflective inquiry root | 19,457 | 1,552 |
 
@@ -47,3 +47,5 @@ Typecheck, lint (four existing warnings), the agent deployment build, stream-dur
 The frozen July documentation reconciliation check fails on unchanged main for extensive existing registry drift. The new references also lack entries in that immutable historical baseline. This change does not rewrite the baseline or weaken its guard; documentation reconciliation is not claimed clean.
 
 During the broad Astra evaluation, unchanged progress tool code rejected declared optional keys retained as undefined by the provider. gh#1169 records the suspected live failure and narrow repair: normalize only absent declared fields before the existing strict command validator. Thirty progress boundary tests pass, including supplied unrelated fields, unknown identity, malformed IDs and missing required fields. Live verification remains required before closing the incident.
+
+The complete material suite passes 546 tests and the complete onboarding suite passes 188 tests. Relocated contract tests require the root to point at the exact supporting reference before checking its original quality assertions. Admin package inspection includes supporting guidance for tool mappings and coverage while continuing to display the root separately.

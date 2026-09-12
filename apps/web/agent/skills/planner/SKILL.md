@@ -30,7 +30,7 @@ Read paths below with `read_file /workspace/skills/planner/<path>`.
 ## Shared boundaries
 
 - Before drafting or reshaping learning, use this child's map snapshot,
-  interests, current progress and saved what-works memories. Current parent
+  interests, current progress and saved `[what works · Child]` memories. Current parent
   instructions and fixed calendar commitments win. Never apply a sibling's
   level or ask for a fact the context already provides.
 - Read before editing, scheduling, or completing an existing item. Use exact

@@ -20,8 +20,8 @@ import { RECIPE_REGISTRY, RECIPE_SLUGS } from "./recipes.generated";
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const SKILLS_ROOT = "apps/web/agent/skills";
 const BUILDER = "scripts/build-recipe-registry.mts";
-const skillMd = readFileSync(
-  path.join(repoRoot, "apps/web/agent/skills/materials-studio/SKILL.md"),
+const formatLibrary = readFileSync(
+  path.join(repoRoot, "apps/web/agent/skills/materials-studio/references/format-library.md"),
   "utf8",
 );
 
@@ -64,11 +64,11 @@ describe("recipe registry", () => {
     }
   });
 
-  it("covers every slug in SKILL.md's recipe-file table", () => {
+  it("covers every slug in the routed format library's recipe-file table", () => {
     const slugs = new Set<string>(RECIPE_SLUGS);
     let inTable = false;
     let seen = 0;
-    for (const line of skillMd.split("\n")) {
+    for (const line of formatLibrary.split("\n")) {
       if (/^\|.*\|\s*$/.test(line) && /\|\s*Recipe file\s*\|/i.test(line)) {
         inTable = true;
         continue;
@@ -79,9 +79,9 @@ describe("recipe registry", () => {
       const slug = cells[cells.length - 1];
       if (!slug || /^[-\s]+$/.test(slug)) continue;
       seen += 1;
-      assert.ok(slugs.has(slug), `SKILL.md recipe table names "${slug}", which the registry lacks`);
+      assert.ok(slugs.has(slug), `Format library recipe table names "${slug}", which the registry lacks`);
     }
-    assert.ok(seen > 0, "the SKILL.md recipe table was not found; update this guard");
+    assert.ok(seen > 0, "the Format library recipe table was not found; update this guard");
   });
 
   it("is byte-identical to what the builder produces from the recipes now", () => {
