@@ -2,6 +2,7 @@ import { readWebSessionBinding } from "../../../../lib/conversation-continuity/w
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { EveMembershipUnavailableError } from "../../../../lib/eve-membership";
+import { measureChatPreparation, type ChatPreparationMetadata } from "../../../../lib/observability/chat-preparation";
 
 /**
  * GET /api/chat/session-binding
@@ -12,13 +13,24 @@ import { EveMembershipUnavailableError } from "../../../../lib/eve-membership";
  * family and member identity come from auth.
  */
 export async function GET(request: Request): Promise<Response> {
+  const timing: ChatPreparationMetadata = {};
+  return measureChatPreparation("binding_total", async () => {
+    const response = await readBindingResponse(request);
+    timing.statusCode = response.status;
+    return response;
+  }, undefined, timing);
+}
+
+async function readBindingResponse(request: Request): Promise<Response> {
   if (rateLimited(`chat-session-binding:${clientIp(request)}`, 120)) {
     return Response.json({ ok: false }, { status: 429 });
   }
 
   let auth;
   try {
-    auth = await resolveApiFamily(request, { transientMembershipErrors: "throw" });
+    auth = await resolveApiFamily(request, {
+      transientMembershipErrors: "throw", traceChatBinding: true,
+    });
   } catch (error) {
     if (error instanceof EveMembershipUnavailableError) return error.response;
     console.error(
@@ -37,10 +49,10 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
   try {
-    const binding = await readWebSessionBinding({
+    const binding = await measureChatPreparation("binding_read", () => readWebSessionBinding({
       familyId: auth.familyId,
       memberUserId: auth.userId,
-    });
+    }));
     return Response.json({ ok: true, binding });
   } catch (error) {
     console.error(

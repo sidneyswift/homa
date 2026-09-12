@@ -1,6 +1,7 @@
 import { embed } from "ai";
 
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
+import { measureChatPreparation, type ChatPreparationTrace } from "../observability/chat-preparation";
 
 /**
  * Best-effort embeddings for the archive (migration #38). One rule
@@ -25,15 +26,21 @@ export function embeddingModelId(): string {
 /** Returns the pgvector literal ('[0.1,0.2,...]') or null on any failure. */
 export async function embedText(
   text: string,
-  attribution?: { familyId: string | null; signal?: AbortSignal },
+  attribution?: {
+    familyId: string | null;
+    signal?: AbortSignal;
+    preparationTrace?: ChatPreparationTrace;
+  },
+  dependencies = { embed, recordModelUsage },
 ): Promise<string | null> {
   const value = text.trim().slice(0, EMBED_MAX_CHARS);
   if (value.length < 3) return null;
   const familyId = attribution?.familyId ?? null;
   const model = embeddingModelId();
   const started = Date.now();
+  const trace = attribution?.preparationTrace;
   try {
-    const result = await embed({
+    const generateEmbedding = () => dependencies.embed({
       model,
       value,
       maxRetries: 1,
@@ -43,10 +50,13 @@ export async function embedText(
         gateway: gatewayAttribution(familyId, "embedding"),
       },
     });
+    const result = trace
+      ? await measureChatPreparation("embedding_provider", generateEmbedding, trace.sessionId, trace)
+      : await generateEmbedding();
     const vector = result.embedding;
     if (!Array.isArray(vector) || vector.length !== EMBEDDING_DIMS) return null;
 
-    await recordModelUsage({
+    const recordUsage = () => dependencies.recordModelUsage({
       familyId,
       surface: "embedding",
       model,
@@ -54,6 +64,11 @@ export async function embedText(
       inputTokens: result.usage.tokens,
       durationMs: Date.now() - started,
     });
+    if (trace) {
+      await measureChatPreparation("embedding_usage", recordUsage, trace.sessionId, trace);
+    } else {
+      await recordUsage();
+    }
 
     return `[${vector.join(",")}]`;
   } catch (error) {

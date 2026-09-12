@@ -1257,7 +1257,7 @@ export function ChatClient({
           preparingSendRef.current = false;
           setPreparingSend(null);
           await sending;
-        });
+        }, "send");
       } catch {
         if (!handedOff) {
           pendingBoundSendRef.current = input;
@@ -1331,7 +1331,7 @@ export function ChatClient({
         setBindingSyncFailure(false);
         setRestoringBoundSession(false);
         if (restored.kind !== "parked") flushQueuedMessages();
-      });
+      }, "restore");
     })();
     return () => controller.abort();
   }, [

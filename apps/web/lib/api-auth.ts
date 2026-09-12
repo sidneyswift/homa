@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { readEveMembership } from "./eve-membership";
 import { createSupabaseRequestClient } from "./supabase/server";
+import { measureChatPreparation } from "./observability/chat-preparation";
 
 /**
  * Family resolution for API routes that serve both surfaces: the web
@@ -40,7 +41,7 @@ export function requestAuthTransport(request: Request): RequestAuthTransport {
  */
 export async function resolveApiFamily(
   request: Request,
-  options: { transientMembershipErrors?: "throw" } = {},
+  options: { transientMembershipErrors?: "throw"; traceChatBinding?: boolean } = {},
 ): Promise<ApiFamilyAuth | null> {
   let supabase: SupabaseClient;
   let userId: string;
@@ -56,12 +57,16 @@ export async function resolveApiFamily(
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data, error } = await supabase.auth.getUser(token);
+    const { data, error } = options.traceChatBinding
+      ? await measureChatPreparation("binding_authenticate", () => supabase.auth.getUser(token))
+      : await supabase.auth.getUser(token);
     if (error || !data.user) return null;
     userId = data.user.id;
   } else {
     supabase = createSupabaseRequestClient(request);
-    const { data } = await supabase.auth.getUser();
+    const { data } = options.traceChatBinding
+      ? await measureChatPreparation("binding_authenticate", () => supabase.auth.getUser())
+      : await supabase.auth.getUser();
     if (!data.user) return null;
     userId = data.user.id;
   }
@@ -73,7 +78,7 @@ export async function resolveApiFamily(
     .limit(1)
     .maybeSingle();
   const { data: membership } = options.transientMembershipErrors === "throw"
-    ? await readEveMembership(readMembership)
+    ? await readEveMembership(readMembership, options.traceChatBinding ? "binding_membership" : "membership")
     : await readMembership();
   const familyId = membership?.family_id as string | undefined;
   if (!familyId) return null;

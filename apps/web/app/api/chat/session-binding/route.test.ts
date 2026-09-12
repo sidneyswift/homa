@@ -111,3 +111,20 @@ test("other API family callers retain null on timeout while chat can opt in and 
     "/auth/v1/user", "/rest/v1/family_members",
   ]);
 });
+
+test("binding timings separate authentication and membership without changing the failed request", async (t) => {
+  const backend = mockMembershipBackend(t);
+  const logs: unknown[][] = [];
+  t.mock.method(console, "info", (...args: unknown[]) => { logs.push(args); });
+  const response = await GET(request());
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("retry-after"), "1");
+  const records = logs.map((row) => JSON.parse(row[1] as string));
+  assert.deepEqual(records.map((row) => [row.stage, row.outcome]), [
+    ["binding_authenticate", "ok"], ["binding_membership", "error"], ["binding_total", "ok"],
+  ]);
+  assert.ok(records.every((row) => Number.isFinite(row.startedAtMs)));
+  assert.equal(records.at(-1).statusCode, 503);
+  assert.doesNotMatch(JSON.stringify(logs), /synthetic-token|private upstream|11111111|22222222/);
+  assert.deepEqual(backend.paths, ["/auth/v1/user", "/rest/v1/family_members"]);
+});
