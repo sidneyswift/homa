@@ -9,6 +9,7 @@ import styles from "./voice-workspace-preview.module.css";
 
 /** Local design controls only. View changes never acquire audio resources. */
 export function ConversationControlsPreview() {
+  const [pointerFocus, setPointerFocus] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -64,7 +65,8 @@ export function ConversationControlsPreview() {
           <div className={styles.modeSelector} role="group" aria-label="Conversation view">
             <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
             <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
-            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} onClick={() => {
+            <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} data-pointer-focus={pointerFocus} onBlur={() => setPointerFocus(false)} onKeyDown={() => setPointerFocus(false)} onClick={(event) => {
+              setPointerFocus(event.detail > 0);
               voiceButton.current?.focus({ preventScroll: true });
               setKeyboardVisible(false);
             }}>Voice</button>
