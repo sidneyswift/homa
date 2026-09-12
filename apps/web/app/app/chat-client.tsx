@@ -1629,7 +1629,7 @@ export function ChatClient({
     ? {
         id: "preparing-send:user",
         role: "user",
-        parts: [{ type: "text", text: preparingSummary, state: "done" }],
+        parts: [{ type: "text", text: preparingSummary }],
         metadata: { optimistic: true, status: "submitted" },
       }
     : null;
