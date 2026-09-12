@@ -1,3 +1,4 @@
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
@@ -98,11 +99,13 @@ function judgeAttempt(
 }
 
 describe("prompt suggestion generation", () => {
-  it("shares an explicit non-reasoning producer budget with the live eval", () => {
+  it("shares the producer budget with the live eval and overrides none for Astra", () => {
     assert.deepEqual(PROMPT_SUGGESTION_PRODUCER_SETTINGS, {
       reasoning: "none",
       maxOutputTokens: 1_024,
     });
+    assert.equal({ ...PROMPT_SUGGESTION_PRODUCER_SETTINGS, ...homaModelSettings(HOMA_MODEL) }.reasoning, "low");
+    assert.equal({ ...PROMPT_SUGGESTION_PRODUCER_SETTINGS, ...homaModelSettings("test/specialist") }.reasoning, "none");
     for (const source of [GENERATOR_SOURCE, LIVE_EVAL_SOURCE]) {
       assert.equal(
         source.match(/\.\.\.PROMPT_SUGGESTION_PRODUCER_SETTINGS/gu)?.length,

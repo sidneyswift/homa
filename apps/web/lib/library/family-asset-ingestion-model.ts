@@ -1,7 +1,7 @@
 import { MAP_SUBJECTS, RESEARCH_STAGES } from "@homa/core";
 import { generateObject } from "ai";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import {
   FAMILY_ASSET_AGE_BAND_LABELS,
@@ -106,7 +106,7 @@ export async function proposeFamilyAssetIngestion(
   const model = familyAssetIngestionModel();
   const startedAt = Date.now();
   const result = await generateObject({
-    model,
+    ...homaModelSettings(model),
     schema: familyAssetIngestionProposalSchema,
     system: FAMILY_ASSET_INGESTION_SYSTEM,
     prompt: familyAssetIngestionPrompt(input),

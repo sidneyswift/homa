@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { buildFourWeekPlan, type Curriculum } from "@homa/core";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { ReportFacts } from "./narrative-facts";
 
@@ -85,7 +85,7 @@ export async function generateCurriculum(
 ): Promise<CurriculumGenerationResult> {
   const started = Date.now();
   const result = await generateObject({
-    model: HOMA_MODEL,
+    ...homaModelSettings(HOMA_MODEL),
     system: systemPrompt(),
     prompt: [
       `Write ${report.childName}'s curriculum from these facts.`,

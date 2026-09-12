@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { skillPhrase, type PlanNarrative, type ReportNarrative } from "@homa/core";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { REPORT_PROMPT_VERSION } from "../../agent/report-writer-version";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { PlanFacts, ReportFacts } from "./narrative-facts";
@@ -196,7 +196,7 @@ export async function generateReportNarrative(
 
   const started = Date.now();
   const result = await generateObject({
-    model: NARRATIVE_MODEL,
+    ...homaModelSettings(NARRATIVE_MODEL),
     system: systemPrompt(),
     prompt: [
       `Write ${facts.childName}'s progress report pieces from these facts, computed by code.`,
@@ -250,7 +250,7 @@ export async function generatePlanNarrative(
 
   const started = Date.now();
   const result = await generateObject({
-    model: NARRATIVE_MODEL,
+    ...homaModelSettings(NARRATIVE_MODEL),
     system: systemPrompt(),
     prompt: [
       `Write the four-week plan pieces for ${facts.childName}'s ${facts.subjectName} month from these facts, computed by code.`,

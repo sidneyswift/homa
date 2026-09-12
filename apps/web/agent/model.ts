@@ -6,4 +6,15 @@
  * model). Gateway-routed: the string resolves through the Vercel AI
  * Gateway in both eve and the AI SDK.
  */
-export const HOMA_MODEL = "anthropic/claude-sonnet-5";
+export const HOMA_MODEL = "openai/gpt-6-astra";
+
+/** Shared turn and background-call effort, selected by the founder in #1159. */
+export const HOMA_REASONING = "low" as const;
+
+/** Explicit specialist overrides keep their own provider-default reasoning. */
+export function homaModelSettings(model: string = HOMA_MODEL) {
+  return {
+    model,
+    ...(model === HOMA_MODEL ? { reasoning: HOMA_REASONING } : {}),
+  };
+}
