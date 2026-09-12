@@ -53,7 +53,8 @@
 .modeSelector { display: flex; align-items: center; gap: 8px; }
 .preview .modeButton { position: relative; min-width: 64px; padding: 8px 12px; border: 0; background: transparent; font-size: 16px; font-weight: 500; }
 .preview .modeButton { border-radius: 999px; }
-.preview .modeButton[aria-pressed="true"] { background: var(--homa-canvas); box-shadow: inset 0 0 0 1px var(--preview-boundary); }
+/* #1158: founder-requested black selection for the local island preview. */
+.preview .modeButton[aria-pressed="true"] { background: #000; color: var(--homa-floating); }
 @media (forced-colors: active) {
   .preview .modeButton[aria-pressed="true"] { border: 1px solid ButtonText; }
 }

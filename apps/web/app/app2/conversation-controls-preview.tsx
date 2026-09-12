@@ -64,11 +64,11 @@ export function ConversationControlsPreview() {
           </div>
           <div className={styles.composerActions}>
             <div className={styles.modeSelector} role="group" aria-label="Conversation view">
+              <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
               <button type="button" className={styles.modeButton} aria-pressed={!keyboardVisible} ref={voiceButton} onClick={() => {
                 voiceButton.current?.focus({ preventScroll: true });
                 setKeyboardVisible(false);
               }}>Voice</button>
-              <button type="button" className={styles.modeButton} aria-pressed={keyboardVisible} aria-controls="preview-chat-input" onClick={showKeyboard}>Text</button>
             </div>
             {keyboardVisible && <span className={styles.actionSpacer} />}
             <button className={styles.iconButton} type="button" aria-label="Settings" aria-controls="preview-audio-settings" aria-expanded={settingsOpen} ref={settingsButton} onClick={openSettings}><Icon name="settings" size={20} /></button>
