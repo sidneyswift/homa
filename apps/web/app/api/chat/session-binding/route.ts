@@ -1,6 +1,7 @@
 import { readWebSessionBinding } from "../../../../lib/conversation-continuity/web-session-binding";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { EveMembershipUnavailableError } from "../../../../lib/eve-membership";
 
 /**
  * GET /api/chat/session-binding
@@ -17,8 +18,9 @@ export async function GET(request: Request): Promise<Response> {
 
   let auth;
   try {
-    auth = await resolveApiFamily(request);
+    auth = await resolveApiFamily(request, { transientMembershipErrors: "throw" });
   } catch (error) {
+    if (error instanceof EveMembershipUnavailableError) return error.response;
     console.error(
       "chat/session-binding auth lookup failed:",
       error instanceof Error ? error.message : "unknown",

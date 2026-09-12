@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { readEveMembership } from "./eve-membership";
 import { createSupabaseRequestClient } from "./supabase/server";
 
 /**
@@ -33,10 +34,13 @@ export function requestAuthTransport(request: Request): RequestAuthTransport {
  * resolveApiFamily(request): Promise<ApiFamilyAuth | null>
  * Returns the caller's RLS-scoped client, user id, and family id, or
  * null when the request carries no valid session or the user has no
- * family yet. Never throws.
+ * family yet. Existing callers retain the non-throwing membership lookup.
+ * Chat may opt into structured service errors for temporary membership
+ * failures so a backend outage does not look like an expired login.
  */
 export async function resolveApiFamily(
   request: Request,
+  options: { transientMembershipErrors?: "throw" } = {},
 ): Promise<ApiFamilyAuth | null> {
   let supabase: SupabaseClient;
   let userId: string;
@@ -62,12 +66,15 @@ export async function resolveApiFamily(
     userId = data.user.id;
   }
 
-  const { data: membership } = await supabase
+  const readMembership = () => supabase
     .from("family_members")
     .select("family_id")
     .eq("user_id", userId)
     .limit(1)
     .maybeSingle();
+  const { data: membership } = options.transientMembershipErrors === "throw"
+    ? await readEveMembership(readMembership)
+    : await readMembership();
   const familyId = membership?.family_id as string | undefined;
   if (!familyId) return null;
 
