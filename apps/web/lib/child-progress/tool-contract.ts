@@ -189,6 +189,17 @@ export type ManageChildProgressInput = z.infer<
   typeof manageChildProgressInputSchema
 >;
 
+/** Providers can retain declared optional keys with undefined values. Remove
+ * only those absent transport fields before strict action validation (#1169).
+ * Unknown keys and supplied values still reach the validator and fail closed. */
+export function parseManageChildProgressCommand(input: unknown): ManageChildProgressInput {
+  const normalized = input !== null && typeof input === "object" && !Array.isArray(input)
+    ? Object.fromEntries(Object.entries(input).filter(([key, value]) =>
+      value !== undefined || !Object.hasOwn(manageChildProgressToolInputSchema.shape, key)))
+    : input;
+  return manageChildProgressInputSchema.parse(normalized);
+}
+
 interface ProgressToolAuthAttributes {
   selectedAssessment?: unknown;
   memberUserId?: unknown;
