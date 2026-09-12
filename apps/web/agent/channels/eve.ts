@@ -3,6 +3,7 @@ import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
 import { measureChatPreparation } from "../../lib/observability/chat-preparation";
+import { readEveAuthentication } from "../../lib/eve-authentication";
 import { readEveMembership } from "../../lib/eve-membership";
 import { familyAccountGate } from "../../lib/billing/wall";
 import {
@@ -107,7 +108,7 @@ function supabaseAuth(): AuthFn<Request> {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: userData, error } = await measureChatPreparation("authenticate", () => supabase.auth.getUser(token));
+    const { data: userData, error } = await readEveAuthentication(() => supabase.auth.getUser(token), "authenticate");
     if (error || !userData.user) return null;
 
     // The caller's OWN membership row (user_id filter matters since
