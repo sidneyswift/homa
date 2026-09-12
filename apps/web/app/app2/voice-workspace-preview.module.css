@@ -1,6 +1,8 @@
 /* #1158: founder-selected white canvas for the local app2 exploration. */
 .preview {
   min-height: 100svh;
+  display: flex;
+  flex-direction: column;
   background: var(--homa-floating);
   color: var(--homa-ink);
   font-family: var(--font-dm-sans), sans-serif;
@@ -20,7 +22,7 @@
 .preview button:hover { border-color: var(--homa-control-boundary); }
 .preview button:focus-visible { outline: 2px solid var(--homa-midnight-action); outline-offset: 3px; }
 .preview .devButton { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10; font-size: 12px; padding: 10px 12px; color: var(--homa-muted-ink); }
-.screen { min-height: 100svh; display: flex; padding: 64px 24px; }
+.screen { flex: 1; display: flex; padding: 64px 24px 24px; }
 .stage { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 40px 0; }
 .dialog { width: min(420px, calc(100% - 32px)); max-height: calc(100svh - 48px); overflow: auto; margin: auto; background: var(--homa-floating); color: var(--homa-ink); border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-card); padding: 24px; }
 .dialog::backdrop { background: color-mix(in srgb, var(--homa-ink) 14%, transparent); }
@@ -34,4 +36,17 @@
 @media (max-width: 600px) {
   .screen { padding: 64px 20px; }
   .stage { padding: 32px 0; }
+}
+
+.composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
+.composer { max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-frame); padding: 16px 12px 12px; background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
+.composer:focus-within { border-color: var(--homa-control-boundary); }
+.inputArea { min-height: 64px; padding: 0 8px; }
+.composerActions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.actionSpacer { flex: 1; }
+.preview .iconButton { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; }
+.preview .iconButton:disabled { cursor: default; opacity: .5; }
+.preview .sendButton { background: var(--homa-midnight-action); color: var(--homa-floating); }
+@media (max-width: 600px) {
+  .composerDock { padding-left: 16px; padding-right: 16px; }
 }

@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
+import { Icon } from "../../components/design/Icon";
+import { SlashComposer } from "../app/slash-composer";
 import styles from "./voice-workspace-preview.module.css";
 
 const statesToDesign = [
@@ -17,6 +19,7 @@ const statesToDesign = [
 ] as const;
 
 export function VoiceWorkspacePreview() {
+  const [draft, setDraft] = useState("");
   const stateDialog = useRef<HTMLDialogElement>(null);
   const stateButton = useRef<HTMLButtonElement>(null);
 
@@ -27,6 +30,19 @@ export function VoiceWorkspacePreview() {
           <Logo variant="mark" size={64} />
         </div>
       </main>
+      <div className={styles.composerDock}>
+        <form className={styles.composer} aria-label="Chat input" onSubmit={(event) => event.preventDefault()}>
+          <div className={styles.inputArea}>
+            <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
+          </div>
+          <div className={styles.composerActions}>
+            <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={24} /></button>
+            <span className={styles.actionSpacer} />
+            <button className={styles.iconButton} type="button" aria-label="Microphone" title="Microphone is not connected yet" disabled><Icon name="voice" size={24} /></button>
+            <button className={`${styles.iconButton} ${styles.sendButton}`} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={24} /></button>
+          </div>
+        </form>
+      </div>
       <button className={styles.devButton} ref={stateButton} aria-haspopup="dialog" onClick={() => stateDialog.current?.showModal()}>Dev mode</button>
       <dialog className={styles.dialog} ref={stateDialog} aria-labelledby="state-title" aria-describedby="state-note" onClose={() => stateButton.current?.focus()}>
         <div className={styles.dialogHeader}>
@@ -40,7 +56,7 @@ export function VoiceWorkspacePreview() {
             </li>
           ))}
         </ul>
-        <p className={styles.note} id="state-note">Reference only. These states have not been designed or approved.</p>
+        <p className={styles.note} id="state-note">Reference only. These states have not been designed or approved. The input supports typing only; sending, attachments, and microphone are not connected.</p>
       </dialog>
     </div>
   );
