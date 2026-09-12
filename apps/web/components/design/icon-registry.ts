@@ -59,6 +59,7 @@ import {
   Clock3,
   ArrowUp,
   Volume2,
+  VolumeOff,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -133,6 +134,7 @@ export const semanticIconRegistry = createSemanticIconRegistry("web", {
   send: ArrowUp,
   assistant: Bot,
   volume: Volume2,
+  volume_muted: VolumeOff,
 } as const satisfies Record<SemanticIconName, LucideIcon>);
 
 export type { SemanticIconName };

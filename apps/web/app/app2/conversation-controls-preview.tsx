@@ -1,11 +1,22 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ComponentProps } from "react";
 import { flushSync } from "react-dom";
 
-import { Icon } from "../../components/design/Icon";
+import { Icon, type SemanticIconName } from "../../components/design/Icon";
 import { SlashComposer } from "../app/slash-composer";
 import styles from "./voice-workspace-preview.module.css";
+
+type ConversationButtonProps = ComponentProps<"button"> & { icon?: SemanticIconName };
+
+/** One control geometry for both composer shapes; state only changes treatment. */
+function ConversationButton({ icon, children, className = "", type = "button", ...props }: ConversationButtonProps) {
+  return (
+    <button type={type} className={`${styles.iconButton} ${className}`} {...props}>
+      {icon ? <Icon name={icon} size={20} /> : children}
+    </button>
+  );
+}
 
 /** Local design controls only. View changes never acquire audio resources. */
 export function ConversationControlsPreview() {
@@ -39,8 +50,8 @@ export function ConversationControlsPreview() {
           <div className={styles.inputArea} ref={inputArea} id="preview-chat-input">
             <SlashComposer kids={[]} skills={[]} draft={draft} onDraftChange={setDraft} placeholder="Message Homa…" />
           </div>
-          <button
-            className={styles.iconButton}
+          <ConversationButton
+            icon="collapse"
             type="button"
             aria-label="Hide keyboard"
             title="Hide keyboard without changing audio"
@@ -48,36 +59,33 @@ export function ConversationControlsPreview() {
               flushSync(() => setKeyboardVisible(false));
               keyboardButton.current?.focus();
             }}
-          ><Icon name="collapse" size={20} /></button>
+          />
         </div>
         <div className={styles.composerActions}>
           {keyboardVisible ? (
             <>
-              <button className={styles.iconButton} type="button" aria-label="Add attachment" title="Attachments are not connected yet" disabled><Icon name="add" size={24} /></button>
+              <ConversationButton icon="add" aria-label="Add attachment" title="Attachments are not connected yet" disabled />
               <span className={styles.actionSpacer} />
             </>
           ) : (
-            <button className={`${styles.iconButton} ${styles.typeButton}`} type="button" ref={keyboardButton} aria-label="Show keyboard" aria-controls="preview-chat-input" aria-expanded={false} title="Type without changing audio" onClick={showKeyboard}>Aa</button>
+            <ConversationButton className={styles.typeButton} ref={keyboardButton} aria-label="Show keyboard" aria-controls="preview-chat-input" aria-expanded={false} title="Type without changing audio" onClick={showKeyboard}>Aa</ConversationButton>
           )}
-          <button
-            className={`${styles.iconButton} ${styles.audioButton}`}
-            type="button"
+          <ConversationButton
+            icon={microphoneOn ? "voice" : "muted"}
             aria-label="Microphone"
             aria-pressed={microphoneOn}
             title={microphoneOn ? "Mute mic" : "Unmute mic"}
             onClick={() => setMicrophoneOn((on) => !on)}
-          ><Icon name={microphoneOn ? "voice" : "muted"} size={20} /><span aria-hidden="true">{microphoneOn ? "On" : "Off"}</span></button>
-          <button
-            className={`${styles.iconButton} ${styles.audioButton}`}
-            type="button"
+          />
+          <ConversationButton
+            icon={speakerOn ? "volume" : "volume_muted"}
             aria-label="Homa speaker"
             aria-pressed={speakerOn}
             title={speakerOn ? "Silence Homa" : "Enable Homa's voice"}
             onClick={() => setSpeakerOn((on) => !on)}
-          ><Icon name="volume" size={20} /><span aria-hidden="true">{speakerOn ? "On" : "Off"}</span></button>
-          <span className={styles.controlDivider} aria-hidden="true" />
-          <button className={styles.iconButton} type="button" aria-label="End voice" title="End voice and keep typing" onClick={chooseTextOnly}><Icon name="end" size={20} /></button>
-          {keyboardVisible && <button className={`${styles.iconButton} ${styles.sendButton}`} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled><Icon name="send" size={24} /></button>}
+          />
+          <ConversationButton icon="close" aria-label="End voice" title="End voice and keep typing" onClick={chooseTextOnly} />
+          {keyboardVisible && <ConversationButton icon="send" className={styles.sendButton} type="submit" aria-label="Send message" title="Sending is not connected yet" disabled />}
         </div>
       </form>
     </div>

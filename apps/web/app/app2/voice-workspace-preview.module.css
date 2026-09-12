@@ -40,27 +40,25 @@
 
 .composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
 .composer { max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-frame); padding: 16px 12px 12px; background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
-.composer:focus-within { border-color: var(--homa-control-boundary); }
+.composer:has(input:focus-visible) { border-color: var(--homa-control-boundary); }
 .inputRow { display: flex; align-items: flex-start; gap: 8px; }
 .inputRow[hidden] { display: none; }
 .inputArea { min-width: 0; flex: 1; min-height: 64px; padding: 0 8px; }
 .composerActions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
 .actionSpacer { flex: 1; }
-.preview .iconButton { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; }
+.preview .iconButton { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 1px solid var(--preview-boundary); border-radius: 50%; background: var(--homa-paper); }
 .preview .iconButton:disabled { cursor: default; opacity: .5; }
 .preview .sendButton { background: var(--homa-midnight-action); color: var(--homa-floating); }
-.compactComposer { width: fit-content; max-width: 100%; padding: 12px; }
+.compactComposer { width: fit-content; max-width: 100%; padding: 8px; }
 .compactComposer .composerActions { margin-top: 0; }
-.preview .typeButton { font-weight: 500; }
-.preview .audioButton { display: flex; flex-direction: column; justify-content: center; gap: 0; border-radius: var(--homa-radius-control); }
-.audioButton span { font-size: 12px; line-height: 14px; }
-.preview .audioButton[aria-pressed="true"] { background: var(--homa-midnight-action); color: var(--homa-floating); }
-.preview .audioButton[aria-pressed="false"] { box-shadow: inset 0 0 0 1px var(--preview-boundary); }
-.controlDivider { width: 1px; height: 24px; background: var(--preview-boundary); margin: 0 4px; }
+.preview .typeButton { font-size: 16px; font-weight: 500; }
+.preview .iconButton[aria-pressed="true"] { background: var(--homa-midnight-action); border-color: var(--homa-midnight-action); color: var(--homa-floating); }
+.preview .iconButton[aria-pressed="false"] { border-color: var(--homa-control-boundary); }
+.preview .iconButton:hover:not(:disabled) { border-color: var(--homa-midnight-action); }
+@media (forced-colors: active) {
+  .preview .iconButton[aria-pressed="true"] { border: 3px double ButtonText; }
+  .preview .iconButton[aria-pressed="false"] { border: 1px solid ButtonText; }
+}
 @media (max-width: 600px) {
   .composerDock { padding-left: 16px; padding-right: 16px; }
-}
-@media (max-width: 380px) {
-  .composerActions { gap: 4px; }
-  .controlDivider { margin: 0; }
 }
