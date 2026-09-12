@@ -1,13 +1,20 @@
-/** Synthetic gateway compatibility checks. No production tools or records. */
+/** Synthetic gateway checks with compiled tool schemas, never tool execution or family records. */
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseArgs, parseEnv } from "node:util";
 
-import { generateObject, generateText, stepCountIs, tool } from "../apps/web/node_modules/ai/dist/index.js";
+import { generateObject, generateText, jsonSchema, stepCountIs, tool } from "../apps/web/node_modules/ai/dist/index.js";
 import { z } from "../apps/web/node_modules/zod/index.js";
 import { homaModelSettings } from "../apps/web/agent/model.ts";
 
-const { values } = parseArgs({ options: { env: { type: "string" }, out: { type: "string", default: "/private/tmp/homa-astra-compatibility.json" } } });
+const { values } = parseArgs({ options: { env: { type: "string" }, manifest: { type: "string", default: "apps/web/.eve/compile/compiled-agent-manifest.json" }, out: { type: "string", default: "/private/tmp/homa-astra-compatibility.json" } } });
+const manifest = JSON.parse(readFileSync(values.manifest, "utf8"));
+assert.ok(manifest.tools.length > 0, "Build the agent before checking its compiled tool catalog");
+const catalog = Object.fromEntries(manifest.tools.map((definition) => [definition.name, tool({
+  description: "Schema-only compatibility check. Do not call this tool.",
+  inputSchema: jsonSchema(definition.inputSchema),
+})]));
+assert.equal(Object.keys(catalog).length, manifest.tools.length, "Tool names must be unique");
 if (values.env) {
   const env = parseEnv(readFileSync(values.env, "utf8"));
   if (env.VERCEL_OIDC_TOKEN) process.env.VERCEL_OIDC_TOKEN = env.VERCEL_OIDC_TOKEN;
@@ -19,6 +26,15 @@ const common = {
   abortSignal: AbortSignal.timeout(120_000),
   providerOptions: { gateway: { disallowPromptTraining: true, tags: ["astra_compatibility_smoke"] } },
 };
+const catalogResult = await generateText({
+  ...common,
+  maxOutputTokens: 1024,
+  prompt: "Synthetic compatibility check: reply with Ready. Do not call any tools.",
+  tools: catalog,
+  toolChoice: "none",
+});
+assert.ok(catalogResult.text.length > 0, "Expected an answer with the complete tool catalog attached");
+assert.equal(catalogResult.toolCalls.length, 0);
 const structured = await generateObject({
   ...common,
   maxOutputTokens: 1024,
@@ -48,6 +64,7 @@ assert.ok(tools.steps.some((step) => step.toolResults.length > 0));
 const receipt = {
   checkedAt: new Date().toISOString(),
   settings: homaModelSettings(),
+  compiledToolCatalog: { passed: true, tools: manifest.tools.length, warnings: catalogResult.warnings, usage: catalogResult.totalUsage },
   structuredOutput: { passed: true, object: structured.object, warnings: structured.warnings, usage: structured.usage },
   toolRoundTrip: { passed: true, calls, steps: tools.steps.length, text: tools.text, warnings: tools.warnings, usage: tools.totalUsage },
 };
