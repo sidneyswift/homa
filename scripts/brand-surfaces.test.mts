@@ -481,7 +481,7 @@ test("web route reachability follows the structural proxy boundary", () => {
       assert.equal(surface.reachability, "authenticated", path);
       assert.deepEqual(surface.audiences, ["operator"], path);
       assert.equal(surface.deliveryState, "controlled-current", path);
-    } else if (first === "dev") {
+    } else if (first === "dev" || first === "app2") {
       assert.equal(surface.reachability, "internal", path);
       assert.deepEqual(surface.audiences, ["developer"], path);
       assert.equal(surface.deliveryState, "controlled-current", path);
