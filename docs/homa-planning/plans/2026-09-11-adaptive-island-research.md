@@ -1,6 +1,6 @@
 # Adaptive island: research and design questions
 
-Status: research and proposed architecture, not an approved implementation specification.
+Status: research and proposed architecture, with the interaction decisions below accepted on 2026-09-12. Visual design and implementation remain unapproved.
 
 Owner and tracker: [#1158](https://github.com/sidneyswift/homa/issues/1158). Research date: 2026-09-11. Repository observations below use Homa commit `9d7f0d074d0e52c1546163e1aa10f68277c13a53`. No app behavior, dependency, recording permission, or production setting changed during this research.
 
@@ -34,6 +34,24 @@ This file collects source evidence, deliberate departures, proposed architecture
 - The island hands large work into the surrounding workspace instead of growing without limit.
 
 These proposals do not approve a final appearance, spring tuning, placement thresholds, audio handoff policy, recorder integration, or whole-app navigation model.
+
+### Accepted interaction decisions, 2026-09-12
+
+Source: founder agreement and correction in the current design conversation. This updates the earlier assumption that opening text input necessarily makes the session quiet.
+
+| User action | Text input | Microphone | Homa's spoken output |
+| --- | --- | --- | --- |
+| Open keyboard | Show | Preserve current setting | Preserve current setting |
+| Hide keyboard | Hide; preserve draft | Preserve current setting | Preserve current setting |
+| Mute/unmute mic | Preserve visibility and draft | Change only this setting | Preserve current setting |
+| Silence/enable speaker | Preserve visibility and draft | Preserve current setting | Change only this setting |
+| Choose text-only mode | Show; preserve draft | Off | Off |
+
+Keyboard visibility, microphone input, and spoken output are independent. A parent can type while the microphone remains open and Homa keeps speaking. Opening the keyboard never implicitly mutes or unmutes the microphone. Text-only is a deliberate shortcut that applies all three settings, not another name for revealing the keyboard. Preserve the conversation and background work when choosing it.
+
+The earlier accepted voice controls were Mute mic, Switch to text, and End voice. Following this clarification, distinguish the keyboard reveal from the explicit text-only shortcut, and include independent speaker control. End voice remains an explicit action; exact layout and labels have not been approved. Do not infer that every control must always be visible or add an automatic volume/audio change when the shape changes.
+
+Remaining engineering question: how to implement quiet audio while preserving conversation continuity, including connection retention, pending speech, and resumption. The user-facing behavior above is settled; the transport mechanism and rules for re-enabling voice from text-only remain to be designed.
 
 ## 2. What the references add beyond beUI
 
@@ -204,7 +222,7 @@ These are risks in the proposed integration, not newly observed production failu
 | Blindspot | Evidence in this repository | Constraint for implementation |
 | --- | --- | --- |
 | Swapping a view can terminate a call | [VoiceMode](../../../apps/web/app/app/voice-mode.tsx) acquires audio in its mount effect and cleans up on unmount; [chat-client](../../../apps/web/app/app/chat-client.tsx) mounts it under voiceOpen and voiceGeneration | Keep call ownership outside animated keyed contents. A view change is not a session command |
-| Text-only needs actual audio semantics | VoiceMode exposes end/close and saving states, not a general pause/resume controller | Decide whether Text ends or suspends the connection; microphone and audible output must be quiet immediately. Do not infer a pause API exists |
+| Independent audio controls need actual session semantics | VoiceMode exposes end/close and saving states, not a general pause/resume controller | Follow the accepted interaction table: keyboard reveal preserves audio; text-only makes both directions quiet. Determine the connection mechanism without assuming a pause API exists |
 | Several features request the microphone | VoiceMode, [dictation](../../../apps/web/app/app/dictation.tsx), and [lesson recorder](../../../apps/web/app/app/[childId]/lessons/record/recorder.tsx) have separate capture paths | Define exclusive ownership and explicit handoff before combining them |
 | Composer geometry has hidden assumptions | [SlashComposer](../../../apps/web/app/app/slash-composer.tsx) uses a single-line input with a text mirror; suggestion/error overlays open above it | Preserve draft, caret, selection and IME composition. Adapt multiline separately. Position overlays outside shell clipping and within available bounds |
 | Result delivery already has identity rules | [Voice result handoff](../../../apps/web/app/app/voice-result-handoff.ts) and chat-client track source session, generation and handled effects; relevant history `817967be` / PR #1151 | Preserve deduplication and speech rules. Shown, spoken, completed and acknowledged are separate facts. Never reopen audio because a result arrived |
@@ -265,7 +283,8 @@ Applied [finding-unknowns](../../../.agents/skills/finding-unknowns/SKILL.md), s
 | Class | Question or assumption | Discovery step |
 | --- | --- | --- |
 | Known known | Top/center/bottom adaptive growth and first three forms | Carry into every prototype review |
-| Known unknown | What precisely happens to a live conversation when Text is selected? | Choose suspend versus end semantics before real audio integration |
+| Known known | Keyboard visibility, mic and speaker are independent; text-only explicitly disables both audio directions | Preserve the accepted interaction table in every view and transition |
+| Known unknown | How are quiet audio, pending speech and voice resumption implemented while preserving conversation continuity? | Design connection/resource handling before real audio integration; do not reopen the settled keyboard behavior |
 | Known unknown | Is the island fixed in a host, or can activities move it across the page? | Start fixed per host; review a relocation scenario separately |
 | Known unknown | How can recording stay visible while typing? | Compare secondary indicator, activity switcher and persistent stop access |
 | Known unknown | Is 800ms reference motion desirable in frequent use, and may the contract change? | Side-by-side repeated-use motion comparison, not a single animation |
@@ -278,7 +297,7 @@ Applied [finding-unknowns](../../../.agents/skills/finding-unknowns/SKILL.md), s
 
 ## 10. Proposed validation ladder and stop points
 
-1. **Review this research.** Resolve operational Text semantics, initial host behavior, and whether comparing motion outside the present contract is allowed. No product implementation is approved by this step.
+1. **Review this research.** Carry forward the accepted interaction table. Resolve initial host behavior and whether comparing motion outside the present contract is allowed. No product implementation is approved by this step.
 2. **Geometry-only prototype after approval.** Same selector/voice/text fixtures at top, center and bottom, plus a narrow scrolling host. No real microphone or model. Controls and exact visual treatments remain subject to review.
 3. **Motion comparison.** Compare measured-dimension and transform strategies with equivalent contents. Compare source-style glide and quicker physics-based tuning. Slow motion exposes clipping; normal speed and repeated use decide the feel. Instrument frame times on representative devices before claiming smoothness.
 4. **Input and accessibility proof.** Real local draft, caret, selection, IME, multiline limits, menus, screen reader, keyboard navigation, large text, zoom and Reduced Motion. No invisible interactive outgoing layers or duplicate input identities. Request Text focus within the user action, not an animation-completion callback; then fit to the actual keyboard viewport. Verify focus handoff on physical mobile devices.
@@ -293,6 +312,9 @@ Applied [finding-unknowns](../../../.agents/skills/finding-unknowns/SKILL.md), s
 | Rapidly reverse a transition | No snap to old start, queued obsolete view, or stuck controls |
 | First click immediately after load | Same animated behavior as later clicks; no measurement snap |
 | Keyboard opens, closes or rotates | Text focus does not wait for animation; input and critical controls remain visible without direction oscillation |
+| Reveal or hide keyboard while audio is active or muted | Both audio settings remain exactly as they were; draft survives |
+| Change mic or speaker setting | Only the selected audio direction changes; input visibility is preserved |
+| Choose text-only | Input appears; mic and spoken output are off; conversation, draft and background work survive |
 | Content grows or fonts load | Latest constrained size wins; no resize-observer loop |
 | Long text, zoom, localization | Readable wrapping and bounded interior; no horizontal overflow |
 | Switch away from a draft and back | Draft, selection intent and composition are preserved correctly |
@@ -314,6 +336,6 @@ Build a reusable adaptive presentation shell whose placement resolves from a sta
 - Document verification: local file links resolve, Markdown fences are balanced, and the diff passes whitespace checks. The repository-wide documentation audit fails on pre-existing drift and also reports this new file as absent from its frozen first-seen inventory and manifest. That historical audit was not rewritten as part of this research; this is not a claim that the global documentation gate passes.
 - Homa paths are repository-relative so this reference survives another engineer's checkout. Verify them against the current branch before implementing; the opening commit identifies this snapshot.
 - Proposed defaults are labeled throughout. Record accepted decisions with date and tracker evidence; remove superseded recommendations rather than letting contradictory guidance accumulate.
-- Review prompts, in priority order: **Text means…; while recording and typing, keep… visible; the initial host should…; motion comparison may…; next approved prototype scope is…**. These are a reply template, not decisions already made.
+- Review prompts, in priority order: **While recording and typing, keep… visible; the initial host should…; motion comparison may…; next approved prototype scope is…**. These are a reply template, not decisions already made. Keyboard/audio independence is already accepted above.
 
 Current outcome: research reference prepared; `/app2` remains unchanged. The remaining unknowns are design and integration questions, not claims that production is broken.
