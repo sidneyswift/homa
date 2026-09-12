@@ -443,7 +443,7 @@ describe("child progress tool result adapter", () => {
 describe("published pause and stop fields", () => {
   it("publishes the reason field as pause-only without widening execution", () => {
     assert.equal(manageChildProgressToolInputSchema.shape.reason.description,
-      "Only for pause_check_in. Omit reason for stop_check_in and every other action; stop_check_in needs only action and checkInId.");
+      "Only for pause_check_in. Use null or omit reason for stop_check_in and every other action; stop_check_in needs only action and checkInId.");
     assert.equal(manageChildProgressInputSchema.safeParse({
       action: "stop_check_in", checkInId: CHECK_IN_ID, reason: "explicit_stop",
     }).success, false);

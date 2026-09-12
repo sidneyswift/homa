@@ -18,7 +18,7 @@ The materials, planner, onboarding and inquiry roots now route to supporting ref
 
 | Authored file | Before bytes | After bytes |
 | --- | ---: | ---: |
-| Main agent instructions | 24,432 | 21,639 |
+| Main agent instructions | 24,432 | 21,644 |
 | Materials root | 54,988 | 3,064 |
 | Planner root | 19,164 | 3,412 |
 | Onboarding root | 27,817 | 9,566 |
@@ -46,7 +46,7 @@ Typecheck, lint (four existing warnings), the agent deployment build, stream-dur
 
 The frozen July documentation reconciliation check fails on unchanged main for extensive existing registry drift. The new references also lack entries in that immutable historical baseline. This change does not rewrite the baseline or weaken its guard; documentation reconciliation is not claimed clean.
 
-During the broad Astra evaluation, unchanged progress tool code rejected declared optional keys retained as undefined by the provider. gh#1169 records the suspected live failure and narrow repair: normalize only absent declared fields before the existing strict command validator. Thirty progress boundary tests pass, including supplied unrelated fields, unknown identity, malformed IDs and missing required fields. Live verification remains required before closing the incident.
+During the Astra evaluations, unchanged progress tool code rejected unrelated fields supplied by the provider. gh#1169 records the suspected live failure. A compiled-schema probe showed Astra supplying stand-in values for unused fields; removing only undefined entries was insufficient. The transport now permits null for optional fields and instructs the model to use it for unused fields. The boundary removes only declared absent/null fields before the unchanged strict command validator. Supplied unrelated values, unknown fields, malformed IDs and missing required fields still fail. Thirty boundary tests pass. Live verification remains required before closing the incident.
 
 The complete material suite passes 546 tests and the complete onboarding suite passes 188 tests. Relocated contract tests require the root to point at the exact supporting reference before checking its original quality assertions. Admin package inspection includes supporting guidance for tool mappings and coverage while continuing to display the root separately.
 
@@ -55,3 +55,5 @@ The complete material suite passes 546 tests and the complete onboarding suite p
 The concurrent chat-preparation change (#1168, main 549c40be) is integrated. Independent reads stay parallel; onboarding receives the authenticated attributes and selects guidance inside the existing read. A failed onboarding read supplies full stage guidance only for onboarding-mode sessions. The progress suite passes 588 tests after integration.
 
 The exploratory 89-case Eve run exhausted the local Node heap before producing a final verdict report. It is not counted as passing. Smaller focused batches on the combined revision replace that unverifiable run.
+
+The first bounded Eve batch passed 7 of 8 routing checks. Its failure was the old onboarding negative asserting that no skill could load; the actual selected skill was progress-next-move, with no onboarding restart. The check now rejects onboarding specifically and setup cards. The batch also confirmed that a routing-only pass could hide a failed progress effect. A new full-catalog case requires the action to complete, and the saved-behavior case separately requires durable local evidence.

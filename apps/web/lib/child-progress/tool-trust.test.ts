@@ -64,9 +64,13 @@ describe("trusted progress command schema", () => {
     const transported = manageChildProgressToolInputSchema.parse({ ...absent, ...command });
     assert.equal(manageChildProgressInputSchema.safeParse(transported).success, false);
     assert.deepEqual(parseManageChildProgressCommand(transported), command);
+    const nullFields = Object.fromEntries(Object.keys(absent).map((key) => [key, null]));
+    assert.deepEqual(parseManageChildProgressCommand(
+      manageChildProgressToolInputSchema.parse({ ...nullFields, ...command })), command);
     for (const supplied of [
       { ...transported, purpose: "whole_map_refresh" },
-      { ...transported, purpose: null },
+      { ...transported, familyId: null },
+      { ...transported, childId: null },
       { ...transported, familyId: undefined },
       { ...transported, familyId: FAMILY_ID },
       { ...transported, childId: undefined },

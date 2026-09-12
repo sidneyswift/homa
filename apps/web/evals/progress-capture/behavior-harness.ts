@@ -15,7 +15,7 @@ import { PostgresChildProgressRepository } from "../../lib/child-progress/postgr
 import { ChildProgressService } from "../../lib/child-progress/progress-service";
 import { buildChildProgressView } from "../../lib/child-progress/projection";
 import { executeChildProgressTool, type ChildProgressToolOperations } from "../../lib/child-progress/tool-adapter";
-import { createProgressToolContext, manageChildProgressInputSchema, manageChildProgressToolInputSchema } from "../../lib/child-progress/tool-contract";
+import { createProgressToolContext, parseManageChildProgressCommand, manageChildProgressToolInputSchema } from "../../lib/child-progress/tool-contract";
 import { DURABLE_WRITE_ENV_VARS, isEvalIsolationActive } from "../../lib/eval-isolation";
 import { mapDb } from "../../lib/map/db";
 import { zonedDateString } from "../../lib/time-zone";
@@ -120,7 +120,7 @@ export async function createCaptureBehaviorFixture(name: CaptureBehaviorCase) {
     },
   };
   const execute = (raw: unknown) => withToolDeadline(TOOL_DEADLINE.quick,()=>executeChildProgressTool({
-    command:manageChildProgressInputSchema.parse(raw),createContext:()=>context,operations}),false);
+    command:parseManageChildProgressCommand(raw),createContext:()=>context,operations}),false);
   async function durableReceipt() {
     const evidence=await database`select id,family_id,child_id,member_user_id,message_id,item_id,answer,quote,source,derivation,channel from public.child_progress_evidence where family_id=${familyId} order by id`;
     const operations=await database`select id,child_id,status,evidence_ids from public.child_progress_operations where family_id=${familyId}`;
