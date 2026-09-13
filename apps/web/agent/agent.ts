@@ -33,6 +33,8 @@ export default defineAgent({
     // previews fall back to screenshots that may not match the PDF.
     // The Telnyx adapter reads its own package.json relative to import.meta.url.
     // Eve 0.54 runtime bundling moves it away from that file unless external.
-    externalDependencies: ["pdfjs-dist", "@napi-rs/canvas", "@telnyx/chat-sdk-adapter"],
+    // Sharp resolves a platform binary relative to its package. Inlining it
+    // made the gh#1171 Linux preview fail before accepting a text-only turn.
+    externalDependencies: ["pdfjs-dist", "@napi-rs/canvas", "@telnyx/chat-sdk-adapter", "sharp"],
   },
 });
