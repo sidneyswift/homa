@@ -1,6 +1,8 @@
 import { defaultBackend, defineSandbox } from "eve/sandbox";
 import { justbash } from "eve/sandbox/just-bash";
 
+import { withPreviewSandboxTiming } from "../lib/observability/chat-sandbox-timing";
+
 /**
  * The agent's sandbox, locked down before anything uses it (agentic
  * ladder item 9 groundwork; 15-agentic-architecture.md §3). eve's default
@@ -22,11 +24,11 @@ import { justbash } from "eve/sandbox/just-bash";
  * Sandbox with deny-all.
  */
 export default defineSandbox({
-  backend: process.env.VERCEL
+  backend: withPreviewSandboxTiming(process.env.VERCEL
     ? defaultBackend({
         vercel: { networkPolicy: "deny-all" },
         docker: { networkPolicy: "deny-all" },
         microsandbox: { networkPolicy: "deny-all" },
       })
-    : justbash(),
+    : justbash()),
 });
