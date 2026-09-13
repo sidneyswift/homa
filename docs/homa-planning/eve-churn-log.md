@@ -10,6 +10,24 @@ upgrades are always a deliberate, dated, logged decision, never a silent
 encountered here, whether or not it cost a full day, so the tripwire has real
 data to count against. Newest entries first.
 
+## 2026-09-13 · Direct 0.19.0 to 0.54.3 continuation rejected
+
+The real paid regression parked the exact `ask_question` on 0.19.0, installed
+0.54.3, and received HTTP 409 with `session_not_active` when answering on the
+original session. A same-version 0.19.0 restart control then passed all four
+proof checks: actual pending question, original session accepted, fresh probe
+repeated in a completed new turn, and no replay corruption. Both runs restored
+the exact original dependency files and installed versions. The active pin stays
+0.19.0. Direct upgrade is not approved; fresh-session candidate testing does not
+resolve the old-session incompatibility. [Issue #1171](https://github.com/sidneyswift/homa/issues/1171).
+
+Two setup defects were corrected during diagnosis: the Telnyx adapter must remain
+external because it reads package-relative metadata, and the checker must accept
+legacy continuation's actual HTTP 200 response separately from creation's 202.
+The final 25 focused proof/orchestration tests pass. Candidate installation also
+passed the empty-delivery and source duration checks, but no full
+candidate hosted build or latency success is claimed.
+
 ## 2026-09-13 · 0.19.0 to 0.54.3 regression blocked by test setup
 
 The first real local attempt stopped on source Eve 0.19.0: without family

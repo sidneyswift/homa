@@ -153,8 +153,10 @@ as unsafe until eve fixes it.
 The proof requires a real `input.requested` question before stopping the old
 server, then supplies a newly generated probe value through `inputResponses`.
 The original session must repeat that value and complete a new turn. A 202
-acknowledgement is admission only: legacy replies require their token and success
-flag, while handle replies require the session ID and reject legacy tokens.
+acknowledgement is admission only. Legacy creation returns 202 with a token and
+success flag; legacy continuation returns 200 with the original session ID and
+success flag. Handle replies return 202 with the session ID and reject legacy
+tokens. The same-version control must use these distinct response contracts.
 Candidate admission must name the original session, and an identity header, when
 present, must agree. Both phase logs are flushed and checked for replay corruption.
 `session.waiting` alone only means that a session is idle; it does not prove
