@@ -8,8 +8,8 @@ import {
   POST,
   type RouteHandlerArgs,
   WS,
-} from "eve/channels";
-import { eveChannel } from "eve/channels/eve";
+} from "eve-legacy-protocol/channels";
+import { eveChannel } from "eve-legacy-protocol/channels/eve";
 
 import { readEveMembership } from "../eve-membership";
 import {
@@ -276,7 +276,10 @@ async function createOwnedSession(input: {
   );
 }
 
-describe("Eve exact-adult session authorization", () => {
+// This suite protects the retained token protocol with its exact SDK. Handle
+// authorization has its own suite; an active SDK upgrade must not reinterpret
+// these token fixtures as handle requests or silently skip their checks.
+describe("Eve 0.19 token-protocol exact-adult session authorization", () => {
   it("returns membership outages before any ownership or runtime access on every protected route", async (t) => {
     t.mock.method(console, "info", () => {});
     let ownerCalls = 0;

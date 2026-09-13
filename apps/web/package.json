@@ -58,6 +58,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "eve-legacy-protocol": "npm:eve@0.19.0",
     "just-bash": "^3.1.0",
     "microsandbox": "^0.6.4",
     "tailwindcss": "^4",

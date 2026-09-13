@@ -113,6 +113,27 @@ mobile, channel, schedule, or session-ownership adapters. Audit those surfaces
 and the new control/child-stream routes before running a September candidate.
 Never loosen the ownership guard merely to get a candidate to boot.
 
+The token-protocol security suite imports the exact dev-only alias
+`eve-legacy-protocol` (`npm:eve@0.19.0`). Keep it pinned while the legacy guard
+is retained. It uses the actual old SDK and active Homa ownership wrapper, so
+all token reservation, cross-adult denial, and failure-boundary cases still run
+after an active SDK upgrade. Do not change this alias to follow the active pin.
+Handle authorization is covered by its separate test suite.
+
+The full continuity command can also run with an extracted candidate's runtime
+exports substituted, while keeping the legacy alias pinned:
+
+```bash
+node scripts/eve-candidate-continuity-check.mjs /path/to/extracted/eve/package /tmp/eve-candidate-continuity.json
+```
+
+This reads the live check:continuity file list, verifies candidate handle-client
+selection and legacy package identity, and requires all tests to pass without
+skips. Its temporary TypeScript loader configuration is removed afterward.
+The receipt and adjacent `.log` retain the result. Other Homa dependencies remain
+installed as before, so this does not replace a full candidate installation,
+build, parked-session regression, or hosted latency comparison.
+
 For a handle-client candidate, an offline lifecycle probe can run against an
 already extracted package before changing the dependency. Use Node 24:
 
