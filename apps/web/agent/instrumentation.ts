@@ -1,12 +1,16 @@
 import { defineInstrumentation } from "eve/instrumentation";
 
 import { markChatPreparation } from "../lib/observability/chat-preparation";
+import { registerPreviewChatModelRace } from "../lib/observability/chat-model-race";
 import { previewModelTimingEnabled, registerPreviewChatModelTiming } from "../lib/observability/chat-model-timing";
 
 export default defineInstrumentation({
   recordInputs: false,
   recordOutputs: false,
-  setup: registerPreviewChatModelTiming,
+  setup() {
+    registerPreviewChatModelTiming();
+    registerPreviewChatModelRace();
+  },
   events: {
     "step.started"(input) {
       if (previewModelTimingEnabled()) {
