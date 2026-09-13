@@ -166,6 +166,7 @@ async function main() {
     const question = parkedUpgradeQuestion(parkedEvents);
     receipt.checks.expectedQuestionParked = true;
     const probe = `upgrade-proof:${randomUUID()}`;
+    receipt.probe = probe;
     await stopServer(server);
     server = undefined;
     console.log(`Installing Eve ${to.eve} and resuming the same conversation...`);
@@ -176,7 +177,10 @@ async function main() {
       method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(60_000)]),
       body: JSON.stringify(upgradeAnswerBody({ version: to.eve, continuationToken, requestId: question.requestId, probe })),
     });
-    acceptedUpgradeSession({ version: to.eve, response: resumed, body: await resumed.json(), expectedSessionId: sessionId });
+    const resumedBody = await resumed.json();
+    receipt.resumeStatus = resumed.status;
+    writeFileSync(path.join(backupDirectory, "resume-response.json"), `${JSON.stringify({ status: resumed.status, body: resumedBody }, null, 2)}\n`);
+    acceptedUpgradeSession({ version: to.eve, response: resumed, body: resumedBody, expectedSessionId: sessionId });
     receipt.checks.sameSessionAccepted = true;
     const resumedEvents = await readUpgradeStream(streamUrl, 60_000);
     controller.signal.throwIfAborted();
