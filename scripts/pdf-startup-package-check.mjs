@@ -64,7 +64,7 @@ try {
     `;
     const stdout = execFileSync(process.execPath, ["--input-type=module", "-e", script], {
       cwd: isolated,
-      env: { PATH: process.env.PATH, VERCEL: "1", VERCEL_ENV: "preview", HOMA_PREVIEW_LAZY_PDF: "1" },
+      env: { PATH: process.env.PATH, VERCEL: "1", VERCEL_ENV: "preview" },
       encoding: "utf8", timeout: 30_000,
     });
     const result = JSON.parse(stdout.trim().split("\n").at(-1));

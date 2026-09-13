@@ -66,12 +66,6 @@ async function pdfEngine(): Promise<PdfEngine> {
   return pdfEngineModule;
 }
 
-// Keep existing eager startup outside the protected preview experiment.
-if (!(process.env.VERCEL_ENV === "preview" && process.env.HOMA_PREVIEW_LAZY_PDF === "1")) {
-  pdfEngineModule = nodeRequire("pdfjs-dist/legacy/build/pdf.mjs") as PdfEngine;
-  nodeRequire("pdfjs-dist/legacy/build/pdf.worker.mjs");
-}
-
 type NapiCanvasModule = typeof import("@napi-rs/canvas");
 
 let napiCanvasModule: NapiCanvasModule | null | undefined;
