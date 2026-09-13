@@ -58,6 +58,16 @@ export type WebSessionRestoration =
   | { kind: "fresh" }
   | { kind: "unavailable" };
 
+/** Only handle clients can continue a verified idle replay without a token. */
+export function replayedHandleCursor(
+  restored: ReplayedWebSession,
+  usesSessionHandles: boolean,
+): { sessionId: string; streamIndex: number } | null {
+  if (!usesSessionHandles || restored.kind !== "replayed" ||
+      restored.events.at(-1)?.type !== "session.waiting") return null;
+  return { sessionId: restored.runtimeSessionId, streamIndex: restored.events.length };
+}
+
 export function latestTurnSequence(
   events: readonly HandleMessageStreamEvent[],
 ): number | null {

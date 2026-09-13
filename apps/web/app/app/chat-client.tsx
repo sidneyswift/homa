@@ -8,7 +8,8 @@ import { selectedAssessmentStatus } from "./assessment-actions";
 import { emitEvent } from "@homa/core";
 import type { UserContent } from "ai";
 import { Client, type HandleMessageStreamEvent } from "eve/client";
-import { useEveAgent, type EveMessage } from "eve/react";
+import type { EveMessage } from "eve/react";
+import { useRecoverableChatAgent } from "./use-recoverable-chat-agent";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Logo } from "../../components/brand/Logo";
@@ -157,7 +158,6 @@ import { buildTranscript } from "./transcript-days";
 import { measureChatPreparation } from "../../lib/observability/chat-preparation";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 import { recoverLostTurn, type RecoveredTurn } from "./turn-recovery";
-import { createReattachableEveSession } from "./reattachable-eve-session";
 import { stripVoiceTranscriptionMarker } from "../../lib/voice/transcription-marker";
 import {
   createTurnBoundaryWatchdog,
@@ -166,6 +166,8 @@ import {
 import {
   latestTurnSequence,
   replayedMessageTimes,
+  replayedHandleCursor,
+  type ReplayedWebSession,
   restoreServerBoundEveSession,
 } from "./web-session-restoration";
 
@@ -173,7 +175,7 @@ import {
  * The chat surface, the main column inside the /app frame: the sidebar
  * and phone top bar come from the layout, so this component fills the
  * rest of the viewport and keeps the composer pinned to the bottom while
- * the transcript scrolls inside. useEveAgent drives session state
+ * the transcript scrolls inside. useRecoverableChatAgent drives session state
  * against the same-origin eve routes; auth rides as a bearer token
  * resolved fresh per request. Homa's per-family context (family,
  * children, memories) is injected server-side on every turn by
@@ -396,27 +398,19 @@ export function ChatClient({
   >(null);
   const [authorizationParked, setAuthorizationParked] = useState(false);
   const [bindingRetryAttempt, setBindingRetryAttempt] = useState(0);
-  const [sessionClient] = useState(
-    () =>
-      new Client({
-        auth: {
-          bearer: async () => {
-            const { data } = await supabase.auth.getSession();
-            return data.session?.access_token ?? "";
-          },
-        },
-        host: "",
-        maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
-      }),
-  );
-  const [reattachableSession] = useState(() => {
-    return createReattachableEveSession({
-      createSession: (state) => sessionClient.session(state),
-      initialSession: staleSessionlessEvents
-        ? undefined
-        : prepared.initialSession,
-    });
-  });
+  const [eveConnection] = useState(() => ({
+    auth: {
+      bearer: async () => {
+        const { data } = await supabase.auth.getSession();
+        return data.session?.access_token ?? "";
+      },
+    },
+    host: "",
+  }));
+  const [sessionClient] = useState(() => new Client({
+    ...eveConnection,
+    ...{ maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS },
+  }));
   const initialLiveMessages = staleSessionlessEvents
     ? []
     : foldEventsToMessages(prepared.initialEvents);
@@ -668,9 +662,12 @@ export function ChatClient({
     [familyId, supabase],
   );
 
-  const agent = useEveAgent({
+  const agent = useRecoverableChatAgent({
+    connection: eveConnection,
+    reconnectAttempts: STREAM_RECONNECT_ATTEMPTS,
+    usesSessionHandles: "sessions" in sessionClient,
+    initialSession: staleSessionlessEvents ? undefined : prepared.initialSession,
     initialEvents: staleSessionlessEvents ? [] : prepared.initialEvents,
-    session: reattachableSession.session,
     onEvent() {
       const nowMs = currentTimeMs();
       lastStreamActivityRef.current = nowMs;
@@ -751,6 +748,8 @@ export function ChatClient({
   });
   const agentError = agent.error;
   const agentReset = agent.reset;
+  const agentAdopt = agent.adopt;
+  const currentAgentSession = agent.currentSession;
   const agentSend = agent.send;
   const agentStop = agent.stop;
 
@@ -1068,7 +1067,7 @@ export function ChatClient({
     setServerArchiveReconciled(false);
     serverArchiveReconciledRef.current = false;
     setLiveTimes({});
-    reattachableSession.adopt(freshSession);
+    agentAdopt(freshSession);
     saveChat(storageKey, {
       ...saved,
       archived: nextArchived,
@@ -1077,11 +1076,9 @@ export function ChatClient({
       messageTimes: {},
       lastActivityAt: currentTimeMs(),
     });
-    agentReset();
     durableCursorRef.current = 0;
   }, [
-    agentReset,
-    reattachableSession,
+    agentAdopt,
     serverArchived,
     serverHistory,
     storageKey,
@@ -1146,6 +1143,17 @@ export function ChatClient({
     [serverHistory, storageKey],
   );
 
+  const adoptRestoredHandle = useCallback((restored: ReplayedWebSession) => {
+    const cursor = replayedHandleCursor(restored, "sessions" in sessionClient);
+    if (!cursor) return;
+    // Replayed text is already in the archive overlay. Keep the complete cache
+    // for the next binding check, while the live projection starts at its tail.
+    agentAdopt(cursor);
+    const saved = loadSavedChat(storageKey);
+    saveChat(storageKey, { ...saved, session: cursor, events: restored.events });
+    durableCursorRef.current = cursor.streamIndex;
+  }, [agentAdopt, sessionClient, storageKey]);
+
   const appendRecoveredArchive = useCallback(
     (additions: readonly ArchivedMessage[]): ArchivedMessage[] => {
       const next = appendRecoveredArchiveState({
@@ -1191,12 +1199,12 @@ export function ChatClient({
       try {
         await withChatTurnLock(storageKey, async () => {
           persistPreparedRotation();
-          let current = reattachableSession.session.state;
+          let current = currentAgentSession();
           const saved = loadSavedChat(storageKey);
           if (shouldAdoptSavedSession(current, saved.session)) {
-            reattachableSession.adopt(saved.session);
+            agentAdopt(saved.session, saved.events ?? []);
             durableCursorRef.current = saved.session.streamIndex;
-            current = reattachableSession.session.state;
+            current = currentAgentSession();
           }
 
           // GH #702: Eve treats the first historical waiting boundary as the
@@ -1233,6 +1241,7 @@ export function ChatClient({
               restored.events,
               restored.runtimeSessionId,
             );
+            adoptRestoredHandle(restored);
             if (restored.kind === "parked") {
               pendingBoundSendRef.current = input;
               setBindingSyncFailureSummary(
@@ -1274,8 +1283,10 @@ export function ChatClient({
       adoptFreshEveSession,
       agentSend,
       persistPreparedRotation,
-      reattachableSession,
+      agentAdopt,
+      currentAgentSession,
       revealServerRestoredEvents,
+      adoptRestoredHandle,
       sessionClient,
       storageKey,
       timeZone,
@@ -1295,7 +1306,7 @@ export function ChatClient({
     void (async () => {
       await withChatTurnLock(storageKey, async () => {
         const saved = loadSavedChat(storageKey);
-        const current = reattachableSession.session.state;
+        const current = currentAgentSession();
         const localLatestSequence = latestTurnSequence(
           saved.events ?? prepared.initialEvents,
         );
@@ -1323,6 +1334,7 @@ export function ChatClient({
             restored.events,
             restored.runtimeSessionId,
           );
+          adoptRestoredHandle(restored);
           setAuthorizationParked(restored.kind === "parked");
         } else if (restored.kind === "fresh" && current.sessionId) {
           adoptFreshEveSession();
@@ -1338,8 +1350,9 @@ export function ChatClient({
     adoptFreshEveSession,
     flushQueuedMessages,
     prepared.initialEvents,
-    reattachableSession,
+    currentAgentSession,
     revealServerRestoredEvents,
+    adoptRestoredHandle,
     sessionClient,
     shouldRestoreServerBinding,
     storageKey,
@@ -1389,7 +1402,7 @@ export function ChatClient({
         ),
       );
       setLiveTimes({});
-      reattachableSession.adopt(recovered.session);
+      agentAdopt(recovered.session);
       saveChat(storageKey, {
         archived: nextArchived,
         events: [],
@@ -1397,19 +1410,17 @@ export function ChatClient({
         messageTimes: {},
         lastActivityAt: currentTimeMs(),
       });
-      agentReset();
       durableCursorRef.current = recovered.session.streamIndex;
       lastSendRef.current = null;
       setRecovering(false);
       flushQueuedMessages();
     },
     [
-      agentReset,
       appendRecoveredArchive,
       clearReplyCutoffRecovery,
       flushQueuedMessages,
       liveTimes,
-      reattachableSession,
+      agentAdopt,
       storageKey,
     ],
   );
@@ -1470,7 +1481,7 @@ export function ChatClient({
         const stillLive = messagesRef.current;
         if (stillLive.length > 0) {
           const stamped = stampMessageTimes(liveTimes, stillLive);
-          const liveSessionId = reattachableSession.session.state.sessionId;
+          const liveSessionId = currentAgentSession().sessionId;
           const nextArchived = appendRecoveredArchive(
             archiveMessages(stillLive, stamped, liveSessionId),
           );
@@ -1502,9 +1513,8 @@ export function ChatClient({
       }
       setRecovering(false);
       // Whichever way it resolved, the line is free again: send anything
-      // she typed while it was undecided (a fresh session either way,
-      // since eve already wiped this one's session id when the stream
-      // died, or agentReset just did on a clean recovery above).
+      // she typed while it was undecided. The next send still verifies
+      // the authenticated binding before selecting a session.
       flushQueuedMessages();
     })();
   }, [
@@ -1515,7 +1525,7 @@ export function ChatClient({
     flushQueuedMessages,
     liveTimes,
     recoverTurn,
-    reattachableSession,
+    currentAgentSession,
     storageKey,
   ]);
 

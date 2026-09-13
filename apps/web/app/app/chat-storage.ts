@@ -1,8 +1,8 @@
+import type { ChatSessionCursor } from "./chat-session-cursor";
 import { defaultMessageReducer } from "eve/client";
 import type {
   EveMessage,
   HandleMessageStreamEvent,
-  SessionState,
 } from "eve/client";
 
 import {
@@ -136,7 +136,7 @@ export function localMessagesForServerReconciliation(
 export interface SavedChat {
   archived?: ArchivedMessage[];
   events?: readonly HandleMessageStreamEvent[];
-  session?: SessionState;
+  session?: ChatSessionCursor;
   messageTimes?: Record<string, number>;
   lastActivityAt?: number;
   promptSuggestions?: PromptSuggestionSet | null;
@@ -152,7 +152,7 @@ export interface SaveChatOptions {
 export interface PreparedChat {
   archived: ArchivedMessage[];
   initialEvents: readonly HandleMessageStreamEvent[];
-  initialSession: SessionState | undefined;
+  initialSession: ChatSessionCursor | undefined;
   messageTimes: Record<string, number>;
   lastActivityAt: number | undefined;
   promptSuggestions: PromptSuggestionSet | null;

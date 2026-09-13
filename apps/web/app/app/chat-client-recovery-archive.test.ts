@@ -120,6 +120,7 @@ describe("ChatClient recovery-timeout archiving fix (GH #466)", () => {
     const events = [
       {
         type: "message.received",
+        meta: { at: "2026-09-13T00:00:00.000Z", ...{ id: "fixture-received-event" } },
         data: {
           message: "A partial local turn",
           sequence: 1,

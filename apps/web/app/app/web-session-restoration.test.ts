@@ -12,12 +12,25 @@ import {
   ACTIVE_WEB_BINDING_MS,
   latestTurnSequence,
   replayedMessageTimes,
+  replayedHandleCursor,
   restoreServerBoundEveSession,
   webSessionBindingDecision,
 } from "./web-session-restoration";
 
 describe("web session binding restoration", () => {
   const now = Date.parse("2026-08-01T16:00:00.000Z");
+
+  it("only a verified idle handle replay supplies a continued cursor", () => {
+    const idle = {
+      kind: "replayed" as const, runtimeSessionId: "verified-session",
+      events: [{ type: "session.waiting", data: { wait: "next-user-message" } }] as HandleMessageStreamEvent[],
+    };
+    assert.deepEqual(replayedHandleCursor(idle, true), { sessionId: "verified-session", streamIndex: 1 });
+    assert.equal(replayedHandleCursor(idle, false), null);
+    assert.equal(replayedHandleCursor({ ...idle, kind: "parked" }, true), null);
+    assert.equal(replayedHandleCursor({ ...idle, events: [] }, true), null);
+    assert.equal(replayedHandleCursor({ ...idle, events: [{ type: "session.completed" }] as HandleMessageStreamEvent[] }, true), null);
+  });
 
   it("handle clients continue only an exact server-confirmed tokenless cursor", async () => {
     const binding = {

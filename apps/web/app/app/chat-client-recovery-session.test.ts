@@ -13,14 +13,14 @@ describe("ChatClient recovered-session reattachment (GH #493 / #702)", () => {
     source.indexOf("const startLostTurnRecovery = useCallback"),
   );
 
-  it("adopts and persists the recovered cursor before resetting projection", () => {
+  it("adopts and persists the recovered cursor without resetting it away", () => {
     const adoptAt = recoveredCloseout.indexOf(
-      "reattachableSession.adopt(recovered.session)",
+      "agentAdopt(recovered.session)",
     );
     const resetAt = recoveredCloseout.indexOf("agentReset()");
 
     assert.ok(adoptAt >= 0);
-    assert.ok(resetAt > adoptAt);
+    assert.equal(resetAt, -1);
     assert.match(recoveredCloseout, /session: recovered\.session/u);
     assert.match(
       recoveredCloseout,
@@ -94,7 +94,7 @@ describe("ChatClient recovered-session reattachment (GH #493 / #702)", () => {
     assert.match(source, /const persistPreparedRotation = useCallback/u);
     assert.match(
       source,
-      /persistPreparedRotation\(\);\s*let current = reattachableSession\.session\.state/u,
+      /persistPreparedRotation\(\);\s*let current = currentAgentSession\(\)/u,
     );
     assert.match(
       source,

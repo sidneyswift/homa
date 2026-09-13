@@ -1,5 +1,7 @@
+import type { ChatSessionCursor } from "./chat-session-cursor";
 import { Client } from "eve/client";
-import type { HandleMessageStreamEvent, SessionState } from "eve/client";
+import { attachEveSessionForReplay } from "./eve-session-replay";
+import type { HandleMessageStreamEvent } from "eve/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -54,14 +56,14 @@ export interface RecoveredTurn {
   /** Every durable event of the session, through the closing boundary. */
   events: HandleMessageStreamEvent[];
   /** The cursor immediately after that boundary, ready for the next turn. */
-  session: SessionState;
+  session: ChatSessionCursor;
 }
 
 export function sessionStateAfterRecoveredBoundary(input: {
   boundary: "session.waiting" | "session.completed";
   sessionId: string;
   streamIndex: number;
-}): SessionState {
+}): ChatSessionCursor {
   return input.boundary === "session.waiting"
     ? { sessionId: input.sessionId, streamIndex: input.streamIndex }
     : { streamIndex: 0 };
@@ -114,12 +116,9 @@ async function replaySessionToBoundary(input: {
   const client = new Client({
     auth: { bearer: input.bearer },
     host: input.host,
-    maxReconnectAttempts: REPLAY_RECONNECT_ATTEMPTS,
+    ...{ maxReconnectAttempts: REPLAY_RECONNECT_ATTEMPTS },
   });
-  const session = client.session({
-    sessionId: input.sessionId,
-    streamIndex: 0,
-  });
+  const session = attachEveSessionForReplay(client, input.sessionId);
 
   const events: HandleMessageStreamEvent[] = [];
   for await (const event of session.stream({

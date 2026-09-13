@@ -14,6 +14,19 @@ export function createRecoverableEveAgentStore<TData>(initial: EveAgentStore<TDa
     for (const listener of listeners) listener();
   };
   let unsubscribe = current.subscribe(notify);
+  function bindCallbacks() {
+    const store = current;
+    store.setCallbacks({
+      ...callbacks,
+      onFinish(snapshot) {
+        if (current !== store) return;
+        // Homa can flush a queued message synchronously from onFinish.
+        activeSend = undefined;
+        callbacks.onFinish?.(snapshot);
+      },
+    });
+  }
+  bindCallbacks();
 
   return {
     get snapshot() {
@@ -25,7 +38,7 @@ export function createRecoverableEveAgentStore<TData>(initial: EveAgentStore<TDa
     },
     setCallbacks(next: EveAgentStoreCallbacks<TData>) {
       callbacks = next;
-      current.setCallbacks(next);
+      bindCallbacks();
     },
     async send(input: Parameters<EveAgentStore<TData>["send"]>[0]) {
       if (activeSend) throw new Error("A chat turn is already being sent.");
@@ -56,7 +69,7 @@ export function createRecoverableEveAgentStore<TData>(initial: EveAgentStore<TDa
       activeSend = undefined;
       current.reset();
       current = replacement;
-      current.setCallbacks(callbacks);
+      bindCallbacks();
       unsubscribe = current.subscribe(notify);
       notify();
     },

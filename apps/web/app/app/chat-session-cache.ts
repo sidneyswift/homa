@@ -1,10 +1,11 @@
-import type { HandleMessageStreamEvent, SessionState } from "eve/client";
+import type { ChatSessionCursor } from "./chat-session-cursor";
+import type { HandleMessageStreamEvent } from "eve/client";
 
 import { recordChatPreparationTiming } from "../../lib/observability/chat-preparation";
 
 export interface SessionEventCache {
   events?: readonly HandleMessageStreamEvent[];
-  session?: SessionState;
+  session?: ChatSessionCursor;
   messageTimes?: Record<string, number>;
   lastActivityAt?: number;
 }
@@ -46,9 +47,9 @@ export async function withChatTurnLock<T>(
 
 /** True when the completed cursor saved by another tab supersedes this tab. */
 export function shouldAdoptSavedSession(
-  current: SessionState,
-  saved: SessionState | undefined,
-): saved is SessionState & { sessionId: string } {
+  current: ChatSessionCursor,
+  saved: ChatSessionCursor | undefined,
+): saved is ChatSessionCursor & { sessionId: string } {
   return Boolean(
     saved?.sessionId &&
       (saved.sessionId !== current.sessionId ||
@@ -91,7 +92,7 @@ export function mergeSavedSessionEvents<T extends SessionEventCache>(
   }
 
   let events: readonly HandleMessageStreamEvent[];
-  let session: SessionState;
+  let session: ChatSessionCursor;
   if (next.end < previous.end) {
     events = previous.events;
     session = saved.session ?? incoming.session ?? { streamIndex: 0 };

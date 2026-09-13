@@ -94,6 +94,20 @@ durable cancellation, read-only replay and replacement, stale callback
 suppression, and duplicate-send rejection. This is not the parked-session
 regression above, a React integration test, a candidate build, or latency proof.
 
+The React connection also has a synthetic browser test:
+
+```bash
+pnpm --filter web test:chat-recovery
+HOMA_EVE_CANDIDATE_PACKAGE=/path/to/extracted/eve/package pnpm --filter web test:chat-recovery
+```
+
+The second command bundles the extracted candidate client into the browser
+fixture without changing the install. Both exercise Homa's actual chat hook,
+including queued sends, partial rendering, local stop, and recovered-session
+adoption. The fixture replaces HTTP responses; it does not mount the complete
+chat screen or contact Homa's hosted server. The installed-version run is part
+of check:chat-ui. Neither command measures model latency or app overhead.
+
 ### 3. Check for live parked sessions before deploying
 
 The repository does not currently have an executable inventory of Eve sessions

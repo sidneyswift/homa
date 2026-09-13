@@ -109,6 +109,7 @@ describe("turn boundary watchdog", () => {
             yield {
               data: {},
               type: "session.started",
+              meta: { at: "2026-09-13T00:00:00.000Z", ...{ id: "fixture-started-event" } },
             } satisfies HandleMessageStreamEvent;
             await new Promise<void>((resolve) => {
               if (!signal || signal.aborted) {
