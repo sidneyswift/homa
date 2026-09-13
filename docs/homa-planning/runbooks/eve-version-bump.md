@@ -49,6 +49,31 @@ three behavior protections until upstream absorbs them:
    streaming and generated-call coverage; `pnpm check:eve-empty-delivery`
    checks the installed harness.
 
+An inactive candidate patch, `patches/eve@0.54.3.patch`, currently ports the
+browser stream-open `TypeError: Load failed` case and the shared function duration
+setting. The new output writer applies the duration before replacing the shared
+function, preserves its other configuration, and rejects malformed configuration.
+The empty-delivery protection is still missing: do not activate this patch or
+accept the candidate as fully protected yet. The current pin and workspace patch
+mapping remain on 0.19.0.
+
+To check an extracted candidate copy with its patch applied, without a package
+install or provider request:
+
+```bash
+node scripts/eve-stream-reconnect-probe.mjs /path/to/patched/eve/package /tmp/eve-reconnect.json
+node scripts/eve-stream-max-duration-check.mjs --package-root /path/to/patched/eve/package
+```
+
+The reconnect probe uses the actual client with synthetic HTTP. It checks an
+initial stream-open failure, a body interruption after partial text, exact cursor
+resumption, no duplicate message POST, bounded retries, and non-retryable parse,
+programming, and authorization failures. It does not run inside a browser engine.
+The duration probe calls the actual candidate build-output normalizer on temporary
+fixtures, checking configuration preservation and stream aliases. The extracted
+package option cannot certify the installed build and is rejected with VERCEL=1.
+A real candidate build and its default duration check are still required.
+
 The candidate regression run is unpatched. Before accepting a new pin, prove
 that each patch hunk is upstream or port it to a patch named for the candidate
 version. Also run `pnpm check:eve-stream-duration` against the candidate
