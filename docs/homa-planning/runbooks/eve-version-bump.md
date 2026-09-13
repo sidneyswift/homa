@@ -247,6 +247,30 @@ turn identity, and a failed send without retry. It does not run the behavioral
 evaluations or their model judges, and does not measure latency. The fixtures
 cover 0.19.0 and 0.54.3; review the protocol before using another version.
 
+### Bounded dynamic callbacks on the September candidate
+
+Homa's `defineBoundedTool` uses the candidate's public `defineDurableCallback`
+API to snapshot deadline, retry, and Progress-access policy. Executor bodies are
+authored implementations; per-turn/family state belongs in `input` and `ctx`,
+not executor captures. The `execute` property calls `createBoundedExecutor`
+directly so Eve does not re-wrap an identifier and overwrite its descriptor.
+The old runtime keeps its ordinary bounded executor.
+
+Run the callback probe against a fully installed candidate package, including
+compiler dependencies. A retained pnpm candidate directory also works. A partial
+extracted runtime without Nitro cannot exercise the compiler:
+
+```bash
+node scripts/eve-bounded-tool-replay-probe.mjs /path/to/installed/eve /tmp/eve-bounded-replay.json
+```
+
+This executes the actual Eve callback transform, then uses separate processes to
+verify saved policy, the five web tools, and seven restricted-task tool overrides.
+It executes the two question-card tools without external effects. Also inspect
+both logs of the real candidate restart check for dynamic resolver failures;
+a passed built-in question test alone does not prove Homa's tools survived.
+A source-only callback probe missed compiler re-wrapping on 2026-09-13.
+
 ### 3. Check for live parked sessions before deploying
 
 The repository does not currently have an executable inventory of Eve sessions

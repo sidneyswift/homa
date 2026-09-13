@@ -40,11 +40,18 @@ import { z } from "zod";
 import { defineBoundedTool, ToolAccessBoundaryError, ToolDeadlineError } from ${JSON.stringify(compiledHelper)};
 import { readDurableDynamicToolCallbacks } from ${JSON.stringify(path.join(candidate, "dist/src/tools/durable-callbacks.js"))};
 ${["ask_for_details", "ask_user_questions", "create_printable", "generate_image", "start_checklist"].map((name, index) => `import dynamic${index} from ${JSON.stringify(path.join(web, "agent/tools", `${name}.ts`))};`).join("\n")}
+import progressBoundary from ${JSON.stringify(path.join(web, "agent/tools/progress_task_boundary.ts"))};
 const webContext = { channel: { kind: "channel:eve", metadata: {} }, session: { auth: { current: { attributes: { channel: "web" } } } } };
-const actualTools = [dynamic0, dynamic1, dynamic2, dynamic3, dynamic4].map(dynamic => (dynamic.default ?? dynamic).events["step.started"]({}, webContext));
-assert.ok(actualTools.every(Boolean), "All five actual Homa tools must resolve");
+const restrictedContext = { ...webContext, session: { auth: { current: { attributes: { channel: "progress_next_move" } } } } };
+const boundaryTools = (progressBoundary.default ?? progressBoundary).events["step.started"]({}, restrictedContext);
+assert.equal(Object.keys(boundaryTools).length, 7);
+const actualTools = [
+  ...[dynamic0, dynamic1, dynamic2, dynamic3, dynamic4].map(dynamic => (dynamic.default ?? dynamic).events["step.started"]({}, webContext)),
+  ...Object.values(boundaryTools),
+];
+assert.ok(actualTools.every(Boolean), "All selected Homa tools must resolve");
 const actualDescriptors = actualTools.map(tool => readDurableDynamicToolCallbacks(tool)?.execute);
-assert.ok(actualDescriptors.every(Boolean), "All five actual executors must be replayable");
+assert.ok(actualDescriptors.every(Boolean), "All selected executors must be replayable");
 const [mode, snapshotPath] = process.argv.slice(2);
 let bodyRuns = 0;
 const tool = defineBoundedTool({
@@ -96,8 +103,8 @@ if (mode === "capture") {
   }
   const receipt = {
     checkedAt: new Date().toISOString(), candidateVersion: metadata.version, success: true,
-    checks: ["actual Eve compiler transforms wrapper before execution", "actual durable descriptor", "JSON-only policy", "fresh-process execution", "snapshotted access denial", "snapshotted deadline and retry policy", "five actual Homa tools resolve", "five actual replay callbacks deny restricted access", "two actual card tools execute after process replacement"],
-    limitations: "Actual Eve callback compiler and API, five source Homa tools, and synthetic policy control in separate processes. No full compiled runtime, paid call, database, hosted build, or app latency proof.",
+    checks: ["actual Eve compiler transforms wrapper before execution", "actual durable descriptor", "JSON-only policy", "fresh-process execution", "snapshotted access denial", "snapshotted deadline and retry policy", "five web tools and seven restricted-task tools resolve", "all twelve replay callbacks preserve restricted access", "two actual card tools execute after process replacement"],
+    limitations: "Actual Eve callback compiler and API, twelve source Homa tools, and synthetic policy control in separate processes. No full compiled runtime, paid call, database, hosted build, or app latency proof.",
   };
   await writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`);
   console.log(JSON.stringify(receipt, null, 2));

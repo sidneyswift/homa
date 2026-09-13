@@ -234,8 +234,9 @@ function createBoundedExecutor<TInput, TOutput>(
   policy: BoundedToolPolicy,
   execute: (input: TInput, ctx: ToolContext) => Promise<TOutput> | TOutput,
 ): (input: TInput, ctx: ToolContext) => Promise<TOutput> {
-  // Definitions and their executor code are created at module scope. Per-turn
-  // or family values belong in input/ctx, never a captured executor closure.
+  // Executors are authored implementations, not per-turn state. Resolvers may
+  // select or construct tools; family values belong in input/ctx, never a
+  // captured executor closure.
   // Eve reconstructs the current implementation when the authored module loads;
   // only this JSON policy is the durable snapshot passed back on replay.
   async function executeWithPolicy(

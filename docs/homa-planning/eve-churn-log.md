@@ -10,6 +10,27 @@ upgrades are always a deliberate, dated, logged decision, never a silent
 encountered here, whether or not it cost a full day, so the tripwire has real
 data to count against. Newest entries first.
 
+## 2026-09-13 · Candidate dynamic tools restored and full local build passed
+
+Local implementation commits `a8e2c64d` and `94056b5d` preserve bounded executor
+policy through Eve's durable callback API and compiler. The real 0.54.3 restart
+check passed with zero dynamic resolver failures in either phase. The prior
+five-tool omission is resolved in this local candidate. Compiler/fresh-process
+checks also cover the seven restricted Progress tool overrides, saved timeout
+and retry policy, access denial, and execution of two real question-card tools.
+
+The installed 0.54.3/AI 7.0.93 candidate passed web typecheck, the full Next build
+including material/Chromium checks, Eve build in CI's combined-service layout,
+all three built stream-duration checks, and the empty-delivery guard. Exact
+original dependencies were restored. This was a macOS local build, not a Linux
+Vercel deployment. The successful corrected runtime's two model steps recorded
+$0.5737485 in Gateway cost; this is not the total investigation spend.
+
+Direct 0.19.0-to-0.54.3 paused-session migration remains rejected. Next is an
+isolated hosted comparison using new synthetic conversations, not a production
+upgrade or a waiver of that gate. Five-second first-visible-answer performance
+remains unverified. [Issue #1171](https://github.com/sidneyswift/homa/issues/1171).
+
 ## 2026-09-13 · 0.54.3 new-session control passes, tool parity fails
 
 A new fictional session created and restarted entirely on 0.54.3 passed the four
