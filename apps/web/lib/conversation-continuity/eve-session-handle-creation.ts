@@ -36,7 +36,7 @@ function validSessionId(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= 255 && value.trim() === value;
 }
 
-/** Staged candidate creation path; it does not enable the newer Eve channel. */
+/** Creation ownership checks for the reviewed handle-channel route contract. */
 export function protectEveSessionHandleCreation<TArgs extends object>(
   route: CreationRoute<TArgs>,
   deps: {

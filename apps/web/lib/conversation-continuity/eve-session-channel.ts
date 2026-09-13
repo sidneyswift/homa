@@ -1,32 +1,9 @@
-import { randomUUID } from "node:crypto";
-
-import type {
-  Channel,
-  HttpRouteDefinition,
-  RouteDefinition,
-  RouteHandlerArgs,
-} from "eve/channels";
 import { routeAuth, type AuthFn } from "eve/channels/auth";
 
-import { bindingClaimForCreatedSession, EveSessionAuthorizationError } from "./eve-session-creation-binding";
-import {
-  authorizationUnavailable,
-  callerFromAuth,
-  sessionNotFound,
-  type EveSessionCaller as Caller,
-} from "./eve-session-route-auth";
-
-import type {
-  EveSessionOwner,
-  EveSessionOwnerStore,
-  EveSessionPrincipal,
-} from "./eve-session-owners";
-
-const CREATE_PATH = "/eve/v1/session";
-const CONTINUE_PATH = "/eve/v1/session/:sessionId";
-const STREAM_PATH = "/eve/v1/session/:sessionId/stream";
-const SESSION_ID_HEADER = "x-eve-session-id";
-const MAX_CONTINUATION_TOKEN_LENGTH = 8_000;
+import { protectEveSessionHandleRoutes } from "./eve-session-handle-channel";
+import { eveSessionHandleOperationKeys, type SessionHandleRouteArgs } from "./eve-session-handle-authorization";
+import { protectLegacyEveSessionRoutes, type LegacyEveChannel } from "./eve-session-legacy-routes";
+import type { EveSessionOwnerStore } from "./eve-session-owners";
 
 type RouteAuthResult = Awaited<ReturnType<typeof routeAuth>>;
 
@@ -63,454 +40,51 @@ export function createCachedRouteAuth(
   };
 }
 
-function logAuthorizationStoreFailure(stage: string, error?: unknown): void {
-  console.error("eve session authorization store failed", {
-    stage,
-    ...(error === undefined
-      ? {}
-      : {
-          error: error instanceof Error ? error.message : "unknown",
-        }),
-  });
+interface RouteMetadata {
+  readonly method?: string;
+  readonly path: string;
+  readonly transport?: string;
+  readonly handler?: unknown;
 }
+const SESSION_PREFIX = "/eve/v1/session";
+const LEGACY_KEYS = [
+  `POST ${SESSION_PREFIX}`,
+  `POST ${SESSION_PREFIX}/:sessionId`,
+  `GET ${SESSION_PREFIX}/:sessionId/stream`,
+];
+const HANDLE_KEYS = [`POST ${SESSION_PREFIX}`, ...eveSessionHandleOperationKeys()];
 
-function isHttpRoute(route: RouteDefinition): route is HttpRouteDefinition {
-  return route.transport !== "websocket";
-}
-
-function routeKey(route: HttpRouteDefinition): string {
-  return `${route.method.toUpperCase()} ${route.path}`;
-}
-
-function ownerFor(
-  args: RouteHandlerArgs,
-  caller: Extract<Caller, { kind: "app" }>,
-): EveSessionOwner | null {
-  const sessionId = args.params.sessionId?.trim() ?? "";
-  if (!sessionId) return null;
-  return {
-    sessionId,
-    familyId: caller.familyId,
-    memberUserId: caller.memberUserId,
-  };
-}
-
-async function ownsSession(
-  owners: EveSessionOwnerStore,
-  owner: EveSessionOwner,
-): Promise<boolean | Response> {
-  try {
-    return await owners.owns(owner);
-  } catch (error) {
-    logAuthorizationStoreFailure("ownership-read", error);
-    return authorizationUnavailable();
-  }
-}
-
-async function restoreReservation(
-  owners: EveSessionOwnerStore,
-  owner: EveSessionOwner,
-  reservationToken: string,
-): Promise<boolean> {
-  try {
-    return await owners.restoreContinuation(owner, reservationToken);
-  } catch (error) {
-    logAuthorizationStoreFailure("continuation-restore", error);
-    return false;
-  }
-}
-
-async function revokeAmbiguousContinuation(
-  owners: EveSessionOwnerStore,
-  owner: EveSessionOwner,
-  reservationToken: string,
-): Promise<void> {
-  try {
-    const revoked = await owners.revokeContinuation(owner, reservationToken);
-    if (!revoked) logAuthorizationStoreFailure("continuation-revoke");
-  } catch (error) {
-    logAuthorizationStoreFailure("continuation-revoke", error);
-  }
-}
-
-async function cancelProvision(
-  owners: EveSessionOwnerStore,
-  provisionId: string,
-  principal: EveSessionPrincipal,
-  provisionalToken: string,
-): Promise<void> {
-  try {
-    const cancelled = await owners.cancel(
-      provisionId,
-      principal,
-      provisionalToken,
-    );
-    if (!cancelled) logAuthorizationStoreFailure("provision-cancel");
-  } catch (error) {
-    logAuthorizationStoreFailure("provision-cancel", error);
-  }
-}
-
-export function protectEveSessionRoutes<TChannel extends Channel>(
+/** Select only complete, reviewed route contracts. No unknown session route is
+ * returned unwrapped. Each implementation rechecks its protocol and authenticates
+ * before invoking the original route handler with the preserved runtime context. */
+export function protectEveSessionRoutes<TChannel extends { readonly routes: readonly RouteMetadata[] }>(
   channel: TChannel,
-  deps: {
-    resolveAuth(request: Request): Promise<RouteAuthResult>;
-    owners: EveSessionOwnerStore;
-  },
+  deps: { resolveAuth(request: Request): Promise<RouteAuthResult>; owners: EveSessionOwnerStore },
 ): TChannel {
-  const expected = new Map([
-    [`POST ${CREATE_PATH}`, 0],
-    [`POST ${CONTINUE_PATH}`, 0],
-    [`GET ${STREAM_PATH}`, 0],
-  ]);
-
-  const unexpectedSessionRoutes = channel.routes.filter((route) => {
-    if (!route.path.startsWith(CREATE_PATH)) return false;
-    return !isHttpRoute(route) || !expected.has(routeKey(route));
-  });
-  if (unexpectedSessionRoutes.length > 0) {
-    throw new Error(
-      `Eve session route contract changed: unexpected ${unexpectedSessionRoutes
-        .map((route) =>
-          isHttpRoute(route) ? routeKey(route) : `WEBSOCKET ${route.path}`,
-        )
-        .join(", ")}`,
-    );
+  const routes = channel.routes.filter(route => route.path.startsWith(SESSION_PREFIX));
+  const known = new Set([...LEGACY_KEYS, ...HANDLE_KEYS]);
+  const keyFor = (route: RouteMetadata) => `${route.method?.toUpperCase()} ${route.path}`;
+  const unexpected = routes.filter(route =>
+    (route.transport !== undefined && route.transport !== "http") ||
+    typeof route.handler !== "function" || !known.has(keyFor(route)));
+  if (unexpected.length) {
+    throw new Error(`Eve session route contract changed: unexpected ${unexpected.map(route =>
+      route.transport === "websocket" ? `WEBSOCKET ${route.path}` : keyFor(route)).join(", ")}`);
   }
-
-  const routes = channel.routes.map((route) => {
-    if (!isHttpRoute(route)) return route;
-    const key = routeKey(route);
-    if (!expected.has(key)) return route;
-    expected.set(key, (expected.get(key) ?? 0) + 1);
-    const original = route.handler;
-
-    if (key === `POST ${CREATE_PATH}`) {
-      return {
-        ...route,
-        handler: async (request, args) => {
-          const caller = callerFromAuth(await deps.resolveAuth(request));
-          if (caller instanceof Response) return caller;
-          if (caller.kind === "privileged")
-            return await original(request, args);
-
-          const principal = {
-            familyId: caller.familyId,
-            memberUserId: caller.memberUserId,
-          };
-          const provisionalToken = `eve-provision:${randomUUID()}`;
-          let provisionId: string | null = null;
-          try {
-            provisionId = await deps.owners.provision(
-              principal,
-              provisionalToken,
-            );
-          } catch (error) {
-            logAuthorizationStoreFailure("provision", error);
-            return authorizationUnavailable();
-          }
-          if (!provisionId) {
-            logAuthorizationStoreFailure("provision");
-            return authorizationUnavailable();
-          }
-          const activeProvisionId = provisionId;
-
-          let registeredSessionId: string | null = null;
-          let registeredContinuationToken: string | null = null;
-          let sendStarted = false;
-          let provisionOpen = true;
-          const wrappedArgs: RouteHandlerArgs = {
-            ...args,
-            send: async (input, options) => {
-              if (sendStarted || registeredSessionId !== null) {
-                throw new EveSessionAuthorizationError();
-              }
-              sendStarted = true;
-              const binding = bindingClaimForCreatedSession(
-                options.auth,
-                caller,
-              );
-
-              let session: Awaited<ReturnType<typeof args.send>>;
-              try {
-                session = await args.send(input, options);
-              } catch (error) {
-                await cancelProvision(
-                  deps.owners,
-                  activeProvisionId,
-                  principal,
-                  provisionalToken,
-                );
-                provisionOpen = false;
-                throw error;
-              }
-              const owner = {
-                sessionId: session.id,
-                familyId: caller.familyId,
-                memberUserId: caller.memberUserId,
-              };
-              let activated = false;
-              try {
-                activated = await deps.owners.activate(
-                  activeProvisionId,
-                  owner,
-                  provisionalToken,
-                  session.continuationToken,
-                  binding,
-                );
-              } catch (error) {
-                logAuthorizationStoreFailure("activation", error);
-                await cancelProvision(
-                  deps.owners,
-                  activeProvisionId,
-                  principal,
-                  provisionalToken,
-                );
-                provisionOpen = false;
-                throw new EveSessionAuthorizationError();
-              }
-              if (!activated) {
-                logAuthorizationStoreFailure("activation");
-                await cancelProvision(
-                  deps.owners,
-                  activeProvisionId,
-                  principal,
-                  provisionalToken,
-                );
-                provisionOpen = false;
-                throw new EveSessionAuthorizationError();
-              }
-              provisionOpen = false;
-              registeredSessionId = session.id;
-              registeredContinuationToken = session.continuationToken;
-              return session;
-            },
-          };
-          try {
-            const response = await original(request, wrappedArgs);
-            if (registeredSessionId) {
-              let responseBody: {
-                continuationToken?: unknown;
-                sessionId?: unknown;
-              };
-              try {
-                responseBody = (await response
-                  .clone()
-                  .json()) as typeof responseBody;
-              } catch {
-                throw new EveSessionAuthorizationError();
-              }
-              if (
-                response.status !== 202 ||
-                response.headers.get(SESSION_ID_HEADER) !==
-                  registeredSessionId ||
-                responseBody.sessionId !== registeredSessionId ||
-                responseBody.continuationToken !== registeredContinuationToken
-              ) {
-                throw new EveSessionAuthorizationError();
-              }
-            } else if (response.status === 202) {
-              throw new EveSessionAuthorizationError();
-            }
-            if (provisionOpen) {
-              await cancelProvision(
-                deps.owners,
-                activeProvisionId,
-                principal,
-                provisionalToken,
-              );
-              provisionOpen = false;
-            }
-            return response;
-          } catch (error) {
-            if (provisionOpen) {
-              await cancelProvision(
-                deps.owners,
-                activeProvisionId,
-                principal,
-                provisionalToken,
-              );
-              provisionOpen = false;
-            }
-            if (!(error instanceof EveSessionAuthorizationError)) throw error;
-            return authorizationUnavailable();
-          }
-        },
-      } satisfies HttpRouteDefinition;
-    }
-
-    if (key === `POST ${CONTINUE_PATH}`) {
-      return {
-        ...route,
-        handler: async (request, args) => {
-          const caller = callerFromAuth(await deps.resolveAuth(request));
-          if (caller instanceof Response) return caller;
-          if (caller.kind === "privileged")
-            return await original(request, args);
-          const owner = ownerFor(args, caller);
-          if (!owner) return sessionNotFound();
-
-          let continuationToken = "";
-          try {
-            const body = (await request.clone().json()) as {
-              continuationToken?: unknown;
-            };
-            continuationToken =
-              typeof body.continuationToken === "string"
-                ? body.continuationToken
-                : "";
-          } catch {
-            return sessionNotFound();
-          }
-          if (
-            continuationToken.length === 0 ||
-            continuationToken.length > MAX_CONTINUATION_TOKEN_LENGTH
-          ) {
-            return sessionNotFound();
-          }
-
-          const reservationToken = `eve-owner:${randomUUID()}`;
-          let reserved = false;
-          try {
-            reserved = await deps.owners.reserveContinuation(
-              owner,
-              continuationToken,
-              reservationToken,
-            );
-          } catch (error) {
-            logAuthorizationStoreFailure("continuation-reserve", error);
-            return authorizationUnavailable();
-          }
-          if (!reserved) return sessionNotFound();
-
-          let sendStarted = false;
-          let sentSessionId: string | null = null;
-          const wrappedArgs: RouteHandlerArgs = {
-            ...args,
-            send: async (input, options) => {
-              if (options.continuationToken !== continuationToken) {
-                throw new EveSessionAuthorizationError();
-              }
-              sendStarted = true;
-              const session = await args.send(input, options);
-              if (
-                session.id !== owner.sessionId ||
-                session.continuationToken !== continuationToken
-              ) {
-                throw new EveSessionAuthorizationError();
-              }
-              sentSessionId = session.id;
-              return session;
-            },
-          };
-
-          try {
-            const response = await original(request, wrappedArgs);
-            if (!sendStarted) {
-              const restored = await restoreReservation(
-                deps.owners,
-                owner,
-                reservationToken,
-              );
-              if (!restored) return authorizationUnavailable();
-            }
-            if (sentSessionId) {
-              let responseBody: Record<string, unknown> | null = null;
-              try {
-                responseBody = (await response.clone().json()) as Record<
-                  string,
-                  unknown
-                >;
-              } catch {
-                responseBody = null;
-              }
-              if (
-                responseBody === null ||
-                response.status !== 200 ||
-                response.headers.get(SESSION_ID_HEADER) !== sentSessionId ||
-                responseBody.sessionId !== sentSessionId ||
-                Object.hasOwn(responseBody, "continuationToken")
-              ) {
-                await revokeAmbiguousContinuation(
-                  deps.owners,
-                  owner,
-                  reservationToken,
-                );
-                return authorizationUnavailable();
-              }
-
-              let completed = false;
-              try {
-                completed = await deps.owners.completeContinuation(
-                  owner,
-                  reservationToken,
-                  continuationToken,
-                );
-              } catch (error) {
-                logAuthorizationStoreFailure("continuation-complete", error);
-                await revokeAmbiguousContinuation(
-                  deps.owners,
-                  owner,
-                  reservationToken,
-                );
-                return authorizationUnavailable();
-              }
-              if (!completed) {
-                await revokeAmbiguousContinuation(
-                  deps.owners,
-                  owner,
-                  reservationToken,
-                );
-                return authorizationUnavailable();
-              }
-            }
-            return response;
-          } catch (error) {
-            if (!sendStarted) {
-              const restored = await restoreReservation(
-                deps.owners,
-                owner,
-                reservationToken,
-              );
-              if (!restored) return authorizationUnavailable();
-            } else {
-              await revokeAmbiguousContinuation(
-                deps.owners,
-                owner,
-                reservationToken,
-              );
-              return authorizationUnavailable();
-            }
-            if (!(error instanceof EveSessionAuthorizationError)) throw error;
-            return authorizationUnavailable();
-          }
-        },
-      } satisfies HttpRouteDefinition;
-    }
-
-    return {
-      ...route,
-      handler: async (request, args) => {
-        const caller = callerFromAuth(await deps.resolveAuth(request));
-        if (caller instanceof Response) return caller;
-        if (caller.kind === "privileged") return await original(request, args);
-        const owner = ownerFor(args, caller);
-        if (!owner) return sessionNotFound();
-        const owned = await ownsSession(deps.owners, owner);
-        if (owned instanceof Response) return owned;
-        if (!owned) return sessionNotFound();
-        return await original(request, args);
-      },
-    } satisfies HttpRouteDefinition;
-  });
-
-  const mismatched = [...expected.entries()].filter(([, count]) => count !== 1);
-  if (mismatched.length > 0) {
-    throw new Error(
-      `Eve session route contract changed: ${mismatched
-        .map(([key, count]) => `${key} found ${count}`)
-        .join(", ")}`,
-    );
+  const matches = (keys: readonly string[]) => routes.length === keys.length && keys.every(key =>
+    routes.filter(route => keyFor(route) === key).length === 1);
+  // This is the version boundary: SDK route handler argument types changed while
+  // the HTTP paths stayed partly shared. The exact complete route set selects the
+  // tested implementation; these casts never change a handler or runtime value.
+  if (matches(HANDLE_KEYS)) {
+    type HandleChannel = { readonly routes: readonly ({
+      readonly method?: string; readonly path: string; readonly transport?: "http";
+      readonly handler?: (request: Request, args: SessionHandleRouteArgs) => Promise<Response>;
+    } | { readonly path: string; readonly transport: "websocket" })[] };
+    return protectEveSessionHandleRoutes(channel as unknown as HandleChannel, deps) as unknown as TChannel;
   }
-  return { ...channel, routes } as TChannel;
+  if (matches(LEGACY_KEYS)) {
+    return protectLegacyEveSessionRoutes(channel as unknown as LegacyEveChannel, deps) as unknown as TChannel;
+  }
+  throw new Error(`Eve session route contract changed: expected one complete reviewed route set; found ${routes.map(route => `${route.transport === "websocket" ? "WEBSOCKET" : route.method?.toUpperCase()} ${route.path}`).join(", ")}`);
 }

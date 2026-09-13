@@ -24,7 +24,7 @@ type CandidateRoute<TArgs extends SessionHandleRouteArgs> = CandidateHttpRoute<T
 const CREATE_PATH = "/eve/v1/session";
 const CREATE_KEY = `POST ${CREATE_PATH}`;
 
-/** Staged composition for the published handle protocol, not selected by the live channel. */
+/** Selected only when the installed channel exposes the complete reviewed handle protocol. */
 export function protectEveSessionHandleRoutes<
   TArgs extends SessionHandleRouteArgs,
   TChannel extends { readonly routes: readonly CandidateRoute<TArgs>[] },

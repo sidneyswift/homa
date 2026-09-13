@@ -37,7 +37,7 @@ interface SessionHandleRoute<TArgs extends SessionHandleRouteArgs> {
 /**
  * Guards one existing-session operation. Creation is deliberately excluded:
  * it must reserve and activate an owner before returning a session to a client.
- * Not wired into the legacy channel until the candidate creation path is ready.
+ * The route-contract selector keeps this separate from legacy token operations.
  */
 export function protectEveSessionHandleOperation<TArgs extends SessionHandleRouteArgs>(
   route: SessionHandleRoute<TArgs>,
