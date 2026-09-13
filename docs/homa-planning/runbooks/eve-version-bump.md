@@ -271,6 +271,25 @@ both logs of the real candidate restart check for dynamic resolver failures;
 a passed built-in question test alone does not prove Homa's tools survived.
 A source-only callback probe missed compiler re-wrapping on 2026-09-13.
 
+### Native package startup on Linux
+
+The September candidate also needs `sharp` in `build.externalDependencies`.
+Without it, source `188ab2524a0e5b291f57997fc154256d42436d68` built successfully
+but its protected Linux preview returned HTTP 500 before accepting a text-only
+session: Sharp could not find its platform binary. Commit
+`592719999d52e7409a48b84e2faede198f49141f` keeps the package external. Its full
+candidate build passed, both traced ESM packages created a PNG locally, and
+the new Linux preview served health and completed real authenticated chat turns.
+Use the import path actually traced by the build; an ESM-only traced package
+need not include its unused CommonJS entry.
+
+This fixes packaging, not latency or cross-version continuation. In the first
+matched hosted screen after the fix, the candidate's first visible responses
+took 27.3 and 27.6 seconds; the baseline took 21.2 and 14.6 seconds. The isolated
+preview evidence and later one-word warm controls are recorded on gh#1171.
+Do not describe this candidate as a proven speed improvement or production-ready
+upgrade on the strength of a successful build.
+
 ### 3. Check for live parked sessions before deploying
 
 The repository does not currently have an executable inventory of Eve sessions
