@@ -54,8 +54,9 @@ createServer(async (request,response) => {
     response.setHeader('x-eve-session-id','fixture-session');
     return response.end(JSON.stringify({ok:true,sessionId:'fixture-session',continuationToken:'fixture-token'}));
   }
-  if('continuationToken' in body) { response.statusCode=400; return response.end('{}'); }
+  if('continuationToken' in body && manifest.dependencies.eve !== '0.19.0') { response.statusCode=400; return response.end('{}'); }
   writeFileSync(sessionFile,JSON.stringify({probe:body.inputResponses[0].text}));
+  if(manifest.dependencies.eve==='0.19.0') { response.statusCode=200; return response.end(JSON.stringify({ok:true,sessionId:'fixture-session'})); }
   response.statusCode=202;
   response.end(JSON.stringify({sessionId:mode==='wrong-session'?'wrong-session':'fixture-session',deliveryId:'fixture-delivery'}));
 }).listen(port,'127.0.0.1');
@@ -112,7 +113,7 @@ async function fixture(t, mode = "success") {
   async function run(preflight = false) {
     let result;
     const execution = execute(process.execPath, [path.join(root, "scripts/eve-upgrade-check.mjs"),
-      "--to", "0.54.3", "--port", String(port), ...(preflight ? ["--preflight"] : [])], { cwd: root, env, timeout: 30_000 });
+      "--to", mode === "same-version" ? "0.19.0" : "0.54.3", "--port", String(port), ...(preflight ? ["--preflight"] : [])], { cwd: root, env, timeout: 30_000 });
     execution.catch(() => {});
     if (mode === "interrupt") {
       const deadline = Date.now() + 10_000;
@@ -207,4 +208,13 @@ for (const mode of ["missing-family", "hosted-family", "production-writes"]) tes
   for (const name of [".synthetic-installs", ".synthetic-posts"]) {
     await assert.rejects(readFile(path.join(f.root, name)), { code: "ENOENT" });
   }
+});
+
+test("same-version control accepts the actual legacy continuation response and still proves the reply", async t => {
+  const f = await fixture(t, "same-version");
+  const result = await f.run();
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(result.receipt.success, true);
+  assert.equal(result.receipt.resumeStatus, 200);
+  await assertRestored(f);
 });

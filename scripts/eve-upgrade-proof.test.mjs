@@ -135,3 +135,16 @@ test("upgrade admission rejects failed, mismatched, malformed, and mixed-protoco
     assert.throws(() => acceptedUpgradeSession({ version: "0.19.0", response: accepted, body }), /continuation token/);
   }
 });
+
+test("legacy continuation uses 200 and original identity, while creation still requires 202 and a token", () => {
+  const response = new Response(null, { status: 200 });
+  const body = { ok: true, sessionId: "session-1" };
+  const request = { version: "0.19.0", response, body, expectedSessionId: "session-1" };
+  assert.deepEqual(acceptedUpgradeSession(request), { sessionId: "session-1" });
+  for (const invalid of [
+    { expectedSessionId: undefined },
+    { expectedSessionId: "different" },
+    { body: { ...body, ok: false } },
+    { response: new Response(null, { status: 202 }) },
+  ]) assert.throws(() => acceptedUpgradeSession({ ...request, ...invalid }));
+});

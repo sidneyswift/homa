@@ -11,7 +11,8 @@ export function usesSessionHandles(version) {
 /** Acceptance is only admission; the later stream proof must still complete. */
 export function acceptedUpgradeSession({ version, response, body, expectedSessionId }) {
   const handles = usesSessionHandles(version);
-  if (response.status !== 202 || !body || typeof body !== "object" || Array.isArray(body) || body.ok === false) {
+  const legacyResume = !handles && expectedSessionId !== undefined;
+  if (response.status !== (legacyResume ? 200 : 202) || !body || typeof body !== "object" || Array.isArray(body) || body.ok === false) {
     throw new Error("Upgrade request was not accepted by the session protocol.");
   }
   const sessionId = body.sessionId;
@@ -25,6 +26,10 @@ export function acceptedUpgradeSession({ version, response, body, expectedSessio
   }
   if (handles) {
     if ("continuationToken" in body) throw new Error("Handle response unexpectedly contains a legacy continuation token.");
+    return { sessionId };
+  }
+  if (legacyResume) {
+    if (body.ok !== true) throw new Error("Legacy continuation did not acknowledge success.");
     return { sessionId };
   }
   if (body.ok !== true || typeof body.continuationToken !== "string" || !body.continuationToken.trim()) {
