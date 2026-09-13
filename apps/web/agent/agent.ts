@@ -31,6 +31,8 @@ export default defineAgent({
     // node_modules in the hosted build, never inlined into the bundle,
     // or the deployed function cannot resolve the platform binary and
     // previews fall back to screenshots that may not match the PDF.
-    externalDependencies: ["pdfjs-dist", "@napi-rs/canvas"],
+    // The Telnyx adapter reads its own package.json relative to import.meta.url.
+    // Eve 0.54 runtime bundling moves it away from that file unless external.
+    externalDependencies: ["pdfjs-dist", "@napi-rs/canvas", "@telnyx/chat-sdk-adapter"],
   },
 });
