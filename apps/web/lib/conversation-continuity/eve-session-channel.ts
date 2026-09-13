@@ -8,6 +8,7 @@ import type {
 } from "eve/channels";
 import { routeAuth, type AuthFn } from "eve/channels/auth";
 
+import { bindingClaimForCreatedSession, EveSessionAuthorizationError } from "./eve-session-creation-binding";
 import {
   authorizationUnavailable,
   callerFromAuth,
@@ -16,7 +17,6 @@ import {
 } from "./eve-session-route-auth";
 
 import type {
-  EveSessionBindingClaim,
   EveSessionOwner,
   EveSessionOwnerStore,
   EveSessionPrincipal,
@@ -27,13 +27,6 @@ const CONTINUE_PATH = "/eve/v1/session/:sessionId";
 const STREAM_PATH = "/eve/v1/session/:sessionId/stream";
 const SESSION_ID_HEADER = "x-eve-session-id";
 const MAX_CONTINUATION_TOKEN_LENGTH = 8_000;
-
-class EveSessionAuthorizationError extends Error {
-  constructor() {
-    super("Eve session authorization failed.");
-    this.name = "EveSessionAuthorizationError";
-  }
-}
 
 type RouteAuthResult = Awaited<ReturnType<typeof routeAuth>>;
 
@@ -99,49 +92,6 @@ function ownerFor(
     sessionId,
     familyId: caller.familyId,
     memberUserId: caller.memberUserId,
-  };
-}
-
-function bindingClaimForCreatedSession(
-  auth: unknown,
-  caller: Extract<Caller, { kind: "app" }>,
-): EveSessionBindingClaim | undefined {
-  if (typeof auth !== "object" || auth === null) {
-    throw new EveSessionAuthorizationError();
-  }
-  const sessionAuth = auth as {
-    principalId?: unknown;
-    attributes?: Record<string, unknown>;
-  };
-  const attributes = sessionAuth.attributes;
-  if (
-    sessionAuth.principalId !== caller.memberUserId ||
-    !attributes ||
-    attributes.memberUserId !== caller.memberUserId ||
-    (attributes.channel !== "web" && attributes.channel !== "mobile")
-  ) {
-    throw new EveSessionAuthorizationError();
-  }
-
-  const accountWalled = attributes.accountWalled === "true";
-  const voiceBridge = attributes.voiceBridge === "true";
-  if (
-    attributes.familyId !== caller.familyId &&
-    !(accountWalled && attributes.familyId === undefined)
-  ) {
-    throw new EveSessionAuthorizationError();
-  }
-  if (accountWalled || voiceBridge) return undefined;
-
-  if (
-    typeof attributes.episodeId !== "string" ||
-    typeof attributes.continuityThreadHash !== "string"
-  ) {
-    throw new EveSessionAuthorizationError();
-  }
-  return {
-    episodeId: attributes.episodeId,
-    threadKeyHash: attributes.continuityThreadHash,
   };
 }
 
