@@ -10,6 +10,7 @@ import {
 } from "eve/client";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
+import { eveMessageReconnectPolicy } from "../../lib/eve-client-message";
 import type { ChatSessionCursor } from "./chat-session-cursor";
 import { createRecoverableEveAgentStore } from "./recoverable-eve-agent-store";
 
@@ -40,10 +41,7 @@ export function useRecoverableChatAgent(options: RecoverableChatAgentOptions) {
       createStore(options.initialSession, options.initialEvents),
     );
     const reconnect = options.usesSessionHandles ? {
-      streamReconnectPolicy: {
-        streamOpenReconnectPolicy: { maxAttempts: options.reconnectAttempts },
-        streamIdleReconnectPolicy: { maxAttempts: options.reconnectAttempts },
-      },
+      streamReconnectPolicy: eveMessageReconnectPolicy(options.reconnectAttempts),
     } : {};
     return {
       ...controller,

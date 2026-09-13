@@ -108,6 +108,21 @@ adoption. The fixture replaces HTTP responses; it does not mount the complete
 chat screen or contact Homa's hosted server. The installed-version run is part
 of check:chat-ui. Neither command measures model latency or app overhead.
 
+The voice bridge can exercise its actual default runner against either reviewed
+SDK with synthetic HTTP responses, preserving signed voice headers and results:
+
+```bash
+node scripts/eve-voice-bridge-probe.mjs apps/web/node_modules/eve /tmp/eve-voice-current.json
+node scripts/eve-voice-bridge-probe.mjs /path/to/extracted/eve/package /tmp/eve-voice-candidate.json
+```
+
+This checks creation, same-session follow-up, advanced cursor persistence,
+spoken output, authored effects, and failure without resubmission. It uses a
+temporary bundle and synthetic signing secret; no model, database, or audio
+device is contacted. Protocol fixtures currently cover 0.19.0 and 0.54.3 and
+must be reviewed for another version. This does not replace a spoken-device
+check or the real parked-session upgrade proof.
+
 ### 3. Check for live parked sessions before deploying
 
 The repository does not currently have an executable inventory of Eve sessions

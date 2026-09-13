@@ -1,8 +1,9 @@
 import {
   Client,
   type HandleMessageStreamEvent,
-  type SessionState,
 } from "eve/client";
+
+import { sendEveClientMessage, type EveSessionCursor as SessionState } from "../eve-client-message";
 
 import {
   HOMA_MESSAGE_MODALITY_HEADER,
@@ -73,16 +74,14 @@ function defaultRunner(): VoiceHomaTurnRunner {
             activeObjectContext: input.activeObjectContext,
           }),
         },
-        maxReconnectAttempts: 4,
-        preserveCompletedSessions: true,
+        ...{ maxReconnectAttempts: 4, preserveCompletedSessions: true },
         redirect: "error",
       });
-      const session = client.session(input.sessionState);
-      const response = await session.send({
+      const { session, response } = await sendEveClientMessage(client, {
         message: input.message,
         clientContext: input.sourceContext,
         signal: input.signal,
-      });
+      }, input.sessionState, 4);
       return { ...(await response.result()), sessionState: session.state };
     },
   };

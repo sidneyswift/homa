@@ -20,6 +20,7 @@ function toolResult(
 ): HandleMessageStreamEvent {
   return {
     type: "action.result",
+    meta: { at: "2026-09-13T00:00:00.000Z", ...{ id: `fixture-${input.callId}` } },
     data: {
       result: {
         kind: "tool-result",
@@ -49,6 +50,7 @@ describe("voice Homa bridge", () => {
       }),
       {
         type: "action.result",
+        meta: { at: "2026-09-13T00:00:00.000Z", ...{ id: "fixture-skill-load" } },
         data: {
           result: {
             kind: "load-skill-result",
