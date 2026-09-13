@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 const [packageDirectory, receiptPath] = process.argv.slice(2);
@@ -25,12 +25,19 @@ try {
   }
   const config = path.join(temporary, "tsconfig.json");
   await writeFile(config, JSON.stringify({ extends: path.join(web, "tsconfig.json"), compilerOptions: { paths } }));
+  const helperPath = path.join(web, "lib/agent-tool-deadline.ts");
+  const helperSource = await readFile(helperPath, "utf8");
+  const { transformDynamicToolExecute } = await import(pathToFileURL(path.join(candidate,
+    "dist/src/internal/workflow-bundle/dynamic-tool-transform.js")).href);
+  const transformed = await transformDynamicToolExecute(helperPath, helperSource);
+  const compiledHelper = path.join(temporary, "compiled-helper.ts");
+  await writeFile(compiledHelper, transformed?.code ?? helperSource);
   const probe = path.join(temporary, "probe.mts");
   await writeFile(probe, `
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { z } from "zod";
-import { defineBoundedTool, ToolAccessBoundaryError, ToolDeadlineError } from ${JSON.stringify(path.join(web, "lib/agent-tool-deadline.ts"))};
+import { defineBoundedTool, ToolAccessBoundaryError, ToolDeadlineError } from ${JSON.stringify(compiledHelper)};
 import { readDurableDynamicToolCallbacks } from ${JSON.stringify(path.join(candidate, "dist/src/tools/durable-callbacks.js"))};
 ${["ask_for_details", "ask_user_questions", "create_printable", "generate_image", "start_checklist"].map((name, index) => `import dynamic${index} from ${JSON.stringify(path.join(web, "agent/tools", `${name}.ts`))};`).join("\n")}
 const webContext = { channel: { kind: "channel:eve", metadata: {} }, session: { auth: { current: { attributes: { channel: "web" } } } } };
@@ -70,7 +77,7 @@ if (mode === "capture") {
   await assert.rejects(call({ hang: true }), error => error instanceof ToolDeadlineError && error.repeatable === false);
   assert.ok(performance.now() - started < 2_000, "Saved deadline must win over the new ten-second policy");
   for (const [index, actual] of actualDescriptors.entries()) {
-    await assert.rejects(actual.callback(snapshot.tools[index], {}, { session: { auth: { current: { attributes: { channel: "progress_next_move" } } } } }), ToolAccessBoundaryError);
+    await assert.rejects(actual.callback(snapshot.tools[index], {}, { session: { auth: { current: { attributes: { channel: "progress_next_move" } } } } }), error => error.name === "ToolAccessBoundaryError");
   }
   const details = await actualDescriptors[0].callback(snapshot.tools[0], actualTools[0].inputSchema.parse({ kind: "child" }), webContext);
   assert.equal(details.asked, true);
@@ -89,8 +96,8 @@ if (mode === "capture") {
   }
   const receipt = {
     checkedAt: new Date().toISOString(), candidateVersion: metadata.version, success: true,
-    checks: ["actual durable descriptor", "JSON-only policy", "fresh-process execution", "snapshotted access denial", "snapshotted deadline and retry policy", "five actual Homa tools resolve", "five actual replay callbacks deny restricted access", "two actual card tools execute after process replacement"],
-    limitations: "Actual callback API, five source Homa tools, and synthetic policy control in separate processes. No compiled runtime, paid call, database, hosted build, or app latency proof.",
+    checks: ["actual Eve compiler transforms wrapper before execution", "actual durable descriptor", "JSON-only policy", "fresh-process execution", "snapshotted access denial", "snapshotted deadline and retry policy", "five actual Homa tools resolve", "five actual replay callbacks deny restricted access", "two actual card tools execute after process replacement"],
+    limitations: "Actual Eve callback compiler and API, five source Homa tools, and synthetic policy control in separate processes. No full compiled runtime, paid call, database, hosted build, or app latency proof.",
   };
   await writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`);
   console.log(JSON.stringify(receipt, null, 2));

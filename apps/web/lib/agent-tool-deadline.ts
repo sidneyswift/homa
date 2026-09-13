@@ -216,14 +216,31 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
     execute,
     ...rest
   } = definition;
-  const policy = { deadlineMs, repeatable, allowProgressNextMove };
+  return defineTool({
+    ...rest,
+    // A factory call preserves the explicit replay descriptor. Eve transforms
+    // an identifier-valued callback again and would capture that function.
+    execute: createBoundedExecutor({ deadlineMs, repeatable, allowProgressNextMove }, execute),
+  }) as ToolDefinition<z.output<TSchema>, TOutput>;
+}
+
+interface BoundedToolPolicy {
+  deadlineMs: number;
+  repeatable: boolean;
+  allowProgressNextMove: boolean;
+}
+
+function createBoundedExecutor<TInput, TOutput>(
+  policy: BoundedToolPolicy,
+  execute: (input: TInput, ctx: ToolContext) => Promise<TOutput> | TOutput,
+): (input: TInput, ctx: ToolContext) => Promise<TOutput> {
   // Definitions and their executor code are created at module scope. Per-turn
   // or family values belong in input/ctx, never a captured executor closure.
   // Eve reconstructs the current implementation when the authored module loads;
   // only this JSON policy is the durable snapshot passed back on replay.
   async function executeWithPolicy(
     savedPolicy: typeof policy,
-    input: z.output<TSchema>,
+    input: TInput,
     ctx: ToolContext,
   ): Promise<TOutput> {
     if (
@@ -246,9 +263,9 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
     | ((definition: {
         closure: typeof policy;
         callback: typeof executeWithPolicy;
-      }) => (input: z.output<TSchema>, ctx: ToolContext) => Promise<TOutput>);
+      }) => (input: TInput, ctx: ToolContext) => Promise<TOutput>);
   const boundedExecute = typeof durableCallback === "function"
     ? durableCallback({ closure: policy, callback: executeWithPolicy })
-    : (input: z.output<TSchema>, ctx: ToolContext) => executeWithPolicy(policy, input, ctx);
-  return defineTool({ ...rest, execute: boundedExecute }) as ToolDefinition<z.output<TSchema>, TOutput>;
+    : (input: TInput, ctx: ToolContext) => executeWithPolicy(policy, input, ctx);
+  return boundedExecute;
 }
