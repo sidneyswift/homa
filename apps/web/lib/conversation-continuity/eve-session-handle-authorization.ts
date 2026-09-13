@@ -17,6 +17,10 @@ const OWNER_PARAMETER = new Map([
   ["GET /eve/v1/session/:parentSessionId/subagents/:callId/:childSessionId/stream", "parentSessionId"],
 ]);
 
+export function eveSessionHandleOperationKeys(): readonly string[] {
+  return [...OWNER_PARAMETER.keys()];
+}
+
 /** Structural types allow testing the September protocol before changing the Eve pin. */
 export interface SessionHandleRouteArgs<TSession = unknown> {
   readonly params: Readonly<Record<string, string>>;
