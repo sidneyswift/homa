@@ -80,6 +80,20 @@ mobile, channel, schedule, or session-ownership adapters. Audit those surfaces
 and the new control/child-stream routes before running a September candidate.
 Never loosen the ownership guard merely to get a candidate to boot.
 
+For a handle-client candidate, an offline lifecycle probe can run against an
+already extracted package before changing the dependency. Use Node 24:
+
+```bash
+node scripts/eve-client-lifecycle-probe.mjs /path/to/extracted/eve/package /tmp/eve-client-lifecycle.json
+```
+
+It runs the candidate's client, store, and message reducer through Homa's
+recoverable-store wrapper, with synthetic HTTP responses and no model calls.
+It checks early partial text, same-session follow-ups, local abort without
+durable cancellation, read-only replay and replacement, stale callback
+suppression, and duplicate-send rejection. This is not the parked-session
+regression above, a React integration test, a candidate build, or latency proof.
+
 ### 3. Check for live parked sessions before deploying
 
 The repository does not currently have an executable inventory of Eve sessions
