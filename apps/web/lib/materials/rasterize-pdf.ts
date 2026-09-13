@@ -1,8 +1,12 @@
 import { createRequire } from "node:module";
 import { dirname, join, sep } from "node:path";
 
-import { getDocument, type PDFDocumentProxy, type PDFPageProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
-import "pdfjs-dist/legacy/build/pdf.worker.mjs";
+import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
+
+// Keep deferred dependency declarations together at the module boundary.
+// Unlike createRequire aliases, these literal imports are traced by Eve.
+const importPdfEngine = () => import("pdfjs-dist/legacy/build/pdf.mjs");
+const importPdfWorker = () => import("pdfjs-dist/legacy/build/pdf.worker.mjs");
 
 /**
  * PDF bytes to per-page preview JPEGs (HOMA-M1, 2026-07-19): the review
@@ -16,7 +20,7 @@ import "pdfjs-dist/legacy/build/pdf.worker.mjs";
  *
  * Engine: pdfjs-dist (Apache-2.0) drawing onto @napi-rs/canvas (MIT),
  * the same backend pdf.js itself targets for Node. Two loading quirks
- * are deliberate. The worker import above is side-effect only: it
+ * are deliberate. The worker load in pdfEngine is side-effect only: it
  * registers WorkerMessageHandler on globalThis.pdfjsWorker, so pdf.js
  * never attempts the dynamic "./pdf.worker.mjs" import that breaks
  * under bundlers. And @napi-rs/canvas loads through a lazy dynamic
@@ -39,6 +43,34 @@ const RASTER_SCALE = 2.5;
 const RASTER_JPEG_QUALITY = 85;
 
 const nodeRequire = createRequire(import.meta.url);
+type PdfEngine = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
+let pdfEngineModule: PdfEngine | undefined;
+
+let pdfEngineLoading: Promise<PdfEngine> | undefined;
+
+/** Register the packaged worker before getDocument can try a relative import.
+ * Concurrent first readers share a load; failures remain retryable. */
+async function pdfEngine(): Promise<PdfEngine> {
+  if (!pdfEngineModule) {
+    pdfEngineLoading ??= (async () => {
+      const engine = await importPdfEngine();
+      await importPdfWorker();
+      pdfEngineModule = engine;
+      return engine;
+    })().catch((error) => {
+      pdfEngineLoading = undefined;
+      throw error;
+    });
+    return pdfEngineLoading;
+  }
+  return pdfEngineModule;
+}
+
+// Keep existing eager startup outside the protected preview experiment.
+if (!(process.env.VERCEL_ENV === "preview" && process.env.HOMA_PREVIEW_LAZY_PDF === "1")) {
+  pdfEngineModule = nodeRequire("pdfjs-dist/legacy/build/pdf.mjs") as PdfEngine;
+  nodeRequire("pdfjs-dist/legacy/build/pdf.worker.mjs");
+}
 
 type NapiCanvasModule = typeof import("@napi-rs/canvas");
 
@@ -159,7 +191,7 @@ export async function withPdfForReading<T>(
 ): Promise<T> {
   signal.throwIfAborted();
   await loadNapiCanvas();
-  const task = getDocument({
+  const task = (await pdfEngine()).getDocument({
     data: new Uint8Array(pdf), CanvasFactory: NapiCanvasFactory,
     standardFontDataUrl: standardFontDataPath(), maxImageSize: 32_000_000,
     stopAtErrors: true,
@@ -255,7 +287,7 @@ export async function rasterizePdfToJpegs(
   await loadNapiCanvas();
   // Copy: pdf.js may transfer (detach) the buffer it is handed, and the
   // caller still uploads these exact bytes to Blob afterward.
-  const task = getDocument({
+  const task = (await pdfEngine()).getDocument({
     data: new Uint8Array(pdf),
     password: options.password,
     standardFontDataUrl: standardFontDataPath(),
