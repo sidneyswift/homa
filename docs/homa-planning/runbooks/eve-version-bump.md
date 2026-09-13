@@ -49,13 +49,13 @@ three behavior protections until upstream absorbs them:
    streaming and generated-call coverage; `pnpm check:eve-empty-delivery`
    checks the installed harness.
 
-An inactive candidate patch, `patches/eve@0.54.3.patch`, currently ports the
-browser stream-open `TypeError: Load failed` case and the shared function duration
-setting. The new output writer applies the duration before replacing the shared
-function, preserves its other configuration, and rejects malformed configuration.
-The empty-delivery protection is still missing: do not activate this patch or
-accept the candidate as fully protected yet. The current pin and workspace patch
-mapping remain on 0.19.0.
+An inactive candidate patch, `patches/eve@0.54.3.patch`, ports the browser
+stream-open `TypeError: Load failed` case, shared function duration setting, and
+empty-delivery guard in both streaming and generated calls. The new output
+writer applies the duration before replacing the shared function, preserves its
+other configuration, and rejects malformed configuration. The current pin and
+workspace patch mapping remain on 0.19.0; application/build compatibility and
+the real upgrade regression still need proof before accepting this candidate.
 
 To check an extracted candidate copy with its patch applied, without a package
 install or provider request:
@@ -63,6 +63,7 @@ install or provider request:
 ```bash
 node scripts/eve-stream-reconnect-probe.mjs /path/to/patched/eve/package /tmp/eve-reconnect.json
 node scripts/eve-stream-max-duration-check.mjs --package-root /path/to/patched/eve/package
+node scripts/eve-empty-delivery-guard-check.mjs --package-root /path/to/patched/eve/package
 ```
 
 The reconnect probe uses the actual client with synthetic HTTP. It checks an
@@ -73,6 +74,13 @@ The duration probe calls the actual candidate build-output normalizer on tempora
 fixtures, checking configuration preservation and stream aliases. The extracted
 package option cannot certify the installed build and is rejected with VERCEL=1.
 A real candidate build and its default duration check are still required.
+
+The candidate empty-delivery check also runs the actual Eve harness and AI SDK
+with a synthetic model in generated and streaming modes. It verifies one retry
+for an unanswered parent, retention of the recovered answer, a previous turn's
+action not authorizing current silence, allowed silence after a current action,
+and failure after a second empty reply. It performs no provider request. This is
+separate from model-backed behavioral evals and the parked-session upgrade proof.
 
 The candidate regression run is unpatched. Before accepting a new pin, prove
 that each patch hunk is upstream or port it to a patch named for the candidate
