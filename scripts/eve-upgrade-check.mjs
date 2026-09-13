@@ -118,11 +118,14 @@ async function main() {
   for (const profile of [from, to]) assert.ok(existsSync(path.join(repoRoot, profile.patch)), `Missing ${profile.patch}`);
   const storeArguments = existingStoreArguments(repoRoot);
   const status = execFileSync("git", ["status", "--porcelain"], { cwd: repoRoot, encoding: "utf8" });
-  const plan = { from, to, originalInstalled: original, cleanCheckout: status.trim() === "",
+  const familyFixtureReady = process.env.HOMA_EVAL_FAMILY_FIXTURE === "1" && process.env.VERCEL === undefined
+    && process.env.HOMA_EVAL_ALLOW_PROD_WRITES !== "1";
+  const plan = { from, to, originalInstalled: original, cleanCheckout: status.trim() === "", familyFixtureReady,
     logicalMessageSubmissions: 2, observationTimeoutMs: 60_000,
     note: "Configuration preflight only. Real execution installs dependencies, starts local servers, and bills model requests; internal model retries may add calls. Full build and hosted latency are separate gates." };
   if (args.preflight) { console.log(JSON.stringify(plan, null, 2)); return; }
   assert.equal(status.trim(), "", "Start from a clean owned checkout; commit or preserve local work first");
+  assert.ok(familyFixtureReady, "Enable the local fictional family with HOMA_EVAL_FAMILY_FIXTURE=1, without VERCEL or HOMA_EVAL_ALLOW_PROD_WRITES=1, before any model request");
   await requireFreePort(args.port);
   const backupDirectory = mkdtempSync(path.join(tmpdir(), "homa-eve-upgrade-"));
   const snapshot = snapshotDependencies(repoRoot, backupDirectory);
@@ -155,11 +158,12 @@ async function main() {
       body: JSON.stringify({ message: `Before doing anything else, call ask_question with prompt "${UPGRADE_QUESTION}" and allowFreeform true, without options. Wait for the answer. Once answered, reply with exactly the supplied probe value and nothing else. Do not call any other tools.` }),
     });
     const { sessionId, continuationToken } = acceptedUpgradeSession({ version: from.eve, response, body: await response.json() });
+    receipt.sessionId = sessionId;
     const streamUrl = `${baseUrl}/eve/v1/session/${encodeURIComponent(sessionId)}/stream`;
     const parkedEvents = await readUpgradeStream(streamUrl, 60_000);
     controller.signal.throwIfAborted();
+    writeFileSync(path.join(backupDirectory, "from-events.json"), `${JSON.stringify(parkedEvents, null, 2)}\n`);
     const question = parkedUpgradeQuestion(parkedEvents);
-    receipt.sessionId = sessionId;
     receipt.checks.expectedQuestionParked = true;
     const probe = `upgrade-proof:${randomUUID()}`;
     await stopServer(server);
@@ -176,6 +180,7 @@ async function main() {
     receipt.checks.sameSessionAccepted = true;
     const resumedEvents = await readUpgradeStream(streamUrl, 60_000);
     controller.signal.throwIfAborted();
+    writeFileSync(path.join(backupDirectory, "to-events.json"), `${JSON.stringify(resumedEvents, null, 2)}\n`);
     assertUpgradeReply({ baseline: parkedEvents, resumed: resumedEvents, probe });
     receipt.checks.newTurnRepeatedProbeAndCompleted = true;
     await stopServer(server);

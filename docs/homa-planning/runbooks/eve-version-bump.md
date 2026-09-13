@@ -47,6 +47,13 @@ installed versions and the empty-delivery/duration guards are checked before
 each server starts. This is a local command; production environments are refused.
 Use `--port <number>` if the default loopback port 4321 is occupied.
 
+The real run requires `HOMA_EVAL_FAMILY_FIXTURE=1`, no `VERCEL` variable, and
+no production-write opt-out. This reuses the existing fictional Walker family
+context so Homa can ask the test question instead of redirecting an unconfigured
+family to setup. It grants no database access. Supply model credentials only;
+production access rules remain unchanged. Preflight reports `familyFixtureReady`
+and execution rejects a missing fixture before installing or calling the model.
+
 The check starts local servers and makes two logical message submissions through
 Homa's configured model. SDK/model retries may add calls. Arrange a fresh model
 spending allowance before executing it when a previous experiment's allowance is
@@ -56,7 +63,9 @@ procedure, never replace the local environment file with a bare env pull.
 
 Before changing dependencies, the runner saves exact original bytes for
 `apps/web/package.json`, `pnpm-workspace.yaml`, and `pnpm-lock.yaml` in the printed
-private temporary backup directory. It retains phase logs and a JSON receipt.
+private temporary backup directory. It retains phase logs, received events, and a JSON receipt with the admitted session
+ID even if the question-parking assertion fails. These are private diagnostic
+artifacts and may include model reasoning; do not publish them wholesale.
 Success, handled failure, SIGINT, and SIGTERM attempt to stop the owned server,
 restore all three files, reinstall with the original frozen lockfile, and verify
 both file bytes and installed versions. A failed restoration fails the command.
@@ -130,7 +139,7 @@ node --test scripts/eve-upgrade-proof.test.mjs scripts/eve-upgrade-install.test.
 After the preflight and spending allowance are ready, run the real regression:
 
 ```bash
-node scripts/eve-upgrade-check.mjs --to <candidate-version>
+HOMA_EVAL_FAMILY_FIXTURE=1 node scripts/eve-upgrade-check.mjs --to <candidate-version>
 ```
 
 This reproduces the exact failure mode from 2026-07-04: park a session in

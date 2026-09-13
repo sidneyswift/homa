@@ -104,8 +104,11 @@ async function fixture(t, mode = "success") {
     { type: "session.waiting", data: { wait: "next-user-message" } },
   ];
   const env = { ...process.env, PATH: `${path.join(root, "bin")}:${process.env.PATH}`,
-    SYNTHETIC_UPGRADE_ROOT: root, SYNTHETIC_UPGRADE_MODE: mode, SYNTHETIC_UPGRADE_EVENTS: JSON.stringify(events) };
-  delete env.VERCEL; delete env.VERCEL_ENV;
+    HOMA_EVAL_FAMILY_FIXTURE: "1", SYNTHETIC_UPGRADE_ROOT: root, SYNTHETIC_UPGRADE_MODE: mode, SYNTHETIC_UPGRADE_EVENTS: JSON.stringify(events) };
+  delete env.VERCEL; delete env.VERCEL_ENV; delete env.HOMA_EVAL_ALLOW_PROD_WRITES;
+  if (mode === "missing-family") delete env.HOMA_EVAL_FAMILY_FIXTURE;
+  if (mode === "hosted-family") env.VERCEL = "1";
+  if (mode === "production-writes") env.HOMA_EVAL_ALLOW_PROD_WRITES = "1";
   async function run(preflight = false) {
     let result;
     const execution = execute(process.execPath, [path.join(root, "scripts/eve-upgrade-check.mjs"),
@@ -191,4 +194,17 @@ test("interruption stops the owned server and restores exact dependencies", asyn
   assert.equal(result.receipt.interrupted, true);
   assert.equal(result.receipt.restored, true);
   await assertRestored(f);
+});
+
+for (const mode of ["missing-family", "hosted-family", "production-writes"]) test(`${mode} rejects setup before installs or model requests`, async t => {
+  const f = await fixture(t, mode);
+  const preflight = await f.run(true);
+  assert.equal(JSON.parse(preflight.stdout).familyFixtureReady, false);
+  const result = await f.run();
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /Enable the local fictional family/);
+  await assertRestored(f);
+  for (const name of [".synthetic-installs", ".synthetic-posts"]) {
+    await assert.rejects(readFile(path.join(f.root, name)), { code: "ENOENT" });
+  }
 });

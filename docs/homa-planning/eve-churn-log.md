@@ -10,6 +10,23 @@ upgrades are always a deliberate, dated, logged decision, never a silent
 encountered here, whether or not it cost a full day, so the tripwire has real
 data to count against. Newest entries first.
 
+## 2026-09-13 · 0.19.0 to 0.54.3 regression blocked by test setup
+
+The first real local attempt stopped on source Eve 0.19.0: without family
+context, Homa correctly redirected the fictional caller to setup instead of
+calling `ask_question`. Candidate 0.54.3 was never installed or exercised.
+This is not evidence of candidate replay incompatibility. The upgrade remains
+unverified and the active pin remains 0.19.0. September protocol and replay
+changes are reviewed in the [version-bump runbook](runbooks/eve-version-bump.md).
+
+The receipt reports exact dependency restoration. One logical model submission
+completed, with SDK usage of 41,098 input and 69 output tokens; dollar cost has
+not been verified. The correction reuses the existing local-only fictional
+family flag, rejects missing setup before installs or model calls, and retains
+failed-phase events and session identity. All 66 focused procedure and family
+context tests passed. [Issue #1171](https://github.com/sidneyswift/homa/issues/1171)
+tracks the corrected rerun and subsequent hosted latency proof.
+
 ## 2026-07-05 (later) · Test (b) retested against real Vercel Workflow: favorable
 
 Resolved the caveat from the earlier local test (b) failure by testing
