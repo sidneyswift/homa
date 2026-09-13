@@ -1,6 +1,9 @@
 import { defineHook } from "eve/hooks";
 
 import { markChatPreparation } from "../../lib/observability/chat-preparation";
+import { createChatAppendObserver } from "../../lib/observability/chat-append-observation";
+
+const observeAppend = createChatAppendObserver();
 
 /** Stream boundaries only. Never pass event content or auth into the logger. */
 export default defineHook({
@@ -13,13 +16,11 @@ export default defineHook({
       });
     },
     "message.appended"(event, ctx) {
-      // Cumulative length identifies each text block's first nonempty delta
-      // without retaining state across workers. Use the earliest turn marker:
-      // Eve can start another block within a step, and this runs after writing
-      // the durable stream, before any guarantee of browser visibility.
-      if (!event.data.messageDelta.length ||
-          event.data.messageSoFar.length !== event.data.messageDelta.length) return;
-      markChatPreparation("first_message_appended", ctx.session.id, {
+      // These hooks run after the durable append, not after browser rendering.
+      // Delta-only streams receive a distinct, worker-observation marker.
+      const stage = observeAppend(ctx.session.id, event.data);
+      if (!stage) return;
+      markChatPreparation(stage, ctx.session.id, {
         turnId: event.data.turnId,
         sequence: event.data.sequence,
         stepIndex: event.data.stepIndex,

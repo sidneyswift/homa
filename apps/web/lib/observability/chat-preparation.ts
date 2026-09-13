@@ -27,7 +27,8 @@ export type ChatPreparationStage =
   | "canonical_transaction"
   | "embedding_update"
   | "agent_step_started"
-  | "first_message_appended";
+  | "first_message_appended"
+  | "first_observed_message_append";
 
 export interface ChatPreparationMetadata {
   turnId?: string;
