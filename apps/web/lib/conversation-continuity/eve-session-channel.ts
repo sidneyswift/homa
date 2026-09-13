@@ -8,6 +8,13 @@ import type {
 } from "eve/channels";
 import { routeAuth, type AuthFn } from "eve/channels/auth";
 
+import {
+  authorizationUnavailable,
+  callerFromAuth,
+  sessionNotFound,
+  type EveSessionCaller as Caller,
+} from "./eve-session-route-auth";
+
 import type {
   EveSessionBindingClaim,
   EveSessionOwner,
@@ -61,57 +68,6 @@ export function createCachedRouteAuth(
     auth: cachedEntries,
     resolve: async (request) => await routeAuth(request, cachedEntries),
   };
-}
-
-type Caller =
-  | { kind: "app"; familyId: string; memberUserId: string }
-  | { kind: "privileged" };
-
-function callerFromAuth(result: RouteAuthResult): Caller | Response {
-  if (result instanceof Response) return result;
-  if (result.authenticator === "app") {
-    const familyId = result.attributes.familyId;
-    const memberUserId = result.attributes.memberUserId;
-    if (
-      typeof familyId === "string" &&
-      familyId.length > 0 &&
-      typeof memberUserId === "string" &&
-      memberUserId.length > 0 &&
-      result.principalId === memberUserId
-    ) {
-      return { kind: "app", familyId, memberUserId };
-    }
-    return sessionNotFound();
-  }
-  if (
-    result.authenticator === "oidc" &&
-    result.principalType === "runtime" &&
-    result.issuer?.startsWith("https://oidc.vercel.com/")
-  ) {
-    return { kind: "privileged" };
-  }
-  if (
-    result.authenticator === "local-dev" &&
-    result.principalType === "local-dev" &&
-    process.env.VERCEL_ENV !== "production"
-  ) {
-    return { kind: "privileged" };
-  }
-  return sessionNotFound();
-}
-
-function sessionNotFound(): Response {
-  return Response.json(
-    { error: "Session not found.", ok: false },
-    { headers: { "cache-control": "no-store" }, status: 404 },
-  );
-}
-
-function authorizationUnavailable(): Response {
-  return Response.json(
-    { error: "Session authorization failed.", ok: false },
-    { headers: { "cache-control": "no-store" }, status: 503 },
-  );
 }
 
 function logAuthorizationStoreFailure(stage: string, error?: unknown): void {
