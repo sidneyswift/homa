@@ -10,6 +10,23 @@ upgrades are always a deliberate, dated, logged decision, never a silent
 encountered here, whether or not it cost a full day, so the tripwire has real
 data to count against. Newest entries first.
 
+## 2026-09-13 · 0.54.3 new-session control passes, tool parity fails
+
+A new fictional session created and restarted entirely on 0.54.3 passed the four
+paused-question checks, including the completed exact probe answer. Original
+0.19.0 dependencies were restored afterward. This narrows the preceding
+cross-version failure to the upgrade boundary; it does not authorize that bump.
+
+The real candidate runtime also logged five rejected dynamic tools:
+`ask_for_details`, `ask_user_questions`, `create_printable`, `generate_image`,
+and `start_checklist`. Their `execute` callbacks capture non-serializable values.
+The shared `defineBoundedTool` wrapper captures the executor function, which
+conflicts with the durable dynamic callback contract introduced in Eve 0.43.0.
+Retain the deadline and access-boundary protections while resolving this before
+benchmarking a fully functional candidate. A benchmark with omitted tools would
+not represent Homa. No candidate production deployment or five-second latency
+claim is established. [Issue #1171](https://github.com/sidneyswift/homa/issues/1171).
+
 ## 2026-09-13 · Direct 0.19.0 to 0.54.3 continuation rejected
 
 The real paid regression parked the exact `ask_question` on 0.19.0, installed
