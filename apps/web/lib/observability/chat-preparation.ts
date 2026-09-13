@@ -27,6 +27,7 @@ export type ChatPreparationStage =
   | "canonical_transaction"
   | "embedding_update"
   | "agent_step_started"
+  | "model_input_ready"
   | "first_message_appended"
   | "first_observed_message_append";
 
