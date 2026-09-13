@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, GET, POST } from "eve/channels";
 
 import {
@@ -159,9 +160,9 @@ export default defineChannel({
     return { adapterName: "dispatch", delivered: state.delivered };
   },
 
-  async receive(input, { send }) {
+  async receive(input, channelOps) {
     const target = (input.target ?? {}) as DispatchTargetInput;
-    return await send(input.message, {
+    return await sendEveChannelMessage(channelOps, input.message, {
       auth: input.auth ?? null,
       ...dispatchSendOptions(target),
     });
@@ -346,7 +347,7 @@ export default defineChannel({
     // their meaning; the manual run row rides scheduled_for null. Path
     // under /eve/v1/ on purpose: only /eve/* is guaranteed to reach the
     // eve runtime through proxy.ts and the withEve() mount.
-    POST<DispatchState>("/eve/v1/dispatch/run-now", async (req, { send }) => {
+    POST<DispatchState>("/eve/v1/dispatch/run-now", async (req, channelOps) => {
       const secret = process.env.CRON_SECRET;
       if (!secret) {
         return Response.json(
@@ -400,7 +401,7 @@ export default defineChannel({
               : null,
           }),
         sendSession: async ({ message, auth, target }) =>
-          await send(message, {
+          await sendEveChannelMessage(channelOps, message, {
             auth,
             ...dispatchSendOptions(target),
           }),

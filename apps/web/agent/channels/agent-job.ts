@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, GET, POST } from "eve/channels";
 
 import { mapDb } from "../../lib/map/db";
@@ -101,8 +102,8 @@ export default defineChannel({
     return { adapterName: "agent-job", jobId: state.jobId };
   },
 
-  async receive(input, { send }) {
-    return await send(input.message, stageSendOptions(input));
+  async receive(input, channelOps) {
+    return await sendEveChannelMessage(channelOps, input.message, stageSendOptions(input));
   },
 
   events: {
@@ -133,14 +134,14 @@ export default defineChannel({
     // job. CRON_SECRET bearer auth, same as the dispatch run-now route;
     // path under /eve/v1/ on purpose, only /eve/* is guaranteed to
     // reach the eve runtime through proxy.ts and the withEve() mount.
-    POST<AgentJobState>("/eve/v1/agent-job/run-now", async (req, { send }) => {
+    POST<AgentJobState>("/eve/v1/agent-job/run-now", async (req, channelOps) => {
       const secret = process.env.CRON_SECRET;
       if (!secret) return Response.json({ ok: false }, { status: 503 });
       if (req.headers.get("authorization") !== `Bearer ${secret}`) {
         return Response.json({ ok: false }, { status: 401 });
       }
       const started = await runAgentJobsCycle(async (input) =>
-        await send(input.message, stageSendOptions(input)),
+        await sendEveChannelMessage(channelOps, input.message, stageSendOptions(input)),
       );
       return Response.json({ ok: true, started });
     }),

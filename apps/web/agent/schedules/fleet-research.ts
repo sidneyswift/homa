@@ -1,3 +1,4 @@
+import { sendEveChannelTarget } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineSchedule } from "eve/schedules";
 
 import { setTaskRunRuntimeSession } from "../../lib/conversation-continuity/delivery-ledger";
@@ -29,7 +30,8 @@ function topicsPerNight(): number {
 
 export default defineSchedule({
   cron: "47 6 * * *",
-  run({ receive, waitUntil }) {
+  run(scheduleOps) {
+    const { waitUntil } = scheduleOps;
     waitUntil(
       (async () => {
         if (process.env.FLEET_RESEARCH_ENABLED !== "true") return;
@@ -44,7 +46,7 @@ export default defineSchedule({
             await startResearchCell(topic, "scheduled", {
               beginRun: beginFleetRun,
               loadPrior: loadPriorResearch,
-              startSession: async (input) => await receive(researchChannel, input),
+              startSession: async (input) => await sendEveChannelTarget(scheduleOps, researchChannel, input),
               markSession: setTaskRunRuntimeSession,
               failRun: async (runId, message) => {
                 await finishTaskRun(runId, {

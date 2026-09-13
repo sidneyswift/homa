@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, POST } from "eve/channels";
 import { z } from "zod";
 
@@ -76,7 +77,7 @@ export default defineChannel({
   routes: [
     POST<ProgressNextMoveChannelState>(
       "/eve/v1/progress-next-move/start",
-      async (request, { send }) => {
+      async (request, channelOps) => {
         const authorizationFailure =
           internalEveRouteAuthorizationFailure(request);
         if (authorizationFailure) return authorizationFailure;
@@ -106,7 +107,7 @@ export default defineChannel({
         }
 
         try {
-          const session = await send(buildProgressNextMoveMessage(snapshot), {
+          const session = await sendEveChannelMessage(channelOps, buildProgressNextMoveMessage(snapshot), {
             auth: buildProgressNextMoveAuth(snapshot),
             continuationToken: `progress-next-move:${snapshot.contextFingerprint}`,
             mode: "task",

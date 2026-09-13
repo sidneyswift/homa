@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, POST } from "eve/channels";
 
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
@@ -116,7 +117,7 @@ export default defineChannel({
     // reach the eve runtime through proxy.ts and the withEve() mount.
     // The explicit generic lets this route's send() carry typed state
     // (POST cannot infer TState from the surrounding defineChannel).
-    POST<EmailState>("/eve/v1/email/inbound", async (req, { send }) => {
+    POST<EmailState>("/eve/v1/email/inbound", async (req, channelOps) => {
       const secret = process.env.RESEND_INBOUND_SECRET;
       const key = new URL(req.url).searchParams.get("key");
       if (!secret || key !== secret) {
@@ -368,7 +369,7 @@ export default defineChannel({
 
       let startedSession;
       try {
-        startedSession = await send(email.text, {
+        startedSession = await sendEveChannelMessage(channelOps, email.text, {
           auth: {
             authenticator: "resend-email",
             principalId: `email:${email.fromEmail}`,

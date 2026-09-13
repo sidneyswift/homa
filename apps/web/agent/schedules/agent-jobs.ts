@@ -1,3 +1,4 @@
+import { sendEveChannelTarget } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineSchedule } from "eve/schedules";
 
 import { runAgentJobsCycle } from "../agent-jobs-cycle";
@@ -24,9 +25,10 @@ import agentJobChannel from "../channels/agent-job";
 
 export default defineSchedule({
   cron: "*/5 * * * *",
-  run({ receive, waitUntil }) {
+  run(scheduleOps) {
+    const { waitUntil } = scheduleOps;
     waitUntil(
-      runAgentJobsCycle((input) => receive(agentJobChannel, input)),
+      runAgentJobsCycle((input) => sendEveChannelTarget(scheduleOps, agentJobChannel, input)),
     );
   },
 });

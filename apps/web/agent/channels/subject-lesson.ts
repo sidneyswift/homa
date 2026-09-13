@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, GET, POST } from "eve/channels";
 import { z } from "zod";
 
@@ -222,7 +223,7 @@ export default defineChannel({
 
     POST<SubjectLessonAdapterState>(
       "/eve/v1/subject-lesson/start",
-      async (request, { send }) => {
+      async (request, channelOps) => {
         const authorizationFailure =
           subjectLessonRouteAuthorizationFailure(request);
         if (authorizationFailure) return authorizationFailure;
@@ -242,7 +243,7 @@ export default defineChannel({
           const result = await startSubjectLessonAttempt(parsed.data, {
             claimSessionInput: claimSubjectLessonSessionInput,
             startSession: async (message, options) =>
-              await send(message, options),
+              await sendEveChannelMessage(channelOps, message, options),
             setRuntimeSession: setSubjectLessonRuntimeSession,
             finishRun: finishSubjectLessonRun,
             emitEvent: emitSubjectLessonEvent,

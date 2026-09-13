@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, GET, POST } from "eve/channels";
 
 import {
@@ -55,9 +56,9 @@ export default defineChannel({
     return { adapterName: "materials-lab", runId: state.runId };
   },
 
-  async receive(input, { send }) {
+  async receive(input, channelOps) {
     const target = (input.target ?? {}) as Partial<MaterialsLabState>;
-    return await send(input.message, {
+    return await sendEveChannelMessage(channelOps, input.message, {
       auth: input.auth ?? null,
       continuationToken: `materials-lab:${target.runId ?? ""}`,
       state: {
@@ -90,7 +91,7 @@ export default defineChannel({
     // The studio page's Run button (launchStudioRunAction) arriving over
     // HTTP. CRON_SECRET is the gate; the founder gate already ran in the
     // server action, and the sandbox re-check below is the belt.
-    POST<MaterialsLabState>("/eve/v1/materials-lab/run", async (req, { send }) => {
+    POST<MaterialsLabState>("/eve/v1/materials-lab/run", async (req, channelOps) => {
       const secret = process.env.CRON_SECRET;
       if (!secret) {
         return Response.json(
@@ -155,7 +156,7 @@ export default defineChannel({
         startedBy,
       });
       try {
-        const session = await send(buildStudioBrief({ request, childName }), {
+        const session = await sendEveChannelMessage(channelOps, buildStudioBrief({ request, childName }), {
           auth: {
             authenticator: "materials-lab",
             principalId: `materials-lab:${family.id}`,

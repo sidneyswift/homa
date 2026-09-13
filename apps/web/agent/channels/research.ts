@@ -1,3 +1,4 @@
+import { sendEveChannelMessage } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineChannel, GET, POST } from "eve/channels";
 
 import { setTaskRunRuntimeSession } from "../../lib/conversation-continuity/delivery-ledger";
@@ -59,9 +60,9 @@ export default defineChannel({
     return { adapterName: "research" };
   },
 
-  async receive(input, { send }) {
+  async receive(input, channelOps) {
     const target = (input.target ?? {}) as { runId?: string };
-    return await send(input.message, {
+    return await sendEveChannelMessage(channelOps, input.message, {
       auth: input.auth ?? null,
       ...researchSendOptions(target),
     });
@@ -134,7 +135,7 @@ export default defineChannel({
      * running-cell DB lock, prior-source dossier, gate, run ledger, and
      * reaper are identical to the nightly path.
      */
-    POST<ResearchState>("/eve/v1/research/run", async (req, { send }) => {
+    POST<ResearchState>("/eve/v1/research/run", async (req, channelOps) => {
       const secret = process.env.CRON_SECRET;
       if (!secret) {
         return Response.json(
@@ -208,7 +209,7 @@ export default defineChannel({
             loadPrior: loadPriorResearch,
             startSession: async (input) => {
               const target = input.target as { runId?: string };
-              return await send(input.message, {
+              return await sendEveChannelMessage(channelOps, input.message, {
                 auth: input.auth,
                 ...researchSendOptions(target),
               });

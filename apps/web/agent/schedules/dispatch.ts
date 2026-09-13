@@ -1,3 +1,4 @@
+import { sendEveChannelTarget } from "../../lib/conversation-continuity/eve-channel-send";
 import { defineSchedule } from "eve/schedules";
 
 import {
@@ -76,7 +77,8 @@ import dispatchChannel from "../channels/dispatch";
 
 export default defineSchedule({
   cron: "0 * * * *",
-  run({ receive, waitUntil }) {
+  run(scheduleOps) {
+    const { waitUntil } = scheduleOps;
     waitUntil(
       (async () => {
         if (enabledFamilyTaskKinds().length === 0) return;
@@ -129,7 +131,7 @@ export default defineSchedule({
             episodeId,
             deliveryVersion,
           }) =>
-            await receive(dispatchChannel, {
+            await sendEveChannelTarget(scheduleOps, dispatchChannel, {
               message,
               target: buildDispatchTarget(
                 scheduledTask,
@@ -219,7 +221,7 @@ export default defineSchedule({
                   now,
                 }),
               sendSession: async ({ message, auth, target }) =>
-                await receive(dispatchChannel, { message, target, auth }),
+                await sendEveChannelTarget(scheduleOps, dispatchChannel, { message, target, auth }),
               setRuntimeSession: setTaskRunRuntimeSession,
               finishRun: finishTaskRun,
             });
@@ -247,7 +249,7 @@ export default defineSchedule({
               familyId: recap.familyId,
               now,
             });
-            await receive(dispatchChannel, {
+            await sendEveChannelTarget(scheduleOps, dispatchChannel, {
               message: buildSitting1RecapMessage(recap),
               target: {
                 familyId: recap.familyId,
@@ -296,7 +298,7 @@ export default defineSchedule({
               // composed reply without touching task-run finalization.
               // acceptedOfferDeliveryId lets create_printable link and
               // dedupe the fulfillment against this exact offer.
-              await receive(dispatchChannel, {
+              await sendEveChannelTarget(scheduleOps, dispatchChannel, {
                 message: buildFulfillmentRecoveryMessage(offer.offerText),
                 target: {
                   familyId: offer.familyId,
