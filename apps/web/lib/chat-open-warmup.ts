@@ -5,13 +5,32 @@ export function chatOpenWarmupEnabled(input: {
   fixtureUserId: string | undefined;
   userId: string;
   hasFamily: boolean;
-}): boolean {
-  return input.environment === "preview"
+  diagnostics?: string;
+}, log: (message: string) => void = console.info): boolean {
+  const enabled = input.environment === "preview"
     && input.flag === "1"
     && input.hasFamily
     && input.userId !== "anonymous"
     && Boolean(input.fixtureUserId)
     && input.fixtureUserId === input.userId;
+
+  if (input.environment === "preview" && input.diagnostics === "1") {
+    try {
+      log(`[chat-open-warmup-gate] ${JSON.stringify({
+        environmentIsPreview: input.environment === "preview",
+        flagIsOne: input.flag === "1",
+        hasFamily: Boolean(input.hasFamily),
+        userIsNotAnonymous: input.userId !== "anonymous",
+        fixtureIdPresent: Boolean(input.fixtureUserId),
+        userMatchesFixtureId: input.fixtureUserId === input.userId,
+        enabled,
+      })}`);
+    } catch {
+      // Optional diagnostics must not change the page or the warmup decision.
+    }
+  }
+
+  return enabled;
 }
 
 /** Loads the existing Eve admission function, without dispatching a turn. */

@@ -18,6 +18,76 @@ test("warmup is restricted to the configured authenticated preview fixture", () 
   ]) assert.equal(chatOpenWarmupEnabled({ ...fixture, ...override }), false);
 });
 
+test("gate diagnostics require an explicit preview-only opt-in", () => {
+  const messages: string[] = [];
+  const log = (message: string) => { messages.push(message); };
+  for (const diagnostics of [undefined, "", "0", "true"]) {
+    assert.equal(chatOpenWarmupEnabled({ ...fixture, diagnostics }, log), true);
+  }
+  for (const environment of [undefined, "production", "development", ""]) {
+    assert.equal(chatOpenWarmupEnabled({ ...fixture, environment, diagnostics: "1" }, log), false);
+  }
+  assert.deepEqual(messages, []);
+});
+
+test("gate diagnostics emit only seven bounded booleans, never supplied identity or extra data", () => {
+  const messages: string[] = [];
+  const privateValue = "private-test-value-".repeat(500);
+  const input = {
+    ...fixture,
+    diagnostics: "1",
+    userId: privateValue,
+    fixtureUserId: privateValue,
+    auth: { token: "private-token" },
+    family: { name: "Private family" },
+    prompt: "Private prompt",
+  };
+  assert.equal(chatOpenWarmupEnabled(input, message => { messages.push(message); }), true);
+  assert.equal(messages.length, 1);
+  assert(messages[0].startsWith("[chat-open-warmup-gate] "));
+  assert(messages[0].length < 256);
+  const record = JSON.parse(messages[0].slice("[chat-open-warmup-gate] ".length));
+  assert.deepEqual(record, {
+    environmentIsPreview: true,
+    flagIsOne: true,
+    hasFamily: true,
+    userIsNotAnonymous: true,
+    fixtureIdPresent: true,
+    userMatchesFixtureId: true,
+    enabled: true,
+  });
+  assert(Object.values(record).every(value => typeof value === "boolean"));
+  assert(!messages[0].includes("private"));
+  assert(!messages[0].includes("Private"));
+});
+
+test("negative preview diagnostics distinguish the failed gate without enabling warmup", () => {
+  const cases = [
+    { override: { flag: "0" }, field: "flagIsOne" },
+    { override: { hasFamily: false }, field: "hasFamily" },
+    { override: { userId: "anonymous" }, field: "userIsNotAnonymous" },
+    { override: { fixtureUserId: undefined }, field: "fixtureIdPresent" },
+    { override: { userId: "another-user" }, field: "userMatchesFixtureId" },
+  ];
+  for (const { override, field } of cases) {
+    const messages: string[] = [];
+    assert.equal(chatOpenWarmupEnabled({ ...fixture, ...override, diagnostics: "1" }, message => { messages.push(message); }), false);
+    assert.equal(messages.length, 1);
+    const record = JSON.parse(messages[0].slice("[chat-open-warmup-gate] ".length));
+    assert.equal(record[field], false);
+    assert.equal(record.enabled, false);
+    assert.equal(record.environmentIsPreview, true);
+    assert.equal(Object.keys(record).length, 7);
+    assert(Object.values(record).every(value => typeof value === "boolean"));
+  }
+});
+
+test("a diagnostic logger failure cannot affect the gate decision", () => {
+  const log = () => { throw new Error("diagnostic unavailable"); };
+  assert.equal(chatOpenWarmupEnabled({ ...fixture, diagnostics: "1" }, log), true);
+  assert.equal(chatOpenWarmupEnabled({ ...fixture, flag: "0", diagnostics: "1" }, log), false);
+});
+
 test("warmup sends one uncached health GET and releases the response body", async () => {
   const calls: unknown[][] = [];
   let released = false;

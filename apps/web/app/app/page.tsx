@@ -144,6 +144,7 @@ export default async function ChatPage({
       environment: process.env.VERCEL_ENV,
       flag: process.env.HOMA_PREVIEW_CHAT_WARMUP,
       fixtureUserId: process.env.HOMA_PREVIEW_CHAT_WARMUP_USER_ID,
+      diagnostics: process.env.HOMA_PREVIEW_CHAT_WARMUP_DIAGNOSTICS,
       userId,
       hasFamily: Boolean(app),
     }) ? <ChatOpenWarmup key={userId} /> : null}

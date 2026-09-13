@@ -27,6 +27,14 @@ The server page enables the component only with `VERCEL_ENV=preview`, literal
 environment values, not public variables or client-selected inputs. Production
 remains excluded even with the flag set. Use a designated synthetic account.
 
+For activation diagnosis only, explicitly set
+`HOMA_PREVIEW_CHAT_WARMUP_DIAGNOSTICS=1` on a protected preview. The page logs
+`[chat-open-warmup-gate]` with six Boolean eligibility checks and the final
+`enabled` value. It emits no IDs, raw environment values, family information or
+conversation content. Diagnostics are off by default and excluded outside
+`VERCEL_ENV=preview`; a missing diagnostic record alone does not prove which
+environment input is missing. Logging failure cannot change eligibility.
+
 The request retains same-origin cookies for existing preview protection, bypasses
 the browser cache, rejects redirects and has no body or custom headers. It has a
 ten-second deadline, cancels on unmount and never retries. No request is made by
@@ -40,11 +48,19 @@ Send or silently exclude users who send before warmup completes. Record actual
 platform cold/warm state rather than assuming a new tab or deployment is cold.
 Instance reuse and a hosted latency improvement remain unverified.
 
-The six focused lifecycle and eligibility checks run in `pnpm check:chat-ui`.
+The focused lifecycle, eligibility and diagnostic checks run in `pnpm check:chat-ui`.
 The September 12 implementation passed 329 chat checks, the existing two-tab
 browser check, web typecheck and lint with five preexisting warnings. Independent
 review accepted the final lifecycle correction. These are implementation checks,
 not acceptance evidence for the five-second target.
+
+The first three approved warmup-screen attempts missed five seconds; two exact
+first-text measurements were censored by observation failures. The intended
+treatment's first admission was still platform-confirmed cold at 2.31 seconds,
+and no health request appeared in its bounded request log. Actual activation
+remains unverified, so these attempts establish no warmup benefit. The diagnostic
+and remaining allowance are tracked on
+[#1171](https://github.com/sidneyswift/homa/issues/1171#issuecomment-5650114320).
 
 ## Separate Priority arm
 
