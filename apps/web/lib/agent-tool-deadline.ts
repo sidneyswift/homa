@@ -1,3 +1,4 @@
+import * as eveTools from "eve/tools";
 import { defineTool, type ToolContext, type ToolDefinition } from "eve/tools";
 import type { z } from "zod";
 
@@ -215,16 +216,39 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
     execute,
     ...rest
   } = definition;
-  return defineTool({
-    ...rest,
-    async execute(input: z.output<TSchema>, ctx: ToolContext): Promise<TOutput> {
-      if (
-        ctx.session?.auth.current?.attributes.channel === "progress_next_move" &&
-        !allowProgressNextMove
-      ) {
-        throw new ToolAccessBoundaryError("progress_next_move");
-      }
-      return await withToolDeadline(deadlineMs, () => execute(input, ctx), repeatable);
-    },
-  }) as ToolDefinition<z.output<TSchema>, TOutput>;
+  const policy = { deadlineMs, repeatable, allowProgressNextMove };
+  // Definitions and their executor code are created at module scope. Per-turn
+  // or family values belong in input/ctx, never a captured executor closure.
+  // Eve reconstructs the current implementation when the authored module loads;
+  // only this JSON policy is the durable snapshot passed back on replay.
+  async function executeWithPolicy(
+    savedPolicy: typeof policy,
+    input: z.output<TSchema>,
+    ctx: ToolContext,
+  ): Promise<TOutput> {
+    if (
+      ctx.session?.auth.current?.attributes.channel === "progress_next_move" &&
+      !savedPolicy.allowProgressNextMove
+    ) {
+      throw new ToolAccessBoundaryError("progress_next_move");
+    }
+    return await withToolDeadline(
+      savedPolicy.deadlineMs,
+      () => execute(input, ctx),
+      savedPolicy.repeatable,
+    );
+  }
+  // Namespace lookup keeps the reviewed 0.19 runtime working: the public helper
+  // was added later. A candidate must use its explicit callback descriptor,
+  // rather than asking the compiler to serialize the executor function as data.
+  const durableCallback = Reflect.get(eveTools, "defineDurableCallback") as
+    | undefined
+    | ((definition: {
+        closure: typeof policy;
+        callback: typeof executeWithPolicy;
+      }) => (input: z.output<TSchema>, ctx: ToolContext) => Promise<TOutput>);
+  const boundedExecute = typeof durableCallback === "function"
+    ? durableCallback({ closure: policy, callback: executeWithPolicy })
+    : (input: z.output<TSchema>, ctx: ToolContext) => executeWithPolicy(policy, input, ctx);
+  return defineTool({ ...rest, execute: boundedExecute }) as ToolDefinition<z.output<TSchema>, TOutput>;
 }
