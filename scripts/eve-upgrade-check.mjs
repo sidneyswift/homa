@@ -1,213 +1,213 @@
 #!/usr/bin/env node
-/**
- * eve upgrade regression check (automated M0-01 test (a)).
- *
- * Exists because eve 0.18.2 -> 0.19.0 corrupted a session parked in HITL on
- * resume, and the resume API returned ok:true with a DIFFERENT sessionId
- * instead of erroring instead of resuming or failing loudly
- * (docs/homa-planning/eve-churn-log.md, 2026-07-04). Run this against any
- * candidate eve version BEFORE changing the pin in apps/web/package.json.
- * Per docs/homa-planning/runbooks/eve-version-bump.md, a version bump is not
- * safe to ship until this passes.
- *
- * What it does: starts eve at --from, parks a session in HITL via the
- * built-in ask_question tool, stops the server, installs --to, restarts,
- * and resumes the same session using the candidate's HTTP protocol. Fails if the resume
- * response names a different session, the original session never receives
- * the answer, or the server log shows a replay divergence or corrupted
- * event log.
- *
- * This check mutates apps/web/package.json, pnpm-lock.yaml, and installed
- * dependencies while it runs, starts local servers, and calls the configured
- * model through AI Gateway. Start from a clean tree. If interrupted, restore
- * the original pin and lockfile, then run pnpm install. The candidate install
- * does not port the version-specific patch in pnpm-workspace.yaml.
- *
- * Usage:
- *   node scripts/eve-upgrade-check.mjs --to 0.20.0            (from = current pin)
- *   node scripts/eve-upgrade-check.mjs --from 0.19.0 --to 0.20.0
- *
- * Exit code 0 = this local regression passed. Exit code 1 = regression failure.
- * Exit code 2 = invalid or missing arguments. Patch review, parked-session
- * inventory, and an authenticated production smoke remain separate gates.
- */
-
+/** Real paused-question regression. This changes local dependencies and calls
+ * Homa's configured model. --preflight only inspects configuration. The full
+ * procedure and remaining release gates live in the Eve version-bump runbook. */
+import assert from "node:assert/strict";
 import { execFileSync, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { createWriteStream, existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { createWriteStream, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { createServer } from "node:net";
+import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { assertUpgradeReply, parkedUpgradeQuestion, readUpgradeStream, upgradeAnswerBody, usesSessionHandles, UPGRADE_QUESTION } from "./eve-upgrade-proof.mjs";
+import { acceptedUpgradeSession, assertUpgradeReply, parkedUpgradeQuestion, readUpgradeStream,
+  upgradeAnswerBody, UPGRADE_QUESTION } from "./eve-upgrade-proof.mjs";
+import { assertDependenciesRestored, assertInstalledProfile, existingStoreArguments, installedVersions,
+  restoreDependencies, selectDependencies, snapshotDependencies, upgradeProfile } from "./eve-upgrade-install.mjs";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const webPackageJsonPath = path.join(repoRoot, "apps/web/package.json");
 const webDir = path.join(repoRoot, "apps/web");
-const port = 4321; // scratch port, distinct from any dev server
-const baseUrl = `http://127.0.0.1:${port}`;
-const logPath = path.join(repoRoot, ".eve-upgrade-check.log");
 
-function parseArgs() {
-  const args = { from: undefined, to: undefined };
-  const argv = process.argv.slice(2);
-  for (let i = 0; i < argv.length; i += 1) {
-    if (argv[i] === "--from") args.from = argv[++i];
-    if (argv[i] === "--to") args.to = argv[++i];
+function parseArgs(argv) {
+  const args = { preflight: false };
+  for (let i = 0; i < argv.length; i++) {
+    const key = argv[i];
+    if (key === "--preflight") {
+      assert.equal(args.preflight, false, "Duplicate --preflight");
+      args.preflight = true;
+    } else if (key === "--from" || key === "--to" || key === "--port") {
+      assert.ok(argv[i + 1] && !argv[i + 1].startsWith("--"), `Missing value for ${key}`);
+      assert.equal(args[key.slice(2)], undefined, `Duplicate ${key}`);
+      args[key.slice(2)] = argv[++i];
+    } else throw new Error(`Unknown argument: ${key}`);
   }
-  if (!args.to) {
-    console.error("Usage: node scripts/eve-upgrade-check.mjs [--from <version>] --to <version>");
-    process.exit(2);
-  }
+  assert.ok(args.to, "Usage: node scripts/eve-upgrade-check.mjs --to <version> [--from <version>] [--preflight]");
+  args.port = args.port === undefined ? 4321 : Number(args.port);
+  assert.ok(Number.isInteger(args.port) && args.port >= 1024 && args.port <= 65535, "Invalid local port");
   return args;
 }
 
-function readPinnedEveVersion() {
-  const pkg = JSON.parse(readFileSync(webPackageJsonPath, "utf8"));
-  return pkg.dependencies.eve;
+function command(commandName, args, { cwd = repoRoot, signal } = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(commandName, args, { cwd, stdio: "inherit", signal });
+    let failure;
+    child.once("error", error => { failure = error; });
+    // Await close even after abort, so restoration cannot race the installer.
+    child.once("close", (code, killedBy) => failure || code !== 0
+      ? reject(failure ?? new Error(`${commandName} failed (${code ?? killedBy})`)) : resolve());
+  });
 }
 
-function setEveVersion(version) {
-  const raw = readFileSync(webPackageJsonPath, "utf8");
-  const updated = raw.replace(/"eve":\s*"[^"]+"/, `"eve": "${version}"`);
-  writeFileSync(webPackageJsonPath, updated);
-  execFileSync("pnpm", ["install"], { cwd: repoRoot, stdio: "inherit" });
+async function requireFreePort(port) {
+  await new Promise((resolve, reject) => {
+    const probe = createServer();
+    probe.once("error", reject);
+    probe.listen({ host: "127.0.0.1", port, exclusive: true }, () => probe.close(error => error ? reject(error) : resolve()));
+  });
 }
 
-async function waitForHealth(timeoutMs) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch(`${baseUrl}/eve/v1/health`);
-      if (res.ok) return true;
-    } catch {
-      // not up yet
-    }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  return false;
+function startServer(logPath, port) {
+  const log = createWriteStream(logPath, { flags: "wx" });
+  const state = { child: undefined, error: undefined };
+  state.child = spawn("corepack", ["pnpm", "exec", "eve", "dev", "--no-ui", "--port", String(port), "--logs", "all"],
+    { cwd: webDir, stdio: ["ignore", "pipe", "pipe"], detached: true });
+  state.child.on("error", error => { state.error = error; });
+  state.child.stdout.on("data", chunk => log.write(chunk));
+  state.child.stderr.on("data", chunk => log.write(chunk));
+  state.closed = new Promise(resolve => {
+    log.once("error", error => { state.error = error; resolve(); });
+    log.once("finish", resolve);
+    state.child.once("close", () => log.end());
+  });
+  return state;
 }
 
-function startServer() {
-  writeFileSync(logPath, "");
-  const log = createWriteStream(logPath, { flags: "a" });
-  const child = spawn(
-    "npx",
-    ["eve", "dev", "--no-ui", "--port", String(port), "--logs", "all"],
-    { cwd: webDir, stdio: ["ignore", "pipe", "pipe"], detached: true },
-  );
-  child.stdout.on("data", (chunk) => log.write(chunk));
-  child.stderr.on("data", (chunk) => log.write(chunk));
-  return child;
-}
-
-function stopServer(child) {
-  if (!child) return;
+async function stopServer(server) {
+  if (!server?.child.pid) return;
+  const child = server.child;
+  try { process.kill(-child.pid, "SIGKILL"); }
+  catch (error) { if (error.code !== "ESRCH") throw error; }
+  let timer;
   try {
-    process.kill(-child.pid, "SIGKILL");
-  } catch {
-    // already dead
-  }
+    await Promise.race([server.closed, new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Owned Eve server or its log did not close")), 5_000);
+    })]);
+    if (server.error) throw server.error;
+  } finally { clearTimeout(timer); }
 }
 
-function logLineContains(needle) {
-  if (!existsSync(logPath)) return false;
-  return readFileSync(logPath, "utf8").includes(needle);
+async function waitForHealth(server, signal, baseUrl) {
+  const deadline = Date.now() + 60_000;
+  while (Date.now() < deadline) {
+    signal.throwIfAborted();
+    if (server.error) throw server.error;
+    if (server.child.exitCode !== null || server.child.signalCode !== null) throw new Error("Eve exited before becoming healthy");
+    try {
+      const response = await fetch(`${baseUrl}/eve/v1/health`, { signal: AbortSignal.any([signal, AbortSignal.timeout(1500)]) });
+      if (response.ok) return;
+    } catch { signal.throwIfAborted(); }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  throw new Error("Eve did not become healthy within 60 seconds");
 }
 
 async function main() {
-  const { from: fromArg, to } = parseArgs();
-  const originalPin = readPinnedEveVersion();
-  const from = fromArg ?? originalPin;
-  usesSessionHandles(from);
-  usesSessionHandles(to);
-  const failures = [];
+  const args = parseArgs(process.argv.slice(2));
+  const baseUrl = `http://127.0.0.1:${args.port}`;
+  const manifest = JSON.parse(readFileSync(path.join(webDir, "package.json"), "utf8"));
+  const original = installedVersions(repoRoot);
+  assert.equal(original.eve, manifest.dependencies.eve, "Installed Eve must match the original pin");
+  assert.equal(original.ai, upgradeProfile(original.eve).ai, "Installed AI SDK must match the reviewed original profile");
+  assert.ok([original.ai, `^${original.ai}`].includes(manifest.dependencies.ai),
+    "Original AI SDK declaration must match the reviewed installed version");
+  const from = upgradeProfile(args.from ?? original.eve);
+  const to = upgradeProfile(args.to);
+  assert.ok(Number(process.versions.node.split(".")[0]) >= Math.max(from.nodeMajor, to.nodeMajor), "Use Node 24 or later");
+  assert.notEqual(process.env.VERCEL_ENV, "production", "This is a local upgrade regression, not a production command");
+  for (const profile of [from, to]) assert.ok(existsSync(path.join(repoRoot, profile.patch)), `Missing ${profile.patch}`);
+  const storeArguments = existingStoreArguments(repoRoot);
+  const status = execFileSync("git", ["status", "--porcelain"], { cwd: repoRoot, encoding: "utf8" });
+  const plan = { from, to, originalInstalled: original, cleanCheckout: status.trim() === "",
+    logicalMessageSubmissions: 2, observationTimeoutMs: 60_000,
+    note: "Configuration preflight only. Real execution installs dependencies, starts local servers, and bills model requests; internal model retries may add calls. Full build and hosted latency are separate gates." };
+  if (args.preflight) { console.log(JSON.stringify(plan, null, 2)); return; }
+  assert.equal(status.trim(), "", "Start from a clean owned checkout; commit or preserve local work first");
+  await requireFreePort(args.port);
+  const backupDirectory = mkdtempSync(path.join(tmpdir(), "homa-eve-upgrade-"));
+  const snapshot = snapshotDependencies(repoRoot, backupDirectory);
+  const receipt = { ...plan, startedAt: new Date().toISOString(), checks: {}, restored: false, success: false };
+  const controller = new AbortController();
   let server;
-
-  function report(label, ok, detail) {
-    console.log(`${ok ? "PASS" : "FAIL"}  ${label}${ok ? "" : `  (${detail ?? ""})`}`);
-    if (!ok) failures.push(label);
+  const interrupted = () => {
+    controller.abort(new Error("Upgrade regression interrupted"));
+    void stopServer(server).catch(() => {});
+  };
+  process.once("SIGINT", interrupted);
+  process.once("SIGTERM", interrupted);
+  console.log(`Original dependency files and evidence: ${backupDirectory}`);
+  async function install(profile) {
+    controller.signal.throwIfAborted();
+    selectDependencies(repoRoot, snapshot, profile.eve);
+    await command("corepack", ["pnpm", "install", "--no-frozen-lockfile", "--ignore-scripts", ...storeArguments], { signal: controller.signal });
+    assertInstalledProfile(repoRoot, profile);
+    for (const script of ["eve-empty-delivery-guard-check.mjs", "eve-stream-max-duration-check.mjs"]) {
+      await command(process.execPath, [path.join(repoRoot, "scripts", script)], { signal: controller.signal });
+    }
   }
-
   try {
-    console.log(`eve upgrade check: ${from} -> ${to}\n`);
-
-    console.log(`[1/4] starting eve ${from} and parking a session in HITL...`);
-    setEveVersion(from);
-    server = startServer();
-    if (!(await waitForHealth(20000))) throw new Error(`eve ${from} did not become healthy`);
-
-    const startRes = await fetch(`${baseUrl}/eve/v1/session`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        message:
-          `Before doing anything else, call ask_question with prompt "${UPGRADE_QUESTION}" and allowFreeform true, without options. Wait for the answer. Once answered, reply with exactly the supplied probe value and nothing else. Do not call any other tools.`,
-      }),
+    console.log(`Starting Eve ${from.eve} and parking the exact upgrade question...`);
+    await install(from);
+    server = startServer(path.join(backupDirectory, "from.log"), args.port);
+    await waitForHealth(server, controller.signal, baseUrl);
+    const response = await fetch(`${baseUrl}/eve/v1/session`, {
+      method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(60_000)]),
+      body: JSON.stringify({ message: `Before doing anything else, call ask_question with prompt "${UPGRADE_QUESTION}" and allowFreeform true, without options. Wait for the answer. Once answered, reply with exactly the supplied probe value and nothing else. Do not call any other tools.` }),
     });
-    const startBody = await startRes.json();
-    if (!startRes.ok || !startBody.ok) throw new Error("Session start failed.");
-    const { sessionId, continuationToken } = startBody;
-    if (typeof sessionId !== "string" || !sessionId ||
-      (!usesSessionHandles(from) && (typeof continuationToken !== "string" || !continuationToken))) {
-      throw new Error("Session start did not return the identity required by its protocol.");
-    }
-
-    const parkedEvents = await readUpgradeStream(`${baseUrl}/eve/v1/session/${sessionId}/stream`, 15000);
+    const { sessionId, continuationToken } = acceptedUpgradeSession({ version: from.eve, response, body: await response.json() });
+    const streamUrl = `${baseUrl}/eve/v1/session/${encodeURIComponent(sessionId)}/stream`;
+    const parkedEvents = await readUpgradeStream(streamUrl, 60_000);
+    controller.signal.throwIfAborted();
     const question = parkedUpgradeQuestion(parkedEvents);
-    report("the expected question is pending on the from-version", true);
-    // Generated only after parking, so old history cannot contain a valid reply.
+    receipt.sessionId = sessionId;
+    receipt.checks.expectedQuestionParked = true;
     const probe = `upgrade-proof:${randomUUID()}`;
-
-    console.log(`\n[2/4] stopping eve ${from}, installing eve ${to}...`);
-    stopServer(server);
+    await stopServer(server);
     server = undefined;
-    setEveVersion(to);
-
-    console.log(`[3/4] starting eve ${to} and resuming the parked session...`);
-    server = startServer();
-    if (!(await waitForHealth(20000))) throw new Error(`eve ${to} did not become healthy`);
-
-    const resumeRes = await fetch(`${baseUrl}/eve/v1/session/${sessionId}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(upgradeAnswerBody({ version: to, continuationToken, requestId: question.requestId, probe })),
+    console.log(`Installing Eve ${to.eve} and resuming the same conversation...`);
+    await install(to);
+    server = startServer(path.join(backupDirectory, "to.log"), args.port);
+    await waitForHealth(server, controller.signal, baseUrl);
+    const resumed = await fetch(`${baseUrl}/eve/v1/session/${encodeURIComponent(sessionId)}`, {
+      method: "POST", headers: { "content-type": "application/json" }, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(60_000)]),
+      body: JSON.stringify(upgradeAnswerBody({ version: to.eve, continuationToken, requestId: question.requestId, probe })),
     });
-    const resumeBody = await resumeRes.json();
-
-    report(
-      "resume response names the same session",
-      resumeRes.ok && resumeBody.ok === true && resumeBody.sessionId === sessionId,
-      "The resume response must preserve the original session ID.",
-    );
-    if (!resumeRes.ok || resumeBody.ok !== true || resumeBody.sessionId !== sessionId) {
-      throw new Error("Resume did not preserve the original session; aborting.");
-    }
-
-    console.log("\n[4/4] verifying the original session actually processed the answer...");
-    const resumedEvents = await readUpgradeStream(`${baseUrl}/eve/v1/session/${sessionId}/stream`, 15000);
+    acceptedUpgradeSession({ version: to.eve, response: resumed, body: await resumed.json(), expectedSessionId: sessionId });
+    receipt.checks.sameSessionAccepted = true;
+    const resumedEvents = await readUpgradeStream(streamUrl, 60_000);
+    controller.signal.throwIfAborted();
     assertUpgradeReply({ baseline: parkedEvents, resumed: resumedEvents, probe });
-    report("the original session repeats the supplied probe and completes its new turn", true);
-
-    report(
-      "no replay divergence or corrupted event log in server logs",
-      !logLineContains("REPLAY_DIVERGENCE") && !logLineContains("CorruptedEventLogError") && !logLineContains("CORRUPTED_EVENT_LOG"),
-    );
+    receipt.checks.newTurnRepeatedProbeAndCompleted = true;
+    await stopServer(server);
+    server = undefined;
+    const logs = ["from.log", "to.log"].map(name => readFileSync(path.join(backupDirectory, name), "utf8")).join("\n");
+    assert.ok(!/REPLAY_DIVERGENCE|CorruptedEventLogError|CORRUPTED_EVENT_LOG/.test(logs), "Server logs contain replay corruption");
+    receipt.checks.noReplayCorruption = true;
+    receipt.probe = probe;
   } catch (error) {
-    console.error(`\nAborted: ${error.message}`);
-    failures.push("script aborted before completing all checks");
+    receipt.error = error.message;
+    console.error(`Upgrade regression failed: ${error.message}`);
   } finally {
-    stopServer(server);
-    console.log(`\nRestoring pinned eve version to ${originalPin}...`);
-    setEveVersion(originalPin);
+    try {
+      await stopServer(server);
+      restoreDependencies(repoRoot, snapshot);
+      await command("corepack", ["pnpm", "install", "--frozen-lockfile", "--ignore-scripts", ...storeArguments]);
+      assertDependenciesRestored(repoRoot, snapshot);
+      assert.deepEqual(installedVersions(repoRoot), original);
+      receipt.restored = true;
+    } catch (error) {
+      receipt.restorationError = error.message;
+      console.error(`Restoration failed. Original files remain in ${backupDirectory}: ${error.message}`);
+    }
+    process.removeListener("SIGINT", interrupted);
+    process.removeListener("SIGTERM", interrupted);
+    receipt.finishedAt = new Date().toISOString();
+    receipt.interrupted = controller.signal.aborted;
+    receipt.success = receipt.restored && !receipt.error && !receipt.interrupted && Object.keys(receipt.checks).length === 4;
+    writeFileSync(path.join(backupDirectory, "receipt.json"), `${JSON.stringify(receipt, null, 2)}\n`);
   }
-
-  if (failures.length > 0) {
-    console.error(`\n${failures.length} check(s) FAILED. Do not bump the eve pin to ${to} yet.`);
-    console.error(`Server log kept for inspection: ${logPath}`);
-    process.exit(1);
-  }
-  if (existsSync(logPath)) unlinkSync(logPath);
-  console.log(`\nAll checks passed. Safe to bump the eve pin to ${to} (per this test alone; still review the changelog).`);
+  assert.ok(receipt.success, `Upgrade proof incomplete. Inspect ${backupDirectory}/receipt.json`);
+  console.log("Local paused-session regression passed. Full build, deployment gates, and hosted latency verification remain required.");
 }
 
-await main();
+await main().catch(error => { console.error(error.message); process.exitCode = 1; });

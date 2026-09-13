@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { assertUpgradeReply, parkedUpgradeQuestion, readUpgradeStream, upgradeAnswerBody, UPGRADE_QUESTION } from "./eve-upgrade-proof.mjs";
+import { acceptedUpgradeSession, assertUpgradeReply, parkedUpgradeQuestion, readUpgradeStream, upgradeAnswerBody, UPGRADE_QUESTION } from "./eve-upgrade-proof.mjs";
 
 const event = (type, data = {}) => ({ type, data });
 const waiting = event("session.waiting", { wait: "next-user-message" });
@@ -107,4 +107,31 @@ test("our observation deadline retains complete events from an open parked strea
       signal.addEventListener("abort", () => controller.error(new DOMException("Deadline", "AbortError")), { once: true });
     } })));
   assert.deepEqual(events, [waiting]);
+});
+
+
+test("upgrade admission accepts each reviewed protocol without treating admission as reply proof", () => {
+  const response = new Response(null, { status: 202, headers: { "x-eve-session-id": "session-1" } });
+  assert.deepEqual(acceptedUpgradeSession({ version: "0.54.3", response,
+    body: { sessionId: "session-1", deliveryId: "delivery-1" }, expectedSessionId: "session-1" }), { sessionId: "session-1" });
+  assert.deepEqual(acceptedUpgradeSession({ version: "0.19.0", response,
+    body: { ok: true, sessionId: "session-1", continuationToken: "legacy-token" } }),
+  { sessionId: "session-1", continuationToken: "legacy-token" });
+  assert.throws(() => assertUpgradeReply({ baseline: baseline(), resumed: baseline(), probe }), /No new turn/);
+});
+
+test("upgrade admission rejects failed, mismatched, malformed, and mixed-protocol acknowledgements", () => {
+  const accepted = new Response(null, { status: 202 });
+  for (const input of [
+    { response: new Response(null, { status: 409 }), body: { sessionId: "session-1" } },
+    { response: new Response(null, { status: 200 }), body: { sessionId: "session-1" } },
+    { body: { ok: false, sessionId: "session-1" } },
+    { body: { sessionId: "different" }, expectedSessionId: "session-1" },
+    { response: new Response(null, { status: 202, headers: { "x-eve-session-id": "different" } }), body: { sessionId: "session-1" } },
+    ...[null, [], {}, { sessionId: "" }, { sessionId: " a " }, { sessionId: "../different" },
+      { sessionId: "session-1", continuationToken: "old-token" }].map(body => ({ body })),
+  ]) assert.throws(() => acceptedUpgradeSession({ version: "0.54.3", response: accepted, ...input }));
+  for (const body of [{ sessionId: "session-1" }, { ok: true, sessionId: "session-1", continuationToken: " " }]) {
+    assert.throws(() => acceptedUpgradeSession({ version: "0.19.0", response: accepted, body }), /continuation token/);
+  }
 });

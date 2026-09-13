@@ -27,13 +27,43 @@ are the categories that have already broken a parked session once.
 
 ### 2. Run the automated regression check
 
-Start from a clean working tree and record the current `apps/web/package.json`,
-`pnpm-lock.yaml`, installed package, and patch state. The check changes the Eve
-dependency, runs `pnpm install` three times, starts local servers, and calls the
-configured model through AI Gateway. It needs package-network access and the
-model credentials used by `apps/web/agent/model.ts`. If it is interrupted,
-restore the original pin and lockfile, run `pnpm install`, and verify the diff
-before doing anything else.
+Use Node 24 and an owned, clean working tree. Inspect the dependency plan first:
+
+```bash
+node scripts/eve-upgrade-check.mjs --to 0.54.3 --preflight
+```
+
+Preflight reads configuration only: no install, server, or model request. It
+checks installed pins, the reviewed Eve/AI SDK pair, patch files, and the existing
+pnpm store. It reports whether the checkout is clean; real execution requires it.
+The reviewed profiles in `scripts/eve-upgrade-install.mjs` currently pair Eve
+0.19.0 with AI SDK 7.0.14 and Eve 0.54.3 with AI SDK 7.0.93. Review peers and port
+patches before adding another profile. Keep the legacy test alias pinned.
+
+Real execution changes both Eve and AI SDK, selects the matching patch, and uses
+`corepack pnpm` for three scripts-disabled installs: source, candidate, then the
+original frozen lockfile. It reuses the checkout's existing pnpm store. Both
+installed versions and the empty-delivery/duration guards are checked before
+each server starts. This is a local command; production environments are refused.
+Use `--port <number>` if the default loopback port 4321 is occupied.
+
+The check starts local servers and makes two logical message submissions through
+Homa's configured model. SDK/model retries may add calls. Arrange a fresh model
+spending allowance before executing it when a previous experiment's allowance is
+exhausted; the runner does not enforce a dollar cap. Package-network access and
+Homa's Vercel OIDC credentials are required. Follow the repository's token-refresh
+procedure, never replace the local environment file with a bare env pull.
+
+Before changing dependencies, the runner saves exact original bytes for
+`apps/web/package.json`, `pnpm-workspace.yaml`, and `pnpm-lock.yaml` in the printed
+private temporary backup directory. It retains phase logs and a JSON receipt.
+Success, handled failure, SIGINT, and SIGTERM attempt to stop the owned server,
+restore all three files, reinstall with the original frozen lockfile, and verify
+both file bytes and installed versions. A failed restoration fails the command.
+If a hard kill prevents restoration, recover these three files from that exact
+backup directory and perform the frozen install with the original pnpm store
+before continuing. Do not delete the backup until restoration is verified; do
+not publish raw server logs or credentials.
 
 Eve also has a version-specific pnpm patch. Inspect
 `pnpm-workspace.yaml` and `patches/eve@0.19.0.patch`. The current patch keeps
@@ -82,13 +112,24 @@ action not authorizing current silence, allowed silence after a current action,
 and failure after a second empty reply. It performs no provider request. This is
 separate from model-backed behavioral evals and the parked-session upgrade proof.
 
-The candidate regression run is unpatched. Before accepting a new pin, prove
-that each patch hunk is upstream or port it to a patch named for the candidate
-version. Also run `pnpm check:eve-stream-duration` against the candidate
-install so the stream-function duration hunk cannot silently disappear.
+The real regression selects the reviewed candidate patch. Before accepting a new
+pin, prove each protection is upstream or preserve it in that patch. The install
+checks do not replace a complete candidate build and its built-output
+`pnpm check:eve-stream-duration` check.
+
+The procedure itself has offline tests. They cover dependency selection, exact
+restoration, admission versus reply proof, failed installs, wrong-session replies,
+restoration drift, and interruption. The orchestration fixtures use temporary
+local servers and synthetic installers/replies; they do not exercise a real
+package install, durable Eve runtime, or paid model:
 
 ```bash
-node --test scripts/eve-upgrade-proof.test.mjs
+node --test scripts/eve-upgrade-proof.test.mjs scripts/eve-upgrade-install.test.mjs scripts/eve-upgrade-check.test.mjs
+```
+
+After the preflight and spending allowance are ready, run the real regression:
+
+```bash
 node scripts/eve-upgrade-check.mjs --to <candidate-version>
 ```
 
@@ -102,7 +143,11 @@ as unsafe until eve fixes it.
 
 The proof requires a real `input.requested` question before stopping the old
 server, then supplies a newly generated probe value through `inputResponses`.
-The original session must repeat that value and complete a new turn.
+The original session must repeat that value and complete a new turn. A 202
+acknowledgement is admission only: legacy replies require their token and success
+flag, while handle replies require the session ID and reject legacy tokens.
+Candidate admission must name the original session, and an identity header, when
+present, must agree. Both phase logs are flushed and checked for replay corruption.
 `session.waiting` alone only means that a session is idle; it does not prove
 a question is pending. Malformed events and transport failures invalidate proof.
 

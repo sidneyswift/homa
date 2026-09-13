@@ -8,6 +8,31 @@ export function usesSessionHandles(version) {
   return Number(match[1]) > 0 || Number(match[2]) >= 31;
 }
 
+/** Acceptance is only admission; the later stream proof must still complete. */
+export function acceptedUpgradeSession({ version, response, body, expectedSessionId }) {
+  const handles = usesSessionHandles(version);
+  if (response.status !== 202 || !body || typeof body !== "object" || Array.isArray(body) || body.ok === false) {
+    throw new Error("Upgrade request was not accepted by the session protocol.");
+  }
+  const sessionId = body.sessionId;
+  if (typeof sessionId !== "string" || sessionId.length === 0 || /[\s/?#]/.test(sessionId)) {
+    throw new Error("Upgrade response has no valid session identity.");
+  }
+  const headerId = response.headers.get("x-eve-session-id");
+  if ((headerId !== null && headerId !== sessionId) ||
+    (expectedSessionId !== undefined && expectedSessionId !== sessionId)) {
+    throw new Error("Upgrade response did not preserve the original session identity.");
+  }
+  if (handles) {
+    if ("continuationToken" in body) throw new Error("Handle response unexpectedly contains a legacy continuation token.");
+    return { sessionId };
+  }
+  if (body.ok !== true || typeof body.continuationToken !== "string" || !body.continuationToken.trim()) {
+    throw new Error("Legacy upgrade response has no valid continuation token.");
+  }
+  return { sessionId, continuationToken: body.continuationToken };
+}
+
 export function upgradeAnswerBody({ version, continuationToken, requestId, probe }) {
   if (!usesSessionHandles(version) && (typeof continuationToken !== "string" || !continuationToken)) {
     throw new Error("The legacy session protocol requires a continuation token.");
