@@ -1,3 +1,4 @@
+import type { EveReplayClient } from "./eve-session-replay";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
@@ -5,7 +6,6 @@ import {
   Client,
   type ClientSession,
   type HandleMessageStreamEvent,
-  type SessionState,
 } from "eve/client";
 
 import {
@@ -18,6 +18,63 @@ import {
 
 describe("web session binding restoration", () => {
   const now = Date.parse("2026-08-01T16:00:00.000Z");
+
+  it("handle clients continue only an exact server-confirmed tokenless cursor", async () => {
+    const binding = {
+      runtimeSessionId: "handle-session", lastSeenAtMs: now - 1_000,
+      latestSequence: 61, latestUserMessageAtMs: now - 900,
+    };
+    const input = {
+      binding, current: { sessionId: "handle-session", latestSequence: 61 },
+      nowMs: now, timeZone: "America/New_York", usesSessionHandles: true,
+    };
+    assert.deepEqual(webSessionBindingDecision(input), { kind: "current" });
+    for (const changed of [
+      { ...input, usesSessionHandles: false },
+      { ...input, current: { sessionId: "other-session", latestSequence: 61 } },
+      { ...input, current: { sessionId: "handle-session", latestSequence: 60 } },
+      { ...input, binding: { ...binding, latestUserMessageAtMs: null } },
+    ]) assert.equal(webSessionBindingDecision(changed).kind, "wait");
+    let reads = 0;
+    const result = await restoreServerBoundEveSession({
+      client: { sessions: { attach() { assert.fail("exact cursor must not replay"); } } },
+      current: input.current, timeZone: input.timeZone, now: () => now,
+      signal: new AbortController().signal,
+      sleep: async () => { assert.fail("exact handle cursor must not wait for a legacy token"); },
+      fetcher: async () => { reads++; return Response.json({ ok: true, binding }); },
+    });
+    assert.deepEqual(result, { kind: "current" });
+    assert.equal(reads, 1);
+  });
+
+  it("handle recovery reads the existing session and confirms the binding without sending", async () => {
+    let reads = 0;
+    let attached = 0;
+    const events = [
+      { type: "turn.started", data: { sequence: 61, turnId: "turn-61" } },
+      { type: "session.waiting", data: { wait: "next-user-message" } },
+    ] as HandleMessageStreamEvent[];
+    const result = await restoreServerBoundEveSession({
+      client: { sessions: { attach(id, cursor) {
+        attached++;
+        assert.equal(id, "handle-session");
+        assert.deepEqual(cursor, { streamIndex: 0 });
+        return { async *stream(options) { assert.equal(options.startIndex, 0); yield* events; } };
+      } } },
+      timeZone: "America/New_York", now: () => now,
+      signal: new AbortController().signal,
+      fetcher: async () => {
+        reads++;
+        return Response.json({ ok: true, binding: {
+          runtimeSessionId: "handle-session", lastSeenAtMs: now - ACTIVE_WEB_BINDING_MS,
+          latestSequence: 61, latestUserMessageAtMs: now - ACTIVE_WEB_BINDING_MS + 1,
+        } });
+      },
+    });
+    assert.deepEqual(result, { kind: "replayed", runtimeSessionId: "handle-session", events });
+    assert.equal(reads, 2);
+    assert.equal(attached, 1);
+  });
 
   it("mints fresh only when the server has no same-day session", () => {
     assert.deepEqual(
@@ -281,7 +338,7 @@ describe("web session binding restoration", () => {
   });
 
   it("replays the server session to its exact waiting cursor for display only", async () => {
-    let state: SessionState = {
+    let state = {
       sessionId: "waiting-session",
       streamIndex: 0,
     };
@@ -305,7 +362,7 @@ describe("web session binding restoration", () => {
       session() {
         return session;
       },
-    } as Pick<Client, "session">;
+    } as EveReplayClient;
     const bindingResponse = () =>
       Response.json({
         ok: true,
@@ -357,7 +414,7 @@ describe("web session binding restoration", () => {
           },
         } as unknown as ClientSession;
       },
-    } as Pick<Client, "session">;
+    } as EveReplayClient;
 
     const restored = await restoreServerBoundEveSession({
       client,
@@ -566,7 +623,7 @@ describe("web session binding restoration", () => {
       const restored = await restoreServerBoundEveSession({
         client: {
           session() { throw new Error("should not replay"); },
-        } as Pick<Client, "session">,
+        } as EveReplayClient,
         timeZone: "America/New_York",
         signal: new AbortController().signal,
         fetcher: async (url, init) => {
@@ -596,7 +653,7 @@ describe("web session binding restoration", () => {
       const restored = await restoreServerBoundEveSession({
         client: {
           session() { throw new Error("should not replay"); },
-        } as Pick<Client, "session">,
+        } as EveReplayClient,
         timeZone: "America/New_York",
         signal: new AbortController().signal,
         fetcher: async () => {
@@ -640,7 +697,7 @@ describe("web session binding restoration", () => {
             },
           } as unknown as ClientSession;
         },
-      } as Pick<Client, "session">;
+      } as EveReplayClient;
       const restored = await restoreServerBoundEveSession({
         client,
         timeZone: "America/New_York",
@@ -682,7 +739,7 @@ describe("web session binding restoration", () => {
     const restored = await restoreServerBoundEveSession({
       client: {
         session() { throw new Error("should not replay an active turn"); },
-      } as Pick<Client, "session">,
+      } as EveReplayClient,
       timeZone: "America/New_York",
       signal: controller.signal,
       fetcher: async () => {
@@ -719,7 +776,7 @@ describe("web session binding restoration", () => {
         session() {
           throw new Error("should not replay");
         },
-      } as Pick<Client, "session">,
+      } as EveReplayClient,
       timeZone: "America/New_York",
       signal: new AbortController().signal,
       fetcher: async () => {

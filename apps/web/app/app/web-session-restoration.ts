@@ -1,10 +1,10 @@
 import {
   ClientError,
-  type Client,
   type HandleMessageStreamEvent,
 } from "eve/client";
 
 import { shouldStartFreshSession } from "./chat-storage";
+import { attachEveSessionForReplay, type EveReplayClient } from "./eve-session-replay";
 
 /** A binding newer than this may still belong to a turn running elsewhere. */
 export const ACTIVE_WEB_BINDING_MS = 30_000;
@@ -120,6 +120,8 @@ export function webSessionBindingDecision(input: {
   current?: LocalWebSessionCursor;
   nowMs: number;
   timeZone: string;
+  /** Derived from the client API, never from cached credentials or binding data. */
+  usesSessionHandles?: boolean;
 }): WebSessionBindingDecision {
   if (
     input.binding === null ||
@@ -141,8 +143,9 @@ export function webSessionBindingDecision(input: {
   }
   if (
     input.current?.sessionId === input.binding.runtimeSessionId &&
-    typeof input.current.continuationToken === "string" &&
-    input.current.continuationToken.length > 0 &&
+    (input.usesSessionHandles === true ||
+      (typeof input.current.continuationToken === "string" &&
+        input.current.continuationToken.length > 0)) &&
     input.current.latestSequence === latestSequence
   ) {
     return { kind: "current" };
@@ -170,15 +173,12 @@ async function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
 }
 
 async function replayBoundSession(input: {
-  client: Pick<Client, "session">;
+  client: EveReplayClient;
   sessionId: string;
   targetSequence: number;
   signal: AbortSignal;
 }): Promise<WebSessionRestoration | null> {
-  const session = input.client.session({
-    sessionId: input.sessionId,
-    streamIndex: 0,
-  });
+  const session = attachEveSessionForReplay(input.client, input.sessionId);
   const events: HandleMessageStreamEvent[] = [];
   let targetTurnSeen = false;
   let targetBoundary: "waiting" | "terminal" | null = null;
@@ -259,12 +259,13 @@ async function replayBoundSession(input: {
  * turn sequence can continue immediately. A mismatch waits out the active-turn
  * window and is then read to its durable end, so another tab's in-flight turn
  * settles before this one rotates to a fresh writable session. Replayed event
- * positions are display-only because Eve continuation tokens rotate after
- * every follow-up and cannot be reconstructed from the event stream. Read
+ * positions are display-only for the legacy protocol because continuation tokens
+ * cannot be reconstructed from events. Handle clients can continue an exact
+ * verified session/sequence without a token; server ownership checks still apply. Read
  * failures retry within a deadline; they never silently authorize a send.
  */
 export async function restoreServerBoundEveSession(input: {
-  client: Pick<Client, "session">;
+  client: EveReplayClient;
   current?: LocalWebSessionCursor;
   timeZone: string;
   signal: AbortSignal;
@@ -306,6 +307,7 @@ export async function restoreServerBoundEveSession(input: {
           current: input.current,
           nowMs: now(),
           timeZone: input.timeZone,
+          usesSessionHandles: "sessions" in input.client,
         });
         if (decision.kind === "fresh" || decision.kind === "current") {
           return decision;
