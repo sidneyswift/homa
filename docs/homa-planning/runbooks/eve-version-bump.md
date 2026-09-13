@@ -37,13 +37,17 @@ before doing anything else.
 
 Eve also has a version-specific pnpm patch. Inspect
 `pnpm-workspace.yaml` and `patches/eve@0.19.0.patch`. The current patch keeps
-two load-bearing hunks until upstream absorbs them:
+three behavior protections until upstream absorbs them:
 
 1. Client `isStreamDisconnectError` treats WebKit/Chromium "Load failed" /
    "Failed to fetch" as reconnectable stream deaths.
 2. Shared Vercel function `eve/__server.func` writes `maxDuration: "max"` so
    long chat streams use the plan ceiling (Pro: 800s) instead of the Fluid
    Compute default of 300s.
+3. The empty-delivery guard retries a sentinel-only reply when the current
+   parent turn has produced no tool action or visible card. Preserve both
+   streaming and generated-call coverage; `pnpm check:eve-empty-delivery`
+   checks the installed harness.
 
 The candidate regression run is unpatched. Before accepting a new pin, prove
 that each patch hunk is upstream or port it to a patch named for the candidate
@@ -51,6 +55,7 @@ version. Also run `pnpm check:eve-stream-duration` against the candidate
 install so the stream-function duration hunk cannot silently disappear.
 
 ```bash
+node --test scripts/eve-upgrade-proof.test.mjs
 node scripts/eve-upgrade-check.mjs --to <candidate-version>
 ```
 
@@ -61,6 +66,19 @@ corrupted event log in the server logs. **Do not bump the pin if this
 script exits non-zero.** If it fails, log the result in `eve-churn-log.md`
 with the same rigor as the original finding, and treat the candidate version
 as unsafe until eve fixes it.
+
+The proof requires a real `input.requested` question before stopping the old
+server, then supplies a newly generated probe value through `inputResponses`.
+The original session must repeat that value and complete a new turn.
+`session.waiting` alone only means that a session is idle; it does not prove
+a question is pending. Malformed events and transport failures invalidate proof.
+
+Eve 0.31.0 changed the public session protocol to ID-addressed handles and
+removed continuation tokens from HTTP bodies. The regression probe selects
+the candidate's request shape, but that does not migrate Homa's browser,
+mobile, channel, schedule, or session-ownership adapters. Audit those surfaces
+and the new control/child-stream routes before running a September candidate.
+Never loosen the ownership guard merely to get a candidate to boot.
 
 ### 3. Check for live parked sessions before deploying
 

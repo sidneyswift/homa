@@ -12,7 +12,7 @@
  *
  * What it does: starts eve at --from, parks a session in HITL via the
  * built-in ask_question tool, stops the server, installs --to, restarts,
- * and resumes with the saved continuation token. Fails loudly if the resume
+ * and resumes the same session using the candidate's HTTP protocol. Fails if the resume
  * response names a different session, the original session never receives
  * the answer, or the server log shows a replay divergence or corrupted
  * event log.
@@ -33,9 +33,12 @@
  */
 
 import { execFileSync, spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { createWriteStream, existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+
+import { assertUpgradeReply, parkedUpgradeQuestion, readUpgradeStream, upgradeAnswerBody, usesSessionHandles, UPGRADE_QUESTION } from "./eve-upgrade-proof.mjs";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const webPackageJsonPath = path.join(repoRoot, "apps/web/package.json");
@@ -106,38 +109,6 @@ function stopServer(child) {
   }
 }
 
-async function readNdjson(url, timeoutMs) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const events = [];
-  try {
-    const res = await fetch(url, { signal: controller.signal });
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          events.push(JSON.parse(line));
-        } catch {
-          // ignore malformed line
-        }
-      }
-    }
-  } catch {
-    // timeout is expected; the stream stays open waiting for more
-  } finally {
-    clearTimeout(timer);
-  }
-  return events;
-}
-
 function logLineContains(needle) {
   if (!existsSync(logPath)) return false;
   return readFileSync(logPath, "utf8").includes(needle);
@@ -147,6 +118,8 @@ async function main() {
   const { from: fromArg, to } = parseArgs();
   const originalPin = readPinnedEveVersion();
   const from = fromArg ?? originalPin;
+  usesSessionHandles(from);
+  usesSessionHandles(to);
   const failures = [];
   let server;
 
@@ -168,17 +141,22 @@ async function main() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         message:
-          'Before doing anything else, call the ask_question tool with prompt "What is 2+2?" and options ["3","4","5"], allowFreeform false. Do not answer it yourself.',
+          `Before doing anything else, call ask_question with prompt "${UPGRADE_QUESTION}" and allowFreeform true, without options. Wait for the answer. Once answered, reply with exactly the supplied probe value and nothing else. Do not call any other tools.`,
       }),
     });
     const startBody = await startRes.json();
-    if (!startBody.ok) throw new Error(`session start failed: ${JSON.stringify(startBody)}`);
+    if (!startRes.ok || !startBody.ok) throw new Error("Session start failed.");
     const { sessionId, continuationToken } = startBody;
+    if (typeof sessionId !== "string" || !sessionId ||
+      (!usesSessionHandles(from) && (typeof continuationToken !== "string" || !continuationToken))) {
+      throw new Error("Session start did not return the identity required by its protocol.");
+    }
 
-    const parkedEvents = await readNdjson(`${baseUrl}/eve/v1/session/${sessionId}/stream`, 15000);
-    const parked = parkedEvents.some((e) => e.type === "session.waiting");
-    report("session parks in HITL on the from-version", parked);
-    if (!parked) throw new Error("could not establish a parked baseline; aborting");
+    const parkedEvents = await readUpgradeStream(`${baseUrl}/eve/v1/session/${sessionId}/stream`, 15000);
+    const question = parkedUpgradeQuestion(parkedEvents);
+    report("the expected question is pending on the from-version", true);
+    // Generated only after parking, so old history cannot contain a valid reply.
+    const probe = `upgrade-proof:${randomUUID()}`;
 
     console.log(`\n[2/4] stopping eve ${from}, installing eve ${to}...`);
     stopServer(server);
@@ -192,21 +170,23 @@ async function main() {
     const resumeRes = await fetch(`${baseUrl}/eve/v1/session/${sessionId}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ continuationToken, message: "4" }),
+      body: JSON.stringify(upgradeAnswerBody({ version: to, continuationToken, requestId: question.requestId, probe })),
     });
     const resumeBody = await resumeRes.json();
 
     report(
       "resume response names the same session",
-      resumeBody.ok === true && resumeBody.sessionId === sessionId,
-      `expected ${sessionId}, got ${JSON.stringify(resumeBody)}`,
+      resumeRes.ok && resumeBody.ok === true && resumeBody.sessionId === sessionId,
+      "The resume response must preserve the original session ID.",
     );
+    if (!resumeRes.ok || resumeBody.ok !== true || resumeBody.sessionId !== sessionId) {
+      throw new Error("Resume did not preserve the original session; aborting.");
+    }
 
     console.log("\n[4/4] verifying the original session actually processed the answer...");
-    const resumedEvents = await readNdjson(`${baseUrl}/eve/v1/session/${sessionId}/stream`, 15000);
-    const sawSecondTurn = resumedEvents.some((e) => e.type === "turn.started" && e.data?.turnId !== "turn_0");
-    const sawFailure = resumedEvents.some((e) => e.type === "turn.failed" || e.type === "session.failed");
-    report("the original session shows a second turn (the answer was processed)", sawSecondTurn && !sawFailure);
+    const resumedEvents = await readUpgradeStream(`${baseUrl}/eve/v1/session/${sessionId}/stream`, 15000);
+    assertUpgradeReply({ baseline: parkedEvents, resumed: resumedEvents, probe });
+    report("the original session repeats the supplied probe and completes its new turn", true);
 
     report(
       "no replay divergence or corrupted event log in server logs",
