@@ -1,4 +1,5 @@
 import { defineEval } from "eve/evals";
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID, EVAL_FIXTURE_MATERIAL_PRINT_REVISION_TITLE } from "../../lib/family-context-eval-fixture";
 import { activeMaterialContext } from "../../lib/voice/active-material";
 
@@ -6,7 +7,7 @@ export default defineEval({
   description: "A requested change plus printing never prepares the old node before the parent sees the revision.",
   timeoutMs: 300_000,
   async test(t) {
-    const turn = await t.send({
+    const turn = await sendEvalMessage(t, {
       message: "Love it. Make the title bigger and print two copies.",
       clientContext: activeMaterialContext({ id: EVAL_FIXTURE_MATERIAL_PRINT_REVISION_ID, title: EVAL_FIXTURE_MATERIAL_PRINT_REVISION_TITLE, status: "final", revisesId: null, pageCount: 1, pageRoles: ["child"] }),
     });

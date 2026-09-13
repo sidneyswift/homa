@@ -1,5 +1,6 @@
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { EVAL_FIXTURE_MATERIAL_MIXED_ID } from "../../lib/family-context-eval-fixture";
 import { activeMaterialContext } from "../../lib/voice/active-material";
 
@@ -7,7 +8,7 @@ export default defineEval({
   description: "A positive clause followed by a change request revises rather than finalizes.",
   timeoutMs: 300_000,
   async test(t) {
-    const reaction = await t.send({
+    const reaction = await sendEvalMessage(t, {
       message: "I like it, but shorten the directions.",
       clientContext: activeMaterialContext({
         id: EVAL_FIXTURE_MATERIAL_MIXED_ID,

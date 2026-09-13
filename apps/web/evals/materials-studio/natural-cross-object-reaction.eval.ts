@@ -1,6 +1,7 @@
 import { defineEval } from "eve/evals";
 import { satisfies } from "eve/evals/expect";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { EVAL_FIXTURE_MATERIAL_CROSS_OBJECT_ID } from "../../lib/family-context-eval-fixture";
 import { activeMaterialContext } from "../../lib/voice/active-material";
 
@@ -10,7 +11,7 @@ export default defineEval({
     await t.send("Show me Maya's Letter Sounds Workbook from the Binder.");
     t.calledTool("show_material");
 
-    const reaction = await t.send({
+    const reaction = await sendEvalMessage(t, {
       message: "I love Finn's one. Print it.",
       clientContext: activeMaterialContext({
         id: EVAL_FIXTURE_MATERIAL_CROSS_OBJECT_ID,

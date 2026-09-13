@@ -1,5 +1,6 @@
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { messageModalityHeaders } from "../../lib/web-message-modality";
 import { markVoiceTranscription } from "../../lib/voice/transcription-marker";
 import { VOICE_NOTE_JUDGE } from "./judge";
@@ -11,7 +12,7 @@ export default defineEval({
   judge: VOICE_NOTE_JUDGE,
   timeoutMs: 120_000,
   async test(t) {
-    await t.send({
+    await sendEvalMessage(t, {
       message: markVoiceTranscription(
         "Maya read nine pages and practiced the sh sound in ship.",
       ),

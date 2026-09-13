@@ -1,5 +1,6 @@
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import {
   EVAL_ONBOARDING_MODE_HEADER,
   EVAL_ONBOARDING_MODE_HEADER_VALUE,
@@ -23,7 +24,7 @@ export default defineEval({
       [EVAL_ONBOARDING_MODE_HEADER]: EVAL_ONBOARDING_MODE_HEADER_VALUE,
     };
 
-    const cardTurn = await t.send({
+    const cardTurn = await sendEvalMessage(t, {
       message:
         "I skipped the child card and typed here instead. My child is Mia. Can you put the card back up for me?",
       headers,
@@ -37,7 +38,7 @@ export default defineEval({
     }
     cardTurn.notCalledTool("load_skill");
 
-    const answerTurn = await t.send({
+    const answerTurn = await sendEvalMessage(t, {
       message:
         "[[homa:onboarding details_saved summary=Mia-born-April-12-2019-loves-dinosaurs-and-drawing]]",
       headers,

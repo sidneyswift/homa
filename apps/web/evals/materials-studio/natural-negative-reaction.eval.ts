@@ -1,5 +1,6 @@
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { EVAL_FIXTURE_MATERIAL_NEGATIVE_ID } from "../../lib/family-context-eval-fixture";
 import { activeMaterialContext } from "../../lib/voice/active-material";
 
@@ -7,7 +8,7 @@ export default defineEval({
   description: "A concrete negative reaction revises the visible material without approving it first.",
   timeoutMs: 300_000,
   async test(t) {
-    const reaction = await t.send({
+    const reaction = await sendEvalMessage(t, {
       message: "This is too crowded. Give the directions more breathing room.",
       clientContext: activeMaterialContext({
         id: EVAL_FIXTURE_MATERIAL_NEGATIVE_ID,

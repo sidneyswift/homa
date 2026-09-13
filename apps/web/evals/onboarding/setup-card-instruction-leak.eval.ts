@@ -1,6 +1,7 @@
 import { gateway } from "ai";
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { HOMA_MODEL } from "../../agent/model";
 import { messageSourceHeaders } from "../../lib/chat-message-source";
 import {
@@ -34,7 +35,7 @@ export default defineEval({
   },
   timeoutMs: 120_000,
   async test(t) {
-    const turn = await t.send({
+    const turn = await sendEvalMessage(t, {
       message: SETUP_CARD_ANSWER,
       headers: {
         ...messageSourceHeaders("saved_card_answer"),

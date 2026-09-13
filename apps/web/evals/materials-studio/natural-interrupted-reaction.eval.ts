@@ -1,5 +1,6 @@
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { EVAL_FIXTURE_MATERIAL_INTERRUPTED_ID } from "../../lib/family-context-eval-fixture";
 import { activeMaterialContext } from "../../lib/voice/active-material";
 
@@ -7,7 +8,7 @@ export default defineEval({
   description: "A parent who interrupts her approval with a correction gets a revision, not approval.",
   timeoutMs: 300_000,
   async test(t) {
-    const reaction = await t.send({
+    const reaction = await sendEvalMessage(t, {
       message: "I love it. Wait, no, make the directions shorter.",
       clientContext: activeMaterialContext({
         id: EVAL_FIXTURE_MATERIAL_INTERRUPTED_ID,

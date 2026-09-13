@@ -1,5 +1,6 @@
 import { defineEval } from "eve/evals";
 
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import {
   EVAL_FIRST_MAKING_FIXTURE_CHILD_ID,
   EVAL_FIRST_MAKING_MODE_HEADER_VALUE,
@@ -21,7 +22,7 @@ export default defineEval({
   tags: ["model-backed", "onboarding"],
   timeoutMs: 120_000,
   async test(t) {
-    const turn = await t.send({
+    const turn = await sendEvalMessage(t, {
       message: INTEREST_ANSWER,
       headers: {
         [EVAL_ONBOARDING_MODE_HEADER]: EVAL_FIRST_MAKING_MODE_HEADER_VALUE,

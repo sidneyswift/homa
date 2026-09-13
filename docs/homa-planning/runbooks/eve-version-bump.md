@@ -123,6 +123,20 @@ device is contacted. Protocol fixtures currently cover 0.19.0 and 0.54.3 and
 must be reviewed for another version. This does not replace a spoken-device
 check or the real parked-session upgrade proof.
 
+Evaluation messages must retain their per-turn context and headers across the
+SDK change. Run the offline probe against each reviewed version:
+
+```bash
+node scripts/eve-eval-message-probe.mjs apps/web/node_modules/eve /tmp/eve-eval-current.json
+node scripts/eve-eval-message-probe.mjs /path/to/extracted/eve/package /tmp/eve-eval-candidate.json
+```
+
+It exercises the SDK's actual evaluation context with a synthetic session
+driver. It checks worksheet context, voice and onboarding headers, returned
+turn identity, and a failed send without retry. It does not run the behavioral
+evaluations or their model judges, and does not measure latency. The fixtures
+cover 0.19.0 and 0.54.3; review the protocol before using another version.
+
 ### 3. Check for live parked sessions before deploying
 
 The repository does not currently have an executable inventory of Eve sessions

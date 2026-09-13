@@ -150,13 +150,24 @@ test("embedding timing preserves provider settings and awaits its usage write", 
 test("ordinary stream hooks mark the step and each text block's first nonempty append without content", (t) => {
   const logs: unknown[][] = [];
   t.mock.method(console, "info", (...args: unknown[]) => { logs.push(args); });
-  const context = { session: { id: "session-timing" } } as Parameters<typeof timingHook.events["step.started"]>[1];
-  const step = { turnId: "turn-timing", sequence: 2, stepIndex: 0 };
-  timingHook.events["step.started"]({ type: "step.started", data: step }, context);
+  const stepStarted = timingHook.events?.["step.started"];
+  const messageAppended = timingHook.events?.["message.appended"];
+  assert.ok(typeof stepStarted === "function");
+  assert.ok(typeof messageAppended === "function");
+  const context = { session: { id: "session-timing" } } as Parameters<typeof stepStarted>[1];
+  const step = { turnId: "turn-timing", sequence: 2, stepIndex: 0, modelId: "synthetic-model" };
+  stepStarted({
+    type: "step.started", data: step,
+    meta: { at: "2026-09-13T00:00:00.000Z", ...{ id: "timing-step" } },
+  }, context);
   for (const [messageDelta, messageSoFar] of [
     ["", ""], ["private first", "private first"], [" second", "private first second"],
   ]) {
-    timingHook.events["message.appended"]({ type: "message.appended", data: { ...step, messageDelta, messageSoFar } }, context);
+    const legacyAppend = { ...step, messageDelta, messageSoFar };
+    messageAppended({
+      type: "message.appended", data: legacyAppend,
+      meta: { at: "2026-09-13T00:00:00.000Z", ...{ id: `timing-append-${messageSoFar.length}` } },
+    }, context);
   }
   assert.deepEqual(logs.map((row) => JSON.parse(row[1] as string).stage), ["agent_step_started", "first_message_appended"]);
   assert.doesNotMatch(JSON.stringify(logs), /private|messageDelta|messageSoFar/);

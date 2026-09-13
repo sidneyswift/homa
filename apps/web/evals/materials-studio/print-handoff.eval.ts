@@ -1,12 +1,13 @@
 import { defineEval } from "eve/evals";
 import { parseMaterialPrintPart } from "@homa/core";
+import { sendEvalMessage } from "../../lib/eval-send-message";
 import { EVAL_FIXTURE_MATERIAL_DRAFT_ID } from "../../lib/family-context-eval-fixture";
 import { activeMaterialContext } from "../../lib/voice/active-material";
 
 export default defineEval({
   description: "An explicit print request prepares the exact visible draft with the requested copies and exclusion option.",
   async test(t) {
-    const turn = await t.send({
+    const turn = await sendEvalMessage(t, {
       message: "Print two copies of this without an answer key, please.",
       clientContext: activeMaterialContext({ id: EVAL_FIXTURE_MATERIAL_DRAFT_ID, title: "Maya's Fresh Letter Sounds Page", status: "draft", revisesId: null, pageCount: 1, pageRoles: ["child"] }),
     });
