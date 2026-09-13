@@ -6,6 +6,10 @@ import {
   isParentedEveSession,
 } from "../../lib/conversation-continuity/session-lineage";
 import { persistConversationMessage } from "../../lib/conversation-log";
+import {
+  deferredConversationIndexEnabled,
+  drainConversationIndexes,
+} from "../../lib/deferred-conversation-index";
 import { emitMapEvent } from "../../lib/map/events";
 import { protectOutboundChildFraming } from "../../lib/outbound-child-framing";
 import { preparedResearchBriefOwnsCanonicalPersistence } from "../../lib/tasks/research-brief-delivery";
@@ -91,6 +95,7 @@ export default defineHook({
           role: "user",
           content: event.data.message,
           turnId: event.data.turnId,
+          deferUserEmbedding: deferredConversationIndexEnabled(),
         });
         if (persisted && attributes) {
           Object.assign(
@@ -150,6 +155,21 @@ export default defineHook({
           "persist-conversation (assistant) failed:",
           error instanceof Error ? error.message : "unknown",
         );
+      }
+    },
+    async "turn.completed"(_event, ctx) {
+      if (!deferredConversationIndexEnabled()) return;
+      const attributes = ctx.session.auth.current?.attributes;
+      if (shouldSkipConversationPersistence(attributes) || ctx.session.parent) return;
+      const familyId = (attributes as { familyId?: string } | undefined)?.familyId;
+      if (!familyId) return;
+      try {
+        await drainConversationIndexes({ familyId, sessionId: ctx.session.id });
+      } catch (error) {
+        // Derived search data must never turn an already delivered answer
+        // into a failed turn. Canonical rows remain the recovery source.
+        console.error("deferred conversation index drain failed:",
+          error instanceof Error ? error.message : "unknown");
       }
     },
   },

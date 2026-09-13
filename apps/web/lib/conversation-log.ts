@@ -29,6 +29,8 @@ export interface PersistMessageInput {
   content: string;
   turnId: string | undefined;
   finishReason?: string;
+  /** Server-selected experiment: canonical user storage remains awaited. */
+  deferUserEmbedding?: boolean;
 }
 
 export interface PersistConversationMessageDependencies {
@@ -190,14 +192,18 @@ async function persistConversationMessageWithDependencies(
     : undefined;
 
   // Best-effort semantic index, awaited before canonical persistence on
-  // both user and assistant messages. Null means
+  // both user and assistant messages unless the server selects the preview
+  // user-index experiment. That path retries saved rows after turn completion.
+  // Null means
   // this row is findable by FTS only, never a failed write.
   //
   // A hidden onboarding directive is skipped: it is the app talking, so
   // indexing it would put machine text in the same vector space recall
   // searches for the parent's own words, and it would spend an embedding
   // call on a string nobody will ever look for.
-  const embedding = isHiddenDirective(content)
+  const embedding = isHiddenDirective(content) || (
+    input.deferUserEmbedding === true && input.role === "user" && channel === "web"
+  )
     ? null
     : trace
       ? await measureChatPreparation("embedding_total", () => dependencies.embed(content, {
