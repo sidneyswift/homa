@@ -1,5 +1,6 @@
 /** Metadata only: never pass auth attributes, message text, or database rows. */
 export type ChatPreparationStage =
+  | "model_input_ready"
   | "authenticate"
   | "membership"
   | "account_gate"
