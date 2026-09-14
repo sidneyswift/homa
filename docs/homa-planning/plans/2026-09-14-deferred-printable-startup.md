@@ -1,6 +1,8 @@
 # Defer printable browser startup
 
-Status: local verification complete; hosted comparison pending. Owner: gh#1171,
+Status: local verification and eight hosted Sends complete. Candidate passed two
+of four useful-prefix checks; control passed one. The target remains unmet.
+Exact-source CI failed the existing PDF memory guard. Owner: gh#1171,
 draft PR #1191. Astra remains medium. The target remains Send to first useful
 visible answer within five seconds for 19/20 normal replies, including all app
 preparation and hidden model work. No production promotion.
@@ -58,3 +60,92 @@ conversation history and useful-prefix reviews. Compare against the Office-only
 source; do not call a local import reduction a reply-time improvement. Freeze
 the sample protocol before sending. Existing authorization covers synthetic paid
 messages and these protected previews, not production promotion.
+
+## Completed hosted comparison
+
+Candidate 3dcfb559f2f624ab62607acee813d72961e485de and control
+38d8474b67f8a986ddafc506d3229366a0db8676 both reached READY from tracked source.
+The candidate deployment is dpl_9KjY9d5213sUTx4n9YNjMJsmiQyk at
+<https://homa-e6eoc0gv9-homa-1d878b0e.vercel.app>, with session
+wrun_01M2FGT86T072F67J4YKN97KFC. The control is
+dpl_Gs3A7nTRJRFuZ2VtgCrjXFWeVefx at
+<https://homa-hec7nlixg-homa-1d878b0e.vercel.app>, with session
+wrun_01M2FGWZ7XWB7MK67FP7Z2SVJ5. Both retain the frozen settings above.
+
+All eight Sends completed without manual retries or exclusions. Each arm has
+four completed root turn steps, one completed continuation dispatch, seven main
+Astra model calls, four completed tool operations and eight indexed conversation
+messages. All seven model calls per arm advertise 96 tools, defer 92 and use zero
+skill-linked tools. Both synthetic accounts signed out on the first click,
+verified on the sign-in screen; both test tabs were closed. This does not resolve
+the separate production sign-out issue gh#1196.
+
+| Question | Control first text | Candidate first text | Control preparation | Candidate preparation |
+| --- | --- | --- | --- | --- |
+| Syllable definition | 7.305 to 7.373 s | 7.757 to 7.842 s | 5.323 s | 6.071 s |
+| Ten-button counting game | 20.371 to 20.440 s | 21.018 to 21.109 s | 2.320 s | 2.010 s |
+| Help with word guessing | 7.118 to 7.189 s | 4.261 to 4.343 s | 5.068 s | 1.529 s |
+| Number-bond definition | 3.141 to 3.220 s | 4.277 to 4.357 s | 1.319 s | 1.594 s |
+
+Useful-prefix review passes candidate reading help at 4.343 seconds and the
+number-bond definition at 4.909 seconds. Control passes its number-bond definition
+at 3.497 seconds. Earlier first letters do not count. The other five samples
+already exceeded five seconds at their first text, so the useful upper boundary
+was not measured. All samples stayed visible, with at most 70 ms between polls;
+the observer measures viewport DOM visibility, not physical screen paint.
+
+Counting used four main model calls in each arm: load the skill, discover tools
+and read the child map, verify the activity, then answer. Step-to-provider-text
+was 18.981 seconds for candidate and 17.882 seconds for control. Both reading
+answers used one model call this time, unlike the preceding Office experiment.
+Candidate reading used 2.635 seconds from first step to provider text; control
+used 1.950 seconds. Its faster visible arrival is explained by a shorter measured
+preparation interval, not faster generation. Across all eight samples, provider
+text to visible text added 60 to 238 ms.
+
+Both first Sends read the current binding, attached the prior Office-preview
+session stream, read the binding again and created a new Workflow. Candidate
+Send-to-new-admission arrival was 2.685 seconds; control was 2.774 seconds.
+The new admission-to-first-step interval was 3.386 and 2.549 seconds. This is a
+measured restoration sequence, not proof that all of the interval is avoidable,
+or that the same behavior occurs for ordinary production conversations. Platform
+Cold/Hot detail was not inspected for these two deployments. Do not label the
+whole first-turn penalty as a cold start.
+
+The candidate's visible initial history contained 24 user messages versus 18 for
+control. Counting advice again differed: candidate targeted the spoken sequence
+from a September 13 record, while control targeted matching one object to one
+number from September 14. The small sample, unequal histories and advice prevent
+a causal or equal-quality claim. The browser-loader change is not established as
+a hosted speed improvement. No production promotion occurred.
+
+### Validation result and retained evidence
+
+Exact-source CI run 34823055811 failed the 64 MiB PDF memory guard at
+775.305 MiB against a 768 MiB ceiling. Other required jobs passed, with the
+aggregate gate failing as expected. The failed guard is the same independently
+observed inconsistent limit from the Office trial; its cause is not established.
+Do not relax the limit or call CI green. The actual hosted builds succeeded;
+local and hosted bundle totals are different, so the local 142 MB total is not
+a claim about the hosted deployment's aggregate size.
+
+Private roots are /private/tmp/homa-eve-hosted-3dcfb559-printable and
+/private/tmp/homa-eve-hosted-38d8474b-printable-control. They retain source hashes,
+project/deployment receipts, the pre-Send protocol, original samples, manual
+useful-prefix reviews, complete visible answers, sign-out receipts, scoped stored
+messages/model/tool metadata and Workflow step metadata. The runtime exports
+contain 1000 rows each with repeated request records; analysis deduplicates
+measurement events and has all seven model starts per arm. They must not be
+represented as an exhaustive platform-log archive. The failed CI log is
+/private/tmp/homa-printable-ci-failed.log.
+
+## Next question
+
+Prioritize the measured restoration sequence and sequential skill/tool/model
+work over further small import cleanups. The official
+[OpenAI latency guide](https://developers.openai.com/api/docs/guides/latency-optimization),
+checked September 14, recommends reducing sequential requests and parallelizing
+independent work. Applied to Homa, that is a hypothesis to test without bypassing
+fresh family context, child-map grounding or activity verification. The guide
+provides no five-second guarantee for Astra medium. No prompt or workflow policy
+change is included in this experiment.
