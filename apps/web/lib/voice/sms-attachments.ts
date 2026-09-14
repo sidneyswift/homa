@@ -1,9 +1,8 @@
 import { sharpFromBmp } from "@huh-david/bmp-js/sharp";
 import type { FilePart, ImagePart } from "ai";
 import type { Attachment } from "chat";
-import mammoth from "mammoth";
-import * as XLSX from "xlsx";
 
+import { loadSpreadsheetParser, loadWordParser } from "../office-document-loaders";
 import { loadSharp } from "../sharp-loader";
 import {
   describeVideoBytes,
@@ -451,6 +450,7 @@ async function processWordDocument(
     return failedAttachment("document", mediaType);
   }
   try {
+    const mammoth = await loadWordParser();
     const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
     const text = value.trim();
     if (text.length === 0) return failedAttachment("document", mediaType);
@@ -478,6 +478,7 @@ async function processSpreadsheet(
     return failedAttachment("document", mediaType);
   }
   try {
+    const XLSX = await loadSpreadsheetParser();
     const workbook = XLSX.read(Buffer.from(bytes), { type: "buffer" });
     const sheets = workbook.SheetNames.map((name) => {
       const sheet = workbook.Sheets[name];

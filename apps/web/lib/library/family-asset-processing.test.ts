@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { officeFixtures } from "../__fixtures__/office-fixtures";
+
 import {
+  extractFamilyAssetText,
+  extractFamilyAssetSourceDocument,
   familyAssetFieldsFromVerified,
   familyAssetEmbeddingDocument,
   familyAssetProcessingCapability,
@@ -260,3 +264,22 @@ describe("Family Library runtime processing", () => {
     );
   });
 });
+
+for (const fixture of officeFixtures) {
+  it(`reads a real ${fixture.name} for Library ingestion and source sections`, async (t) => {
+    const originalFetch = globalThis.fetch;
+    t.after(() => { globalThis.fetch = originalFetch; });
+    const asset = { ...ASSET, mediaType: fixture.mediaType, originalName: fixture.name,
+      url: `https://assets.public.blob.vercel-storage.com/families/${ASSET.familyId}/library/${fixture.name}` };
+    globalThis.fetch = async (input) => {
+      assert.equal(String(input), asset.url);
+      return new Response(fixture.bytes);
+    };
+    const extracted = await extractFamilyAssetText(asset);
+    assert.ok(extracted.ok);
+    assert.ok(extracted.text.includes(fixture.text), extracted.text);
+    const source = await extractFamilyAssetSourceDocument(asset);
+    assert.ok(source.ok);
+    assert.ok(source.segments.some((segment) => segment.text.includes(fixture.text)));
+  });
+}

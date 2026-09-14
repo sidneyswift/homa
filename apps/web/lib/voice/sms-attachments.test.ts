@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import type { Attachment } from "chat";
 
+import { officeFixtures } from "../__fixtures__/office-fixtures";
 import { loadSharp } from "../sharp-loader";
 import { normalizeSmsAttachments } from "./sms-attachments";
 
@@ -279,3 +280,24 @@ describe("file-typed voice notes (the CG-05 routing gap)", () => {
     assert.equal(record.uploadedFileName, "voice-note.mp3");
   });
 });
+
+for (const fixture of officeFixtures) {
+  it(`extracts a real ${fixture.name} through SMS attachment normalization`, async (t) => {
+    const originalFetch = globalThis.fetch;
+    const originalApiKey = process.env.TELNYX_API_KEY;
+    process.env.TELNYX_API_KEY = "test-key";
+    t.after(() => {
+      globalThis.fetch = originalFetch;
+      restoreEnvironmentValue("TELNYX_API_KEY", originalApiKey);
+    });
+    globalThis.fetch = async (input) => {
+      assert.equal(String(input), MEDIA_URL);
+      return new Response(fixture.bytes);
+    };
+    const result = await normalizeSmsAttachments([
+      { type: "file", mimeType: fixture.mediaType, name: fixture.name, url: MEDIA_URL },
+    ]);
+    assert.equal(result.results[0]?.outcome, "extracted");
+    assert.ok(result.blocks.join("\n").includes(fixture.text), result.blocks.join("\n"));
+  });
+}

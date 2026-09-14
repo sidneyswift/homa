@@ -1,7 +1,6 @@
 import type { FilePart } from "ai";
-import mammoth from "mammoth";
-import * as XLSX from "xlsx";
 
+import { loadSpreadsheetParser, loadWordParser } from "../office-document-loaders";
 import { signedFamilyBlobReadUrl } from "../family-blob";
 import { composeFileMarker, composePhotoMarker } from "./markers";
 import { describeVideoAtUrl, twelveLabsConfigured } from "../video/twelvelabs";
@@ -283,6 +282,7 @@ async function processWordDocument(
   const bytes = await fetchBlobBytes(readableUrl, EXTRACT_MAX_BYTES);
   if (!bytes) return failed(input, "document");
   try {
+    const mammoth = await loadWordParser();
     const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
     const text = value.trim();
     if (text.length === 0) return failed(input, "document");
@@ -307,6 +307,7 @@ async function processSpreadsheet(
   const bytes = await fetchBlobBytes(readableUrl, EXTRACT_MAX_BYTES);
   if (!bytes) return failed(input, "document");
   try {
+    const XLSX = await loadSpreadsheetParser();
     const workbook = XLSX.read(Buffer.from(bytes), { type: "buffer" });
     const sheets = workbook.SheetNames.map((name) => {
       const sheet = workbook.Sheets[name];

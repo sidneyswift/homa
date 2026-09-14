@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
-import mammoth from "mammoth";
-import * as XLSX from "xlsx";
 
+import { loadSpreadsheetParser, loadWordParser } from "../office-document-loaders";
 import { fetchFamilyAssetBytes } from "./family-asset-bytes";
 import { readFamilyPdf, type FamilyPdfDocument } from "./family-pdf-reader";
 import { FAMILY_ASSET_PROCESSING_BUDGET_MS, FAMILY_PDF_READ_BUDGET_MS, FAMILY_PDF_EXTRACTION_VERSION } from "./family-asset-read-contract";
@@ -275,6 +274,7 @@ export function familyPdfTextForIngestion(document: FamilyPdfDocument): FamilyAs
 
 async function extractWordText(bytes: Uint8Array): Promise<FamilyAssetTextExtraction> {
   try {
+    const mammoth = await loadWordParser();
     const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
     const text = clipExtractedText(value);
     return text ? { ok: true, text } : { ok: false, reason: "unreadable" };
@@ -283,8 +283,9 @@ async function extractWordText(bytes: Uint8Array): Promise<FamilyAssetTextExtrac
   }
 }
 
-function extractSpreadsheetText(bytes: Uint8Array): FamilyAssetTextExtraction {
+async function extractSpreadsheetText(bytes: Uint8Array): Promise<FamilyAssetTextExtraction> {
   try {
+    const XLSX = await loadSpreadsheetParser();
     const workbook = XLSX.read(Buffer.from(bytes), { type: "buffer" });
     const sheets = workbook.SheetNames.flatMap((name) => {
       const sheet = workbook.Sheets[name];
@@ -411,6 +412,7 @@ export async function extractFamilyAssetSourceDocument(
 
   if (capability === "word") {
     try {
+      const mammoth = await loadWordParser();
       const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
       const clipped = value.slice(0, FAMILY_CURRICULUM_SOURCE_MAX_CHARS);
       const segments = splitSourceText(clipped, (ordinal) => `Section ${ordinal}`);
@@ -430,6 +432,7 @@ export async function extractFamilyAssetSourceDocument(
 
   if (capability === "spreadsheet") {
     try {
+      const XLSX = await loadSpreadsheetParser();
       const workbook = XLSX.read(Buffer.from(bytes), { type: "buffer" });
       const segments: FamilyAssetSourceSegment[] = [];
       let chars = 0;

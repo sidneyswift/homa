@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
+import { officeFixtures } from "../__fixtures__/office-fixtures";
+
 import {
   chatAttachmentKind,
   normalizeOneChatAttachment,
@@ -115,3 +117,18 @@ describe("web photo attachments (BUG-P3-1 / gh#202)", () => {
     assert.equal(result.part, null);
   });
 });
+
+for (const fixture of officeFixtures) {
+  it(`extracts a real ${fixture.name} through web attachment normalization`, async (t) => {
+    const originalFetch = globalThis.fetch;
+    t.after(() => { globalThis.fetch = originalFetch; });
+    const url = `https://x1y2.public.blob.vercel-storage.com/families/fam-1/chat/${fixture.name}`;
+    globalThis.fetch = async (input) => {
+      assert.equal(String(input), url);
+      return new Response(fixture.bytes);
+    };
+    const result = await normalizeOneChatAttachment({ url, name: fixture.name, mediaType: fixture.mediaType }, "fam-1");
+    assert.equal(result.outcome, "extracted");
+    assert.ok(result.block?.includes(fixture.text), result.block ?? "missing document text");
+  });
+}
