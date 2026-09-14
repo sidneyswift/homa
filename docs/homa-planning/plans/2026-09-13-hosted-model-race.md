@@ -1,6 +1,6 @@
 # Hosted Astra race experiment
 
-Status: implemented and locally verified; hosted comparison pending. Owner: gh#1171.
+Status: first hosted intervention did not activate; corrected pilot pending. Owner: gh#1171.
 
 The target remains Send to first visible useful answer within five seconds for
 19 of 20 normal replies, including preparation, reasoning, tools, transport, and
@@ -18,9 +18,14 @@ The SDK default-provider hook preserves Eve's canonical string model reference,
 Gateway attribution, automatic caching, and compaction identity. Registration
 only wraps Astra. The main-agent attribution header further excludes standalone
 claim extraction and report calls that share Astra. Production and disabled
-previews use their original provider. Provider-executed tools and raw-stream
-consumers bypass the race because their speculative effects or buffering cannot
-be controlled here.
+previews use their original provider. Unknown provider-executed tools and
+raw-stream consumers bypass the race because their speculative effects or
+buffering cannot be controlled here. Eve's specific `gateway.parallel_search`
+tool is allowed: it reads web results and may incur speculative search charges,
+but does not perform application writes. This does not authorize other provider
+tools. The installed Gateway factory and
+[Vercel's description](https://vercel.com/changelog/parallel-web-search-is-now-on-ai-gateway)
+establish this tool's search scope.
 
 Loser cancellation is requested without delaying the winner for acknowledgement.
 Cancellation does not prove billing stopped. Existing usage records describe
@@ -57,3 +62,35 @@ and stream failures, parent cancellation, selected-stream cancellation, slow
 loser acknowledgement, provider-tool bypass, and main-agent-only registration.
 Type checking, focused lint, Next build, Eve build, and the stream-duration guard
 pass. These checks do not prove hosted latency, total cost, or answer quality.
+
+## Interrupted first deployment
+
+Source `c502bad3d5f0a43d02fb7bd3420c8b8ce02beba1` produced two READY,
+protected previews: baseline `dpl_F6pVw6aZokGn6QnwRe3DM4mjgoG3` and candidate
+`dpl_Fcuzvmsqzhdmqy4XUzY23WCw5qmB`. The first three baseline observations were
+20.891-20.973s, 42.197-42.266s, and 12.502-12.595s. The first candidate observation
+was 19.625-19.707s. All four had continuous sampled visibility without a gap
+above one second. No observation met five seconds.
+
+The candidate's three chat calls produced timing logs but no race logs. Stop
+after four of twelve planned Sends; retain the other eight as unattempted.
+Do not interpret this candidate observation as a race treatment result.
+
+Installed Eve 0.19 advertises Gateway's provider-executed Parallel search on
+every main chat request. The original all-provider-tools bypass therefore
+excludes this workload even when no search executes. The correction permits
+only that audited read-only tool and adds explicit registration and skip
+diagnostics. The real-SDK save test now includes the actual Gateway search
+factory, matching this important part of Eve's live tool list.
+
+The two used fixture accounts were signed out; fixtures and all observations
+remain retained. Two original families remain unused and are eligible for a
+fresh corrected six-Send mechanism pilot on matched source deployments. This
+smaller pilot checks activation and tool safety before spending on a larger
+comparison; it does not change the five-second, 19-of-20 goal.
+
+Raw local evidence: `/private/tmp/homa-eve-hosted-c502bad3/`, including protocol,
+four samples, stopped-run state, segmented logs, deployment identities, and
+fixture-scoped server records. Production stayed on deployment
+`dpl_HJ8w7KiwbdjFEcPxeorznh9mDQ7i`, SHA
+`2e67c7f13a0e67b3b8d726c6615180dc94db71ce` at the preflight check.

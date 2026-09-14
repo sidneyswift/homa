@@ -23,6 +23,14 @@ interface Attempt {
 /** These bounds end speculation; they never discard a long reasoning response. */
 const MAX_PREFIX_PARTS = 4096;
 const MAX_PREFIX_CHARS = 1_000_000;
+// Eve 0.19 advertises this Gateway read-only web search on every turn.
+// Speculative searches may cost money, but cannot save or mutate family data.
+const READ_ONLY_PROVIDER_TOOLS = new Set(["gateway.parallel_search"]);
+
+function diagnostic(stage: string, fields: Record<string, unknown>) {
+  try { console.info("[chat-model-race]", JSON.stringify({ stage, ...fields })); }
+  catch { /* Diagnostic failure cannot interrupt model work. */ }
+}
 
 export function previewModelRaceEnabled(): boolean {
   return process.env.VERCEL_ENV === "preview" && process.env.HOMA_PREVIEW_MODEL_RACE === "1";
@@ -48,6 +56,7 @@ export function registerPreviewChatModelRace(): void {
       return typeof value === "function" ? value.bind(target) : value;
     },
   });
+  diagnostic("registered", { atMs: Date.now() });
 }
 
 /** Race inference below tool execution. Never run two Eve turns or mix their protocols. */
@@ -58,11 +67,15 @@ export function createChatModelRace(requireMainAgentTitle = false): LanguageMode
       // Eve attributes its main agent as "web". Standalone extraction/report
       // calls sharing Astra do not have this header and stay single requests.
       if (requireMainAgentTitle && (!previewModelRaceEnabled() || params.headers?.["x-title"] !== "web")) {
+        if (previewModelRaceEnabled()) diagnostic("skipped", { atMs: Date.now(), reason: "outside_main_agent" });
         return doStream();
       }
-      // A provider tool can act remotely before a stream wins. Raw chunks can
-      // also carry unbounded opaque values that cannot be safely prefix-buffered.
-      if (params.tools?.some(tool => tool.type === "provider") || params.includeRawChunks) {
+      // Unknown provider tools can act remotely before selection. Only the
+      // audited read-only search is allowed. Raw chunks can be unbounded.
+      const unsafeProviderTool = params.tools?.some(tool =>
+        tool.type === "provider" && !READ_ONLY_PROVIDER_TOOLS.has(tool.id));
+      if (unsafeProviderTool || params.includeRawChunks) {
+        diagnostic("skipped", { atMs: Date.now(), reason: unsafeProviderTool ? "provider_tool" : "raw_chunks" });
         return doStream();
       }
       params.abortSignal?.throwIfAborted();
@@ -76,12 +89,8 @@ export function createChatModelRace(requireMainAgentTitle = false): LanguageMode
       let selectionEnded = false;
 
       function record(stage: string, fields: Record<string, string | number>) {
-        try {
-          console.info("[chat-model-race]", JSON.stringify({ stage, raceId, startedAtMs,
-            elapsedMs: Math.round(performance.now() - started), ...fields }));
-        } catch {
-          // Diagnostic failure cannot interrupt the selected model stream.
-        }
+        diagnostic(stage, { raceId, startedAtMs,
+          elapsedMs: Math.round(performance.now() - started), ...fields });
       }
       function finish(attempt: Attempt, outcome: "completed" | "failed" | "cancelled") {
         if (attempt.finished) return;

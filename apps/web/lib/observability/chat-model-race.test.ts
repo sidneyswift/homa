@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { streamText, tool, wrapLanguageModel } from "ai";
+import { gateway, streamText, tool, wrapLanguageModel } from "ai";
 import { MockLanguageModelV4, MockProviderV4 } from "ai/test";
 import { z } from "zod";
 
@@ -36,7 +36,8 @@ test("real SDK executes only the winning tool, preserving medium and ignoring hi
   const model = new MockLanguageModelV4({ doStream: async params => {
     const index = opened++;
     assert.equal(params.reasoning, "medium");
-    assert.equal(params.tools?.length, 1);
+    assert.equal(params.tools?.length, 2);
+    assert.ok(params.tools?.some(tool => tool.type === "provider" && tool.id === "gateway.parallel_search"));
     assert.equal(params.providerOptions?.gateway?.caching, "auto");
     if (index === 0) {
       loserSignal = params.abortSignal;
@@ -62,7 +63,7 @@ test("real SDK executes only the winning tool, preserving medium and ignoring hi
   const writes: string[] = [];
   const result = streamText({ model: wrap(model), prompt: "synthetic request", reasoning: "medium", maxRetries: 0,
     providerOptions: { gateway: { caching: "auto" } },
-    tools: { save: tool({ inputSchema: z.object({ value: z.string() }),
+    tools: { web_search: gateway.tools.parallelSearch(), save: tool({ inputSchema: z.object({ value: z.string() }),
       execute: async ({ value }) => { writes.push(value); return { saved: true }; } }) } });
   const chunks = [];
   for await (const chunk of result.fullStream) chunks.push(chunk.type);
