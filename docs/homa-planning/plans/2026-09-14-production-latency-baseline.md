@@ -95,8 +95,10 @@ all boundaries. The production baseline and five-second target remain unchanged.
 
 Local validation: 13 timing/race SDK tests, web typecheck, focused ESLint,
 `VERCEL=1 eve build`, and all three stream-duration checks passed. The emitted
-web server and workflow handler both contain the new first-text marker. No
-hosted run of this instrumentation has been performed yet. One initial
+web server and workflow handler both contain the new first-text marker. The
+subsequent [four-reply hosted diagnostic](2026-09-14-stream-boundary-preview.md)
+captured all timing boundaries and still missed five seconds on every reply.
+One initial
 controlled-stream test omitted the required runtime-context projection and
 waited indefinitely; that test was stopped, corrected, bounded by a timeout,
 and passed in the final suite.
