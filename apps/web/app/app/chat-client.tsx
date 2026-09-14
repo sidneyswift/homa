@@ -164,6 +164,7 @@ import {
   type TurnBoundaryWatchdog,
 } from "./turn-boundary-watchdog";
 import {
+  createWebSessionReplayCache,
   latestTurnSequence,
   replayedMessageTimes,
   replayedHandleCursor,
@@ -407,6 +408,10 @@ export function ChatClient({
     },
     host: "",
   }));
+  // A changed authenticated chat key must discard the old replay, even if this
+  // component stays mounted. The dependency sets lifetime rather than content.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const replayCache = useMemo(() => createWebSessionReplayCache(), [storageKey]);
   const [sessionClient] = useState(() => new Client({
     ...eveConnection,
     ...{ maxReconnectAttempts: STREAM_RECONNECT_ATTEMPTS },
@@ -1214,6 +1219,7 @@ export function ChatClient({
           const localLatestSequence = latestTurnSequence(saved.events ?? []);
           const restored = await measureChatPreparation("session_binding", () => restoreServerBoundEveSession({
             client: sessionClient,
+            replayCache,
             current: {
               sessionId: current.sessionId,
               continuationToken: current.continuationToken,
@@ -1288,6 +1294,7 @@ export function ChatClient({
       revealServerRestoredEvents,
       adoptRestoredHandle,
       sessionClient,
+      replayCache,
       storageKey,
       timeZone,
     ],
@@ -1312,6 +1319,7 @@ export function ChatClient({
         );
         const restored = await restoreServerBoundEveSession({
           client: sessionClient,
+          replayCache,
           current: {
             sessionId: current.sessionId,
             continuationToken: current.continuationToken,
@@ -1354,6 +1362,7 @@ export function ChatClient({
     revealServerRestoredEvents,
     adoptRestoredHandle,
     sessionClient,
+    replayCache,
     shouldRestoreServerBinding,
     storageKey,
     timeZone,

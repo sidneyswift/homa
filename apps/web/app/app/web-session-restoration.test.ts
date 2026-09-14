@@ -10,6 +10,7 @@ import {
 
 import {
   ACTIVE_WEB_BINDING_MS,
+  createWebSessionReplayCache,
   latestTurnSequence,
   replayedMessageTimes,
   replayedHandleCursor,
@@ -802,5 +803,150 @@ describe("web session binding restoration", () => {
     assert.deepEqual(restored, { kind: "unavailable" });
     assert.equal(reads, 3);
     assert.deepEqual(delays, [1_000, 1_000]);
+  });
+});
+
+
+describe("verified replay reuse", () => {
+  function harness() {
+    let now = Date.parse("2026-09-14T16:00:00Z");
+    let binding = {
+      runtimeSessionId: "owned-session", lastSeenAtMs: now - 90_000,
+      latestSequence: 4, latestUserMessageAtMs: now - 89_900,
+    };
+    let reads = 0;
+    let streams = 0;
+    let failNextRead = false;
+    const replayCache = createWebSessionReplayCache();
+    const client: EveReplayClient = {
+      session({ sessionId }) {
+        streams++;
+        assert.equal(sessionId, binding.runtimeSessionId);
+        const sequence = binding.latestSequence;
+        return { async *stream() {
+          yield { type: "turn.started", data: { sequence, turnId: `turn-${sequence}` } } as HandleMessageStreamEvent;
+          yield { type: "session.waiting", data: { wait: "next-user-message" } } as HandleMessageStreamEvent;
+        } };
+      },
+    };
+    const input = {
+      client, replayCache, timeZone: "America/New_York",
+      signal: new AbortController().signal, now: () => now,
+      fetcher: async () => {
+        reads++;
+        if (failNextRead) { failNextRead = false; return new Response(null, { status: 503 }); }
+        return Response.json({ ok: true, binding });
+      },
+      sleep: async (ms: number) => { now += ms; },
+    };
+    return {
+      restore: () => restoreServerBoundEveSession(input), input,
+      counts: () => ({ reads, streams }),
+      change: (next: Partial<typeof binding>) => { binding = { ...binding, ...next }; },
+      advance: (ms: number) => { now += ms; },
+      failNext: () => { failNextRead = true; },
+      currentBinding: () => ({ ...binding }),
+    };
+  }
+
+  it("reuses one confirmed mount replay after a fresh exact binding read, without a writable token", async () => {
+    const h = harness();
+    const mounted = await h.restore();
+    assert.deepEqual(h.counts(), { reads: 2, streams: 1 });
+    const sending = await h.restore();
+    assert.deepEqual(sending, mounted);
+    assert.deepEqual(h.counts(), { reads: 3, streams: 1 });
+    assert.equal(sending?.kind, "replayed");
+    if (sending?.kind === "replayed") assert.equal(replayedHandleCursor(sending, false), null);
+    // The witness is single-use; it cannot stand in for future server checks.
+    await h.restore();
+    assert.deepEqual(h.counts(), { reads: 5, streams: 2 });
+  });
+
+  it("copies verified events before the display layer can mutate them", async () => {
+    const h = harness();
+    const mounted = await h.restore();
+    assert.equal(mounted?.kind, "replayed");
+    if (mounted?.kind !== "replayed") return;
+    mounted.events.splice(0);
+    const sending = await h.restore();
+    assert.equal(sending?.kind, "replayed");
+    if (sending?.kind === "replayed") assert.equal(latestTurnSequence(sending.events), 4);
+  });
+
+  for (const change of [
+    { latestSequence: 5 },
+    { runtimeSessionId: "another-owned-session" },
+    { lastSeenAtMs: Date.parse("2026-09-14T16:00:00Z") - 89_950 },
+    { latestUserMessageAtMs: Date.parse("2026-09-14T16:00:00Z") - 89_800 },
+  ]) it(`replays again when the server changes ${Object.keys(change)[0]}`, async () => {
+    const h = harness();
+    await h.restore(); h.change(change); await h.restore();
+    assert.deepEqual(h.counts(), { reads: 4, streams: 2 });
+  });
+
+  it("does not use an unchanged cached replay after any failed binding check", async () => {
+    const h = harness(); await h.restore(); h.failNext();
+    await h.restore();
+    assert.deepEqual(h.counts(), { reads: 5, streams: 2 });
+  });
+
+  for (const delta of [60_000, -1]) it(`discards the replay when the clock moves ${delta} ms`, async () => {
+    const h = harness(); await h.restore(); h.advance(delta); await h.restore();
+    assert.deepEqual(h.counts(), { reads: 4, streams: 2 });
+  });
+
+  it("waits for possible work in another tab and then replays, even if the old witness exists", async () => {
+    const h = harness(); await h.restore();
+    const at = Date.parse("2026-09-14T16:00:00Z");
+    h.change({ lastSeenAtMs: at - 1_000, latestUserMessageAtMs: at - 900 });
+    await h.restore();
+    assert.equal(h.counts().streams, 2);
+    assert.ok(h.counts().reads > 4);
+  });
+
+  it("does not cache pending approvals or oversized histories", () => {
+    const h = harness();
+    for (const replay of [
+      { kind: "parked" as const, runtimeSessionId: "owned-session", events: [] },
+      { kind: "replayed" as const, runtimeSessionId: "owned-session", events: Array(513).fill({ type: "session.waiting" }) },
+    ]) {
+      const cache = createWebSessionReplayCache();
+      cache.remember(h.currentBinding(), replay, 1);
+      assert.equal(cache.read(h.currentBinding(), 1), undefined);
+    }
+  });
+
+  it("only remembers the new sequence after a change during replay has been confirmed", async () => {
+    const h = harness();
+    const fetcher = h.input.fetcher;
+    let requests = 0;
+    h.input.fetcher = async () => {
+      if (++requests === 2) h.change({ latestSequence: 5 });
+      return fetcher();
+    };
+    const restored = await h.restore();
+    assert.equal(restored?.kind, "replayed");
+    if (restored?.kind === "replayed") assert.equal(latestTurnSequence(restored.events), 5);
+    assert.deepEqual(h.counts(), { reads: 4, streams: 2 });
+    assert.deepEqual(await h.restore(), restored);
+    assert.deepEqual(h.counts(), { reads: 5, streams: 2 });
+  });
+
+  it("keeps the session-handle replay path independent of the legacy cache", async () => {
+    const h = harness(); await h.restore();
+    const legacy = h.input.client;
+    if (!("session" in legacy)) assert.fail("fixture requires the legacy API");
+    await restoreServerBoundEveSession({ ...h.input, client: {
+      sessions: { attach: (sessionId, options) => legacy.session({ sessionId, streamIndex: options.streamIndex }) },
+    } });
+    assert.deepEqual(h.counts(), { reads: 4, streams: 2 });
+  });
+
+  it("does not change the default restoration path without the optional cache", async () => {
+    const h = harness();
+    const input = { ...h.input, replayCache: undefined };
+    await restoreServerBoundEveSession(input); await restoreServerBoundEveSession(input);
+    assert.deepEqual(h.counts(), { reads: 4, streams: 2 });
   });
 });

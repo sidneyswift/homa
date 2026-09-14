@@ -58,6 +58,40 @@ export type WebSessionRestoration =
   | { kind: "fresh" }
   | { kind: "unavailable" };
 
+/** One in-memory replay per mounted chat, never persisted as send authority. */
+export function createWebSessionReplayCache() {
+  let entry: {
+    binding: WebSessionBindingPayload;
+    replay: ReplayedWebSession;
+    verifiedAtMs: number;
+  } | undefined;
+  return {
+    clear() { entry = undefined; },
+    read(binding: WebSessionBindingPayload, nowMs: number): ReplayedWebSession | undefined {
+      const saved = entry;
+      if (saved && nowMs >= saved.verifiedAtMs && nowMs - saved.verifiedAtMs < 60_000 &&
+        saved.binding.runtimeSessionId === binding.runtimeSessionId &&
+        saved.binding.latestSequence === binding.latestSequence &&
+        saved.binding.lastSeenAtMs === binding.lastSeenAtMs &&
+        saved.binding.latestUserMessageAtMs === binding.latestUserMessageAtMs) {
+        entry = undefined;
+        return saved.replay;
+      }
+      entry = undefined;
+      return undefined;
+    },
+    remember(binding: WebSessionBindingPayload, replay: ReplayedWebSession, nowMs: number) {
+      // Pending approvals and incomplete streams must always be read again.
+      // Bound retained events as well as lifetime; oversized histories use replay.
+      if (replay.kind !== "replayed" || replay.events.length > 512) {
+        entry = undefined;
+        return;
+      }
+      entry = { binding: { ...binding }, replay: structuredClone(replay), verifiedAtMs: nowMs };
+    },
+  };
+}
+
 /** Only handle clients can continue a verified idle replay without a token. */
 export function replayedHandleCursor(
   restored: ReplayedWebSession,
@@ -282,6 +316,7 @@ export async function restoreServerBoundEveSession(input: {
   fetcher?: typeof fetch;
   now?: () => number;
   sleep?: (ms: number, signal: AbortSignal) => Promise<void>;
+  replayCache?: ReturnType<typeof createWebSessionReplayCache>;
 }): Promise<WebSessionRestoration | null> {
   const fetcher = input.fetcher ?? fetch;
   const now = input.now ?? Date.now;
@@ -320,15 +355,24 @@ export async function restoreServerBoundEveSession(input: {
           usesSessionHandles: "sessions" in input.client,
         });
         if (decision.kind === "fresh" || decision.kind === "current") {
+          input.replayCache?.clear();
           return decision;
         }
         if (decision.kind === "wait") {
+          input.replayCache?.clear();
           failureCount = 0;
           await sleep(
             Math.min(decision.delayMs, BINDING_RETRY_MS),
             deadlineController.signal,
           );
           continue;
+        }
+        // GH #1171: mount already proved this legacy replay. A fresh authenticated
+        // binding read must still match every witness field before reusing it.
+        // Handle clients retain their existing cursor-based continuation path.
+        if (payload && !("sessions" in input.client)) {
+          const cached = input.replayCache?.read(payload, now());
+          if (cached) return cached;
         }
         const restored = await replayBoundSession({
           client: input.client,
@@ -358,13 +402,20 @@ export async function restoreServerBoundEveSession(input: {
             confirmed?.runtimeSessionId === decision.sessionId &&
             confirmed.latestSequence === decision.targetSequence
           ) {
+            if (!("sessions" in input.client) && restored.kind === "replayed") {
+              input.replayCache?.remember(confirmed, restored, now());
+            } else {
+              input.replayCache?.clear();
+            }
             return restored;
           }
+          input.replayCache?.clear();
           failureCount = 0;
           continue;
         }
         failureCount += 1;
       } catch {
+        input.replayCache?.clear();
         if (input.signal.aborted) return null;
         if (deadlineController.signal.aborted) return { kind: "unavailable" };
         failureCount += 1;
