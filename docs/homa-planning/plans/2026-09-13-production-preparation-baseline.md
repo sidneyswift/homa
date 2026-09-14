@@ -1,7 +1,8 @@
 # Production preparation baseline
 
-Status: protocol prepared; production fixture creation rejected by automatic
-approval review, awaiting explicit founder approval. Owner: gh#1171.
+Status: founder approved the production test on September 14, 2026; all six
+messages completed. Results: [production latency baseline](2026-09-14-production-latency-baseline.md).
+Owner: gh#1171. The approval boundary below is retained as historical evidence.
 
 The target remains Send to first visible useful answer within five seconds for
 19 of 20 normal replies, Astra medium, including app preparation and reasoning.
