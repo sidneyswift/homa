@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { z } from "zod";
 
+import { runMatched, MATCHED_FAMILY } from "../../../../lib/runtime-matched";
+
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { persistCanonicalMessage } from "../../../../lib/conversation-continuity/ledger";
 import { loadFamilyContextPinned, renderFamilyContext } from "../../../../lib/family-context";
@@ -11,7 +13,7 @@ export const runtime = "nodejs";
 export const maxDuration = 180;
 export const preferredRegion = "iad1";
 
-const schema = z.object({ arm: z.enum(["direct", "agents"]), prompt: z.string().trim().min(1).max(1000) }).strict();
+const schema = z.object({ arm: z.enum(["direct", "agents", "matched"]), prompt: z.string().trim().min(1).max(1000) }).strict();
 
 export async function POST(request: Request) {
   const started = Date.now();
@@ -23,6 +25,7 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return new Response("Invalid experiment request", { status: 400 });
   const { arm, prompt } = parsed.data;
+  if (arm === "matched" && auth.familyId !== MATCHED_FAMILY) return new Response("Not found", { status: 404 });
   const sessionId = `runtime-bench-${randomUUID()}`;
   const turnId = randomUUID();
   const attributes = { familyId: auth.familyId, memberUserId: auth.userId };
@@ -48,7 +51,7 @@ export async function POST(request: Request) {
       }, (text) => send({ type: "answer", text, elapsedMs: Date.now() - started }));
       try {
         send({ type: "started", sessionId, arm, model: "gpt-6-astra", reasoning: "medium" });
-        const run = arm === "direct" ? runDirect : runHosted;
+        const run = arm === "matched" ? runMatched : arm === "direct" ? runDirect : runHosted;
         await run(prompt, {
           signal, text: publisher.update, trace: record,
           async lookup() {

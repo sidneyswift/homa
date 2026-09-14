@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { Logo } from "../../../components/brand/Logo";
 
 export function RuntimeBench() {
-  const [arm, setArm] = useState("direct");
+  const [arm, setArm] = useState("matched");
   const [prompt, setPrompt] = useState("");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -56,7 +56,7 @@ export function RuntimeBench() {
     <h1>Response timing preview</h1>
     <p>Small question comparison. Sign in with the reserved test account first. Each Send starts a fresh conversation.</p>
     <label>Runtime <select aria-label="Runtime" value={arm} onChange={(event) => setArm(event.target.value)} disabled={busy}>
-      <option value="direct">Vercel without Workflows</option><option value="agents">OpenAI hosted agent</option>
+      <option value="matched">Exact full request replay</option><option value="direct">Vercel without Workflows</option><option value="agents">OpenAI hosted agent</option>
     </select></label>
     <form onSubmit={submit} className="flex flex-col gap-4">
       <textarea aria-label="Message Homa" value={prompt} onChange={(event) => setPrompt(event.target.value)} disabled={busy} className="rounded-md border border-border p-3" />
