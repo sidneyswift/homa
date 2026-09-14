@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 
-import chromium from "@sparticuz/chromium";
-import puppeteer, { type Browser, type Page } from "puppeteer-core";
+import type { Browser, Page } from "puppeteer-core";
 
 import { resolveEvalBlobStore } from "./eval-blob-store";
+import { loadBundledPrintableChromium, loadPrintableBrowserDriver } from "./printable-browser-loader";
 import {
   isAllowedPrintableSubresourceUrl,
   SHEET_BODY_CLASS,
@@ -99,6 +99,10 @@ export class RendererUnavailableError extends Error {
 async function launchBrowser(): Promise<Browser> {
   // Vercel (and any Lambda-shaped runtime) gets the bundled binary.
   if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const [puppeteer, chromium] = await Promise.all([
+      loadPrintableBrowserDriver(),
+      loadBundledPrintableChromium(),
+    ]);
     // Worksheets never need WebGL; skipping the graphics stack trims boot.
     chromium.setGraphicsMode = false;
     return puppeteer.launch({
@@ -112,6 +116,7 @@ async function launchBrowser(): Promise<Browser> {
     process.env.CHROME_EXECUTABLE_PATH ??
     LOCAL_CHROME_PATHS.find((path) => existsSync(path));
   if (!localPath) throw new RendererUnavailableError();
+  const puppeteer = await loadPrintableBrowserDriver();
   return puppeteer.launch({
     executablePath: localPath,
     headless: true,
