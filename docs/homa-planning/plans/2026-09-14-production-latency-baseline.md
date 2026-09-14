@@ -58,6 +58,49 @@ Client-to-server timestamp differences assume aligned clocks; clock offsets
 were not independently calibrated. The six Send-to-visible-text measurements
 use the observer's own clock and do not depend on that assumption.
 
+### Follow-up: separate model setup from streamed answer delivery
+
+Read-only inspection found no recorded Vercel trace for the slow definition's
+exact worker request (`7b5db-1789362323767-7d49905c2eb0`, trace lookup returned
+404). The exact Agent Runs lookup did not return within roughly two minutes
+and was stopped. Neither lookup sent another model request. Clicking the
+external API path in the platform panel only copies the path; it does not
+expose the missing request-start timing. The displayed API duration is not
+established as answer-text latency.
+
+Installed, patched Eve 0.19.0 source confirms that `tool-loop.js` emits
+`step.started` before asynchronous provider-tool preparation and advertised-tool
+assembly. `emission.js` forwards each answer delta to the ordered durable
+emitter. This ordering identifies possible measurement gaps; it does not prove
+which one caused the production outlier.
+
+The preview-only `chat-model-timing.ts` observer now records model-stream
+request, stream opening, first nonblank reasoning delta and first nonblank
+answer delta, alongside existing SDK call and durable append markers. It logs
+coordinates and times only. It does not change model settings or add requests.
+Correlation uses the prompt-array identity supplied by installed AI 7.0.14;
+the SDK's public event type omits that runtime field, so a guard logs
+`model_stream_correlation_unavailable` and leaves inference unchanged if it
+disappears. Real SDK tests verify this correlation across concurrent sessions.
+These are worker observation times, not independent network packet timestamps
+or proof of browser paint.
+
+Next hosted diagnostic: keep Astra medium and racing disabled; join the new
+markers to first durable text and continuous viewport observations for repeated
+one-sentence definitions. Before-provider delay implicates remaining setup;
+provider-to-first-text delay implicates model/gateway streaming; first-text to
+durable-append delay implicates the delivery queue. Do not attribute the old
+24-second bucket using the new instrumentation until a hosted sample captures
+all boundaries. The production baseline and five-second target remain unchanged.
+
+Local validation: 13 timing/race SDK tests, web typecheck, focused ESLint,
+`VERCEL=1 eve build`, and all three stream-duration checks passed. The emitted
+web server and workflow handler both contain the new first-text marker. No
+hosted run of this instrumentation has been performed yet. One initial
+controlled-stream test omitted the required runtime-context projection and
+waited indefinitely; that test was stopped, corrected, bounded by a timeout,
+and passed in the final suite.
+
 Family-context assembly took 198–376ms. User persistence, including its
 embedding, took 341–997ms. They are contained within the preparation bucket,
 not additional waits to add to it. The follow-ups each perform `load_skill`,

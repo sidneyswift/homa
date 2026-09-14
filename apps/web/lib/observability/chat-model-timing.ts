@@ -1,4 +1,4 @@
-import { registerTelemetry, type Telemetry } from "ai";
+import { gateway, registerTelemetry, wrapLanguageModel, type LanguageModelMiddleware, type Telemetry } from "ai";
 
 type Attempt = {
   sessionId: string;
@@ -17,12 +17,47 @@ export function previewModelTimingEnabled(): boolean {
 }
 
 /** No request bodies, response text, headers, auth or provider metadata enter logs. */
-export function createChatModelTiming(): Telemetry {
+export function createChatModelTiming(): Telemetry & { middleware: LanguageModelMiddleware } {
   const calls = new Map<string, Attempt>();
+  // The installed SDK passes this same prompt array to telemetry and doStream.
+  // Weak keys correlate concurrent calls without retaining or logging content.
+  const prompts = new WeakMap<object, { callId: string; attempt: Attempt }>();
   const write = (row: Record<string, string | number | undefined>) => {
     try { console.info("[chat-model]", JSON.stringify(row)); } catch { /* Observation cannot fail a turn. */ }
   };
   return {
+    middleware: {
+      specificationVersion: "v4",
+      async wrapStream({ params, doStream }) {
+        const match = prompts.get(params.prompt);
+        if (!match) return doStream();
+        const startedAtMs = Date.now();
+        const started = performance.now();
+        const record = (stage: string) => write({ stage, callId: match.callId,
+          sessionId: match.attempt.sessionId, turnId: match.attempt.turnId,
+          sequence: match.attempt.sequence, stepIndex: match.attempt.stepIndex,
+          startedAtMs, observedAtMs: Date.now(), elapsedMs: performance.now() - started });
+        record("model_stream_requested");
+        const result = await doStream();
+        // Stream creation is distinct from receiving any answer text.
+        record("model_stream_opened");
+        let firstText = false;
+        let firstReasoning = false;
+        return { ...result, stream: result.stream.pipeThrough(new TransformStream({
+          transform(part, controller) {
+            if (!firstText && part.type === "text-delta" && part.delta.trim().length > 0) {
+              firstText = true;
+              record("model_stream_first_text");
+            }
+            if (!firstReasoning && part.type === "reasoning-delta" && part.delta.trim().length > 0) {
+              firstReasoning = true;
+              record("model_stream_first_reasoning");
+            }
+            controller.enqueue(part);
+          },
+        })) };
+      },
+    },
     onStepStart(event) {
       const context = event.runtimeContext;
       const sessionId = context?.["eve.session.id"];
@@ -38,7 +73,16 @@ export function createChatModelTiming(): Telemetry {
       }
       // Aborted calls need not produce an end callback; keep the registry bounded.
       if (!calls.has(event.callId) && calls.size >= MAX_CALLS) calls.delete(calls.keys().next().value!);
-      calls.set(event.callId, { sessionId, turnId, sequence, stepIndex, observedAtMs: now });
+      const attempt = { sessionId, turnId, sequence, stepIndex, observedAtMs: now };
+      calls.set(event.callId, attempt);
+      // AI 7.0.14 supplies this runtime field but omits it from the public type.
+      // Fail open if a later SDK stops supplying it; never infer a different call.
+      if ("promptMessages" in event && Array.isArray(event.promptMessages)) {
+        prompts.set(event.promptMessages, { callId: event.callId, attempt });
+      } else {
+        write({ stage: "model_stream_correlation_unavailable", callId: event.callId,
+          sessionId, turnId, sequence, stepIndex });
+      }
     },
     onLanguageModelCallStart(event) {
       const attempt = calls.get(event.callId);
@@ -67,5 +111,18 @@ let registered = false;
 export function registerPreviewChatModelTiming(): void {
   if (!previewModelTimingEnabled() || registered) return;
   registered = true;
-  registerTelemetry(createChatModelTiming());
+  const timing = createChatModelTiming();
+  registerTelemetry(timing);
+  const provider = globalThis.AI_SDK_DEFAULT_PROVIDER ?? gateway;
+  globalThis.AI_SDK_DEFAULT_PROVIDER = new Proxy(provider, {
+    get(target, property) {
+      if (property === "languageModel") return (id: string) => {
+        const model = target.languageModel(id);
+        return id === "openai/gpt-6-astra"
+          ? wrapLanguageModel({ model, middleware: timing.middleware }) : model;
+      };
+      const value = Reflect.get(target, property, target);
+      return typeof value === "function" ? value.bind(target) : value;
+    },
+  });
 }
