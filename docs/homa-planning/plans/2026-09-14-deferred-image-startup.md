@@ -1,6 +1,7 @@
 # Deferred image-processing startup experiment
 
-Status: implemented and verified locally; hosted benefit unmeasured. Owner:
+Status: local checks and hosted admission smoke checks pass; cold-start benefit
+and hosted first image use remain unmeasured. Owner:
 gh#1171, existing branch `codex/gh-1171-inline-turn-preview`. No production
 deployment or live test records were created. The separate six-message
 production preparation baseline still requires explicit approval following
@@ -68,3 +69,56 @@ raw profiles in `/private/tmp/homa-five-second-active/startup-investigation/`.
   covers dependency tracing and real image output, but not Vercel's Linux host.
 - Keep Astra medium and the requirement that 19 of 20 ordinary replies show a
   useful answer within five seconds. This experiment does not establish that.
+
+## Hosted admission comparison
+
+Two source-only protected previews reached READY on September 14, 2026 UTC:
+
+- Updated `5c3c42851272b599dbadf75f4b5cdecca66b7c97`:
+  `dpl_Gka75MG7UaQVfNkFhRk1Qg9AQyC9`,
+  https://homa-2caxdt2z0-homa-1d878b0e.vercel.app.
+- Control `b1689ffe0602ca9123edc035b76953d0b74c5fd9`:
+  `dpl_AAScYRWW87aPr3qPLpBFKmcdmzjh`,
+  https://homa-i6kvv5jge-homa-1d878b0e.vercel.app.
+
+Both use Eve 0.19.0, AI 7.0.14, Node 24, and the same explicit build/runtime
+flags: deferred user indexing, model timing, sandbox timing, live progress and
+claim extraction enabled; model racing, inline turns, priority service and
+chat warmup disabled. Tracked source and dependency bytes were verified before
+upload. Local disk exhaustion interrupted the first control staging attempt;
+only this turn's incomplete and unused temporary copies were removed before
+staging one verified source copy per version. No partial source was deployed.
+
+The fixed sequence was updated first, control first, control repeat, updated
+repeat. Each POST `/eve/v1/session` had an empty JSON object and no Homa
+authorization. All four returned the expected 401 before conversation creation.
+There were no retries or warmups. Curl request-to-first-byte measurements:
+
+| Version | First request | Repeat |
+| --- | ---: | ---: |
+| Updated | 339ms | 161ms |
+| Control | 304ms | 133ms |
+
+These exclude the CLI's authentication/setup time and include connection/TLS
+time. They are not answer TTFT and do not establish a warm-request improvement.
+The first requests' Vercel panels both report **Hot (prewarmed)**, despite being
+protected previews. Updated: 64ms execution, 166ms platform response, 381MB peak.
+Control: 62ms execution, 140ms platform response, 388MB peak. Both had concurrency
+one and no outgoing API requests. Exact request IDs:
+
+- Updated: `c2q99-1789346410881-67d051fe98ea`.
+- Control: `dvrgp-1789346435757-63396e574716`.
+
+Blindspot: a new preview deployment is not a reliable cold-start experiment.
+Inspect the request's actual start type; do not infer coldness from deployment
+age or infer that all previews lack prewarming from production-focused docs.
+The next measurement must separate observed cold and prewarmed requests, retain
+both, and include real authenticated preparation before drawing a user-latency
+conclusion. Hosted image first use remains a separate release check.
+
+Evidence: `hosted-startup-protocol.json`, `hosted-startup-results.json`, the four
+`*-startup-*.json` samples and both `*-startup-panel.txt` snapshots in
+`/private/tmp/homa-preparation-startup-20260914/`. Deployment/source receipts live
+in `/private/tmp/homa-eve-hosted-5c3c4285/` and
+`/private/tmp/homa-eve-hosted-b1689ffe/`. Production-test approval remains pending;
+this comparison created no Homa accounts, conversations or model requests.
