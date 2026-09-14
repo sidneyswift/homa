@@ -107,6 +107,11 @@ const LINE_ALLOWLIST = new Map([
     // The inline-step patch also quotes this unchanged upstream failure log.
     "workflow loop threw \u2014 emitting terminal session.failed",
   ]],
+  // The retained 0.54.3 upgrade probe likewise needs byte-exact upstream
+  // minified context on both patch sides. This is not Homa-authored copy.
+  ["patches/eve@0.54.3.patch", [
+    "turn boundary handler failed \u2014 parking session",
+  ]],
 ]);
 
 function isExcludedPath(relPath) {
