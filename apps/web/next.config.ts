@@ -54,6 +54,7 @@ const nextConfig: NextConfig = {
   // explicitly. Report writing and memory compaction use generated mirrors
   // instead because Eve-hosted code can reach those modules too.
   outputFileTracingIncludes: {
+    "/api/dev/foreground": ["./agent/instructions.md"],
     // NOTE (gh#335): do NOT re-add node_modules globs here for
     // @napi-rs/canvas. Tracing-include globs copy pnpm's symlinked
     // directories verbatim and Vercel's packager rejects the function

@@ -114,7 +114,6 @@ function supabaseAuth(): AuthFn<Request> {
 
     const { data: userData, error } = await readEveAuthentication(() => supabase.auth.getUser(token), "authenticate");
     if (error || !userData.user) return null;
-    if (process.env.VERCEL_ENV === "preview" && process.env.HOMA_RUNTIME_BENCH_USER_ID && userData.user.id !== process.env.HOMA_RUNTIME_BENCH_USER_ID) return null;
 
     // The caller's OWN membership row (user_id filter matters since
     // migration #49 let members read the whole family roster). The

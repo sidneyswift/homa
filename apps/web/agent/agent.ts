@@ -1,7 +1,6 @@
 import { defineAgent } from "eve";
 
-import { HOMA_REASONING } from "./model";
-import { matchedModel } from "../lib/runtime-matched";
+import { HOMA_MODEL, HOMA_REASONING } from "./model";
 
 export default defineAgent({
   // Gateway-routed model id (shared with the report writer via model.ts);
@@ -9,7 +8,7 @@ export default defineAgent({
   // Eve session compaction runs on the active turn model and triggers
   // earlier than the 0.9 default per docs/homa-planning/01-architecture.md
   // (session-rotation design).
-  model: matchedModel,
+  model: HOMA_MODEL,
   reasoning: HOMA_REASONING,
   // GPT-6 Astra exposes a 1,050,000-token context window. Pin it here so
   // eve build does not depend on a live Gateway model-catalog fetch to
