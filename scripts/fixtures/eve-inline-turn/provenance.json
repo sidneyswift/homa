@@ -101,7 +101,7 @@
   "protectedFiles": [
     {
       "relative": "dist/src/harness/tool-loop.js",
-      "sha256": "4185eee93d9c809909bd54531d2827659b3c6554e2fa23ad485e05c691d19229"
+      "sha256": "cac8da47f36964c0cc288b60184f6c56701d57d1460bcde3d7752b79a3494a63"
     },
     {
       "relative": "dist/src/harness/ordered-stream-emitter.js",
@@ -130,6 +130,14 @@
     {
       "relative": "dist/src/execution/durable-session-store.js",
       "sha256": "2675bfeed27b16bc120afb8a1753075592e9e4e625ccdccc4098cc79191112b2"
+    },
+    {
+      "relative": "dist/src/harness/preview-deferred-tools.js",
+      "sha256": "9b83660c9e3d7ddfa2988247bf78ecdbcca49eaf27ffd3da7303978268b992d4"
+    },
+    {
+      "relative": "dist/src/harness/preview-deferred-tools.d.ts",
+      "sha256": "f30e20a5c44e9a3bfd78ecb980de2a7fc0f11e87a00ba048c390e9965be87dcb"
     }
   ],
   "originalPatchSections": [
@@ -163,11 +171,24 @@
     },
     {
       "header": "diff --git a/dist/src/harness/tool-loop.js b/dist/src/harness/tool-loop.js",
-      "sha256": "cce6fb7ea9efbb56fb185c90d92bab4c22b726aede3907779d9c8183a0123789"
+      "sha256": "5988992fb33b553513629a4c0b51f551104388edd1e7469e2b6bdd2bb9242d9b"
     },
     {
       "header": "diff --git a/dist/src/internal/workflow-bundle/eve-service-route-output.js b/dist/src/internal/workflow-bundle/eve-service-route-output.js",
       "sha256": "991c26067b03d8a3a16d34ed8603d0c9fa8d188f8585f876db0ac3f172357e52"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/preview-deferred-tools.js b/dist/src/harness/preview-deferred-tools.js",
+      "sha256": "179c72d164be21b3f8410b4ee13af37f9dd23434ea0edaeb0a73c37dba9b70b3"
+    },
+    {
+      "header": "diff --git a/dist/src/harness/preview-deferred-tools.d.ts b/dist/src/harness/preview-deferred-tools.d.ts",
+      "sha256": "9dc6ab2d96ba20859d8ca494b38fe5b82149e40fe95584f50c7a6f43eee62e0a"
     }
-  ]
+  ],
+  "deferredToolsIntegration": {
+    "date": "2026-09-14",
+    "reason": "Preview-only deferred-tool adapter. Removing its one import and assembly call restores the exact previously protected tool-loop hash. Both inline comparison arms retain this adapter with its switch off.",
+    "priorToolLoopSha256": "4185eee93d9c809909bd54531d2827659b3c6554e2fa23ad485e05c691d19229"
+  }
 }

@@ -27,6 +27,7 @@
     "check:seo": "tsx scripts/seo-contract-check.mts",
     "check:eve-stream-duration": "node scripts/eve-stream-max-duration-check.mjs",
     "check:eve-empty-delivery": "node scripts/eve-empty-delivery-guard-check.mjs",
+    "check:eve-deferred-tools": "node --require ./scripts/test-support/eve-deferred-tools-no-network.cjs scripts/eve-deferred-tools-check.mjs",
     "check:eve-ordered-stream": "node --test scripts/eve-ordered-stream-emitter.test.mjs && pnpm check:eve-inline-turn",
     "check:eve-inline-turn": "node --test scripts/eve-inline-turn.test.mjs",
     "check:em-dash": "node scripts/em-dash-check.mjs",
