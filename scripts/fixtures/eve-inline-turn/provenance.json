@@ -101,7 +101,7 @@
   "protectedFiles": [
     {
       "relative": "dist/src/harness/tool-loop.js",
-      "sha256": "cac8da47f36964c0cc288b60184f6c56701d57d1460bcde3d7752b79a3494a63"
+      "sha256": "f461ca9929212e2d34c0e805dbafc32b2b36294337dabafd4e19495c0c466b9f"
     },
     {
       "relative": "dist/src/harness/ordered-stream-emitter.js",
@@ -133,11 +133,11 @@
     },
     {
       "relative": "dist/src/harness/preview-deferred-tools.js",
-      "sha256": "9b83660c9e3d7ddfa2988247bf78ecdbcca49eaf27ffd3da7303978268b992d4"
+      "sha256": "efc5601ef83720a1d9b099ad6d20a774b4c9a11f6a63c895c2e3f75c6fc9825e"
     },
     {
       "relative": "dist/src/harness/preview-deferred-tools.d.ts",
-      "sha256": "f30e20a5c44e9a3bfd78ecb980de2a7fc0f11e87a00ba048c390e9965be87dcb"
+      "sha256": "04cf6aeaa6dc73b1bb82aafd4ce68c3ffa3d3711ef1a1de725c33208eedc3b75"
     }
   ],
   "originalPatchSections": [
@@ -171,7 +171,7 @@
     },
     {
       "header": "diff --git a/dist/src/harness/tool-loop.js b/dist/src/harness/tool-loop.js",
-      "sha256": "5988992fb33b553513629a4c0b51f551104388edd1e7469e2b6bdd2bb9242d9b"
+      "sha256": "950467058e2236f67f974d2499cc915a04e9a9698b5106a360c1ba6b61340dce"
     },
     {
       "header": "diff --git a/dist/src/internal/workflow-bundle/eve-service-route-output.js b/dist/src/internal/workflow-bundle/eve-service-route-output.js",
@@ -179,11 +179,11 @@
     },
     {
       "header": "diff --git a/dist/src/harness/preview-deferred-tools.js b/dist/src/harness/preview-deferred-tools.js",
-      "sha256": "179c72d164be21b3f8410b4ee13af37f9dd23434ea0edaeb0a73c37dba9b70b3"
+      "sha256": "0a19f1ff964bf060666f89e257e88a70be2fdb727cd2e9df68e4330beb86840e"
     },
     {
       "header": "diff --git a/dist/src/harness/preview-deferred-tools.d.ts b/dist/src/harness/preview-deferred-tools.d.ts",
-      "sha256": "9dc6ab2d96ba20859d8ca494b38fe5b82149e40fe95584f50c7a6f43eee62e0a"
+      "sha256": "569b027bbc7e91b6bc5b36bee8accb3d5f5e89ac0215d30b5ec243a7a496735a"
     }
   ],
   "deferredToolsIntegration": {

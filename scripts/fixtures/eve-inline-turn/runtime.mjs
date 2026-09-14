@@ -15,7 +15,7 @@ const artifact = process.argv[2];
 const provenance = JSON.parse(readFileSync(join(artifact, 'provenance.json')));
 const [arm = 'candidate', scenario = 'ordinary', phase = 'start', tag = 'default'] = process.argv.slice(3);
 assert.ok(['candidate', 'baseline'].includes(arm));
-assert.ok(['ordinary', 'skill', 'approval', 'failure', 'mismatch', 'missing', 'empty', 'abort', 'deferred-search'].includes(scenario));
+assert.ok(['ordinary', 'skill', 'approval', 'failure', 'mismatch', 'missing', 'empty', 'abort', 'deferred-search', 'skill-linked'].includes(scenario));
 assert.ok(['start', 'crash-after-step', 'replay', 'approve', 'deny'].includes(phase));
 const packageRoot = arm === 'candidate' ? provenance.candidate : provenance.installed;
 const src = join(packageRoot, 'dist/src');
@@ -41,10 +41,12 @@ process.env.WORKFLOW_LOCAL_DATA_DIR = join(data, 'world');
 process.env.WORKFLOW_TURBO = '0';
 process.env.VERCEL_DEPLOYMENT_ID = 'dpl_offline_candidate';
 const deferred = tag.includes('-deferred');
+const skillLinked = scenario === 'skill-linked';
 if (deferred) {
     process.env.VERCEL_ENV = 'preview';
     process.env.HOMA_PREVIEW_ASTRA_DEFERRED_TOOLS = '1';
 }
+if (skillLinked) process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS = '1';
 const web = join(provenance.repo, 'apps/web');
 const { MockLanguageModelV4 } = await import(join(web, 'node_modules/ai/dist/test/index.js'));
 const { createOpenAI } = await import(join(web, 'node_modules/@ai-sdk/openai/dist/index.js'));
@@ -81,7 +83,11 @@ const model = new MockLanguageModelV4({ provider: 'offline.gateway', modelId: MO
         assert.ok(round < 8, 'Unexpected repeated model invocation');
         log({ type: 'model', round, prompt: options.prompt, roles: options.prompt.map(x => x.role), userMessages: options.prompt.filter(x => x.role === 'user').map(x => x.content) });
         if (deferred) {
-            assert.equal(options.tools.find(tool => tool.name === 'offline_review').providerOptions?.openai?.deferLoading, true);
+            assert.equal(options.tools.find(tool => tool.name === 'offline_review').providerOptions?.openai?.deferLoading, !(skillLinked && round > 0));
+            if (skillLinked) {
+                assert.equal(options.tools.find(tool => tool.name === 'offline_unrelated').providerOptions?.openai?.deferLoading, true);
+                log({ type: 'skill-linked-verified', round, eager: round > 0 });
+            }
             assert.ok(options.tools.some(tool => tool.id === 'openai.tool_search'));
             assert.notEqual(options.tools.find(tool => tool.name === 'load_skill').providerOptions?.openai?.deferLoading, true);
             log({ type: 'deferred-tools-verified', round });
@@ -95,6 +101,10 @@ const model = new MockLanguageModelV4({ provider: 'offline.gateway', modelId: MO
             parts.push({ type: 'error', error: new FatalError('Synthetic terminal stream failure') });
         else if (scenario === 'skill' && round === 0)
             parts.push({ type: 'tool-call', toolCallId: 'call_skill', toolName: 'load_skill', input: JSON.stringify({ skill: 'materials-studio' }) });
+        else if (skillLinked && round === 0)
+            parts.push({ type: 'tool-call', toolCallId: 'call_skill', toolName: 'load_skill', input: JSON.stringify({ skill: 'offline-skill' }) });
+        else if (skillLinked && round === 1)
+            parts.push({ type: 'tool-call', toolCallId: 'call_review', toolName: 'offline_review', input: JSON.stringify({ plan: 'A fictional lesson.' }) });
         else if (scenario === 'approval' && round === 0)
             parts.push({ type: 'tool-call', toolCallId: 'call_review', toolName: 'offline_review', input: JSON.stringify({ plan: 'A fictional lesson.' }) });
         else
@@ -109,7 +119,7 @@ let bundle;
 mock.module(join(src, 'runtime/sessions/compiled-agent-cache.js'), { namedExports: { clearCompiledRuntimeAgentBundleCache() { }, getCompiledRuntimeAgentBundle: async () => bundle } });
 mock.module(join(src, 'runtime/channels/registry.js'), { namedExports: { createRuntimeAdapterRegistry() { throw Error('Unused synthetic registry'); }, deserializeRuntimeAdapter: (_registry, value) => ({ kind: value.kind, state: value.state ?? {} }) } });
 mock.module(join(src, 'execution/sandbox/ensure.js'), { namedExports: { ensureSandboxAccess: async () => ({
-            get: async () => ({ readTextFile: async ({ path }) => { assert.equal(path, '/workspace/skills/materials-studio/SKILL.md'); log({ type: 'skill-read', path }); return skillText; } }),
+            get: async () => ({ readTextFile: async ({ path }) => { assert.equal(path, skillLinked ? '/workspace/skills/offline-skill/SKILL.md' : '/workspace/skills/materials-studio/SKILL.md'); log({ type: 'skill-read', path }); return skillLinked ? '---\ndescription: Synthetic review.\nmetadata:\n  homa-tools: offline_review\n---\nUse offline_review to check this fictional plan.' : skillText; } }),
             captureState: async () => null,
         }) } });
 const { SKILL_TOOL_DEFINITION } = await import(join(src, 'runtime/framework-tools/skill.js'));
@@ -119,13 +129,14 @@ const { loadContext } = await import(join(src, 'context/container.js'));
 const keys = await import(join(src, 'context/keys.js'));
 const review = { name: 'offline_review', sourceId: 'eve:offline-review', logicalPath: 'eve:offline-review', description: 'Review a fictional plan only after approval.',
     inputSchema: reviewSchema,
-    approval: async (ctx) => scenario !== 'deferred-search' && !ctx.approvedTools.has('offline_review'),
+    approval: async (ctx) => !['deferred-search', 'skill-linked'].includes(scenario) && !ctx.approvedTools.has('offline_review'),
     execute: async (input) => { const ctx = buildCallbackContext(); log({ type: 'tool-effect', name: 'offline_review', principal: ctx.session.auth.current.principalId, initiator: ctx.session.auth.initiator.principalId }); return { reviewed: true, plan: input.plan }; },
 };
-const registry = await createRuntimeToolRegistry({ tools: [SKILL_TOOL_DEFINITION, review] });
+const unrelated = { ...review, name: 'offline_unrelated', sourceId: 'eve:offline-unrelated', logicalPath: 'eve:offline-unrelated', execute: async () => { throw Error('Unrelated tool must not run'); } };
+const registry = await createRuntimeToolRegistry({ tools: [SKILL_TOOL_DEFINITION, review, ...(skillLinked ? [unrelated] : [])] });
 const turnAgent = { id: 'offline-homa', instructions: [instructions], model: { id: MODEL, contextWindowTokens: 1050000 }, reasoning: 'medium', tools: registry.preparedTools };
 const node = { nodeId: 'root', turnAgent, toolRegistry: registry, agent: { config: { name: 'offline-homa' }, workflowEnabled: true, connections: [] } };
-bundle = { nodeId: 'root', compiledArtifactsSource: { kind: 'offline-fixture' }, turnAgent, graph: { root: node }, resolvedAgent: { config: { name: 'offline-homa' }, dynamicInstructionsResolvers: [], dynamicSkillResolvers: [], dynamicToolResolvers: [] },
+bundle = { nodeId: 'root', compiledArtifactsSource: { kind: 'offline-fixture' }, turnAgent, graph: { root: node }, resolvedAgent: { config: { name: 'offline-homa' }, skills: skillLinked ? [{ name: 'offline-skill', metadata: { 'homa-tools': 'offline_review' } }] : [], dynamicInstructionsResolvers: [], dynamicSkillResolvers: [], dynamicToolResolvers: [] },
     hookRegistry: { streamEventsByType: new Map(), streamEventsWildcard: [{ handler: async (event) => {
                     emitted++;
                     const ctx = loadContext();

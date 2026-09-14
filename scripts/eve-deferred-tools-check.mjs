@@ -26,7 +26,8 @@ const keys=await import(source+'/context/keys.js');
 const {getHarnessEmissionState}=await import(source+'/harness/emission.js');
 const {hasPendingInputBatch}=await import(source+'/harness/input-requests.js');
 const {buildToolSet,buildToolApproval}=await import(source+'/harness/tools.js');
-const {applyPreviewDeferredTools}=await import(source+'/harness/preview-deferred-tools.js');
+const {applyPreviewDeferredTools,selectSkillLinkedToolNames}=await import(source+'/harness/preview-deferred-tools.js');
+const {BundleKey}=await import(source+'/runtime/sessions/runtime-context-keys.js');
 const MODEL='openai/gpt-6-astra';
 const schema={type:'object',properties:{value:{type:'string'}},required:['value'],additionalProperties:false};
 const loaded={type:'function',name:'offline_read',description:'Synthetic exact read.',parameters:schema,defer_loading:true};
@@ -142,6 +143,70 @@ const identity=await contextStorage.run(identityCtx,async()=>{
  assert.equal(before,'user-approval');assert.equal(afterClone,undefined);assert.equal(afterMutation,'user-approval');
  return {original:before,naiveClone:afterClone??null,identityPreserving:afterMutation};
 });
+// Skill output strips frontmatter. Use compiled metadata plus the exact
+// successful client call/result pair, never names mentioned in result prose.
+const skillCatalog=[{name:'offline-skill',metadata:{'homa-tools':'offline_read, offline_missing'}}];
+const skillCall={role:'assistant',content:[{type:'tool-call',toolCallId:'skill_1',toolName:'load_skill',input:{skill:'offline-skill'}}]};
+const skillResult={role:'tool',content:[{type:'tool-result',toolCallId:'skill_1',toolName:'load_skill',output:{type:'text',value:'Use offline_read to verify the synthetic record.'}}]};
+const parent={role:'user',content:'Read the synthetic record.'};
+const skillMessages=[parent,skillCall,skillResult];
+assert.deepEqual([...selectSkillLinkedToolNames(skillMessages,skillCatalog)],['offline_read','offline_missing']);
+for(const [name,messages] of [
+ ['user text is not activation',[{role:'user',content:'load_skill offline-skill offline_read'}]],
+ ['uncompleted call',[parent,skillCall]],
+ ['failed load',[parent,skillCall,{...skillResult,content:[{...skillResult.content[0],output:{type:'error-text',value:'Unavailable'}}]}]],
+ ['mismatched result',[parent,skillCall,{...skillResult,content:[{...skillResult.content[0],toolCallId:'other'}]}]],
+ ['provider-executed imitation',[parent,{...skillCall,content:[{...skillCall.content[0],providerExecuted:true}]},skillResult]],
+ ['older turn',[...skillMessages,{role:'user',content:'Another request.'}]],
+ ['unknown compiled skill',[parent,{...skillCall,content:[{...skillCall.content[0],input:{skill:'unknown'}}]},skillResult]],
+ ['duplicate ambiguous call id',[parent,skillCall,skillCall,skillResult]],
+ ['duplicate id after a completed result',[parent,skillCall,skillResult,skillCall]],
+ ['result before call',[parent,skillResult,skillCall]],
+]) {
+ assert.equal(selectSkillLinkedToolNames(messages,skillCatalog).size,0,name);
+ checks.push({name:'skill-linked: '+name,status:'passed'});
+}
+process.env.VERCEL_ENV='preview';process.env.HOMA_PREVIEW_ASTRA_DEFERRED_TOOLS='1';process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS='1';
+delete process.env.HOMA_PREVIEW_ASTRA_PRIORITY;
+const linkedContext=new ContextContainer();
+linkedContext.set(keys.SessionKey,{sessionId:'linked-fixture',auth:{},turn:{id:'turn_0',sequence:0}});
+linkedContext.set(BundleKey,{resolvedAgent:{skills:skillCatalog}});
+await contextStorage.run(linkedContext,async()=>{
+ const built=buildToolSet({tools:new Map([
+  ['offline_read',{name:'offline_read',description:'Existing approved read.',inputSchema:jsonSchema(schema),approval:async()=>true}],
+  ['offline_other',{name:'offline_other',description:'Other existing tool.',inputSchema:jsonSchema(schema)}],
+ ])});
+ const original=built.offline_read;
+ await applyPreviewDeferredTools(built,{model:MODEL,modelReference:{id:MODEL},messages:JSON.parse(JSON.stringify(skillMessages))});
+ assert.equal(built.offline_read,original);assert.equal(built.offline_read.providerOptions.openai.deferLoading,false);
+ assert.equal(built.offline_other.providerOptions.openai.deferLoading,true);assert.equal(built.offline_missing,undefined);
+ assert.equal(await buildToolApproval(built)({toolCall:{toolName:'offline_read',input:{value:'synthetic'}}}),'user-approval');
+ assert.equal(built.tool_search.id,'openai.tool_search');
+ checks.push({name:'skill-linked: checkpoint history selects existing tool without granting missing tools or bypassing approval',status:'passed'});
+ for(const flag of [undefined,'0','true']){
+  if(flag===undefined)delete process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS;else process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS=flag;
+  const tools={offline_read:{inputSchema:jsonSchema(schema)}};
+  await applyPreviewDeferredTools(tools,{model:MODEL,modelReference:{id:MODEL},messages:skillMessages});
+  assert.equal(tools.offline_read.providerOptions.openai.deferLoading,true);
+ }
+ process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS='1';
+ for(const env of ['production','development']){
+  process.env.VERCEL_ENV=env;
+  const tools={offline_read:{inputSchema:jsonSchema(schema)}};
+  const original=tools.offline_read;
+  await applyPreviewDeferredTools(tools,{model:MODEL,modelReference:{id:MODEL},messages:skillMessages});
+  assert.equal(tools.offline_read,original);assert.equal(tools.offline_read.providerOptions,undefined);assert.equal(tools.tool_search,undefined);
+  checks.push({name:'skill-linked: '+env+' stays unchanged with both switches enabled',status:'passed'});
+ }
+});
+delete process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS;
+const ordinaryDeferred=await plainDefault({VERCEL_ENV:'preview',HOMA_PREVIEW_ASTRA_DEFERRED_TOOLS:'1'});
+const ordinaryLinked=await plainDefault({VERCEL_ENV:'preview',HOMA_PREVIEW_ASTRA_DEFERRED_TOOLS:'1',HOMA_PREVIEW_SKILL_LINKED_TOOLS:'1'});
+assert.deepEqual(ordinaryLinked.requests,ordinaryDeferred.requests);
+assert.deepEqual(ordinaryLinked.events,ordinaryDeferred.events);
+assert.deepEqual(ordinaryLinked.history,ordinaryDeferred.history);
+checks.push({name:'skill-linked: ordinary first-call request bytes and response events unchanged',status:'passed'});
+delete process.env.HOMA_PREVIEW_SKILL_LINKED_TOOLS;
 delete globalThis.AI_SDK_DEFAULT_PROVIDER;
 assert.deepEqual(globalThis.__startupNetworkAttempts,[]);
 const report={checks,approvalIdentity:identity,networkAttempts:globalThis.__startupNetworkAttempts,realModelCalls:0,isolate,limits:['Canned local OpenAI Responses events, not remote Gateway behavior.','No actual Workflow service checkpoint or replay; session JSON roundtrip only.','No Homa hooks or database work invoked.','Actual candidate preview gate enabled only inside this network-disabled test process; no deployed app configuration changed.']};

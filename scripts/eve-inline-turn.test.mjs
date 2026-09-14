@@ -153,6 +153,23 @@ await test('installed inline trial preserves durable replay, authorization, prot
             assert.deepEqual(events(deferredReplay), events(deferredCases['deferred-search']));
             assert.deepEqual(prompts(deferredReplay), prompts(deferredCases['deferred-search']));
         });
+        const linkedBaseline = run('baseline', 'skill-linked', 'start', '-deferred-linked');
+        const linkedCandidate = run('candidate', 'skill-linked', 'start', '-deferred-linked');
+        check('skill-linked: completed skill activates its existing tool across the actual child checkpoint', () => {
+            assert.deepEqual(prompts(linkedCandidate), prompts(linkedBaseline));
+            assert.deepEqual(events(linkedCandidate), events(linkedBaseline));
+            assert.deepEqual(linkedCandidate.ops.filter(x => x.type === 'skill-linked-verified').map(x => x.eager), [false, true, true]);
+            assert.equal(linkedCandidate.result.skillReads, 1); assert.equal(linkedCandidate.result.toolEffects, 1);
+            assert.equal(linkedCandidate.result.modelCallsTotal, 3);
+        });
+        run('candidate', 'skill-linked', 'crash-after-step', '-deferred-linked-crash', 73);
+        const linkedReplay = run('candidate', 'skill-linked', 'replay', '-deferred-linked-crash');
+        check('skill-linked: fresh process reconstructs the hint without another skill load or duplicate effect', () => {
+            assert.deepEqual(prompts(linkedReplay), prompts(linkedCandidate));
+            assert.deepEqual(events(linkedReplay), events(linkedCandidate));
+            assert.deepEqual(linkedReplay.ops.filter(x => x.type === 'skill-linked-verified').map(x => x.eager), [false, true, true]);
+            assert.equal(linkedReplay.result.skillReads, 1); assert.equal(linkedReplay.result.toolEffects, 1);
+        });
         processFixture('contracts.mjs');
         const contracts = JSON.parse(readFileSync(join(root, 'trust-contract-results.json')));
         processFixture('declarations.mjs');
