@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import type { Attachment } from "chat";
 
+import { loadSharp } from "../sharp-loader";
 import { normalizeSmsAttachments } from "./sms-attachments";
 
 /**
@@ -19,6 +20,46 @@ const STT_URL = "https://api.telnyx.com/v2/ai/audio/transcriptions";
 
 const VOICE_NOTE_FAILURE_NOTE =
   "[A voice note was attached but could not be transcribed.]";
+
+it("loads image processing on first BMP conversion and preserves the pixel", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalApiKey = process.env.TELNYX_API_KEY;
+  process.env.TELNYX_API_KEY = "test-key";
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    restoreEnvironmentValue("TELNYX_API_KEY", originalApiKey);
+  });
+  // One red pixel in an uncompressed 24-bit BMP, including row padding.
+  const bmp = Buffer.alloc(58);
+  bmp.write("BM");
+  bmp.writeUInt32LE(58, 2);
+  bmp.writeUInt32LE(54, 10);
+  bmp.writeUInt32LE(40, 14);
+  bmp.writeInt32LE(1, 18);
+  bmp.writeInt32LE(1, 22);
+  bmp.writeUInt16LE(1, 26);
+  bmp.writeUInt16LE(24, 28);
+  bmp.writeUInt32LE(4, 34);
+  bmp[56] = 255;
+  globalThis.fetch = async (input) => {
+    assert.equal(String(input), MEDIA_URL);
+    return new Response(new Uint8Array(bmp));
+  };
+  const result = await normalizeSmsAttachments([
+    { type: "image", mimeType: "image/bmp", url: MEDIA_URL },
+  ]);
+  assert.deepEqual(result.results, [
+    { kind: "image", mediaType: "image/bmp", outcome: "converted" },
+  ]);
+  const part = result.mediaParts[0];
+  assert.equal(part.type, "image");
+  assert.ok(part.type === "image" && Buffer.isBuffer(part.image));
+  const sharp = await loadSharp();
+  const decoded = await sharp(part.image).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(decoded.info.width, 1);
+  assert.equal(decoded.info.height, 1);
+  assert.deepEqual([...decoded.data], [255, 0, 0]);
+});
 
 function restoreEnvironmentValue(
   name: string,

@@ -31,6 +31,17 @@ try {
       assert.equal(Boolean(globalThis.pdfjsWorker), false);
       assert.equal(typeof globalThis.DOMMatrix, "undefined");
       const require = createRequire(entry);
+      assert.equal(Object.keys(require.cache).some(name => /[/\\\\]sharp[/\\\\]/.test(name)), false,
+        "Plain-text startup must not load native image processing");
+      // Exercise the same ESM export condition as the app's dynamic import.
+      const sharpUrl = import.meta.resolve("sharp");
+      assert.ok(sharpUrl.startsWith(pathToFileURL(${JSON.stringify(isolated + path.sep)}).href));
+      const { default: sharp } = await import(sharpUrl);
+      const jpeg = await sharp({ create: { width: 2, height: 3, channels: 3, background: "red" } }).jpeg().toBuffer();
+      const imageMetadata = await sharp(jpeg).metadata();
+      assert.equal(imageMetadata.format, "jpeg");
+      assert.equal(imageMetadata.width, 2);
+      assert.equal(imageMetadata.height, 3);
       for (const specifier of ["pdfjs-dist/legacy/build/pdf.mjs", "pdfjs-dist/legacy/build/pdf.worker.mjs", "@napi-rs/canvas"]) {
         assert.ok(require.resolve(specifier).startsWith(${JSON.stringify(isolated + path.sep)}));
       }

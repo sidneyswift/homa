@@ -2,9 +2,9 @@ import { sharpFromBmp } from "@huh-david/bmp-js/sharp";
 import type { FilePart, ImagePart } from "ai";
 import type { Attachment } from "chat";
 import mammoth from "mammoth";
-import sharp from "sharp";
 import * as XLSX from "xlsx";
 
+import { loadSharp } from "../sharp-loader";
 import {
   describeVideoBytes,
   twelveLabsConfigured,
@@ -334,6 +334,7 @@ async function convertBmpToPng(
     return failedAttachment("image", "image/bmp");
   }
   try {
+    const sharp = await loadSharp();
     const png = await sharpFromBmp(new Uint8Array(bytes), sharp).png().toBuffer();
     return {
       result: { kind: "image", mediaType: "image/bmp", outcome: "converted" },

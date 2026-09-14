@@ -5,8 +5,7 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import sharp from "sharp";
-
+import { loadSharp } from "../sharp-loader.ts";
 import { rasterizePdfToJpegs } from "./rasterize-pdf.ts";
 
 const ZIP_PRIMARY_DOMINANCE_RATIO = 4;
@@ -167,6 +166,7 @@ export async function inspectLibraryCoverJpeg(
   bytes: Buffer,
 ): Promise<LibraryCoverEvidence> {
   if (!bytes.length) throw new Error("cover is empty");
+  const sharp = await loadSharp();
   const metadata = await sharp(bytes).metadata();
   if (
     metadata.format !== "jpeg" ||
@@ -476,6 +476,7 @@ async function renderPrintable(
 ): Promise<Buffer> {
   const kind = printableKind(name);
   if (kind === "image") {
+    const sharp = await loadSharp();
     return sharp(bytes, { limitInputPixels: 100_000_000 })
       .rotate()
       .flatten({ background: "#ffffff" })
