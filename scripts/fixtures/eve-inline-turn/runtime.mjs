@@ -15,7 +15,7 @@ const artifact = process.argv[2];
 const provenance = JSON.parse(readFileSync(join(artifact, 'provenance.json')));
 const [arm = 'candidate', scenario = 'ordinary', phase = 'start', tag = 'default'] = process.argv.slice(3);
 assert.ok(['candidate', 'baseline'].includes(arm));
-assert.ok(['ordinary', 'skill', 'approval', 'failure', 'mismatch', 'missing', 'empty', 'abort'].includes(scenario));
+assert.ok(['ordinary', 'skill', 'approval', 'failure', 'mismatch', 'missing', 'empty', 'abort', 'deferred-search'].includes(scenario));
 assert.ok(['start', 'crash-after-step', 'replay', 'approve', 'deny'].includes(phase));
 const packageRoot = arm === 'candidate' ? provenance.candidate : provenance.installed;
 const src = join(packageRoot, 'dist/src');
@@ -40,18 +40,54 @@ process.env.WORKFLOW_TARGET_WORLD = 'local';
 process.env.WORKFLOW_LOCAL_DATA_DIR = join(data, 'world');
 process.env.WORKFLOW_TURBO = '0';
 process.env.VERCEL_DEPLOYMENT_ID = 'dpl_offline_candidate';
+const deferred = tag.includes('-deferred');
+if (deferred) {
+    process.env.VERCEL_ENV = 'preview';
+    process.env.HOMA_PREVIEW_ASTRA_DEFERRED_TOOLS = '1';
+}
 const web = join(provenance.repo, 'apps/web');
 const { MockLanguageModelV4 } = await import(join(web, 'node_modules/ai/dist/test/index.js'));
+const { createOpenAI } = await import(join(web, 'node_modules/@ai-sdk/openai/dist/index.js'));
 const skillText = readFileSync(join(web, 'agent/skills/materials-studio/SKILL.md'), 'utf8');
 const instructions = readFileSync(join(web, 'agent/instructions.md'), 'utf8');
 const MODEL = 'openai/gpt-6-astra';
 const usage = { inputTokens: { total: 100, noCache: 100, cacheRead: 0, cacheWrite: 0 }, outputTokens: { total: 6, text: 6, reasoning: 0 } };
 const { FatalError } = await import(join(src, 'compiled/@workflow/errors/index.js'));
+const reviewSchema = { type: 'object', additionalProperties: false, properties: { plan: { type: 'string' } }, required: ['plan'] };
+const loadedReview = { type: 'function', name: 'offline_review', description: 'Review a fictional plan only after approval.', parameters: reviewSchema, defer_loading: true };
+const searchModel = createOpenAI({ apiKey: 'offline-synthetic-only', fetch: async (_url, init) => {
+        const request = JSON.parse(init.body);
+        assert.equal(request.tools.find(tool => tool.name === 'offline_review').defer_loading, true);
+        assert.ok(request.tools.some(tool => tool.type === 'tool_search'));
+        log({ type: 'search-wire', searchEnabled: true, deferredReview: true });
+        const search = { type: 'tool_search_call', id: 'search_call_1', execution: 'server', call_id: null, status: 'completed', arguments: { paths: ['offline_review'] } };
+        const output = { type: 'tool_search_output', id: 'search_output_1', execution: 'server', call_id: null, status: 'completed', tools: [loadedReview] };
+        const call = { type: 'function_call', id: 'fc_1', call_id: 'call_review', name: 'offline_review', arguments: JSON.stringify({ plan: 'A fictional lesson.' }), status: 'completed' };
+        const chunks = [
+            { type: 'response.created', response: { id: 'offline_response', created_at: 0, model: 'gpt-6-astra' } },
+            { type: 'response.output_item.added', output_index: 0, item: { ...search, status: 'in_progress' } },
+            { type: 'response.output_item.done', output_index: 0, item: search },
+            { type: 'response.output_item.added', output_index: 1, item: output },
+            { type: 'response.output_item.done', output_index: 1, item: output },
+            { type: 'response.output_item.added', output_index: 2, item: call },
+            { type: 'response.output_item.done', output_index: 2, item: call },
+            { type: 'response.completed', response: { usage: { input_tokens: 0, output_tokens: 0 } } },
+        ];
+        return new Response(chunks.map(chunk => 'data: ' + JSON.stringify(chunk) + '\n\n').join(''), { headers: { 'content-type': 'text/event-stream' } });
+    } }).responses('gpt-6-astra');
 let activeRunId;
 const model = new MockLanguageModelV4({ provider: 'offline.gateway', modelId: MODEL, doStream: async (options) => {
         const round = modelCalls++;
         assert.ok(round < 8, 'Unexpected repeated model invocation');
         log({ type: 'model', round, prompt: options.prompt, roles: options.prompt.map(x => x.role), userMessages: options.prompt.filter(x => x.role === 'user').map(x => x.content) });
+        if (deferred) {
+            assert.equal(options.tools.find(tool => tool.name === 'offline_review').providerOptions?.openai?.deferLoading, true);
+            assert.ok(options.tools.some(tool => tool.id === 'openai.tool_search'));
+            assert.notEqual(options.tools.find(tool => tool.name === 'load_skill').providerOptions?.openai?.deferLoading, true);
+            log({ type: 'deferred-tools-verified', round });
+            if (round === 0 && ['deferred-search', 'approval'].includes(scenario))
+                return searchModel.doStream(options);
+        }
         if (scenario === 'abort')
             await core.getRun(activeRunId).cancel();
         const parts = [{ type: 'stream-start', warnings: [] }];
@@ -82,8 +118,8 @@ const { buildCallbackContext } = await import(join(src, 'context/build-callback-
 const { loadContext } = await import(join(src, 'context/container.js'));
 const keys = await import(join(src, 'context/keys.js'));
 const review = { name: 'offline_review', sourceId: 'eve:offline-review', logicalPath: 'eve:offline-review', description: 'Review a fictional plan only after approval.',
-    inputSchema: { type: 'object', additionalProperties: false, properties: { plan: { type: 'string' } }, required: ['plan'] },
-    approval: async (ctx) => !ctx.approvedTools.has('offline_review'),
+    inputSchema: reviewSchema,
+    approval: async (ctx) => scenario !== 'deferred-search' && !ctx.approvedTools.has('offline_review'),
     execute: async (input) => { const ctx = buildCallbackContext(); log({ type: 'tool-effect', name: 'offline_review', principal: ctx.session.auth.current.principalId, initiator: ctx.session.auth.initiator.principalId }); return { reviewed: true, plan: input.plan }; },
 };
 const registry = await createRuntimeToolRegistry({ tools: [SKILL_TOOL_DEFINITION, review] });

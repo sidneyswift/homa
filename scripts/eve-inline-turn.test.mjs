@@ -109,6 +109,50 @@ await test('installed inline trial preserves durable replay, authorization, prot
         check('crash: first durable step persisted before any child dispatch', () => { assert.equal(crashOps.filter(x => x.type === 'model').length, 1); assert.equal(crashOps.filter(x => x.type === 'skill-read').length, 1); assert.equal(crashOps.filter(x => x.type === 'dispatch-input').length, 0); assert.equal(crashOps.at(-1).event, 'step_completed'); assert.equal(crashOps.at(-1).stepName, 'turnStep'); });
         const replayed = run('candidate', 'skill', 'replay', '-crash');
         check('fresh process replay: saved step reused with no repeat of model, skill or hooks', () => { assert.equal(replayed.result.modelCallsTotal, 2); assert.equal(replayed.result.skillReads, 1); assert.deepEqual(events(replayed), events(observations.skill.candidate)); assert.deepEqual(prompts(replayed), prompts(observations.skill.candidate)); assert.equal(replayed.result.childRuns, 1); });
+        const deferredCases = {};
+        for (const scenario of ['ordinary', 'deferred-search']) {
+            const baseline = run('baseline', scenario, 'start', '-deferred');
+            const candidate = run('candidate', scenario, 'start', '-deferred');
+            deferredCases[scenario] = candidate;
+            check(`${scenario} with deferred tools: identical prompts and protocol through durable handoff`, () => { assert.deepEqual(prompts(candidate), prompts(baseline)); assert.deepEqual(events(candidate), events(baseline)); });
+            check(`${scenario} with deferred tools: every model round retains enabled search`, () => { for (const current of [baseline, candidate]) assert.equal(current.ops.filter(x => x.type === 'deferred-tools-verified').length, current.result.modelCallsTotal); });
+            if (scenario === 'ordinary')
+                check('combined ordinary: one model call and no child dispatch', () => { assert.equal(candidate.result.modelCallsTotal, 1); assert.equal(candidate.result.childRuns, 0); });
+            else
+                check('combined search: one real SDK search conversion and authored effect with checkpoint', () => { assert.equal(candidate.ops.filter(x => x.type === 'search-wire').length, 1); assert.equal(candidate.result.toolEffects, 1); assert.equal(candidate.result.modelCallsTotal, 2); assert.deepEqual(candidate.ops.filter(x => x.type === 'dispatch-input').map(x => [x.wireVersion, x.hasCheckpoint]), [[2, true]]); });
+        }
+        for (const choice of ['approve', 'deny']) {
+            const pair = {};
+            for (const arm of ['baseline', 'candidate']) {
+                const initial = run(arm, 'approval', 'start', '-deferred-' + choice);
+                check(`${arm} combined ${choice}: discovered tool parks without an effect`, () => { assert.equal(initial.result.toolEffects, 0); assert.equal(initial.ops.filter(x => x.type === 'search-wire').length, 1); });
+                pair[arm] = run(arm, 'approval', choice, '-deferred-' + choice);
+            }
+            const resumed = pair.candidate;
+            check(`combined ${choice}: resumed search history preserves consent and initiator`, () => {
+                // This fixture also submits a follow-up message with the choice.
+                // Compare both accepted turns with the existing child runner.
+                assert.equal(resumed.result.modelCallsTotal, pair.baseline.result.modelCallsTotal);
+                assert.deepEqual(prompts(resumed), prompts(pair.baseline));
+                assert.deepEqual(events(resumed), events(pair.baseline));
+                assert.equal(resumed.result.toolEffects, choice === 'approve' ? 1 : 0);
+                assert.equal(resumed.ops.filter(x => x.type === 'search-wire').length, 1);
+                assert.equal(resumed.ops.filter(x => x.type === 'event' && x.event === 'message.received' && x.data.message === 'Keep the fictional plan short.').length, 1);
+                const later = resumed.ops.filter(x => x.type === 'event' && x.data?.sequence === 1);
+                assert.ok(later.length > 0);
+                assert.ok(later.every(x => x.principal === 'responder' && x.initiator === 'initiator'));
+            });
+        }
+        const deferredCrash = run('candidate', 'deferred-search', 'crash-after-step', '-deferred-crash', 73);
+        const deferredCrashOps = readFileSync(join(deferredCrash.folder, 'operations.jsonl'), 'utf8').trim().split('\n').map(JSON.parse);
+        check('combined crash: search and tool persisted before child dispatch', () => { assert.equal(deferredCrashOps.filter(x => x.type === 'search-wire').length, 1); assert.equal(deferredCrashOps.filter(x => x.type === 'tool-effect').length, 1); assert.equal(deferredCrashOps.filter(x => x.type === 'dispatch-input').length, 0); });
+        const deferredReplay = run('candidate', 'deferred-search', 'replay', '-deferred-crash');
+        check('combined fresh-process replay: no repeated search or tool effect', () => {
+            assert.equal(deferredReplay.result.modelCallsTotal, 2); assert.equal(deferredReplay.result.toolEffects, 1);
+            assert.equal(deferredReplay.ops.filter(x => x.type === 'search-wire').length, 1);
+            assert.deepEqual(events(deferredReplay), events(deferredCases['deferred-search']));
+            assert.deepEqual(prompts(deferredReplay), prompts(deferredCases['deferred-search']));
+        });
         processFixture('contracts.mjs');
         const contracts = JSON.parse(readFileSync(join(root, 'trust-contract-results.json')));
         processFixture('declarations.mjs');
