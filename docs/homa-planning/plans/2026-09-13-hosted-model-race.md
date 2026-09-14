@@ -1,6 +1,6 @@
 # Hosted Astra race experiment
 
-Status: first hosted intervention did not activate; corrected pilot pending. Owner: gh#1171.
+Status: corrected hosted pilot completed, target not met. First failed activation retained separately. Owner: gh#1171.
 
 The target remains Send to first visible useful answer within five seconds for
 19 of 20 normal replies, including preparation, reasoning, tools, transport, and
@@ -94,3 +94,73 @@ four samples, stopped-run state, segmented logs, deployment identities, and
 fixture-scoped server records. Production stayed on deployment
 `dpl_HJ8w7KiwbdjFEcPxeorznh9mDQ7i`, SHA
 `2e67c7f13a0e67b3b8d726c6615180dc94db71ce` at the preflight check.
+
+## Corrected hosted pilot
+
+Source `c6c59c3e08948702c5f19384a0ac4e2e866d41dc` produced READY protected
+previews: candidate `dpl_7EwNSG9QfyRX7hVk1GSg2oHaiXkB` and control
+`dpl_G2ZZrkHwgcHfYNbbimtZGfpme74D`. A recorded amendment before any Send put
+the candidate first, so activation could be verified before another control
+batch. The two unused synthetic families each received the same three prompts.
+
+| Prompt | Two-copy first visible text | Control first visible text | Content qualification |
+| --- | --- | --- | --- |
+| Counting request | 18.602-18.680s | 27.909-27.981s | Both ended in a relevant clarifying question. Control also reported it could not check counting notes. |
+| Observation and activity | 34.839-34.911s | 8.702-8.769s | Candidate began the activity. Control began a save/check notice; the activity arrived later. Its exact first-useful timestamp was not captured. |
+| Short phonics definition | 10.306-10.381s | 9.975-10.048s | Both completed a correct short definition. |
+
+All six first-text observations already exceeded five seconds, so no later
+useful prefix could meet the target. Every observation had continuous sampled
+visibility without a gap above one second; largest gap was 342ms. The observer
+measures visible DOM intervals, not physical paint or an exact first-ever time.
+For late first text it stops at that observation, so do not turn the control's
+8.8-second notice into an answer-time result. Its later complete activity is
+preserved in the post-observation UI snapshot.
+
+Activation is verified: nine candidate model steps produced 18 attempt-start
+records, nine winners, nine loser-cancellation requests, nine completed winner
+streams and nine cancelled loser streams. The control had nine model steps and
+zero races. Both tool ledgers contain six completed calls, including exactly one
+`manage_child_progress` invocation per family. Neither used web search. All six
+user and six assistant messages are saved and indexed. Both accounts are signed
+out and their test tabs are closed. Cancellation observations do not establish
+zero loser charges or total race cost.
+
+The control's first map lookup lasted 5.253s and Homa reported it could not check
+the notes. The tool ledger says `completed` with null `is_error`; it does not
+independently establish the failure cause. Do not report a verified database
+outage or a clean counting-prompt treatment effect from this pair. The next
+followup's map lookup completed in 259ms. Progress updates and activity output
+were present in both followups, but this is not a complete quality or provenance
+certification.
+
+Preparation alone exceeded five seconds on both counting requests and both
+phonics questions. For phonics, candidate Send-to-model-start was 6.717s, then
+3.586s to the first SDK output and roughly 78ms to visible text. Control was
+8.028s preparation, 1.982s to first SDK output and roughly 38ms to visible text.
+The race's SDK output boundary includes buffered selection, so it is not a raw
+upstream-first-chunk comparison. These figures locate the delay without claiming
+a statistically reliable speed difference from one pair.
+
+The multi-step requests still required three and five sequential model steps.
+One candidate winning stream needed 9.711s just to reach its selected answer
+prefix. Two copies therefore do not guarantee a five-second model bound either.
+Cache-read counts differed across arms and the families ran sequentially. No
+median, p95, universal speedup, or cost-efficiency claim follows from this pilot.
+
+Decision: do not promote two-copy inference as the solution to gh#1171. Keep it
+preview-only; the next experiment should address preparation that occurs before
+the first model call and retain the same Send-to-useful-answer acceptance target.
+The five-second, 19-of-20 goal is still active and unmet.
+
+Corrected evidence: `/private/tmp/homa-eve-hosted-c6c59c3e/`, including frozen
+protocol and pre-Send amendment, six samples, complete UI snapshots, exact-source
+deployment receipts, segmented logs, activation records, fixture-scoped metadata,
+and derived `analysis.json`. The interrupted four-Send run remains separate.
+
+At the 2026-09-14 00:20 UTC closeout check, production was still READY on
+`dpl_HJ8w7KiwbdjFEcPxeorznh9mDQ7i`, SHA
+`2e67c7f13a0e67b3b8d726c6615180dc94db71ce`. This experiment made no production
+deployment or merge. A concise report and sanitized metrics are saved as
+`ttft-hosted-model-race.md` and `ttft-hosted-model-race-summary.json` in the
+task's visualization directory.
