@@ -73,6 +73,8 @@ test("outbound observer preserves lazy bytes, response metadata and cancellation
     await timeServer("homa.test.request", async () => {
       const response = await fetch("https://example.com/private");
       assert.equal(pulls, 0);
+      flushTimingRecords();
+      assert.ok(logs.some(row => String(row[1]).includes('"kind":"span","name":"homa.http.outbound"')), "request headers must be timed even if nobody reads the body");
       assert.equal(response.status, 206);
       assert.equal(response.url, "https://example.com/private");
       assert.equal(response.headers.get("x-test"), "present");

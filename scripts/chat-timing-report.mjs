@@ -54,8 +54,10 @@ export function timingReport(records) {
       const beginning=direct.find(x=>x.kind==='browser.request.start'&&x.name===r.name&&Math.abs(x.elapsedMs-(r.elapsedMs-r.durationMs))<1);
       return {name:r.name,serverClockOffsetMinMs:r.serverHeadersMs-r.atMs,serverClockOffsetMaxMs:beginning?r.serverReceivedMs-beginning.atMs:null};
     });
+    const endedSpans=new Set(records.filter(r=>r.kind==='span').map(r=>r.traceId+':'+r.spanId));
+    const unfinishedSpans=associated.filter(r=>r.kind==='span.start'&&!endedSpans.has(r.traceId+':'+r.spanId)).map(r=>({name:r.name,traceId:r.traceId,spanId:r.spanId}));
     const incomplete=associated.filter(r=>r.kind==='runtime'&&r.phase==='start'&&!records.some(x=>x.kind==='runtime'&&x.phase==='end'&&x.receiptId===r.receiptId));
-    return {sendId,sessionIds:[...sessions],firstVisibleMs:visible?.elapsedMs??null,clockIds:clocks,clockBounds,incompleteOperations:incomplete.map(r=>r.name),browserTimeline:browserTimeline(direct),operationAttribution:spanAttribution(associated),coverage:'Inspect stage boundaries and platform request spans before claiming complete attribution. Parent spans account for elapsed time but do not explain their uninstrumented interior.',records:associated.sort((a,b)=>(a.startedAtMs??a.atMs??0)-(b.startedAtMs??b.atMs??0))};
+    return {sendId,sessionIds:[...sessions],firstVisibleMs:visible?.elapsedMs??null,clockIds:clocks,clockBounds,incompleteOperations:incomplete.map(r=>r.name),unfinishedSpans,browserTimeline:browserTimeline(direct),operationAttribution:spanAttribution(associated),coverage:'Inspect stage boundaries and platform request spans before claiming complete attribution. Parent spans account for elapsed time but do not explain their uninstrumented interior.',records:associated.sort((a,b)=>(a.startedAtMs??a.atMs??0)-(b.startedAtMs??b.atMs??0))};
   })};
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href){
@@ -64,6 +66,6 @@ if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href){
   const report=timingReport(extractTimingRecords(input));
   const cappedRequests=new Set();
   for(const line of input.split('\n')){try{const entry=JSON.parse(line);if(entry.logs?.length>=256)cappedRequests.add(entry.id);}catch{/* Non-JSON CLI notices are not measurements. */}}
-  report.collection={possiblyTruncatedRequests:[...cappedRequests],complete:cappedRequests.size===0 && report.turns.every(t=>t.firstVisibleMs!==null && t.incompleteOperations.length===0)};
+  report.collection={possiblyTruncatedRequests:[...cappedRequests],complete:cappedRequests.size===0 && report.turns.every(t=>t.firstVisibleMs!==null && t.incompleteOperations.length===0 && t.unfinishedSpans.length===0)};
   await writeFile(destination,JSON.stringify(report,null,2));console.log(JSON.stringify({records:report.recordCount,turns:report.turns.map(t=>({sendId:t.sendId,firstVisibleMs:t.firstVisibleMs,incompleteOperations:t.incompleteOperations}))}));
 }

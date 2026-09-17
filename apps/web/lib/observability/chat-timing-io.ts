@@ -39,24 +39,31 @@ export function registerTimingFetch(): void {
   globalThis.fetch = async function(input, init) {
     if (!trace.getSpan(context.active())) return original(input, init);
     const tracer = trace.getTracer("homa-chat-timing");
+    const parentContext = context.active();
     const span = tracer.startSpan("homa.http.outbound");
     try {
       const response = await original(input, init);
       span.addEvent("headers.received");
       span.setAttribute("http.status_code", response.status);
-      if (!response.body) { span.end(); return response; }
+      span.end();
+      if (!response.body) return response;
+      // Headers complete the request even when an SDK intentionally ignores its body.
+      // Start a separate body timer only when the caller reads or cancels it.
+      let bodySpan: ReturnType<typeof tracer.startSpan> | undefined;
+      const observeBody = () => bodySpan ??= tracer.startSpan("homa.http.response_body", {}, trace.setSpan(parentContext, span));
       let first = true;
       const reader = response.body.getReader();
       const body = new ReadableStream<Uint8Array>({
         async pull(controller) {
+          const reading = observeBody();
           try {
             const chunk = await reader.read();
-            if (chunk.done) { span.end(); controller.close(); return; }
-            if (first) { first = false; span.addEvent("body.first_byte"); }
+            if (chunk.done) { reading.end(); controller.close(); return; }
+            if (first) { first = false; reading.addEvent("body.first_byte"); }
             controller.enqueue(chunk.value);
-          } catch (error) { span.setStatus({code: SpanStatusCode.ERROR}); span.end(); controller.error(error); }
+          } catch (error) { reading.setStatus({code: SpanStatusCode.ERROR}); reading.end(); controller.error(error); }
         },
-        async cancel(reason) { span.addEvent("body.cancelled"); span.end(); await reader.cancel(reason); },
+        async cancel(reason) { const reading = observeBody(); reading.addEvent("body.cancelled"); reading.end(); await reader.cancel(reason); },
       }, { highWaterMark: 0 });
       const wrapped = new Response(body, { status: response.status, statusText: response.statusText, headers: response.headers });
       // Preserve standard fetch metadata used by SDKs, while keeping body streaming.
