@@ -10,13 +10,13 @@ import { timingId, timingRecord, flushTimingRecords } from "./chat-timing";
 
 test("span export excludes prompts, SQL, errors, tool payloads and unknown event attributes", () => {
   const span = {
-    name:"ai.streamText", attributes:{"ai.prompt":"PRIVATE","db.statement":"PRIVATE","eve.session.id":"session", "ai.usage.inputTokens":42},
+    name:"ai.streamText", attributes:{"ai.prompt":"PRIVATE","db.statement":"PRIVATE","eve.session.id":"session", "ai.usage.inputTokens":42,"ai.settings.context.homa.send.id":"send","ai.settings.context.private":"PRIVATE"},
     startTime:[1,0], duration:[0,12500000], status:{code:2,message:"PRIVATE"},
     spanContext:()=>({traceId:"trace",spanId:"span"}),
     events:[{name:"exception",time:[1,0],attributes:{message:"PRIVATE"}},{name:"model.first_answer_text",time:[1,1000000],attributes:{text:"PRIVATE"}}],
   } as unknown as ReadableSpan;
   const result=spanRecord(span);assert.equal(result.durationMs,12.5);assert.equal(result.outcome,"error");
-  assert.equal(JSON.stringify(result).includes("PRIVATE"),false);assert.equal(result.events.length,1);
+  assert.equal(JSON.stringify(result).includes("PRIVATE"),false);assert.equal(result.events.length,1);assert.equal(result.attributes["homa.send.id"],"send");
 });
 test("correlation accepts only bounded opaque IDs",()=>{
   assert.equal(timingId("secret-token"),undefined);assert.equal(timingId("a".repeat(10000)),undefined);
