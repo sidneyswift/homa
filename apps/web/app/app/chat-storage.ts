@@ -1,3 +1,4 @@
+import { timeBrowserSync } from "../../lib/observability/chat-timing-browser";
 import { defaultMessageReducer } from "eve/client";
 import type {
   EveMessage,
@@ -179,7 +180,7 @@ export function chatStorageKey(userId: string): string {
 export function loadSavedChat(storageKey: string): SavedChat {
   if (typeof window === "undefined") return {};
   try {
-    const raw = window.localStorage.getItem(storageKey);
+    const raw = timeBrowserSync("storage.read", () => window.localStorage.getItem(storageKey));
     return raw ? (JSON.parse(raw) as SavedChat) : {};
   } catch {
     return {};
@@ -195,14 +196,14 @@ export function saveChat(
     const next = options.mergeSessionEvents
       ? mergeSavedSessionEvents(loadSavedChat(storageKey), chat)
       : chat;
-    window.localStorage.setItem(
+    timeBrowserSync("storage.write", () => window.localStorage.setItem(
       storageKey,
       JSON.stringify({
         ...next,
         archived: capArchived(next.archived ?? []),
         events: trimEventsForSave(next.events ?? []),
       }),
-    );
+    ));
   } catch {
     // Storage full or blocked: the durable session still lives server-side.
   }

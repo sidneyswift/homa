@@ -124,7 +124,7 @@ test("binding classifies real SDK Auth 504 and network errors before any members
       assert.deepEqual(backend.paths.slice(before), Array(status === 429 ? 1 : 2).fill("/auth/v1/user"), "Only bounded transient Auth GET retries are allowed before admission");
     }
   }
-  const records = logs.map(row => JSON.parse(row[1] as string));
+  const records = logs.filter(row => row[0] === "[chat-preparation]").map(row => JSON.parse(row[1] as string));
   assert.equal(records.length, 16);
   assert.ok(records.filter(row => row.stage === "binding_authenticate").every(row => row.outcome === "error"));
   assert.ok(records.filter(row => row.stage === "binding_total").every(row => row.statusCode === 503));
@@ -169,7 +169,7 @@ test("binding timings separate authentication and membership without changing th
   const response = await GET(request());
   assert.equal(response.status, 503);
   assert.equal(response.headers.get("retry-after"), "1");
-  const records = logs.map((row) => JSON.parse(row[1] as string));
+  const records = logs.filter(row => row[0] === "[chat-preparation]").map((row) => JSON.parse(row[1] as string));
   assert.deepEqual(records.map((row) => [row.stage, row.outcome]), [
     ["binding_authenticate", "ok"], ["binding_membership", "error"], ["binding_total", "ok"],
   ]);

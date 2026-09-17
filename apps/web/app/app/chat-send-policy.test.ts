@@ -454,3 +454,14 @@ describe("composerPrimaryAction", () => {
     assert.equal(composerPrimaryAction({ draft: "look", readyAttachments: 2 }), "send");
   });
 });
+
+
+it("queue timing retains the first send time when consecutive parent messages combine", () => {
+  const first = prepareChatSend({ text: "First", busy: true, draftFromVoice: false, source: {kind: "composer"} });
+  const second = prepareChatSend({ text: "Second", busy: true, draftFromVoice: false, source: {kind: "composer"} });
+  assert.ok(first && second);
+  const queue = appendPreparedChatSendToQueue(appendPreparedChatSendToQueue([], first, 100), second, 200);
+  const result = flushChatQueue(queue);
+  assert.equal(result.timingStartedAt, 100);
+  assert.equal(result.outgoing, "First\n\nSecond");
+});

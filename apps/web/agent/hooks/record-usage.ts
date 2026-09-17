@@ -1,3 +1,4 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import { HOMA_MODEL } from "../model";
@@ -26,7 +27,7 @@ import {
  * conversation. Sessions with no family (unlinked SMS, dev probes)
  * record with family_id null so fleet spend still adds up.
  */
-export default defineHook({
+export default defineHook(withTimedHooks("record-usage", {
   events: {
     async "step.completed"(event, ctx) {
       try {
@@ -62,4 +63,4 @@ export default defineHook({
       }
     },
   },
-});
+}));

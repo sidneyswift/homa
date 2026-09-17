@@ -90,6 +90,7 @@ export interface PreparedChatSend {
 }
 
 export interface QueuedChatMessage {
+  timingStartedAt?: number;
   assessmentAction?: SelectedAssessmentAction;
   text: string;
   progressActionKey: string | null;
@@ -148,6 +149,7 @@ export function prepareChatSend(input: {
 export function appendPreparedChatSendToQueue(
   queue: QueuedChatMessage[],
   plan: PreparedChatSend,
+  timingStartedAt?: number,
 ): QueuedChatMessage[] {
   if (plan.destination !== "queue") {
     throw new TypeError("Only queued chat sends can enter the queue");
@@ -174,6 +176,7 @@ export function appendPreparedChatSendToQueue(
     ...queue,
     {
       ...(plan.assessmentAction ? {assessmentAction: plan.assessmentAction} : {}),
+      ...(timingStartedAt === undefined ? {} : { timingStartedAt }),
       text: plan.message,
       progressActionKey: plan.progressActionKey,
       lane: plan.lane,
@@ -183,6 +186,7 @@ export function appendPreparedChatSendToQueue(
 }
 
 export interface ChatQueueFlush {
+  timingStartedAt?: number;
   assessmentAction?: SelectedAssessmentAction;
   /** The turn to send now, or null when there is nothing to say. */
   outgoing: string | null;
@@ -210,6 +214,7 @@ export interface ChatQueueFlush {
 export function flushChatQueue(
   queue: QueuedChatMessage[],
   appended?: {
+    timingStartedAt?: number;
     text: string;
     lane: ChatSendLane;
     modality: ChatTurnModality;
@@ -222,6 +227,7 @@ export function flushChatQueue(
         ...queue,
         {
           ...(appended.assessmentAction ? {assessmentAction: appended.assessmentAction} : {}),
+          ...(appended.timingStartedAt === undefined ? {} : { timingStartedAt: appended.timingStartedAt }),
           text: appended.text,
           progressActionKey: appended.progressActionKey ?? null,
           lane: appended.lane,
@@ -240,6 +246,7 @@ export function flushChatQueue(
 
   if (all[0].lane === "directive" || all[0].lane === "assessment_action") {
     return {
+      ...(all[0].timingStartedAt === undefined ? {} : { timingStartedAt: all[0].timingStartedAt }),
       outgoing: all[0].text,
       remaining: all.slice(1),
       lane: all[0].lane,
@@ -252,6 +259,7 @@ export function flushChatQueue(
   while (end < all.length && all[end].lane === lane) end += 1;
   const sending = all.slice(0, end);
   return {
+    ...(sending[0].timingStartedAt === undefined ? {} : { timingStartedAt: sending[0].timingStartedAt }),
     outgoing: sending
       .map((entry) => entry.text)
       .join("\n\n"),

@@ -2,6 +2,8 @@ import { extractBearerToken, localDev, vercelOidc, type AuthFn } from "eve/chann
 import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
+import { CHAT_TIMING_HEADER, timingId } from "../../lib/observability/chat-timing";
+import { timeRequest } from "../../lib/observability/chat-timing-server";
 import { measureChatPreparation } from "../../lib/observability/chat-preparation";
 import { createBoundedAuthUserFetch } from "../../lib/auth-user-fetch";
 import { readEveAuthentication } from "../../lib/eve-authentication";
@@ -158,6 +160,7 @@ function supabaseAuth(): AuthFn<Request> {
 
     // attributes only admits string values; absent facts are omitted keys.
     const attributes: Record<string, string> = {
+      ...(timingId(request.headers.get(CHAT_TIMING_HEADER)) ? { chatTimingId: timingId(request.headers.get(CHAT_TIMING_HEADER))! } : {}),
       channel,
       messageModality: messageModalityFromRequest(request),
       messageSource: messageSourceFromRequest(request),
@@ -466,7 +469,15 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
 
 const channel = eveChannel({auth: eveRouteAuth.auth, onMessage: onEveMessage});
 
-export default protectEveSessionRoutes(channel, {
+const protectedChannel = protectEveSessionRoutes(channel, {
   resolveAuth: eveRouteAuth.resolve,
   owners: eveSessionOwnerStore,
 });
+
+const timedChannel = { ...protectedChannel, routes: protectedChannel.routes.map(route => {
+  if (route.method === "WEBSOCKET") return route;
+  const handler = route.handler;
+  return { ...route, handler: (request: Request, args: Parameters<typeof handler>[1]) => timeRequest(request, "homa.http.admission", () => handler(request, args)) };
+}) };
+
+export default timedChannel;

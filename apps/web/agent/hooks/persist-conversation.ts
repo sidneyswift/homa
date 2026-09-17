@@ -1,3 +1,4 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
@@ -56,7 +57,7 @@ function outboundChannel(attributes: unknown) {
  * persist terminal output before sending it. Idempotency rides the
  * (session_id, turn_id, role, sequence) key.
  */
-export default defineHook({
+export default defineHook(withTimedHooks("persist-conversation", {
   events: {
     async "message.received"(event, ctx) {
       const attributes = ctx.session.auth.current?.attributes;
@@ -153,4 +154,4 @@ export default defineHook({
       }
     },
   },
-});
+}));

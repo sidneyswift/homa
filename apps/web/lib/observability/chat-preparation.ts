@@ -1,3 +1,5 @@
+import { trace, SpanStatusCode } from "@opentelemetry/api";
+
 /** Metadata only: never pass auth attributes, message text, or database rows. */
 export type ChatPreparationStage =
   | "authenticate"
@@ -84,6 +86,9 @@ export async function measureChatPreparation<T>(
   sessionId?: string,
   metadata?: ChatPreparationMetadata,
 ): Promise<T> {
+  return trace.getTracer("homa-chat-timing").startActiveSpan(`homa.prepare.${stage}`, async span => {
+  if (sessionId) span.setAttribute("eve.session.id", sessionId);
+  if (metadata?.turnId) span.setAttribute("eve.turn.id", metadata.turnId);
   const startedAtMs = Date.now();
   const startedAt = performance.now();
   let outcome: "ok" | "error" = "error";
@@ -95,5 +100,8 @@ export async function measureChatPreparation<T>(
     recordChatPreparationTiming(
       stage, startedAtMs, performance.now() - startedAt, outcome, sessionId, metadata,
     );
+    if (outcome === "error") span.setStatus({ code: SpanStatusCode.ERROR });
+    span.end();
   }
+  });
 }

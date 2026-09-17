@@ -1,9 +1,10 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import { markChatPreparation } from "../../lib/observability/chat-preparation";
 
 /** Stream boundaries only. Never pass event content or auth into the logger. */
-export default defineHook({
+export default defineHook(withTimedHooks("preparation-timing", {
   events: {
     "step.started"(event, ctx) {
       markChatPreparation("agent_step_started", ctx.session.id, {
@@ -26,4 +27,4 @@ export default defineHook({
       });
     },
   },
-});
+}));
