@@ -6,7 +6,7 @@ import { registerChatTiming, spanRecord, timeServer } from "./chat-timing-server
 import { registerTimingFetch, timedSql } from "./chat-timing-io";
 import { chatTimingMiddleware } from "./chat-timing-model";
 import { browserTimingBatch } from "./chat-timing-browser-contract";
-import { timingId } from "./chat-timing";
+import { timingId, timingRecord, flushTimingRecords } from "./chat-timing";
 
 test("span export excludes prompts, SQL, errors, tool payloads and unknown event attributes", () => {
   const span = {
@@ -81,7 +81,8 @@ test("outbound observer preserves lazy bytes, response metadata and cancellation
       await reader.cancel();
     });
     assert.equal(cancelled, true);
-    const records = logs.filter(row => row[0] === "[chat-timing]").map(row => JSON.parse(row[1] as string));
+    flushTimingRecords();
+    const records = logs.filter(row => row[0] === "[chat-timing]").flatMap(row => { const record = JSON.parse(row[1] as string); return record.kind === "batch" ? record.records : [record]; });
     const outbound = records.find(row => row.kind === "span" && row.name === "homa.http.outbound");
     const parent = records.find(row => row.kind === "span" && row.name === "homa.test.request");
     assert.ok(outbound && parent);
@@ -89,4 +90,18 @@ test("outbound observer preserves lazy bytes, response metadata and cancellation
     assert.equal(outbound.traceId, parent.traceId);
     assert.doesNotMatch(JSON.stringify(records), /private/);
   } finally { globalThis.fetch = original; }
+});
+
+
+test("batched timing retains every record within bounded log entries", t => {
+  flushTimingRecords();
+  const entries: string[] = [];
+  t.mock.method(console, "info", (_label: string, value: string) => entries.push(value));
+  for (let i = 0; i < 1500; i++) timingRecord({ kind: "test", index: i });
+  flushTimingRecords();
+  const records = entries.flatMap(entry => JSON.parse(entry).records);
+  assert.equal(records.length, 1500);
+  assert.deepEqual(records.map(record => record.index), Array.from({length: 1500}, (_, i) => i));
+  assert.ok(entries.length < 50);
+  assert.ok(entries.every(entry => entry.length < 17000));
 });

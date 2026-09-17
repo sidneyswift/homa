@@ -14,8 +14,38 @@ export function timingClockId(): string {
   const target = globalThis as typeof globalThis & { [clockKey]?: string };
   return target[clockKey] ??= crypto.randomUUID();
 }
+type TimingBuffer = { records: Record<string, unknown>[]; bytes: number; timer?: ReturnType<typeof setTimeout> };
+const bufferKey = Symbol.for("homa.chat-timing.buffer");
+const recordKey = Symbol.for("homa.chat-timing.record");
+const flushKey = Symbol.for("homa.chat-timing.flush");
+const shared = globalThis as typeof globalThis & {
+  [bufferKey]?: TimingBuffer;
+  [recordKey]?: typeof timingRecord;
+  [flushKey]?: typeof flushTimingRecords;
+};
+export function flushTimingRecords(): void {
+  const buffer = shared[bufferKey];
+  if (!buffer?.records.length) return;
+  if (buffer.timer) clearTimeout(buffer.timer);
+  const records = buffer.records.splice(0); buffer.bytes = 0; buffer.timer = undefined;
+  try { console.info("[chat-timing]", JSON.stringify({ version: 1, kind: "batch", records })); } catch { /* Observing must not fail a turn. */ }
+}
+/** Batch individual records so platform per-request log limits do not discard later operations. */
 export function timingRecord(record: Record<string, unknown>): void {
-  try { console.info("[chat-timing]", JSON.stringify({ version: 1, clockId: timingClockId(), ...record })); } catch { /* Observing must not fail a turn. */ }
+  try {
+    const stamped = { version: 1, clockId: timingClockId(), ...record };
+    if (typeof window !== "undefined") { console.info("[chat-timing]", JSON.stringify(stamped)); return; }
+    shared[recordKey] = timingRecord; shared[flushKey] = flushTimingRecords;
+    const buffer = shared[bufferKey] ??= { records: [], bytes: 0 };
+    const bytes = JSON.stringify(stamped).length;
+    if (buffer.bytes + bytes > 16000) flushTimingRecords();
+    buffer.records.push(stamped); buffer.bytes += bytes;
+    if (buffer.records.length >= 40) flushTimingRecords();
+    else if (!buffer.timer) {
+      buffer.timer = setTimeout(flushTimingRecords, 200);
+      buffer.timer.unref?.();
+    }
+  } catch { /* Observing must not fail a turn. */ }
 }
 export function timingIdentity(input: TimingIdentity): TimingIdentity {
   return {

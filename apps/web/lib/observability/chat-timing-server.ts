@@ -1,7 +1,7 @@
 import { context, trace, SpanStatusCode } from "@opentelemetry/api";
 import { NodeTracerProvider, type ReadableSpan, type SpanProcessor, type Span } from "@opentelemetry/sdk-trace-node";
 
-import { CHAT_TIMING_HEADER, timingId, timingIdentity, timingRecord, type TimingIdentity } from "./chat-timing";
+import { flushTimingRecords, CHAT_TIMING_HEADER, timingId, timingIdentity, timingRecord, type TimingIdentity } from "./chat-timing";
 
 const hrMs = (time: readonly [number, number]) => time[0] * 1000 + time[1] / 1e6;
 const safeKeys = new Set(["eve.session.id", "eve.turn.id", "eve.turn.sequence", "eve.step.index", "homa.send.id", "ai.model.id", "ai.usage.inputTokens", "ai.usage.outputTokens", "ai.response.msToFirstChunk", "http.status_code", "gen_ai.request.model", "gen_ai.usage.input_tokens", "gen_ai.usage.output_tokens", "gen_ai.tool.name"]);
@@ -49,12 +49,12 @@ export async function timeRequest(request: Request, name: string, operation: () 
   registerChatTiming();
   const receivedAtMs = Date.now();
   const sendId = timingId(request.headers.get(CHAT_TIMING_HEADER));
-  return timeServer(name, async () => {
+  try { return await timeServer(name, async () => {
     const result = await operation();
     trace.getSpan(context.active())?.setAttribute("http.status_code", result.status);
     const headers = new Headers(result.headers);
     headers.set("x-homa-timing-received", String(receivedAtMs));
     headers.set("x-homa-timing-headers", String(Date.now()));
     return new Response(result.body, { status: result.status, statusText: result.statusText, headers });
-  }, { sendId });
+  }, { sendId }); } finally { flushTimingRecords(); }
 }

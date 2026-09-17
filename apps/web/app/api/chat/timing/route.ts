@@ -1,6 +1,6 @@
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
-import { timingRecord } from "../../../../lib/observability/chat-timing";
+import { flushTimingRecords, timingRecord } from "../../../../lib/observability/chat-timing";
 import { browserTimingBatch } from "../../../../lib/observability/chat-timing-browser-contract";
 
 /** Authenticated, bounded metadata only. Runs after visibility, never in the answer's critical path. */
@@ -23,4 +23,5 @@ export async function POST(request: Request): Promise<Response> {
     for (const record of parsed.data) timingRecord({ ...record, source: "authenticated-browser", receivedAtMs: Date.now() });
     return new Response(null, { status: 204 });
   } catch { return new Response(null, { status: 400 }); }
+  finally { flushTimingRecords(); }
 }
