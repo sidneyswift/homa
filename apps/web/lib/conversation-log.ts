@@ -194,8 +194,8 @@ async function persistConversationMessageWithDependencies(
   const deferIndex = input.role === "user" &&
     (input.deferSemanticIndex ?? process.env.HOMA_DEFER_USER_INDEX === "true");
 
-  // Best-effort semantic index, awaited before canonical persistence on
-  // both user and assistant messages. Null means
+  // The experimental user path queues indexing with the canonical write.
+  // The existing path still awaits its best-effort index. Null means
   // this row is findable by FTS only, never a failed write.
   //
   // A hidden onboarding directive is skipped: it is the app talking, so
