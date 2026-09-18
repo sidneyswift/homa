@@ -29,3 +29,20 @@ test('batched platform logs retain each individual timing record',()=>{
  const raw=JSON.stringify({message:'[chat-timing] '+JSON.stringify({version:1,kind:'batch',records:[{version:1,kind:'mark',name:'first'},{version:1,kind:'mark',name:'last'}]})});
  assert.deepEqual(extractTimingRecords(raw).map(r=>r.name),['first','last']);
 });
+
+test('managed receipts bridge platform traces without importing later turns or other clocks',()=>{
+ const records=[
+  {kind:'browser.mark',sendId:'a',name:'send.begin',atMs:10000,elapsedMs:0},
+  {kind:'browser.mark',sendId:'a',name:'answer.dom_visible',atMs:11000,elapsedMs:1000},
+  {kind:'mark',sendId:'a',sessionId:'s',atMs:10500},
+  {kind:'runtime',sessionId:'s',clockId:'worker',spanId:'dispatch',startedAtMs:10300},
+  {kind:'span',clockId:'worker',spanId:'dispatch',traceId:'startup',startedAtMs:10300,durationMs:100},
+  {kind:'span',clockId:'worker',spanId:'parent',traceId:'startup',startedAtMs:10200,durationMs:200},
+  {kind:'span',clockId:'other',spanId:'dispatch',traceId:'unrelated',startedAtMs:10300,durationMs:100},
+  {kind:'runtime',sessionId:'s',clockId:'worker',spanId:'later',startedAtMs:15000},
+  {kind:'span',clockId:'worker',spanId:'later',traceId:'later-turn',startedAtMs:15000,durationMs:100},
+ ];
+ const result=timingReport(records).turns[0].records;
+ assert.ok(result.some(r=>r.spanId==='parent'));
+ assert.equal(result.some(r=>r.traceId==='unrelated'||r.traceId==='later-turn'),false);
+});

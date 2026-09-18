@@ -48,7 +48,14 @@ export function timingReport(records) {
     const traceIds=new Set(direct.map(r=>r.traceId).filter(id=>id && !/^0+$/.test(id)));
     const start=direct.find(r=>r.name==='send.begin');const visible=direct.find(r=>r.name==='answer.dom_visible');
     const lower=start ? start.atMs-start.elapsedMs : undefined;const upper=visible?.atMs;
-    const associated=records.filter(r=>direct.includes(r)||traceIds.has(r.traceId)||(sessions.has(r.sessionId??r.attributes?.['eve.session.id']) && (lower===undefined || (r.startedAtMs??r.atMs??0)>=lower-1000) && (upper===undefined || (r.startedAtMs??r.atMs??0)<=upper+1000)));
+    const sessionWindow=records.filter(r=>sessions.has(r.sessionId??r.attributes?.['eve.session.id']) && (lower===undefined || (r.startedAtMs??r.atMs??0)>=lower-1000) && (upper===undefined || (r.startedAtMs??r.atMs??0)<=upper+1000));
+    // Managed-step receipts omit trace IDs, but share clock and span IDs with OTel.
+    // Bound the receipt seed to this send so later turns cannot widen correlation.
+    const receiptSpans=new Set(sessionWindow.filter(r=>r.kind==='runtime'&&r.clockId&&r.spanId).map(r=>r.clockId+':'+r.spanId));
+    for(const record of records){
+      if(receiptSpans.has(record.clockId+':'+record.spanId)&&record.traceId&&!/^0+$/.test(record.traceId))traceIds.add(record.traceId);
+    }
+    const associated=records.filter(r=>direct.includes(r)||traceIds.has(r.traceId)||sessionWindow.includes(r));
     const clocks=[...new Set(associated.map(r=>r.clockId).filter(Boolean))];
     const clockBounds=direct.filter(r=>r.kind==='browser.request.headers'&&r.serverReceivedMs!==undefined).map(r=>{
       const beginning=direct.find(x=>x.kind==='browser.request.start'&&x.name===r.name&&Math.abs(x.elapsedMs-(r.elapsedMs-r.durationMs))<1);
