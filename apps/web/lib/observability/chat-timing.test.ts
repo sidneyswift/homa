@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { type ReadableSpan } from "@opentelemetry/sdk-trace-node";
 
-import { registerChatTiming, spanRecord, timeServer } from "./chat-timing-server";
+import { registerChatTiming, spanRecord, timeServer, safeOperationName } from "./chat-timing-server";
 import { registerTimingFetch, timedSql } from "./chat-timing-io";
 import { chatTimingMiddleware } from "./chat-timing-model";
 import { browserTimingBatch } from "./chat-timing-browser-contract";
@@ -106,4 +106,10 @@ test("batched timing retains every record within bounded log entries", t => {
   assert.deepEqual(records.map(record => record.index), Array.from({length: 1500}, (_, i) => i));
   assert.ok(entries.length < 50);
   assert.ok(entries.every(entry => entry.length < 17000));
+});
+
+test("workflow labels are fixed names, never arbitrary provider descriptions", () => {
+  assert.equal(safeOperationName("hook.resume"), "hook.resume");
+  assert.equal(safeOperationName("workflow.route.get_world"), "workflow.route.get_world");
+  assert.equal(safeOperationName("world.runs/private-token"), "platform.operation");
 });

@@ -286,3 +286,23 @@ describe("conversation log continuity integration", () => {
     );
   });
 });
+
+it("durably queues user indexing without waiting for the embedding provider", async () => {
+  let saved = false;
+  await persistConversationMessage({
+    attributes: { familyId: "family", episodeId: "episode" },
+    sessionId: "session", channelKind: "eve", sequence: 1,
+    role: "user", content: "What is a number bond?", turnId: "turn",
+    deferSemanticIndex: true,
+  }, {
+    resolveInbound: async () => { throw new Error("unexpected resolve"); },
+    persistCanonical: async input => {
+      assert.equal(input.deferSemanticIndex, true);
+      saved = true;
+      return {id:"message",episodeId:"episode",replyClaimed:false,content:input.content};
+    },
+    embed: async () => { throw new Error("embedding must be deferred"); },
+    saveEmbedding: async () => { throw new Error("embedding must be deferred"); },
+  });
+  assert.equal(saved, true);
+});

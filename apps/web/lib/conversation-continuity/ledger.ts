@@ -395,6 +395,8 @@ async function episodeForRuntimeSession(
 }
 
 export interface PersistCanonicalMessageInput {
+  /** Server-owned durable indexing queue marker, never model supplied. */
+  deferSemanticIndex?: boolean;
   attributes: unknown;
   sessionId: string;
   channel: "web" | "sms" | "email" | "dispatch";
@@ -508,13 +510,14 @@ export async function persistCanonicalMessage(
           insert into public.conversation_messages
             (family_id, session_id, sequence, channel, role, content, turn_id,
              episode_id, member_user_id, visibility, task_run_id,
-             provider_message_id, thread_key_hash, modality)
+             provider_message_id, thread_key_hash, modality, embedding_retry_at)
           values
             (${familyId}, ${input.sessionId}, ${input.sequence}, ${input.channel},
              ${input.role}, ${content}, ${input.turnId ?? null}, ${episodeId},
              ${memberUserId}, ${visibility}, ${attrs.taskRunId ?? null},
              ${providerMessageId}, ${attrs.continuityThreadHash ?? null},
-             ${modality})
+             ${modality},
+             ${input.deferSemanticIndex === true && input.role === "user" ? new Date() : null})
           on conflict
             (session_id, (coalesce(turn_id, '')), role, sequence)
           do update set
