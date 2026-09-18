@@ -199,7 +199,9 @@
     "test:material-print:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/print-finalization-postgres.mts",
     "test:material-handwriting:postgres": "HOMA_EVAL_ISOLATION=1 pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/handwriting-material-integration-postgres.mts",
     "build:agent-prompts": "node --experimental-strip-types scripts/build-agent-prompts.mts && pnpm build:voice-persona && pnpm build:report-writer-prompt",
-    "check:agent-prompts": "node --experimental-strip-types scripts/build-agent-prompts.mts --check && node --experimental-strip-types --test scripts/build-agent-prompts.test.mts"
+    "check:agent-prompts": "node --experimental-strip-types scripts/build-agent-prompts.mts --check && node --experimental-strip-types --test scripts/build-agent-prompts.test.mts",
+    "check:model-router": "tsx --test apps/web/lib/model-router/router.test.ts",
+    "eval:model-router": "tsx scripts/model-router-eval.mts"
   },
   "devDependencies": {
     "@vercel/blob": "^2.6.1",

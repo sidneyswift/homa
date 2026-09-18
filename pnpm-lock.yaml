@@ -72,7 +72,7 @@ importers:
         version: 7.0.14(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)
       expo:
         specifier: ~56.0.15
         version: 56.0.15(@babel/core@7.29.7)(@expo/dom-webview@56.0.6)(@expo/metro-runtime@56.0.16)(expo-router@56.2.14)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.8.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -195,8 +195,8 @@ importers:
   apps/web:
     dependencies:
       '@ai-sdk/gateway':
-        specifier: ^4.0.31
-        version: 4.0.31(zod@4.4.3)
+        specifier: ^4.0.85
+        version: 4.0.85(zod@4.4.3)
       '@ai-sdk/openai':
         specifier: ^4.0.23
         version: 4.0.23(zod@4.4.3)
@@ -208,7 +208,7 @@ importers:
         version: 3.1.0
       '@chat-adapter/state-memory':
         specifier: ^4.32.0
-        version: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
+        version: 4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)
       '@homa/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -241,22 +241,22 @@ importers:
         version: 2.110.0
       '@telnyx/chat-sdk-adapter':
         specifier: ^0.1.0
-        version: 0.1.0(ai@7.0.14(zod@4.4.3))(chat@4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3))(zod@4.4.3)
+        version: 0.1.0(ai@7.0.105(zod@4.4.3))(chat@4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3))(zod@4.4.3)
       '@vercel/analytics':
         specifier: ^2.0.1
-        version: 2.0.1(next@16.2.10(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        version: 2.0.1(next@16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@vercel/blob':
         specifier: ^2.6.1
         version: 2.6.1
       ai:
-        specifier: ^7.0.14
-        version: 7.0.14(zod@4.4.3)
+        specifier: ^7.0.105
+        version: 7.0.105(zod@4.4.3)
       chat:
         specifier: ^4.32.0
-        version: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
+        version: 4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)
       eve:
         specifier: 0.19.0
-        version: 0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
+        version: 0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.105(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4)
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -271,7 +271,7 @@ importers:
         version: 1.12.0
       next:
         specifier: 16.2.10
-        version: 16.2.10(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-mdx-remote:
         specifier: ^6.0.0
         version: 6.0.0(@types/react@19.2.17)(react@19.2.4)
@@ -395,6 +395,12 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/gateway@4.0.85':
+    resolution: {integrity: sha512-c8ztST/CslupqO3p7izsAuG3TlKg9mhE6mGJ42iUADsSMJIV5IOKd9AsLG33QCAY7SWs6NDO2giM/rq7bUTNlQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/mcp@2.0.18':
     resolution: {integrity: sha512-0NEiqoS3PzkITQFldRuuPyO+CckgUPb9wWkp2hQlcaGxKu9ebFJDyjxGYEySE7TQN7mYc8PUuaNEODvky51NaA==}
     engines: {node: '>=22'}
@@ -413,11 +419,21 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@5.0.43':
+    resolution: {integrity: sha512-gw/bcNseOGSs59TMtV4H1KwqXXe24NHgx+uBYr98pa4Fg6Uvp8hPPxjuckVnfFFyIxHCDew8so0ujpvcSuyMZA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider-utils@5.0.5':
     resolution: {integrity: sha512-oI0t3dvCoqWNV1I8o1Rybi2DXDvHES5r/TrwtJW90tuFLVepgJlftPxrcjh8vaSvjqC2diTuA2vXyjKAyHJm4A==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider@4.0.17':
+    resolution: {integrity: sha512-VYMBxIQdcHqbIf1j+YZlI9Ati6LZ4wJe0GGd4z4a5H/KxTggjeOiyaVYTnfF7LHZK5jMQ+rofmzz4QPqf++NUw==}
+    engines: {node: '>=22'}
 
   '@ai-sdk/provider@4.0.2':
     resolution: {integrity: sha512-pfPoy9J1B1xV7cqJ8MYHOsDYrMv5tR3+EMNfI249OhkD2uRakvav3Fo7XpD2luuN/YNCBY7KfEQc7vEV7KEtyw==}
@@ -2956,6 +2972,12 @@ packages:
     resolution: {integrity: sha512-qdZ/9JFORtTKJNhT/IczMeEfEUbUU0K5umYeiIQHX+AjHs+Y9SXVzSgaYlpZeyNMrvuh2HpZiOTpvS57iPfBkQ==}
     engines: {node: '>=18.18'}
     hasBin: true
+
+  ai@7.0.105:
+    resolution: {integrity: sha512-gkV3W+tTtWwQ41KNV/KjV8wabBrk+bnbnZ3f0AWp/T9LLyljose8uhFViKleVy7tIdEiR2PiS4BpbNdcExf7rQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
 
   ai@7.0.14:
     resolution: {integrity: sha512-qA82fZyD4xh9IDB+s3SvwbjwjR+GGRmJjTYMwON1uROj8vPDIQbPTZLLq6ZWTVESn9daeH1GMv0zKfVLwNU2sQ==}
@@ -6789,6 +6811,10 @@ packages:
     resolution: {integrity: sha512-YmfV3YnEDzXRC5lZ2jWtWWHKGUm1zIt8AhesR1tens+HTNv+YZlN/dp6G727LOvMJ8xjP9Be7Y2Sdr96LDm+pg==}
     engines: {node: '>=18.17'}
 
+  undici@7.29.1:
+    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
+    engines: {node: '>=20.18.1'}
+
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
 
@@ -7193,6 +7219,13 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
+  '@ai-sdk/gateway@4.0.85(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.17
+      '@ai-sdk/provider-utils': 5.0.43(zod@4.4.3)
+      '@vercel/oidc': 3.2.0
+      zod: 4.4.3
+
   '@ai-sdk/mcp@2.0.18(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.4
@@ -7214,6 +7247,15 @@ snapshots:
       eventsource-parser: 3.1.0
       zod: 4.4.3
 
+  '@ai-sdk/provider-utils@5.0.43(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.17
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.0
+      undici: 7.29.1
+      zod: 4.4.3
+
   '@ai-sdk/provider-utils@5.0.5(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.2
@@ -7221,6 +7263,10 @@ snapshots:
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.0
       zod: 4.4.3
+
+  '@ai-sdk/provider@4.0.17':
+    dependencies:
+      json-schema: 0.4.0
 
   '@ai-sdk/provider@4.0.2':
     dependencies:
@@ -7743,17 +7789,17 @@ snapshots:
 
   '@borewit/text-codec@0.2.2': {}
 
-  '@chat-adapter/shared@4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/shared@4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
+      chat: 4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
       - zod
 
-  '@chat-adapter/state-memory@4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)':
+  '@chat-adapter/state-memory@4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      chat: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
+      chat: 4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
@@ -9180,9 +9226,7 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 
@@ -9497,10 +9541,10 @@ snapshots:
       postcss: 8.5.16
       tailwindcss: 4.3.2
 
-  '@telnyx/chat-sdk-adapter@0.1.0(ai@7.0.14(zod@4.4.3))(chat@4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3))(zod@4.4.3)':
+  '@telnyx/chat-sdk-adapter@0.1.0(ai@7.0.105(zod@4.4.3))(chat@4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3))(zod@4.4.3)':
     dependencies:
-      '@chat-adapter/shared': 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
-      chat: 4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3)
+      '@chat-adapter/shared': 4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)
+      chat: 4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3)
     transitivePeerDependencies:
       - ai
       - supports-color
@@ -9807,9 +9851,9 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vercel/analytics@2.0.1(next@16.2.10(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
+  '@vercel/analytics@2.0.1(next@16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     optionalDependencies:
-      next: 16.2.10(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next: 16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
 
   '@vercel/blob@2.6.1':
@@ -9871,6 +9915,13 @@ snapshots:
   agent-base@7.1.4: {}
 
   agent-cli-detector@0.1.2: {}
+
+  ai@7.0.105(zod@4.4.3):
+    dependencies:
+      '@ai-sdk/gateway': 4.0.85(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.17
+      '@ai-sdk/provider-utils': 5.0.43(zod@4.4.3)
+      zod: 4.4.3
 
   ai@7.0.14(zod@4.4.3):
     dependencies:
@@ -10291,7 +10342,7 @@ snapshots:
 
   character-reference-invalid@2.0.1: {}
 
-  chat@4.32.0(ai@7.0.14(zod@4.4.3))(zod@4.4.3):
+  chat@4.32.0(ai@7.0.105(zod@4.4.3))(zod@4.4.3):
     dependencies:
       '@workflow/serde': 4.1.0-beta.2
       mdast-util-to-string: 4.0.0
@@ -10301,7 +10352,7 @@ snapshots:
       remend: 1.3.0
       unified: 11.0.5
     optionalDependencies:
-      ai: 7.0.14(zod@4.4.3)
+      ai: 7.0.105(zod@4.4.3)
       zod: 4.4.3
     transitivePeerDependencies:
       - supports-color
@@ -11100,14 +11151,61 @@ snapshots:
 
   etag@1.8.1: {}
 
-  eve@0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
+  eve@0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.105(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1)(microsandbox@0.6.4):
+    dependencies:
+      ai: 7.0.105(zod@4.4.3)
+      nitro: 3.0.260610-beta(@vercel/blob@2.6.1)(jiti@2.7.0)(lru-cache@11.5.1)
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.1
+      just-bash: 3.1.0
+      microsandbox: 0.6.4
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@netlify/blobs'
+      - '@netlify/runtime'
+      - '@planetscale/database'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - '@vercel/queue'
+      - aws4fetch
+      - better-sqlite3
+      - chokidar
+      - dotenv
+      - drizzle-orm
+      - giget
+      - idb-keyval
+      - ioredis
+      - jiti
+      - lru-cache
+      - miniflare
+      - mongodb
+      - mysql2
+      - rollup
+      - sqlite3
+      - uploadthing
+      - vite
+      - wrangler
+      - xml2js
+      - zephyr-agent
+
+  eve@0.19.0(patch_hash=44e745a152563a569df2cf17c9fa23342faaaa687598afa67e236743c301a685)(@opentelemetry/api@1.9.1)(@vercel/blob@2.6.1)(ai@7.0.14(zod@4.4.3))(jiti@2.7.0)(just-bash@3.1.0)(lru-cache@11.5.1):
     dependencies:
       ai: 7.0.14(zod@4.4.3)
       nitro: 3.0.260610-beta(@vercel/blob@2.6.1)(jiti@2.7.0)(lru-cache@11.5.1)
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       just-bash: 3.1.0
-      microsandbox: 0.6.4
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -13112,7 +13210,7 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  next@16.2.10(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@16.2.10(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.2.10
       '@swc/helpers': 0.5.15
@@ -13121,7 +13219,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(react@19.2.4)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.10
       '@next/swc-darwin-x64': 16.2.10
@@ -14441,10 +14539,12 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(react@19.2.4):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.4):
     dependencies:
       client-only: 0.0.1
       react: 19.2.4
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   styleq@0.1.3: {}
 
@@ -14690,6 +14790,8 @@ snapshots:
   undici-types@7.24.6: {}
 
   undici@6.27.0: {}
+
+  undici@7.29.1: {}
 
   unenv@2.0.0-rc.24:
     dependencies:

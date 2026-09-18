@@ -469,6 +469,9 @@ jobs:
       - name: Taxonomy checks (skill graph integrity, id law, DAG)
         run: pnpm check:taxonomy
 
+      - name: Model router boundaries and failure handling
+        run: pnpm check:model-router
+
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
 
