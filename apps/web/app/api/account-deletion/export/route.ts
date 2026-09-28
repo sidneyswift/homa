@@ -1,3 +1,4 @@
+import { exportFamilyWorkspace } from "../../../../lib/family-workspace/export";
 import { mapDb } from "../../../../lib/map/db";
 import { requireFamilyWithActorFromRequest } from "../../../../lib/map/session";
 import { exportConversationMessagesForAdult } from "../../../../lib/conversation-visibility";
@@ -12,7 +13,7 @@ export async function GET(request: Request): Promise<Response> {
   const sql = mapDb();
   const familyId = actor.family.id;
   const memberUserId = actor.memberUserId;
-  const [family, children, hours, materials, library, calendar, memories, conversation] = await Promise.all([
+  const [family, children, hours, materials, library, calendar, memories, conversation, workspace] = await Promise.all([
     sql`select to_jsonb(family) - 'resume_token_hash' - 'link_token_hash' as value from public.families family where id = ${familyId}`,
     sql`select coalesce(jsonb_agg(to_jsonb(child) order by child.created_at), '[]'::jsonb) as value from public.children child where family_id = ${familyId}`,
     sql`select coalesce(jsonb_agg(to_jsonb(entry) order by entry.created_at), '[]'::jsonb) as value from public.hours_log entry where family_id = ${familyId}`,
@@ -21,6 +22,7 @@ export async function GET(request: Request): Promise<Response> {
     sql`select coalesce(jsonb_agg(to_jsonb(event) order by event.created_at), '[]'::jsonb) as value from public.family_events event where family_id = ${familyId}`,
     sql`select coalesce(jsonb_agg(to_jsonb(memory) order by memory.created_at), '[]'::jsonb) as value from public.family_memories memory where family_id = ${familyId}`,
     exportConversationMessagesForAdult(sql, { familyId, memberUserId }),
+    exportFamilyWorkspace(familyId),
   ]);
   const body = JSON.stringify({
     exportedAt: new Date().toISOString(),
@@ -32,6 +34,7 @@ export async function GET(request: Request): Promise<Response> {
     calendar: calendar[0]?.value ?? [],
     memories: memories[0]?.value ?? [],
     conversation,
+    workspace,
   });
   return new Response(body, {
     headers: {

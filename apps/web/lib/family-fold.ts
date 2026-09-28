@@ -100,6 +100,14 @@ async function lockFamilyRowsForFold(
   await testHooks.afterFamilyLocks?.();
   if (rows.length !== 2) return null;
 
+  // A workspace-bearing family is not an empty signup stub. Preserve its
+  // provider identity and checkpoint paths instead of silently folding them.
+  const [workspaceSchema] = await tx`select to_regclass('public.family_workspace_files') is not null as ready`;
+  if (workspaceSchema?.ready) {
+    const workspace = await tx`select 1 from public.family_workspace_files where family_id = ${sourceFamilyId} limit 1`;
+    if (workspace.length) return null;
+  }
+
   const [artifactSchema] = await tx<FamilyFoldArtifactSchema[]>`
     select
       exists (
