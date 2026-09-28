@@ -1,4 +1,4 @@
-export type FamilyBlobSpace = "chat" | "library";
+export type FamilyBlobSpace = "chat" | "library" | "workspace";
 
 const PUBLIC_BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
 const PRIVATE_BLOB_HOST_SUFFIX = ".private.blob.vercel-storage.com";

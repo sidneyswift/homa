@@ -1114,6 +1114,12 @@ export const EVENT_SCHEMAS = {
       prior_status: z.enum(["ready", "processing", "needs_attention", "failed"]),
     })
     .strict(),
+  "workspace.operation": z.object({
+    family_id: z.uuid(),
+    operation: z.enum(["list", "read", "write", "move", "remove"]),
+    success: z.boolean(),
+    cache_hit: z.boolean().nullable(),
+  }).strict(),
   "library.asset_used": z
     .object({
       family_id: z.uuid(),

@@ -1,5 +1,5 @@
 ---
-description: Use to save, find, open, edit, delete, cite, or teach from family-owned or uploaded resources. Retrieve required family sources before another skill uses them. Homa-made Binder materials belong to materials-studio; curriculum decomposition to curriculum-mapping.
+description: Use to save, find, open, edit, delete, cite, or teach from family-owned resources, or maintain explicitly requested shared working text files across chats. Retrieve required family sources before another skill uses them. Homa-made Binder materials belong to materials-studio; curriculum decomposition to curriculum-mapping; family facts to memory tools.
 metadata:
   homa-related-skills: materials-studio, curriculum-studio, curriculum-mapping, planner
 ---
@@ -13,6 +13,10 @@ For a named Binder worksheet or packet, load `materials-studio` and follow its
 reopening workflow; do not substitute Library source searches.
 
 ## Decide the Library action first
+
+For an explicit working-file request (such as keeping a named Markdown draft
+for the next chat), read `references/working-files.md`. This optional workspace
+does not change where originals, verified source evidence, or Binder outputs live.
 
 Choose one action from what the parent actually asked:
 

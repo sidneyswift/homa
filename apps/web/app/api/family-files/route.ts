@@ -12,6 +12,8 @@ export async function GET(request: Request): Promise<Response> {
     ? "chat"
     : isFamilyBlobUrl(url, auth.familyId, "library")
     ? "library"
+    : isFamilyBlobUrl(url, auth.familyId, "workspace")
+    ? "workspace"
     : null;
   if (!space) {
     return Response.json({ ok: false, reason: "not-found" }, { status: 404 });

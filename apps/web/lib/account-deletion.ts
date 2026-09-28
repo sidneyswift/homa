@@ -13,6 +13,7 @@ import {
 } from "./account-deletion-billing";
 import { blobConfigured, deleteFamilyBlobs } from "./materials/artifact-store";
 import { familyBlobToken } from "./family-blob";
+import { deleteFamilyWorkspaceDrives } from "./family-workspace/provider";
 import { lessonBlobConfigured } from "./lessons/blobs";
 import { mapDb } from "./map/db";
 import {
@@ -113,6 +114,7 @@ export async function runAccountDeletionCleanup(input: {
 }
 
 export interface AccountDeletionWorkerDependencies {
+  deleteWorkspaceDrives?: (familyId: string) => Promise<number>;
   deleteAvatars(userIds: readonly string[]): Promise<number>;
   deleteAuthUsers(userIds: readonly string[]): Promise<number>;
   deletePublicFamilyBlobs(familyId: string): Promise<number>;
@@ -135,6 +137,7 @@ export interface AccountDeletionJobDependencies
 }
 
 const DEFAULT_ACCOUNT_DELETION_WORKER_DEPENDENCIES: AccountDeletionWorkerDependencies = {
+  deleteWorkspaceDrives: deleteFamilyWorkspaceDrives,
   deleteAvatars: deleteAccountDeletionAvatars,
   deleteAuthUsers: deleteAccountDeletionAuthUsers,
   deletePublicFamilyBlobs: deleteFamilyBlobs,
@@ -1230,11 +1233,12 @@ export async function runAccountDeletionJob(
         }
         const blobCounts: number[] = [];
         for (const prefix of artifactPrefixes) {
-          const [publicCount, privateCount] = await Promise.all([
+          const [publicCount, privateCount, workspaceCount] = await Promise.all([
             dependencies.deletePublicFamilyBlobs(prefix.family_id),
             dependencies.deletePrivateFamilyBlobs(prefix.family_id),
+            dependencies.deleteWorkspaceDrives?.(prefix.family_id) ?? Promise.resolve(0),
           ]);
-          blobCounts.push(publicCount, privateCount);
+          blobCounts.push(publicCount, privateCount, workspaceCount);
         }
         return [...blobCounts, avatarCount, authUserCount];
       },
@@ -1346,7 +1350,7 @@ export async function sweepCompletedDeletionTombstones(
   limit = 20,
   worker: Pick<
     AccountDeletionWorkerDependencies,
-    "deletePublicFamilyBlobs" | "deletePrivateFamilyBlobs"
+    "deletePublicFamilyBlobs" | "deletePrivateFamilyBlobs" | "deleteWorkspaceDrives"
   > = DEFAULT_ACCOUNT_DELETION_WORKER_DEPENDENCIES,
 ): Promise<void> {
   const sql = mapDb();
@@ -1374,6 +1378,7 @@ export async function sweepCompletedDeletionTombstones(
       await Promise.all([
         worker.deletePublicFamilyBlobs(row.family_id),
         worker.deletePrivateFamilyBlobs(row.family_id),
+        worker.deleteWorkspaceDrives?.(row.family_id) ?? Promise.resolve(0),
       ]);
       await sql`
         update public.account_deletion_artifact_tombstones

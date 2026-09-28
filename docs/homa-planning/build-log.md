@@ -1,3 +1,14 @@
+## 2026-09-28 · Implement the gated family working-file pilot
+
+The founder approved the Vercel Drives pilot in gh#1199. The existing family-librarian
+skill now owns shared draft maintenance through a bounded, authenticated file tool.
+Postgres metadata and private Blob checkpoints retain storage authority; short-lived
+Drive mounts provide recoverable working copies. The implementation includes
+revision conflicts, quotas, export, deletion sweeps, and eval isolation. Activation
+is off by default and limited to disposable fixture families. The [implementation
+plan](plans/2026-09-28-family-drives.md) records the provider probe and release gates;
+this entry does not claim production activation or fleet availability.
+
 # Build log: decisions agents made alone
 
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is

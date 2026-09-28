@@ -1,0 +1,31 @@
+{
+  "startedAt": "2026-09-28T09:42:11.389Z",
+  "sdk": "3.5.1",
+  "driveName": "homa-drive-probe-631f8393",
+  "region": "iad1",
+  "checks": {
+    "created": true,
+    "writeRead": true,
+    "secondWriterRejected": {
+      "name": "Error",
+      "code": "drive_attached",
+      "message": "Drive `homa-drive-probe-631f8393` is already attached as read-write to sandbox homa-drive-probe-631f8393-writer. You can mount it to multiple sandboxes via read-only snapshots."
+    },
+    "liveSnapshotSeesAcknowledgedWrite": false,
+    "snapshotPointInTime": true,
+    "freshSnapshotAfterStop": true,
+    "crossSandboxPersistence": true
+  },
+  "cleanup": {
+    "homa-drive-probe-631f8393-writer": "deleted",
+    "homa-drive-probe-631f8393-conflict": "absent",
+    "homa-drive-probe-631f8393-live": "deleted",
+    "homa-drive-probe-631f8393-reader": "deleted",
+    "homa-drive-probe-631f8393-nextwriter": "deleted",
+    "homa-drive-probe-631f8393-fresh": "deleted",
+    "homa-drive-probe-631f8393-next": "deleted",
+    "drive": "verified absent"
+  },
+  "failures": [],
+  "durationMs": 54715
+}
