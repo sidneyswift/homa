@@ -230,7 +230,7 @@ test("every route handler has matching independent fail-closed boundary reviews"
   }
   assert.deepEqual(Object.fromEntries(counts), {
     operator: 2,
-    family: 90,
+    family: 91,
     provider: 10,
     developer: 2,
     "developer-family": 1,
