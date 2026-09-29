@@ -1,8 +1,8 @@
 ---
 name: hours-records
-description: Use to read, total or explain recorded school time and manage Hours categories. New activity logs and Planner changes belong to planner; state paperwork and attendance judgments to state-records.
+description: Use to read, total or explain recorded school time manage Hours categories, or correct/remove recorded time. New activity logs and Planner changes belong to planner; state paperwork and attendance judgments to state-records.
 metadata:
-  homa-tools: find_hours, manage_hours_categories
+  homa-tools: inspect_hours_entry, correct_hours_entry, find_hours, manage_hours_categories
 ---
 
 # Read the Hours record
@@ -67,3 +67,8 @@ alone does not call for a state packet, a legal verdict, or a write.
 - When the parent reports new timed work under a category, pass the catalog's current name as `customLabel` in the existing Planner/log_hours workflow. Preserve the stable parent subject. The database keeps new category names available even after their last entry is deleted.
 
 Use the parent-facing subject names in your answer. Canonical ids such as `reading` and `spanish` are tool inputs only; do not explain those internal names to the parent. For example, a saved Literature category under `reading` is "Literature is ready under Language arts, with no time logged yet."
+
+## Correct recorded time
+
+Read `references/corrections.md` when the parent asks to change or remove existing
+time, including a shared co-op entry. New work belongs to Planner.

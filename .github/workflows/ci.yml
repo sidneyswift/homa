@@ -639,6 +639,9 @@ jobs:
 
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).
+      - name: Co-op program workflow and correction checks
+        run: pnpm check:programs
+
       - name: hours_log dedupe disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm hours-log:e2e
