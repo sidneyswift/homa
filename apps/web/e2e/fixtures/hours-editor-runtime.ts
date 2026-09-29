@@ -68,7 +68,13 @@ export async function updateHoursEntryAction(id: string, _revision: string, data
   fixture.calls.push({ kind: "save", id, values: Object.fromEntries(data.entries()) });
   const error = await waitForMutation();
   if (error) return { error };
-  const activity = activities.find((item) => item.hoursEntryIds.includes(id));
+  let activity = activities.find((item) => item.hoursEntryIds.includes(id));
+  if (activity && data.get("scope") === "child" && activity.childIds.length > 1) {
+    const childId=entries.find(row=>row.id===id)!.childId!;
+    const split={...activity,id:"b0000000-0000-4000-8000-000000000002",childIds:[childId],hoursEntryIds:[id]};
+    activities=activities.map(row=>row.id===activity!.id?{...row,childIds:row.childIds.filter(cid=>cid!==childId),hoursEntryIds:row.hoursEntryIds.filter(eid=>eid!==id)}:row);
+    activities.push(split); activity=split;
+  }
   const ids = activity?.hoursEntryIds ?? [id];
   const minutes = Number(data.get("minutes"));
   const subject = String(data.get("subject")) as HoursEntry["subject"];

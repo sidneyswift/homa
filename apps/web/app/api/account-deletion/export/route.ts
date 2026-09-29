@@ -13,7 +13,19 @@ export async function GET(request: Request): Promise<Response> {
   const sql = mapDb();
   const familyId = actor.family.id;
   const memberUserId = actor.memberUserId;
-  const [family, children, hours, materials, library, calendar, memories, conversation, workspace] = await Promise.all([
+  const [
+    family,
+    children,
+    hours,
+    materials,
+    library,
+    calendar,
+    memories,
+    conversation,
+    workspace,
+    programs,
+    programOccurrences,
+  ] = await Promise.all([
     sql`select to_jsonb(family) - 'resume_token_hash' - 'link_token_hash' as value from public.families family where id = ${familyId}`,
     sql`select coalesce(jsonb_agg(to_jsonb(child) order by child.created_at), '[]'::jsonb) as value from public.children child where family_id = ${familyId}`,
     sql`select coalesce(jsonb_agg(to_jsonb(entry) order by entry.created_at), '[]'::jsonb) as value from public.hours_log entry where family_id = ${familyId}`,
@@ -23,6 +35,8 @@ export async function GET(request: Request): Promise<Response> {
     sql`select coalesce(jsonb_agg(to_jsonb(memory) order by memory.created_at), '[]'::jsonb) as value from public.family_memories memory where family_id = ${familyId}`,
     exportConversationMessagesForAdult(sql, { familyId, memberUserId }),
     exportFamilyWorkspace(familyId),
+    sql`select coalesce(jsonb_agg(to_jsonb(p) order by p.created_at), '[]'::jsonb) as value from public.learning_programs p where family_id = ${familyId}`,
+    sql`select coalesce(jsonb_agg(to_jsonb(o) order by o.activity_date), '[]'::jsonb) as value from public.learning_program_occurrences o where family_id = ${familyId}`,
   ]);
   const body = JSON.stringify({
     exportedAt: new Date().toISOString(),
@@ -35,6 +49,8 @@ export async function GET(request: Request): Promise<Response> {
     memories: memories[0]?.value ?? [],
     conversation,
     workspace,
+    programs: programs[0]?.value ?? [],
+    programOccurrences: programOccurrences[0]?.value ?? [],
   });
   return new Response(body, {
     headers: {

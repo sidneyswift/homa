@@ -26,7 +26,15 @@ import { KID_AGE_BANDS, WAITLIST_SOURCES } from "./waitlist";
  *  the card comes out before the product, HOMA_SIGNUP_PAYWALL_ENABLED).
  *  Shared by the wall.* and report.action_tapped schemas and the beacon
  *  route's request schema. */
-export const WALL_DOORS = ["plan", "month", "call", "chat", "lesson", "report", "signup"] as const;
+export const WALL_DOORS = [
+  "plan",
+  "month",
+  "call",
+  "chat",
+  "lesson",
+  "report",
+  "signup",
+] as const;
 export type WallDoor = (typeof WALL_DOORS)[number];
 
 /** The onboarding flow's trackable cards: map-flow.tsx's FlowPhase minus
@@ -168,8 +176,7 @@ export const MOBILE_ONBOARDING_INTENTS = [
   "research",
   "all",
 ] as const;
-export type MobileOnboardingIntent =
-  (typeof MOBILE_ONBOARDING_INTENTS)[number];
+export type MobileOnboardingIntent = (typeof MOBILE_ONBOARDING_INTENTS)[number];
 
 /**
  * Why a family's onboarding record flipped to "done" (founder ruling
@@ -201,8 +208,7 @@ export const MOBILE_FAMILY_EVENT_NAMES = [
   "planner.device_calendar_export_finished",
   CAPTURE_LOOP_EVENT_NAME,
 ] as const;
-export type MobileFamilyEventName =
-  (typeof MOBILE_FAMILY_EVENT_NAMES)[number];
+export type MobileFamilyEventName = (typeof MOBILE_FAMILY_EVENT_NAMES)[number];
 
 /** The three governed scheduling-offer venues (§4.3.8): the empty-grid
  * card, the moment after the first plan is built, and the capped
@@ -418,9 +424,7 @@ export const EVENT_SCHEMAS = {
     .strict(),
   // The account owner approved the ready lesson's attached worksheet.
   // Material identity and worksheet content stay in durable rows.
-  "map.subject_lesson_kept": z
-    .object(SUBJECT_LESSON_EVENT_FIELDS)
-    .strict(),
+  "map.subject_lesson_kept": z.object(SUBJECT_LESSON_EVENT_FIELDS).strict(),
   // The living record (2026-07-07): answers edited from the report page
   // itself. source separates a tapped receipt correction from the inline
   // sharpening question and the staleness re-check; changes counts the
@@ -542,11 +546,7 @@ export const EVENT_SCHEMAS = {
     .object({
       family_id: z.uuid(),
       child_id: z.uuid(),
-      classification: z.enum([
-        "no_match",
-        "activity_only",
-        "ambiguous",
-      ]),
+      classification: z.enum(["no_match", "activity_only", "ambiguous"]),
     })
     .strict(),
   "progress.observation_used": z
@@ -650,6 +650,21 @@ export const EVENT_SCHEMAS = {
     .strict(),
   // A parent recap or future request became one stable Planner row. Counts
   // and enums only; lesson text and the provenance quote stay in the record.
+  "planner.program_changed": z
+    .object({
+      family_id: z.uuid(),
+      operation: z.enum(["saved", "scheduled", "recorded", "removed"]),
+      count: z.number().int().min(0).max(512),
+    })
+    .strict(),
+  "hours.corrected": z
+    .object({
+      family_id: z.uuid(),
+      scope: z.enum(["child", "shared"]),
+      operation: z.enum(["update", "remove"]),
+      count: z.number().int().min(1).max(12),
+    })
+    .strict(),
   "planner.learning_recorded": z
     .object({
       family_id: z.uuid(),
@@ -728,7 +743,14 @@ export const EVENT_SCHEMAS = {
   "planner.device_calendar_export_finished": z
     .object({
       family_id: z.uuid(),
-      outcome: z.enum(["saved", "canceled", "denied", "failed", "mixed", "duplicates_only"]),
+      outcome: z.enum([
+        "saved",
+        "canceled",
+        "denied",
+        "failed",
+        "mixed",
+        "duplicates_only",
+      ]),
       selected_count: z.number().int().min(1),
       saved_count: z.number().int().min(0),
       duplicate_count: z.number().int().min(0),
@@ -1001,7 +1023,12 @@ export const EVENT_SCHEMAS = {
       // "binder" is the walk-v2 decline exit (S11 armed branch, D5):
       // she finished the walk through the paywall and left to her kept
       // pages, which is a completion with a door, never exited_early.
-      next_door: z.enum(["another_worksheet", "plan_week", "look_around", "binder"]),
+      next_door: z.enum([
+        "another_worksheet",
+        "plan_week",
+        "look_around",
+        "binder",
+      ]),
       second_create_tapped: z.boolean(),
     })
     .strict(),
@@ -1111,15 +1138,22 @@ export const EVENT_SCHEMAS = {
     .object({
       family_id: z.uuid(),
       asset_id: z.uuid(),
-      prior_status: z.enum(["ready", "processing", "needs_attention", "failed"]),
+      prior_status: z.enum([
+        "ready",
+        "processing",
+        "needs_attention",
+        "failed",
+      ]),
     })
     .strict(),
-  "workspace.operation": z.object({
-    family_id: z.uuid(),
-    operation: z.enum(["list", "read", "write", "move", "remove"]),
-    success: z.boolean(),
-    cache_hit: z.boolean().nullable(),
-  }).strict(),
+  "workspace.operation": z
+    .object({
+      family_id: z.uuid(),
+      operation: z.enum(["list", "read", "write", "move", "remove"]),
+      success: z.boolean(),
+      cache_hit: z.boolean().nullable(),
+    })
+    .strict(),
   "library.asset_used": z
     .object({
       family_id: z.uuid(),
@@ -1398,9 +1432,7 @@ export const EVENT_SCHEMAS = {
   "chat.turn_completed": z
     .object({
       status: z.enum(["ok", "error"]),
-      error_class: z
-        .enum(["turn_failed", "send_failed", "unknown"])
-        .optional(),
+      error_class: z.enum(["turn_failed", "send_failed", "unknown"]).optional(),
       modality: z.enum(["text", "voice"]),
       latency_ms: z.number().int().min(0),
       model_tier: z.enum(["fast", "mid", "premium"]),
@@ -1455,7 +1487,12 @@ export const EVENT_SCHEMAS = {
   // run; fleet runs carry no family_id. Kind + status only, no content.
   "tasks.run_completed": z.object({
     family_id: z.uuid().optional(),
-    kind: z.enum(["journal_prompt", "morning_brief", "custom", "fleet_research"]),
+    kind: z.enum([
+      "journal_prompt",
+      "morning_brief",
+      "custom",
+      "fleet_research",
+    ]),
     status: z.enum([
       "done",
       "partial",
@@ -1553,7 +1590,13 @@ export const EVENT_SCHEMAS = {
   // A research row entered (or was refused by) the knowledge bank's
   // automated gate (HT-2, D-ht-5). Topic type only, never content.
   "knowledge.row_merged": z.object({
-    topic_type: z.enum(["method_philosophy", "method_format", "subject", "study", "other"]),
+    topic_type: z.enum([
+      "method_philosophy",
+      "method_format",
+      "subject",
+      "study",
+      "other",
+    ]),
     gate: z.enum(["passed", "flagged"]),
   }),
   // A physical thank-you card order was placed with the mail vendor
@@ -1649,7 +1692,9 @@ export const EVENT_SCHEMAS = {
 } as const;
 
 export type EventName = keyof typeof EVENT_SCHEMAS;
-export type EventProps<N extends EventName> = z.input<(typeof EVENT_SCHEMAS)[N]>;
+export type EventProps<N extends EventName> = z.input<
+  (typeof EVENT_SCHEMAS)[N]
+>;
 
 /**
  * The native wire contract deliberately omits family_id. The authenticated
