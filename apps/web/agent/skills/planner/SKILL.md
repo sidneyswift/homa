@@ -1,7 +1,7 @@
 ---
-description: Use to log completed learning, finish planned work, read or change plans, schedule existing lessons, or manage family calendar events. Creating new materials belongs to materials-studio; reading recorded hours to hours-records; ability reports to progress-capture.
+description: Use to log completed learning, finish planned work, read or change plans, schedule existing lessons, or manage family calendar events and reusable co-op or program schedules. Creating new materials belongs to materials-studio; reading recorded hours to hours-records; ability reports to progress-capture.
 metadata:
-  homa-tools: log_hours, open_planner, record_planner_activity, complete_planner_activity, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
+  homa-tools: read_learning_programs, save_learning_program, schedule_learning_program, find_attachments, log_hours, open_planner, record_planner_activity, complete_planner_activity, edit_plan, schedule_plan_activity, add_family_event, list_family_events, update_family_event, remove_family_event, find_materials, preview_month_plan, approve_month_plan, find_family_assets, get_family_asset
   homa-related-skills: curriculum-studio, curriculum-mapping, materials-studio, family-librarian
 ---
 
@@ -20,6 +20,7 @@ Read paths below with `read_file /workspace/skills/planner/<path>`.
 
 | Request | Reference |
 | --- | --- |
+| Import, review or reuse a co-op/program schedule | `references/programs.md` |
 | Log what happened or mark existing work finished | `references/capture-work.md`, `references/hours-identity.md` |
 | Read or edit existing plans, or change the first-week handoff | `references/edit-existing.md` |
 | Put activities on dates or manage family events | `references/dates-and-events.md` |

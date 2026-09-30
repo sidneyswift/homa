@@ -5676,6 +5676,26 @@ await expectReadDenied("admin_alert_acknowledgments");
 // context snapshots hold family conversation material, deny-all,
 // server-only writes, founder-console reads only.
 await expectReadDenied("agent_tool_calls");
+{
+  const response = await rest("family_workspace_files?select=id&limit=1", { headers: { Prefer: "" } });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add("family_workspace_files");
+    report("family workspace index absent (additive pilot migration); nothing exposed", true);
+  } else {
+    await expectReadDenied("family_workspace_files");
+  }
+}
+for (const table of ["learning_programs", "learning_program_occurrences"]) {
+  const response = await rest(`${table}?select=family_id&limit=1`, { headers: { Prefer: "" } });
+  const raw = await response.text();
+  if (response.status === 404 && raw.includes("PGRST205")) {
+    coveredTables.add(table);
+    report(`${table} absent before additive rollout; nothing exposed`, true);
+  } else {
+    await expectReadDenied(table);
+  }
+}
 await expectReadDenied("session_context_snapshots");
 // Chat attachments (migration #80): members read their own family's
 // rows; anon has explicit revokes; only the server-side attachment

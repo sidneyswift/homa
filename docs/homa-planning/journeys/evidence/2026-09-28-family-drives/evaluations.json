@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-28",
+  "model": "openai/gpt-6-astra",
+  "command": "pnpm eval:sandbox family-librarian/working-file-routing family-librarian/working-file-negative",
+  "database": "disposable local Postgres",
+  "liveProviderWrites": "disabled",
+  "results": {
+    "family-librarian/working-file-routing": {
+      "passed": true,
+      "gates": 4
+    },
+    "family-librarian/working-file-negative": {
+      "passed": true,
+      "gates": 2
+    }
+  }
+}

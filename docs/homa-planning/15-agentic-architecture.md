@@ -187,7 +187,7 @@ needs is unreplicable; what is unreplicable was already cut on purpose.**
 | 7 | Journal prompt loop | time-zone-aware dispatch, flag-dark until founder review | Built and flag-gated; successful production delivery unverified | FR-6 / MJ-05 seed |
 | 8 | Post-turn review | bounded verbatim role-labeled rows, reduced toolset, delta guards, undo | Built; production model behavior unverified | M2-13 full |
 | 9 | Materials factory | current path renders HTML through Chromium in a Next.js function; sandbox code is deny-all groundwork | Repository path built; image, Blob, review, and delivery production flow unverified | M0-03 / M2-05 |
-| 10 | Durable family workspace projection | proposed Blob-backed projection seeded into sandbox | Not built; Blob artifact storage exists, but this projection does not | proposed surface |
+| 10 | Family workspace projection | Private Blob checkpoints and Postgres metadata, mounted Drive working copies | [Gated pilot implementation](plans/2026-09-28-family-drives.md); production activation and fleet rollout tracked on the issue | gh#1199 |
 
 The 2026-07-09 synthetic transcript probe is preserved in the build log as dated
 evidence. It is not proof of the current deployment after later migrations and

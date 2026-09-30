@@ -30,6 +30,12 @@ test("sonnet 5 chat call splits input into uncached, cache read, cache write", (
   assertClose(usd, (2 * 2 + 39540 * 0.2 + 1323 * 2.5 + 1482 * 10) / 1_000_000);
 });
 
+test("Sonnet 5.5 research has a priced fallback including cache usage", () => {
+  assertClose(estimateUsageCostUsd("anthropic/claude-sonnet-5.5", {
+    inputTokens: 1_000, outputTokens: 100, cacheReadTokens: 400, cacheWriteTokens: 100,
+  }), (500 * 2 + 400 * 0.2 + 100 * 2.5 + 100 * 10) / 1_000_000);
+});
+
 test("sonnet 5 reprices when the standard window starts", () => {
   const quantities = {
     inputTokens: 40865,

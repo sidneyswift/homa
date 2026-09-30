@@ -71,7 +71,7 @@ If a capability is absent from the current repository or lacks production eviden
 ## Non-negotiable laws
 
 1. Tenant identity comes from authenticated context or an authenticated transport mapping, never from model or client choice. Every model-supplied ID is re-scoped server-side. Run `pnpm check:isolation` before schema or query changes.
-2. Durable product state belongs in Postgres and durable artifacts belong in Blob storage. Conversation history and sandbox files are not load-bearing state.
+2. Durable product state belongs in Postgres and durable artifacts belong in Blob storage. Conversation history and sandbox files are not load-bearing state. The [family Drive pilot](docs/homa-planning/plans/2026-09-28-family-drives.md) uses rebuildable working copies with Postgres metadata and private Blob checkpoints.
 3. Features use the typed event registry. Billable capabilities also use the action-cost registry before they ship.
 4. Product language never uses red or a "behind" label for a child's progress and never compares siblings. Honest downward trajectory segments are allowed when the surrounding treatment stays neutral and growth-oriented. The trajectory chart plots a measured below-age frontier as its real negative months (founder ruling 2026-07-13, `trajectory-real-negative-months`); copy surfaces keep growth framing and `monthsAhead` stays non-negative.
 5. Child-photo personalization requires the D4 consent, retention, provider, and no-face-recognition floor. Private-by-default sharing for minors' media remains an unresolved founder decision and must not be invented.

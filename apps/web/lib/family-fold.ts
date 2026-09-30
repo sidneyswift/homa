@@ -1,8 +1,6 @@
 import type postgres from "postgres";
 
-import {
-  CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY,
-} from "./child-progress/postgres-repository-helpers";
+import { CHILD_PROGRESS_RECONCILIATION_ADVISORY_LOCK_KEY } from "./child-progress/postgres-repository-helpers";
 import { mergeFamilyContextBags } from "./family-context-merge";
 import { mapDb } from "./map/db";
 import type { DbJson } from "./map/db";
@@ -66,7 +64,10 @@ export function classifyFamilyFoldArtifactSchema(
     schema.prefixes_present,
     schema.candidates_present,
   ];
-  if (!schema.hard_delete_guard_present && relationStates.every((present) => !present)) {
+  if (
+    !schema.hard_delete_guard_present &&
+    relationStates.every((present) => !present)
+  ) {
     return "legacy";
   }
   if (schema.hard_delete_guard_present && relationStates.every(Boolean)) {
@@ -100,6 +101,16 @@ async function lockFamilyRowsForFold(
   await testHooks.afterFamilyLocks?.();
   if (rows.length !== 2) return null;
 
+  // A workspace-bearing family is not an empty signup stub. Preserve its
+  // provider identity and checkpoint paths instead of silently folding them.
+  const [workspaceSchema] =
+    await tx`select to_regclass('public.family_workspace_files') is not null as ready`;
+  if (workspaceSchema?.ready) {
+    const workspace =
+      await tx`select 1 from public.family_workspace_files where family_id = ${sourceFamilyId} limit 1`;
+    if (workspace.length) return null;
+  }
+
   const [artifactSchema] = await tx<FamilyFoldArtifactSchema[]>`
     select
       exists (
@@ -124,6 +135,13 @@ async function lockFamilyRowsForFold(
     ? classifyFamilyFoldArtifactSchema(artifactSchema)
     : "partial";
   if (artifactSchemaState === "partial") return null;
+  const [programSchema] =
+    await tx`select to_regclass('public.learning_programs') is not null as ready`;
+  if (programSchema?.ready) {
+    const programs =
+      await tx`select 1 from public.learning_programs where family_id = ${sourceFamilyId} limit 1`;
+    if (programs.length > 0) return null;
+  }
   if (artifactSchemaState === "legacy") {
     return { rows, artifactSchemaReady: false };
   }
@@ -389,30 +407,23 @@ export async function foldStubFamilyIntoTx(
   testHooks: FamilyFoldTestHooks = {},
 ): Promise<boolean> {
   if (stubId === intoId) return false;
-  const lockedFold = await lockFamilyRowsForFold(
-    tx,
-    stubId,
-    intoId,
-    testHooks,
-  );
+  const lockedFold = await lockFamilyRowsForFold(tx, stubId, intoId, testHooks);
   const stub = lockedFold?.rows.find((row) => row.id === stubId);
   if (
     !lockedFold ||
     !stub ||
     stub.email !== null ||
-    await countFamilyMembersAfterLock(tx, stubId) !== 0
+    (await countFamilyMembersAfterLock(tx, stubId)) !== 0
   ) {
     return false;
   }
-  return moveLockedFamilyDataIntoTx(
-    tx,
-    stubId,
-    intoId,
-    lockedFold,
-  );
+  return moveLockedFamilyDataIntoTx(tx, stubId, intoId, lockedFold);
 }
 
-export async function foldStubFamilyInto(stubId: string, intoId: string): Promise<boolean> {
+export async function foldStubFamilyInto(
+  stubId: string,
+  intoId: string,
+): Promise<boolean> {
   const sql = mapDb();
   return await sql.begin((tx) => foldStubFamilyIntoTx(tx, stubId, intoId));
 }

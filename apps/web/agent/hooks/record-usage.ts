@@ -1,6 +1,8 @@
 import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
+import { HOMA_MODEL } from "../model";
+import { turnModelState } from "../turn-model-state";
 import { modelRouterState } from "../model-router-state";
 import { ROUTER_MODEL } from "../../lib/model-router/router";
 import {
@@ -42,7 +44,10 @@ export default defineHook(withTimedHooks("record-usage", {
               deliveryVersion?: string;
             }
           | undefined;
-        const route = modelRouterState.get();
+        const selected = turnModelState.get();
+        const route = selected === HOMA_MODEL
+          ? modelRouterState.get()
+          : { model: selected, inputTokens: undefined, outputTokens: undefined };
         await recordModelUsage({
           familyId: attributes?.familyId ?? null,
           surface: usageSurfaceFromAttributes(attributes),

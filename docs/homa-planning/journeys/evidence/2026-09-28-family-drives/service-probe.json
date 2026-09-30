@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-09-28T10:10:59.109Z",
+  "database": "disposable local Postgres",
+  "checkpoints": "in-memory test adapter",
+  "provider": "real Vercel Drive",
+  "family": "d87af151-a1c9-45c5-b6be-8f6ed870c4f7",
+  "checks": [
+    "service write and read across fresh sandboxes",
+    "idempotent retry reuses checkpoint",
+    "deleted Drive rebuilt from verified checkpoint",
+    "move and remove clear index and checkpoints"
+  ],
+  "cleanup": "Drive verified absent; operation sandboxes stopped and deleted"
+}

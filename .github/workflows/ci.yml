@@ -628,6 +628,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm conversation-privacy:e2e
 
+      - name: Family workspace unit and disposable PostgreSQL tests
+        timeout-minutes: 10
+        run: pnpm check:family-workspace && pnpm test:family-workspace:postgres
+
       - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:account-deletion:postgres
@@ -638,6 +642,9 @@ jobs:
 
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).
+      - name: Co-op program workflow and correction checks
+        run: pnpm check:programs
+
       - name: hours_log dedupe disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm hours-log:e2e
