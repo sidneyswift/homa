@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { test } from "node:test";
 import { MockLanguageModelV4 } from "ai/test";
+import { zodSchema } from "ai";
 
 import { FLEET_RESEARCH_MODEL, HOMA_MODEL, selectHomaTurnModel, type HomaTurnModel } from "../agent/model";
 import selectTurnModelHook from "../agent/hooks/select-turn-model";
 import { turnModelState } from "../agent/turn-model-state";
+import { workspaceInputSchema } from "../agent/tools/manage_workspace";
 import { buildResearchSessionInput } from "./knowledge/research-run";
 import { createHomaTurnModel } from "./turn-model";
 
@@ -109,4 +111,40 @@ test("turn-start selection is refreshed and concurrent session state is not capt
   });
   assert.deepEqual(await Promise.all([run(researchAuth), run(null)]), [FLEET_RESEARCH_MODEL, HOMA_MODEL]);
   assert.deepEqual(f.calls.map(call => call.model), [FLEET_RESEARCH_MODEL, HOMA_MODEL]);
+});
+
+
+test("workspace tool has a provider-compatible object root and retains per-operation validation", async () => {
+  const inputSchema = await zodSchema(workspaceInputSchema).jsonSchema;
+  assert.equal(inputSchema.type, "object");
+  assert.equal(inputSchema.oneOf, undefined);
+  assert.equal(inputSchema.anyOf, undefined);
+  assert.deepEqual(inputSchema.required, ["request"]);
+  const revision = "12345678-1234-4234-8234-123456789abc";
+  const validRequests = [
+    { operation: "list" },
+    { operation: "read", path: "drafts/a.md" },
+    { operation: "write", path: "drafts/a.md", content: "Draft", expectedRevision: null, requestId: revision },
+    { operation: "move", path: "drafts/a.md", destination: "drafts/b.md", expectedRevision: revision },
+    { operation: "remove", path: "drafts/a.md", expectedRevision: revision },
+  ];
+  for (const request of validRequests) {
+    assert.deepEqual(workspaceInputSchema.parse({ request }), { request });
+  }
+  for (const request of [
+    { operation: "read" },
+    { operation: "write", path: "drafts/a.md", content: "Draft" },
+    { operation: "write", path: "drafts/a.md", content: "Draft", expectedRevision: "invalid", requestId: revision },
+    { operation: "move", path: "drafts/a.md", expectedRevision: revision },
+    { operation: "remove", path: "drafts/a.md" },
+    { operation: "unknown" },
+  ]) assert.equal(workspaceInputSchema.safeParse({ request }).success, false);
+  assert.equal(workspaceInputSchema.safeParse({}).success, false);
+  for (const selected of [FLEET_RESEARCH_MODEL, HOMA_MODEL] as const) {
+    const f = fixture(() => selected);
+    const tools: Params["tools"] = [{ type: "function", name: "manage_workspace", inputSchema }];
+    await f.model.doGenerate({ prompt, tools });
+    await f.model.doStream({ prompt, tools });
+    for (const call of f.calls) assert.equal(call.params.tools, tools);
+  }
 });
