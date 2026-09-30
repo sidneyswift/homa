@@ -1,4 +1,5 @@
 import { storeConversationAttachmentPreparation } from "../../../../lib/conversation-attachments";
+import { conversationRecordingEnabled } from "../../../../lib/conversation-recording";
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { isFamilyChatAttachmentUrl } from "../../../../lib/attachments/markers";
 import {
@@ -90,9 +91,38 @@ export async function POST(request: Request): Promise<Response> {
   const normalized = await normalizeChatAttachments(items, auth.familyId);
 
   const receipts: ChatAttachmentReceipt[] = [];
+  // Durable recording keeps one retry-safe receipt per adult and blob. With
+  // recording off (and before its migrations exist) the original insert stays.
+  const recording = conversationRecordingEnabled();
+  const sql = mapDb();
   for (const item of normalized) {
-    receipts.push(await storeConversationAttachmentPreparation({ familyId: auth.familyId,
-      memberUserId: auth.userId, childId, item }));
+    if (recording) {
+      receipts.push(await storeConversationAttachmentPreparation({ familyId: auth.familyId,
+        memberUserId: auth.userId, childId, item }));
+    } else {
+      const [row] = await sql`
+        insert into public.chat_attachments (
+          family_id, child_id, member_user_id, url, media_type, kind, caption
+        )
+        values (
+          ${auth.familyId},
+          ${childId},
+          ${auth.userId},
+          ${item.input.url},
+          ${item.input.mediaType},
+          ${item.kind},
+          ${item.caption}
+        )
+        returning id
+      `;
+      receipts.push({
+        id: row?.id as string,
+        kind: item.kind,
+        outcome: item.outcome,
+        caption: item.caption,
+        childId,
+      });
+    }
     await emitMapEvent(
       "chat.attachment_processed",
       {

@@ -84,6 +84,11 @@ function defaultRunner(): VoiceHomaTurnRunner {
         clientContext: input.sourceContext,
         signal: input.signal,
       });
+      // gh#1158: the reattaching reader ships with the conversation rebuild.
+      // Until then voice keeps the established single result read.
+      if (process.env.HOMA_CONVERSATION_RECORDING !== "1") {
+        return { ...(await response.result()), sessionState: session.state };
+      }
       return readVoiceBridgeStream({
         state: {
           sessionId: response.sessionId,

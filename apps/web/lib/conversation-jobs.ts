@@ -77,6 +77,9 @@ export async function startConversationJob(ctx: ToolContext,input: StartJobInput
 }
 
 export async function prepareConversationJobDispatch(familyId:string,jobId:string) {
+  // Flags off: no job can be a conversation job, and the rebuild tables may not
+  // exist yet (code deploys before migrations). Keep the legacy path exact.
+  if (!conversationJobsEnabled()) return null;
   return requestTransaction(async tx=>{
     const [link]=await tx`select l.*,c.family_id,c.member_user_id,c.access_epoch as current_epoch,r.canonical_message_id
       from public.conversation_jobs l join public.conversation_records c on c.id=l.conversation_id
@@ -140,6 +143,9 @@ export async function requireConversationJobDatabaseAccess(attributes:unknown) {
 /** A claimed execution is never automatically stolen. Uncertain original work
  * parks for reconciliation; an unclaimed dispatch may retry the same secret. */
 export async function releaseConversationJobDispatch(familyId:string,jobId:string):Promise<boolean> {
+  // Flags off: no job can be a conversation job, and the rebuild tables may not
+  // exist yet (code deploys before migrations). Keep the legacy path exact.
+  if (!conversationJobsEnabled()) return false;
   return requestTransaction(async tx=>{
     const [link]=await tx`select l.state,l.execution_session_id from public.conversation_jobs l
       join public.conversation_records c on c.id=l.conversation_id where l.job_id=${jobId} and c.family_id=${familyId} for update of l`;
@@ -154,6 +160,9 @@ export async function releaseConversationJobDispatch(familyId:string,jobId:strin
  * must never park the original worker. Only the stale-stage reaper omits it. */
 export type ConversationJobObservation = Pick<ToolContext['session'],'id'|'auth'> & {turn?:{id:string;sequence:number}};
 export async function observeConversationJobEnd(familyId:string,jobId:string,session?:ConversationJobObservation) {
+  // Flags off: no job can be a conversation job, and the rebuild tables may not
+  // exist yet (code deploys before migrations). Keep the legacy path exact.
+  if (!conversationJobsEnabled()) return false;
   const envelope=session?conversationJobEnvelope(session.auth.current):null;
   if (session && (!envelope || envelope.jobId!==jobId || envelope.familyId!==familyId)) return false;
   return requestTransaction(async tx=>{
@@ -176,6 +185,9 @@ export async function observeConversationJobEnd(familyId:string,jobId:string,ses
   });
 }
 export async function isConversationJob(familyId:string,jobId:string) {
+  // Flags off: no job can be a conversation job, and the rebuild tables may not
+  // exist yet (code deploys before migrations). Keep the legacy path exact.
+  if (!conversationJobsEnabled()) return false;
   const rows=await mapDb()`select 1 from public.conversation_jobs l join public.conversation_records c on c.id=l.conversation_id
     where l.job_id=${jobId} and c.family_id=${familyId}`;
   return rows.length>0;
@@ -185,6 +197,9 @@ export async function isConversationJob(familyId:string,jobId:string) {
  * together. The older multi-stage runner keeps its existing behavior. */
 export async function completeConversationJobStage(familyId:string,jobId:string,stageNumber:number,
   materialIds:string[],metering:StageMetering):Promise<WorkerStageResult|null> {
+  // Flags off: no job can be a conversation job, and the rebuild tables may not
+  // exist yet (code deploys before migrations). Keep the legacy path exact.
+  if (!conversationJobsEnabled()) return null;
   return requestTransaction(async tx=>{
     const [record]=await tx`select c.id from public.conversation_records c join public.conversation_jobs l on l.conversation_id=c.id
       where l.job_id=${jobId} and c.family_id=${familyId} for update of c`;

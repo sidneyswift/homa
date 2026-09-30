@@ -23,7 +23,7 @@ import { conversationRequestEnvelope } from "../../lib/conversation-request-admi
  */
 export default defineBoundedTool({
   description:
-    "Use when the loaded skill directs a durable background build: an eligible standalone material in a permanent conversation, a multi-week curriculum, or a multi-part project. The parent's request must establish the scope; follow the skill's calibration and eligibility procedure before calling. familyId is taken from the session, never from you. If a job for this skill and child is already running, this returns that one instead of starting a second. Not for reopening, printing, or revising an existing material.",
+    "Start a finite background job that builds in stages over time, for a skill that needs it (a multi-week curriculum, a multi-part project). Only call this after the skill's procedure says to, and after the parent has confirmed the scope. familyId is taken from the session, never from you. If a job for this skill and child is already running, this returns that one instead of starting a second.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z.object({

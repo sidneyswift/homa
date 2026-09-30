@@ -19,6 +19,7 @@ test("PostgreSQL prospective delivery snapshots preserve only the addressed revi
   assert(!process.env.VERCEL && process.env.HOMA_EVAL_ALLOW_PROD_WRITES !== "1");
   const sql = mapDb(), originalFlag = process.env.HOMA_CONVERSATION_RECORDING;
   await sql`update public.conversation_rebuild_settings set enabled = true`; // gh#1158: these suites exercise the rebuild itself.
+  process.env.HOMA_CONVERSATION_RECORDING ??= "1"; // exact-text recording is part of the rebuild under test.
   try {
     const [target] = await sql`select current_setting('data_directory') as directory,
       host(inet_server_addr()) as address,current_database() as database,current_user as owner`;

@@ -5,6 +5,7 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { MissingFamilyContextError, resolveAgentAccess } from "../../lib/agent-db";
+import { conversationJobEnvelope } from "../../lib/conversation-jobs";
 import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { jobWorkerContext, refuseNonJobWorkerSession } from "../../lib/jobs/guard";
 import { completeStageFromWorker } from "../../lib/jobs/runner";
@@ -76,7 +77,7 @@ export default defineBoundedTool({
       note:
         result.status === "awaiting_input"
           ? "Stage recorded. The build now waits for the parent to approve this first volume before continuing."
-          : result.status === "completed"
+          : result.status === "completed" && conversationJobEnvelope(ctx.session.auth.current)
             ? "The build is complete. Its material is saved in the parent's conversation."
           : "Stage recorded. The build will continue to the next stage.",
     };

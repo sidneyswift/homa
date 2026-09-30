@@ -99,6 +99,9 @@ try {
   assert.equal((await sql`select id from public.conversation_records where id=${other.conversationId}`).length, 0);
   console.log("PASS access revocation preserves history; actual account erasure removes it");
 
+  // Exact long text and the first write's timestamp are recording behavior.
+  const exactTextFlag = process.env.HOMA_CONVERSATION_RECORDING;
+  process.env.HOMA_CONVERSATION_RECORDING = "1";
   const long = "  " + "Exact words 🧡\n".repeat(1500) + "  ";
   // Establish the real parent-input provenance required by the existing guards.
   await persistCanonicalMessage({
@@ -131,6 +134,8 @@ try {
   assert.equal(removed.length, 0);
   await assert.rejects(recordConversationContent(principal, session, event, 0), /deleted/);
   console.log("PASS exact long canonical text and recording deletion follows its canonical message");
+  if (exactTextFlag === undefined) delete process.env.HOMA_CONVERSATION_RECORDING;
+  else process.env.HOMA_CONVERSATION_RECORDING = exactTextFlag;
   principal.accessEpoch = (await readConversationAccess(principal)).accessEpoch;
   const intentId = randomUUID();
   const sentText = "  Exact submitted request 🧡\n".repeat(700);

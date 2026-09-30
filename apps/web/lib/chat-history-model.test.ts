@@ -198,7 +198,8 @@ describe("archiveFromServerHistory", () => {
         .map(entry => entry.message.id),
       ["hist:older"],
     );
-    assert.equal(archiveFromServerHistory({ messages, materials: [] }, live).length, 2);
+    // Without a live session id (/app today) the original turn/role rule applies.
+    assert.equal(archiveFromServerHistory({ messages, materials: [] }, live).length, 0);
   });
 
   it("attaches only the latest passing revision to the session's reply", () => {

@@ -279,7 +279,8 @@ export function archiveFromServerHistory(
   const liveMessageIds = new Set(liveMessages.map((message) => message.id));
   const history = payload.messages.filter(
     (entry) =>
-      entry.sessionId !== liveSessionId ||
+      // Without a live session id (/app today) keep the original turn/role rule.
+      (liveSessionId !== undefined && entry.sessionId !== liveSessionId) ||
       entry.turnId === null ||
       !liveMessageIds.has(`${entry.turnId}:${entry.role}`),
   );
