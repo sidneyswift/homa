@@ -1,3 +1,4 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import { canonicalInboundAuthAttributes } from "../../lib/conversation-continuity/canonical-inbound";
@@ -65,7 +66,7 @@ function outboundChannel(attributes: unknown) {
  * persist terminal output before sending it. Idempotency rides the
  * (session_id, turn_id, role, sequence) key.
  */
-export default defineHook({
+export default defineHook(withTimedHooks("persist-conversation", {
   events: {
     async "turn.started"(event, ctx) {
       await withToolDeadline(TOOL_DEADLINE.quick, () => requireConversationJobAccess(ctx.session, "prepare"), true);
@@ -246,4 +247,4 @@ export default defineHook({
         turnId: event.data.turnId, outcome: "recovery_required" });
     },
   },
-});
+}));

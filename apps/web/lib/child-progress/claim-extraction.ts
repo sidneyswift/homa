@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { ClaimChild, ProposedClaim } from "./claim-validation";
 import { renderSkillCatalog } from "./skill-catalog";
@@ -146,7 +146,7 @@ export function buildClaimExtractionPrompt(input: ClaimExtractionInput): string 
 /** Shared exact request for the production extractor and isolated model evals. */
 export function buildClaimExtractionRequest(input: ClaimExtractionInput) {
   return {
-    model: HOMA_MODEL,
+    ...homaModelSettings(),
     schema: extractedClaimsSchema,
     system: EXTRACTION_SYSTEM,
     // Catalog FIRST, deliberately. It is the largest and most stable

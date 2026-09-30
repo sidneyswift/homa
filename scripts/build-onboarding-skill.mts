@@ -32,7 +32,7 @@
  *   node --experimental-strip-types scripts/build-onboarding-skill.mts
  *   node --experimental-strip-types scripts/build-onboarding-skill.mts --check
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -63,7 +63,13 @@ function renderGeneratedModule(rawSkill: string): string {
 }
 
 const rawSkill = readFileSync(path.join(repoRoot, SKILL_SOURCE), "utf8");
-const generated = renderGeneratedModule(rawSkill);
+const referencesDir = path.join(repoRoot, "apps/web/agent/skills/onboarding/references");
+const references = Object.fromEntries(readdirSync(referencesDir).sort()
+  .filter((name) => name.endsWith(".md"))
+  .map((name) => [name.replace(/\.md$/, ""), readFileSync(path.join(referencesDir, name), "utf8")]));
+const generated = renderGeneratedModule(rawSkill)
+  + "\nexport const ONBOARDING_STAGE_MARKDOWN = "
+  + JSON.stringify(references, null, 2) + " as const;\n";
 
 if (process.argv.includes("--check")) {
   const onDisk = readFileSync(path.join(repoRoot, OUT), "utf8");

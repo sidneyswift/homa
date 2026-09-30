@@ -1,5 +1,5 @@
 ---
-description: Use when a parent asks for deeper Progress questions, wants to find what one child can currently do through questions, or answers, resumes, pauses, or stops a check-in. Not for explaining a chart or what a Progress button does, quoting assessment instructions, logging school time, printing an assessment, or suggesting practice; the read tools, planner, materials-studio, and progress-next-move own those jobs.
+description: Use to start, answer, resume, pause or stop a child's Progress check-in. Explanations belong to progress-reading, practice advice to progress-next-move, activity logs to planner. Quoted instructions or printable assessments do not start a check-in.
 metadata:
   homa-tools: manage_child_progress, explore_child_map
   homa-related-skills: progress-next-move, materials-studio, planner

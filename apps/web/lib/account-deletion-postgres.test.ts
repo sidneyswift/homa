@@ -2326,6 +2326,7 @@ test(
     const controlPhone = `+1303${controlPhoneDigits}`;
     const familyName = `Successful deletion ${randomUUID()}`;
     const operations: string[] = [];
+    const workspaceSweeps: string[] = [];
     const artifactFamilyIds: string[] = [familyId, inheritedArtifactFamilyId];
     const publicBlobCounts = new Map<string, number>(
       artifactFamilyIds.map((artifactFamilyId) => [artifactFamilyId, 1]),
@@ -2347,6 +2348,11 @@ test(
     let jobId: string | null = null;
 
     const worker: AccountDeletionWorkerDependencies = {
+      deleteWorkspaceDrives: async (deletedFamilyId) => {
+        workspaceSweeps.push(deletedFamilyId);
+        assert.equal(artifactFamilyIds.includes(deletedFamilyId), true);
+        return 0;
+      },
       deleteAvatars: async (userIds) => {
         operations.push("avatar");
         assert.deepEqual(userIds, [userId]);
@@ -2586,6 +2592,10 @@ test(
         )
       `;
 
+      await sql`
+        insert into public.family_workspace_files (family_id, namespace, path, revision, sha256, byte_size, blob_url)
+        values (${familyId}, 'production', 'drafts/delete-me.md', ${randomUUID()}, ${"a".repeat(64)}, 4, 'https://fixture.invalid/file')
+      `;
       const requested = await requestAccountDeletion(
         {
           familyId,
@@ -2756,6 +2766,9 @@ test(
           (select count(*)::integer from storage.objects where id = ${avatarObjectId}) as avatars
       `;
       assert.deepEqual(closedArtifactState, { sessions: 0, avatars: 0 });
+      assert.deepEqual(new Set(workspaceSweeps), new Set(artifactFamilyIds));
+      const [workspaceRemaining] = await sql`select count(*)::int as count from public.family_workspace_files where family_id = ${familyId}`;
+      assert.equal(workspaceRemaining.count, 0);
       const firstArtifactSweepJob = await readJob(jobId);
       assert.equal(firstArtifactSweepJob.family_id, familyId);
       assert.equal(firstArtifactSweepJob.status, "waiting_for_artifacts");
@@ -2828,7 +2841,9 @@ test(
 
       resetBlobCounts(1);
       operations.length = 0;
+      workspaceSweeps.length = 0;
       await sweepCompletedDeletionTombstones(10, worker);
+      assert.equal(workspaceSweeps.length, operations.length ? artifactFamilyIds.length : 0);
       assert.equal(remainingBlobCount(), 0);
       assert.deepEqual(
         operations.sort(),
@@ -2855,7 +2870,9 @@ test(
 
       resetBlobCounts(1);
       operations.length = 0;
+      workspaceSweeps.length = 0;
       await sweepCompletedDeletionTombstones(10, worker);
+      assert.equal(workspaceSweeps.length, operations.length ? artifactFamilyIds.length : 0);
       assert.equal(remainingBlobCount(), 4);
       assert.deepEqual(operations, []);
 
@@ -2864,7 +2881,9 @@ test(
         set last_swept_at = now() - interval '5 minutes 1 second'
         where deletion_job_id = ${jobId}
       `;
+      workspaceSweeps.length = 0;
       await sweepCompletedDeletionTombstones(10, worker);
+      assert.equal(workspaceSweeps.length, operations.length ? artifactFamilyIds.length : 0);
       assert.equal(remainingBlobCount(), 0);
       assert.deepEqual(
         operations.sort(),

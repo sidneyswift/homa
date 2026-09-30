@@ -2,6 +2,12 @@ import { extractBearerToken, localDev, vercelOidc, type AuthFn } from "eve/chann
 import { defaultEveAuth, eveChannel } from "eve/channels/eve";
 import { createClient } from "@supabase/supabase-js";
 
+import { CHAT_TIMING_HEADER, timingId } from "../../lib/observability/chat-timing";
+import { timeRequest } from "../../lib/observability/chat-timing-server";
+import { measureChatPreparation } from "../../lib/observability/chat-preparation";
+import { createBoundedAuthUserFetch } from "../../lib/auth-user-fetch";
+import { readEveAuthentication } from "../../lib/eve-authentication";
+import { readEveMembership } from "../../lib/eve-membership";
 import { familyAccountGate } from "../../lib/billing/wall";
 import {
   messageSourceContext,
@@ -101,11 +107,14 @@ function supabaseAuth(): AuthFn<Request> {
     if (!url || !key) return null;
 
     const supabase = createClient(url, key, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+        fetch: createBoundedAuthUserFetch(url, { signal: request.signal }),
+      },
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: userData, error } = await supabase.auth.getUser(token);
+    const { data: userData, error } = await readEveAuthentication(() => supabase.auth.getUser(token), "authenticate");
     if (error || !userData.user) return null;
 
     // The caller's OWN membership row (user_id filter matters since
@@ -123,7 +132,7 @@ function supabaseAuth(): AuthFn<Request> {
     // a retired household while the page rendered the live one, with
     // nothing anywhere reporting a mismatch. The `!inner` matters, since
     // a filter on a plain embed narrows the embed rather than the parent.
-    const { data: membership, error: membershipError } = await supabase
+    const { data: membership, error: membershipError } = await readEveMembership(() => supabase
       .from("family_members")
       .select(
         "family_id, display_name, created_at, families!inner(profile_completed_at, context, status)",
@@ -132,7 +141,7 @@ function supabaseAuth(): AuthFn<Request> {
       .neq("families.status", "deleted")
       .order("created_at", { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .maybeSingle());
     if (membershipError) {
       console.error(
         "eve channel: membership lookup failed:",
@@ -151,6 +160,7 @@ function supabaseAuth(): AuthFn<Request> {
 
     // attributes only admits string values; absent facts are omitted keys.
     const attributes: Record<string, string> = {
+      ...(timingId(request.headers.get(CHAT_TIMING_HEADER)) ? { chatTimingId: timingId(request.headers.get(CHAT_TIMING_HEADER))! } : {}),
       channel,
       messageModality: messageModalityFromRequest(request),
       messageSource: messageSourceFromRequest(request),
@@ -321,7 +331,7 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
     // family context loads; the note below only shapes how Homa says
     // it. familyAccountGate fails open on read errors and is a no-op
     // while HOMA_SIGNUP_PAYWALL_ENABLED is dark.
-    const accountGate = await familyAccountGate(familyId);
+    const accountGate = await measureChatPreparation("account_gate", () => familyAccountGate(familyId), ctx.eve.sessionId ?? undefined);
     // Mobile-only exemption (gh#305, founder ruling 2026-07-28, "phone
     // app only"): a walled family still mid-onboarding on the iOS app
     // keeps the conversation, so the paywall arrives after she has met
@@ -416,7 +426,7 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
     }
 
     try {
-      const continuity = await resolveInboundContinuity({
+      const continuity = await measureChatPreparation("inbound_continuity", () => resolveInboundContinuity({
         familyId,
         memberUserId:
           typeof memberUserId === "string" ? memberUserId : null,
@@ -427,7 +437,7 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
         providerReplyTo: null,
         destinationKey: auth.principalId,
         text,
-      });
+      }), ctx.eve.sessionId ?? undefined);
       const continuityAttributes = resolvedContinuityAttributes(continuity, {
         memberUserId:
           typeof memberUserId === "string" ? memberUserId : null,
@@ -459,7 +469,15 @@ export const onEveMessage: NonNullable<Parameters<typeof eveChannel>[0]["onMessa
 
 const channel = eveChannel({auth: eveRouteAuth.auth, onMessage: onEveMessage});
 
-export default protectEveSessionRoutes(channel, {
+const protectedChannel = protectEveSessionRoutes(channel, {
   resolveAuth: eveRouteAuth.resolve,
   owners: eveSessionOwnerStore,
 });
+
+const timedChannel = { ...protectedChannel, routes: protectedChannel.routes.map(route => {
+  if (route.method === "WEBSOCKET") return route;
+  const handler = route.handler;
+  return { ...route, handler: (request: Request, args: Parameters<typeof handler>[1]) => timeRequest(request, "homa.http.admission", () => handler(request, args)) };
+}) };
+
+export default timedChannel;

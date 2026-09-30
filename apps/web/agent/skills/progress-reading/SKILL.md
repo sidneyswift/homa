@@ -1,5 +1,5 @@
 ---
-description: Use when explaining an actual child's saved Progress reading, its months-ahead number, supporting evidence, or observation date. Not for editing or rewriting a sentence that merely mentions Progress or months ahead; that is a writing request. Not for starting or answering a check-in, choosing practice, or recording school time; progress-check-in, progress-next-move, and hours-records own those jobs.
+description: Use to explain a child's saved Progress reading, comparison, evidence or observation date. Rewriting text that merely mentions Progress is ordinary writing. Check-ins belong to progress-check-in; practice advice to progress-next-move.
 metadata:
   homa-tools: explore_child_map
   homa-related-skills: progress-check-in, progress-next-move, hours-records
@@ -108,3 +108,21 @@ a non-winning answer is not necessarily unanswered.
 This read workflow never saves evidence or starts practice. A separate request
 for questions belongs to progress-check-in; practice belongs to
 progress-next-move; a new observation follows the existing capture boundary.
+
+## Explore beyond a summary
+
+The snapshot is the summary; explore_child_map is the depth behind it,
+read-only. It walks the full skill map for one child: every checklist rung
+with their answers (subject_map), what each skill needs first and unlocks
+next with the reason on every edge (topic, teaching_order), what their own
+confirmed evidence says they are ready for now (ready_next), and the
+earliest missing prerequisite when something is not landing (bottleneck).
+Reach for it whenever where-is-he or what's-missing needs
+more than one sentence, and ground your answer in what it returns: quote
+the receipts plainly ("division leans on equal groups, and he has that"),
+keep teaching windows as typical teaching ages, never deadlines or
+verdicts, and let the parent's own evidence stay the hero of the story.
+Exploring never records anything, so browse freely; saving evidence stays
+with manage_child_progress. For one next activity or a supported offer after
+a progress save, load progress-next-move. It owns current-fit evidence and
+verification before advice; a map summary alone is not that verification.

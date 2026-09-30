@@ -35,30 +35,33 @@ export function subjectLessonMaterialFinalOnly(
  */
 export default defineBoundedTool({
   description:
-    "Load materials-studio before finding or reopening generated Binder work with this tool, including a named worksheet or packet. Also search before designing something new. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
+    "Load materials-studio before finding or reopening generated Binder work with this tool, including a named worksheet or packet. Also search before designing something new. Use null for unused fields; a title search needs materialId:null and only known filters. Returns finals by default with their preview URLs; a final's previewUrl can be passed to generate_image as a reference image, and fetching one material by id also returns its html for reuse with a swapped theme or character.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: true,
   inputSchema: z.object({
     materialId: z
       .uuid()
+      .nullable()
       .optional()
-      .describe("Fetch exactly this material WITH its html (the reuse path). All other filters are ignored."),
+      .describe("A real id from a previous tool result fetches exactly that material WITH its html and ignores all filters. Use null for title searches; do not invent an id."),
     pageIndex: z
       .int()
       .min(1)
+      .nullable()
       .optional()
       .describe("With materialId on a multi-page packet, return only THIS page's html (1 is the first page) instead of all of them. Use it when you are revising one page: you need that page's html to rewrite it, and the others come back by reference through create_printable's fromMaterialId + pageIndex."),
-    title: z.string().trim().min(1).max(240).optional().describe("Case-insensitive literal title substring, such as Letter Sounds Workbook. Punctuation is literal, not a wildcard."),
-    childId: z.uuid().optional().describe("Only materials made for this child."),
-    kind: z.enum(MATERIAL_KINDS).optional(),
-    subject: z.string().trim().max(80).optional().describe("Substring match, e.g. 'handwriting'."),
-    theme: z.string().trim().max(120).optional().describe("Substring match, e.g. 'Paw Patrol'."),
-    character: z.string().trim().max(60).optional().describe("A character name to match."),
+    title: z.string().trim().min(1).max(240).nullable().optional().describe("Case-insensitive literal title substring, such as Letter Sounds Workbook. Punctuation is literal, not a wildcard."),
+    childId: z.uuid().nullable().optional().describe("Only materials made for this child; null when the child is not part of the request."),
+    kind: z.enum(MATERIAL_KINDS).nullable().optional().describe("Filter by a known material kind; null when unknown."),
+    subject: z.string().trim().max(80).nullable().optional().describe("Substring match, e.g. 'handwriting'."),
+    theme: z.string().trim().max(120).nullable().optional().describe("Substring match, e.g. 'Paw Patrol'."),
+    character: z.string().trim().max(60).nullable().optional().describe("A character name to match."),
     status: z
       .enum(["final", "draft", "any"])
+      .nullable()
       .optional()
       .describe("Defaults to final (the approved keepers)."),
-    limit: z.number().int().min(1).max(12).optional().describe("Defaults to 6."),
+    limit: z.number().int().min(1).max(12).nullable().optional().describe("Defaults to 6."),
   }),
   async execute(input, ctx) {
     const finalOnly = subjectLessonMaterialFinalOnly(
@@ -99,7 +102,7 @@ export default defineBoundedTool({
       // when asked for one, and when not asked, say plainly that asking
       // is cheaper.
       const pages = splitPageBodies(material.html ?? "");
-      if (pages.length > 1 && input.pageIndex !== undefined) {
+      if (pages.length > 1 && input.pageIndex != null) {
         const selected = selectMaterialPages(material.html ?? "", input.pageIndex);
         if (!selected.ok) {
           return {
@@ -122,12 +125,12 @@ export default defineBoundedTool({
     }
 
     const filters = {
-      title: input.title,
-      childId: input.childId,
-      kind: input.kind,
-      subject: input.subject,
-      theme: input.theme,
-      character: input.character,
+      title: input.title ?? undefined,
+      childId: input.childId ?? undefined,
+      kind: input.kind ?? undefined,
+      subject: input.subject ?? undefined,
+      theme: input.theme ?? undefined,
+      character: input.character ?? undefined,
       status: finalOnly
         ? ("final" as const)
         : input.status ?? ("final" as const),

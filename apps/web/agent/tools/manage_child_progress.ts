@@ -28,7 +28,7 @@ import {
 } from "../../lib/child-progress/tool-adapter";
 import {
   createProgressToolContext,
-  manageChildProgressInputSchema,
+  parseManageChildProgressCommand,
   manageChildProgressToolInputSchema,
   REFUSED_PROGRESS_NOTE,
 } from "../../lib/child-progress/tool-contract";
@@ -132,7 +132,7 @@ export default defineBoundedTool({
   inputSchema: manageChildProgressToolInputSchema,
   async execute(input, ctx) {
     try {
-      const command = manageChildProgressInputSchema.parse(input);
+      const command = parseManageChildProgressCommand(input);
       return await executeChildProgressTool({
         command,
         createContext: async () => {

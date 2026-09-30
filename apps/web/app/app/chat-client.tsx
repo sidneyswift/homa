@@ -1,5 +1,6 @@
 "use client";
 
+import { beginBrowserTiming, browserTimingMark, browserTimingEvent, installBrowserTiming } from "../../lib/observability/chat-timing-browser";
 import type { ResolvedAssessmentAction, SelectedAssessmentAction } from "../../lib/child-progress/assessment-intent";
 import { useSelectedAssessment } from "./use-selected-assessment";
 import { SelectedAssessmentNotice } from "./selected-assessment-notice";
@@ -89,6 +90,7 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
+  shouldAdoptSavedSession,
   withChatTurnLock,
 } from "./chat-session-cache";
 import {
@@ -153,6 +155,7 @@ import { SlashComposer } from "./slash-composer";
 import { latestQuestionRequest } from "./question-card";
 import { latestSnapRequest } from "./snap-card";
 import { buildTranscript } from "./transcript-days";
+import { measureChatPreparation } from "../../lib/observability/chat-preparation";
 import { markTurnStarted, takeTurnLatencyMs } from "./turn-clock";
 import { recoverLostTurn, type RecoveredTurn } from "./turn-recovery";
 import { createReattachableEveSession } from "./reattachable-eve-session";
@@ -277,6 +280,7 @@ const STREAM_RECONNECT_ATTEMPTS = 8;
 const RECOVERY_DEADLINE_MS = 240_000;
 
 interface BoundChatSendInput {
+  timingStartedAt?: number;
   message: string | UserContent;
   headers?: Readonly<Record<string, string>>;
 }
@@ -399,7 +403,9 @@ export function ChatClient({
       new Client({
         auth: {
           bearer: async () => {
+            browserTimingMark("browser.auth_begin");
             const { data } = await supabase.auth.getSession();
+            browserTimingMark("browser.auth_end");
             return data.session?.access_token ?? "";
           },
         },
@@ -429,7 +435,7 @@ export function ChatClient({
   // A partial local replay can therefore never hide durable work.
   const [archived, setArchived] = useState<ArchivedMessage[]>(() =>
     serverHistory
-      ? archiveFromServerHistory(serverHistory, initialLiveMessages, prepared.initialSession?.sessionId)
+      ? archiveFromServerHistory(serverHistory, initialLiveMessages)
       : prepared.archived,
   );
   // Missed current-session turns recovered before a send stay visible in this
@@ -446,9 +452,6 @@ export function ChatClient({
     ...prepared.messageTimes,
   }));
   const messagesRef = useRef<readonly EveMessage[]>([]);
-  const renderedEventsRef = useRef<readonly HandleMessageStreamEvent[]>(
-    staleSessionlessEvents ? [] : prepared.initialEvents,
-  );
   const archivedRef = useRef(archived);
   const reportedErrorRef = useRef<Error | null>(null);
   /** Last moment the stream showed signs of life (0 = none yet). */
@@ -468,6 +471,10 @@ export function ChatClient({
   /** Exact preflight-blocked input, kept until the parent retries or the
    * authenticated binding can be reconciled. */
   const pendingBoundSendRef = useRef<BoundChatSendInput | null>(null);
+  // A local receipt while session reconciliation owns the send. Eve takes
+  // over its display at handoff; this never enters durable history.
+  const [preparingSend, setPreparingSend] = useState<BoundChatSendInput | null>(null);
+  const preparingSendRef = useRef(false);
   /** Lost-turn recovery, held by ref for onFinish (same reason). */
   const startRecoveryRef = useRef<(() => void) | null>(null);
   // The attach flow (approved chat redesign): staged files upload to
@@ -668,13 +675,15 @@ export function ChatClient({
   const agent = useEveAgent({
     initialEvents: staleSessionlessEvents ? [] : prepared.initialEvents,
     session: reattachableSession.session,
-    onEvent() {
+    onEvent(event) {
+      browserTimingEvent(event);
       const nowMs = currentTimeMs();
       lastStreamActivityRef.current = nowMs;
       boundaryWatchdogRef.current?.noteActivity(nowMs);
       durableCursorRef.current += 1;
     },
     onFinish(snapshot) {
+      browserTimingMark("send.finished");
       boundaryWatchdogRef.current?.finish();
       const failedUser = snapshot.data.messages.findLast(message => message.role === "user");
       const submitted = lastSendRef.current;
@@ -953,9 +962,8 @@ export function ChatClient({
     );
   });
 
-  // Elapsed seconds beside the busy label (the reference transcript's
-  // "· 19s"): long waits read as work in progress, not a hang. Reset
-  // happens in sendMessage (an event handler), so this effect only ticks.
+  // Elapsed time drives honest long-wait labels and watchdogs, without
+  // putting a stopwatch beside the parent's conversation.
   const [busySeconds, setBusySeconds] = useState(0);
   useEffect(() => {
     if (!busy) return;
@@ -969,10 +977,6 @@ export function ChatClient({
   useEffect(() => {
     messagesRef.current = agent.data.messages;
   }, [agent.data.messages]);
-
-  useEffect(() => {
-    renderedEventsRef.current = agent.events;
-  }, [agent.events]);
 
   useEffect(() => {
     archivedRef.current = archived;
@@ -1007,6 +1011,7 @@ export function ChatClient({
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
       void sendRef.current?.({
+        timingStartedAt: flush.timingStartedAt,
         message,
         headers: headersForMessage(
           message,
@@ -1185,68 +1190,99 @@ export function ChatClient({
 
   const sendAcrossTabs = useCallback(
     async (input: BoundChatSendInput): Promise<void> => {
-      await withChatTurnLock(storageKey, async () => {
-        persistPreparedRotation();
-        const current = reattachableSession.session.state;
+      installBrowserTiming();
+      beginBrowserTiming(input.timingStartedAt);
+      browserTimingMark("session.lock_requested");
+      preparingSendRef.current = true;
+      setPreparingSend(input);
+      setBindingSyncFailure(false);
+      setBindingSyncFailureSummary(null);
+      let handedOff = false;
+      try {
+        await withChatTurnLock(storageKey, async () => {
+          browserTimingMark("session.lock_acquired");
+          persistPreparedRotation();
+          let current = reattachableSession.session.state;
+          const saved = loadSavedChat(storageKey);
+          if (shouldAdoptSavedSession(current, saved.session)) {
+            reattachableSession.adopt(saved.session);
+            durableCursorRef.current = saved.session.streamIndex;
+            current = reattachableSession.session.state;
+          }
 
-        // GH #702: Eve treats the first historical waiting boundary as the
-        // new turn's finish. Prove this browser is at the authenticated
-        // session's latest durable user turn before agentSend can append one.
-        setRestoringBoundSession(true);
-        // Another tab's cache can be ahead of this mounted reducer. Its cursor
-        // proves what was stored, not what this page has rendered. Let the
-        // authenticated restoration path replay missing turns before sending.
-        const localLatestSequence = latestTurnSequence(renderedEventsRef.current);
-        const restored = await restoreServerBoundEveSession({
-          client: sessionClient,
-          current: {
-            sessionId: current.sessionId,
-            continuationToken: current.continuationToken,
-            latestSequence: localLatestSequence,
-          },
-          timeZone,
-          signal: new AbortController().signal,
-        });
-        if (restored === null) {
-          setRestoringBoundSession(false);
-          return;
-        }
-        if (restored.kind === "unavailable") {
-          pendingBoundSendRef.current = input;
-          setBindingSyncFailureSummary(
-            visibleBoundSendSummary(input.message),
-          );
-          setBindingSyncFailure(true);
-          setRestoringBoundSession(false);
-          return;
-        }
-        setBindingSyncFailure(false);
-        if (restored.kind === "replayed" || restored.kind === "parked") {
-          adoptFreshEveSession({
-            stageLocalForServerReconciliation: true,
-          });
-          revealServerRestoredEvents(
-            restored.events,
-            restored.runtimeSessionId,
-          );
-          if (restored.kind === "parked") {
+          // GH #702: Eve treats the first historical waiting boundary as the
+          // new turn's finish. Prove this browser is at the authenticated
+          // session's latest durable user turn before agentSend can append one.
+          setRestoringBoundSession(true);
+          const localLatestSequence = latestTurnSequence(saved.events ?? []);
+          browserTimingMark("session.binding_begin");
+          const restored = await measureChatPreparation("session_binding", () => restoreServerBoundEveSession({
+            client: sessionClient,
+            current: {
+              sessionId: current.sessionId,
+              continuationToken: current.continuationToken,
+              latestSequence: localLatestSequence,
+            },
+            timeZone,
+            signal: new AbortController().signal,
+          }));
+          browserTimingMark("session.binding_end");
+          if (restored === null) throw new Error("Session preparation interrupted");
+          if (restored.kind === "unavailable") {
             pendingBoundSendRef.current = input;
             setBindingSyncFailureSummary(
               visibleBoundSendSummary(input.message),
             );
-            setAuthorizationParked(true);
+            setBindingSyncFailure(true);
             setRestoringBoundSession(false);
             return;
           }
-        } else if (restored.kind === "fresh" && current.sessionId) {
-          adoptFreshEveSession();
+          setBindingSyncFailure(false);
+          if (restored.kind === "replayed" || restored.kind === "parked") {
+            adoptFreshEveSession({
+              stageLocalForServerReconciliation: true,
+            });
+            revealServerRestoredEvents(
+              restored.events,
+              restored.runtimeSessionId,
+            );
+            if (restored.kind === "parked") {
+              pendingBoundSendRef.current = input;
+              setBindingSyncFailureSummary(
+                visibleBoundSendSummary(input.message),
+              );
+              setAuthorizationParked(true);
+              setRestoringBoundSession(false);
+              return;
+            }
+          } else if (restored.kind === "fresh" && current.sessionId) {
+            adoptFreshEveSession();
+          }
+          setAuthorizationParked(false);
+          pendingBoundSendRef.current = null;
+          setBindingSyncFailureSummary(null);
+          setRestoringBoundSession(false);
+          // Eve publishes submitted synchronously and adds its optimistic
+          // message before opening the network stream. Retire our receipt in
+          // the same handoff so repeated identical prompts never deduplicate.
+          handedOff = true;
+          browserTimingMark("eve.send_begin");
+          const sending = agentSend(input);
+          preparingSendRef.current = false;
+          setPreparingSend(null);
+          await sending;
+        }, "send");
+      } catch {
+        if (!handedOff) {
+          pendingBoundSendRef.current = input;
+          setBindingSyncFailureSummary(visibleBoundSendSummary(input.message));
+          setBindingSyncFailure(true);
         }
-        setAuthorizationParked(false);
-        pendingBoundSendRef.current = null;
-        setBindingSyncFailureSummary(null);
+      } finally {
+        preparingSendRef.current = false;
+        setPreparingSend(null);
         setRestoringBoundSession(false);
-        await agentSend(input);
-      });
+      }
     },
     [
       adoptFreshEveSession,
@@ -1272,9 +1308,10 @@ export function ChatClient({
     const controller = new AbortController();
     void (async () => {
       await withChatTurnLock(storageKey, async () => {
+        const saved = loadSavedChat(storageKey);
         const current = reattachableSession.session.state;
         const localLatestSequence = latestTurnSequence(
-          renderedEventsRef.current,
+          saved.events ?? prepared.initialEvents,
         );
         const restored = await restoreServerBoundEveSession({
           client: sessionClient,
@@ -1308,7 +1345,7 @@ export function ChatClient({
         setBindingSyncFailure(false);
         setRestoringBoundSession(false);
         if (restored.kind !== "parked") flushQueuedMessages();
-      });
+      }, "restore");
     })();
     return () => controller.abort();
   }, [
@@ -1601,9 +1638,22 @@ export function ChatClient({
   });
   const renderMessages = renderSources.live;
   const renderBusy = hydrated && busy;
+  const preparingSummary = preparingSend ? visibleBoundSendSummary(preparingSend.message) : null;
+  const pendingPreparationMessage: EveMessage | null = hydrated && preparingSummary
+    ? {
+        id: "preparing-send:user",
+        role: "user",
+        parts: [{ type: "text", text: preparingSummary }],
+        metadata: { optimistic: true, status: "submitted" },
+      }
+    : null;
+  const workingLabel = hydrated && preparingSend !== null
+    ? "working on it…"
+    : renderBusy ? busyLabel(renderMessages, busySeconds) : null;
   const renderRestoringBoundSession = hydrated && restoringBoundSession;
   const lineOccupied =
     busy ||
+    preparingSend !== null ||
     recovering ||
     renderRestoringBoundSession ||
     bindingSyncFailure ||
@@ -1667,6 +1717,8 @@ export function ChatClient({
    */
   const openingMoment =
     onboarding !== null &&
+    pendingPreparationMessage === null &&
+    bindingSyncFailureSummary === null &&
     !transcript.some(
       (item) => item.kind === "message" && messageSpeaksWords(item.message),
     );
@@ -1709,7 +1761,7 @@ export function ChatClient({
       setHasNewActivity(true);
     }
     firstScrollDoneRef.current = true;
-  }, [agent.data.messages, archived, queued, spoken]);
+  }, [agent.data.messages, archived, queued, spoken, preparingSend]);
 
   const focusComposer = useCallback(() => {
     focusChatComposerInput(composerFormRef.current);
@@ -2045,6 +2097,7 @@ export function ChatClient({
     text: string,
     source: ChatSendSource = { kind: "composer" },
   ): ChatSendAcceptance {
+    const timingStartedAt = performance.now();
     // She answered in prose instead of filling the card in, so the card
     // steps aside. Leaving it up would sit a form asking her name over a
     // reply where she just gave it, which is the ambiguity the composer
@@ -2075,7 +2128,8 @@ export function ChatClient({
           recovering ||
           restoringBoundSession ||
           bindingSyncFailure ||
-          authorizationParked,
+          authorizationParked ||
+          preparingSendRef.current,
       }),
       draftFromVoice: draftFromVoiceRef.current,
       source,
@@ -2101,7 +2155,7 @@ export function ChatClient({
     // composer and goes out the moment the line is free.
     if (plan.destination === "queue") {
       setQueued((current) =>
-        appendPreparedChatSendToQueue(current, plan),
+        appendPreparedChatSendToQueue(current, plan, timingStartedAt),
       );
       return "queued";
     }
@@ -2120,6 +2174,7 @@ export function ChatClient({
     // that queue still goes alone: it is the app's sentence, and gluing
     // it to hers is the exact failure the lane exists to prevent.
     const flush = flushChatQueue(queued, {
+      timingStartedAt,
       text: plan.message,
       lane: plan.lane,
       modality: plan.modality,
@@ -2137,6 +2192,7 @@ export function ChatClient({
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
     void sendRef.current?.({
+      timingStartedAt: flush.timingStartedAt ?? timingStartedAt,
       message: outgoing,
       headers: headersForMessage(
         outgoing,
@@ -2179,6 +2235,7 @@ export function ChatClient({
    * the queue stays text-only).
    */
   async function sendMessageWithAttachments(text: string): Promise<void> {
+    const timingStartedAt = performance.now();
     // Attachments hold for the idle line already (no queueing for
     // files); recovering counts as occupied for the same session-fork
     // reason sendMessage's plan does (GH #170).
@@ -2189,7 +2246,8 @@ export function ChatClient({
           recovering ||
           restoringBoundSession ||
           bindingSyncFailure ||
-          authorizationParked,
+          authorizationParked ||
+          preparingSendRef.current,
       }) || preparingAttachments
     ) {
       return;
@@ -2240,6 +2298,7 @@ export function ChatClient({
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
       void sendRef.current?.({
+        timingStartedAt,
         message: parts,
         headers: headersForMessage(parts, turn.modality, "parent"),
       });
@@ -2269,7 +2328,7 @@ export function ChatClient({
   }
 
   function retryBindingSync(): void {
-    if (restoringBoundSession) return;
+    if (restoringBoundSession || preparingSendRef.current) return;
     const pending = pendingBoundSendRef.current;
     if (pending === null) {
       setBindingSyncFailure(false);
@@ -2352,7 +2411,7 @@ export function ChatClient({
           openingMoment ? "ob-open-column justify-center pb-4" : "pb-6"
         }`}
       >
-        {!hasAnyMessages && !onboarding ? (
+        {!hasAnyMessages && !pendingPreparationMessage && !bindingSyncFailureSummary && !onboarding ? (
           <div className="my-auto text-center">
             <h1 className="font-display text-2xl font-semibold text-strong">
               {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
@@ -2564,6 +2623,7 @@ export function ChatClient({
               return (
                 <div
                   key={item.key}
+                  data-chat-timing-message={item.message.id}
                   className={`flex flex-col gap-1.5 ${dimmed ? "opacity-45 transition-opacity" : ""}`}
                 >
                   {messageView}
@@ -2585,20 +2645,18 @@ export function ChatClient({
             })}
           </>
         )}
-        {renderBusy && busyLabel(renderMessages, busySeconds) ? (
-          // The mark is awake while Homa thinks, so the wait is never a
-          // blank page (tester ask, evidence memo 1; MJ-06). Goes still
-          // under reduced motion; the label still reads what is happening.
-          //
-          // The clock leads. It is the part that actually moves every
-          // second, so it anchors the row and the words become the thing
-          // that changes occasionally rather than the thing being stared
-          // at. The label shimmers and escalates with the same clock, so
-          // twenty five seconds reads as work rather than as a hang.
-          //
-          // The character escalates on that same clock too, and this is
-          // the only place all three meet: seconds, mood and words are
-          // one reading of one wait, never three opinions about it.
+        {pendingPreparationMessage ? (
+          <div data-chat-preparing-message="true">
+            <MessageView
+              message={pendingPreparationMessage}
+              timeZone={timeZone}
+              familyId={familyId}
+            />
+          </div>
+        ) : null}
+        {workingLabel ? (
+          // One status stays mounted through preparation and model work.
+          // Elapsed time still drives watchdogs, never a visible stopwatch.
           <div className="quiet-chat__busy flex items-baseline gap-2.5 text-muted" role="status">
             <ThinkingMark
               size={28}
@@ -2607,13 +2665,8 @@ export function ChatClient({
               tool={activeToolName(renderMessages)}
               className="self-center"
             />
-            {busySeconds > 0 ? (
-              <span className="font-mono text-sm tabular-nums text-subtle">
-                {busySeconds}s
-              </span>
-            ) : null}
             <span className="chat-busy-label">
-              {busyLabel(renderMessages, busySeconds)}
+              {workingLabel}
             </span>
           </div>
         ) : null}
@@ -2686,7 +2739,7 @@ export function ChatClient({
             </p>
           </div>
         ) : null}
-        {recovering || renderRestoringBoundSession ? (
+        {(recovering || renderRestoringBoundSession) && !preparingSend && !workingLabel ? (
           // A dead local stream or a missing local cursor both resolve from
           // the durable server session. The wait reads as work, not failure.
           <div className="flex items-center gap-2.5 text-muted" role="status">
@@ -2714,7 +2767,7 @@ export function ChatClient({
               Try again
             </QuietAction>
           </div>
-        ) : authorizationParked ? (
+        ) : authorizationParked && !preparingSend ? (
           <div
             className="flex flex-wrap items-center justify-center gap-3 text-sm text-body"
             role="status"

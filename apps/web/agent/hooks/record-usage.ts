@@ -1,6 +1,10 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import { HOMA_MODEL } from "../model";
+import { turnModelState } from "../turn-model-state";
+import { modelRouterState } from "../model-router-state";
+import { ROUTER_MODEL } from "../../lib/model-router/router";
 import {
   recordModelUsage,
   modelUsageChannelFromAttributes,
@@ -15,8 +19,7 @@ import {
  * email, dispatch, and the subject lesson lane because they are all
  * channels on the one agent.
  *
- * The model id is the agent's pinned HOMA_MODEL: step.completed does not
- * carry a model id, and the agent runs exactly one. Compaction summary
+ * The model id comes from session-scoped routing state for the completed call. Compaction summary
  * calls are not separately recorded (compaction.completed carries no
  * usage; the trigger event's usageInputTokens measures context size, not
  * spend), a known small gap noted in the plan.
@@ -26,7 +29,7 @@ import {
  * conversation. Sessions with no family (unlinked SMS, dev probes)
  * record with family_id null so fleet spend still adds up.
  */
-export default defineHook({
+export default defineHook(withTimedHooks("record-usage", {
   events: {
     async "step.completed"(event, ctx) {
       try {
@@ -41,11 +44,15 @@ export default defineHook({
               deliveryVersion?: string;
             }
           | undefined;
+        const selected = turnModelState.get();
+        const route = selected === HOMA_MODEL
+          ? modelRouterState.get()
+          : { model: selected, inputTokens: undefined, outputTokens: undefined };
         await recordModelUsage({
           familyId: attributes?.familyId ?? null,
           surface: usageSurfaceFromAttributes(attributes),
           channel: modelUsageChannelFromAttributes(attributes),
-          model: HOMA_MODEL,
+          model: route.model,
           modality: "text",
           inputTokens: usage.inputTokens,
           outputTokens: usage.outputTokens,
@@ -54,6 +61,19 @@ export default defineHook({
           sessionId: ctx.session.id,
           turnId: event.data.turnId,
         });
+        if (route.inputTokens !== undefined) {
+          await recordModelUsage({
+            familyId: attributes?.familyId ?? null,
+            surface: usageSurfaceFromAttributes(attributes),
+            channel: modelUsageChannelFromAttributes(attributes),
+            model: ROUTER_MODEL,
+            modality: "text",
+            inputTokens: route.inputTokens,
+            outputTokens: route.outputTokens,
+            sessionId: ctx.session.id,
+            turnId: event.data.turnId,
+          });
+        }
       } catch (error) {
         console.error(
           "record-usage hook failed:",
@@ -62,4 +82,4 @@ export default defineHook({
       }
     },
   },
-});
+}));

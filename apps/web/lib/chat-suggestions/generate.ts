@@ -4,7 +4,7 @@ import path from "node:path";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { loadFamilyContextPinned, renderFamilyContext } from "../family-context";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import {
@@ -97,8 +97,8 @@ async function producePromptSuggestions(
   const model = process.env.HOMA_SUGGESTIONS_MODEL ?? HOMA_MODEL;
   const familyContext = await loadFamilyContextPinned(input.familyId);
   const result = await generateText({
-    model,
     ...PROMPT_SUGGESTION_PRODUCER_SETTINGS,
+    ...homaModelSettings(model),
     system: promptSuggestionsPrompt(),
     prompt: [
       "Family context:",

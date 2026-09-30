@@ -1,3 +1,4 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import { bindDeliveredProgressCheckIn } from "../../lib/child-progress/delivery-binding.server";
@@ -91,4 +92,4 @@ export const screenDeliveryHook = {
   },
 } satisfies Parameters<typeof defineHook>[0];
 
-export default defineHook(screenDeliveryHook);
+export default defineHook(withTimedHooks("continuity-web-delivery", screenDeliveryHook));

@@ -305,7 +305,13 @@ describe("conversation log continuity integration", () => {
 
 
 describe("conversation recording before enrichment", () => {
-  it("persists the exact complete text before indexing and survives index failure", async () => {
+  it("persists the exact complete text before indexing and survives index failure", async t => {
+    const previous = process.env.HOMA_CONVERSATION_RECORDING;
+    process.env.HOMA_CONVERSATION_RECORDING = "1";
+    t.after(() => {
+      if (previous === undefined) delete process.env.HOMA_CONVERSATION_RECORDING;
+      else process.env.HOMA_CONVERSATION_RECORDING = previous;
+    });
     const content = "  " + "Long conversation 🧡\n".repeat(800) + "  ";
     let recorded: string | undefined;
     const result = await persistConversationMessage({
@@ -342,4 +348,49 @@ describe("conversation recording before enrichment", () => {
     }), /database unavailable/);
     assert.equal(indexed, false);
   });
+
+  it("keeps the trimmed, capped text while recording is off", async () => {
+    const previous = process.env.HOMA_CONVERSATION_RECORDING;
+    delete process.env.HOMA_CONVERSATION_RECORDING;
+    try {
+      let recorded: string | undefined;
+      await persistConversationMessage({
+        attributes: { familyId: FAMILY_ID }, sessionId: "capped-session",
+        channelKind: "web", sequence: 1, role: "assistant",
+        content: "  " + "x".repeat(9000) + "  ",
+        turnId: "capped-turn", finishReason: "stop",
+      }, {
+        resolveInbound: async () => { throw new Error("unexpected resolution"); },
+        persistCanonical: async input => {
+          recorded = input.content;
+          return { id: MESSAGE_ID, episodeId: EPISODE_ID, replyClaimed: false, content: input.content };
+        },
+        embed: async () => null,
+        saveEmbedding: async () => undefined,
+      });
+      assert.equal(recorded, "x".repeat(8000));
+    } finally {
+      if (previous !== undefined) process.env.HOMA_CONVERSATION_RECORDING = previous;
+    }
+  });
+});
+
+it("durably queues user indexing without waiting for the embedding provider", async () => {
+  let saved = false;
+  await persistConversationMessage({
+    attributes: { familyId: "family", episodeId: "episode" },
+    sessionId: "session", channelKind: "eve", sequence: 1,
+    role: "user", content: "What is a number bond?", turnId: "turn",
+    deferSemanticIndex: true,
+  }, {
+    resolveInbound: async () => { throw new Error("unexpected resolve"); },
+    persistCanonical: async input => {
+      assert.equal(input.deferSemanticIndex, true);
+      saved = true;
+      return {id:"message",episodeId:"episode",replyClaimed:false,content:input.content};
+    },
+    embed: async () => { throw new Error("embedding must be deferred"); },
+    saveEmbedding: async () => { throw new Error("embedding must be deferred"); },
+  });
+  assert.equal(saved, true);
 });

@@ -49,6 +49,9 @@ The candidate regression run is unpatched. Before accepting a new pin, prove
 that each patch hunk is upstream or port it to a patch named for the candidate
 version. Also run `pnpm check:eve-stream-duration` against the candidate
 install so the stream-function duration hunk cannot silently disappear.
+Run `pnpm check:research` against the candidate too: its installed-Eve test
+guards Gateway web-search discovery for Homa's wrapped model (gh#1209).
+Losing that patch removes search from both research and family conversations.
 
 ```bash
 node scripts/eve-upgrade-check.mjs --to <candidate-version>

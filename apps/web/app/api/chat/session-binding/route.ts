@@ -1,6 +1,9 @@
+import { timeRequest } from "../../../../lib/observability/chat-timing-server";
 import { readWebSessionBinding } from "../../../../lib/conversation-continuity/web-session-binding";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../lib/api-auth";
+import { EveAuthServiceUnavailableError } from "../../../../lib/eve-authentication";
+import { measureChatPreparation, type ChatPreparationMetadata } from "../../../../lib/observability/chat-preparation";
 
 /**
  * GET /api/chat/session-binding
@@ -11,14 +14,26 @@ import { resolveApiFamily } from "../../../../lib/api-auth";
  * family and member identity come from auth.
  */
 export async function GET(request: Request): Promise<Response> {
+  const timing: ChatPreparationMetadata = {};
+  return timeRequest(request, "homa.http.binding", () => measureChatPreparation("binding_total", async () => {
+    const response = await readBindingResponse(request);
+    timing.statusCode = response.status;
+    return response;
+  }, undefined, timing));
+}
+
+async function readBindingResponse(request: Request): Promise<Response> {
   if (rateLimited(`chat-session-binding:${clientIp(request)}`, 120)) {
     return Response.json({ ok: false }, { status: 429 });
   }
 
   let auth;
   try {
-    auth = await resolveApiFamily(request);
+    auth = await resolveApiFamily(request, {
+      transientAuthErrors: "throw", transientMembershipErrors: "throw", traceChatBinding: true,
+    });
   } catch (error) {
+    if (error instanceof EveAuthServiceUnavailableError) return error.response;
     console.error(
       "chat/session-binding auth lookup failed:",
       error instanceof Error ? error.message : "unknown",
@@ -35,10 +50,10 @@ export async function GET(request: Request): Promise<Response> {
     );
   }
   try {
-    const binding = await readWebSessionBinding({
+    const binding = await measureChatPreparation("binding_read", () => readWebSessionBinding({
       familyId: auth.familyId,
       memberUserId: auth.userId,
-    });
+    }));
     return Response.json({ ok: true, binding });
   } catch (error) {
     console.error(

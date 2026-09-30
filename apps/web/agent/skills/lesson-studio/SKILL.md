@@ -1,5 +1,5 @@
 ---
-description: Use when a parent asks for a full lesson, a complete lesson on one skill, a lesson with teaching and practice and a check, "teach this and give her practice and a test", or a lesson packet she can run start to finish without you. Not for one single worksheet, page, or activity (materials-studio owns that); not for a themed multi-topic bundle (unit-study-packet, a materials-studio format, owns that); not for a multi-week curriculum or program (curriculum-studio owns that); not for scheduling an existing lesson or curriculum (planner owns placement).
+description: Use for a complete single-skill lesson with teaching, practice, a check and answer key. Single worksheets and themed bundles belong to materials-studio; multi-week programs to curriculum-studio; scheduling to planner.
 metadata:
   homa-related-skills: materials-studio
 ---
@@ -24,8 +24,8 @@ materials-studio owns how each page actually gets designed and built.
 
 ## Before building: use the child's evidence (binding)
 
-Materials-studio's evidence hierarchy applies here unchanged. Read its
-"Before designing: use the child's evidence" section before you choose
+Materials-studio's evidence hierarchy applies here unchanged. Read
+`/workspace/skills/materials-studio/references/design-guide.md` before you choose
 the target skill: what the parent said in this conversation outranks the
 child's map snapshot, which outranks a saved "what works" memory, which
 outranks anything else. No evidence for the target skill means one short

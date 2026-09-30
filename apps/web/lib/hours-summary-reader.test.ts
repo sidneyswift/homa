@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { readHoursCategorySummary, validateHoursCategorySummary } from "./hours-category-summary";
 import { readHoursSummaryCaller, validateHoursSummaryRecord, type HoursSummaryRecord } from "./hours-summary-reader";
 
 const familyId = "a1111111-1111-4111-8111-111111111111";
@@ -107,6 +108,75 @@ describe("complete Hours summary receipts", () => {
     for (const response of [{ data: null, error: null }, { data: null, error: { message: "Synthetic read failure" } }, { data: { status: "not_found" }, error: null }]) {
       const db = { rpc: () => ({ abortSignal: async () => response }) } as unknown as SupabaseClient;
       await assert.rejects(readHoursSummaryCaller(db, familyId, request, now), /No complete total is available/u);
+    }
+  });
+});
+
+
+describe("Hours category summary receipts", () => {
+  const categoryId = "c3333333-3333-4333-8333-333333333333";
+  const reasonIs = (reason: string) => (error: unknown) => Boolean(error && typeof error === "object" && "reason" in error && error.reason === reason);
+  function categoryRecord() {
+    const r = record();
+    return { ...r, byCategory: [{ subject: "math", categoryId, name: "Saved category", minutes: r.totalMinutes }],
+      entries: r.entries.map(entry => ({ ...entry, categoryId, customLabel: "Saved category" })) };
+  }
+
+  it("preserves minimal RPC refusals without requiring ready receipt fields", () => {
+    for (const [status, reason] of [["invalid", "invalid"], ["not_found", "not_found"], ["unavailable", "unavailable"], ["unknown", "unavailable"]]) {
+      assert.throws(() => validateHoursCategorySummary({ status }, familyId, request, now), reasonIs(reason));
+    }
+  });
+
+  it("still rejects malformed ready receipts, foreign ownership, and contradictory categories", () => {
+    const r = categoryRecord();
+    const { byCategory, ...withoutCategories } = r;
+    const { entries, ...withoutEntries } = r;
+    void byCategory; void entries;
+    for (const broken of [null, {}, { status: "ready" }, withoutCategories, withoutEntries,
+      { ...r, familyId: foreignId }, { ...r, byCategory: [] },
+      { ...r, byCategory: [{ ...r.byCategory[0], minutes: 1 }] },
+      { ...r, entries: r.entries.map(entry => ({ ...entry, categoryId: foreignId })) }]) {
+      assert.throws(() => validateHoursCategorySummary(broken, familyId, request, now), invalidReceipt);
+    }
+    assert.throws(() => validateHoursCategorySummary(r, familyId, { ...request, categoryId: foreignId }, now), invalidReceipt);
+    assert.throws(() => validateHoursCategorySummary(r, familyId, { ...request, uncategorizedOnly: true }, now), invalidReceipt);
+    assert.equal(validateHoursCategorySummary(r, familyId, { ...request, categoryId }, now).totalMinutes, 4001);
+  });
+
+  it("accepts an honest empty custom-date receipt for an owned child", () => {
+    const r = record();
+    const empty = { ...r, window: { ...r.window, period: "custom" }, entryCount: 0, totalMinutes: 0, recordedDays: 0,
+      firstDay: null, lastDay: null, byEntryScope: [], bySubject: [], byCategory: [], entries: [],
+      recordedDaysByChild: [{ childId, childName: "Avery", recordedDays: 0, minutes: 0 }] };
+    const result = validateHoursCategorySummary(empty, familyId, { period: "all", childId, from: "2026-09-10", through: "2026-09-10" }, now);
+    assert.equal(result.entryCount, 0);
+    assert.equal(result.totalMinutes, 0);
+  });
+
+  it("keeps a well-formed unowned category in the scoped RPC and preserves its invalid status", async () => {
+    let calls = 0;
+    const db = { rpc: (name: string, args: Record<string, unknown>) => {
+      calls++;
+      assert.equal(name, "read_hours_category_summary");
+      assert.equal(args.target_family_id, familyId);
+      assert.equal(args.target_category_id, foreignId);
+      assert.equal(args.target_subject, "math");
+      return { abortSignal: async (signal: AbortSignal) => {
+        assert.equal(signal.aborted, false);
+        return { data: { status: "invalid" }, error: null };
+      } };
+    } } as unknown as SupabaseClient;
+    await assert.rejects(readHoursCategorySummary({ mode: "caller", familyId, db }, { ...request, subject: "math", categoryId: foreignId }, now), reasonIs("invalid"));
+    assert.equal(calls, 1);
+  });
+
+  it("keeps transport failures unavailable and malformed category requests query-free", async () => {
+    const failed = { rpc: () => ({ abortSignal: async () => ({ data: null, error: { message: "Synthetic failure" } }) }) } as unknown as SupabaseClient;
+    await assert.rejects(readHoursCategorySummary({ mode: "caller", familyId, db: failed }, request, now), reasonIs("unavailable"));
+    const noRead = { rpc: () => { throw new Error("Unexpected query"); } } as unknown as SupabaseClient;
+    for (const input of [{ categoryId: "invalid" }, { categoryId, uncategorizedOnly: true }]) {
+      await assert.rejects(readHoursCategorySummary({ mode: "caller", familyId, db: noRead }, input, now), reasonIs("invalid"));
     }
   });
 });

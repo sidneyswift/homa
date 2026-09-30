@@ -1,4 +1,4 @@
-import { accessSync, readFileSync } from "node:fs";
+import { accessSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { resolve } from "node:path";
 
@@ -9,19 +9,18 @@ import {
   test,
   type Browser,
 } from "@playwright/test";
-import ts from "typescript";
+import { buildSync } from "esbuild";
 
 const storageKey = "homa-chat-two-tab-e2e";
-const cacheSource = readFileSync(
-  resolve(process.cwd(), "app/app/chat-session-cache.ts"),
-  "utf8",
-);
-const cacheModule = ts.transpileModule(cacheSource, {
-  compilerOptions: {
-    module: ts.ModuleKind.ESNext,
-    target: ts.ScriptTarget.ES2022,
-  },
-}).outputText;
+// Bundle the real cache and telemetry dependencies for this standalone browser fixture.
+const cacheModule = buildSync({
+  entryPoints: [resolve(process.cwd(), "app/app/chat-session-cache.ts")],
+  bundle: true,
+  write: false,
+  format: "esm",
+  platform: "browser",
+  target: "es2022",
+}).outputFiles[0].text;
 
 let browser: Browser;
 let server: Server;
@@ -54,6 +53,11 @@ test.beforeAll(async () => {
     if (request.url === "/chat-session-cache.js") {
       response.writeHead(200, { "content-type": "text/javascript" });
       response.end(cacheModule);
+      return;
+    }
+    if (request.url !== "/") {
+      response.writeHead(404);
+      response.end();
       return;
     }
     response.writeHead(200, { "content-type": "text/html" });

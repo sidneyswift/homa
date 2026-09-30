@@ -541,8 +541,179 @@ describe("web session binding restoration", () => {
     }
   });
 
-  it("bounds a persistent binding route failure", async () => {
+  it("honors only bounded 503 delta-second delays before retrying a binding GET", async () => {
+    for (const [status, retryAfter, expectedMs] of [
+      [503, "1", 1_000],
+      [503, "0", 1_000],
+      [503, "2", 2_000],
+      [503, "5", 5_000],
+      [503, "60", 5_000],
+      [503, "9".repeat(400), 5_000],
+      [503, undefined, 5_000],
+      [503, "", 5_000],
+      [503, "-1", 5_000],
+      [503, "1.5", 5_000],
+      [503, "1e0", 5_000],
+      [503, "Infinity", 5_000],
+      [503, "1, 2", 5_000],
+      [503, "Sat, 12 Sep 2026 12:00:00 GMT", 5_000],
+      [401, "1", 5_000],
+      [429, "1", 5_000],
+      [500, "1", 5_000],
+    ] as const) {
+      let reads = 0;
+      const delays: number[] = [];
+      const restored = await restoreServerBoundEveSession({
+        client: {
+          session() { throw new Error("should not replay"); },
+        } as Pick<Client, "session">,
+        timeZone: "America/New_York",
+        signal: new AbortController().signal,
+        fetcher: async (url, init) => {
+          assert.equal(url, "/api/chat/session-binding");
+          assert.equal(init?.method ?? "GET", "GET");
+          reads += 1;
+          return reads === 1
+            ? new Response(null, {
+                status,
+                headers: retryAfter === undefined ? {} : { "retry-after": retryAfter },
+              })
+            : Response.json({ ok: true, binding: null });
+        },
+        sleep: async (ms) => { delays.push(ms); },
+      });
+
+      assert.deepEqual(restored, { kind: "fresh" });
+      assert.equal(reads, 2);
+      assert.deepEqual(delays, [expectedMs], `${status} Retry-After ${retryAfter}`);
+    }
+  });
+
+  it("keeps the default delay for transport and invalid-body failures", async () => {
+    for (const failure of ["transport", "invalid-body"] as const) {
+      let reads = 0;
+      const delays: number[] = [];
+      const restored = await restoreServerBoundEveSession({
+        client: {
+          session() { throw new Error("should not replay"); },
+        } as Pick<Client, "session">,
+        timeZone: "America/New_York",
+        signal: new AbortController().signal,
+        fetcher: async () => {
+          reads += 1;
+          if (reads > 1) return Response.json({ ok: true, binding: null });
+          if (failure === "transport") throw new TypeError("Failed to fetch");
+          return Response.json({}, { headers: { "retry-after": "1" } });
+        },
+        sleep: async (ms) => { delays.push(ms); },
+      });
+
+      assert.deepEqual(restored, { kind: "fresh" });
+      assert.equal(reads, 2);
+      assert.deepEqual(delays, [5_000], failure);
+    }
+  });
+
+  it("retries failed confirmation reads and follows a newer binding before returning replay", async () => {
+    for (const [status, retryAfter, expectedMs] of [
+      [503, "1", 1_000],
+      [503, "invalid", 5_000],
+      [500, "1", 5_000],
+    ] as const) {
+      let bindingReads = 0;
+      let replayReads = 0;
+      const delays: number[] = [];
+      const client = {
+        session() {
+          replayReads += 1;
+          const sequence = replayReads === 1 ? 61 : 62;
+          return {
+            async *stream() {
+              yield {
+                type: "turn.started",
+                data: { sequence, turnId: `turn-${sequence}` },
+              } as HandleMessageStreamEvent;
+              yield {
+                type: "session.waiting",
+                data: { wait: "next-user-message" },
+              } as HandleMessageStreamEvent;
+            },
+          } as unknown as ClientSession;
+        },
+      } as Pick<Client, "session">;
+      const restored = await restoreServerBoundEveSession({
+        client,
+        timeZone: "America/New_York",
+        signal: new AbortController().signal,
+        fetcher: async (url, init) => {
+          assert.equal(url, "/api/chat/session-binding");
+          assert.equal(init?.method ?? "GET", "GET");
+          bindingReads += 1;
+          if (bindingReads === 2) {
+            return new Response(null, { status, headers: { "retry-after": retryAfter } });
+          }
+          return Response.json({
+            ok: true,
+            binding: {
+              runtimeSessionId: "waiting-session",
+              lastSeenAtMs: now - ACTIVE_WEB_BINDING_MS,
+              latestSequence: bindingReads === 1 ? 61 : 62,
+              latestUserMessageAtMs: now - ACTIVE_WEB_BINDING_MS + 100,
+            },
+          });
+        },
+        now: () => now,
+        sleep: async (ms) => { delays.push(ms); },
+      });
+
+      assert.equal(restored?.kind, "replayed");
+      if (restored?.kind !== "replayed") return;
+      assert.equal(latestTurnSequence(restored.events), 62);
+      assert.equal(replayReads, 2);
+      assert.equal(bindingReads, 4);
+      assert.deepEqual(delays, [expectedMs]);
+    }
+  });
+
+  it("does not shorten active-turn waits after a retryable binding failure", async () => {
+    const controller = new AbortController();
     let reads = 0;
+    const delays: number[] = [];
+    const restored = await restoreServerBoundEveSession({
+      client: {
+        session() { throw new Error("should not replay an active turn"); },
+      } as Pick<Client, "session">,
+      timeZone: "America/New_York",
+      signal: controller.signal,
+      fetcher: async () => {
+        reads += 1;
+        return reads === 1
+          ? new Response(null, { status: 503, headers: { "retry-after": "1" } })
+          : Response.json({
+              ok: true,
+              binding: {
+                runtimeSessionId: "active-session",
+                lastSeenAtMs: now - 2_000,
+                latestSequence: 61,
+                latestUserMessageAtMs: now - 1_900,
+              },
+            });
+      },
+      now: () => now,
+      sleep: async (ms) => {
+        delays.push(ms);
+        if (delays.length === 2) controller.abort();
+      },
+    });
+
+    assert.equal(restored, null);
+    assert.equal(reads, 2);
+    assert.deepEqual(delays, [1_000, 5_000]);
+  });
+
+  it("bounds a persistent binding route failure even with a shorter retry delay", async () => {
+    let reads = 0;
+    const delays: number[] = [];
     const restored = await restoreServerBoundEveSession({
       client: {
         session() {
@@ -553,12 +724,13 @@ describe("web session binding restoration", () => {
       signal: new AbortController().signal,
       fetcher: async () => {
         reads += 1;
-        return new Response(null, { status: 503 });
+        return new Response(null, { status: 503, headers: { "retry-after": "1" } });
       },
-      sleep: async () => {},
+      sleep: async (ms) => { delays.push(ms); },
     });
 
     assert.deepEqual(restored, { kind: "unavailable" });
     assert.equal(reads, 3);
+    assert.deepEqual(delays, [1_000, 1_000]);
   });
 });

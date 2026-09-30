@@ -9,6 +9,10 @@ const categoryFields = z.object({ categoryId: z.uuid().nullable(), customLabel: 
 const categorySummary = z.object({ subject: z.enum(HOURS_SUBJECTS), categoryId: z.uuid().nullable(), name: z.string().refine(value => Array.from(value).length <= 40).nullable(), minutes: z.number().int().positive() });
 
 export function validateHoursCategorySummary(raw: unknown, familyId: string, request: HoursCategorySummaryRequest, now: Date) {
+  // RPC refusals have no successful receipt fields. Preserve their reason first.
+  if (raw && typeof raw === "object" && "status" in raw && raw.status !== "ready") {
+    validateHoursSummaryRecord(raw, familyId, request, now);
+  }
   const refuse = () => { throw new HoursSummaryReadError("invalid_receipt"); };
   if (!raw || typeof raw !== "object" || !("byCategory" in raw) || !("entries" in raw)) return refuse();
   const parsed = z.object({ byCategory: z.array(categorySummary).max(5000), entries: z.array(categoryFields.passthrough()).max(50) }).safeParse(raw);

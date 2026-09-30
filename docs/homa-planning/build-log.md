@@ -1,3 +1,26 @@
+## 2026-09-30 · Founder ruling: Sonnet for fleet research, Astra for families
+
+Sidney requested Anthropic Sonnet 5.5 for Homa's automated research runs while
+keeping Astra for user interaction. The existing fleet research channel, including
+scheduled and manual corpus runs, selects `anthropic/claude-sonnet-5.5` from its
+server-created research identity. Conversations, family-facing dispatch and report
+generation retain `openai/gpt-6-astra`. The selection also covers non-streaming
+research calls and updates model-usage attribution. Research failures do not fall
+back to the more expensive model. This changes model procurement, not research
+procedure, tenancy, delivery, or the knowledge-save gate. Release evidence lives
+on gh#1209; this ruling alone does not claim deployment.
+
+## 2026-09-28 · Implement the gated family working-file pilot
+
+The founder approved the Vercel Drives pilot in gh#1199. The existing family-librarian
+skill now owns shared draft maintenance through a bounded, authenticated file tool.
+Postgres metadata and private Blob checkpoints retain storage authority; short-lived
+Drive mounts provide recoverable working copies. The implementation includes
+revision conflicts, quotas, export, deletion sweeps, and eval isolation. Activation
+is off by default and limited to disposable fixture families. The [implementation
+plan](plans/2026-09-28-family-drives.md) records the provider probe and release gates;
+this entry does not claim production activation or fleet availability.
+
 # Build log: decisions agents made alone
 
 Per BUILD.md: anything an agent was forced to decide without a founder ruling is

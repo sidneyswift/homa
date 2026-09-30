@@ -52,7 +52,7 @@ describe("ChatClient recovered-session reattachment (GH #493 / #702)", () => {
     const reconcileAt = sendAcrossTabs.indexOf(
       "restoreServerBoundEveSession({",
     );
-    const sendAt = sendAcrossTabs.indexOf("await agentSend(input)");
+    const sendAt = sendAcrossTabs.indexOf("agentSend(input)");
 
     assert.ok(reconcileAt >= 0);
     assert.ok(sendAt > reconcileAt);
@@ -71,8 +71,6 @@ describe("ChatClient recovered-session reattachment (GH #493 / #702)", () => {
       /restored\.kind === "replayed" \|\| restored\.kind === "parked"[\s\S]*?stageLocalForServerReconciliation: true,[\s\S]*?revealServerRestoredEvents/u,
     );
     assert.doesNotMatch(sendAcrossTabs, /reattachableSession\.adopt\(restored/u);
-    assert.match(sendAcrossTabs, /latestTurnSequence\(renderedEventsRef\.current\)/u);
-    assert.doesNotMatch(sendAcrossTabs, /adopt\(saved\.session\)|latestTurnSequence\(saved\.events/u);
   });
 
   it("retains a blocked input and exposes retry for unavailable or parked reconciliation", () => {
@@ -96,7 +94,7 @@ describe("ChatClient recovered-session reattachment (GH #493 / #702)", () => {
     assert.match(source, /const persistPreparedRotation = useCallback/u);
     assert.match(
       source,
-      /persistPreparedRotation\(\);\s*const current = reattachableSession\.session\.state/u,
+      /persistPreparedRotation\(\);\s*let current = reattachableSession\.session\.state/u,
     );
     assert.match(
       source,

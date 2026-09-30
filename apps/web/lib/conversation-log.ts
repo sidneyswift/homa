@@ -9,6 +9,7 @@ import { conversationRecordingEnabled, linkConversationRecording } from "./conve
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
 import { isHiddenDirective } from "./onboarding/directives";
+import { measureChatPreparation, type ChatPreparationTrace } from "./observability/chat-preparation";
 
 /**
  * Writes one conversation message row for the persist-conversation hook
@@ -17,6 +18,8 @@ import { isHiddenDirective } from "./onboarding/directives";
  * browser can never forge history; only this hook-driven path writes,
  * and members read their own rows through RLS (the recall tool's path).
  */
+
+const CONTENT_MAX_CHARS = 8000;
 
 export interface PersistMessageInput {
   attributes: unknown;
@@ -27,6 +30,8 @@ export interface PersistMessageInput {
   content: string;
   turnId: string | undefined;
   finishReason?: string;
+  /** Server-only experiment: canonical save atomically queues semantic indexing. */
+  deferSemanticIndex?: boolean;
 }
 
 export interface PersistConversationMessageDependencies {
@@ -38,7 +43,10 @@ export interface PersistConversationMessageDependencies {
   persistCanonical(
     input: PersistCanonicalMessageInput,
   ): ReturnType<typeof persistCanonicalMessage>;
-  embed(text: string, attribution: { familyId: string }): Promise<string | null>;
+  embed(text: string, attribution: {
+    familyId: string;
+    preparationTrace?: ChatPreparationTrace;
+  }): Promise<string | null>;
   /** sourceContent guards a replayed/delayed embedding write: the row's
    *  content may have moved on (a later terminal replacement) by the time
    *  this resolves, and a vector for text the row no longer holds must
@@ -103,7 +111,7 @@ export async function persistConversationMessage(
 > {
   const familyId = (input.attributes as { familyId?: string } | undefined)
     ?.familyId;
-  return persistConversationMessageWithDependencies(
+  const persist = () => persistConversationMessageWithDependencies(
     input,
     dependencies ?? {
       deferIndexing: conversationRecordingEnabled(),
@@ -129,6 +137,11 @@ export async function persistConversationMessage(
       },
     },
   );
+  return input.role === "user"
+    ? measureChatPreparation("user_persistence", persist, input.sessionId, {
+        role: input.role, turnId: input.turnId, sequence: input.sequence,
+      })
+    : persist();
 }
 
 async function persistConversationMessageWithDependencies(
@@ -150,7 +163,11 @@ async function persistConversationMessageWithDependencies(
   const familyId = attrs.familyId;
   if (!familyId) return null;
 
-  const content = input.content;
+  // Durable recording keeps the exact complete text; the existing path keeps
+  // its trimmed, capped form until recording is switched on.
+  const content = conversationRecordingEnabled()
+    ? input.content
+    : input.content.trim().slice(0, CONTENT_MAX_CHARS);
   if (content.length === 0) return null;
   const channel = channelLabel(input.attributes, input.channelKind);
   let continuityAttributes: Record<string, string> = {};
@@ -185,8 +202,16 @@ async function persistConversationMessageWithDependencies(
   const isTerminalAssistantStop =
     input.role === "assistant" && input.finishReason === "stop";
 
-  const persisted = await dependencies.persistCanonical({
+  const trace: ChatPreparationTrace | undefined = input.role === "user"
+    ? { sessionId: input.sessionId, turnId: input.turnId, role: input.role, sequence: input.sequence }
+    : undefined;
+
+  const deferIndex = input.role === "user" &&
+    (input.deferSemanticIndex ?? process.env.HOMA_DEFER_USER_INDEX === "true");
+
+  const persistCanonical = () => dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },
+    deferSemanticIndex: deferIndex && !isHiddenDirective(content) && content.length >= 3,
     sessionId: input.sessionId,
     channel,
     sequence: input.sequence,
@@ -203,14 +228,38 @@ async function persistConversationMessageWithDependencies(
         ? isTerminalAssistantStop
         : undefined,
   });
-  // The canonical text is durable before the optional search provider runs.
-  // An unavailable index cannot make a stored message look like a failed send.
-  if (persisted && !dependencies.deferIndexing && !isHiddenDirective(content)) {
+  const persisted = trace
+    ? await measureChatPreparation("canonical_persistence", persistCanonical, input.sessionId, trace)
+    : await persistCanonical();
+
+  // The canonical text is durable before the optional search provider runs,
+  // so an unavailable index cannot make a stored message look like a failed
+  // send. Null means this row is findable by FTS only, never a failed write.
+  //
+  // A hidden onboarding directive is skipped: it is the app talking, so
+  // indexing it would put machine text in the same vector space recall
+  // searches for the parent's own words, and it would spend an embedding
+  // call on a string nobody will ever look for.
+  if (persisted && !deferIndex && !dependencies.deferIndexing && !isHiddenDirective(content)) {
     try {
-      const embedding = await dependencies.embed(content, { familyId });
-      if (embedding) await dependencies.saveEmbedding(
-        persisted.id, embedding, content, isTerminalAssistantStop,
-      );
+      const embedding = trace
+        ? await measureChatPreparation("embedding_total", () => dependencies.embed(content, {
+            familyId, preparationTrace: trace,
+          }), input.sessionId, trace)
+        : await dependencies.embed(content, { familyId });
+      if (embedding) {
+        const saveEmbedding = () => dependencies.saveEmbedding(
+          persisted.id,
+          embedding,
+          content,
+          isTerminalAssistantStop,
+        );
+        if (trace) {
+          await measureChatPreparation("embedding_update", saveEmbedding, input.sessionId, trace);
+        } else {
+          await saveEmbedding();
+        }
+      }
     } catch {
       console.error("conversation indexing unavailable; canonical message retained");
     }

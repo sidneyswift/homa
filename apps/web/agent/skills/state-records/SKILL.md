@@ -1,6 +1,6 @@
 ---
 name: state-records
-description: Use when a parent asks about state homeschool paperwork, requirements, attendance packets, state packets, notice letters, filing forms, or wants to find, make, refresh, print, or share those records. Not for logging today's school time; the hours tools own that. Not for ordinary worksheets; materials-studio owns those.
+description: Use for state homeschool requirements, paperwork, attendance packets, notices, filing forms, and finding, refreshing, printing or sharing those records. School-time capture belongs to planner; ordinary worksheets to materials-studio.
 metadata:
   homa-tools: open_state_records, save_school_year_start, ask_user_questions
 ---

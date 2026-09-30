@@ -1,6 +1,10 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { createBoundedAuthUserFetch } from "./auth-user-fetch";
+import { readEveAuthentication } from "./eve-authentication";
+import { readEveMembership } from "./eve-membership";
 import { createSupabaseRequestClient } from "./supabase/server";
+import { measureChatPreparation } from "./observability/chat-preparation";
 
 /**
  * Family resolution for API routes that serve both surfaces: the web
@@ -33,41 +37,60 @@ export function requestAuthTransport(request: Request): RequestAuthTransport {
  * resolveApiFamily(request): Promise<ApiFamilyAuth | null>
  * Returns the caller's RLS-scoped client, user id, and family id, or
  * null when the request carries no valid session or the user has no
- * family yet. Never throws.
+ * family yet. Existing callers retain the non-throwing membership lookup.
+ * Chat may opt into structured service errors for temporary Auth or membership
+ * failures so a backend outage does not look like an expired login.
  */
 export async function resolveApiFamily(
   request: Request,
+  options: {
+    transientAuthErrors?: "throw";
+    transientMembershipErrors?: "throw";
+    traceChatBinding?: boolean;
+  } = {},
 ): Promise<ApiFamilyAuth | null> {
   let supabase: SupabaseClient;
-  let userId: string;
+  let token: string | undefined;
 
   const transport = requestAuthTransport(request);
   if (transport.kind === "invalid") return null;
   if (transport.kind === "bearer") {
-    const token = transport.token;
+    token = transport.token;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return null;
     supabase = createClient(url, key, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+        ...(options.transientAuthErrors === "throw"
+          ? { fetch: createBoundedAuthUserFetch(url, { signal: request.signal }) }
+          : {}),
+      },
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data.user) return null;
-    userId = data.user.id;
   } else {
-    supabase = createSupabaseRequestClient(request);
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) return null;
-    userId = data.user.id;
+    supabase = createSupabaseRequestClient(request, options.transientAuthErrors === "throw"
+      ? { fetch: createBoundedAuthUserFetch(process.env.NEXT_PUBLIC_SUPABASE_URL!, { signal: request.signal }) }
+      : undefined);
   }
+  const readUser = () => supabase.auth.getUser(token);
+  const { data, error } = options.transientAuthErrors === "throw"
+    ? await readEveAuthentication(readUser, options.traceChatBinding ? "binding_authenticate" : undefined)
+    : options.traceChatBinding
+      ? await measureChatPreparation("binding_authenticate", readUser)
+      : await readUser();
+  if (error || !data.user) return null;
+  const userId = data.user.id;
 
-  const { data: membership } = await supabase
+  const readMembership = () => supabase
     .from("family_members")
     .select("family_id")
     .eq("user_id", userId)
     .limit(1)
     .maybeSingle();
+  const { data: membership } = options.transientMembershipErrors === "throw"
+    ? await readEveMembership(readMembership, options.traceChatBinding ? "binding_membership" : "membership")
+    : await readMembership();
   const familyId = membership?.family_id as string | undefined;
   if (!familyId) return null;
 

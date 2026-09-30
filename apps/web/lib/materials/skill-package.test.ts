@@ -43,6 +43,18 @@ Answer paths and dead ends.
 `;
 
 describe("parseSkillPackage", () => {
+  it("inspects supporting guidance while displaying only the root body", () => {
+    const root = "# Root\nRead references/drawing.md.\n";
+    const expanded = parseSkillPackage(root, ["drawing.png"], ["generate_image"], [
+      "## Drawing\nUse generate_image.\nReference image: references/drawing.png\nStudy the spacing.",
+    ]);
+    assert.equal(expanded.body, root);
+    assert.equal(expanded.lineCount, root.split("\n").length);
+    assert.deepEqual(expanded.sections, ["Drawing"]);
+    assert.deepEqual(expanded.toolMentions, [{ tool: "generate_image", sections: ["Drawing"] }]);
+    assert.equal(expanded.citations[0]?.present, true);
+    assert.deepEqual(expanded.uncitedFiles, []);
+  });
   const parsed = parseSkillPackage(
     SAMPLE,
     ["homa-foldable-reference.png", "orphaned-extra.png"],
@@ -94,10 +106,19 @@ describe("studioFeedbackProblem", () => {
   });
 });
 
+/** These contracts follow the same direct router edges as the model. An
+ * unlinked reference cannot satisfy a quality rule merely by remaining on disk. */
+async function routedMaterialsReference(file: string): Promise<string> {
+  const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
+  const root = await readFile(new URL("SKILL.md", dir), "utf8");
+  assert.ok(root.includes(`references/${file}.md`), `Root must route to ${file}`);
+  return readFile(new URL(`references/${file}.md`, dir), "utf8");
+}
+
 describe("the real materials-studio package", () => {
   it("makes saved what-works evidence binding at every planning layer", async () => {
     const [materials, planner, curriculum] = await Promise.all([
-      readFile(new URL("../../agent/skills/materials-studio/SKILL.md", import.meta.url), "utf8"),
+      routedMaterialsReference("design-guide"),
       readFile(new URL("../../agent/skills/planner/SKILL.md", import.meta.url), "utf8"),
       readFile(new URL("../../agent/skills/curriculum-studio/SKILL.md", import.meta.url), "utf8"),
     ]);
@@ -133,7 +154,7 @@ describe("the real materials-studio package", () => {
 
   it("routes every image build through the page-level call strategy", async () => {
     const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
-    const skill = await readFile(new URL("SKILL.md", dir), "utf8");
+    const skill = await routedMaterialsReference("creation-paths");
     const strategy = await readFile(
       new URL("references/image-call-strategy.md", dir),
       "utf8",
@@ -149,7 +170,7 @@ describe("the real materials-studio package", () => {
   it("routes routine charts to one composed visual-schedule sheet, not per-card art", async () => {
     const dir = new URL("../../agent/skills/materials-studio/", import.meta.url);
     const [skill, recipe, dailyRhythm] = await Promise.all([
-      readFile(new URL("SKILL.md", dir), "utf8"),
+      routedMaterialsReference("format-library"),
       readFile(new URL("references/recipes/visual-schedule-cards.md", dir), "utf8"),
       readFile(new URL("references/recipes/daily-rhythm-cards.md", dir), "utf8"),
     ]);
@@ -183,7 +204,7 @@ describe("the real materials-studio package", () => {
         new URL("references/recipes/phonics-spelling-diagnostic-assessment.md", dir),
         "utf8",
       ),
-      readFile(new URL("SKILL.md", dir), "utf8"),
+      routedMaterialsReference("format-library"),
       readFile(new URL("../../agent/activity-formats.md", import.meta.url), "utf8"),
     ]);
 
@@ -232,7 +253,7 @@ describe("the real materials-studio package", () => {
         "utf8",
       ),
       readFile(new URL("references/recipes/picture-bingo-board.md", dir), "utf8"),
-      readFile(new URL("SKILL.md", dir), "utf8"),
+      routedMaterialsReference("format-library"),
       readFile(new URL("../../agent/activity-formats.md", import.meta.url), "utf8"),
     ]);
 
@@ -287,7 +308,7 @@ describe("the real materials-studio package", () => {
           body: await readFile(new URL(`references/recipes/${slug}.md`, dir), "utf8"),
         })),
       ),
-      readFile(new URL("SKILL.md", dir), "utf8"),
+      routedMaterialsReference("format-library"),
       readFile(new URL("../../agent/activity-formats.md", import.meta.url), "utf8"),
     ]);
 

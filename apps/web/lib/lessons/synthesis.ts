@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { SegmentToneNotes } from "./tone";
 import { MAX_LESSON_CLAUSES } from "./pairs";
@@ -171,7 +171,7 @@ export async function synthesizeLessonReview(
   const transcript = assembleLessonTranscript(input.segments);
   const startedAt = Date.now();
   const result = await generateObject({
-    model: HOMA_MODEL,
+    ...homaModelSettings(HOMA_MODEL),
     schema: lessonInsightsSchema,
     system: SYNTHESIS_SYSTEM,
     prompt: [

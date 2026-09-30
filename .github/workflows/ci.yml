@@ -433,6 +433,9 @@ jobs:
       - name: Agent context checks (chart parity, injection escaping)
         run: pnpm check:agent-context
 
+      - name: Eve ordered-stream and empty-delivery regressions
+        run: pnpm check:eve-ordered-stream && pnpm check:eve-empty-delivery
+
       - name: Agent context budget ratchet (always-on bytes per component)
         run: pnpm check:agent-budget
 
@@ -465,6 +468,9 @@ jobs:
 
       - name: Taxonomy checks (skill graph integrity, id law, DAG)
         run: pnpm check:taxonomy
+
+      - name: Model router boundaries and failure handling
+        run: pnpm check:model-router
 
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
@@ -635,6 +641,9 @@ jobs:
       - name: Conversation recording and request acceptance disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:conversation-storage:postgres
+      - name: Family workspace unit and disposable PostgreSQL tests
+        timeout-minutes: 10
+        run: pnpm check:family-workspace && pnpm test:family-workspace:postgres
 
       - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10
@@ -646,6 +655,9 @@ jobs:
 
       # hours_log is compliance evidence: the unique index, the cleanup
       # migration, and both writers' raced-insert handling (issue #215).
+      - name: Co-op program workflow and correction checks
+        run: pnpm check:programs
+
       - name: hours_log dedupe disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm hours-log:e2e

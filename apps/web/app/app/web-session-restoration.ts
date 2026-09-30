@@ -1,3 +1,4 @@
+import { browserTimingMark } from "../../lib/observability/chat-timing-browser";
 import {
   ClientError,
   type Client,
@@ -12,6 +13,15 @@ const BINDING_RETRY_MS = 5_000;
 const BINDING_RESTORE_DEADLINE_MS = 45_000;
 const MAX_BINDING_FAILURES = 3;
 const AUTHORIZATION_REPLAY_GRACE_MS = 250;
+
+function bindingFailureRetryMs(response: Response): number {
+  if (response.status !== 503) return BINDING_RETRY_MS;
+  const retryAfter = response.headers.get("retry-after")?.trim();
+  if (!retryAfter || !/^\d+$/u.test(retryAfter)) return BINDING_RETRY_MS;
+  const seconds = Number(retryAfter);
+  if (!Number.isFinite(seconds)) return BINDING_RETRY_MS;
+  return Math.min(BINDING_RETRY_MS, Math.max(1_000, seconds * 1_000));
+}
 
 export interface WebSessionBindingPayload {
   runtimeSessionId: string;
@@ -149,6 +159,7 @@ export function webSessionBindingDecision(input: {
 }
 
 async function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
+  browserTimingMark("binding.retry_begin");
   await new Promise<void>((resolve) => {
     const timer = setTimeout(done, ms);
     function done() {
@@ -158,6 +169,7 @@ async function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
     }
     signal.addEventListener("abort", done);
   });
+  browserTimingMark("binding.retry_end");
 }
 
 async function replayBoundSession(input: {
@@ -278,12 +290,14 @@ export async function restoreServerBoundEveSession(input: {
 
   try {
     while (!deadlineController.signal.aborted) {
+      let retryMs = BINDING_RETRY_MS;
       try {
         const response = await fetcher("/api/chat/session-binding", {
           cache: "no-store",
           signal: deadlineController.signal,
         });
         if (!response.ok) {
+          retryMs = bindingFailureRetryMs(response);
           throw new Error(`binding read returned ${response.status}`);
         }
         const payload = bindingPayload(await response.json());
@@ -322,6 +336,7 @@ export async function restoreServerBoundEveSession(input: {
             },
           );
           if (!confirmationResponse.ok) {
+            retryMs = bindingFailureRetryMs(confirmationResponse);
             throw new Error(
               `binding confirmation returned ${confirmationResponse.status}`,
             );
@@ -346,7 +361,7 @@ export async function restoreServerBoundEveSession(input: {
         failureCount += 1;
       }
       if (failureCount >= MAX_BINDING_FAILURES) return { kind: "unavailable" };
-      await sleep(BINDING_RETRY_MS, deadlineController.signal);
+      await sleep(retryMs, deadlineController.signal);
     }
     return input.signal.aborted ? null : { kind: "unavailable" };
   } finally {

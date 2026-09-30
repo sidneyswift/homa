@@ -1,3 +1,4 @@
+import { withTimedHooks } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import {
@@ -16,7 +17,7 @@ function receiptId(attributes: unknown): string | null {
  * output. Outbound delivery has its own ledger and retry state, so a failed
  * response send can never replay the parent's tools or writes.
  */
-export default defineHook({
+export default defineHook(withTimedHooks("continuity-receipts", {
   events: {
     async "message.completed"(event, ctx) {
       if (event.data.finishReason !== "stop") return;
@@ -32,4 +33,4 @@ export default defineHook({
       if (id) await failInboundReceipt(id, event.data);
     },
   },
-});
+}));

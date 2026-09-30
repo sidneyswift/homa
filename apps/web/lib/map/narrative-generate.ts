@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { skillPhrase, type PlanNarrative, type ReportNarrative } from "@homa/core";
 
-import { HOMA_MODEL } from "../../agent/model";
+import { HOMA_MODEL, homaModelSettings } from "../../agent/model";
 import { REPORT_PROMPT_VERSION } from "../../agent/report-writer-version";
 import { gatewayAttribution, recordModelUsage } from "../model-usage";
 import type { PlanFacts, ReportFacts } from "./narrative-facts";
@@ -41,8 +41,8 @@ function requiredStrings(ids: string[]): z.ZodObject<Record<string, z.ZodString>
 }
 
 const reportDraftDrawer = z.object({
-  activity: z.string().nullable().optional(),
-  materials: z.string().nullable().optional(),
+  activity: z.string().nullable(),
+  materials: z.string().nullable(),
 });
 
 function sentence(text: string): string {
@@ -110,12 +110,12 @@ function draftSchema(drawerIds: string[]) {
   return z.object({
     noteFacts: z.array(z.string()).max(2),
     drawers: z.object(
-      Object.fromEntries(drawerIds.map((id) => [id, reportDraftDrawer.optional()])),
+      Object.fromEntries(drawerIds.map((id) => [id, reportDraftDrawer.nullable()])),
     ),
   });
 }
 
-function reportParametersSchema(drawerIds: string[]) {
+export function reportParametersSchema(drawerIds: string[]) {
   const parameters = draftSchema(drawerIds);
   return z.union([
     parameters,
@@ -188,15 +188,15 @@ export async function generateReportNarrative(
     .filter((subject) => subject.position !== "not_mapped")
     .map((subject) => subject.subjectId);
 
-  // The schema names every optional drawer key explicitly. Subject lines are
-  // deterministic map facts, so a model omission cannot create a blank card.
+  // Astra requires every schema property, including nullable drawer slots,
+  // in required (gh#1175). Subject lines remain deterministic map facts.
   const schema = z.object({
     parameters: reportParametersSchema(drawerIds),
   });
 
   const started = Date.now();
   const result = await generateObject({
-    model: NARRATIVE_MODEL,
+    ...homaModelSettings(NARRATIVE_MODEL),
     system: systemPrompt(),
     prompt: [
       `Write ${facts.childName}'s progress report pieces from these facts, computed by code.`,
@@ -250,7 +250,7 @@ export async function generatePlanNarrative(
 
   const started = Date.now();
   const result = await generateObject({
-    model: NARRATIVE_MODEL,
+    ...homaModelSettings(NARRATIVE_MODEL),
     system: systemPrompt(),
     prompt: [
       `Write the four-week plan pieces for ${facts.childName}'s ${facts.subjectName} month from these facts, computed by code.`,

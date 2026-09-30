@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { QuietAction } from "../../../components/design/QuietAction";
 import { PageColumn } from "../../../components/dashboard/page-column";
 import { getAppData, getAppShellData } from "../../../lib/app-data";
 import { familyAccountGate } from "../../../lib/billing/wall";
@@ -22,7 +23,10 @@ import {
   todayDateOnly,
   weekRangeForDate,
 } from "../../../lib/unified-planner";
-import { resolvePlannerViewContext, VIEW_CONTEXT_COOKIE } from "../../../lib/view-context";
+import {
+  resolvePlannerViewContext,
+  VIEW_CONTEXT_COOKIE,
+} from "../../../lib/view-context";
 import { FirstWeekHandoff } from "./first-week-handoff";
 import { UnifiedPlannerView } from "./unified-planner-view";
 
@@ -64,70 +68,81 @@ export default async function PlannerPage({
   // A report can take a signed-in parent straight to this child's week.
   // The query is only a focus preference, never authority: it is accepted
   // only after checking against the authenticated family's loaded children.
-  const focusChildId = viewContext.kind === "child" ? viewContext.childId : null;
+  const focusChildId =
+    viewContext.kind === "child" ? viewContext.childId : null;
   // A report can start this focused handoff, but the query cannot turn on a
   // child experience unless the child itself was authenticated above.
-  const handoffChild = query.handoff === "report" && linkedChildId !== null
-    ? children.find((child) => child.id === linkedChildId) ?? null
-    : null;
+  const handoffChild =
+    query.handoff === "report" && linkedChildId !== null
+      ? (children.find((child) => child.id === linkedChildId) ?? null)
+      : null;
   const timeZone = effectiveTimeZone(family.time_zone);
   const now = new Date();
   const today = todayDateOnly(now, timeZone);
   const activeDate = parsePlannerDate(query.date, today);
-  const range = view === "month"
-    ? monthGridRangeForDate(activeDate, today)
-    : weekRangeForDate(activeDate);
+  const range =
+    view === "month"
+      ? monthGridRangeForDate(activeDate, today)
+      : weekRangeForDate(activeDate);
 
   // Calendar and day-hours reads stay bounded to the visible range. Hours
   // alone loads the full compliance record.
-  const [familyEvents, scheduledActivities, learningActivities, hoursRead] = await Promise.all([
-    view === "hours"
-      ? Promise.resolve([])
-      : getFamilyEventsForFamily(family.id, range.start, range.end).catch((error: unknown) => {
-          console.error(
-            "planner: family_events read failed (migration may be unapplied):",
-            error instanceof Error ? error.message : "unknown",
-          );
-          return [];
-        }),
-    view === "hours"
-      ? Promise.resolve([])
-      : getScheduledActivitiesForFamily(family.id, range.start, range.end).catch(
-          (error: unknown) => {
+  const [familyEvents, scheduledActivities, learningActivities, hoursRead] =
+    await Promise.all([
+      view === "hours"
+        ? Promise.resolve([])
+        : getFamilyEventsForFamily(family.id, range.start, range.end).catch(
+            (error: unknown) => {
+              console.error(
+                "planner: family_events read failed (migration may be unapplied):",
+                error instanceof Error ? error.message : "unknown",
+              );
+              return [];
+            },
+          ),
+      view === "hours"
+        ? Promise.resolve([])
+        : getScheduledActivitiesForFamily(
+            family.id,
+            range.start,
+            range.end,
+          ).catch((error: unknown) => {
             console.error(
               "planner: plan_activity_schedule read failed (migration may be unapplied):",
               error instanceof Error ? error.message : "unknown",
             );
             return [];
-          },
-        ),
-    view === "hours"
-      ? Promise.resolve([])
-      : getPlannerLearningActivitiesForFamily(family.id, range.start, range.end).catch(
-          (error: unknown) => {
+          }),
+      view === "hours"
+        ? Promise.resolve([])
+        : getPlannerLearningActivitiesForFamily(
+            family.id,
+            range.start,
+            range.end,
+          ).catch((error: unknown) => {
             console.error(
               "planner: learning activity read failed (migration may be unapplied):",
               error instanceof Error ? error.message : "unknown",
             );
             return [];
-          },
-        ),
-    view === "hours"
-      ? getHoursLogForFamily(family.id)
-      : getHoursLogForFamilyBetween(family.id, range.start, range.end).then((rows) => ({ rows, complete: false })).catch(
-          (error: unknown) => {
-            console.error(
-              "planner: bounded hours_log read failed:",
-              error instanceof Error ? error.message : "unknown",
-            );
-            return { rows: [], complete: false };
-          },
-        ),
-  ]);
+          }),
+      view === "hours"
+        ? getHoursLogForFamily(family.id)
+        : getHoursLogForFamilyBetween(family.id, range.start, range.end)
+            .then((rows) => ({ rows, complete: false }))
+            .catch((error: unknown) => {
+              console.error(
+                "planner: bounded hours_log read failed:",
+                error instanceof Error ? error.message : "unknown",
+              );
+              return { rows: [], complete: false };
+            }),
+    ]);
   const allHoursEntries = toHoursEntries(hoursRead.rows, children);
-  const hoursEntries = view === "hours"
-    ? scopedToViewContext(allHoursEntries, viewContext)
-    : allHoursEntries;
+  const hoursEntries =
+    view === "hours"
+      ? scopedToViewContext(allHoursEntries, viewContext)
+      : allHoursEntries;
 
   if (view === "hours") {
     const gate = await familyAccountGate(family.id);
@@ -144,7 +159,12 @@ export default async function PlannerPage({
 
   return (
     <PageColumn>
-      {handoffChild && view === "week" ? <FirstWeekHandoff child={handoffChild} /> : null}
+      <QuietAction href="/app/planner/programs" kind="quiet">
+        Programs and co-op
+      </QuietAction>
+      {handoffChild && view === "week" ? (
+        <FirstWeekHandoff child={handoffChild} />
+      ) : null}
       <UnifiedPlannerView
         kids={children.map((child) => ({
           id: child.id,

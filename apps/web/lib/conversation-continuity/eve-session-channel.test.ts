@@ -11,6 +11,7 @@ import {
 } from "eve/channels";
 import { eveChannel } from "eve/channels/eve";
 
+import { readEveMembership } from "../eve-membership";
 import {
   createCachedRouteAuth,
   protectEveSessionRoutes,
@@ -276,6 +277,130 @@ async function createOwnedSession(input: {
 }
 
 describe("Eve exact-adult session authorization", () => {
+  it("returns membership outages before any ownership or runtime access on every protected route", async (t) => {
+    t.mock.method(console, "info", () => {});
+    let ownerCalls = 0;
+    let runtimeCalls = 0;
+    let fallbackCalls = 0;
+    const unavailableOwner = async () => {
+      ownerCalls += 1;
+      throw new Error("ownership must not run");
+    };
+    const cachedAuth = createCachedRouteAuth([
+      async () => {
+        await readEveMembership(async () => ({
+          data: null, error: { message: "Gateway Timeout" }, status: 504,
+        }));
+        return null;
+      },
+      () => { fallbackCalls += 1; return null; },
+    ]);
+    const channel = protectEveSessionRoutes(eveChannel({ auth: cachedAuth.auth }), {
+      resolveAuth: cachedAuth.resolve,
+      owners: {
+        ...inMemoryOwners(),
+        provision: unavailableOwner,
+        reserveContinuation: unavailableOwner,
+        owns: unavailableOwner,
+      },
+    });
+    for (const [method, pattern, path, body] of [
+      ["POST", "/eve/v1/session", "/eve/v1/session", { message: "Hello Homa" }],
+      ["POST", "/eve/v1/session/:sessionId", "/eve/v1/session/session-a", { message: "Hello Homa", continuationToken: "eve:session-a" }],
+      ["GET", "/eve/v1/session/:sessionId/stream", "/eve/v1/session/session-a/stream", undefined],
+    ] as const) {
+      const response = await handler(channel, method, pattern)(
+        request(path, "adult-a", body),
+        routeArgs("session-a", {
+          send: async () => { runtimeCalls += 1; return sessionFixture("session-a"); },
+          getSession: () => { runtimeCalls += 1; return sessionFixture("session-a"); },
+        }),
+      );
+      assert.equal(response.status, 503);
+      assert.equal(response.headers.get("retry-after"), "1");
+      assert.equal((await response.json()).code, "auth_service_unavailable");
+    }
+    assert.equal(ownerCalls, 0);
+    assert.equal(runtimeCalls, 0);
+    assert.equal(fallbackCalls, 0);
+  });
+
+  it("keeps invalid credentials and missing family membership denied before ownership", async () => {
+    let ownerCalls = 0;
+    for (const [expectedStatus, resolve] of [
+      [401, async () => null],
+      [404, async () => ({
+        authenticator: "app", principalId: "adult-a", principalType: "user" as const,
+        attributes: { memberUserId: "adult-a" },
+      })],
+    ] as const) {
+      const cachedAuth = createCachedRouteAuth(resolve);
+      const channel = protectEveSessionRoutes(eveChannel({ auth: cachedAuth.auth }), {
+        resolveAuth: cachedAuth.resolve,
+        owners: {
+          ...inMemoryOwners(),
+          async provision() { ownerCalls += 1; return null; },
+        },
+      });
+      const response = await handler(channel, "POST", "/eve/v1/session")(
+        request("/eve/v1/session", "adult-a", { message: "Hello Homa" }),
+        routeArgs(),
+      );
+      assert.equal(response.status, expectedStatus);
+    }
+    assert.equal(ownerCalls, 0);
+  });
+
+  it("rechecks membership on a fresh retry and preserves the rejected continuation token", async (t) => {
+    t.mock.method(console, "info", () => {});
+    let unavailable = false;
+    let authCalls = 0;
+    let reserveCalls = 0;
+    let sends = 0;
+    const cachedAuth = createCachedRouteAuth(async (incoming) => {
+      authCalls += 1;
+      await readEveMembership(async () => ({
+        data: null,
+        error: unavailable ? { message: "Gateway Timeout" } : null,
+        status: unavailable ? 504 : 200,
+      }));
+      return await authFor(incoming);
+    });
+    const owners = inMemoryOwners();
+    const channel = protectEveSessionRoutes(eveChannel({ auth: cachedAuth.auth }), {
+      resolveAuth: cachedAuth.resolve,
+      owners: {
+        ...owners,
+        async reserveContinuation(...args) {
+          reserveCalls += 1;
+          return await owners.reserveContinuation(...args);
+        },
+      },
+    });
+    assert.equal((await createOwnedSession({ channel, sessionId: "session-a", user: "adult-a" })).status, 202);
+    const continueOnce = () => handler(channel, "POST", "/eve/v1/session/:sessionId")(
+      request("/eve/v1/session/session-a", "adult-a", {
+        continuationToken: "eve:session-a", message: "Retry these exact words",
+      }),
+      routeArgs("session-a", {
+        getSession: () => sessionFixture("session-a"),
+        send: async () => {
+          sends += 1;
+          return sessionFixture("session-a", "eve:session-a");
+        },
+      }),
+    );
+    unavailable = true;
+    assert.equal((await continueOnce()).status, 503);
+    assert.equal(reserveCalls, 0);
+    assert.equal(sends, 0);
+    unavailable = false;
+    assert.equal((await continueOnce()).status, 200);
+    assert.equal(reserveCalls, 1);
+    assert.equal(sends, 1);
+    assert.equal(authCalls, 3, "each request rechecks once, including the retry");
+  });
+
   it("provisions before work and activates the exact adult before returning", async () => {
     let authCalls = 0;
     let ownerProvisioned = false;
