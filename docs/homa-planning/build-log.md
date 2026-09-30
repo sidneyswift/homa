@@ -1,3 +1,15 @@
+## 2026-09-30 · Founder ruling: Sonnet for fleet research, Astra for families
+
+Sidney requested Anthropic Sonnet 5.5 for Homa's automated research runs while
+keeping Astra for user interaction. The existing fleet research channel, including
+scheduled and manual corpus runs, selects `anthropic/claude-sonnet-5.5` from its
+server-created research identity. Conversations, family-facing dispatch and report
+generation retain `openai/gpt-6-astra`. The selection also covers non-streaming
+research calls and updates model-usage attribution. Research failures do not fall
+back to the more expensive model. This changes model procurement, not research
+procedure, tenancy, delivery, or the knowledge-save gate. Release evidence lives
+on gh#1209; this ruling alone does not claim deployment.
+
 ## 2026-09-28 · Implement the gated family working-file pilot
 
 The founder approved the Vercel Drives pilot in gh#1199. The existing family-librarian
