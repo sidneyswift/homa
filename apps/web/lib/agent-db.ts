@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { hasConversationJobContext, requireConversationJobDatabaseAccess } from "./conversation-jobs";
+import { hasConversationRequestContext, requireConversationRequestDatabaseAccess } from "./conversation-request-access";
 import { mapDb } from "./map/db";
 import { assertFamilyArtifactAccess } from "./account-deletion-artifact-fence";
 
@@ -186,6 +188,8 @@ export interface ResolveAgentAccessDependencies {
   /** Rejects a family whose account deletion has begun. */
   verifyFamilyArtifactAccess?(familyId: string): Promise<void>;
   nowSeconds(): number;
+  verifyConversationRequest?: typeof requireConversationRequestDatabaseAccess;
+  verifyConversationJob?: typeof requireConversationJobDatabaseAccess;
 }
 
 async function verifyFamilyMembershipPinned(
@@ -219,6 +223,16 @@ export async function resolveAgentAccess(
   dependencies: ResolveAgentAccessDependencies = DEFAULT_RESOLVE_DEPENDENCIES,
 ): Promise<AgentAccess> {
   const attrs = (attributes ?? {}) as CallerAuthAttributes & { channel?: string };
+  if (hasConversationJobContext(attributes)) {
+    const owner = await (dependencies.verifyConversationJob ?? requireConversationJobDatabaseAccess)(attributes);
+    if (!owner) throw new MissingFamilyContextError();
+    return { mode: "pinned", familyId: owner.familyId };
+  }
+  if (hasConversationRequestContext(attributes)) {
+    const owner = await (dependencies.verifyConversationRequest ?? requireConversationRequestDatabaseAccess)(attributes);
+    if (!owner) throw new MissingFamilyContextError();
+    return { mode: "pinned", familyId: owner.familyId };
+  }
   if (attrs.supabaseAccessToken && attrs.familyId) {
     if (!callerTokenIsExpired(attrs.supabaseAccessToken, dependencies.nowSeconds())) {
       await verifyResolvedFamilyAccess(attrs.familyId, dependencies);

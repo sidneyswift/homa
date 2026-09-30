@@ -1,0 +1,1 @@
+{"name": "homa-native-workflow-host-proof", "private": true, "type": "module", "dependencies": {"eve": "0.19.0", "ai": "*", "zod": "*"}}

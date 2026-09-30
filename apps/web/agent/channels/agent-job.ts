@@ -1,6 +1,7 @@
 import { defineChannel, GET, POST } from "eve/channels";
 
 import { mapDb } from "../../lib/map/db";
+import { observeConversationJobEnd, type ConversationJobObservation } from "../../lib/conversation-jobs";
 import { handleUnreportedStage, type ClaimedJob } from "../../lib/jobs/runner";
 import { runAgentJobsCycle } from "../agent-jobs-cycle";
 
@@ -43,9 +44,10 @@ async function stageStillInProgress(
 /** The session ended. If its stage never reached a reported state, the
  * build session failed or stalled without calling report_agent_job_stage;
  * retry it on the next tick a few times, then park it so nothing is lost. */
-async function failIfUnreported(state: AgentJobState, reason: string): Promise<void> {
+async function failIfUnreported(state: AgentJobState, reason: string, session: ConversationJobObservation): Promise<void> {
   const { familyId, jobId, stageNumber, skill, totalStages } = state;
   if (!familyId || !jobId || stageNumber === null) return;
+  if (await observeConversationJobEnd(familyId, jobId, session)) return;
   if (!(await stageStillInProgress(familyId, jobId, stageNumber))) return;
   const job: ClaimedJob = {
     jobId,
@@ -93,8 +95,8 @@ export default defineChannel({
     episodeId: null,
   } as AgentJobState,
 
-  context(state) {
-    return { state };
+  context(state, session) {
+    return { state, session };
   },
 
   metadata(state) {
@@ -106,17 +108,19 @@ export default defineChannel({
   },
 
   events: {
-    async "turn.completed"(_eventData, channel) {
+    async "turn.completed"(event, channel) {
       await failIfUnreported(
         channel.state,
         "the build session ended without producing this stage's material",
+        {id:channel.session.id,auth:channel.session.auth,turn:{id:event.turnId,sequence:event.sequence}},
       );
     },
-    async "turn.failed"(_eventData, channel) {
-      await failIfUnreported(channel.state, "the build session failed");
+    async "turn.failed"(event, channel) {
+      await failIfUnreported(channel.state, "the build session failed", {id:channel.session.id,auth:channel.session.auth,
+        turn:{id:event.turnId,sequence:event.sequence}});
     },
     async "session.failed"(_eventData, channel) {
-      await failIfUnreported(channel.state, "the build session failed to run");
+      await failIfUnreported(channel.state, "the build session failed to run", channel.session);
     },
   },
 

@@ -458,7 +458,7 @@ export async function persistCanonicalMessage(
 } | null> {
   const attrs = (input.attributes ?? {}) as ContinuityAuthAttributes;
   const familyId = attrs.familyId;
-  const content = input.content.trim().slice(0, 8000);
+  const content = input.content;
   if (!familyId || content.length === 0) return null;
 
   const memberUserId = attrs.memberUserId ?? null;
@@ -517,11 +517,6 @@ export async function persistCanonicalMessage(
               when ${input.role === "assistant" && input.terminal === true}
                 then excluded.content
               else public.conversation_messages.content
-            end,
-            created_at = case
-              when ${input.role === "assistant" && input.terminal === true}
-                then excluded.created_at
-              else public.conversation_messages.created_at
             end,
             embedding = case
               when ${input.role === "assistant" && input.terminal === true}

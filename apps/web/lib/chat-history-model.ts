@@ -92,6 +92,7 @@ export interface ChatHistoryMaterialRow {
 export interface ChatHistoryPayload {
   messages: ChatHistoryMessage[];
   materials: ChatHistoryMaterial[];
+  materialsUnavailable?: boolean;
 }
 
 /** Raw row shape as selected from conversation_messages. */
@@ -253,7 +254,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
 /**
  * archiveFromServerHistory(payload, liveMessages): server rows in the
  * render archive's shape. A server row is excluded only when the live
- * reducer proves that it has the same turn and role. This keeps a
+ * reducer proves that it has the same session, turn and role. This keeps a
  * partially replayed current session from hiding durable work while
  * still preventing duplicate bubbles. The `hist:` id prefix keeps
  * server ids from ever colliding with eve's turn ids.
@@ -267,6 +268,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
 export function archiveFromServerHistory(
   payload: ChatHistoryPayload,
   liveMessages: readonly EveMessage[],
+  liveSessionId?: string,
 ): {
   at: number;
   channel: ChatHistoryChannel;
@@ -277,6 +279,7 @@ export function archiveFromServerHistory(
   const liveMessageIds = new Set(liveMessages.map((message) => message.id));
   const history = payload.messages.filter(
     (entry) =>
+      entry.sessionId !== liveSessionId ||
       entry.turnId === null ||
       !liveMessageIds.has(`${entry.turnId}:${entry.role}`),
   );

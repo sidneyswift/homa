@@ -1,13 +1,17 @@
 "use client";
 
+import { motion as motionContract } from "@homa/design/motion";
+import { motion, useReducedMotion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 
-import { Logo } from "../../components/brand/Logo";
+import type { ChatHistoryPayload } from "../../lib/chat-history-model";
 import { ConversationControlsPreview } from "./conversation-controls-preview";
 import styles from "./voice-workspace-preview.module.css";
 
-const HomaCharacter = dynamic(() => import("./homa-character"), { ssr: false, loading: () => <Logo variant="mark" size={144} /> });
+const HomaCharacter = dynamic(() => import("./homa-character"), { ssr: false, loading: () => null });
+
+const characterEase = motionContract.easeOut.match(/[\d.]+/g)!.map(Number) as [number, number, number, number];
 
 const statesToDesign = [
   ["listening", "Listening", "Voice just started"],
@@ -26,20 +30,22 @@ export interface App2Family {
   children: Array<{ id: string; name: string }>;
 }
 
-export function VoiceWorkspacePreview({ family }: { family: App2Family | null }) {
+export function VoiceWorkspacePreview({ family, userId, history, durableConversation = false }: { durableConversation?: boolean; family: App2Family | null; userId: string | null; history: ChatHistoryPayload | null }) {
   const [characterPaused, setCharacterPaused] = useState(false);
+  const [engaged, setEngaged] = useState(false);
+  const reducedMotion = useReducedMotion();
   const stateDialog = useRef<HTMLDialogElement>(null);
   const stateButton = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className={styles.preview}>
+    <div className={styles.preview} data-engaged={engaged}>
       <main className={styles.screen}>
         <div className={styles.stage}>
-          <div className={styles.characterStage}><HomaCharacter paused={characterPaused} /></div>
+          <motion.div layout initial={false} className={styles.characterStage} transition={{ layout: { duration: reducedMotion ? 0 : motionContract.durations.slow / 1000, ease: characterEase } }}><HomaCharacter paused={characterPaused} /></motion.div>
         </div>
       </main>
-      <ConversationControlsPreview family={family} />
-      <button className={styles.devButton} ref={stateButton} aria-haspopup="dialog" onClick={() => stateDialog.current?.showModal()}>Dev mode</button>
+      <ConversationControlsPreview durableConversation={durableConversation} family={family} userId={userId} history={history} workspaceEngaged={engaged} onEngagedChange={setEngaged} />
+      <button hidden className={styles.devButton} ref={stateButton} aria-haspopup="dialog" onClick={() => stateDialog.current?.showModal()}>Dev mode</button>
       <dialog className={styles.dialog} ref={stateDialog} aria-labelledby="state-title" aria-describedby="state-note" onClose={() => stateButton.current?.focus()}>
         <div className={styles.dialogHeader}>
           <h2 id="state-title">States to design</h2>
@@ -53,7 +59,7 @@ export function VoiceWorkspacePreview({ family }: { family: App2Family | null })
             </li>
           ))}
         </ul>
-        <p className={styles.note} id="state-note">The list is a reference for future designs. Voice connects to your Homa account and saves the conversation. You can type in the same voice session without muting your mic. Attachments are not connected yet. Character movement is still a design study.</p>
+        <p className={styles.note} id="state-note">The list is a reference for future designs. Voice connects to your Homa account and saves the conversation. You can type in the same voice session without muting your mic. Photos and files use the main chat attachment flow. Typed messages and attachments receive replies here. Character movement is still a design study.</p>
       </dialog>
     </div>
   );

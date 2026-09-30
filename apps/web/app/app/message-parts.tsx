@@ -76,6 +76,7 @@ import {
 import { ReportRevealCard } from "./report-reveal-card";
 import { parseSnapCardPart, SnapCard, type SnapCardData } from "./snap-card";
 import { WorkedForLine, workedForSteps } from "./worked-for";
+import { TOOL_STATUS_LABELS } from "./tool-activity-labels";
 
 /**
  * Message rendering for the chat transcript (approved chat redesign
@@ -882,8 +883,11 @@ export function MessageView({
   dockedDetailPartKey,
   dockedChecklistPartKey,
   onRetryFailedMessage,
+  showSendingStatus = true,
 }: {
   message: EveMessage;
+  /** Compact conversations show delivery failures without routine send chatter. */
+  showSendingStatus?: boolean;
   onSendSuggestion?: (message: string) => void;
   onFocusComposer?: () => void;
   actionableProgressPartKey?: string;
@@ -957,14 +961,14 @@ export function MessageView({
                 erase her words with no sign anything was wrong). */}
             <div
               className={`quiet-message__user-bubble ${
-                sendState === null
+                sendState === null || (sendState === "sending" && !showSendingStatus)
                   ? ""
                   : "quiet-message__user-bubble--pending"
               }`}
             >
               <p className="whitespace-pre-wrap">{visibleText}</p>
             </div>
-            {sendState === "sending" ? (
+            {sendState === "sending" && showSendingStatus ? (
               <p className="quiet-message__send-state" role="status">
                 Sending&hellip;
               </p>
@@ -1024,7 +1028,7 @@ export function MessageView({
     <div className="flex w-full items-start gap-2.5">
       <span
         aria-hidden="true"
-        className="mt-0.5 inline-flex shrink-0 opacity-70"
+        className="quiet-message__avatar mt-0.5 inline-flex shrink-0 opacity-70"
       >
         <Logo size={20} variant="mark" />
       </span>
@@ -1063,45 +1067,7 @@ export function MessageView({
   );
 }
 
-const TOOL_STATUS_LABELS: Record<string, string> = {
-  get_children: "checking your family's info…",
-  create_printable: "putting the page together…",
-  show_material: "bringing the page back…",
-  generate_image: "making the image…",
-  search_photos: "looking for real photos…",
-  keep_photo: "saving the photo…",
-  find_materials: "looking through your materials…",
-  mark_material_final: "keeping the final version…",
-  remember: "saving a note…",
-  forget: "tidying my notes…",
-  update_child_profile: "updating the profile…",
-  save_skill: "saving that as a skill…",
-  forget_skill: "removing the skill…",
-  // "looking up how we do this…" read as checking the manual for its
-  // own job (copy-review 2026-07-13); plain setup language instead.
-  load_skill: "getting set up…",
-  manage_child_progress: "updating progress…",
-  open_planner: "opening the planner…",
-  read_family_curriculum: "reading the curriculum…",
-  preview_curriculum_mapping: "building your review…",
-  approve_curriculum_mapping: "saving what you approved…",
-  edit_plan: "updating the planner…",
-  schedule_plan_activity: "putting it on the calendar…",
-  add_family_event: "adding it to the calendar…",
-  update_family_event: "updating the calendar…",
-  list_family_events: "checking the calendar…",
-  remove_family_event: "taking it off the calendar…",
-  add_child: "adding them…",
-  save_family_basics: "saving what you told me…",
-  save_homeschool_profile: "saving what you told me…",
-  start_checklist: "getting the questions ready…",
-  start_first_making: "getting a page started…",
-  ask_for_details: "putting up a few fields…",
-  // The one wait that is worth narrating rather than labelling. The
-  // reveal card takes over from here and says the rest.
-  score_child_report: "reading the answers…",
-  send_skeptic_brief: "sending it to your inbox…",
-};
+
 
 /** The skill whose load marks a material build starting; the studio
  *  tools themselves are the other signals. */

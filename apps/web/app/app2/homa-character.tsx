@@ -1,9 +1,9 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { addAfterEffect, Canvas, useFrame, useThree } from "@react-three/fiber";
 import { colorTokens } from "@homa/design/contract";
-import { Component, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Group, Shape, Vector2 } from "three";
+import { Component, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Group, OrthographicCamera, Shape, Vector2 } from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
 
 import { EYES, HOUSE_PATH, Logo, PUPIL_FILL } from "../../components/brand/Logo";
@@ -33,21 +33,69 @@ function StillMark() {
   return <div className={styles.still}><Logo variant="mark" size={144} /></div>;
 }
 
-function ContextLifecycle({ onLost }: { onLost: () => void }) {
+function ContextLifecycle({ onLost, onFrame }: { onLost: () => void; onFrame: (snapshot: string | null) => void }) {
   const gl = useThree(state => state.gl);
+  const invalidate = useThree(state => state.invalidate);
   useEffect(() => {
     const canvas = gl.domElement;
+    let lastFrame = -1;
+    let capturedAt = -Infinity;
+    const lost = (event: Event) => {
+      event.preventDefault();
+      onLost();
+    };
+    const restored = () => {
+      lastFrame = -1;
+      capturedAt = -Infinity;
+      // Keep the still visible until a restored frame has actually rendered.
+      invalidate();
+    };
     gl.setClearColor(0xffffff, 0);
-    canvas.addEventListener("webglcontextlost", onLost);
-    return () => canvas.removeEventListener("webglcontextlost", onLost);
-  }, [gl, onLost]);
+    canvas.addEventListener("webglcontextlost", lost);
+    canvas.addEventListener("webglcontextrestored", restored);
+    const removeAfterRender = addAfterEffect(now => {
+      if (gl.getContext().isContextLost() || !gl.info.render.frame || gl.info.render.frame === lastFrame) return;
+      lastFrame = gl.info.render.frame;
+      if (now - capturedAt < 1000) return;
+      capturedAt = now;
+      let snapshot: string | null = null;
+      try {
+        // Capture immediately after drawing, before the browser clears the buffer.
+        snapshot = canvas.toDataURL("image/png");
+      } catch {
+        // A snapshot failure must not interrupt an otherwise healthy renderer.
+      }
+      onFrame(snapshot);
+    });
+    return () => {
+      removeAfterRender();
+      canvas.removeEventListener("webglcontextlost", lost);
+      canvas.removeEventListener("webglcontextrestored", restored);
+    };
+  }, [gl, invalidate, onLost, onFrame]);
   return null;
 }
 
-class CharacterBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class CharacterBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <StillMark /> : this.props.children; }
+  componentDidCatch() { this.props.onError(); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
+function CharacterFraming() {
+  const getScene = useThree(state => state.get);
+  const size = useThree(state => state.size);
+  const invalidate = useThree(state => state.invalidate);
+  useLayoutEffect(() => {
+    const { camera } = getScene();
+    if (!(camera instanceof OrthographicCamera) || !size.width || !size.height) return;
+    // The 48-unit logo needs room for bevels, depth during glances, and its bob.
+    camera.zoom = Math.min(size.width, size.height) / 64;
+    camera.updateProjectionMatrix();
+    invalidate();
+  }, [getScene, size.width, size.height, invalidate]);
+  return null;
 }
 
 /** #1158: approved local 3D study. The master logo supplies the silhouette and eye proportions. */
@@ -120,25 +168,23 @@ export default function HomaCharacter({ paused = false }: { paused?: boolean }) 
   const host = useRef<HTMLDivElement>(null);
   const [onScreen, setOnScreen] = useState(false);
   const [contextLost, setContextLost] = useState(false);
-  const [webglAvailable, setWebglAvailable] = useState(false);
+  const [snapshot, setSnapshot] = useState<string | null>(null);
+  const [rendererAttempt, setRendererAttempt] = useState(0);
+  const markContextLost = useCallback(() => setContextLost(true), []);
+  const markFrame = useCallback((frame: string | null) => {
+    if (frame && frame !== "data:,") setSnapshot(frame);
+    setContextLost(false);
+  }, []);
   const appearance = useSyncExternalStore(subscribeAppearance, appearanceSnapshot, () => "true:true:false");
   const [hidden, reduced, forced] = appearance.split(":").map(value => value === "true");
-  const moving = onScreen && !hidden && !reduced && !paused;
+  const moving = onScreen && !hidden && !reduced && !paused && !contextLost;
 
   useEffect(() => {
-    // Canvas fallback alone does not cover browsers with WebGL disabled.
-    const frame = requestAnimationFrame(() => {
-      const probe = document.createElement("canvas");
-      try {
-        const context = probe.getContext("webgl2");
-        setWebglAvailable(Boolean(context));
-        context?.getExtension("WEBGL_lose_context")?.loseContext();
-      } catch {
-        setWebglAvailable(false);
-      }
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
+    if (!contextLost || hidden || forced || rendererAttempt >= 2) return;
+    // Give native restoration a chance, then replace only the failed renderer.
+    const retry = setTimeout(() => setRendererAttempt(attempt => attempt + 1), 1500);
+    return () => clearTimeout(retry);
+  }, [contextLost, hidden, forced, rendererAttempt]);
 
   useEffect(() => {
     const element = host.current;
@@ -149,27 +195,39 @@ export default function HomaCharacter({ paused = false }: { paused?: boolean }) 
   }, []);
 
   return (
-    <div ref={host} className={styles.character} role="img" aria-label="Homa, a rounded orange house character" data-motion={moving ? "active" : "still"}>
+    <div ref={host} className={styles.character} role="img" aria-label="Homa, a rounded orange house character" data-motion={moving ? "active" : "still"} data-render-state={forced ? "accessible" : contextLost ? "recovering" : "live"} data-renderer-attempt={rendererAttempt}>
       <div aria-hidden="true" className={styles.scene} onContextMenu={event => event.preventDefault()}>
-        {forced || contextLost || !webglAvailable ? <StillMark /> : (
-          <CharacterBoundary>
-            <Canvas
-              orthographic camera={{ position: [0, 0, 100], zoom: 5.3, near: 0.1, far: 300 }}
-              dpr={[1, 1.5]} frameloop={moving ? "always" : "demand"}
-              gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
-              fallback={<StillMark />}
-            >
-              <ContextLifecycle onLost={() => setContextLost(true)} />
-              <ambientLight intensity={1.2} />
-              <directionalLight position={[-30, 45, 60]} intensity={3.2} />
-              <directionalLight position={[35, 10, -10]} intensity={2.4} />
-              <directionalLight position={[0, -20, 40]} intensity={0.3} />
-              <CharacterModel moving={moving} />
-            </Canvas>
-          </CharacterBoundary>
+        {forced ? <StillMark /> : (
+          <div className={styles.renderer} data-unavailable={contextLost}>
+            <CharacterBoundary key={rendererAttempt} onError={markContextLost}>
+              <Canvas
+                resize={{ offsetSize: true }}
+                orthographic camera={{ position: [0, 0, 100], near: 0.1, far: 300 }}
+                dpr={[1, 1.5]} frameloop={moving ? "always" : "demand"}
+                gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
+                fallback={<StillMark />}
+              >
+                {/* Keep the canvas mounted so Three.js can restore a temporary context loss. */}
+                <ContextLifecycle onLost={markContextLost} onFrame={markFrame} />
+                <ambientLight intensity={1.2} />
+                <directionalLight position={[-30, 45, 60]} intensity={3.2} />
+                <directionalLight position={[35, 10, -10]} intensity={2.4} />
+                <directionalLight position={[0, -20, 40]} intensity={0.3} />
+                <CharacterFraming />
+                <CharacterModel moving={moving} />
+              </Canvas>
+            </CharacterBoundary>
+          </div>
         )}
+        {!forced && contextLost && <div className={styles.recovery}>
+          {snapshot ? (
+            // The image contains only this locally rendered brand character.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className={styles.snapshot} src={snapshot} alt="" />
+          ) : <StillMark />}
+        </div>}
       </div>
-      {!forced && !contextLost && webglAvailable && <div className={styles.shadow} aria-hidden="true" />}
+      {!forced && <div className={styles.shadow} aria-hidden="true" />}
     </div>
   );
 }

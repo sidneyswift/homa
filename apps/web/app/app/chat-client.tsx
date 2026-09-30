@@ -89,7 +89,6 @@ import {
   type ArchivedMessage,
 } from "./chat-storage";
 import {
-  shouldAdoptSavedSession,
   withChatTurnLock,
 } from "./chat-session-cache";
 import {
@@ -430,7 +429,7 @@ export function ChatClient({
   // A partial local replay can therefore never hide durable work.
   const [archived, setArchived] = useState<ArchivedMessage[]>(() =>
     serverHistory
-      ? archiveFromServerHistory(serverHistory, initialLiveMessages)
+      ? archiveFromServerHistory(serverHistory, initialLiveMessages, prepared.initialSession?.sessionId)
       : prepared.archived,
   );
   // Missed current-session turns recovered before a send stay visible in this
@@ -447,6 +446,9 @@ export function ChatClient({
     ...prepared.messageTimes,
   }));
   const messagesRef = useRef<readonly EveMessage[]>([]);
+  const renderedEventsRef = useRef<readonly HandleMessageStreamEvent[]>(
+    staleSessionlessEvents ? [] : prepared.initialEvents,
+  );
   const archivedRef = useRef(archived);
   const reportedErrorRef = useRef<Error | null>(null);
   /** Last moment the stream showed signs of life (0 = none yet). */
@@ -969,6 +971,10 @@ export function ChatClient({
   }, [agent.data.messages]);
 
   useEffect(() => {
+    renderedEventsRef.current = agent.events;
+  }, [agent.events]);
+
+  useEffect(() => {
     archivedRef.current = archived;
   }, [archived]);
 
@@ -1181,19 +1187,16 @@ export function ChatClient({
     async (input: BoundChatSendInput): Promise<void> => {
       await withChatTurnLock(storageKey, async () => {
         persistPreparedRotation();
-        let current = reattachableSession.session.state;
-        const saved = loadSavedChat(storageKey);
-        if (shouldAdoptSavedSession(current, saved.session)) {
-          reattachableSession.adopt(saved.session);
-          durableCursorRef.current = saved.session.streamIndex;
-          current = reattachableSession.session.state;
-        }
+        const current = reattachableSession.session.state;
 
         // GH #702: Eve treats the first historical waiting boundary as the
         // new turn's finish. Prove this browser is at the authenticated
         // session's latest durable user turn before agentSend can append one.
         setRestoringBoundSession(true);
-        const localLatestSequence = latestTurnSequence(saved.events ?? []);
+        // Another tab's cache can be ahead of this mounted reducer. Its cursor
+        // proves what was stored, not what this page has rendered. Let the
+        // authenticated restoration path replay missing turns before sending.
+        const localLatestSequence = latestTurnSequence(renderedEventsRef.current);
         const restored = await restoreServerBoundEveSession({
           client: sessionClient,
           current: {
@@ -1269,10 +1272,9 @@ export function ChatClient({
     const controller = new AbortController();
     void (async () => {
       await withChatTurnLock(storageKey, async () => {
-        const saved = loadSavedChat(storageKey);
         const current = reattachableSession.session.state;
         const localLatestSequence = latestTurnSequence(
-          saved.events ?? prepared.initialEvents,
+          renderedEventsRef.current,
         );
         const restored = await restoreServerBoundEveSession({
           client: sessionClient,

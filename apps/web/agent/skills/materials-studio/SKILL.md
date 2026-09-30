@@ -66,6 +66,17 @@ real basis, plainly: data is data ("your checklist has him counting to
 aimed mid-range for 3"). Never dress a guess up as knowledge; she can
 tell, and it costs trust.
 
+## Keep the conversation available during a build
+
+When current server context says background material delivery to this
+conversation is available, read `references/conversation-background.md`
+after gathering the child's level and the parent's scope, before building.
+For an eligible new standalone material, start its background job and finish
+this reply. The background worker owns the design and quality loop below.
+This keeps the parent's conversation available while the material is made.
+A background stage follows the craft here and reports its result; it never
+starts another job. Other surfaces continue with the normal build loop.
+
 ## Subject decision rules: what the page asks for, not how it renders
 
 Evidence above sets the level; these rules set the content once you know
@@ -835,7 +846,8 @@ real question, whether she has to sit there: "On it. Skye's counting
 page needs a minute or two. You don't have to wait here, it'll be
 ready when you look back." It streams to her immediately, so she is
 never watching a bare spinner. One note per turn, no exact time
-promises, then do the work in the same turn.
+promises. Continue in the same turn unless the conversation-background
+procedure has returned a recorded job receipt.
 
 When the build lands: on text, create_printable already delivered the
 passing version to her phone; follow with one short message naming the

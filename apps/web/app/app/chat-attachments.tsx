@@ -2,9 +2,12 @@
 
 import { upload } from "@vercel/blob/client";
 import type { FilePart, ImagePart, UserContent } from "ai";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { createPortal } from "react-dom";
 
 import { Icon } from "../../components/design/Icon";
+import { useDurableChatAttachments } from "../app2/use-durable-chat-attachments";
 import { prepareChildPhotoForUpload } from "../../lib/child-photo-prepare";
 
 /**
@@ -73,7 +76,8 @@ export function summarizeOutgoingParts(parts: UserContent): string {
   return lines.join("\n");
 }
 
-export function useChatAttachments(familyId: string | null) {
+export function useChatAttachments(familyId: string | null, options?: { durableAccount: string | null }) {
+  const durable = useDurableChatAttachments(options?.durableAccount ?? null);
   const [staged, setStaged] = useState<StagedAttachment[]>([]);
 
   const addFiles = useCallback(
@@ -152,7 +156,8 @@ export function useChatAttachments(familyId: string | null) {
     });
   }, []);
 
-  return {
+  return options ? durable : {
+    error: null,
     staged,
     addFiles,
     remove,
@@ -225,16 +230,43 @@ const FILE_ACCEPT = [
 export function AttachMenuButton({
   onFiles,
   disabled,
+  portal = false,
+  className,
 }: {
   onFiles: (files: readonly File[]) => void;
   disabled?: boolean;
+  portal?: boolean;
+  className?: string;
 }) {
+  const [position, setPosition] = useState({ left: 0, bottom: 0 });
+  const trigger = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const libraryRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!open || !portal) return;
+    menu.current?.querySelector("button")?.focus();
+    const close = () => setOpen(false);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      trigger.current?.focus();
+    };
+    window.addEventListener("resize", close);
+    window.addEventListener("keydown", escape);
+
+    return () => {
+      window.removeEventListener("resize", close);
+      window.removeEventListener("keydown", escape);
+    };
+  }, [open, portal]);
+
   function pick(input: HTMLInputElement | null) {
     setOpen(false);
+    if (portal) trigger.current?.focus();
     input?.click();
   }
 
@@ -242,7 +274,37 @@ export function AttachMenuButton({
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
     if (files.length > 0) onFiles(files);
+    if (portal) trigger.current?.focus();
   }
+
+  const options = (
+    <>
+      <button
+        type="button"
+        aria-label="Close menu"
+        className="fixed inset-0 z-30 cursor-default"
+        onClick={() => { setOpen(false); trigger.current?.focus(); }}
+      />
+      <div ref={menu} role="group" aria-label="Add an attachment" style={portal ? { position: "fixed", left: position.left, bottom: position.bottom } : undefined} className="absolute bottom-12 left-0 z-40 w-52 overflow-hidden rounded-md border border-border-subtle bg-card shadow-lg">
+        <button
+          type="button"
+          onClick={() => pick(libraryRef.current)}
+          className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-strong transition-colors hover:bg-page"
+        >
+          <Icon name="image" size={16} className="text-muted" />
+          Photo or video
+        </button>
+        <button
+          type="button"
+          onClick={() => pick(fileRef.current)}
+          className="flex w-full items-center gap-2.5 border-t border-border-subtle px-3.5 py-2.5 text-left text-sm font-medium text-strong transition-colors hover:bg-page"
+        >
+          <Icon name="document" size={16} className="text-muted" />
+          File (PDF, Word, more)
+        </button>
+      </div>
+    </>
+  );
 
   return (
     <div className="relative">
@@ -257,42 +319,22 @@ export function AttachMenuButton({
       <input ref={fileRef} type="file" accept={FILE_ACCEPT} multiple hidden onChange={onPicked} />
       <button
         type="button"
+        ref={trigger}
         aria-label="Add a photo, video, or file"
         aria-expanded={open}
         disabled={disabled}
-        onClick={() => setOpen((current) => !current)}
-        className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-page hover:text-strong disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() => {
+          if (portal && trigger.current) {
+            const rect = trigger.current.getBoundingClientRect();
+            setPosition({ left: Math.max(8, Math.min(rect.left, window.innerWidth - 216)), bottom: window.innerHeight - rect.top + 8 });
+          }
+          setOpen((current) => !current);
+        }}
+        className={className ?? "flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-page hover:text-strong disabled:cursor-not-allowed disabled:opacity-50"}
       >
         <Icon name="add" size={20} />
       </button>
-      {open ? (
-        <>
-          <button
-            type="button"
-            aria-label="Close menu"
-            className="fixed inset-0 z-30 cursor-default"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute bottom-12 left-0 z-40 w-52 overflow-hidden rounded-md border border-border-subtle bg-card shadow-lg">
-            <button
-              type="button"
-              onClick={() => pick(libraryRef.current)}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium text-strong transition-colors hover:bg-page"
-            >
-              <Icon name="image" size={16} className="text-muted" />
-              Photo or video
-            </button>
-            <button
-              type="button"
-              onClick={() => pick(fileRef.current)}
-              className="flex w-full items-center gap-2.5 border-t border-border-subtle px-3.5 py-2.5 text-left text-sm font-medium text-strong transition-colors hover:bg-page"
-            >
-              <Icon name="document" size={16} className="text-muted" />
-              File (PDF, Word, more)
-            </button>
-          </div>
-        </>
-      ) : null}
+      {open && (portal ? createPortal(options, document.body) : options)}
     </div>
   );
 }

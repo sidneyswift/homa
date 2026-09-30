@@ -14,15 +14,12 @@ import {
 import { EYES, HOUSE_PATH } from "../../components/brand/Logo";
 import { ACT_IDS, COND_ART } from "../../components/brand/thinking-acts";
 import { busyLabel, busyMood, genericBusyLabel } from "./message-parts";
+import { TOOL_STATUS_LABELS } from "./tool-activity-labels";
 
 /** The component source, read as text so the two files that must agree
  *  about act durations can be compared without exporting internals. */
 const ThinkingMarkSource = readFileSync(
   join(import.meta.dirname, "..", "..", "components", "brand", "ThinkingMark.tsx"),
-  "utf8",
-);
-const MessagePartsSource = readFileSync(
-  join(import.meta.dirname, "message-parts.tsx"),
   "utf8",
 );
 
@@ -559,9 +556,7 @@ describe("Homa's acts", () => {
   it("only names tools the product actually has", () => {
     // A pairing against a tool that does not exist is a pairing that can
     // never fire, and it would fail silently forever.
-    const known = new Set(
-      [...MessagePartsSource.matchAll(/^\s{2}(\w+): "/gm)].map(([, t]) => t),
-    );
+    const known = new Set(Object.keys(TOOL_STATUS_LABELS));
     const named = [...ThinkingMarkSource.matchAll(/whenTool: \[([^\]]+)\]/g)]
       .flatMap(([, list]) => [...list.matchAll(/"(\w+)"/g)].map(([, t]) => t));
     assert.ok(named.length > 0);

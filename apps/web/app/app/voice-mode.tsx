@@ -28,16 +28,18 @@ export interface VoiceModePresentation {
   retrySave: () => Promise<void>;
 }
 
-export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange, onWorking, onAnnouncementChange, microphoneOn = true, speakerOn = true, controlsRef, presentation: Presentation }: {
+export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange, onConnectingChange, onWorking, onAnnouncementChange, microphoneOn = true, speakerOn = true, localApp2 = false, controlsRef, presentation: Presentation }: {
   onTurn: (line: VoiceTranscriptLine) => void;
   onClose: () => void;
   onEffects: (output: VoiceHomaBridgeOutput, context: { sessionId: string; sourceSequence: number }) => void;
   onNotice: (message: string) => void;
   onActiveChange: (active: boolean) => void;
+  onConnectingChange?: (connecting: boolean) => void;
   onWorking: (working: boolean, context: { sessionId: string; sourceSequence: number }) => void;
   onAnnouncementChange: (say: ((text: string) => void) | null) => void;
   microphoneOn?: boolean;
   speakerOn?: boolean;
+  localApp2?: boolean;
   controlsRef?: Ref<VoiceModeHandle>;
   presentation?: ComponentType<VoiceModePresentation>;
 }) {
@@ -71,7 +73,8 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
   };
   const retrySave = async () => {
     setSaving(true);
-    if (await sessionRef.current?.retrySave()) onClose();
+    const saved = await sessionRef.current?.retrySave();
+    if (saved) { setSaveFailed(false); if (ended) onClose(); }
     setSaving(false);
   };
 
@@ -107,6 +110,7 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
       },
       onWorking: (working, context) => callbacksRef.current.onWorking(working, context),
       onError: (message) => { setError(message); callbacksRef.current.onNotice(message); },
+      onSaveStatus: setSaveFailed,
     });
     sessionRef.current = session;
     const release = async () => {
@@ -197,7 +201,7 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
         await waitForLiveIce(() => peer?.iceGatheringState === "complete" || cancelled);
         if (cancelled) return;
         const response = await fetch("/api/voice/live/session", {
-          method: "POST", headers: { "Content-Type": "application/json" },
+          method: "POST", headers: { "Content-Type": "application/json", ...(localApp2 ? { "x-homa-dev-surface": "app2" } : {}) },
           body: JSON.stringify({ sdp: peer.localDescription?.sdp }), signal: AbortSignal.timeout(40_000),
         });
         const body = await response.json();
@@ -233,9 +237,10 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
       }
     })();
     return () => { void stop().then(() => session.finish()); };
-  }, []);
+  }, [localApp2]);
 
   const connecting = !ended && error === null && !isCapturing;
+  useEffect(() => { onConnectingChange?.(connecting); }, [connecting, onConnectingChange]);
 
   if (Presentation) {
     return <Presentation error={error} ended={ended} saving={saving} saveFailed={saveFailed} connecting={connecting} isCapturing={isCapturing} isPlaying={isPlaying && speakerOn} microphoneOn={microphoneOn} speakerOn={speakerOn} end={leave} retrySave={retrySave} />;
@@ -283,8 +288,9 @@ export function VoiceMode({ onTurn, onClose, onEffects, onNotice, onActiveChange
           <Icon name="close" size={20} />
         </button>
       </div>
-      {ended && saveFailed ? (
+      {saveFailed ? (
         <div className="mt-3">
+          <p role="status">Some of this conversation has not saved. Keep Homa open and try saving again.</p>
           <QuietAction disabled={saving} kind="secondary" onClick={() => { void retrySave(); }}>
             {saving ? "Saving…" : "Try saving again"}
           </QuietAction>

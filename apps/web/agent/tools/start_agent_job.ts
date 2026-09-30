@@ -9,6 +9,8 @@ import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
 import { kickAgentJobsRunner } from "../../lib/jobs/kick";
 import { startJob } from "../../lib/jobs/store";
+import { startConversationJob } from "../../lib/conversation-jobs";
+import { conversationRequestEnvelope } from "../../lib/conversation-request-admission";
 
 /**
  * Start a finite, resumable, multi-stage job for a fleet skill (agent-jobs
@@ -21,7 +23,7 @@ import { startJob } from "../../lib/jobs/store";
  */
 export default defineBoundedTool({
   description:
-    "Start a finite background job that builds in stages over time, for a skill that needs it (a multi-week curriculum, a multi-part project). Only call this after the skill's procedure says to, and after the parent has confirmed the scope. familyId is taken from the session, never from you. If a job for this skill and child is already running, this returns that one instead of starting a second.",
+    "Use when the loaded skill directs a durable background build: an eligible standalone material in a permanent conversation, a multi-week curriculum, or a multi-part project. The parent's request must establish the scope; follow the skill's calibration and eligibility procedure before calling. familyId is taken from the session, never from you. If a job for this skill and child is already running, this returns that one instead of starting a second. Not for reopening, printing, or revising an existing material.",
   deadlineMs: TOOL_DEADLINE.quick,
   repeatable: false,
   inputSchema: z.object({
@@ -77,7 +79,7 @@ export default defineBoundedTool({
     }
 
     const memberUserId = (attributes as { memberUserId?: unknown } | undefined)?.memberUserId;
-    const result = await startJob({
+    const jobInput = {
       familyId,
       requestedByUserId: typeof memberUserId === "string" ? memberUserId : null,
       sessionId: ctx.session.id,
@@ -87,7 +89,10 @@ export default defineBoundedTool({
       totalStages: input.totalStages,
       childId: input.childId ?? null,
       startIdempotencyKey: input.startIdempotencyKey ?? null,
-    });
+    };
+    const result = conversationRequestEnvelope(ctx.session.auth.current)
+      ? await startConversationJob(ctx, jobInput)
+      : await startJob(jobInput);
     if (!result.ok) return { started: false, note: result.note };
     // Start the build now rather than at the next sweeper tick (founder
     // directive 2026-07-23). Best-effort: the row is the promise, the

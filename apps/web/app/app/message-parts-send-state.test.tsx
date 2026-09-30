@@ -87,6 +87,15 @@ describe("userMessageSendState", () => {
 });
 
 describe("MessageView send-state rendering", () => {
+  it("can omit routine Sending without concealing a failed delivery", () => {
+    const pending = renderToStaticMarkup(<MessageView timeZone="America/Chicago" showSendingStatus={false}
+      message={userMessage("Make a worksheet", { optimistic: true, status: "submitted" })} />);
+    assert.match(pending, /Make a worksheet/);
+    assert.doesNotMatch(pending, /Sending|user-bubble--pending/);
+    const failed = renderToStaticMarkup(<MessageView timeZone="America/Chicago" showSendingStatus={false}
+      message={userMessage("Make a worksheet", { optimistic: true, status: "failed" })} />);
+    assert.match(failed, /Not sent/);
+  });
   it("shows a quiet Sending state for a message still awaiting confirmation", () => {
     const html = renderToStaticMarkup(
       <MessageView

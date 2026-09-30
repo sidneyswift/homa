@@ -1,5 +1,6 @@
 "use client";
 
+import { elevation, radii } from "@homa/design/contract";
 import { motion as contract } from "@homa/design/motion";
 import { MotionConfig, motion, type HTMLMotionProps } from "motion/react";
 import { useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from "react";
@@ -9,7 +10,7 @@ import styles from "./adaptive-island.module.css";
 
 const ease = contract.easeOut.match(/[\d.]+/g)!.map(Number) as [number, number, number, number];
 // #1158: founder-requested slower spring experiment, scoped to the local island.
-const islandSpring = { type: "spring", stiffness: 180, damping: 25, mass: 1.6 } as const;
+export const islandSpring = { type: "spring", stiffness: 180, damping: 25, mass: 1.6 } as const;
 const reducedQuery = "(prefers-reduced-motion: reduce)";
 function subscribeToReducedMotion(notify: () => void) {
   const media = window.matchMedia(reducedQuery);
@@ -23,12 +24,13 @@ function useLiveReducedMotion() {
 interface AdaptiveIslandProps extends HTMLMotionProps<"form"> {
   size: "content" | "fill";
   view: string;
+  edgeAttached?: boolean;
   placement?: Placement | "auto";
   regionRef?: RefObject<HTMLElement | null>;
 }
 
 /** Presentation only. Activity state, editable drafts and audio ownership stay with the caller. */
-export function AdaptiveIsland({ children, size, view, placement = "auto", regionRef, className, ...props }: AdaptiveIslandProps) {
+export function AdaptiveIsland({ children, size, view, edgeAttached = false, placement = "auto", regionRef, className, ...props }: AdaptiveIslandProps) {
   const host = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLFormElement>(null);
   const previousPlacement = useRef<Placement | undefined>(undefined);
@@ -122,7 +124,14 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
             {...props}
             ref={surface}
             initial={false}
-            animate={{ width: dimensions.width, height: dimensions.height }}
+            animate={{
+              width: dimensions.width, height: dimensions.height,
+              borderTopLeftRadius: edgeAttached ? radii.control : dimensions.height / 2,
+              borderTopRightRadius: edgeAttached ? radii.control : dimensions.height / 2,
+              borderBottomLeftRadius: edgeAttached ? 0 : dimensions.height / 2,
+              borderBottomRightRadius: edgeAttached ? 0 : dimensions.height / 2,
+              boxShadow: edgeAttached ? "0 0px 0px rgba(32, 36, 43, 0)" : elevation.raised,
+            }}
             className={`${styles.surface} ${className ?? ""}`}
             style={{
               ...props.style,
@@ -140,8 +149,6 @@ export function AdaptiveIsland({ children, size, view, placement = "auto", regio
               originX: 0.5,
               originY: origin,
               // Only the shell dimensions spring; text and icons are never scaled.
-              borderRadius: 999,
-              boxShadow: "0 8px 24px rgba(32, 36, 43, 0.08)",
             } as CSSProperties}
           >
             {children}

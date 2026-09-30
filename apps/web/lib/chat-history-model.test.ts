@@ -175,6 +175,7 @@ describe("archiveFromServerHistory", () => {
     const archive = archiveFromServerHistory(
       { messages: history, materials: [] },
       [liveMessage("turn-represented", "user")],
+      "wrun_live",
     );
     assert.deepEqual(
       archive.map((entry) => entry.message.id),
@@ -184,6 +185,20 @@ describe("archiveFromServerHistory", () => {
     assert.equal(archive[0].at, Date.parse("2026-07-10T12:00:00.000Z"));
     const part = archive[0].message.parts[0];
     assert.equal(part.type === "text" ? part.text : null, "hello");
+  });
+
+  it("does not hide another session that reused a live turn id", () => {
+    const messages = mergeChatHistoryRows([[
+      row({ id: "older", session_id: "older-session", turn_id: "turn-1" }),
+      row({ id: "live", session_id: "live-session", turn_id: "turn-1" }),
+    ]], 10);
+    const live = [liveMessage("turn-1", "user")];
+    assert.deepEqual(
+      archiveFromServerHistory({ messages, materials: [] }, live, "live-session")
+        .map(entry => entry.message.id),
+      ["hist:older"],
+    );
+    assert.equal(archiveFromServerHistory({ messages, materials: [] }, live).length, 2);
   });
 
   it("attaches only the latest passing revision to the session's reply", () => {

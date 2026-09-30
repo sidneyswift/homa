@@ -1,3 +1,4 @@
+import { storeConversationAttachmentPreparation } from "../../../../lib/conversation-attachments";
 import { resolveApiFamily } from "../../../../lib/api-auth";
 import { isFamilyChatAttachmentUrl } from "../../../../lib/attachments/markers";
 import {
@@ -88,31 +89,10 @@ export async function POST(request: Request): Promise<Response> {
 
   const normalized = await normalizeChatAttachments(items, auth.familyId);
 
-  const sql = mapDb();
   const receipts: ChatAttachmentReceipt[] = [];
   for (const item of normalized) {
-    const [row] = await sql`
-      insert into public.chat_attachments (
-        family_id, child_id, member_user_id, url, media_type, kind, caption
-      )
-      values (
-        ${auth.familyId},
-        ${childId},
-        ${auth.userId},
-        ${item.input.url},
-        ${item.input.mediaType},
-        ${item.kind},
-        ${item.caption}
-      )
-      returning id
-    `;
-    receipts.push({
-      id: row?.id as string,
-      kind: item.kind,
-      outcome: item.outcome,
-      caption: item.caption,
-      childId,
-    });
+    receipts.push(await storeConversationAttachmentPreparation({ familyId: auth.familyId,
+      memberUserId: auth.userId, childId, item }));
     await emitMapEvent(
       "chat.attachment_processed",
       {

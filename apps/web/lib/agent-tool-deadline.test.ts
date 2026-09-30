@@ -9,6 +9,7 @@ import {
   ToolAccessBoundaryError,
   ToolDeadlineError,
   withToolDeadline,
+  withAuthorizedToolDeadline,
 } from "./agent-tool-deadline";
 
 test("a tool that answers in time returns its value untouched", async () => {
@@ -259,4 +260,22 @@ test("the one opted-in Progress persistence tool may start", async () => {
   )({}, context);
   assert.equal(result, "persisted");
   assert.equal(bodyRuns, 1);
+});
+
+
+test("permission arriving after timeout never starts the effect", async () => {
+  let resolve!: () => void;
+  const permission = new Promise<void>(done => { resolve = done; });
+  let effects = 0;
+  await assert.rejects(withAuthorizedToolDeadline(20, () => permission, () => ++effects, false), ToolDeadlineError);
+  resolve();
+  await new Promise(done => setImmediate(done));
+  assert.equal(effects, 0);
+});
+
+test("permission rejection prevents effects and success preserves their result", async () => {
+  let effects = 0;
+  await assert.rejects(withAuthorizedToolDeadline(1000, async () => { throw new Error("revoked"); }, () => ++effects, false), /revoked/);
+  assert.equal(effects, 0);
+  assert.equal(await withAuthorizedToolDeadline(1000, async () => {}, () => ++effects, false), 1);
 });

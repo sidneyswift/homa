@@ -59,7 +59,7 @@ export const screenDeliveryHook = {
         channel: "web",
         destination: `member:${attributes.memberUserId}`,
         providerThreadKey: `web:${ctx.session.id}`,
-        content: persisted.content,
+        content: event.data.message,
         delivered: true,
       });
       const progress =

@@ -28,8 +28,8 @@ import { selectParentVisibleMaterialRevisions } from "./materials/parent-visible
  * single-adult family. Account deletion can turn a formerly attributed row
  * null, so member count is not evidence of historical ownership.
  *
- * Failure posture: any error returns null and the client renders from
- * its localStorage cache exactly as before this slice existed.
+ * Failure posture: a message query error returns null. Material enrichment
+ * can fail independently while readable messages remain available.
  */
 
 const HISTORY_CAP = 240;
@@ -122,24 +122,29 @@ export async function fetchChatHistory(input: {
       ...new Set(messages.map((message) => message.sessionId)),
     ];
     if (historySessionIds.length > 0) {
-      const materialQuery = await supabase
-        .from("materials")
-        .select(MATERIAL_COLUMNS)
-        .eq("family_id", input.familyId)
-        .order("created_at", { ascending: false })
-        .limit(MATERIAL_CAP);
-      if (materialQuery.error) return null;
-      const sessionSet = new Set(historySessionIds);
-      materials = selectParentVisibleMaterialRevisions(
-        (
-          (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
-        )
-          .map(toChatHistoryMaterial)
-          .filter(
-            (material): material is ChatHistoryMaterial =>
-              material !== null && sessionSet.has(material.sessionId),
-          ),
-      );
+      try {
+        const materialQuery = await supabase
+          .from("materials")
+          .select(MATERIAL_COLUMNS)
+          .eq("family_id", input.familyId)
+          .order("created_at", { ascending: false })
+          .limit(MATERIAL_CAP);
+        // An unavailable card must not erase an otherwise healthy conversation.
+        if (materialQuery.error) return { messages, materials: [], materialsUnavailable: true };
+        const sessionSet = new Set(historySessionIds);
+        materials = selectParentVisibleMaterialRevisions(
+          (
+            (materialQuery.data ?? []) as unknown as ChatHistoryMaterialRow[]
+          )
+            .map(toChatHistoryMaterial)
+            .filter(
+              (material): material is ChatHistoryMaterial =>
+                material !== null && sessionSet.has(material.sessionId),
+            ),
+        );
+      } catch {
+        return { messages, materials: [], materialsUnavailable: true };
+      }
     }
 
     return { messages, materials };

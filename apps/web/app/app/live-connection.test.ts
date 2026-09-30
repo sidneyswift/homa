@@ -7,7 +7,7 @@ import { LiveSessionDiagnostics, LiveVoiceConversation } from "../../../../packa
 
 // Exercise the actual clients with controllable transports, not a second
 // implementation of their lifecycle. No microphone or provider is contacted.
-async function mount(native: boolean, initialPreferences = { microphoneOn: true, speakerOn: true }) {
+async function mount(native: boolean, initialPreferences = { microphoneOn: true, speakerOn: true }, saveOptions = { failed: false }) {
   const effects: (() => unknown)[] = [];
   const hookSlots: Array<{ value?: unknown; deps?: unknown[] }> = [];
   let hookIndex = 0;
@@ -17,6 +17,8 @@ async function mount(native: boolean, initialPreferences = { microphoneOn: true,
   let stopped = false;
   let peerClosed = false;
   let created = 0;
+  let closed = 0;
+  let presentation: { saveFailed: boolean; retrySave: () => Promise<void> };
   const audioElements: Array<{ muted: boolean }> = [];
   const controller = { current: null as { end: () => Promise<void>; sendText: (text: string) => boolean } | null };
   let appState: ((state: string) => void) | undefined;
@@ -62,7 +64,7 @@ async function mount(native: boolean, initialPreferences = { microphoneOn: true,
   const exports = {} as { useVoiceSession: () => { start: () => void }; VoiceMode: (props: Record<string, unknown>) => unknown };
   const source = native ? "apps/mobile/src/features/voice/use-voice-session.ts" : "apps/web/app/app/voice-mode.tsx";
   const code = ts.transpileModule(readFileSync(source, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
-  const fetcher = async (path: string) => path.endsWith("/session") ? Response.json({ sessionId: "fixture", sdp: "answer", closeToken: "fixture" }) : Response.json({ ok: true });
+  const fetcher = async (path: string) => path.endsWith("/session") ? Response.json({ sessionId: "fixture", sdp: "answer", closeToken: "fixture" }) : Response.json({ ok: !saveOptions.failed });
   runInNewContext(code, {
     exports, crypto: { randomUUID: () => "fixture" }, AbortSignal, Response,
     setTimeout, clearTimeout, setInterval: () => 1, clearInterval() {},
@@ -71,7 +73,7 @@ async function mount(native: boolean, initialPreferences = { microphoneOn: true,
     console: { info: (...args: unknown[]) => logs.push(args) },
     require: (name: string) => {
       if (name === "react") return react;
-      if (name === "react/jsx-runtime") return { jsx: () => ({}), jsxs: () => ({}) };
+      if (name === "react/jsx-runtime") return { jsx: (_type: unknown, props: typeof presentation) => { presentation = props; return {}; }, jsxs: () => ({}) };
       if (name === "@homa/core") return { LiveSessionDiagnostics, LiveVoiceConversation, waitForLiveIce: async () => {} };
       if (name === "react-native") return { AppState: { addEventListener: (_type: string, listener: (state: string) => void) => { appState = listener; return { remove() {} }; } } };
       if (name === "react-native-webrtc") return { RTCPeerConnection: Peer, RTCSessionDescription: class {}, mediaDevices: { getUserMedia: async () => stream } };
@@ -79,12 +81,13 @@ async function mount(native: boolean, initialPreferences = { microphoneOn: true,
       if (name.endsWith("/env")) return { env: { apiUrl: "https://fixture.test" }, EVE_CHANNEL_HEADER: {} };
       if (name.endsWith("/supabase")) return { supabase: { auth: { getSession: async () => ({ data: { session: { access_token: "fixture" } } }) } } };
       if (name.endsWith("/realtime-tool-effects")) return { messagesFromVoiceToolEffects: () => [] };
+      if (name === "./voice-effects") return { webVoiceOutputForDisplay: (output: unknown) => output };
       return {};
     },
   });
   const renderWeb = (preferences = initialPreferences) => {
     hookIndex = 0;
-    exports.VoiceMode({ ...preferences, controlsRef: controller, onTurn() {}, onClose() {}, onEffects() {}, onNotice: (text: string) => notices.push(text), onActiveChange() {}, onWorking() {}, onAnnouncementChange() {} });
+    exports.VoiceMode({ ...preferences, controlsRef: controller, presentation: () => null, onTurn() {}, onClose() { closed++; }, onEffects() {}, onNotice: (text: string) => notices.push(text), onActiveChange() {}, onWorking() {}, onAnnouncementChange() {} });
     effects.splice(0).forEach(effect => effect());
   };
   if (native) {
@@ -93,8 +96,29 @@ async function mount(native: boolean, initialPreferences = { microphoneOn: true,
     renderWeb();
   }
   await new Promise((resolve) => setTimeout(resolve, 20));
-  return { receive, channel, states, notices, logs, renderWeb, track, audioElements, controller, appState: (state: string) => appState?.(state), created: () => created, stopped: () => stopped, peerClosed: () => peerClosed };
+  return { receive, channel, states, notices, logs, renderWeb, track, audioElements, controller, presentation: () => presentation, closed: () => closed, appState: (state: string) => appState?.(state), created: () => created, stopped: () => stopped, peerClosed: () => peerClosed };
 }
+
+test("web can retry transcript saving during a live call without closing audio", async () => {
+  const saveOptions = { failed: true };
+  const f = await mount(false, { microphoneOn: true, speakerOn: true }, saveOptions);
+  f.receive({ type: "session.started" });
+  f.receive({ type: "session.input_transcript.delta", delta: "Hello", start_ms: 0, end_ms: 10 });
+  f.renderWeb();
+  // An explicit typed turn seals the preceding caption, triggering its save.
+  f.controller.current!.sendText("Hello again");
+  await new Promise(resolve => setTimeout(resolve, 20));
+  f.renderWeb();
+  assert.equal(f.presentation().saveFailed, true);
+  saveOptions.failed = false;
+  await f.presentation().retrySave();
+  f.renderWeb();
+  assert.equal(f.presentation().saveFailed, false);
+  assert.equal(f.closed(), 0);
+  assert.equal(f.stopped(), false);
+  assert.equal(f.peerClosed(), false);
+  await f.controller.current!.end();
+});
 
 test("web audio preferences change the live resources without reconnecting", async () => {
   const f = await mount(false, { microphoneOn: false, speakerOn: false });

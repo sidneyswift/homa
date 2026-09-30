@@ -76,6 +76,8 @@ export default defineBoundedTool({
       note:
         result.status === "awaiting_input"
           ? "Stage recorded. The build now waits for the parent to approve this first volume before continuing."
+          : result.status === "completed"
+            ? "The build is complete. Its material is saved in the parent's conversation."
           : "Stage recorded. The build will continue to the next stage.",
     };
   },

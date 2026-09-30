@@ -4,6 +4,41 @@ import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { chatHistoryResponse } from "./chat-history-route";
+import { fetchChatHistory } from "./chat-history";
+
+describe("history enrichment failures", () => {
+  for (const failure of ["query-error", "transport-rejection"] as const) {
+    it(`keeps readable history after a material ${failure}`, async () => {
+      const calls: [string, string, unknown][] = [];
+      const supabase = {
+        from(table: string) {
+          const query = {
+            select() { return query; },
+            eq(column: string, value: unknown) { calls.push([table, column, value]); return query; },
+            order() { return query; },
+            async limit() {
+              if (table === "materials") {
+                if (failure === "transport-rejection") throw new Error("synthetic network failure");
+                return { data: null, error: { message: "synthetic material failure" } };
+              }
+              return { error: null, data: table === "conversation_messages" ? [{
+                id: "message-one", session_id: "session-one", turn_id: "turn_0",
+                role: "assistant", channel: "web", modality: "text",
+                content: "Your work is here.", created_at: "2026-09-12T12:00:00Z",
+              }] : [] };
+            },
+          };
+          return query;
+        },
+      } as unknown as SupabaseClient;
+      const history = await fetchChatHistory({ familyId: "family-one", userId: "adult-one", supabase });
+      assert.equal(history?.messages[0]?.content, "Your work is here.");
+      assert.equal(history?.materialsUnavailable, true);
+      assert.deepEqual(history?.materials, []);
+      assert(calls.some(([table, column, value]) => table === "conversation_messages" && column === "member_user_id" && value === "adult-one"));
+    });
+  }
+});
 
 describe("chatHistoryResponse", () => {
   it("rejects a request with no authenticated family", async () => {
@@ -70,6 +105,6 @@ describe("chat history completeness contract", () => {
     assert.match(source, /\.eq\("status", "sent"\)/u);
     assert.match(source, /if \(delivered\.error\) return null;/u);
     assert.match(source, /if \(deliveredMessages\.error\) return null;/u);
-    assert.match(source, /if \(materialQuery\.error\) return null;/u);
+    assert.match(source, /if \(materialQuery\.error\) return \{ messages, materials: \[\], materialsUnavailable: true \};/u);
   });
 });

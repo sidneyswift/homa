@@ -5,6 +5,8 @@ import {
   isPinnedAgentChannel,
   MissingFamilyContextError,
 } from "../../lib/agent-db";
+import { hasConversationJobContext, requireConversationJobDatabaseAccess } from "../../lib/conversation-jobs";
+import { hasConversationRequestContext, requireConversationRequestContextAccess } from "../../lib/conversation-request-access";
 import { type MemoryRow } from "../../lib/agent-memory";
 import {
   getChildProgressView,
@@ -142,6 +144,7 @@ interface FamilyContextInstructionAttributes {
   onboardingActive?: string;
   episodeId?: string;
   continuityContext?: string;
+  conversationRequestContextLoaded?: string;
   taskKind?: string;
   deliveryVersion?: string;
   familySmsInviteState?: "pending" | "awaiting-parent" | "expired";
@@ -153,6 +156,8 @@ interface ProgressContextInput {
 }
 
 export interface FamilyContextInstructionDependencies {
+  authorizeConversationRequest?: typeof requireConversationRequestContextAccess;
+  authorizeConversationJob?: typeof requireConversationJobDatabaseAccess;
   loadCallerFamilyContext(
     attributes: FamilyContextInstructionAttributes,
   ): Promise<FamilyContextRows>;
@@ -217,6 +222,13 @@ export async function resolveFamilyContextInstructionMarkdown(
     FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES,
 ): Promise<string | null> {
   const { attributes } = input;
+  if (hasConversationJobContext(attributes)) {
+    await (dependencies.authorizeConversationJob ?? requireConversationJobDatabaseAccess)(attributes);
+  }
+  if (hasConversationRequestContext(attributes)) {
+    if (!input.turnId) throw new MissingFamilyContextError();
+    await (dependencies.authorizeConversationRequest ?? requireConversationRequestContextAccess)(attributes, { sessionId: input.sessionId, turnId: input.turnId });
+  }
   if (attributes?.channel === "progress_next_move") {
     return PROGRESS_NEXT_MOVE_RESTRICTED_INSTRUCTIONS;
   }
@@ -271,7 +283,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       rows = await dependencies.loadCallerFamilyContext(attributes);
     } else if (
       attributes?.familyId &&
-      isPinnedAgentChannel(attributes.channel)
+      (isPinnedAgentChannel(attributes.channel) || hasConversationRequestContext(attributes))
     ) {
       rows = await dependencies.loadPinnedFamilyContext(attributes.familyId);
     } else {
@@ -348,8 +360,8 @@ export async function resolveFamilyContextInstructionMarkdown(
         );
       }
     }
-    let continuityContext = attributes?.continuityContext ?? "";
-    if (attributes?.familyId && continuityContext.length === 0) {
+    let continuityContext = hasConversationJobContext(attributes) ? "" : attributes?.continuityContext ?? "";
+    if (attributes?.familyId && !hasConversationJobContext(attributes) && continuityContext.length === 0 && !(hasConversationRequestContext(attributes) && attributes.conversationRequestContextLoaded === "true")) {
       try {
         continuityContext = await dependencies.loadContinuityContext({
           familyId: attributes.familyId,
@@ -374,7 +386,7 @@ export async function resolveFamilyContextInstructionMarkdown(
     // fail-soft like every other block here: losing it costs Homa some
     // memory, it must never cost her the family.
     let recentCallsContext = "";
-    if (attributes?.familyId) {
+    if (attributes?.familyId && !hasConversationJobContext(attributes)) {
       try {
         recentCallsContext = await dependencies.loadRecentCallsContext({
           familyId: attributes.familyId,
@@ -446,6 +458,7 @@ export default defineDynamic({
       // never settles never throws. On the quick tier because this is
       // database work; there is no production latency series for it yet,
       // so it inherits the tier rather than inventing a tighter number.
+      const turnId = (_event as { data?: { turnId?: unknown } } | null)?.data?.turnId;
       let markdown: string | null;
       try {
         markdown = await withToolDeadline(TOOL_DEADLINE.quick, () =>
@@ -454,11 +467,9 @@ export default defineDynamic({
               | FamilyContextInstructionAttributes
               | undefined,
             sessionId: ctx.session.id,
-            // The dynamic-instructions callback context is typed without `turn`
-            // (SessionContext has it, DynamicResolverContext does not), so read
-            // it defensively; the recorder accepts null.
-            turnId:
-              (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
+            // Dynamic context omits turn/parent metadata. The event carries the
+            // actual turn; the global preflight has already checked lineage.
+            turnId: typeof turnId === "string" ? turnId : null,
           }),
         );
       } catch (error) {

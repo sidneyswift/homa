@@ -12587,3 +12587,76 @@ A synthetic spoken delegation through the actual web controller dispatched exact
 once, relayed the stub backend result with Gleam, saved all caption groups, and
 closed with hangup 200 and no notices or browser errors. This caught and fixed
 the browser fetch binding and tightened spoken-result fidelity before release.
+
+
+## 2026-09-12: automatically send queued conversation requests (gh#1158)
+
+During the one-question-at-a-time conversation architecture review, Sidney was asked whether a request sent offline should send automatically or wait for review after the parent closes Homa and returns the next day. Sidney answered “send auto.” The canonical ruling is `conversation-offline-auto-send` in the founder index. The plan and review now select automatic delivery of queued sends; unsent drafts and existing authentication/idempotency boundaries remain distinct. Delayed-date meaning remains to be discussed. This records a product decision, not an implemented or deployed change.
+
+
+## 2026-09-12: voice continues when switching apps (gh#1158)
+
+Asked whether Homa should keep listening/talking or pause when a parent switches to another app during voice, Sidney answered “keeps going.” The canonical ruling is `conversation-voice-app-switch-continues`. The rebuild must not intentionally stop voice merely because the app loses foreground visibility. Device support and actual interruptions still require testing; explicit Stop remains immediate. This is a planning decision, not an implemented or deployed change.
+
+
+## 2026-09-12: typing keeps voice active (gh#1158)
+
+Asked whether starting to type during a voice conversation should keep voice going or switch to text, Sidney answered “voice keeps going too.” The canonical ruling is `conversation-voice-typing-continues`. The conversation plan retains simultaneous input and the council's always-reachable Stop control, including when Send is available for a draft. This records a product decision, not an implemented or deployed change.
+
+
+## 2026-09-12: return to the newest conversation message (gh#1158)
+
+After an explanation contrasting the newest response with the older spot where a parent stopped reading, Sidney chose “newest message.” The canonical ruling is `conversation-return-newest`. Return/reopen goes to the latest message; actively reading older content remains protected against incoming-message scroll jumps. This is a planning choice, not a deployed change.
+
+
+## 2026-09-12: defer special handling for delayed dates (gh#1158)
+
+After discussing how an offline message saying “tomorrow” might arrive days later, Sidney answered “this is too edge of a case. skip.” The ruling `conversation-delayed-dates-deferred` removes this specialized behavior from initial rebuild scope and from blocking questions. Ordinary timestamp provenance and existing date validation remain; no new date-interpretation policy was selected. Automatic sending is unchanged. Planning only, not an implemented or deployed change.
+
+
+## 2026-09-12: continuous server recording is infrastructure (gh#1158, gh#1182)
+
+Sidney accepted quiet operation and clarified: “everything should be saved always” and “every token in or out should be saved to the server.” Saving must not depend on Homa choosing to save or occasional save operations. Registered `conversation-continuous-server-recording`. The plan now requires lossless infrastructure-owned recording of incoming/outgoing conversation text, durable-before-publish assistant text, and a server-owned voice event path. The earlier periodic browser-checkpoint authority and lossy provisional-snapshot compaction are superseded. Normal saving UI is removed from the proposed experience; actual failures remain visible with automatic recovery. Phase 0 must prove the transport and revalidate the baseline estimate. This records an architectural requirement, not implemented or deployed behavior.
+
+
+### September 12, 2026: Conversation rebuild local implementation and recording gate
+
+Sidney authorized implementation. Local history/draft recovery, session-scoped history identity, stale-tab reconciliation and text-preserving material failure handling are implemented. A new content-recording storage candidate passed disposable PostgreSQL tests but is disconnected from live traffic. Council review reproduced an Eve text/tool/text identity collision; the removed hook draft was replaced with a source-index requirement. Continuous voice recovery and accepted-request dispatch remain unresolved release gates. No remote migration, production deploy or completed-rebuild claim. Existing persistence failures remain escalated under gh#1182; gh#1158 remains open. [Evidence and remaining scope](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+### 2026-09-12: Conversation request and device queue storage, local only
+
+Continued #1158/#1182 with atomic canonical-input/request acceptance, fenced dispatch claims, revocation epochs, deletion tombstones and account-scoped device outbox primitives. Fixed recorder deletion before initialization and draft account/revision races. Disposable PostgreSQL, 16 focused unit tests and three real-browser fixture journeys passed; web typecheck, focused lint and migration-version checks passed. No live acceptance adapter, dispatch worker or automatic composer retry is connected, and no migration/code is deployed. Execution-effect replay, continuous voice recording and the rest of the rebuild remain open. See [implementation evidence](plans/2026-09-12-conversation-rebuild-implementation.md) for exact boundaries and commands.
+
+### 2026-09-12: Conversation HTTP acceptance and execution admission, local only
+
+Continued gh#1158/gh#1182 with a bearer-only acceptance/receipt API, exact-account HTTP outbox transport and pre-tool request claiming in the existing canonical persistence hook. Lost confirmation retries preserve the same intent and receipt. Independent review caught and closed a root dispatcher path around the persistence claim. The new route remains disabled, and neither a worker nor composer automatic delivery is enabled. Fifty-four focused tests, 288 continuity regressions, web typecheck, focused lint, Eve Vercel build and stream-duration guard passed. Unit, local PostgreSQL and device-browser journeys are now wired into CI, without claiming a remote CI run. Background adult/epoch permissions, effect recovery, response catch-up and continuous voice remain outstanding. [Implementation evidence](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+
+### September 12, 2026: disabled conversation worker and access/context boundary (gh#1158, gh#1182)
+
+Implemented local background pickup, immediate best-effort wake-up backed by a one-minute schedule, current-adult execution checks before context/tools, and observed completion requiring persisted assistant output. Worker context spans prior episodes while respecting own/recipient privacy and excluding queued or unpublished work. Review found and corrected late permission execution, pickup starvation, routing-secret exposure and delivered-update exclusion. Unit/regression checks and the disposable 200-migration PostgreSQL suite passed. The rollout flag remains off: pending question/card continuation, tool-effect replay protection, source reconciliation and continuous server-owned voice recording remain open. This is candidate implementation, not a deployed fix or certified parent journey. Detailed boundaries and evidence: [conversation rebuild implementation](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+### September 12, 2026: durable question-card recording and ordinary continuation, local only
+
+Continued gh#1158/gh#1182 with atomic question/canonical storage, exact runtime source identity, authenticated restoration and a card-only ending that releases the next ordinary message. Independent review and database tests caught and fixed revocation finalization, deletion-before-ending, sequence binding, payload serialization and provenance errors. The 201-migration disposable database suite exercises the actual question/ending hooks plus replay, privacy and erasure. Unit/continuity, typecheck, lint, agent build, migration and isolation checks passed; the remote isolation repeat resolved two initial gateway timeouts. Validated typed-choice submission and real runtime approval continuation remain separate open work. New flags remain off, no migration or deployment occurred, and no completed rebuild or live fix is claimed. [Evidence and remaining gates](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+
+### September 13, 2026: permanent conversation local integration and recovery checks (gh#1158, gh#1182)
+
+Completed local integration of durable source projection, committed-feed updates, offline acceptance recovery, native question history, private immutable delivery copies, durable indexing and bounded standalone background materials. Background completion now commits artifact links and job state together; a deletion race exposed and fixed incompatible cancellation timestamps. Exact quoted words are verified against accepted input. Four disposable database suites passed with 210 migrations, along with 289 continuity tests, 148 storage unit passes (one database-only skip), 10 device browser journeys, 10 mounted-control journeys, typecheck, changed-file lint, fleet-skill hygiene, Vercel-target Eve build and stream-duration checks. Counts overlap and browser services are synthetic.
+
+The final real-model workflow check passed three synthetic cases after correcting a tool description that caused eligible work to bypass the background handoff. The new rollout flags remain off. No remote schema change, deployment, live-provider certification, physical voice proof or completed-rebuild claim. Automatic approval review rejected installing the candidate native-answer replay patch; explicit founder approval is needed for that reviewed same-version runtime change. The voice-generated-from-recorded-replies decision remains unanswered. Existing production persistence findings remain escalated under gh#1182. See [current evidence and remaining release gates](plans/2026-09-12-conversation-rebuild-implementation.md) and the [concrete native replay proposal](plans/2026-09-12-native-replay-approval.md).
+
+
+### September 13, 2026, 03:11 UTC: approved native answer retry, installed locally (gh#1158, gh#1182)
+
+Sidney explicitly approved the prepared same-version Eve 0.19.0 runtime patch and local reinstall. The checksum is refreshed, authenticated answer admission is integrated, and queued answer envelopes keep their individual identity and access context. Identical retries are dropped before pending input consumption. Child-question provenance carries exact parent coordinates; stale events cannot regress finished replies or affect newer requests.
+
+Final storage checks passed 157 tests with one database-only skip, plus eight installed queue/envelope tests. Core and native disposable PostgreSQL suites each applied 210 migrations and passed. Web typecheck, focused lint, 289 continuity tests, the full isolation guard, Vercel-target Eve build and three stream-duration checks passed. New remote tables remain pending, and no remote migration, deployment or enablement occurred. Workflow-host crash proof, the unanswered voice transport choice, provider/device journeys and rollout gates remain open. This supersedes the prior approval blocker, not the release gates. [Current evidence](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+
+### September 13, 2026, 16:12 UTC: hard-restart answer proof, local only (gh#1158, gh#1182)
+
+The installed Eve host now has a passing reusable hard-restart regression: checkpoint two successive questions, kill the owned process group, restart from disk, replay answer one, and verify question two remains pending until its own answer. The final exact Yes/No reply appears once. Added the isolated command to CI; no remote CI run is claimed.
+
+An exploratory mid-step kill revealed default local startup did not automatically resume the interrupted child. Explicit namespaced requeue succeeded and preserved answer identity, but this is not automatic recovery or deployed-host proof. The HTTP stream probe also failed locally, so restart evidence reads persisted runtime records. No product runtime, flags, schema or deployment changed in this checkpoint. Automatic recovery, live streaming/provider/device journeys, voice choice and rollout remain open. [Evidence](plans/2026-09-12-native-replay-approval.md).

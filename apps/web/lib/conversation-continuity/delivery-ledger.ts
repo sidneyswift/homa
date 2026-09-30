@@ -1,5 +1,6 @@
 import { mapDb } from "../map/db";
-import type { Sql } from "postgres";
+import type { Sql, TransactionSql } from "postgres";
+import { lockConversationDeliverySnapshotScope, prepareConversationDeliverySnapshot } from "../conversation-delivery-snapshots";
 import type { FamilyTaskKind } from "../tasks/kinds";
 import { hashContinuityKey } from "./continuity-service";
 import {
@@ -156,7 +157,7 @@ export interface DeliveryAttempt {
   providerMessageId?: string | null;
 }
 
-export async function beginDeliveryAttempt(input: {
+export interface BeginDeliveryAttemptInput {
   familyId: string;
   episodeId: string;
   messageId: string;
@@ -165,23 +166,37 @@ export async function beginDeliveryAttempt(input: {
   channel: "sms" | "email" | "web";
   destination: string;
   providerThreadKey?: string | null;
-}): Promise<DeliveryAttempt> {
+  /** Exact outbound message body, supplied by the sender, never reloaded. */
+  content?: string;
+}
+export async function beginDeliveryAttempt(input: BeginDeliveryAttemptInput): Promise<DeliveryAttempt> {
   return await beginDeliveryAttemptWithDatabase(mapDb(), input);
 }
 
 export async function beginDeliveryAttemptWithDatabase(
   sql: Sql,
-  input: {
-    familyId: string;
-    episodeId: string;
-    messageId: string;
-    taskRunId: string | null;
-    memberUserId: string | null;
-    channel: "sms" | "email" | "web";
-    destination: string;
-    providerThreadKey?: string | null;
-  },
+  input: BeginDeliveryAttemptInput,
 ): Promise<DeliveryAttempt> {
+  if (input.content === undefined || process.env.HOMA_CONVERSATION_RECORDING !== "1") return beginDeliveryAttemptInDatabase(sql, input);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await sql.begin(async tx => {
+        await lockConversationDeliverySnapshotScope(tx, input);
+        const receipt = await beginDeliveryAttemptInDatabase(tx, input);
+        if (receipt.shouldSend) await prepareConversationDeliverySnapshot(tx, { deliveryId: receipt.id,
+          familyId: input.familyId, messageId: input.messageId, memberUserId: input.memberUserId,
+          channel: input.channel, content: input.content! });
+        return receipt;
+      }) as DeliveryAttempt;
+    } catch (error) {
+      // Canonical deletion holds a message before its timeline. This retry is
+      // wholly before transport, so it cannot repeat a provider effect.
+      if (attempt >= 2 || !["40P01", "40001"].includes((error as { code?: string }).code ?? "")) throw error;
+    }
+  }
+}
+
+async function beginDeliveryAttemptInDatabase(sql: Sql | TransactionSql, input: BeginDeliveryAttemptInput): Promise<DeliveryAttempt> {
   const destinationHash = hashContinuityKey(
     `${input.channel}:${input.destination.toLowerCase()}`,
   );
@@ -428,6 +443,7 @@ export async function recordReactiveDelivery(input: {
     channel: input.channel,
     destination: input.destination,
     providerThreadKey: input.providerThreadKey ?? null,
+    content: input.content,
   });
   if (attempt.shouldSend) {
     await finishDeliveryAttempt(

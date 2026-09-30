@@ -36,10 +36,56 @@
 .voiceNotice { max-width: 780px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; text-align: center; font-size: 14px; color: var(--homa-muted-ink); }
 .voiceNotice:empty { display: none; }
 .voiceNotice a { text-decoration: underline; }
-.voiceConversation { max-width: 780px; margin: 0 auto 16px; }
-.voiceConversation summary { cursor: pointer; color: var(--homa-muted-ink); font-size: 14px; }
-.voiceConversationBody { max-height: 40svh; overflow-y: auto; overflow-wrap: anywhere; padding: 12px 0; }
-.voiceConversationBody > p { margin: 0 0 16px; }
+.voiceConversation { width: min(100%, 560px); flex: 1; min-height: 0; display: flex; margin: 24px auto 8px; }
+.voiceConversationBody {
+  --transcript-fade-top: 32px;
+  --transcript-fade-bottom: 48px;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  padding: var(--transcript-fade-top) 16px var(--transcript-fade-bottom) 0;
+  scroll-padding-block: var(--transcript-fade-top) var(--transcript-fade-bottom);
+  mask-image: linear-gradient(to bottom, transparent, black var(--transcript-fade-top), black calc(100% - var(--transcript-fade-bottom)), transparent);
+}
+.voiceConversationBody::-webkit-scrollbar { display: none; }
+.voiceConversation:has(.voiceConversationBody:focus-visible) { outline: 2px solid var(--homa-midnight-action); outline-offset: 4px; }
+.voiceConversationBody:focus-visible { outline: none; }
+@media (forced-colors: active) { .voiceConversationBody { mask-image: none; scrollbar-width: auto; } }
+.spokenTurns { display: grid; gap: 32px; }
+.thinking { justify-self: stretch; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 400; }
+.activityLabel { min-height: 20px; }
+.activityLabelText { display: inline-block; animation: activity-enter var(--dur-base) var(--ease-out); }
+.activitySteps { display: grid; gap: 8px; list-style: none; padding: 0; margin: 12px 0 0; color: var(--homa-muted-ink); }
+.activityStep { display: flex; align-items: baseline; gap: 8px; min-width: 0; animation: activity-enter var(--dur-base) var(--ease-out); }
+.activityStep svg { flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
+.activityStepState { margin-left: auto; padding-left: 8px; font-size: 12px; white-space: nowrap; }
+.activityStep[data-state="active"] { color: var(--homa-ink); }
+@keyframes activity-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .activityLabelText, .activityStep { animation: none; } }
+.spokenTurn { min-width: 0; width: 100%; justify-self: start; text-align: left; color: var(--homa-muted-ink); }
+.spokenTurn[data-speaker="user"] { max-width: calc(100% - 32px); justify-self: end; text-align: right; }
+.spokenTurn[data-current="true"] { color: var(--homa-ink); }
+.spokenTurn p { margin: 0; font-size: 18px; line-height: 28px; font-weight: 400; white-space: pre-wrap; }
+.spokenTurns:not(:empty) { margin-bottom: 24px; }
+.preview[data-engaged="true"] { height: 100svh; min-height: 0; overflow: hidden; }
+.preview[data-engaged="true"] .screen { flex: 0 0 auto; padding: 48px 24px 0; }
+.preview[data-engaged="true"] .stage { padding: 0; }
+.preview[data-engaged="true"] .characterStage { top: -24px; width: min(104px, 11svh); }
+.preview[data-engaged="true"] .composerDock { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.preview[data-engaged="true"] .voiceNotice { order: 1; }
+.preview[data-engaged="true"] .islandFootprint { order: 2; margin-top: auto; height: auto; }
+.preview[data-engaged="true"] .islandPosition { position: relative; inset: auto; width: 100%; }
+@media (max-width: 600px) {
+  .spokenTurn p { font-size: 16px; line-height: 24px; }
+  .spokenTurns { gap: 24px; }
+  .voiceConversation { margin-top: 16px; }
+  .preview[data-engaged="true"] .screen { padding-top: 32px; }
+}
 .preview .settingsControls button:disabled { opacity: .5; cursor: default; }
 @media (max-width: 600px) {
   .screen { padding: 64px 20px; }
@@ -47,6 +93,23 @@
 }
 
 .composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
+.islandFootprint { height: 62px; flex-shrink: 0; }
+.islandPosition { position: fixed; left: 24px; right: 24px; bottom: 80px; max-width: 420px; margin-inline: auto; z-index: 5; }
+.preview .startComposer { --tab-surface: color-mix(in srgb, var(--homa-floating) 96%, var(--homa-ink)); --tab-boundary: color-mix(in srgb, var(--homa-control-boundary) 35%, transparent); border-color: var(--tab-boundary); border-bottom: 0; padding: 0; padding-bottom: env(safe-area-inset-bottom); background: var(--tab-surface); }
+.preview .startComposer:has(.startButton:enabled:hover) { --tab-surface: color-mix(in srgb, var(--homa-floating) 93%, var(--homa-ink)); }
+.preview .startComposer:has(.startButton:active) { --tab-surface: color-mix(in srgb, var(--homa-floating) 90%, var(--homa-ink)); }
+.preview .startComposer:has(.startButton:focus-visible) { outline: 2px solid var(--homa-midnight-action); outline-offset: -3px; }
+.preview .composer .startButton:focus-visible { outline: none; }
+.preview .composer .startButton { min-width: 176px; min-height: 56px; padding: 16px 32px; border: 0; background: transparent; border-radius: var(--homa-radius-control) var(--homa-radius-control) 0 0; font-weight: 500; }
+.preview .composer .startButton:enabled:hover { background: transparent; }
+@media (forced-colors: active) {
+  .preview .startComposer { --tab-surface: Canvas; --tab-boundary: ButtonText; }
+  .preview .startComposer:has(.startButton:enabled:hover), .preview .startComposer:has(.startButton:active) { --tab-surface: Canvas; }
+  .preview .startComposer:has(.startButton:focus-visible) { outline-color: Highlight; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .islandPosition { transition: none; }
+}
 .composer { --island-radius: 999px; max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--island-radius); padding: 8px; font-size: 16px; font-weight: 400; line-height: 24px; background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
 .preview .composer button:focus-visible { outline-offset: -3px; }
 .preview .composer button { border-radius: var(--island-radius); font: inherit; }
@@ -56,7 +119,7 @@
 .composer:has(input:focus-visible) { border-color: var(--homa-control-boundary); }
 .conversationView { display: grid; grid-template-columns: auto; grid-template-areas: "modes"; column-gap: 4px; }
 .conversationView[hidden] { display: none; }
-.conversationView.expandedView { width: 100%; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "input modes actions"; overflow-x: auto; scrollbar-width: none; }
+.conversationView.expandedView { width: 100%; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "input actions"; overflow-x: auto; scrollbar-width: none; }
 .expandedView::-webkit-scrollbar { display: none; }
 .inputRow { overflow: clip; grid-area: input; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .inputRow[hidden] { display: none; }
@@ -68,7 +131,9 @@
 .composerActions[hidden] { display: none; }
 .preview .iconButton { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--homa-radius-control); background: transparent; }
 .preview .iconButton:disabled { cursor: default; opacity: .5; }
+.preview .composerActions .iconButton { color: #000; opacity: 1; }
 .compactComposer { width: fit-content; max-width: 100%; }
+.modeSelector[hidden] { display: none; }
 .modeSelector { grid-area: modes; justify-self: end; align-self: center; display: flex; align-items: center; gap: 4px; }
 .preview .modeButton { position: relative; min-width: 72px; border: 0; background: transparent; }
 .preview .modeButton, .preview .settingsControls button:not(.iconButton) { padding: 8px 16px; }
@@ -84,11 +149,41 @@
 .preview .settingsControls button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; background: transparent; white-space: nowrap; }
 @media (max-width: 600px) {
   .composerDock { padding-left: 16px; padding-right: 16px; }
+  .islandPosition { left: 16px; right: 16px; }
 }
 
 @media (max-width: 600px) {
-  .conversationView.expandedView { grid-template-columns: minmax(180px, 1fr) auto auto; }
+  .conversationView.expandedView { grid-template-columns: minmax(180px, 1fr) auto; }
 }
 
-.characterStage { width: min(320px, 75vw); aspect-ratio: 1; display: grid; place-items: center; }
+.characterStage { width: min(208px, 49vw); aspect-ratio: 1; display: grid; place-items: center; position: relative; top: -192px; }
 .characterPause { margin-bottom: 16px; width: 100%; }
+
+.pendingAttachments { margin: 0 8px 8px; max-height: min(160px, 20svh); overflow-y: auto; }
+.preview .pendingAttachments button { min-height: 20px; width: 20px; height: 20px; padding: 0; border: 0; }
+
+.spokenTurn :global(.quiet-message__bubble),
+.spokenTurn :global(.quiet-message__user-bubble) { width: 100%; max-width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; color: inherit; }
+
+.spokenTurn :global(.quiet-message__avatar) { display: none; }
+.preview .spokenTurn :global(.quiet-worked-for__toggle) {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--homa-muted-ink);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  gap: 4px;
+}
+.preview .spokenTurn :global(.quiet-worked-for__toggle):hover { color: var(--homa-ink); }
+.preview .spokenTurn :global(.quiet-worked-for__toggle):focus-visible { outline-offset: -2px; }
+
+@media (max-height: 500px) {
+  .preview[data-engaged="true"] .screen { padding-top: 16px; }
+  .preview[data-engaged="true"] .characterStage { width: min(52px, 9svh); top: 0; }
+  .voiceConversation { margin-top: 8px; }
+  .voiceConversationBody { --transcript-fade-top: 16px; --transcript-fade-bottom: 24px; }
+}

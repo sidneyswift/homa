@@ -5,6 +5,7 @@ import {
   type InboundContinuityInput,
   type PersistCanonicalMessageInput,
 } from "./conversation-continuity/ledger";
+import { conversationRecordingEnabled, linkConversationRecording } from "./conversation-recording";
 import { embedText } from "./learning/embeddings";
 import { mapDb } from "./map/db";
 import { isHiddenDirective } from "./onboarding/directives";
@@ -16,8 +17,6 @@ import { isHiddenDirective } from "./onboarding/directives";
  * browser can never forge history; only this hook-driven path writes,
  * and members read their own rows through RLS (the recall tool's path).
  */
-
-const CONTENT_MAX_CHARS = 8000;
 
 export interface PersistMessageInput {
   attributes: unknown;
@@ -31,6 +30,8 @@ export interface PersistMessageInput {
 }
 
 export interface PersistConversationMessageDependencies {
+  /** Canonical triggers already queued the exact revision for server retry. */
+  deferIndexing?: boolean;
   resolveInbound(
     input: InboundContinuityInput,
   ): ReturnType<typeof resolveInboundContinuity>;
@@ -105,8 +106,16 @@ export async function persistConversationMessage(
   return persistConversationMessageWithDependencies(
     input,
     dependencies ?? {
+      deferIndexing: conversationRecordingEnabled(),
       resolveInbound: resolveInboundContinuity,
-      persistCanonical: persistCanonicalMessage,
+      persistCanonical: async input => {
+        const result = await persistCanonicalMessage(input);
+        const attrs = input.attributes as { familyId?: string; memberUserId?: string };
+        if (result && attrs.familyId && attrs.memberUserId && conversationRecordingEnabled()) {
+          await linkConversationRecording({ familyId: attrs.familyId, memberUserId: attrs.memberUserId }, result.id);
+        }
+        return result;
+      },
       embed: embedText,
       async saveEmbedding(messageId, embedding, sourceContent, replaceExisting) {
         if (!familyId) return;
@@ -141,7 +150,7 @@ async function persistConversationMessageWithDependencies(
   const familyId = attrs.familyId;
   if (!familyId) return null;
 
-  const content = input.content.trim().slice(0, CONTENT_MAX_CHARS);
+  const content = input.content;
   if (content.length === 0) return null;
   const channel = channelLabel(input.attributes, input.channelKind);
   let continuityAttributes: Record<string, string> = {};
@@ -176,18 +185,6 @@ async function persistConversationMessageWithDependencies(
   const isTerminalAssistantStop =
     input.role === "assistant" && input.finishReason === "stop";
 
-  // Best-effort semantic index (about 200-400ms per message inside the
-  // hook, after the user already has their streamed text). Null means
-  // this row is findable by FTS only, never a failed write.
-  //
-  // A hidden onboarding directive is skipped: it is the app talking, so
-  // indexing it would put machine text in the same vector space recall
-  // searches for the parent's own words, and it would spend an embedding
-  // call on a string nobody will ever look for.
-  const embedding = isHiddenDirective(content)
-    ? null
-    : await dependencies.embed(content, { familyId });
-
   const persisted = await dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },
     sessionId: input.sessionId,
@@ -206,13 +203,17 @@ async function persistConversationMessageWithDependencies(
         ? isTerminalAssistantStop
         : undefined,
   });
-  if (persisted && embedding) {
-    await dependencies.saveEmbedding(
-      persisted.id,
-      embedding,
-      content,
-      isTerminalAssistantStop,
-    );
+  // The canonical text is durable before the optional search provider runs.
+  // An unavailable index cannot make a stored message look like a failed send.
+  if (persisted && !dependencies.deferIndexing && !isHiddenDirective(content)) {
+    try {
+      const embedding = await dependencies.embed(content, { familyId });
+      if (embedding) await dependencies.saveEmbedding(
+        persisted.id, embedding, content, isTerminalAssistantStop,
+      );
+    } catch {
+      console.error("conversation indexing unavailable; canonical message retained");
+    }
   }
   return persisted;
 }
