@@ -24,6 +24,7 @@ create index conversation_index_jobs_due on public.conversation_index_jobs(next_
 create function public.advance_conversation_search_revision() returns trigger
 language plpgsql security definer set search_path = public, pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return new; end if;
   if (new.content,new.family_id,new.member_user_id) is distinct from (old.content,old.family_id,old.member_user_id)
     or (old.embedding is not null and new.embedding is null) then
     new.search_revision := gen_random_uuid();
@@ -39,6 +40,7 @@ create trigger zz_conversation_search_revision before update on public.conversat
 create function public.queue_conversation_search_revision() returns trigger
 language plpgsql security definer set search_path = public, pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return new; end if;
   if tg_op='UPDATE' and new.search_revision=old.search_revision then return new; end if;
   insert into public.conversation_index_jobs(message_id,family_id,member_user_id,revision,next_attempt_at)
     values(new.id,new.family_id,new.member_user_id,new.search_revision,clock_timestamp()+interval '5 seconds')

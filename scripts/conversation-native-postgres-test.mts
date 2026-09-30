@@ -18,6 +18,7 @@ assert(process.env.HOMA_EVAL_DATABASE_URL && process.env.HOMA_EVAL_BLOB_DIR);
 process.env.HOMA_CONVERSATION_NATIVE_INPUT="1";
 assert(!process.env.VERCEL && process.env.HOMA_EVAL_ALLOW_PROD_WRITES !== "1");
 const sql=mapDb();
+await sql`update public.conversation_rebuild_settings set enabled = true`; // gh#1158: these suites exercise the rebuild itself.
 try {
   const [target]=await sql`select current_setting('data_directory') as directory,host(inet_server_addr()) as address,current_database() as database,current_user as owner`;
   const root=path.dirname(realpathSync(process.env.HOMA_EVAL_BLOB_DIR!));

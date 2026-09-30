@@ -72,11 +72,15 @@ begin
   -- Deletion can precede the first recorder write. Create the content-free
   -- owner record so a later durable-source replay still finds the tombstone.
   -- During actual account/family erasure the parent may already be gone.
-  insert into public.conversation_records(family_id, member_user_id)
-    select old.family_id, old.member_user_id
-    where exists (select 1 from public.families where id = old.family_id)
-      and exists (select 1 from auth.users where id = old.member_user_id)
-    on conflict (family_id, member_user_id) do nothing;
+  -- Off: no rebuild record exists to tombstone, and account erasure must never
+  -- insert rows beneath a family it is deleting.
+  if public.conversation_rebuild_enabled() then
+    insert into public.conversation_records(family_id, member_user_id)
+      select old.family_id, old.member_user_id
+      where exists (select 1 from public.families where id = old.family_id)
+        and exists (select 1 from auth.users where id = old.member_user_id)
+      on conflict (family_id, member_user_id) do nothing;
+  end if;
   select id into record_id from public.conversation_records
     where family_id = old.family_id and member_user_id = old.member_user_id
     for update;

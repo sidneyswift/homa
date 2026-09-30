@@ -54,6 +54,7 @@ create trigger conversation_delivery_snapshot_guard before insert or update on p
 create function public.track_conversation_feed_snapshot() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op='DELETE' and old.published_at is not null then
     perform public.append_conversation_feed_change(old.family_id,old.recipient_member_user_id,old.id,'delivery:'||old.id::text,'delete');
   elsif tg_op<>'DELETE' and new.published_at is not null then
@@ -70,6 +71,7 @@ create function public.publish_conversation_delivery_snapshot() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare snapshot public.conversation_delivery_snapshots%rowtype;
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if new.status='sent' then
     -- A removed/rejoined adult cannot regain an old pending grant. Recording
     -- provider completion still succeeds; the stale snapshot stays unpublished.
@@ -95,6 +97,7 @@ create function public.track_conversation_snapshot_source_owner() returns trigge
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare snapshot public.conversation_delivery_snapshots%rowtype;
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if new.member_user_id is distinct from old.member_user_id or new.family_id<>old.family_id then
     for snapshot in select * from public.conversation_delivery_snapshots where source_message_id=new.id and published_at is not null
     loop

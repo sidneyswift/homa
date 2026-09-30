@@ -27,6 +27,7 @@ test('job quotations preserve exact saved words without interpreting a paraphras
 test('PostgreSQL permanent jobs release the foreground and preserve private effect ownership', {skip:!process.env.HOMA_EVAL_DATABASE_URL},async t=>{
   assert(process.env.HOMA_EVAL_DATABASE_URL&&process.env.HOMA_EVAL_BLOB_DIR);assert(!process.env.VERCEL&&process.env.HOMA_EVAL_ALLOW_PROD_WRITES!=='1');
   const sql=mapDb(),flags={HOMA_AGENT_JOBS_ENABLED:process.env.HOMA_AGENT_JOBS_ENABLED,HOMA_CONVERSATION_REQUESTS:process.env.HOMA_CONVERSATION_REQUESTS,HOMA_CONVERSATION_RECORDING:process.env.HOMA_CONVERSATION_RECORDING};
+  await sql`update public.conversation_rebuild_settings set enabled = true`; // gh#1158: these suites exercise the rebuild itself.
   try{
     const [target]=await sql`select current_setting('data_directory') as directory,host(inet_server_addr()) as address,current_database() as database,current_user as owner`;
     const root=path.dirname(realpathSync(process.env.HOMA_EVAL_BLOB_DIR));assert.match(path.basename(root),/^homa-eval-sandbox-/u);

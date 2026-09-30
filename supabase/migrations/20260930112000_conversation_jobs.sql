@@ -26,6 +26,7 @@ create function public.track_conversation_job_feed() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare j public.conversation_jobs%rowtype; c public.conversation_records%rowtype;
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_table_name='conversation_jobs' then
     if tg_op='DELETE' then j=old; else j=new; end if;
   elsif tg_table_name='agent_jobs' then
@@ -108,6 +109,10 @@ create function public.track_conversation_job_material() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare j record; material uuid;
 begin
+  if not public.conversation_rebuild_enabled() then
+    if tg_op='DELETE' then return old; end if;
+    return new;
+  end if;
   material=case when tg_op='DELETE' then old.id else new.id end;
   for j in select l.message_id,l.job_id,c.family_id,c.member_user_id from public.conversation_jobs l
     join public.conversation_records c on c.id=l.conversation_id
@@ -124,6 +129,7 @@ create trigger conversation_job_material_change before update or delete on publi
 create function public.track_conversation_native_feed() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op<>'INSERT' and old.canonical_message_id is not null then
     perform public.invalidate_conversation_feed_message(old.canonical_message_id);
   end if;

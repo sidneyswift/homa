@@ -205,7 +205,7 @@
     "seed:family-history": "tsx --tsconfig apps/web/tsconfig.json scripts/seed-family-history.mts",
     "test:material-print:postgres": "pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/print-finalization-postgres.mts",
     "test:material-handwriting:postgres": "HOMA_EVAL_ISOLATION=1 pnpm eval:sandbox --exec pnpm exec tsx ../../scripts/handwriting-material-integration-postgres.mts",
-    "test:conversation-core:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json ../../scripts/conversation-recording-postgres-test.mts",
+    "test:conversation-core:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json ../../scripts/conversation-recording-postgres-test.mts && pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json ../../scripts/conversation-rebuild-switch-postgres-test.mts",
     "test:conversation-attachments:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json ../../scripts/conversation-attachments-postgres-test.mts",
     "test:conversation-feed:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json --test lib/conversation-feed.test.ts lib/conversation-question-freeform.test.ts lib/conversation-operations.test.ts lib/conversation-delivery-snapshots.test.ts lib/conversation-indexing.test.ts lib/conversation-jobs.test.ts",
     "test:conversation-native:postgres": "pnpm eval:sandbox --exec pnpm exec tsx --tsconfig tsconfig.json ../../scripts/conversation-native-postgres-test.mts",

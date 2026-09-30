@@ -129,7 +129,7 @@ them as evidence at their stated checkpoint, not as a current inventory.
 
 ## Recording storage candidate, disconnected from live traffic
 
-Migration `20260912180000_conversation_recording.sql` and `conversation-recording.ts` provide an adult-scoped, content-only event store with commit-ordered positions. The canonical message UUID remains the history identity. Raw event tables have no browser read/write grants.
+Migration `20260930101000_conversation_recording.sql` and `conversation-recording.ts` provide an adult-scoped, content-only event store with commit-ordered positions. The canonical message UUID remains the history identity. Raw event tables have no browser read/write grants.
 
 The recorder requires the absolute source index from the durable Eve stream, including non-content events in that count. Do not substitute a hook-local counter, timestamp, string hash, offset or turn/step identity. Only conversation text is copied; raw audio, reasoning, tool arguments and authentication envelopes are excluded.
 
@@ -165,7 +165,7 @@ Required next implementation: caller intent identity, committed request receipt 
 
 The earlier September 12 continuation added a tested storage boundary disconnected from live submission. The later HTTP/admission continuation is recorded below; no new path is enabled for parents.
 
-`conversation-requests.ts` plus `20260912213000_conversation_requests.sql` commit the exact canonical user input, request receipt and queued dispatch state in one transaction. Repeating an intent returns the same request and canonical UUID; changing its text conflicts. Dispatch leases are fenced and expire only before execution. The winning runtime session/turn/sequence owns execution permanently. A timeout becomes `recovery_required`, never an automatic new execution. Claim validates the exact submitted text and rebinds the existing canonical UUID before the ordinary persistence hook can see it. Canonical creation time remains unchanged.
+`conversation-requests.ts` plus `20260930102000_conversation_requests.sql` commit the exact canonical user input, request receipt and queued dispatch state in one transaction. Repeating an intent returns the same request and canonical UUID; changing its text conflicts. Dispatch leases are fenced and expire only before execution. The winning runtime session/turn/sequence owns execution permanently. A timeout becomes `recovery_required`, never an automatic new execution. Claim validates the exact submitted text and rebinds the existing canonical UUID before the ordinary persistence hook can see it. Canonical creation time remains unchanged.
 
 Membership removal rotates the adult record's access epoch and revokes queued/leased requests. Old clients cannot re-admit or claim them after rejoining. Access revocation preserves history. A trusted original runtime can still record an already-observed terminal outcome with its exact secret lease and runtime identity; it cannot regain read access or permission for new effects. Canonical deletion scrubs the request fingerprint and leaves a content-free intent tombstone. The earlier recorder also now creates a source tombstone when deletion precedes its first write. Bounded whole-transaction retries handle deletion/claim deadlocks without retrying external effects.
 
@@ -238,7 +238,7 @@ Do not enable `HOMA_CONVERSATION_REQUESTS` yet. The ordinary question-card recor
 
 ## Ordinary question cards, local candidate
 
-The new `20260912223000_conversation_question_cards.sql` migration stores validated public question cards separately from tool notes and arbitrary tool output. The global `action.result` hook records only a confirmed successful `ask_user_questions` result. Card payload and a readable canonical assistant message commit together. The canonical message retains the original runtime session for adult provenance and uses its own `question-card:<UUID>` turn segment to avoid overwriting normal assistant text. Runtime operations must use the real turn on the request, never that canonical segment.
+The new `20260930103000_conversation_question_cards.sql` migration stores validated public question cards separately from tool notes and arbitrary tool output. The global `action.result` hook records only a confirmed successful `ask_user_questions` result. Card payload and a readable canonical assistant message commit together. The canonical message retains the original runtime session for adult provenance and uses its own `question-card:<UUID>` turn segment to avoid overwriting normal assistant text. Runtime operations must use the real turn on the request, never that canonical segment.
 
 Source identity includes the original claimed request/session/turn, turn sequence and call ID; step index is bound into replay validation. Installed Eve's action sequence is the turn sequence, not an event counter. Mismatched sequence, changed payload/step, wrong execution and deleted replay fail closed. Exact concurrent replays return one card and one canonical message. The database also requires an object payload so accidental double serialization fails at write time.
 

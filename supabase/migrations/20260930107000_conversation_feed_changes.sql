@@ -16,6 +16,7 @@ create function public.append_conversation_feed_change(target_family uuid,target
 returns void language plpgsql security definer set search_path=public,pg_temp as $$
 declare record_id uuid; next_position bigint;
 begin
+  if not public.conversation_rebuild_enabled() then return; end if;
   if target_adult is null or target_message is null or target_session is null then return; end if;
   select id into record_id from public.conversation_records
     where family_id=target_family and member_user_id=target_adult for update;
@@ -42,6 +43,7 @@ create function public.invalidate_conversation_feed_message(target_message uuid)
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare message public.conversation_messages%rowtype;
 begin
+  if not public.conversation_rebuild_enabled() then return; end if;
   select * into message from public.conversation_messages where id=target_message;
   if found and message.visibility='family' then
     perform public.append_conversation_feed_change(message.family_id,message.member_user_id,message.id,message.session_id,'invalidate');
@@ -53,6 +55,7 @@ revoke all on function public.invalidate_conversation_feed_message(uuid) from pu
 create function public.track_conversation_feed_message() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op <> 'INSERT' and old.visibility='family' and old.member_user_id is not null then
     if tg_op='DELETE' then
       perform public.append_conversation_feed_change(old.family_id,old.member_user_id,old.id,old.session_id,'delete');
@@ -73,6 +76,7 @@ create trigger conversation_feed_message_change after insert or update or delete
 create function public.track_conversation_feed_question() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op <> 'INSERT' then perform public.invalidate_conversation_feed_message(old.canonical_message_id); end if;
   if tg_op <> 'DELETE' then perform public.invalidate_conversation_feed_message(new.canonical_message_id); end if;
   return null;
@@ -86,6 +90,7 @@ create function public.track_conversation_feed_request() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare message_id uuid;
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op <> 'INSERT' then perform public.invalidate_conversation_feed_message(old.canonical_message_id); end if;
   if tg_op <> 'DELETE' then
     perform public.invalidate_conversation_feed_message(new.canonical_message_id);
@@ -106,6 +111,7 @@ create function public.invalidate_conversation_feed_material_session(target_fami
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare message_id uuid;
 begin
+  if not public.conversation_rebuild_enabled() then return; end if;
   -- One invalidation per adult/session reloads its material list, including an
   -- empty list after deletion. No other adult's conversation is inferred.
   for message_id in select distinct on(m.member_user_id) m.id from public.conversation_messages m
@@ -118,6 +124,7 @@ revoke all on function public.invalidate_conversation_feed_material_session(uuid
 create function public.track_conversation_feed_material() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op <> 'INSERT' then perform public.invalidate_conversation_feed_material_session(old.family_id,old.generation->>'sessionId'); end if;
   if tg_op <> 'DELETE' then perform public.invalidate_conversation_feed_material_session(new.family_id,new.generation->>'sessionId'); end if;
   return null;
@@ -131,6 +138,7 @@ create function public.track_conversation_feed_attachment() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare message_id uuid; attachment uuid;
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   attachment := case when tg_op='DELETE' then old.id else new.id end;
   for message_id in select r.canonical_message_id from public.conversation_requests r
     join public.conversation_request_attachments a on a.request_id=r.id
@@ -147,6 +155,7 @@ create function public.track_conversation_feed_preparation() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare message_id uuid; attachment uuid;
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   attachment := case when tg_op='DELETE' then old.attachment_id else new.attachment_id end;
   for message_id in select r.canonical_message_id from public.conversation_requests r
     join public.conversation_request_attachments a on a.request_id=r.id
@@ -162,6 +171,7 @@ create trigger conversation_feed_preparation_change after update or delete on pu
 create function public.track_conversation_feed_delivery() returns trigger
 language plpgsql security definer set search_path=public,pg_temp as $$
 begin
+  if not public.conversation_rebuild_enabled() then return null; end if;
   if tg_op <> 'INSERT' then perform public.invalidate_conversation_feed_message(old.message_id); end if;
   if tg_op <> 'DELETE' then perform public.invalidate_conversation_feed_message(new.message_id); end if;
   return null;
