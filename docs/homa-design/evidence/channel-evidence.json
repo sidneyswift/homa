@@ -13,7 +13,7 @@
         "selector": "email",
         "surfaceCount": 16,
         "surfaceIdsFingerprint": "c03430691117eaf8004c6104aceb718714f6c89f33ff40b66aabbe8a22cd58e1",
-        "scopedInputFingerprint": "21ea7c0b0603c9ec0ed7725b90d64854a956e3dabd12caeda8e08605f3814d32"
+        "scopedInputFingerprint": "83fe590af9fb85d6c5fc81381be05aa6d1257469807203dc66fe70c72a3a7d31"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/email.json",
       "fixtureChecksum": "6efc3722530e61905087bcf6f788c632522930ecd032ef7d056726853186bb4e",
@@ -117,9 +117,9 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "parent-pdf",
-        "surfaceCount": 84,
-        "surfaceIdsFingerprint": "ac95ab402d0fbf73dd2d04ada610431498b05f3d13c3efbb1dca1aeca804dd95",
-        "scopedInputFingerprint": "dd29e4187f80700deceac90b45fb83a47599d5968a6d8929d265277dd66fb131"
+        "surfaceCount": 115,
+        "surfaceIdsFingerprint": "1dff992abdbff514bf628bc249cbf1a5d1ff68f77d0293da0843de919e823ff9",
+        "scopedInputFingerprint": "660bc3feb46e88be6363207f289f027a27791b9574688e7c9345e393cd9ae9cd"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/parent-pdf.json",
       "fixtureChecksum": "ab26dc0e9cdca23930a5502d0512042c870271890f992a87827d3df218153314",
@@ -213,9 +213,9 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "physical-print",
-        "surfaceCount": 84,
-        "surfaceIdsFingerprint": "36d740930eeb3531042b6dfc1c7fa34dcdb9337f9a680da6be5b2841cdb1dbe9",
-        "scopedInputFingerprint": "b2c7b39e228f96a5eed0b8bd7a8ad8ce024135fe907dc8d79f5e39d06b216ff5"
+        "surfaceCount": 115,
+        "surfaceIdsFingerprint": "ca8a5e8e2e70b81f5f5f486b33ff2734e726a4f5f2737b6318de5a63d2672e3a",
+        "scopedInputFingerprint": "a0e3d6558a810e32bc80522b292bcc21be4847b96c9d48ba4a9c7db6045cd9c7"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/physical-print.json",
       "fixtureChecksum": "53d9f100310e6668b99ba2b43775e904a7cb2618fff4acc729c0814cd9327795",
@@ -291,7 +291,7 @@
         "selector": "provider",
         "surfaceCount": 23,
         "surfaceIdsFingerprint": "4573a1c94a5ca79e918530a93665c4d3012bd5de1b3c3b895648ea223f9ada8a",
-        "scopedInputFingerprint": "ed756b5060cd330549f3569830a4afb54748b004ae457fe3e730030d4d097d62"
+        "scopedInputFingerprint": "3d0c124fa84eba1b68bdf0ac7d7151b1101075d2294671a15dd657292b06a62e"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/provider.json",
       "fixtureChecksum": "61c76f13a8a058f145b811b43cb16322871313915fd090bfe4588044adc21a83",
@@ -370,9 +370,9 @@
       "ownerIssue": "gh#728",
       "surfaceCoverage": {
         "selector": "distribution-asset",
-        "surfaceCount": 72,
-        "surfaceIdsFingerprint": "27ef92cc05818d1d9caebc2898d5e9161ea47a6082f149064d8531f9c6f3ed9e",
-        "scopedInputFingerprint": "7434a733c04e811fdc38ade16b3b89eb46f7eacfa7d3c3484416b0c26ed4f2df"
+        "surfaceCount": 77,
+        "surfaceIdsFingerprint": "a98c13b633f16ac43c6c7b9d5042207d51b0f337cb3c846e9a4f674aa5e42035",
+        "scopedInputFingerprint": "7facd7498a535c6b5d20f41c1a41f280c8ffa350067a0750425cdc9713a77d9a"
       },
       "fixturePath": "docs/homa-design/evidence/channel-inputs/distribution-asset.json",
       "fixtureChecksum": "1b7669dcaca9728eca86d8c7be1e1f68a599f7cabb813286611a981e9cdccf18",
