@@ -23,7 +23,7 @@ test("chat starts a read-only boundary witness before the hard stall abort", () 
 });
 
 test("primary activity and finish cancel the boundary witness", () => {
-  const eventStart = source.indexOf("onEvent() {");
+  const eventStart = source.indexOf("onEvent(event) {");
   const finishStart = source.indexOf("onFinish(snapshot) {");
   const hookEnd = source.indexOf("  });", finishStart);
   assert.ok(eventStart >= 0 && finishStart > eventStart && hookEnd > finishStart);

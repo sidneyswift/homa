@@ -29,6 +29,8 @@ export interface PersistMessageInput {
   content: string;
   turnId: string | undefined;
   finishReason?: string;
+  /** Server-only experiment: canonical save atomically queues semantic indexing. */
+  deferSemanticIndex?: boolean;
 }
 
 export interface PersistConversationMessageDependencies {
@@ -189,15 +191,18 @@ async function persistConversationMessageWithDependencies(
     ? { sessionId: input.sessionId, turnId: input.turnId, role: input.role, sequence: input.sequence }
     : undefined;
 
-  // Best-effort semantic index, awaited before canonical persistence on
-  // both user and assistant messages. Null means
+  const deferIndex = input.role === "user" &&
+    (input.deferSemanticIndex ?? process.env.HOMA_DEFER_USER_INDEX === "true");
+
+  // The experimental user path queues indexing with the canonical write.
+  // The existing path still awaits its best-effort index. Null means
   // this row is findable by FTS only, never a failed write.
   //
   // A hidden onboarding directive is skipped: it is the app talking, so
   // indexing it would put machine text in the same vector space recall
   // searches for the parent's own words, and it would spend an embedding
   // call on a string nobody will ever look for.
-  const embedding = isHiddenDirective(content)
+  const embedding = deferIndex || isHiddenDirective(content)
     ? null
     : trace
       ? await measureChatPreparation("embedding_total", () => dependencies.embed(content, {
@@ -207,6 +212,7 @@ async function persistConversationMessageWithDependencies(
 
   const persistCanonical = () => dependencies.persistCanonical({
     attributes: { ...attrs, ...continuityAttributes },
+    deferSemanticIndex: deferIndex && !isHiddenDirective(content) && content.length >= 3,
     sessionId: input.sessionId,
     channel,
     sequence: input.sequence,

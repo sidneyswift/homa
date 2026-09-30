@@ -1,5 +1,7 @@
 import postgres from "postgres";
 
+import { timedSql } from "../observability/chat-timing-io";
+
 import {
   EVAL_DATABASE_URL_VAR,
   isEvalIsolationActive,
@@ -92,5 +94,6 @@ export function mapDb(): ReturnType<typeof postgres> {
           idle_timeout: 20,
           connect_timeout: 15,
         });
+  client = timedSql(client);
   return client;
 }

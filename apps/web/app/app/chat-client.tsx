@@ -1,5 +1,6 @@
 "use client";
 
+import { beginBrowserTiming, browserTimingMark, browserTimingEvent, installBrowserTiming } from "../../lib/observability/chat-timing-browser";
 import type { ResolvedAssessmentAction, SelectedAssessmentAction } from "../../lib/child-progress/assessment-intent";
 import { useSelectedAssessment } from "./use-selected-assessment";
 import { SelectedAssessmentNotice } from "./selected-assessment-notice";
@@ -279,6 +280,7 @@ const STREAM_RECONNECT_ATTEMPTS = 8;
 const RECOVERY_DEADLINE_MS = 240_000;
 
 interface BoundChatSendInput {
+  timingStartedAt?: number;
   message: string | UserContent;
   headers?: Readonly<Record<string, string>>;
 }
@@ -401,7 +403,9 @@ export function ChatClient({
       new Client({
         auth: {
           bearer: async () => {
+            browserTimingMark("browser.auth_begin");
             const { data } = await supabase.auth.getSession();
+            browserTimingMark("browser.auth_end");
             return data.session?.access_token ?? "";
           },
         },
@@ -671,13 +675,15 @@ export function ChatClient({
   const agent = useEveAgent({
     initialEvents: staleSessionlessEvents ? [] : prepared.initialEvents,
     session: reattachableSession.session,
-    onEvent() {
+    onEvent(event) {
+      browserTimingEvent(event);
       const nowMs = currentTimeMs();
       lastStreamActivityRef.current = nowMs;
       boundaryWatchdogRef.current?.noteActivity(nowMs);
       durableCursorRef.current += 1;
     },
     onFinish(snapshot) {
+      browserTimingMark("send.finished");
       boundaryWatchdogRef.current?.finish();
       const failedUser = snapshot.data.messages.findLast(message => message.role === "user");
       const submitted = lastSendRef.current;
@@ -1005,6 +1011,7 @@ export function ChatClient({
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
       void sendRef.current?.({
+        timingStartedAt: flush.timingStartedAt,
         message,
         headers: headersForMessage(
           message,
@@ -1183,6 +1190,9 @@ export function ChatClient({
 
   const sendAcrossTabs = useCallback(
     async (input: BoundChatSendInput): Promise<void> => {
+      installBrowserTiming();
+      beginBrowserTiming(input.timingStartedAt);
+      browserTimingMark("session.lock_requested");
       preparingSendRef.current = true;
       setPreparingSend(input);
       setBindingSyncFailure(false);
@@ -1190,6 +1200,7 @@ export function ChatClient({
       let handedOff = false;
       try {
         await withChatTurnLock(storageKey, async () => {
+          browserTimingMark("session.lock_acquired");
           persistPreparedRotation();
           let current = reattachableSession.session.state;
           const saved = loadSavedChat(storageKey);
@@ -1204,6 +1215,7 @@ export function ChatClient({
           // session's latest durable user turn before agentSend can append one.
           setRestoringBoundSession(true);
           const localLatestSequence = latestTurnSequence(saved.events ?? []);
+          browserTimingMark("session.binding_begin");
           const restored = await measureChatPreparation("session_binding", () => restoreServerBoundEveSession({
             client: sessionClient,
             current: {
@@ -1214,6 +1226,7 @@ export function ChatClient({
             timeZone,
             signal: new AbortController().signal,
           }));
+          browserTimingMark("session.binding_end");
           if (restored === null) throw new Error("Session preparation interrupted");
           if (restored.kind === "unavailable") {
             pendingBoundSendRef.current = input;
@@ -1253,6 +1266,7 @@ export function ChatClient({
           // message before opening the network stream. Retire our receipt in
           // the same handoff so repeated identical prompts never deduplicate.
           handedOff = true;
+          browserTimingMark("eve.send_begin");
           const sending = agentSend(input);
           preparingSendRef.current = false;
           setPreparingSend(null);
@@ -2083,6 +2097,7 @@ export function ChatClient({
     text: string,
     source: ChatSendSource = { kind: "composer" },
   ): ChatSendAcceptance {
+    const timingStartedAt = performance.now();
     // She answered in prose instead of filling the card in, so the card
     // steps aside. Leaving it up would sit a form asking her name over a
     // reply where she just gave it, which is the ambiguity the composer
@@ -2140,7 +2155,7 @@ export function ChatClient({
     // composer and goes out the moment the line is free.
     if (plan.destination === "queue") {
       setQueued((current) =>
-        appendPreparedChatSendToQueue(current, plan),
+        appendPreparedChatSendToQueue(current, plan, timingStartedAt),
       );
       return "queued";
     }
@@ -2159,6 +2174,7 @@ export function ChatClient({
     // that queue still goes alone: it is the app's sentence, and gluing
     // it to hers is the exact failure the lane exists to prevent.
     const flush = flushChatQueue(queued, {
+      timingStartedAt,
       text: plan.message,
       lane: plan.lane,
       modality: plan.modality,
@@ -2176,6 +2192,7 @@ export function ChatClient({
     turnStartedAtRef.current = currentTimeMs();
     markTurnStarted();
     void sendRef.current?.({
+      timingStartedAt: flush.timingStartedAt ?? timingStartedAt,
       message: outgoing,
       headers: headersForMessage(
         outgoing,
@@ -2218,6 +2235,7 @@ export function ChatClient({
    * the queue stays text-only).
    */
   async function sendMessageWithAttachments(text: string): Promise<void> {
+    const timingStartedAt = performance.now();
     // Attachments hold for the idle line already (no queueing for
     // files); recovering counts as occupied for the same session-fork
     // reason sendMessage's plan does (GH #170).
@@ -2280,6 +2298,7 @@ export function ChatClient({
       turnStartedAtRef.current = currentTimeMs();
       markTurnStarted();
       void sendRef.current?.({
+        timingStartedAt,
         message: parts,
         headers: headersForMessage(parts, turn.modality, "parent"),
       });
@@ -2604,6 +2623,7 @@ export function ChatClient({
               return (
                 <div
                   key={item.key}
+                  data-chat-timing-message={item.message.id}
                   className={`flex flex-col gap-1.5 ${dimmed ? "opacity-45 transition-opacity" : ""}`}
                 >
                   {messageView}

@@ -1,3 +1,4 @@
+import { timeRequest } from "../../../../lib/observability/chat-timing-server";
 import { readWebSessionBinding } from "../../../../lib/conversation-continuity/web-session-binding";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
 import { resolveApiFamily } from "../../../../lib/api-auth";
@@ -14,11 +15,11 @@ import { measureChatPreparation, type ChatPreparationMetadata } from "../../../.
  */
 export async function GET(request: Request): Promise<Response> {
   const timing: ChatPreparationMetadata = {};
-  return measureChatPreparation("binding_total", async () => {
+  return timeRequest(request, "homa.http.binding", () => measureChatPreparation("binding_total", async () => {
     const response = await readBindingResponse(request);
     timing.statusCode = response.status;
     return response;
-  }, undefined, timing);
+  }, undefined, timing));
 }
 
 async function readBindingResponse(request: Request): Promise<Response> {

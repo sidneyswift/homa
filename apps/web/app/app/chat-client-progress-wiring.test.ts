@@ -46,7 +46,7 @@ describe("ChatClient progress card wiring", () => {
     );
     assert.match(
       source,
-      /appendPreparedChatSendToQueue\(current, plan\)/u,
+      /appendPreparedChatSendToQueue\(current, plan, timingStartedAt\)/u,
     );
   });
 

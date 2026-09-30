@@ -1,3 +1,4 @@
+import { browserTimingMark } from "../../lib/observability/chat-timing-browser";
 import {
   ClientError,
   type Client,
@@ -158,6 +159,7 @@ export function webSessionBindingDecision(input: {
 }
 
 async function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
+  browserTimingMark("binding.retry_begin");
   await new Promise<void>((resolve) => {
     const timer = setTimeout(done, ms);
     function done() {
@@ -167,6 +169,7 @@ async function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
     }
     signal.addEventListener("abort", done);
   });
+  browserTimingMark("binding.retry_end");
 }
 
 async function replayBoundSession(input: {

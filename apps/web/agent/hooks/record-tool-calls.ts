@@ -1,3 +1,4 @@
+import { timedHookEvents } from "../../lib/observability/chat-timing-hooks";
 import { defineHook } from "eve/hooks";
 
 import {
@@ -19,7 +20,7 @@ import { usageChannelFromAttributes } from "../../lib/model-usage";
  * never from model output.
  */
 export default defineHook({
-  events: {
+  events: timedHookEvents("record-tool-calls", {
     async "actions.requested"(event, ctx) {
       try {
         const attributes = ctx.session.auth.current?.attributes as
@@ -69,5 +70,5 @@ export default defineHook({
         );
       }
     },
-  },
+  }),
 });

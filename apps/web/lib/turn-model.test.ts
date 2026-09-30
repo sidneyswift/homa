@@ -9,6 +9,7 @@ import selectTurnModelHook from "../agent/hooks/select-turn-model";
 import { turnModelState } from "../agent/turn-model-state";
 import { workspaceInputSchema } from "../agent/tools/manage_workspace";
 import { buildResearchSessionInput } from "./knowledge/research-run";
+import { FAST_MODELS, routedGatewayModel } from "./model-router/router";
 import { createHomaTurnModel } from "./turn-model";
 
 const researchAuth = buildResearchSessionInput(
@@ -147,4 +148,36 @@ test("workspace tool has a provider-compatible object root and retains per-opera
     await f.model.doStream({ prompt, tools });
     for (const call of f.calls) assert.equal(call.params.tools, tools);
   }
+});
+
+
+test("research bypasses the conversational router while eligible family turns can use Luna", async () => {
+  let selected: HomaTurnModel = FLEET_RESEARCH_MODEL;
+  let classifications = 0;
+  const calls: string[] = [];
+  const resolveModel = (id: string) => new MockLanguageModelV4({
+    modelId: id,
+    doStream: async () => {
+      calls.push(id);
+      return { stream: new ReadableStream({ start(controller) { controller.close(); } }) };
+    },
+  });
+  const conversational = routedGatewayModel({
+    candidate: () => FAST_MODELS.luna,
+    resolveModel,
+    classify: async () => {
+      classifications++;
+      return { model: FAST_MODELS.luna, reason: "simple", routerMs: 1 };
+    },
+  });
+  const model = createHomaTurnModel({
+    currentModel: () => selected,
+    resolveModel: id => id === HOMA_MODEL ? conversational : resolveModel(id),
+  });
+  await model.doStream({ prompt });
+  assert.equal(classifications, 0);
+  selected = HOMA_MODEL;
+  await model.doStream({ prompt });
+  assert.equal(classifications, 1);
+  assert.deepEqual(calls, [FLEET_RESEARCH_MODEL, FAST_MODELS.luna]);
 });
