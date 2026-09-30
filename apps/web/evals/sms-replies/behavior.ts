@@ -15,7 +15,7 @@ export const SMS_REPLY_CASES = [
   { id: "picture-book", message: "During Leo's picture book this morning, he noticed that the little bear was eating berries just like the child in the story. Please save that observation and log our reading.", headsUp: false, required: ["manage_child_progress", "record_planner_activity"] },
   { id: "multi-child", message: "Please log 20 minutes of reading for Maya and 15 minutes of drawing for Leo today. Maya retold the beginning, middle and end by herself. Remember that Leo concentrates best at the kitchen table.", headsUp: false, required: ["manage_child_progress", "record_planner_activity", "remember"] },
   { id: "research", message: "Please research three current complete third-grade math curricula, check their current prices and what comes in each, compare the teaching approaches, and recommend one for Maya.", headsUp: true, required: ["web_search"] },
-  { id: "material", message: "Create a new illustrated, four-page ocean-themed counting packet for Leo, with an answer key and a printable PDF.", headsUp: true, required: ["create_printable"] },
+  { id: "material", message: "Make a one-page printable with ten large empty circles for Leo to count and color. Use a simple black-and-white HTML layout. No illustrations or answer key needed.", headsUp: true, required: ["create_printable"] },
 ] as const;
 
 const agentRoot = new URL("../../agent/", import.meta.url);
@@ -36,7 +36,7 @@ export async function runSmsReplyCase(id: string, signal: AbortSignal) {
   const system = [
     await readFile(new URL("instructions.md", agentRoot), "utf8"),
     composeSmsModeMarkdown({familyId: "synthetic-family"}),
-    `Current local date: 2026-09-30. Parent: Jamie. Partner: Alex. Maya, age 8, id ${childIds[0]}. Leo, age 5, id ${childIds[1]}. This is a linked SMS family.`,
+    `Current local date: 2026-09-30. Parent: Jamie. Partner: Alex. Maya, age 8, id ${childIds[0]}. Leo, age 5, id ${childIds[1]}. Leo's current progress snapshot: independently counts sets of up to five objects and recognizes numerals 1 to 5. His saved interest is ocean animals. This is a linked SMS family.`,
     "Available skills:\n" + skillBodies.map(({name, body}) => `${name}: ${body.match(/^description: (.+)$/m)?.[1]}`).join("\n"),
   ].join("\n\n");
   const result = await generateText({
