@@ -1,6 +1,6 @@
 import { defineHook } from "eve/hooks";
 
-import { HOMA_MODEL } from "../model";
+import { turnModelState } from "../turn-model-state";
 import {
   recordModelUsage,
   modelUsageChannelFromAttributes,
@@ -15,8 +15,8 @@ import {
  * email, dispatch, and the subject lesson lane because they are all
  * channels on the one agent.
  *
- * The model id is the agent's pinned HOMA_MODEL: step.completed does not
- * carry a model id, and the agent runs exactly one. Compaction summary
+ * The model id is the turn's selected model: step.completed does not
+ * carry a model id. The same session state drives the Gateway call. Compaction summary
  * calls are not separately recorded (compaction.completed carries no
  * usage; the trigger event's usageInputTokens measures context size, not
  * spend), a known small gap noted in the plan.
@@ -45,7 +45,7 @@ export default defineHook({
           familyId: attributes?.familyId ?? null,
           surface: usageSurfaceFromAttributes(attributes),
           channel: modelUsageChannelFromAttributes(attributes),
-          model: HOMA_MODEL,
+          model: turnModelState.get(),
           modality: "text",
           inputTokens: usage.inputTokens,
           outputTokens: usage.outputTokens,

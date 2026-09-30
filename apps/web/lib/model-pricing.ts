@@ -76,6 +76,15 @@ export const MODEL_RATES: ModelRates = {
       from: "2026-09-01",
     },
   ],
+  // Gateway catalog verified 2026-09-30, standard context base rates.
+  "anthropic/claude-sonnet-5.5": [
+    {
+      inputUsdPerMTok: 2,
+      outputUsdPerMTok: 10,
+      cacheReadUsdPerMTok: 0.2,
+      cacheWriteUsdPerMTok: 2.5,
+    },
+  ],
   "openai/gpt-5.4-mini": [
     { inputUsdPerMTok: 0.75, outputUsdPerMTok: 4.5, cacheReadUsdPerMTok: 0.075 },
   ],

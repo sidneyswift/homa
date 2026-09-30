@@ -1,19 +1,19 @@
 import { defineAgent } from "eve";
 
-import { HOMA_MODEL, HOMA_REASONING } from "./model";
+import { createHomaTurnModel } from "../lib/turn-model";
+import { HOMA_REASONING } from "./model";
+import { turnModelState } from "./turn-model-state";
 
 export default defineAgent({
-  // Gateway-routed model id (shared with the report writer via model.ts);
-  // swapped per model-mix experiments (T2).
+  // Research uses Sonnet; user-facing turns retain Astra (gh#1209).
   // Eve session compaction runs on the active turn model and triggers
   // earlier than the 0.9 default per docs/homa-planning/01-architecture.md
   // (session-rotation design).
-  model: HOMA_MODEL,
+  model: createHomaTurnModel({ currentModel: () => turnModelState.get() }),
   reasoning: HOMA_REASONING,
-  // GPT-6 Astra exposes a 1,050,000-token context window. Pin it here so
-  // eve build does not depend on a live Gateway model-catalog fetch to
-  // compile the compaction trigger.
-  modelContextWindowTokens: 1_050_000,
+  // Use the smaller research window for safe compaction on either model;
+  // pinning also keeps Eve builds independent of the live model catalog.
+  modelContextWindowTokens: 1_000_000,
   compaction: {
     thresholdPercent: 0.75,
   },
