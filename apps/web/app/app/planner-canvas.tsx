@@ -12,11 +12,11 @@ import { PlannerView } from "./planner/planner-view";
 
 /**
  * The planner canvas (founder ask 2026-07-19, the Vercel-chatbot
- * artifact shape translated to eve): when Homa calls open_planner, the
- * week board opens BESIDE the chat instead of navigating away, and a
- * small card stays in the transcript to reopen it later. The canvas is
- * chat-turn state, not a route: the tool's output part is the open
- * signal (the same tool-output-to-card seam as snap-card.tsx), a fetch
+ * artifact shape translated to eve): open_planner leaves a card in typed
+ * chat. The parent opens the week board by tapping that card; a tool read
+ * must not interrupt typing (issue #1216). Live voice can show the board.
+ * The canvas is chat-turn state, not a route: the tool's output supplies
+ * the card's child focus, a fetch
  * of /api/map/plan/board supplies the data, and each plan-writing tool
  * result (PLAN_WRITE_TOOLS below: edit_plan, schedule_plan_activity)
  * refreshes it, so the parent watches Homa fill the week in place.
@@ -56,8 +56,8 @@ export interface LatestPlannerOpen {
 
 /** The newest open_planner output in the live session, if any. Unlike
  * the snap card there is no "settled by the next user message" rule:
- * the canvas belongs to the whole sitting, and the chat client decides
- * (by part key) whether a signal is new enough to auto-open. */
+ * the card belongs to the whole sitting. Live voice uses this to find
+ * the planner focus among a new batch of effects. */
 export function latestPlannerOpen(
   messages: readonly EveMessage[],
 ): LatestPlannerOpen | null {
