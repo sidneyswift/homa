@@ -502,16 +502,12 @@ export function ChatClient({
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>(
     {},
   );
-  /** The planner canvas beside the chat: open with a focus (or null for
-   *  closed). Opens when a NEW open_planner result streams in, reopens
-   *  from any planner card in the transcript, closes with its X. */
+  /** The planner canvas opens from a transcript card or a live voice effect.
+   *  Typed-chat reads never open it: reading before an edit must not cover
+   *  the parent's composer (Carolyng feedback, issue #1216). */
   const [plannerCanvas, setPlannerCanvas] = useState<PlannerOpenSignal | null>(
     null,
   );
-  /** The newest open_planner part already acted on. Starts undefined so
-   *  the first pass records whatever a restored session carries WITHOUT
-   *  opening it: a mid-day reload should not throw the panel back up. */
-  const handledPlannerPartKeyRef = useRef<string | null | undefined>(undefined);
   /** One kickoff per mount. See the kickoff effect for the other two locks. */
   const kickoffSentRef = useRef(false);
   /** sendMessage is declared below the effects that need it, and the
@@ -1786,10 +1782,6 @@ export function ChatClient({
     );
   }, []);
 
-  // Canvas auto-open: a NEW open_planner result opens the panel with the
-  // tool's own focus. The first pass only records what a restored
-  // session already carried, so a reload never re-throws the panel up;
-  // the transcript's planner cards reopen it on purpose instead.
   const queuedParentMessages = queued
     .map((entry, index) => ({ entry, index }))
     .filter(({ entry }) => entry.lane !== "directive");
@@ -1920,17 +1912,6 @@ export function ChatClient({
         (!onboarding || hasVisibleMessages)));
   const planEditsSeen = planEditCount(renderMessages);
   const handledReportOpenPartKeyRef = useRef<string | null | undefined>(undefined);
-  useEffect(() => {
-    const latest = latestPlannerOpen(agent.data.messages);
-    if (handledPlannerPartKeyRef.current === undefined) {
-      handledPlannerPartKeyRef.current = latest?.partKey ?? null;
-      return;
-    }
-    if (!latest || latest.partKey === handledPlannerPartKeyRef.current) return;
-    handledPlannerPartKeyRef.current = latest.partKey;
-    setPlannerCanvas(latest.signal);
-  }, [agent.data.messages]);
-
   useEffect(() => {
     const latest = latestReportOpen(agent.data.messages);
     if (handledReportOpenPartKeyRef.current === undefined) {

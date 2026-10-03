@@ -12610,3 +12610,12 @@ A synthetic spoken delegation through the actual web controller dispatched exact
 once, relayed the stub backend result with Gleam, saved all caption groups, and
 closed with hangup 200 and no notices or browser errors. This caught and fixed
 the browser fetch binding and tightened spoken-result fidelity before release.
+
+
+## 2026-10-03 · Planner cards keep typed chat in place
+
+Founder direction from Carolyng's screenshot and the explicit request to fix:
+reading or updating Planner in typed chat must not open a panel over the
+parent's conversation. The existing planner card is the explicit opening
+control. Live voice retains its separately ruled display behavior. Tracked
+in gh#1216; the issue holds release checks and production evidence.

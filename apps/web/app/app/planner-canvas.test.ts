@@ -11,9 +11,8 @@ import {
 } from "./planner-canvas";
 
 /**
- * The canvas's open signal is an open_planner tool-output part, exactly
- * the snap-card seam: these tests pin the parse rules so a refusal, an
- * error result, or a half-streamed call can never open the panel.
+ * Planner cards come from successful open_planner output. Errors and
+ * unfinished reads cannot offer an opening action.
  */
 
 function toolPart(
@@ -131,5 +130,18 @@ describe("Planner canvas request ordering", () => {
     );
     assert.match(source, /latestBoardRequestRef\.current !== requestId/u);
     assert.match(source, /latestBoardRequestRef\.current \+= 1/u);
+  });
+});
+
+
+describe("typed chat planner interruption regression (#1216)", () => {
+  it("keeps planner reads out of the chat message effects and preserves card opening", () => {
+    const source = readFileSync(new URL("./chat-client.tsx", import.meta.url), "utf8");
+    // Reads arrive both during streaming and when restoring the session.
+    // Neither path may change the planner panel state.
+    assert.doesNotMatch(source, /latestPlannerOpen\(agent\.data\.messages\)/u);
+    assert.doesNotMatch(source, /setPlannerCanvas\(latest\.signal\)/u);
+    assert.match(source, /onOpenPlanner=\{setPlannerCanvas\}/u);
+    assert.match(source, /refreshSignal=\{planEditsSeen\}/u);
   });
 });
