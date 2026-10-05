@@ -90,3 +90,13 @@ reference. The native static gauntlet passes all 33 tests with this pin.
 The CI workflow was audited end to end again after its model-router test
 addition; the exact audit hash was refreshed, and release-rail tests pass.
 Android remains compile-only.
+
+The first cloud simulator build failed because OpenIAP now references
+StoreKit PricingTerms/BillingPlanType APIs unavailable in Xcode 26.4.
+The build image was corrected to `macos-tahoe-26.5-xcode-26.6`, which
+provides the newer StoreKit SDK while avoiding the Xcode 27 Swift failure.
+Replacement simulator build: `d6e132c1-3b2b-4c6a-8191-c081496f52ad`.
+Static gauntlet and mobile brand checks pass.
+
+Apple's live subscription offers confirm monthly one-week and annual
+two-week free trials. The app review notes were corrected accordingly.

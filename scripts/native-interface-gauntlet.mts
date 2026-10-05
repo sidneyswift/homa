@@ -684,7 +684,7 @@ function checkAppConfig(): GauntletCheck[] {
     check(
       "release-rails",
       eas.build?.production?.channel === "production"
-        && eas.build.production.ios?.image === "macos-tahoe-26.4-xcode-26.4"
+        && eas.build.production.ios?.image === "macos-tahoe-26.5-xcode-26.6"
         && typeof eas.submit?.production?.ios?.ascAppId === "string"
         ? "pass"
         : "fail",
