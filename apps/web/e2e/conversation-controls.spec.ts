@@ -7,6 +7,8 @@ import { resolve } from "node:path";
 import serverlessChromium from "@sparticuz/chromium";
 import { chromium, expect, test, type Browser, type Page } from "@playwright/test";
 
+import { parsePlannerDate, parsePlannerView } from "../lib/unified-planner";
+import type { FamilyEventRow } from "../lib/family-events";
 import type { ConversationFeedMessage } from "../lib/conversation-feed";
 import type { NativeConversationBatch } from "../app/app2/native-conversation-card";
 import type { NativeInputResponse } from "../lib/conversation-native-input";
@@ -22,12 +24,15 @@ const plannerKids = [
   { id: "11111111-1111-4111-8111-111111111111", name: "Maya", birthMonth: "2019-05-10", avatarUrl: null, reportToken: null },
   { id: "22222222-2222-4222-8222-222222222222", name: "Leo", birthMonth: "2021-02-10", avatarUrl: null, reportToken: null },
 ];
+let calendarWrites: { name: string; args: unknown[] }[] = [], calendarFailure = false;
+let calendarEvents: FamilyEventRow[] = [];
+const calendarToday = "2026-10-05";
 let boardStatus = 200, checkWrites: Record<string, unknown>[] = [];
 let plannerProgress: Record<string, boolean> = {};
 const plannerResponse = () => ({ ok: true, board: { timeZone: "America/New_York", kids: plannerKids, plans: plannerKids.map((child, index) => ({
   childId: child.id, subjectId: "math", planRevision: 1, progressRevision: index === 0 ? checkWrites.length : 0,
   done: index === 0 ? Object.values(plannerProgress).filter(Boolean).length : 0, total: 1,
-  retestAt: new Date(Date.now() + 28 * 86400000).toISOString(),
+  retestAt: "2026-11-02T16:00:00.000Z",
   weeks: [{ week: 1, focus: "Count together", activities: [index === 0 ? "Count the blue buttons" : "Count the toy cars"] }],
   progress: index === 0 ? plannerProgress : {}, activitySources: {},
 })) } });
@@ -65,7 +70,7 @@ test.beforeAll(async () => {
         const source = readFileSync(args.path, "utf8");
         if (!/^['"]use server['"]/u.test(source)) return;
         const names = [...source.matchAll(/export async function (\w+)/gu)].map(match => match[1]);
-        return { contents: names.map(name => `export async function ${name}(){throw new Error('Server action outside fixture scope');}`).join("\n"), loader: "js" };
+        return { contents: names.map(name => `export async function ${name}(...args){const response = await fetch('/fixture-action', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:'${name}',args})}); if(!response.ok) throw new Error('Fixture connection failed'); return response.json();}`).join("\n"), loader: "js" };
       });
     } }],
   });
@@ -78,6 +83,28 @@ test.beforeAll(async () => {
     try {
       const url = new URL(request.url!, "http://fixture");
       const send = (body: unknown, status = 200) => { response.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" }); response.end(JSON.stringify(body)); };
+      if (url.pathname === "/fixture-action") {
+        const call = await jsonBody(request); calendarWrites.push(call);
+        if (calendarFailure) return send({ error: "Fixture connection failed" }, 503);
+        if (call.name === "createFamilyEventAction") {
+          const input = call.args[0];
+          calendarEvents.push({ id: randomUUID(), familyId, childId: input.childIds[0] ?? null, ...input, createdAt: "2026-10-05T16:00:00Z" });
+        } else if (call.name === "deleteFamilyEventOccurrenceAction") {
+          const event = calendarEvents.find(event => event.id === call.args[0]);
+          if (event) event.occurrenceExceptions = [...event.occurrenceExceptions ?? [], { occurrenceOn: call.args[1], kind: "cancelled", startsOn: null, endsOn: null, startTime: null, endTime: null }];
+        } else throw new Error(`Unexpected fixture action ${call.name}`);
+        return send({ error: null });
+      }
+      if (url.pathname === "/api/workspace/planner") {
+        const board = plannerResponse().board;
+        return send(boardStatus === 200 ? { ok: true, board: { ...board,
+          kids: board.kids.map(kid => ({ id: kid.id, name: kid.name, avatar_url: null, birth_month: kid.birthMonth, reportToken: null })),
+          now: "2026-10-05T16:00:00.000Z", today: calendarToday,
+          activeDate: parsePlannerDate(url.searchParams.get("date") ?? undefined, calendarToday),
+          view: parsePlannerView(url.searchParams.get("view") ?? undefined),
+          familyEvents: calendarEvents, scheduledActivities: plannerKids.map(kid => ({ id: kid.id, familyId, childId: kid.id, subjectId: "math", week: 1, activityIndex: 0, scheduledDate: calendarToday, createdAt: "2026-10-05T16:00:00Z", updatedAt: "2026-10-05T16:00:00Z" })), learningActivities: [], hoursEntries: [],
+        } } : { ok: false }, boardStatus);
+      }
       if (url.pathname === "/api/map/plan/board") {
         return send(boardStatus === 200 ? plannerResponse() : { error: "unavailable" }, boardStatus);
       }
@@ -155,7 +182,7 @@ test.beforeAll(async () => {
   browser = await chromium.launch({ headless: true, executablePath: executablePath ?? await serverlessChromium.executablePath(), args: executablePath ? [] : serverlessChromium.args });
 });
 test.afterAll(async () => { await browser?.close(); if (server?.listening) await new Promise<void>((done, reject) => server.close(error => error ? reject(error) : done())); });
-test.beforeEach(() => { boardStatus = 200; checkWrites = []; plannerProgress = {}; messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
+test.beforeEach(() => { calendarEvents = []; calendarWrites = []; calendarFailure = false; boardStatus = 200; checkWrites = []; plannerProgress = {}; messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
 async function open() {
   const context = await browser.newContext({ viewport: { width: 900, height: 900 }, reducedMotion: "reduce" });
   const page = await context.newPage(); const errors: string[] = []; page.on("pageerror", error => errors.push(error.stack ?? error.message));
@@ -428,11 +455,11 @@ test("workspace opens beside the real chat, preserves the draft, and follows bro
   expect(chat!.x + chat!.width).toBeLessThanOrEqual(panel!.x);
   await expect(composer(page)).toHaveValue("Keep this unfinished thought");
   expect(await input!.evaluate(node => node === document.querySelector('[placeholder="Message Homa…"]'))).toBe(true);
-  await page.getByRole("combobox", { name: "Whose week" }).selectOption(plannerKids[0]!.id);
+  await page.getByRole("combobox", { name: "Whose plan" }).selectOption(plannerKids[0]!.id);
   await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
   await expect(page.getByText("Count the toy cars", { exact: true })).toHaveCount(0);
   await page.goBack();
-  await expect(page.getByRole("combobox", { name: "Whose week" })).toHaveValue("");
+  await expect(page.getByRole("combobox", { name: "Whose plan" })).toHaveValue("");
   await page.goBack();
   await expect(page.getByRole("complementary")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeFocused();
@@ -495,12 +522,13 @@ test("workspace deep links reject missing children and restore valid selection a
 test("workspace completion uses the existing atomic endpoint and survives reopening", async () => {
   const { context, page } = await open();
   await page.getByRole("button", { name: "Your week", exact: true }).click();
-  await page.getByRole("checkbox", { name: "Maya: Count the blue buttons" }).check();
+  await page.getByRole("button", { name: "Mark finished: Count the blue buttons" }).click();
   await expect.poll(() => checkWrites.length).toBe(1);
   expect(checkWrites[0]).toMatchObject({ childId: plannerKids[0]!.id, subjectId: "math", planRevision: 1, checkKey: "1.0", done: true });
   await page.getByRole("button", { name: "Close planner" }).click();
   await page.getByRole("button", { name: "Your week", exact: true }).click();
-  await expect(page.getByRole("checkbox", { name: "Maya: Count the blue buttons" })).toBeChecked();
+  await page.getByRole("button", { name: "Show 1 finished activity" }).click();
+  await expect(page.getByRole("button", { name: "Mark not finished: Count the blue buttons" })).toHaveAttribute("aria-pressed", "true");
   await context.close();
 });
 
@@ -546,5 +574,112 @@ test("workspace phone keeps failed-message recovery above the composer", async (
   await failure.getByRole("button", { name: "Use as draft" }).click();
   await expect(composer(page)).toHaveValue("Please keep my words");
   await expect(page.getByRole("complementary")).toBeVisible();
+  await context.close();
+});
+
+
+test("workspace calendar navigation restores exact dates without losing the chat", async () => {
+  const { context, page } = await open();
+  await composer(page).fill("Keep my draft");
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByRole("link", { name: "Week", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Week summary" })).toBeVisible();
+  await page.getByRole("link", { name: "Next week" }).click();
+  await expect(page).toHaveURL(/workspaceDate=2026-10-12/);
+  await page.getByRole("link", { name: "Month", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("link", { name: "Month", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(composer(page)).toHaveValue("Keep my draft");
+  await page.goBack();
+  await expect(page.getByRole("link", { name: "Week", exact: true })).toHaveAttribute("aria-current", "page");
+  await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-week.png" });
+  await context.close();
+});
+
+test("workspace event form survives a failed save and keeps the composer reachable", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await composer(page).fill("A thought for Homa");
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: /^Event Appointment/ }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("textbox", { name: "What's happening?" }).fill("Nature walk");
+  calendarFailure = true;
+  await dialog.getByRole("button", { name: "Add event", exact: true }).click();
+  await expect(dialog.getByRole("alert")).toContainText("couldn’t be confirmed");
+  await expect(dialog.getByRole("textbox", { name: "What's happening?" })).toHaveValue("Nature walk");
+  await composer(page).fill("Still able to type");
+  calendarFailure = false;
+  await dialog.getByRole("button", { name: "Add event", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Nature walk/ })).toBeVisible();
+  expect(calendarWrites[1]).toMatchObject({ name: "createFamilyEventAction", args: [{ title: "Nature walk", startsOn: calendarToday, childIds: [] }] });
+  await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-phone.png" });
+  await context.close();
+});
+
+test("workspace recurring deletion targets one occurrence and Escape keeps the planner open", async () => {
+  calendarEvents = [{ id: "11111111-aaaa-4111-8111-111111111111", familyId, childId: plannerKids[0]!.id, childIds: [plannerKids[0]!.id],
+    title: "Nature club", startsOn: calendarToday, endsOn: calendarToday, startTime: "10:00", endTime: "11:00", note: null,
+    recurrence: { frequency: "weekly", interval: 1, weekdays: [1], until: null }, createdAt: "2026-10-01T16:00:00Z" }];
+  const { context, page } = await open();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByRole("button", { name: /Nature club/ }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("complementary")).toBeVisible();
+  await page.getByRole("button", { name: /Nature club/ }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
+  await page.getByRole("button", { name: /^Delete this event/ }).click();
+  await expect.poll(() => calendarWrites.length).toBe(1);
+  expect(calendarWrites[0]).toEqual({ name: "deleteFamilyEventOccurrenceAction", args: [calendarEvents[0]!.id, calendarToday] });
+  await context.close();
+});
+
+test("workspace Add menu leaves the composer usable and Escape only closes the menu", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  const menu = page.locator("[data-workspace-add-menu]");
+  const box = await menu.boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  await composer(page).fill("Still here");
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
+  await expect(page.getByRole("complementary")).toBeVisible();
+  await context.close();
+});
+
+test("workspace activity help adds the selected activity without overwriting a draft or sending", async () => {
+  const { context, page } = await open();
+  await composer(page).fill("Keep this thought.");
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByText("Count the blue buttons", { exact: true }).click();
+  await page.getByRole("button", { name: "Ask Homa how to do it" }).click();
+  await expect(composer(page)).toHaveValue(/Keep this thought\.[\s\S]*Give me simple steps.*Maya.*2026-10-05.*Count the blue buttons/);
+  expect(submissions).toHaveLength(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await context.close();
+});
+
+test("workspace event detail opens visibly after scrolling and restores the list position", async () => {
+  calendarEvents = Array.from({ length: 24 }, (_, index) => ({ id: `event-${index}`, familyId, childId: null,
+    title: `Outing ${String(index).padStart(2, "0")}`, startsOn: calendarToday, endsOn: calendarToday,
+    startTime: null, endTime: null, note: null, createdAt: "2026-10-01T16:00:00Z" }));
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByRole("button", { name: /Outing 23/ }).click();
+  const title = page.getByRole("dialog").getByRole("heading", { name: "Outing 23" });
+  await expect(title).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add", exact: true })).toHaveCount(0);
+  const panel = await page.getByRole("complementary").boundingBox(), heading = await title.boundingBox();
+  expect(heading!.y).toBeGreaterThanOrEqual(panel!.y);
+  expect(heading!.y).toBeLessThan(panel!.y + panel!.height);
+  await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-detail.png" });
+  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  expect(await page.locator("[data-workspace-scroll]").evaluate(element => element.scrollTop)).toBeGreaterThan(100);
   await context.close();
 });

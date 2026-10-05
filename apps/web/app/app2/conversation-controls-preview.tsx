@@ -16,6 +16,7 @@ import { usePermanentConversationDelivery } from "./use-permanent-conversation";
 import { NativeConversationCard, type NativeConversationBatch } from "./native-conversation-card";
 import type { NativeInputResponse } from "../../lib/conversation-native-input";
 import { PermanentQuestionCard } from "./permanent-question-card";
+import { useWorkspaceShell } from "./workspace-shell";
 import { useConversationDraft } from "./use-conversation-draft";
 import { Icon } from "../../components/design/Icon";
 import { AttachMenuButton, PendingAttachmentChips, useChatAttachments } from "../app/chat-attachments";
@@ -105,6 +106,13 @@ function ConversationControlsSession({ onOpenPlanner, conversationCovered = fals
   const account = family && userId ? `${family.id}:${userId}` : null;
   const delivery = usePermanentConversationDelivery(account, durableConversation);
   const { draft, setDraft, draftError, draftRevision, queueDraft, replyToQuestionId, setReplyToQuestionId, clearReplyToQuestion } = useConversationDraft(delivery.signedOut ? null : account);
+  const { draftRequest, acknowledgeDraft } = useWorkspaceShell();
+  useEffect(() => {
+    if (!draftRequest || delivery.signedOut) return;
+    // An explicit planner action prepares text; it never submits or replaces the parent's words.
+    setDraft(draft.trim() ? `${draft}\n\n${draftRequest.text}` : draftRequest.text);
+    acknowledgeDraft();
+  }, [draftRequest, acknowledgeDraft, delivery.signedOut, draft, setDraft]);
   const feed = useConversationFeed(delivery.signedOut ? null : account, durableConversation, delivery.revision);
   const nativeBatches = useMemo(() => feed.messages.flatMap(message => message.nativeInput ? [message.nativeInput] : []), [feed.messages]);
   const confirmVisibleIntents = delivery.confirmVisibleIntents;

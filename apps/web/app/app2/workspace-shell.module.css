@@ -81,3 +81,32 @@
 .empty button { margin-top: 20px; }
 .scopeNote { margin-top: 20px; color: var(--homa-muted-ink); font-size: 13px; line-height: 1.6; }
 .scopeNote a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Embedded calendar keeps its domain controls, with App2's neutral presentation. */
+.panelBody { position: relative; }
+.planner [data-workspace-planner] { font-size: 14px; }
+.planner [data-workspace-planner] h2 { font-size: 20px; line-height: 1.35; }
+.planner [data-workspace-planner] h3 { font-size: 16px; }
+.planner [data-workspace-planner] section { background: var(--homa-floating); box-shadow: none; border-radius: 0; }
+.planner [data-workspace-planner] button, .planner [data-workspace-planner] a { font-weight: 500; }
+.planner [data-workspace-planner] [class*="bg-"], .planner [data-workspace-planner] .quiet-frame { background-color: var(--homa-floating); }
+.planner [data-workspace-planner] [class*="text-"]:not(:global(.text-transparent)) { color: var(--homa-ink); }
+.planner [data-workspace-planner] [class*="border-"] { border-color: var(--workspace-line); }
+.planner [data-workspace-planner] [aria-current="page"] { border-bottom-color: var(--homa-ink); }
+.planner [data-workspace-planner] [aria-label$="calendar"] a { min-width: 0; padding: 8px 2px; text-align: center; }
+.planner [data-workspace-planner] [aria-label$="calendar"] a span { font-size: 10px; white-space: normal; }
+.planner [data-workspace-planner] input, .planner [data-workspace-planner] textarea { max-width: 100%; }
+.planner [data-workspace-dialog] { position: absolute; inset: 0; z-index: 40; min-height: 100%; overflow-y: auto; padding: 20px 24px 32px; background: var(--homa-floating); outline: none; }
+.planner:has([data-workspace-dialog]) .toolbar { visibility: hidden; }
+.planner [data-workspace-planner] [role="alert"] { color: var(--homa-error-ink); }
+
+.planCollection { margin-top: 24px; border-top: 1px solid var(--workspace-line); padding-top: 16px; }
+.planCollection summary { cursor: pointer; min-height: 44px; font-size: 14px; }
+
+.planner [data-workspace-planner] section:not([data-workspace-dialog]) { border-left: 0; border-right: 0; }
+.planner [data-workspace-planner] [data-planner-row] { background: transparent; }
+.planner [data-workspace-planner] [data-planner-row] > button { border: 0; border-radius: 0; }
+.planner [data-workspace-planner] [aria-pressed="true"] > span { background: var(--homa-ink); color: var(--homa-floating); }
+.planner [data-workspace-planner] [aria-pressed="false"] > span { color: transparent; }
+
+.planner [data-workspace-planner] > [inert] { visibility: hidden; }

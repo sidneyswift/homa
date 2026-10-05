@@ -12723,3 +12723,20 @@ and reuses gh#1182 for continuity. The source audit used the existing gh#1158
 lane at ad7c9f3c; production behavior was not re-certified in this planning task.
 No product code, environment flag, schema or deployed behavior changes as part
 of this documentation and tracking work. Status and ownership remain on GitHub.
+
+### October 5, 2026: App2 embedded calendar, local verification (gh#1223)
+
+The white adjacent workspace now reuses the existing planner's day, week and month
+calendar, event editors and recurrence controls. The family-scoped read adapter
+uses existing caller-RLS readers, and writes remain on existing authenticated
+actions. Calendar links preserve the mounted conversation and draft; activity help
+appends context for parent review. Phone event details keep the composer reachable.
+
+The mounted conversation suite passed 24 cases, with a final 14-case workspace
+rerun after visual corrections; 53 focused data/date/URL tests, web typecheck,
+changed-file lint and tenant isolation passed. Actual signed-in day/month loading
+and opening/cancelling an event editor were checked without family writes. See
+[evidence and limits](../homa-design/evidence/2026-10-05-app2-calendar/README.md).
+Full planner parity, structured selected-object context, saved work, Hours and
+program workspaces remain on the epic tickets. No production rollout or schema
+change is claimed.

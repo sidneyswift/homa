@@ -20,3 +20,9 @@ describe("workspace view URLs", () => {
     assert.deepEqual(readWorkspaceLocation("?workspace=planner"), { kind: "planner", childId: null });
   });
 });
+
+it("preserves a calendar date and view through deep links and removes them on close", () => {
+  const href = workspaceHref("https://homa.test/app2?theme=white", { kind: "planner", childId: "maya", date: "2026-11-01", view: "month" });
+  assert.deepEqual(readWorkspaceLocation(new URL(`https://homa.test${href}`).search), { kind: "planner", childId: "maya", date: "2026-11-01", view: "month" });
+  assert.equal(workspaceHref(`https://homa.test${href}`, null), "/app2?theme=white");
+});

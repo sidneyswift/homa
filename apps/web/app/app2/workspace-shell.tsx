@@ -36,6 +36,8 @@ export interface WorkspaceConversationProps {
   workspaceOpen: boolean;
   conversationCovered: boolean;
   onPlanRevision(revision: number): void;
+  draftRequest: { id: number; text: string } | null;
+  acknowledgeDraft(): void;
 }
 
 const WorkspaceContext = createContext<WorkspaceConversationProps | null>(null);
@@ -53,6 +55,8 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
   const selection = access ? readWorkspaceLocation(search) : null;
   const open = selection !== null;
   const [planRevision, setPlanRevision] = useState(0);
+  const [draftRequest, setDraftRequest] = useState<{ id: number; text: string } | null>(null);
+  const acknowledgeDraft = useCallback(() => setDraftRequest(null), []);
   const root = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
@@ -65,6 +69,10 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
     navigate({ kind: "planner", childId: signal.childId });
   }, []);
   const close = useCallback(() => navigate(null), []);
+  const askHoma = useCallback((text?: string) => {
+    if (text) setDraftRequest({ id: Date.now(), text });
+    root.current?.querySelector<HTMLInputElement>("[data-workspace-composer] input:not([type=file])")?.focus();
+  }, []);
 
   useEffect(() => {
     const client = createSupabaseBrowserClient();
@@ -90,7 +98,7 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
     if (!open) return;
     const escape = (event: KeyboardEvent) => {
       // A nested attachment menu or dialog gets the first chance to consume Escape.
-      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector("dialog[open]")) return;
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector('dialog[open], [data-workspace-dialog], [data-workspace-add-menu]')) return;
       event.preventDefault();
       close();
     };
@@ -131,16 +139,15 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
           <Icon name="calendar" size={16} /><span>Your week</span>
         </button>
       </nav>
-      <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision }}>{children}</WorkspaceContext.Provider>
+      <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft }}>{children}</WorkspaceContext.Provider>
     </div>
     {selection && <aside id="family-workspace" className={styles.panel} aria-labelledby="workspace-title">
       <header className={styles.panelHeader}>
         <h2 id="workspace-title" tabIndex={-1} ref={heading}>Planner</h2>
         <button type="button" onClick={close} aria-label="Close planner"><Icon name="close" size={20} /></button>
       </header>
-      <div className={styles.panelBody}>
-        <WorkspacePlanner childId={selection.childId} revision={planRevision} onAskHoma={() => root.current?.querySelector<HTMLInputElement>("[data-workspace-composer] input:not([type=file])")?.focus()}
-          onChildChange={childId => navigate({ kind: "planner", childId })} />
+      <div className={styles.panelBody} data-workspace-scroll>
+        <WorkspacePlanner selection={selection} revision={planRevision} onAskHoma={askHoma} onNavigate={navigate} />
       </div>
     </aside>}
   </div>;

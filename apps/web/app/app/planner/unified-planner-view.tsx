@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
@@ -118,6 +118,36 @@ const VIEW_LABELS: ReadonlyArray<{ mode: PlannerViewMode; label: string }> = [
 ];
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+export interface PlannerWorkspaceAdapter {
+  href(view: PlannerViewMode, date: string, childId: string | null): string;
+  navigate(view: PlannerViewMode, date: string, childId: string | null): void;
+  refresh(): void;
+  askHoma(text?: string): void;
+}
+const PlannerWorkspaceContext = createContext<PlannerWorkspaceAdapter | undefined>(undefined);
+
+function PlannerLink({ href, children, ...props }: React.ComponentProps<typeof Link>) {
+  const workspace = useContext(PlannerWorkspaceContext);
+  if (!workspace || typeof href !== "string") return <Link href={href} {...props}>{children}</Link>;
+  const url = new URL(href, "https://homa.test");
+  const view = url.searchParams.get("view") as PlannerViewMode;
+  if (url.pathname === "/app/planner" && view !== "hours") {
+    const date = url.searchParams.get("date")!;
+    const childId = url.searchParams.get("child");
+    return <a {...props} href={workspace.href(view, date, childId)} onClick={event => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      event.preventDefault(); workspace.navigate(view, date, childId);
+    }}>{children}</a>;
+  }
+  if (url.pathname === "/app") return <button type="button" className={props.className} onClick={() => workspace.askHoma(url.searchParams.get("draft") === "schedule-week" ? "Put this week's school work on real days for me." : url.searchParams.get("draft") ?? undefined)}>{children}</button>;
+  return <a href={href} className={props.className} target="_blank" rel="noreferrer">{children}</a>;
+}
+
+async function calendarAction(action: () => Promise<{ error: string | null }>) {
+  try { return await action(); }
+  catch { return { error: "That change couldn’t be confirmed. Check your connection and try again." }; }
+}
 
 function plannerHref(view: PlannerViewMode, date: string, childId: string | null): string {
   return `/app/planner?view=${view}&date=${date}${childId ? `&child=${encodeURIComponent(childId)}` : ""}`;
@@ -333,13 +363,28 @@ function ModalShell({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  const workspace = useContext(PlannerWorkspaceContext);
+  const detail = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!workspace) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const scrollParent = detail.current?.parentElement?.closest("[data-workspace-scroll]");
+    const previousScroll = scrollParent?.scrollTop ?? 0;
+    if (scrollParent) scrollParent.scrollTop = 0;
+    detail.current?.focus({ preventScroll: true });
+    return () => {
+      if (scrollParent) scrollParent.scrollTop = previousScroll;
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, [workspace]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); onClose(); }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
+  if (workspace) return <section ref={detail} tabIndex={-1} role="dialog" aria-labelledby={titleId} data-workspace-dialog>{children}</section>;
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-[color-mix(in_srgb,var(--homa-midnight-action)_42%,transparent)] p-4 backdrop-blur-[2px]">
@@ -398,7 +443,7 @@ function ActivityRow({
   onOpen: () => void;
 }) {
   return (
-    <div className="grid min-h-[72px] grid-cols-[48px_minmax(0,1fr)] items-center border-b border-border-subtle last:border-b-0">
+    <div data-planner-row className="grid min-h-[72px] grid-cols-[48px_minmax(0,1fr)] items-center border-b border-border-subtle last:border-b-0">
       <button
         type="button"
         onClick={onToggle}
@@ -477,7 +522,7 @@ function LearningActivityRow({
 }) {
   const completed = status === "completed";
   return (
-    <div className="grid min-h-[72px] grid-cols-[48px_minmax(0,1fr)] items-center border-b border-border-subtle last:border-b-0">
+    <div data-planner-row className="grid min-h-[72px] grid-cols-[48px_minmax(0,1fr)] items-center border-b border-border-subtle last:border-b-0">
       <button
         type="button"
         onClick={onToggle}
@@ -535,7 +580,7 @@ function EventRow({
   onOpen: () => void;
 }) {
   return (
-    <div className="grid min-h-[74px] grid-cols-[84px_minmax(0,1fr)] items-center border-b border-border-subtle bg-[var(--sky-50)] last:border-b-0">
+    <div data-planner-row className="grid min-h-[74px] grid-cols-[84px_minmax(0,1fr)] items-center border-b border-border-subtle bg-[var(--sky-50)] last:border-b-0">
       <span className="px-2 text-center text-sm font-bold text-[var(--sky-600)]">
         {eventTimeLabel(event)}
       </span>
@@ -662,6 +707,7 @@ function ActivityDetails({
   onDelete: () => Promise<{ ok: boolean; reason?: string }>;
   onClose: () => void;
 }) {
+  const workspace = useContext(PlannerWorkspaceContext);
   return (
     <ModalShell titleId="planner-activity-title" onClose={onClose}>
       <div className="flex items-start justify-between gap-4">
@@ -689,7 +735,8 @@ function ActivityDetails({
       </dl>
       <div className="mt-5 flex flex-wrap gap-2">
         <QuietAction
-          href={plannerActivityHelpHref({
+          onClick={workspace ? () => { onClose(); workspace.askHoma(`Give me simple steps for this activity with ${activity.kidName} on ${activity.date}: ${activity.text}`); } : undefined}
+          href={workspace ? undefined : plannerActivityHelpHref({
             childId: activity.childId,
             subjectId: activity.subjectId,
             checkId: activity.checkId,
@@ -700,7 +747,8 @@ function ActivityDetails({
         </QuietAction>
         <QuietAction
           kind="secondary"
-          href="/app?draft=schedule-week"
+          href={workspace ? undefined : "/app?draft=schedule-week"}
+          onClick={workspace ? () => { onClose(); workspace.askHoma(`Help me change the day for ${activity.kidName}’s activity on ${activity.date}: ${activity.text}`); } : undefined}
         >
           Change the day
         </QuietAction>
@@ -879,12 +927,12 @@ function LearningActivityDetails({
             <QuietAction kind="secondary" onClick={startEditing}>
               Edit
             </QuietAction>
-            <Link
+            <PlannerLink
               href={`/app?draft=${encodeURIComponent(`Change this Planner item: ${activity.title}`)}`}
               className="inline-flex min-h-11 items-center rounded-pill bg-brand px-4 py-2 text-sm font-bold text-white hover:bg-[var(--clay-700)]"
             >
               Ask Homa to change it
-            </Link>
+            </PlannerLink>
             <PlannerEntryDeleteControl
               label="Delete"
               confirmMessage={`Delete "${activity.title}"? This can't be undone.`}
@@ -1504,7 +1552,9 @@ export function UnifiedPlannerView({
   activeDate,
   view,
   focusChildId,
+  workspace,
 }: {
+  workspace?: PlannerWorkspaceAdapter;
   kids: UnifiedPlannerKid[];
   plans: DashboardPlan[];
   familyEvents: FamilyEventRow[];
@@ -1521,7 +1571,7 @@ export function UnifiedPlannerView({
   focusChildId: string | null;
 }) {
   const router = useRouter();
-  const refreshPlanChecks = useCallback(() => router.refresh(), [router]);
+  const refreshPlanChecks = useCallback(() => workspace ? workspace.refresh() : router.refresh(), [router, workspace]);
   const planChecks = useAuthenticatedPlanChecks({
     plans,
     refresh: refreshPlanChecks,
@@ -1546,6 +1596,14 @@ export function UnifiedPlannerView({
   const [savingLearningActivityDetail, setSavingLearningActivityDetail] = useState(false);
   const [learningActivityDetailError, setLearningActivityDetailError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  useEffect(() => {
+    if (!addOpen || !workspace) return;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setAddOpen(false); }
+    };
+    document.addEventListener("keydown", dismiss);
+    return () => document.removeEventListener("keydown", dismiss);
+  }, [addOpen, workspace]);
   const [dayFilter, setDayFilter] = useState({
     routeChildId: focusChildId,
     selectedChildId: focusChildId,
@@ -1700,14 +1758,14 @@ export function UnifiedPlannerView({
     setSavingLearningActivityId(null);
     if (!result.ok) {
       setLearningActivityError(result.reason);
-      router.refresh();
+      refreshPlanChecks();
       return;
     }
     setLearningStatusOverrides((current) => ({
       ...current,
       [activity.id]: result.status,
     }));
-    router.refresh();
+    refreshPlanChecks();
   }
 
   async function saveLearningActivityDetails(
@@ -1759,7 +1817,7 @@ export function UnifiedPlannerView({
           }
         : current,
     );
-    router.refresh();
+    refreshPlanChecks();
     return true;
   }
 
@@ -1769,7 +1827,7 @@ export function UnifiedPlannerView({
     const result = await deletePlannerLearningActivityAction(activityId);
     if (!result.ok) return { ok: false, reason: result.reason };
     setSelectedLearningActivity(null);
-    router.refresh();
+    refreshPlanChecks();
     return { ok: true };
   }
 
@@ -1785,7 +1843,7 @@ export function UnifiedPlannerView({
     });
     if (!result.ok) return { ok: false, reason: result.reason };
     setSelectedActivity(null);
-    router.refresh();
+    refreshPlanChecks();
     return { ok: true };
   }
 
@@ -1816,17 +1874,17 @@ export function UnifiedPlannerView({
     }
     setSaving(true);
     setRecurringActionError(null);
-    const result = await deleteFamilyEventOccurrenceAction(
+    const result = await calendarAction(() => deleteFamilyEventOccurrenceAction(
       recurringScope.event.id,
       occurrenceOn(recurringScope.event),
-    );
+    ));
     setSaving(false);
     if (result.error) {
       setRecurringActionError(result.error);
       return;
     }
     setRecurringScope(null);
-    router.refresh();
+    refreshPlanChecks();
   }
 
   async function chooseEntireRecurringSeries() {
@@ -1839,14 +1897,14 @@ export function UnifiedPlannerView({
     }
     setSaving(true);
     setRecurringActionError(null);
-    const result = await deleteFamilyEventAction(recurringScope.event.id);
+    const result = await calendarAction(() => deleteFamilyEventAction(recurringScope.event.id));
     setSaving(false);
     if (result.error) {
       setRecurringActionError(result.error);
       return;
     }
     setRecurringScope(null);
-    router.refresh();
+    refreshPlanChecks();
   }
 
   async function saveMovedOccurrence() {
@@ -1859,18 +1917,18 @@ export function UnifiedPlannerView({
       startTime: moveState.allDay ? null : moveState.startTime,
       endTime: moveState.allDay ? null : moveState.endTime,
     };
-    const result = await moveFamilyEventOccurrenceAction(
+    const result = await calendarAction(() => moveFamilyEventOccurrenceAction(
       moveState.event.id,
       occurrenceOn(moveState.event),
       timing,
-    );
+    ));
     setSaving(false);
     if (result.error) {
       setRecurringActionError(result.error);
       return;
     }
     setMoveState(null);
-    router.refresh();
+    refreshPlanChecks();
   }
 
   async function saveComposer() {
@@ -1895,28 +1953,28 @@ export function UnifiedPlannerView({
         : null,
     };
     const result = composer.eventId
-      ? await updateFamilyEventAction(composer.eventId, input)
-      : await createFamilyEventAction(input);
+      ? await calendarAction(() => updateFamilyEventAction(composer.eventId!, input))
+      : await calendarAction(() => createFamilyEventAction(input));
     setSaving(false);
     if (result.error) {
       setComposerError(result.error);
       return;
     }
     setComposer(null);
-    router.refresh();
+    refreshPlanChecks();
   }
 
   async function deleteComposerEvent() {
     if (!composer?.eventId || saving) return;
     setSaving(true);
-    const result = await deleteFamilyEventAction(composer.eventId);
+    const result = await calendarAction(() => deleteFamilyEventAction(composer.eventId!));
     setSaving(false);
     if (result.error) {
       setComposerError(result.error);
       return;
     }
     setComposer(null);
-    router.refresh();
+    refreshPlanChecks();
   }
 
   const totalWeekActivities = weekDays.reduce(
@@ -1937,7 +1995,9 @@ export function UnifiedPlannerView({
         : "Nothing planned";
 
   return (
-    <div className="mx-auto w-full max-w-[820px]" data-hours-focus-anchor tabIndex={-1} data-brand-surface="planner">
+    <PlannerWorkspaceContext.Provider value={workspace}>
+    <div className="mx-auto w-full max-w-[820px]" data-hours-focus-anchor tabIndex={-1} data-brand-surface="planner" data-workspace-planner={workspace ? "true" : undefined}>
+      <div inert={Boolean(workspace && (selectedActivity || selectedLearningActivity || selectedEvent || recurringScope || moveState || composer))}>
       {planChecks.getMessage() ? (
         <QuietStatus tone="attention" className="mb-3">
           <div className="flex items-start justify-between gap-3 text-sm">
@@ -1953,15 +2013,13 @@ export function UnifiedPlannerView({
         </QuietStatus>
       ) : null}
       <header className="flex items-center justify-between gap-4">
-        <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-strong">
-          Planner
-        </h1>
+        {!workspace && <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-strong">Planner</h1>}
         <div className="relative">
           {addOpen ? (
             <button
               type="button"
               aria-label="Close Add menu"
-              className="fixed inset-0 z-20 cursor-default"
+              className={workspace ? "absolute inset-0 z-20 cursor-default" : "fixed inset-0 z-20 cursor-default"}
               onClick={() => setAddOpen(false)}
             />
           ) : null}
@@ -1971,10 +2029,10 @@ export function UnifiedPlannerView({
             onClick={() => setAddOpen((open) => !open)}
             className="quiet-action quiet-action--primary quiet-action--default relative z-30"
           >
-            <Icon name="add" size={20} /> Choose an event or activity
+            <Icon name="add" size={20} /> {workspace ? "Add" : "Choose an event or activity"}
           </button>
           {addOpen ? (
-            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-64 overflow-hidden rounded-lg border border-border-subtle bg-card p-1.5 shadow-lg">
+            <div data-workspace-add-menu={workspace ? "true" : undefined} className={`${workspace ? "left-0" : "right-0"} absolute top-[calc(100%+0.5rem)] z-30 w-64 max-w-[calc(100vw-3rem)] overflow-hidden rounded-lg border border-border-subtle bg-card p-1.5 shadow-lg`}>
               <button
                 type="button"
                 onClick={openNewAppointment}
@@ -1986,7 +2044,7 @@ export function UnifiedPlannerView({
                   <span className="block text-xs text-muted">Appointment, co-op, trip, or outing</span>
                 </span>
               </button>
-              <Link
+              <PlannerLink
                 href="/app?draft=schedule-week"
                 className="flex min-h-12 items-center gap-3 rounded-md px-3 py-2 hover:bg-page"
               >
@@ -1995,15 +2053,15 @@ export function UnifiedPlannerView({
                   <span className="block text-sm font-bold text-strong">Plan activity</span>
                   <span className="block text-xs text-muted">Ask Homa to add schoolwork</span>
                 </span>
-              </Link>
+              </PlannerLink>
             </div>
           ) : null}
         </div>
       </header>
 
       <ToolShelf label="Planner views" className="mt-5 border-b border-border-subtle">
-        {VIEW_LABELS.map(({ mode, label }) => (
-          <Link
+        {VIEW_LABELS.filter(({ mode }) => !workspace || mode !== "hours").map(({ mode, label }) => (
+          <PlannerLink
             key={mode}
             href={plannerHref(mode, activeDate, focusChildId)}
             aria-current={view === mode ? "page" : undefined}
@@ -2014,7 +2072,7 @@ export function UnifiedPlannerView({
             }
           >
             {label}
-          </Link>
+          </PlannerLink>
         ))}
       </ToolShelf>
 
@@ -2047,13 +2105,13 @@ export function UnifiedPlannerView({
       ) : (
         <>
           <div className="mt-7 flex items-center justify-between gap-3">
-            <Link
+            <PlannerLink
               href={plannerHref(view, dayNavigationDate(view, activeDate, -1), focusChildId)}
               aria-label={`Previous ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
               <Icon name="back" size={20} />
-            </Link>
+            </PlannerLink>
             <div className="min-w-0 text-center">
               {view === "day" && activeDate === today ? (
                 <span className="block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[var(--clay-700)]">
@@ -2071,18 +2129,18 @@ export function UnifiedPlannerView({
                     : "Tap a date to open its day."}
               </p>
             </div>
-            <Link
+            <PlannerLink
               href={plannerHref(view, dayNavigationDate(view, activeDate, 1), focusChildId)}
               aria-label={`Next ${view}`}
               className="grid h-11 w-11 flex-none place-items-center rounded-full border border-border bg-card text-body hover:bg-page"
             >
               <Icon name="next" size={20} />
-            </Link>
+            </PlannerLink>
           </div>
 
           {view === "day" ? (
             <>
-              {kids.length > 1 ? (
+              {!workspace && kids.length > 1 ? (
                 <div
                   className="mt-4 flex gap-2 overflow-x-auto pb-1"
                   role="group"
@@ -2223,7 +2281,7 @@ export function UnifiedPlannerView({
                 </>
               ) : null}
               </section>
-              <RecordedHours entries={activeHours} showChild={kids.length > 1} onEdit={setSelectedHoursEntry} />
+              {!workspace && <RecordedHours entries={activeHours} showChild={kids.length > 1} onEdit={setSelectedHoursEntry} />}
             </>
           ) : null}
 
@@ -2257,7 +2315,7 @@ export function UnifiedPlannerView({
                     : "Nothing planned";
                 return (
                   <div key={day.date} className="border-b border-border-subtle last:border-b-0">
-                  <Link
+                  <PlannerLink
                     href={plannerHref("day", day.date, focusChildId)}
                     className={
                       day.date === today
@@ -2280,9 +2338,9 @@ export function UnifiedPlannerView({
                       ) : null}
                     </span>
                       <Icon name="next" size={20} className="text-subtle" />
-                  </Link>
+                  </PlannerLink>
                   <div className="px-4 pb-4">
-                    <RecordedHours entries={recordedHoursForDate(hoursEntries, day.date, visibleFocusChildId)} showChild={kids.length > 1} onEdit={setSelectedHoursEntry} />
+                    {!workspace && <RecordedHours entries={recordedHoursForDate(hoursEntries, day.date, visibleFocusChildId)} showChild={kids.length > 1} onEdit={setSelectedHoursEntry} />}
                   </div>
                   </div>
                 );
@@ -2306,7 +2364,7 @@ export function UnifiedPlannerView({
                   const itemCount = activityCount + eventCount;
                   const label = `${formatFullDate(cell.date)}, ${activityCount} ${activityCount === 1 ? "activity" : "activities"}, ${eventCount} ${eventCount === 1 ? "event" : "events"}`;
                   return (
-                    <Link
+                    <PlannerLink
                       key={cell.date}
                       href={plannerHref("day", cell.date, focusChildId)}
                       aria-label={label}
@@ -2324,7 +2382,7 @@ export function UnifiedPlannerView({
                           {itemCount} {itemCount === 1 ? "item" : "items"}
                         </span>
                       ) : null}
-                    </Link>
+                    </PlannerLink>
                   );
                 })}
               </div>
@@ -2333,6 +2391,7 @@ export function UnifiedPlannerView({
         </>
       )}
 
+      </div>
       {selectedHoursEntry ? <HoursEntryOverlay key={selectedHoursEntry.id} entry={selectedHoursEntry} onClose={() => setSelectedHoursEntry(null)} /> : null}
       {selectedActivity ? (
         <ActivityDetails
@@ -2402,5 +2461,6 @@ export function UnifiedPlannerView({
         />
       ) : null}
     </div>
+    </PlannerWorkspaceContext.Provider>
   );
 }

@@ -5170,6 +5170,7 @@ await expectReadDenied("family_phone_access_epochs");
 for (const relations of [
   ["conversation_records", "conversation_record_events", "conversation_record_deletions"],
   ["conversation_requests"],
+  ["conversation_rebuild_settings"],
   ["conversation_question_cards"],
   ["conversation_sources"],
   ["conversation_attachment_preparations"],

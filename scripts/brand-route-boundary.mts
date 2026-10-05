@@ -188,6 +188,7 @@ export const reviewedWebRouteHandlerBoundaries = {
   "apps/web/app/api/voice/tools/send-email/route.ts": "provider",
   "apps/web/app/api/voice/tools/send-signup-link/route.ts": "provider",
   "apps/web/app/api/waitlist/route.ts": "public",
+  "apps/web/app/api/workspace/planner/route.ts": "family",
   "apps/web/app/auth/callback/route.ts": "public",
   "apps/web/app/auth/confirm/route.ts": "public",
   "apps/web/app/blog/rss.xml/route.ts": "public",

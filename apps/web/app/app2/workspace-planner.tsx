@@ -1,21 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { parsePlanBoardResponse, type PlanBoardPayload } from "../../lib/plan-board";
+import type { WorkspacePlannerData } from "../../lib/workspace-planner-data";
+import type { PlannerViewMode } from "../../lib/unified-planner";
+import { workspaceHref, type WorkspaceLocation } from "./workspace-location";
 import { PlannerView } from "../app/planner/planner-view";
+import { UnifiedPlannerView, type PlannerWorkspaceAdapter } from "../app/planner/unified-planner-view";
 import styles from "./workspace-shell.module.css";
 
-type BoardState = { phase: "loading" } | { phase: "ready"; board: PlanBoardPayload; refreshing: boolean } |
+type BoardState = { phase: "loading" } | { phase: "ready"; board: WorkspacePlannerData; requestKey: string; refreshing: boolean } |
   { phase: "error"; message: string; signIn: boolean };
 
 /** Reuses the family-scoped board and atomic check operations owned by app1. */
-export function WorkspacePlanner({ childId, revision, onChildChange, onAskHoma }: {
-  onAskHoma(): void; childId: string | null; revision: number; onChildChange(childId: string | null): void;
+export function WorkspacePlanner({ selection, revision, onNavigate, onAskHoma }: {
+  onAskHoma(text?: string): void; selection: WorkspaceLocation; revision: number; onNavigate(selection: WorkspaceLocation): void;
 }) {
+  const { childId, view = "day", date } = selection;
+  const requestKey = `${view}:${date ?? "today"}`;
+  const onChildChange = (childId: string | null) => onNavigate({ ...selection, childId });
   const [state, setState] = useState<BoardState>({ phase: "loading" });
   const [refresh, setRefresh] = useState(0);
+  const [plansOpen, setPlansOpen] = useState(false);
   const reload = useCallback(() => setRefresh(value => value + 1), []);
+  const adapter = useMemo<PlannerWorkspaceAdapter>(() => ({
+    href: (view, date, childId) => workspaceHref(window.location.href, { kind: "planner", view: view === "hours" ? "day" : view, date, childId }),
+    navigate: (view: PlannerViewMode, date: string, childId: string | null) => onNavigate({ kind: "planner", view: view === "hours" ? "day" : view, date, childId }),
+    refresh: reload, askHoma: onAskHoma,
+  }), [onNavigate, reload, onAskHoma]);
   useEffect(() => {
     const controller = new AbortController();
     let disposed = false;
@@ -23,16 +35,16 @@ export function WorkspacePlanner({ childId, revision, onChildChange, onAskHoma }
     async function load() {
       setState(current => current.phase === "ready" ? { ...current, refreshing: true } : { phase: "loading" });
       try {
-        const response = await fetch("/api/map/plan/board", { credentials: "same-origin", cache: "no-store", signal: controller.signal });
+        const response = await fetch(`/api/workspace/planner?view=${view}${date ? `&date=${encodeURIComponent(date)}` : ""}`, { credentials: "same-origin", cache: "no-store", signal: controller.signal });
         if (disposed) return;
         if (response.status === 401 || response.status === 403) {
           setState({ phase: "error", message: "Your planner is unavailable. Sign in again to check your access.", signIn: true });
           return;
         }
         if (!response.ok) throw new Error("Board unavailable");
-        const board = parsePlanBoardResponse(await response.json());
-        if (!board) throw new Error("Invalid board");
-        if (!disposed) setState({ phase: "ready", board, refreshing: false });
+        const result = await response.json() as { ok: boolean; board: WorkspacePlannerData };
+        if (!result.ok || !result.board?.kids || !result.board?.today) throw new Error("Invalid board");
+        if (!disposed) setState({ phase: "ready", board: result.board, requestKey, refreshing: false });
       } catch {
         if (!disposed) setState({ phase: "error", message: "Your week couldn’t load. Your plans haven’t changed.", signIn: false });
       } finally {
@@ -41,7 +53,7 @@ export function WorkspacePlanner({ childId, revision, onChildChange, onAskHoma }
     }
     void load();
     return () => { disposed = true; window.clearTimeout(timeout); controller.abort(); };
-  }, [refresh, revision]);
+  }, [refresh, revision, requestKey, view, date]);
 
   useEffect(() => {
     const resume = () => { if (document.visibilityState === "visible") reload(); };
@@ -50,7 +62,7 @@ export function WorkspacePlanner({ childId, revision, onChildChange, onAskHoma }
     return () => { window.removeEventListener("focus", resume); window.removeEventListener("online", resume); };
   }, [reload]);
 
-  if (state.phase === "loading") return <p className={styles.state} role="status">Loading your week…</p>;
+  if (state.phase === "loading" || (state.phase === "ready" && state.requestKey !== requestKey)) return <p className={styles.state} role="status">Loading your calendar…</p>;
   if (state.phase === "error") return <div className={styles.state} role="alert">
     <p>{state.message}</p>
     <button type="button" onClick={reload}>Try again</button>
@@ -63,8 +75,8 @@ export function WorkspacePlanner({ childId, revision, onChildChange, onAskHoma }
   </div>;
   return <div className={styles.planner}>
     <div className={styles.toolbar}>
-      <label><span className="sr-only">Whose week</span>
-        <select aria-label="Whose week" value={childId ?? ""} onChange={event => onChildChange(event.target.value || null)}>
+      <label><span className="sr-only">Whose plan</span>
+        <select aria-label="Whose plan" value={childId ?? ""} onChange={event => onChildChange(event.target.value || null)}>
           <option value="">Everyone</option>
           {board.kids.map(child => <option key={child.id} value={child.id}>{child.name}</option>)}
         </select>
@@ -72,14 +84,13 @@ export function WorkspacePlanner({ childId, revision, onChildChange, onAskHoma }
       <button type="button" onClick={reload} disabled={state.refreshing}>{state.refreshing ? "Refreshing…" : "Refresh"}</button>
     </div>
     <div aria-busy={state.refreshing} inert={state.refreshing}>
-    {!board.plans.some(plan => !childId || plan.childId === childId) ? <div className={styles.empty}>
-      <h3>No learning activities planned yet</h3>
-      <p>Tell Homa what you’d like to work on this week.</p>
-      <button type="button" onClick={onAskHoma}>Plan with Homa</button>
-    </div> : <PlannerView kids={board.kids.map(child => ({ id: child.id, name: child.name, birth_month: child.birthMonth, avatar_url: child.avatarUrl }))}
-      reports={new Map(board.kids.map(child => [child.id, { token: child.reportToken }]))} plans={board.plans}
-      timeZone={board.timeZone} now={new Date()} focusChildId={childId} surface="workspace" onPlannerRefresh={reload} />}
+      <UnifiedPlannerView key={`${requestKey}:${childId ?? "family"}`} {...board} now={new Date(board.now)} focusChildId={childId} workspace={adapter} />
     </div>
-    <p className={styles.scopeNote}>Learning activities for this week. <a href="/app/planner" target="_blank" rel="noreferrer">Calendar and events open in a new tab.</a></p>
+    {board.plans.length > 0 && <details className={styles.planCollection} open={plansOpen} onToggle={event => setPlansOpen(event.currentTarget.open)}>
+      <summary>Learning plans</summary>
+      {plansOpen && <PlannerView kids={board.kids} reports={new Map(board.kids.map(child => [child.id, { token: child.reportToken }]))}
+        plans={board.plans} timeZone={board.timeZone} now={new Date(board.now)} focusChildId={childId} surface="workspace" onPlannerRefresh={reload} />}
+    </details>}
+    <p className={styles.scopeNote}><a href="/app/planner?view=hours" target="_blank" rel="noreferrer">School hours</a> · <a href="/app/planner/programs" target="_blank" rel="noreferrer">Programs and co-op</a> open in a new tab.</p>
   </div>;
 }
