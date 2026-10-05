@@ -75,3 +75,18 @@ An existing development binary was installed on the iPad simulator as a
 fallback, but the available app-control tool could not access Simulator.
 Metro did not receive a bundle request. This is not a successful simulator
 check and does not replace physical-device certification.
+
+## Continued publication work
+
+Device Hub at Xcode's `Contents/Applications/DeviceHub.app` is controllable
+and replaces the unavailable Simulator app. The old development binary
+loads Metro but lacks ExpoPushTokenManager, so it is not a valid test host.
+A fresh EAS review-simulator build is in progress:
+`fdc942fe-2109-4356-b19a-219c02006d15`.
+
+Production and review-simulator profiles now pin the SDK 56-compatible
+`macos-tahoe-26.4-xcode-26.4` image from Expo's official infrastructure
+reference. The native static gauntlet passes all 33 tests with this pin.
+The CI workflow was audited end to end again after its model-router test
+addition; the exact audit hash was refreshed, and release-rail tests pass.
+Android remains compile-only.
