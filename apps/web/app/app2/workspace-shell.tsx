@@ -55,17 +55,20 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
   const selection = access ? readWorkspaceLocation(search) : null;
   const open = selection !== null;
   const [planRevision, setPlanRevision] = useState(0);
+  const [navigationOpen, setNavigationOpen] = useState(false);
   const [draftRequest, setDraftRequest] = useState<{ id: number; text: string } | null>(null);
   const acknowledgeDraft = useCallback(() => setDraftRequest(null), []);
   const root = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
+  const navigation = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const wasOpen = useRef(false);
   const openPlanner = useCallback((signal: PlannerOpenSignal) => {
     if (!readWorkspaceLocation(window.location.search)) {
       opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     }
+    setNavigationOpen(false);
     navigate({ kind: "planner", childId: signal.childId });
   }, []);
   const close = useCallback(() => navigate(null), []);
@@ -80,10 +83,20 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
     const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
       const allowed = Boolean(userId && session?.user.id === userId);
       setAccess(allowed);
+      if (!allowed) setNavigationOpen(false);
       if (!allowed && readWorkspaceLocation(window.location.search)) navigate(null);
     });
     return () => subscription.unsubscribe();
   }, [userId]);
+
+  useEffect(() => {
+    if (!navigationOpen) return;
+    const dismiss = (event: PointerEvent) => {
+      if (event.target instanceof Node && !navigation.current?.contains(event.target)) setNavigationOpen(false);
+    };
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, [navigationOpen]);
 
   useEffect(() => {
     if (open && (!wasOpen.current || (phone && document.activeElement?.closest("[inert]")))) heading.current?.focus({ preventScroll: true });
@@ -98,7 +111,7 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
     if (!open) return;
     const escape = (event: KeyboardEvent) => {
       // A nested attachment menu or dialog gets the first chance to consume Escape.
-      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector('dialog[open], [data-workspace-dialog], [data-workspace-add-menu]')) return;
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector('dialog[open], [data-workspace-dialog], [data-workspace-add-menu], [data-workspace-navigation-open]')) return;
       event.preventDefault();
       close();
     };
@@ -132,13 +145,34 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
   }, [open, phone]);
 
   return <div className={styles.shell} data-workspace-open={open} ref={root}>
+    <nav ref={navigation} className={styles.navigation} aria-label="Your workspace"
+      data-workspace-navigation-open={navigationOpen || undefined}
+      onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setNavigationOpen(false); }}
+      onKeyDown={event => {
+        if (event.key === "Escape" && navigationOpen) {
+          event.preventDefault(); event.stopPropagation(); setNavigationOpen(false); launcher.current?.focus();
+        }
+      }}>
+      <button type="button" className={styles.navigationToggle} ref={launcher} disabled={!access}
+        aria-label={navigationOpen ? "Close navigation" : "Open navigation"} aria-expanded={navigationOpen}
+        aria-controls={navigationOpen ? "workspace-destinations" : undefined}
+        onClick={() => setNavigationOpen(current => !current)}>
+        <Icon name="menu" size={20} />
+      </button>
+      {navigationOpen && <div id="workspace-destinations" className={styles.navigationTray}>
+        <button type="button" aria-current={open ? "page" : undefined} onClick={() => {
+          if (open) { setNavigationOpen(false); heading.current?.focus({ preventScroll: true }); }
+          else openPlanner({ childId: null });
+        }}><Icon name="calendar" size={20} /><span>Planner</span></button>
+        <a href="/app/binder" target="_blank" rel="noreferrer" onClick={() => { setNavigationOpen(false); launcher.current?.focus(); }}>
+          <Icon name="book" size={20} /><span>Binder</span><Icon name="external" size={16} /><span className="sr-only"> (opens in a new tab)</span>
+        </a>
+        <a href="/app/progress" target="_blank" rel="noreferrer" onClick={() => { setNavigationOpen(false); launcher.current?.focus(); }}>
+          <Icon name="progress" size={20} /><span>Progress</span><Icon name="external" size={16} /><span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      </div>}
+    </nav>
     <div className={styles.conversation}>
-      <nav className={styles.navigation} aria-label="Your workspace" inert={open && phone}>
-        <button type="button" ref={launcher} disabled={!access} aria-expanded={open} aria-controls={open ? "family-workspace" : undefined}
-          onClick={() => open ? close() : openPlanner({ childId: null })}>
-          <Icon name="calendar" size={16} /><span>Your week</span>
-        </button>
-      </nav>
       <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft }}>{children}</WorkspaceContext.Provider>
     </div>
     {selection && <aside id="family-workspace" className={styles.panel} aria-labelledby="workspace-title">

@@ -12740,3 +12740,17 @@ and opening/cancelling an event editor were checked without family writes. See
 Full planner parity, structured selected-object context, saved work, Hours and
 program workspaces remain on the epic tickets. No production rollout or schema
 change is claimed.
+
+### October 5, 2026: App2 compact top-right navigation (gh#1220, gh#1221)
+
+Sidney approved replacing the prominent Your week button with a top-right menu
+that reveals Planner, Binder and Progress using icons and short labels. Keep
+the white minimal App2 presentation and fold the tray away after selection.
+This refines `app2-adjacent-white-workspace`; it does not change domain or release
+policy. The initial implementation opens Planner beside chat and explicitly
+links Binder/Progress to their existing views in new tabs until those workspaces
+are built. Chat remains mounted.
+
+All 26 mounted conversation/browser cases, web typecheck and changed-file lint
+passed. Actual local signed-in reveal and independent desktop/phone visual review
+passed. [Evidence](../homa-design/evidence/2026-10-05-app2-navigation/README.md).

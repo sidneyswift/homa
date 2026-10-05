@@ -24,7 +24,7 @@ function FixtureConversation() {
 
 function Fixture() {
   return <AppRouterContext.Provider value={router}>
-    <button style={{ position: "fixed", right: 0, top: 0, zIndex: 100 }} onClick={() => {
+    <button style={{ position: "fixed", left: 0, bottom: 0, zIndex: 100 }} onClick={() => {
       window.dispatchEvent(new CustomEvent("fixture-auth", { detail: null }));
     }}>Fixture sign out</button>
     <WorkspaceShell userId={userId}><FixtureConversation /></WorkspaceShell>

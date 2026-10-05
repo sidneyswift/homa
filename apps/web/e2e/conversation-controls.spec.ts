@@ -191,6 +191,10 @@ async function open() {
   return { context, page };
 }
 const composer = (page: Page) => page.getByPlaceholder("Message Homa…");
+async function openPlanner(page: Page) {
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Planner", exact: true }).click();
+}
 async function submit(page: Page, text: string) { await composer(page).fill(text); await page.getByRole("button", { name: "Send message", exact: true }).click(); }
 
 test("real composer acceptance stays visible until canonical feed catches up, then refresh restores it", async () => {
@@ -441,13 +445,61 @@ test("native question history follows message paging and canonical deletion", as
 });
 
 
+test("workspace navigation reveals labeled destinations and Escape preserves the open planner", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await composer(page).fill("Keep my thought");
+  const toggle = page.getByRole("button", { name: "Open navigation", exact: true });
+  await expect(page.getByText("Your week", { exact: true })).toHaveCount(0);
+  const bounds = await toggle.boundingBox();
+  expect(bounds!.x).toBeGreaterThan(1300);
+  await toggle.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Planner", exact: true })).toBeFocused();
+  for (const [name, href] of [["Binder", "/app/binder"], ["Progress", "/app/progress"]]) {
+    const link = page.getByRole("link", { name: `${name} (opens in a new tab)`, exact: true });
+    await expect(link).toHaveAttribute("href", href!);
+    await expect(link).toHaveAttribute("target", "_blank");
+  }
+  await page.screenshot({ path: "/private/tmp/homa-navigation-desktop.png" });
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "Planner", exact: true })).toBeFocused();
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Planner", exact: true })).toHaveAttribute("aria-current", "page");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("complementary")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeFocused();
+  await expect(composer(page)).toHaveValue("Keep my thought");
+  await context.close();
+});
+
+test("workspace navigation fits phones and dismisses without intercepting the composer", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await expect(page.getByRole("link", { name: /^Progress/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await composer(page).fill("Still here");
+  await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ forcedColors: "none", reducedMotion: "reduce" });
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.screenshot({ path: "/private/tmp/homa-navigation-phone.png" });
+  await page.getByRole("button", { name: "Fixture sign out" }).click();
+  await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeDisabled();
+  await expect(page.getByRole("link", { name: /^Binder/ })).toHaveCount(0);
+  await context.close();
+});
+
 test("workspace opens beside the real chat, preserves the draft, and follows browser history", async () => {
   addMessage("Let’s plan a calm week.");
   const { context, page } = await open();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await composer(page).fill("Keep this unfinished thought");
   const input = await composer(page).elementHandle();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await expect(page.getByRole("heading", { name: "Planner", exact: true })).toBeFocused();
   await expect(page.getByRole("complementary", { name: "Planner" })).toBeVisible();
   await expect(page.getByRole("log")).toBeVisible();
@@ -462,7 +514,7 @@ test("workspace opens beside the real chat, preserves the draft, and follows bro
   await expect(page.getByRole("combobox", { name: "Whose plan" })).toHaveValue("");
   await page.goBack();
   await expect(page.getByRole("complementary")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeFocused();
   await page.goForward();
   await expect(page.getByRole("complementary")).toBeVisible();
   await expect(composer(page)).toHaveValue("Keep this unfinished thought");
@@ -475,7 +527,7 @@ test("workspace on a phone keeps the composer usable and covered conversation ou
   addMessage("This conversation stays mounted.");
   const { context, page } = await open();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
   await expect(page.getByRole("log")).toHaveCount(0);
   expect(await page.locator('[role="log"]').evaluate(element => Boolean(element.closest("[inert]")))).toBe(true);
@@ -494,7 +546,7 @@ test("workspace on a phone keeps the composer usable and covered conversation ou
 test("workspace retry never turns a failed load into an empty week", async () => {
   boardStatus = 503;
   const { context, page } = await open();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await expect(page.getByRole("alert")).toContainText("Your week couldn’t load");
   await expect(page.getByText("There's no month set up yet.")).toHaveCount(0);
   boardStatus = 200;
@@ -502,7 +554,7 @@ test("workspace retry never turns a failed load into an empty week", async () =>
   await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("complementary")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeFocused();
   await context.close();
 });
 
@@ -521,12 +573,12 @@ test("workspace deep links reject missing children and restore valid selection a
 
 test("workspace completion uses the existing atomic endpoint and survives reopening", async () => {
   const { context, page } = await open();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("button", { name: "Mark finished: Count the blue buttons" }).click();
   await expect.poll(() => checkWrites.length).toBe(1);
   expect(checkWrites[0]).toMatchObject({ childId: plannerKids[0]!.id, subjectId: "math", planRevision: 1, checkKey: "1.0", done: true });
   await page.getByRole("button", { name: "Close planner" }).click();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("button", { name: "Show 1 finished activity" }).click();
   await expect(page.getByRole("button", { name: "Mark not finished: Count the blue buttons" })).toHaveAttribute("aria-pressed", "true");
   await context.close();
@@ -534,11 +586,11 @@ test("workspace completion uses the existing atomic endpoint and survives reopen
 
 test("workspace removes private planner data immediately on sign out", async () => {
   const { context, page } = await open();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Fixture sign out" }).click();
   await expect(page.getByRole("complementary")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeDisabled();
   expect(new URL(page.url()).searchParams.has("workspace")).toBe(false);
   await context.close();
 });
@@ -548,7 +600,7 @@ test("workspace fits a narrow short screen with large text and forced colors", a
   await page.setViewportSize({ width: 320, height: 568 });
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
   await page.addStyleTag({ content: "html { font-size: 200%; }" });
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await expect(page.getByRole("button", { name: "Close planner" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start voice", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -567,7 +619,7 @@ test("workspace phone keeps failed-message recovery above the composer", async (
   await submit(page, "Please keep my words");
   const failure = page.getByRole("region", { name: "Message not sent" });
   await expect(failure).toBeVisible();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await expect(page.getByRole("complementary")).toBeVisible();
   const panel = await page.getByRole("complementary").boundingBox(), notice = await failure.boundingBox();
   expect(panel!.y + panel!.height).toBeLessThan(notice!.y);
@@ -581,7 +633,7 @@ test("workspace phone keeps failed-message recovery above the composer", async (
 test("workspace calendar navigation restores exact dates without losing the chat", async () => {
   const { context, page } = await open();
   await composer(page).fill("Keep my draft");
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("link", { name: "Week", exact: true }).click();
   await expect(page.getByRole("region", { name: "Week summary" })).toBeVisible();
   await page.getByRole("link", { name: "Next week" }).click();
@@ -600,7 +652,7 @@ test("workspace event form survives a failed save and keeps the composer reachab
   const { context, page } = await open();
   await page.setViewportSize({ width: 390, height: 844 });
   await composer(page).fill("A thought for Homa");
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("button", { name: "Add", exact: true }).click();
   await page.getByRole("button", { name: /^Event Appointment/ }).click();
   const dialog = page.getByRole("dialog");
@@ -624,7 +676,7 @@ test("workspace recurring deletion targets one occurrence and Escape keeps the p
     title: "Nature club", startsOn: calendarToday, endsOn: calendarToday, startTime: "10:00", endTime: "11:00", note: null,
     recurrence: { frequency: "weekly", interval: 1, weekdays: [1], until: null }, createdAt: "2026-10-01T16:00:00Z" }];
   const { context, page } = await open();
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("button", { name: /Nature club/ }).click();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -640,7 +692,7 @@ test("workspace recurring deletion targets one occurrence and Escape keeps the p
 test("workspace Add menu leaves the composer usable and Escape only closes the menu", async () => {
   const { context, page } = await open();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("button", { name: "Add", exact: true }).click();
   const menu = page.locator("[data-workspace-add-menu]");
   const box = await menu.boundingBox();
@@ -655,7 +707,7 @@ test("workspace Add menu leaves the composer usable and Escape only closes the m
 test("workspace activity help adds the selected activity without overwriting a draft or sending", async () => {
   const { context, page } = await open();
   await composer(page).fill("Keep this thought.");
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByText("Count the blue buttons", { exact: true }).click();
   await page.getByRole("button", { name: "Ask Homa how to do it" }).click();
   await expect(composer(page)).toHaveValue(/Keep this thought\.[\s\S]*Give me simple steps.*Maya.*2026-10-05.*Count the blue buttons/);
@@ -670,7 +722,7 @@ test("workspace event detail opens visibly after scrolling and restores the list
     startTime: null, endTime: null, note: null, createdAt: "2026-10-01T16:00:00Z" }));
   const { context, page } = await open();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await openPlanner(page);
   await page.getByRole("button", { name: /Outing 23/ }).click();
   const title = page.getByRole("dialog").getByRole("heading", { name: "Outing 23" });
   await expect(title).toBeVisible();
