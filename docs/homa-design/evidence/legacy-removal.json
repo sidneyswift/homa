@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "d37f9c3ec6290b4e317b531bc4d163d0b8af046e17ccee3d446862a627099d34",
+  "ownedInputFingerprint": "5757334c7b7bc1db34734e8bc92e1929936cc0ff55be572b6027d3c43260892b",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2501,7 +2501,7 @@
     {
       "surfaceId": "surface:0251c96a3bf92d13",
       "path": "apps/web/app/app/planner/unified-planner-view.tsx",
-      "sourceHash": "836645570fe900a9d8e5addca5c64cc2676cf3c7e5274adad9e17483ac62b4f7",
+      "sourceHash": "64b178db1c72a0d68224bc4364e6a0c20e783449e123f106bb268239eb9cb1b6",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
@@ -6386,7 +6386,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "acd393e3b4aa5dd90da6d2365dc512b8d8f6049c647c478904df9bea1d06b3b1",
+      "sourceHash": "5f0bc3159682b97ce7606006ba8841fa2a7c07a7ba3bc70834937bac6ed59179",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
