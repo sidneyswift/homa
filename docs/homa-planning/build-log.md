@@ -12683,3 +12683,25 @@ Final storage checks passed 157 tests with one database-only skip, plus eight in
 The installed Eve host now has a passing reusable hard-restart regression: checkpoint two successive questions, kill the owned process group, restart from disk, replay answer one, and verify question two remains pending until its own answer. The final exact Yes/No reply appears once. Added the isolated command to CI; no remote CI run is claimed.
 
 An exploratory mid-step kill revealed default local startup did not automatically resume the interrupted child. Explicit namespaced requeue succeeded and preserved answer identity, but this is not automatic recovery or deployed-host proof. The HTTP stream probe also failed locally, so restart evidence reads persisted runtime records. No product runtime, flags, schema or deployment changed in this checkpoint. Automatic recovery, live streaming/provider/device journeys, voice choice and rollout remain open. [Evidence](plans/2026-09-12-native-replay-approval.md).
+
+
+### October 5, 2026: Homa v2 preserves abilities while simplifying the experience (gh#1219)
+
+Sidney requested an epic and executable tickets with these exact intentions:
+"fewer places to go", "fewer decisions to make", "no loss of control",
+"easy and intuitive", and "simple, clean, minimal, and beautiful" UI/UX.
+The current task establishes app2 as the replacement experience being designed
+for eventual /app, not a second reduced-feature product. Preserve family-facing
+outcomes and direct controls; consolidate their presentation without changing
+privacy, billing, domain or retention policy. The exact planner composition is
+still a prototype decision, and production activation remains a separate release
+gate. This supersedes earlier home-layout assumptions only for the planned v2
+experience; it is not evidence that the live home has changed.
+
+The [shared handoff](plans/2026-10-05-app2-simplified-workspace.md) contains the
+22-capability source inventory, 23 journeys, evidence-backed finding-unknowns
+pass and work order. Epic gh#1219 links 16 implementation/design/release tickets
+and reuses gh#1182 for continuity. The source audit used the existing gh#1158
+lane at ad7c9f3c; production behavior was not re-certified in this planning task.
+No product code, environment flag, schema or deployed behavior changes as part
+of this documentation and tracking work. Status and ownership remain on GitHub.
