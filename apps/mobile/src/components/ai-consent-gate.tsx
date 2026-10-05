@@ -1,6 +1,7 @@
 import type { MobileBootstrapFailureReason } from "@homa/core";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   getMyConsentStatus,
@@ -32,7 +33,7 @@ export function AiConsentGate({
   embedded = false,
 }: {
   children: ReactNode;
-  purpose?: "chat" | "progress";
+  purpose?: "chat" | "progress" | "onboarding";
   embedded?: boolean;
 }) {
   const [status, setStatus] =
@@ -98,7 +99,9 @@ export function AiConsentGate({
   }
 
   if (status === "loading") {
-    return <LoadingStatus label="Checking your privacy choice" style={{ marginTop: space.xl }} />;
+    return <ConsentFrame onboarding={purpose === "onboarding"} embedded={embedded}>
+      <LoadingStatus label="Checking your privacy choice" style={{ marginTop: space.xl }} />
+    </ConsentFrame>;
   }
 
   if (status === "given") {
@@ -107,7 +110,7 @@ export function AiConsentGate({
 
   if (status === "failed") {
     return (
-      <View style={embedded ? undefined : { padding: space.lg }}>
+      <ConsentFrame onboarding={purpose === "onboarding"} embedded={embedded}>
         <Card style={{ gap: space.md }}>
           <Text
             accessibilityRole="header"
@@ -139,12 +142,12 @@ export function AiConsentGate({
             />
           ) : null}
         </Card>
-      </View>
+      </ConsentFrame>
     );
   }
 
   return (
-    <View style={embedded ? undefined : { padding: space.lg }}>
+    <ConsentFrame onboarding={purpose === "onboarding"} embedded={embedded}>
       <Card style={{ gap: space.md }}>
         <Text
           accessibilityRole="header"
@@ -154,7 +157,9 @@ export function AiConsentGate({
             color: colors.textStrong,
           }}
         >
-          {purpose === "progress"
+          {purpose === "onboarding"
+            ? "Before Homa makes your first page"
+            : purpose === "progress"
             ? "Before Homa suggests a next move"
             : "Before you chat with Homa"}
         </Text>
@@ -175,7 +180,9 @@ export function AiConsentGate({
           label={
             saving
               ? "One moment\u2026"
-              : purpose === "progress"
+              : purpose === "onboarding"
+                ? "I agree, keep going"
+                : purpose === "progress"
                 ? "I agree, show suggestions"
                 : "I agree, let's chat"
           }
@@ -183,6 +190,21 @@ export function AiConsentGate({
           disabled={saving}
         />
       </Card>
-    </View>
+    </ConsentFrame>
   );
+}
+
+function ConsentFrame({ children, onboarding, embedded }: {
+  children: ReactNode;
+  onboarding: boolean;
+  embedded: boolean;
+}) {
+  if (onboarding) {
+    return <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: space.lg, flexGrow: 1 }}>
+        {children}
+      </ScrollView>
+    </SafeAreaView>;
+  }
+  return <View style={embedded ? undefined : { padding: space.lg }}>{children}</View>;
 }

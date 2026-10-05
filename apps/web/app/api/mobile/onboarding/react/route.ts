@@ -3,7 +3,7 @@ import { z } from "zod";
 import { MOBILE_ONBOARDING_INTENTS } from "@homa/core";
 
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
-import { requireFamilyFromBearer } from "../../../../../lib/map/session";
+import { requireFamilyWithAiConsentFromBearer } from "../../../../../lib/map/session";
 
 /**
  * POST /api/mobile/onboarding/react
@@ -61,9 +61,18 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false }, { status: 429 });
   }
 
-  const family = await requireFamilyFromBearer(request);
-  if (!family) {
+  let access: Awaited<ReturnType<typeof requireFamilyWithAiConsentFromBearer>>;
+  try {
+    access = await requireFamilyWithAiConsentFromBearer(request);
+  } catch {
+    return Response.json({ ok: false, reason: "consent-unavailable" }, { status: 503 });
+  }
+  if (!access) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
+  }
+
+  if (!access.aiProcessingConsented) {
+    return Response.json({ ok: false, reason: "ai-consent-required" }, { status: 403 });
   }
 
   let body: unknown;

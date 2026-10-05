@@ -2,6 +2,7 @@ import { Redirect, Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
+import { AiConsentGate } from "../../components/ai-consent-gate";
 import { NativeText } from "../../components/ui/semantic";
 import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
@@ -22,6 +23,7 @@ export default function OnboardingLayout() {
   if (!session) return <Redirect href="/signin" />;
 
   return (
+    <AiConsentGate purpose="onboarding">
     <View style={{ flex: 1 }}>
       <WalkCharacterProvider>
         <Stack
@@ -54,6 +56,7 @@ export default function OnboardingLayout() {
         {__DEV__ ? <DevRestartWalk /> : null}
       </WalkCharacterProvider>
     </View>
+    </AiConsentGate>
   );
 }
 

@@ -12,6 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { US_STATES } from "@homa/core";
 
+import { useSession } from "../../features/auth/session-provider";
+
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
 import { Icon } from "../../components/design/icon";
@@ -49,7 +51,11 @@ import { colors, fontSize, radius, space } from "../../theme/tokens";
  */
 export default function YouScreen() {
   const router = useRouter();
-  const { family } = useFamilyData();
+  const { family, memberDisplayName } = useFamilyData();
+  const { session } = useSession();
+  const isAppleSignIn = session?.user.app_metadata.provider === "apple";
+  const providerName = session?.user.user_metadata.full_name;
+  const knownName = memberDisplayName || (typeof providerName === "string" ? providerName : "");
   const reported = useRef(false);
   const [name, setName] = useState("");
   const [stateCode, setStateCode] = useState<string | null>(null);
@@ -80,13 +86,14 @@ export default function YouScreen() {
   async function continueWalk() {
     if (saving) return;
     setError(null);
-    if (!name.trim() && !stateCode) {
+    const callMeName = isAppleSignIn ? knownName.trim() : name.trim();
+    if (!callMeName && !stateCode) {
       await advanceToMaking();
       return;
     }
     setSaving(true);
     const saved = await saveWalkBasics({
-      callMeName: name.trim() || undefined,
+      callMeName: callMeName || undefined,
       usState: stateCode ?? undefined,
     });
     setSaving(false);
@@ -117,10 +124,12 @@ export default function YouScreen() {
           {/* Deck S7 (approved 2026-08-31): one body carries both
               justifications; the per-field captions are folded in. */}
           <NativeText role="body" tone="body">
-            {"Your name, so I stop calling you \"hey\". Your state, because homeschool rules are local and I've done the reading."}
+            {isAppleSignIn
+              ? "Your state, because homeschool rules are local and I've done the reading."
+              : "Your name, so I stop calling you \"hey\". Your state, because homeschool rules are local and I've done the reading."}
           </NativeText>
 
-          <View style={{ gap: space.xs }}>
+          {!isAppleSignIn ? <View style={{ gap: space.xs }}>
             <TextField
               label="What should I call you?"
               value={name}
@@ -128,7 +137,7 @@ export default function YouScreen() {
               placeholder="e.g. Sarah"
               autoCapitalize="words"
             />
-          </View>
+          </View> : null}
 
           <View style={{ gap: space.xs }}>
             <NativeText role="label" tone="strong">
