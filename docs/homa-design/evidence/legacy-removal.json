@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "b907a8a6ab5c67fc0ffb6d955c19eb5e41d407bed6a78bd6d81cff23462c7c4f",
+  "ownedInputFingerprint": "d37f9c3ec6290b4e317b531bc4d163d0b8af046e17ccee3d446862a627099d34",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -2389,7 +2389,7 @@
     {
       "surfaceId": "surface:2591c71957f33e59",
       "path": "apps/web/app/app/planner/day-grid.tsx",
-      "sourceHash": "0917ed651a4ed86fca2ec2255de45e1a1d351ae395203af6782d5b3b6d53cd7f",
+      "sourceHash": "dcf867464592ae2a8bd01220d231961978d4ae9d79e1fc593e030a3897119d49",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -2445,7 +2445,7 @@
     {
       "surfaceId": "surface:25bd56d8f145d1f2",
       "path": "apps/web/app/app/planner/planner-view.tsx",
-      "sourceHash": "418097c594594d9a99ff29b214beda101fdf39b860ec440fda1c65010e0f5680",
+      "sourceHash": "99fdf3ea69ae9bf139291de59ae7d028154b4005ec97ac16dbf3d5e759d40ff1",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -6386,7 +6386,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "1ce3f7d9cdf53b09fc35f3e9f5ea00cf1647957b2d29cfc9e4fb61269a64ea1e",
+      "sourceHash": "acd393e3b4aa5dd90da6d2365dc512b8d8f6049c647c478904df9bea1d06b3b1",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
@@ -6502,7 +6502,7 @@
     {
       "surfaceId": "surface:1aac9cfdef6206ce",
       "path": "docs/homa-planning/journeys/10-reconciliation.md",
-      "sourceHash": "a5dedd69d2b952b190d89be059763efaa3b9d75c05a9a70b39c6f20ea8c83b0e",
+      "sourceHash": "e501a3a09e7055f5726b51fb39d853c3b88d89a73dd5ac451dd9ddafe2f3e597",
       "legacySignatures": [],
       "detectedSourceHash": "e2ca1ca294cb2e4e739a96957d9b84251c1d2910acd2e16c089b2433ebede8d9",
       "detectedLegacySignatures": [
