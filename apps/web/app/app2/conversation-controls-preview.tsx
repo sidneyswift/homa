@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 
 import { archiveFromServerHistory, type ChatHistoryPayload } from "../../lib/chat-history-model";
 import type { EveMessage } from "eve/client";
@@ -21,6 +21,7 @@ import { Icon } from "../../components/design/Icon";
 import { AttachMenuButton, PendingAttachmentChips, useChatAttachments } from "../app/chat-attachments";
 import { composerPrimaryAction } from "../app/chat-send-policy";
 import { MessageView } from "../app/message-parts";
+import { planEditCount, type PlannerOpenSignal } from "../app/planner-canvas";
 import { useWorkspaceChat } from "./use-workspace-chat";
 import { submitWorkspaceDraft } from "./workspace-send";
 import { durableWorkspaceActivity, workspaceActivity } from "./workspace-activity";
@@ -92,12 +93,13 @@ function ConversationAnnouncement({ messages, ready, speaking, readingHistory }:
 }
 
 /** View selection and audio preferences remain independent of session lifetime. */
-type ConversationControlsProps = { durableConversation?: boolean; family: App2Family | null; userId: string | null;
+type ConversationControlsProps = { activityTarget?: HTMLDivElement | null; durableConversation?: boolean; family: App2Family | null; userId: string | null;
+  onOpenPlanner: (signal: PlannerOpenSignal) => void; conversationCovered?: boolean; onPlanRevision?: (revision: number) => void;
   history: ChatHistoryPayload | null; workspaceEngaged: boolean; onEngagedChange: (engaged: boolean) => void };
 export function ConversationControlsPreview(props: ConversationControlsProps) {
   return <ConversationControlsSession key={`${props.family?.id ?? ""}:${props.userId ?? ""}`} {...props} />;
 }
-function ConversationControlsSession({ family, userId, history, workspaceEngaged, onEngagedChange, durableConversation = false }: ConversationControlsProps) {
+function ConversationControlsSession({ onOpenPlanner, conversationCovered = false, onPlanRevision, activityTarget, family, userId, history, workspaceEngaged, onEngagedChange, durableConversation = false }: ConversationControlsProps) {
   const [pointerFocus, setPointerFocus] = useState<"voice" | "settings" | "back" | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const account = family && userId ? `${family.id}:${userId}` : null;
@@ -171,6 +173,9 @@ function ConversationControlsSession({ family, userId, history, workspaceEngaged
     }),
     ...results.map(entry => ({ kind: "result" as const, key: entry.message.id, at: entry.at ?? 0, message: entry.message })),
   ].sort((a, b) => a.at - b.at || a.key.localeCompare(b.key)), [archived, chat.messages, chat.messageTimes, chat.sessionId, turns, turnTimes, results, feed.messages, durableMessages, delivery.pending, durableMaterials]);
+
+  const planRevision = planEditCount(timeline.map(entry => entry.message));
+  useEffect(() => { onPlanRevision?.(planRevision); }, [planRevision, onPlanRevision]);
 
   const activity = durableConversation
     ? durableWorkspaceActivity({ messages: feed.messages, requests: feed.requests, pending: delivery.pending, unavailable: delivery.signedOut || !!delivery.error })
@@ -301,6 +306,62 @@ function ConversationControlsSession({ family, userId, history, workspaceEngaged
 
   return (
     <div className={styles.composerDock}>
+      {!delivery.signedOut && (timeline.length > 0 || activity !== null) && <section className={styles.voiceConversation} aria-label="Conversation" inert={conversationCovered} aria-hidden={conversationCovered || undefined}>
+        <div className={styles.voiceConversationBody} ref={transcript} role="log" aria-label="Conversation transcript" aria-live={durableConversation || (speakerOn && voiceActive) ? "off" : "polite"} aria-relevant="additions text" tabIndex={0} onScroll={event => {
+          const element = event.currentTarget;
+          const latest = element.querySelector<HTMLElement>('[data-current="true"]');
+          const bottom = element.scrollHeight - element.clientHeight;
+          const speechTarget = latest ? Math.min(bottom, Math.max(0, latest.offsetTop + latest.offsetHeight + parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)) : bottom;
+          followLatest.current = bottom - element.scrollTop < 48 || (!durableConversation && Math.abs(speechTarget - element.scrollTop) < 48);
+          if (durableConversation) feed.setFollowingNewest(followLatest.current);
+        }}>
+          <div className={styles.spokenTurns}>
+            {durableConversation && feed.hasOlder && <button type="button" disabled={feed.loading || feed.loadingOlder} onClick={() => {
+              const element = transcript.current;
+              const anchor = element?.querySelector<HTMLElement>("[data-message-id]");
+              const anchorId = anchor?.dataset.messageId;
+              const offset = anchor && element ? anchor.getBoundingClientRect().top - element.getBoundingClientRect().top : 0;
+              followLatest.current = false;
+              feed.setFollowingNewest(false);
+              void feed.loadOlder().then(() => requestAnimationFrame(() => {
+                if (!element || !anchorId) return;
+                const restored = Array.from(element.querySelectorAll<HTMLElement>("[data-message-id]")).find(node => node.dataset.messageId === anchorId);
+                if (restored) element.scrollTop += restored.getBoundingClientRect().top - element.getBoundingClientRect().top - offset;
+              }));
+            }}>Earlier messages</button>}
+            {timeline.map((entry, index) => <div className={styles.spokenTurn} data-message-id={entry.key} data-speaker={entry.message.role} data-current={index === timeline.length - 1} key={entry.key}>
+              {durableConversation && feed.messages.find(row => row.id === entry.key)?.attachments?.map(file =>
+                <a key={file.id} href={file.url} target="_blank" rel="noreferrer">{file.name || file.caption || "Attached file"}</a>)}
+              <span className="sr-only">{entry.message.role === "user" ? "You" : "Homa"}</span>
+              {durableConversation && feed.messages.find(row => row.id === entry.key)?.nativeInput ? <FeedNativeQuestion
+                batch={feed.messages.find(row => row.id === entry.key)!.nativeInput!} pending={delivery.pending} failed={delivery.failed}
+                epoch={feed.accessEpoch} onAnswer={answerNative} /> : durableConversation && feed.messages.find(row => row.id === entry.key)?.question ? <FeedQuestion
+                question={feed.messages.find(row => row.id === entry.key)!.question!} onAnswer={answerQuestion} onTypeReply={typeReplyToQuestion} /> : entry.kind === "result" ? <VoiceEffectsView
+                message={entry.message} working={working[entry.message.id] ?? false}
+                voiceActive={voiceActive} currentRequest={voiceMounted && answerSource !== null && voiceEffectMessageId(answerSource) === entry.message.id}
+                canAnswerOutLoud={voiceActive && microphoneOn && answerSource !== null && voiceEffectMessageId(answerSource) === entry.message.id}
+                timeZone={family?.timeZone ?? "America/New_York"} familyId={family?.id ?? null}
+                childNameById={new Map(family?.children.map(child => [child.id, child.name]) ?? [])}
+                onOpenPlanner={onOpenPlanner}
+                onOpenChecklist={setChecklistChild}
+                onOpenReport={childId => window.open(`/app/${encodeURIComponent(childId)}/report`, "_blank", "noopener")}
+              /> : entry.kind === "voice" ? <p>{entry.message.parts.map(part => part.type === "text" ? part.text : "").join("").trimStart()}</p> : <MessageView
+                showSendingStatus={false}
+                message={entry.message} attachmentReceipts={entry.message.role === "user" ? chat.receiptsBySummary[entry.message.parts.map(part => part.type === "text" ? part.text : "").join("")] : undefined}
+                familyId={family?.id ?? null} timeZone={family?.timeZone ?? "America/New_York"}
+                childNameById={new Map(family?.children.map(child => [child.id, child.name]) ?? [])}
+                onSendSuggestion={setDraft} onSendQuestionAnswers={setDraft}
+                onOpenPlanner={onOpenPlanner}
+                onOpenChecklist={setChecklistChild}
+                onOpenReport={childId => window.open(`/app/${encodeURIComponent(childId)}/report`, "_blank", "noopener")}
+              />}
+            </div>)}
+          </div>
+          {checklistChild && <ChecklistTakeover childId={checklistChild} onClose={() => setChecklistChild(null)} />}
+        </div>
+      </section>}
+      <div className={styles.islandFootprint} data-workspace-composer>
+      <div className={styles.composerNotices}>
       {voiceMounted && !delivery.signedOut && <VoiceMode
         key={generation}
         localApp2
@@ -337,7 +398,10 @@ function ConversationControlsSession({ family, userId, history, workspaceEngaged
         }}
         presentation={App2VoiceStatus}
       />}
-      {Object.values(working).some(Boolean) && <p className={styles.voiceNotice} role="status">Homa is working on your request…</p>}
+      {activityTarget && !delivery.signedOut && (activity || Object.values(working).some(Boolean)) && createPortal(
+        <WorkspaceActivity activity={activity ?? { label: "Working on your request", steps: [] }} speaking={speakerOn && voiceActive} />,
+        activityTarget,
+      )}
       {notice && <p className={styles.voiceNotice} role="status">{notice} {!family && <a href="/app" target="_blank" rel="noreferrer">Open Homa</a>}</p>}
       {attachments.error && <p className={styles.voiceNotice} role="alert">{attachments.error}</p>}
       {draftError && <p className={styles.voiceNotice} role="alert">{draftError}</p>}
@@ -355,68 +419,13 @@ function ConversationControlsSession({ family, userId, history, workspaceEngaged
       {durableConversation && feed.requests.some(request => request.state === "recovery_required") && <p className={styles.voiceNotice} role="status">This request stopped before Homa could confirm the result. Your message is recorded.</p>}
       {chat.error && <p className={styles.voiceNotice} role="alert">{chat.error} <a href="/app" target="_blank" rel="noreferrer">Open conversation</a></p>}
       {durableConversation && feed.messages.some(message => message.nativeUnavailable) && <p className={styles.voiceNotice} role="status">Homa’s questions could not refresh. Trying again shortly.</p>}
-      {!delivery.signedOut && (timeline.length > 0 || activity !== null) && <section className={styles.voiceConversation} aria-label="Conversation">
-        <div className={styles.voiceConversationBody} ref={transcript} role="log" aria-label="Conversation transcript" aria-live={durableConversation || (speakerOn && voiceActive) ? "off" : "polite"} aria-relevant="additions text" tabIndex={0} onScroll={event => {
-          const element = event.currentTarget;
-          const latest = element.querySelector<HTMLElement>('[data-current="true"]');
-          const bottom = element.scrollHeight - element.clientHeight;
-          const speechTarget = latest ? Math.min(bottom, Math.max(0, latest.offsetTop + latest.offsetHeight + parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)) : bottom;
-          followLatest.current = bottom - element.scrollTop < 48 || (!durableConversation && Math.abs(speechTarget - element.scrollTop) < 48);
-          if (durableConversation) feed.setFollowingNewest(followLatest.current);
-        }}>
-          <div className={styles.spokenTurns}>
-            {durableConversation && feed.hasOlder && <button type="button" disabled={feed.loading || feed.loadingOlder} onClick={() => {
-              const element = transcript.current;
-              const anchor = element?.querySelector<HTMLElement>("[data-message-id]");
-              const anchorId = anchor?.dataset.messageId;
-              const offset = anchor && element ? anchor.getBoundingClientRect().top - element.getBoundingClientRect().top : 0;
-              followLatest.current = false;
-              feed.setFollowingNewest(false);
-              void feed.loadOlder().then(() => requestAnimationFrame(() => {
-                if (!element || !anchorId) return;
-                const restored = Array.from(element.querySelectorAll<HTMLElement>("[data-message-id]")).find(node => node.dataset.messageId === anchorId);
-                if (restored) element.scrollTop += restored.getBoundingClientRect().top - element.getBoundingClientRect().top - offset;
-              }));
-            }}>Earlier messages</button>}
-            {timeline.map((entry, index) => <div className={styles.spokenTurn} data-message-id={entry.key} data-speaker={entry.message.role} data-current={index === timeline.length - 1} key={entry.key}>
-              {durableConversation && feed.messages.find(row => row.id === entry.key)?.attachments?.map(file =>
-                <a key={file.id} href={file.url} target="_blank" rel="noreferrer">{file.name || file.caption || "Attached file"}</a>)}
-              <span className="sr-only">{entry.message.role === "user" ? "You" : "Homa"}</span>
-              {durableConversation && feed.messages.find(row => row.id === entry.key)?.nativeInput ? <FeedNativeQuestion
-                batch={feed.messages.find(row => row.id === entry.key)!.nativeInput!} pending={delivery.pending} failed={delivery.failed}
-                epoch={feed.accessEpoch} onAnswer={answerNative} /> : durableConversation && feed.messages.find(row => row.id === entry.key)?.question ? <FeedQuestion
-                question={feed.messages.find(row => row.id === entry.key)!.question!} onAnswer={answerQuestion} onTypeReply={typeReplyToQuestion} /> : entry.kind === "result" ? <VoiceEffectsView
-                message={entry.message} working={working[entry.message.id] ?? false}
-                voiceActive={voiceActive} currentRequest={voiceMounted && answerSource !== null && voiceEffectMessageId(answerSource) === entry.message.id}
-                canAnswerOutLoud={voiceActive && microphoneOn && answerSource !== null && voiceEffectMessageId(answerSource) === entry.message.id}
-                timeZone={family?.timeZone ?? "America/New_York"} familyId={family?.id ?? null}
-                childNameById={new Map(family?.children.map(child => [child.id, child.name]) ?? [])}
-                onOpenPlanner={() => window.open("/app/planner", "_blank", "noopener")}
-                onOpenChecklist={setChecklistChild}
-                onOpenReport={childId => window.open(`/app/${encodeURIComponent(childId)}/report`, "_blank", "noopener")}
-              /> : entry.kind === "voice" ? <p>{entry.message.parts.map(part => part.type === "text" ? part.text : "").join("").trimStart()}</p> : <MessageView
-                showSendingStatus={false}
-                message={entry.message} attachmentReceipts={entry.message.role === "user" ? chat.receiptsBySummary[entry.message.parts.map(part => part.type === "text" ? part.text : "").join("")] : undefined}
-                familyId={family?.id ?? null} timeZone={family?.timeZone ?? "America/New_York"}
-                childNameById={new Map(family?.children.map(child => [child.id, child.name]) ?? [])}
-                onSendSuggestion={setDraft} onSendQuestionAnswers={setDraft}
-                onOpenPlanner={() => window.open("/app/planner", "_blank", "noopener")}
-                onOpenChecklist={setChecklistChild}
-                onOpenReport={childId => window.open(`/app/${encodeURIComponent(childId)}/report`, "_blank", "noopener")}
-              />}
-            </div>)}
-            {activity && <WorkspaceActivity activity={activity} speaking={speakerOn && voiceActive} />}
-          </div>
-          {checklistChild && <ChecklistTakeover childId={checklistChild} onClose={() => setChecklistChild(null)} />}
-        </div>
-      </section>}
       {durableConversation && (!feed.followingNewest || feed.hasNewer) && <button type="button" className={styles.voiceNotice} onClick={() => {
         void feed.jumpToNewest().then(() => {
           followLatest.current = true;
           requestAnimationFrame(() => { if (transcript.current) transcript.current.scrollTop = transcript.current.scrollHeight; });
         });
       }}>Newest messages</button>}
-      <div className={styles.islandFootprint}>
+      </div>
       <div className={styles.islandPosition}>
       {durableConversation && replyToQuestionId && <div className={styles.voiceNotice}>
         Replying to Homa’s question <button type="button" onClick={clearReplyToQuestion}>Cancel reply</button>

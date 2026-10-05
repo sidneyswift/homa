@@ -18,6 +18,19 @@ let messages: ConversationFeedMessage[] = [], changes: { position: number; messa
 let receipts = new Map<string, { intentId: string; requestId: string; messageId: string }>();
 let submissions: { intentId: string; text: string; attachmentIds?: string[] }[] = [];
 let feedPaused = false, rejectSubmissions = false, permanentRejection = false, feedRequests: string[] = [];
+const plannerKids = [
+  { id: "11111111-1111-4111-8111-111111111111", name: "Maya", birthMonth: "2019-05-10", avatarUrl: null, reportToken: null },
+  { id: "22222222-2222-4222-8222-222222222222", name: "Leo", birthMonth: "2021-02-10", avatarUrl: null, reportToken: null },
+];
+let boardStatus = 200, checkWrites: Record<string, unknown>[] = [];
+let plannerProgress: Record<string, boolean> = {};
+const plannerResponse = () => ({ ok: true, board: { timeZone: "America/New_York", kids: plannerKids, plans: plannerKids.map((child, index) => ({
+  childId: child.id, subjectId: "math", planRevision: 1, progressRevision: index === 0 ? checkWrites.length : 0,
+  done: index === 0 ? Object.values(plannerProgress).filter(Boolean).length : 0, total: 1,
+  retestAt: new Date(Date.now() + 28 * 86400000).toISOString(),
+  weeks: [{ week: 1, focus: "Count together", activities: [index === 0 ? "Count the blue buttons" : "Count the toy cars"] }],
+  progress: index === 0 ? plannerProgress : {}, activitySources: {},
+})) } });
 let nativeBatches: NativeConversationBatch[] = [];
 let nativeSubmissions: { account: string; accessEpoch: string; intentId: string; batchId: string; responses: NativeInputResponse[] }[] = [];
 
@@ -65,6 +78,15 @@ test.beforeAll(async () => {
     try {
       const url = new URL(request.url!, "http://fixture");
       const send = (body: unknown, status = 200) => { response.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" }); response.end(JSON.stringify(body)); };
+      if (url.pathname === "/api/map/plan/board") {
+        return send(boardStatus === 200 ? plannerResponse() : { error: "unavailable" }, boardStatus);
+      }
+      if (url.pathname === "/api/map/plan/check") {
+        const input = await jsonBody(request);
+        checkWrites.push(input); plannerProgress[input.checkKey] = input.done;
+        return send({ status: "applied", planId: plannerKids[0]!.id, planRevision: 1,
+          progressRevision: checkWrites.length, progress: plannerProgress, checkKey: input.checkKey, done: input.done });
+      }
       if (url.pathname.startsWith("/api/conversation/")) {
         if (request.headers.authorization !== "Bearer fixture-adult-token") return send({ reason: "sign_in" }, 401);
         if (url.pathname === "/api/conversation/native-input") {
@@ -133,7 +155,7 @@ test.beforeAll(async () => {
   browser = await chromium.launch({ headless: true, executablePath: executablePath ?? await serverlessChromium.executablePath(), args: executablePath ? [] : serverlessChromium.args });
 });
 test.afterAll(async () => { await browser?.close(); if (server?.listening) await new Promise<void>((done, reject) => server.close(error => error ? reject(error) : done())); });
-test.beforeEach(() => { messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
+test.beforeEach(() => { boardStatus = 200; checkWrites = []; plannerProgress = {}; messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
 async function open() {
   const context = await browser.newContext({ viewport: { width: 900, height: 900 }, reducedMotion: "reduce" });
   const page = await context.newPage(); const errors: string[] = []; page.on("pageerror", error => errors.push(error.stack ?? error.message));
@@ -388,5 +410,141 @@ test("native question history follows message paging and canonical deletion", as
   messages = messages.filter(row => row.id !== message.id);
   changes.push({ position: changes.length + 1, message, deleted: true });
   await expect(card).toHaveCount(0);
+  await context.close();
+});
+
+
+test("workspace opens beside the real chat, preserves the draft, and follows browser history", async () => {
+  addMessage("Let’s plan a calm week.");
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await composer(page).fill("Keep this unfinished thought");
+  const input = await composer(page).elementHandle();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Planner", exact: true })).toBeFocused();
+  await expect(page.getByRole("complementary", { name: "Planner" })).toBeVisible();
+  await expect(page.getByRole("log")).toBeVisible();
+  const panel = await page.getByRole("complementary").boundingBox(), chat = await page.getByRole("log").boundingBox();
+  expect(chat!.x + chat!.width).toBeLessThanOrEqual(panel!.x);
+  await expect(composer(page)).toHaveValue("Keep this unfinished thought");
+  expect(await input!.evaluate(node => node === document.querySelector('[placeholder="Message Homa…"]'))).toBe(true);
+  await page.getByRole("combobox", { name: "Whose week" }).selectOption(plannerKids[0]!.id);
+  await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
+  await expect(page.getByText("Count the toy cars", { exact: true })).toHaveCount(0);
+  await page.goBack();
+  await expect(page.getByRole("combobox", { name: "Whose week" })).toHaveValue("");
+  await page.goBack();
+  await expect(page.getByRole("complementary")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeFocused();
+  await page.goForward();
+  await expect(page.getByRole("complementary")).toBeVisible();
+  await expect(composer(page)).toHaveValue("Keep this unfinished thought");
+  await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
+  await page.screenshot({ path: "/private/tmp/homa-workspace-desktop.png" });
+  await context.close();
+});
+
+test("workspace on a phone keeps the composer usable and covered conversation out of keyboard navigation", async () => {
+  addMessage("This conversation stays mounted.");
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
+  await expect(page.getByRole("log")).toHaveCount(0);
+  expect(await page.locator('[role="log"]').evaluate(element => Boolean(element.closest("[inert]")))).toBe(true);
+  const panel = await page.getByRole("complementary").boundingBox(), input = await composer(page).boundingBox();
+  expect(panel!.y + panel!.height).toBeLessThan(input!.y);
+  await submit(page, "Keep planning while I type");
+  await expect.poll(() => submissions.length).toBe(1);
+  await expect(page.getByRole("complementary")).toBeVisible();
+  await page.screenshot({ path: "/private/tmp/homa-workspace-phone.png" });
+  await page.getByRole("button", { name: "Close planner" }).click();
+  await expect(page.getByRole("log")).toContainText("Keep planning while I type");
+  await expect(page.getByRole("button", { name: "Start voice", exact: true })).toBeVisible();
+  await context.close();
+});
+
+test("workspace retry never turns a failed load into an empty week", async () => {
+  boardStatus = 503;
+  const { context, page } = await open();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Your week couldn’t load");
+  await expect(page.getByText("There's no month set up yet.")).toHaveCount(0);
+  boardStatus = 200;
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("complementary")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeFocused();
+  await context.close();
+});
+
+test("workspace deep links reject missing children and restore valid selection after refresh", async () => {
+  const { context, page } = await open();
+  await page.goto(`${origin}/?workspace=planner&child=not-a-family-child`);
+  await expect(page.getByText("This child’s planner is no longer available to this account.")).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await page.getByRole("button", { name: "Show your family’s week" }).click();
+  await page.getByRole("combobox").selectOption(plannerKids[1]!.id);
+  await page.reload();
+  await expect(page.getByText("Count the toy cars", { exact: true })).toBeVisible();
+  await expect(page.getByText("Count the blue buttons", { exact: true })).toHaveCount(0);
+  await context.close();
+});
+
+test("workspace completion uses the existing atomic endpoint and survives reopening", async () => {
+  const { context, page } = await open();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await page.getByRole("checkbox", { name: "Maya: Count the blue buttons" }).check();
+  await expect.poll(() => checkWrites.length).toBe(1);
+  expect(checkWrites[0]).toMatchObject({ childId: plannerKids[0]!.id, subjectId: "math", planRevision: 1, checkKey: "1.0", done: true });
+  await page.getByRole("button", { name: "Close planner" }).click();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: "Maya: Count the blue buttons" })).toBeChecked();
+  await context.close();
+});
+
+test("workspace removes private planner data immediately on sign out", async () => {
+  const { context, page } = await open();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Fixture sign out" }).click();
+  await expect(page.getByRole("complementary")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Your week", exact: true })).toBeDisabled();
+  expect(new URL(page.url()).searchParams.has("workspace")).toBe(false);
+  await context.close();
+});
+
+test("workspace fits a narrow short screen with large text and forced colors", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.addStyleTag({ content: "html { font-size: 200%; }" });
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Close planner" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start voice", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  const panel = await page.getByRole("complementary").boundingBox(), input = await composer(page).boundingBox();
+  expect(panel!.height).toBeGreaterThan(100);
+  expect(panel!.y + panel!.height).toBeLessThan(input!.y);
+  await page.screenshot({ path: "/private/tmp/homa-workspace-phone-forced.png" });
+  await context.close();
+});
+
+
+test("workspace phone keeps failed-message recovery above the composer", async () => {
+  permanentRejection = true;
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await submit(page, "Please keep my words");
+  const failure = page.getByRole("region", { name: "Message not sent" });
+  await expect(failure).toBeVisible();
+  await page.getByRole("button", { name: "Your week", exact: true }).click();
+  await expect(page.getByRole("complementary")).toBeVisible();
+  const panel = await page.getByRole("complementary").boundingBox(), notice = await failure.boundingBox();
+  expect(panel!.y + panel!.height).toBeLessThan(notice!.y);
+  await failure.getByRole("button", { name: "Use as draft" }).click();
+  await expect(composer(page)).toHaveValue("Please keep my words");
+  await expect(page.getByRole("complementary")).toBeVisible();
   await context.close();
 });

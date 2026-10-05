@@ -1,3 +1,21 @@
+## 2026-10-05 · Founder selects a white workspace beside the conversation
+
+For gh#1219, Sidney selected “beside it” after comparing workspace compositions,
+then explicitly said “also keep the white minimal design. NOT the homa design.”
+The selected desktop workspace sits beside the chat. Phones use a focused sheet
+with the input and voice control reachable. The white, minimal, sans-serif app2
+presentation takes precedence over the mineral/serif design direction for this
+exploration. Registered as `app2-adjacent-white-workspace`.
+
+The first gh#1221 implementation keeps the conversation mounted, uses URL view
+selection and browser history, and opens the existing authenticated learning-plan
+board in the adjacent workspace. It preserves the atomic completion endpoint and
+rejects a selected child absent from the authenticated board. It does not introduce
+new storage or automatically open from typed-chat tool results. Calendar/events
+and existing report/source links retain explicit new-tab handoffs until their
+workspace tickets are implemented. This entry records local implementation, not
+full planner parity, production rollout, or completion of the epic.
+
 ## 2026-09-30 · Founder ruling: Sonnet for fleet research, Astra for families
 
 Sidney requested Anthropic Sonnet 5.5 for Homa's automated research runs while

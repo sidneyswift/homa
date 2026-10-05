@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import type { ChatHistoryPayload } from "../../lib/chat-history-model";
 import { ConversationControlsPreview } from "./conversation-controls-preview";
 import styles from "./voice-workspace-preview.module.css";
+import { WorkspaceShell, useWorkspaceShell } from "./workspace-shell";
 
 const HomaCharacter = dynamic(() => import("./homa-character"), { ssr: false, loading: () => null });
 
@@ -30,21 +31,29 @@ export interface App2Family {
   children: Array<{ id: string; name: string }>;
 }
 
-export function VoiceWorkspacePreview({ family, userId, history, durableConversation = false }: { durableConversation?: boolean; family: App2Family | null; userId: string | null; history: ChatHistoryPayload | null }) {
+type PreviewProps = { durableConversation?: boolean; family: App2Family | null; userId: string | null; history: ChatHistoryPayload | null };
+export function VoiceWorkspacePreview(props: PreviewProps) {
+  return <WorkspaceShell userId={props.userId} key={`${props.family?.id ?? ""}:${props.userId ?? ""}`}><WorkspaceConversation {...props} /></WorkspaceShell>;
+}
+
+function WorkspaceConversation({ family, userId, history, durableConversation = false }: PreviewProps) {
+  const { openPlanner, workspaceOpen, conversationCovered, onPlanRevision } = useWorkspaceShell();
   const [characterPaused, setCharacterPaused] = useState(false);
   const [engaged, setEngaged] = useState(false);
+  const [activityTarget, setActivityTarget] = useState<HTMLDivElement | null>(null);
   const reducedMotion = useReducedMotion();
   const stateDialog = useRef<HTMLDialogElement>(null);
   const stateButton = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className={styles.preview} data-engaged={engaged}>
-      <main className={styles.screen}>
+    <div className={styles.preview} data-engaged={engaged || workspaceOpen}>
+      <main className={styles.screen} inert={conversationCovered} aria-hidden={conversationCovered || undefined}>
         <div className={styles.stage}>
           <motion.div layout initial={false} className={styles.characterStage} transition={{ layout: { duration: reducedMotion ? 0 : motionContract.durations.slow / 1000, ease: characterEase } }}><HomaCharacter paused={characterPaused} /></motion.div>
+          <motion.div layout="position" initial={false} className={styles.activityAnchor} ref={setActivityTarget} transition={{ layout: { duration: reducedMotion ? 0 : motionContract.durations.slow / 1000, ease: characterEase } }} />
         </div>
       </main>
-      <ConversationControlsPreview durableConversation={durableConversation} family={family} userId={userId} history={history} workspaceEngaged={engaged} onEngagedChange={setEngaged} />
+      <ConversationControlsPreview activityTarget={activityTarget} durableConversation={durableConversation} family={family} userId={userId} history={history} workspaceEngaged={engaged || workspaceOpen} onEngagedChange={setEngaged} onOpenPlanner={openPlanner} conversationCovered={conversationCovered} onPlanRevision={onPlanRevision} />
       <button hidden className={styles.devButton} ref={stateButton} aria-haspopup="dialog" onClick={() => stateDialog.current?.showModal()}>Dev mode</button>
       <dialog className={styles.dialog} ref={stateDialog} aria-labelledby="state-title" aria-describedby="state-note" onClose={() => stateButton.current?.focus()}>
         <div className={styles.dialogHeader}>

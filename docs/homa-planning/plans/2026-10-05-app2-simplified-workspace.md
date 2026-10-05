@@ -2,7 +2,7 @@
 
 Date: October 5, 2026. Epic: [#1219](https://github.com/sidneyswift/homa/issues/1219).
 
-This is a developer handoff for the replacement experience being designed in `/app2`, eventually becoming `/app`. The founder approved the intention and requested this epic. Final layout selection and release authorization remain explicit gates. This document is the shared specification and evidence layer; GitHub issues own status, priority, assignees and ticket-specific acceptance criteria.
+This is a developer handoff for the replacement experience being designed in `/app2`, eventually becoming `/app`. The founder approved the intention and requested this epic. The founder selected the adjacent workspace and white/minimal app2 presentation on October 5. Release authorization remains an explicit gate. This document is the shared specification and evidence layer; GitHub issues own status, priority, assignees and ticket-specific acceptance criteria.
 
 ## Read this first
 
@@ -16,11 +16,11 @@ The five founder requirements are:
 4. Easy and intuitive.
 5. Simple, clean, minimal and beautiful UI/UX.
 
-The approved intent is not approval of a specific panel, menu or calendar composition. Start with the design ticket, then implement its reviewed interaction model. Preserve existing permissions, billing, child scope, consent and retention policy. The feature inventory is source-backed, not a claim that every flow currently works in production.
+The founder selected the beside-chat composition, including a focused phone sheet, and explicitly retained app2’s white, minimal, sans-serif design. Implement that selected shell; detailed calendar and object interactions still follow their ticket acceptance criteria. Preserve existing permissions, billing, child scope, consent and retention policy. The feature inventory is source-backed, not a claim that every flow currently works in production.
 
 ## Authority and audited baseline
 
-Read `AGENTS.md`, `BUILD.md`, `docs/homa-planning/13-mr-prd.md` as amended by the founder registry in `docs/homa-planning/journeys/10-reconciliation.md` section 5. UI work follows `docs/homa-design/SKILL.md` and `packages/design/src/contract/`. Reuse the fleet-skill/domain-tool boundary in `docs/homa-planning/15-agentic-architecture.md`; this project is a surface redesign, not permission to create a parallel agent or database.
+Read `AGENTS.md`, `BUILD.md`, `docs/homa-planning/13-mr-prd.md` as amended by the founder registry in `docs/homa-planning/journeys/10-reconciliation.md` section 5. UI verification follows `docs/homa-design/SKILL.md`. The `app2-adjacent-white-workspace` founder ruling overrides its mineral/serif styling for app2; preserve the existing white, minimal, sans-serif presentation. Reuse contract controls and accessibility requirements. Reuse the fleet-skill/domain-tool boundary in `docs/homa-planning/15-agentic-architecture.md`; this project is a surface redesign, not permission to create a parallel agent or database.
 
 The inventory was inspected in `codex/gh-1158-generative-workspace`, base `ad7c9f3cabd0f5c4fb848bc3cd82b6ecaf081be3`, with local app2 activity-bubble edits. PR #1215 is an existing dark conversation-rebuild PR, not a deployed capability receipt. `/app2/page.tsx` returns notFound outside development; its durable path requires both conversation flags. The two local flags were off at the audit. Refresh this baseline against implementation main and applicable live configuration before wiring each slice; never copy a preview bypass into shipping code.
 
@@ -32,7 +32,7 @@ Recent source history worth reading: `5649bd55` (conversation rebuild work), `26
 
 Chat handles requests, short answers, questions and receipts. Compact objects show the plan, worksheet, progress summary, resource or task and its next useful actions. Expanded views handle week arrangement, documents, evidence and bulk inspection. Use the same domain object and component contract in compact and expanded form.
 
-Prototype inline expansion and a desktop side workspace, with a phone sheet/fullscreen treatment. Choose based on actual journeys, not a screenshot alone. Keep a small predictable way to open schedule, saved work, progress and scheduled help, plus occasional account controls. Exact placement, labels and fullscreen behavior are owned by design ticket V2-01.
+Selected October 5: desktop work beside the conversation, with a focused phone sheet that leaves the composer and voice Stop reachable. The comparative prototype remains decision evidence; its mineral/serif styling is not the implementation target. Keep a small predictable way to open schedule, saved work, progress and scheduled help, plus occasional account controls. Exact placement, labels and fullscreen behavior are owned by design ticket V2-01.
 
 Opening a view does not authorize a mutation. Homa receives typed selected-object identity, child/date scope and version, not a vague page title. Chat and direct edits must converge on the same durable object. Views need stable deep links; authentication returns to the intended object. Closing an object returns focus and reading position to its opener. The user can dismiss a view without losing the composer or stopping accepted work.
 
@@ -118,7 +118,7 @@ Applied the repository skill's blindspot pass against source, flags and bounded 
 
 | Question | Current working assumption, not a new ruling | Resolution |
 |---|---|---|
-| Inline planner or side workspace; where does navigation live? | Compact inline objects plus one expandable work view. | V2-01 compares both with the same tasks and gets founder visual selection before final wiring. |
+| Inline planner or side workspace; where does navigation live? | Resolved October 5: beside the chat, white and minimal. | V2-01 comparison and explicit founder selection authorize V2-02 wiring. Final navigation and domain interactions retain their acceptance gates. |
 | What feels too dense on a real phone, especially with several children? | Details on demand, child scope visible at actions. | V2-01 uses real-size synthetic long-content fixtures; V2-16 validates accessibility and task completion. |
 | What happens to half-edited forms when closing or switching an object? | Preserve drafts where safe; confirm only actual loss or irreversible effects. | V2-01 defines per-form close rules; V2-02 implements and domain tickets test them. |
 | Do all existing voice, persistence, provider and privacy paths work in the shipping environment? | Current code alone cannot answer. | #1182 plus V2-03/11/15/16 produce explicit evidence. Existing related issues stay linked; failures cannot be waived by this epic. |
@@ -375,7 +375,7 @@ Do not remove these outcomes merely to reduce visible controls: inspect records 
 5. A small, predictable workspace entry opens schedule, saved work, progress, and scheduled help without requiring a prompt. An account entry houses occasional settings. Exact menu placement remains unresolved.
 6. Preserve deep links and bookmarks, even if old routes redirect to the new object view. Direct access after sign-in is part of functionality.
 
-For Planner, test two compositions with the same task: an inline expandable week and a side workspace. The first is strongest for checking today or moving one activity. The second is stronger for arranging a whole week while talking to Homa. Both can expose the same underlying plan; we do not need two planner implementations. This is a hypothesis to test, not a selected design.
+For Planner, test two compositions with the same task: an inline expandable week and a side workspace. The first is strongest for checking today or moving one activity. The second is stronger for arranging a whole week while talking to Homa. Both can expose the same underlying plan; we do not need two planner implementations. The founder selected the side workspace on October 5; keep this comparison as the design rationale.
 
 ## Journeys that determine whether simplification actually works
 
@@ -425,4 +425,4 @@ Paths below are relative to the audited worktree. These are evidence for reposit
 - Product policy: `docs/homa-planning/13-mr-prd.md` as amended by `docs/homa-planning/journeys/10-reconciliation.md` §5.
 - App2 integration and feature gates: `apps/web/app/app2/page.tsx`, `conversation-controls-preview.tsx`, `use-workspace-chat.ts`.
 
-The next design decision is where expandable work lives. Preserve this capability checklist whichever composition wins. Do not silently decide that a feature is unnecessary merely because its current screen is awkward.
+Expandable work now lives beside the chat, with a focused phone sheet. Preserve this capability checklist in that selected composition. Do not silently decide that a feature is unnecessary merely because its current screen is awkward.

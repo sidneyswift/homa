@@ -23,7 +23,7 @@
 .preview button:focus-visible { outline: 2px solid var(--homa-midnight-action); outline-offset: 3px; }
 .preview .devButton { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10; font-size: 12px; padding: 10px 12px; color: var(--homa-muted-ink); }
 .screen { flex: 1; display: flex; padding: 64px 24px 24px; }
-.stage { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 40px 0; }
+.stage { position: relative; min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 40px 0; }
 .dialog { width: min(420px, calc(100% - 32px)); max-height: calc(100svh - 48px); overflow: auto; margin: auto; background: var(--homa-floating); color: var(--homa-ink); border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-card); padding: 24px; }
 .dialog::backdrop { background: color-mix(in srgb, var(--homa-ink) 14%, transparent); }
 .dialogHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
@@ -57,16 +57,16 @@
 .voiceConversationBody:focus-visible { outline: none; }
 @media (forced-colors: active) { .voiceConversationBody { mask-image: none; scrollbar-width: auto; } }
 .spokenTurns { display: grid; gap: 32px; }
-.thinking { justify-self: stretch; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 400; }
-.activityLabel { min-height: 20px; }
+/* A stable slot keeps progress attached to Homa without shifting the transcript. */
+.activityAnchor { position: absolute; top: calc(100% - 32px); inset-inline: 0; display: flex; justify-content: center; z-index: 2; pointer-events: none; }
+.activityBubble { width: max-content; max-width: min(320px, 100%); padding: 8px 16px; border: 1px solid var(--preview-boundary); border-radius: var(--homa-radius-card); background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); color: var(--homa-muted-ink); font-size: 14px; line-height: 20px; font-weight: 400; text-align: center; overflow-wrap: anywhere; animation: activity-enter var(--dur-base) var(--ease-out); }
 .activityLabelText { display: inline-block; animation: activity-enter var(--dur-base) var(--ease-out); }
-.activitySteps { display: grid; gap: 8px; list-style: none; padding: 0; margin: 12px 0 0; color: var(--homa-muted-ink); }
-.activityStep { display: flex; align-items: baseline; gap: 8px; min-width: 0; animation: activity-enter var(--dur-base) var(--ease-out); }
-.activityStep svg { flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
-.activityStepState { margin-left: auto; padding-left: 8px; font-size: 12px; white-space: nowrap; }
-.activityStep[data-state="active"] { color: var(--homa-ink); }
+@media (forced-colors: active) {
+  .activityBubble { border-color: CanvasText; background: Canvas; color: CanvasText; }
+  .activityBubble :global(.chat-busy-label) { background: none; color: CanvasText; -webkit-text-fill-color: currentColor; animation: none; }
+}
 @keyframes activity-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .activityLabelText, .activityStep { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .activityBubble, .activityLabelText { animation: none; } }
 .spokenTurn { min-width: 0; width: 100%; justify-self: start; text-align: left; color: var(--homa-muted-ink); }
 .spokenTurn[data-speaker="user"] { max-width: calc(100% - 32px); justify-self: end; text-align: right; }
 .spokenTurn[data-current="true"] { color: var(--homa-ink); }
@@ -94,7 +94,8 @@
 
 .composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
 .islandFootprint { height: 62px; flex-shrink: 0; }
-.islandPosition { position: fixed; left: 24px; right: 24px; bottom: 80px; max-width: 420px; margin-inline: auto; z-index: 5; }
+.islandPosition { position: relative; width: 100%; max-width: 420px; margin-inline: auto; z-index: 5; }
+.preview:not([data-engaged="true"]) .islandFootprint { position: fixed; inset: auto 24px 80px; max-width: 420px; margin-inline: auto; height: auto; z-index: 5; }
 .preview .startComposer { --tab-surface: color-mix(in srgb, var(--homa-floating) 96%, var(--homa-ink)); --tab-boundary: color-mix(in srgb, var(--homa-control-boundary) 35%, transparent); border-color: var(--tab-boundary); border-bottom: 0; padding: 0; padding-bottom: env(safe-area-inset-bottom); background: var(--tab-surface); }
 .preview .startComposer:has(.startButton:enabled:hover) { --tab-surface: color-mix(in srgb, var(--homa-floating) 93%, var(--homa-ink)); }
 .preview .startComposer:has(.startButton:active) { --tab-surface: color-mix(in srgb, var(--homa-floating) 90%, var(--homa-ink)); }
@@ -184,6 +185,10 @@
 @media (max-height: 500px) {
   .preview[data-engaged="true"] .screen { padding-top: 16px; }
   .preview[data-engaged="true"] .characterStage { width: min(52px, 9svh); top: 0; }
-  .voiceConversation { margin-top: 8px; }
+  .voiceConversation { margin-top: 40px; }
+  .activityAnchor { top: 100%; }
   .voiceConversationBody { --transcript-fade-top: 16px; --transcript-fade-bottom: 24px; }
 }
+
+.composerNotices { max-height: min(28svh, 220px); overflow-y: auto; }
+.composerNotices:empty { display: none; }

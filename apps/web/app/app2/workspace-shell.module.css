@@ -1,0 +1,83 @@
+/* Founder choice, 2026-10-05: white, minimal app2 with work beside the chat. */
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 0;
+  background: var(--homa-floating);
+  color: var(--homa-ink);
+  font-family: var(--font-dm-sans), sans-serif;
+  --workspace-line: color-mix(in srgb, var(--homa-control-boundary) 28%, transparent);
+}
+.shell[data-workspace-open="true"] { grid-template-columns: minmax(400px, 1fr) minmax(400px, 0.9fr); }
+.conversation { min-width: 0; position: relative; }
+.navigation { position: absolute; top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); z-index: 6; }
+.navigation[inert] { visibility: hidden; }
+.navigation button { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.shell button:focus-visible, .shell select:focus-visible, .panel a:focus-visible { outline: 2px solid var(--homa-ink); outline-offset: 3px; }
+.navigation button, .panel button, .panel select {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--workspace-line);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-floating);
+  color: var(--homa-ink);
+  padding: 8px 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.navigation button:disabled { opacity: .5; cursor: default; }
+.navigation button:hover, .panel button:hover { border-color: var(--homa-control-boundary); }
+.panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--workspace-line); background: var(--homa-floating); }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; flex-shrink: 0; }
+.panelHeader h2 { margin: 0; font: 500 16px/1.5 var(--font-dm-sans), sans-serif; }
+.panelHeader h2:focus { outline: none; }
+.panelHeader button { display: grid; place-items: center; padding: 8px; border-color: transparent; }
+.panelBody { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 8px 24px 32px; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.toolbar label { min-width: 0; }
+.toolbar select { max-width: 100%; font-size: 14px; }
+.toolbar button { font-size: 13px; color: var(--homa-muted-ink); border-color: transparent; }
+.state { margin: 24px 0; color: var(--homa-muted-ink); font-size: 14px; line-height: 1.6; }
+.state button, .state a { display: inline-flex; margin: 16px 12px 0 0; }
+.state a { text-decoration: underline; }
+.planner {
+  /* App2 presentation only. The existing planner owns completion and revisions. */
+  --font-display: var(--font-dm-sans), sans-serif;
+  --surface-card: var(--homa-floating);
+  --bg-page: var(--homa-floating);
+  --brand: var(--homa-ink);
+  --brand-hover: var(--homa-ink);
+  --border-subtle: var(--workspace-line);
+  --text-muted: var(--homa-muted-ink);
+  --text-subtle: var(--homa-muted-ink);
+  --color-card: var(--homa-floating);
+  --color-brand: var(--homa-ink);
+  --color-brand-hover: var(--homa-ink);
+}
+.planner :global(.font-display) { font-family: var(--font-dm-sans), sans-serif; }
+.planner :global(.shadow-sm) { box-shadow: none; }
+.planner a { overflow-wrap: anywhere; }
+@media (max-width: 960px) {
+  .shell[data-workspace-open="true"] { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: fixed; z-index: 4; inset: max(8px, env(safe-area-inset-top)) 0 var(--workspace-sheet-bottom, 180px); border: 0; border-bottom: 1px solid var(--workspace-line); }
+  .panelHeader { padding: 8px 20px; }
+  .panelBody { padding: 8px 20px 24px; }
+}
+@media (forced-colors: active) {
+  .panel, .navigation button, .panel button, .panel select { border-color: ButtonText; }
+}
+
+.planner [data-workspace-day] { border: 0; border-top: 1px solid var(--workspace-line); border-radius: 0; padding: 20px 0 12px; box-shadow: none; gap: 12px; }
+.planner [data-workspace-day] header { padding: 0; }
+.planner [data-workspace-activity] { background: transparent; padding: 0; }
+.planner [data-workspace-activity] label { min-height: 44px; align-items: center; margin-top: 0; }
+.planner [data-workspace-activity] label span { font-size: 14px; line-height: 1.5; }
+.planner [data-workspace-activity] input { accent-color: var(--homa-ink); }
+.planner [data-workspace-focus] { background: transparent; padding: 8px 0; }
+.empty { padding: 24px 0; }
+.empty h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.empty p { color: var(--homa-muted-ink); font-size: 14px; line-height: 1.6; }
+.empty button { margin-top: 20px; }
+.scopeNote { margin-top: 20px; color: var(--homa-muted-ink); font-size: 13px; line-height: 1.6; }
+.scopeNote a { text-decoration: underline; text-underline-offset: 3px; }
