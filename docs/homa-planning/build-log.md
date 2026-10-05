@@ -12638,3 +12638,8 @@ also cleared after the founder action.
 Code repairs and verification remain tracked by gh#299 and gh#1136. Local
 checks are not a deployed fix or App Review approval. Current evidence:
 `plans/2026-10-05-ios-review-repairs.md`.
+
+
+## 2026-10-05: optional existing-password sign-in authorized
+
+Sidney approved an optional existing-password path to support repeatable App Review access. Email codes remain the default. The email screen uses Supabase password authentication and offers return to email-code sign-in; no privileged reviewer bypass is introduced. Implementation and release evidence belong to gh#299 / PR #1218.

@@ -51,9 +51,9 @@ const HERO_CHARACTER_SIZE = 150;
  * walk, and this is a single pre-auth screen with nothing to persist
  * across.
  *
- * There is no password anywhere in this app, so there is nothing to
- * recover and no reset action competing with the way in. There is also
- * no route out to the web: setup finishes here.
+ * Email codes are the default; the email screen also offers optional
+ * existing-password sign-in. A forgotten password needs no reset here:
+ * the parent can use a code. Setup stays in the app.
  *
  * Shape comes from a survey of 28 real iOS entry screens: eight of ten
  * comparable screens are a short list of doors rather than a credential
