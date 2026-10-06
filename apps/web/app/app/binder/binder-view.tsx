@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useWorkspaceSurface } from "../../../components/workspace/surface-context";
+import { useCallback, useMemo, useState } from "react";
 
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
@@ -67,6 +68,7 @@ export function BinderView({
     subject: null,
     query: "",
   });
+  const workspace = useWorkspaceSurface();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const kinds = useMemo(() => kindOptions(materials), [materials]);
@@ -88,6 +90,7 @@ export function BinderView({
   const gridItems = showCover ? filtered.filter((item) => !coverIds.has(item.id)) : filtered;
   const selected = materials.find((item) => item.id === selectedId) ?? null;
 
+  const closeDetail = useCallback(() => setSelectedId(null), []);
   const activeSubject = subjects.find((subject) => subject.key === filter.subject) ?? null;
   const sectionTitle = showCover
     ? "Everything else"
@@ -207,7 +210,7 @@ export function BinderView({
           <p className="mx-auto mt-5 max-w-sm text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Make something new in chat.
           </p>
-          <QuietAction href="/app" className="mt-3" size="large" icon={<Icon name="next" size={20} />}>
+          <QuietAction href={workspace ? undefined : "/app"} onClick={workspace ? () => workspace.askHoma("Help me make something for our family.") : undefined} className="mt-3" size="large" icon={<Icon name="next" size={20} />}>
             Ask Homa
           </QuietAction>
         </QuietFrame>
@@ -252,7 +255,7 @@ export function BinderView({
       )}
 
       {selected ? (
-        <MaterialDetailOverlay material={selected} timeZone={timeZone} onClose={() => setSelectedId(null)} />
+        <MaterialDetailOverlay material={selected} timeZone={timeZone} onClose={closeDetail} />
       ) : null}
     </div>
   );

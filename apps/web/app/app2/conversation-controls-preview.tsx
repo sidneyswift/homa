@@ -110,7 +110,7 @@ function ConversationControlsSession({ onOpenPlanner, conversationCovered = fals
   useEffect(() => {
     if (!draftRequest || delivery.signedOut) return;
     // An explicit planner action prepares text; it never submits or replaces the parent's words.
-    setDraft(draft.trim() ? `${draft}\n\n${draftRequest.text}` : draftRequest.text);
+    setDraft(draft.trim() ? `${draft.trimEnd()} ${draftRequest.text}` : draftRequest.text);
     acknowledgeDraft();
   }, [draftRequest, acknowledgeDraft, delivery.signedOut, draft, setDraft]);
   const feed = useConversationFeed(delivery.signedOut ? null : account, durableConversation, delivery.revision);

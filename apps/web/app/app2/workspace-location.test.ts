@@ -26,3 +26,9 @@ it("preserves a calendar date and view through deep links and removes them on cl
   assert.deepEqual(readWorkspaceLocation(new URL(`https://homa.test${href}`).search), { kind: "planner", childId: "maya", date: "2026-11-01", view: "month" });
   assert.equal(workspaceHref(`https://homa.test${href}`, null), "/app2?theme=white");
 });
+
+for (const kind of ["binder", "progress"] as const) it(`${kind} links retain the selected child without authorizing it`, () => {
+  const href = workspaceHref("https://homa.test/app2?workspace=planner&workspaceDate=2026-10-05&workspaceView=month", { kind, childId: "selected-child" });
+  assert.deepEqual(readWorkspaceLocation(new URL(href, "https://homa.test").search), { kind, childId: "selected-child" });
+  assert.equal(workspaceHref(`https://homa.test${href}`, null), "/app2");
+});

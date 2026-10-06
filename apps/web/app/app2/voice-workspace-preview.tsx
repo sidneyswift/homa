@@ -3,7 +3,7 @@
 import { motion as motionContract } from "@homa/design/motion";
 import { motion, useReducedMotion } from "motion/react";
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 import type { ChatHistoryPayload } from "../../lib/chat-history-model";
 import { ConversationControlsPreview } from "./conversation-controls-preview";
@@ -31,9 +31,9 @@ export interface App2Family {
   children: Array<{ id: string; name: string }>;
 }
 
-type PreviewProps = { durableConversation?: boolean; family: App2Family | null; userId: string | null; history: ChatHistoryPayload | null };
+type PreviewProps = { workspacePage?: ReactNode; durableConversation?: boolean; family: App2Family | null; userId: string | null; history: ChatHistoryPayload | null };
 export function VoiceWorkspacePreview(props: PreviewProps) {
-  return <WorkspaceShell userId={props.userId} key={`${props.family?.id ?? ""}:${props.userId ?? ""}`}><WorkspaceConversation {...props} /></WorkspaceShell>;
+  return <WorkspaceShell workspacePage={props.workspacePage} userId={props.userId} key={`${props.family?.id ?? ""}:${props.userId ?? ""}`}><WorkspaceConversation {...props} /></WorkspaceShell>;
 }
 
 function WorkspaceConversation({ family, userId, history, durableConversation = false }: PreviewProps) {

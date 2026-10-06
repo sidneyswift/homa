@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { useWorkspaceDetail } from "../workspace/use-workspace-detail";
+import { useWorkspaceSurface } from "../workspace/surface-context";
 
 /**
  * SidePanel: the one modal-sheet chassis
@@ -40,7 +42,9 @@ export function SidePanel({
   detent?: "resting" | "expanded";
   children: React.ReactNode;
 }) {
+  const workspace = useWorkspaceSurface();
   const dialogRef = useRef<HTMLDivElement>(null);
+  useWorkspaceDetail(dialogRef);
 
   useEffect(() => {
     (initialFocusRef?.current ?? dialogRef.current)?.focus();
@@ -61,7 +65,7 @@ export function SidePanel({
         onClose();
         return;
       }
-      if (event.key !== "Tab") return;
+      if (workspace || event.key !== "Tab") return;
       const focusable = focusableElements();
       if (focusable.length === 0) {
         event.preventDefault();
@@ -84,7 +88,11 @@ export function SidePanel({
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, initialFocusRef]);
+  }, [onClose, initialFocusRef, workspace]);
+
+  if (workspace) return <section ref={dialogRef} role="dialog" aria-labelledby={labelledBy} tabIndex={-1} data-workspace-dialog>
+    {children}
+  </section>;
 
   return (
     <>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { QuietAction } from "../../../components/design/QuietAction";
@@ -25,6 +26,7 @@ export function InProgressShelf({ materials, scopeChildName = null }: {
   materials: BinderMaterial[];
   scopeChildName?: string | null;
 }) {
+  const router = useRouter();
   const [kept, setKept] = useState<Record<string, string>>({});
   const [removed, setRemoved] = useState<Record<string, true>>({});
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export function InProgressShelf({ materials, scopeChildName = null }: {
       try {
         const result = await keepMaterialAction(material.id);
         if (result.kept) {
+          router.refresh();
           setKept((current) => ({ ...current, [material.id]: result.note }));
         } else {
           setError({ id: material.id, note: result.note });
@@ -61,6 +64,7 @@ export function InProgressShelf({ materials, scopeChildName = null }: {
       try {
         const result = await deleteMaterialAction(material.id);
         if (result.deleted) {
+          router.refresh();
           setRemoved((current) => ({ ...current, [material.id]: true }));
           setConfirmingDeleteId(null);
         } else {

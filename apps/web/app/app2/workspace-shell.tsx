@@ -1,6 +1,9 @@
 "use client";
 
-import { createContext, useContext, useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, useOptimistic, useTransition, useMemo, type ReactNode } from "react";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { WorkspaceSurfaceContext } from "../../components/workspace/surface-context";
 
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { Icon } from "../../components/design/Icon";
@@ -9,26 +12,16 @@ import { readWorkspaceLocation, workspaceHref, type WorkspaceLocation } from "./
 import { WorkspacePlanner } from "./workspace-planner";
 import styles from "./workspace-shell.module.css";
 
-const locationEvent = "homa-workspace-location";
 function subscribeLocation(callback: () => void) {
   window.addEventListener("popstate", callback);
-  window.addEventListener(locationEvent, callback);
   return () => {
     window.removeEventListener("popstate", callback);
-    window.removeEventListener(locationEvent, callback);
   };
 }
 function subscribePhone(callback: () => void) {
   const media = window.matchMedia("(max-width: 960px)");
   media.addEventListener("change", callback);
   return () => media.removeEventListener("change", callback);
-}
-function navigate(selection: WorkspaceLocation | null) {
-  const href = workspaceHref(window.location.href, selection);
-  if (href === `${window.location.pathname}${window.location.search}${window.location.hash}`) return;
-  // Native history integrates with Next without navigating or remounting chat.
-  window.history.pushState(null, "", href);
-  window.dispatchEvent(new Event(locationEvent));
 }
 
 export interface WorkspaceConversationProps {
@@ -48,11 +41,23 @@ export function useWorkspaceShell(): WorkspaceConversationProps {
 }
 
 /** Keep the conversation in the same React position for the lifetime of the adult session. */
-export function WorkspaceShell({ children, userId }: { userId: string | null; children: ReactNode }) {
+export function WorkspaceShell({ children, userId, workspacePage }: { userId: string | null; children: ReactNode; workspacePage?: ReactNode }) {
+  const router = useRouter();
   const [access, setAccess] = useState(Boolean(userId));
-  const search = useSyncExternalStore(subscribeLocation, () => window.location.search, () => "");
+  const routeParams = useSearchParams();
+  const nativeSearch = useSyncExternalStore(subscribeLocation, () => window.location.search, () => "");
   const phone = useSyncExternalStore(subscribePhone, () => window.matchMedia("(max-width: 960px)").matches, () => false);
-  const selection = access ? readWorkspaceLocation(search) : null;
+  const search = routeParams?.toString() ?? nativeSearch;
+  const location = useMemo(() => access ? readWorkspaceLocation(search) : null, [access, search]);
+  const [selection, setSelection] = useOptimistic(location, (_previous, next: WorkspaceLocation | null) => next);
+  const [navigating, startNavigation] = useTransition();
+  const navigate = useCallback((next: WorkspaceLocation | null) => {
+    startNavigation(() => {
+      setSelection(next);
+      router.push(workspaceHref(window.location.href, next), { scroll: false });
+    });
+  }, [router, setSelection]);
+  const title = selection?.kind === "binder" ? "Binder" : selection?.kind === "progress" ? "Progress" : "Planner";
   const open = selection !== null;
   const [planRevision, setPlanRevision] = useState(0);
   const [navigationOpen, setNavigationOpen] = useState(false);
@@ -64,18 +69,21 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
   const navigation = useRef<HTMLElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const wasOpen = useRef(false);
+  const previousTitle = useRef(title);
   const openPlanner = useCallback((signal: PlannerOpenSignal) => {
     if (!readWorkspaceLocation(window.location.search)) {
       opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     }
     setNavigationOpen(false);
     navigate({ kind: "planner", childId: signal.childId });
-  }, []);
-  const close = useCallback(() => navigate(null), []);
+  }, [navigate]);
+  const close = useCallback(() => navigate(null), [navigate]);
   const askHoma = useCallback((text?: string) => {
     if (text) setDraftRequest({ id: Date.now(), text });
     root.current?.querySelector<HTMLInputElement>("[data-workspace-composer] input:not([type=file])")?.focus();
   }, []);
+
+  const surface = useMemo(() => ({ askHoma, openProgress: (childId: string) => navigate({ kind: "progress", childId }) }), [askHoma, navigate]);
 
   useEffect(() => {
     const client = createSupabaseBrowserClient();
@@ -87,7 +95,7 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
       if (!allowed && readWorkspaceLocation(window.location.search)) navigate(null);
     });
     return () => subscription.unsubscribe();
-  }, [userId]);
+  }, [userId, navigate]);
 
   useEffect(() => {
     if (!navigationOpen) return;
@@ -99,13 +107,14 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
   }, [navigationOpen]);
 
   useEffect(() => {
-    if (open && (!wasOpen.current || (phone && document.activeElement?.closest("[inert]")))) heading.current?.focus({ preventScroll: true });
+    if (open && (!wasOpen.current || previousTitle.current !== title || (phone && document.activeElement?.closest("[inert]")))) heading.current?.focus({ preventScroll: true });
     if (!open && wasOpen.current) {
       const target = opener.current?.isConnected ? opener.current : launcher.current;
       target?.focus({ preventScroll: true });
     }
     wasOpen.current = open;
-  }, [open, phone]);
+    previousTitle.current = title;
+  }, [open, phone, title]);
 
   useEffect(() => {
     if (!open) return;
@@ -142,7 +151,7 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
       window.visualViewport?.removeEventListener("resize", measure);
       window.visualViewport?.removeEventListener("scroll", measure);
     };
-  }, [open, phone]);
+  }, [open, phone, title]);
 
   return <div className={styles.shell} data-workspace-open={open} ref={root}>
     <nav ref={navigation} className={styles.navigation} aria-label="Your workspace"
@@ -160,16 +169,12 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
         <Icon name="menu" size={20} />
       </button>
       {navigationOpen && <div id="workspace-destinations" className={styles.navigationTray}>
-        <button type="button" aria-current={open ? "page" : undefined} onClick={() => {
-          if (open) { setNavigationOpen(false); heading.current?.focus({ preventScroll: true }); }
-          else openPlanner({ childId: null });
-        }}><Icon name="calendar" size={20} /><span>Planner</span></button>
-        <a href="/app/binder" target="_blank" rel="noreferrer" onClick={() => { setNavigationOpen(false); launcher.current?.focus(); }}>
-          <Icon name="book" size={20} /><span>Binder</span><Icon name="external" size={16} /><span className="sr-only"> (opens in a new tab)</span>
-        </a>
-        <a href="/app/progress" target="_blank" rel="noreferrer" onClick={() => { setNavigationOpen(false); launcher.current?.focus(); }}>
-          <Icon name="progress" size={20} /><span>Progress</span><Icon name="external" size={16} /><span className="sr-only"> (opens in a new tab)</span>
-        </a>
+        {(["planner", "binder", "progress"] as const).map(kind => <button key={kind} type="button" aria-current={selection?.kind === kind ? "page" : undefined} onClick={() => {
+          setNavigationOpen(false);
+          if (!open) opener.current = launcher.current;
+          if (selection?.kind !== kind) navigate({ kind, childId: selection?.childId ?? null });
+          else heading.current?.focus({ preventScroll: true });
+        }}><Icon name={kind === "planner" ? "calendar" : kind === "binder" ? "book" : "progress"} size={20} /><span>{kind === "planner" ? "Planner" : kind === "binder" ? "Binder" : "Progress"}</span></button>)}
       </div>}
     </nav>
     <div className={styles.conversation}>
@@ -177,11 +182,14 @@ export function WorkspaceShell({ children, userId }: { userId: string | null; ch
     </div>
     {selection && <aside id="family-workspace" className={styles.panel} aria-labelledby="workspace-title">
       <header className={styles.panelHeader}>
-        <h2 id="workspace-title" tabIndex={-1} ref={heading}>Planner</h2>
-        <button type="button" onClick={close} aria-label="Close planner"><Icon name="close" size={20} /></button>
+        <h2 id="workspace-title" tabIndex={-1} ref={heading}>{title}</h2>
+        <button type="button" onClick={close} aria-label={`Close ${title.toLowerCase()}`}><Icon name="close" size={20} /></button>
       </header>
       <div className={styles.panelBody} data-workspace-scroll>
-        <WorkspacePlanner selection={selection} revision={planRevision} onAskHoma={askHoma} onNavigate={navigate} />
+        {selection.kind === "planner" ? <WorkspacePlanner selection={selection} revision={planRevision} onAskHoma={askHoma} onNavigate={navigate} /> :
+          <WorkspaceSurfaceContext.Provider value={surface}>
+            {!navigating ? workspacePage : <p className={styles.state} role="status">Loading {title.toLowerCase()}…</p>}
+          </WorkspaceSurfaceContext.Provider>}
       </div>
     </aside>}
   </div>;

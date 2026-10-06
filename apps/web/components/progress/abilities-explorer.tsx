@@ -316,6 +316,7 @@ function AbilityDetail({
           key={`${childId}:${selected.id}`}
           childId={childId}
           destination={abilityQuestionHref(childId, selected.id)}
+          preparedQuestion={question}
           variant="secondary"
           onOpen={async () => {
             sendAbilitiesExplorerEvent(

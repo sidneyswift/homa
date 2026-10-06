@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceLink } from "../../../components/workspace/workspace-link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -108,14 +109,14 @@ export function StateFilingCard({
               )}
             </QuietAction>
             {status.kind === "done" ? (
-              <a
+              <WorkspaceLink
                 href={status.pdfPath}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-semibold text-[color:var(--homa-brand-text)] underline underline-offset-2"
               >
                 Open it
-              </a>
+              </WorkspaceLink>
             ) : null}
           </div>
           {status.kind === "done" && status.gaps.length > 0 ? (
@@ -150,12 +151,12 @@ export function StateFilingCard({
           {stateName} counts your deadline from the day you start your
           school year, so Homa needs that date to tell you when this is
           due.{" "}
-          <a
+          <WorkspaceLink
             href="/app/settings"
             className="underline underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
           >
             Add it in settings
-          </a>
+          </WorkspaceLink>
           .
         </p>
       ) : null}

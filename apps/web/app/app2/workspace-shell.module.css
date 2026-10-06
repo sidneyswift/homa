@@ -124,3 +124,24 @@
 .planner [data-workspace-planner] [aria-pressed="false"] > span { color: transparent; }
 
 .planner [data-workspace-planner] > [inert] { visibility: hidden; }
+
+/* Shared server-rendered Binder and Progress pages, fitted to the workspace. */
+.page { --homa-canvas: var(--homa-floating); --homa-paper: var(--homa-floating); --homa-soft-boundary: var(--workspace-line); container-type: inline-size; }
+.page :global(.quiet-workspace--page), .page :global(.quiet-work-stage--page), .page :global(.quiet-workspace__content) { padding: 0; margin: 0; min-height: 0; width: 100%; max-width: none; background: transparent; }
+.page h1 { font-size: 24px; line-height: 1.35; }
+.page h2 { font-size: 18px; line-height: 1.4; }
+.page h3 { font-size: 16px; line-height: 1.4; }
+.page :global(.quiet-frame) { box-shadow: none; }
+.page :global(.quiet-artifact-dialog) { width: 100%; max-width: none; max-height: none; padding: 0; border: 0; overflow: visible; }
+.page [data-workspace-dialog] { position: absolute; inset: 0; z-index: 5; overflow-y: auto; padding: 16px 20px 32px; background: var(--homa-floating); outline: none; }
+.panelBody:has(.page [data-workspace-dialog]) { overflow: hidden; }
+.page:has([data-workspace-dialog]) { container-type: normal; }
+.page:has([data-workspace-dialog]) > .toolbar { visibility: hidden; }
+.page [class*="grid-cols-4"], .page [class*="grid-cols-3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page aside[aria-label^="Details for"] { position: static; max-height: none; box-shadow: none; }
+.page input { max-width: 100%; }
+@container (max-width: 420px) {
+  .page [class*="grid-cols-"] { grid-template-columns: minmax(0, 1fr); }
+}
+
+.page :global(.quiet-artifact-dialog) > a, .page :global(.quiet-artifact-dialog) > button { margin-right: 8px; }

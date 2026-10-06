@@ -86,6 +86,8 @@ test.beforeAll(async () => {
       if (url.pathname === "/fixture-action") {
         const call = await jsonBody(request); calendarWrites.push(call);
         if (calendarFailure) return send({ error: "Fixture connection failed" }, 503);
+        if (call.name === "materialVersionsAction") return send([]);
+        if (call.name === "setViewContextAction") return send({ ok: true });
         if (call.name === "createFamilyEventAction") {
           const input = call.args[0];
           calendarEvents.push({ id: randomUUID(), familyId, childId: input.childIds[0] ?? null, ...input, createdAt: "2026-10-05T16:00:00Z" });
@@ -245,7 +247,7 @@ test("older reading stays in place during live updates and Newest returns to new
   expect(await log.evaluate(element => element.scrollTop)).toBeCloseTo(before, 0);
   await expect(page.getByText("A new reply while reading older messages", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Newest messages" }).click();
-  await expect(page.getByText("A new reply while reading older messages", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Conversation transcript", { exact: true }).getByText("A new reply while reading older messages", { exact: true })).toBeVisible();
   expect(feedRequests.filter(query => query.includes("before=")).length).toBe(1);
   await context.close();
 });
@@ -457,11 +459,7 @@ test("workspace navigation reveals labeled destinations and Escape preserves the
   await page.keyboard.press("Enter");
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "Planner", exact: true })).toBeFocused();
-  for (const [name, href] of [["Binder", "/app/binder"], ["Progress", "/app/progress"]]) {
-    const link = page.getByRole("link", { name: `${name} (opens in a new tab)`, exact: true });
-    await expect(link).toHaveAttribute("href", href!);
-    await expect(link).toHaveAttribute("target", "_blank");
-  }
+  for (const name of ["Binder", "Progress"]) await expect(page.getByRole("button", { name, exact: true })).toBeVisible();
   await page.screenshot({ path: "/private/tmp/homa-navigation-desktop.png" });
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "Planner", exact: true })).toBeFocused();
@@ -479,7 +477,7 @@ test("workspace navigation fits phones and dismisses without intercepting the co
   await page.setViewportSize({ width: 320, height: 568 });
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Open navigation", exact: true }).click();
-  await expect(page.getByRole("link", { name: /^Progress/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Progress", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await composer(page).fill("Still here");
   await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeVisible();
@@ -733,5 +731,46 @@ test("workspace event detail opens visibly after scrolling and restores the list
   await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-detail.png" });
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   expect(await page.locator("[data-workspace-scroll]").evaluate(element => element.scrollTop)).toBeGreaterThan(100);
+  await context.close();
+});
+
+for (const width of [1440, 390]) test(`Binder and Progress stay in the workspace at ${width}px`, async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width, height: 1000 });
+  await composer(page).fill("Keep this draft");
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Binder", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Close binder" })).toBeVisible();
+  await expect(page.getByText("Garden counting", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /Garden counting/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("dialog")).not.toHaveAttribute("aria-modal", "true");
+  await composer(page).fill("Keep this draft while viewing a worksheet");
+  const detail = await page.getByRole("dialog").boundingBox();
+  const input = await composer(page).boundingBox();
+  if (width < 960) expect(detail!.y + detail!.height).toBeLessThan(input!.y);
+  await page.screenshot({ path: `/private/tmp/homa-binder-${width}.png` });
+  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Progress", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Maya’s progress" })).toBeVisible();
+  await page.getByLabel("Whose progress").selectOption("22222222-2222-4222-8222-222222222222");
+  await expect(page.getByRole("heading", { name: "Leo’s progress" })).toBeVisible();
+  await page.getByRole("button", { name: "Math", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("dialog")).not.toHaveAttribute("aria-modal", "true");
+  await composer(page).focus();
+  await expect(composer(page)).toBeFocused();
+  await page.screenshot({ path: `/private/tmp/homa-progress-detail-${width}.png` });
+  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Ask Homa about Leo" }).click();
+  await expect(composer(page)).toHaveValue("Keep this draft while viewing a worksheet Help me understand Leo’s progress.");
+  expect(submissions).toHaveLength(0);
+  await page.screenshot({ path: `/private/tmp/homa-progress-${width}.png` });
+  await page.getByRole("button", { name: "Close progress" }).click();
+  await expect(page.getByRole("complementary")).toHaveCount(0);
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Leo’s progress" })).toBeVisible();
+  expect(context.pages()).toHaveLength(1);
   await context.close();
 });
