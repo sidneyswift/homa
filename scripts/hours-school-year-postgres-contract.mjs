@@ -199,6 +199,7 @@ export async function runHoursSchoolYearReadContract(sql) {
       'apps/web/lib/map/db': { mapDb: () => sql },
       'apps/web/lib/map/events': { emitMapEvent: noEffect },
       'apps/web/lib/learning/embeddings': { embedText: noEffect },
+      'apps/web/lib/family-blob': { signedFamilyBlobReadUrl: noEffect },
       'apps/web/lib/account-deletion-artifact-fence': { assertFamilyArtifactAccess: async id => {
         assert([familyA, familyB].includes(id));
         const [family] = await sql`select sandbox from public.families where id = ${id}`;
@@ -222,7 +223,7 @@ export async function runHoursSchoolYearReadContract(sql) {
       function importModule(name) {
         const key = name.startsWith('.') ? path.posix.normalize(path.posix.join(path.posix.dirname(relative), name)) : name;
         if (key in stubs) return stubs[key];
-        if (!name.startsWith('.')) { assert(['zod', 'node:crypto'].includes(name)); return require(name); }
+        if (!name.startsWith('.')) { assert(['zod', 'node:crypto', 'node:timers/promises'].includes(name), `Unexpected dependency: ${name}`); return require(name); }
         return load(key.endsWith('.ts') ? key : key + '.ts');
       }
       vm.runInNewContext(code, { module, exports: module.exports, require: importModule,
