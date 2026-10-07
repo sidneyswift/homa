@@ -19,11 +19,12 @@ Screenshots use the real shared components in the existing conversation-controls
 ![Planner](planner-phone.jpg)
 ![Binder](binder-phone.jpg)
 ![Separate question](question-phone.jpg)
-![Event draft after switching sections](event-draft-phone.jpg)
+![Event draft retained after closing the editor](event-draft-phone.jpg)
+![Progress provenance collapsed](progress-phone.jpg)
 
 ## Validation
 
-- `pnpm exec playwright test --config playwright.conversation-controls.config.ts --workers=1 --reporter=line` in apps/web: 32 passed, including durable queue, file preservation, phone handoff, event save failures, section changes, and sign-out.
+- `pnpm exec playwright test --config playwright.conversation-controls.config.ts --workers=1 --reporter=line` in apps/web: 33 passed, including durable queue, file preservation, phone handoff, event save failures, section changes, and sign-out.
 - `pnpm --filter web typecheck`: passed.
 - Scoped ESLint on the eight changed TypeScript UI components: passed.
 - `pnpm check:progress-ui`: 422 passed.
@@ -37,3 +38,5 @@ Screenshots use the real shared components in the existing conversation-controls
 Reader gate flagged ambiguous prepare terminology and duplicate drafts. Revised to one explicit separate question, Send, and Dismiss. Copy editor returned no must-fix notes; its error-preservation suggestion was applied.
 
 Independent screenshot reviewer found no blocking hierarchy issue in Planner or Binder. Largest remaining usability gap is the low prominence of School hours and Programs compatibility links (#1223). Binder thumbnail recognition with representative materials remains a follow-up under #1227. Existing browser tests cover narrow reflow, large text, forced colors, keyboard navigation, and reduced-motion conditions; screenshots alone do not establish device or screen-reader acceptance.
+
+The final screenshot gate caught a light-on-light Add button. The follow-up fixes the foreground/background as one pair and adds browser-measured contrast checks for Add and activity help (minimum 4.5:1).

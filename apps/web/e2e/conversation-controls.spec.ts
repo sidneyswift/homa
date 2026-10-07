@@ -855,3 +855,29 @@ test("dismissing an empty-composer question keeps it empty and sign out clears a
   expect(submissions).toHaveLength(0);
   await context.close();
 });
+
+
+test("workspace primary actions retain readable foreground and background pairs", async () => {
+  const { context, page } = await open();
+  await openPlanner(page);
+  async function contrast(name: string) {
+    return page.getByRole("button", { name, exact: true }).evaluate(element => {
+      const style = getComputedStyle(element);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const luminance = (color: string) => {
+        ctx.fillStyle = color; ctx.fillRect(0, 0, 1, 1);
+        const rgb = [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).map(v => {
+          const c = v / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        });
+        return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+      };
+      const ink = luminance(style.color), background = luminance(style.backgroundColor);
+      return (Math.max(ink, background) + 0.05) / (Math.min(ink, background) + 0.05);
+    });
+  }
+  expect(await contrast("Add")).toBeGreaterThanOrEqual(4.5);
+  await page.getByText("Count the blue buttons", { exact: true }).click();
+  expect(await contrast("Ask about the steps")).toBeGreaterThanOrEqual(4.5);
+  await context.close();
+});

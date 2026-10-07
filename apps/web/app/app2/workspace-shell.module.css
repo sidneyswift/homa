@@ -151,4 +151,4 @@
 .planner [data-workspace-planner] [data-workspace-day] { clear: both; }
 
 /* Primary actions retain the design contract contrast inside the workspace. */
-.panel :global(.quiet-action--primary) { color: var(--homa-paper); }
+.panel :global(.quiet-action--primary) { color: var(--homa-paper); background: var(--homa-midnight-action); }
