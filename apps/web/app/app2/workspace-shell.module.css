@@ -36,7 +36,7 @@
 .navigationTray button, .navigationTray a { border-color: transparent; white-space: nowrap; text-decoration: none; }
 .navigationTray [aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; font-weight: 600; }
 
-@keyframes navigationReveal { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes navigationReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .navigationTray { animation: none; } }
 .panel button:hover { border-color: var(--homa-control-boundary); }
 .panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--workspace-line); background: var(--homa-floating); }
@@ -183,7 +183,7 @@
 
 /* Expanded navigation is part of the layout, flush with the viewport top. */
 .shell[data-navigation-expanded] { --workspace-navigation-height: calc(72px + env(safe-area-inset-top)); }
-.shell[data-navigation-expanded] .navigation { inset: 0 0 auto; height: var(--workspace-navigation-height); display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); background: var(--homa-floating); border-bottom: 1px solid var(--workspace-line); }
+.shell[data-navigation-expanded] .navigation { inset: 0 0 auto; height: var(--workspace-navigation-height); display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); background: var(--homa-floating); }
 .shell[data-navigation-expanded] .navigationTray { justify-self: center; max-width: 100%; }
 .navigationTray button { border-radius: 0; background: transparent; }
 @media (max-width: 960px) {
