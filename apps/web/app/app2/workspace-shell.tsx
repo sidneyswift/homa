@@ -10,6 +10,7 @@ import { Icon } from "../../components/design/Icon";
 import type { PlannerOpenSignal } from "../app/planner-canvas";
 import { readWorkspaceLocation, workspaceHref, type WorkspaceLocation } from "./workspace-location";
 import { WorkspacePlanner } from "./workspace-planner";
+import type { ComposerState } from "../app/planner/unified-planner-view";
 import styles from "./workspace-shell.module.css";
 
 function subscribeLocation(callback: () => void) {
@@ -30,7 +31,8 @@ export interface WorkspaceConversationProps {
   conversationCovered: boolean;
   onPlanRevision(revision: number): void;
   draftRequest: { id: number; text: string } | null;
-  acknowledgeDraft(): void;
+  acknowledgeDraft(id: number): void;
+  revealConversation(): void;
 }
 
 const WorkspaceContext = createContext<WorkspaceConversationProps | null>(null);
@@ -60,9 +62,10 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
   const title = selection?.kind === "binder" ? "Binder" : selection?.kind === "progress" ? "Progress" : "Planner";
   const open = selection !== null;
   const [planRevision, setPlanRevision] = useState(0);
+  const [eventDraft, keepEventDraft] = useState<ComposerState | null>(null);
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [draftRequest, setDraftRequest] = useState<{ id: number; text: string } | null>(null);
-  const acknowledgeDraft = useCallback(() => setDraftRequest(null), []);
+  const acknowledgeDraft = useCallback((id: number) => setDraftRequest(current => current?.id === id ? null : current), []);
   const root = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
@@ -78,10 +81,20 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
     navigate({ kind: "planner", childId: signal.childId });
   }, [navigate]);
   const close = useCallback(() => navigate(null), [navigate]);
+  const revealConversation = useCallback(() => { if (phone) navigate(null); }, [phone, navigate]);
   const askHoma = useCallback((text?: string) => {
-    if (text) setDraftRequest({ id: Date.now(), text });
-    root.current?.querySelector<HTMLInputElement>("[data-workspace-composer] input:not([type=file])")?.focus();
+    if (text) {
+      setDraftRequest({ id: Date.now(), text });
+      requestAnimationFrame(() => root.current?.querySelector<HTMLButtonElement>("[data-workspace-question] button")?.focus());
+    } else root.current?.querySelector<HTMLInputElement>("[data-workspace-composer] input:not([type=file])")?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!eventDraft) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [eventDraft]);
 
   const surface = useMemo(() => ({ askHoma, openProgress: (childId: string) => navigate({ kind: "progress", childId }) }), [askHoma, navigate]);
 
@@ -91,7 +104,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
     const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
       const allowed = Boolean(userId && session?.user.id === userId);
       setAccess(allowed);
-      if (!allowed) setNavigationOpen(false);
+      if (!allowed) { setNavigationOpen(false); keepEventDraft(null); setDraftRequest(null); }
       if (!allowed && readWorkspaceLocation(window.location.search)) navigate(null);
     });
     return () => subscription.unsubscribe();
@@ -178,7 +191,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
       </div>}
     </nav>
     <div className={styles.conversation}>
-      <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft }}>{children}</WorkspaceContext.Provider>
+      <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft, revealConversation }}>{children}</WorkspaceContext.Provider>
     </div>
     {selection && <aside id="family-workspace" className={styles.panel} aria-labelledby="workspace-title">
       <header className={styles.panelHeader}>
@@ -186,7 +199,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
         <button type="button" onClick={close} aria-label={`Close ${title.toLowerCase()}`}><Icon name="close" size={20} /></button>
       </header>
       <div className={styles.panelBody} data-workspace-scroll>
-        {selection.kind === "planner" ? <WorkspacePlanner selection={selection} revision={planRevision} onAskHoma={askHoma} onNavigate={navigate} /> :
+        {selection.kind === "planner" ? <WorkspacePlanner eventDraft={eventDraft} keepEventDraft={keepEventDraft} selection={selection} revision={planRevision} onAskHoma={askHoma} onNavigate={navigate} /> :
           <WorkspaceSurfaceContext.Provider value={surface}>
             {!navigating ? workspacePage : <p className={styles.state} role="status">Loading {title.toLowerCase()}…</p>}
           </WorkspaceSurfaceContext.Provider>}

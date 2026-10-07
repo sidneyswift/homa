@@ -702,15 +702,20 @@ test("workspace Add menu leaves the composer usable and Escape only closes the m
   await context.close();
 });
 
-test("workspace activity help adds the selected activity without overwriting a draft or sending", async () => {
+test("workspace activity help sends separately without consuming the parent draft", async () => {
   const { context, page } = await open();
+  await page.setViewportSize({ width: 1440, height: 900 });
   await composer(page).fill("Keep this thought.");
   await openPlanner(page);
   await page.getByText("Count the blue buttons", { exact: true }).click();
-  await page.getByRole("button", { name: "Ask Homa how to do it" }).click();
-  await expect(composer(page)).toHaveValue(/Keep this thought\.[\s\S]*Give me simple steps.*Maya.*2026-10-05.*Count the blue buttons/);
+  await page.getByRole("button", { name: "Ask about the steps" }).click();
+  await expect(composer(page)).toHaveValue("Keep this thought.");
   expect(submissions).toHaveLength(0);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByRole("button", { name: "Send this question", exact: true }).click();
+  await expect.poll(() => submissions.length).toBe(1);
+  await expect(composer(page)).toHaveValue("Keep this thought.");
+  await expect(page.getByRole("region", { name: "Prepared question" })).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toBeVisible();
   await context.close();
 });
 
@@ -764,7 +769,10 @@ for (const width of [1440, 390]) test(`Binder and Progress stay in the workspace
   await page.screenshot({ path: `/private/tmp/homa-progress-detail-${width}.png` });
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   await page.getByRole("button", { name: "Ask Homa about Leo" }).click();
-  await expect(composer(page)).toHaveValue("Keep this draft while viewing a worksheet Help me understand Leo’s progress.");
+  await expect(page.getByRole("button", { name: "Send this question", exact: true })).toBeFocused();
+  await expect(composer(page)).toHaveValue("Keep this draft while viewing a worksheet");
+  await page.getByRole("button", { name: "Dismiss question", exact: true }).click();
+  await expect(composer(page)).toHaveValue("Keep this draft while viewing a worksheet");
   expect(submissions).toHaveLength(0);
   await page.screenshot({ path: `/private/tmp/homa-progress-${width}.png` });
   await page.getByRole("button", { name: "Close progress" }).click();
@@ -772,5 +780,78 @@ for (const width of [1440, 390]) test(`Binder and Progress stay in the workspace
   await page.goBack();
   await expect(page.getByRole("heading", { name: "Leo’s progress" })).toBeVisible();
   expect(context.pages()).toHaveLength(1);
+  await context.close();
+});
+
+
+test("unfinished workspace event survives close and section changes, then clears after save", async () => {
+  const { context, page } = await open();
+  await openPlanner(page);
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Event Appointment, co-op, trip, or outing" }).click();
+  await page.getByLabel("What's happening?").fill("Library afternoon");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(page.getByText("Unsaved event: Library afternoon")).toBeVisible();
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Binder", exact: true }).click();
+  await openPlanner(page);
+  await page.getByRole("button", { name: "Continue editing", exact: true }).click();
+  await expect(page.getByLabel("What's happening?")).toHaveValue("Library afternoon");
+  await page.getByRole("button", { name: "Add event", exact: true }).click();
+  await expect(page.getByRole("button", { name: /Library afternoon Whole family/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue editing", exact: true })).toHaveCount(0);
+  await context.close();
+});
+
+test("worksheet revision stays in App2 and does not send or overwrite the parent's draft", async () => {
+  const { context, page } = await open();
+  await composer(page).fill("My original thought");
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Binder", exact: true }).click();
+  await page.getByRole("button", { name: "Garden counting. View and print." }).click();
+  await page.getByRole("button", { name: "Discuss changes" }).click();
+  await expect(composer(page)).toHaveValue("My original thought");
+  await expect(page.getByRole("region", { name: "Prepared question" })).toContainText("Garden counting");
+  expect(context.pages()).toHaveLength(1);
+  expect(submissions).toHaveLength(0);
+  await context.close();
+});
+
+
+test("phone contextual send reveals the conversation and preserves a draft and attached file", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await composer(page).fill("Ask about reading later");
+  await page.locator('input[type="file"]').nth(1).setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("My draft attachment") });
+  await expect(page.getByLabel("Attachments").getByTitle("notes.txt")).toBeVisible();
+  await openPlanner(page);
+  await page.getByText("Count the blue buttons", { exact: true }).click();
+  await page.getByRole("button", { name: "Ask about the steps" }).click();
+  await page.getByRole("button", { name: "Send this question", exact: true }).click();
+  await expect.poll(() => submissions.length).toBe(1);
+  await expect(page.getByRole("complementary")).toHaveCount(0);
+  await expect(page.getByRole("log")).toContainText("Give me simple steps");
+  await expect(composer(page)).toHaveValue("Ask about reading later");
+  await expect(page.getByLabel("Attachments").getByTitle("notes.txt")).toBeVisible();
+  expect(submissions[0].attachmentIds ?? []).toHaveLength(0);
+  await context.close();
+});
+
+test("dismissing an empty-composer question keeps it empty and sign out clears an unsaved event", async () => {
+  const { context, page } = await open();
+  await openPlanner(page);
+  await page.getByText("Count the blue buttons", { exact: true }).click();
+  await page.getByRole("button", { name: "Ask about the steps" }).click();
+  await expect(composer(page)).toHaveValue("");
+  await page.getByRole("button", { name: "Dismiss question", exact: true }).click();
+  await expect(composer(page)).toHaveValue("");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: /^Event Appointment/ }).click();
+  await page.getByLabel("What's happening?").fill("Private event draft");
+  await page.getByRole("button", { name: "Fixture sign out" }).click();
+  await expect(page.getByRole("complementary")).toHaveCount(0);
+  await expect(page.getByText("Private event draft")).toHaveCount(0);
+  expect(submissions).toHaveLength(0);
   await context.close();
 });

@@ -192,3 +192,8 @@
 
 .composerNotices { max-height: min(28svh, 220px); overflow-y: auto; }
 .composerNotices:empty { display: none; }
+
+.preparedQuestion { border: 1px solid var(--homa-control-boundary); border-radius: var(--homa-radius-card); background: var(--homa-floating); padding: 12px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; }
+.preparedQuestion p + p { margin-top: 8px; }
+.questionText { max-height: 120px; overflow-y: auto; overflow-wrap: anywhere; white-space: pre-wrap; }
+.preparedQuestion button { min-height: 44px; padding: 8px 12px; text-decoration: underline; text-underline-offset: 3px; }

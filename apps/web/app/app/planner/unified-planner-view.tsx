@@ -79,7 +79,7 @@ interface PlannerActivity extends CalendarActivityItem {
   date: string;
 }
 
-interface ComposerState {
+export interface ComposerState {
   eventId: string | null;
   editingSeries: boolean;
   title: string;
@@ -124,6 +124,8 @@ export interface PlannerWorkspaceAdapter {
   navigate(view: PlannerViewMode, date: string, childId: string | null): void;
   refresh(): void;
   askHoma(text?: string): void;
+  eventDraft?: ComposerState | null;
+  keepEventDraft?(draft: ComposerState | null): void;
 }
 const PlannerWorkspaceContext = createContext<PlannerWorkspaceAdapter | undefined>(undefined);
 
@@ -719,7 +721,8 @@ function ActivityDetails({
         </div>
         <DialogClose onClose={onClose} />
       </div>
-      <dl className="mt-5 divide-y divide-border-subtle border-y border-border-subtle text-sm">
+      {workspace && <p className="mt-4 text-sm text-body">{activity.kidName} · {activity.subjectLabel} · {done ? "Finished" : "Not finished"}. Need help getting started? Ask Homa for the steps.</p>}
+      <dl hidden={Boolean(workspace)} className="mt-5 divide-y divide-border-subtle border-y border-border-subtle text-sm">
         <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-3">
           <dt className="text-muted">Who</dt>
           <dd className="font-semibold text-strong">{activity.kidName}</dd>
@@ -735,7 +738,7 @@ function ActivityDetails({
       </dl>
       <div className="mt-5 flex flex-wrap gap-2">
         <QuietAction
-          onClick={workspace ? () => { onClose(); workspace.askHoma(`Give me simple steps for this activity with ${activity.kidName} on ${activity.date}: ${activity.text}`); } : undefined}
+          onClick={workspace ? () => { workspace.askHoma(`Give me simple steps for this activity with ${activity.kidName} on ${formatFullDate(activity.date)}: ${activity.text}`); } : undefined}
           href={workspace ? undefined : plannerActivityHelpHref({
             childId: activity.childId,
             subjectId: activity.subjectId,
@@ -743,7 +746,7 @@ function ActivityDetails({
           })}
           icon={<Icon name="next" size={16} />}
         >
-          Ask Homa how to do it
+          {workspace ? "Ask about the steps" : "Ask Homa how to do it"}
         </QuietAction>
         <QuietAction
           kind="secondary"
@@ -1727,6 +1730,7 @@ export function UnifiedPlannerView({
   }
 
   function toggleActivity(activity: PlannerActivity) {
+    if (workspace && !resolvedDone(activity)) setShowFinished(true);
     planChecks.toggle({
       childId: activity.childId,
       subjectId: activity.subjectId,
@@ -1850,10 +1854,12 @@ export function UnifiedPlannerView({
   function openNewAppointment() {
     setAddOpen(false);
     setComposerError(null);
-    setComposer(createComposer(activeDate, visibleFocusChildId));
+    setComposer(workspace?.eventDraft ?? createComposer(activeDate, visibleFocusChildId));
   }
 
   function openEventEditor(event: FamilyEventRow) {
+    if (workspace?.eventDraft && !window.confirm("Discard your event draft and edit this event?")) return;
+    workspace?.keepEventDraft?.(null);
     setSelectedEvent(null);
     setComposerError(null);
     setComposer(editComposer(event));
@@ -1961,6 +1967,7 @@ export function UnifiedPlannerView({
       return;
     }
     setComposer(null);
+    workspace?.keepEventDraft?.(null);
     refreshPlanChecks();
   }
 
@@ -1974,6 +1981,7 @@ export function UnifiedPlannerView({
       return;
     }
     setComposer(null);
+    workspace?.keepEventDraft?.(null);
     refreshPlanChecks();
   }
 
@@ -2012,6 +2020,11 @@ export function UnifiedPlannerView({
           </div>
         </QuietStatus>
       ) : null}
+      {workspace?.eventDraft && !composer && <div className="mb-3 flex flex-wrap items-center gap-3 text-sm" role="status">
+        <span>Unsaved event: {workspace.eventDraft.title || "Untitled event"}</span>
+        <button type="button" className="quiet-action quiet-action--secondary" onClick={() => setComposer(workspace.eventDraft!)}>Continue editing</button>
+        <button type="button" className="quiet-action quiet-action--secondary" onClick={() => { if (window.confirm("Discard this event draft?")) workspace.keepEventDraft?.(null); }}>Discard draft</button>
+      </div>}
       <header className="flex items-center justify-between gap-4">
         {!workspace && <h1 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-strong">Planner</h1>}
         <div className="relative">
@@ -2331,6 +2344,9 @@ export function UnifiedPlannerView({
                     </span>
                     <span className="text-sm text-body">
                       {summary}
+                      {workspace && (dayActivities[0] || dayPlannedLearning[0]) && <span className="mt-1 block text-sm font-semibold">
+                        {dayActivities[0] ? `${dayActivities[0].kidName}: ${dayActivities[0].text}` : dayPlannedLearning[0].title}
+                      </span>}
                       {firstEvent ? (
                         <span className="mt-1 block text-xs font-bold text-[var(--sky-600)]">
                           {eventTimeLabel(firstEvent)} · {firstEvent.title}
@@ -2454,7 +2470,7 @@ export function UnifiedPlannerView({
           kids={kids}
           saving={saving}
           error={composerError}
-          onChange={setComposer}
+          onChange={next => { setComposer(next); workspace?.keepEventDraft?.(next); }}
           onSave={() => void saveComposer()}
           onDelete={() => void deleteComposerEvent()}
           onClose={() => setComposer(null)}

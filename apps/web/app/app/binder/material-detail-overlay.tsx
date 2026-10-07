@@ -302,13 +302,15 @@ export function MaterialDetailOverlay({
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="print" size={20} /></span>
         </WorkspaceLink>
 
-        <WorkspaceLink
+        {workspace ? <QuietAction kind="secondary" className="mt-2" onClick={() => workspace.askHoma(`I’d like to change the ${KIND_LABELS[material.kind].toLowerCase()} “${material.title}” for ${material.childName ?? "the whole family"}. Can we talk through the changes before editing?`)}>
+          Discuss changes
+        </QuietAction> : <WorkspaceLink
           href={`/app?draft=revise-material&material=${encodeURIComponent(material.id)}`}
           className="quiet-action quiet-action--secondary mt-2"
         >
           <span>Change this with Homa</span>
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="chat" size={20} /></span>
-        </WorkspaceLink>
+        </WorkspaceLink>}
 
         <VersionRail materialId={material.id} />
 

@@ -145,3 +145,10 @@
 }
 
 .page :global(.quiet-artifact-dialog) > a, .page :global(.quiet-artifact-dialog) > button { margin-right: 8px; }
+
+.planner [data-workspace-planner] > div > header { float: right; margin-bottom: 8px; }
+.planner [data-workspace-planner] nav[aria-label="Planner views"] { margin-top: 0; }
+.planner [data-workspace-planner] [data-workspace-day] { clear: both; }
+
+/* Primary actions retain the design contract contrast inside the workspace. */
+.panel :global(.quiet-action--primary) { color: var(--homa-paper); }

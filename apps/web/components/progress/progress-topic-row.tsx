@@ -1,3 +1,7 @@
+"use client";
+
+import { useWorkspaceSurface } from "../workspace/surface-context";
+
 import type {
   OpenProgressConflictView,
   ProgressTopicView,
@@ -148,10 +152,26 @@ export function ProgressTopicRow({
   timeZone: string;
   conflictActions?: ProgressConflictActions;
 }) {
+  const workspace = useWorkspaceSurface();
   const tone = TOPIC_STATE_TONES[topic.state];
   const hasEvidence =
     topic.state === "observed_today" || topic.state === "older";
 
+  const evidenceSource = hasEvidence ? <>
+          <p className="mt-1 text-sm text-body">
+            {topic.detail}
+            {topic.source.adultDisplayName
+              ? ` Shared by ${topic.source.adultDisplayName}.`
+              : ""}
+          </p>
+          <p className="mt-1 font-mono text-sm text-muted">
+            {progressEvidenceDerivationLabel(
+              topic.source.derivation,
+            )}{" "}
+            {"\u00b7"}{" "}
+            {formatProgressDate(topic.observedAt, timeZone)}
+          </p>
+  </> : null;
   return (
     <li className="rounded-lg border border-border-subtle bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -171,19 +191,10 @@ export function ProgressTopicRow({
           <p className="mt-3 font-display text-lg font-semibold text-strong">
             {progressAnswerLabel(topic.answer)}
           </p>
-          <p className="mt-1 text-sm text-body">
-            {topic.detail}
-            {topic.source.adultDisplayName
-              ? ` Shared by ${topic.source.adultDisplayName}.`
-              : ""}
-          </p>
-          <p className="mt-1 font-mono text-sm text-muted">
-            {progressEvidenceDerivationLabel(
-              topic.source.derivation,
-            )}{" "}
-            {"\u00b7"}{" "}
-            {formatProgressDate(topic.observedAt, timeZone)}
-          </p>
+          {workspace ? <details className="mt-2">
+            <summary className="cursor-pointer py-2 text-sm font-semibold">Where this answer came from</summary>
+            {evidenceSource}
+          </details> : evidenceSource}
         </>
       ) : topic.state === "ask_next" ? (
         <p className="mt-3 text-sm text-body">

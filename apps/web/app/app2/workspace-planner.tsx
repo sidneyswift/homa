@@ -6,14 +6,15 @@ import type { WorkspacePlannerData } from "../../lib/workspace-planner-data";
 import type { PlannerViewMode } from "../../lib/unified-planner";
 import { workspaceHref, type WorkspaceLocation } from "./workspace-location";
 import { PlannerView } from "../app/planner/planner-view";
-import { UnifiedPlannerView, type PlannerWorkspaceAdapter } from "../app/planner/unified-planner-view";
+import { UnifiedPlannerView, type PlannerWorkspaceAdapter, type ComposerState } from "../app/planner/unified-planner-view";
 import styles from "./workspace-shell.module.css";
 
 type BoardState = { phase: "loading" } | { phase: "ready"; board: WorkspacePlannerData; requestKey: string; refreshing: boolean } |
   { phase: "error"; message: string; signIn: boolean };
 
 /** Reuses the family-scoped board and atomic check operations owned by app1. */
-export function WorkspacePlanner({ selection, revision, onNavigate, onAskHoma }: {
+export function WorkspacePlanner({ selection, revision, onNavigate, onAskHoma, eventDraft, keepEventDraft }: {
+  eventDraft: ComposerState | null; keepEventDraft(draft: ComposerState | null): void;
   onAskHoma(text?: string): void; selection: WorkspaceLocation; revision: number; onNavigate(selection: WorkspaceLocation): void;
 }) {
   const { childId, view = "day", date } = selection;
@@ -26,8 +27,8 @@ export function WorkspacePlanner({ selection, revision, onNavigate, onAskHoma }:
   const adapter = useMemo<PlannerWorkspaceAdapter>(() => ({
     href: (view, date, childId) => workspaceHref(window.location.href, { kind: "planner", view: view === "hours" ? "day" : view, date, childId }),
     navigate: (view: PlannerViewMode, date: string, childId: string | null) => onNavigate({ kind: "planner", view: view === "hours" ? "day" : view, date, childId }),
-    refresh: reload, askHoma: onAskHoma,
-  }), [onNavigate, reload, onAskHoma]);
+    refresh: reload, askHoma: onAskHoma, eventDraft, keepEventDraft,
+  }), [onNavigate, reload, onAskHoma, eventDraft, keepEventDraft]);
   useEffect(() => {
     const controller = new AbortController();
     let disposed = false;

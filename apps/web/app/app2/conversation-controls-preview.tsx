@@ -106,13 +106,9 @@ function ConversationControlsSession({ onOpenPlanner, conversationCovered = fals
   const account = family && userId ? `${family.id}:${userId}` : null;
   const delivery = usePermanentConversationDelivery(account, durableConversation);
   const { draft, setDraft, draftError, draftRevision, queueDraft, replyToQuestionId, setReplyToQuestionId, clearReplyToQuestion } = useConversationDraft(delivery.signedOut ? null : account);
-  const { draftRequest, acknowledgeDraft } = useWorkspaceShell();
-  useEffect(() => {
-    if (!draftRequest || delivery.signedOut) return;
-    // An explicit planner action prepares text; it never submits or replaces the parent's words.
-    setDraft(draft.trim() ? `${draft.trimEnd()} ${draftRequest.text}` : draftRequest.text);
-    acknowledgeDraft();
-  }, [draftRequest, acknowledgeDraft, delivery.signedOut, draft, setDraft]);
+  const { draftRequest, acknowledgeDraft, revealConversation } = useWorkspaceShell();
+  const [sendingQuestion, setSendingQuestion] = useState(false);
+  const contextualIntent = useRef<{ requestId: number; intentId: string; submittedAt: number } | null>(null);
   const feed = useConversationFeed(delivery.signedOut ? null : account, durableConversation, delivery.revision);
   const nativeBatches = useMemo(() => feed.messages.flatMap(message => message.nativeInput ? [message.nativeInput] : []), [feed.messages]);
   const confirmVisibleIntents = delivery.confirmVisibleIntents;
@@ -267,6 +263,36 @@ function ConversationControlsSession({ onOpenPlanner, conversationCovered = fals
       }
     } finally {
       enqueueing.current = false;
+    }
+  }
+
+  async function sendContextualQuestion() {
+    if (!draftRequest || enqueueing.current || delivery.signedOut || !family || chat.busy) return;
+    const request = draftRequest;
+    enqueueing.current = true;
+    setSendingQuestion(true);
+    try {
+      if (durableConversation) {
+        if (!account || !delivery.accessEpoch) {
+          setNotice("The conversation is reconnecting. Your question is still here.");
+          return;
+        }
+        if (contextualIntent.current?.requestId !== request.id) {
+          contextualIntent.current = { requestId: request.id, intentId: crypto.randomUUID(), submittedAt: Date.now() };
+        }
+        const { intentId, submittedAt } = contextualIntent.current;
+        // No draft revision: this question must not consume the parent's text, files, or reply context.
+        await queueConversationIntent({ account, accessEpoch: delivery.accessEpoch, intentId, submittedAt, text: request.text });
+        delivery.notifyQueued();
+      } else if (!await chat.send(request.text, [], turns)) return;
+      acknowledgeDraft(request.id);
+      revealConversation();
+      setNotice(null);
+    } catch {
+      setNotice("Your question did not send. It’s still here. Try sending again.");
+    } finally {
+      enqueueing.current = false;
+      setSendingQuestion(false);
     }
   }
 
@@ -435,6 +461,15 @@ function ConversationControlsSession({ onOpenPlanner, conversationCovered = fals
       }}>Newest messages</button>}
       </div>
       <div className={styles.islandPosition}>
+      {draftRequest && !delivery.signedOut && <section className={styles.preparedQuestion} aria-label="Prepared question" data-workspace-question>
+        <p className="font-semibold">Ask Homa</p>
+        <p className={styles.questionText}>{draftRequest.text}</p>
+        {(draft.trim() || attachments.staged.length > 0 || replyToQuestionId) && <p>Your unfinished message stays below. This question sends separately.</p>}
+        <div className="flex flex-wrap gap-2">
+          <button type="button" disabled={sendingQuestion || chat.busy} onClick={() => void sendContextualQuestion()}>{sendingQuestion ? "Sending…" : "Send this question"}</button>
+          <button type="button" disabled={sendingQuestion} onClick={() => acknowledgeDraft(draftRequest.id)}>Dismiss question</button>
+        </div>
+      </section>}
       {durableConversation && replyToQuestionId && <div className={styles.voiceNotice}>
         Replying to Homa’s question <button type="button" onClick={clearReplyToQuestion}>Cancel reply</button>
       </div>}
