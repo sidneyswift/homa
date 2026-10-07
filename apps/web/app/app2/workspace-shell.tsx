@@ -166,7 +166,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
     };
   }, [open, phone, title]);
 
-  return <div className={styles.shell} data-workspace-open={open} ref={root}>
+  return <div className={styles.shell} data-workspace-open={open} data-navigation-expanded={navigationOpen || undefined} ref={root}>
     <nav ref={navigation} className={styles.navigation} aria-label="Your workspace"
       data-workspace-navigation-open={navigationOpen || undefined}
       onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setNavigationOpen(false); }}

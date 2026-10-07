@@ -58,3 +58,9 @@ Founder-approved follow-up: the global menu sits at top-left, opens toward the r
 
 ![Left menu](left-menu-phone.jpg)
 ![Open menu](left-menu-open-phone.jpg)
+
+## Flush top navigation
+
+The expanded navigation now spans the viewport with a flat background and bottom divider. Its height reserves space in the conversation and moves phone workspace panels beneath it. The composer remains visible.
+
+Evidence: `flush-nav-phone.jpg` and `flush-nav-binder.jpg`, captured from the synthetic local component fixture. The actual App2 development page was also checked with an existing conversation: Homa and the transcript remain below the bar. Independent screenshot review found no visual blockers. Six focused navigation and responsive browser tests passed, alongside scoped lint and the brand-surface guard. This is development evidence, not production verification.

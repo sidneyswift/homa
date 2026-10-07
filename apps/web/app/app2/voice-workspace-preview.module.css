@@ -1,6 +1,6 @@
 /* #1158: founder-selected white canvas for the local app2 exploration. */
 .preview {
-  min-height: 100svh;
+  min-height: calc(100svh - var(--workspace-navigation-height, 0px));
   display: flex;
   flex-direction: column;
   background: var(--homa-floating);
@@ -72,7 +72,7 @@
 .spokenTurn[data-current="true"] { color: var(--homa-ink); }
 .spokenTurn p { margin: 0; font-size: 18px; line-height: 28px; font-weight: 400; white-space: pre-wrap; }
 .spokenTurns:not(:empty) { margin-bottom: 24px; }
-.preview[data-engaged="true"] { height: 100svh; min-height: 0; overflow: hidden; }
+.preview[data-engaged="true"] { height: calc(100svh - var(--workspace-navigation-height, 0px)); min-height: 0; overflow: hidden; }
 .preview[data-engaged="true"] .screen { flex: 0 0 auto; padding: 48px 24px 0; }
 .preview[data-engaged="true"] .stage { padding: 0; }
 .preview[data-engaged="true"] .characterStage { top: -24px; width: min(104px, 11svh); }
