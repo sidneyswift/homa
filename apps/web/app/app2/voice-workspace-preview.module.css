@@ -7,6 +7,7 @@
   color: var(--homa-ink);
   font-family: var(--font-dm-sans), sans-serif;
   line-height: 1.5;
+  --conversation-width: 560px;
   --preview-boundary: color-mix(in srgb, var(--homa-control-boundary) 28%, transparent);
 }
 .preview button {
@@ -36,9 +37,9 @@
 .voiceNotice { max-width: 780px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; text-align: center; font-size: 14px; color: var(--homa-muted-ink); }
 .voiceNotice:empty { display: none; }
 .voiceNotice a { text-decoration: underline; }
-.voiceConversation { width: min(100%, 560px); flex: 1; min-height: 0; display: flex; margin: 24px auto 8px; }
+.voiceConversation { width: min(100%, var(--conversation-width)); flex: 1; min-height: 0; display: flex; margin: 8px auto 8px; }
 .voiceConversationBody {
-  --transcript-fade-top: 32px;
+  --transcript-fade-top: 16px;
   --transcript-fade-bottom: 48px;
   position: relative;
   flex: 1;
@@ -48,7 +49,7 @@
   overflow-wrap: anywhere;
   overscroll-behavior-y: contain;
   scrollbar-width: none;
-  padding: var(--transcript-fade-top) 16px var(--transcript-fade-bottom) 0;
+  padding: var(--transcript-fade-top) 0 var(--transcript-fade-bottom);
   scroll-padding-block: var(--transcript-fade-top) var(--transcript-fade-bottom);
   mask-image: linear-gradient(to bottom, transparent, black var(--transcript-fade-top), black calc(100% - var(--transcript-fade-bottom)), transparent);
 }
@@ -67,15 +68,15 @@
 }
 @keyframes activity-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .activityBubble, .activityLabelText { animation: none; } }
-.spokenTurn { min-width: 0; width: 100%; justify-self: start; text-align: left; color: var(--homa-muted-ink); }
-.spokenTurn[data-speaker="user"] { max-width: calc(100% - 32px); justify-self: end; text-align: right; }
+.spokenTurn { min-width: 0; width: 100%; justify-self: start; text-align: left; color: var(--homa-ink); }
+.spokenTurn[data-speaker="user"] { width: fit-content; max-width: calc(100% - 32px); justify-self: end; text-align: right; padding: 0; background: transparent; color: #707070; }
 .spokenTurn[data-current="true"] { color: var(--homa-ink); }
 .spokenTurn p { margin: 0; font-size: 18px; line-height: 28px; font-weight: 400; white-space: pre-wrap; }
 .spokenTurns:not(:empty) { margin-bottom: 24px; }
 .preview[data-engaged="true"] { height: calc(100svh - var(--workspace-navigation-height, 0px)); min-height: 0; overflow: hidden; }
-.preview[data-engaged="true"] .screen { flex: 0 0 auto; padding: 48px 24px 0; }
+.preview[data-engaged="true"] .screen { flex: 0 0 auto; padding: 24px 24px 0; }
 .preview[data-engaged="true"] .stage { padding: 0; }
-.preview[data-engaged="true"] .characterStage { top: -24px; width: min(104px, 11svh); }
+.preview[data-engaged="true"] .characterStage { top: 0; width: min(80px, 10svh); }
 .preview[data-engaged="true"] .composerDock { display: flex; flex: 1; min-height: 0; flex-direction: column; }
 .preview[data-engaged="true"] .voiceNotice { order: 1; }
 .preview[data-engaged="true"] .islandFootprint { order: 2; margin-top: auto; height: auto; }
@@ -83,8 +84,8 @@
 @media (max-width: 600px) {
   .spokenTurn p { font-size: 16px; line-height: 24px; }
   .spokenTurns { gap: 24px; }
-  .voiceConversation { margin-top: 16px; }
-  .preview[data-engaged="true"] .screen { padding-top: 32px; }
+  .voiceConversation { margin-top: 8px; }
+  .preview[data-engaged="true"] .screen { padding-top: 24px; }
 }
 .preview .settingsControls button:disabled { opacity: .5; cursor: default; }
 @media (max-width: 600px) {
@@ -92,10 +93,10 @@
   .stage { padding: 32px 0; }
 }
 
-.composerDock { flex-shrink: 0; padding: 0 24px max(80px, calc(64px + env(safe-area-inset-bottom))); }
+.composerDock { flex-shrink: 0; padding: 0 24px max(24px, env(safe-area-inset-bottom)); }
 .islandFootprint { height: 62px; flex-shrink: 0; }
-.islandPosition { position: relative; width: 100%; max-width: 420px; margin-inline: auto; z-index: 5; }
-.preview:not([data-engaged="true"]) .islandFootprint { position: fixed; inset: auto 24px 80px; max-width: 420px; margin-inline: auto; height: auto; z-index: 5; }
+.islandPosition { position: relative; width: 100%; max-width: var(--conversation-width); margin-inline: auto; z-index: 5; }
+.preview:not([data-engaged="true"]) .islandFootprint { position: fixed; inset: auto 24px max(24px, env(safe-area-inset-bottom)); max-width: var(--conversation-width); margin-inline: auto; height: auto; z-index: 5; }
 .preview .startComposer { --tab-surface: color-mix(in srgb, var(--homa-floating) 96%, var(--homa-ink)); --tab-boundary: color-mix(in srgb, var(--homa-control-boundary) 35%, transparent); border-color: var(--tab-boundary); border-bottom: 0; padding: 0; padding-bottom: env(safe-area-inset-bottom); background: var(--tab-surface); }
 .preview .startComposer:has(.startButton:enabled:hover) { --tab-surface: color-mix(in srgb, var(--homa-floating) 93%, var(--homa-ink)); }
 .preview .startComposer:has(.startButton:active) { --tab-surface: color-mix(in srgb, var(--homa-floating) 90%, var(--homa-ink)); }
@@ -114,7 +115,7 @@
 .composer { --island-radius: var(--homa-radius-card); max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--island-radius); padding: 8px; font-size: 16px; font-weight: 400; line-height: 24px; background: var(--homa-floating); box-shadow: none; }
 .preview .composer button:focus-visible { outline-offset: -3px; }
 .preview .composer button { border-radius: var(--island-radius); font: inherit; }
-.preview .composer button:enabled:hover { background: var(--homa-canvas); }
+.preview .composer button:enabled:hover { background: #f5f5f5; }
 .preview .composer button[data-pointer-focus="true"]:focus-visible { outline: none; }
 .composer .inputArea input { min-height: 44px; font: inherit; }
 .composer:has(input:focus-visible) { border-color: var(--homa-control-boundary); }
@@ -138,7 +139,7 @@
 .modeSelector { grid-area: modes; justify-self: end; align-self: center; display: flex; align-items: center; gap: 4px; }
 .preview .modeButton { position: relative; min-width: 72px; border: 0; background: transparent; }
 .preview .modeButton, .preview .settingsControls button:not(.iconButton) { padding: 8px 16px; }
-.preview .composer .modeButton[aria-pressed="true"] { background: var(--homa-canvas); color: var(--homa-ink); }
+.preview .composer .modeButton[aria-pressed="true"] { background: #f5f5f5; color: var(--homa-ink); }
 @media (forced-colors: active) {
   .preview .composer .modeButton[aria-pressed="true"]:focus-visible { outline-color: Highlight; }
   .preview .modeButton[aria-pressed="true"] { border: 1px solid ButtonText; }
@@ -150,7 +151,8 @@
 .preview .settingsControls button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; background: transparent; white-space: nowrap; }
 @media (max-width: 600px) {
   .composerDock { padding-left: 16px; padding-right: 16px; }
-  .islandPosition { left: 16px; right: 16px; }
+  .islandPosition { inset-inline: auto; }
+  .preview:not([data-engaged="true"]) .islandFootprint { inset-inline: 16px; }
 }
 
 @media (max-width: 600px) {

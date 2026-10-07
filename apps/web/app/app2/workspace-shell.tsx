@@ -179,7 +179,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
         aria-label={navigationOpen ? "Close navigation" : "Open navigation"} aria-expanded={navigationOpen}
         aria-controls={navigationOpen ? "workspace-destinations" : undefined}
         onClick={() => setNavigationOpen(current => !current)}>
-        <Icon name="menu" size={24} />
+        <Icon name={navigationOpen ? "close" : "menu"} size={24} />
       </button>
       {navigationOpen && <div id="workspace-destinations" className={styles.navigationTray}>
         {(["planner", "binder", "progress"] as const).map(kind => <button key={kind} type="button" aria-current={selection?.kind === kind ? "page" : undefined} onClick={() => {
