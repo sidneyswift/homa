@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "../../../components/design/Icon";
 import { KIND_LABELS, type BinderMaterial } from "../../../lib/materials/binder";
 
 /**
@@ -35,12 +36,15 @@ export function BinderCard({
 }) {
   const [chipBg, chipInk] = kindTone(material.kind);
   if (compact) return <button type="button" onClick={() => onOpen(material)} aria-label={`${material.title}. View and print.`}
-    className="flex min-h-14 w-full items-center gap-4 border-b border-[var(--homa-control-boundary)] py-3 text-left">
+    data-binder-document className="text-left">
+    <span data-binder-preview>
     {/* eslint-disable-next-line @next/next/no-img-element */}
-    <img src={material.previewUrl} alt="" width={48} height={64} loading="lazy" className="h-16 w-12 shrink-0 object-contain" />
-    <span className="min-w-0"><span className="block font-semibold text-[var(--homa-ink)]">{material.title}</span>
+    <img src={material.previewUrl} alt="" width={112} height={144} loading="lazy" className="h-full w-full object-contain" />
+    </span>
+    <span data-binder-caption><span data-binder-title>{material.title}</span>
       <span className="mt-1 block text-sm text-[var(--homa-muted-ink)]">{material.childName ?? "Whole family"} · {KIND_LABELS[material.kind]}{material.pageCount > 1 ? ` · ${material.pageCount} pages` : ""}</span>
     </span>
+    <span data-binder-open aria-hidden="true"><Icon name="next" size={20} /></span>
   </button>;
   return (
     <button

@@ -40,3 +40,14 @@ Reader gate flagged ambiguous prepare terminology and duplicate drafts. Revised 
 Independent screenshot reviewer found no blocking hierarchy issue in Planner or Binder. Largest remaining usability gap is the low prominence of School hours and Programs compatibility links (#1223). Binder thumbnail recognition with representative materials remains a follow-up under #1227. Existing browser tests cover narrow reflow, large text, forced colors, keyboard navigation, and reduced-motion conditions; screenshots alone do not establish device or screen-reader acceptance.
 
 The final screenshot gate caught a light-on-light Add button. The follow-up fixes the foreground/background as one pair and adds browser-measured contrast checks for Add and activity help (minimum 4.5:1).
+
+## Binder visual refinement after founder review
+
+The founder found the compact version visually amateur. This pass gives Binder one clear display heading, full-width search, quieter family selection and refresh, larger contained previews, display titles, and open rows separated by a fine rule. The default duplicate section heading and count remain available to assistive technology without competing visually. App2's composer uses the contract card radius and no raised shadow; the island component owns this appearance instead of fighting its animated inline styles. Other island appearances retain their current behavior.
+
+These new screenshots use the actual EB Garamond and DM Sans font assets from the app. The synthetic worksheet is intentionally sparse; several populated worksheets and long titles remain useful future evidence, not a claim made by this pass. The fixture's sign-out utility is hidden only in the scratch capture harness. The absent desktop mascot/conversation is a harness limitation.
+
+![Refined Binder on phone](binder-refined-phone.jpg)
+![Refined Binder on desktop](binder-refined-desktop.jpg)
+
+Independent screenshot review found no blocking visual flaw and confirmed clearer hierarchy and document recognition. Manual checks verified search/no results and row opening. Existing browser tests cover mobile and desktop Binder navigation, contained worksheet detail, keyboard access, and composer preservation. Final local validation: all 33 browser journeys, web typecheck, scoped ESLint, brand-surface regeneration/check, and diff checks passed. The actual Next dev App2 route returned 200. No live AI or production behavior is claimed.

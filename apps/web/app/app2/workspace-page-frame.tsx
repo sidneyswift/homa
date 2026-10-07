@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "../../components/design/Icon";
 import { useRouter } from "next/navigation";
 import { useMemo, useTransition, type ReactNode } from "react";
 import { WorkspaceSurfaceContext, useWorkspaceSurface } from "../../components/workspace/surface-context";
@@ -31,7 +32,7 @@ export function WorkspacePageFrame({ kind, childId, kids, children }: {
           {kids.map(child => <option key={child.id} value={child.id}>{child.name}</option>)}
         </select>
       </label>
-      <button disabled={pending} onClick={() => startTransition(() => router.refresh())}>{pending ? "Refreshing…" : "Refresh"}</button>
+      <button disabled={pending} aria-label={pending ? "Refreshing…" : "Refresh"} onClick={() => startTransition(() => router.refresh())}>{kind === "binder" ? <Icon name="refresh" size={20} /> : pending ? "Refreshing…" : "Refresh"}</button>
     </div>
     <WorkspaceSurfaceContext.Provider value={surface}><div key={childId ?? "family"} data-workspace-page-content>{children}</div></WorkspaceSurfaceContext.Provider>
   </div>;

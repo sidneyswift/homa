@@ -119,6 +119,7 @@ export function BinderView({
           </p>
         </div>}
         <label className="quiet-search" aria-label="Search your Binder">
+          {workspace && <span aria-hidden="true"><Icon name="search" size={20} /></span>}
           <input
             type="search"
             value={filter.query}
@@ -232,8 +233,8 @@ export function BinderView({
             </QuietFrame>
           ) : null}
 
-          {!showCover || gridItems.length > 0 ? <section className="mt-7">
-            <div className="flex items-baseline justify-between gap-3">
+          {!showCover || gridItems.length > 0 ? <section className="mt-7" data-binder-collection>
+            <div className={workspace && isDefaultFilter(filter) ? "sr-only" : "flex items-baseline justify-between gap-3"}>
               <h2 className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">{sectionTitle}</h2>
               <span className="text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                 {gridItems.length} {gridItems.length === 1 ? "thing" : "things"}

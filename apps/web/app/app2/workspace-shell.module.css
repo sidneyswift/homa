@@ -152,3 +152,27 @@
 
 /* Primary actions retain the design contract contrast inside the workspace. */
 .panel :global(.quiet-action--primary) { color: var(--homa-paper); background: var(--homa-midnight-action); }
+
+/* Binder is a collection of real documents, with its own display hierarchy. */
+.panel[data-workspace-kind="binder"] .panelHeader { padding-top: 24px; padding-bottom: 20px; }
+.panel[data-workspace-kind="binder"] .panelHeader h2 { font: 600 32px/36px var(--font-eb-garamond), Georgia, serif; letter-spacing: -.02em; }
+.page[data-workspace-page="binder"] > .toolbar { margin-bottom: 12px; }
+.page[data-workspace-page="binder"] > .toolbar select { border-color: transparent; background: transparent; padding-left: 0; font-weight: 500; }
+.page[data-workspace-page="binder"] > .toolbar button { display: grid; place-items: center; padding: 8px; }
+.page[data-workspace-page="binder"] :global(.quiet-search) { width: 100%; max-width: none; min-height: 48px; gap: 12px; background: var(--homa-floating); border-color: var(--homa-control-boundary); }
+.page[data-workspace-page="binder"] :global(.quiet-search) > span { display: flex; color: var(--homa-muted-ink); }
+.page[data-workspace-page="binder"] [data-binder-collection] { margin-top: 24px; }
+.page[data-workspace-page="binder"] [data-binder-document] { display: grid; grid-template-columns: 112px minmax(0, 1fr) 20px; align-items: center; gap: 16px; width: 100%; padding: 16px 0; border: 0; border-bottom: 1px solid var(--workspace-line); border-radius: 0; background: transparent; }
+.page[data-workspace-page="binder"] [data-binder-preview] { display: block; width: 112px; height: 144px; padding: 8px; background: var(--homa-soft-boundary); border: 1px solid var(--homa-soft-boundary); border-radius: var(--homa-radius-control); }
+.page[data-workspace-page="binder"] [data-binder-caption] { min-width: 0; }
+.page[data-workspace-page="binder"] [data-binder-title] { display: block; font: 600 22px/28px var(--font-eb-garamond), Georgia, serif; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.page[data-workspace-page="binder"] [data-binder-caption] > span + span { margin-top: 8px; font-size: 13px; line-height: 20px; }
+.page[data-workspace-page="binder"] [data-binder-open] { color: var(--homa-muted-ink); }
+@container (max-width: 340px) {
+  .page[data-workspace-page="binder"] [data-binder-document] { grid-template-columns: 80px minmax(0, 1fr) 20px; gap: 12px; }
+  .page[data-workspace-page="binder"] [data-binder-preview] { width: 80px; height: 112px; }
+  .page[data-workspace-page="binder"] [data-binder-title] { font-size: 20px; line-height: 26px; }
+}
+@media (forced-colors: active) {
+  .page[data-workspace-page="binder"] [data-binder-preview], .page[data-workspace-page="binder"] [data-binder-document] { border-color: CanvasText; }
+}

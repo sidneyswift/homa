@@ -111,7 +111,7 @@
 @media (prefers-reduced-motion: reduce) {
   .islandPosition { transition: none; }
 }
-.composer { --island-radius: 999px; max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--island-radius); padding: 8px; font-size: 16px; font-weight: 400; line-height: 24px; background: var(--homa-floating); box-shadow: 0 8px 24px rgba(32, 36, 43, 0.08); }
+.composer { --island-radius: var(--homa-radius-card); max-width: 780px; margin: 0 auto; border: 1px solid var(--preview-boundary); border-radius: var(--island-radius); padding: 8px; font-size: 16px; font-weight: 400; line-height: 24px; background: var(--homa-floating); box-shadow: none; }
 .preview .composer button:focus-visible { outline-offset: -3px; }
 .preview .composer button { border-radius: var(--island-radius); font: inherit; }
 .preview .composer button:enabled:hover { background: var(--homa-canvas); }

@@ -477,6 +477,7 @@ function ConversationControlsSession({ onOpenPlanner, conversationCovered = fals
         <PendingAttachmentChips staged={attachments.staged} onRemove={attachments.remove} />
       </div>}
       <AdaptiveIsland
+        appearance="composer"
         view={settingsOpen ? "settings" : "text"}
         size={settingsOpen ? "content" : "fill"}
         className={`${styles.composer} ${settingsOpen ? styles.settingsComposer : ""}`}

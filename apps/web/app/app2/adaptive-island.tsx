@@ -25,12 +25,13 @@ interface AdaptiveIslandProps extends HTMLMotionProps<"form"> {
   size: "content" | "fill";
   view: string;
   edgeAttached?: boolean;
+  appearance?: "floating" | "composer";
   placement?: Placement | "auto";
   regionRef?: RefObject<HTMLElement | null>;
 }
 
 /** Presentation only. Activity state, editable drafts and audio ownership stay with the caller. */
-export function AdaptiveIsland({ children, size, view, edgeAttached = false, placement = "auto", regionRef, className, ...props }: AdaptiveIslandProps) {
+export function AdaptiveIsland({ children, size, view, edgeAttached = false, appearance = "floating", placement = "auto", regionRef, className, ...props }: AdaptiveIslandProps) {
   const host = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLFormElement>(null);
   const previousPlacement = useRef<Placement | undefined>(undefined);
@@ -126,11 +127,11 @@ export function AdaptiveIsland({ children, size, view, edgeAttached = false, pla
             initial={false}
             animate={{
               width: dimensions.width, height: dimensions.height,
-              borderTopLeftRadius: edgeAttached ? radii.control : dimensions.height / 2,
-              borderTopRightRadius: edgeAttached ? radii.control : dimensions.height / 2,
-              borderBottomLeftRadius: edgeAttached ? 0 : dimensions.height / 2,
-              borderBottomRightRadius: edgeAttached ? 0 : dimensions.height / 2,
-              boxShadow: edgeAttached ? "0 0px 0px rgba(32, 36, 43, 0)" : elevation.raised,
+              borderTopLeftRadius: edgeAttached ? radii.control : appearance === "composer" ? radii.card : dimensions.height / 2,
+              borderTopRightRadius: edgeAttached ? radii.control : appearance === "composer" ? radii.card : dimensions.height / 2,
+              borderBottomLeftRadius: edgeAttached ? 0 : appearance === "composer" ? radii.card : dimensions.height / 2,
+              borderBottomRightRadius: edgeAttached ? 0 : appearance === "composer" ? radii.card : dimensions.height / 2,
+              boxShadow: edgeAttached || appearance === "composer" ? "0 0px 0px rgba(32, 36, 43, 0)" : elevation.raised,
             }}
             className={`${styles.surface} ${className ?? ""}`}
             style={{

@@ -193,7 +193,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
     <div className={styles.conversation}>
       <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft, revealConversation }}>{children}</WorkspaceContext.Provider>
     </div>
-    {selection && <aside id="family-workspace" className={styles.panel} aria-labelledby="workspace-title">
+    {selection && <aside id="family-workspace" data-workspace-kind={selection.kind} className={styles.panel} aria-labelledby="workspace-title">
       <header className={styles.panelHeader}>
         <h2 id="workspace-title" tabIndex={-1} ref={heading}>{title}</h2>
         <button type="button" onClick={close} aria-label={`Close ${title.toLowerCase()}`}><Icon name="close" size={20} /></button>
