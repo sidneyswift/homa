@@ -454,7 +454,8 @@ test("workspace navigation reveals labeled destinations and Escape preserves the
   const toggle = page.getByRole("button", { name: "Open navigation", exact: true });
   await expect(page.getByText("Your week", { exact: true })).toHaveCount(0);
   const bounds = await toggle.boundingBox();
-  expect(bounds!.x).toBeGreaterThan(1300);
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x).toBeLessThan(40);
   await toggle.focus();
   await page.keyboard.press("Enter");
   await page.keyboard.press("Tab");

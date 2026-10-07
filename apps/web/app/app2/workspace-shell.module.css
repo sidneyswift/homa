@@ -12,7 +12,7 @@
 }
 .shell[data-workspace-open="true"] { grid-template-columns: minmax(400px, 1fr) minmax(400px, 0.9fr); }
 .conversation { min-width: 0; position: relative; }
-.navigation { position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 6; }
+.navigation { position: absolute; top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); z-index: 6; }
 .navigation button, .navigation a { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; }
 .navigation a:focus-visible { outline: 2px solid var(--homa-ink); outline-offset: 3px; }
 .shell button:focus-visible, .shell select:focus-visible, .panel a:focus-visible { outline: 2px solid var(--homa-ink); outline-offset: 3px; }
@@ -30,15 +30,15 @@
 .navigation button:disabled { opacity: .5; cursor: default; }
 .navigation .navigationToggle { padding: 12px; border-color: transparent; }
 .navigation .navigationToggle[aria-expanded="true"] { border-color: var(--workspace-line); }
-.navigationTray { position: absolute; right: 56px; top: 0; display: flex; gap: 4px; padding: 4px; background: var(--homa-floating); border: 1px solid var(--workspace-line); border-radius: var(--homa-radius-control); animation: navigationReveal var(--homa-motion-base) var(--homa-motion-ease-out); }
+.navigationTray { position: absolute; left: 56px; top: 0; display: flex; gap: 4px; padding: 4px; background: var(--homa-floating); border: 1px solid var(--workspace-line); border-radius: var(--homa-radius-control); animation: navigationReveal var(--homa-motion-base) var(--homa-motion-ease-out); }
 .navigationTray button, .navigationTray a { border-color: transparent; white-space: nowrap; text-decoration: none; }
 .navigationTray [aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; font-weight: 600; }
 .navigationTray a:hover { border-color: var(--workspace-line); }
-@keyframes navigationReveal { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes navigationReveal { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .navigationTray { animation: none; } }
 .navigation button:hover, .panel button:hover { border-color: var(--homa-control-boundary); }
 .panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--workspace-line); background: var(--homa-floating); }
-.panelHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 80px 16px 24px; flex-shrink: 0; }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; flex-shrink: 0; }
 .panelHeader h2 { margin: 0; font: 500 16px/1.5 var(--font-dm-sans), sans-serif; }
 .panelHeader h2:focus { outline: none; }
 .panelHeader button { display: grid; place-items: center; padding: 8px; border-color: transparent; }
@@ -70,11 +70,13 @@
 @media (max-width: 960px) {
   .shell[data-workspace-open="true"] { grid-template-columns: minmax(0, 1fr); }
   .panel { position: fixed; z-index: 4; inset: max(8px, env(safe-area-inset-top)) 0 var(--workspace-sheet-bottom, 180px); border: 0; border-bottom: 1px solid var(--workspace-line); }
-  .panelHeader { padding: 8px 80px 8px 20px; }
+  .panelHeader { padding: 8px 20px 8px 80px; }
+  .navigation { top: max(16px, calc(env(safe-area-inset-top) + 8px)); }
+  .shell:has([data-workspace-kind="binder"]) .navigation { top: max(32px, calc(env(safe-area-inset-top) + 24px)); }
   .panelBody { padding: 8px 20px 24px; }
 }
 @media (max-width: 600px) {
-  .navigationTray { top: 56px; right: 0; width: min(360px, calc(100vw - 32px)); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .navigationTray { top: 56px; left: 0; width: min(360px, calc(100vw - 32px)); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .navigationTray button, .navigationTray a { flex-direction: column; gap: 4px; padding: 12px 4px; position: relative; }
   .navigationTray a > svg:last-of-type { position: absolute; top: 8px; right: 8px; width: 12px; height: 12px; }
 }

@@ -51,3 +51,10 @@ These new screenshots use the actual EB Garamond and DM Sans font assets from th
 ![Refined Binder on desktop](binder-refined-desktop.jpg)
 
 Independent screenshot review found no blocking visual flaw and confirmed clearer hierarchy and document recognition. Manual checks verified search/no results and row opening. Existing browser tests cover mobile and desktop Binder navigation, contained worksheet detail, keyboard access, and composer preservation. Final local validation: all 33 browser journeys, web typecheck, scoped ESLint, brand-surface regeneration/check, and diff checks passed. The actual Next dev App2 route returned 200. No live AI or production behavior is claimed.
+
+## Left-side navigation
+
+Founder-approved follow-up: the global menu sits at top-left, opens toward the right, and opens below its trigger on narrow phones. Mobile headers reserve room for menu, title, and close. The desktop panel no longer reserves empty right-side menu space. Screenshot review found no overlap or alignment blocker. Existing navigation/reflow/Binder tests verify the change; the prior right-position assertion now checks the left edge.
+
+![Left menu](left-menu-phone.jpg)
+![Open menu](left-menu-open-phone.jpg)
