@@ -5,7 +5,7 @@
   grid-template-columns: minmax(0, 1fr);
   height: 100svh;
   min-height: 0;
-  --workspace-navigation-height: 0px;
+  --workspace-navigation-height: calc(72px + env(safe-area-inset-top));
   padding-top: var(--workspace-navigation-height);
   background: var(--homa-floating);
   color: var(--homa-ink);
@@ -181,8 +181,7 @@
   .page[data-workspace-page="binder"] [data-binder-preview], .page[data-workspace-page="binder"] [data-binder-document] { border-color: CanvasText; }
 }
 
-/* Expanded navigation is part of the layout, flush with the viewport top. */
-.shell[data-navigation-expanded] { --workspace-navigation-height: calc(72px + env(safe-area-inset-top)); }
+/* Reserve the navigation row even when collapsed so Homa never moves through it. */
 .shell[data-navigation-expanded] .navigation { inset: 0 0 auto; height: var(--workspace-navigation-height); display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); background: var(--homa-floating); }
 .shell[data-navigation-expanded] .navigationTray { justify-self: center; max-width: 100%; }
 .navigationTray button { border-radius: 0; background: transparent; }
