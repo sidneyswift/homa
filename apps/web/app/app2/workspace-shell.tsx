@@ -179,7 +179,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
         aria-label={navigationOpen ? "Close navigation" : "Open navigation"} aria-expanded={navigationOpen}
         aria-controls={navigationOpen ? "workspace-destinations" : undefined}
         onClick={() => setNavigationOpen(current => !current)}>
-        <Icon name="menu" size={20} />
+        <Icon name="menu" size={24} />
       </button>
       {navigationOpen && <div id="workspace-destinations" className={styles.navigationTray}>
         {(["planner", "binder", "progress"] as const).map(kind => <button key={kind} type="button" aria-current={selection?.kind === kind ? "page" : undefined} onClick={() => {
@@ -187,7 +187,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
           if (!open) opener.current = launcher.current;
           if (selection?.kind !== kind) navigate({ kind, childId: selection?.childId ?? null });
           else heading.current?.focus({ preventScroll: true });
-        }}><Icon name={kind === "planner" ? "calendar" : kind === "binder" ? "book" : "progress"} size={20} /><span>{kind === "planner" ? "Planner" : kind === "binder" ? "Binder" : "Progress"}</span></button>)}
+        }}><Icon name={kind === "planner" ? "calendar" : kind === "binder" ? "book" : "progress"} size={24} /><span>{kind === "planner" ? "Planner" : kind === "binder" ? "Binder" : "Progress"}</span></button>)}
       </div>}
     </nav>
     <div className={styles.conversation}>
