@@ -85,7 +85,7 @@ export function classifyValidatedWebRouteBoundary(path: string): "public" | "fam
   if (first === "app") return "family";
   if (first === "admin") return "operator";
   // #1158: /app2 is server-gated to local development.
-  if (first === "dev" || first === "app2") return "developer";
+  if (first === "dev" || first === "app2" || first === "app2-lab") return "developer";
   return "public";
 }
 
@@ -104,6 +104,7 @@ export type ValidatedWebRouteHandlerBoundary =
 // Deliberately independent from the generator registry. A change must satisfy
 // both the producer and the completeness validator before evidence can move.
 export const validatedWebRouteHandlerBoundaries = {
+  "apps/web/app/app2-lab/generate/route.ts": "developer-family",
   "apps/web/app/admin/studio/anchor/[id]/route.ts": "operator",
   "apps/web/app/admin/studio/reference/[file]/route.ts": "operator",
   "apps/web/app/api/account-deletion/export/route.ts": "family",

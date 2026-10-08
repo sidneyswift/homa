@@ -139,8 +139,8 @@ interface Classification {
 }
 
 const baseRules: ReadonlyArray<{ match: (path: string) => boolean; value: Classification }> = [
-  { match: (path) => /^apps\/web\/app\/app2\/(?:page|layout|error)\.tsx$/.test(path), value: { type: "route", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", ownerIssue: "gh#1158", deliveryState: "controlled-current" } },
-  { match: (path) => path.startsWith("apps/web/app/app2/"), value: { type: "component-family", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", ownerIssue: "gh#1158", deliveryState: "controlled-current" } },
+  { match: (path) => /^apps\/web\/app\/app2(?:-lab)?\/(?:page|layout|error)\.tsx$/.test(path), value: { type: "route", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", ownerIssue: "gh#1158", deliveryState: "controlled-current" } },
+  { match: (path) => (path.startsWith("apps/web/app/app2/") || (path.startsWith("apps/web/app/app2-lab/") && !path.endsWith("/route.ts"))), value: { type: "component-family", audiences: ["developer"], disposition: "replace-active", targetProfile: "web-product", reachability: "internal", ownerIssue: "gh#1158", deliveryState: "controlled-current" } },
   { match: (path) => path === "work/onboardingandpaywall8-30/assets/making-feature-cards/MANIFEST.md", value: { type: "authoring-rule", audiences: ["developer"], disposition: "replace-active", targetProfile: "authoring", reachability: "internal", ownerIssue: "gh#729", deliveryState: "controlled-current" } },
   { match: (path) => [".github/workflows/ci.yml", ".github/workflows/android-native-compile.yml", "package.json"].includes(path) || [
     "scripts/channel-evidence-check.mts",

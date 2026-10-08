@@ -214,7 +214,7 @@ test("public metadata and authentication entry points require public rollback pr
 
 test("every route handler has matching independent fail-closed boundary reviews", () => {
   const routeHandlers = git("ls-files", "--", "apps/web/app/**/route.ts").split("\n").filter(Boolean).sort(stableCompare);
-  assert.equal(routeHandlers.length, 127);
+  assert.equal(routeHandlers.length, 128);
   assert.deepEqual(Object.keys(reviewedWebRouteHandlerBoundaries).sort(stableCompare), routeHandlers);
   assert.deepEqual(Object.keys(validatedWebRouteHandlerBoundaries).sort(stableCompare), routeHandlers);
 
@@ -233,7 +233,7 @@ test("every route handler has matching independent fail-closed boundary reviews"
     family: 96,
     provider: 10,
     developer: 2,
-    "developer-family": 1,
+    "developer-family": 2,
     public: 11,
     "mixed-family-provider": 1,
     "internal-service": 2,
@@ -262,6 +262,7 @@ test("route handler fixtures retain public, family, operator, provider, develope
     ["apps/web/app/api/email/webhook/route.ts", "provider"],
     ["apps/web/app/api/dev/oidc-status/route.ts", "developer"],
     ["apps/web/app/api/dev/reset-onboarding/route.ts", "developer-family"],
+    ["apps/web/app/app2-lab/generate/route.ts", "developer-family"],
     ["apps/web/app/api/map/cron/route.ts", "internal-service"],
     ["apps/web/app/api/sync/ingest/route.ts", "family-device"],
     ["apps/web/app/api/library/upload/route.ts", "mixed-family-provider"],
@@ -481,7 +482,7 @@ test("web route reachability follows the structural proxy boundary", () => {
       assert.equal(surface.reachability, "authenticated", path);
       assert.deepEqual(surface.audiences, ["operator"], path);
       assert.equal(surface.deliveryState, "controlled-current", path);
-    } else if (first === "dev" || first === "app2") {
+    } else if (first === "dev" || first === "app2" || first === "app2-lab") {
       assert.equal(surface.reachability, "internal", path);
       assert.deepEqual(surface.audiences, ["developer"], path);
       assert.equal(surface.deliveryState, "controlled-current", path);
@@ -517,6 +518,7 @@ test("route groups and slots stay neutral while interceptors fail closed", () =>
   const fixtures = new Map<string, ReturnType<typeof classifyGeneratedWebRouteBoundary>>([
     ["apps/web/app/(marketing)/page.tsx", "public"],
     ["apps/web/app/app2/page.tsx", "developer"],
+    ["apps/web/app/app2-lab/page.tsx", "developer"],
     ["apps/web/app/app2/layout.tsx", "developer"],
     ["apps/web/app/app2/error.tsx", "developer"],
     ["apps/web/app/app20/page.tsx", "public"],

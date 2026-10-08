@@ -38,7 +38,7 @@ export function classifyGeneratedWebRouteBoundary(path: string): GeneratedWebRou
   if (first === "app") return "family";
   if (first === "admin") return "operator";
   // #1158: /app2 is server-gated to local development.
-  if (first === "dev" || first === "app2") return "developer";
+  if (first === "dev" || first === "app2" || first === "app2-lab") return "developer";
   return "public";
 }
 
@@ -66,6 +66,7 @@ export type GeneratedWebRouteHandlerBoundary =
 // Exact by design. Route handlers own their authorization rather than inheriting
 // the page proxy, so every new handler must receive an explicit reviewed policy.
 export const reviewedWebRouteHandlerBoundaries = {
+  "apps/web/app/app2-lab/generate/route.ts": "developer-family",
   "apps/web/app/admin/studio/anchor/[id]/route.ts": "operator",
   "apps/web/app/admin/studio/reference/[file]/route.ts": "operator",
   "apps/web/app/api/account-deletion/export/route.ts": "family",
