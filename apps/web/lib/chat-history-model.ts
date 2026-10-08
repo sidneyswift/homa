@@ -1,3 +1,4 @@
+import { readActivityPlan, type ActivityPlan } from "./materials/activity-plan";
 /**
  * Pure model for the server-rendered chat history (the M1-02 render
  * slice, founder cut 2026-07-12): the web transcript's scrollback comes
@@ -63,6 +64,7 @@ export interface ChatHistoryMaterial extends MaterialRevisionCandidate {
   pageCount: number;
   /** Per-page previews for multi-page materials, page 1 first. */
   pagePreviewUrls: string[] | null;
+  activityPlan?: ActivityPlan;
   /** Verified Family Library inputs, linked back to their originals. */
   sources: FamilyAssetReference[];
   /** materials.created_at as epoch ms, for transcript placement. */
@@ -82,6 +84,7 @@ export interface ChatHistoryMaterialRow {
   child_name: string | null;
   page_count?: number | string | null;
   page_preview_urls?: unknown;
+  activity_plan?: unknown;
   family_sources?: unknown;
   status: "draft" | "final" | "superseded";
   revises: string | null;
@@ -214,6 +217,7 @@ export function toChatHistoryMaterial(
     pdfUrl: row.pdf_url,
     pageCount: parsePageCount(row.page_count),
     pagePreviewUrls: parsePagePreviewUrls(row.page_preview_urls),
+    activityPlan: readActivityPlan(row.activity_plan),
     sources: familyAssetReferencesForSurface(
       parseFamilyAssetReferenceSnapshots(row.family_sources),
     ),
@@ -239,6 +243,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
         previewUrl: material.previewUrl,
         pdfUrl: material.pdfUrl,
         pageCount: material.pageCount,
+        ...(material.activityPlan ? { activityPlan: material.activityPlan } : {}),
         ...(material.pagePreviewUrls
           ? { pagePreviewUrls: material.pagePreviewUrls }
           : {}),

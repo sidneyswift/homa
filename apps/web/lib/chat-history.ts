@@ -48,7 +48,7 @@ const MATERIAL_COLUMNS =
   "status, revises, review_pass:generation->review->>pass, " +
   "session_id:generation->>sessionId, child_name:generation->input->>childName, " +
   "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls, " +
-  "family_sources:generation->familySources";
+  "family_sources:generation->familySources, activity_plan:generation->input->activityPlan";
 
 export type {
   ChatHistoryMessage,

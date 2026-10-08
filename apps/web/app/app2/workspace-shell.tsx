@@ -1,5 +1,7 @@
 "use client";
 
+import "./activity-plan-card.css";
+
 import { createContext, useContext, useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, useOptimistic, useTransition, useMemo, type ReactNode } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -191,7 +193,7 @@ export function WorkspaceShell({ children, userId, workspacePage }: { userId: st
       </div>}
     </nav>
     <div className={styles.conversation}>
-      <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft, revealConversation }}>{children}</WorkspaceContext.Provider>
+      <WorkspaceContext.Provider value={{ openPlanner, workspaceOpen: open, conversationCovered: open && phone, onPlanRevision: setPlanRevision, draftRequest, acknowledgeDraft, revealConversation }}><WorkspaceSurfaceContext.Provider value={surface}>{children}</WorkspaceSurfaceContext.Provider></WorkspaceContext.Provider>
     </div>
     {selection && <aside id="family-workspace" data-workspace-kind={selection.kind} className={styles.panel} aria-labelledby="workspace-title">
       <header className={styles.panelHeader}>

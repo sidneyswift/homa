@@ -1,5 +1,7 @@
 "use client";
 
+import { ActivityPlanCard } from "../../app2/activity-plan-card";
+import { readActivityPlan } from "../../../lib/materials/activity-plan";
 import { WorkspaceLink } from "../../../components/workspace/workspace-link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -115,6 +117,7 @@ export function MaterialDetailOverlay({
       ? material.pagePreviewUrls
       : [material.previewUrl];
   const [pageIndex, setPageIndex] = useState(0);
+  const activityPlan = workspace ? readActivityPlan(material.activityPlan) : undefined;
   const currentPreview = pagePreviews[Math.min(pageIndex, pagePreviews.length - 1)];
 
   useEffect(() => {
@@ -196,6 +199,7 @@ export function MaterialDetailOverlay({
           </button>
         </div>
 
+        {!activityPlan && <>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={currentPreview}
@@ -233,6 +237,8 @@ export function MaterialDetailOverlay({
             </button>
           </div>
         ) : null}
+
+        </>}
 
         <h2 id="binder-detail-title" className="mt-4 font-display text-xl font-semibold text-[color:var(--homa-ink)]">
           {material.title}
@@ -292,6 +298,7 @@ export function MaterialDetailOverlay({
           </div>
         ) : null}
 
+        {activityPlan && workspace ? <ActivityPlanCard key={material.id} id={material.id} title={material.title} plan={activityPlan} askHoma={workspace.askHoma} /> : <>
         <WorkspaceLink
           href={`/api/materials/${material.id}/pdf`}
           target="_blank"
@@ -312,6 +319,7 @@ export function MaterialDetailOverlay({
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="chat" size={20} /></span>
         </WorkspaceLink>}
 
+        </>}
         <VersionRail materialId={material.id} />
 
         <DeleteMaterialControl material={material} onDeleted={onClose} />

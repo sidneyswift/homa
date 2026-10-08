@@ -1,3 +1,4 @@
+import type { ChatHistoryMaterial } from "../lib/chat-history-model";
 import { randomUUID } from "node:crypto";
 import { accessSync, readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
@@ -16,6 +17,7 @@ import type { NativeInputResponse } from "../lib/conversation-native-input";
 const familyId = "00000000-0000-4000-8000-000000000001", userId = "00000000-0000-4000-8000-000000000002";
 const account = `${familyId}:${userId}`, accessEpoch = "00000000-0000-4000-8000-000000000003", conversationId = "00000000-0000-4000-8000-000000000004";
 let browser: Browser, server: Server, origin: string;
+let fixtureMaterials: ChatHistoryMaterial[] = [];
 let messages: ConversationFeedMessage[] = [], changes: { position: number; message: ConversationFeedMessage; deleted?: true }[] = [];
 let receipts = new Map<string, { intentId: string; requestId: string; messageId: string }>();
 let submissions: { intentId: string; text: string; attachmentIds?: string[] }[] = [];
@@ -152,8 +154,8 @@ test.beforeAll(async () => {
         if (url.pathname === "/api/conversation/feed") {
           feedRequests.push(url.search);
           if (feedPaused) return send({ reason: "retry" }, 503);
-          const common = { account, accessEpoch, conversationId, materials: [], requests: [], requestsTruncated: false };
-          if (url.searchParams.has("materialsFor")) return send({ ...common, mode: "materials", materialSessions: [], requestedMessageIds: url.searchParams.get("materialsFor")!.split(",") });
+          const common = { account, accessEpoch, conversationId, materials: fixtureMaterials, requests: [], requestsTruncated: false };
+          if (url.searchParams.has("materialsFor")) return send({ ...common, mode: "materials", materialSessions: fixtureMaterials.map(item => item.sessionId), requestedMessageIds: url.searchParams.get("materialsFor")!.split(",") });
           if (url.searchParams.has("after")) {
             const after = Number(url.searchParams.get("after")), page = changes.filter(change => change.position > after).slice(0, 100);
             return send({ ...common, mode: "changes", changes: page.map(change => change.deleted ? { kind: "delete", messageId: change.message.id } : { kind: "upsert", message: change.message }),
@@ -184,7 +186,7 @@ test.beforeAll(async () => {
   browser = await chromium.launch({ headless: true, executablePath: executablePath ?? await serverlessChromium.executablePath(), args: executablePath ? [] : serverlessChromium.args });
 });
 test.afterAll(async () => { await browser?.close(); if (server?.listening) await new Promise<void>((done, reject) => server.close(error => error ? reject(error) : done())); });
-test.beforeEach(() => { calendarEvents = []; calendarWrites = []; calendarFailure = false; boardStatus = 200; checkWrites = []; plannerProgress = {}; messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
+test.beforeEach(() => { fixtureMaterials = []; calendarEvents = []; calendarWrites = []; calendarFailure = false; boardStatus = 200; checkWrites = []; plannerProgress = {}; messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
 async function open() {
   const context = await browser.newContext({ viewport: { width: 900, height: 900 }, reducedMotion: "reduce" });
   const page = await context.newPage(); const errors: string[] = []; page.on("pageerror", error => errors.push(error.stack ?? error.message));
@@ -880,5 +882,42 @@ test("workspace primary actions retain readable foreground and background pairs"
   expect(await contrast("Add")).toBeGreaterThanOrEqual(4.5);
   await page.getByText("Count the blue buttons", { exact: true }).click();
   expect(await contrast("Ask about the steps")).toBeGreaterThanOrEqual(4.5);
+  await context.close();
+});
+
+
+test("saved activity plan adjusts locally and prepares an explicit save request", async () => {
+  const { context, page } = await open();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const message = addMessage("Here is a little counting plan.");
+  fixtureMaterials = [{ id: "11111111-1111-4111-8111-111111111119", title: "Count together", kind: "other", skill: "Counting", childName: "Maya", previewUrl: "/fixture.png", pdfUrl: "/fixture.pdf", pageCount: 1, pagePreviewUrls: null, sources: [], sessionId: message.sessionId!, atMs: message.atMs, order: message.atMs, status: "draft", revisesId: null, reviewPass: true, activityPlan: { version: 1, introduction: "A little counting with things you already have.", minutes: 20, swapped: [], activities: [1, 2].map(n => ({ id: `step-${n}`, title: n === 1 ? "Count the buttons" : "Make a number trail", minutes: 10, instructions: n === 1 ? "Set out five buttons. Touch each one as you count together." : "Place number cards across the floor. Step along them and say each number.", materials: n === 1 ? ["Five buttons"] : ["Paper", "Pencil"], alternative: { title: `Count steps ${n}`, instructions: "Take five steps together, saying one number with each step." } })) } }];
+  await page.reload();
+  const card = page.getByRole("region", { name: "Count together activity plan" });
+  await expect(card).toBeVisible();
+  const slider = card.getByRole("slider");
+  await slider.fill("25");
+  await card.getByRole("button", { name: "Try another idea" }).first().click();
+  await expect(card.getByText("Count steps 1", { exact: true })).toBeVisible();
+  await expect(card.getByRole("status")).toContainText("not saved yet");
+  expect(submissions).toHaveLength(0);
+  await card.getByRole("button", { name: "Try this activity" }).first().click();
+  await expect(card.getByRole("button", { name: "Help us get started" })).toBeVisible();
+  expect(checkWrites).toHaveLength(0);
+  await card.getByRole("button", { name: "Ask Homa to save changes" }).scrollIntoViewIfNeeded();
+  const actionBox = await card.getByRole("button", { name: "Ask Homa to save changes" }).boundingBox();
+  const composerBox = await composer(page).boundingBox();
+  expect(actionBox!.y + actionBox!.height).toBeLessThan(composerBox!.y);
+  await page.screenshot({ path: "/private/tmp/homa-activity-plan-phone.png" });
+  await card.getByRole("button", { name: "Ask Homa to save changes" }).click();
+  await expect(page.getByRole("button", { name: "Send this question" })).toBeVisible();
+  expect(submissions).toHaveLength(0);
+  await page.getByRole("button", { name: "Send this question" }).click();
+  await expect.poll(() => submissions.length).toBe(1);
+  expect(submissions[0].text).toContain("25 minutes");
+  expect(submissions[0].text).toContain("Selected alternatives: step-1");
+  await page.reload();
+  await expect(slider).toHaveValue("20");
+  await expect(card.getByRole("status")).toContainText("stored with your materials");
+  expect(checkWrites).toHaveLength(0);
   await context.close();
 });

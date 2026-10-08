@@ -107,6 +107,7 @@ export default defineBoundedTool({
       done: true,
       material: {
         id: material.id,
+        ...(material.activityPlan ? { activityPlan: material.activityPlan } : {}),
         title: material.title,
         kind: material.kind,
         skill: material.skill,

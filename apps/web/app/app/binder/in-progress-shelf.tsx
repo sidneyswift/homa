@@ -1,5 +1,6 @@
 "use client";
 
+import { useWorkspaceSurface } from "../../../components/workspace/surface-context";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -27,6 +28,7 @@ export function InProgressShelf({ materials, scopeChildName = null }: {
   scopeChildName?: string | null;
 }) {
   const router = useRouter();
+  const workspace = useWorkspaceSurface();
   const [kept, setKept] = useState<Record<string, string>>({});
   const [removed, setRemoved] = useState<Record<string, true>>({});
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -154,6 +156,7 @@ export function InProgressShelf({ materials, scopeChildName = null }: {
                 >
                   Open
                 </a>
+                {workspace && material.activityPlan && <button type="button" className="quiet-action quiet-action--quiet text-xs" onClick={() => workspace.askHoma(`Reopen saved activity plan ${material.id} so we can adjust it or try an activity.`)}>Open activity plan</button>}
                 <button
                   type="button"
                   onClick={() => setConfirmingDeleteId(material.id)}

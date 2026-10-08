@@ -282,7 +282,7 @@ async function readFeed(principal: ConversationRequestPrincipal,
           select m.id,m.title,m.kind,m.skill,m.preview_url,m.pdf_url,m.created_at::text,m.status,m.revises,
             coalesce(linked.session_id,m.generation->>'sessionId') as session_id,m.generation->'input'->>'childName' as child_name,
             m.generation->'review'->>'pass' as review_pass,m.generation->>'pageCount' as page_count,
-            m.generation->'pagePreviewUrls' as page_preview_urls,m.generation->'familySources' as family_sources
+            m.generation->'input'->'activityPlan' as activity_plan,m.generation->'pagePreviewUrls' as page_preview_urls,m.generation->'familySources' as family_sources
           from public.materials m
           left join lateral (
             select 'job:'||l.job_id::text as session_id from public.conversation_jobs l

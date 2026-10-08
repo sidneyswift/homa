@@ -1,5 +1,5 @@
 ---
-description: Use to create, reopen, revise, approve, print, share, or combine Homa-made materials and standalone lesson plans. Library originals belong to family-librarian; full teach-practice-check lessons to lesson-studio; multi-week programs to curriculum-studio; scheduling to planner.
+description: Use to create, reopen, revise, approve, print, share, or combine Homa-made materials and standalone lesson plans, including short "we have 20 minutes" activity plans. Library originals belong to family-librarian; full teach-practice-check lessons to lesson-studio; multi-week programs to curriculum-studio; scheduling to planner.
 ---
 
 # The materials studio
@@ -16,6 +16,7 @@ load the relevant ones before acting, not every file in the package.
 
 | Parent's request | Read before acting |
 | --- | --- |
+| Create or adjust a short timed activity plan | `references/short-plan.md`, `references/review-and-delivery.md` |
 | Find or reopen a saved Homa worksheet or packet | `references/reopen-work.md` |
 | React to, revise, approve, print, share, or resend the visible material | `references/review-and-delivery.md` |
 | Create a page or packet, or change its teaching target | `references/design-guide.md`, `references/creation-paths.md`, `references/design-quality.md` |

@@ -1,3 +1,4 @@
+import type { ActivityPlan } from "./activity-plan";
 import { MATERIAL_KINDS, type MaterialKind } from "./kinds";
 import type { MaterialSummary } from "./library";
 import type { ChildRecord } from "../family";
@@ -21,6 +22,7 @@ import type { ViewContext } from "../view-context";
 
 export interface BinderMaterial {
   id: string;
+  activityPlan?: ActivityPlan;
   title: string;
   kind: MaterialKind;
   subject: string | null;
@@ -51,6 +53,7 @@ export function toBinderMaterials(
   const nameById = new Map(children.map((child) => [child.id, child.name]));
   return materials.map((material) => ({
     id: material.id,
+    activityPlan: material.activityPlan,
     title: material.title,
     kind: material.kind,
     subject: material.subject,
