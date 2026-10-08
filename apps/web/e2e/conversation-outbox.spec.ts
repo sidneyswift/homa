@@ -64,6 +64,11 @@ test.beforeAll(async () => {
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("Fixture did not bind");
   origin = `http://127.0.0.1:${address.port}`;
+});
+
+// Serverless Chromium is single-process; closing a context can end its browser.
+// Give each independent journey a fresh browser, as the Hours harness does.
+test.beforeEach(async () => {
   let executablePath: string | undefined;
   for (const path of ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"]) {
@@ -73,8 +78,9 @@ test.beforeAll(async () => {
     args: executablePath ? [] : serverlessChromium.args });
 });
 
+test.afterEach(async () => { await browser?.close(); });
+
 test.afterAll(async () => {
-  await browser?.close();
   await new Promise<void>((done, reject) => server.close(e => e ? reject(e) : done()));
 });
 
