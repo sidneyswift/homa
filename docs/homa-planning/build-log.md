@@ -12763,6 +12763,29 @@ parent's conversation. The existing planner card is the explicit opening
 control. Live voice retains its separately ruled display behavior. Tracked
 in gh#1216; the issue holds release checks and production evidence.
 
+## 2026-10-05 · iOS publication resumed
+
+Sidney explicitly requested publishing the existing native iOS app: "Please
+help me get it published!" This reaffirms the September 6 review-submission
+authorization and reopens gh#299, gh#308 and gh#310 for the existing app.
+Pricing and unrelated native growth work remain outside this scope.
+
+Authenticated Apple evidence: version 1.0, build 48, was rejected September 9
+for repeated identity collection after Apple sign-in, inaccurate tracking
+declarations and onboarding blocked at Print it on iPad. The earlier missing
+EULA link is already present. Sidney confirmed Homa shares no app/backend
+data with ad networks or data brokers; all ten tracking declarations were
+changed to no and published in ASC. The updated developer-agreement warning
+also cleared after the founder action.
+
+Code repairs and verification remain tracked by gh#299 and gh#1136. Local
+checks are not a deployed fix or App Review approval. Current evidence:
+`plans/2026-10-05-ios-review-repairs.md`.
+
+
+## 2026-10-05: optional existing-password sign-in authorized
+
+Sidney approved an optional existing-password path to support repeatable App Review access. Email codes remain the default. The email screen uses Supabase password authentication and offers return to email-code sign-in; no privileged reviewer bypass is introduced. Implementation and release evidence belong to gh#299 / PR #1218.
 
 ## 2026-10-08: App 2 native preparation approved
 

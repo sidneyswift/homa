@@ -5,16 +5,14 @@ description: Ship the Homa iOS app (apps/mobile) safely. Use when building, subm
 
 # iOS release
 
-## Program posture first (PMF cut, 2026-08-16)
+## Program posture
 
-Public App Store distribution is not authorized: the launch program was
-cut from the PMF queue ("No App Store launch is authorized now", gh#299
-and gh#308 closing comments). Store builds and TestFlight distribution
-remain legitimate maintenance whenever a fingerprint change would
-otherwise orphan the installed fleet; a public release, submission for
-public sale, or listing work needs an explicit founder reopen. Posture
-detail and reopen triggers:
-`docs/homa-planning/16-mobile-native-architecture.md` §2.
+Read the latest iOS release ruling in
+`docs/homa-planning/journeys/10-reconciliation.md` before acting. The August
+PMF pause was superseded for review repairs and public submission by
+`ios-review-resubmission-authorized`, reaffirmed by
+`ios-publication-resumed` on October 5. This does not authorize unrelated
+native growth scope or changes to pricing.
 
 ## The one law: the fingerprint decides everything
 
@@ -29,7 +27,7 @@ could never be patched.
 Before calling any mobile change shipped, prove the chain:
 
 ```sh
-cd apps/mobile && npx expo fingerprint --platform ios   # fingerprint of HEAD
+cd apps/mobile && npx @expo/fingerprint fingerprint:generate --platform ios .   # fingerprint of HEAD
 npx eas-cli build:list --platform ios --limit 5 --json --non-interactive \
   | jq '.[] | {id, status, version: .appVersion, buildNumber: .appBuildVersion, fingerprint: .fingerprintHash, commit: .gitCommitHash}'
 npx eas-cli update:list --branch production --limit 5 --non-interactive
@@ -51,7 +49,7 @@ the change did not ship, no matter how green the workflow run was.
   installed binary from future OTA until a new binary ships. Batch native
   changes together; each one costs a full build + review cycle.
 
-When in doubt: run `npx expo fingerprint --platform ios` before and after
+When in doubt: run `npx @expo/fingerprint fingerprint:generate --platform ios .` before and after
 the change. Same hash = OTA. Different hash = store build.
 
 ## Store build and submit
@@ -77,15 +75,14 @@ npx eas-cli submit --platform ios --latest
 - After any store build lands in ASC, publish one OTA update from the same
   commit so the new fingerprint has a matching update stream from day one.
 
-## What agents cannot see or do (hand to the founder, explicitly)
+## Apple account access
 
-App Store Connect state is invisible without an ASC API key: whether a
-build is attached to a version, review status, rejection messages,
-metadata completeness. When release state matters, ask the founder to read
-ASC directly, or to provision an ASC API key as an EAS secret. Founder-only
-surfaces: ASC metadata and screenshots, App Privacy questionnaire, age
-rating questionnaire, review notes and demo account entry, Supabase Apple
-provider Client IDs, Apple capability/profile regeneration.
+Inspect App Store Connect through an authenticated browser or an authorized
+ASC API connection. Read the actual attached build, review messages, metadata,
+privacy declarations and subscription state. Prepared files and EAS build
+success do not establish Apple approval. Ask the founder to sign in only when
+current access is unavailable. The Account Holder reviews updated legal
+agreements; do not accept those on their behalf without action-time approval.
 
 The App Review demo account is the sandbox family
 `sidney+homatestappreview@recoupable.com` ("App Review Family"). Keep it working:
@@ -94,8 +91,8 @@ on device before every submit.
 
 ## Review-sensitive invariants (why the app is shaped this way)
 
-- The app sells the monthly Homa, Homa Plus, and Homa Max plans through
-  StoreKit. It never opens or links to Stripe checkout. Existing Stripe-paid
+- Native plans follow the current pricing ruling in the founder index and
+  StoreKit product data. The app never opens or links to Stripe checkout. Existing Stripe-paid
   families receive the same provider-neutral entitlement after signing in and
   are never asked to subscribe twice. Changing this posture is a founder
   decision with review consequences, not a code cleanup.

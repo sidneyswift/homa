@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import { Image, Pressable, ScrollView, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { LoadingStatus } from "../../components/ui/loading-status";
@@ -158,33 +158,37 @@ export default function RevealScreen() {
   }, [family]);
 
   async function printMaterial() {
-    if (!material || !family) return;
+    if (!material || !family || printing) return;
     setPrinting(true);
-    const prepared = await prepareMaterialPrintFromApp(material.id, {
-      copies: 1,
-      includeAnswerKey: false,
-    });
-    if (!prepared) {
-      setNotice("That could not be prepared for printing. It's saved; you can print it any time.");
+    try {
+      const prepared = await prepareMaterialPrintFromApp(material.id, {
+        copies: 1,
+        includeAnswerKey: false,
+      });
+      if (!prepared) {
+        setNotice("That could not be prepared for printing. It's saved; you can print it any time.");
+        return;
+      }
+      const result = await runPreparedMaterialPrint(prepared);
+      setNotice(result.message);
+      void emitFamilyEvent(family.id, "materials.print_result", {
+        material_id: prepared.materialId,
+        outcome: result.status,
+        requested_copies: prepared.copies,
+        pages_selected: prepared.pageIndexes.length,
+        answer_key_excluded: prepared.answerKeyExcluded,
+      });
+      // No auto-navigation: the OS print sheet closing and the screen
+      // underneath having silently become a menu read as a hard cut with
+      // no receipt (founder call 2026-08-24). The moment lands here, and
+      // she advances when she is ready.
+      if (result.status === "completed") {
+        setPrinted(true);
+      }
+    } catch {
+      setNotice("Printing didn't open. Your page is saved; you can keep going.");
+    } finally {
       setPrinting(false);
-      return;
-    }
-    const result = await runPreparedMaterialPrint(prepared);
-    setNotice(result.message);
-    void emitFamilyEvent(family.id, "materials.print_result", {
-      material_id: prepared.materialId,
-      outcome: result.status,
-      requested_copies: prepared.copies,
-      pages_selected: prepared.pageIndexes.length,
-      answer_key_excluded: prepared.answerKeyExcluded,
-    });
-    setPrinting(false);
-    // No auto-navigation: the OS print sheet closing and the screen
-    // underneath having silently become a menu read as a hard cut with
-    // no receipt (founder call 2026-08-24). The moment lands here, and
-    // she advances when she is ready.
-    if (result.status === "completed") {
-      setPrinted(true);
     }
   }
 
@@ -193,9 +197,10 @@ export default function RevealScreen() {
 
   return (
     <WalkScene>
-      <View
-        style={{
-          flex: 1,
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
           padding: space.lg,
           paddingTop: space.xl,
           gap: space.md,
@@ -299,7 +304,7 @@ export default function RevealScreen() {
             {printed ? "Saved. Print it anytime." : "Saved. Print it anytime. Keep going"}
           </NativeText>
         </Pressable>
-      </View>
+      </ScrollView>
     </WalkScene>
   );
 }

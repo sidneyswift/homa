@@ -17,6 +17,7 @@ import {
 } from "../../features/auth/sign-in-code";
 import { LegalLine } from "../../features/auth/legal-line";
 import { useSession } from "../../features/auth/session-provider";
+import { supabase } from "../../lib/supabase";
 import { quietColors } from "../../theme/native-projection";
 
 /**
@@ -24,9 +25,8 @@ import { quietColors } from "../../theme/native-projection";
  * rather than two routes, so the back gesture returns a parent to their
  * own address rather than dumping them at the front door to start again.
  *
- * No password is asked for here or anywhere. A parent who already has
- * one is unaffected: a code does not care whether an account also has a
- * password.
+ * Email codes remain the default. Existing-password sign-in is optional
+ * for returning families and the App Review account (founder, 2026-10-05).
  *
  * Two rules this screen learned the hard way. Errors belong on the field
  * they describe, not floating in the layout, because a message 200pt
@@ -41,6 +41,8 @@ export default function EmailCodeScreen() {
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [usePassword, setUsePassword] = useState(false);
+  const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -110,6 +112,29 @@ export default function EmailCodeScreen() {
     );
   }
 
+  async function signInWithPassword() {
+    if (pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: normalizeEmail(email),
+        password,
+      });
+      if (authError || !data.session) {
+        setError(authError?.status === 429
+          ? "Too many attempts. Wait a few minutes, then try again."
+          : "That email and password didn't match. Try again, or use an email code.");
+        return;
+      }
+      setPassword("");
+    } catch {
+      setError("Couldn't connect. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   const onEmailStep = step === "email";
 
   return (
@@ -154,11 +179,11 @@ export default function EmailCodeScreen() {
 
           <View style={{ gap: 16 }}>
             <NativeHeading level={2}>
-              {onEmailStep ? "What's your email?" : "Check your email."}
+              {onEmailStep ? (usePassword ? "Welcome back." : "What's your email?") : "Check your email."}
             </NativeHeading>
             <NativeText role="body" tone="body">
               {onEmailStep
-                ? "Homa sends a six digit code. No password to make up, and none to forget later."
+                ? (usePassword ? "Sign in with the password you already use for Homa." : "Homa sends a six digit code. No password to make up, and none to forget later.")
                 : `Six digits, sent to ${normalizeEmail(email)}. It works once.`}
             </NativeText>
           </View>
@@ -195,14 +220,40 @@ export default function EmailCodeScreen() {
                   keyboardType="email-address"
                   placeholder="you@example.com"
                   returnKeyType="go"
-                  onSubmitEditing={() => void send(false)}
+                  onSubmitEditing={() => void (usePassword ? signInWithPassword() : send(false))}
+                />
+                {usePassword ? (
+                  <TextField
+                    label="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="current-password"
+                    textContentType="password"
+                    editable={!pending}
+                    returnKeyType="go"
+                    onSubmitEditing={() => void signInWithPassword()}
+                  />
+                ) : null}
+                <Button
+                  label={pending ? (usePassword ? "Signing in…" : "Sending…") : (usePassword ? "Sign in" : "Send my code")}
+                  size="lg"
+                  onPress={() => void (usePassword ? signInWithPassword() : send(false))}
+                  disabled={pending || (usePassword && (!email.trim() || !password))}
+                  busy={pending}
                 />
                 <Button
-                  label={pending ? "Sending…" : "Send my code"}
-                  size="lg"
-                  onPress={() => void send(false)}
+                  label={usePassword ? "Use an email code instead" : "Use an existing password"}
+                  variant="ghost"
                   disabled={pending}
-                  busy={pending}
+                  onPress={() => {
+                    setUsePassword(!usePassword);
+                    setPassword("");
+                    setError(null);
+                    setNotice(null);
+                  }}
                 />
               </>
             ) : (

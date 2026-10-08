@@ -19,6 +19,9 @@ const SHELL_DYNAMIC_WORD = /[$*?]/u;
 const SHELL_ASSIGNMENT = /^[a-z_][a-z0-9_]*=/iu;
 const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until|sudo|nohup|time)$/u;
 const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
+  // CI reviewed end to end on 2026-10-05 for GH #299. The new model-router
+  // test adds no distribution command; Android remains compile-only.
+  "82b08481bda06655ee8d21a45a5ad1f493501def555f31518d57541be3e61cf2",
   // .github/workflows/ci.yml, reviewed end to end on 2026-09-29 for GH #1204.
   // Includes family workspace and co-op checks; Android remains export-only.
   // The dynamic Chrome executable only runs --version. No EAS build/submit.
