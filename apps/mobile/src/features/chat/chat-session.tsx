@@ -1,3 +1,4 @@
+import { useNativeWorkspace } from "../workspace/context";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AppState,
@@ -31,8 +32,7 @@ import { emitFamilyEvent } from "../../lib/events";
 import { supabase } from "../../lib/supabase";
 import { markTurnStarted, takeTurnLatencyMs } from "../../lib/turn-clock";
 import { recoverLostTurn } from "../../lib/turn-recovery";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, pressScale, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, pressScale, radius, space } from "../../theme/app2";
 import {
   isSendLineOccupied,
   takeNextQueuedTurn,
@@ -261,6 +261,7 @@ export function ChatSession({
       headers?: QueuedChatMessage["headers"];
     }) => Promise<void>) | null
   >(null);
+  const workspace = useNativeWorkspace();
   const [draft, setDraft] = useState("");
   const [pendingProgressDraft, setPendingProgressDraft] = useState<{
     request: ComposerDraftRequest;
@@ -1064,6 +1065,13 @@ export function ChatSession({
         </View>
       ) : (
         <View style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle, backgroundColor: colors.page }}>
+        {workspace?.question ? <View style={{ padding: space.md, gap: space.sm }}>
+          <ScrollView style={{ maxHeight: 120 }} nestedScrollEnabled keyboardShouldPersistTaps="handled"><Text style={{ fontFamily: fontFamilies.body, color: colors.textBody }}>{workspace.question}</Text></ScrollView>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.md }}>
+            <Pressable accessibilityRole="button" accessibilityState={{ disabled: restoringSession }} disabled={restoringSession} style={{ minHeight: 44, justifyContent: "center" }} onPress={() => { if (workspace.question) { sendMessage(workspace.question, "card"); workspace.dismissQuestion(); } }}><Text style={{ fontFamily: fontFamilies.bodySemibold, color: colors.textStrong }}>Send this question</Text></Pressable>
+            <Pressable accessibilityRole="button" style={{ minHeight: 44, justifyContent: "center" }} onPress={workspace.dismissQuestion}><Text style={{ fontFamily: fontFamilies.body, color: colors.textBody }}>Dismiss</Text></Pressable>
+          </View>
+        </View> : null}
         {pendingProgressDraft ? (
           <ProgressDraftChoice
             intent={pendingProgressDraft.intent}

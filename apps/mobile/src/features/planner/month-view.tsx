@@ -2,8 +2,7 @@ import { Pressable, ScrollView, Text, View, useWindowDimensions } from "react-na
 
 import type { FamilyEventRecord } from "../../lib/family-events";
 import type { PlannerLearningActivityRecord } from "../../lib/planner-learning-activities";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import {
   compareDateOnly,
   dayOfMonth,

@@ -31,8 +31,7 @@ import {
 } from "../../features/progress/view-copy";
 import { supabase } from "../../lib/supabase";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * Progress reads the canonical server projection. Every visible state is

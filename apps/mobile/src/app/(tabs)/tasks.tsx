@@ -11,8 +11,7 @@ import { TaskHistoryRow } from "../../features/tasks/task-history-row";
 import { groupRunsByDay, HISTORY_RUN_LIMIT } from "../../features/tasks/task-view";
 import { useTasksData } from "../../features/tasks/use-tasks-data";
 import { recordTaskFeedback, setTaskPaused, type ResearchBriefFeedbackSignal } from "../../lib/tasks";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, space } from "../../theme/app2";
 
 /**
  * Tasks: Homa's own schedule, ported from apps/web/app/app/tasks/

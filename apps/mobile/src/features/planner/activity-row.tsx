@@ -5,8 +5,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { Icon } from "../../components/design/icon";
 import { reportCrash } from "../../lib/crash-reporting";
 import { PlanActivityCheckConflictError } from "../../lib/plan-check-mutation";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import type { PlanActivityView } from "./planner-model";
 
 /**

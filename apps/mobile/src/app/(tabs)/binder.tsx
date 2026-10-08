@@ -35,8 +35,7 @@ import { useFamilyData } from "../../features/family/use-family-data";
 import { useVoiceWorkbench } from "../../features/voice/voice-workbench-provider";
 import { keepMaterial } from "../../lib/materials";
 import type { StateRecordDocument } from "../../lib/state-records";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import { StateRecordsCard } from "../../features/state-records/state-records-card";
 
 const COVER_COUNT = 3;
@@ -169,6 +168,7 @@ export default function BinderScreen() {
                   key={material.id}
                   material={material}
                   keeping={keepingId === material.id}
+                  onOpen={() => openMaterialDetail(material)}
                   onKeep={() => void handleKeep(material.id)}
                 />
               ))}

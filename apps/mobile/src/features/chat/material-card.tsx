@@ -1,9 +1,10 @@
+import { readActivityPlan, type ActivityPlan } from "@homa/core";
+import { ActivityPlanCard } from "../materials/activity-plan-card";
 import { Image, Linking, Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * A create_printable result: the rendered page's preview image with the
@@ -13,6 +14,7 @@ import { colors, fontSize, radius, space } from "../../theme/tokens";
  */
 
 export interface MaterialArtifact {
+  activityPlan?: ActivityPlan;
   id?: string;
   title: string;
   kind?: string;
@@ -46,6 +48,7 @@ const KIND_HEADLINES: Record<string, string> = {
 };
 
 export function MaterialCard({ material }: { material: MaterialArtifact }) {
+  const plan = readActivityPlan(material.activityPlan);
   const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
   const pageCount = material.pageCount ?? 1;
   const subtitle = [
@@ -62,6 +65,7 @@ export function MaterialCard({ material }: { material: MaterialArtifact }) {
     });
   }
 
+  if (plan && material.id) return <View><ActivityPlanCard key={material.id} id={material.id} title={material.title} plan={plan} childName={material.childName} /><Button label="Open saved PDF" onPress={openPdf} />{material.sources?.map(source => <Pressable key={source.id} accessibilityRole="link" disabled={!source.libraryUrl} onPress={() => source.libraryUrl && void Linking.openURL(source.libraryUrl)} style={{ minHeight: 44, justifyContent: "center" }}><Text style={{ fontFamily: fontFamilies.body, color: colors.textBody }}>Made from {source.title}</Text></Pressable>)}</View>;
   return (
     <Card style={{ padding: space.md, gap: space.sm }}>
       <Text

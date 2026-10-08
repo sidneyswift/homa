@@ -5,8 +5,7 @@ import { Pressable, Text, View } from "react-native";
 import { Icon } from "../design/icon";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { supabase } from "../../lib/supabase";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, shadows, space } from "../../theme/app2";
 
 /**
  * Ported from apps/web/components/dashboard/account-menu.tsx: the

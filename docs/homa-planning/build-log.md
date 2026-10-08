@@ -12762,3 +12762,8 @@ reading or updating Planner in typed chat must not open a panel over the
 parent's conversation. The existing planner card is the explicit opening
 control. Live voice retains its separately ruled display behavior. Tracked
 in gh#1216; the issue holds release checks and production evidence.
+
+
+## 2026-10-08: App 2 native preparation approved
+
+Sidney approved bringing the App 2 experience into the existing iPhone app and preparing its App Store submission. The native surface inherits App 2’s white, minimal, sans-serif direction. gh#1236 owns the port and verification; gh#1218 owns the existing review repairs. Approval reopens native store preparation and preserves the existing device, main-ancestor build and submission gates. No new binary or production activation is claimed by this entry.

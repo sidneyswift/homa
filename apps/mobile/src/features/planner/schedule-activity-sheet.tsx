@@ -8,8 +8,7 @@ import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import { addDays, formatMonthDay, formatWeekdayLong, type DateOnly } from "./date-utils";
 import type { PlanActivityView } from "./planner-model";
 

@@ -18,8 +18,7 @@ import { IconButton } from "../../components/ui/icon-button";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { TextField } from "../../components/ui/text-field";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import {
   fetchMapChild,
   finalizeReport,

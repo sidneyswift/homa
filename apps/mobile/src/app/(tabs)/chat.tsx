@@ -36,8 +36,7 @@ import {
 import { env } from "../../lib/env";
 import { restoreServerBoundMobileSession } from "../../lib/session-binding";
 import { supabase } from "../../lib/supabase";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, space } from "../../theme/app2";
 
 /** Stable identity: a new object every render would refire the composer
  *  effect that watches for it. */

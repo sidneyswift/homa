@@ -2,8 +2,7 @@ import { Pressable, Text, View } from "react-native";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, shadows, space } from "../../theme/app2";
 import { MarkdownText } from "./markdown-text";
 import {
   approvedOutboundChildFramingTexts,

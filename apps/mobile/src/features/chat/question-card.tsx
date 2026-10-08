@@ -4,8 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { Logo } from "../../components/brand/logo";
 import { Card } from "../../components/ui/card";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import {
   cardSignature,
   composeAnswerMessage,

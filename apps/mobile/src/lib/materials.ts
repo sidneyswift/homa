@@ -1,3 +1,4 @@
+import { readActivityPlan, type ActivityPlan } from "@homa/core";
 import { supabase } from "./supabase";
 
 /**
@@ -34,6 +35,7 @@ export interface MaterialSummary {
   previewUrl: string;
   pdfUrl: string;
   createdAt: string;
+  activityPlan?: ActivityPlan;
   pageCount: number;
   pagePreviewUrls: string[] | null;
 }
@@ -50,13 +52,14 @@ interface MaterialDbRow {
   preview_url: string;
   pdf_url: string;
   created_at: string;
+  activity_plan?: unknown;
   page_count: number | string | null;
   page_preview_urls: string[] | null;
 }
 
 const SUMMARY_COLUMNS =
   "id, title, kind, status, skill, subject, theme, child_id, preview_url, pdf_url, created_at, " +
-  "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls";
+  "activity_plan:generation->input->activityPlan, page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls";
 
 function normalizePageCount(raw: number | string | null | undefined): number {
   const parsed = typeof raw === "string" ? Number.parseInt(raw, 10) : raw;
@@ -76,6 +79,7 @@ function isMaterialKind(value: string): value is MaterialKind {
 function toSummary(row: MaterialDbRow): MaterialSummary {
   return {
     id: row.id,
+    activityPlan: readActivityPlan(row.activity_plan),
     title: row.title,
     kind: isMaterialKind(row.kind) ? row.kind : "other",
     status: (row.status as MaterialStatus) ?? "draft",

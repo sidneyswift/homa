@@ -15,8 +15,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
 import { hapticSuccess, hapticTick } from "../../lib/haptics";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import { fetchMapChild, saveChecklistAnswer } from "./onboarding-card-api";
 import {
   checklistChaptersFor,

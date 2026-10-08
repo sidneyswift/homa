@@ -1,3 +1,4 @@
+import { NativeWorkspaceProvider } from "../../features/workspace/context";
 import { Redirect, Stack } from "expo-router";
 import { useRef, useState } from "react";
 import { View } from "react-native";
@@ -10,7 +11,7 @@ import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { OnboardingGate } from "../../features/onboarding/onboarding-gate";
 import { VoiceDock } from "../../features/voice/voice-dock";
-import { colors } from "../../theme/tokens";
+import { colors } from "../../theme/app2";
 
 /**
  * The signed-in shell, ported from web's DashboardShell: a persistent
@@ -42,7 +43,7 @@ function TabsWithFamily() {
     <FamilyReadinessGate>
       {(family) => (
         <BillingGate familyId={family.id}>
-          <AppShell />
+          <NativeWorkspaceProvider key={family.id}><AppShell /></NativeWorkspaceProvider>
         </BillingGate>
       )}
     </FamilyReadinessGate>

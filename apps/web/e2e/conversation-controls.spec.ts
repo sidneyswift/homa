@@ -183,7 +183,7 @@ test.beforeAll(async () => {
   for (const path of ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"]) {
     try { accessSync(path); executablePath = path; break; } catch { /* Next candidate. */ }
   }
-  browser = await chromium.launch({ headless: true, executablePath: executablePath ?? await serverlessChromium.executablePath(), args: executablePath ? [] : serverlessChromium.args });
+  browser = await chromium.launch({ headless: true, executablePath: executablePath ?? await serverlessChromium.executablePath(), args: executablePath ? [] : serverlessChromium.args.filter(argument => argument !== "--single-process") });
 });
 test.afterAll(async () => { await browser?.close(); if (server?.listening) await new Promise<void>((done, reject) => server.close(error => error ? reject(error) : done())); });
 test.beforeEach(() => { fixtureMaterials = []; calendarEvents = []; calendarWrites = []; calendarFailure = false; boardStatus = 200; checkWrites = []; plannerProgress = {}; messages = []; changes = []; receipts = new Map(); submissions = []; nativeBatches = []; nativeSubmissions = []; feedPaused = false; rejectSubmissions = false; permanentRejection = false; feedRequests = []; });
