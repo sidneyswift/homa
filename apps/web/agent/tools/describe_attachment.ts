@@ -6,7 +6,8 @@ import {
   TOOL_DEADLINE,
 } from "../../lib/agent-tool-deadline";
 import { describeAttachment } from "../../lib/attachments/describe";
-import { isFamilyArtifactUrl } from "../../lib/materials/artifact-store";
+import { signedFamilyBlobReadUrl } from "../../lib/family-blob";
+import { canonicalFamilyBlobUrl, isFamilyBlobUrl } from "../../lib/family-blob-url";
 import { mapDb } from "../../lib/map/db";
 
 /**
@@ -56,7 +57,15 @@ export default defineBoundedTool({
       throw error;
     }
 
-    if (!isFamilyArtifactUrl(input.url, access.familyId)) {
+    // Photos live in the private store since 2026-08-17, and
+    // find_attachments hands out signed links whose query carries a
+    // short-lived token. The old public-store-only check refused every
+    // photo sent after the move, so match the family's chat space on
+    // either store and look the row up by the bare URL the table stores.
+    const storedUrl = isFamilyBlobUrl(input.url, access.familyId, "chat")
+      ? canonicalFamilyBlobUrl(input.url)
+      : null;
+    if (storedUrl === null) {
       return {
         read: false,
         note: "That url is not one of this family's files. Use a url from find_attachments.",
@@ -65,7 +74,7 @@ export default defineBoundedTool({
 
     const rows = await mapDb()<{ media_type: string; kind: string }[]>`
       select media_type, kind from public.chat_attachments
-      where family_id = ${access.familyId} and url = ${input.url}
+      where family_id = ${access.familyId} and url = ${storedUrl}
       limit 1
     `;
     const row = rows[0];
@@ -82,8 +91,20 @@ export default defineBoundedTool({
       };
     }
 
+    // A fresh signed link: the one the model holds may have expired, and
+    // the private store refuses a bare URL.
+    let readUrl: string;
+    try {
+      readUrl = await signedFamilyBlobReadUrl(storedUrl, access.familyId, "chat");
+    } catch {
+      return {
+        read: false,
+        note: "Could not read it. Say so plainly and ask her rather than guessing what it shows.",
+      };
+    }
+
     const result = await describeAttachment({
-      url: input.url,
+      url: readUrl,
       mediaType: row.media_type,
       question: input.question,
       familyId: access.familyId,

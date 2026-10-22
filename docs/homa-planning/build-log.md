@@ -12619,3 +12619,36 @@ reading or updating Planner in typed chat must not open a panel over the
 parent's conversation. The existing planner card is the explicit opening
 control. Live voice retains its separately ruled display behavior. Tracked
 in gh#1216; the issue holds release checks and production evidence.
+
+## 2026-10-22 · Skills outage, parent photo references, page checker
+
+Carolyng's Friday WhatsApp report (2026-10-16) led to three production
+failures, all diagnosed against prod data. Tracked in gh#1237.
+
+Every load_skill and read_file call in production failed with
+SandboxTemplateNotProvisionedError from 2026-10-13 19:25 UTC until a
+production redeploy at 14:43 UTC today, for every family and channel.
+eve snapshots the skill sandbox template at build time with no
+expiration, so the snapshot takes Vercel's 30-day default; templates are
+reused across deploys by content key, so deploys do not refresh it, and
+once it lapses the runtime deletes the template and fails until the next
+build recreates it. The redeploy rebuilt it (build log: 0 reused, 1
+built); the eve patch now snapshots templates with expiration 0 and
+salts the template key so the 30-day snapshot built today is never
+reused (scripts/eve-sandbox-template-expiry.test.mjs).
+
+generate_image and describe_attachment accepted only the public Blob
+store, but parent uploads moved to the private store on 2026-08-17, so
+every photo she sent was refused as an outside URL. Both now accept the
+family's chat and library space on either store and read through a
+fresh signed link.
+
+The materials page checker blocked every Book 2 revision she asked for
+on 2026-10-15 although the pages were correct: it numbered pages by
+position, flagged the renderer's own "made with Homa" footer, and held
+pages to other pages' instructions. Page images now carry their own
+labels and the prompt covers the footer and per-page instructions. The
+reviewer model moved from openai/gpt-5.4-mini to
+anthropic/claude-sonnet-5.5 on measured evidence from her real pages (6
+calls per set): correct pages passed 18/18 against roughly a third, real
+defects caught 18/18 against 4/18.

@@ -439,12 +439,12 @@ describe("buildReviewMessages", () => {
     abortSignal: new AbortController().signal,
     familyId: "f",
   };
-  const page = { mediaType: "image/jpeg", data: Buffer.from("page") };
+  const page = { mediaType: "image/jpeg", data: Buffer.from("page"), pageNumber: 1 };
 
   it("puts the reference in its own message before the pages, labeled not under review", () => {
     const messages = buildReviewMessages({
       ...base,
-      images: [page, page],
+      images: [page, { ...page, pageNumber: 2 }],
       reference: { title: "Anchor T", mediaType: "image/jpeg", data: Buffer.from("anchor") },
     });
     assert.equal(messages.length, 2);
@@ -461,7 +461,84 @@ describe("buildReviewMessages", () => {
   it("sends one message of pages and brief when there is no reference", () => {
     const messages = buildReviewMessages({ ...base, images: [page], reference: null });
     assert.equal(messages.length, 1);
-    assert.equal(messages[0].content.length, 2);
+    assert.deepEqual(
+      messages[0].content.map((part) => part.type),
+      ["text", "file", "text"],
+    );
+  });
+
+  // Carolyng's Book 2 revision (2026-10-15) was held for "Page 2: the
+  // brief says page 4 should be Alma" while the reviewer was shown pages
+  // 4, 5, 10, and 11: with one sentence after the images naming them, it
+  // numbered by position. Each image now carries its own label.
+  it("labels every page image with its document page number, just before it", () => {
+    const shown = [4, 5, 10, 11].map((pageNumber) => ({
+      mediaType: "image/jpeg",
+      data: Buffer.from(`p${pageNumber}`),
+      pageNumber,
+    }));
+    const [message] = buildReviewMessages({ ...base, images: shown, reference: null });
+    const labels: string[] = [];
+    message.content.forEach((part, index) => {
+      if (part.type !== "file") return;
+      const label = message.content[index - 1];
+      assert.ok(label && label.type === "text", "every image is preceded by its label");
+      labels.push(label.text);
+      assert.equal(Buffer.from(part.data).toString(), `p${label.text.match(/\d+/)?.[0]}`);
+    });
+    assert.deepEqual(labels, ["Page 4:", "Page 5:", "Page 10:", "Page 11:"]);
+    assert.deepEqual(message.content[message.content.length - 1], { type: "text", text: "the brief" });
+  });
+
+  it("hands the runner each page's own number, not its position", async () => {
+    const calls: ReviewModelCall[] = [];
+    await reviewArtifact(
+      {
+        familyId: "f",
+        channel: "web",
+        pages: [3, 7].map((pageNumber) => ({
+          data: Buffer.from(`p${pageNumber}`),
+          pageNumber,
+          fresh: true,
+        })),
+        pageCount: 12,
+        brief: "b",
+      },
+      {
+        run: async (call) => {
+          calls.push(call);
+          return { object: { pass: true, issues: [] }, usage: {} };
+        },
+        recordUsage: async () => {},
+      },
+    );
+    assert.deepEqual(
+      calls.flatMap((call) => call.images.map((image) => image.pageNumber)),
+      [3, 7],
+    );
+    assert.match(calls[0].text, /labeled "Page N:"/);
+  });
+
+  it("tells the reviewer the renderer's Homa footer is never an issue", async () => {
+    const calls: ReviewModelCall[] = [];
+    await reviewArtifact(
+      {
+        familyId: "f",
+        channel: "web",
+        pages: [{ data: Buffer.from("p1"), pageNumber: 1, fresh: true }],
+        pageCount: 1,
+        brief: "b",
+      },
+      {
+        run: async (call) => {
+          calls.push(call);
+          return { object: { pass: true, issues: [] }, usage: {} };
+        },
+        recordUsage: async () => {},
+      },
+    );
+    assert.match(calls[0].system, /made with Homa/);
+    assert.match(calls[0].system, /never an issue/);
   });
 
   it("hands the anchor to the runner as the reference and never among the page images", async () => {

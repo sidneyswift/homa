@@ -57,13 +57,25 @@ describe("the describe prompt", () => {
 });
 
 describe("the describe_attachment tool", () => {
-  it("re-scopes the url to this family's own storage", () => {
-    assert.match(toolSource, /isFamilyArtifactUrl\(input\.url, access\.familyId\)/u);
+  it("re-scopes the url to this family's own chat storage, on either store", () => {
+    // Photos moved to the private store on 2026-08-17; the old
+    // public-store-only check refused every one sent after that.
+    assert.match(toolSource, /isFamilyBlobUrl\(input\.url, access\.familyId, "chat"\)/u);
+    assert.doesNotMatch(toolSource, /isFamilyArtifactUrl/u);
   });
 
-  it("also requires a real attachment row, not just a matching prefix", () => {
+  it("also requires a real attachment row, matched on the bare stored url", () => {
+    // find_attachments hands out signed links whose query carries a token;
+    // the table stores the bare url.
     assert.match(toolSource, /from public\.chat_attachments/u);
     assert.match(toolSource, /family_id = \$\{access\.familyId\}/u);
+    assert.match(toolSource, /canonicalFamilyBlobUrl\(input\.url\)/u);
+    assert.match(toolSource, /url = \$\{storedUrl\}/u);
+  });
+
+  it("reads through a fresh signed link, never the model-supplied one", () => {
+    assert.match(toolSource, /signedFamilyBlobReadUrl\(storedUrl, access\.familyId, "chat"\)/u);
+    assert.match(toolSource, /url: readUrl/u);
   });
 
   it("refuses a non-image instead of sending it to a vision model", () => {

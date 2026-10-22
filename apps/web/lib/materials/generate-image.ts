@@ -1,5 +1,7 @@
 import { generateImage } from "ai";
 
+import { signedFamilyBlobReadUrl } from "../family-blob";
+import { canonicalFamilyBlobUrl, isFamilyBlobUrl } from "../family-blob-url";
 import {
   gatewayAttribution,
   recordModelUsage,
@@ -20,8 +22,9 @@ import { MAX_REFERENCE_BYTES, MAX_REFERENCE_IMAGES } from "./reference-limits";
  * Not illustration-shaped on purpose (founder direction 2026-07-10):
  * callers may be making coloring art, a themed header, an infographic,
  * or the entire page in one image. Reference images (the family's own
- * approved finals, validated by isFamilyArtifactUrl) steer style and
- * enable "same page, different character" without re-imagining.
+ * approved finals and the photos she sent, validated by
+ * familyReferenceSpace) steer style and enable "same page, different
+ * character" without re-imagining.
  *
  * Image models return bytes, never a hosted URL, so this module owns
  * the one hop that makes the result reusable: decode, upload to Blob,
@@ -235,7 +238,48 @@ export function imageFailureNote(kind: ImageFailureKind): string {
   }
 }
 
-async function fetchReferenceBytes(url: string): Promise<Uint8Array | null> {
+/**
+ * familyReferenceSpace(url, familyId): which of this family's own spaces a
+ * reference image comes from, or null when it is not the family's.
+ * Homa's own artifacts (materials, generated images, approved finals)
+ * live in the public store. Photos the parent sent in chat or saved to
+ * Family Library live in the private store since 2026-08-17 (23988c88),
+ * and this check used to know only the public one: every parent photo was
+ * refused as "an outside URL", including the photos Carolyng sent so her
+ * family could be drawn into Amalia's reader (2026-10-16).
+ */
+export function familyReferenceSpace(
+  url: string,
+  familyId: string,
+): "artifact" | "chat" | "library" | null {
+  if (isFamilyArtifactUrl(url, familyId)) return "artifact";
+  if (isFamilyBlobUrl(url, familyId, "chat")) return "chat";
+  if (isFamilyBlobUrl(url, familyId, "library")) return "library";
+  return null;
+}
+
+/** Where to read a validated reference from. A parent upload is re-signed
+ * here: the link find_attachments handed out lasts minutes, and the
+ * private store refuses a bare URL. Null when signing fails. */
+async function referenceReadUrl(
+  url: string,
+  space: "artifact" | "chat" | "library",
+  familyId: string,
+): Promise<string | null> {
+  if (space === "artifact") return url;
+  try {
+    return await signedFamilyBlobReadUrl(
+      canonicalFamilyBlobUrl(url) ?? url,
+      familyId,
+      space,
+    );
+  } catch {
+    return null;
+  }
+}
+
+async function fetchReferenceBytes(url: string | null): Promise<Uint8Array | null> {
+  if (url === null) return null;
   try {
     const response = await fetch(url);
     if (!response.ok) return null;
@@ -342,7 +386,7 @@ export async function generateStudioImage(input: {
   /**
    * Pre-trusted reference bytes from the fleet anchor registry (no family
    * data, no URL). The tool resolves anchor ids to these bytes; they are
-   * NOT subject to isFamilyArtifactUrl because they never came from a URL
+   * NOT subject to familyReferenceSpace because they never came from a URL
    * and carry no tenant boundary. Anchors lead, so they set the bar.
    */
   anchorBytes?: readonly Uint8Array[];
@@ -350,18 +394,23 @@ export async function generateStudioImage(input: {
   const anchorReferences = (input.anchorBytes ?? []).slice(0, MAX_REFERENCE_IMAGES);
   const urlBudget = MAX_REFERENCE_IMAGES - anchorReferences.length;
   const referenceUrls = (input.referenceImageUrls ?? []).slice(0, Math.max(0, urlBudget));
+  const referenceSources: Array<{ url: string; space: "artifact" | "chat" | "library" }> = [];
   for (const url of referenceUrls) {
-    if (!isFamilyArtifactUrl(url, input.familyId)) {
+    const space = familyReferenceSpace(url, input.familyId);
+    if (space === null) {
       return {
         ok: false,
-        note: "Reference images must come from this family's own library (a previewUrl or image url a tool returned). Drop the outside URL and try again.",
+        note: "Reference images must be this family's own: a previewUrl or image url a tool returned, a photo from find_attachments, or a Family Library image. Drop the outside URL and try again.",
       };
     }
+    referenceSources.push({ url, space });
   }
 
   const references: Uint8Array[] = [...anchorReferences];
-  for (const url of referenceUrls) {
-    const bytes = await fetchReferenceBytes(url);
+  for (const source of referenceSources) {
+    const bytes = await fetchReferenceBytes(
+      await referenceReadUrl(source.url, source.space, input.familyId),
+    );
     if (!bytes) {
       return {
         ok: false,
