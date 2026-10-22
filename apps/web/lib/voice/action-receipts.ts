@@ -70,7 +70,11 @@ const plannerActivityIdentitySchema = z.object({
   note: z.string().max(500).nullable(),
   sourceChannel: z.enum(PLANNER_LEARNING_SOURCE_CHANNELS),
   sourceQuote: z.string().min(1).max(1000),
-  sourceMessageId: z.string().uuid(),
+  // Null for an item from her schedule, a program, or the Planner screen:
+  // no chat message created it. Undo compares it like any other field, so
+  // null matches null. Requiring it refused every spoken check-off of a
+  // scheduled item (gh#1239: 48 refusals for one family in two weeks).
+  sourceMessageId: z.string().uuid().nullable(),
   childIds: z.array(z.string().uuid()).max(12),
 });
 
