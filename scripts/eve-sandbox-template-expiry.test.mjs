@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 /**
- * Eve 0.19 sandbox-template expiry guard (patches/eve@0.19.0.patch).
+ * Eve 0.19 sandbox-template guard (patches/eve@0.19.0.patch).
  *
  * eve builds one Vercel Sandbox template per agent at deploy time and
- * snapshots it with no expiration, so the snapshot takes Vercel's default
- * 30-day lifetime. Templates are reused across deploys by content key, so
- * a deploy does not refresh the snapshot. When it expires, the runtime
- * deletes the template and every load_skill and read_file fails with
- * SandboxTemplateNotProvisionedError until a later deploy rebuilds it.
- * That took every fleet skill down for every family from 2026-10-13 to
- * 2026-10-22 (Carolyng: "Materials guide won't load").
+ * reuses it across deploys by content key. When a session fails to start
+ * from it with any 404 or 410, the runtime deletes the template, and every
+ * load_skill and read_file fails with SandboxTemplateNotProvisionedError
+ * until a later build recreates it. That took every fleet skill down for
+ * every family from 2026-10-13 to 2026-10-22 (Carolyng: "Materials guide
+ * won't load"). eve threw the original error away, so the trigger is not
+ * known: the snapshot's 30-day expiry (it slides with use) or a transient
+ * Sandbox API error both fit.
  *
- * The patch snapshots templates with expiration 0 (never expires) and
- * salts the template key, so a template built before the patch, whose
- * snapshot still expires, is never reused by a patched build.
+ * The patch snapshots templates with expiration 0 (never expires), salts
+ * the template key so a pre-patch template whose snapshot still expires is
+ * never reused, and logs the original error when a template is dropped.
+ * Detection and alerting live in apps/web/lib/observability/skills-health.ts.
  *
  * Runs the installed patched package against a fake sandbox module. No
  * network, no credentials.
@@ -86,4 +88,42 @@ test("the template key is salted so pre-patch templates are never reused", async
     if (previousProject === undefined) delete process.env.VERCEL_PROJECT_ID;
     else process.env.VERCEL_PROJECT_ID = previousProject;
   }
+});
+
+test("a dropped template logs the error that dropped it", async () => {
+  const logged = [];
+  const originalError = console.error;
+  console.error = (...parts) => { logged.push(parts.join(" ")); };
+  const deleted = [];
+  const template = {
+    ...fakeTemplateSandbox("eve-sbx-tpl-vercel-guard", []),
+    status: "stopped",
+    currentSnapshotId: "snap_gone",
+    async delete() { deleted.push("template"); },
+  };
+  const gone = Object.assign(new Error("Snapshot is no longer available"), { response: { status: 410 } });
+  const backend = createVercelSandbox({
+    loadSandboxModule: async () => ({
+      Sandbox: {
+        get: async ({ name }) => {
+          if (name === template.name) return template;
+          throw missing();
+        },
+      },
+    }),
+    createSandbox: async () => { throw gone; },
+    createOptions: { networkPolicy: "deny-all" },
+  });
+  try {
+    await assert.rejects(
+      backend.create({ templateKey: template.name, sessionKey: "session-guard" }),
+      /is not provisioned/u,
+    );
+  } finally {
+    console.error = originalError;
+  }
+  assert.deepEqual(deleted, ["template"]);
+  assert.equal(logged.length, 1);
+  assert.match(logged[0], /eve-sbx-tpl-vercel-guard/u);
+  assert.match(logged[0], /Snapshot is no longer available/u);
 });
