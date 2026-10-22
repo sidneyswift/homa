@@ -191,6 +191,137 @@ try {
   `;
   assert.equal(completionHoursCount, 0);
 
+  // gh#1239: an item from her schedule has no source message. A spoken
+  // check-off of it used to be refused before anything ran, so Carolyng's
+  // dictated minutes never reached Hours. It must complete, log Hours,
+  // and undo exactly like an item a chat message created.
+  const scheduledMessageId = randomUUID();
+  const scheduledKey = plannerLearningIdempotencyKey({
+    action: "record",
+    sourceMessageId: scheduledMessageId,
+    identity: [1],
+  });
+  const scheduledActivityId = plannerLearningMutationUuid(scheduledKey, "activity");
+  const scheduledQuote = "Math every weekday morning.";
+  await recordPlannerLearningActivity({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    title: "Math (mami)",
+    subject: "math",
+    activityDate: "2026-08-04",
+    status: "planned",
+    childIds: [childIds[0]],
+    sourceChannel: "web",
+    sourceQuote: scheduledQuote,
+    sourceMessageId: scheduledMessageId,
+    idempotencyKey: scheduledKey,
+    activityId: scheduledActivityId,
+    hoursEntryIds: [],
+  });
+  // The shape of 2,435 production schedule items: web channel, a quote,
+  // and no chat message behind it.
+  await sql`
+    update public.planner_learning_activities
+    set source_message_id = null
+    where id = ${scheduledActivityId}
+  `;
+  const scheduledBefore = await getPlannerLearningActivityPinned({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    activityId: scheduledActivityId,
+  });
+  assert.equal(scheduledBefore?.sourceMessageId, null);
+
+  const spokenMessageId = randomUUID();
+  const spokenQuote = "Alma finished Lesson 30 for math in 20 minutes.";
+  const spokenKey = plannerLearningIdempotencyKey({
+    action: "complete-independent",
+    sourceMessageId: spokenMessageId,
+    identity: [scheduledActivityId],
+  });
+  const spokenHoursIds = [plannerLearningMutationUuid(spokenKey, "hours:0")];
+  const spoken = await armVoiceActionThenMutate({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    record: () => recordVoiceAction({
+      familyId: EVAL_FIXTURE_FAMILY_ID,
+      actorUserId: EVAL_FIXTURE_PARENT_USER_ID,
+      runtimeSessionId: "planner-log-e2e-scheduled",
+      turnId: "turn-1",
+      objectKind: "plan_activity",
+      objectId: scheduledActivityId,
+      effect: "planner_activity.completed",
+      namedEffect: "marked Math (mami) finished in Planner",
+      undoCapability: "exact_restore",
+      payload: {
+        effect: "planner_activity.completed",
+        beforeStatus: "planned",
+        after: {
+          title: "Math (mami)",
+          subject: "math",
+          activityDate: "2026-08-04",
+          durationMinutes: 20,
+          note: null,
+          sourceChannel: "web",
+          sourceQuote: scheduledQuote,
+          sourceMessageId: null,
+          childIds: [childIds[0]],
+          completionSourceChannel: sourceChannel,
+          completionSourceQuote: spokenQuote,
+          completionSourceMessageId: spokenMessageId,
+          completionIdempotencyKey: spokenKey,
+          hours: [{
+            id: spokenHoursIds[0],
+            childId: childIds[0],
+            subject: "math",
+            minutes: 20,
+            happenedOn: "2026-08-04",
+            source: plannerHoursSourceForChannel(sourceChannel),
+            note: plannerHoursNote(spokenQuote, "Math (mami)"),
+          }],
+        },
+      },
+      now,
+    }),
+    mutate: () => completePlannerLearningActivity({
+      familyId: EVAL_FIXTURE_FAMILY_ID,
+      activityId: scheduledActivityId,
+      expectedStatus: "planned",
+      durationMinutes: 20,
+      sourceChannel,
+      sourceQuote: spokenQuote,
+      sourceMessageId: spokenMessageId,
+      idempotencyKey: spokenKey,
+      hoursEntryIds: spokenHoursIds,
+    }),
+    replay: async () => {
+      throw new Error("first scheduled completion must not replay");
+    },
+    succeeded: (result) => result.status === "completed" && result.changed,
+  });
+  assert.equal(spoken.result.status, "completed");
+  assert.equal(spoken.actionReceipt.lifecycleStatus, "committed");
+  const scheduledDone = await getPlannerLearningActivityPinned({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    activityId: scheduledActivityId,
+  });
+  assert.equal(scheduledDone?.status, "completed");
+  assert.equal(scheduledDone?.hoursEntryIds.length, 1, "her minutes reach Hours");
+
+  const scheduledUndo = await undoVoiceAction({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    actorUserId: EVAL_FIXTURE_PARENT_USER_ID,
+    runtimeSessionId: "planner-log-e2e-scheduled",
+    undoTurnId: "turn-2",
+    receiptId: spoken.actionReceipt.id,
+    now: new Date(now.getTime() + 60_000),
+  });
+  assert.equal(scheduledUndo.status, "undone");
+  const scheduledRestored = await getPlannerLearningActivityPinned({
+    familyId: EVAL_FIXTURE_FAMILY_ID,
+    activityId: scheduledActivityId,
+  });
+  assert.equal(scheduledRestored?.status, "planned");
+  assert.equal(scheduledRestored?.sourceMessageId, null);
+  assert.equal(scheduledRestored?.hoursEntryIds.length, 0);
+
   const correctionMessageId = randomUUID();
   const correctionQuote = "Piano practice took 20 minutes.";
   const correctionKey = plannerLearningIdempotencyKey({
