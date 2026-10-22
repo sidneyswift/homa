@@ -46,6 +46,7 @@ import {
   type LessonSweepResult,
 } from "../../../../lib/lessons/worker";
 import { reportStuckToolCalls } from "../../../../lib/observability/agent-trace";
+import { checkSkillsHealth } from "../../../../lib/observability/skills-health";
 import { subjectLessonsEnabled } from "../../../../lib/subject-lessons/flag";
 import { staleSubjectLessonFailureEvent } from "../../../../lib/subject-lessons/stale-reaper";
 import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
@@ -100,6 +101,11 @@ import { reapStaleSubjectLessons } from "../../../../lib/subject-lessons/store";
  *      mirror from provider truth. It only calls Stripe after the recorded
  *      paid-through date is two days stale, and a failed read changes no
  *      entitlement. Issue #274.
+ *  14. Skills health (lib/observability/skills-health.ts, gh#1237): when
+ *      fleet skills stop loading, email the founder within the hour and
+ *      redeploy if HOMA_SKILLS_REDEPLOY_HOOK_URL is set. Runs FIRST and
+ *      outside the job chain below, because a failing job must never
+ *      hide a fleet-wide outage; it never throws.
  *
  * Every tick also writes one cron_runs heartbeat row (founder console
  * MJ-14), success or failure, so a dead cron is visible from /admin.
@@ -114,6 +120,8 @@ export async function GET(request: Request): Promise<Response> {
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return Response.json({ ok: false }, { status: 401 });
   }
+
+  const skillsHealth = await checkSkillsHealth();
 
   let reminders = 0;
   let bandReady = 0;
@@ -327,6 +335,7 @@ export async function GET(request: Request): Promise<Response> {
         lessons,
         staleSubjectLessons,
         stuckToolCalls,
+        skillsHealth,
         drip,
         billingReconciliation,
       },
@@ -345,6 +354,7 @@ export async function GET(request: Request): Promise<Response> {
         lessons,
         staleSubjectLessons,
         stuckToolCalls,
+        skillsHealth,
         drip,
         billingReconciliation,
         filings,
@@ -369,6 +379,7 @@ export async function GET(request: Request): Promise<Response> {
     lessons,
     staleSubjectLessons,
     stuckToolCalls,
+    skillsHealth,
     drip,
     billingReconciliation,
   });
@@ -384,6 +395,7 @@ export async function GET(request: Request): Promise<Response> {
     lessons,
     staleSubjectLessons,
     stuckToolCalls,
+    skillsHealth,
     drip,
     billingReconciliation,
     filings,

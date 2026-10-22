@@ -12652,3 +12652,24 @@ reviewer model moved from openai/gpt-5.4-mini to
 anthropic/claude-sonnet-5.5 on measured evidence from her real pages (6
 calls per set): correct pages passed 18/18 against roughly a third, real
 defects caught 18/18 against 4/18.
+
+## 2026-10-22 · Skills self-heal, and a correction to the outage cause
+
+Correction to the entry above. Vercel Sandbox snapshot expiry slides: it
+is 30 days after last use, not after creation (the old template's
+`expiresAt` moved to the minute of the next session that started from
+it). The confirmed mechanism is eve deleting its template on ANY 404 or
+410 while starting a session, then throwing the original error away; the
+10-13 trigger (expiry or a transient Sandbox API error) cannot be
+recovered. The expiration-0 patch removes one trigger, not the class.
+Tracked in gh#1237.
+
+Now hardened: the eve patch logs the dropped error ("eve: dropping
+sandbox template"), and the hourly cron runs a skills health check first
+(lib/observability/skills-health.ts). When the latest skill load in the
+last two hours failed with eve's not-provisioned error, it emails the
+digest address (once per six hours) and POSTs HOMA_SKILLS_REDEPLOY_HOOK_URL
+(once per three hours) if set. Run against production history, the
+query reads "down" on the evening of 10-13 and healthy before and since,
+so the outage would have alerted about 35 minutes in instead of nine
+days later.
