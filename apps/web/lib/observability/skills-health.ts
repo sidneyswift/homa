@@ -145,16 +145,21 @@ const defaultDeps: SkillsHealthDeps = {
   },
   async lastAlertAt() {
     const sql = mapDb();
+    // Any send the provider did not refuse. A send is inserted as
+    // 'submitted' and the Resend webhook later rewrites it to 'delivered'
+    // or 'bounced' ('unknown' when the POST timed out), so matching only
+    // 'submitted' would never see an alert and would email every hour.
     const [row] = await sql<{ at: string | null }[]>`
       select max(created_at) as at from public.email_sends
-      where kind = 'skills_outage_alert' and status = 'submitted'
+      where kind = 'skills_outage_alert' and status <> 'rejected'
     `;
     return toDate(row?.at ?? null);
   },
   async lastRedeployAt() {
     const sql = mapDb();
+    // cron_runs stamps ran_at; it has no created_at column.
     const [row] = await sql<{ at: string | null }[]>`
-      select max(created_at) as at from public.cron_runs
+      select max(ran_at) as at from public.cron_runs
       where job = 'skills_self_heal' and counts->>'redeploy' = 'triggered'
     `;
     return toDate(row?.at ?? null);

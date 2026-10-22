@@ -653,6 +653,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm test:voice-action-receipts:postgres
 
+      - name: Skills health check SQL on disposable PostgreSQL
+        timeout-minutes: 10
+        run: pnpm test:skills-health:postgres
+
       - name: Recurring family event occurrence disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:family-event-occurrences:postgres

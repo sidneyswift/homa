@@ -19,6 +19,10 @@ const SHELL_DYNAMIC_WORD = /[$*?]/u;
 const SHELL_ASSIGNMENT = /^[a-z_][a-z0-9_]*=/iu;
 const SHELL_COMMAND_PREFIX = /^(?:!|command|exec|env|if|then|elif|do|while|until|sudo|nohup|time)$/u;
 const AUDITED_NON_MOBILE_WORKFLOW_SHA256 = new Set([
+  // .github/workflows/ci.yml, 2026-10-22 (gh#1237): the 6e03e517 file below
+  // plus one db-checks step, `pnpm test:skills-health:postgres`, a
+  // disposable-PostgreSQL test. No EAS build/submit or Android command.
+  "07e44d1918db83ec52cb34646a0a283a4b5367dc0767538a0885c51849c76768",
   // .github/workflows/ci.yml, 2026-10-22: the 2026-09-29 audited file plus
   // two reviewed step edits, a `pnpm check:model-router` step (2026-09-30)
   // and `pnpm check:eve-sandbox-template` on the eve regression step. Both
