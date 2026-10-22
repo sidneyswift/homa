@@ -11,6 +11,8 @@ import { APICallError } from "ai";
 
 import {
   classifyImageFailure,
+  familyReferenceSpace,
+  generateStudioImage,
   imageFailureNote,
   imageFallbackModelId,
   shouldTryPolicyFallback,
@@ -210,6 +212,73 @@ test("the fallback model is opt-in, trimmed, and never the primary", () => {
     else process.env.HOMA_IMAGE_MODEL = saved.primary;
     if (saved.fallback === undefined) delete process.env.HOMA_IMAGE_FALLBACK_MODEL;
     else process.env.HOMA_IMAGE_FALLBACK_MODEL = saved.fallback;
+  }
+});
+
+const FAMILY_ID = "304f0003-0000-4000-8000-000000000001";
+const OTHER_FAMILY_ID = "304f0003-0000-4000-8000-000000000002";
+// The shapes from Carolyng's refused calls (2026-10-16): a signed chat
+// photo link from find_attachments, and Homa's own public material page.
+const SIGNED_CHAT_PHOTO = `https://op7kkdcjyqedlv5l.private.blob.vercel-storage.com/families/${FAMILY_ID}/chat/IMG_8056-2tAj.jpg?cache=0&vercel-blob-delegation=abc.def&vercel-blob-signature=xyz`;
+const MATERIAL_PAGE = `https://pkvvudjdhxk33dig.public.blob.vercel-storage.com/families/${FAMILY_ID}/materials/libro-1-amalia-y-la-lata-restored-gGh3.jpg`;
+
+test("a photo the parent sent is her own reference, not an outside URL", () => {
+  assert.equal(familyReferenceSpace(MATERIAL_PAGE, FAMILY_ID), "artifact");
+  assert.equal(familyReferenceSpace(SIGNED_CHAT_PHOTO, FAMILY_ID), "chat");
+  assert.equal(
+    familyReferenceSpace(
+      `https://op7kkdcjyqedlv5l.private.blob.vercel-storage.com/families/${FAMILY_ID}/library/papi.png`,
+      FAMILY_ID,
+    ),
+    "library",
+  );
+});
+
+test("another family's photo, a working file, and an outside host stay refused", () => {
+  assert.equal(familyReferenceSpace(SIGNED_CHAT_PHOTO, OTHER_FAMILY_ID), null);
+  assert.equal(
+    familyReferenceSpace(
+      `https://op7kkdcjyqedlv5l.private.blob.vercel-storage.com/families/${FAMILY_ID}/workspace/notes.png`,
+      FAMILY_ID,
+    ),
+    null,
+  );
+  assert.equal(
+    familyReferenceSpace(`https://example.com/families/${FAMILY_ID}/chat/a.jpg`, FAMILY_ID),
+    null,
+  );
+});
+
+test("a parent photo reaches the read step instead of the outside-URL refusal", async () => {
+  const saved = {
+    family: process.env.HOMA_FAMILY_READ_WRITE_TOKEN,
+    lesson: process.env.HOMA_LESSON_READ_WRITE_TOKEN,
+  };
+  // With no store token the private read cannot be signed, so the call
+  // stops at the load step without any network or model call. The point
+  // is which note comes back: before the fix it was the refusal.
+  delete process.env.HOMA_FAMILY_READ_WRITE_TOKEN;
+  delete process.env.HOMA_LESSON_READ_WRITE_TOKEN;
+  try {
+    const result = await generateStudioImage({
+      familyId: FAMILY_ID,
+      channel: "web",
+      prompt: "Papi walking up the hill",
+      referenceImageUrls: [SIGNED_CHAT_PHOTO],
+    });
+    assert.equal(result.ok, false);
+    assert.match(result.ok ? "" : result.note, /could not be loaded/u);
+
+    const outside = await generateStudioImage({
+      familyId: OTHER_FAMILY_ID,
+      channel: "web",
+      prompt: "Papi walking up the hill",
+      referenceImageUrls: [SIGNED_CHAT_PHOTO],
+    });
+    assert.match(outside.ok ? "" : outside.note, /must be this family's own/u);
+  } finally {
+    if (saved.family !== undefined) process.env.HOMA_FAMILY_READ_WRITE_TOKEN = saved.family;
+    if (saved.lesson !== undefined) process.env.HOMA_LESSON_READ_WRITE_TOKEN = saved.lesson;
   }
 });
 

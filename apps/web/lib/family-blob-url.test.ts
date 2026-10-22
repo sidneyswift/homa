@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  canonicalFamilyBlobUrl,
   familyBlobBrowserUrl,
   familyBlobPathname,
   isFamilyBlobUrl,
@@ -52,4 +53,15 @@ test("returns the decoded object pathname without query parameters", () => {
     `families/${FAMILY_ID}/library/math page.pdf`
   );
   assert.equal(familyBlobPathname("https://example.com/file.pdf"), null);
+});
+
+test("a signed read link canonicalizes to the stored URL", () => {
+  assert.equal(
+    canonicalFamilyBlobUrl(
+      `${PRIVATE_URL}?cache=0&vercel-blob-delegation=abc.def&vercel-blob-signature=xyz#page=2`
+    ),
+    PRIVATE_URL
+  );
+  assert.equal(canonicalFamilyBlobUrl(PUBLIC_URL), PUBLIC_URL);
+  assert.equal(canonicalFamilyBlobUrl("not a url"), null);
 });
