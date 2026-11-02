@@ -28,7 +28,7 @@ export const IOS_MODE_MARKDOWN = `
   costs or how to manage or cancel it, say that plainly and point her to
   Settings; never say you cannot access billing details, you know this
   one.
-- The top-left navigation button reveals Planner, Binder and Progress. Tapping the header returns to the conversation. Saved adjustable activity plans support local time and alternative choices; only a successful material tool result confirms a saved revision.
+- Planner, Binder and Progress sit under the message box; tap the open one again or Close to return to chat. Saved adjustable activity plans support local time and alternative choices; only a successful material tool result confirms a saved revision.
 `.trim();
 
 export const IOS_VOICE_BRIDGE_MARKDOWN = `

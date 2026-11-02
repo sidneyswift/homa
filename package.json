@@ -52,7 +52,7 @@
     "check:icon-residue": "node --experimental-strip-types scripts/icon-import-residue-check.mts && node --experimental-strip-types --test scripts/icon-import-residue-check.test.mts",
     "check:design-parity": "node --experimental-strip-types scripts/design-contract.mts --check",
     "check:design-fixtures": "node --experimental-strip-types scripts/design-fixture-gallery.mts --check && node --experimental-strip-types --test scripts/design-fixture-gallery.test.mts",
-    "check:mobile-brand": "tsx --test scripts/mobile-brand-assets.test.mts apps/mobile/src/components/design/icon-registry.test.ts",
+    "check:mobile-brand": "tsx --test scripts/mobile-brand-assets.test.mts apps/mobile/src/components/design/icon-registry.test.ts apps/mobile/src/features/app2/house-shape.test.ts",
     "check:mobile-release-rails": "node --test apps/mobile/scripts/android-release-guard.test.mjs apps/mobile/scripts/classify-ios-delivery.test.mjs apps/mobile/scripts/mobile-production-bundle-check.test.mjs apps/mobile/scripts/production-routes.test.mjs apps/mobile/scripts/wait-for-production-gates.test.mjs apps/mobile/scripts/mobile-delivery-receipt.test.mjs apps/mobile/scripts/mobile-ota-workflow.test.mjs",
     "check:auth-recovery": "tsx --tsconfig apps/web/tsconfig.json --test apps/mobile/src/features/auth/sign-in-voice.test.ts packages/core/src/password-recovery.test.ts scripts/password-recovery-contract.test.mts scripts/supabase-password-recovery-template.test.mts apps/web/lib/supabase/session-proxy.test.ts",
     "auth-recovery:template": "tsx scripts/supabase-password-recovery-template.mts",

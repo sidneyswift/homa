@@ -12,12 +12,17 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 import { useEveAgent, type EveMessage } from "eve/react";
+import { useRouter } from "expo-router";
 import { useReducedMotion } from "react-native-reanimated";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { formatHiddenDirective } from "@homa/core";
+import { type SemanticIconName } from "@homa/design/contract";
 
 import { env, EVE_CHANNEL_HEADER } from "../../lib/env";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
+import { Icon } from "../../components/design/icon";
 import { InlineError } from "../../components/ui/inline-error";
+import { CharacterStage } from "../app2/character-stage";
 import {
   archiveMessages,
   foldEventsToMessages,
@@ -47,7 +52,7 @@ import {
   chatCompletionAnnouncement,
   countLastTurnToolCalls,
 } from "./message-utils";
-import { BusyBubble, MessageView, NewReplyPill } from "./message-view";
+import { MessageView, NewReplyPill } from "./message-view";
 import {
   bindProgressDraftContext,
   progressTransportForDraft,
@@ -112,13 +117,6 @@ type ChatSendSource = "composer" | "card" | "directive";
 /** Stream reconnects per turn; matches the web twin (chat-client.tsx). */
 const STREAM_RECONNECT_ATTEMPTS = 8;
 
-/** Chat's opening prompts. Native Voice owns task-specific starter cards. */
-export const SUGGESTIONS = [
-  "What should we work on this week?",
-  "Make a worksheet for today",
-  "We had a rough morning, help me reset",
-] as const;
-
 /** A backgrounded app kills the stream within seconds; a stream this
  *  quiet when the app comes back is dead, not thinking. Exported (with
  *  the other stall constants) so the voice surface's watchdogs stay in
@@ -176,7 +174,6 @@ export function ChatSession({
   prepared,
   restoringSession,
   familyId,
-  parentName,
   draftRequest,
   initialProgressChildId,
   initialProgressIntent,
@@ -189,7 +186,6 @@ export function ChatSession({
   prepared: PreparedChat;
   restoringSession: boolean;
   familyId: string | null;
-  parentName: string | null;
   draftRequest: ComposerDraftRequest | null;
   initialProgressChildId: string | null;
   initialProgressIntent: ProgressDraftIntent | null;
@@ -198,6 +194,7 @@ export function ChatSession({
   planWeekDraft?: ComposerDraftRequest | null;
   onPlanWeekDraftHandled?: () => void;
 }) {
+  const router = useRouter();
   const { fontScale } = useWindowDimensions();
   const reducedMotion = useReducedMotion();
   const stackComposer = fontScale >= 1.4;
@@ -814,20 +811,29 @@ export function ChatSession({
   const activeChecklist = busy || restoringSession ? null : latestChecklistRequest(messages);
   const activeDetail = busy || restoringSession ? null : latestDetailRequest(messages);
   const activeReport = busy || restoringSession ? null : latestReportReveal(messages);
-  // The chips return whenever a session has no words in it yet: the
-  // first run, or a fresh morning over yesterday's scrollback.
-  const showSuggestions = messages.length === 0 && !busy && !restoringSession;
-
   const statusLabel = busy ? busyLabel(messages) : null;
+  // Progress rides under Homa (web App 2's activity bubble), never inside
+  // the transcript; a replaying turn reads as work, not as a failure.
+  const activityLabel = statusLabel ?? (recovering ? "Reconnecting…" : restoringSession ? "Restoring conversation…" : null);
+  const hasQueuedParentMessages = queued.some((entry) => entry.lane === "parent");
+  // A fresh conversation is only Homa and the composer. Any words, work
+  // or error opens the transcript and moves Homa to the top.
+  const engaged = hasAnyMessages || activityLabel !== null || hasQueuedParentMessages || Boolean(agent.error);
+  const latestMessageKey = [...transcript].reverse().find((item) => item.kind === "message")?.key;
 
   return (
     <View style={{ flex: 1 }}>
+      <CharacterStage engaged={engaged} activity={activityLabel} />
+      {engaged ? (
+      <View style={{ flex: 1 }}>
       <ScrollView
         ref={scrollRef}
         style={{ flex: 1 }}
         contentContainerStyle={{
-          padding: space.md,
-          gap: space.md,
+          paddingHorizontal: space.lg,
+          paddingTop: space.md,
+          paddingBottom: space.xxl,
+          gap: space.lg,
           flexGrow: 1,
         }}
         onContentSizeChange={() => {
@@ -839,48 +845,6 @@ export function ChatSession({
         scrollEventThrottle={100}
         keyboardShouldPersistTaps="handled"
       >
-        {!hasAnyMessages ? (
-          <View style={{ flex: 1, justifyContent: "center", gap: space.sm }}>
-            <Text
-              style={{
-                textAlign: "center",
-                fontFamily: fontFamilies.displaySemibold,
-                fontSize: fontSize.xl,
-                color: colors.textStrong,
-              }}
-            >
-              {parentName ? `Hi ${parentName}, I'm Homa.` : "Hi, I'm Homa."}
-            </Text>
-            <Text
-              style={{
-                textAlign: "center",
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.base,
-                color: colors.textBody,
-              }}
-            >
-              Ask me anything about your homeschool day.
-            </Text>
-            <View
-              style={{
-                marginTop: space.md,
-                gap: space.sm,
-                alignItems: "center",
-              }}
-            >
-              {showSuggestions
-                ? SUGGESTIONS.map((suggestion) => (
-                    <SuggestionChip
-                      key={suggestion}
-                      label={suggestion}
-                      onPress={() => sendMessage(suggestion, "card")}
-                    />
-                  ))
-                : null}
-            </View>
-          </View>
-        ) : (
-          <>
             {transcript.map((item) =>
               item.kind === "separator" ? (
                 <DaySeparator key={item.key} label={item.label} />
@@ -888,6 +852,7 @@ export function ChatSession({
                 <MessageView
                   key={item.key}
                   message={item.message}
+                  current={item.key === latestMessageKey}
                   onRetryFailedMessage={
                     liveMessageSet.has(item.message)
                       ? retryFailedMessage
@@ -922,27 +887,7 @@ export function ChatSession({
                 />
               ),
             )}
-            {showSuggestions ? (
-              <View
-                style={{
-                  marginTop: space.sm,
-                  gap: space.sm,
-                  alignItems: "center",
-                }}
-              >
-                {SUGGESTIONS.map((suggestion) => (
-                  <SuggestionChip
-                    key={suggestion}
-                    label={suggestion}
-                    onPress={() => sendMessage(suggestion, "card")}
-                  />
-                ))}
-              </View>
-            ) : null}
-          </>
-        )}
-        {statusLabel ? <BusyBubble label={statusLabel} /> : null}
-        {queued.some((entry) => entry.lane === "parent") ? (
+        {hasQueuedParentMessages ? (
           // Messages sent mid-turn wait here as dimmed bubbles and go
           // out on turn end; the remove button pulls one back first.
           <View style={{ alignItems: "flex-end", gap: space.sm }}>
@@ -1036,16 +981,14 @@ export function ChatSession({
             </View>
           </View>
         ) : null}
-        {recovering || restoringSession ? (
-          // The stream died but the turn is durable server-side; while
-          // the replay runs, the wait reads as work, not as a failure.
-          <BusyBubble
-            label={recovering ? "Reconnecting\u2026" : "Restoring conversation\u2026"}
-          />
-        ) : agent.error ? (
+        {!(recovering || restoringSession) && agent.error ? (
           <InlineError message="Your conversation is safe; that last message didn't go through. Try sending it again." />
         ) : null}
       </ScrollView>
+      <TranscriptFade edge="top" height={space.md} />
+      <TranscriptFade edge="bottom" height={space.xxl} />
+      </View>
+      ) : null}
 
       {hasNewReply && turnAnnouncement ? (
         <View style={{ paddingHorizontal: space.md, paddingBottom: space.sm, alignItems: "center" }}>
@@ -1064,7 +1007,7 @@ export function ChatSession({
           <ChecklistTakeover childId={checklistTakeover} onClose={closeChecklist} />
         </View>
       ) : (
-        <View style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle, backgroundColor: colors.page }}>
+        <View style={{ backgroundColor: colors.page }}>
         {workspace?.question ? <View style={{ padding: space.md, gap: space.sm }}>
           <ScrollView style={{ maxHeight: 120 }} nestedScrollEnabled keyboardShouldPersistTaps="handled"><Text style={{ fontFamily: fontFamilies.body, color: colors.textBody }}>{workspace.question}</Text></ScrollView>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.md }}>
@@ -1146,12 +1089,17 @@ export function ChatSession({
             </Pressable>
           </View>
         ) : null}
+        <View style={{ paddingHorizontal: space.lg, paddingTop: space.xs, paddingBottom: space.sm }}>
         <View
           style={{
             flexDirection: stackComposer ? "column" : "row",
             alignItems: stackComposer ? "stretch" : "flex-end",
-            gap: space.sm,
-            padding: space.md,
+            gap: space.xs,
+            padding: space.sm,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: radius.lg,
+            backgroundColor: colors.card,
           }}
         >
         <TextInput
@@ -1159,7 +1107,7 @@ export function ChatSession({
           value={draft}
           onChangeText={updateDraft}
           accessibilityLabel="Message Homa"
-          placeholder={"Tell Homa about your day\u2026"}
+          placeholder={"Message Homa…"}
           placeholderTextColor={colors.textMuted}
           multiline
           returnKeyType="send"
@@ -1168,13 +1116,11 @@ export function ChatSession({
           style={{
             flex: stackComposer ? undefined : 1,
             width: stackComposer ? "100%" : undefined,
-            minHeight: 48,
+            minHeight: 44,
             maxHeight: 128,
-            borderRadius: radius.lg,
-            borderWidth: 1,
-            borderColor: colors.border,
-            paddingHorizontal: 20,
-            paddingVertical: 12,
+            paddingHorizontal: space.sm,
+            paddingTop: 11,
+            paddingBottom: 11,
             textAlignVertical: "top",
             fontFamily: fontFamilies.body,
             fontSize: fontSize.base,
@@ -1182,71 +1128,26 @@ export function ChatSession({
           }}
         />
         {/* The Claude-composer shape (founder ruling 2026-07-10 night):
-            while Homa works, an empty composer shows Stop; a typed one
+            while Homa works, an empty composer shows Stop and a typed one
             shows Stop AND Send, where Send queues the message for the
-            moment the turn ends. Idle shows Send. */}
-        {busy ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Stop Homa's response"
-            onPress={() => stopForUser("stop")}
-            style={({ pressed }) => ({
-              minHeight: 48,
-              alignSelf: stackComposer ? "stretch" : "auto",
-              borderRadius: radius.pill,
-              borderWidth: draft.trim().length > 0 ? 1 : 0,
-              borderColor: pressed ? colors.brand : colors.border,
-              backgroundColor:
-                draft.trim().length > 0
-                  ? colors.card
-                  : pressed
-                    ? colors.brandHover
-                    : colors.brandHover,
-              paddingHorizontal: space.lg,
-              alignItems: "center",
-              justifyContent: "center",
-            })}
-          >
-            <Text
-              style={{
-                fontFamily: fontFamilies.bodySemibold,
-                fontSize: fontSize.base,
-                color: draft.trim().length > 0 ? colors.textStrong : colors.onBrand,
-              }}
-            >
-              Stop
-            </Text>
-          </Pressable>
-        ) : null}
-        {!busy || draft.trim().length > 0 ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={busy ? "Queue message to send when Homa finishes" : "Send message to Homa"}
-            accessibilityState={{ disabled: restoringSession || draft.trim().length === 0 }}
-            onPress={() => sendMessage(draft)}
-            disabled={restoringSession || draft.trim().length === 0}
-            style={({ pressed }) => ({
-              minHeight: 48,
-              alignSelf: stackComposer ? "stretch" : "auto",
-              borderRadius: radius.pill,
-              backgroundColor: colors.brandHover,
-              paddingHorizontal: space.lg,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: restoringSession || draft.trim().length === 0 ? 0.6 : 1,
-            })}
-          >
-            <Text
-              style={{
-                fontFamily: fontFamilies.bodySemibold,
-                fontSize: fontSize.base,
-                color: colors.onBrand,
-              }}
-            >
-              Send
-            </Text>
-          </Pressable>
-        ) : null}
+            moment the turn ends. Idle and empty, the mic opens voice
+            (App 2's composer), and voice still starts only on that tap. */}
+        <View style={{ flexDirection: "row", alignSelf: stackComposer ? "flex-end" : "auto" }}>
+          {busy ? (
+            <ComposerIconButton icon="stop" label="Stop Homa's response" onPress={() => stopForUser("stop")} />
+          ) : null}
+          {draft.trim().length > 0 ? (
+            <ComposerIconButton
+              icon="send"
+              label={busy ? "Queue message to send when Homa finishes" : "Send message to Homa"}
+              disabled={restoringSession || draft.trim().length === 0}
+              onPress={() => sendMessage(draft)}
+            />
+          ) : !busy ? (
+            <ComposerIconButton icon="voice" label="Talk to Homa" hint="Opens a voice conversation" onPress={() => router.navigate("/voice")} />
+          ) : null}
+        </View>
+        </View>
         </View>
         </View>
       )}
@@ -1299,41 +1200,60 @@ function ProgressDraftChoice({
   );
 }
 
-function SuggestionChip({
+/** A 44pt icon control inside the composer island (web App 2's .iconButton). */
+function ComposerIconButton({
+  icon,
   label,
+  hint,
+  disabled = false,
   onPress,
 }: {
+  icon: SemanticIconName;
   label: string;
+  hint?: string;
+  disabled?: boolean;
   onPress: () => void;
 }) {
   const reducedMotion = useReducedMotion();
   return (
     <Pressable
-      accessible
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={hint}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => ({
-        minHeight: 44,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        borderColor: pressed ? colors.brand : colors.border,
-        backgroundColor: colors.card,
-        paddingHorizontal: space.md,
-        paddingVertical: 10,
+        width: 44,
+        height: 44,
+        borderRadius: radius.lg,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: pressed ? colors.surfaceSunken : "transparent",
+        opacity: disabled ? 0.5 : 1,
         transform: [{ scale: pressed && !reducedMotion ? pressScale : 1 }],
       })}
     >
-      <Text
-        style={{
-          fontFamily: fontFamilies.body,
-          fontSize: fontSize.sm,
-          color: colors.textStrong,
-        }}
-      >
-        {label}
-      </Text>
+      <Icon name={icon} size={20} color={colors.textStrong} />
     </Pressable>
+  );
+}
+
+/** Web App 2 masks the transcript's edges; native fades them to the page instead. */
+function TranscriptFade({ edge, height }: { edge: "top" | "bottom"; height: number }) {
+  const id = `transcript-fade-${edge}`;
+  return (
+    <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, height, [edge]: 0 }}>
+      <Svg width="100%" height="100%">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={colors.page} stopOpacity={edge === "top" ? 1 : 0} />
+            <Stop offset="1" stopColor={colors.page} stopOpacity={edge === "top" ? 0 : 1} />
+          </LinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill={`url(#${id})`} />
+      </Svg>
+    </View>
   );
 }
 

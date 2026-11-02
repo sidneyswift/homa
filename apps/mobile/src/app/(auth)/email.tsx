@@ -1,15 +1,11 @@
 import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "../../components/ui/button";
-import {
-  NativeHeading,
-  NativeStatus,
-  NativeText,
-} from "../../components/ui/semantic";
+import { NativeStatus } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
+import { App2Button } from "../../features/app2/app2-button";
 import {
   checkEmailCode,
   normalizeEmail,
@@ -18,7 +14,7 @@ import {
 import { LegalLine } from "../../features/auth/legal-line";
 import { useSession } from "../../features/auth/session-provider";
 import { supabase } from "../../lib/supabase";
-import { quietColors } from "../../theme/native-projection";
+import { colors, fontFamilies, fontSize } from "../../theme/app2";
 
 /**
  * The email door: address, then a six digit code. Two steps in one route
@@ -34,6 +30,10 @@ import { quietColors } from "../../theme/native-projection";
  * And a confirmation that only announces is invisible: resending a code
  * changes no other pixel, so without a rendered status a sighted parent
  * taps and watches nothing happen.
+ *
+ * App 2 look (gh#1236), matching the front door: white canvas, ink
+ * controls, DM Sans headings. Fields keep the shared primitive, whose
+ * darker boundary is what clears the 3:1 non-text contrast floor.
  */
 export default function EmailCodeScreen() {
   const { session } = useSession();
@@ -140,7 +140,7 @@ export default function EmailCodeScreen() {
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
-      style={{ flex: 1, backgroundColor: quietColors.page }}
+      style={{ flex: 1, backgroundColor: colors.page }}
     >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -158,9 +158,9 @@ export default function EmailCodeScreen() {
           {/* Back sits at the top where a back control belongs. Below the
               legal line it read as part of the fine print, and this stack
               renders no header of its own to hold a chevron. */}
-          <Button
+          <App2Button
             label={onEmailStep ? "Back" : "Use a different email"}
-            variant="ghost"
+            variant="quiet"
             size="sm"
             style={{ alignSelf: "flex-start" }}
             disabled={pending}
@@ -178,14 +178,17 @@ export default function EmailCodeScreen() {
           <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 24 }} />
 
           <View style={{ gap: 16 }}>
-            <NativeHeading level={2}>
+            <Text
+              accessibilityRole="header"
+              style={{ fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.xxl, color: colors.textStrong }}
+            >
               {onEmailStep ? (usePassword ? "Welcome back." : "What's your email?") : "Check your email."}
-            </NativeHeading>
-            <NativeText role="body" tone="body">
+            </Text>
+            <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}>
               {onEmailStep
                 ? (usePassword ? "Sign in with the password you already use for Homa." : "Homa sends a six digit code. No password to make up, and none to forget later.")
                 : `Six digits, sent to ${normalizeEmail(email)}. It works once.`}
-            </NativeText>
+            </Text>
           </View>
 
           <View
@@ -210,6 +213,7 @@ export default function EmailCodeScreen() {
             {onEmailStep ? (
               <>
                 <TextField
+                  style={{ backgroundColor: colors.card }}
                   label="Email"
                   value={email}
                   onChangeText={setEmail}
@@ -224,6 +228,7 @@ export default function EmailCodeScreen() {
                 />
                 {usePassword ? (
                   <TextField
+                    style={{ backgroundColor: colors.card }}
                     label="Password"
                     value={password}
                     onChangeText={setPassword}
@@ -237,16 +242,17 @@ export default function EmailCodeScreen() {
                     onSubmitEditing={() => void signInWithPassword()}
                   />
                 ) : null}
-                <Button
+                <App2Button
                   label={pending ? (usePassword ? "Signing in…" : "Sending…") : (usePassword ? "Sign in" : "Send my code")}
                   size="lg"
                   onPress={() => void (usePassword ? signInWithPassword() : send(false))}
                   disabled={pending || (usePassword && (!email.trim() || !password))}
                   busy={pending}
                 />
-                <Button
+                <App2Button
                   label={usePassword ? "Use an email code instead" : "Use an existing password"}
-                  variant="ghost"
+                  variant="quiet"
+                  size="sm"
                   disabled={pending}
                   onPress={() => {
                     setUsePassword(!usePassword);
@@ -259,6 +265,7 @@ export default function EmailCodeScreen() {
             ) : (
               <>
                 <TextField
+                  style={{ backgroundColor: colors.card }}
                   label="Six digit code"
                   value={code}
                   onChangeText={(next) =>
@@ -274,16 +281,16 @@ export default function EmailCodeScreen() {
                   returnKeyType="go"
                   onSubmitEditing={() => void check()}
                 />
-                <Button
+                <App2Button
                   label={pending ? "Checking…" : "Let me in"}
                   size="lg"
                   onPress={() => void check()}
                   disabled={pending || code.length < 6}
                   busy={pending}
                 />
-                <Button
+                <App2Button
                   label="Send a new code"
-                  variant="ghost"
+                  variant="quiet"
                   size="sm"
                   style={{ alignSelf: "flex-start" }}
                   onPress={() => void send(true)}
@@ -292,7 +299,7 @@ export default function EmailCodeScreen() {
               </>
             )}
 
-            <LegalLine />
+            <LegalLine linkColor={colors.textStrong} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

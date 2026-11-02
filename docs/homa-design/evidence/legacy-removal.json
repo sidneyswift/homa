@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "baee32895ecd07752aac4107b36de1d2009f86fa891665960f3032f1ad44f870",
+  "ownedInputFingerprint": "f70bd3225f15c44b0b7dc64102977c1dc63db8862ccb5962f518c1cd84a47058",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -116,7 +116,7 @@
     {
       "surfaceId": "surface:0181a9657036c0f8",
       "path": "apps/web/agent/skills/materials-studio/SKILL.md",
-      "sourceHash": "eadf0f1315ad25ca1977fde7ffd45a19d038b5ac457ccc134873840b81b757f0",
+      "sourceHash": "6fd57173517027aeae5367f06891480a28663710f55344589dc500e8cd84a515",
       "legacySignatures": [],
       "detectedSourceHash": "c6e2b3d894f8136fe677ab5e11a528e4a06d2b87d5941f80b140068bdea3924c",
       "detectedLegacySignatures": [
@@ -2501,7 +2501,7 @@
     {
       "surfaceId": "surface:0251c96a3bf92d13",
       "path": "apps/web/app/app/planner/unified-planner-view.tsx",
-      "sourceHash": "64b178db1c72a0d68224bc4364e6a0c20e783449e123f106bb268239eb9cb1b6",
+      "sourceHash": "e10253ecbc2d61d3eb9d049fdbc21692bf825dbcd68da1eac11aeb50fc607416",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
@@ -5749,7 +5749,7 @@
     {
       "surfaceId": "surface:b9bc78a43593455a",
       "path": "apps/web/components/progress/progress-topic-row.tsx",
-      "sourceHash": "98c2b2ac16acb3dd5acab42f2839e1fb560c3f15e08ab550724582d201cf198b",
+      "sourceHash": "259169449380a4961037aae13aa7a55852ab8fd6ef5140424e6f4d472df8430e",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -6386,7 +6386,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "e42c8f8204901f46de9eb53f37c24adccccf9be796c3663044bf717b71630ea0",
+      "sourceHash": "9f59379094fc238e1564c83f5961dafa6e044a7f65eb9b1fad5fb2343ea71a05",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
@@ -6502,7 +6502,7 @@
     {
       "surfaceId": "surface:1aac9cfdef6206ce",
       "path": "docs/homa-planning/journeys/10-reconciliation.md",
-      "sourceHash": "8d61cfc0d8585e363c6f5106e6548f33300c65bab42f9da1848e08c531d6ed62",
+      "sourceHash": "7faf35b08bcc8272914b36d74a0b7d53b2f8de9344a18f538fa1de0e777f9f5f",
       "legacySignatures": [],
       "detectedSourceHash": "e2ca1ca294cb2e4e739a96957d9b84251c1d2910acd2e16c089b2433ebede8d9",
       "detectedLegacySignatures": [

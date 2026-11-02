@@ -101,6 +101,7 @@ function MessagePartView({
   part,
   partKey,
   isUser,
+  current,
   assistantText,
   questions,
   onboarding,
@@ -108,19 +109,22 @@ function MessagePartView({
   part: EveMessagePart;
   partKey: string;
   isUser: boolean;
+  current: boolean;
   assistantText?: string | null;
   questions: QuestionCardWiring;
   onboarding: OnboardingCardWiring;
 }) {
   if (part.type === "text") {
     if (isUser) {
+      // App 2: her earlier words recede to grey; the newest line stays in ink.
       return (
         <Text
           style={{
             fontFamily: fontFamilies.body,
             fontSize: fontSize.base,
             lineHeight: fontSize.base * 1.5,
-            color: colors.onBrand,
+            color: current ? colors.textStrong : colors.textMuted,
+            textAlign: "right",
           }}
         >
           {part.text}
@@ -257,11 +261,14 @@ function userMessageText(message: EveMessage): string {
 
 export function MessageView({
   message,
+  current = false,
   questions = {},
   onboarding = {},
   onRetryFailedMessage,
 }: {
   message: EveMessage;
+  /** The newest message in the transcript, which App 2 keeps in full ink. */
+  current?: boolean;
   questions?: QuestionCardWiring;
   onboarding?: OnboardingCardWiring;
   /** Resends this exact text (a card-equivalent send, so the existing
@@ -310,26 +317,15 @@ export function MessageView({
     >
       <View
         style={{
-          maxWidth: "85%",
-          borderRadius: radius.lg,
-          paddingHorizontal: space.md,
-          paddingVertical: 12,
+          // App 2 transcript: no bubbles. Homa's reply uses the full
+          // column; hers sits right, inset from the edge (web .spokenTurn).
+          maxWidth: isUser ? "85%" : "100%",
+          width: isUser ? undefined : "100%",
           // A message still finding out whether it landed, or one that
-          // did not, dims the same way a queued bubble does elsewhere in
-          // this screen: quieter, never hidden (no pending/failed state
+          // did not, dims: quieter, never hidden (no pending/failed state
           // existed before GH #170; a dropped connection used to erase
           // her words with no sign anything was wrong).
-          ...(isUser
-            ? {
-                backgroundColor: colors.brandHover,
-                borderBottomRightRadius: radius.sm,
-                opacity: sendState === null ? 1 : 0.7,
-              }
-            : {
-                backgroundColor: colors.card,
-                borderBottomLeftRadius: radius.sm,
-                ...shadows.sm,
-              }),
+          opacity: isUser && sendState !== null ? 0.7 : 1,
         }}
       >
         {message.parts.map((part, index) => (
@@ -340,6 +336,7 @@ export function MessageView({
             // and only the live card recognises itself.
             partKey={`${message.id}:${index}`}
             isUser={isUser}
+            current={current}
             assistantText={assistantTextByPart.get(index)}
             questions={questions}
             onboarding={onboarding}

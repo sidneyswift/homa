@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { View } from "react-native";
 
 import { AppDrawer } from "../../components/nav/app-drawer";
+import { App2BottomNav } from "../../components/nav/app2-bottom-nav";
 import { AppTopBar } from "../../components/nav/app-top-bar";
 import { BillingGate } from "../../components/billing-gate";
 import { FamilyReadinessGate } from "../../components/family-readiness-gate";
@@ -72,6 +73,7 @@ function AppShell() {
           />
         </View>
         <VoiceDock />
+        <App2BottomNav />
       </View>
       <AppDrawer
         open={drawerOpen}

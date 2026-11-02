@@ -60,6 +60,24 @@ jest.mock("react-native-reanimated", () => {
   };
 });
 
+jest.mock("../../apps/mobile/src/features/app2/homa-character-3d", () => {
+  // The App 2 entry screens draw Homa with expo-gl and three.js (gh#1236).
+  // Neither runs under Jest: three ships ES modules this transform skips,
+  // and there is no GL context. These tests read accessibility properties
+  // only, so the stand-in keeps the real component's image semantics.
+  const React = jest.requireActual("react");
+  const { View } = jest.requireActual("react-native");
+  return {
+    HomaCharacter3D: ({ size }) =>
+      React.createElement(View, {
+        accessible: true,
+        accessibilityRole: "image",
+        accessibilityLabel: "Homa, a rounded orange house character",
+        style: { width: size, height: size },
+      }),
+  };
+});
+
 jest.mock(
   "lucide-react-native",
   () =>
