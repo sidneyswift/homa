@@ -19,6 +19,7 @@ import {
   type PlanNarrative,
   type ReportNarrative,
 } from "@homa/core";
+import type { TransactionSql } from "postgres";
 
 import {
   correctLegacyProgressAnswers,
@@ -148,8 +149,8 @@ interface StartAnonymousInput {
  */
 export async function startAnonymousFamily(
   input: StartAnonymousInput,
+  sql: MapQueryable = mapDb(),
 ): Promise<{ familyId: string; resumeToken: string }> {
-  const sql = mapDb();
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
   const inserted = await sql<{ id: string }[]>`
@@ -169,15 +170,19 @@ export async function startAnonymousFamily(
 }
 
 type MapDatabase = ReturnType<typeof mapDb>;
+/** A bare client, or a transaction a caller already holds open. */
+type MapQueryable = MapDatabase | TransactionSql;
 
 async function foldFamilyInto(
-  sql: MapDatabase,
+  sql: MapQueryable,
   fromId: string,
   intoId: string,
 ): Promise<void> {
-  const folded = await sql.begin((tx) =>
-    foldFamilyDataIntoTx(tx, fromId, intoId)
-  );
+  // Inside a caller's transaction the fold joins it; a bare client opens
+  // its own, so the fold is all-or-nothing either way.
+  const folded = "begin" in sql
+    ? await sql.begin((tx) => foldFamilyDataIntoTx(tx, fromId, intoId))
+    : await foldFamilyDataIntoTx(sql, fromId, intoId);
   if (!folded) {
     throw new Error("Family fold source or destination is missing");
   }
@@ -235,7 +240,7 @@ export function isSandboxSignupEmail(email: string): boolean {
  */
 export async function attachAuthUser(
   input: AttachAuthUserInput,
-  sql: MapDatabase = mapDb(),
+  sql: MapQueryable = mapDb(),
 ): Promise<{ familyId: string; returning: boolean; resumeToken: string }> {
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
@@ -317,7 +322,7 @@ export async function attachAuthUser(
  */
 async function seedWhatWorksMemories(
   familyId: string,
-  sql: MapDatabase = mapDb(),
+  sql: MapQueryable = mapDb(),
 ): Promise<void> {
   const kids = await sql<{ id: string; context: Record<string, unknown> }[]>`
     select id, context from public.children where family_id = ${familyId}
@@ -367,8 +372,10 @@ export async function getFamilyByResumeToken(rawToken: string): Promise<FamilyRo
 /** The signed-in fallback: a caller with a Supabase session but no resume
  * cookie (fresh browser, emailed link opened elsewhere) still reaches
  * their own family through their membership row. */
-export async function getFamilyByAuthUser(authUserId: string): Promise<FamilyRow | null> {
-  const sql = mapDb();
+export async function getFamilyByAuthUser(
+  authUserId: string,
+  sql: MapQueryable = mapDb(),
+): Promise<FamilyRow | null> {
   const rows = await sql<FamilyRow[]>`
     select ${sql.unsafe(FAMILY_COLUMNS)}
     from public.families
@@ -378,6 +385,40 @@ export async function getFamilyByAuthUser(authUserId: string): Promise<FamilyRow
     limit 1
   `;
   return rows[0] ?? null;
+}
+
+/**
+ * The native bootstrap's get-or-create for a mobile-born account,
+ * serialized per auth user. Without the lock, two bootstrap calls for one
+ * brand-new parent (a remounted onboarding gate fired them 1 ms apart)
+ * both saw no family and each opened and attached its own, leaving one
+ * parent in two families. The second call now waits here until the first
+ * commits, then finds the family the first one made. Transaction-scoped,
+ * so pooler-safe (createReport's lock relies on the same guarantee).
+ */
+export async function getOrCreateMobileFamily(
+  input: { authUserId: string; email: string },
+  sql: MapDatabase = mapDb(),
+): Promise<FamilyRow | null> {
+  return sql.begin(async (tx) => {
+    await tx`
+      select pg_advisory_xact_lock(
+        hashtextextended(${"mobile-bootstrap:" + input.authUserId}, 0)
+      )
+    `;
+    const existing = await getFamilyByAuthUser(input.authUserId, tx);
+    if (existing) return existing;
+
+    const opened = await startAnonymousFamily({ source: "mobile", utm: {} }, tx);
+    await attachAuthUser(
+      { familyId: opened.familyId, authUserId: input.authUserId, email: input.email },
+      tx,
+    );
+    // Re-read through the same door every later request uses, so the
+    // result reflects exactly what the membership row now grants
+    // (attachAuthUser may have recovered an existing family instead).
+    return getFamilyByAuthUser(input.authUserId, tx);
+  });
 }
 
 /** The family's own address on file, or null. Server-scoped read: the
