@@ -26,7 +26,7 @@ import {
   getInProgressMaterials,
   type MaterialSummary,
 } from "../../lib/materials";
-import { colors, palette, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * The reveal (wireframe v4 step 5, the payoff GIVE): the first kid's
@@ -214,7 +214,7 @@ export default function RevealScreen() {
         </NativeText>
 
         {receipts ? (
-          <NativeText role="caption" tone="muted" style={{ color: palette.clay600 }}>
+          <NativeText role="caption" tone="muted">
             {receipts}
           </NativeText>
         ) : null}
@@ -228,7 +228,7 @@ export default function RevealScreen() {
         {previewUrl ? (
           <View
             style={{
-              backgroundColor: palette.gold100,
+              backgroundColor: colors.surfaceSunken,
               borderRadius: radius.xl,
               padding: space.sm,
             }}

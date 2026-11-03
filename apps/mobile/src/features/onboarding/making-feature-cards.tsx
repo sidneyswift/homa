@@ -4,7 +4,7 @@ import Animated, { FadeIn, FadeOut, useReducedMotion } from "react-native-reanim
 
 import { Button } from "../../components/ui/button";
 import { NativeText } from "../../components/ui/semantic";
-import { colors, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * The making-wait's opening beat: before the checklist or the easel

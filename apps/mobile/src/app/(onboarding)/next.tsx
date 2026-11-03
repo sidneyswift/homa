@@ -13,7 +13,7 @@ import {
 } from "../../features/onboarding/onboarding-state";
 import { WalkScene, WalkSpeech } from "../../features/onboarding/walk-scene";
 import { hapticAdvance } from "../../lib/haptics";
-import { colors, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * S12, the doors (walk v2): reached after the paywall says yes, or

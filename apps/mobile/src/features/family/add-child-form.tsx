@@ -7,8 +7,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { TextField } from "../../components/ui/text-field";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { addChild } from "../../lib/family";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, space } from "../../theme/app2";
 
 /** Add-a-child intake, mirroring apps/web/app/app/settings/add-child-form.tsx. */
 export function AddChildForm({

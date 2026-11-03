@@ -30,8 +30,7 @@ import {
 import { useFamilyData } from "../../features/family/use-family-data";
 import { hapticAdvance } from "../../lib/haptics";
 import { WalkScene } from "../../features/onboarding/walk-scene";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * About you (founder call 2026-08-24): the two facts about the PARENT
@@ -226,7 +225,7 @@ export default function YouScreen() {
           style={{
             flex: 1,
             justifyContent: "flex-end",
-            backgroundColor: "rgba(51,42,33,0.42)",
+            backgroundColor: "rgba(32,33,36,0.42)",
           }}
         >
           <SafeAreaView

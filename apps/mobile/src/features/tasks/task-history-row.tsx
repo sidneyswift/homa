@@ -4,8 +4,7 @@ import { Pressable, Text, View } from "react-native";
 
 import type { ResearchBriefFeedbackSignal, TaskRunView } from "../../lib/tasks";
 import { Icon } from "../../components/design/icon";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 import { isResearchBriefFeedbackEligible, showsAskHoma, statusNote, timeLabel } from "./task-view";
 
 /**

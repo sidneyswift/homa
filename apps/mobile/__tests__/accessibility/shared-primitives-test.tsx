@@ -20,7 +20,8 @@ import {
   useAccessibilityFocusOnChange,
 } from "../../src/lib/accessibility";
 import { darkQuietColors, quietTypeRoles } from "../../src/theme/tokens";
-import { fontFamilies } from "../../src/theme/fonts";
+// The primitives speak App 2's type (DM Sans display), gh#1236.
+import { fontFamilies } from "../../src/theme/app2";
 
 const mockedUseReducedMotion = jest.mocked(useReducedMotion);
 const mockWindowDimensions = jest.fn();

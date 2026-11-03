@@ -16,7 +16,7 @@ import Animated, {
 import Svg, { Circle, Rect } from "react-native-svg";
 
 import { NativeText } from "../../components/ui/semantic";
-import { colors, palette, radius, space } from "../../theme/tokens";
+import { colors, palette, radius, space } from "../../theme/app2";
 
 /**
  * The making wait's show (gauntlet 2026-08-21, winner "Now drawing",

@@ -30,7 +30,7 @@ import {
   type MaterialSummary,
 } from "../../lib/materials";
 import { openPrivacyPolicy, openTermsOfUse } from "../../lib/web-links";
-import { colors, palette, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * S10, the walk's named climax (walk v2, D8 ruled 2026-08-31): the
@@ -244,7 +244,7 @@ export default function PaywallScreen() {
         {previewUrl ? (
           <View
             style={{
-              backgroundColor: palette.gold100,
+              backgroundColor: colors.surfaceSunken,
               borderRadius: radius.xl,
               padding: space.sm,
             }}
@@ -485,8 +485,8 @@ function PlanCard({
         paddingVertical: space.sm,
         borderRadius: radius.lg,
         borderWidth: 1,
-        borderColor: selected ? palette.clay600 : colors.border,
-        backgroundColor: selected ? palette.clay600 : palette.clay50,
+        borderColor: selected ? colors.action : colors.border,
+        backgroundColor: selected ? colors.action : colors.card,
         gap: 2,
       }}
     >

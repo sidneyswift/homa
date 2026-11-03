@@ -20,7 +20,7 @@ import { useWalkCharacterState } from "../../features/onboarding/walk-character"
 import { WalkScene } from "../../features/onboarding/walk-scene";
 import { addChild, getMyChildren } from "../../lib/family";
 import { hapticAdvance, hapticTick } from "../../lib/haptics";
-import { colors, palette, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * Meet the kids (wireframe v4 step 4). One question per sub-step, a
@@ -506,9 +506,9 @@ function Progress({ subStep }: { subStep: SubStep }) {
             // finished segments outweighed the live one).
             backgroundColor:
               index < position
-                ? palette.clay300
+                ? colors.border
                 : index === position
-                  ? colors.brand
+                  ? colors.action
                   : colors.borderSubtle,
           }}
         />
@@ -593,8 +593,8 @@ function Chip({
         justifyContent: "center",
         borderRadius: fixedWidth ? 26 : radius.pill,
         borderWidth: 1,
-        borderColor: selected ? palette.clay600 : colors.border,
-        backgroundColor: selected ? palette.clay600 : palette.clay50,
+        borderColor: selected ? colors.action : colors.border,
+        backgroundColor: selected ? colors.action : colors.card,
       }}
     >
       <NativeText role="body" tone={selected ? "inverse" : "strong"}>

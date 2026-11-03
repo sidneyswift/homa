@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 import type { HoursEntry } from "./hours-view";
 import { formatMinutesAsHours, SOURCE_LABELS, SUBJECT_LABELS } from "./hours-view";
 import { subjectTone } from "./subject-tone";

@@ -6,7 +6,7 @@ import { View } from "react-native";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { getMyFamily } from "../../lib/family";
 import { supabase } from "../../lib/supabase";
-import { colors, space } from "../../theme/tokens";
+import { colors, space } from "../../theme/app2";
 import {
   bootstrapOnboarding,
   reportOnboardingResumed,

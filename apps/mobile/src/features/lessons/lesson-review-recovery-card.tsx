@@ -3,8 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Button } from "../../components/ui/button";
 import { InlineError } from "../../components/ui/inline-error";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, darkColors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 import {
   lessonReviewRecoveryCopy,
   type LessonReviewRecoveryAction,

@@ -9,8 +9,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { env } from "../../lib/env";
 import { supabase } from "../../lib/supabase";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, space } from "../../theme/app2";
 
 /**
  * Full family deletion, not deactivation. The shared server workflow first

@@ -9,7 +9,7 @@ import { useFamilyData } from "../../features/family/use-family-data";
 import { resetOnboardingWalk } from "../../features/onboarding/onboarding-state";
 import { WalkCharacterProvider } from "../../features/onboarding/walk-character";
 import { WalkStage } from "../../features/onboarding/walk-scene";
-import { colors, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * The native onboarding walk's shell (v1 plan 2026-08-18). Signed-in

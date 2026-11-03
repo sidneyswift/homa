@@ -2,8 +2,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { Icon } from "../../components/design/icon";
 import type { TaskRowView } from "../../lib/tasks";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 import { BUILT_IN_COPY, hourLabel, nextRunLabel, weekdaysLabel } from "./task-view";
 
 /**

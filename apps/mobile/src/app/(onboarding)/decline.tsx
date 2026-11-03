@@ -17,7 +17,7 @@ import {
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
 import { hapticAdvance } from "../../lib/haptics";
 import { WalkScene } from "../../features/onboarding/walk-scene";
-import { space } from "../../theme/tokens";
+import { space } from "../../theme/app2";
 
 /**
  * S11, the decline path (walk v2, D5 ruled 2026-08-31): only ever

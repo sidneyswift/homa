@@ -21,16 +21,16 @@ import { Logo } from "../brand/logo";
 import { AccessibleModal } from "./accessible-modal";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { nativeHapticRoles, type NativePrimitiveRole } from "@homa/design/contract";
-import { fontFamilies } from "../../theme/fonts";
 import {
   darkQuietColors as darkColors,
+  fontFamilies,
   quietColors as colors,
   quietPressScale as pressScale,
   quietRadii,
   quietSpace,
   quietTypeRoles,
   quietTypeScale as fontSize,
-} from "../../theme/tokens";
+} from "../../theme/app2";
 
 const space = {
   xs: quietSpace.scale[1],

@@ -43,7 +43,7 @@ import {
   type DraftKid,
 } from "../../features/onboarding/onboarding-state";
 import { getMyChildren } from "../../lib/family";
-import { colors, palette, space } from "../../theme/tokens";
+import { colors, space } from "../../theme/app2";
 
 /**
  * The making (wireframe v4 step 5, cadence FRAME then DO): the first
@@ -274,7 +274,7 @@ export default function MakingScreen() {
                       gap: space.sm,
                       padding: space.sm,
                       borderRadius: 12,
-                      backgroundColor: palette.gold100,
+                      backgroundColor: colors.surfaceSunken,
                     }}
                   >
                     <NativeText role="bodySmall" tone="strong" style={{ flex: 1 }}>
