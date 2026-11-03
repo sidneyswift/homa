@@ -595,7 +595,7 @@
         "Provider outages never become a guessed paid state and never cross family boundaries.",
         "App Store products stay unavailable until old builds cannot start a legacy-token purchase and the signed auto-renew plus immediate-deletion activation requirements are certified."
       ],
-      "scopedInputFingerprint": "d536856c0c5f9dc427ee492ac60cb3ac42b72264e4e54d307f7256cc697e1274"
+      "scopedInputFingerprint": "5d646586696d47378a735cda676e0b33df81d6920f91bc38cd18bc97aac98c9a"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -612,11 +612,11 @@
       },
       {
         "path": "apps/mobile/src/app/settings.tsx",
-        "sha256": "12301e993e9a9de87e0545d9cc81f596564e022f1c6bf993b03f27882dc8b8f1"
+        "sha256": "8d2b2463b872ae57fd0f578293537e4dc69833fe60d32f2aaa7a91c8277f585f"
       },
       {
         "path": "apps/mobile/src/components/billing-gate.tsx",
-        "sha256": "a5509f2f0c7ccc2bf230ce84e877e126f0b4a8e2d4bcc6538e9a5734d6cc567e"
+        "sha256": "231aeb4ce794a869df5a4f62c23cdca02c426f7d0df1d7718204dcbb998197b6"
       },
       {
         "path": "apps/mobile/src/features/auth/apple-sign-in.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "d3990b440c7b600ad5f443839f1912b17582f1c632e117988ea5f89bf568226c"
+    "sourceFingerprint": "b8637962ebeaed4c7e57438f07385d1e517d1b473a2851e3165a7584ec07d4f8"
   }
 }
