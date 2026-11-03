@@ -124,6 +124,25 @@ export function localMobileEnvironment(
   };
 }
 
+/**
+ * The process environment for the tenancy isolation guard
+ * (scripts/isolation-check.mjs) against the local stack. The guard loads
+ * apps/web/.env.local, which names production, but Node's loadEnvFile
+ * leaves keys already in process.env alone, so these win. The hosted
+ * database password is blanked so it cannot ride along.
+ */
+export function localIsolationEnvironment(
+  endpoints: LocalStackEndpoints,
+): Record<string, string> {
+  requireLocal(endpoints);
+  return {
+    NEXT_PUBLIC_SUPABASE_URL: endpoints.apiUrl,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: endpoints.publishableKey,
+    HOMA_ISOLATION_DATABASE_URL: endpoints.dbUrl,
+    SUPABASE_DB_PASSWORD: "",
+  };
+}
+
 /** Keys defined in a dotenv file's text, values ignored. */
 export function dotenvKeys(text: string): string[] {
   const keys: string[] = [];

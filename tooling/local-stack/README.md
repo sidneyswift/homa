@@ -84,6 +84,7 @@ http://127.0.0.1:54324. Nothing is actually sent.
 | `pnpm dev:stack mobile` | Metro against the stack (clears its cache) |
 | `pnpm dev:stack persona <id\|all>` | Rebuild a test parent |
 | `pnpm dev:stack open <id>` | Rebuild it, then sign the booted simulator in as it |
+| `pnpm dev:stack isolation` | The tenancy isolation guard (`check:isolation`) against the stack, not production |
 | `pnpm dev:stack status` | Print URLs and personas |
 | `pnpm dev:stack reset` | Wipe the database, replay every migration, reseed |
 | `pnpm dev:stack down` | Stop the containers; the data stays for next time |
@@ -110,6 +111,12 @@ largest optional download, and everything else works without it.
   lab route (`src/app/labs/personas.tsx`), which Metro blocks from
   production bundles, and both the picker and its sign-in link stay
   hidden unless the app points at a backend on this machine.
+- **The isolation guard** (`pnpm check:isolation`, which AGENTS.md asks
+  for before any schema or query change) creates fixture users and
+  families in whatever `apps/web/.env.local` names, which is production.
+  `pnpm dev:stack isolation` aims both its API and its database here
+  instead, and the guard refuses any run where the two disagree
+  (`scripts/isolation-target.mjs`).
 
 Plain `pnpm --filter mobile start` and `pnpm --filter web dev` still use
 `.env` and `.env.local`, which point at production. Use the `dev:stack`

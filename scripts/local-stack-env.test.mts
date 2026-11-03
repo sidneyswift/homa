@@ -1,13 +1,19 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import { DURABLE_WRITE_ENV_VARS } from "../apps/web/lib/eval-isolation";
 import { resolveMapDbTarget } from "../apps/web/lib/map/db";
 import { resolveEvalBlobStore } from "../apps/web/lib/materials/eval-blob-store";
 
+import { isolationTargetMismatch } from "./isolation-target.mjs";
 import {
   dotenvKeys,
   isSafeLocalWebKey,
+  localIsolationEnvironment,
   localMobileEnvironment,
   localWebEnvironment,
   type LocalStackEndpoints,
@@ -148,6 +154,62 @@ describe("localMobileEnvironment", () => {
   it("refuses the production origin", () => {
     assert.throws(
       () => localMobileEnvironment(endpoints, "https://thankshoma.com"),
+      /not on this machine/u,
+    );
+  });
+});
+
+describe("localIsolationEnvironment", () => {
+  it("aims the guard's API and database at the local stack", () => {
+    assert.deepEqual(localIsolationEnvironment(endpoints), {
+      NEXT_PUBLIC_SUPABASE_URL: endpoints.apiUrl,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-anon",
+      HOMA_ISOLATION_DATABASE_URL: endpoints.dbUrl,
+      SUPABASE_DB_PASSWORD: "",
+    });
+  });
+
+  it("still wins after the guard loads a production .env.local", () => {
+    const dir = mkdtempSync(join(tmpdir(), "homa-isolation-env-"));
+    const file = join(dir, ".env.local");
+    writeFileSync(
+      file,
+      [
+        "NEXT_PUBLIC_SUPABASE_URL=https://prod-ref.supabase.co",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=prod-anon",
+        "SUPABASE_DB_PASSWORD=prod-password",
+      ].join("\n"),
+    );
+    try {
+      // The guard's own first move, in a child so this process's env stays clean.
+      const seen = JSON.parse(
+        execFileSync(
+          process.execPath,
+          [
+            "-e",
+            `process.loadEnvFile(${JSON.stringify(file)});
+             const e = process.env;
+             console.log(JSON.stringify([e.NEXT_PUBLIC_SUPABASE_URL,
+               e.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, e.SUPABASE_DB_PASSWORD,
+               e.HOMA_ISOLATION_DATABASE_URL]));`,
+          ],
+          { env: { PATH: process.env.PATH, ...localIsolationEnvironment(endpoints) }, encoding: "utf8" },
+        ),
+      ) as string[];
+      assert.deepEqual(seen, [endpoints.apiUrl, "local-anon", "", endpoints.dbUrl]);
+      assert.equal(isolationTargetMismatch(seen[0], seen[3]), null);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses a hosted database", () => {
+    assert.throws(
+      () =>
+        localIsolationEnvironment({
+          ...endpoints,
+          dbUrl: "postgresql://postgres.ref:pw@aws-0-us-east-1.pooler.supabase.com:6543/postgres",
+        }),
       /not on this machine/u,
     );
   });

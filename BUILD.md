@@ -113,7 +113,7 @@ than from any hand-copied block. Four triggers still apply BEFORE a change
 or push, where CI is too late:
 
 ```sh
-pnpm check:isolation            # before any schema or query change
+pnpm dev:stack isolation        # before any schema or query change (check:isolation on the local stack; plain check:isolation writes fixtures to production)
 node scripts/eve-upgrade-check.mjs   # before any eve version bump
 pnpm check:continuity           # when touching continuity or channel adapters
 VERCEL=1 pnpm --filter web exec eve build && VERCEL=1 pnpm check:eve-stream-duration   # before pushing apps/web/agent changes

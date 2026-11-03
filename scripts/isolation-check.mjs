@@ -13,7 +13,10 @@
  *
  * Usage: node scripts/isolation-check.mjs
  * Env: reads apps/web/.env.local (NEXT_PUBLIC_SUPABASE_URL /
- * _PUBLISHABLE_KEY / SUPABASE_DB_PASSWORD).
+ * _PUBLISHABLE_KEY / SUPABASE_DB_PASSWORD), which names production. On a
+ * laptop, run `pnpm dev:stack isolation` instead: it sets those plus
+ * HOMA_ISOLATION_DATABASE_URL to the local stack, whose values win over the
+ * file, so the fixtures land in a database on this machine.
  * Exit code 0 = all covered checks passed, not proof of every possible table
  * operation or application query path.
  */
@@ -24,6 +27,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import postgres from "postgres";
+
+import { isolationTargetMismatch } from "./isolation-target.mjs";
 
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 try {
@@ -37,6 +42,12 @@ const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const dbPassword = process.env.SUPABASE_DB_PASSWORD;
 if (!url || !key) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+  process.exit(2);
+}
+const localDatabaseUrl = process.env.HOMA_ISOLATION_DATABASE_URL || null;
+const targetMismatch = isolationTargetMismatch(url, localDatabaseUrl);
+if (targetMismatch) {
+  console.error(`Refusing a mixed isolation target: ${targetMismatch}`);
   process.exit(2);
 }
 
@@ -59,20 +70,27 @@ let progressStartRequestsSchemaAvailable = false;
 let eveWebSessionOwnersSchemaAvailable = false;
 
 const projectRef = new URL(url).hostname.split(".")[0];
-const sql = dbPassword
-  ? postgres({
-      host: "aws-0-us-east-1.pooler.supabase.com",
-      port: 6543,
-      database: "postgres",
-      username: `postgres.${projectRef}`,
-      password: dbPassword,
-      ssl: "require",
+const sql = localDatabaseUrl
+  ? postgres(localDatabaseUrl, {
       prepare: false,
       max: 1,
       idle_timeout: 10,
       connect_timeout: 15,
     })
-  : null;
+  : dbPassword
+    ? postgres({
+        host: "aws-0-us-east-1.pooler.supabase.com",
+        port: 6543,
+        database: "postgres",
+        username: `postgres.${projectRef}`,
+        password: dbPassword,
+        ssl: "require",
+        prepare: false,
+        max: 1,
+        idle_timeout: 10,
+        connect_timeout: 15,
+      })
+    : null;
 
 async function rest(pathname, init = {}) {
   const response = await fetch(`${url}/rest/v1/${pathname}`, {
@@ -5468,7 +5486,11 @@ await expectEmptyRead("materials");
 await expectReadDenied("model_usage");
 // Thank-you card outbox (migration #53): deny-all, server-only. It holds
 // mailing-address snapshots, so no Data API role may ever see or touch it.
-await expectEmptyRead("thank_you_cards");
+// The migration revokes anon outright, and the local stack, built from the
+// migrations, answers 401. CI's hosted target still answers 200 with no
+// rows, so it has kept a grant the migration removes (gh#1248). Both
+// expose nothing.
+await expectAnonymousNoRowsOrDenied("thank_you_cards");
 // Founder console ledgers (migration #73): deny-all, server-only. The
 // email ledger holds address hashes and delivery errors; the cron
 // heartbeat is pure ops state. No Data API role reads or writes either.

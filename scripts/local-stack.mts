@@ -9,6 +9,7 @@
  *   pnpm dev:stack mobile           run Metro against it (simulator dev build)
  *   pnpm dev:stack persona <id>     rebuild new | onboarding | established | all
  *   pnpm dev:stack open <id>        rebuild, then sign the booted simulator in as it
+ *   pnpm dev:stack isolation        run check:isolation against it, not production
  *   pnpm dev:stack status           print URLs and personas
  *   pnpm dev:stack reset            wipe the database, replay migrations, reseed
  *   pnpm dev:stack down             stop the containers (data is kept)
@@ -38,6 +39,7 @@ import { isLocalBackendUrl } from "../apps/mobile/src/lib/local-backend";
 
 import {
   dotenvKeys,
+  localIsolationEnvironment,
   localMobileEnvironment,
   localWebEnvironment,
   type LocalStackEndpoints,
@@ -285,6 +287,18 @@ async function mobile(): Promise<number> {
   );
 }
 
+/**
+ * The tenancy isolation guard, which AGENTS.md asks for before any schema
+ * or query change. Run plainly it follows apps/web/.env.local and creates
+ * its fixture users and families in production; here they land in this
+ * stack's database instead.
+ */
+async function isolation(): Promise<number> {
+  const status = await readStatus();
+  log(`isolation check against ${status.apiUrl}`);
+  return runForeground("pnpm", ["check:isolation"], localIsolationEnvironment(status));
+}
+
 async function persona(target: string | undefined, open: boolean): Promise<void> {
   const ids: LocalPersonaId[] =
     target === "all"
@@ -339,9 +353,11 @@ async function main(): Promise<number> {
     case "open":
       await persona(rest[0], true);
       return 0;
+    case "isolation":
+      return isolation();
     default:
       console.error(
-        "usage: pnpm dev:stack [up | web | mobile | persona <id|all> | open <id> | status | reset | down] [--no-studio]",
+        "usage: pnpm dev:stack [up | web | mobile | persona <id|all> | open <id> | isolation | status | reset | down] [--no-studio]",
       );
       return 2;
   }
