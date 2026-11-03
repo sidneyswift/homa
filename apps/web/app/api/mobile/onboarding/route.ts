@@ -1,4 +1,4 @@
-import { getFamilyByAuthUser, startAnonymousFamily, attachAuthUser } from "../../../../lib/map/store";
+import { getFamilyByAuthUser, getOrCreateMobileFamily } from "../../../../lib/map/store";
 import { mapDb } from "../../../../lib/map/db";
 import { writeOnboardingRecord } from "../../../../lib/onboarding/store";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
@@ -35,6 +35,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    // Unlocked fast path: every app open after the first finds the family
+    // here. Only a family-less caller takes the per-user lock below.
     let family = await getFamilyByAuthUser(caller.userId);
 
     if (!family) {
@@ -46,19 +48,10 @@ export async function POST(request: Request): Promise<Response> {
           { status: 400 },
         );
       }
-      const opened = await startAnonymousFamily({
-        source: "mobile",
-        utm: {},
-      });
-      await attachAuthUser({
-        familyId: opened.familyId,
+      family = await getOrCreateMobileFamily({
         authUserId: caller.userId,
         email: caller.email,
       });
-      // Re-read through the same door every later request uses, so the
-      // response reflects exactly what the membership row now grants
-      // (attachAuthUser may have recovered an existing family instead).
-      family = await getFamilyByAuthUser(caller.userId);
       if (!family) {
         return Response.json({ ok: false }, { status: 502 });
       }
