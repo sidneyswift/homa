@@ -35,8 +35,8 @@
 
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
-import { createServer as createHttpServer, type Server } from "node:http";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import type { Server } from "node:http";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -44,8 +44,10 @@ import { fileURLToPath } from "node:url";
 
 import { evalFamilyFixtureSeedSql } from "../apps/web/lib/family-context-eval-fixture";
 
+import { startBlobServer } from "./loopback-blob-server.mts";
+import { MIGRATIONS_DIR, orderedMigrations } from "./supabase-migration-order.mts";
+
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const MIGRATIONS_DIR = join(REPO_ROOT, "supabase", "migrations");
 const WEB_DIR = join(REPO_ROOT, "apps", "web");
 
 const DB_NAME = "homa_eval";
@@ -104,15 +106,6 @@ alter default privileges in schema public
   grant all privileges on sequences to anon, authenticated, service_role;
 alter database ${DB_NAME} set search_path = public, extensions;
 `;
-
-/**
- * Filename order lies exactly once: 20260707120000_one_world_families.sql
- * alters child_reports, which 20260707190000_child_reports.sql creates.
- * Production applied them in dependency order; the replay does the same.
- */
-const APPLY_BEFORE: ReadonlyArray<readonly [dependency: string, dependent: string]> = [
-  ["20260707190000_child_reports.sql", "20260707120000_one_world_families.sql"],
-];
 
 interface RunResult {
   code: number;
@@ -190,57 +183,6 @@ async function discoverPostgresBin(): Promise<string> {
   );
 }
 
-const BLOB_CONTENT_TYPES: Record<string, string> = {
-  ".pdf": "application/pdf",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".webp": "image/webp",
-};
-
-/**
- * Serves the sandbox blob directory over loopback so the PDF renderer
- * (headless Chromium inside create_printable) can fetch the images the
- * studio generated during the same run. GET only, path-prefix guarded,
- * throwaway by construction.
- */
-function startBlobServer(blobDir: string): Promise<{ server: Server; url: string }> {
-  return new Promise((resolvePromise, rejectPromise) => {
-    const server = createHttpServer((request, response) => {
-      void (async () => {
-        try {
-          const pathname = decodeURIComponent(
-            new URL(request.url ?? "/", "http://sandbox").pathname,
-          );
-          const filePath = resolve(blobDir, pathname.replace(/^\/+/, ""));
-          if (request.method !== "GET" || !filePath.startsWith(blobDir + "/")) {
-            response.writeHead(404).end();
-            return;
-          }
-          const body = await readFile(filePath);
-          const extension = pathname.slice(pathname.lastIndexOf("."));
-          response
-            .writeHead(200, {
-              "content-type": BLOB_CONTENT_TYPES[extension] ?? "application/octet-stream",
-            })
-            .end(body);
-        } catch {
-          response.writeHead(404).end();
-        }
-      })();
-    });
-    server.once("error", rejectPromise);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      if (address === null || typeof address === "string") {
-        rejectPromise(new Error("blob server: could not allocate a port"));
-        return;
-      }
-      resolvePromise({ server, url: `http://127.0.0.1:${address.port}` });
-    });
-  });
-}
-
 function freePort(): Promise<number> {
   return new Promise((resolvePromise, rejectPromise) => {
     const server = createServer();
@@ -255,24 +197,6 @@ function freePort(): Promise<number> {
       server.close(() => resolvePromise(address.port));
     });
   });
-}
-
-async function orderedMigrations(): Promise<string[]> {
-  const files = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith(".sql")).sort();
-  for (const [dependency, dependent] of APPLY_BEFORE) {
-    const from = files.indexOf(dependency);
-    const to = files.indexOf(dependent);
-    if (from === -1 || to === -1) {
-      throw new Error(
-        `migration ordering override references a missing file: ${dependency} / ${dependent}`,
-      );
-    }
-    if (from > to) {
-      files.splice(from, 1);
-      files.splice(to, 0, dependency);
-    }
-  }
-  return files;
 }
 
 async function main(): Promise<number> {

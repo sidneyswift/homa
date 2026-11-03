@@ -112,11 +112,17 @@ needs a rebuild, just Metro's hot reload.
   the full string landed before submitting. If it is short, tap to
   place the cursor at the true end (see above) and type the missing
   remainder rather than clearing and starting over.
-- Sign-in and every other network call in the simulator hit the real
-  Supabase project, the same one web uses. Use a `+homatest` alias
-  account for anything that should not look like a real family (see
-  the prod test family hygiene note in project memory); errors shown
-  are real backend responses, not simulator artifacts.
+- With the default `apps/mobile/.env`, sign-in and every other network
+  call in the simulator hit the real Supabase project, the same one web
+  uses. Use a `+homatest` alias account for anything that should not
+  look like a real family (see the prod test family hygiene note in
+  project memory); errors shown are real backend responses, not
+  simulator artifacts.
+- To test signed in without touching production, use the local stack
+  (`tooling/local-stack/README.md`): `pnpm dev:stack`, then
+  `pnpm dev:stack web` and `pnpm dev:stack mobile` in place of plain
+  Metro, then `pnpm dev:stack open <new|onboarding|established>` to sign
+  the booted simulator in as that test parent. No typing, no email code.
 
 ## If attach or launch cannot find a simulator that simctl says is booted
 

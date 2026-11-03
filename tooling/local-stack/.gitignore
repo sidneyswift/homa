@@ -1,0 +1,7 @@
+# Artifacts the local web app renders (PDFs, images); kept between runs.
+.data/
+# Supabase CLI working state.
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+supabase/.env.keys

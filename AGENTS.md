@@ -188,6 +188,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
 - Install: `pnpm install`
 - Dev (all packages): `pnpm dev`, or one package: `pnpm --filter web dev`
 - Mobile app (not part of `pnpm dev` on purpose; it needs a simulator): `pnpm --filter mobile ios` (or `android`, `start`); setup in `apps/mobile/README.md`
+- Local stack, for testing web and the simulator signed in without touching production: `pnpm dev:stack` starts a private Supabase (Docker) with every migration and three resettable test parents (new, onboarding, established). Runbook: `tooling/local-stack/README.md`
 - Build: `pnpm build`
 - Lint: `pnpm lint`
 - Typecheck: `pnpm typecheck`

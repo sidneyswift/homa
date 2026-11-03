@@ -17,6 +17,7 @@ import { useSession } from "../../features/auth/session-provider";
 import { signInFailureMessage } from "../../features/auth/sign-in-voice";
 import { LegalLine } from "../../features/auth/legal-line";
 import { HomaCharacter } from "../../features/voice/homa-character";
+import { isLocalBackendUrl } from "../../lib/local-backend";
 import { quietColors, quietRadii } from "../../theme/native-projection";
 
 /**
@@ -32,6 +33,12 @@ import { quietColors, quietRadii } from "../../theme/native-projection";
  * closer to a banner than a backdrop. SafeAreaView below only insets
  * "bottom" so this block can sit behind the Dynamic Island the same way.
  */
+/** Dev builds on the local stack get a door to the test parents
+ * (src/app/labs/personas.tsx); production and hosted backends never do.
+ * Reads the raw value: a missing URL just means no door, not a crash. */
+const SHOW_LOCAL_PERSONAS =
+  __DEV__ && isLocalBackendUrl(process.env.EXPO_PUBLIC_SUPABASE_URL);
+
 const HERO_HEIGHT = 260;
 const HERO_CHARACTER_SIZE = 150;
 
@@ -253,6 +260,17 @@ export default function SignInScreen() {
               onPress={() => router.push("/email")}
               disabled={signInBusy}
             />
+
+            {SHOW_LOCAL_PERSONAS ? (
+              <Button
+                label="Local test parents"
+                variant="ghost"
+                size="sm"
+                accessibilityHint="Dev only. Signs in as a seeded test parent on this Mac."
+                onPress={() => router.push("/labs/personas" as never)}
+                disabled={signInBusy}
+              />
+            ) : null}
 
             <LegalLine />
           </View>
