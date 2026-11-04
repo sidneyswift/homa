@@ -45,11 +45,88 @@ const SAFE_EXACT = new Set([
   "HOMA_DEV_TEST_SESSIONS",
 ]);
 
-/** Flags that send real mail, SMS or cards stay off locally. */
+/**
+ * Flags that send real mail, SMS or cards, or write to storage outside
+ * this machine, stay off locally. Family drives mount real Vercel drives.
+ */
 const UNSAFE_FLAGS = new Set([
   "TELNYX_SMS_ENABLED",
   "THANK_YOU_CARDS_ENABLED",
+  "HOMA_FAMILY_DRIVES_ENABLED",
 ]);
+
+/**
+ * Feature flags production sets, mirrored so the local app behaves like the
+ * live one: without them worksheets answered 503 and Progress showed "taking
+ * a pause" (founder ask 2026-11-03). Read from Vercel's production
+ * environment on 2026-11-03. Most are Sensitive, so the CLI shows only that
+ * they exist; every one with a recorded rollout is on, so presence means
+ * "true" here. UNSAFE_FLAGS still win. Refresh with
+ * `vercel env ls production` from apps/web.
+ */
+export const PRODUCTION_FLAGS = [
+  "FLEET_RESEARCH_ENABLED",
+  "HOMA_ABILITIES_EXPLORER_ENABLED",
+  "HOMA_AGENT_JOBS_ENABLED",
+  "HOMA_CHANNEL_GATE_ENABLED",
+  "HOMA_CLAIM_EXTRACTION_ENABLED",
+  "HOMA_DEVICE_SYNC_ENABLED",
+  "HOMA_DRIP_ENABLED",
+  "HOMA_FAMILY_DRIVES_ENABLED",
+  "HOMA_LESSON_LISTEN_ENABLED",
+  "HOMA_LIVE_PROGRESS_ENABLED",
+  "HOMA_MEMORY_COMPACTION_ENABLED",
+  "HOMA_MORNING_BRIEF_SLIM_CONTEXT_ENABLED",
+  "HOMA_OFFER_RECOVERY_ENABLED",
+  "HOMA_REPORT_LOCK_ENABLED",
+  "HOMA_RESEARCH_BRIEF_V2_ENABLED",
+  "HOMA_SIGNUP_PAYWALL_ENABLED",
+  "HOMA_SUBJECT_LESSONS_ENABLED",
+  "HOMA_WALL_ENABLED",
+  "JOURNAL_PROMPT_ENABLED",
+  "MORNING_BRIEF_ENABLED",
+  "REPORT_NARRATIVE_ENABLED",
+  "TELNYX_SMS_ENABLED",
+  "THANK_YOU_CARDS_ENABLED",
+] as const;
+
+/**
+ * The agent-job kick POSTs this same server's run-now route with
+ * CRON_SECRET (apps/web/lib/jobs/kick.ts); without one a worksheet waits
+ * for a sweeper that never runs locally. Production's secret stays blanked.
+ */
+export const LOCAL_CRON_SECRET = "local-stack-cron-secret";
+
+/**
+ * The account gate signs each checkout link with the Stripe secret
+ * (apps/web/lib/billing/wall.ts checkoutUrl) and quietly opens every
+ * account when there is none, so the paywall never appeared locally
+ * (2026-11-03). Stripe rejects this key, so it signs links and nothing
+ * else: no customer, session or charge can be created with it.
+ */
+export const LOCAL_STRIPE_SIGNING_KEY = "sk_test_homa_local_stack_not_a_real_key";
+
+/**
+ * Production sweeps agent jobs every five minutes (agent/schedules/
+ * agent-jobs.ts), which is what retries a stage and catches a missed kick.
+ * Nothing schedules it locally, so `dev:stack web` posts the same run-now
+ * route on this interval, shorter so local testing does not wait.
+ */
+export const LOCAL_JOBS_SWEEP_MS = 60_000;
+
+/** The sweeper's request: this machine's run-now route, never anywhere else. */
+export function localJobsSweepRequest(webOrigin: string): {
+  url: string;
+  init: { method: "POST"; headers: Record<string, string> };
+} {
+  if (!isLocalBackendUrl(webOrigin)) {
+    throw new Error(`local stack: the web origin is not on this machine (${webOrigin})`);
+  }
+  return {
+    url: `${webOrigin.replace(/\/+$/u, "")}/eve/v1/agent-job/run-now`,
+    init: { method: "POST", headers: { authorization: `Bearer ${LOCAL_CRON_SECRET}` } },
+  };
+}
 
 export function isSafeLocalWebKey(key: string): boolean {
   if ((DURABLE_WRITE_ENV_VARS as readonly string[]).includes(key)) return false;
@@ -85,15 +162,24 @@ export function localWebEnvironment(
   endpoints: LocalStackEndpoints,
 ): Record<string, string> {
   requireLocal(endpoints);
+  const fileKeys = [...envFileKeys];
   const environment: Record<string, string> = {};
-  for (const key of envFileKeys) {
+  for (const key of fileKeys) {
     if (!isSafeLocalWebKey(key)) environment[key] = "";
   }
   // Credentials that are not in the files today are blanked too, so a
   // value inherited from the shell cannot reach production either.
   for (const key of DURABLE_WRITE_ENV_VARS) environment[key] = "";
+  // Production's flags. A safe flag the env files set keeps the developer's
+  // value; an unsafe one stays off even when the shell sets it.
+  for (const flag of PRODUCTION_FLAGS) {
+    if (UNSAFE_FLAGS.has(flag)) environment[flag] = "";
+    else if (!(fileKeys.includes(flag) && isSafeLocalWebKey(flag))) environment[flag] = "true";
+  }
   return {
     ...environment,
+    CRON_SECRET: LOCAL_CRON_SECRET,
+    STRIPE_TEST_SECRET_KEY: LOCAL_STRIPE_SIGNING_KEY,
     NEXT_PUBLIC_SUPABASE_URL: endpoints.apiUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: endpoints.publishableKey,
     // The eval isolation seam (apps/web/lib/eval-isolation.ts) is the one

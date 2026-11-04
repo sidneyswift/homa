@@ -13,7 +13,10 @@ import { isolationTargetMismatch } from "./isolation-target.mjs";
 import {
   dotenvKeys,
   isSafeLocalWebKey,
+  LOCAL_CRON_SECRET,
+  LOCAL_STRIPE_SIGNING_KEY,
   localIsolationEnvironment,
+  localJobsSweepRequest,
   localMobileEnvironment,
   localWebEnvironment,
   type LocalStackEndpoints,
@@ -61,8 +64,6 @@ describe("localWebEnvironment", () => {
     for (const key of [
       "SUPABASE_DB_PASSWORD",
       "RESEND_API_KEY",
-      "CRON_SECRET",
-      "STRIPE_TEST_SECRET_KEY",
       "STRIPE_LIVE_SECRET_KEY",
       "STRIPE_LIVE_RESTRICTED_KEY",
       "NEXT_PUBLIC_STRIPE_LIVE_PUBLISHABLE_KEY",
@@ -79,9 +80,46 @@ describe("localWebEnvironment", () => {
     }
   });
 
+  it("replaces production's cron secret with a local one", () => {
+    assert.equal(environment.CRON_SECRET, LOCAL_CRON_SECRET);
+    assert.notEqual(LOCAL_CRON_SECRET, "");
+  });
+
+  it("turns on production's flags that are safe locally", () => {
+    for (const key of [
+      "HOMA_AGENT_JOBS_ENABLED",
+      "HOMA_LIVE_PROGRESS_ENABLED",
+      "HOMA_SIGNUP_PAYWALL_ENABLED",
+      "JOURNAL_PROMPT_ENABLED",
+      "FLEET_RESEARCH_ENABLED",
+    ]) {
+      assert.equal(environment[key], "true", key);
+    }
+  });
+
+  it("keeps flags that write outside this machine off, whatever the files or shell say", () => {
+    for (const env of [environment, localWebEnvironment([], endpoints)]) {
+      for (const key of ["TELNYX_SMS_ENABLED", "THANK_YOU_CARDS_ENABLED", "HOMA_FAMILY_DRIVES_ENABLED"]) {
+        assert.equal(env[key], "", key);
+      }
+    }
+    const fromFile = localWebEnvironment(["HOMA_FAMILY_DRIVES_ENABLED"], endpoints);
+    assert.equal(fromFile.HOMA_FAMILY_DRIVES_ENABLED, "");
+  });
+
+  it("replaces production's Stripe test secret with a key Stripe rejects", () => {
+    for (const env of [environment, localWebEnvironment([], endpoints)]) {
+      assert.equal(env.STRIPE_TEST_SECRET_KEY, LOCAL_STRIPE_SIGNING_KEY);
+    }
+    assert.match(LOCAL_STRIPE_SIGNING_KEY, /not_a_real_key$/u);
+  });
+
   it("blanks durable-write credentials even when no env file defines them", () => {
     const bare = localWebEnvironment([], endpoints);
-    for (const key of DURABLE_WRITE_ENV_VARS) assert.equal(bare[key], "", key);
+    for (const key of DURABLE_WRITE_ENV_VARS) {
+      if (key === "STRIPE_TEST_SECRET_KEY") continue;
+      assert.equal(bare[key], "", key);
+    }
   });
 
   it("blanks a key it has never heard of", () => {
@@ -132,6 +170,21 @@ describe("localWebEnvironment", () => {
         }),
       /not on this machine/u,
     );
+  });
+});
+
+describe("localJobsSweepRequest", () => {
+  it("posts this machine's run-now route with the local secret", () => {
+    const request = localJobsSweepRequest("http://localhost:3000/");
+    assert.equal(request.url, "http://localhost:3000/eve/v1/agent-job/run-now");
+    assert.deepEqual(request.init, {
+      method: "POST",
+      headers: { authorization: `Bearer ${LOCAL_CRON_SECRET}` },
+    });
+  });
+
+  it("refuses an origin that is not on this machine", () => {
+    assert.throws(() => localJobsSweepRequest("https://thankshoma.com"), /not on this machine/u);
   });
 });
 

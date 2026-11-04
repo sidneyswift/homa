@@ -118,6 +118,24 @@ largest optional download, and everything else works without it.
   instead, and the guard refuses any run where the two disagree
   (`scripts/isolation-target.mjs`).
 
+## What behaves like production
+
+- **Feature flags:** every flag production sets is on locally
+  (`PRODUCTION_FLAGS` in `scripts/local-stack-env.mts`), so worksheets,
+  Progress and the paywall work. Three stay off because they reach
+  outside this Mac: SMS, thank-you cards and family drives. Refresh the
+  list with `vercel env ls production` from `apps/web`.
+- **Worksheets:** `dev:stack web` nudges the job runner every minute,
+  standing in for production's five-minute sweep, so a first worksheet
+  finishes and a failed step retries. Each one spends real model and
+  image tokens.
+- **The paywall:** a new family is walled exactly as in production. The
+  gate signs its checkout links with a fake Stripe key that Stripe
+  rejects, so no checkout or charge can happen. In the simulator the
+  App Store prices do not load (there is no StoreKit test catalog yet),
+  so the paywall says it cannot reach the App Store; "No thanks" and
+  everything after it work.
+
 Plain `pnpm --filter mobile start` and `pnpm --filter web dev` still use
 `.env` and `.env.local`, which point at production. Use the `dev:stack`
 commands whenever you mean local.

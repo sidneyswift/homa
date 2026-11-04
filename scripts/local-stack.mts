@@ -39,7 +39,9 @@ import { isLocalBackendUrl } from "../apps/mobile/src/lib/local-backend";
 
 import {
   dotenvKeys,
+  LOCAL_JOBS_SWEEP_MS,
   localIsolationEnvironment,
+  localJobsSweepRequest,
   localMobileEnvironment,
   localWebEnvironment,
   type LocalStackEndpoints,
@@ -269,9 +271,16 @@ async function web(): Promise<number> {
     `web app against ${status.apiUrl}; ${blanked} production settings blanked, ` +
       `artifacts in ${BLOB_DIR}`,
   );
+  // Production's job sweeper, locally (see LOCAL_JOBS_SWEEP_MS). Best
+  // effort like the real one: a cold or busy server just misses a tick.
+  const sweep = localJobsSweepRequest(WEB_ORIGIN);
+  const sweeper = setInterval(() => {
+    void fetch(sweep.url, { ...sweep.init, signal: AbortSignal.timeout(30_000) }).catch(() => {});
+  }, LOCAL_JOBS_SWEEP_MS);
   try {
     return await runForeground("pnpm", ["--filter", "web", "dev"], env);
   } finally {
+    clearInterval(sweeper);
     blob.server.close();
   }
 }
