@@ -88,6 +88,7 @@ describe("localWebEnvironment", () => {
   it("turns on production's flags that are safe locally", () => {
     for (const key of [
       "HOMA_AGENT_JOBS_ENABLED",
+      "HOMA_CHAT_ONBOARDING",
       "HOMA_LIVE_PROGRESS_ENABLED",
       "HOMA_SIGNUP_PAYWALL_ENABLED",
       "JOURNAL_PROMPT_ENABLED",

@@ -62,13 +62,17 @@ const UNSAFE_FLAGS = new Set([
  * environment on 2026-11-03. Most are Sensitive, so the CLI shows only that
  * they exist; every one with a recorded rollout is on, so presence means
  * "true" here. UNSAFE_FLAGS still win. Refresh with
- * `vercel env ls production` from apps/web.
+ * `vercel env ls production` from apps/web. HOMA_CHAT_ONBOARDING has no
+ * _ENABLED suffix, so the 2026-11-03 read missed it; it has been true in
+ * production since 2026-07-24, and without it the answer route walls a new
+ * iOS family's check-in.
  */
 export const PRODUCTION_FLAGS = [
   "FLEET_RESEARCH_ENABLED",
   "HOMA_ABILITIES_EXPLORER_ENABLED",
   "HOMA_AGENT_JOBS_ENABLED",
   "HOMA_CHANNEL_GATE_ENABLED",
+  "HOMA_CHAT_ONBOARDING",
   "HOMA_CLAIM_EXTRACTION_ENABLED",
   "HOMA_DEVICE_SYNC_ENABLED",
   "HOMA_DRIP_ENABLED",

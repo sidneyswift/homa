@@ -122,9 +122,11 @@ largest optional download, and everything else works without it.
 
 - **Feature flags:** every flag production sets is on locally
   (`PRODUCTION_FLAGS` in `scripts/local-stack-env.mts`), so worksheets,
-  Progress and the paywall work. Three stay off because they reach
-  outside this Mac: SMS, thank-you cards and family drives. Refresh the
-  list with `vercel env ls production` from `apps/web`.
+  Progress, the paywall and a new iPhone family's check-in work. Three
+  stay off because they reach outside this Mac: SMS, thank-you cards and
+  family drives. Refresh the list with `vercel env ls production` from
+  `apps/web`, and read every name: `HOMA_CHAT_ONBOARDING` is a flag
+  without the `_ENABLED` ending.
 - **Worksheets:** `dev:stack web` nudges the job runner every minute,
   standing in for production's five-minute sweep, so a first worksheet
   finishes and a failed step retries. Each one spends real model and
