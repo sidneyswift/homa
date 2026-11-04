@@ -170,11 +170,12 @@ export function localWebEnvironment(
   // Credentials that are not in the files today are blanked too, so a
   // value inherited from the shell cannot reach production either.
   for (const key of DURABLE_WRITE_ENV_VARS) environment[key] = "";
-  // Production's flags. A safe flag the env files set keeps the developer's
-  // value; an unsafe one stays off even when the shell sets it.
+  // Production's flags win over the env files, which are pulled snapshots:
+  // .env.development.local held HOMA_LIVE_PROGRESS_ENABLED=false and kept
+  // Progress paused locally (2026-11-04). Unsafe ones stay off even when
+  // the shell sets them.
   for (const flag of PRODUCTION_FLAGS) {
-    if (UNSAFE_FLAGS.has(flag)) environment[flag] = "";
-    else if (!(fileKeys.includes(flag) && isSafeLocalWebKey(flag))) environment[flag] = "true";
+    environment[flag] = UNSAFE_FLAGS.has(flag) ? "" : "true";
   }
   return {
     ...environment,

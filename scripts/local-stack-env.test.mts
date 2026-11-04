@@ -97,6 +97,16 @@ describe("localWebEnvironment", () => {
     }
   });
 
+  it("turns production's flags on even when an env file says otherwise", () => {
+    const stale = localWebEnvironment(
+      ["HOMA_LIVE_PROGRESS_ENABLED", "HOMA_WALL_ENABLED", "REPORT_NARRATIVE_ENABLED"],
+      endpoints,
+    );
+    assert.equal(stale.HOMA_LIVE_PROGRESS_ENABLED, "true");
+    assert.equal(stale.HOMA_WALL_ENABLED, "true");
+    assert.equal(stale.REPORT_NARRATIVE_ENABLED, "true");
+  });
+
   it("keeps flags that write outside this machine off, whatever the files or shell say", () => {
     for (const env of [environment, localWebEnvironment([], endpoints)]) {
       for (const key of ["TELNYX_SMS_ENABLED", "THANK_YOU_CARDS_ENABLED", "HOMA_FAMILY_DRIVES_ENABLED"]) {
@@ -127,13 +137,11 @@ describe("localWebEnvironment", () => {
     assert.equal(next.SOME_NEW_PROVIDER_SECRET, "");
   });
 
-  it("leaves the model gateway, flags and test links to load from the files", () => {
+  it("leaves the model gateway, local-only flags and test links to load from the files", () => {
     for (const key of [
       "VERCEL_OIDC_TOKEN",
       "OPENAI_API_KEY",
-      "HOMA_WALL_ENABLED",
       "HOMA_DEV_TEST_SESSIONS",
-      "REPORT_NARRATIVE_ENABLED",
       "NEXT_PUBLIC_STRIPE_TEST_PAYMENT_LINK_MONTHLY_URL",
     ]) {
       assert.equal(key in environment, false, `${key} should load from the file`);
