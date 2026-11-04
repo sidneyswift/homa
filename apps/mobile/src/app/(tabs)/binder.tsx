@@ -134,16 +134,16 @@ export default function BinderScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }} edges={["bottom"]}>
       <ScrollView
         contentContainerStyle={{ padding: space.md, gap: space.md }}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void reload()} />}
+        // The pull spinner only while pages are on screen; the first load
+        // has its own named loader below (2026-11-03 walk, gh#1236).
+        refreshControl={<RefreshControl refreshing={loading && materials.length > 0} onRefresh={() => void reload()} />}
       >
-        <View style={{ gap: 2 }}>
-          <Text accessibilityRole="header" style={{ fontFamily: fontFamilies.display, fontSize: fontSize.xxl, color: colors.textStrong }}>
-            Binder
-          </Text>
-          <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
-            Every worksheet, coloring page, or other material Homa has made.
-          </Text>
-        </View>
+        {/* The App 2 top bar already titles this screen "Binder" (and
+            carries the header role), so the screen opens on what it
+            holds rather than saying "Binder" twice (2026-11-03 walk). */}
+        <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textMuted }}>
+          Every worksheet, coloring page, or other material Homa has made.
+        </Text>
 
         {familyLoading || (loading && materials.length === 0) ? (
           <View style={{ paddingVertical: space.xl, alignItems: "center" }}>

@@ -91,6 +91,16 @@ describe("mobile checklist state", () => {
     assert.equal(twice.answered, 1);
     assert.equal(twice.answers[0]?.answer, "easily");
   });
+
+  it("asks first about what the parent said the child is working on", () => {
+    const usual = checklistChaptersFor(child).chapters.map((chapter) => chapter.subjectId);
+    assert.equal(usual[0], "math");
+    const reading = { ...child, helpWith: "Reading" };
+    assert.equal(checklistPositionFor(reading).currentItem?.id.split(".")[0], "literacy");
+    const chapters = checklistChaptersFor(reading).chapters.map((chapter) => chapter.subjectId);
+    assert.deepEqual(chapters.slice(0, 3), ["literacy", "phonics", "math"]);
+    assert.deepEqual([...chapters].sort(), [...usual].sort());
+  });
 });
 
 describe("checklistChaptersFor (D15 rechaptering)", () => {

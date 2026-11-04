@@ -18,6 +18,7 @@ import {
 import { startFirstMaking } from "../../features/onboarding/making";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
+import { joinNatural, workingChipsForAge } from "../../features/onboarding/working-chips";
 import { addChild, getMyChildren } from "../../lib/family";
 import { hapticAdvance, hapticTick } from "../../lib/haptics";
 import { colors, radius, space } from "../../theme/app2";
@@ -54,20 +55,6 @@ function loveChipsForAge(age: number | null): string[] {
   return ["dinosaurs", "animals", "space", "sports", "video games", "drawing", "baking", "music", "princesses"];
 }
 
-function workingChipsForAge(age: number | null): string[] {
-  // "I'm not sure yet" is the deck's S6 escape chip (approved
-  // 2026-08-31): a parent who does not know the working edge yet still
-  // gets through, and the phrase reads fine downstream as an honest
-  // focus hint.
-  if (age !== null && age <= 5) {
-    return ["Letters", "Counting", "Shapes and colors", "First reading", "Handwriting", "I'm not sure yet"];
-  }
-  if (age !== null && age >= 10) {
-    return ["Writing", "Math", "Reading", "Science", "History", "Grammar", "I'm not sure yet"];
-  }
-  return ["Reading", "Writing", "Math", "Handwriting", "Spelling", "Science", "I'm not sure yet"];
-}
-
 const emptyKid = (): DraftKid => ({
   name: "",
   age: null,
@@ -75,13 +62,6 @@ const emptyKid = (): DraftKid => ({
   workingOn: [],
   childId: null,
 });
-
-/** "letters", "letters and counting", "letters, counting and reading". */
-function joinNatural(items: string[]): string {
-  if (items.length <= 1) return items[0] ?? "";
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
-}
 
 export default function KidsScreen() {
   const router = useRouter();

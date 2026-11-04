@@ -189,7 +189,10 @@ export default function ProgressScreen() {
         contentContainerStyle={{ padding: space.md, gap: space.md }}
         refreshControl={
           <RefreshControl
-            refreshing={progressLoading}
+            // The pull spinner belongs to a page she can see; a first load
+            // already shows the placeholder cards, and both at once read as
+            // three loaders (2026-11-03 walk, gh#1236).
+            refreshing={progressLoading && visibleView !== null}
             onRefresh={() => void refreshProgress()}
           />
         }
@@ -418,10 +421,12 @@ function NextMoveStatusCard({
   );
 }
 
+/** One loading state: the placeholder cards, named for screen readers. */
 function ProgressSkeleton({ childName }: { childName: string }) {
+  const label = `Loading ${childName}’s progress`;
+  useAccessibilityAnnouncement(label);
   return (
-    <View style={{ gap: space.md }}>
-      <LoadingStatus label={`Loading ${childName}’s progress`} />
+    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={{ gap: space.md }}>
       <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ gap: space.md }}>
         {[0, 1].map((index) => (
           <Card key={index} style={{ gap: space.sm }}>

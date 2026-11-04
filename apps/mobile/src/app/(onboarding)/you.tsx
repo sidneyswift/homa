@@ -23,6 +23,7 @@ import { NativeText } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { saveWalkBasics } from "../../features/onboarding/basics";
+import { searchStates } from "../../features/onboarding/state-search";
 import {
   reportOnboardingStep,
   saveOnboardingStep,
@@ -59,6 +60,7 @@ export default function YouScreen() {
   const [name, setName] = useState("");
   const [stateCode, setStateCode] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [stateQuery, setStateQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sheetHeadingRef = useRef<View>(null);
@@ -66,6 +68,12 @@ export default function YouScreen() {
 
   const stateName =
     US_STATES.find((state) => state.code === stateCode)?.name ?? null;
+  const stateMatches = searchStates(stateQuery);
+
+  function closePicker() {
+    setPickerOpen(false);
+    setStateQuery("");
+  }
 
   useEffect(() => {
     if (!family || reported.current) return;
@@ -219,9 +227,12 @@ export default function YouScreen() {
         title="Choose your state"
         initialFocusRef={sheetHeadingRef}
         transparent
-        onRequestClose={() => setPickerOpen(false)}
+        onRequestClose={closePicker}
       >
-        <View
+        {/* The search field lives in this bottom sheet, so the sheet
+            rises with the keyboard; otherwise the keyboard covers it. */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{
             flex: 1,
             justifyContent: "flex-end",
@@ -261,18 +272,37 @@ export default function YouScreen() {
                   Choose your state
                 </Text>
               </View>
-              <IconButton label="Close" onPress={() => setPickerOpen(false)}>
+              <IconButton label="Close" onPress={closePicker}>
                 <Icon name="close" size={20} color={colors.textSubtle} />
               </IconButton>
             </View>
+            <View style={{ paddingHorizontal: space.lg, paddingBottom: space.sm }}>
+              <TextField
+                label="Find your state"
+                value={stateQuery}
+                onChangeText={setStateQuery}
+                placeholder="Start typing, like Ohio"
+                autoCapitalize="words"
+                autoCorrect={false}
+                clearButtonMode="while-editing"
+                returnKeyType="done"
+                testID="you.stateSearch"
+              />
+            </View>
             <ScrollView
               showsVerticalScrollIndicator
+              keyboardShouldPersistTaps="handled"
               contentContainerStyle={{
                 paddingHorizontal: space.lg,
                 paddingBottom: space.lg,
               }}
             >
-              {US_STATES.map((state) => {
+              {stateMatches.length === 0 ? (
+                <NativeText role="body" tone="muted">
+                  {`No state starts with "${stateQuery.trim()}".`}
+                </NativeText>
+              ) : null}
+              {stateMatches.map((state) => {
                 const selected = stateCode === state.code;
                 return (
                   <Pressable
@@ -282,7 +312,7 @@ export default function YouScreen() {
                     accessibilityState={{ selected }}
                     onPress={() => {
                       setStateCode(state.code);
-                      setPickerOpen(false);
+                      closePicker();
                     }}
                     style={{
                       minHeight: 48,
@@ -312,7 +342,7 @@ export default function YouScreen() {
               })}
             </ScrollView>
           </SafeAreaView>
-        </View>
+        </KeyboardAvoidingView>
       </AccessibleModal>
     </WalkScene>
   );

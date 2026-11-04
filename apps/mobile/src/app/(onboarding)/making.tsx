@@ -33,6 +33,7 @@ import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
 import { MakingFeatureCards } from "../../features/onboarding/making-feature-cards";
+import { withMakingNote } from "../../features/onboarding/making-notes";
 import { MakingShow } from "../../features/onboarding/making-show";
 import {
   loadOnboardingAnswers,
@@ -177,13 +178,7 @@ export default function MakingScreen() {
             : job?.status === "running"
               ? "Pencils are moving"
               : null);
-        if (note) {
-          setNotes((current) =>
-            current[current.length - 1] === note
-              ? current
-              : [...current.slice(-3), note],
-          );
-        }
+        if (note) setNotes((current) => withMakingNote(current, note));
         if (job?.status === "completed") {
           await saveOnboardingStep(family.id, "reveal").catch(() => {});
           setPageReady(true);

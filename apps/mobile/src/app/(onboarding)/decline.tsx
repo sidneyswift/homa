@@ -39,6 +39,13 @@ import { space } from "../../theme/app2";
  * for the free-page credit, and the "Remind me later" snooze waits for
  * the D13 notification module (both flagged on gh#1045).
  */
+/** The walk's beat layout (as in you.tsx): the words sit right under
+ * Homa and the actions rest at the bottom. Centering the short copy in
+ * the space below her left a tall blank band above the heading
+ * (2026-11-03 walk, gh#1236). */
+const BEAT_LAYOUT = { flex: 1, padding: space.lg, paddingTop: space.xl, gap: space.md } as const;
+const ACTIONS_LAYOUT = { marginTop: "auto", gap: space.sm } as const;
+
 export default function DeclineScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ trial?: string | string[] }>();
@@ -101,7 +108,7 @@ export default function DeclineScreen() {
   if (gate === null) {
     return (
       <WalkScene>
-        <View style={{ flex: 1, padding: space.lg, gap: space.md, justifyContent: "center" }}>
+        <View style={BEAT_LAYOUT}>
           <NativeText role="body" tone="body">
             That did not load. Check your connection and try again.
           </NativeText>
@@ -116,19 +123,21 @@ export default function DeclineScreen() {
     // entitled (a restore landed mid-paywall): nothing to soften.
     return (
       <WalkScene>
-        <View style={{ flex: 1, padding: space.lg, paddingTop: space.xl, gap: space.md, justifyContent: "center" }}>
+        <View style={BEAT_LAYOUT}>
           <NativeText role="display" tone="strong">
             Take your time.
           </NativeText>
           <NativeText role="body" tone="body">
             {"Nothing's locked yet. When that's about to change, I'll say so."}
           </NativeText>
-          <Button
-            label="Look around"
-            size="lg"
-            onPress={() => router.replace("/next" as never)}
-            testID="decline.lookAround"
-          />
+          <View style={ACTIONS_LAYOUT}>
+            <Button
+              label="Look around"
+              size="lg"
+              onPress={() => router.replace("/next" as never)}
+              testID="decline.lookAround"
+            />
+          </View>
         </View>
       </WalkScene>
     );
@@ -136,7 +145,7 @@ export default function DeclineScreen() {
 
   return (
     <WalkScene>
-      <View style={{ flex: 1, padding: space.lg, paddingTop: space.xl, gap: space.md, justifyContent: "center" }}>
+      <View style={BEAT_LAYOUT}>
         <NativeText role="display" tone="strong">
           No pressure.
         </NativeText>
@@ -145,23 +154,25 @@ export default function DeclineScreen() {
             ? `${childName}'s page is yours to keep.`
             : "The page you made is yours to keep."}
         </NativeText>
-        <Button
-          label={childName ? `See ${childName}'s page` : "See the page"}
-          size="lg"
-          onPress={() => void completeIntoBinder()}
-          disabled={leaving}
-          busy={leaving}
-          testID="decline.seePage"
-        />
-        {trialOffered ? (
+        <View style={ACTIONS_LAYOUT}>
           <Button
-            label="Actually, start the free week"
-            variant="secondary"
-            onPress={() => router.replace("/paywall" as never)}
+            label={childName ? `See ${childName}'s page` : "See the page"}
+            size="lg"
+            onPress={() => void completeIntoBinder()}
             disabled={leaving}
-            testID="decline.startFreeWeek"
+            busy={leaving}
+            testID="decline.seePage"
           />
-        ) : null}
+          {trialOffered ? (
+            <Button
+              label="Actually, start the free week"
+              variant="secondary"
+              onPress={() => router.replace("/paywall" as never)}
+              disabled={leaving}
+              testID="decline.startFreeWeek"
+            />
+          ) : null}
+        </View>
       </View>
     </WalkScene>
   );
