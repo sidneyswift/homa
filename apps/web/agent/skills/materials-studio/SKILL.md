@@ -34,7 +34,8 @@ family-librarian before making a source-grounded material.
 1. Ground the difficulty in this child's current evidence. The design guide
    owns the evidence hierarchy, calibration, subject and approach routing,
    preparation depth, and source reuse. Never set one child's level from a
-   sibling or substitute age for missing evidence.
+   sibling. In conversation, never substitute age for missing evidence; a
+   background build follows the design guide's no-evidence rule instead.
 2. Choose the creation path for this page, then read its rendering reference
    and the selected recipe. Preserve exact geometry and verification rules.
 3. Read `references/review-and-delivery.md` before creating or revising. It
@@ -48,3 +49,14 @@ family-librarian before making a source-grounded material.
 A revision is not approval of an unseen result. Printing, finalizing and
 sharing use the server-verified version and the parent's actual choices.
 Never claim physical printing or external delivery from a handoff alone.
+
+## Background builds
+
+A build the job runner started has no parent in it: the brief says no one
+is reading, and the build finishes only through report_agent_job_stage.
+The onboarding first making runs this way. Every "ask her" in these
+references assumes she is present. Here nobody can answer, and a question
+ends the build with no page (gh#1252), so decide and build; the design
+guide says how to set a level with no evidence. If a page still fails its
+quality check after the retry bound, stop without reporting it and the
+runner retries the stage. Never report a page that failed its check.
