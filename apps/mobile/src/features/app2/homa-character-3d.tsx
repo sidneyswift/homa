@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber/native";
 import { useFocusEffect } from "expo-router";
 import { Component, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppState, View } from "react-native";
-import { useReducedMotion } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useReducedMotion, withTiming } from "react-native-reanimated";
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from "react-native-svg";
 import { OrthographicCamera, type Group } from "three";
 
@@ -14,6 +14,26 @@ import { houseShape } from "./house-shape";
 
 /** Animation cadence for the idle character; see PacedFrames. */
 const FRAME_MS = 1000 / 30;
+
+/**
+ * Homa and her shadow fade in together once a frame has really drawn.
+ * Starting a GL surface takes a moment, and the shadow, plain SVG, used
+ * to sit alone on screen meanwhile (founder ask 2026-11-03: look more
+ * professional). The fallback shows her even if no frame ever reports.
+ */
+const REVEAL_MS = 220;
+const REVEAL_FALLBACK_MS = 2500;
+
+/**
+ * How long Homa must stay mounted before she gets a GL surface. Screens
+ * mount, tear down and remount her while navigation settles (chat did it
+ * three times on entry), and each short-lived copy started and dropped a
+ * GL context; a blank chat character after onboarding followed that churn
+ * (2026-11-03). Throwaway mounts now never create one, so the first-surface
+ * replacement below also lands on the copy that stays. The reveal hides
+ * the wait.
+ */
+const SURFACE_SETTLE_MS = 200;
 
 /**
  * The first on-screen GL view after launch never shows a frame on iOS:
@@ -64,17 +84,22 @@ function PacedFrames({ moving }: { moving: boolean }) {
 }
 
 /** Native port of the #1158 web study (apps/web/app/app2/homa-character.tsx): same silhouette, timings and materials. */
-function CharacterModel({ moving }: { moving: boolean }) {
+function CharacterModel({ moving, onFirstFrame }: { moving: boolean; onFirstFrame: () => void }) {
   const body = useRef<Group>(null);
   const eyes = useRef<(Group | null)[]>([]);
   const pupils = useRef<(Group | null)[]>([]);
   const time = useRef(0);
+  const reported = useRef(false);
   const invalidate = useThree(state => state.invalidate);
   const shape = useMemo(() => houseShape(HOUSE_PATH), []);
   const extrusion = useMemo(() => ({ depth: 18, bevelEnabled: true, bevelThickness: 1.5, bevelSize: 1.25, bevelSegments: 6, curveSegments: 32, steps: 1 }), []);
 
   useEffect(() => { invalidate(); }, [moving, invalidate]);
   useFrame((_, delta) => {
+    if (!reported.current) {
+      reported.current = true;
+      onFirstFrame();
+    }
     if (moving) time.current += Math.min(delta, 0.05);
     const t = moving ? time.current : 0;
     if (!body.current) return;
@@ -153,12 +178,34 @@ export function HomaCharacter3D({ size, paused = false }: { size: number; paused
   const [focused, setFocused] = useState(true);
   const [failed, setFailed] = useState(false);
   const [surface, setSurface] = useState(0);
+  const [settled, setSettled] = useState(false);
+  const [drawn, setDrawn] = useState(false);
+  // The first surface after launch is replaced unseen, so its frames never reveal.
+  const replacing = useRef(false);
+  const revealStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(drawn ? 1 : 0, { duration: drawn && !reducedMotion ? REVEAL_MS : 0 }),
+  }), [drawn, reducedMotion]);
   const markFailed = useCallback(() => setFailed(true), []);
   const surfaceReady = useCallback(() => {
+    replacing.current = !firstSurfaceSpent;
     if (firstSurfaceSpent) return;
     firstSurfaceSpent = true;
     requestAnimationFrame(() => setSurface(current => current + 1));
   }, []);
+  const reveal = useCallback(() => {
+    if (replacing.current) return;
+    // The frame presents on the next vsync; reveal after it, not before.
+    requestAnimationFrame(() => setDrawn(true));
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(true), SURFACE_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (drawn) return;
+    const timer = setTimeout(() => setDrawn(true), SURFACE_SETTLE_MS + REVEAL_FALLBACK_MS);
+    return () => clearTimeout(timer);
+  }, [drawn]);
   useEffect(() => {
     const subscription = AppState.addEventListener("change", state => setForeground(state === "active"));
     return () => subscription.remove();
@@ -174,30 +221,32 @@ export function HomaCharacter3D({ size, paused = false }: { size: number; paused
       {failed ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}><Logo variant="mark" size={size * 0.7} /></View>
       ) : (
-        <CharacterBoundary onError={markFailed}>
-          <Canvas
-            key={surface}
-            style={{ flex: 1 }}
-            orthographic
-            camera={{ position: [0, 0, 100], near: 0.1, far: 300 }}
-            frameloop="demand"
-            gl={{ antialias: true }}
-            onCreated={({ gl }) => {
-              gl.setClearColor(colors.page, 1);
-              surfaceReady();
-            }}
-          >
-            <ambientLight intensity={1.2} />
-            <directionalLight position={[-30, 45, 60]} intensity={3.2} />
-            <directionalLight position={[35, 10, -10]} intensity={2.4} />
-            <directionalLight position={[0, -20, 40]} intensity={0.3} />
-            <CharacterFraming />
-            <PacedFrames moving={moving} />
-            <CharacterModel moving={moving} />
-          </Canvas>
-        </CharacterBoundary>
+        <Animated.View style={[{ flex: 1 }, revealStyle]}>
+          {settled ? <CharacterBoundary onError={markFailed}>
+            <Canvas
+              key={surface}
+              style={{ flex: 1 }}
+              orthographic
+              camera={{ position: [0, 0, 100], near: 0.1, far: 300 }}
+              frameloop="demand"
+              gl={{ antialias: true }}
+              onCreated={({ gl }) => {
+                gl.setClearColor(colors.page, 1);
+                surfaceReady();
+              }}
+            >
+              <ambientLight intensity={1.2} />
+              <directionalLight position={[-30, 45, 60]} intensity={3.2} />
+              <directionalLight position={[35, 10, -10]} intensity={2.4} />
+              <directionalLight position={[0, -20, 40]} intensity={0.3} />
+              <CharacterFraming />
+              <PacedFrames moving={moving} />
+              <CharacterModel moving={moving} onFirstFrame={reveal} />
+            </Canvas>
+          </CharacterBoundary> : null}
+          <GroundShadow size={size} />
+        </Animated.View>
       )}
-      {failed ? null : <GroundShadow size={size} />}
     </View>
   );
 }

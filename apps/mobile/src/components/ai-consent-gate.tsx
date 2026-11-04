@@ -7,6 +7,8 @@ import {
   getMyConsentStatus,
   recordAiProcessingConsent,
 } from "../lib/family";
+import { App2Button } from "../features/app2/app2-button";
+import { HomaCharacter3D } from "../features/app2/homa-character-3d";
 import { useSession } from "../features/auth/session-provider";
 import { reportBootstrapEvent } from "../features/bootstrap/bootstrap-events";
 import { runMobileBootstrapStep } from "../features/bootstrap/mobile-bootstrap";
@@ -25,7 +27,15 @@ import { LoadingStatus } from "./ui/loading-status";
  * passes through. Record lives on family_members
  * (supabase/migrations/20260728190000_ai_processing_consent.sql), not a
  * local flag, so it survives reinstalls and is auditable.
+ *
+ * The onboarding gate is a whole screen, so it takes the email door's App 2
+ * layout: the 3D Homa over a centered heading and the disclosure, the agree
+ * control directly beneath (founder ask 2026-11-03: centered, more
+ * professional). Chat and Progress keep the in-place card.
  */
+const DISCLOSURE =
+  "What you and your kids share here, including what you write and your family's details, is processed by outside AI providers so Homa can help. We never sell it.";
+
 export function AiConsentGate({
   children,
   purpose = "chat",
@@ -145,8 +155,66 @@ export function AiConsentGate({
     );
   }
 
+  const agreeLabel = saving
+    ? "One moment\u2026"
+    : purpose === "onboarding"
+      ? "I agree, keep going"
+      : purpose === "progress"
+      ? "I agree, show suggestions"
+      : "I agree, let's chat";
+
+  if (purpose === "onboarding") {
+    return (
+      <ConsentFrame onboarding embedded={embedded}>
+        <View style={{ alignItems: "center", gap: space.sm }}>
+          <HomaCharacter3D size={96} />
+          <Text
+            accessibilityRole="header"
+            style={{
+              textAlign: "center",
+              marginTop: space.xs,
+              fontFamily: fontFamilies.displaySemibold,
+              fontSize: fontSize.xxl,
+              color: colors.textStrong,
+            }}
+          >
+            Before Homa makes your first page
+          </Text>
+          <Text
+            style={{
+              textAlign: "center",
+              maxWidth: 340,
+              fontFamily: fontFamilies.body,
+              fontSize: fontSize.base,
+              lineHeight: 22,
+              color: colors.textBody,
+            }}
+          >
+            {DISCLOSURE}
+          </Text>
+        </View>
+        <View style={{ gap: space.sm, marginTop: space.xl }}>
+          {errorMessage ? <InlineError message={errorMessage} /> : null}
+          <App2Button
+            label={agreeLabel}
+            size="lg"
+            onPress={() => void handleAgree()}
+            disabled={saving}
+            busy={saving}
+          />
+          <App2Button
+            label="Read the privacy policy"
+            variant="quiet"
+            size="sm"
+            onPress={() => void openPrivacyPolicy()}
+          />
+        </View>
+      </ConsentFrame>
+    );
+  }
+
   return (
-    <ConsentFrame onboarding={purpose === "onboarding"} embedded={embedded}>
+    <ConsentFrame onboarding={false} embedded={embedded}>
       <Card style={{ gap: space.md }}>
         <Text
           accessibilityRole="header"
@@ -156,18 +224,14 @@ export function AiConsentGate({
             color: colors.textStrong,
           }}
         >
-          {purpose === "onboarding"
-            ? "Before Homa makes your first page"
-            : purpose === "progress"
+          {purpose === "progress"
             ? "Before Homa suggests a next move"
             : "Before you chat with Homa"}
         </Text>
         <Text
           style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textBody }}
         >
-          {
-            "What you and your kids share here, including what you write and your family's details, is processed by outside AI providers so Homa can help. We never sell it."
-          }
+          {DISCLOSURE}
         </Text>
         <Button
           label="Read the privacy policy"
@@ -176,15 +240,7 @@ export function AiConsentGate({
         />
         {errorMessage ? <InlineError message={errorMessage} /> : null}
         <Button
-          label={
-            saving
-              ? "One moment\u2026"
-              : purpose === "onboarding"
-                ? "I agree, keep going"
-                : purpose === "progress"
-                ? "I agree, show suggestions"
-                : "I agree, let's chat"
-          }
+          label={agreeLabel}
           onPress={() => void handleAgree()}
           disabled={saving}
         />
@@ -199,9 +255,14 @@ function ConsentFrame({ children, onboarding, embedded }: {
   embedded: boolean;
 }) {
   if (onboarding) {
-    return <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: space.lg, flexGrow: 1 }}>
-        {children}
+    // Spacers sit the content a little above center, where the eye lands.
+    return <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: space.lg, paddingVertical: space.lg }}>
+        <View style={{ flexGrow: 1, minHeight: space.lg }} />
+        <View style={{ width: "100%", maxWidth: 440, alignSelf: "center" }}>
+          {children}
+        </View>
+        <View style={{ flexGrow: 1.3, minHeight: space.lg }} />
       </ScrollView>
     </SafeAreaView>;
   }
