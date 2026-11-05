@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { accessSync, readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { createRequire } from "node:module";
-import { resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 import serverlessChromium from "@sparticuz/chromium";
 import { chromium, expect, test, type Browser, type Page } from "@playwright/test";
@@ -227,7 +228,7 @@ test("real composer acceptance stays visible until canonical feed catches up, th
   await page.reload(); await expect(page.getByRole("log").getByText("Please keep these exact words", { exact: true })).toBeVisible();
   await expect(page.getByRole("log").getByText("Your conversation stays with you.", { exact: true })).toBeVisible();
   await page.waitForTimeout(200);
-  await page.screenshot({ path: "/private/tmp/homa-conversation-controls-restored.png", fullPage: true });
+  await page.screenshot({ path: join(tmpdir(), "homa-conversation-controls-restored.png"), fullPage: true });
   await context.close();
 });
 
@@ -381,7 +382,7 @@ test("native multi-question choices freeze one complete batch, survive refresh a
   const ids = await page.getByRole("log").locator("[data-message-id]").evaluateAll(rows => rows.map(row => row.getAttribute("data-message-id")));
   expect(ids.indexOf(preceding.id)).toBeLessThan(ids.indexOf(nativeMessage.id));
   expect(ids.indexOf(nativeMessage.id)).toBeLessThan(ids.indexOf(receipts.get(entry!.intentId)!.messageId));
-  await page.screenshot({ path: "/private/tmp/homa-native-question-history.png", fullPage: true });
+  await page.screenshot({ path: join(tmpdir(), "homa-native-question-history.png"), fullPage: true });
   expect(nativeSubmissions).toHaveLength(1);
   await context.close();
 });
@@ -463,7 +464,7 @@ test("workspace navigation reveals labeled destinations and Escape preserves the
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "Planner", exact: true })).toBeFocused();
   for (const name of ["Binder", "Progress"]) await expect(page.getByRole("button", { name, exact: true })).toBeVisible();
-  await page.screenshot({ path: "/private/tmp/homa-navigation-desktop.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-navigation-desktop.png") });
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "Planner", exact: true })).toBeFocused();
   await page.getByRole("button", { name: "Open navigation", exact: true }).click();
@@ -487,7 +488,7 @@ test("workspace navigation fits phones and dismisses without intercepting the co
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ forcedColors: "none", reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Open navigation", exact: true }).click();
-  await page.screenshot({ path: "/private/tmp/homa-navigation-phone.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-navigation-phone.png") });
   await page.getByRole("button", { name: "Fixture sign out" }).click();
   await expect(page.getByRole("button", { name: "Open navigation", exact: true })).toBeDisabled();
   await expect(page.getByRole("link", { name: /^Binder/ })).toHaveCount(0);
@@ -520,7 +521,7 @@ test("workspace opens beside the real chat, preserves the draft, and follows bro
   await expect(page.getByRole("complementary")).toBeVisible();
   await expect(composer(page)).toHaveValue("Keep this unfinished thought");
   await expect(page.getByText("Count the blue buttons", { exact: true })).toBeVisible();
-  await page.screenshot({ path: "/private/tmp/homa-workspace-desktop.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-workspace-desktop.png") });
   await context.close();
 });
 
@@ -537,7 +538,7 @@ test("workspace on a phone keeps the composer usable and covered conversation ou
   await submit(page, "Keep planning while I type");
   await expect.poll(() => submissions.length).toBe(1);
   await expect(page.getByRole("complementary")).toBeVisible();
-  await page.screenshot({ path: "/private/tmp/homa-workspace-phone.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-workspace-phone.png") });
   await page.getByRole("button", { name: "Close planner" }).click();
   await expect(page.getByRole("log")).toContainText("Keep planning while I type");
   await expect(page.getByRole("button", { name: "Start voice", exact: true })).toBeVisible();
@@ -608,7 +609,7 @@ test("workspace fits a narrow short screen with large text and forced colors", a
   const panel = await page.getByRole("complementary").boundingBox(), input = await composer(page).boundingBox();
   expect(panel!.height).toBeGreaterThan(100);
   expect(panel!.y + panel!.height).toBeLessThan(input!.y);
-  await page.screenshot({ path: "/private/tmp/homa-workspace-phone-forced.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-workspace-phone-forced.png") });
   await context.close();
 });
 
@@ -645,7 +646,7 @@ test("workspace calendar navigation restores exact dates without losing the chat
   await expect(composer(page)).toHaveValue("Keep my draft");
   await page.goBack();
   await expect(page.getByRole("link", { name: "Week", exact: true })).toHaveAttribute("aria-current", "page");
-  await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-week.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-workspace-calendar-week.png") });
   await context.close();
 });
 
@@ -668,7 +669,7 @@ test("workspace event form survives a failed save and keeps the composer reachab
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Nature walk/ })).toBeVisible();
   expect(calendarWrites[1]).toMatchObject({ name: "createFamilyEventAction", args: [{ title: "Nature walk", startsOn: calendarToday, childIds: [] }] });
-  await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-phone.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-workspace-calendar-phone.png") });
   await context.close();
 });
 
@@ -736,7 +737,7 @@ test("workspace event detail opens visibly after scrolling and restores the list
   const panel = await page.getByRole("complementary").boundingBox(), heading = await title.boundingBox();
   expect(heading!.y).toBeGreaterThanOrEqual(panel!.y);
   expect(heading!.y).toBeLessThan(panel!.y + panel!.height);
-  await page.screenshot({ path: "/private/tmp/homa-workspace-calendar-detail.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-workspace-calendar-detail.png") });
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   expect(await page.locator("[data-workspace-scroll]").evaluate(element => element.scrollTop)).toBeGreaterThan(100);
   await context.close();
@@ -757,7 +758,7 @@ for (const width of [1440, 390]) test(`Binder and Progress stay in the workspace
   const detail = await page.getByRole("dialog").boundingBox();
   const input = await composer(page).boundingBox();
   if (width < 960) expect(detail!.y + detail!.height).toBeLessThan(input!.y);
-  await page.screenshot({ path: `/private/tmp/homa-binder-${width}.png` });
+  await page.screenshot({ path: join(tmpdir(), `homa-binder-${width}.png`) });
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   await page.getByRole("button", { name: "Open navigation", exact: true }).click();
   await page.getByRole("button", { name: "Progress", exact: true }).click();
@@ -769,7 +770,7 @@ for (const width of [1440, 390]) test(`Binder and Progress stay in the workspace
   await expect(page.getByRole("dialog")).not.toHaveAttribute("aria-modal", "true");
   await composer(page).focus();
   await expect(composer(page)).toBeFocused();
-  await page.screenshot({ path: `/private/tmp/homa-progress-detail-${width}.png` });
+  await page.screenshot({ path: join(tmpdir(), `homa-progress-detail-${width}.png`) });
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   await page.getByRole("button", { name: "Ask Homa about Leo" }).click();
   await expect(page.getByRole("button", { name: "Send this question", exact: true })).toBeFocused();
@@ -777,7 +778,7 @@ for (const width of [1440, 390]) test(`Binder and Progress stay in the workspace
   await page.getByRole("button", { name: "Dismiss question", exact: true }).click();
   await expect(composer(page)).toHaveValue("Keep this draft while viewing a worksheet");
   expect(submissions).toHaveLength(0);
-  await page.screenshot({ path: `/private/tmp/homa-progress-${width}.png` });
+  await page.screenshot({ path: join(tmpdir(), `homa-progress-${width}.png`) });
   await page.getByRole("button", { name: "Close progress" }).click();
   await expect(page.getByRole("complementary")).toHaveCount(0);
   await page.goBack();
@@ -907,7 +908,7 @@ test("saved activity plan adjusts locally and prepares an explicit save request"
   const actionBox = await card.getByRole("button", { name: "Ask Homa to save changes" }).boundingBox();
   const composerBox = await composer(page).boundingBox();
   expect(actionBox!.y + actionBox!.height).toBeLessThan(composerBox!.y);
-  await page.screenshot({ path: "/private/tmp/homa-activity-plan-phone.png" });
+  await page.screenshot({ path: join(tmpdir(), "homa-activity-plan-phone.png") });
   await card.getByRole("button", { name: "Ask Homa to save changes" }).click();
   await expect(page.getByRole("button", { name: "Send this question" })).toBeVisible();
   expect(submissions).toHaveLength(0);
