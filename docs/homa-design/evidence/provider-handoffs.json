@@ -21,7 +21,7 @@
       "surface:c8e463bbf676c362"
     ],
     "surfaceIdsFingerprint": "a059090192c9aaf1bc03670f05ac8be13d17496f8869a1f7b326d37ab6587881",
-    "scopedInputFingerprint": "6170006891622504e530d5a42116fc8dab782bbe3ccb5143782a55f0974bf4ba"
+    "scopedInputFingerprint": "730e4d40eee7ad1ddb34df082accb56bc78eb6aa0c46eb95b2c8ae3f147162cb"
   },
   "records": [
     {
@@ -181,7 +181,7 @@
         "Stripe retries transient webhook failures while unknown families are acknowledged without cross-tenant writes.",
         "Payment failures return a truthful recovery destination instead of a branded dead end."
       ],
-      "scopedInputFingerprint": "e965dd4b5348dd2e44a0bb976cf3b5c18b2dc809667d344ae05c3b0237a1a993"
+      "scopedInputFingerprint": "19a5cd4d436c009f35a8b782e1109df5255bdd664acc668a4e56b40c17b86f87"
     },
     {
       "id": "supabase-auth-email-and-callback",
@@ -280,7 +280,7 @@
         "Expired recovery tokens never create a session and return to the recovery screen.",
         "Tenant identity is derived from the authenticated Supabase session, never provider callback text."
       ],
-      "scopedInputFingerprint": "8369165c975bfc1dedaffaea1e828fa7f258e4a70a6fdfb9b49fedd2de135282"
+      "scopedInputFingerprint": "c2e378bfc7495aeeaea160a0347f3ac99036ebdcf3c023927b7f62b5ffdbaa76"
     },
     {
       "id": "google-identity",
@@ -595,7 +595,7 @@
         "Provider outages never become a guessed paid state and never cross family boundaries.",
         "App Store products stay unavailable until old builds cannot start a legacy-token purchase and the signed auto-renew plus immediate-deletion activation requirements are certified."
       ],
-      "scopedInputFingerprint": "5d646586696d47378a735cda676e0b33df81d6920f91bc38cd18bc97aac98c9a"
+      "scopedInputFingerprint": "6d660886fcde837181844a12926ccbce1496ae52d87d4b8963a0053f478646e7"
     }
   ],
   "manifestSchemaVersion": 3,
@@ -644,7 +644,7 @@
       },
       {
         "path": "apps/web/.env.example",
-        "sha256": "e0a25d231a184791cadc07ecafdac739867c782483a453845267cd94b8d88d94"
+        "sha256": "01e70b161756c6b9a27381cf0f756920f44e8106f53f92eca088473bcbf9e32d"
       },
       {
         "path": "apps/web/app/api/billing/apple/confirm/route.ts",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "3cae12e11f80e21bb60169ba8d4b9cdd7544cfa6a192a6246264d5b97c4cfc08"
+    "sourceFingerprint": "834513eccf98cc4776debee6fdccd3c2e9cb0d7b3fe0560a70a962e99325b77a"
   }
 }

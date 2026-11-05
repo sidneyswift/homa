@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "6f00f9a251157f0eef2444efb19611aeba6fd7ed9ab1bae341daddbad7932721",
+  "ownedInputFingerprint": "4076572fe4c63055bd661de986fd3d37f17815117bcc35be554873a715a5c5ad",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -116,7 +116,7 @@
     {
       "surfaceId": "surface:0181a9657036c0f8",
       "path": "apps/web/agent/skills/materials-studio/SKILL.md",
-      "sourceHash": "6fd57173517027aeae5367f06891480a28663710f55344589dc500e8cd84a515",
+      "sourceHash": "f7af8fbbaf5fbd8c54d70e0e3472884886328d207f12139ada9d9464bed593d3",
       "legacySignatures": [],
       "detectedSourceHash": "c6e2b3d894f8136fe677ab5e11a528e4a06d2b87d5941f80b140068bdea3924c",
       "detectedLegacySignatures": [
@@ -6386,7 +6386,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "9f59379094fc238e1564c83f5961dafa6e044a7f65eb9b1fad5fb2343ea71a05",
+      "sourceHash": "7c3c305c0f5937df2fe809ee3395c57fd3ad80dc3d7347aa21832667f8855907",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
