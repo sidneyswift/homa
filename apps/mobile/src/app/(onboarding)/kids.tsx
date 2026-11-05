@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { InlineError } from "../../components/ui/inline-error";
@@ -18,6 +18,7 @@ import {
 import { startFirstMaking } from "../../features/onboarding/making";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
+import { interestWithGlyph, WorksheetPreviewCard } from "../../features/onboarding/worksheet-preview-card";
 import { joinNatural, workingChipsForAge } from "../../features/onboarding/working-chips";
 import { addChild, getMyChildren } from "../../lib/family";
 import { hapticAdvance, hapticTick } from "../../lib/haptics";
@@ -72,6 +73,15 @@ export default function KidsScreen() {
   const [workingText, setWorkingText] = useState("");
   const [workingOther, setWorkingOther] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const shown = Keyboard.addListener("keyboardWillShow", () => setKeyboardVisible(true));
+    const hidden = Keyboard.addListener("keyboardWillHide", () => setKeyboardVisible(false));
+    return () => {
+      shown.remove();
+      hidden.remove();
+    };
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const reported = useRef(false);
   // Saves must wait for hydration: the save effect fires on mount with
@@ -279,8 +289,45 @@ export default function KidsScreen() {
   }
 
   const kidNumber = kids.length;
+  const forward =
+    subStep === "name"
+      ? {
+          label: kid.name.trim() ? `Meet ${kid.name.trim()}` : "Next",
+          disabled: !kid.name.trim(),
+          onPress: () => goTo("age"),
+          testID: "kids.name.next",
+        }
+      : subStep === "age"
+        ? { label: "Next", disabled: kid.age === null, onPress: () => goTo("love"), testID: "kids.age.next" }
+        : subStep === "love"
+          ? {
+              label: "Next",
+              disabled: !loveText.trim() && kid.love.length === 0,
+              onPress: confirmLoves,
+              testID: "kids.love.next",
+            }
+          : {
+              label: saving
+                ? "One moment…"
+                : kidNumber === 1
+                  ? `Make ${kid.name.trim()}'s worksheet`
+                  : "That's everyone",
+              disabled: kid.workingOn.length === 0 || saving,
+              onPress: () => void thatIsEveryone(),
+              testID: "kids.thatsEveryone",
+            };
+  // The worksheet fills in as she answers; it steps aside while a
+  // keyboard is up so the forward button never leaves the screen.
+  const preview = keyboardVisible ? null : (
+    <WorksheetPreviewCard
+      name={kid.name}
+      age={kid.age}
+      interests={[...kid.love, ...(loveText.trim() ? [loveText.trim()] : [])]}
+      subjects={kid.workingOn}
+    />
+  );
   const heading =
-    kidNumber === 1 ? "Who are we making this for?" : "Who else are we making this for?";
+    kidNumber === 1 ? "Who's the first worksheet for?" : "Who's the next worksheet for?";
 
   return (
     <WalkScene>
@@ -305,7 +352,7 @@ export default function KidsScreen() {
                 {heading}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                First name is enough. It goes on their worksheet.
+                Just a first name. It goes at the top of the worksheet. More kids? Add them after this one.
               </NativeText>
               <TextField
                 label="Your child's first name"
@@ -313,30 +360,19 @@ export default function KidsScreen() {
                 onChangeText={(name) => updateKid({ name })}
                 autoCapitalize="words"
                 autoComplete="off"
-                placeholder="Your child's name, e.g. Maya"
+                placeholder="e.g. Maya"
                 autoFocus
               />
-              <View style={{ marginTop: "auto", gap: space.sm }}>
-                <Button
-                  label={kid.name.trim() ? `Meet ${kid.name.trim()}` : "Next"}
-                  size="lg"
-                  disabled={!kid.name.trim()}
-                  onPress={() => goTo("age")}
-                  testID="kids.name.next"
-                />
-                {firstKidNameCard ? null : <BackLink onPress={goBack} />}
-              </View>
             </View>
           ) : null}
 
           {subStep === "age" ? (
             <View style={{ flex: 1, gap: space.md }}>
-              <View style={{ flex: 1 }} />
               <NativeText role="display" tone="strong">
                 {`How old is ${kid.name.trim()}?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                This sets the difficulty.
+                {"It's my starting point for the level. You can nudge it later."}
               </NativeText>
               <ChipGrid
                 options={["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13+"]}
@@ -347,17 +383,6 @@ export default function KidsScreen() {
                 }}
                 fixedWidth
               />
-              <View style={{ flex: 1 }} />
-              <View style={{ gap: space.sm }}>
-                <Button
-                  label="Next"
-                  size="lg"
-                  disabled={kid.age === null}
-                  onPress={() => goTo("love")}
-                  testID="kids.age.next"
-                />
-                <BackLink onPress={goBack} />
-              </View>
             </View>
           ) : null}
 
@@ -367,26 +392,21 @@ export default function KidsScreen() {
                 {`What's ${kid.name.trim()} into right now?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                Whatever you put here ends up on the worksheet.
+                {"Pick a few. I'll build the worksheet around them."}
               </NativeText>
-              <ChipGrid options={loveChipsForAge(kid.age)} selected={kid.love} onPick={toggleLove} />
+              <ChipGrid
+                options={loveChipsForAge(kid.age)}
+                selected={kid.love}
+                onPick={toggleLove}
+                display={interestWithGlyph}
+              />
               <TextField
-                label="Or type anything"
+                label="Something else?"
                 value={loveText}
                 onChangeText={setLoveText}
                 autoCapitalize="none"
-                placeholder="Bugs, volcanoes, ocean animals…"
+                placeholder="Volcanoes, ocean animals, trains…"
               />
-              <View style={{ marginTop: "auto", gap: space.sm }}>
-                <Button
-                  label="Next"
-                  size="lg"
-                  disabled={!loveText.trim() && kid.love.length === 0}
-                  onPress={confirmLoves}
-                  testID="kids.love.next"
-                />
-                <BackLink onPress={goBack} />
-              </View>
             </View>
           ) : null}
 
@@ -396,7 +416,7 @@ export default function KidsScreen() {
                 {`What's ${kid.name.trim()} working on?`}
               </NativeText>
               <NativeText role="caption" tone="muted">
-                This picks what the worksheet practices.
+                Pick what the worksheet practices.
               </NativeText>
               <ChipGrid
                 options={workingChipsForAge(kid.age)}
@@ -439,32 +459,48 @@ export default function KidsScreen() {
               )}
 
               {error ? <InlineError message={error} /> : null}
-
-              <View style={{ marginTop: "auto", gap: space.sm, paddingBottom: space.sm }}>
-                <Pressable
-                  accessibilityRole="button"
-                  disabled={kid.workingOn.length === 0 || saving}
-                  testID="kids.addAnotherKid"
-                  onPress={() => void anotherKid()}
-                  style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
-                >
-                  <NativeText role="control" tone={kid.workingOn.length === 0 || saving ? "muted" : "strong"}>
-                    {saving ? "One moment…" : "+ Add another kid"}
-                  </NativeText>
-                </Pressable>
-                <Button
-                  label={saving ? "One moment…" : "That's everyone"}
-                  size="lg"
-                  disabled={kid.workingOn.length === 0 || saving}
-                  busy={saving}
-                  onPress={() => void thatIsEveryone()}
-                  testID="kids.thatsEveryone"
-                />
-                <BackLink onPress={goBack} disabled={saving} />
-              </View>
             </View>
           ) : null}
         </ScrollView>
+
+        {/* One fixed footer for every step (gauntlet round 1, 2026-11-04):
+            the forward button sits in the same place on all four steps
+            and never drops below the fold when a step's chips wrap. The
+            questions scroll above it; the worksheet rides on top of it. */}
+        <View
+          style={{
+            paddingHorizontal: space.lg,
+            paddingTop: space.sm,
+            gap: space.sm,
+            backgroundColor: colors.page,
+          }}
+        >
+          {preview ? <View style={{ marginBottom: space.sm }}>{preview}</View> : null}
+          {subStep === "working" ? (
+            <Pressable
+              accessibilityRole="button"
+              disabled={kid.workingOn.length === 0 || saving}
+              testID="kids.addAnotherKid"
+              onPress={() => void anotherKid()}
+              style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
+            >
+              <NativeText role="control" tone={kid.workingOn.length === 0 || saving ? "muted" : "strong"}>
+                {saving ? "One moment…" : "+ Add another kid"}
+              </NativeText>
+            </Pressable>
+          ) : null}
+          <Button
+            label={forward.label}
+            size="lg"
+            disabled={forward.disabled}
+            busy={subStep === "working" && saving}
+            onPress={forward.onPress}
+            testID={forward.testID}
+          />
+          {subStep === "name" && firstKidNameCard ? null : (
+            <BackLink onPress={goBack} disabled={saving} />
+          )}
+        </View>
       </KeyboardAvoidingView>
     </WalkScene>
   );
@@ -502,11 +538,14 @@ function ChipGrid({
   selected,
   onPick,
   fixedWidth = false,
+  display,
 }: {
   options: string[];
   selected: string | string[] | null;
   onPick: (value: string) => void;
   fixedWidth?: boolean;
+  /** What the chip shows; the value it saves is always the option. */
+  display?: (option: string) => string;
 }) {
   const isSelected = (option: string) =>
     Array.isArray(selected) ? selected.includes(option) : selected === option;
@@ -516,6 +555,7 @@ function ChipGrid({
         <Chip
           key={option}
           label={option}
+          shown={display ? display(option) : option}
           selected={isSelected(option)}
           onPress={() => onPick(option)}
           fixedWidth={fixedWidth}
@@ -546,11 +586,13 @@ function BackLink({ onPress, disabled }: { onPress: () => void; disabled?: boole
 
 function Chip({
   label,
+  shown = label,
   selected,
   onPress,
   fixedWidth = false,
 }: {
   label: string;
+  shown?: string;
   selected: boolean;
   onPress: () => void;
   fixedWidth?: boolean;
@@ -562,6 +604,7 @@ function Chip({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={{
@@ -578,7 +621,7 @@ function Chip({
       }}
     >
       <NativeText role="body" tone={selected ? "inverse" : "strong"}>
-        {label}
+        {shown}
       </NativeText>
     </Pressable>
   );

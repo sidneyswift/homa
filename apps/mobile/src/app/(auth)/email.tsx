@@ -101,10 +101,10 @@ export default function EmailCodeScreen() {
     );
   }
 
-  async function check() {
+  async function check(entered = code) {
     setPending(true);
     setError(null);
-    const result = await checkEmailCode(email, code);
+    const result = await checkEmailCode(email, entered);
     setPending(false);
 
     // Success: SessionProvider picks up the session and this screen redirects.
@@ -203,16 +203,17 @@ export default function EmailCodeScreen() {
               {onEmailStep ? (
                 usePassword
                   ? "Sign in with the password you already use for Homa."
-                  : "Homa sends a six digit code. No password to make up, and none to forget later."
+                  : "I'll send you a six-digit code. No password to make up or forget."
               ) : (
                 // The address gets its own line: wrapped mid-sentence it
-                // stranded "once." alone on the last line.
+                // stranded a word alone on the last line. "It works once"
+                // only added worry; where to look is the useful line.
                 <>
-                  {"Six digits, sent to\n"}
+                  {"I sent it to\n"}
                   <Text style={{ fontFamily: fontFamilies.bodySemibold, color: colors.textStrong }}>
                     {normalizeEmail(email)}
                   </Text>
-                  {".\nIt works once."}
+                  {".\nNot there? Check spam."}
                 </>
               )}
             </Text>
@@ -269,7 +270,7 @@ export default function EmailCodeScreen() {
                   busy={pending}
                 />
                 <App2Button
-                  label={usePassword ? "Use an email code instead" : "Use an existing password"}
+                  label={usePassword ? "Use an email code instead" : "I already have a password"}
                   variant="quiet"
                   size="sm"
                   disabled={pending}
@@ -296,9 +297,16 @@ export default function EmailCodeScreen() {
                   }}
                   label="Six digit code"
                   value={code}
-                  onChangeText={(next) =>
-                    setCode(next.replace(/[^0-9]/gu, "").slice(0, 6))
-                  }
+                  onChangeText={(next) => {
+                    const digits = next.replace(/[^0-9]/gu, "").slice(0, 6);
+                    setCode(digits);
+                    // The sixth digit signs her in, typed or filled by
+                    // iOS from the email banner; "Let me in" stays for
+                    // a retry after a wrong code.
+                    if (digits.length === 6 && code.length < 6 && !pending) {
+                      void check(digits);
+                    }
+                  }}
                   error={error ?? undefined}
                   autoFocus
                   // oneTimeCode lets iOS offer the code straight from the

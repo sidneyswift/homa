@@ -32,6 +32,7 @@ import { WalkScene } from "../../features/onboarding/walk-scene";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
+import { firstMakingStopped } from "../../features/onboarding/making-status";
 import { MakingFeatureCards } from "../../features/onboarding/making-feature-cards";
 import { withMakingNote } from "../../features/onboarding/making-notes";
 import { MakingShow } from "../../features/onboarding/making-show";
@@ -184,7 +185,7 @@ export default function MakingScreen() {
           setPageReady(true);
           return;
         }
-        if (job?.status === "failed" || job?.status === "cancelled") {
+        if (firstMakingStopped(job?.status)) {
           setPhase("failed");
           return;
         }
@@ -206,6 +207,18 @@ export default function MakingScreen() {
   // to the reveal, with reduced motion collapsing to an immediate call.
   const showingChecklist =
     checklistAvailable === "yes" && checklistChildId !== null && !checklistExited;
+
+  // The page is the reward. Ready before she has answered anything, she
+  // sees it first instead of a quiz standing in front of it (gauntlet
+  // round 1, 2026-11-04: both mom reviewers would quit at "1 of 16" with
+  // a finished page behind it). Mid-answer, the banner still waits for
+  // her (D8), and nothing is lost: with no answers there is nothing to
+  // score.
+  useEffect(() => {
+    if (pageReady && (checklistPositionRef.current?.answered ?? 0) === 0) {
+      setChecklistExited(true);
+    }
+  }, [pageReady]);
 
   function handleChecklistClose(exit: ChecklistExit | null) {
     setChecklistExited(true);
@@ -245,8 +258,13 @@ export default function MakingScreen() {
         {phase !== "failed" ? (
           <>
             <NativeText role="display" tone="strong">
+              {/* One noun, the one the kid card used (gauntlet round 1,
+                  2026-11-04), and the heading never says "drawing" over a
+                  banner that says the page is ready. */}
               {childName
-                ? `Homa is drawing ${childName}'s page`
+                ? pageReady
+                  ? `${childName}'s worksheet is ready`
+                  : `Making ${childName}'s worksheet`
                 : "Homa is getting her pencils"}
             </NativeText>
 
@@ -273,7 +291,8 @@ export default function MakingScreen() {
                     }}
                   >
                     <NativeText role="bodySmall" tone="strong" style={{ flex: 1 }}>
-                      {childName ? `${childName}'s page is ready.` : "The page is ready."}
+                      {/* The heading already says it is ready. */}
+                      {"Take a look now, or keep answering."}
                     </NativeText>
                     {/* Through the one close path, never around it: an
                         answered session scores on the way out, and the
@@ -291,9 +310,9 @@ export default function MakingScreen() {
                   <NativeText role="body" tone="body">
                     {childName
                       ? parentFirstName
-                        ? `While I draw, ${parentFirstName}, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
-                        : `While I draw, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
-                      : "While I draw, tell me about your kid. Every answer builds their progress report."}
+                        ? `While I work, ${parentFirstName}, tell me how ${childName}'s doing. It helps me get the next worksheet's level right.`
+                        : `While I work, tell me how ${childName}'s doing. It helps me get the next worksheet's level right.`
+                      : "While I work, tell me how your kid's doing. It helps me get the next worksheet's level right."}
                   </NativeText>
                 )}
                 <ChecklistTakeover
@@ -382,7 +401,9 @@ export default function MakingScreen() {
               The drawing table hiccupped
             </NativeText>
             <NativeText role="body" tone="body">
-              {"Nothing's lost. The page keeps trying on its own and is saved for you when it's ready."}
+              {childName
+                ? `Nothing you told me is lost. Ask me for ${childName}'s page in chat and I'll draw it there.`
+                : "Nothing you told me is lost. Ask me for the page in chat and I'll draw it there."}
             </NativeText>
             <Button
               label="Take me in"

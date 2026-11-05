@@ -1,6 +1,6 @@
 import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
-import { Platform, ScrollView, Text, View } from "react-native";
+import { Image, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -15,15 +15,24 @@ import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
 import { signInFailureMessage } from "../../features/auth/sign-in-voice";
 import { LegalLine } from "../../features/auth/legal-line";
-import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 
 /**
- * Homa's size on the front door: close to the idle size she takes on the
- * App 2 conversation canvas, so signing in feels like the same room
- * rather than a new screen. Fixed rather than measured from the window,
- * which the #985 layout test forbids here.
+ * Homa's size on the front door: smaller than her conversation idle
+ * size since 2026-11-04, because she now shares the hero with a sample
+ * worksheet she is presenting. Fixed rather than measured from the
+ * window, which the #985 layout test forbids here.
  */
-const HOMA_SIZE = 196;
+const HOMA_SIZE = 150;
+
+/**
+ * A real first page beside her, so the door shows what it opens onto
+ * (gauntlet round 1, 2026-11-04): the mom reviewer wanted proof before
+ * signing in, and the designer measured the top third of this screen
+ * as empty. It is an actual first making from the local stack (a
+ * seven-year-old, space, math), downsized, not a mock.
+ */
+const SAMPLE_WORKSHEET = require("../../../assets/onboarding/sample-worksheet/moon-mission.jpg");
 
 /**
  * The front door AND the first impression, merged (founder direction
@@ -107,7 +116,37 @@ export default function SignInScreen() {
         <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: space.md }} />
 
         <View style={{ alignItems: "center", gap: space.sm }}>
-          <HomaCharacter3D size={HOMA_SIZE} />
+          <View style={{ width: 280, height: 236 }}>
+            {/* Homa first, the page over her: her GL view paints an
+                opaque square, which cut a white notch into the page when
+                she stood in front (gauntlet round 1, 2026-11-04). She
+                peeks out from behind the page she made instead. */}
+            <View style={{ position: "absolute", left: 0, bottom: 0 }}>
+              <HomaCharacter3D size={HOMA_SIZE} />
+            </View>
+            <View
+              style={{
+                position: "absolute",
+                right: 12,
+                top: 0,
+                width: 162,
+                height: 210,
+                borderRadius: radius.sm,
+                backgroundColor: colors.card,
+                borderWidth: 1,
+                borderColor: colors.borderSubtle,
+                transform: [{ rotate: "5deg" }],
+                ...shadows.md,
+              }}
+            >
+              <Image
+                source={SAMPLE_WORKSHEET}
+                accessibilityLabel="A worksheet Homa made: Lena's moon mission, space-themed addition practice"
+                resizeMode="cover"
+                style={{ width: "100%", height: "100%", borderRadius: radius.sm }}
+              />
+            </View>
+          </View>
           {/* Generic, not a name: nobody is signed in yet. */}
           <Text
             accessibilityRole="header"
@@ -121,7 +160,11 @@ export default function SignInScreen() {
             {"Hi, I'm Homa."}
           </Text>
           {/* Founder direction 2026-09-09: the short promise belongs
-              at sign-in; the benefits belong in the new-parent intro. */}
+              at sign-in; the benefits belong in the new-parent intro.
+              The promise names what she gets: four blind reviewers
+              (2026-11-04) read "Homeschool, handled." as a category,
+              not a reason to sign up, and only learned a worksheet was
+              coming two screens past the account wall. */}
           <Text
             style={{
               fontFamily: fontFamilies.body,
@@ -130,7 +173,7 @@ export default function SignInScreen() {
               textAlign: "center",
             }}
           >
-            {"Homeschool, handled."}
+            {"Tell me about your kid. I'll make them a worksheet about what they love."}
           </Text>
         </View>
 

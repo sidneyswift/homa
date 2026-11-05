@@ -132,8 +132,8 @@ export default function YouScreen() {
               justifications; the per-field captions are folded in. */}
           <NativeText role="body" tone="body">
             {isAppleSignIn
-              ? "Your state, because homeschool rules are local and I've done the reading."
-              : "Your name, so I stop calling you \"hey\". Your state, because homeschool rules are local and I've done the reading."}
+              ? "Your state. Homeschool rules are local, and I've done the reading for yours."
+              : "Your name and your state. Homeschool rules are local, and I've done the reading for yours."}
           </NativeText>
 
           {!isAppleSignIn ? <View style={{ gap: space.xs }}>

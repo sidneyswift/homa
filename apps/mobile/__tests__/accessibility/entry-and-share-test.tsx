@@ -146,18 +146,18 @@ describe("native entry accessibility", () => {
   it("keeps codes default and clears a password when changing modes", async () => {
     const view = await render(<EmailCodeScreen />);
     expect(view.queryByLabelText("Password")).toBeNull();
-    await fireEvent.press(view.getByRole("button", { name: "Use an existing password" }));
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
     await fireEvent.changeText(view.getByLabelText("Password"), "test-only-secret");
     await fireEvent.press(view.getByRole("button", { name: "Use an email code instead" }));
     expect(view.getByRole("button", { name: "Send my code" })).toBeTruthy();
-    await fireEvent.press(view.getByRole("button", { name: "Use an existing password" }));
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
     expect(view.getByLabelText("Password").props.value).toBe("");
   });
 
   it("uses ordinary password authentication and recovers after rejection", async () => {
     mockSignInWithPassword.mockResolvedValue({ data: { session: null }, error: { status: 400 } });
     const view = await render(<EmailCodeScreen />);
-    await fireEvent.press(view.getByRole("button", { name: "Use an existing password" }));
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
     await fireEvent.changeText(view.getByLabelText("Email"), " Parent@Example.com ");
     await fireEvent.changeText(view.getByLabelText("Password"), " keep spaces ");
     await fireEvent.press(view.getByRole("button", { name: /^Sign in$/ }));
@@ -169,7 +169,7 @@ describe("native entry accessibility", () => {
   it("releases loading after network failure and clears credentials after success", async () => {
     mockSignInWithPassword.mockRejectedValueOnce(new Error("offline"));
     const view = await render(<EmailCodeScreen />);
-    await fireEvent.press(view.getByRole("button", { name: "Use an existing password" }));
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
     await fireEvent.changeText(view.getByLabelText("Email"), "parent@example.com");
     await fireEvent.changeText(view.getByLabelText("Password"), "test-only-secret");
     await fireEvent.press(view.getByRole("button", { name: /^Sign in$/ }));

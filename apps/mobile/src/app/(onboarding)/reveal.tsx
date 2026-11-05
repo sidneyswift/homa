@@ -18,6 +18,7 @@ import {
 } from "../../features/onboarding/onboarding-state";
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
+import { joinNatural } from "../../features/onboarding/working-chips";
 import { emitFamilyEvent } from "../../lib/events";
 import { hapticSuccess } from "../../lib/haptics";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
@@ -89,11 +90,14 @@ export default function RevealScreen() {
                 other.length > item.length,
             ),
         );
-        const loves = distinct.slice(0, 2).join(" + ");
         const working = Array.isArray(first.workingOn) ? (first.workingOn[0] ?? "").toLowerCase() : "";
-        const parts = [loves, working ? `${working} practice` : ""].filter(Boolean);
+        const parts = [...distinct.slice(0, 2), working].filter(Boolean);
+        // What she said, not a claim about what the page used: a page
+        // built around dinosaurs alone read "built from dinosaurs +
+        // trucks" and the mom reviewer went looking for the trucks
+        // (gauntlet round 1, 2026-11-04).
         if (parts.length > 0) {
-          setReceipts(`Built from what you told me: ${parts.join(" + ")}.`);
+          setReceipts(`You told me ${joinNatural(parts)}. Here's where I started.`);
         }
       }
 

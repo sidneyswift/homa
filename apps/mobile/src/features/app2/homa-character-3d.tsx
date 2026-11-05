@@ -36,13 +36,16 @@ const REVEAL_FALLBACK_MS = 2500;
 const SURFACE_SETTLE_MS = 200;
 
 /**
- * The first on-screen GL view after launch never shows a frame on iOS:
- * its renderer builds and draws, the view stays blank, and every later
- * view renders (gh#1236, reproduced on each cold start on whichever screen
- * mounts Homa first; an offscreen warm-up context did not help). That
- * first view is replaced once, as soon as it reports ready.
+ * A GL view that mounts while no other Homa is on screen can build and
+ * draw and still never show a frame on iOS (gh#1236): on each cold start,
+ * and on sign-in after signing out (2026-11-04), when every earlier Homa
+ * had just unmounted. An offscreen warm-up context did not help. That
+ * lone instance replaces its first surface once, as soon as it reports
+ * ready. Replacing every instance's first surface was tried the same day
+ * and left Homa blank for about nine seconds on every screen, so a Homa
+ * that mounts beside another one keeps its first surface.
  */
-let firstSurfaceSpent = false;
+let liveCharacters = 0;
 
 class CharacterBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
@@ -180,16 +183,27 @@ export function HomaCharacter3D({ size, paused = false }: { size: number; paused
   const [surface, setSurface] = useState(0);
   const [settled, setSettled] = useState(false);
   const [drawn, setDrawn] = useState(false);
-  // The first surface after launch is replaced unseen, so its frames never reveal.
+  // A lone instance's first surface is replaced unseen, so its frames never reveal.
+  const firstSurfaceSpent = useRef(false);
   const replacing = useRef(false);
+  const mountedAlone = useRef(false);
+  useEffect(() => {
+    // React runs a commit's unmount cleanups before its new effects, so a
+    // screen swap that drops the last Homa reads as alone here too.
+    mountedAlone.current = liveCharacters === 0;
+    liveCharacters += 1;
+    return () => {
+      liveCharacters -= 1;
+    };
+  }, []);
   const revealStyle = useAnimatedStyle(() => ({
     opacity: withTiming(drawn ? 1 : 0, { duration: drawn && !reducedMotion ? REVEAL_MS : 0 }),
   }), [drawn, reducedMotion]);
   const markFailed = useCallback(() => setFailed(true), []);
   const surfaceReady = useCallback(() => {
-    replacing.current = !firstSurfaceSpent;
-    if (firstSurfaceSpent) return;
-    firstSurfaceSpent = true;
+    replacing.current = mountedAlone.current && !firstSurfaceSpent.current;
+    if (!replacing.current) return;
+    firstSurfaceSpent.current = true;
     requestAnimationFrame(() => setSurface(current => current + 1));
   }, []);
   const reveal = useCallback(() => {

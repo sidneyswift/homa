@@ -80,10 +80,13 @@ export function MakingFeatureCards({ onDone }: { onDone: () => void }) {
         exiting={reduced ? undefined : FadeOut.duration(160)}
         style={{ alignItems: "center", gap: space.sm }}
       >
+        {/* Full width, not a thumbnail: at 176pt the art took 43% of
+            the width and left a quarter of the screen empty (gauntlet
+            round 1, 2026-11-04). */}
         <View
           style={{
-            width: 176,
-            height: 176,
+            width: 248,
+            height: 248,
             borderRadius: radius.xl,
             alignItems: "center",
             justifyContent: "center",
@@ -92,15 +95,15 @@ export function MakingFeatureCards({ onDone }: { onDone: () => void }) {
         >
           <Image
             source={card.image}
-            style={{ width: 176, height: 176 }}
+            style={{ width: 248, height: 248 }}
             resizeMode="contain"
             accessibilityLabel={card.title}
           />
         </View>
-        <NativeText role="body" tone="strong" style={{ textAlign: "center" }}>
+        <NativeText role="bodyLarge" tone="strong" style={{ textAlign: "center" }}>
           {card.title}
         </NativeText>
-        <NativeText role="bodySmall" tone="body" style={{ textAlign: "center" }}>
+        <NativeText role="body" tone="muted" style={{ textAlign: "center" }}>
           {card.body}
         </NativeText>
       </Animated.View>
