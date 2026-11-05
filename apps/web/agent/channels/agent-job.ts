@@ -2,6 +2,7 @@ import { defineChannel, GET, POST } from "eve/channels";
 
 import { mapDb } from "../../lib/map/db";
 import { handleUnreportedStage, type ClaimedJob } from "../../lib/jobs/runner";
+import { stageContinuationToken } from "../../lib/jobs/session";
 import { runAgentJobsCycle } from "../agent-jobs-cycle";
 
 /**
@@ -70,7 +71,7 @@ function stageSendOptions(input: {
   const target = (input.target ?? {}) as Partial<AgentJobState>;
   return {
     auth: (input.auth ?? null) as never,
-    continuationToken: `agent-job:${target.jobId ?? ""}:${target.stageNumber ?? ""}`,
+    continuationToken: stageContinuationToken(target),
     state: {
       familyId: target.familyId ?? null,
       jobId: target.jobId ?? null,
