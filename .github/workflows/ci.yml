@@ -632,6 +632,10 @@ jobs:
         timeout-minutes: 10
         run: pnpm check:family-workspace && pnpm test:family-workspace:postgres
 
+      - name: Onboarding basics member name disposable PostgreSQL test
+        timeout-minutes: 10
+        run: pnpm test:onboarding-basics:postgres
+
       - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:account-deletion:postgres
