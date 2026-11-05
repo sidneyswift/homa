@@ -1,4 +1,5 @@
 import { createProactiveEpisode } from "../lib/conversation-continuity/ledger";
+import { prepareConversationJobDispatch, releaseConversationJobDispatch } from "../lib/conversation-jobs";
 import { agentJobsEnabled } from "../lib/jobs/flag";
 import {
   claimNextRunnableJob,
@@ -49,6 +50,10 @@ export interface StageSpawnInput {
       agentJobId: string;
       agentJobStageNumber: string;
       episodeId: string;
+      memberUserId?: string;
+      conversationJobId?: string;
+      conversationJobEpoch?: string;
+      conversationJobLease?: string;
     };
   };
 }
@@ -83,10 +88,11 @@ export async function runAgentJobsCycle(
 
     const job = claim.job;
     try {
-      const plan = await loadJobPlan(job.familyId, job.jobId);
+      const linked = await prepareConversationJobDispatch(job.familyId, job.jobId);
+      const plan = linked?.plan ?? await loadJobPlan(job.familyId, job.jobId);
       const episodeId = await createProactiveEpisode({ familyId: job.familyId });
       await spawn({
-        message: buildStageBrief(job, plan),
+        message: buildStageBrief(job, plan, !!linked),
         target: {
           familyId: job.familyId,
           jobId: job.jobId,
@@ -105,6 +111,8 @@ export async function runAgentJobsCycle(
             agentJobId: job.jobId,
             agentJobStageNumber: String(job.stageNumber),
             episodeId,
+            ...(linked ? { memberUserId: linked.memberUserId, conversationJobId: job.jobId,
+              conversationJobEpoch: linked.accessEpoch, conversationJobLease: linked.leaseToken } : {}),
           },
         },
       });
@@ -112,7 +120,8 @@ export async function runAgentJobsCycle(
     } catch (error) {
       // The session could not be started; release the claim so the
       // next cycle retries this stage instead of wedging it.
-      await releaseStageClaim(job.familyId, job.jobId, job.stageNumber);
+      if (!(await releaseConversationJobDispatch(job.familyId, job.jobId)))
+        await releaseStageClaim(job.familyId, job.jobId, job.stageNumber);
       console.error(
         `agent-job runner failed to start job ${job.jobId} stage ${job.stageNumber}:`,
         error instanceof Error ? error.message : "unknown",

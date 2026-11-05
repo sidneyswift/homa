@@ -23,7 +23,7 @@ export interface TaskDeliveryLedger {
     input: Omit<
       DeliveryAttempt,
       "id" | "existingStatus" | "shouldSend"
-    >,
+    > & { content?: string },
   ): Promise<DeliveryAttempt>;
   finishAttempt(
     attempt: DeliveryAttempt,
@@ -157,6 +157,7 @@ async function attemptSms(
       channel: "sms",
       destination: phone,
       providerThreadKey: `telnyx:${phone}`,
+      content: input.text,
     });
     if (!attempt.shouldSend) {
       if (attempt.existingStatus === "sent") {
@@ -252,6 +253,7 @@ async function attemptEmail(
     channel: "email",
     destination: recipient.email,
     providerThreadKey: `email:${recipient.email.toLowerCase()}`,
+    content: input.text,
   });
   if (!attempt.shouldSend) {
     if (attempt.existingStatus === "sent") {

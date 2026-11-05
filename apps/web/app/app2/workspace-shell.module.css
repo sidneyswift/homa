@@ -1,0 +1,204 @@
+/* Founder choice, 2026-10-05: white, minimal app2 with work beside the chat. */
+.shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  min-height: 0;
+  --workspace-navigation-height: calc(72px + env(safe-area-inset-top));
+  padding-top: var(--workspace-navigation-height);
+  background: var(--homa-floating);
+  color: var(--homa-ink);
+  font-family: var(--font-dm-sans), sans-serif;
+  --workspace-line: color-mix(in srgb, var(--homa-control-boundary) 28%, transparent);
+}
+.shell[data-workspace-open="true"] { grid-template-columns: minmax(400px, 1fr) minmax(400px, 0.9fr); }
+.conversation { min-width: 0; position: relative; }
+.navigation { position: absolute; top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); z-index: 6; }
+.navigation button, .navigation a { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; line-height: 24px; }
+.navigation a:focus-visible { outline: 2px solid var(--homa-ink); outline-offset: 3px; }
+.shell button:focus-visible, .shell select:focus-visible, .panel a:focus-visible { outline: 2px solid var(--homa-ink); outline-offset: 3px; }
+.navigation button, .navigation a, .panel button, .panel select {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--workspace-line);
+  border-radius: var(--homa-radius-control);
+  background: var(--homa-floating);
+  color: var(--homa-ink);
+  padding: 8px 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.navigation button:disabled { opacity: .5; cursor: default; }
+.navigation .navigationToggle { padding: 12px; border-color: transparent; }
+.navigation .navigationToggle[aria-expanded="true"] { border-color: transparent; }
+.navigationTray { display: flex; align-items: stretch; gap: 8px; min-width: 0; animation: navigationReveal var(--homa-motion-base) var(--homa-motion-ease-out); }
+.navigationTray button, .navigationTray a { border-color: transparent; white-space: nowrap; text-decoration: none; }
+.navigationTray [aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; font-weight: 600; }
+
+@keyframes navigationReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .navigationTray { animation: none; } }
+.panel button:hover { border-color: var(--homa-control-boundary); }
+.panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--workspace-line); background: var(--homa-floating); }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; flex-shrink: 0; }
+.panelHeader h2 { margin: 0; font: 500 16px/1.5 var(--font-dm-sans), sans-serif; }
+.panelHeader h2:focus { outline: none; }
+.panelHeader button { display: grid; place-items: center; padding: 8px; border-color: transparent; }
+.panelBody { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 8px 24px 32px; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.toolbar label { min-width: 0; }
+.toolbar select { max-width: 100%; font-size: 14px; }
+.toolbar button { font-size: 13px; color: var(--homa-muted-ink); border-color: transparent; }
+.state { margin: 24px 0; color: var(--homa-muted-ink); font-size: 14px; line-height: 1.6; }
+.state button, .state a { display: inline-flex; margin: 16px 12px 0 0; }
+.state a { text-decoration: underline; }
+.planner {
+  /* App2 presentation only. The existing planner owns completion and revisions. */
+  --font-display: var(--font-dm-sans), sans-serif;
+  --surface-card: var(--homa-floating);
+  --bg-page: var(--homa-floating);
+  --brand: var(--homa-ink);
+  --brand-hover: var(--homa-ink);
+  --border-subtle: var(--workspace-line);
+  --text-muted: var(--homa-muted-ink);
+  --text-subtle: var(--homa-muted-ink);
+  --color-card: var(--homa-floating);
+  --color-brand: var(--homa-ink);
+  --color-brand-hover: var(--homa-ink);
+}
+.planner :global(.font-display) { font-family: var(--font-dm-sans), sans-serif; }
+.planner :global(.shadow-sm) { box-shadow: none; }
+.planner a { overflow-wrap: anywhere; }
+@media (max-width: 960px) {
+  .shell[data-workspace-open="true"] { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: fixed; z-index: 4; inset: max(8px, env(safe-area-inset-top)) 0 var(--workspace-sheet-bottom, 180px); border: 0; border-bottom: 1px solid var(--workspace-line); }
+  .panelHeader { padding: 8px 20px 8px 80px; }
+  .navigation { top: max(16px, calc(env(safe-area-inset-top) + 8px)); }
+  .shell:has([data-workspace-kind="binder"]) .navigation { top: max(32px, calc(env(safe-area-inset-top) + 24px)); }
+  .panelBody { padding: 8px 20px 24px; }
+}
+@media (max-width: 600px) {
+  .navigationTray { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+  .navigationTray button, .navigationTray a { flex-direction: column; gap: 4px; padding: 4px; position: relative; }
+  .navigationTray a > svg:last-of-type { position: absolute; top: 8px; right: 8px; width: 12px; height: 12px; }
+}
+@media (forced-colors: active) {
+  .panel, .navigation button, .navigation a, .navigationTray, .panel button, .panel select { border-color: ButtonText; }
+}
+
+.planner [data-workspace-day] { border: 0; border-top: 1px solid var(--workspace-line); border-radius: 0; padding: 20px 0 12px; box-shadow: none; gap: 12px; }
+.planner [data-workspace-day] header { padding: 0; }
+.planner [data-workspace-activity] { background: transparent; padding: 0; }
+.planner [data-workspace-activity] label { min-height: 44px; align-items: center; margin-top: 0; }
+.planner [data-workspace-activity] label span { font-size: 14px; line-height: 1.5; }
+.planner [data-workspace-activity] input { accent-color: var(--homa-ink); }
+.planner [data-workspace-focus] { background: transparent; padding: 8px 0; }
+.empty { padding: 24px 0; }
+.empty h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.empty p { color: var(--homa-muted-ink); font-size: 14px; line-height: 1.6; }
+.empty button { margin-top: 20px; }
+.scopeNote { margin-top: 20px; color: var(--homa-muted-ink); font-size: 13px; line-height: 1.6; }
+.scopeNote a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Embedded calendar keeps its domain controls, with App2's neutral presentation. */
+.panelBody { position: relative; }
+.planner [data-workspace-planner] { font-size: 14px; }
+.planner [data-workspace-planner] h2 { font-size: 20px; line-height: 1.35; }
+.planner [data-workspace-planner] h3 { font-size: 16px; }
+.planner [data-workspace-planner] section { background: var(--homa-floating); box-shadow: none; border-radius: 0; }
+.planner [data-workspace-planner] button, .planner [data-workspace-planner] a { font-weight: 500; }
+.planner [data-workspace-planner] [class*="bg-"], .planner [data-workspace-planner] .quiet-frame { background-color: var(--homa-floating); }
+.planner [data-workspace-planner] [class*="text-"]:not(:global(.text-transparent)) { color: var(--homa-ink); }
+.planner [data-workspace-planner] [class*="border-"] { border-color: var(--workspace-line); }
+.planner [data-workspace-planner] [aria-current="page"] { border-bottom-color: var(--homa-ink); }
+.planner [data-workspace-planner] [aria-label$="calendar"] a { min-width: 0; padding: 8px 2px; text-align: center; }
+.planner [data-workspace-planner] [aria-label$="calendar"] a span { font-size: 10px; white-space: normal; }
+.planner [data-workspace-planner] input, .planner [data-workspace-planner] textarea { max-width: 100%; }
+.planner [data-workspace-dialog] { position: absolute; inset: 0; z-index: 40; min-height: 100%; overflow-y: auto; padding: 20px 24px 32px; background: var(--homa-floating); outline: none; }
+.planner:has([data-workspace-dialog]) .toolbar { visibility: hidden; }
+.planner [data-workspace-planner] [role="alert"] { color: var(--homa-error-ink); }
+
+.planCollection { margin-top: 24px; border-top: 1px solid var(--workspace-line); padding-top: 16px; }
+.planCollection summary { cursor: pointer; min-height: 44px; font-size: 14px; }
+
+.planner [data-workspace-planner] section:not([data-workspace-dialog]) { border-left: 0; border-right: 0; }
+.planner [data-workspace-planner] [data-planner-row] { background: transparent; }
+.planner [data-workspace-planner] [data-planner-row] > button { border: 0; border-radius: 0; }
+.planner [data-workspace-planner] [aria-pressed="true"] > span { background: var(--homa-ink); color: var(--homa-floating); }
+.planner [data-workspace-planner] [aria-pressed="false"] > span { color: transparent; }
+
+.planner [data-workspace-planner] > [inert] { visibility: hidden; }
+
+/* Shared server-rendered Binder and Progress pages, fitted to the workspace. */
+.page { --homa-canvas: var(--homa-floating); --homa-paper: var(--homa-floating); --homa-soft-boundary: var(--workspace-line); container-type: inline-size; }
+.page :global(.quiet-workspace--page), .page :global(.quiet-work-stage--page), .page :global(.quiet-workspace__content) { padding: 0; margin: 0; min-height: 0; width: 100%; max-width: none; background: transparent; }
+.page h1 { font-size: 24px; line-height: 1.35; }
+.page h2 { font-size: 18px; line-height: 1.4; }
+.page h3 { font-size: 16px; line-height: 1.4; }
+.page :global(.quiet-frame) { box-shadow: none; }
+.page :global(.quiet-artifact-dialog) { width: 100%; max-width: none; max-height: none; padding: 0; border: 0; overflow: visible; }
+.page [data-workspace-dialog] { position: absolute; inset: 0; z-index: 5; overflow-y: auto; padding: 16px 20px 32px; background: var(--homa-floating); outline: none; }
+.panelBody:has(.page [data-workspace-dialog]) { overflow: hidden; }
+.page:has([data-workspace-dialog]) { container-type: normal; }
+.page:has([data-workspace-dialog]) > .toolbar { visibility: hidden; }
+.page [class*="grid-cols-4"], .page [class*="grid-cols-3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page aside[aria-label^="Details for"] { position: static; max-height: none; box-shadow: none; }
+.page input { max-width: 100%; }
+@container (max-width: 420px) {
+  .page [class*="grid-cols-"] { grid-template-columns: minmax(0, 1fr); }
+}
+
+.page :global(.quiet-artifact-dialog) > a, .page :global(.quiet-artifact-dialog) > button { margin-right: 8px; }
+
+.planner [data-workspace-planner] > div > header { float: right; margin-bottom: 8px; }
+.planner [data-workspace-planner] nav[aria-label="Planner views"] { margin-top: 0; }
+.planner [data-workspace-planner] [data-workspace-day] { clear: both; }
+
+/* Primary actions retain the design contract contrast inside the workspace. */
+.panel :global(.quiet-action--primary) { color: var(--homa-paper); background: var(--homa-midnight-action); }
+
+/* Binder is a collection of real documents, with its own display hierarchy. */
+.panel[data-workspace-kind="binder"] .panelHeader { padding-top: 24px; padding-bottom: 20px; }
+.panel[data-workspace-kind="binder"] .panelHeader h2 { font: 600 32px/36px var(--font-eb-garamond), Georgia, serif; letter-spacing: -.02em; }
+.page[data-workspace-page="binder"] > .toolbar { margin-bottom: 12px; }
+.page[data-workspace-page="binder"] > .toolbar select { border-color: transparent; background: transparent; padding-left: 0; font-weight: 500; }
+.page[data-workspace-page="binder"] > .toolbar button { display: grid; place-items: center; padding: 8px; }
+.page[data-workspace-page="binder"] :global(.quiet-search) { width: 100%; max-width: none; min-height: 48px; gap: 12px; background: var(--homa-floating); border-color: var(--homa-control-boundary); }
+.page[data-workspace-page="binder"] :global(.quiet-search) > span { display: flex; color: var(--homa-muted-ink); }
+.page[data-workspace-page="binder"] [data-binder-collection] { margin-top: 24px; }
+.page[data-workspace-page="binder"] [data-binder-document] { display: grid; grid-template-columns: 112px minmax(0, 1fr) 20px; align-items: center; gap: 16px; width: 100%; padding: 16px 0; border: 0; border-bottom: 1px solid var(--workspace-line); border-radius: 0; background: transparent; }
+.page[data-workspace-page="binder"] [data-binder-preview] { display: block; width: 112px; height: 144px; padding: 8px; background: var(--homa-soft-boundary); border: 1px solid var(--homa-soft-boundary); border-radius: var(--homa-radius-control); }
+.page[data-workspace-page="binder"] [data-binder-caption] { min-width: 0; }
+.page[data-workspace-page="binder"] [data-binder-title] { display: block; font: 600 22px/28px var(--font-eb-garamond), Georgia, serif; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.page[data-workspace-page="binder"] [data-binder-caption] > span + span { margin-top: 8px; font-size: 13px; line-height: 20px; }
+.page[data-workspace-page="binder"] [data-binder-open] { color: var(--homa-muted-ink); }
+@container (max-width: 340px) {
+  .page[data-workspace-page="binder"] [data-binder-document] { grid-template-columns: 80px minmax(0, 1fr) 20px; gap: 12px; }
+  .page[data-workspace-page="binder"] [data-binder-preview] { width: 80px; height: 112px; }
+  .page[data-workspace-page="binder"] [data-binder-title] { font-size: 20px; line-height: 26px; }
+}
+@media (forced-colors: active) {
+  .page[data-workspace-page="binder"] [data-binder-preview], .page[data-workspace-page="binder"] [data-binder-document] { border-color: CanvasText; }
+}
+
+/* Reserve the navigation row even when collapsed so Homa never moves through it. */
+.shell[data-navigation-expanded] .navigation { inset: 0 0 auto; height: var(--workspace-navigation-height); display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); background: var(--homa-floating); }
+.shell[data-navigation-expanded] .navigationTray { justify-self: center; max-width: 100%; }
+.navigationTray button { border-radius: 0; background: transparent; }
+@media (max-width: 960px) {
+  .shell[data-navigation-expanded] .panel { top: var(--workspace-navigation-height); }
+  .shell[data-navigation-expanded] .panelHeader { padding-left: 20px; }
+}
+
+/* App2 navigation stays unboxed on the white canvas. */
+.navigation button, .navigation a { border: 0; min-height: 52px; }
+.navigation button:hover, .navigation a:hover, .navigation [aria-current="page"] { background: transparent; }
+.navigation button:focus-visible, .navigation a:focus-visible { outline: none; background: transparent; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.navigation .navigationToggle:focus-visible { outline: none; background: transparent; color: var(--homa-ink); box-shadow: none; }
+.navigation .navigationToggle:focus-visible svg { stroke-width: 3; }
+.navigationTray { width: max-content; }
+.navigationTray button { padding-inline: 16px; }
+@media (max-width: 600px) {
+  .navigationTray { width: 100%; }
+  .navigationTray button { padding-inline: 4px; }
+}

@@ -1,8 +1,7 @@
 import { Linking, Pressable, Text, View } from "react-native";
 
 import { Card } from "../../components/ui/card";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import type { LibrarySourceCardData } from "./library-source-card-model";
 
 export function LibrarySourceCard({

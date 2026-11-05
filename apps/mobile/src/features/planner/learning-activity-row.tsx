@@ -6,8 +6,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
 import type { ChildRecord } from "../../lib/family";
 import type { PlannerLearningActivityRecord } from "../../lib/planner-learning-activities";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 function audienceLabel(
   activity: PlannerLearningActivityRecord,

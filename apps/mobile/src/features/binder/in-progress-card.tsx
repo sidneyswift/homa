@@ -1,8 +1,7 @@
 import { Image, Linking, Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import type { BinderMaterial } from "./binder-model";
 
 /**
@@ -16,10 +15,12 @@ export function InProgressCard({
   material,
   keeping,
   onKeep,
+  onOpen,
 }: {
   material: BinderMaterial;
   keeping: boolean;
   onKeep: () => void;
+  onOpen?: () => void;
 }) {
   return (
     <View
@@ -34,10 +35,10 @@ export function InProgressCard({
     >
       <Pressable
         accessible
-        accessibilityRole="link"
-        accessibilityLabel={`Open draft PDF for ${material.title}`}
-        accessibilityHint="Opens outside Homa"
-        onPress={() => void Linking.openURL(material.pdfUrl).catch(() => {})}
+        accessibilityRole={material.activityPlan && onOpen ? "button" : "link"}
+        accessibilityLabel={`Open draft ${material.activityPlan && onOpen ? "plan" : "PDF"} for ${material.title}`}
+        accessibilityHint={material.activityPlan && onOpen ? "Adjust this activity plan" : "Opens outside Homa"}
+        onPress={() => material.activityPlan && onOpen ? onOpen() : void Linking.openURL(material.pdfUrl).catch(() => {})}
         style={{ minHeight: 44 }}
       >
         <Image

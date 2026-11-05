@@ -1,8 +1,13 @@
 "use client";
 
+import { ActivityPlanCard } from "../../app2/activity-plan-card";
+import { readActivityPlan } from "../../../lib/materials/activity-plan";
+import { WorkspaceLink } from "../../../components/workspace/workspace-link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { useWorkspaceDetail } from "../../../components/workspace/use-workspace-detail";
+import { useWorkspaceSurface } from "../../../components/workspace/surface-context";
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
 import { QuietFrame } from "../../../components/design/QuietFrame";
@@ -103,13 +108,16 @@ export function MaterialDetailOverlay({
   timeZone: string;
   onClose: () => void;
 }) {
+  const workspace = useWorkspaceSurface();
   const dialogRef = useRef<HTMLDivElement>(null);
+  useWorkspaceDetail(dialogRef);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pagePreviews =
     material.pagePreviewUrls && material.pagePreviewUrls.length > 1
       ? material.pagePreviewUrls
       : [material.previewUrl];
   const [pageIndex, setPageIndex] = useState(0);
+  const activityPlan = workspace ? readActivityPlan(material.activityPlan) : undefined;
   const currentPreview = pagePreviews[Math.min(pageIndex, pagePreviews.length - 1)];
 
   useEffect(() => {
@@ -133,7 +141,7 @@ export function MaterialDetailOverlay({
         onClose();
         return;
       }
-      if (event.key !== "Tab") return;
+      if (workspace || event.key !== "Tab") return;
       const focusable = focusableElements();
       if (focusable.length === 0) {
         event.preventDefault();
@@ -159,15 +167,16 @@ export function MaterialDetailOverlay({
       document.removeEventListener("keydown", onKeyDown);
       previouslyFocused?.focus();
     };
-  }, [onClose]);
+  }, [onClose, workspace]);
 
   return (
     <div
       ref={dialogRef}
       role="dialog"
-      aria-modal="true"
+      aria-modal={workspace ? undefined : true}
+      data-workspace-dialog={workspace ? true : undefined}
       aria-labelledby="binder-detail-title"
-      className="quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
+      className={workspace ? "" : "quiet-artifact-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"}
       onClick={onClose}
     >
       <QuietFrame
@@ -190,6 +199,7 @@ export function MaterialDetailOverlay({
           </button>
         </div>
 
+        {!activityPlan && <>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={currentPreview}
@@ -227,6 +237,8 @@ export function MaterialDetailOverlay({
             </button>
           </div>
         ) : null}
+
+        </>}
 
         <h2 id="binder-detail-title" className="mt-4 font-display text-xl font-semibold text-[color:var(--homa-ink)]">
           {material.title}
@@ -269,13 +281,13 @@ export function MaterialDetailOverlay({
             <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-sm">
               {material.sources.map((source) =>
                 source.libraryUrl ? (
-                  <a
+                  <WorkspaceLink
                     key={source.id}
                     href={source.libraryUrl}
                     className="font-semibold text-[color:var(--homa-ink)] underline decoration-[var(--homa-control-boundary)] underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
                   >
                     {source.title}{source.sourceLocator ? ` · ${source.sourceLocator}` : null}
-                  </a>
+                  </WorkspaceLink>
                 ) : (
                   <span key={source.id} className="font-semibold text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
                     {source.title}{source.sourceLocator ? ` · ${source.sourceLocator}` : null}
@@ -286,7 +298,8 @@ export function MaterialDetailOverlay({
           </div>
         ) : null}
 
-        <a
+        {activityPlan && workspace ? <ActivityPlanCard key={material.id} id={material.id} title={material.title} plan={activityPlan} askHoma={workspace.askHoma} /> : <>
+        <WorkspaceLink
           href={`/api/materials/${material.id}/pdf`}
           target="_blank"
           rel="noopener noreferrer"
@@ -294,16 +307,19 @@ export function MaterialDetailOverlay({
         >
           <span>{material.pageCount > 1 ? `Open all ${material.pageCount} pages to print` : "Open PDF to print"}</span>
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="print" size={20} /></span>
-        </a>
+        </WorkspaceLink>
 
-        <a
+        {workspace ? <QuietAction kind="secondary" className="mt-2" onClick={() => workspace.askHoma(`I’d like to change the ${KIND_LABELS[material.kind].toLowerCase()} “${material.title}” for ${material.childName ?? "the whole family"}. Can we talk through the changes before editing?`)}>
+          Discuss changes
+        </QuietAction> : <WorkspaceLink
           href={`/app?draft=revise-material&material=${encodeURIComponent(material.id)}`}
           className="quiet-action quiet-action--secondary mt-2"
         >
           <span>Change this with Homa</span>
           <span className="quiet-action__icon" aria-hidden="true"><Icon name="chat" size={20} /></span>
-        </a>
+        </WorkspaceLink>}
 
+        </>}
         <VersionRail materialId={material.id} />
 
         <DeleteMaterialControl material={material} onDeleted={onClose} />

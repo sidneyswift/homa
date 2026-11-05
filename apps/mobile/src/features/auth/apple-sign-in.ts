@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AppleAuthentication from "expo-apple-authentication";
 
 import { supabase } from "../../lib/supabase";
@@ -50,11 +51,30 @@ export async function signInWithApple(): Promise<SignInFlowResult> {
     return { status: "failed", reason: "no identity token" };
   }
 
-  const { error } = await supabase.auth.signInWithIdToken({
+  // Apple supplies the name once. Keep an account-keyed retry copy until
+  // Supabase confirms it, including when the identity exchange fails.
+  const nameKey = `homa.apple-profile:${credential.user}`;
+  const fullName = credential.fullName
+    ? AppleAuthentication.formatFullName(credential.fullName).trim()
+    : "";
+  if (fullName) await AsyncStorage.setItem(nameKey, fullName).catch(() => {});
+
+  const { data, error } = await supabase.auth.signInWithIdToken({
     provider: "apple",
     token: credential.identityToken,
   });
   if (error) return { status: "failed", reason: error.message };
+
+  const pendingName = fullName || await AsyncStorage.getItem(nameKey).catch(() => null);
+  if (pendingName) {
+    if (data.user?.user_metadata?.full_name) {
+      await AsyncStorage.removeItem(nameKey).catch(() => {});
+    } else {
+      const saved = await supabase.auth.updateUser({ data: { full_name: pendingName } })
+        .catch(() => ({ error: true }));
+      if (!saved.error) await AsyncStorage.removeItem(nameKey).catch(() => {});
+    }
+  }
 
   return { status: "signed-in" };
 }

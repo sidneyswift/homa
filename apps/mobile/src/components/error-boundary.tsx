@@ -3,8 +3,7 @@ import * as Updates from "expo-updates";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
 import { reportCrash } from "../lib/crash-reporting";
-import { fontFamilies } from "../theme/fonts";
-import { colors, fontSize, space } from "../theme/tokens";
+import { colors, fontFamilies, fontSize, space } from "../theme/app2";
 import { Button } from "./ui/button";
 
 /**

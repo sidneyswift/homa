@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { useWorkspaceSurface } from "../workspace/surface-context";
 import { setViewContextAction } from "../../app/app/view-context-actions";
 import { focusChildThenOpenChat } from "./ask-homa-about-child-action";
 
@@ -22,6 +23,7 @@ export function AskHomaAboutChild({
   childName: string;
   variant?: keyof typeof ASK_HOMA_CLASSES;
 }) {
+  const workspace = useWorkspaceSurface();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [failed, setFailed] = useState(false);
@@ -32,7 +34,7 @@ export function AskHomaAboutChild({
       try {
         await focusChildThenOpenChat(childId, {
           setViewContext: setViewContextAction,
-          navigate: (href) => router.push(href),
+          navigate: (href) => workspace ? workspace.askHoma(`Help me understand ${childName}’s progress.`) : router.push(href),
         });
       } catch {
         setFailed(true);

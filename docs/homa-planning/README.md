@@ -47,6 +47,8 @@ Files under `plans/` and other files ending in `-plan.md` are implementation rec
 
 Files under `icp-research/`, `lead-magnet/`, `materials/calibration/`, and similar research locations preserve dated inputs and prototypes. They do not override the PRD or founder rulings. Volatile prices, laws, provider behavior, and market facts require an observation date and refresh path.
 
+- [Adaptive island research](plans/2026-09-11-adaptive-island-research.md): source comparison, placement-aware growth, activity lifetimes, and open design questions for #1158. Research and proposed architecture, not an approved implementation.
+
 ### Historical records
 
 `build-log.md`, `eve-churn-log.md`, tester notes, decision-session records, and superseded plans preserve what was observed or decided at a point in time. Annotate later corrections rather than rewriting the original event. Historical statements must not be copied into current guidance without re-verification.

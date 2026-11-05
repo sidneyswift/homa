@@ -2,8 +2,7 @@ import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 import { Icon } from "../../components/design/icon";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, shadows, space } from "../../theme/app2";
 
 /**
  * The chat transcript's planner pointer: when Homa opens the planner

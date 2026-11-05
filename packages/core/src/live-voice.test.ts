@@ -3,7 +3,7 @@ import test from "node:test";
 import { LiveSessionDiagnostics, LiveVoiceConversation, liveCommentary } from "./live-voice";
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 15));
-function fixture(options: { failedSave?: boolean; failedTool?: boolean; needsReply?: boolean; hold?: Promise<void> } = {}) {
+function fixture(options: { failedSave?: boolean; failedTool?: boolean; needsReply?: boolean; hold?: Promise<void>; onSaveStatus?: (failed: boolean) => void } = {}) {
   const calls: Record<string, unknown>[] = [];
   const saves: Record<string, unknown>[] = [];
   const sent: Record<string, unknown>[] = [];
@@ -16,6 +16,7 @@ function fixture(options: { failedSave?: boolean; failedTool?: boolean; needsRep
     onWorking: (active, context) => working.push({ active, ...context }),
     onEffects: (output) => { effects.push(output); },
     onError: (message) => errors.push(message), onCaption: (row) => captions.set(row.sequence, row.text),
+    onSaveStatus: options.onSaveStatus,
     fetch: async (path, init) => {
       const body = JSON.parse(String(init?.body));
       if (path.endsWith("/turn")) { saves.push(body); return Response.json({ ok: !options.failedSave }); }
@@ -138,6 +139,22 @@ test("failed transcript persistence is visible and retryable", async () => {
   assert.ok(f.errors.length);
   options.failedSave = false;
   assert.equal(await f.conversation.retrySave(), true);
+});
+
+test("save recovery clears only the save failure and concurrent retries stay serialized", async () => {
+  const statuses: boolean[] = [];
+  const options = { failedSave: true, onSaveStatus: (failed: boolean) => statuses.push(failed) };
+  const f = fixture(options);
+  f.fragment("Keep this line", 0, 10);
+  assert.equal(await f.conversation.finish(), false);
+  assert.deepEqual(statuses, [true]);
+  assert.equal(f.errors.length, 0);
+  options.failedSave = false;
+  const before = f.saves.length;
+  assert.deepEqual(await Promise.all([f.conversation.retrySave(), f.conversation.retrySave()]), [true, true]);
+  assert.equal(f.saves.length - before, 1);
+  assert.deepEqual(statuses, [true, false]);
+  assert.equal(f.saves.at(-1)?.content, "Keep this line");
 });
 
 test("typed starters use the same authenticated bridge without Realtime commands", async () => {

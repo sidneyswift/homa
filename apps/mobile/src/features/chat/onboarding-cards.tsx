@@ -18,8 +18,8 @@ import { IconButton } from "../../components/ui/icon-button";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { TextField } from "../../components/ui/text-field";
 import { useAccessibilityFocusOnChange } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
+import { searchStates } from "../onboarding/state-search";
 import {
   fetchMapChild,
   finalizeReport,
@@ -230,6 +230,12 @@ export function DetailCard({
   const [saved, setSaved] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [choosingState, setChoosingState] = useState(false);
+  const [stateQuery, setStateQuery] = useState("");
+  const stateMatches = searchStates(stateQuery);
+  function closeStatePicker() {
+    setChoosingState(false);
+    setStateQuery("");
+  }
   const fields = DETAIL_FIELDS[card.kind];
   const field = fields[Math.min(step, fields.length - 1)];
   const isLast = step === fields.length - 1;
@@ -385,7 +391,7 @@ export function DetailCard({
             title="Choose your state"
             initialFocusRef={statePickerHeadingRef}
             presentationStyle="pageSheet"
-            onRequestClose={() => setChoosingState(false)}
+            onRequestClose={closeStatePicker}
           >
             <SafeAreaView style={{ flex: 1, backgroundColor: colors.page }}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: space.md, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}>
@@ -394,12 +400,29 @@ export function DetailCard({
                     Choose your state
                   </Text>
                 </View>
-                <IconButton label="Close state picker" onPress={() => setChoosingState(false)}>
+                <IconButton label="Close state picker" onPress={closeStatePicker}>
                   <Icon name="close" size={20} color={colors.textSubtle} />
                 </IconButton>
               </View>
-              <ScrollView contentContainerStyle={{ padding: space.md }}>
-                {US_STATES.map((state) => {
+              <View style={{ paddingHorizontal: space.md, paddingTop: space.md }}>
+                <TextField
+                  label="Find your state"
+                  value={stateQuery}
+                  onChangeText={setStateQuery}
+                  placeholder="Start typing, like Ohio"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  clearButtonMode="while-editing"
+                  returnKeyType="done"
+                />
+              </View>
+              <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: space.md }}>
+                {stateMatches.length === 0 ? (
+                  <Text style={{ fontFamily: fontFamilies.body, fontSize: fontSize.base, color: colors.textMuted }}>
+                    {`No state starts with "${stateQuery.trim()}".`}
+                  </Text>
+                ) : null}
+                {stateMatches.map((state) => {
                   const selected = state.code === values.usState;
                   return (
                     <Pressable
@@ -409,7 +432,7 @@ export function DetailCard({
                       accessibilityState={{ selected }}
                       onPress={() => {
                         setValue("usState", state.code);
-                        setChoosingState(false);
+                        closeStatePicker();
                       }}
                       style={{
                         minHeight: 48,

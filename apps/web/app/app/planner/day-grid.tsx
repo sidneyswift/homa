@@ -70,15 +70,19 @@ function ActivityCard({
   checked,
   pending,
   onToggle,
+  workspace,
+  preserveConversation,
 }: {
   item: PlannerDayItem;
   readOnly: boolean;
   checked: boolean;
   pending: boolean;
   onToggle: () => void;
+  workspace: boolean;
+  preserveConversation: boolean;
 }) {
   return (
-    <div className="rounded-md p-2.5" style={{ background: item.toneBg }}>
+    <div data-workspace-activity={workspace || undefined} className="rounded-md p-2.5" style={workspace ? undefined : { background: item.toneBg }}>
       <div className="flex items-center justify-between gap-1.5">
         <span
           className="text-[0.58rem] font-bold uppercase tracking-[0.05em]"
@@ -86,7 +90,7 @@ function ActivityCard({
         >
           {item.subjectLabel}
         </span>
-        {item.kidName ? (
+        {item.kidName && workspace ? <span className="text-sm text-muted">{item.kidName}</span> : item.kidName ? (
           <KidAvatar
             name={item.kidName}
             index={item.kidIndex}
@@ -110,6 +114,7 @@ function ActivityCard({
         ) : (
           <input
             type="checkbox"
+            aria-label={item.kidName ? `${item.kidName}: ${item.text}` : undefined}
             checked={checked}
             onChange={onToggle}
             aria-busy={pending}
@@ -138,6 +143,8 @@ function ActivityCard({
               {source.libraryUrl ? (
                 <a
                   href={source.libraryUrl}
+                  target={preserveConversation ? "_blank" : undefined}
+                  rel={preserveConversation ? "noreferrer" : undefined}
                   className="underline decoration-border underline-offset-2 hover:text-body"
                 >
                   {source.title}
@@ -158,6 +165,8 @@ export function DayGrid({
   days,
   plans,
   singleColumn = false,
+  workspace = false,
+  preserveConversation = false,
   onRefresh,
 }: {
   days: PlannerDay[];
@@ -165,6 +174,8 @@ export function DayGrid({
   /** The chat's planner canvas is ~half a viewport wide: five viewport-
    * breakpoint columns would crush there, so it stacks the days. */
   singleColumn?: boolean;
+  workspace?: boolean;
+  preserveConversation?: boolean;
   /** Canvas refreshes its fetched board; the page falls back to router refresh. */
   onRefresh?: () => void;
 }) {
@@ -212,6 +223,7 @@ export function DayGrid({
       {days.map((day) => (
         <section
           key={day.cell.label}
+          data-workspace-day={workspace || undefined}
           aria-label={`${day.cell.label} ${day.cell.dayOfMonth}${day.cell.isToday ? ", today" : ""}`}
           className={
             day.cell.isToday
@@ -259,6 +271,8 @@ export function DayGrid({
                 <ActivityCard
                   key={`${item.planKey}-${item.checkId}`}
                   item={item}
+                  workspace={workspace}
+                  preserveConversation={preserveConversation}
                   readOnly={readOnly}
                   checked={checks.isChecked(
                     plan.childId,
@@ -287,7 +301,7 @@ export function DayGrid({
                   "Open day" parses as an instruction to open something
                   (copy-editor gate 2026-07-11). */}
               <p className="px-0.5 pb-1 text-[0.72rem] text-subtle md:min-h-10">
-                Free day
+                {workspace ? "No learning activities" : "Free day"}
               </p>
             </>
           )}

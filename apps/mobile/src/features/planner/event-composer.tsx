@@ -14,8 +14,7 @@ import {
   type FamilyEventInput,
   type FamilyEventRecord,
 } from "../../lib/family-events";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import { addDays, compareDateOnly, formatMonthDay, formatWeekdayShort, type DateOnly } from "./date-utils";
 
 const TIME_STEP_MINUTES = 30;

@@ -1,3 +1,4 @@
+import { readActivityPlan, type ActivityPlan } from "./activity-plan";
 import { del } from "@vercel/blob";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type postgres from "postgres";
@@ -57,6 +58,7 @@ export interface MaterialSummary {
   /** Verified Family Library inputs captured when this version was made. */
   sources: FamilyAssetReferenceSnapshot[];
   html?: string;
+  activityPlan?: ActivityPlan;
   handwritingRows?: unknown;
   handwritingRender?: unknown;
 }
@@ -91,6 +93,7 @@ interface MaterialDbRow {
   page_preview_urls: string[] | null;
   family_sources: unknown;
   html?: string;
+  activity_plan?: unknown;
   handwriting_rows?: unknown;
   handwriting_render?: unknown;
   subject_lesson_id?: string | null;
@@ -104,7 +107,7 @@ interface MaterialSearchRow extends MaterialDbRow {
 const SUMMARY_COLUMNS =
   "id, title, kind, status, source, skill, subject, curriculum, theme, characters, child_id, preview_url, pdf_url, created_at, " +
   "page_count:generation->pageCount, page_preview_urls:generation->pagePreviewUrls, " +
-  "family_sources:generation->familySources";
+  "family_sources:generation->familySources, activity_plan:generation->input->activityPlan";
 
 /** Rows older than the packet work carry no pageCount; they are one page. */
 function normalizePageCount(raw: number | string | null | undefined): number {
@@ -167,6 +170,7 @@ function toSummary(row: MaterialDbRow): MaterialSummary {
     createdAt: row.created_at,
     pageCount: normalizePageCount(row.page_count),
     pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
+    activityPlan: readActivityPlan(row.activity_plan),
     sources: parseFamilyAssetReferenceSnapshots(row.family_sources),
     ...(row.html !== undefined ? { html: row.html, handwritingRender: row.handwriting_render, handwritingRows: row.handwriting_rows } : {}),
   };
@@ -197,6 +201,7 @@ function selectSearchRows(
  * lose their Blob bytes at finalize, so they are not re-showable).
  */
 export interface MaterialCardView {
+  activityPlan?: ActivityPlan;
   id: string;
   title: string;
   kind: MaterialKind;
@@ -216,6 +221,7 @@ export interface MaterialCardView {
 }
 
 interface MaterialCardRow {
+  activity_plan?: unknown;
   id: string;
   title: string;
   kind: MaterialKind;
@@ -244,6 +250,7 @@ function toCardView(row: MaterialCardRow): MaterialCardView {
     pageCount: normalizePageCount(row.page_count),
     pagePreviewUrls: normalizePagePreviewUrls(row.page_preview_urls),
     sources: parseFamilyAssetReferenceSnapshots(row.family_sources),
+    activityPlan: readActivityPlan(row.activity_plan),
     reviewPassed: row.review_pass !== "false",
   };
 }
@@ -257,7 +264,7 @@ async function getMaterialCardPinnedLegacy(
     select m.id, m.title, m.kind, m.status, m.skill,
            c.name as child_name, m.preview_url, m.pdf_url,
            m.generation->'pageCount' as page_count,
-           m.generation->'pagePreviewUrls' as page_preview_urls,
+           m.generation->'input'->'activityPlan' as activity_plan, m.generation->'pagePreviewUrls' as page_preview_urls,
            m.generation->'familySources' as family_sources,
            m.generation->'review'->>'pass' as review_pass
     from public.materials m
@@ -277,7 +284,7 @@ async function getMaterialCardPinnedProtected(
     select m.id, m.title, m.kind, m.status, m.skill, m.subject_lesson_id,
            c.name as child_name, m.preview_url, m.pdf_url,
            m.generation->'pageCount' as page_count,
-           m.generation->'pagePreviewUrls' as page_preview_urls,
+           m.generation->'input'->'activityPlan' as activity_plan, m.generation->'pagePreviewUrls' as page_preview_urls,
            m.generation->'familySources' as family_sources,
            m.generation->'review'->>'pass' as review_pass
     from public.materials m
@@ -326,7 +333,7 @@ export async function getMaterialCardCaller(
       "id, title, kind, status, skill, preview_url, pdf_url, " +
         "page_count:generation->pageCount, " +
         "page_preview_urls:generation->pagePreviewUrls, " +
-        "family_sources:generation->familySources, " +
+        "family_sources:generation->familySources, activity_plan:generation->input->activityPlan, " +
         "review_pass:generation->review->>pass, children(name)",
     )
     .eq("family_id", familyId)
@@ -355,7 +362,7 @@ async function getMaterialPinnedLegacy(
            created_at::text as created_at,
            revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'input'->'activityPlan' as activity_plan, generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources,
            generation->'handwritingRows' as handwriting_rows, generation->'handwritingRender' as handwriting_render, html
     from public.materials
@@ -375,7 +382,7 @@ async function getMaterialPinnedProtected(
            theme, characters, child_id, preview_url, pdf_url,
            created_at::text as created_at, html, subject_lesson_id,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'input'->'activityPlan' as activity_plan, generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources,
            generation->'handwritingRows' as handwriting_rows, generation->'handwritingRender' as handwriting_render
     from public.materials
@@ -460,7 +467,7 @@ export async function getSubjectLessonRevisionMaterialPinned(
            material.preview_url, material.pdf_url,
            material.created_at::text as created_at, material.html,
            material.generation->'pageCount' as page_count,
-           material.generation->'pagePreviewUrls' as page_preview_urls,
+           material.generation->'input'->'activityPlan' as activity_plan, material.generation->'pagePreviewUrls' as page_preview_urls,
            material.generation->'familySources' as family_sources,
            material.generation->'handwritingRows' as handwriting_rows,
            material.generation->'handwritingRender' as handwriting_render
@@ -499,7 +506,7 @@ async function findMaterialsPinnedLegacy(
            created_at::text as created_at,
            revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'input'->'activityPlan' as activity_plan, generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}
@@ -532,7 +539,7 @@ async function findMaterialsPinnedProtected(
            created_at::text as created_at, subject_lesson_id,
            revises, generation->'review'->>'pass' as review_pass,
            generation->'pageCount' as page_count,
-           generation->'pagePreviewUrls' as page_preview_urls,
+           generation->'input'->'activityPlan' as activity_plan, generation->'pagePreviewUrls' as page_preview_urls,
            generation->'familySources' as family_sources
     from public.materials
     where family_id = ${familyId}

@@ -17,7 +17,7 @@ import {
 } from "./binder";
 
 const BINDER_PAGE_SOURCE = readFileSync(
-  new URL("../../app/app/binder/page.tsx", import.meta.url),
+  new URL("../../app/app/binder/binder-content.tsx", import.meta.url),
   "utf8",
 );
 

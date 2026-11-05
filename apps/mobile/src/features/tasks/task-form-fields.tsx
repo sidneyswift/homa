@@ -1,8 +1,7 @@
 import { useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 import { hourLabel } from "./task-view";
 
 /**

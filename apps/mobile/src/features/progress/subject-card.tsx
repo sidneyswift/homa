@@ -3,8 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { Icon } from "../../components/design/icon";
 import type { ChildProgressView, ProgressSubjectView } from "../../lib/child-progress";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, shadows, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, palette, radius, shadows, space } from "../../theme/app2";
 import { subjectFreshness } from "./map-model";
 import { TopicRow } from "./topic-row";
 import {

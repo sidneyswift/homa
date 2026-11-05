@@ -1,8 +1,7 @@
 import { ActivityIndicator, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, space } from "../../theme/app2";
 
 /** A visible, named loading state with one explicit screen-reader announcement. */
 export function LoadingStatus({

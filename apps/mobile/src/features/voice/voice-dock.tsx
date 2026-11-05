@@ -5,8 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Icon } from "../../components/design/icon";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, palette, radius, shadows, space } from "../../theme/tokens";
+import { colors, darkColors, fontFamilies, fontSize, palette, radius, shadows, space } from "../../theme/app2";
 import { deriveCharacterState } from "./character-state";
 import { HomaCharacter } from "./homa-character";
 import {

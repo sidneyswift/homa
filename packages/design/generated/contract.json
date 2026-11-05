@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "quiet-authority-v1",
-  "sourceChecksum": "4cb70938cd3b6866e72ecc67905dd69552ce186615d76af2597151443b56f618",
+  "sourceChecksum": "af3b5867c5eec647c8eea85ea4f243e84386c08cb822d9c2189a57c88dcaf8ba",
   "source": {
     "brand": {
       "version": "quiet-authority-v1",
@@ -1995,7 +1995,8 @@
         "mobile",
         "send",
         "assistant",
-        "volume"
+        "volume",
+        "volume_muted"
       ],
       "semanticIconAliases": {
         "back": "ArrowLeft",
@@ -2059,7 +2060,8 @@
         "mobile": "Smartphone",
         "send": "ArrowUp",
         "assistant": "Bot",
-        "volume": "Volume2"
+        "volume": "Volume2",
+        "volume_muted": "VolumeOff"
       },
       "semanticIconAdapterContract": {
         "platforms": [
@@ -2136,7 +2138,8 @@
           "mobile": "Smartphone",
           "send": "ArrowUp",
           "assistant": "Bot",
-          "volume": "Volume2"
+          "volume": "Volume2",
+          "volume_muted": "VolumeOff"
         },
         "native": {
           "back": "ArrowLeft",
@@ -2200,7 +2203,8 @@
           "mobile": "Smartphone",
           "send": "ArrowUp",
           "assistant": "Bot",
-          "volume": "Volume2"
+          "volume": "Volume2",
+          "volume_muted": "VolumeOff"
         }
       }
     },

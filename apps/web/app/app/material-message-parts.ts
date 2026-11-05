@@ -1,3 +1,4 @@
+import { readActivityPlan } from "../../lib/materials/activity-plan";
 import { selectParentVisibleMaterialRevisions } from "../../lib/materials/parent-visible";
 import {
   familyAssetReferencesForSurface,
@@ -84,6 +85,7 @@ function parseMaterialMessagePart(
       // real material row.
       id: id.startsWith("legacy-part:") ? undefined : id,
       title: material.title,
+      activityPlan: readActivityPlan(material.activityPlan),
       ...(typeof material.kind === "string" ? { kind: material.kind } : {}),
       skill: typeof material.skill === "string" ? material.skill : null,
       childName:

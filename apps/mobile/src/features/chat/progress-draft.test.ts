@@ -127,11 +127,11 @@ describe("Progress to Chat draft handoff", () => {
 });
 
 describe("Progress draft wiring", () => {
-  it("keeps suggestion chips out of the composer provenance lane", () => {
-    const suggestionCalls = chatSessionSource.match(
-      /sendMessage\(suggestion, "card"\)/gu,
-    );
-    assert.equal(suggestionCalls?.length, 2);
+  it("keeps any suggestion chips out of the composer provenance lane", () => {
+    // App 2 (gh#1236) opens on Homa alone, without chips. If chips
+    // return, each one must still send as a card, never as typed text.
+    const suggestionSends = chatSessionSource.match(/sendMessage\(suggestion\b[^)]*\)/gu) ?? [];
+    assert.ok(suggestionSends.every(call => call === 'sendMessage(suggestion, "card")'));
   });
 
   it("keeps attached context through edits until send or explicit unlink", () => {

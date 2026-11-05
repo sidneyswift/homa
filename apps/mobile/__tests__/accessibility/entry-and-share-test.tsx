@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react-native";
 
+import EmailCodeScreen from "../../src/app/(auth)/email";
 import SignInScreen from "../../src/app/(auth)/signin";
 import { MaterialShareComposer } from "../../src/features/materials/material-share-composer";
 import type { PreparedMaterialShareRequest } from "../../src/features/materials/material-share-contract";
@@ -140,6 +141,42 @@ describe("native entry accessibility", () => {
     jest
       .spyOn(AccessibilityInfo, "announceForAccessibility")
       .mockImplementation(() => undefined);
+  });
+
+  it("keeps codes default and clears a password when changing modes", async () => {
+    const view = await render(<EmailCodeScreen />);
+    expect(view.queryByLabelText("Password")).toBeNull();
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
+    await fireEvent.changeText(view.getByLabelText("Password"), "test-only-secret");
+    await fireEvent.press(view.getByRole("button", { name: "Use an email code instead" }));
+    expect(view.getByRole("button", { name: "Send my code" })).toBeTruthy();
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
+    expect(view.getByLabelText("Password").props.value).toBe("");
+  });
+
+  it("uses ordinary password authentication and recovers after rejection", async () => {
+    mockSignInWithPassword.mockResolvedValue({ data: { session: null }, error: { status: 400 } });
+    const view = await render(<EmailCodeScreen />);
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
+    await fireEvent.changeText(view.getByLabelText("Email"), " Parent@Example.com ");
+    await fireEvent.changeText(view.getByLabelText("Password"), " keep spaces ");
+    await fireEvent.press(view.getByRole("button", { name: /^Sign in$/ }));
+    await waitFor(() => expect(mockSignInWithPassword).toHaveBeenCalledWith({ email: "parent@example.com", password: " keep spaces " }));
+    expect(view.getByText("That email and password didn't match. Try again, or use an email code.")).toBeTruthy();
+    expect(view.getByRole("button", { name: /^Sign in$/ })).not.toBeDisabled();
+  });
+
+  it("releases loading after network failure and clears credentials after success", async () => {
+    mockSignInWithPassword.mockRejectedValueOnce(new Error("offline"));
+    const view = await render(<EmailCodeScreen />);
+    await fireEvent.press(view.getByRole("button", { name: "I already have a password" }));
+    await fireEvent.changeText(view.getByLabelText("Email"), "parent@example.com");
+    await fireEvent.changeText(view.getByLabelText("Password"), "test-only-secret");
+    await fireEvent.press(view.getByRole("button", { name: /^Sign in$/ }));
+    await waitFor(() => expect(view.getByText("Couldn't connect. Check your connection and try again.")).toBeTruthy());
+    mockSignInWithPassword.mockResolvedValueOnce({ data: { session: { access_token: "test-session" } }, error: null });
+    await fireEvent.press(view.getByRole("button", { name: /^Sign in$/ }));
+    await waitFor(() => expect(view.getByLabelText("Password").props.value).toBe(""));
   });
 
   it("names three doors and offers nothing else to get wrong", async () => {

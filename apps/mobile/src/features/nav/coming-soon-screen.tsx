@@ -1,8 +1,7 @@
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, space } from "../../theme/app2";
 
 /**
  * Transient stand-in for a sidebar destination whose real screen is

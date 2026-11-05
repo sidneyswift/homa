@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Client } from "eve/client";
-import { ageInMonths, ageLabel } from "@homa/core";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { AiConsentGate } from "../../components/ai-consent-gate";
@@ -21,7 +20,6 @@ import {
   progressFingerprintFromRoute,
 } from "../../features/chat/progress-draft";
 import { useFamilyData } from "../../features/family/use-family-data";
-import { type ChildRecord } from "../../lib/family";
 import {
   chatStorageKey,
   prepareChat,
@@ -36,20 +34,20 @@ import {
 import { env } from "../../lib/env";
 import { restoreServerBoundMobileSession } from "../../lib/session-binding";
 import { supabase } from "../../lib/supabase";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, space } from "../../theme/app2";
 
 /** Stable identity: a new object every render would refire the composer
  *  effect that watches for it. */
 const PLAN_WEEK_DRAFT = { id: "plan-week-intent", text: "Let's plan our week." };
+/** The "Log today's lesson" door: logging is telling Homa, so the door
+ *  starts the sentence and she finishes it with what they did. */
+const LOG_LESSON_DRAFT = { id: "log-lesson-intent", text: "Log today's lesson: " };
 
 /**
  * Chat is the app's front door (founder call 2026-07-29, matching web:
- * /app IS chat, there is no separate landing screen). The former
- * Today tab's greeting and kid cards fold in here as the welcome
- * state, shown only on a truly fresh conversation (no archived
- * messages, no in-flight session); once she has talked to Homa at
- * all, this screen is just the transcript, same as it always was.
+ * /app IS chat, there is no separate landing screen). App 2 (gh#1236)
+ * opens a fresh conversation on Homa herself and the composer, the same
+ * white canvas as web's /app2; the transcript appears once she talks.
  */
 export default function ChatScreen() {
   const router = useRouter();
@@ -60,9 +58,10 @@ export default function ChatScreen() {
     progressIntent?: string | string[];
     progressNextMoveFingerprint?: string | string[];
     planIntent?: string | string[];
+    logIntent?: string | string[];
   }>();
   const { session } = useSession();
-  const { family, children, memberDisplayName, loading } = useFamilyData();
+  const { family, children, loading } = useFamilyData();
   const userId = session?.user.id ?? null;
   const [preparedState, setPreparedState] = useState<{
     userId: string;
@@ -124,9 +123,19 @@ export default function ChatScreen() {
   const planIntentParam = Array.isArray(params.planIntent)
     ? params.planIntent[0]
     : params.planIntent;
-  const planWeekDraft = planIntentParam === "week" ? PLAN_WEEK_DRAFT : null;
+  const logIntentParam = Array.isArray(params.logIntent)
+    ? params.logIntent[0]
+    : params.logIntent;
+  // Both onboarding doors hand over an opening line the same way; the
+  // composer treats either as her own words waiting in the box.
+  const planWeekDraft =
+    planIntentParam === "week"
+      ? PLAN_WEEK_DRAFT
+      : logIntentParam === "lesson"
+        ? LOG_LESSON_DRAFT
+        : null;
   const handlePlanWeekDraftHandled = useCallback(() => {
-    router.setParams({ planIntent: "" });
+    router.setParams({ planIntent: "", logIntent: "" });
   }, [router]);
 
   useEffect(() => {
@@ -201,11 +210,6 @@ export default function ChatScreen() {
     };
   }, [family?.time_zone, loading, userId]);
 
-  const isFreshConversation =
-    prepared !== null &&
-    preparedState?.historySettled === true &&
-    prepared.archived.length === 0 &&
-    prepared.initialEvents.length === 0;
   const chatSessionKey = preparedState?.historySettled !== true
     ? "hydrating"
     : prepared?.initialSession?.sessionId ??
@@ -252,20 +256,12 @@ export default function ChatScreen() {
           </View>
         ) : (
           <AiConsentGate>
-            {isFreshConversation ? (
-              <WelcomeHeader
-                greeting={memberDisplayName ?? readyFamily.parent_display_name}
-                familyName={readyFamily.name}
-                kids={children}
-              />
-            ) : null}
             <ChatSession
               key={`${userId}:${chatSessionKey}`}
               storageKey={chatStorageKey(userId)}
               prepared={prepared}
               restoringSession={restoringSession}
               familyId={readyFamily.id}
-              parentName={memberDisplayName ?? readyFamily.parent_display_name ?? null}
               draftRequest={validatedDraftRequest}
               planWeekDraft={planWeekDraft}
               onPlanWeekDraftHandled={handlePlanWeekDraftHandled}
@@ -278,70 +274,5 @@ export default function ChatScreen() {
         )}
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
-}
-
-/** The former Today tab's greeting + kid cards, now Chat's own
- *  welcome state instead of a separate screen a family had to leave
- *  chat to reach. */
-function WelcomeHeader({
-  greeting,
-  familyName,
-  kids,
-}: {
-  greeting: string | null;
-  familyName: string;
-  kids: ChildRecord[];
-}) {
-  return (
-    <View style={{ padding: space.lg, paddingBottom: space.md, gap: space.md }}>
-      <Text
-        style={{
-          fontFamily: fontFamilies.display,
-          fontSize: fontSize.xxl,
-          lineHeight: fontSize.xxl * 1.1,
-          color: colors.textStrong,
-        }}
-      >
-        {greeting ? `Hi ${greeting}.` : familyName}
-      </Text>
-      {kids.map((child) => (
-        <Card key={child.id} style={{ gap: 4 }}>
-          <Text
-            style={{
-              fontFamily: fontFamilies.displaySemibold,
-              fontSize: fontSize.lg,
-              color: colors.textStrong,
-            }}
-          >
-            {child.name}
-            <Text
-              style={{
-                fontFamily: fontFamilies.body,
-                fontSize: fontSize.sm,
-                color: colors.textMuted,
-              }}
-            >
-              {"  "}
-              {ageLabel(ageInMonths(child.birth_month))}
-            </Text>
-          </Text>
-          {child.profile.interests?.length ? (
-            <Text
-              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}
-            >
-              Into: {child.profile.interests.join(", ")}
-            </Text>
-          ) : null}
-          {child.profile.focus ? (
-            <Text
-              style={{ fontFamily: fontFamilies.body, fontSize: fontSize.sm, color: colors.textBody }}
-            >
-              Working on: {child.profile.focus}
-            </Text>
-          ) : null}
-        </Card>
-      ))}
-    </View>
   );
 }

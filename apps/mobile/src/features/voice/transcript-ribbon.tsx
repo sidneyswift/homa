@@ -2,8 +2,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { InlineError } from "../../components/ui/inline-error";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, palette, space } from "../../theme/app2";
 import { whisperText } from "./whisper-text";
 
 /**

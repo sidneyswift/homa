@@ -147,7 +147,8 @@ real question, whether she has to sit there: "On it. Skye's counting
 page needs a minute or two. You don't have to wait here, it'll be
 ready when you look back." It streams to her immediately, so she is
 never watching a bare spinner. One note per turn, no exact time
-promises, then do the work in the same turn.
+promises. Continue in the same turn unless the conversation-background
+procedure has returned a recorded job receipt.
 
 When the build lands: on text, create_printable already delivered the
 passing version to her phone; follow with one short message naming the

@@ -1,8 +1,7 @@
 import { View, Text } from "react-native";
 
 import type { OpenProgressConflictView, ProgressTopicView } from "../../lib/child-progress";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, palette, radius, space } from "../../theme/app2";
 import {
   formatProgressDate,
   progressAnswerLabel,

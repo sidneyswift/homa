@@ -102,10 +102,11 @@ export function PlannerView({
    * button disappears (she is already right there), the day grid stays
    * one column for the narrow panel, and month links open a new tab so
    * the conversation is never navigated away from. */
-  surface?: "page" | "canvas";
+  surface?: "page" | "canvas" | "workspace";
   onPlannerRefresh?: () => void;
 }) {
-  const canvas = surface === "canvas";
+  const canvas = surface !== "page";
+  const workspace = surface === "workspace";
   const nowMs = now.getTime();
   const plansByKid = new Map<string, DashboardPlan[]>();
   for (const plan of plans) {
@@ -166,7 +167,7 @@ export function PlannerView({
       // Cycle tones across the whole board (focusRows counts every plan
       // placed so far), so on the family calendar two kids' first plans
       // get different colors instead of both landing on clay.
-      const tone = BLOCK_TONES[focusRows.length % BLOCK_TONES.length];
+      const tone = workspace ? { bg: "transparent", ink: "var(--homa-ink)" } : BLOCK_TONES[focusRows.length % BLOCK_TONES.length];
       const planKey = `${plan.childId}:${plan.subjectId}`;
       dayPlans.push({
         key: planKey,
@@ -304,6 +305,8 @@ export function PlannerView({
                   <Link
                     key={child.id}
                     href="/onboarding"
+                    target={canvas ? "_blank" : undefined}
+                    rel={canvas ? "noreferrer" : undefined}
                     className="inline-flex min-h-10 items-center rounded-pill border border-border bg-card px-4 py-2 text-xs font-semibold text-strong transition-colors hover:border-brand"
                   >
                     Start {child.name}&apos;s checklist
@@ -320,10 +323,11 @@ export function PlannerView({
             {focusRows.map((row) => (
               <div
                 key={row.key}
+                data-workspace-focus={workspace || undefined}
                 className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md px-3 py-2"
                 style={{ background: row.tone.bg }}
               >
-                {row.kidName ? (
+                {row.kidName && workspace ? <span className="text-sm font-medium">{row.kidName}</span> : row.kidName ? (
                   <KidAvatar
                     name={row.kidName}
                     index={row.kidIndex}
@@ -373,6 +377,8 @@ export function PlannerView({
               days={days}
               plans={dayPlans}
               singleColumn={canvas}
+              workspace={workspace}
+              preserveConversation={canvas}
               onRefresh={onPlannerRefresh}
             />
           </div>

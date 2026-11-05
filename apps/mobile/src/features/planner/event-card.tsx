@@ -1,8 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import type { FamilyEventRecord } from "../../lib/family-events";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, palette, radius, space } from "../../theme/app2";
 import { kidTone } from "./kid-tone";
 
 function formatTime(time: string | null): string | null {

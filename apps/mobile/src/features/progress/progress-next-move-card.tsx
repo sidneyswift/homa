@@ -3,8 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 export function ProgressNextMoveCard({
   nextMove,

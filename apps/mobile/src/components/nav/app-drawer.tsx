@@ -16,7 +16,7 @@ import { Logo } from "../brand/logo";
 import { Icon } from "../design/icon";
 import { IconButton } from "../ui/icon-button";
 import { sendAccessibilityFocus } from "../../lib/accessibility";
-import { colors, radius, shadows, space } from "../../theme/tokens";
+import { colors, radius, shadows, space } from "../../theme/app2";
 
 const DRAWER_WIDTH = Math.min(300, Dimensions.get("window").width * 0.85);
 

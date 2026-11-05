@@ -1,3 +1,4 @@
+import { activityPlanSchema, activityPlanHtml, type ActivityPlan } from "../../lib/materials/activity-plan";
 import { materialReviewAdvisoryNotes } from "../../lib/materials/review-advisory-notes";
 import { randomUUID } from "node:crypto";
 
@@ -165,6 +166,7 @@ const packetPageInput = z.object({
 });
 
 export const createPrintableInputSchema = z.object({
+  activityPlan: activityPlanSchema.optional().describe("An adjustable short activity plan. Supplies the printable content directly; omit html, pages, and pageImageUrl. Load materials-studio and its short-plan reference first."),
   handwritingRows: handwritingRowsSchema,
   title: z
     .string()
@@ -314,6 +316,7 @@ export interface PrintableGenerationInput {
   sourceFamilyAssetIds: string[];
   path: "html" | "pageImageUrl" | "pages";
   lessonId?: string;
+  activityPlan?: ActivityPlan;
 }
 
 export function subjectLessonPrintableRestriction(
@@ -365,6 +368,7 @@ export function buildPrintableGenerationInput(
 ): PrintableGenerationInput {
   const trustedLesson = readSubjectLessonTrustedContext(attributes);
   return {
+    ...(input.activityPlan ? { activityPlan: input.activityPlan } : {}),
     title: input.title,
     kind: input.kind ?? "worksheet",
     recipe: input.recipe ?? null,
@@ -417,6 +421,7 @@ const createPrintable = defineBoundedTool({
   repeatable: false,
   inputSchema: createPrintableInputSchema,
   async execute(input, ctx) {
+    if (input.activityPlan && (input.html || input.pages || input.pageImageUrl || input.handwritingRows)) return { created: false, note: "An activity plan supplies its own printable content. Omit other page content." };
     let access;
     try {
       access = await resolveAgentAccess(ctx.session.auth.current?.attributes);
@@ -507,7 +512,7 @@ const createPrintable = defineBoundedTool({
     }
 
     const inputHtml =
-      typeof input.html === "string" ? stripCdataWrapper(input.html) : undefined;
+      input.activityPlan ? activityPlanHtml(input.title, input.activityPlan) : typeof input.html === "string" ? stripCdataWrapper(input.html) : undefined;
     const paths = [
       typeof inputHtml === "string",
       typeof input.pageImageUrl === "string",
@@ -1330,6 +1335,7 @@ const createPrintable = defineBoundedTool({
       done: true,
       material: {
         id: materialId,
+        ...(input.activityPlan ? { activityPlan: input.activityPlan } : {}),
         title: input.title,
         kind,
         skill: input.skill ?? null,

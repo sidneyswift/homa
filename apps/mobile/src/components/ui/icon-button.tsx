@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { radius } from "../../theme/tokens";
+import { radius } from "../../theme/app2";
 
 /** A named icon action with a guaranteed 44-point target. */
 interface IconButtonProps {

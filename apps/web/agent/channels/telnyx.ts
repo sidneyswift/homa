@@ -229,6 +229,7 @@ const { bot, channel, send } = chatSdkChannel({
         channel: "sms",
         destination: attributes.phoneNumber,
         providerThreadKey: channel.thread.id,
+        content: messageText,
       });
       const genericContract = replyContractForReactiveMessage(
         messageText,

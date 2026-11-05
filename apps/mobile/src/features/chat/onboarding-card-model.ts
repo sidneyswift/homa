@@ -4,8 +4,11 @@ import {
   planQuestions,
   type MapAnswer,
   type MapItem,
+  type MapQuestionPlan,
 } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
+
+import { focusSubjectIds } from "../onboarding/working-chips";
 
 export interface ChecklistCardData {
   childId: string;
@@ -178,11 +181,26 @@ export function latestReportReveal(messages: readonly EveMessage[]) {
   return latestCard(messages, parseReportCardPart);
 }
 
+/**
+ * The child's question plan, with the subjects her parent said they are
+ * working on first (working-chips.ts) and every other subject in its
+ * usual order. Walk and chat both read this, so they ask in the same
+ * order.
+ */
+export function checklistPlansFor(child: MapStateChild): MapQuestionPlan[] {
+  const plans = planQuestions(child.ageMonths);
+  const first = focusSubjectIds(child.helpWith);
+  return [
+    ...first.flatMap((id) => plans.filter((plan) => plan.subjectId === id)),
+    ...plans.filter((plan) => !first.includes(plan.subjectId)),
+  ];
+}
+
 export function checklistPositionFor(child: MapStateChild): ChecklistPosition {
   const answers = Object.fromEntries(
     child.answers.map((entry) => [entry.itemId, entry.answer]),
   );
-  const queue = buildMapQuestionQueue(planQuestions(child.ageMonths), answers);
+  const queue = buildMapQuestionQueue(checklistPlansFor(child), answers);
   return {
     answered: child.answered,
     remaining: queue.length,
@@ -195,7 +213,7 @@ export function checklistPositionFor(child: MapStateChild): ChecklistPosition {
 /**
  * The rechaptered checklist (D15, ruled 2026-08-31): the adaptive queue
  * is already subject-contiguous (buildMapQuestionQueue walks the age
- * plan in domain order, one askable question per subject at a time), so
+ * plan in checklistPlansFor order, one askable question per subject at a time), so
  * a chapter IS a subject, and the counter counts chapters, the only
  * total the adaptive ladder makes deterministic. Every derived number
  * here is computable from the child's saved answers alone, so walk and
@@ -222,7 +240,7 @@ export function checklistChaptersFor(child: MapStateChild): ChecklistChapterPosi
   const answers = Object.fromEntries(
     child.answers.map((entry) => [entry.itemId, entry.answer]),
   );
-  const plans = planQuestions(child.ageMonths);
+  const plans = checklistPlansFor(child);
   const queue = buildMapQuestionQueue(plans, answers);
   const openSubjects = new Set(queue.map((entry) => entry.subjectId));
   const currentSubjectId = queue[0]?.subjectId ?? null;

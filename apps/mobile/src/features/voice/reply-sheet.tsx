@@ -3,8 +3,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccessibleModal } from "../../components/ui/accessible-modal";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 import { MarkdownText } from "../chat/markdown-text";
 
 /**
@@ -22,7 +21,7 @@ import { MarkdownText } from "../chat/markdown-text";
  * carries its float puck; this stays a leaf.
  */
 
-const SCRIM_COLOR = "rgba(51,42,33,0.42)";
+const SCRIM_COLOR = "rgba(32,33,36,0.42)";
 /** Swipe-down travel on the grab handle that reads as "close". */
 const DISMISS_DRAG_PX = 48;
 

@@ -1,5 +1,8 @@
 "use client";
 
+import { ActivityPlanCard } from "../app2/activity-plan-card";
+import { useWorkspaceSurface } from "../../components/workspace/surface-context";
+import { readActivityPlan, type ActivityPlan } from "../../lib/materials/activity-plan";
 import { useState } from "react";
 
 import type { FamilyAssetReference } from "../../lib/library/family-asset-reference";
@@ -21,6 +24,7 @@ export interface MaterialArtifact {
   /** Absent only for pre-2026-07-25 reconstructed cards with no real id
    * to attribute a beacon to; those fall back to the raw pdfUrl link. */
   id?: string;
+  activityPlan?: ActivityPlan;
   title: string;
   kind?: string;
   skill: string | null;
@@ -53,6 +57,8 @@ export function MaterialCard({
   material: MaterialArtifact;
   showStatusHeadline?: boolean;
 }) {
+  const workspace = useWorkspaceSurface();
+  const plan = readActivityPlan(material.activityPlan);
   const headline = KIND_HEADLINES[material.kind ?? ""] ?? "Ready to print";
   // Routed through the pdf_opened beacon when a real id exists (records
   // that a parent's own click reached this material, the funnel's
@@ -74,6 +80,8 @@ export function MaterialCard({
   ]
     .filter(Boolean)
     .join(" · ");
+
+  if (workspace && plan && material.id) return <ActivityPlanCard key={material.id} id={material.id} title={material.title} plan={plan} askHoma={workspace.askHoma} context={<>{subtitle && <p>{subtitle}</p>}{material.sources?.length ? <p>Made from {material.sources.map((source, index) => <span key={source.id}>{index > 0 ? ", " : ""}{source.libraryUrl ? <a href={source.libraryUrl}>{source.title}</a> : source.title}{source.sourceLocator ? ` · ${source.sourceLocator}` : ""}</span>)}</p> : null}</>} />;
 
   return (
     <div
