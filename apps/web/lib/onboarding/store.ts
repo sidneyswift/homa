@@ -319,9 +319,12 @@ export interface FamilyBasicsInput {
  * /app reachable, and while the onboarding record says active it does NOT
  * end onboarding, because the record outranks the stamp.
  *
- * memberUserId mirrors the photo onto her own family_members row too
- * (same two-writes pattern saveFamilySetup uses), only when the browser
- * session is authenticated rather than an anonymous resume cookie.
+ * memberUserId mirrors her name and photo onto her own family_members row
+ * too (same two-writes pattern saveFamilySetup uses), only when the
+ * session is authenticated rather than an anonymous resume cookie. The
+ * iPhone walk greets her from that row, so without the name mirror its
+ * "While I draw, {parent}" and doors lines never said her name
+ * (2026-11-04).
  */
 export async function saveFamilyBasics(
   familyId: string,
@@ -346,10 +349,11 @@ export async function saveFamilyBasics(
       updated_at = now()
     where id = ${familyId}
   `;
-  if (avatarUrl && memberUserId) {
+  if ((callMeName || avatarUrl) && memberUserId) {
     await sql`
       update public.family_members
-      set avatar_url = coalesce(${avatarUrl}, avatar_url)
+      set display_name = coalesce(${callMeName}, display_name),
+          avatar_url = coalesce(${avatarUrl}, avatar_url)
       where family_id = ${familyId} and user_id = ${memberUserId}
     `;
   }
