@@ -3,8 +3,35 @@ import test from "node:test";
 
 import { agentJobsKickUrl } from "./kick";
 
-// The kick must target THIS deployment: a preview kicking prod would
+// Production's *.vercel.app deployment URL is behind Vercel
+// Authentication, so a kick there never reached the runner and every job
+// waited for the sweeper (2026-11-04). Production kicks its public domain.
+test("production kicks the public production domain", () => {
+  assert.equal(
+    agentJobsKickUrl({
+      VERCEL_ENV: "production",
+      VERCEL_PROJECT_PRODUCTION_URL: "thankshoma.com",
+      VERCEL_URL: "homa-abc123.vercel.app",
+      NODE_ENV: "production",
+    }),
+    "https://thankshoma.com/eve/v1/agent-job/run-now",
+  );
+});
+
+// A preview must target THIS deployment: a preview kicking prod would
 // run prod's code against rows prod may not understand yet.
+test("a preview deployment kicks its own deployment URL", () => {
+  assert.equal(
+    agentJobsKickUrl({
+      VERCEL_ENV: "preview",
+      VERCEL_PROJECT_PRODUCTION_URL: "thankshoma.com",
+      VERCEL_URL: "homa-git-branch.vercel.app",
+      NODE_ENV: "production",
+    }),
+    "https://homa-git-branch.vercel.app/eve/v1/agent-job/run-now",
+  );
+});
+
 test("a Vercel deployment kicks its own deployment URL", () => {
   assert.equal(
     agentJobsKickUrl({
