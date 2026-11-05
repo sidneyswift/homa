@@ -449,7 +449,7 @@
         "Email and Google remain available as truthful alternatives.",
         "Native identity is tied to the configured bundle identifier, not a client-supplied family ID."
       ],
-      "scopedInputFingerprint": "dc3fe2c657254177677db4e98a2a658b596ffc87fbbeb274538340b23697b1e2"
+      "scopedInputFingerprint": "8db528994b8b63c59629b489d08797a5abefb11ca0090a818b9c015e758b7c41"
     },
     {
       "id": "apple-subscription-management",
@@ -608,7 +608,7 @@
       },
       {
         "path": "apps/mobile/src/app/(auth)/signin.tsx",
-        "sha256": "94fe5d9cc9f325c4702ab2e0c95b38ce99de26479e529630f0b3552590083820"
+        "sha256": "91119d0dadd3abb0924f85a431d30217f3a378514ce2a81e5ed7a36f5b719b13"
       },
       {
         "path": "apps/mobile/src/app/settings.tsx",
@@ -767,6 +767,6 @@
         "sha256": "65fa59a81966adc6440131d768123dab474e6bb37106676d8f494f7977f5f127"
       }
     ],
-    "sourceFingerprint": "20afd3ef03ac17b025040871ec53959227bb9ba8caab22269a666eec9b25cece"
+    "sourceFingerprint": "e9cb53695e6de44477e0383556b516cf8e360a8c0e1606d879650b5764f1daff"
   }
 }
