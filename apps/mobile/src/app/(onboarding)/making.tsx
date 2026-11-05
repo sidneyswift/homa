@@ -32,6 +32,7 @@ import { WalkScene } from "../../features/onboarding/walk-scene";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
+import { firstMakingStopped } from "../../features/onboarding/making-status";
 import { MakingFeatureCards } from "../../features/onboarding/making-feature-cards";
 import { MakingShow } from "../../features/onboarding/making-show";
 import {
@@ -189,7 +190,7 @@ export default function MakingScreen() {
           setPageReady(true);
           return;
         }
-        if (job?.status === "failed" || job?.status === "cancelled") {
+        if (firstMakingStopped(job?.status)) {
           setPhase("failed");
           return;
         }
@@ -387,7 +388,9 @@ export default function MakingScreen() {
               The drawing table hiccupped
             </NativeText>
             <NativeText role="body" tone="body">
-              {"Nothing's lost. The page keeps trying on its own and is saved for you when it's ready."}
+              {childName
+                ? `Nothing you told me is lost. Ask me for ${childName}'s page in chat and I'll draw it there.`
+                : "Nothing you told me is lost. Ask me for the page in chat and I'll draw it there."}
             </NativeText>
             <Button
               label="Take me in"
