@@ -102,6 +102,15 @@ export const PRODUCTION_FLAGS = [
 export const LOCAL_CRON_SECRET = "local-stack-cron-secret";
 
 /**
+ * Where `dev:stack web` serves. It is also HOMA_INTERNAL_ORIGIN: Progress
+ * next moves and subject lessons start their Eve session by POSTing this
+ * server's own /eve/v1 routes there. The env files point that variable at
+ * production, so it is blanked like every unsafe key, and with nothing in
+ * its place every next move failed before a session started (2026-11-04).
+ */
+export const LOCAL_WEB_ORIGIN = "http://localhost:3000";
+
+/**
  * The account gate signs each checkout link with the Stripe secret
  * (apps/web/lib/billing/wall.ts checkoutUrl) and quietly opens every
  * account when there is none, so the paywall never appeared locally
@@ -184,6 +193,7 @@ export function localWebEnvironment(
   return {
     ...environment,
     CRON_SECRET: LOCAL_CRON_SECRET,
+    HOMA_INTERNAL_ORIGIN: LOCAL_WEB_ORIGIN,
     STRIPE_TEST_SECRET_KEY: LOCAL_STRIPE_SIGNING_KEY,
     NEXT_PUBLIC_SUPABASE_URL: endpoints.apiUrl,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: endpoints.publishableKey,

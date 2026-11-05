@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import { DURABLE_WRITE_ENV_VARS } from "../apps/web/lib/eval-isolation";
+import { resolveInternalEveOrigin } from "../apps/web/lib/internal-eve-route";
 import { resolveMapDbTarget } from "../apps/web/lib/map/db";
 import { resolveEvalBlobStore } from "../apps/web/lib/materials/eval-blob-store";
 
@@ -15,6 +16,7 @@ import {
   isSafeLocalWebKey,
   LOCAL_CRON_SECRET,
   LOCAL_STRIPE_SIGNING_KEY,
+  LOCAL_WEB_ORIGIN,
   localIsolationEnvironment,
   localJobsSweepRequest,
   localMobileEnvironment,
@@ -83,6 +85,16 @@ describe("localWebEnvironment", () => {
   it("replaces production's cron secret with a local one", () => {
     assert.equal(environment.CRON_SECRET, LOCAL_CRON_SECRET);
     assert.notEqual(LOCAL_CRON_SECRET, "");
+  });
+
+  it("points server-started Eve sessions at this server, never production", () => {
+    for (const env of [environment, localWebEnvironment(["HOMA_INTERNAL_ORIGIN"], endpoints)]) {
+      assert.equal(env.HOMA_INTERNAL_ORIGIN, LOCAL_WEB_ORIGIN);
+    }
+    assert.equal(
+      resolveInternalEveOrigin({ value: LOCAL_WEB_ORIGIN, nodeEnv: "development" }),
+      LOCAL_WEB_ORIGIN,
+    );
   });
 
   it("turns on production's flags that are safe locally", () => {

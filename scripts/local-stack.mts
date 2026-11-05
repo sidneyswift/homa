@@ -40,6 +40,7 @@ import { isLocalBackendUrl } from "../apps/mobile/src/lib/local-backend";
 import {
   dotenvKeys,
   LOCAL_JOBS_SWEEP_MS,
+  LOCAL_WEB_ORIGIN,
   localIsolationEnvironment,
   localJobsSweepRequest,
   localMobileEnvironment,
@@ -55,7 +56,7 @@ const WORKDIR = join(REPO_ROOT, "tooling", "local-stack");
 const BLOB_DIR = join(WORKDIR, ".data", "blob");
 /** Pinned so artifact URLs stored in the database survive a restart. */
 const BLOB_PORT = 54330;
-const WEB_ORIGIN = "http://localhost:3000";
+const WEB_ORIGIN = LOCAL_WEB_ORIGIN;
 const METRO_PORT = 8081;
 
 interface StackStatus extends LocalStackEndpoints {
