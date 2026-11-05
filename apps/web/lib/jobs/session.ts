@@ -21,6 +21,22 @@ export async function loadJobPlan(
   return rows[0]?.plan ?? null;
 }
 
+/**
+ * Which conversation a stage's build runs in. Every attempt gets its own:
+ * the runner mints a fresh episode per spawn, and the token carries it.
+ * Keyed by job and stage alone, a retry resumed the attempt that had just
+ * failed, so a build that ended on a question asked it again on every
+ * retry and the first page never arrived (2026-11-04 local walk: four
+ * attempts, the same question, 180k input tokens by the fourth).
+ */
+export function stageContinuationToken(target: {
+  jobId?: string | null;
+  stageNumber?: number | null;
+  episodeId?: string | null;
+}): string {
+  return `agent-job:${target.jobId ?? ""}:${target.stageNumber ?? ""}:${target.episodeId ?? ""}`;
+}
+
 /** The message that tells the build session what to do. It never delivers
  * to the parent; it builds the stage's material and calls
  * report_agent_job_stage. */
