@@ -19,12 +19,14 @@ import { Button } from "../../components/ui/button";
 import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { NativeText } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { saveWalkBasics } from "../../features/onboarding/basics";
 import { searchStates } from "../../features/onboarding/state-search";
 import {
+  loadOnboardingAnswers,
   reportOnboardingStep,
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
@@ -63,6 +65,7 @@ export default function YouScreen() {
   const [stateQuery, setStateQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [kidName, setKidName] = useState<string | null>(null);
   const sheetHeadingRef = useRef<View>(null);
   useWalkCharacterState(saving ? "thinking" : "listening");
 
@@ -79,6 +82,9 @@ export default function YouScreen() {
     if (!family || reported.current) return;
     reported.current = true;
     reportOnboardingStep(family.id, "you");
+    void loadOnboardingAnswers(family.id)
+      .then((answers) => setKidName(answers?.kids?.[0]?.name.trim() || null))
+      .catch(() => {});
   }, [family]);
 
   async function advanceToMaking() {
@@ -125,6 +131,36 @@ export default function YouScreen() {
             gap: space.md,
           }}
         >
+          {/* The last kid-card button reads "Make Theo's worksheet" and
+              starts the build, but it lands here, on a form: two round 3
+              reviewers (2026-11-04) read that as a broken promise. The
+              build really is running (kids.tsx starts it; making.tsx
+              re-requests it), so say so. */}
+          {kidName ? (
+            <View
+              accessible
+              accessibilityLabel={`Drawing ${kidName}'s page now`}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                alignSelf: "flex-start",
+                gap: space.xs,
+                paddingHorizontal: space.sm,
+                paddingVertical: 6,
+                borderRadius: radius.pill,
+                backgroundColor: colors.surfaceSunken,
+              }}
+            >
+              <LoadingStatus
+                label={`Drawing ${kidName}'s page now`}
+                showLabel={false}
+                style={{ minHeight: 0 }}
+              />
+              <NativeText role="caption" tone="strong">
+                {`Drawing ${kidName}'s page now`}
+              </NativeText>
+            </View>
+          ) : null}
           <NativeText role="display" tone="strong">
             {"And you?"}
           </NativeText>

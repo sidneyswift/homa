@@ -36,9 +36,16 @@ interface FeatureCard {
  * ad (gauntlet round 0: five generic cards "felt like an ad"). The three
  * things she will use most lead: the page, the report, the log.
  */
-function featureCards(childName: string | null, interest: string | null): FeatureCard[] {
+function featureCards(
+  childName: string | null,
+  interest: string | null,
+  stateName: string | null,
+): FeatureCard[] {
   const kid = childName ?? "your kid";
   const kids = childName ? `${childName}'s` : "Your kid's";
+  // Round 3 reviewers (2026-11-04) could not say what the log was FOR;
+  // the state she picked a screen earlier is the reason it exists.
+  const records = stateName ? `your ${stateName} homeschool records` : "your homeschool records";
   return [
     {
       key: "practice",
@@ -52,13 +59,13 @@ function featureCards(childName: string | null, interest: string | null): Featur
       key: "progress",
       image: require("../../../assets/onboarding/making-feature-cards/progress.png"),
       title: `${kids} progress report`,
-      body: `Answer a few quick questions and I'll show you where ${kid} is in each subject, and what to try next.`,
+      body: `Answer what you can, and I'll show you where ${kid} is in each subject and what to try next.`,
     },
     {
       key: "hours",
       image: require("../../../assets/onboarding/making-feature-cards/hours.png"),
       title: "Your lesson log",
-      body: "Tell me what you taught, by text or voice. I log it by child and subject, so your records keep themselves.",
+      body: `Tell me what you taught, by text or voice. I log it by child and subject, so ${records} are ready when you need them.`,
     },
     {
       key: "plan",
@@ -79,14 +86,16 @@ export function MakingFeatureCards({
   onDone,
   childName = null,
   interest = null,
+  stateName = null,
 }: {
   onDone: () => void;
   childName?: string | null;
   interest?: string | null;
+  stateName?: string | null;
 }) {
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
-  const CARDS = featureCards(childName, interest);
+  const CARDS = featureCards(childName, interest, stateName);
   const isLast = index === CARDS.length - 1;
   const card = CARDS[index];
 

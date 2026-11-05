@@ -83,8 +83,10 @@ export default function NextScreen() {
   const reported = useRef(false);
   // DELTA change 4 (ruled 2026-08-31): the parent's name lands at a
   // peak. First name only; a family with no stored name simply gets the
-  // sentence without the address, never a guessed one.
-  const parentFirstName = memberDisplayName?.trim().split(/\s+/u)[0] ?? null;
+  // sentence without the address, never a guessed one. The walk saves it
+  // on the family record, so that counts too (see making.tsx).
+  const parentFirstName =
+    (memberDisplayName || family?.parent_display_name)?.trim().split(/\s+/u)[0] || null;
 
   useEffect(() => {
     if (!family || reported.current) return;

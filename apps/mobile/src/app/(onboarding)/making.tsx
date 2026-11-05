@@ -14,6 +14,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+import { US_STATES } from "@homa/core";
+
 import { Button } from "../../components/ui/button";
 import { NativeText } from "../../components/ui/semantic";
 import {
@@ -61,7 +63,13 @@ const POLL_MS = 4_000;
 export default function MakingScreen() {
   const router = useRouter();
   const { family, memberDisplayName } = useFamilyData();
-  const parentFirstName = memberDisplayName?.trim().split(/\s+/u)[0] ?? null;
+  // The walk saved her name on the family record; her member row only has
+  // it once the server mirrors it (#1258), so read either (2026-11-04: a
+  // new parent was never greeted by name here).
+  const parentFirstName =
+    (memberDisplayName || family?.parent_display_name)?.trim().split(/\s+/u)[0] || null;
+  const stateName =
+    US_STATES.find((state) => state.code === family?.us_state)?.name ?? null;
   const [childName, setChildName] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [phase, setPhase] = useState<"starting" | "building" | "failed">(
@@ -279,6 +287,7 @@ export default function MakingScreen() {
                 onDone={() => setIntroFinished(true)}
                 childName={childName || null}
                 interest={chipLabels[0] ?? null}
+                stateName={stateName}
               />
             ) : showingChecklist && checklistChildId ? (
               <>
