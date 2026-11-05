@@ -1,4 +1,4 @@
-import { getFamilyByAuthUser, startAnonymousFamily, attachAuthUser } from "../../../../lib/map/store";
+import { ensureFamilyForAuthUser, getFamilyByAuthUser } from "../../../../lib/map/store";
 import { mapDb } from "../../../../lib/map/db";
 import { writeOnboardingRecord } from "../../../../lib/onboarding/store";
 import { clientIp, rateLimited } from "../../../../lib/map/ratelimit";
@@ -46,19 +46,16 @@ export async function POST(request: Request): Promise<Response> {
           { status: 400 },
         );
       }
-      const opened = await startAnonymousFamily({
-        source: "mobile",
-        utm: {},
-      });
-      await attachAuthUser({
-        familyId: opened.familyId,
+      // Locked per auth user: the app's first requests after sign-in
+      // arrive together, and an unlocked look-then-create gave one parent
+      // two families. The result is re-read through the same door every
+      // later request uses, so it reflects exactly what the membership
+      // row grants (attachAuthUser may have recovered an existing family).
+      family = await ensureFamilyForAuthUser({
         authUserId: caller.userId,
         email: caller.email,
+        source: "mobile",
       });
-      // Re-read through the same door every later request uses, so the
-      // response reflects exactly what the membership row now grants
-      // (attachAuthUser may have recovered an existing family instead).
-      family = await getFamilyByAuthUser(caller.userId);
       if (!family) {
         return Response.json({ ok: false }, { status: 502 });
       }
