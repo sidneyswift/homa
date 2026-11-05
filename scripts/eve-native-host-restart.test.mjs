@@ -70,8 +70,15 @@ async function completedTurns(directory) {
   return records.filter(step => step.stepName.endsWith("//turnStep") && step.status === "completed");
 }
 
+// Known failure, gh#1259: main's sandbox no-expiry template key (#1238,
+// #1241) stops the restarted host from replaying the answer. The
+// conversation rebuild this covers ships switched off; fix it and remove
+// this skip before the rebuild or its env flags are turned on. Founder go
+// to land #1215 past it, 2026-11-05.
+const KNOWN_FAILURE = "gh#1259: replay after a hard restart fails with the sandbox no-expiry key";
+
 test("native answer receipt survives hard host restart without consuming the next question", {
-  skip: !enabled && "Set EVE_NATIVE_HOST_RESTART=1 to run the isolated slow host regression",
+  skip: (!enabled && "Set EVE_NATIVE_HOST_RESTART=1 to run the isolated slow host regression") || KNOWN_FAILURE,
   timeout: 300_000,
 }, async context => {
   assert.ok(Number(process.versions.node.split(".")[0]) >= 24, "Eve requires Node 24 or newer");
