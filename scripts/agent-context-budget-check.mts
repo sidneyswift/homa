@@ -74,7 +74,12 @@ export const CONTEXT_BUDGETS: Record<string, number> = {
   "sms-mode (largest branch)": 4_600,
   "email-mode": 450,
   "web-mode": 400,
-  "ios-mode": 700,
+  // Raised from 700 on 2026-11-05 (gh#1236, landing with #1215). App 2
+  // moved the account and every feature behind the top-right More button,
+  // and the saved-plans line keeps Homa from claiming a revision no tool
+  // confirmed. Channel honesty for a UI that changed is the reason this
+  // file exists (gh#1040), so neither line is a deletion candidate.
+  "ios-mode": 880,
   "research-mode": 3_700,
   // Raised from 28,000 on 2026-07-30 (PR #469). Nine measured walks in
   // one session added real, load-bearing content the ratchet is meant to

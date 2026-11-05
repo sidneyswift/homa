@@ -5518,7 +5518,9 @@ await expectEmptyRead("materials");
 await expectReadDenied("model_usage");
 // Thank-you card outbox (migration #53): deny-all, server-only. It holds
 // mailing-address snapshots, so no Data API role may ever see or touch it.
-await expectEmptyRead("thank_you_cards");
+// The migration revokes every grant, so anon is refused, not handed an
+// empty list. Production kept the grants until gh#1248.
+await expectReadDenied("thank_you_cards");
 // Founder console ledgers (migration #73): deny-all, server-only. The
 // email ledger holds address hashes and delivery errors; the cron
 // heartbeat is pure ops state. No Data API role reads or writes either.

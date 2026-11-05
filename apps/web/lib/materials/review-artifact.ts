@@ -32,10 +32,18 @@ import {
  * Failure posture: a review that cannot run returns null and never
  * blocks a creation; the parent's own critique remains the outer loop.
  * Cost control: HOMA_MATERIALS_REVIEW=off disables the pass fleet-wide;
- * HOMA_REVIEW_MODEL swaps the model (default a cheap vision tier).
+ * HOMA_REVIEW_MODEL swaps the model.
+ *
+ * Why Sonnet and not the cheap vision tier (2026-10-22): on Carolyng's
+ * real Book 2 pages, 6 calls per set, gpt-5.4-mini passed about a third
+ * of correct pages and caught 4 of 18 real defects (0 of 6 on a sheet
+ * with a visibly cropped picture), so it both blocked her revisions and
+ * let defects through. With the same prompt, claude-sonnet-5.5 passed
+ * 18 of 18 correct pages and caught 18 of 18 defects, faster (3 to 5s
+ * per 4-page chunk). It costs about 4x per call, a few cents per review.
  */
 
-const DEFAULT_REVIEW_MODEL = "openai/gpt-5.4-mini";
+const DEFAULT_REVIEW_MODEL = "anthropic/claude-sonnet-5.5";
 const REVIEW_TIMEOUT_MS = 45_000;
 
 /** Pages shown to the reviewer per call (input-token ceiling). */
@@ -220,9 +228,10 @@ export interface ReviewModelCall {
   model: string;
   schema: z.ZodType<ChunkModelOutput>;
   system: string;
-  /** The pages under review, in reading order. Only pages: the anchor
-   * has its own field so it can never be counted as one of them. */
-  images: Array<{ mediaType: string; data: Buffer | Uint8Array }>;
+  /** The pages under review, in reading order, each with its page number
+   * in the document. Only pages: the anchor has its own field so it can
+   * never be counted as one of them. */
+  images: Array<{ mediaType: string; data: Buffer | Uint8Array; pageNumber: number }>;
   /** The format's anchor, or null. Delivered in its own message before
    * the pages (buildReviewMessages), never mixed into `images`. */
   reference: ReviewReferenceImage | null;
@@ -267,16 +276,26 @@ export interface ReviewMessage {
  * images in one content array with a sentence saying which is which is
  * not a boundary a vision model reliably keeps; a separate message with
  * its own label is a structural one. Exported for the contract test.
+ *
+ * Each page image carries its own "Page N" label just before it, for the
+ * same reason. With only one sentence after the images naming which
+ * pages they were, the reviewer numbered issues by position: on
+ * Carolyng's Book 2 revision (2026-10-15) it blocked delivery for
+ * "Page 2: the brief says page 4 should be Alma", and page 2 was not
+ * among the pages it was shown.
  */
 export function buildReviewMessages(call: ReviewModelCall): ReviewMessage[] {
   const pages: ReviewMessage = {
     role: "user",
     content: [
-      ...call.images.map((image) => ({
-        type: "file" as const,
-        mediaType: image.mediaType,
-        data: image.data,
-      })),
+      ...call.images.flatMap((image) => [
+        { type: "text" as const, text: `Page ${image.pageNumber}:` },
+        {
+          type: "file" as const,
+          mediaType: image.mediaType,
+          data: image.data,
+        },
+      ]),
       { type: "text" as const, text: call.text },
     ],
   };
@@ -377,7 +396,9 @@ on, not as a screen layout. You receive the rendered page images (in page
 order) and the brief they were made from. Judge ONLY what a parent would
 notice on paper:
 
-- misspelled words, garbled or illegible text, wrong child name spelling
+- misspelled words, garbled or illegible text, the child's name spelled
+  differently from the brief (other people a story names, such as
+  siblings, parents, and pets, are meant to be there)
 - the requested character, theme, or subject missing or wrong
 - broken layout: overlapping or cut-off elements, a mostly blank page
 - exercises that contradict the brief (wrong letter, wrong count, wrong
@@ -386,11 +407,27 @@ notice on paper:
   logo, or a sample/preview overlay: that reads on paper and a parent
   notices it immediately
 
+Every page ends with Homa's own footer in a bottom corner: a small mark
+and "made with Homa", often followed by "for" and the child's name. The
+renderer prints it on every page on purpose (founder ruling, journeys/10
+section 5). It is not a watermark and never an issue, even when a brief
+mentions it.
+
+A brief often gives instructions for particular pages ("p4", "page 5").
+Apply each one only to the page with that number; never hold one page to
+another page's instruction. A list of sentences the brief says to keep
+does not say which page shows which sentence unless the brief pairs
+them. Judge a requested character change by whether a parent would see
+it: the right character, the asked-for hair or clothes, a child where a
+child was asked for. How old a drawn child looks beyond that, or how
+much she resembles someone, is art taste.
+
 When told the document has more pages than you were shown, judge only
 the pages you can see; never report unshown pages as missing or broken.
 Do not nitpick style, art taste, or things the brief never asked for.
-A usable page passes. List issues concretely, each one fixable, naming
-the page number when there is more than one page.
+A usable page passes. List issues concretely, each one fixable. Each
+image arrives with a "Page N:" label just before it: when there is more
+than one page, name a page by that label, never by the image's position.
 
 You may be given measured page geometry (fill percent, where content
 ends, overflow past the page box). Those numbers come from the renderer,
@@ -485,7 +522,7 @@ async function reviewChunk(input: {
       : `pages ${shownNumbers.join(", ")}`;
   const pageContext =
     input.pageCount > 1
-      ? `The document has ${input.pageCount} pages; this message shows ${shownList}, in that order. Number every issue by the page number given here, not by its position among the images.\n`
+      ? `The document has ${input.pageCount} pages; this message shows ${shownList}, each labeled "Page N:" just before its image. Name every issue's page by that label, never by its position among the images.\n`
       : anchor
         ? `This message shows ${shownList}, the only page under review.\n`
         : "";
@@ -509,7 +546,11 @@ async function reviewChunk(input: {
       model,
       schema: buildChunkSchema(checklist),
       system: REVIEW_SYSTEM,
-      images: shownPages.map((page) => ({ mediaType: "image/jpeg", data: page.data })),
+      images: shownPages.map((page) => ({
+        mediaType: "image/jpeg",
+        data: page.data,
+        pageNumber: page.pageNumber,
+      })),
       // The anchor travels in its own message ahead of the pages
       // (buildReviewMessages), never among them.
       reference: anchor

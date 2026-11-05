@@ -47,6 +47,10 @@ export type EmailLedgerKind =
   | "band_ready"
   | "family_invite"
   | "admin_digest"
+  // The skills outage alert (gh#1237, lib/observability/skills-health.ts).
+  // Internal, to the digest address. Its submitted rows are also the
+  // once-per-six-hours guard.
+  | "skills_outage_alert"
   | "agent_composed"
   // The onboarding drip (funnel work 2026-07-20). DARK until the copy
   // clears review and compliance lands (lib/drip/flag.ts). The ledger
@@ -1071,6 +1075,29 @@ export async function sendAdminDigestEmail(
     bodyLines,
     cta: { label: "Open the founder console", url: `${siteUrl()}/admin` },
     footerNote: "Internal digest for the Homa founder console.",
+    outerNote: "Sent by your own Homa deployment's hourly cron to its configured founder address.",
+  });
+}
+
+/**
+ * The skills outage alert (gh#1237): sent by the hourly cron when fleet
+ * skills stop loading, to the digest address, at most once per six hours.
+ * The digest comes once a day; this cannot wait for it.
+ */
+export async function sendSkillsOutageEmail(
+  to: string,
+  subject: string,
+  bodyLines: string[],
+): Promise<boolean> {
+  return send({
+    ledger: { kind: "skills_outage_alert" },
+    to,
+    subject,
+    preview: bodyLines[0]?.slice(0, 120) ?? subject,
+    heading: subject,
+    bodyLines,
+    cta: { label: "Open the founder console", url: `${siteUrl()}/admin` },
+    footerNote: "Internal alert for the Homa founder console.",
     outerNote: "Sent by your own Homa deployment's hourly cron to its configured founder address.",
   });
 }

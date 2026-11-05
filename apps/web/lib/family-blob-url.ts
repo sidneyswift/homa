@@ -48,6 +48,21 @@ export function familyBlobPathname(url: string): string | null {
   }
 }
 
+/**
+ * canonicalFamilyBlobUrl(url): the URL as tables store it, without the
+ * query or fragment. A signed read link (find_attachments hands these to
+ * the model) carries a short-lived token in its query; matching it
+ * against a stored row, or re-signing it, needs the bare URL.
+ */
+export function canonicalFamilyBlobUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return null;
+  }
+}
+
 export function familyBlobBrowserUrl(url: string): string {
   return isPrivateFamilyBlobUrl(url)
     ? `/api/family-files?url=${encodeURIComponent(url)}`

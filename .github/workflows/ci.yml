@@ -433,8 +433,8 @@ jobs:
       - name: Agent context checks (chart parity, injection escaping)
         run: pnpm check:agent-context
 
-      - name: Eve ordered-stream and empty-delivery regressions
-        run: pnpm check:eve-ordered-stream && pnpm check:eve-empty-delivery
+      - name: Eve ordered-stream, empty-delivery, and sandbox-template regressions
+        run: pnpm check:eve-ordered-stream && pnpm check:eve-empty-delivery && pnpm check:eve-sandbox-template
 
       - name: Agent context budget ratchet (always-on bytes per component)
         run: pnpm check:agent-budget
@@ -645,6 +645,14 @@ jobs:
         timeout-minutes: 10
         run: pnpm check:family-workspace && pnpm test:family-workspace:postgres
 
+      - name: One family per sign-in disposable PostgreSQL test
+        timeout-minutes: 10
+        run: pnpm test:one-family-per-signin:postgres
+
+      - name: Onboarding basics member name disposable PostgreSQL test
+        timeout-minutes: 10
+        run: pnpm test:onboarding-basics:postgres
+
       - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:account-deletion:postgres
@@ -665,6 +673,10 @@ jobs:
       - name: Voice action receipts disposable PostgreSQL E2E
         timeout-minutes: 10
         run: pnpm test:voice-action-receipts:postgres
+
+      - name: Skills health check SQL on disposable PostgreSQL
+        timeout-minutes: 10
+        run: pnpm test:skills-health:postgres
 
       - name: Recurring family event occurrence disposable PostgreSQL E2E
         timeout-minutes: 10

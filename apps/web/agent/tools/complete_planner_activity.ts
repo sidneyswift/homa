@@ -219,12 +219,6 @@ export default defineBoundedTool({
           runtimeSessionId: ctx.session.id,
           turnId: ctx.session.turn.id,
         });
-        if (receiptContext && before.sourceMessageId === null) {
-          return {
-            completed: false,
-            note: "Voice could not verify the original Planner record, so nothing changed. Open Planner and check it off there.",
-          };
-        }
         const mutate = () => completePlannerLearningActivity({
           expectedUpdatedAt: before.updatedAt,
             familyId: access.familyId,
@@ -258,7 +252,7 @@ export default defineBoundedTool({
                     note: before.note,
                     sourceChannel: before.sourceChannel,
                     sourceQuote: before.sourceQuote,
-                    sourceMessageId: before.sourceMessageId!,
+                    sourceMessageId: before.sourceMessageId,
                     childIds: before.childIds,
                     completionSourceChannel: trusted.sourceChannel,
                     completionSourceQuote: sourceQuote,
