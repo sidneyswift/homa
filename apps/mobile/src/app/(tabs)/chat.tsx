@@ -39,6 +39,9 @@ import { fontFamilies , colors, fontSize, space } from "../../theme/app2";
 /** Stable identity: a new object every render would refire the composer
  *  effect that watches for it. */
 const PLAN_WEEK_DRAFT = { id: "plan-week-intent", text: "Let's plan our week." };
+/** The "Log today's lesson" door: logging is telling Homa, so the door
+ *  starts the sentence and she finishes it with what they did. */
+const LOG_LESSON_DRAFT = { id: "log-lesson-intent", text: "Log today's lesson: " };
 
 /**
  * Chat is the app's front door (founder call 2026-07-29, matching web:
@@ -55,6 +58,7 @@ export default function ChatScreen() {
     progressIntent?: string | string[];
     progressNextMoveFingerprint?: string | string[];
     planIntent?: string | string[];
+    logIntent?: string | string[];
   }>();
   const { session } = useSession();
   const { family, children, loading } = useFamilyData();
@@ -119,9 +123,19 @@ export default function ChatScreen() {
   const planIntentParam = Array.isArray(params.planIntent)
     ? params.planIntent[0]
     : params.planIntent;
-  const planWeekDraft = planIntentParam === "week" ? PLAN_WEEK_DRAFT : null;
+  const logIntentParam = Array.isArray(params.logIntent)
+    ? params.logIntent[0]
+    : params.logIntent;
+  // Both onboarding doors hand over an opening line the same way; the
+  // composer treats either as her own words waiting in the box.
+  const planWeekDraft =
+    planIntentParam === "week"
+      ? PLAN_WEEK_DRAFT
+      : logIntentParam === "lesson"
+        ? LOG_LESSON_DRAFT
+        : null;
   const handlePlanWeekDraftHandled = useCallback(() => {
-    router.setParams({ planIntent: "" });
+    router.setParams({ planIntent: "", logIntent: "" });
   }, [router]);
 
   useEffect(() => {

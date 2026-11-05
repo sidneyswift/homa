@@ -208,16 +208,21 @@ export default function MakingScreen() {
   const showingChecklist =
     checklistAvailable === "yes" && checklistChildId !== null && !checklistExited;
 
-  // The page is the reward. Ready before she has answered anything, she
-  // sees it first instead of a quiz standing in front of it (gauntlet
-  // round 1, 2026-11-04: both mom reviewers would quit at "1 of 16" with
-  // a finished page behind it). Mid-answer, the banner still waits for
-  // her (D8), and nothing is lost: with no answers there is nothing to
-  // score.
+  // The page is the reward. Ready before the check-in has even appeared,
+  // she sees the page first instead of a quiz standing in front of it
+  // (gauntlet round 1, 2026-11-04: both mom reviewers would quit at "1 of
+  // 16" with a finished page behind it). Once the check-in is on screen
+  // she may be mid-answer, so the banner waits for her instead (D8):
+  // keying this on answered === 0 cut a parent off on her first
+  // question (round 3 walk).
+  const checklistSeen = useRef(false);
   useEffect(() => {
-    if (pageReady && (checklistPositionRef.current?.answered ?? 0) === 0) {
-      setChecklistExited(true);
-    }
+    // Only a check-in that was on screen while the page was still being
+    // made counts; the render where the page flips ready must not.
+    if (!pageReady && !showIntro && showingChecklist) checklistSeen.current = true;
+  }, [pageReady, showIntro, showingChecklist]);
+  useEffect(() => {
+    if (pageReady && !checklistSeen.current) setChecklistExited(true);
   }, [pageReady]);
 
   function handleChecklistClose(exit: ChecklistExit | null) {
@@ -258,18 +263,23 @@ export default function MakingScreen() {
         {phase !== "failed" ? (
           <>
             <NativeText role="display" tone="strong">
-              {/* One noun, the one the kid card used (gauntlet round 1,
-                  2026-11-04), and the heading never says "drawing" over a
-                  banner that says the page is ready. */}
+              {/* Vocabulary law D7 (copy deck, 2026-08-31): from this
+                  screen on it is her page, never "worksheet". The heading
+                  never says "making" over a banner that says the page is
+                  ready (gauntlet round 1, 2026-11-04). */}
               {childName
                 ? pageReady
-                  ? `${childName}'s worksheet is ready`
-                  : `Making ${childName}'s worksheet`
+                  ? `${childName}'s page is ready`
+                  : `Making ${childName}'s page`
                 : "Homa is getting her pencils"}
             </NativeText>
 
             {showIntro ? (
-              <MakingFeatureCards onDone={() => setIntroFinished(true)} />
+              <MakingFeatureCards
+                onDone={() => setIntroFinished(true)}
+                childName={childName || null}
+                interest={chipLabels[0] ?? null}
+              />
             ) : showingChecklist && checklistChildId ? (
               <>
                 {/* The chapter cover (deck S8, D15): the heading says
@@ -310,9 +320,9 @@ export default function MakingScreen() {
                   <NativeText role="body" tone="body">
                     {childName
                       ? parentFirstName
-                        ? `While I work, ${parentFirstName}, tell me how ${childName}'s doing. It helps me get the next worksheet's level right.`
-                        : `While I work, tell me how ${childName}'s doing. It helps me get the next worksheet's level right.`
-                      : "While I work, tell me how your kid's doing. It helps me get the next worksheet's level right."}
+                        ? `While I work, ${parentFirstName}, tell me how ${childName}'s doing. Your answers start ${childName}'s progress report and set the level of the next page.`
+                        : `While I work, tell me how ${childName}'s doing. Your answers start ${childName}'s progress report and set the level of the next page.`
+                      : "While I work, tell me how your kid's doing. Your answers start their progress report and set the level of the next page."}
                   </NativeText>
                 )}
                 <ChecklistTakeover

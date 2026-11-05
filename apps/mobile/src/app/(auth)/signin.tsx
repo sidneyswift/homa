@@ -164,7 +164,9 @@ export default function SignInScreen() {
               The promise names what she gets: four blind reviewers
               (2026-11-04) read "Homeschool, handled." as a category,
               not a reason to sign up, and only learned a worksheet was
-              coming two screens past the account wall. */}
+              coming two screens past the account wall. Founder direction
+              2026-11-04: the app is more than worksheets, so the promise
+              names the progress report and the lesson log too. */}
           <Text
             style={{
               fontFamily: fontFamilies.body,
@@ -173,7 +175,7 @@ export default function SignInScreen() {
               textAlign: "center",
             }}
           >
-            {"Tell me about your kid. I'll make them a worksheet about what they love."}
+            {"Tell me about your kid. I'll make their worksheets, track their progress and keep your lesson log."}
           </Text>
         </View>
 

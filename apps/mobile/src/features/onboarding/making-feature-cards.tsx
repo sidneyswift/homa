@@ -20,47 +20,73 @@ import { colors, radius, space } from "../../theme/app2";
  * the reveal, even mid-stack.
  */
 
-const CARDS: readonly {
+interface FeatureCard {
   key: string;
   image: number;
   title: string;
   body: string;
-}[] = [
-  {
-    key: "plan",
-    image: require("../../../assets/onboarding/making-feature-cards/plan.png"),
-    title: "The weekly plan",
-    body: "Tell Homa what each child studies and when. She builds the week.",
-  },
-  {
-    key: "practice",
-    image: require("../../../assets/onboarding/making-feature-cards/practice-pages.png"),
-    title: "Practice pages",
-    body: "This is what's happening right now.",
-  },
-  {
-    key: "progress",
-    image: require("../../../assets/onboarding/making-feature-cards/progress.png"),
-    title: "Progress reports",
-    body: "See what's going well and what to try next.",
-  },
-  {
-    key: "hours",
-    image: require("../../../assets/onboarding/making-feature-cards/hours.png"),
-    title: "Teaching hours",
-    body: "Report the time you taught. Homa records it by child and subject.",
-  },
-  {
-    key: "chat",
-    image: require("../../../assets/onboarding/making-feature-cards/chat.png"),
-    title: "Just ask",
-    body: "Ask for a change, a new page, or help with today's lesson, anytime.",
-  },
-];
+}
 
-export function MakingFeatureCards({ onDone }: { onDone: () => void }) {
+/**
+ * The tour teaches the whole app on her child's terms (founder direction
+ * 2026-11-04: "the app is way more than a worksheet... progress reports
+ * ... lesson logging: I want onboarding to teach all of that"). Each
+ * card stays close to its approved capability line in landing-content.ts
+ * and names her child, so it reads as what Homa will do for Lena, not an
+ * ad (gauntlet round 0: five generic cards "felt like an ad"). The three
+ * things she will use most lead: the page, the report, the log.
+ */
+function featureCards(childName: string | null, interest: string | null): FeatureCard[] {
+  const kid = childName ?? "your kid";
+  const kids = childName ? `${childName}'s` : "Your kid's";
+  return [
+    {
+      key: "practice",
+      image: require("../../../assets/onboarding/making-feature-cards/practice-pages.png"),
+      title: `${kids} pages`,
+      body: interest
+        ? `Like the ${interest.toLowerCase()} page I'm making right now. A new one whenever you ask.`
+        : "Like the one I'm making right now. A new one whenever you ask.",
+    },
+    {
+      key: "progress",
+      image: require("../../../assets/onboarding/making-feature-cards/progress.png"),
+      title: `${kids} progress report`,
+      body: `Answer a few quick questions and I'll show you where ${kid} is in each subject, and what to try next.`,
+    },
+    {
+      key: "hours",
+      image: require("../../../assets/onboarding/making-feature-cards/hours.png"),
+      title: "Your lesson log",
+      body: "Tell me what you taught, by text or voice. I log it by child and subject, so your records keep themselves.",
+    },
+    {
+      key: "plan",
+      image: require("../../../assets/onboarding/making-feature-cards/plan.png"),
+      title: "The weekly plan",
+      body: `Tell me what ${kid} studies and when. I'll build the week.`,
+    },
+    {
+      key: "chat",
+      image: require("../../../assets/onboarding/making-feature-cards/chat.png"),
+      title: "Just ask",
+      body: "Ask for a change, a new page, or help with today's lesson, anytime.",
+    },
+  ];
+}
+
+export function MakingFeatureCards({
+  onDone,
+  childName = null,
+  interest = null,
+}: {
+  onDone: () => void;
+  childName?: string | null;
+  interest?: string | null;
+}) {
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const CARDS = featureCards(childName, interest);
   const isLast = index === CARDS.length - 1;
   const card = CARDS[index];
 

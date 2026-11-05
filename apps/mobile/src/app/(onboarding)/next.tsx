@@ -24,25 +24,49 @@ import { colors, radius, space } from "../../theme/app2";
  * vocabulary law makes this screen say "page", never "worksheet",
  * because her page exists by now.
  */
-type Door = "another_worksheet" | "plan_week" | "look_around";
+type Door = "another_worksheet" | "see_report" | "log_lesson" | "plan_week" | "look_around";
 
-const DOORS: { door: Door; label: string; detail: string }[] = [
-  {
-    door: "another_worksheet",
-    label: "Make another page",
-    detail: "For a sibling, or tomorrow morning",
-  },
-  { door: "plan_week", label: "Plan our week", detail: "Homa builds it with you" },
-  // Not "the whole app is yours": onboarding-completion-milestones
-  // (2026-07-31, apps/web/lib/onboarding/state.ts) already ends the
-  // free window the moment the questionnaire scores its first report,
-  // often before she ever reaches this screen. This door's copy must
-  // never promise an access state the wall isn't actually granting.
-  { door: "look_around", label: "Just look around", detail: "Peek in, no pressure" },
-];
+/**
+ * Report and lesson-log doors (founder direction 2026-11-04: onboarding
+ * teaches progress reports and lesson logging, not only pages). Each one
+ * lands on the real surface: Progress for the report the check-in
+ * starts, and chat with the log sentence begun, because logging is
+ * telling Homa.
+ */
+function doorsFor(kid: string | null): { door: Door; label: string; detail: string }[] {
+  return [
+    {
+      door: "another_worksheet",
+      label: "Make another page",
+      detail: "For a sibling, or tomorrow morning",
+    },
+    {
+      door: "see_report",
+      label: kid ? `See ${kid}'s progress report` : "See the progress report",
+      detail: kid
+        ? `Where ${kid} is in each subject, and what to try next`
+        : "Where your kid is in each subject, and what to try next",
+    },
+    {
+      door: "log_lesson",
+      label: "Log today's lesson",
+      detail: "Tell me what you did. I keep the record",
+    },
+    { door: "plan_week", label: "Plan our week", detail: "Homa builds it with you" },
+    // Not "the whole app is yours": onboarding-completion-milestones
+    // (2026-07-31, apps/web/lib/onboarding/state.ts) already ends the
+    // free window the moment the questionnaire scores its first report,
+    // often before she ever reaches this screen. This door's copy must
+    // never promise an access state the wall isn't actually granting.
+    { door: "look_around", label: "Just look around", detail: "Peek in, no pressure" },
+  ];
+}
 
 const DOOR_ROUTES: Record<Door, string> = {
   another_worksheet: "/binder",
+  // Opened on the walk's child (see choose()), not the family's first.
+  see_report: "/progress",
+  log_lesson: "/chat?logIntent=lesson",
   // The planner screen is only calendar views; building the plan itself
   // is a chat conversation (open_planner/edit_plan). Land her in chat
   // with the ask already in the box, not a blank grid with no way in.
@@ -54,6 +78,8 @@ export default function NextScreen() {
   const router = useRouter();
   const { family, memberDisplayName } = useFamilyData();
   const [choosing, setChoosing] = useState(false);
+  const [kidName, setKidName] = useState<string | null>(null);
+  const [kidChildId, setKidChildId] = useState<string | null>(null);
   const reported = useRef(false);
   // DELTA change 4 (ruled 2026-08-31): the parent's name lands at a
   // peak. First name only; a family with no stored name simply gets the
@@ -65,6 +91,12 @@ export default function NextScreen() {
     reported.current = true;
     reportOnboardingStep(family.id, "next");
     void saveOnboardingStep(family.id, "next").catch(() => {});
+    void loadOnboardingAnswers(family.id)
+      .then((answers) => {
+        setKidName(answers?.kids?.[0]?.name.trim() || null);
+        setKidChildId(answers?.kids?.[0]?.childId ?? null);
+      })
+      .catch(() => {});
   }, [family]);
 
   async function choose(door: Door) {
@@ -79,7 +111,11 @@ export default function NextScreen() {
     });
     await markOnboardingComplete(family.id);
     hapticAdvance();
-    router.replace(DOOR_ROUTES[door] as never);
+    const route =
+      door === "see_report" && kidChildId
+        ? `${DOOR_ROUTES[door]}?childId=${encodeURIComponent(kidChildId)}`
+        : DOOR_ROUTES[door];
+    router.replace(route as never);
   }
 
   return (
@@ -99,7 +135,7 @@ export default function NextScreen() {
           {/* One confident door leads; the rest are quiet rows. Three
               identical ghost cards gave the final beat no momentum
               (gauntlet round 1, 2026-08-21). */}
-          {DOORS.map((item, index) => (
+          {doorsFor(kidName).map((item, index) => (
             <Pressable
               key={item.door}
               accessibilityRole="button"

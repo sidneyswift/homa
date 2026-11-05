@@ -1,5 +1,5 @@
 import type { ChildProgressView } from "@homa/core";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -45,7 +45,11 @@ export default function ProgressScreen() {
     loading: familyLoading,
     reload: reloadFamily,
   } = useFamilyData();
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  // A link can name the child to open on (the onboarding walk's "See
+  // Max's progress report" door); otherwise the first child leads.
+  const params = useLocalSearchParams<{ childId?: string | string[] }>();
+  const linkedChildId = Array.isArray(params.childId) ? params.childId[0] : params.childId;
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(linkedChildId ?? null);
   const selectedChild =
     children.find((child) => child.id === selectedChildId) ?? children[0] ?? null;
   const effectiveChildId = selectedChild?.id ?? null;
