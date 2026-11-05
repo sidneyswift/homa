@@ -8,6 +8,10 @@ import {
 import { type FamilyContextRows } from "./family-context";
 import { joinPageBodies } from "./materials/page-shell";
 import { messageSourceFromRequest } from "./chat-message-source";
+import {
+  mobileFirstMakingJob,
+  type MobileFirstMakingChild,
+} from "./onboarding/mobile-first-making";
 
 /**
  * The eval host's stand-in family (2026-07-24 routing-eval investigation).
@@ -80,6 +84,17 @@ export const EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID =
   "00000000-0000-4000-8000-0000000000f2";
 export const EVAL_FIRST_MAKING_FIXTURE_CHILD_ID =
   "00000000-0000-4000-8000-0000000000c1";
+/**
+ * A brand-new family's background first making, mid-build: the job row
+ * and its in-progress stage exactly as the runner leaves them after a
+ * claim, so the eval's session can finish the stage for real.
+ */
+export const EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID =
+  "00000000-0000-4000-8000-0000000000f3";
+export const EVAL_BACKGROUND_MAKING_FIXTURE_CHILD_ID =
+  "00000000-0000-4000-8000-0000000000c2";
+export const EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID =
+  "00000000-0000-4000-8000-0000000000b1";
 export const EVAL_FIXTURE_PARENT_USER_ID =
   "00000000-0000-4000-8000-0000000000a0";
 
@@ -190,6 +205,7 @@ export const EVAL_FIXTURE_SESSION_ATTRIBUTE = "evalFamilyFixture";
 export const EVAL_ONBOARDING_MODE_HEADER = "x-homa-eval-onboarding-mode";
 export const EVAL_ONBOARDING_MODE_HEADER_VALUE = "1";
 export const EVAL_FIRST_MAKING_MODE_HEADER_VALUE = "first-making";
+export const EVAL_BACKGROUND_MAKING_MODE_HEADER_VALUE = "background-making";
 export const EVAL_ONBOARDING_SESSION_ATTRIBUTE = "evalOnboardingMode";
 
 /**
@@ -201,6 +217,40 @@ export const EVAL_ONBOARDING_SESSION_ATTRIBUTE = "evalOnboardingMode";
  * so eval sessions keep the most web-like tool surface.
  */
 const EVAL_FIXTURE_CHANNEL: PinnedAgentChannel = "materials-lab";
+
+/**
+ * The background-making family's only child, as mobile onboarding saves
+ * a kid card: an age, a love, and the subject chip picked under "working
+ * on" (the step cannot be skipped). A subject says what to practice, not
+ * how far he is; there are no memories and no map. That is the
+ * no-evidence case the 2026-11-03 local walk stalled on (gh#1252).
+ */
+export function evalBackgroundMakingChild(): MobileFirstMakingChild {
+  return {
+    id: EVAL_BACKGROUND_MAKING_FIXTURE_CHILD_ID,
+    name: "Theo",
+    birth_month: "2020-05-01",
+    profile: { interests: ["sharks"], focus: "Reading" },
+  };
+}
+
+/**
+ * The attributes agent-jobs-cycle.ts stamps on a stage's build session,
+ * minus the continuity episode (eval sessions skip the ledger). The
+ * channel is the real agent-job channel, so the instruction modes, the
+ * generation gate, and report_agent_job_stage's worker guard all see a
+ * production build session.
+ */
+const EVAL_BACKGROUND_MAKING_CHANNEL: PinnedAgentChannel = "agent-job";
+
+function backgroundMakingAttributes(): Record<string, string> {
+  return {
+    channel: EVAL_BACKGROUND_MAKING_CHANNEL,
+    familyId: EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID,
+    agentJobId: EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID,
+    agentJobStageNumber: "1",
+  };
+}
 
 /**
  * Decorates the eve channel's localDev() auth entry. When the run is
@@ -227,6 +277,16 @@ export function evalFamilyFixtureAuth(
       return auth;
     }
     const onboardingMode = request.headers.get(EVAL_ONBOARDING_MODE_HEADER);
+    if (onboardingMode === EVAL_BACKGROUND_MAKING_MODE_HEADER_VALUE) {
+      return {
+        ...auth,
+        attributes: {
+          ...auth.attributes,
+          ...backgroundMakingAttributes(),
+          [EVAL_FIXTURE_SESSION_ATTRIBUTE]: "true",
+        },
+      };
+    }
     const firstMakingModeRequested =
       onboardingMode === EVAL_FIRST_MAKING_MODE_HEADER_VALUE;
     const onboardingModeRequested =
@@ -391,11 +451,58 @@ values
    '2021-02-01'::date, '{}'::jsonb,
    timestamptz '2026-07-01 12:00:00+00');
 
+${evalBackgroundMakingSeedSql()}
+
 ${evalFixtureLibrarySeedSql()}
 
 ${evalFixturePacketSeedSql()}
 
 ${evalFixturePlannerSeedSql()}
+`.trim();
+}
+
+/**
+ * The background-making family, child, and claimed first-making job. The
+ * plan is built by the same function the mobile making route uses, so the
+ * build session reads the production brief, not a paraphrase.
+ */
+function evalBackgroundMakingSeedSql(): string {
+  const child = evalBackgroundMakingChild();
+  const job = mobileFirstMakingJob(child);
+  return `
+insert into public.families
+  (id, name, us_state, parent_display_name, time_zone, status,
+   profile_completed_at, context, sandbox)
+values
+  (${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID)}, 'Background making fixture',
+   'DC', ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)},
+   'America/New_York', 'claimed', now(),
+   ${sqlJson({ onboarding: { state: "active" } })}, true);
+
+insert into public.family_members (family_id, user_id, role, display_name)
+values (${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID)},
+        ${sqlString(EVAL_FIXTURE_PARENT_USER_ID)}, 'parent',
+        ${sqlString(EVAL_ONBOARDING_FIXTURE_PARENT_NAME)});
+
+insert into public.children
+  (id, family_id, name, birth_month, profile, created_at)
+values
+  (${sqlString(child.id)}, ${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID)},
+   ${sqlString(child.name)}, ${sqlBirthMonth(child.birth_month ?? "2020-05-01")},
+   ${sqlJson(child.profile ?? {})}, timestamptz '2026-07-01 12:00:00+00');
+
+insert into public.agent_jobs
+  (id, family_id, child_id, skill, title, plan, total_stages, current_stage,
+   start_idempotency_key, status, started_at)
+values
+  (${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID)},
+   ${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID)}, ${sqlString(child.id)},
+   'materials-studio', ${sqlString(job.title)}, ${sqlJson(job.plan)}, 1, 0,
+   ${sqlString(`first-making:${child.id}`)}, 'running', now());
+
+insert into public.agent_job_stages (job_id, family_id, stage_number, status)
+values (${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID)},
+        ${sqlString(EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID)}, 1, 'in_progress');
 `.trim();
 }
 

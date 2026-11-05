@@ -13,10 +13,27 @@ never from age alone. Evidence, in order of strength:
    for level evidence or overrides what the parent asked for today.
 4. Other saved memories about the skill.
 
-No evidence for the skill you are targeting? Ask the parent ONE short
-calibrating question before you generate anything ("about how high does
-he count these days?"). One question, then build; never a quiz. The age
-table below shapes layout and item counts, not level.
+No evidence for the skill you are targeting? What you do depends on
+whether the parent is there to answer.
+
+- In conversation, ask her ONE short calibrating question before you
+  generate anything ("about how high does he count these days?"). One
+  question, then build; never a quiz.
+- In a background build nobody is there (see "Background builds" in
+  SKILL.md). Never ask: the question ends the build with no page, which
+  is how new families' first pages stopped arriving (gh#1252). Set a
+  conservative level from what onboarding saved, then build. Subjects
+  she picked ("working on reading") choose what the page practices. Age
+  sets the level: a skill most children that age already have, one
+  small step up, so the first page lands as a win, not a struggle.
+  Interests set the theme, never the level. Say the guess on the page
+  in one short line for the grown-up ("For the grown-up: I didn't know
+  yet where Theo is with reading, so this starts with three-letter
+  words. Too easy? Tell me and the next one climbs."). Never record the
+  guess as evidence about the child.
+
+The age table below shapes layout and item counts. It sets level only in
+the background case above, never in conversation.
 
 When the parent corrects your difficulty ("she can already do X"), X is
 a floor, not a ceiling: ask how far past X the child goes before you
