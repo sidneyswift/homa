@@ -461,7 +461,11 @@ export async function persistCanonicalMessage(
 } | null> {
   const attrs = (input.attributes ?? {}) as ContinuityAuthAttributes;
   const familyId = attrs.familyId;
-  const content = input.content.trim().slice(0, 8000);
+  // Durable recording (gh#1158) keeps the exact complete text and the first
+  // write's timestamp. Until it is switched on, every channel keeps the
+  // trimmed, 8000-character form the database constraint requires.
+  const exactRecording = process.env.HOMA_CONVERSATION_RECORDING === "1";
+  const content = exactRecording ? input.content : input.content.trim().slice(0, 8000);
   if (!familyId || content.length === 0) return null;
 
   const memberUserId = attrs.memberUserId ?? null;
@@ -527,7 +531,7 @@ export async function persistCanonicalMessage(
               else public.conversation_messages.content
             end,
             created_at = case
-              when ${input.role === "assistant" && input.terminal === true}
+              when ${input.role === "assistant" && input.terminal === true && !exactRecording}
                 then excluded.created_at
               else public.conversation_messages.created_at
             end,

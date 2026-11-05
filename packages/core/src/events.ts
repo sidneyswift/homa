@@ -1025,6 +1025,10 @@ export const EVENT_SCHEMAS = {
       // pages, which is a completion with a door, never exited_early.
       next_door: z.enum([
         "another_worksheet",
+        // The report and lesson-log doors teach the rest of the app at
+        // the walk's end (founder direction 2026-11-04).
+        "see_report",
+        "log_lesson",
         "plan_week",
         "look_around",
         "binder",

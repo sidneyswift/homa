@@ -62,8 +62,10 @@ test("unavailable Plus and Max links never enter a new web checkout", () => {
 });
 
 test("an unavailable Plus plan leaves no regular-family filing upsell", () => {
+  // The Binder renders from binder-content.tsx since App 2 opened it
+  // beside chat; page.tsx is now only its route wrapper.
   const binderPage = readFileSync(
-    new URL("../../app/app/binder/page.tsx", import.meta.url),
+    new URL("../../app/app/binder/binder-content.tsx", import.meta.url),
     "utf8",
   );
   const filingCard = readFileSync(

@@ -18,8 +18,15 @@ function closeToken(sessionId: string, familyId: string, userId: string, key: st
 export async function POST(request: Request): Promise<Response> {
   const auth = await resolveApiFamily(request);
   if (!auth) return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
-  if ((await familyWallCheckout(auth.familyId)) !== null) return Response.json({ ok: false, reason: "walled" }, { status: 403 });
-  if (!(await familyHasChannel(auth.familyId))) return Response.json({ ok: false, reason: "not-included" }, { status: 403 });
+  // #1158 founder request: local app2 voice testing does not need a paid plan.
+  // The browser marker alone never grants a production billing exception.
+  const localApp2 = process.env.NODE_ENV === "development"
+    && ["127.0.0.1", "localhost", "[::1]"].includes(new URL(request.url).hostname)
+    && request.headers.get("x-homa-dev-surface") === "app2";
+  if (!localApp2) {
+    if ((await familyWallCheckout(auth.familyId)) !== null) return Response.json({ ok: false, reason: "walled" }, { status: 403 });
+    if (!(await familyHasChannel(auth.familyId))) return Response.json({ ok: false, reason: "not-included" }, { status: 403 });
+  }
   const key = process.env.OPENAI_API_KEY;
   if (!key) return Response.json({ ok: false, reason: "not-configured" }, { status: 503 });
   let body: { sdp?: unknown } | null;

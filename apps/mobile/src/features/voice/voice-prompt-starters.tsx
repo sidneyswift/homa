@@ -3,16 +3,7 @@ import { useReducedMotion } from "react-native-reanimated";
 
 import { Icon } from "../../components/design/icon";
 import type { SemanticIconName } from "@homa/design/contract";
-import { fontFamilies } from "../../theme/fonts";
-import {
-  colors,
-  fontSize,
-  palette,
-  pressScale,
-  radius,
-  shadows,
-  space,
-} from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, palette, pressScale, radius, shadows, space } from "../../theme/app2";
 import {
   VOICE_PROMPT_STARTERS,
   type VoicePromptStarter,
@@ -21,7 +12,7 @@ import {
 
 const CARD_FILL_LIGHT = "rgba(255,255,255,0.78)";
 const CARD_FILL_DARK = "rgba(51,46,41,0.78)";
-const CARD_BORDER_LIGHT = "rgba(214,200,180,0.8)";
+const CARD_BORDER_LIGHT = "rgba(213,213,213,0.8)";
 const CARD_BORDER_DARK = "rgba(214,200,180,0.28)";
 
 const STARTER_ICONS: Record<VoicePromptStarterId, SemanticIconName> = {

@@ -22,8 +22,7 @@ import {
   toHoursEntries,
 } from "../../features/hours/hours-view";
 import { deleteHoursEntry, updateHoursEntry, type HoursSubject } from "../../lib/hours";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * Hours: the compliance record, ported from apps/web/app/app/hours/

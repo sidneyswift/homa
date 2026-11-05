@@ -122,7 +122,7 @@ export function WorkedForLine({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className="inline-flex min-h-8 items-center gap-1.5 text-sm text-subtle transition-colors hover:text-muted"
+        className="quiet-worked-for__toggle inline-flex min-h-8 items-center gap-1.5 text-sm text-subtle transition-colors hover:text-muted"
       >
         {label}
         <Icon name={open ? "expand" : "collapse"} size={16} />

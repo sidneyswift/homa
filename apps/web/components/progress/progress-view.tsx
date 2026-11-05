@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { WorkspaceLink as Link } from "../workspace/workspace-link";
 
 import { ReportSnapshot } from "../../app/onboarding/r/[token]/report-snapshot";
 import {

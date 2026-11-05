@@ -1,0 +1,44 @@
+{
+  "status": "Approved by Sidney and applied locally to the existing Eve 0.19.0 patch on September 13, 2026. Production flags remain disabled.",
+  "version": "eve@0.19.0",
+  "exactJavaScriptEdits": [
+    {
+      "file": "dist/src/public/definitions/defineChannel.js",
+      "replace": "c=r||a||s!==void 0,",
+      "with": "c=r||a||s!==void 0||e.deliver!==void 0,"
+    },
+    {
+      "file": "dist/src/public/definitions/defineChannel.js",
+      "replace": "deliver(e){return defaultDeliverResult(e)}",
+      "with": "deliver(payload,ctx){return e.deliver?e.deliver(payload,ctx):defaultDeliverResult(payload)}"
+    },
+    {
+      "file": "dist/src/channel/send.js",
+      "replace": "outputSchema:v}=normalizeSendInput(o)",
+      "with": "outputSchema:v,idempotencyKey:k}=normalizeSendInput(o)"
+    },
+    {
+      "file": "dist/src/channel/send.js",
+      "replace": "payload:{inputResponses:g,message:y,context:_,outputSchema:v}",
+      "with": "payload:{inputResponses:g,message:y,context:_,outputSchema:v,idempotencyKey:k}"
+    }
+  ],
+  "declarations": {
+    "dist/src/public/definitions/defineChannel.d.ts": "Import SendPayload from the existing routes import. Add to ChannelDefinition: deliver?(payload: SendPayload, context: TCtx & { state: NonNullable<TState>; session: SessionHandle }): SendPayload | void | Promise<SendPayload | void>;",
+    "dist/src/channel/routes.d.ts": "Add to SendPayload: readonly idempotencyKey?: string;"
+  },
+  "verificationExtension": {
+    "reason": "Installed-path review found answer coalescing before the guard and unmarked child input requests. The same-version fix now preserves keyed answer envelopes and rejects unsupported child input safely. Proxy provenance includes exact parent turn coordinates, preventing delayed child events from mutating finished or newer requests.",
+    "files": [
+      "dist/src/execution/deliver-payloads.js",
+      "dist/src/execution/deliver-payloads.d.ts",
+      "dist/src/execution/workflow-entry.js",
+      "dist/src/execution/route-child-delivery.js",
+      "dist/src/execution/route-child-delivery.d.ts",
+      "dist/src/execution/subagent-hitl-proxy.js",
+      "dist/src/protocol/message.d.ts"
+    ],
+    "exactPatch": "patches/eve@0.19.0.patch",
+    "installedBoundaryTests": "scripts/eve-native-envelope.test.mjs"
+  }
+}

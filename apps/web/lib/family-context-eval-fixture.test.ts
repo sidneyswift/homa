@@ -3,7 +3,12 @@ import { createHash } from "node:crypto";
 import { describe, it } from "node:test";
 
 import { resolveAgentAccess } from "./agent-db";
+import { jobWorkerContext, refuseNonJobWorkerSession } from "./jobs/guard";
 import {
+  EVAL_BACKGROUND_MAKING_FIXTURE_CHILD_ID,
+  EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID,
+  EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID,
+  EVAL_BACKGROUND_MAKING_MODE_HEADER_VALUE,
   EVAL_FIRST_MAKING_FIXTURE_CHILD_ID,
   EVAL_FIRST_MAKING_FIXTURE_FAMILY_ID,
   EVAL_FIRST_MAKING_MODE_HEADER_VALUE,
@@ -27,11 +32,13 @@ import {
   EVAL_ONBOARDING_MODE_HEADER,
   EVAL_ONBOARDING_MODE_HEADER_VALUE,
   EVAL_ONBOARDING_SESSION_ATTRIBUTE,
+  evalBackgroundMakingChild,
   evalFamilyFixtureAuth,
   evalFamilyFixtureRows,
   evalFamilyFixtureSeedSql,
   isEvalFamilyFixtureDbBacked,
 } from "./family-context-eval-fixture";
+import { mobileFirstMakingJob } from "./onboarding/mobile-first-making";
 
 const SANDBOX_ENV = {
   HOMA_EVAL_FAMILY_FIXTURE: "1",
@@ -59,6 +66,11 @@ const ONBOARDING_REQUEST = new Request("http://localhost/eve/v1/session", {
 const FIRST_MAKING_REQUEST = new Request("http://localhost/eve/v1/session", {
   headers: {
     [EVAL_ONBOARDING_MODE_HEADER]: EVAL_FIRST_MAKING_MODE_HEADER_VALUE,
+  },
+});
+const BACKGROUND_MAKING_REQUEST = new Request("http://localhost/eve/v1/session", {
+  headers: {
+    [EVAL_ONBOARDING_MODE_HEADER]: EVAL_BACKGROUND_MAKING_MODE_HEADER_VALUE,
   },
 });
 
@@ -210,6 +222,36 @@ describe("evalFamilyFixtureAuth", () => {
     );
   });
 
+  it("stamps the background-making eval as the job runner's own build session", async () => {
+    const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
+    const stamped = await auth(BACKGROUND_MAKING_REQUEST);
+
+    assert.ok(stamped);
+    assert.equal(stamped.attributes.channel, "agent-job");
+    assert.equal(
+      stamped.attributes.familyId,
+      EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID,
+    );
+    // A runner-stamped build session carries no parent and no onboarding
+    // flag (agent-jobs-cycle.ts); the eval must not add either.
+    assert.equal(stamped.attributes.memberName, undefined);
+    assert.equal(stamped.attributes.onboardingActive, undefined);
+    assert.equal(stamped.attributes[EVAL_FIXTURE_SESSION_ATTRIBUTE], "true");
+    assert.deepEqual(jobWorkerContext(stamped.attributes), {
+      jobId: EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID,
+      stageNumber: 1,
+    });
+    assert.equal(refuseNonJobWorkerSession(stamped.attributes), null);
+    assert.deepEqual(await resolveAgentAccess(stamped.attributes, {
+      nowSeconds: () => Math.floor(Date.now() / 1_000),
+      verifyFamilyMembership: async () => true,
+      verifyFamilyArtifactAccess: async () => {},
+    }), {
+      mode: "pinned",
+      familyId: EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID,
+    });
+  });
+
   it("does not opt in for a truthy-looking header value", async () => {
     const auth = evalFamilyFixtureAuth(() => localDevAuth(), SANDBOX_ENV);
     const request = new Request("http://localhost/eve/v1/session", {
@@ -265,6 +307,21 @@ describe("evalFamilyFixtureSeedSql", () => {
     assert.ok(sql.includes(EVAL_FIRST_MAKING_FIXTURE_CHILD_ID));
     assert.ok(sql.includes("'First making fixture'"));
     assert.ok(sql.includes("'Story'"));
+  });
+
+  it("seeds a no-evidence child with a claimed first-making job mid-build", () => {
+    const child = evalBackgroundMakingChild();
+    assert.equal(child.id, EVAL_BACKGROUND_MAKING_FIXTURE_CHILD_ID);
+    assert.equal(child.profile?.focus, "Reading");
+    assert.ok(sql.includes(EVAL_BACKGROUND_MAKING_FIXTURE_FAMILY_ID));
+    assert.ok(sql.includes("'Background making fixture'"));
+    assert.ok(sql.includes(EVAL_BACKGROUND_MAKING_FIXTURE_JOB_ID));
+    assert.ok(sql.includes(`'first-making:${child.id}'`));
+    assert.match(sql, /'running', now\(\)\);/u);
+    assert.match(sql, /1, 'in_progress'\);/u);
+    // The plan is the mobile route's own builder output, not a copy.
+    const request = mobileFirstMakingJob(child).plan.request;
+    assert.ok(sql.includes(JSON.stringify(request).slice(1, -1).replace(/'/g, "''")));
   });
 
   it("staggers child created_at so pinned load order is deterministic", () => {

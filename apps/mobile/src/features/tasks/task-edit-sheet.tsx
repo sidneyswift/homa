@@ -15,8 +15,7 @@ import {
   updateTaskSchedule,
   type TaskRowView,
 } from "../../lib/tasks";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 import { DeliveryChoice, HourChips, WeekdayChips, type DeliveryPref } from "./task-form-fields";
 import { BUILT_IN_COPY } from "./task-view";
 

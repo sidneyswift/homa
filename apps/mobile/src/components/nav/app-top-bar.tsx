@@ -1,59 +1,34 @@
-import { useRouter } from "expo-router";
-import type { RefObject } from "react";
-import { View } from "react-native";
+import { usePathname, useRouter } from "expo-router";
+import { type RefObject } from "react";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Logo } from "../brand/logo";
 import { Icon } from "../design/icon";
-import { IconButton } from "../ui/icon-button";
-import { colors, space } from "../../theme/tokens";
+import { colors, fontFamilies } from "../../theme/app2";
+import { app2Destinations } from "./app2-destinations";
 
 /**
- * Ported from apps/web/components/dashboard/mobile-nav.tsx's phone
- * bar: hamburger left (opens the drawer), wordmark center, and the
- * voice-surface mic on the right balancing the hamburger (web's
- * kid-context-switcher avatar would need a new slot when it lands;
- * see app-drawer.tsx). Persistent across every screen in this shell,
- * mirroring web's "the app frame renders once" design.
+ * App 2 keeps the conversation canvas clear: Homa is the header there.
+ * Elsewhere the bar names the destination and closes back to the
+ * conversation. More stays on every screen, so Hours, Tasks, Settings and
+ * the account remain reachable (gh#1236).
  */
-export function AppTopBar({
-  menuButtonRef,
-  onMenuPress,
-}: {
-  menuButtonRef?: RefObject<View | null>;
-  onMenuPress: () => void;
-}) {
+export function AppTopBar({ menuButtonRef, onMenuPress }: { menuButtonRef?: RefObject<View | null>; onMenuPress: () => void }) {
   const router = useRouter();
-  return (
-    <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.page }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 56,
-          paddingHorizontal: space.sm,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.borderSubtle,
-        }}
-      >
-        <IconButton
-          ref={menuButtonRef}
-          label="Open menu"
-          onPress={onMenuPress}
-        >
-          <Icon name="menu" size={20} color={colors.textBody} />
-        </IconButton>
-
-        <Logo size={24} />
-
-        <IconButton
-          label="Talk to Homa"
-          onPress={() => router.navigate("/voice")}
-        >
-          <Icon name="voice" size={20} color={colors.textBody} />
-        </IconButton>
+  const pathname = usePathname();
+  const onConversation = pathname === "/chat" || pathname === "/";
+  const destination = app2Destinations.find(item => pathname === item.route);
+  return <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.page }}>
+    <View style={{ flexDirection: "row", alignItems: "center", minHeight: 48, paddingHorizontal: 8 }}>
+      <View style={{ width: 44 }}>
+        {onConversation ? null : <Pressable accessibilityRole="button" accessibilityLabel="Back to conversation" onPress={() => router.navigate("/chat")} style={{ width: 44, minHeight: 48, alignItems: "center", justifyContent: "center" }}>
+          <Icon name="close" size={24} color={colors.textStrong} />
+        </Pressable>}
       </View>
-    </SafeAreaView>
-  );
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        {destination ? <Text accessibilityRole="header" style={{ color: colors.textStrong, fontFamily: fontFamilies.bodySemibold, fontSize: 18 }}>{destination.title}</Text> : null}
+      </View>
+      <Pressable ref={menuButtonRef} accessibilityRole="button" accessibilityLabel="Open menu" accessibilityHint="Account, settings, and all Homa features" onPress={onMenuPress} style={{ width: 44, minHeight: 48, alignItems: "center", justifyContent: "center" }}><Icon name="more" size={24} color={colors.textStrong} /></Pressable>
+    </View>
+  </SafeAreaView>;
 }

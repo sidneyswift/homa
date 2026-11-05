@@ -59,6 +59,7 @@ import {
   Clock3,
   ArrowUp,
   Volume2,
+  VolumeOff,
   X,
   type LucideIcon,
   type LucideProps,
@@ -128,6 +129,7 @@ const semanticIconRegistry = createSemanticIconRegistry("native", {
   send: ArrowUp,
   assistant: Bot,
   volume: Volume2,
+  volume_muted: VolumeOff,
 } as const satisfies Record<SemanticIconName, LucideIcon>);
 
 type IconProps = Omit<LucideProps, "size" | "strokeWidth" | "accessibilityLabel" | "accessible"> & {

@@ -4,7 +4,7 @@ import type { ChildRecord } from "../../lib/family";
 import type { FamilyEventRecord } from "../../lib/family-events";
 import type { HoursLogRow } from "../../lib/hours";
 import type { PlannerLearningActivityRecord } from "../../lib/planner-learning-activities";
-import { space } from "../../theme/tokens";
+import { space } from "../../theme/app2";
 import { DayAgenda } from "./day-agenda";
 import { compareDateOnly, type DateOnly } from "./date-utils";
 import type { PlanActivityView, ScheduledActivityView } from "./planner-model";

@@ -1,3 +1,21 @@
+## 2026-10-05 · Founder selects a white workspace beside the conversation
+
+For gh#1219, Sidney selected “beside it” after comparing workspace compositions,
+then explicitly said “also keep the white minimal design. NOT the homa design.”
+The selected desktop workspace sits beside the chat. Phones use a focused sheet
+with the input and voice control reachable. The white, minimal, sans-serif app2
+presentation takes precedence over the mineral/serif design direction for this
+exploration. Registered as `app2-adjacent-white-workspace`.
+
+The first gh#1221 implementation keeps the conversation mounted, uses URL view
+selection and browser history, and opens the existing authenticated learning-plan
+board in the adjacent workspace. It preserves the atomic completion endpoint and
+rejects a selected child absent from the authenticated board. It does not introduce
+new storage or automatically open from typed-chat tool results. Calendar/events
+and existing report/source links retain explicit new-tab handoffs until their
+workspace tickets are implemented. This entry records local implementation, not
+full planner parity, production rollout, or completion of the epic.
+
 ## 2026-09-30 · Founder ruling: Sonnet for fleet research, Astra for families
 
 Sidney requested Anthropic Sonnet 5.5 for Homa's automated research runs while
@@ -12612,6 +12630,131 @@ closed with hangup 200 and no notices or browser errors. This caught and fixed
 the browser fetch binding and tightened spoken-result fidelity before release.
 
 
+## 2026-09-12: automatically send queued conversation requests (gh#1158)
+
+During the one-question-at-a-time conversation architecture review, Sidney was asked whether a request sent offline should send automatically or wait for review after the parent closes Homa and returns the next day. Sidney answered “send auto.” The canonical ruling is `conversation-offline-auto-send` in the founder index. The plan and review now select automatic delivery of queued sends; unsent drafts and existing authentication/idempotency boundaries remain distinct. Delayed-date meaning remains to be discussed. This records a product decision, not an implemented or deployed change.
+
+
+## 2026-09-12: voice continues when switching apps (gh#1158)
+
+Asked whether Homa should keep listening/talking or pause when a parent switches to another app during voice, Sidney answered “keeps going.” The canonical ruling is `conversation-voice-app-switch-continues`. The rebuild must not intentionally stop voice merely because the app loses foreground visibility. Device support and actual interruptions still require testing; explicit Stop remains immediate. This is a planning decision, not an implemented or deployed change.
+
+
+## 2026-09-12: typing keeps voice active (gh#1158)
+
+Asked whether starting to type during a voice conversation should keep voice going or switch to text, Sidney answered “voice keeps going too.” The canonical ruling is `conversation-voice-typing-continues`. The conversation plan retains simultaneous input and the council's always-reachable Stop control, including when Send is available for a draft. This records a product decision, not an implemented or deployed change.
+
+
+## 2026-09-12: return to the newest conversation message (gh#1158)
+
+After an explanation contrasting the newest response with the older spot where a parent stopped reading, Sidney chose “newest message.” The canonical ruling is `conversation-return-newest`. Return/reopen goes to the latest message; actively reading older content remains protected against incoming-message scroll jumps. This is a planning choice, not a deployed change.
+
+
+## 2026-09-12: defer special handling for delayed dates (gh#1158)
+
+After discussing how an offline message saying “tomorrow” might arrive days later, Sidney answered “this is too edge of a case. skip.” The ruling `conversation-delayed-dates-deferred` removes this specialized behavior from initial rebuild scope and from blocking questions. Ordinary timestamp provenance and existing date validation remain; no new date-interpretation policy was selected. Automatic sending is unchanged. Planning only, not an implemented or deployed change.
+
+
+## 2026-09-12: continuous server recording is infrastructure (gh#1158, gh#1182)
+
+Sidney accepted quiet operation and clarified: “everything should be saved always” and “every token in or out should be saved to the server.” Saving must not depend on Homa choosing to save or occasional save operations. Registered `conversation-continuous-server-recording`. The plan now requires lossless infrastructure-owned recording of incoming/outgoing conversation text, durable-before-publish assistant text, and a server-owned voice event path. The earlier periodic browser-checkpoint authority and lossy provisional-snapshot compaction are superseded. Normal saving UI is removed from the proposed experience; actual failures remain visible with automatic recovery. Phase 0 must prove the transport and revalidate the baseline estimate. This records an architectural requirement, not implemented or deployed behavior.
+
+
+### September 12, 2026: Conversation rebuild local implementation and recording gate
+
+Sidney authorized implementation. Local history/draft recovery, session-scoped history identity, stale-tab reconciliation and text-preserving material failure handling are implemented. A new content-recording storage candidate passed disposable PostgreSQL tests but is disconnected from live traffic. Council review reproduced an Eve text/tool/text identity collision; the removed hook draft was replaced with a source-index requirement. Continuous voice recovery and accepted-request dispatch remain unresolved release gates. No remote migration, production deploy or completed-rebuild claim. Existing persistence failures remain escalated under gh#1182; gh#1158 remains open. [Evidence and remaining scope](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+### 2026-09-12: Conversation request and device queue storage, local only
+
+Continued #1158/#1182 with atomic canonical-input/request acceptance, fenced dispatch claims, revocation epochs, deletion tombstones and account-scoped device outbox primitives. Fixed recorder deletion before initialization and draft account/revision races. Disposable PostgreSQL, 16 focused unit tests and three real-browser fixture journeys passed; web typecheck, focused lint and migration-version checks passed. No live acceptance adapter, dispatch worker or automatic composer retry is connected, and no migration/code is deployed. Execution-effect replay, continuous voice recording and the rest of the rebuild remain open. See [implementation evidence](plans/2026-09-12-conversation-rebuild-implementation.md) for exact boundaries and commands.
+
+### 2026-09-12: Conversation HTTP acceptance and execution admission, local only
+
+Continued gh#1158/gh#1182 with a bearer-only acceptance/receipt API, exact-account HTTP outbox transport and pre-tool request claiming in the existing canonical persistence hook. Lost confirmation retries preserve the same intent and receipt. Independent review caught and closed a root dispatcher path around the persistence claim. The new route remains disabled, and neither a worker nor composer automatic delivery is enabled. Fifty-four focused tests, 288 continuity regressions, web typecheck, focused lint, Eve Vercel build and stream-duration guard passed. Unit, local PostgreSQL and device-browser journeys are now wired into CI, without claiming a remote CI run. Background adult/epoch permissions, effect recovery, response catch-up and continuous voice remain outstanding. [Implementation evidence](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+
+### September 12, 2026: disabled conversation worker and access/context boundary (gh#1158, gh#1182)
+
+Implemented local background pickup, immediate best-effort wake-up backed by a one-minute schedule, current-adult execution checks before context/tools, and observed completion requiring persisted assistant output. Worker context spans prior episodes while respecting own/recipient privacy and excluding queued or unpublished work. Review found and corrected late permission execution, pickup starvation, routing-secret exposure and delivered-update exclusion. Unit/regression checks and the disposable 200-migration PostgreSQL suite passed. The rollout flag remains off: pending question/card continuation, tool-effect replay protection, source reconciliation and continuous server-owned voice recording remain open. This is candidate implementation, not a deployed fix or certified parent journey. Detailed boundaries and evidence: [conversation rebuild implementation](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+### September 12, 2026: durable question-card recording and ordinary continuation, local only
+
+Continued gh#1158/gh#1182 with atomic question/canonical storage, exact runtime source identity, authenticated restoration and a card-only ending that releases the next ordinary message. Independent review and database tests caught and fixed revocation finalization, deletion-before-ending, sequence binding, payload serialization and provenance errors. The 201-migration disposable database suite exercises the actual question/ending hooks plus replay, privacy and erasure. Unit/continuity, typecheck, lint, agent build, migration and isolation checks passed; the remote isolation repeat resolved two initial gateway timeouts. Validated typed-choice submission and real runtime approval continuation remain separate open work. New flags remain off, no migration or deployment occurred, and no completed rebuild or live fix is claimed. [Evidence and remaining gates](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+
+### September 13, 2026: permanent conversation local integration and recovery checks (gh#1158, gh#1182)
+
+Completed local integration of durable source projection, committed-feed updates, offline acceptance recovery, native question history, private immutable delivery copies, durable indexing and bounded standalone background materials. Background completion now commits artifact links and job state together; a deletion race exposed and fixed incompatible cancellation timestamps. Exact quoted words are verified against accepted input. Four disposable database suites passed with 210 migrations, along with 289 continuity tests, 148 storage unit passes (one database-only skip), 10 device browser journeys, 10 mounted-control journeys, typecheck, changed-file lint, fleet-skill hygiene, Vercel-target Eve build and stream-duration checks. Counts overlap and browser services are synthetic.
+
+The final real-model workflow check passed three synthetic cases after correcting a tool description that caused eligible work to bypass the background handoff. The new rollout flags remain off. No remote schema change, deployment, live-provider certification, physical voice proof or completed-rebuild claim. Automatic approval review rejected installing the candidate native-answer replay patch; explicit founder approval is needed for that reviewed same-version runtime change. The voice-generated-from-recorded-replies decision remains unanswered. Existing production persistence findings remain escalated under gh#1182. See [current evidence and remaining release gates](plans/2026-09-12-conversation-rebuild-implementation.md) and the [concrete native replay proposal](plans/2026-09-12-native-replay-approval.md).
+
+
+### September 13, 2026, 03:11 UTC: approved native answer retry, installed locally (gh#1158, gh#1182)
+
+Sidney explicitly approved the prepared same-version Eve 0.19.0 runtime patch and local reinstall. The checksum is refreshed, authenticated answer admission is integrated, and queued answer envelopes keep their individual identity and access context. Identical retries are dropped before pending input consumption. Child-question provenance carries exact parent coordinates; stale events cannot regress finished replies or affect newer requests.
+
+Final storage checks passed 157 tests with one database-only skip, plus eight installed queue/envelope tests. Core and native disposable PostgreSQL suites each applied 210 migrations and passed. Web typecheck, focused lint, 289 continuity tests, the full isolation guard, Vercel-target Eve build and three stream-duration checks passed. New remote tables remain pending, and no remote migration, deployment or enablement occurred. Workflow-host crash proof, the unanswered voice transport choice, provider/device journeys and rollout gates remain open. This supersedes the prior approval blocker, not the release gates. [Current evidence](plans/2026-09-12-conversation-rebuild-implementation.md).
+
+
+### September 13, 2026, 16:12 UTC: hard-restart answer proof, local only (gh#1158, gh#1182)
+
+The installed Eve host now has a passing reusable hard-restart regression: checkpoint two successive questions, kill the owned process group, restart from disk, replay answer one, and verify question two remains pending until its own answer. The final exact Yes/No reply appears once. Added the isolated command to CI; no remote CI run is claimed.
+
+An exploratory mid-step kill revealed default local startup did not automatically resume the interrupted child. Explicit namespaced requeue succeeded and preserved answer identity, but this is not automatic recovery or deployed-host proof. The HTTP stream probe also failed locally, so restart evidence reads persisted runtime records. No product runtime, flags, schema or deployment changed in this checkpoint. Automatic recovery, live streaming/provider/device journeys, voice choice and rollout remain open. [Evidence](plans/2026-09-12-native-replay-approval.md).
+
+
+### October 5, 2026: Homa v2 preserves abilities while simplifying the experience (gh#1219)
+
+Sidney requested an epic and executable tickets with these exact intentions:
+"fewer places to go", "fewer decisions to make", "no loss of control",
+"easy and intuitive", and "simple, clean, minimal, and beautiful" UI/UX.
+The current task establishes app2 as the replacement experience being designed
+for eventual /app, not a second reduced-feature product. Preserve family-facing
+outcomes and direct controls; consolidate their presentation without changing
+privacy, billing, domain or retention policy. The exact planner composition is
+still a prototype decision, and production activation remains a separate release
+gate. This supersedes earlier home-layout assumptions only for the planned v2
+experience; it is not evidence that the live home has changed.
+
+The [shared handoff](plans/2026-10-05-app2-simplified-workspace.md) contains the
+22-capability source inventory, 23 journeys, evidence-backed finding-unknowns
+pass and work order. Epic gh#1219 links 16 implementation/design/release tickets
+and reuses gh#1182 for continuity. The source audit used the existing gh#1158
+lane at ad7c9f3c; production behavior was not re-certified in this planning task.
+No product code, environment flag, schema or deployed behavior changes as part
+of this documentation and tracking work. Status and ownership remain on GitHub.
+
+### October 5, 2026: App2 embedded calendar, local verification (gh#1223)
+
+The white adjacent workspace now reuses the existing planner's day, week and month
+calendar, event editors and recurrence controls. The family-scoped read adapter
+uses existing caller-RLS readers, and writes remain on existing authenticated
+actions. Calendar links preserve the mounted conversation and draft; activity help
+appends context for parent review. Phone event details keep the composer reachable.
+
+The mounted conversation suite passed 24 cases, with a final 14-case workspace
+rerun after visual corrections; 53 focused data/date/URL tests, web typecheck,
+changed-file lint and tenant isolation passed. Actual signed-in day/month loading
+and opening/cancelling an event editor were checked without family writes. See
+[evidence and limits](../homa-design/evidence/2026-10-05-app2-calendar/README.md).
+Full planner parity, structured selected-object context, saved work, Hours and
+program workspaces remain on the epic tickets. No production rollout or schema
+change is claimed.
+
+### October 5, 2026: App2 compact top-right navigation (gh#1220, gh#1221)
+
+Sidney approved replacing the prominent Your week button with a top-right menu
+that reveals Planner, Binder and Progress using icons and short labels. Keep
+the white minimal App2 presentation and fold the tray away after selection.
+This refines `app2-adjacent-white-workspace`; it does not change domain or release
+policy. The initial implementation opens Planner beside chat and explicitly
+links Binder/Progress to their existing views in new tabs until those workspaces
+are built. Chat remains mounted.
+
+All 26 mounted conversation/browser cases, web typecheck and changed-file lint
+passed. Actual local signed-in reveal and independent desktop/phone visual review
+passed. [Evidence](../homa-design/evidence/2026-10-05-app2-navigation/README.md).
+
 ## 2026-10-03 · Planner cards keep typed chat in place
 
 Founder direction from Carolyng's screenshot and the explicit request to fix:
@@ -12619,6 +12762,34 @@ reading or updating Planner in typed chat must not open a panel over the
 parent's conversation. The existing planner card is the explicit opening
 control. Live voice retains its separately ruled display behavior. Tracked
 in gh#1216; the issue holds release checks and production evidence.
+
+## 2026-10-05 · iOS publication resumed
+
+Sidney explicitly requested publishing the existing native iOS app: "Please
+help me get it published!" This reaffirms the September 6 review-submission
+authorization and reopens gh#299, gh#308 and gh#310 for the existing app.
+Pricing and unrelated native growth work remain outside this scope.
+
+Authenticated Apple evidence: version 1.0, build 48, was rejected September 9
+for repeated identity collection after Apple sign-in, inaccurate tracking
+declarations and onboarding blocked at Print it on iPad. The earlier missing
+EULA link is already present. Sidney confirmed Homa shares no app/backend
+data with ad networks or data brokers; all ten tracking declarations were
+changed to no and published in ASC. The updated developer-agreement warning
+also cleared after the founder action.
+
+Code repairs and verification remain tracked by gh#299 and gh#1136. Local
+checks are not a deployed fix or App Review approval. Current evidence:
+`plans/2026-10-05-ios-review-repairs.md`.
+
+
+## 2026-10-05: optional existing-password sign-in authorized
+
+Sidney approved an optional existing-password path to support repeatable App Review access. Email codes remain the default. The email screen uses Supabase password authentication and offers return to email-code sign-in; no privileged reviewer bypass is introduced. Implementation and release evidence belong to gh#299 / PR #1218.
+
+## 2026-10-08: App 2 native preparation approved
+
+Sidney approved bringing the App 2 experience into the existing iPhone app and preparing its App Store submission. The native surface inherits App 2’s white, minimal, sans-serif direction. gh#1236 owns the port and verification; gh#1218 owns the existing review repairs. Approval reopens native store preparation and preserves the existing device, main-ancestor build and submission gates. No new binary or production activation is claimed by this entry.
 
 ## 2026-10-22 · Skills outage, parent photo references, page checker
 

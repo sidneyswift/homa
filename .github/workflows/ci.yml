@@ -475,6 +475,12 @@ jobs:
       - name: Conversation continuity checks (episodes, replies, deliveries)
         run: pnpm check:continuity
 
+      - name: Conversation storage and request recovery checks
+        run: pnpm check:conversation-storage
+
+      - name: Conversation answer survives a hard server restart
+        run: pnpm test:conversation-host:restart
+
       - name: Web voice source identity, delivery, and persona checks
         run: pnpm check:voice-persona
 
@@ -505,6 +511,10 @@ jobs:
 
       - name: Chat UI checks (attachment markers, transcript, worked-for, snap card)
         run: pnpm check:chat-ui
+
+      - name: Conversation device queue browser journeys
+        timeout-minutes: 5
+        run: pnpm test:conversation-device:browser
 
       - name: Job contract registry (schemas parse, skills resolve)
         run: pnpm check:jobs
@@ -628,9 +638,20 @@ jobs:
         timeout-minutes: 10
         run: pnpm conversation-privacy:e2e
 
+      - name: Conversation recording and request acceptance disposable PostgreSQL E2E
+        timeout-minutes: 10
+        run: pnpm test:conversation-storage:postgres
       - name: Family workspace unit and disposable PostgreSQL tests
         timeout-minutes: 10
         run: pnpm check:family-workspace && pnpm test:family-workspace:postgres
+
+      - name: One family per sign-in disposable PostgreSQL test
+        timeout-minutes: 10
+        run: pnpm test:one-family-per-signin:postgres
+
+      - name: Onboarding basics member name disposable PostgreSQL test
+        timeout-minutes: 10
+        run: pnpm test:onboarding-basics:postgres
 
       - name: Account deletion disposable PostgreSQL E2E
         timeout-minutes: 10

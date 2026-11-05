@@ -73,6 +73,8 @@ const nextConfig: NextConfig = {
     // Bring back rebuilds a saved version's PDF in this server action.
     // Externalizing Chromium alone does not trace its runtime archives.
     "/app/binder": chromiumArchives,
+    // App2 embeds Binder and its saved-version PDF server actions.
+    "/app2": chromiumArchives,
     // The founder mirror mounts the same Binder component and actions.
     "/admin/families/*/screen": chromiumArchives,
     "/api/chat/suggestions": ["./agent/prompt-suggestions.md"],

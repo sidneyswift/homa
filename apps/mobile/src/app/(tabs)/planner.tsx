@@ -62,8 +62,7 @@ import { buildScheduledActivities, buildUnscheduledActivities, type PlanActivity
 import { ScheduleActivitySheet } from "../../features/planner/schedule-activity-sheet";
 import { usePlannerData } from "../../features/planner/use-planner-data";
 import { WeekView } from "../../features/planner/week-view";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, shadows, space } from "../../theme/app2";
 
 type PlannerViewMode = "day" | "week" | "month" | "hours";
 

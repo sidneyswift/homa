@@ -1,3 +1,4 @@
+import type { ActivityPlan } from "@homa/core";
 import { MATERIAL_KINDS, type MaterialKind, type MaterialSummary } from "../../lib/materials";
 import type { ChildRecord } from "../../lib/family";
 
@@ -9,6 +10,7 @@ import type { ChildRecord } from "../../lib/family";
  */
 
 export interface BinderMaterial {
+  activityPlan?: ActivityPlan;
   id: string;
   title: string;
   kind: MaterialKind;
@@ -31,6 +33,7 @@ export function toBinderMaterials(
   const nameById = new Map(children.map((child) => [child.id, child.name]));
   return materials.map((material) => ({
     id: material.id,
+    activityPlan: material.activityPlan,
     title: material.title,
     kind: material.kind,
     subject: material.subject,

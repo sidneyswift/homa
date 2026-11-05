@@ -13,8 +13,7 @@ import {
   type StateRecordDocument,
   type StateRecordsSummary,
 } from "../../lib/state-records";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {

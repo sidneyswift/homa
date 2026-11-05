@@ -1,8 +1,8 @@
 import { supabase } from "../../lib/supabase";
 
 /**
- * Email sign-in by six digit code. There is no password in this app, so
- * this is the whole email path: send a code, check a code.
+ * Default email sign-in by six digit code: send a code, check a code.
+ * The email screen also offers optional existing-password sign-in.
  *
  * shouldCreateUser stays at its default of true, and that is the point.
  * It is what lets one screen serve a parent who has never opened Homa

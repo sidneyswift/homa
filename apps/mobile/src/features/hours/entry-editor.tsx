@@ -9,8 +9,7 @@ import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { reportCrash } from "../../lib/crash-reporting";
 import { HOURS_SUBJECTS, type HoursSubject } from "../../lib/hours";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 import type { HoursEntry } from "./hours-view";
 import { SUBJECT_LABELS } from "./hours-view";
 

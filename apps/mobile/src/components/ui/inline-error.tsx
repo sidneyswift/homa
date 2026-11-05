@@ -2,8 +2,7 @@ import { Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Icon } from "../design/icon";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, darkColors, fontSize, radius, space } from "../../theme/app2";
 
 /** A visible and screen-reader-live recovery message, never color alone. */
 export function InlineError({

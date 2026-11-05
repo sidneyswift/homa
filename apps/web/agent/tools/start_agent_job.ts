@@ -9,6 +9,8 @@ import { agentJobsEnabled } from "../../lib/jobs/flag";
 import { refuseJobSpawnedSession } from "../../lib/jobs/guard";
 import { kickAgentJobsRunner } from "../../lib/jobs/kick";
 import { startJob } from "../../lib/jobs/store";
+import { startConversationJob } from "../../lib/conversation-jobs";
+import { conversationRequestEnvelope } from "../../lib/conversation-request-admission";
 
 /**
  * Start a finite, resumable, multi-stage job for a fleet skill (agent-jobs
@@ -77,7 +79,7 @@ export default defineBoundedTool({
     }
 
     const memberUserId = (attributes as { memberUserId?: unknown } | undefined)?.memberUserId;
-    const result = await startJob({
+    const jobInput = {
       familyId,
       requestedByUserId: typeof memberUserId === "string" ? memberUserId : null,
       sessionId: ctx.session.id,
@@ -87,7 +89,10 @@ export default defineBoundedTool({
       totalStages: input.totalStages,
       childId: input.childId ?? null,
       startIdempotencyKey: input.startIdempotencyKey ?? null,
-    });
+    };
+    const result = conversationRequestEnvelope(ctx.session.auth.current)
+      ? await startConversationJob(ctx, jobInput)
+      : await startJob(jobInput);
     if (!result.ok) return { started: false, note: result.note };
     // Start the build now rather than at the next sweeper tick (founder
     // directive 2026-07-23). Best-effort: the row is the promise, the

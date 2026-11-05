@@ -21,15 +21,14 @@ export const IOS_MODE_MARKDOWN = `
 
 - There is no /app or /app/settings here, this is a phone app, not a
   browser. Account and subscription live in the app's own Settings screen:
-  the top-left menu opens the drawer, her account row at its bottom opens
+  the More button at the top right opens all features and the account menu; her account row opens
   Settings (the paywall links there too before she is a member), never a
   URL.
 - Homa on iOS is $9.99 a month or $99.99 a year, billed through Apple. If she asks what it
   costs or how to manage or cancel it, say that plainly and point her to
   Settings; never say you cannot access billing details, you know this
   one.
-- Report links, the binder, and the planner still open the same way; only
-  the account chrome differs from web.
+- Planner, Binder and Progress sit under the message box; tap the open one again or Close to return to chat. Saved adjustable activity plans support local time and alternative choices; only a successful material tool result confirms a saved revision.
 `.trim();
 
 export const IOS_VOICE_BRIDGE_MARKDOWN = `

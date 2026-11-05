@@ -21,10 +21,26 @@ export async function loadJobPlan(
   return rows[0]?.plan ?? null;
 }
 
+/**
+ * Which conversation a stage's build runs in. Every attempt gets its own:
+ * the runner mints a fresh episode per spawn, and the token carries it.
+ * Keyed by job and stage alone, a retry resumed the attempt that had just
+ * failed, so a build that ended on a question asked it again on every
+ * retry and the first page never arrived (2026-11-04 local walk: four
+ * attempts, the same question, 180k input tokens by the fourth).
+ */
+export function stageContinuationToken(target: {
+  jobId?: string | null;
+  stageNumber?: number | null;
+  episodeId?: string | null;
+}): string {
+  return `agent-job:${target.jobId ?? ""}:${target.stageNumber ?? ""}:${target.episodeId ?? ""}`;
+}
+
 /** The message that tells the build session what to do. It never delivers
  * to the parent; it builds the stage's material and calls
  * report_agent_job_stage. */
-export function buildStageBrief(job: ClaimedJob, plan: unknown): string {
+export function buildStageBrief(job: ClaimedJob, plan: unknown, linkedConversation = false): string {
   const planText = JSON.stringify(plan ?? {}, null, 2);
   return [
     `You are running a BACKGROUND build for this family: "${job.title}". No one is`,
@@ -37,9 +53,15 @@ export function buildStageBrief(job: ClaimedJob, plan: unknown): string {
     "Do exactly this, in order, using tool calls only:",
     `1. Call load_skill with skill "${job.skill}" and follow its craft for one stage.`,
     "2. Build this stage's material (create_printable, using the materials-studio",
-    "   craft), aimed at the child's level from your family context. If you have no",
-    "   reading for the child, aim at a sensible level for their age; never stop to",
-    "   ask, there is no one to ask.",
+    ...(linkedConversation ? [
+      "   craft), preserving the complete accepted scope and the child's level evidence in the plan.",
+      "   Do not guess a missing level or omit a constraint. If the brief is insufficient,",
+      "   stop without making a substitute; the durable work receipt will show that it needs attention.",
+    ] : [
+      "   craft), aimed at the child's level from your family context. If you have no",
+      "   reading for the child, aim at a sensible level for their age; never stop to",
+      "   ask, there is no one to ask.",
+    ]),
     "3. The moment a material passes its quality check, call report_agent_job_stage",
     "   with its id(s). That is the ONLY way to finish this build.",
     "",

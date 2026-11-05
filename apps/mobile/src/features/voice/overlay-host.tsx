@@ -23,8 +23,7 @@ import {
   setPlannerLearningActivityStatus,
   type PlannerLearningActivityRecord,
 } from "../../lib/planner-learning-activities";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 import { MaterialCard } from "../chat/material-card";
 import { MaterialShareComposer } from "../materials/material-share-composer";
 import { QuestionCard } from "../chat/question-card";
@@ -82,7 +81,7 @@ import { StateRecordsCard } from "../state-records/state-records-card";
  * record through useHoursData.
  */
 
-const SCRIM_COLOR = "rgba(51,42,33,0.42)";
+const SCRIM_COLOR = "rgba(32,33,36,0.42)";
 const RECEIPT_DISMISS_MS = 4000;
 /** Swipe-down travel on the grab handle that reads as "close". */
 const DISMISS_DRAG_PX = 48;

@@ -60,7 +60,8 @@ export const screenDeliveryHook = {
         channel: "web",
         destination: `member:${attributes.memberUserId}`,
         providerThreadKey: `web:${ctx.session.id}`,
-        content: persisted.content,
+        // Recording snapshots the exact delivered text; otherwise the stored form.
+        content: process.env.HOMA_CONVERSATION_RECORDING === "1" ? event.data.message : persisted.content,
         delivered: true,
       });
       const progress =

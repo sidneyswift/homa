@@ -11,7 +11,7 @@ export const iconContract = {
 } as const;
 export const semanticIcons = [
   "back", "next", "close", "menu", "more", "add", "edit", "delete", "calendar", "book", "plan", "progress", "chat", "tasks", "settings", "logout", "print", "share", "voice", "muted", "end", "collapse", "expand", "check", "warning", "error", "info", "external", "refresh", "stop",
-  "play", "pause", "reminder", "experiment", "journal", "document", "undo", "phone", "camera", "image", "time", "learn", "command", "bookmark_add", "bookmark_remove", "erase", "history", "mail", "search", "spark", "person", "people", "tools", "folder", "files", "help", "nature", "globe", "mobile", "send", "assistant", "volume",
+  "play", "pause", "reminder", "experiment", "journal", "document", "undo", "phone", "camera", "image", "time", "learn", "command", "bookmark_add", "bookmark_remove", "erase", "history", "mail", "search", "spark", "person", "people", "tools", "folder", "files", "help", "nature", "globe", "mobile", "send", "assistant", "volume", "volume_muted",
 ] as const;
 export type SemanticIconName = (typeof semanticIcons)[number];
 
@@ -83,6 +83,7 @@ export const semanticIconAliases = {
   send: "ArrowUp",
   assistant: "Bot",
   volume: "Volume2",
+  volume_muted: "VolumeOff",
 } as const satisfies Record<SemanticIconName, string>;
 
 export type SemanticIconPlatform = "web" | "native";

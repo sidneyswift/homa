@@ -1,3 +1,4 @@
+import { readActivityPlan, type ActivityPlan } from "@homa/core";
 import type {
   EveMessage,
   HandleMessageStreamEvent,
@@ -35,6 +36,7 @@ export interface MobileChatHistoryMaterial {
   childName: string | null;
   previewUrl: string;
   pdfUrl: string;
+  activityPlan?: ActivityPlan;
   pageCount: number;
   pagePreviewUrls: string[] | null;
   sources: unknown[];
@@ -205,6 +207,7 @@ function materialToolPart(
         previewUrl: material.previewUrl,
         pdfUrl: material.pdfUrl,
         pageCount: material.pageCount,
+        activityPlan: readActivityPlan(material.activityPlan),
         ...(material.pagePreviewUrls
           ? { pagePreviewUrls: material.pagePreviewUrls }
           : {}),

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import { Image, Pressable, ScrollView, View } from "react-native";
 
 import { Button } from "../../components/ui/button";
 import { LoadingStatus } from "../../components/ui/loading-status";
@@ -18,6 +18,7 @@ import {
 } from "../../features/onboarding/onboarding-state";
 import { useWalkCharacterState, useWalkSky } from "../../features/onboarding/walk-character";
 import { WalkScene } from "../../features/onboarding/walk-scene";
+import { joinNatural } from "../../features/onboarding/working-chips";
 import { emitFamilyEvent } from "../../lib/events";
 import { hapticSuccess } from "../../lib/haptics";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
@@ -26,7 +27,7 @@ import {
   getInProgressMaterials,
   type MaterialSummary,
 } from "../../lib/materials";
-import { colors, palette, radius, space } from "../../theme/tokens";
+import { colors, radius, space } from "../../theme/app2";
 
 /**
  * The reveal (wireframe v4 step 5, the payoff GIVE): the first kid's
@@ -89,11 +90,14 @@ export default function RevealScreen() {
                 other.length > item.length,
             ),
         );
-        const loves = distinct.slice(0, 2).join(" + ");
         const working = Array.isArray(first.workingOn) ? (first.workingOn[0] ?? "").toLowerCase() : "";
-        const parts = [loves, working ? `${working} practice` : ""].filter(Boolean);
+        const parts = [...distinct.slice(0, 2), working].filter(Boolean);
+        // What she said, not a claim about what the page used: a page
+        // built around dinosaurs alone read "built from dinosaurs +
+        // trucks" and the mom reviewer went looking for the trucks
+        // (gauntlet round 1, 2026-11-04).
         if (parts.length > 0) {
-          setReceipts(`Built from what you told me: ${parts.join(" + ")}.`);
+          setReceipts(`You told me ${joinNatural(parts)}. Here's where I started.`);
         }
       }
 
@@ -158,33 +162,37 @@ export default function RevealScreen() {
   }, [family]);
 
   async function printMaterial() {
-    if (!material || !family) return;
+    if (!material || !family || printing) return;
     setPrinting(true);
-    const prepared = await prepareMaterialPrintFromApp(material.id, {
-      copies: 1,
-      includeAnswerKey: false,
-    });
-    if (!prepared) {
-      setNotice("That could not be prepared for printing. It's saved; you can print it any time.");
+    try {
+      const prepared = await prepareMaterialPrintFromApp(material.id, {
+        copies: 1,
+        includeAnswerKey: false,
+      });
+      if (!prepared) {
+        setNotice("That could not be prepared for printing. It's saved; you can print it any time.");
+        return;
+      }
+      const result = await runPreparedMaterialPrint(prepared);
+      setNotice(result.message);
+      void emitFamilyEvent(family.id, "materials.print_result", {
+        material_id: prepared.materialId,
+        outcome: result.status,
+        requested_copies: prepared.copies,
+        pages_selected: prepared.pageIndexes.length,
+        answer_key_excluded: prepared.answerKeyExcluded,
+      });
+      // No auto-navigation: the OS print sheet closing and the screen
+      // underneath having silently become a menu read as a hard cut with
+      // no receipt (founder call 2026-08-24). The moment lands here, and
+      // she advances when she is ready.
+      if (result.status === "completed") {
+        setPrinted(true);
+      }
+    } catch {
+      setNotice("Printing didn't open. Your page is saved; you can keep going.");
+    } finally {
       setPrinting(false);
-      return;
-    }
-    const result = await runPreparedMaterialPrint(prepared);
-    setNotice(result.message);
-    void emitFamilyEvent(family.id, "materials.print_result", {
-      material_id: prepared.materialId,
-      outcome: result.status,
-      requested_copies: prepared.copies,
-      pages_selected: prepared.pageIndexes.length,
-      answer_key_excluded: prepared.answerKeyExcluded,
-    });
-    setPrinting(false);
-    // No auto-navigation: the OS print sheet closing and the screen
-    // underneath having silently become a menu read as a hard cut with
-    // no receipt (founder call 2026-08-24). The moment lands here, and
-    // she advances when she is ready.
-    if (result.status === "completed") {
-      setPrinted(true);
     }
   }
 
@@ -193,9 +201,10 @@ export default function RevealScreen() {
 
   return (
     <WalkScene>
-      <View
-        style={{
-          flex: 1,
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
           padding: space.lg,
           paddingTop: space.xl,
           gap: space.md,
@@ -209,7 +218,7 @@ export default function RevealScreen() {
         </NativeText>
 
         {receipts ? (
-          <NativeText role="caption" tone="muted" style={{ color: palette.clay600 }}>
+          <NativeText role="caption" tone="muted">
             {receipts}
           </NativeText>
         ) : null}
@@ -223,7 +232,7 @@ export default function RevealScreen() {
         {previewUrl ? (
           <View
             style={{
-              backgroundColor: palette.gold100,
+              backgroundColor: colors.surfaceSunken,
               borderRadius: radius.xl,
               padding: space.sm,
             }}
@@ -299,7 +308,7 @@ export default function RevealScreen() {
             {printed ? "Saved. Print it anytime." : "Saved. Print it anytime. Keep going"}
           </NativeText>
         </Pressable>
-      </View>
+      </ScrollView>
     </WalkScene>
   );
 }

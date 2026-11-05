@@ -1,0 +1,15 @@
+.app2-activity-plan { width:100%; background:#fff; color:#202124; font:inherit; text-align:left; padding:20px 0; }
+.app2-activity-plan h3 { font-family:inherit; font-size:22px; font-weight:600; margin:0 0 12px; }
+.app2-activity-plan p { margin:10px 0; line-height:1.55; }
+.app2-activity-time { display:grid; grid-template-columns:1fr auto; gap:12px; margin:24px 0; }
+.app2-activity-time input { grid-column:1/-1; width:100%; min-height:44px; accent-color:#202124; }
+.app2-activity-activities { list-style:none; padding:0; margin:0; }
+.app2-activity-activities li { padding:20px 0; }
+.app2-activity-heading { display:flex; justify-content:space-between; gap:16px; }
+.app2-activity-heading span { white-space:nowrap; }
+.app2-activity-actions { display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; }
+.app2-activity-plan.app2-activity-plan button, .app2-activity-plan.app2-activity-plan a { font:inherit; color:inherit; background:transparent; border:0; box-shadow:none; border-radius:0; min-height:44px; padding:8px 0; text-decoration:underline; text-underline-offset:4px; cursor:pointer; }
+.app2-activity-plan :focus-visible { outline:2px solid #202124; outline-offset:4px; }
+.app2-activity-plan .app2-activity-supplies, .app2-activity-plan .app2-activity-status { color:#626262; font-size:14px; }
+.app2-activity-tryIt { padding:16px; background:#f5f5f5; border-radius:12px; }
+.app2-activity-tryIt button { display:block; }

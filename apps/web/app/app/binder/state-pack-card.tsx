@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkspaceLink } from "../../../components/workspace/workspace-link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -88,14 +89,14 @@ export function StatePackCard({
           )}
         </QuietAction>
         {status.kind === "done" ? (
-          <a
+          <WorkspaceLink
             href={status.pdfPath}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-semibold text-[color:var(--homa-brand-text)] underline underline-offset-2"
           >
             Open your pack
-          </a>
+          </WorkspaceLink>
         ) : null}
       </div>
       {status.kind === "error" ? (
@@ -103,12 +104,12 @@ export function StatePackCard({
       ) : null}
       <p className="mt-3 text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
         Not {stateName}?{" "}
-        <a
+        <WorkspaceLink
           href="/app/settings"
           className="underline underline-offset-2 hover:text-[color:var(--homa-brand-text)]"
         >
           Update your state in settings
-        </a>
+        </WorkspaceLink>
         . The pack is legal information, not legal advice, and making it
         does not notify your state.
       </p>

@@ -1,7 +1,6 @@
 import { Text, View } from "react-native";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * A small markdown renderer for assistant replies: paragraphs, headings,

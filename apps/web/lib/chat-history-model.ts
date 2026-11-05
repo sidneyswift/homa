@@ -1,3 +1,4 @@
+import { readActivityPlan, type ActivityPlan } from "./materials/activity-plan";
 /**
  * Pure model for the server-rendered chat history (the M1-02 render
  * slice, founder cut 2026-07-12): the web transcript's scrollback comes
@@ -63,6 +64,7 @@ export interface ChatHistoryMaterial extends MaterialRevisionCandidate {
   pageCount: number;
   /** Per-page previews for multi-page materials, page 1 first. */
   pagePreviewUrls: string[] | null;
+  activityPlan?: ActivityPlan;
   /** Verified Family Library inputs, linked back to their originals. */
   sources: FamilyAssetReference[];
   /** materials.created_at as epoch ms, for transcript placement. */
@@ -82,6 +84,7 @@ export interface ChatHistoryMaterialRow {
   child_name: string | null;
   page_count?: number | string | null;
   page_preview_urls?: unknown;
+  activity_plan?: unknown;
   family_sources?: unknown;
   status: "draft" | "final" | "superseded";
   revises: string | null;
@@ -92,6 +95,7 @@ export interface ChatHistoryMaterialRow {
 export interface ChatHistoryPayload {
   messages: ChatHistoryMessage[];
   materials: ChatHistoryMaterial[];
+  materialsUnavailable?: boolean;
 }
 
 /** Raw row shape as selected from conversation_messages. */
@@ -213,6 +217,7 @@ export function toChatHistoryMaterial(
     pdfUrl: row.pdf_url,
     pageCount: parsePageCount(row.page_count),
     pagePreviewUrls: parsePagePreviewUrls(row.page_preview_urls),
+    activityPlan: readActivityPlan(row.activity_plan),
     sources: familyAssetReferencesForSurface(
       parseFamilyAssetReferenceSnapshots(row.family_sources),
     ),
@@ -238,6 +243,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
         previewUrl: material.previewUrl,
         pdfUrl: material.pdfUrl,
         pageCount: material.pageCount,
+        ...(material.activityPlan ? { activityPlan: material.activityPlan } : {}),
         ...(material.pagePreviewUrls
           ? { pagePreviewUrls: material.pagePreviewUrls }
           : {}),
@@ -253,7 +259,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
 /**
  * archiveFromServerHistory(payload, liveMessages): server rows in the
  * render archive's shape. A server row is excluded only when the live
- * reducer proves that it has the same turn and role. This keeps a
+ * reducer proves that it has the same session, turn and role. This keeps a
  * partially replayed current session from hiding durable work while
  * still preventing duplicate bubbles. The `hist:` id prefix keeps
  * server ids from ever colliding with eve's turn ids.
@@ -267,6 +273,7 @@ function materialToolPart(material: ChatHistoryMaterial) {
 export function archiveFromServerHistory(
   payload: ChatHistoryPayload,
   liveMessages: readonly EveMessage[],
+  liveSessionId?: string,
 ): {
   at: number;
   channel: ChatHistoryChannel;
@@ -277,6 +284,8 @@ export function archiveFromServerHistory(
   const liveMessageIds = new Set(liveMessages.map((message) => message.id));
   const history = payload.messages.filter(
     (entry) =>
+      // Without a live session id (/app today) keep the original turn/role rule.
+      (liveSessionId !== undefined && entry.sessionId !== liveSessionId) ||
       entry.turnId === null ||
       !liveMessageIds.has(`${entry.turnId}:${entry.role}`),
   );

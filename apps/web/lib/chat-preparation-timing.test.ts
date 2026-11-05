@@ -48,7 +48,7 @@ test("timing whitelists correlation fields and keeps absolute start time without
   await assert.rejects(measureChatPreparation("canonical_persistence", async () => { throw failure; }), (error) => error === failure);
 });
 
-test("user timing preserves awaited embedding, canonical write and vector update order", async (t) => {
+test("user timing saves canonical text before indexing and awaits the vector update", { timeout: 5000 }, async (t) => {
   const logs: unknown[][] = [];
   t.mock.method(console, "info", (...args: unknown[]) => { logs.push(args); });
   const embedding = deferred<string>();
@@ -82,37 +82,38 @@ test("user timing preserves awaited embedding, canonical write and vector update
     },
   };
   const result = persistConversationMessage(userMessage, dependencies).then((value) => { finished = true; return value; });
-  await enteredEmbedding.promise;
-  assert.deepEqual(calls, ["embedding"]);
-  embedding.resolve("private-vector");
   await enteredCanonical.promise;
+  assert.deepEqual(calls, ["canonical"]);
   assert.equal(finished, false);
-  assert.deepEqual(calls, ["embedding", "canonical"]);
   canonical.resolve(persisted);
+  await enteredEmbedding.promise;
+  assert.deepEqual(calls, ["canonical", "embedding"]);
+  assert.equal(finished, false);
+  embedding.resolve("private-vector");
   await enteredVector.promise;
   assert.equal(finished, false);
   vector.resolve();
   assert.equal(await result, persisted);
-  assert.deepEqual(calls, ["embedding", "canonical", "vector"]);
+  assert.deepEqual(calls, ["canonical", "embedding", "vector"]);
   assert.deepEqual(logs.map((row) => JSON.parse(row[1] as string).stage), [
-    "embedding_total", "canonical_persistence", "embedding_update", "user_persistence",
+    "canonical_persistence", "embedding_total", "embedding_update", "user_persistence",
   ]);
   assert.doesNotMatch(JSON.stringify(logs), /private-/);
 });
 
-test("canonical failure still aborts user persistence before vector update", async (t) => {
+test("canonical failure aborts before indexing or vector updates", async (t) => {
   const logs: unknown[][] = [];
   t.mock.method(console, "info", (...args: unknown[]) => { logs.push(args); });
   const failure = new Error("private canonical failure");
   await assert.rejects(persistConversationMessage(userMessage, {
     resolveInbound: async () => { throw new Error("unexpected continuity read"); },
-    embed: async () => "private-vector",
+    embed: async () => { assert.fail("indexing must not run before the canonical write"); },
     persistCanonical: async () => { throw failure; },
     saveEmbedding: async () => { assert.fail("vector write must not run"); },
   }), (error) => error === failure);
   const records = logs.map((row) => JSON.parse(row[1] as string));
   assert.deepEqual(records.map((row) => [row.stage, row.outcome]), [
-    ["embedding_total", "ok"], ["canonical_persistence", "error"], ["user_persistence", "error"],
+    ["canonical_persistence", "error"], ["user_persistence", "error"],
   ]);
   assert.doesNotMatch(JSON.stringify(logs), /private-/);
 });

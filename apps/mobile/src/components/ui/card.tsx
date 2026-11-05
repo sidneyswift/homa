@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors, radius, shadows, space } from "../../theme/tokens";
+import { colors, radius, shadows, space } from "../../theme/app2";
 
 /** Paper surface, one Quiet authority card radius, and one restrained elevation. */
 export function Card({

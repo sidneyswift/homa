@@ -67,7 +67,11 @@ export function VersionRail({ materialId }: { materialId: string }) {
       try {
         const result = await restoreMaterialVersionAction(materialId, version.id);
         setRestoreNote(result.note);
-        if (result.restored) router.refresh();
+        if (result.restored) {
+          router.refresh();
+          try { setLoaded({ materialId, versions: await materialVersionsAction(materialId) }); }
+          catch { setRestoreNote("That version is restored. Refresh to reload its history."); }
+        }
       } catch {
         setRestoreNote("I could not bring that version back. Nothing changed. Try again in a moment.");
       } finally {

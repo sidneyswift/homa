@@ -12,6 +12,7 @@ import { findMaterialsCaller, findMaterialsPinned, type MaterialFilters } from "
 function callerOnPostgres(sql: postgres.Sql, userId: string) {
   const columns = new Set(["id", "title", "kind", "status", "source", "skill", "subject", "curriculum", "theme", "characters", "child_id", "preview_url", "pdf_url", "created_at", "revises"]);
   const projections: Record<string, string> = {
+    "activity_plan:generation->input->activityPlan": "generation->'input'->'activityPlan' as activity_plan",
     "page_count:generation->pageCount": "generation->'pageCount' as page_count",
     "page_preview_urls:generation->pagePreviewUrls": "generation->'pagePreviewUrls' as page_preview_urls",
     "family_sources:generation->familySources": "generation->'familySources' as family_sources",

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "galleryVersion": "fixture-gallery-v1",
   "designEra": "quiet-authority-v1",
-  "sourceContractChecksum": "a27c223c3d9a8deaff621493b4639cd2037b7194e3e3fb75c50cfebafdcbfda4",
+  "sourceContractChecksum": "af3b5867c5eec647c8eea85ea4f243e84386c08cb822d9c2189a57c88dcaf8ba",
   "generator": "scripts/design-fixture-gallery.mts",
   "profileMatrix": [
     {
@@ -5227,6 +5227,48 @@
         ],
         "source": "packages/design/src/contract/icons.ts#semanticIcons",
         "checksum": "a0fd775ef2fe05d1ecd5cc24cb68e269f5dbe0ff9cd87a1e5ea6d6589bc916b4"
+      },
+      {
+        "category": "atoms",
+        "description": "Semantic icon role volume_muted.",
+        "details": {
+          "role": "volume_muted"
+        },
+        "evidenceStatus": "contract-only",
+        "galleryVersion": "fixture-gallery-v1",
+        "id": "atom-icon-volume_muted",
+        "profileIds": [
+          "web-phone-small",
+          "web-phone",
+          "web-desktop",
+          "web-reflow-200",
+          "web-reflow-400",
+          "web-large-text",
+          "web-localization-expanded",
+          "web-forced-colors",
+          "web-increased-contrast",
+          "web-reduced-motion",
+          "web-dark-adaptive",
+          "native-iphone-oldest",
+          "native-iphone-current",
+          "native-large-text",
+          "native-localization-expanded",
+          "native-increased-contrast",
+          "native-reduced-motion",
+          "native-dark-adaptive",
+          "marketing-desktop",
+          "marketing-grayscale",
+          "email-600-light",
+          "email-320-narrow",
+          "email-client-controlled",
+          "sms-plain-text",
+          "print-letter",
+          "print-a4",
+          "provider-static",
+          "metadata-plain-text"
+        ],
+        "source": "packages/design/src/contract/icons.ts#semanticIcons",
+        "checksum": "6d4a7e27c44ea8940ec0c7041bd488c65882a0ab1cb63cb55a827bbb912ebaa8"
       },
       {
         "category": "atoms",
@@ -11858,6 +11900,6 @@
       }
     ]
   },
-  "fixtureCount": 280,
-  "manifestChecksum": "88d48b819388f4a0b3cde6cc5bb9f18980eb0aadd7748c0bf034468685d0dbca"
+  "fixtureCount": 281,
+  "manifestChecksum": "67e8418057ba5aec26627b9a5847e3096e84bb1c7d84380d82fb6d1e5724e357"
 }

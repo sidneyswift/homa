@@ -1,5 +1,5 @@
 import type { ChildProgressView } from "@homa/core";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,8 +31,7 @@ import {
 } from "../../features/progress/view-copy";
 import { supabase } from "../../lib/supabase";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * Progress reads the canonical server projection. Every visible state is
@@ -46,7 +45,11 @@ export default function ProgressScreen() {
     loading: familyLoading,
     reload: reloadFamily,
   } = useFamilyData();
-  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  // A link can name the child to open on (the onboarding walk's "See
+  // Max's progress report" door); otherwise the first child leads.
+  const params = useLocalSearchParams<{ childId?: string | string[] }>();
+  const linkedChildId = Array.isArray(params.childId) ? params.childId[0] : params.childId;
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(linkedChildId ?? null);
   const selectedChild =
     children.find((child) => child.id === selectedChildId) ?? children[0] ?? null;
   const effectiveChildId = selectedChild?.id ?? null;
@@ -190,7 +193,10 @@ export default function ProgressScreen() {
         contentContainerStyle={{ padding: space.md, gap: space.md }}
         refreshControl={
           <RefreshControl
-            refreshing={progressLoading}
+            // The pull spinner belongs to a page she can see; a first load
+            // already shows the placeholder cards, and both at once read as
+            // three loaders (2026-11-03 walk, gh#1236).
+            refreshing={progressLoading && visibleView !== null}
             onRefresh={() => void refreshProgress()}
           />
         }
@@ -419,10 +425,12 @@ function NextMoveStatusCard({
   );
 }
 
+/** One loading state: the placeholder cards, named for screen readers. */
 function ProgressSkeleton({ childName }: { childName: string }) {
+  const label = `Loading ${childName}’s progress`;
+  useAccessibilityAnnouncement(label);
   return (
-    <View style={{ gap: space.md }}>
-      <LoadingStatus label={`Loading ${childName}’s progress`} />
+    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={{ gap: space.md }}>
       <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ gap: space.md }}>
         {[0, 1].map((index) => (
           <Card key={index} style={{ gap: space.sm }}>
