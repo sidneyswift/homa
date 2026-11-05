@@ -12,24 +12,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { US_STATES } from "@homa/core";
 
+import { useSession } from "../../features/auth/session-provider";
+
 import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { Button } from "../../components/ui/button";
 import { Icon } from "../../components/design/icon";
 import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
+import { LoadingStatus } from "../../components/ui/loading-status";
 import { NativeText } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
 import { useWalkCharacterState } from "../../features/onboarding/walk-character";
 import { saveWalkBasics } from "../../features/onboarding/basics";
+import { searchStates } from "../../features/onboarding/state-search";
 import {
+  loadOnboardingAnswers,
   reportOnboardingStep,
   saveOnboardingStep,
 } from "../../features/onboarding/onboarding-state";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { hapticAdvance } from "../../lib/haptics";
 import { WalkScene } from "../../features/onboarding/walk-scene";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 
 /**
  * About you (founder call 2026-08-24): the two facts about the PARENT
@@ -49,23 +53,38 @@ import { colors, fontSize, radius, space } from "../../theme/tokens";
  */
 export default function YouScreen() {
   const router = useRouter();
-  const { family } = useFamilyData();
+  const { family, memberDisplayName } = useFamilyData();
+  const { session } = useSession();
+  const isAppleSignIn = session?.user.app_metadata.provider === "apple";
+  const providerName = session?.user.user_metadata.full_name;
+  const knownName = memberDisplayName || (typeof providerName === "string" ? providerName : "");
   const reported = useRef(false);
   const [name, setName] = useState("");
   const [stateCode, setStateCode] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [stateQuery, setStateQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [kidName, setKidName] = useState<string | null>(null);
   const sheetHeadingRef = useRef<View>(null);
   useWalkCharacterState(saving ? "thinking" : "listening");
 
   const stateName =
     US_STATES.find((state) => state.code === stateCode)?.name ?? null;
+  const stateMatches = searchStates(stateQuery);
+
+  function closePicker() {
+    setPickerOpen(false);
+    setStateQuery("");
+  }
 
   useEffect(() => {
     if (!family || reported.current) return;
     reported.current = true;
     reportOnboardingStep(family.id, "you");
+    void loadOnboardingAnswers(family.id)
+      .then((answers) => setKidName(answers?.kids?.[0]?.name.trim() || null))
+      .catch(() => {});
   }, [family]);
 
   async function advanceToMaking() {
@@ -80,13 +99,14 @@ export default function YouScreen() {
   async function continueWalk() {
     if (saving) return;
     setError(null);
-    if (!name.trim() && !stateCode) {
+    const callMeName = isAppleSignIn ? knownName.trim() : name.trim();
+    if (!callMeName && !stateCode) {
       await advanceToMaking();
       return;
     }
     setSaving(true);
     const saved = await saveWalkBasics({
-      callMeName: name.trim() || undefined,
+      callMeName: callMeName || undefined,
       usState: stateCode ?? undefined,
     });
     setSaving(false);
@@ -111,16 +131,48 @@ export default function YouScreen() {
             gap: space.md,
           }}
         >
+          {/* The last kid-card button reads "Make Theo's worksheet" and
+              starts the build, but it lands here, on a form: two round 3
+              reviewers (2026-11-04) read that as a broken promise. The
+              build really is running (kids.tsx starts it; making.tsx
+              re-requests it), so say so. */}
+          {kidName ? (
+            <View
+              accessible
+              accessibilityLabel={`Drawing ${kidName}'s page now`}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                alignSelf: "flex-start",
+                gap: space.xs,
+                paddingHorizontal: space.sm,
+                paddingVertical: 6,
+                borderRadius: radius.pill,
+                backgroundColor: colors.surfaceSunken,
+              }}
+            >
+              <LoadingStatus
+                label={`Drawing ${kidName}'s page now`}
+                showLabel={false}
+                style={{ minHeight: 0 }}
+              />
+              <NativeText role="caption" tone="strong">
+                {`Drawing ${kidName}'s page now`}
+              </NativeText>
+            </View>
+          ) : null}
           <NativeText role="display" tone="strong">
             {"And you?"}
           </NativeText>
           {/* Deck S7 (approved 2026-08-31): one body carries both
               justifications; the per-field captions are folded in. */}
           <NativeText role="body" tone="body">
-            {"Your name, so I stop calling you \"hey\". Your state, because homeschool rules are local and I've done the reading."}
+            {isAppleSignIn
+              ? "Your state. Homeschool rules are local, and I've done the reading for yours."
+              : "Your name and your state. Homeschool rules are local, and I've done the reading for yours."}
           </NativeText>
 
-          <View style={{ gap: space.xs }}>
+          {!isAppleSignIn ? <View style={{ gap: space.xs }}>
             <TextField
               label="What should I call you?"
               value={name}
@@ -128,7 +180,7 @@ export default function YouScreen() {
               placeholder="e.g. Sarah"
               autoCapitalize="words"
             />
-          </View>
+          </View> : null}
 
           <View style={{ gap: space.xs }}>
             <NativeText role="label" tone="strong">
@@ -211,13 +263,16 @@ export default function YouScreen() {
         title="Choose your state"
         initialFocusRef={sheetHeadingRef}
         transparent
-        onRequestClose={() => setPickerOpen(false)}
+        onRequestClose={closePicker}
       >
-        <View
+        {/* The search field lives in this bottom sheet, so the sheet
+            rises with the keyboard; otherwise the keyboard covers it. */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{
             flex: 1,
             justifyContent: "flex-end",
-            backgroundColor: "rgba(51,42,33,0.42)",
+            backgroundColor: "rgba(32,33,36,0.42)",
           }}
         >
           <SafeAreaView
@@ -253,18 +308,37 @@ export default function YouScreen() {
                   Choose your state
                 </Text>
               </View>
-              <IconButton label="Close" onPress={() => setPickerOpen(false)}>
+              <IconButton label="Close" onPress={closePicker}>
                 <Icon name="close" size={20} color={colors.textSubtle} />
               </IconButton>
             </View>
+            <View style={{ paddingHorizontal: space.lg, paddingBottom: space.sm }}>
+              <TextField
+                label="Find your state"
+                value={stateQuery}
+                onChangeText={setStateQuery}
+                placeholder="Start typing, like Ohio"
+                autoCapitalize="words"
+                autoCorrect={false}
+                clearButtonMode="while-editing"
+                returnKeyType="done"
+                testID="you.stateSearch"
+              />
+            </View>
             <ScrollView
               showsVerticalScrollIndicator
+              keyboardShouldPersistTaps="handled"
               contentContainerStyle={{
                 paddingHorizontal: space.lg,
                 paddingBottom: space.lg,
               }}
             >
-              {US_STATES.map((state) => {
+              {stateMatches.length === 0 ? (
+                <NativeText role="body" tone="muted">
+                  {`No state starts with "${stateQuery.trim()}".`}
+                </NativeText>
+              ) : null}
+              {stateMatches.map((state) => {
                 const selected = stateCode === state.code;
                 return (
                   <Pressable
@@ -274,7 +348,7 @@ export default function YouScreen() {
                     accessibilityState={{ selected }}
                     onPress={() => {
                       setStateCode(state.code);
-                      setPickerOpen(false);
+                      closePicker();
                     }}
                     style={{
                       minHeight: 48,
@@ -304,7 +378,7 @@ export default function YouScreen() {
               })}
             </ScrollView>
           </SafeAreaView>
-        </View>
+        </KeyboardAvoidingView>
       </AccessibleModal>
     </WalkScene>
   );

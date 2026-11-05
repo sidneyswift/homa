@@ -21,7 +21,7 @@ import { installStreamingFetch } from "../lib/streaming-fetch";
 import { BOOTSTRAP_TIMEOUT_MS } from "../features/bootstrap/bootstrap";
 import { reportBootstrapEvent } from "../features/bootstrap/bootstrap-events";
 import { useHomaFonts } from "../theme/fonts";
-import { colors, fontSize, radius, space } from "../theme/tokens";
+import { colors, fontSize, radius, space } from "../theme/app2";
 
 // Must run before any module sends a request: eve streams NDJSON over
 // fetch and React Native's built-in fetch cannot read response streams.

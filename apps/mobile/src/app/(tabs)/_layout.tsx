@@ -1,8 +1,10 @@
+import { NativeWorkspaceProvider } from "../../features/workspace/context";
 import { Redirect, Stack } from "expo-router";
 import { useRef, useState } from "react";
 import { View } from "react-native";
 
 import { AppDrawer } from "../../components/nav/app-drawer";
+import { App2BottomNav } from "../../components/nav/app2-bottom-nav";
 import { AppTopBar } from "../../components/nav/app-top-bar";
 import { BillingGate } from "../../components/billing-gate";
 import { FamilyReadinessGate } from "../../components/family-readiness-gate";
@@ -10,7 +12,7 @@ import { useSession } from "../../features/auth/session-provider";
 import { useFamilyData } from "../../features/family/use-family-data";
 import { OnboardingGate } from "../../features/onboarding/onboarding-gate";
 import { VoiceDock } from "../../features/voice/voice-dock";
-import { colors } from "../../theme/tokens";
+import { colors } from "../../theme/app2";
 
 /**
  * The signed-in shell, ported from web's DashboardShell: a persistent
@@ -42,7 +44,7 @@ function TabsWithFamily() {
     <FamilyReadinessGate>
       {(family) => (
         <BillingGate familyId={family.id}>
-          <AppShell />
+          <NativeWorkspaceProvider key={family.id}><AppShell /></NativeWorkspaceProvider>
         </BillingGate>
       )}
     </FamilyReadinessGate>
@@ -71,6 +73,7 @@ function AppShell() {
           />
         </View>
         <VoiceDock />
+        <App2BottomNav />
       </View>
       <AppDrawer
         open={drawerOpen}

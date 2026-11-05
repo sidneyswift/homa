@@ -5,6 +5,8 @@ import {
   MissingFamilyContextError,
 } from "../../lib/agent-db";
 import { loadCallerFamilyContext } from "../../lib/family-context-caller";
+import { hasConversationJobContext, requireConversationJobDatabaseAccess } from "../../lib/conversation-jobs";
+import { hasConversationRequestContext, requireConversationRequestContextAccess } from "../../lib/conversation-request-access";
 import {
   getChildProgressView,
   listActiveFamilyProgressCheckIns,
@@ -87,6 +89,7 @@ interface FamilyContextInstructionAttributes {
   evalOnboardingMode?: string;
   episodeId?: string;
   continuityContext?: string;
+  conversationRequestContextLoaded?: string;
   taskKind?: string;
   deliveryVersion?: string;
   familySmsInviteState?: "pending" | "awaiting-parent" | "expired";
@@ -98,6 +101,8 @@ interface ProgressContextInput {
 }
 
 export interface FamilyContextInstructionDependencies {
+  authorizeConversationRequest?: typeof requireConversationRequestContextAccess;
+  authorizeConversationJob?: typeof requireConversationJobDatabaseAccess;
   loadCallerFamilyContext(
     attributes: FamilyContextInstructionAttributes,
     trace?: Pick<ChatPreparationTrace, "sessionId" | "turnId">,
@@ -177,6 +182,13 @@ export async function resolveFamilyContextInstructionMarkdown(
     FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES,
 ): Promise<string | null> {
   const { attributes } = input;
+  if (hasConversationJobContext(attributes)) {
+    await (dependencies.authorizeConversationJob ?? requireConversationJobDatabaseAccess)(attributes);
+  }
+  if (hasConversationRequestContext(attributes)) {
+    if (!input.turnId) throw new MissingFamilyContextError();
+    await (dependencies.authorizeConversationRequest ?? requireConversationRequestContextAccess)(attributes, { sessionId: input.sessionId, turnId: input.turnId });
+  }
   if (attributes?.channel === "progress_next_move") {
     return PROGRESS_NEXT_MOVE_RESTRICTED_INSTRUCTIONS;
   }
@@ -235,7 +247,7 @@ export async function resolveFamilyContextInstructionMarkdown(
       }), input.sessionId);
     } else if (
       familyId &&
-      isPinnedAgentChannel(attributes.channel)
+      (isPinnedAgentChannel(attributes.channel) || hasConversationRequestContext(attributes))
     ) {
       rows = await measureChatPreparation("family_rows", () => dependencies.loadPinnedFamilyContext(familyId), input.sessionId);
     } else {
@@ -285,6 +297,11 @@ export async function resolveFamilyContextInstructionMarkdown(
         return fallback;
       }
     }
+    // A conversation job carries its own bounded context, and a request
+    // whose context was already loaded must not load continuity twice.
+    const conversationJob = hasConversationJobContext(attributes);
+    const skipContinuity = conversationJob ||
+      (hasConversationRequestContext(attributes) && attributes?.conversationRequestContextLoaded === "true");
     const [progressContext, onboardingContext, continuityContext, recentCallsContext] =
       await Promise.all([
         familyId
@@ -300,7 +317,7 @@ export async function resolveFamilyContextInstructionMarkdown(
               (dependencies.loadOnboardingContext ?? FAMILY_CONTEXT_INSTRUCTION_DEPENDENCIES.loadOnboardingContext)(familyId, attributes),
               isOnboardingModeSession(attributes) ? renderOnboardingStageGuidance(null) : "")
           : "",
-        attributes?.continuityContext || (familyId
+        conversationJob ? "" : attributes?.continuityContext || (familyId && !skipContinuity
           ? optionalContext("continuity", () => dependencies.loadContinuityContext({
               familyId,
               memberUserId: attributes?.memberUserId ?? null,
@@ -309,7 +326,7 @@ export async function resolveFamilyContextInstructionMarkdown(
             }))
           : ""),
         // #171: recent calls remain per adult, current on every turn.
-        familyId
+        familyId && !conversationJob
           ? optionalContext("recent_calls", () => dependencies.loadRecentCallsContext({
               familyId,
               memberUserId: attributes?.memberUserId ?? null,
@@ -375,6 +392,7 @@ export default defineDynamic({
       // try/catch inside the resolver cannot help, because a promise that
       // never settles never throws. On the quick tier because this is
       // database work. Stage timings now record this wait without family data.
+      const turnId = (_event as { data?: { turnId?: unknown } } | null)?.data?.turnId;
       let markdown: string | null;
       try {
         markdown = await measureChatPreparation("family_context_total", () => withToolDeadline(TOOL_DEADLINE.quick, () =>
@@ -383,11 +401,9 @@ export default defineDynamic({
               | FamilyContextInstructionAttributes
               | undefined,
             sessionId: ctx.session.id,
-            // The dynamic-instructions callback context is typed without `turn`
-            // (SessionContext has it, DynamicResolverContext does not), so read
-            // it defensively; the recorder accepts null.
-            turnId:
-              (ctx.session as { turn?: { id?: string } }).turn?.id ?? null,
+            // Dynamic context omits turn/parent metadata. The event carries the
+            // actual turn; the global preflight has already checked lineage.
+            turnId: typeof turnId === "string" ? turnId : null,
           }),
         ), ctx.session.id);
       } catch (error) {

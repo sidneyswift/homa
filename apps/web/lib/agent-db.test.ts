@@ -220,3 +220,15 @@ describe("resolveAgentAccess", () => {
     );
   });
 });
+
+it("linked background jobs cannot fall through to family-pinned access after revocation", async () => {
+  const attributes = { channel: "agent-job", familyId: "family-1", memberUserId: "adult-1", conversationJobId: "job-1" };
+  let checks = 0;
+  await assert.rejects(resolveAgentAccess(attributes, {
+    ...dependencies({}), verifyConversationJob: async () => { checks++; throw new Error("revoked job"); },
+  }), /revoked job/);
+  assert.equal(checks, 1);
+  assert.deepEqual(await resolveAgentAccess(attributes, {
+    ...dependencies({}), verifyConversationJob: async () => ({ familyId: "verified-family", memberUserId: "verified-adult" }),
+  }), { mode: "pinned", familyId: "verified-family" });
+});

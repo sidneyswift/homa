@@ -2,6 +2,7 @@ import { mapDb, type DbJson } from "../map/db";
 import { emitMapEvent } from "../map/events";
 import { getJobContract } from "./contracts";
 import { deliverJobMilestone } from "./milestone";
+import { completeConversationJobStage, observeConversationJobEnd, releaseConversationJobDispatch } from "../conversation-jobs";
 
 /**
  * The agent-jobs runner spine: the deterministic Postgres transitions that
@@ -417,6 +418,8 @@ export async function completeStageFromWorker(
   materialIds: string[],
   metering: StageMetering = {},
 ): Promise<WorkerStageResult> {
+  const linked = await completeConversationJobStage(familyId, jobId, stageNumber, materialIds, metering);
+  if (linked) return linked;
   const sql = mapDb();
   const rows = await sql<
     {
@@ -528,6 +531,10 @@ export async function handleUnreportedStage(
   job: ClaimedJob,
   reason: string,
 ): Promise<void> {
+  if (await observeConversationJobEnd(job.familyId, job.jobId)) {
+    await releaseConversationJobDispatch(job.familyId, job.jobId);
+    return;
+  }
   const sql = mapDb();
   const rows = await sql<{ count: string }[]>`
     select count(*)::text as count from public.agent_job_events

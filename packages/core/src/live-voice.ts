@@ -24,6 +24,7 @@ interface Dependencies {
   onCaption: (caption: LiveCaption) => void;
   onEffects: (output: LiveBridgeOutput, context: { sessionId: string; sourceSequence: number }) => LiveBridgeOutput | void;
   onError: (message: string) => void;
+  onSaveStatus?: (failed: boolean) => void;
   onWorking: (working: boolean, context: { sessionId: string; sourceSequence: number }) => void;
   activeObject?: () => unknown;
   transcriptDelayMs?: number;
@@ -71,6 +72,7 @@ export class LiveVoiceConversation {
   private sourceOffset = -1;
   private requestVersion = 0;
   private pendingSpeechTimer?: ReturnType<typeof setTimeout>;
+  private saveFailed = false;
 
   constructor(readonly sessionId: string, private readonly deps: Dependencies) {}
 
@@ -153,8 +155,17 @@ export class LiveVoiceConversation {
           saved = response.ok && (await response.json()).ok === true;
         } catch { /* Only immutable transcript writes are safe to retry. */ }
       }
-      if (!saved) { this.deps.onError("Some of this conversation has not saved. Keep Homa open and try saving again."); return; }
+      if (!saved) {
+        this.saveFailed = true;
+        if (this.deps.onSaveStatus) this.deps.onSaveStatus(true);
+        else this.deps.onError("Some of this conversation has not saved. Keep Homa open and try saving again.");
+        return;
+      }
       this.unsaved.delete(sequence);
+    }
+    if (this.saveFailed && this.unsaved.size === 0) {
+      this.saveFailed = false;
+      this.deps.onSaveStatus?.(false);
     }
   }
 
@@ -328,7 +339,11 @@ export class LiveVoiceConversation {
     return this.unsaved.size === 0;
   }
   resume() { this.ended = false; this.sourceOffset = -1; this.seen.clear(); }
-  async retrySave(): Promise<boolean> { await this.saves; await this.savePending(); return this.unsaved.size === 0; }
+  async retrySave(): Promise<boolean> {
+    this.saves = this.saves.then(() => this.savePending());
+    await this.saves;
+    return this.unsaved.size === 0;
+  }
 }
 
 /** ICE gathering finishes before the one-shot server offer exchange. */

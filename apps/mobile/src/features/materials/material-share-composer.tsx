@@ -4,8 +4,7 @@ import { Text, TextInput, View } from "react-native";
 import { Button } from "../../components/ui/button";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { emitFamilyEvent } from "../../lib/events";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import { runPreparedMaterialShare } from "./material-share";
 import type { PreparedMaterialShareRequest } from "./material-share-contract";
 

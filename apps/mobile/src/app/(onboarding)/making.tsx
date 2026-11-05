@@ -14,6 +14,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+import { US_STATES } from "@homa/core";
+
 import { Button } from "../../components/ui/button";
 import { NativeText } from "../../components/ui/semantic";
 import {
@@ -34,6 +36,7 @@ import { useFamilyData } from "../../features/family/use-family-data";
 import { getMakingStatus, startFirstMaking } from "../../features/onboarding/making";
 import { firstMakingStopped } from "../../features/onboarding/making-status";
 import { MakingFeatureCards } from "../../features/onboarding/making-feature-cards";
+import { withMakingNote } from "../../features/onboarding/making-notes";
 import { MakingShow } from "../../features/onboarding/making-show";
 import {
   loadOnboardingAnswers,
@@ -44,7 +47,7 @@ import {
   type DraftKid,
 } from "../../features/onboarding/onboarding-state";
 import { getMyChildren } from "../../lib/family";
-import { colors, palette, space } from "../../theme/tokens";
+import { colors, space } from "../../theme/app2";
 
 /**
  * The making (wireframe v4 step 5, cadence FRAME then DO): the first
@@ -60,7 +63,13 @@ const POLL_MS = 4_000;
 export default function MakingScreen() {
   const router = useRouter();
   const { family, memberDisplayName } = useFamilyData();
-  const parentFirstName = memberDisplayName?.trim().split(/\s+/u)[0] ?? null;
+  // The walk saved her name on the family record; her member row only has
+  // it once the server mirrors it (#1258), so read either (2026-11-04: a
+  // new parent was never greeted by name here).
+  const parentFirstName =
+    (memberDisplayName || family?.parent_display_name)?.trim().split(/\s+/u)[0] || null;
+  const stateName =
+    US_STATES.find((state) => state.code === family?.us_state)?.name ?? null;
   const [childName, setChildName] = useState<string | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
   const [phase, setPhase] = useState<"starting" | "building" | "failed">(
@@ -178,13 +187,7 @@ export default function MakingScreen() {
             : job?.status === "running"
               ? "Pencils are moving"
               : null);
-        if (note) {
-          setNotes((current) =>
-            current[current.length - 1] === note
-              ? current
-              : [...current.slice(-3), note],
-          );
-        }
+        if (note) setNotes((current) => withMakingNote(current, note));
         if (job?.status === "completed") {
           await saveOnboardingStep(family.id, "reveal").catch(() => {});
           setPageReady(true);
@@ -212,6 +215,23 @@ export default function MakingScreen() {
   // to the reveal, with reduced motion collapsing to an immediate call.
   const showingChecklist =
     checklistAvailable === "yes" && checklistChildId !== null && !checklistExited;
+
+  // The page is the reward. Ready before the check-in has even appeared,
+  // she sees the page first instead of a quiz standing in front of it
+  // (gauntlet round 1, 2026-11-04: both mom reviewers would quit at "1 of
+  // 16" with a finished page behind it). Once the check-in is on screen
+  // she may be mid-answer, so the banner waits for her instead (D8):
+  // keying this on answered === 0 cut a parent off on her first
+  // question (round 3 walk).
+  const checklistSeen = useRef(false);
+  useEffect(() => {
+    // Only a check-in that was on screen while the page was still being
+    // made counts; the render where the page flips ready must not.
+    if (!pageReady && !showIntro && showingChecklist) checklistSeen.current = true;
+  }, [pageReady, showIntro, showingChecklist]);
+  useEffect(() => {
+    if (pageReady && !checklistSeen.current) setChecklistExited(true);
+  }, [pageReady]);
 
   function handleChecklistClose(exit: ChecklistExit | null) {
     setChecklistExited(true);
@@ -251,13 +271,24 @@ export default function MakingScreen() {
         {phase !== "failed" ? (
           <>
             <NativeText role="display" tone="strong">
+              {/* Vocabulary law D7 (copy deck, 2026-08-31): from this
+                  screen on it is her page, never "worksheet". The heading
+                  never says "making" over a banner that says the page is
+                  ready (gauntlet round 1, 2026-11-04). */}
               {childName
-                ? `Homa is drawing ${childName}'s page`
+                ? pageReady
+                  ? `${childName}'s page is ready`
+                  : `Making ${childName}'s page`
                 : "Homa is getting her pencils"}
             </NativeText>
 
             {showIntro ? (
-              <MakingFeatureCards onDone={() => setIntroFinished(true)} />
+              <MakingFeatureCards
+                onDone={() => setIntroFinished(true)}
+                childName={childName || null}
+                interest={chipLabels[0] ?? null}
+                stateName={stateName}
+              />
             ) : showingChecklist && checklistChildId ? (
               <>
                 {/* The chapter cover (deck S8, D15): the heading says
@@ -275,11 +306,12 @@ export default function MakingScreen() {
                       gap: space.sm,
                       padding: space.sm,
                       borderRadius: 12,
-                      backgroundColor: palette.gold100,
+                      backgroundColor: colors.surfaceSunken,
                     }}
                   >
                     <NativeText role="bodySmall" tone="strong" style={{ flex: 1 }}>
-                      {childName ? `${childName}'s page is ready.` : "The page is ready."}
+                      {/* The heading already says it is ready. */}
+                      {"Take a look now, or keep answering."}
                     </NativeText>
                     {/* Through the one close path, never around it: an
                         answered session scores on the way out, and the
@@ -297,9 +329,9 @@ export default function MakingScreen() {
                   <NativeText role="body" tone="body">
                     {childName
                       ? parentFirstName
-                        ? `While I draw, ${parentFirstName}, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
-                        : `While I draw, tell me about ${childName}. Every answer builds ${childName}'s progress report.`
-                      : "While I draw, tell me about your kid. Every answer builds their progress report."}
+                        ? `While I work, ${parentFirstName}, tell me how ${childName}'s doing. Your answers start ${childName}'s progress report and set the level of the next page.`
+                        : `While I work, tell me how ${childName}'s doing. Your answers start ${childName}'s progress report and set the level of the next page.`
+                      : "While I work, tell me how your kid's doing. Your answers start their progress report and set the level of the next page."}
                   </NativeText>
                 )}
                 <ChecklistTakeover

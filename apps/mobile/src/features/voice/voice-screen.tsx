@@ -15,11 +15,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 
 import { Icon } from "../../components/design/icon";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, darkColors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { colors, darkColors, fontFamilies, fontSize, radius, space } from "../../theme/app2";
 import { reportCrash } from "../../lib/crash-reporting";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { emitFamilyEvent } from "../../lib/events";
@@ -76,21 +74,6 @@ interface QueuedLessonReviewHandoff {
   prompt: string;
   fingerprint: string;
   activeObject: ActiveObjectReference | null;
-}
-
-function GoldAuraField({ size }: { size: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: "absolute" }} pointerEvents="none">
-      <Defs>
-        <RadialGradient id="voiceAuraField" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor={palette.gold100} stopOpacity={1} />
-          <Stop offset="45%" stopColor={palette.gold100} stopOpacity={0.5} />
-          <Stop offset="100%" stopColor={palette.gold100} stopOpacity={0} />
-        </RadialGradient>
-      </Defs>
-      <Circle cx="50" cy="50" r="50" fill="url(#voiceAuraField)" opacity={0.5} />
-    </Svg>
-  );
 }
 
 /**
@@ -586,7 +569,6 @@ export function VoiceScreen() {
           style={[{ position: "absolute", left: 0, right: 0, alignItems: "center" }, characterLayerStyle]}
         >
           <View style={{ width: AURA_SIZE, height: AURA_SIZE, alignItems: "center", justifyContent: "center" }}>
-            <GoldAuraField size={AURA_SIZE} />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={

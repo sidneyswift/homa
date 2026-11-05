@@ -4,7 +4,7 @@
   "contractVersion": "@homa/design:quiet-authority-v1",
   "harnessVersion": "legacy-removal-v2",
   "manifestBaselineSourceCommit": "7340aec679577b307b48b77eacc1749d89cf18d6",
-  "ownedInputFingerprint": "f93ac690cabb12c3d0a9ec4b64bcd09d4237ce8350b2179409bd36cbe3d49e26",
+  "ownedInputFingerprint": "4076572fe4c63055bd661de986fd3d37f17815117bcc35be554873a715a5c5ad",
   "ownerIssue": "gh#729",
   "records": [
     {
@@ -116,10 +116,8 @@
     {
       "surfaceId": "surface:0181a9657036c0f8",
       "path": "apps/web/agent/skills/materials-studio/SKILL.md",
-      "sourceHash": "39ce890cb20828a9fa565c8000b16edb32cbf49f6a8473b0887226196f26569f",
-      "legacySignatures": [
-        "legacy-shape-language"
-      ],
+      "sourceHash": "f7af8fbbaf5fbd8c54d70e0e3472884886328d207f12139ada9d9464bed593d3",
+      "legacySignatures": [],
       "detectedSourceHash": "c6e2b3d894f8136fe677ab5e11a528e4a06d2b87d5941f80b140068bdea3924c",
       "detectedLegacySignatures": [
         "legacy-shape-language"
@@ -143,7 +141,7 @@
         "deliveryState": "controlled-current",
         "rollbackBoundary": "web-deployment"
       },
-      "sourceState": "present-signaled",
+      "sourceState": "present-clear",
       "status": "open",
       "evidence": {
         "replacement": null,
@@ -2335,7 +2333,7 @@
     {
       "surfaceId": "surface:470a17e3086c0817",
       "path": "apps/web/app/app/planner-canvas.tsx",
-      "sourceHash": "70c176e5940b5dfac380eb776c046035cfef32aa3d4916468445465ee4b611d5",
+      "sourceHash": "78d5d0fd4e35f9a365db82b1de14c5e523ddf84d7f12e8e044e28887030a946e",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -2391,7 +2389,7 @@
     {
       "surfaceId": "surface:2591c71957f33e59",
       "path": "apps/web/app/app/planner/day-grid.tsx",
-      "sourceHash": "0917ed651a4ed86fca2ec2255de45e1a1d351ae395203af6782d5b3b6d53cd7f",
+      "sourceHash": "dcf867464592ae2a8bd01220d231961978d4ae9d79e1fc593e030a3897119d49",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -2447,7 +2445,7 @@
     {
       "surfaceId": "surface:25bd56d8f145d1f2",
       "path": "apps/web/app/app/planner/planner-view.tsx",
-      "sourceHash": "418097c594594d9a99ff29b214beda101fdf39b860ec440fda1c65010e0f5680",
+      "sourceHash": "99fdf3ea69ae9bf139291de59ae7d028154b4005ec97ac16dbf3d5e759d40ff1",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -2503,7 +2501,7 @@
     {
       "surfaceId": "surface:0251c96a3bf92d13",
       "path": "apps/web/app/app/planner/unified-planner-view.tsx",
-      "sourceHash": "538e22125c7ff93a1843425c5df3ac02c74029d850449f8633e16e267f577f82",
+      "sourceHash": "e10253ecbc2d61d3eb9d049fdbc21692bf825dbcd68da1eac11aeb50fc607416",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
@@ -2618,7 +2616,7 @@
     {
       "surfaceId": "surface:c2927ede89d7112c",
       "path": "apps/web/app/app/progress-question-card.tsx",
-      "sourceHash": "13ececaa79014163d8c175bcaeded3c6f61e63b9b0983368294fa1699be5da51",
+      "sourceHash": "36b42d33e96e959841c397c6c811aaa11097e17679ccab4e66c2baa3282c2db7",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -2890,7 +2888,7 @@
     {
       "surfaceId": "surface:39c1d79c4559eb4d",
       "path": "apps/web/app/app/worked-for.tsx",
-      "sourceHash": "95e14e9a4ceb4eaefaa3d73e365dffb36af2337a957fe9f7fb21469b8df99c21",
+      "sourceHash": "823d5a1f4bcd9f3bd6c1d89ef560acffefb75de017354dac66ea6a64a3dc96e4",
       "legacySignatures": [
         "legacy-token-namespace"
       ],
@@ -3753,7 +3751,7 @@
     {
       "surfaceId": "surface:ae3ee5106a7dfa50",
       "path": "apps/web/components/chassis/side-panel.tsx",
-      "sourceHash": "650d9caa9cf5c92669eb805d1df01b6ff820b33a18deebcddf9120ea48f663a4",
+      "sourceHash": "bed715e7ac1c9ac5b166ca3be9f07e98e519155c338d46e8c4fba5ad40dc2259",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-shadow-radius-namespace",
@@ -4191,7 +4189,7 @@
     {
       "surfaceId": "surface:ae88754b4ff63a0b",
       "path": "apps/web/components/design/quiet-primitives.css",
-      "sourceHash": "c5b80758f4d173052764a19e551a3d302dda15ef2fe2ae019b6ee405ebf6fbde",
+      "sourceHash": "85d9f15e47ae2088aeea7e51c0492c43426d2b9d5ac69aab982981e1a920138d",
       "legacySignatures": [],
       "detectedSourceHash": "4e9182f1662608194f946d04dbaa9c510c1ca7b860f9b61d58e0325acf28460d",
       "detectedLegacySignatures": [
@@ -5419,9 +5417,8 @@
     {
       "surfaceId": "surface:300e0d3c56d613cf",
       "path": "apps/web/components/progress/abilities-explorer.tsx",
-      "sourceHash": "2f85ec8a746bd9e27eeb478de183e8911b4b6303b848a6cde81369c1ef91cc2a",
+      "sourceHash": "a1e022214695fc6db8687bba573a2fcdc73ae0c4964c0d53395d963f05a6dead",
       "legacySignatures": [
-        "legacy-rounded-pill",
         "legacy-token-namespace"
       ],
       "detectedSourceHash": "2f85ec8a746bd9e27eeb478de183e8911b4b6303b848a6cde81369c1ef91cc2a",
@@ -5475,7 +5472,7 @@
     {
       "surfaceId": "surface:3b2508400e664f0a",
       "path": "apps/web/components/progress/ask-homa-about-child.tsx",
-      "sourceHash": "72257745969c393b0b8776f71e73e1277057539a91815a0345b8c0c4ee59254b",
+      "sourceHash": "87b0d5cae6e8f79a7b0d3c6cdd0d283f8e513a4c57c150865637d214a2f5e4db",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5584,7 +5581,7 @@
     {
       "surfaceId": "surface:90d533f86d88df02",
       "path": "apps/web/components/progress/progress-chat-door.tsx",
-      "sourceHash": "8140f49bb1a8dc6e10dfd4f4839dae3167c2fc70b76a9f1b241d59ffce7dfdb1",
+      "sourceHash": "92c9ccc6f016afc2b105c51c62d62ca5504a70833429d4ffe716347e06b19179",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5640,7 +5637,7 @@
     {
       "surfaceId": "surface:21e82a508a0cef0e",
       "path": "apps/web/components/progress/progress-detail-panel.tsx",
-      "sourceHash": "9e8873f6d81536d721de46369829d3eea0b31aff13f65f7a47b507e9d0f0c3f8",
+      "sourceHash": "79e7b7988c0c6e313f53dddf6b7e441a025bd3ab832eee0550bcc5b1e5c3eb27",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5696,7 +5693,7 @@
     {
       "surfaceId": "surface:6b074833e02c2a88",
       "path": "apps/web/components/progress/progress-map.tsx",
-      "sourceHash": "4535ec91009ccde7261c761431a6d9ca16398c37332de1c94991c43ffb9fcea4",
+      "sourceHash": "5dcec000db9bdb2de17b361d64d39800afb421aa3d8cbc2d79dee6d2d6377272",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5752,7 +5749,7 @@
     {
       "surfaceId": "surface:b9bc78a43593455a",
       "path": "apps/web/components/progress/progress-topic-row.tsx",
-      "sourceHash": "98c2b2ac16acb3dd5acab42f2839e1fb560c3f15e08ab550724582d201cf198b",
+      "sourceHash": "259169449380a4961037aae13aa7a55852ab8fd6ef5140424e6f4d472df8430e",
       "legacySignatures": [
         "legacy-rounded-pill",
         "legacy-token-namespace"
@@ -5861,7 +5858,7 @@
     {
       "surfaceId": "surface:91593b41f57ed79a",
       "path": "apps/web/components/progress/progress-view.tsx",
-      "sourceHash": "46c2ba9681c6b3cee548b6b5857e4d7d5399bc935d631eb4a0a88bb3a233fcac",
+      "sourceHash": "b2d946caa33ad337fd2000e477a6863867d219ce5db267d7c47fc0cb2a7b6f96",
       "legacySignatures": [],
       "detectedSourceHash": "8ff9259339264eca65dfc6404ccaa828c2204aa77c3a05bb868f73c1c9789433",
       "detectedLegacySignatures": [
@@ -6074,7 +6071,7 @@
     {
       "surfaceId": "surface:2f1507491dd07030",
       "path": "apps/web/lib/child-progress/map-model.ts",
-      "sourceHash": "d484ed4cb5654f2dff85d5f619b0c79376afe5e6800eb6327c22f0e2c43676a3",
+      "sourceHash": "dd2b2424f0eb2ff8438ec629e3c165fe5d095192ab26d8cf602e411298a99b12",
       "legacySignatures": [
         "legacy-token-namespace"
       ],
@@ -6389,7 +6386,7 @@
     {
       "surfaceId": "surface:99233b3c0e0eff07",
       "path": "docs/homa-planning/build-log.md",
-      "sourceHash": "c9dce5bce3d53f7702172b5405f97978c7f84288a48520a423f2f44d3cff163f",
+      "sourceHash": "7c3c305c0f5937df2fe809ee3395c57fd3ad80dc3d7347aa21832667f8855907",
       "legacySignatures": [],
       "detectedSourceHash": "02b704d9b8b75513b8e32fedb17de6a01861b6601f90a44281eb339847522074",
       "detectedLegacySignatures": [
@@ -6505,7 +6502,7 @@
     {
       "surfaceId": "surface:1aac9cfdef6206ce",
       "path": "docs/homa-planning/journeys/10-reconciliation.md",
-      "sourceHash": "7ff3d8c29426029a796de0da6d2e029e34b26e33a353e2cc7df27f6485a42703",
+      "sourceHash": "7faf35b08bcc8272914b36d74a0b7d53b2f8de9344a18f538fa1de0e777f9f5f",
       "legacySignatures": [],
       "detectedSourceHash": "e2ca1ca294cb2e4e739a96957d9b84251c1d2910acd2e16c089b2433ebede8d9",
       "detectedLegacySignatures": [

@@ -1,12 +1,16 @@
 import { defineTool, type ToolContext, type ToolDefinition } from "eve/tools";
 import type { z } from "zod";
 
+import { prepareConversationOperation, executeConversationOperation, type PreparedConversationOperation } from "./conversation-operations";
+import { requireConversationJobAccess } from "./conversation-jobs";
+import { requireConversationRequestAccess } from "./conversation-request-access";
+
 /**
  * Every tool answers, or it fails out loud (2026-07-23).
  *
  * eve 0.19.0 has no per-tool timeout and hands authored tools no abort
- * signal: the harness's wrapToolExecute is a bare `await execute(input)`,
- * and the AI SDK's own abortSignal never reaches us. So one tool call
+ * signal. Homa's local patch forwards the runtime call identity, but the
+ * AI SDK's abortSignal still does not reach authored tool bodies. So one tool call
  * that never settles parks the whole turn forever. That is not
  * hypothetical. In production it has happened twice:
  *
@@ -167,6 +171,18 @@ export async function withToolDeadline<T>(
   }
 }
 
+/** Finish permission checks before entering the effect body. A late permission
+ * result after timeout cannot resume an abandoned callback and start new work. */
+export async function withAuthorizedToolDeadline<T>(
+  deadlineMs: number, authorize: () => Promise<unknown>, execute: () => Promise<T> | T, repeatable: boolean,
+): Promise<T> {
+  const started = performance.now();
+  await withToolDeadline(deadlineMs, authorize, true);
+  const remaining = deadlineMs - (performance.now() - started);
+  if (remaining <= 0) throw new ToolDeadlineError(deadlineMs, true);
+  return withToolDeadline(remaining, execute, repeatable);
+}
+
 /**
  * defineTool with a mandatory deadline. Every file in agent/tools/ that
  * exports a tool uses this instead of eve's defineTool; the guard script
@@ -224,7 +240,15 @@ export function defineBoundedTool<TSchema extends z.ZodType, TOutput>(definition
       ) {
         throw new ToolAccessBoundaryError("progress_next_move");
       }
-      return await withToolDeadline(deadlineMs, () => execute(input, ctx), repeatable);
+      const authorizationStarted = performance.now();
+      let operation: PreparedConversationOperation | null = null;
+      return withAuthorizedToolDeadline(deadlineMs,
+        async () => {
+          const owner = ctx.session ? await requireConversationRequestAccess(ctx.session, "execute") : null;
+          const jobOwner = ctx.session ? await requireConversationJobAccess(ctx.session, "execute") : null;
+          if ((owner || jobOwner) && !repeatable) operation = await prepareConversationOperation(ctx, input, deadlineMs - (performance.now() - authorizationStarted));
+        },
+        () => operation ? executeConversationOperation(operation, () => execute(input, ctx)) : execute(input, ctx), repeatable);
     },
   }) as ToolDefinition<z.output<TSchema>, TOutput>;
 }

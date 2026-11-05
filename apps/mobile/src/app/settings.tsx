@@ -26,8 +26,7 @@ import {
   openTermsOfUse,
   openWebAccount,
 } from "../lib/web-links";
-import { fontFamilies } from "../theme/fonts";
-import { colors, fontSize, space } from "../theme/tokens";
+import { colors, fontFamilies, fontSize, space } from "../theme/app2";
 
 const PLAN_TIER_LABELS: Record<string, string> = {
   regular: "Homa",

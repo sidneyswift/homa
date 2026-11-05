@@ -1,0 +1,40 @@
+.host {
+  position: relative;
+  width: 100%;
+  max-width: 780px;
+  /* Stable anchor footprint: one control, both insets, both borders. */
+  height: calc(44px + 8px + 8px + 2px);
+  margin: 0 auto;
+  isolation: isolate;
+}
+
+.surface {
+  position: absolute;
+  left: 50%;
+  max-width: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.view { position: relative; width: max-content; max-width: calc(var(--island-max-width) - 18px); }
+.view[data-active="false"] {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: var(--island-view-width, max-content);
+  /* Preserve the outgoing row layout while the shell contracts around it. */
+  max-width: none;
+  max-height: calc(100% - 16px);
+  overflow: clip;
+  pointer-events: none;
+}
+
+.view[data-visible="false"] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .surface { transform: translate(-50%, var(--island-y)) !important; width: var(--island-target-width) !important; height: var(--island-target-height) !important; }
+  .surface * { transform: none !important; }
+  .view[data-active="true"] { opacity: 1 !important; }
+  .view[data-active="false"] { visibility: hidden; }
+}

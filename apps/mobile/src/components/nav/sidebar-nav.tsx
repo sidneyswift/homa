@@ -4,8 +4,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { APP_NAV_ITEMS, type AppNavItem } from "../../features/nav/nav-items";
 import { Icon } from "../design/icon";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, palette, radius, space } from "../../theme/app2";
 
 /** Ported from apps/web/components/dashboard/sidebar-nav.tsx's
  *  isAppNavItemActive: exact-match or any sub-path counts as active. */

@@ -1,0 +1,14 @@
+/* #1158: user-approved local 3D character exploration; shared brand geometry stays unchanged. */
+.character { position: relative; width: 100%; height: 100%; }
+.scene { position: absolute; inset: 0; }
+.still { display: grid; place-items: center; width: 100%; height: 100%; }
+.shadow {
+  position: absolute; left: 50%; bottom: 18px; width: 100px; height: 10px;
+  border-radius: 50%; transform: translateX(-50%);
+  background: var(--homa-ink); opacity: 0.09; filter: blur(9px); pointer-events: none;
+}
+
+.renderer { width: 100%; height: 100%; }
+.renderer[data-unavailable="true"] { visibility: hidden; }
+.recovery { position: absolute; inset: 0; pointer-events: none; }
+.snapshot { display: block; width: 100%; height: 100%; object-fit: contain; }

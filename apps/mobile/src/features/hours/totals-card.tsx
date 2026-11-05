@@ -1,8 +1,7 @@
 import { Text, View } from "react-native";
 
 import { kidTone } from "./kid-tone";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 import { formatMinutesAsHours, type ChildHoursTotals } from "./hours-view";
 
 function TotalStat({ label, value }: { label: string; value: string }) {

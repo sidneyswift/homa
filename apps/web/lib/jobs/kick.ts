@@ -20,15 +20,25 @@
 const KICK_TIMEOUT_MS = 5_000;
 
 /** This deployment's own origin, from the environment (tools have no
- * request to read headers from). VERCEL_URL names this exact deployment
- * (previews included); the public site URL and the dev port are the
- * fallbacks. Null means nowhere safe to kick, so the sweeper carries it. */
+ * request to read headers from). Production kicks its public domain:
+ * the per-deployment *.vercel.app URL sits behind Vercel Authentication,
+ * so a kick there landed on the login wall and every production job
+ * waited for the 5-minute sweep (found 2026-11-04 verifying a new
+ * family's first page live). A preview still kicks its own deployment
+ * URL, which the bypass header below gets through when the project has
+ * one. The public site URL and the dev port are the fallbacks. Null
+ * means nowhere safe to kick, so the sweeper carries it. */
 export function agentJobsKickUrl(env: {
+  VERCEL_ENV?: string;
+  VERCEL_PROJECT_PRODUCTION_URL?: string;
   VERCEL_URL?: string;
   NEXT_PUBLIC_SITE_URL?: string;
   NODE_ENV?: string;
   PORT?: string;
 } = process.env): string | null {
+  if (env.VERCEL_ENV === "production" && env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${env.VERCEL_PROJECT_PRODUCTION_URL}/eve/v1/agent-job/run-now`;
+  }
   if (env.VERCEL_URL) {
     return `https://${env.VERCEL_URL}/eve/v1/agent-job/run-now`;
   }
@@ -45,11 +55,18 @@ export async function kickAgentJobsRunner(): Promise<boolean> {
   const url = agentJobsKickUrl();
   const secret = process.env.CRON_SECRET;
   if (!url || !secret) return false;
+  const headers: Record<string, string> = { authorization: `Bearer ${secret}` };
+  const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  if (bypass) headers["x-vercel-protection-bypass"] = bypass;
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: { authorization: `Bearer ${secret}` },
+      headers,
       cache: "no-store",
+      // A protection wall answers with a redirect to a login page;
+      // following it returned that page's 200 and reported a kick that
+      // never reached the runner.
+      redirect: "manual",
       signal: AbortSignal.timeout(KICK_TIMEOUT_MS),
     });
     return response.ok;

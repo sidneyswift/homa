@@ -24,8 +24,7 @@ import { InlineError } from "../../components/ui/inline-error";
 import { Icon } from "../../components/design/icon";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
 import { reportCrash } from "../../lib/crash-reporting";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { colors, fontFamilies, fontSize, palette, radius, space } from "../../theme/app2";
 import {
   formatLessonElapsed,
   lessonReviewFailureCopy,

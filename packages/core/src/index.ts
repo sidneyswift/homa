@@ -363,3 +363,5 @@ export {
 
 export * from "./material-print";
 export * from "./live-voice";
+
+export { activityPlanSchema, readActivityPlan, activityPlanMinutes, selectedPlanActivities, activityPlanHtml, activityPlanRevisionRequest, type ActivityPlan } from "./activity-plan";

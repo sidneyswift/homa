@@ -1,7 +1,6 @@
 import { Image, Pressable, Text, View } from "react-native";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, shadows, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, shadows, space } from "../../theme/app2";
 import type { BinderMaterial } from "./binder-model";
 import { KIND_LABELS } from "./binder-model";
 

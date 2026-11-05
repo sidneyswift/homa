@@ -34,7 +34,11 @@ import { quietColors } from "../../theme/native-projection";
 /** 18pt caption line plus 14 each side clears the 44pt floor vertically,
  *  and 8 each side carries the short "terms" run over it horizontally. */
 const LINK_HIT_SLOP = { top: 14, bottom: 14, left: 8, right: 8 };
-export function LegalLine() {
+/** App 2's entry screens center the line and link in ink, not brand rust (gh#1236). */
+export function LegalLine({
+  align = "start",
+  linkColor = quietColors.brandText,
+}: { align?: "start" | "center"; linkColor?: string } = {}) {
   return (
     <View
       style={{
@@ -42,9 +46,10 @@ export function LegalLine() {
         flexDirection: "row",
         flexWrap: "wrap",
         alignItems: "center",
+        justifyContent: align === "center" ? "center" : "flex-start",
       }}
     >
-      <NativeText role="caption" tone="muted" style={{ width: "100%" }}>
+      <NativeText role="caption" tone="muted" style={{ width: "100%", textAlign: align === "center" ? "center" : "left" }}>
         By continuing, you agree to our
       </NativeText>
 
@@ -59,7 +64,7 @@ export function LegalLine() {
         <NativeText
           role="caption"
           style={{
-            color: quietColors.brandText,
+            color: linkColor,
             textDecorationLine: "underline",
           }}
         >
@@ -82,7 +87,7 @@ export function LegalLine() {
         <NativeText
           role="caption"
           style={{
-            color: quietColors.brandText,
+            color: linkColor,
             textDecorationLine: "underline",
           }}
         >

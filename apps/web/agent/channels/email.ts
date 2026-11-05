@@ -511,6 +511,7 @@ export default defineChannel({
               channel: "email",
               destination: to,
               providerThreadKey: `email:${to.toLowerCase()}`,
+              content: messageText,
             }),
           sendEmail: async (attempt) => {
             if (

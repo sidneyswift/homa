@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToStaticMarkup as renderMarkup } from "react-dom/server";
+import type { ReactNode } from "react";
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 import type { BinderMaterial } from "../../../lib/materials/binder";
 import { InProgressShelf } from "./in-progress-shelf";
+
+const router = { back() {}, forward() {}, refresh() {}, hmrRefresh() {}, push() {}, replace() {}, prefetch: async () => {} };
+const renderToStaticMarkup = (node: ReactNode) => renderMarkup(<AppRouterContext.Provider value={router}>{node}</AppRouterContext.Provider>);
 
 /**
  * The shelf that ends draft stranding (gh#197). Renders server-side so

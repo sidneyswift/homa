@@ -1,3 +1,6 @@
+import { readActivityPlan } from "@homa/core";
+import { ActivityPlanCard } from "../materials/activity-plan-card";
+import { useNativeWorkspace } from "../workspace/context";
 import { Image, ScrollView, Text, View } from "react-native";
 import { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,8 +11,7 @@ import { AccessibleModal } from "../../components/ui/accessible-modal";
 import { IconButton } from "../../components/ui/icon-button";
 import { emitFamilyEvent } from "../../lib/events";
 import { useAccessibilityAnnouncement } from "../../lib/accessibility";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import { useFamilyData } from "../family/use-family-data";
 import type { BinderMaterial } from "./binder-model";
 import { KIND_LABELS } from "./binder-model";
@@ -38,6 +40,8 @@ function formatKeptOn(dateOnly: string): string {
  * ("earlier tries") yet, a tracked gap, not a silent one.
  */
 export function MaterialDetailModal({ material, onClose }: { material: BinderMaterial | null; onClose: () => void }) {
+  const workspace = useNativeWorkspace();
+  const activityPlan = readActivityPlan(material?.activityPlan);
   const headingRef = useRef<View>(null);
   const { family } = useFamilyData();
   const [printing, setPrinting] = useState(false);
@@ -124,7 +128,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
 
         {material ? (
           <ScrollView contentContainerStyle={{ padding: space.md, gap: space.md }}>
-            <Image
+            {activityPlan && material ? <ActivityPlanCard key={material.id} id={material.id} title={material.title} plan={activityPlan} childName={material.childName} prepareQuestion={workspace ? text => { onClose(); workspace.prepareQuestion(text); } : undefined} /> : <Image
               source={{ uri: material.previewUrl }}
               accessibilityLabel={`Preview of ${material.title}`}
               style={{
@@ -136,7 +140,7 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
                 backgroundColor: "#FFFFFF",
               }}
               resizeMode="contain"
-            />
+            />}
 
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.md }}>
               <DetailField label="For" value={material.childName ?? "Whole family"} />
@@ -146,12 +150,12 @@ export function MaterialDetailModal({ material, onClose }: { material: BinderMat
             </View>
 
             <Button
-              label={printing ? "Opening print sheet…" : material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
+              label={printing ? "Opening print sheet…" : activityPlan ? "Print saved version" : material.pageCount > 1 ? `Print all ${material.pageCount} pages` : "Print it"}
               busy={printing}
               onPress={() => void printMaterial()}
             />
             <Button
-              label={preparingShare ? "Getting the PDF ready…" : "Share through another app"}
+              label={preparingShare ? "Getting the PDF ready…" : activityPlan ? "Share saved version" : "Share through another app"}
               variant="secondary"
               busy={preparingShare}
               onPress={() => void prepareShare()}

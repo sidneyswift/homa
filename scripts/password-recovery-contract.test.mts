@@ -75,17 +75,9 @@ test("the web reset form validates and writes the new password", async () => {
   assert.match(form, /updateUser\(\{ password \}\)/u);
 });
 
-/**
- * Mobile left this contract on purpose. Founder ruling 2026-08-18: the app
- * has no password, so there is nothing to recover and no reset flow to keep
- * in step with web. This used to assert the opposite, and the assertion is
- * inverted rather than deleted so the absence stays guarded: a password field
- * reappearing on the phone would quietly reintroduce a recovery path that no
- * longer exists anywhere in the app.
- *
- * Web is unchanged and every test above still holds it to the full flow.
- */
-test("mobile has no password to recover", async () => {
+/** October 5 founder ruling: optional existing-password login, with email
+ * codes as recovery. The web reset flow remains unchanged. */
+test("mobile keeps email-code recovery with optional password login", async () => {
   const [signIn, emailDoor] = await Promise.all([
     source(files.mobileSignIn),
     source(files.mobileEmailDoor),
@@ -95,11 +87,15 @@ test("mobile has no password to recover", async () => {
     assert.doesNotMatch(screen, /resetPasswordForEmail/u);
     assert.doesNotMatch(screen, /passwordRecoveryRedirectUrl/u);
     assert.doesNotMatch(screen, /Send reset link/u);
-    assert.doesNotMatch(screen, /secureTextEntry/u);
+
   }
+  assert.doesNotMatch(signIn, /secureTextEntry/u);
+  assert.match(emailDoor, /secureTextEntry/u);
+  assert.match(emailDoor, /Use an email code instead/u);
+  assert.match(emailDoor, /supabase\.auth\.signInWithPassword/u);
 });
 
-test("mobile signs in with a one time code instead", async () => {
+test("mobile keeps one time codes available", async () => {
   const code = await source(files.mobileSignInCode);
 
   assert.match(code, /signInWithOtp/u);

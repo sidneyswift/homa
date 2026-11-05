@@ -23,7 +23,18 @@
         "EXPO_PUBLIC_API_URL": "https://thankshoma.com"
       },
       "ios": {
-        "image": "latest"
+        "image": "macos-tahoe-26.5-xcode-26.6"
+      }
+    },
+    "review-simulator": {
+      "extends": "production",
+      "developmentClient": true,
+      "distribution": "internal",
+      "autoIncrement": false,
+      "channel": "development",
+      "ios": {
+        "simulator": true,
+        "image": "macos-tahoe-26.5-xcode-26.6"
       }
     }
   },

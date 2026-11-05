@@ -37,7 +37,8 @@ export function classifyGeneratedWebRouteBoundary(path: string): GeneratedWebRou
   const first = parts.filter((segment) => !isUrlNeutralSegment(segment))[0] ?? "";
   if (first === "app") return "family";
   if (first === "admin") return "operator";
-  if (first === "dev") return "developer";
+  // #1158: /app2 is server-gated to local development.
+  if (first === "dev" || first === "app2" || first === "app2-lab") return "developer";
   return "public";
 }
 
@@ -65,6 +66,7 @@ export type GeneratedWebRouteHandlerBoundary =
 // Exact by design. Route handlers own their authorization rather than inheriting
 // the page proxy, so every new handler must receive an explicit reviewed policy.
 export const reviewedWebRouteHandlerBoundaries = {
+  "apps/web/app/app2-lab/generate/route.ts": "developer-family",
   "apps/web/app/admin/studio/anchor/[id]/route.ts": "operator",
   "apps/web/app/admin/studio/reference/[file]/route.ts": "operator",
   "apps/web/app/api/account-deletion/export/route.ts": "family",
@@ -83,10 +85,14 @@ export const reviewedWebRouteHandlerBoundaries = {
   "apps/web/app/api/chat/history/route.ts": "family",
   "apps/web/app/api/chat/session-binding/route.ts": "family",
   "apps/web/app/api/chat/suggestions/route.ts": "family",
+  "apps/web/app/api/chat/timing/route.ts": "family",
   "apps/web/app/api/chat/upload/route.ts": "family",
   "apps/web/app/api/compliance/filing/route.ts": "family",
   "apps/web/app/api/compliance/pack/route.ts": "family",
   "apps/web/app/api/compliance/summary/route.ts": "family",
+  "apps/web/app/api/conversation/feed/route.ts": "family",
+  "apps/web/app/api/conversation/native-input/route.ts": "family",
+  "apps/web/app/api/conversation/requests/route.ts": "family",
   "apps/web/app/api/dev/oidc-status/route.ts": "developer",
   "apps/web/app/api/dev/reset-onboarding/route.ts": "developer-family",
   "apps/web/app/api/dev/test-session/route.ts": "developer",
@@ -183,6 +189,7 @@ export const reviewedWebRouteHandlerBoundaries = {
   "apps/web/app/api/voice/tools/send-email/route.ts": "provider",
   "apps/web/app/api/voice/tools/send-signup-link/route.ts": "provider",
   "apps/web/app/api/waitlist/route.ts": "public",
+  "apps/web/app/api/workspace/planner/route.ts": "family",
   "apps/web/app/auth/callback/route.ts": "public",
   "apps/web/app/auth/confirm/route.ts": "public",
   "apps/web/app/blog/rss.xml/route.ts": "public",

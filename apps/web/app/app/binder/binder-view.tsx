@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useWorkspaceSurface } from "../../../components/workspace/surface-context";
+import { useCallback, useMemo, useState } from "react";
 
 import { Icon } from "../../../components/design/Icon";
 import { QuietAction } from "../../../components/design/QuietAction";
@@ -67,6 +68,7 @@ export function BinderView({
     subject: null,
     query: "",
   });
+  const workspace = useWorkspaceSurface();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const kinds = useMemo(() => kindOptions(materials), [materials]);
@@ -75,7 +77,7 @@ export function BinderView({
     [materials],
   );
   const filtered = useMemo(() => filterMaterials(materials, filter), [materials, filter]);
-  const showCover = materials.length > 0 && isDefaultFilter(filter);
+  const showCover = !workspace && materials.length > 0 && isDefaultFilter(filter);
   const nowMs = now.getTime();
   const cover = useMemo(
     () =>
@@ -88,6 +90,7 @@ export function BinderView({
   const gridItems = showCover ? filtered.filter((item) => !coverIds.has(item.id)) : filtered;
   const selected = materials.find((item) => item.id === selectedId) ?? null;
 
+  const closeDetail = useCallback(() => setSelectedId(null), []);
   const activeSubject = subjects.find((subject) => subject.key === filter.subject) ?? null;
   const sectionTitle = showCover
     ? "Everything else"
@@ -102,7 +105,7 @@ export function BinderView({
   return (
     <div data-brand-surface="binder">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        {!workspace && <div>
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[color:var(--homa-brand-text)]">
             Kept to use again
           </p>
@@ -114,8 +117,9 @@ export function BinderView({
               ? `Everything kept for ${scopeChildName}, plus anything for the whole family.`
               : "Everything your family keeps, in one place to browse and print."}
           </p>
-        </div>
+        </div>}
         <label className="quiet-search" aria-label="Search your Binder">
+          {workspace && <span aria-hidden="true"><Icon name="search" size={20} /></span>}
           <input
             type="search"
             value={filter.query}
@@ -207,7 +211,7 @@ export function BinderView({
           <p className="mx-auto mt-5 max-w-sm text-sm text-[color:color-mix(in_srgb,var(--homa-ink)_66%,var(--homa-canvas))]">
             Make something new in chat.
           </p>
-          <QuietAction href="/app" className="mt-3" size="large" icon={<Icon name="next" size={20} />}>
+          <QuietAction href={workspace ? undefined : "/app"} onClick={workspace ? () => workspace.askHoma("Help me make something for our family.") : undefined} className="mt-3" size="large" icon={<Icon name="next" size={20} />}>
             Ask Homa
           </QuietAction>
         </QuietFrame>
@@ -223,23 +227,23 @@ export function BinderView({
               </h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {cover.items.map((material) => (
-                  <BinderCard key={material.id} material={material} onOpen={(item) => setSelectedId(item.id)} />
+                  <BinderCard key={material.id} material={material} compact={Boolean(workspace)} onOpen={(item) => setSelectedId(item.id)} />
                 ))}
               </div>
             </QuietFrame>
           ) : null}
 
-          {!showCover || gridItems.length > 0 ? <section className="mt-7">
-            <div className="flex items-baseline justify-between gap-3">
+          {!showCover || gridItems.length > 0 ? <section className="mt-7" data-binder-collection>
+            <div className={workspace && isDefaultFilter(filter) ? "sr-only" : "flex items-baseline justify-between gap-3"}>
               <h2 className="font-display text-lg font-semibold text-[color:var(--homa-ink)]">{sectionTitle}</h2>
               <span className="text-xs text-[color:color-mix(in_srgb,var(--homa-ink)_52%,var(--homa-canvas))]">
                 {gridItems.length} {gridItems.length === 1 ? "thing" : "things"}
               </span>
             </div>
             {gridItems.length > 0 ? (
-              <div className="mt-4 grid gap-5 sm:grid-cols-3 lg:grid-cols-4">
+              <div className={workspace ? "mt-4 grid gap-3" : "mt-4 grid gap-5 sm:grid-cols-3 lg:grid-cols-4"}>
                 {gridItems.map((material) => (
-                  <BinderCard key={material.id} material={material} onOpen={(item) => setSelectedId(item.id)} />
+                  <BinderCard key={material.id} material={material} compact={Boolean(workspace)} onOpen={(item) => setSelectedId(item.id)} />
                 ))}
               </div>
             ) : (
@@ -252,7 +256,7 @@ export function BinderView({
       )}
 
       {selected ? (
-        <MaterialDetailOverlay material={selected} timeZone={timeZone} onClose={() => setSelectedId(null)} />
+        <MaterialDetailOverlay material={selected} timeZone={timeZone} onClose={closeDetail} />
       ) : null}
     </div>
   );

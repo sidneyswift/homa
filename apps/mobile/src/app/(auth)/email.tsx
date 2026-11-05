@@ -1,15 +1,13 @@
 import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "../../components/ui/button";
-import {
-  NativeHeading,
-  NativeStatus,
-  NativeText,
-} from "../../components/ui/semantic";
+import { Icon } from "../../components/design/icon";
+import { NativeStatus } from "../../components/ui/semantic";
 import { TextField } from "../../components/ui/text-field";
+import { App2Button } from "../../features/app2/app2-button";
+import { HomaCharacter3D } from "../../features/app2/homa-character-3d";
 import {
   checkEmailCode,
   normalizeEmail,
@@ -17,23 +15,33 @@ import {
 } from "../../features/auth/sign-in-code";
 import { LegalLine } from "../../features/auth/legal-line";
 import { useSession } from "../../features/auth/session-provider";
-import { quietColors } from "../../theme/native-projection";
+import { useAccessibilityAnnouncement } from "../../lib/accessibility";
+import { supabase } from "../../lib/supabase";
+import { colors, fontFamilies, fontSize, space } from "../../theme/app2";
+
+/** Smaller than the front door's Homa, so the form still clears the keyboard. */
+const HOMA_SIZE = 96;
 
 /**
  * The email door: address, then a six digit code. Two steps in one route
  * rather than two routes, so the back gesture returns a parent to their
  * own address rather than dumping them at the front door to start again.
  *
- * No password is asked for here or anywhere. A parent who already has
- * one is unaffected: a code does not care whether an account also has a
- * password.
+ * Email codes remain the default. Existing-password sign-in is optional
+ * for returning families and the App Review account (founder, 2026-10-05).
  *
  * Two rules this screen learned the hard way. Errors belong on the field
  * they describe, not floating in the layout, because a message 200pt
  * above an input is not attached to it for a screen reader or an eye.
  * And a confirmation that only announces is invisible: resending a code
  * changes no other pixel, so without a rendered status a sighted parent
- * taps and watches nothing happen.
+ * taps and watches nothing happen. The first send moves to the code step,
+ * whose subtitle already names the address, so that one only announces.
+ *
+ * App 2 look (gh#1236), matching the front door: white canvas, the 3D
+ * Homa over a centered heading, ink controls, the form directly beneath
+ * (founder ask 2026-11-03: centered, more professional). Fields keep the
+ * shared primitive, whose darker boundary clears the 3:1 contrast floor.
  */
 export default function EmailCodeScreen() {
   const { session } = useSession();
@@ -41,17 +49,22 @@ export default function EmailCodeScreen() {
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [usePassword, setUsePassword] = useState(false);
+  const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [noticeShown, setNoticeShown] = useState(false);
   // Retapping resend with the same wording must still announce, so the
   // status gets a changing identity rather than relying on new text.
   const [noticeId, setNoticeId] = useState(0);
+  useAccessibilityAnnouncement(notice && !noticeShown ? notice : null, noticeId);
 
   if (session) return <Redirect href="/" />;
 
-  function announce(message: string) {
+  function announce(message: string, show: boolean) {
     setNotice(message);
+    setNoticeShown(show);
     setNoticeId((current) => current + 1);
   }
 
@@ -68,6 +81,7 @@ export default function EmailCodeScreen() {
         resending
           ? `A new code is on its way to ${normalizeEmail(email)}.`
           : `Code sent to ${normalizeEmail(email)}.`,
+        resending,
       );
       return;
     }
@@ -87,10 +101,10 @@ export default function EmailCodeScreen() {
     );
   }
 
-  async function check() {
+  async function check(entered = code) {
     setPending(true);
     setError(null);
-    const result = await checkEmailCode(email, code);
+    const result = await checkEmailCode(email, entered);
     setPending(false);
 
     // Success: SessionProvider picks up the session and this screen redirects.
@@ -110,12 +124,36 @@ export default function EmailCodeScreen() {
     );
   }
 
+  async function signInWithPassword() {
+    if (pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: normalizeEmail(email),
+        password,
+      });
+      if (authError || !data.session) {
+        setError(authError?.status === 429
+          ? "Too many attempts. Wait a few minutes, then try again."
+          : "That email and password didn't match. Try again, or use an email code.");
+        return;
+      }
+      setPassword("");
+    } catch {
+      setError("Couldn't connect. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   const onEmailStep = step === "email";
+  const textCentered = { textAlign: "center" as const };
 
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
-      style={{ flex: 1, backgroundColor: quietColors.page }}
+      style={{ flex: 1, backgroundColor: colors.page }}
     >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -124,20 +162,21 @@ export default function EmailCodeScreen() {
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
-            paddingHorizontal: 20,
-            paddingTop: 8,
-            paddingBottom: 24,
+            paddingHorizontal: space.lg,
+            paddingTop: space.sm,
+            paddingBottom: space.lg,
           }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Back sits at the top where a back control belongs. Below the
               legal line it read as part of the fine print, and this stack
               renders no header of its own to hold a chevron. */}
-          <Button
+          <App2Button
             label={onEmailStep ? "Back" : "Use a different email"}
-            variant="ghost"
+            variant="quiet"
             size="sm"
-            style={{ alignSelf: "flex-start" }}
+            icon={<Icon name="back" size={20} color={colors.textStrong} />}
+            style={{ alignSelf: "flex-start", marginLeft: -space.sm }}
             disabled={pending}
             onPress={() => {
               if (onEmailStep) {
@@ -150,30 +189,38 @@ export default function EmailCodeScreen() {
             }}
           />
 
-          <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 24 }} />
+          <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: space.md }} />
 
-          <View style={{ gap: 16 }}>
-            <NativeHeading level={2}>
-              {onEmailStep ? "What's your email?" : "Check your email."}
-            </NativeHeading>
-            <NativeText role="body" tone="body">
-              {onEmailStep
-                ? "Homa sends a six digit code. No password to make up, and none to forget later."
-                : `Six digits, sent to ${normalizeEmail(email)}. It works once.`}
-            </NativeText>
+          <View style={{ alignItems: "center", gap: space.sm }}>
+            <HomaCharacter3D size={HOMA_SIZE} />
+            <Text
+              accessibilityRole="header"
+              style={{ ...textCentered, marginTop: space.xs, fontFamily: fontFamilies.displaySemibold, fontSize: fontSize.xxl, color: colors.textStrong }}
+            >
+              {onEmailStep ? (usePassword ? "Welcome back." : "What's your email?") : "Check your email."}
+            </Text>
+            <Text style={{ ...textCentered, maxWidth: 320, fontFamily: fontFamilies.body, fontSize: fontSize.base, lineHeight: 22, color: colors.textMuted }}>
+              {onEmailStep ? (
+                usePassword
+                  ? "Sign in with the password you already use for Homa."
+                  : "I'll send you a six-digit code. No password to make up or forget."
+              ) : (
+                // The address gets its own line: wrapped mid-sentence it
+                // stranded a word alone on the last line. "It works once"
+                // only added worry; where to look is the useful line.
+                <>
+                  {"I sent it to\n"}
+                  <Text style={{ fontFamily: fontFamilies.bodySemibold, color: colors.textStrong }}>
+                    {normalizeEmail(email)}
+                  </Text>
+                  {".\nNot there? Check spam."}
+                </>
+              )}
+            </Text>
           </View>
 
-          <View
-            style={{
-              flexGrow: 1.6,
-              flexShrink: 0,
-              flexBasis: 0,
-              minHeight: 24,
-            }}
-          />
-
-          <View style={{ gap: 12 }}>
-            {notice ? (
+          <View style={{ gap: space.sm, marginTop: space.xl, width: "100%", maxWidth: 440, alignSelf: "center" }}>
+            {notice && noticeShown ? (
               <NativeStatus
                 announce
                 tone="info"
@@ -185,6 +232,7 @@ export default function EmailCodeScreen() {
             {onEmailStep ? (
               <>
                 <TextField
+                  style={{ backgroundColor: colors.card }}
                   label="Email"
                   value={email}
                   onChangeText={setEmail}
@@ -195,54 +243,104 @@ export default function EmailCodeScreen() {
                   keyboardType="email-address"
                   placeholder="you@example.com"
                   returnKeyType="go"
-                  onSubmitEditing={() => void send(false)}
+                  onSubmitEditing={() => void (usePassword ? signInWithPassword() : send(false))}
                 />
-                <Button
-                  label={pending ? "Sending…" : "Send my code"}
+                {usePassword ? (
+                  <TextField
+                    style={{ backgroundColor: colors.card }}
+                    label="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="current-password"
+                    textContentType="password"
+                    editable={!pending}
+                    returnKeyType="go"
+                    onSubmitEditing={() => void signInWithPassword()}
+                  />
+                ) : null}
+                <App2Button
+                  label={pending ? (usePassword ? "Signing in…" : "Sending…") : (usePassword ? "Sign in" : "Send my code")}
                   size="lg"
-                  onPress={() => void send(false)}
-                  disabled={pending}
+                  style={{ marginTop: space.xs }}
+                  onPress={() => void (usePassword ? signInWithPassword() : send(false))}
+                  disabled={pending || (usePassword && (!email.trim() || !password))}
                   busy={pending}
+                />
+                <App2Button
+                  label={usePassword ? "Use an email code instead" : "I already have a password"}
+                  variant="quiet"
+                  size="sm"
+                  disabled={pending}
+                  onPress={() => {
+                    setUsePassword(!usePassword);
+                    setPassword("");
+                    setError(null);
+                    setNotice(null);
+                  }}
                 />
               </>
             ) : (
               <>
                 <TextField
+                  // A code reads as one object: large, centered, spaced digits.
+                  style={{
+                    backgroundColor: colors.card,
+                    minHeight: 60,
+                    textAlign: "center",
+                    fontFamily: fontFamilies.bodySemibold,
+                    fontSize: 28,
+                    lineHeight: 34,
+                    letterSpacing: 8,
+                  }}
                   label="Six digit code"
                   value={code}
-                  onChangeText={(next) =>
-                    setCode(next.replace(/[^0-9]/gu, "").slice(0, 6))
-                  }
+                  onChangeText={(next) => {
+                    const digits = next.replace(/[^0-9]/gu, "").slice(0, 6);
+                    setCode(digits);
+                    // The sixth digit signs her in, typed or filled by
+                    // iOS from the email banner; "Let me in" stays for
+                    // a retry after a wrong code.
+                    if (digits.length === 6 && code.length < 6 && !pending) {
+                      void check(digits);
+                    }
+                  }}
                   error={error ?? undefined}
+                  autoFocus
                   // oneTimeCode lets iOS offer the code straight from the
                   // notification banner, which is why it is in the subject.
                   autoComplete="one-time-code"
                   textContentType="oneTimeCode"
                   keyboardType="number-pad"
-                  placeholder="123456"
+                  // Spaced digits as a placeholder read as a code already filled in.
+                  placeholder="······"
                   returnKeyType="go"
                   onSubmitEditing={() => void check()}
                 />
-                <Button
+                <App2Button
                   label={pending ? "Checking…" : "Let me in"}
                   size="lg"
+                  style={{ marginTop: space.xs }}
                   onPress={() => void check()}
                   disabled={pending || code.length < 6}
                   busy={pending}
                 />
-                <Button
+                <App2Button
                   label="Send a new code"
-                  variant="ghost"
+                  variant="quiet"
                   size="sm"
-                  style={{ alignSelf: "flex-start" }}
                   onPress={() => void send(true)}
                   disabled={pending}
                 />
               </>
             )}
-
-            <LegalLine />
           </View>
+
+          <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: space.lg }} />
+
+          <LegalLine align="center" linkColor={colors.textStrong} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -1,7 +1,6 @@
 import { Pressable, Text, View, useWindowDimensions } from "react-native";
 
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, radius, space } from "../../theme/app2";
 import type { PlanActivityView } from "./planner-model";
 
 /**

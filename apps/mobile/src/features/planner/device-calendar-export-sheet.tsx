@@ -9,8 +9,7 @@ import { IconButton } from "../../components/ui/icon-button";
 import { InlineError } from "../../components/ui/inline-error";
 import { LoadingStatus } from "../../components/ui/loading-status";
 import { emitFamilyEvent } from "../../lib/events";
-import { fontFamilies } from "../../theme/fonts";
-import { colors, fontSize, palette, radius, space } from "../../theme/tokens";
+import { fontFamilies , colors, fontSize, palette, radius, space } from "../../theme/app2";
 import {
   calendarExportFingerprint,
   recurrenceLabel,

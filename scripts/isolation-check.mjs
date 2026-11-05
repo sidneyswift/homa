@@ -53,6 +53,7 @@ if (targetMismatch) {
 
 const failures = [];
 const coveredTables = new Set();
+const conversationStorageTables = new Set();
 const fixtureFamilyIds = [];
 const fixtureKnowledgeIds = [];
 const fixtureUserIds = [];
@@ -2652,6 +2653,18 @@ async function expectAuthenticatedIsolation() {
     const familyBMultiColumnUser = await signUpFixtureUser("b-multi", suffix);
     const familyAId = await createFixtureFamily(familyAUser, "A");
     const familyBId = await createFixtureFamily(familyBUser, "B");
+    for (const table of conversationStorageTables) {
+      await expectAuthenticatedInsertDenied(familyAUser.accessToken, table, {}, `adult cannot forge ${table}`);
+      if (table !== "conversation_records") {
+        await expectAuthenticatedReadDenied(familyAUser.accessToken, table, `adult cannot read raw ${table}`);
+      }
+    }
+    if (conversationStorageTables.has("conversation_records")) {
+      const [record] = await sql`insert into public.conversation_records(family_id,member_user_id)
+        values (${familyBId},${familyBUser.userId}) returning id`;
+      await expectAuthenticatedRead(familyBUser.accessToken, "conversation_records", record.id, 1, "adult reads own record");
+      await expectAuthenticatedRead(familyAUser.accessToken, "conversation_records", record.id, 0, "other family cannot read record");
+    }
     await expectEventsFamilyDeleteCascade(familyBId, suffix);
     await insertFixtureFamilyMember(
       familyBId,
@@ -5169,6 +5182,43 @@ await expectReadDenied("family_phones");
 // Session-access generations retain phone identity after unlinking and are
 // server-only for the same reason as family_phones.
 await expectReadDenied("family_phone_access_epochs");
+// These additive v2 stores are not enabled yet. Absence is a rollout state,
+// not deployed-behavior certification; partial application fails. The disposable
+// PostgreSQL suite exercises the candidate schema before deployment.
+for (const relations of [
+  ["conversation_records", "conversation_record_events", "conversation_record_deletions"],
+  ["conversation_requests"],
+  ["conversation_rebuild_settings"],
+  ["conversation_question_cards"],
+  ["conversation_sources"],
+  ["conversation_attachment_preparations"],
+  ["conversation_request_attachments"],
+  ["conversation_native_batches"],
+  ["conversation_native_authorizations"],
+  ["conversation_delivery_snapshots"],
+  ["conversation_feed_changes"],
+  ["conversation_index_jobs"],
+  ["conversation_jobs"],
+  ["conversation_operations"],
+]) {
+  const absent = [];
+  for (const table of relations) {
+    const response = await rest(`${table}?select=*&limit=1`, { headers: { Prefer: "" } });
+    const raw = await response.text();
+    absent.push(response.status === 404 && raw.includes("PGRST205"));
+    coveredTables.add(table);
+  }
+  if (absent.every(Boolean)) {
+    console.log(`PENDING  ${relations.join(", ")} absent; v2 storage is not deployed or certified`);
+  } else if (absent.some(Boolean)) {
+    report("conversation storage migration is complete", false, relations.join(", "));
+  } else {
+    for (const table of relations) {
+      conversationStorageTables.add(table);
+      await expectReadDenied(table);
+    }
+  }
+}
 // Eve runtime session ids and continuation-token hashes are server-only.
 // Session creation now provisions this table before Eve starts work, so a code
 // deploy must never lead the additive migration. Absence is a rollout failure,

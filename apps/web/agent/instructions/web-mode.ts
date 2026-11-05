@@ -23,7 +23,7 @@ export const WEB_MODE_MARKDOWN = `
 export function webModeMarkdown(
   attributes: WebModeAttributes,
 ): string | null {
-  return attributes?.channel === "web" ? WEB_MODE_MARKDOWN : null;
+  return attributes?.channel === "web" || attributes?.channel === "conversation-request" ? WEB_MODE_MARKDOWN : null;
 }
 
 export default defineDynamic({

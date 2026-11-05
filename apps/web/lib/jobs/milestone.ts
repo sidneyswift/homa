@@ -3,6 +3,7 @@ import { mapDb } from "../map/db";
 import { jobMaterialDeliveryEnabled } from "./flag";
 import { buildJobMaterialPack } from "./pack";
 import { submitHomaSms } from "../voice/telnyx-api";
+import { isConversationJob } from "../conversation-jobs";
 
 /**
  * Parent-facing milestone delivery for agent jobs (agent-jobs runner spec).
@@ -202,6 +203,9 @@ export function compose(
  * a transport or write failure only logs.
  */
 export async function deliverJobMilestone(input: JobMilestoneInput): Promise<string | null> {
+  // Permanent-chat jobs publish their durable work entry and exact artifact
+  // links in that adult's feed. They do not opt the family into another SMS.
+  if (input.jobId && await isConversationJob(input.familyId, input.jobId)) return null;
   const childName = await childFirstName(input.familyId, input.childId).catch(() => null);
   const { title, body } = compose(
     input.kind,

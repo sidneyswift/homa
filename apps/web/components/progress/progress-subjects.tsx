@@ -7,6 +7,7 @@ import type {
   OpenProgressConflictView,
   ProgressSubjectView,
 } from "../../lib/child-progress/types";
+import { useWorkspaceSurface } from "../workspace/surface-context";
 import { ProgressDetailPanel } from "./progress-detail-panel";
 import { SubjectDoorContext } from "./subject-door-context";
 
@@ -44,19 +45,20 @@ export function ProgressSubjects({
   hoursWindowLabel?: "this school year" | "all time through today";
   children: ReactNode;
 }) {
+  const workspace = useWorkspaceSurface();
   const [openSubjectId, setOpenSubjectId] = useState<string | null>(() => subjects.some(subject => subject.subjectId === initialSubjectId) ? initialSubjectId ?? null : null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
   // A full-height panel over a scrolled page: the page underneath stays
   // put while the panel is up (same rule as the tile grid had).
   useEffect(() => {
-    if (openSubjectId === null) return;
+    if (workspace || openSubjectId === null) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [openSubjectId]);
+  }, [openSubjectId, workspace]);
 
   const door = useMemo(
     () => ({

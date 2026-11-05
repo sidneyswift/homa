@@ -3,7 +3,7 @@ import { kickAgentJobsRunner } from "../../../../../lib/jobs/kick";
 import { getJobStatus, startJob } from "../../../../../lib/jobs/store";
 import { mapDb } from "../../../../../lib/map/db";
 import { clientIp, rateLimited } from "../../../../../lib/map/ratelimit";
-import { requireFamilyFromBearer } from "../../../../../lib/map/session";
+import { requireFamilyFromBearer, requireFamilyWithAiConsentFromBearer } from "../../../../../lib/map/session";
 import {
   mobileFirstMakingJob,
   type MobileFirstMakingChild,
@@ -32,10 +32,20 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ ok: false, reason: "disabled" }, { status: 503 });
   }
 
-  const family = await requireFamilyFromBearer(request);
-  if (!family) {
+  let access: Awaited<ReturnType<typeof requireFamilyWithAiConsentFromBearer>>;
+  try {
+    access = await requireFamilyWithAiConsentFromBearer(request);
+  } catch {
+    return Response.json({ ok: false, reason: "consent-unavailable" }, { status: 503 });
+  }
+  if (!access) {
     return Response.json({ ok: false, reason: "no-session" }, { status: 401 });
   }
+
+  if (!access.aiProcessingConsented) {
+    return Response.json({ ok: false, reason: "ai-consent-required" }, { status: 403 });
+  }
+  const { family } = access;
 
   let body: unknown;
   try {

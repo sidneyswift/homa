@@ -8,6 +8,7 @@ import {
   HOMA_MESSAGE_MODALITY_HEADER,
 } from "../web-message-modality";
 import { voiceBridgeAuthHeaders } from "./voice-bridge-auth";
+import { readVoiceBridgeStream } from "./bridge-stream";
 
 /**
  * The realtime model owns audio and turn taking. The ordinary Eve agent owns
@@ -83,7 +84,20 @@ function defaultRunner(): VoiceHomaTurnRunner {
         clientContext: input.sourceContext,
         signal: input.signal,
       });
-      return { ...(await response.result()), sessionState: session.state };
+      // gh#1158: the reattaching reader ships with the conversation rebuild.
+      // Until then voice keeps the established single result read.
+      if (process.env.HOMA_CONVERSATION_RECORDING !== "1") {
+        return { ...(await response.result()), sessionState: session.state };
+      }
+      return readVoiceBridgeStream({
+        state: {
+          sessionId: response.sessionId,
+          continuationToken: response.continuationToken,
+          streamIndex: input.sessionState?.sessionId === response.sessionId ? input.sessionState.streamIndex : 0,
+        },
+        signal: input.signal,
+        open: (state, signal) => client.session(state).stream({ startIndex: state.streamIndex, signal }),
+      });
     },
   };
 }

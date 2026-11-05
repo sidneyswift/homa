@@ -13,6 +13,22 @@ const MESSAGE_ID = "22222222-2222-4222-8222-222222222222";
 const EPISODE_ID = "33333333-3333-4333-8333-333333333333";
 
 describe("conversation log continuity integration", () => {
+  it("returns recorded text without waiting for the optional provider when durable indexing owns it", async () => {
+    let providerCalls = 0;
+    const result = await persistConversationMessage({
+      attributes: { familyId: FAMILY_ID, memberUserId: "member-1", episodeId: EPISODE_ID },
+      sessionId: "durable-index", channelKind: "web", sequence: 0, role: "assistant", content: "Saved reply", turnId: "turn",
+    }, {
+      deferIndexing: true,
+      resolveInbound: async () => { throw new Error("Unexpected inbound resolution"); },
+      persistCanonical: async input => ({ id: MESSAGE_ID, episodeId: EPISODE_ID, replyClaimed: false, content: input.content }),
+      embed: async () => { providerCalls++; throw new Error("Durable queue owns indexing"); },
+      saveEmbedding: async () => { throw new Error("Durable queue owns indexing"); },
+    });
+    assert.equal(result?.id, MESSAGE_ID);
+    assert.equal(result?.content, "Saved reply");
+    assert.equal(providerCalls, 0);
+  });
   it("carries validated web dictation provenance into the canonical user row", async () => {
     let canonicalModality: unknown = null;
     let canonicalContent: unknown = null;
@@ -284,6 +300,78 @@ describe("conversation log continuity integration", () => {
       { canonicalContent, embedding },
       { canonicalContent: terminalText, embedding: null },
     );
+  });
+});
+
+
+describe("conversation recording before enrichment", () => {
+  it("persists the exact complete text before indexing and survives index failure", async t => {
+    const previous = process.env.HOMA_CONVERSATION_RECORDING;
+    process.env.HOMA_CONVERSATION_RECORDING = "1";
+    t.after(() => {
+      if (previous === undefined) delete process.env.HOMA_CONVERSATION_RECORDING;
+      else process.env.HOMA_CONVERSATION_RECORDING = previous;
+    });
+    const content = "  " + "Long conversation 🧡\n".repeat(800) + "  ";
+    let recorded: string | undefined;
+    const result = await persistConversationMessage({
+      attributes: { familyId: FAMILY_ID }, sessionId: "long-session",
+      channelKind: "web", sequence: 1, role: "assistant", content,
+      turnId: "long-turn", finishReason: "stop",
+    }, {
+      resolveInbound: async () => { throw new Error("unexpected resolution"); },
+      persistCanonical: async input => {
+        recorded = input.content;
+        return { id: MESSAGE_ID, episodeId: EPISODE_ID, replyClaimed: false, content: input.content };
+      },
+      embed: async () => {
+        assert.equal(recorded, content);
+        throw new Error("index unavailable");
+      },
+      saveEmbedding: async () => { throw new Error("unexpected index write"); },
+    });
+    assert.equal(recorded, content);
+    assert.equal(result?.content, content);
+  });
+
+  it("does not index or acknowledge a message whose recording failed", async () => {
+    let indexed = false;
+    await assert.rejects(persistConversationMessage({
+      attributes: { familyId: FAMILY_ID }, sessionId: "session",
+      channelKind: "web", sequence: 1, role: "assistant", content: "Hello",
+      turnId: "turn", finishReason: "stop",
+    }, {
+      resolveInbound: async () => { throw new Error("unexpected resolution"); },
+      persistCanonical: async () => { throw new Error("database unavailable"); },
+      embed: async () => { indexed = true; return null; },
+      saveEmbedding: async () => undefined,
+    }), /database unavailable/);
+    assert.equal(indexed, false);
+  });
+
+  it("keeps the trimmed, capped text while recording is off", async () => {
+    const previous = process.env.HOMA_CONVERSATION_RECORDING;
+    delete process.env.HOMA_CONVERSATION_RECORDING;
+    try {
+      let recorded: string | undefined;
+      await persistConversationMessage({
+        attributes: { familyId: FAMILY_ID }, sessionId: "capped-session",
+        channelKind: "web", sequence: 1, role: "assistant",
+        content: "  " + "x".repeat(9000) + "  ",
+        turnId: "capped-turn", finishReason: "stop",
+      }, {
+        resolveInbound: async () => { throw new Error("unexpected resolution"); },
+        persistCanonical: async input => {
+          recorded = input.content;
+          return { id: MESSAGE_ID, episodeId: EPISODE_ID, replyClaimed: false, content: input.content };
+        },
+        embed: async () => null,
+        saveEmbedding: async () => undefined,
+      });
+      assert.equal(recorded, "x".repeat(8000));
+    } finally {
+      if (previous !== undefined) process.env.HOMA_CONVERSATION_RECORDING = previous;
+    }
   });
 });
 

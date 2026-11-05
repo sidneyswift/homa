@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import type { TransactionSql } from "postgres";
+
 import {
   ageInMonths,
   buildFourWeekPlan,
@@ -169,15 +171,17 @@ export async function startAnonymousFamily(
 }
 
 type MapDatabase = ReturnType<typeof mapDb>;
+/** The pool, or a transaction already open on it. */
+type MapQuery = MapDatabase | TransactionSql;
 
 async function foldFamilyInto(
-  sql: MapDatabase,
+  sql: MapQuery,
   fromId: string,
   intoId: string,
 ): Promise<void> {
-  const folded = await sql.begin((tx) =>
-    foldFamilyDataIntoTx(tx, fromId, intoId)
-  );
+  const folded = "savepoint" in sql
+    ? await foldFamilyDataIntoTx(sql, fromId, intoId)
+    : await sql.begin((tx) => foldFamilyDataIntoTx(tx, fromId, intoId));
   if (!folded) {
     throw new Error("Family fold source or destination is missing");
   }
@@ -235,7 +239,7 @@ export function isSandboxSignupEmail(email: string): boolean {
  */
 export async function attachAuthUser(
   input: AttachAuthUserInput,
-  sql: MapDatabase = mapDb(),
+  sql: MapQuery = mapDb(),
 ): Promise<{ familyId: string; returning: boolean; resumeToken: string }> {
   const resumeToken = newToken();
   const tokenHash = hashToken(resumeToken);
@@ -317,7 +321,7 @@ export async function attachAuthUser(
  */
 async function seedWhatWorksMemories(
   familyId: string,
-  sql: MapDatabase = mapDb(),
+  sql: MapQuery = mapDb(),
 ): Promise<void> {
   const kids = await sql<{ id: string; context: Record<string, unknown> }[]>`
     select id, context from public.children where family_id = ${familyId}
@@ -378,6 +382,46 @@ export async function getFamilyByAuthUser(authUserId: string): Promise<FamilyRow
     limit 1
   `;
   return rows[0] ?? null;
+}
+
+/**
+ * The signed-in caller's family, opening a new one on her first request.
+ * The look-up and the opening share one transaction, serialized per auth
+ * user: the app's first requests after sign-in arrive together, each found
+ * no family and opened its own, and one parent held two. Her kid was saved
+ * to one and her first page was requested against the other, so it never
+ * built (local stack, 2026-11-04).
+ */
+export async function ensureFamilyForAuthUser(input: {
+  authUserId: string;
+  email: string;
+  source: string;
+}): Promise<FamilyRow | null> {
+  await mapDb().begin(async (tx) => {
+    await tx`
+      select pg_advisory_xact_lock(
+        hashtextextended(${`family-for-auth-user:${input.authUserId}`}, 0)
+      )
+    `;
+    const member = await tx<{ id: string }[]>`
+      select f.id from public.families f
+      where f.status <> 'deleted'
+        and exists (select 1 from public.family_members m
+                    where m.family_id = f.id and m.user_id = ${input.authUserId})
+      limit 1
+    `;
+    if (member[0]) return;
+    const opened = await tx<{ id: string }[]>`
+      insert into public.families (email, source, utm, resume_token_hash)
+      values (null, ${input.source}, ${tx.json({})}, ${hashToken(newToken())})
+      returning id
+    `;
+    await attachAuthUser(
+      { familyId: opened[0].id, authUserId: input.authUserId, email: input.email },
+      tx,
+    );
+  });
+  return await getFamilyByAuthUser(input.authUserId);
 }
 
 /** The family's own address on file, or null. Server-scoped read: the

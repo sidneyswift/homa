@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useWorkspaceSurface } from "../workspace/surface-context";
+import { WorkspaceLink as Link } from "../workspace/workspace-link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -65,6 +66,7 @@ export function ProgressDetailPanel({
   hoursWindowLabel?: "this school year" | "all time through today";
   onClose: () => void;
 }) {
+  const workspace = useWorkspaceSurface();
   const router = useRouter();
   const closeRef = useRef<HTMLButtonElement>(null);
   const headingId = `progress-panel-${subject.subjectId}`;
@@ -132,7 +134,7 @@ export function ProgressDetailPanel({
               </p>
             ) : null}
             {hoursWindowLabel === "all time through today" ? (
-              <a href="/app/settings#school-year-start" className="text-xs underline">Set your school-year start</a>
+              <Link href="/app/settings#school-year-start" className="text-xs underline">Set your school-year start</Link>
             ) : null}
             {hoursMinutes ? (
               <p className="mt-1 text-xs font-semibold text-subtle">
@@ -192,7 +194,7 @@ export function ProgressDetailPanel({
               )}
             </div>
           ) : null}
-          <ProgressChatDoor childId={childId} variant="link">
+          <ProgressChatDoor preparedQuestion={`Something looks wrong in ${workspace?.childName?.(childId) ?? "my child"}’s ${subject.displayName} progress. Help me review the saved evidence.`} childId={childId} variant="link">
             Tell Homa something looks wrong
           </ProgressChatDoor>
         </div>
