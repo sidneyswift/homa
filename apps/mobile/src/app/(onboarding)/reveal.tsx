@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "../../components/ui/button";
 import { LoadingStatus } from "../../components/ui/loading-status";
@@ -45,6 +46,7 @@ const FETCH_MAX_ATTEMPTS = 12;
 
 export default function RevealScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { family } = useFamilyData();
   const [material, setMaterial] = useState<MaterialSummary | null>(null);
   const [childName, setChildName] = useState<string>("");
@@ -270,7 +272,24 @@ export default function RevealScreen() {
         ) : (
           <LoadingStatus label="Fetching the page" />
         )}
+      </ScrollView>
 
+      {/* Print is the hero action, so it never scrolls. Inside the
+          scroll, the portrait page pushed it under the home bar on an
+          iPhone (founder catch 2026-11-06, build 50). The page scrolls
+          above this footer instead, the way the kids steps keep their
+          forward button fixed, and the bottom inset keeps the footnote
+          clear of the home indicator. App Review's 375 by 667 iPad
+          window still gets both actions without scrolling. */}
+      <View
+        style={{
+          paddingHorizontal: space.lg,
+          paddingTop: space.sm,
+          paddingBottom: Math.max(insets.bottom, space.md),
+          gap: space.xs,
+          backgroundColor: colors.page,
+        }}
+      >
         {notice ? (
           <NativeText role="bodySmall" tone="body">
             {notice}
@@ -301,14 +320,14 @@ export default function RevealScreen() {
         <Pressable
           accessibilityRole="button"
           onPress={() => router.replace("/paywall" as never)}
-          style={{ minHeight: 44, alignItems: "center", justifyContent: "center", marginBottom: space.lg }}
+          style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}
           testID="reveal.footnoteContinue"
         >
           <NativeText role="caption" tone="muted">
             {printed ? "Saved. Print it anytime." : "Saved. Print it anytime. Keep going"}
           </NativeText>
         </Pressable>
-      </ScrollView>
+      </View>
     </WalkScene>
   );
 }

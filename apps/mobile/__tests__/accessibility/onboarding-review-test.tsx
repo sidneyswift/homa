@@ -87,3 +87,24 @@ test("a cancelled print sheet restores controls and never prevents continuing", 
   await fireEvent.press(view.getByTestId("reveal.footnoteContinue"));
   expect(mockReplace).toHaveBeenCalledWith("/paywall");
 });
+
+/** True when a host element sits inside a native scroll view. */
+function insideScrollView(element: { type: unknown; parent: unknown } | null): boolean {
+  let node = element?.parent as { type: unknown; parent: unknown } | null;
+  while (node) {
+    if (node.type === "RCTScrollView") return true;
+    node = node.parent as { type: unknown; parent: unknown } | null;
+  }
+  return false;
+}
+
+test("print and the footnote sit outside the scrolling page, so neither falls below the fold", async () => {
+  const view = await render(<RevealScreen />);
+  await waitFor(() => expect(view.getByTestId("reveal.print")).toBeTruthy());
+  // The page scrolls (Apple 2.1, iPad compatibility window)...
+  expect(insideScrollView(view.getByTestId("reveal.heading"))).toBe(true);
+  // ...while the hero action stays pinned above the home bar on a phone
+  // (founder catch 2026-11-06: Print it hid under the home indicator).
+  expect(insideScrollView(view.getByTestId("reveal.print"))).toBe(false);
+  expect(insideScrollView(view.getByTestId("reveal.footnoteContinue"))).toBe(false);
+});
