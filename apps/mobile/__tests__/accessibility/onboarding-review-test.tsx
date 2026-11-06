@@ -5,7 +5,7 @@ import { AiConsentGate } from "../../src/components/ai-consent-gate";
 import RevealScreen from "../../src/app/(onboarding)/reveal";
 import YouScreen from "../../src/app/(onboarding)/you";
 import { getMyConsentStatus, recordAiProcessingConsent } from "../../src/lib/family";
-import { prepareMaterialPrintFromApp } from "../../src/features/materials/material-print";
+import { prepareMaterialPrintFromApp, runPreparedMaterialPrint } from "../../src/features/materials/material-print";
 
 const mockReplace = jest.fn();
 const mockSaveBasics = jest.fn(async (_input: unknown) => true);
@@ -69,6 +69,20 @@ test("a rejected print preparation restores controls and never prevents continui
   await waitFor(() => expect(view.getByTestId("reveal.print")).toBeTruthy());
   await fireEvent.press(view.getByTestId("reveal.print"));
   await waitFor(() => expect(view.getByText("Printing didn't open. Your page is saved; you can keep going.")).toBeTruthy());
+  expect(view.getByTestId("reveal.print")).toBeEnabled();
+  await fireEvent.press(view.getByTestId("reveal.footnoteContinue"));
+  expect(mockReplace).toHaveBeenCalledWith("/paywall");
+});
+
+test("a cancelled print sheet restores controls and never prevents continuing", async () => {
+  jest.mocked(prepareMaterialPrintFromApp).mockResolvedValue({
+    materialId: "material-fixture", copies: 1, pageIndexes: [0], answerKeyExcluded: true,
+  } as never);
+  jest.mocked(runPreparedMaterialPrint).mockResolvedValue({ status: "canceled", message: "Printing canceled." } as never);
+  const view = await render(<RevealScreen />);
+  await waitFor(() => expect(view.getByTestId("reveal.print")).toBeTruthy());
+  await fireEvent.press(view.getByTestId("reveal.print"));
+  await waitFor(() => expect(view.getByText("Printing canceled.")).toBeTruthy());
   expect(view.getByTestId("reveal.print")).toBeEnabled();
   await fireEvent.press(view.getByTestId("reveal.footnoteContinue"));
   expect(mockReplace).toHaveBeenCalledWith("/paywall");

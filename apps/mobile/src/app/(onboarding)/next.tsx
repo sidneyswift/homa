@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 import { NativeText } from "../../components/ui/semantic";
 import { useFamilyData } from "../../features/family/use-family-data";
@@ -122,7 +122,13 @@ export default function NextScreen() {
 
   return (
     <WalkScene>
-      <View style={{ flex: 1, padding: space.lg, gap: space.md, paddingTop: space.xs }}>
+      {/* Five doors fill App Review's 375 by 667 iPad compatibility
+          window exactly; one more wrapped line pushed the last door off
+          a screen that could not scroll (Apple 2.1, 2026-09-09). */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, padding: space.lg, gap: space.md, paddingTop: space.xs }}
+      >
         <WalkSpeech>
           <NativeText role="body" tone="strong">
             {parentFirstName
@@ -170,7 +176,7 @@ export default function NextScreen() {
           ))}
         </View>
         <View style={{ height: space.xl }} />
-      </View>
+      </ScrollView>
     </WalkScene>
   );
 }
