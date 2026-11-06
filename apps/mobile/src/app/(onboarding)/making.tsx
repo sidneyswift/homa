@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -260,9 +260,16 @@ export default function MakingScreen() {
 
   return (
     <WalkScene>
-      <View
-        style={{
-          flex: 1,
+      {/* Scrolls for the reason the reveal does (Apple 2.1 rejection,
+          2026-09-09): App Review runs this iPhone-only app on an iPad
+          in a 375 by 667 compatibility window, where the feature cards
+          and the drawing show outgrow the screen and pushed their only
+          way forward off the bottom edge. */}
+      <ScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
           padding: space.lg,
           paddingTop: space.md,
           gap: space.md,
@@ -432,7 +439,7 @@ export default function MakingScreen() {
             />
           </>
         )}
-      </View>
+      </ScrollView>
     </WalkScene>
   );
 }

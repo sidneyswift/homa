@@ -108,7 +108,10 @@ export function MakingFeatureCards({
   }
 
   return (
-    <View style={{ flex: 1, gap: space.md }}>
+    // flexGrow, not flex: inside the making screen's ScrollView, a zero
+    // flex basis held the cards to the screen's height and clipped the
+    // button instead of letting the page scroll to it.
+    <View style={{ flexGrow: 1, gap: space.md }}>
       <Animated.View
         key={card.key}
         entering={reduced ? undefined : FadeIn.duration(220)}

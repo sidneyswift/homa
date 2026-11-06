@@ -100,3 +100,48 @@ Static gauntlet and mobile brand checks pass.
 
 Apple's live subscription offers confirm monthly one-week and annual
 two-week free trials. The app review notes were corrected accordingly.
+
+## App 2 reconciliation (2026-11-05)
+
+App 2 (#1243, squash-merged with #1215 as `755e3742`) carried every #1218
+commit in its branch history, so main already holds the four code repairs:
+Apple's name kept and the name question skipped for Apple accounts, the
+scrollable reveal, print controls restored in `finally`, and the onboarding
+consent gate plus the consent check on both `/api/mobile/onboarding/making`
+and `/react`. Build 50 (EAS `808e250d`, fingerprint `f6352036`) and its
+update stream run that code. The privacy label needs no code.
+
+App 2 also added the making screen's feature cards (2026-11-04 gauntlet): a
+248pt image, a caption and a bottom-pinned Next on a screen that could not
+scroll. In App Review's iPad compatibility window (375 by 667 points) the
+second card pushed Next below the edge, the same class as the September 9
+print block. The follow-up PR makes the making screen and the walk's last
+screen scroll and adds a rendered test for a cancelled print sheet. The
+fingerprint stays `f6352036`, so it ships over the air to build 50.
+
+Simulator walk on the local stack, iPad Air 11-inch (M3) and iPhone 17 on
+iOS 26.5, dev client at runtime `f6352036`:
+
+- Consent: the walk waits behind "Before Homa makes your first page". With
+  the same parent's token, both AI endpoints answered 403
+  `ai-consent-required` before consent, including a body claiming consent.
+- Apple name: an account with provider `apple` and Apple's `full_name` sees
+  only the state question; Continue saved that name as the member's
+  display name.
+- Reveal: scrolls on the iPad, with Print it and Keep going reachable. A
+  failed print (local artifact URLs carry a port, which the print download
+  refuses) showed its notice and re-enabled Print it.
+- Making and next: before the fix, card 2's Next sat almost entirely below
+  the window and the fifth door touched the edge; after it, both screens
+  scroll clear of the edge. On the iPhone the cards still pin Next to the
+  bottom band.
+
+Not covered: the real print sheet (the rendered test covers cancel),
+StoreKit, Apple sign-in itself and physical devices, which stay under
+"Remaining evidence before resubmission".
+
+Production-bug status: AI processing before consent (gh#1136) is FIXED
+server side in `755e3742`, whose Vercel production deploy succeeded; no
+live 403 probe was run. The Apple-name, print and consent-gate client
+repairs ship in build 50 and its update stream; App Review has not yet seen
+them.
