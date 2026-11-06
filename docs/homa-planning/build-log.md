@@ -12844,3 +12844,20 @@ digest address (once per six hours) and POSTs HOMA_SKILLS_REDEPLOY_HOOK_URL
 query reads "down" on the evening of 10-13 and healthy before and since,
 so the outage would have alerted about 35 minutes in instead of nine
 days later.
+
+## 2026-11-03 · Founder ruling: keep the learner modality schema, record it on main
+
+A read-only comparison of production against the local stack (gh#1248 item
+3) found objects no migration on main creates: the `learner_modality_signals`
+table, an `events` insert policy for `learner.*` events, and
+`family_memories.modality` with its index. All came from
+`20260718150000_learner_modality.sql` in PR #41, which was run against
+production by hand in July (production's migration history has no entry for
+it) before the PR closed without merging. Sidney ruled to keep them
+(`adopt-learner-modality-schema`). `20261103160000_adopt_learner_modality.sql`
+reproduces production's catalog as read that day, the PR's final Phase 4
+shape, with every statement guarded, so production changes nothing and the
+hot tables take no lock. On the local stack it builds an identical shape
+(all 13 compared catalog fields match) and is a no-op on a second run. The
+isolation guard now covers the table and the `learner.*` events policy.
+Schema only: no learner modality feature ships. Tracked in gh#1250.

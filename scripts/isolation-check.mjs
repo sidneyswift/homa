@@ -2787,7 +2787,21 @@ async function expectAuthenticatedIsolation() {
       },
       "create Family B memory fixture",
     );
-    const [hoursIdentitySchema] = await sql`select to_regclass('public.learning_write_operations') is not null as ready`;
+    // Learner modality signals (gh#1250): a member inserts for their own
+    // family's child, which proves the insert policy admits the right rows.
+    const modalitySignalBId = await insertFixtureRow(
+      familyBUser,
+      "learner_modality_signals",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        modality: "visual",
+        signal_type: "parent_stated",
+        content: "Isolation check modality signal for Family B.",
+      },
+      "create Family B modality signal fixture",
+    );
+    const [hoursIdentitySchema] =await sql`select to_regclass('public.learning_write_operations') is not null as ready`;
     let hoursLogBId;
     if (hoursIdentitySchema.ready) {
       const [source] = await sql`insert into public.conversation_messages(family_id,member_user_id,session_id,sequence,channel,role,visibility,content)
@@ -3438,6 +3452,20 @@ async function expectAuthenticatedIsolation() {
       memoryBId,
       0,
       "auth member cannot read another family's memory",
+    );
+    await expectAuthenticatedRead(
+      familyBUser.accessToken,
+      "learner_modality_signals",
+      modalitySignalBId,
+      1,
+      "auth member can read own family modality signal",
+    );
+    await expectAuthenticatedRead(
+      familyAUser.accessToken,
+      "learner_modality_signals",
+      modalitySignalBId,
+      0,
+      "auth member cannot read another family's modality signal",
     );
     await expectAuthenticatedRead(
       familyBUser.accessToken,
@@ -5067,6 +5095,34 @@ async function expectAuthenticatedIsolation() {
     );
     await expectAuthenticatedInsertDenied(
       familyAUser.accessToken,
+      "learner_modality_signals",
+      {
+        family_id: familyBId,
+        child_id: childBId,
+        modality: "visual",
+        signal_type: "parent_stated",
+      },
+      "auth member cannot create another family's modality signal",
+    );
+    await expectAuthenticatedInsertDenied(
+      familyBUser.accessToken,
+      "learner_modality_signals",
+      {
+        family_id: familyBId,
+        child_id: childAId,
+        modality: "visual",
+        signal_type: "parent_stated",
+      },
+      "auth member cannot attach a modality signal to another family's child",
+    );
+    await expectAuthenticatedInsertDenied(
+      familyAUser.accessToken,
+      "events",
+      { name: "learner.isolation_probe", props: {}, family_id: familyBId },
+      "auth member cannot emit learner events for another family",
+    );
+    await expectAuthenticatedInsertDenied(
+      familyAUser.accessToken,
       "materials",
       {
         family_id: familyBId,
@@ -5150,6 +5206,8 @@ await expectEmptyRead("family_members");
 await expectEmptyRead("children");
 // Homa's durable memory (migration #13): family-scoped, members only.
 await expectEmptyRead("family_memories");
+// Learner modality signals (gh#1250): family-scoped like family_memories.
+await expectEmptyRead("learner_modality_signals");
 // Family skill library (migration #14): family-scoped, members only.
 await expectEmptyRead("family_skills");
 // Shared skills bank (migration #15): members read published rows; anon
@@ -5856,6 +5914,21 @@ await expectInsertDenied(
   "family_memories",
   { family_id: "00000000-0000-0000-0000-000000000000", content: "intruder note" },
   "anon cannot write family memories",
+);
+await expectInsertDenied(
+  "learner_modality_signals",
+  {
+    family_id: "00000000-0000-0000-0000-000000000000",
+    child_id: "00000000-0000-0000-0000-000000000000",
+    modality: "visual",
+    signal_type: "parent_stated",
+  },
+  "anon cannot write learner modality signals",
+);
+await expectInsertDenied(
+  "events",
+  { name: "learner.isolation_probe", props: {}, family_id: "00000000-0000-0000-0000-000000000000" },
+  "anon cannot emit learner events",
 );
 await expectInsertDenied(
   "family_skills",
