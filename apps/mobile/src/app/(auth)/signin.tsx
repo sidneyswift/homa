@@ -15,6 +15,7 @@ import type { SignInFlowResult } from "../../features/auth/sign-in-result";
 import { useSession } from "../../features/auth/session-provider";
 import { signInFailureMessage } from "../../features/auth/sign-in-voice";
 import { LegalLine } from "../../features/auth/legal-line";
+import { isLocalBackendUrl } from "../../lib/local-backend";
 import { colors, fontFamilies, fontSize, radius, shadows, space } from "../../theme/app2";
 
 /**
@@ -33,6 +34,12 @@ const HOMA_SIZE = 150;
  * seven-year-old, space, math), downsized, not a mock.
  */
 const SAMPLE_WORKSHEET = require("../../../assets/onboarding/sample-worksheet/moon-mission.jpg");
+
+/** Dev builds on the local stack get a door to the test parents
+ * (src/app/labs/personas.tsx); production and hosted backends never do.
+ * Reads the raw value: a missing URL just means no door, not a crash. */
+const SHOW_LOCAL_PERSONAS =
+  __DEV__ && isLocalBackendUrl(process.env.EXPO_PUBLIC_SUPABASE_URL);
 
 /**
  * The front door AND the first impression, merged (founder direction
@@ -255,6 +262,17 @@ export default function SignInScreen() {
             onPress={() => router.push("/email")}
             disabled={signInBusy}
           />
+
+          {SHOW_LOCAL_PERSONAS ? (
+            <App2Button
+              label="Local test parents"
+              variant="quiet"
+              size="sm"
+              accessibilityHint="Dev only. Signs in as a seeded test parent on this Mac."
+              onPress={() => router.push("/labs/personas" as never)}
+              disabled={signInBusy}
+            />
+          ) : null}
 
           <LegalLine align="center" linkColor={colors.textStrong} />
         </View>

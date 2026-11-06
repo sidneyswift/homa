@@ -133,9 +133,13 @@ class HomaTelnyxAdapter extends TelnyxAdapter {
   }
 }
 
+// `||`, not `??`: a blank value is as unset as a missing one (smsEnabled
+// already reads it that way), and the adapter throws on an empty key at
+// construction, which takes the whole eve server down with it. Eval
+// isolation and the local stack blank this key on purpose.
 const telnyx = new HomaTelnyxAdapter({
-  apiKey: process.env.TELNYX_API_KEY ?? "not-configured",
-  phoneNumber: process.env.TELNYX_FROM_NUMBER ?? FALLBACK_FROM_NUMBER,
+  apiKey: process.env.TELNYX_API_KEY || "not-configured",
+  phoneNumber: process.env.TELNYX_FROM_NUMBER || FALLBACK_FROM_NUMBER,
   publicKey: process.env.TELNYX_PUBLIC_KEY,
   messagingProfileId: process.env.TELNYX_MESSAGING_PROFILE_ID,
   userName: "homa",

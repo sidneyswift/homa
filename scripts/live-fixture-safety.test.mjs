@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
 
+import { isolationTargetMismatch } from "./isolation-target.mjs";
+
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 const liveFixtureScripts = [
@@ -382,4 +384,26 @@ test("selected receipt view write checks accept only exact non-updatable failure
     assert.deepEqual(calls.map(args => args.at(-1).method), ["POST", "PATCH", "DELETE"]);
     assert.deepEqual(outcomes, [expected, expected, expected], `${table} HTTP${status} ${code}`);
   }
+});
+
+test("the isolation guard refuses a target that is half local, half hosted", () => {
+  const hostedApi = "https://abcd.supabase.co";
+  const localApi = "http://127.0.0.1:54321";
+  const localDb = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  const hostedDb = "postgresql://postgres.abcd:pw@aws-0-us-east-1.pooler.supabase.com:6543/postgres";
+
+  assert.equal(isolationTargetMismatch(hostedApi, null), null);
+  assert.equal(isolationTargetMismatch(localApi, localDb), null);
+  assert.match(isolationTargetMismatch(localApi, null), /pnpm dev:stack isolation/u);
+  assert.match(isolationTargetMismatch(hostedApi, localDb), /hosted/u);
+  assert.match(isolationTargetMismatch(localApi, hostedDb), /not on this machine/u);
+});
+
+test("the isolation guard settles its target before creating any fixture", () => {
+  const source = readFileSync(path.join(repoRoot, "scripts/isolation-check.mjs"), "utf8");
+  const targetCheck = source.indexOf("isolationTargetMismatch(url, localDatabaseUrl)");
+  const connect = source.indexOf("const sql = localDatabaseUrl");
+  const signup = source.indexOf("const familyAUser = await signUpFixtureUser");
+  assert.ok(targetCheck >= 0 && connect >= 0 && signup >= 0);
+  assert.ok(targetCheck < connect && connect < signup);
 });

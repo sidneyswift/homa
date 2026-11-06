@@ -188,6 +188,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
 - Install: `pnpm install`
 - Dev (all packages): `pnpm dev`, or one package: `pnpm --filter web dev`
 - Mobile app (not part of `pnpm dev` on purpose; it needs a simulator): `pnpm --filter mobile ios` (or `android`, `start`); setup in `apps/mobile/README.md`
+- Local stack, for testing web and the simulator signed in without touching production: `pnpm dev:stack` starts a private Supabase (Docker) with every migration and three resettable test parents (new, onboarding, established). Runbook: `tooling/local-stack/README.md`
 - Build: `pnpm build`
 - Lint: `pnpm lint`
 - Typecheck: `pnpm typecheck`
@@ -196,7 +197,7 @@ files, fleet skills, `.agents/skills/`, tool descriptions, and
   focused route and card tests; and `pnpm child-progress:e2e` for the
   disposable local PostgreSQL harness. The E2E command creates and removes its
   own cluster and needs no remote credentials.
-- Required guards, named here because they run BEFORE a change (CI is too late for them): `pnpm check:isolation` (tenant isolation, run before any schema/query change), `pnpm check:migration-versions` (unique Supabase migration versions, run before any migration change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene, reference integrity, and slash-menu parity), and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG). For the full check roster, enumerate `.github/workflows/ci.yml` rather than any hand-copied list
+- Required guards, named here because they run BEFORE a change (CI is too late for them): `pnpm check:isolation` (tenant isolation, run before any schema/query change; on a laptop run it as `pnpm dev:stack isolation`, since a plain run writes its fixtures into production), `pnpm check:migration-versions` (unique Supabase migration versions, run before any migration change), `pnpm check:map` (bank content + scorer), `pnpm check:events` (MJ-08 registry parity), `pnpm check:fleet-skills` (fleet-skill package hygiene, reference integrity, and slash-menu parity), and `pnpm check:taxonomy` (skill graph integrity: mapping completeness, ID law, DAG). For the full check roster, enumerate `.github/workflows/ci.yml` rather than any hand-copied list
 - Local eval runs (`eve eval` in apps/web) are isolated by default:
   evals.config.ts strips durable-write credentials from the eval process
   (apps/web/lib/eval-isolation.ts), so passing evals no longer write
