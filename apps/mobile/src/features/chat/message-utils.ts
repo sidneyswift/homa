@@ -1,3 +1,4 @@
+import { parseStateRecordsCardPart } from "./state-records-card-model";
 import { isHiddenDirective, visibleOutboundChildFramingText, parseMaterialPrintPart } from "@homa/core";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
@@ -140,6 +141,7 @@ export function partIsRenderable(part: EveMessagePart): boolean {
     if (parseDetailCardPart(part) !== null) return true;
     if (parseReportCardPart(part) !== null) return true;
     if (parseCurriculumMappingCardPart(part) !== null) return true;
+    if (parseStateRecordsCardPart(part) !== null) return true;
     if (
       part.toolName === "create_printable" ||
       part.toolName === "show_material" ||

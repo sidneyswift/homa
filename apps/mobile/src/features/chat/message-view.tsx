@@ -1,3 +1,4 @@
+import * as WebBrowser from "expo-web-browser";
 import { Pressable, Text, View } from "react-native";
 import type { EveMessage, EveMessagePart } from "eve/react";
 
@@ -21,6 +22,8 @@ import { parseLibrarySourceCardPart } from "./library-source-card-model";
 import { CurriculumMappingCard } from "./curriculum-mapping-card";
 import { parseCurriculumMappingCardPart } from "./curriculum-mapping-card-model";
 import { PlannerCard } from "./planner-card";
+import { parseStateRecordsCardPart } from "./state-records-card-model";
+import { StateRecordsCard } from "../state-records/state-records-card";
 import { QuestionCard } from "./question-card";
 import { parseQuestionCardPart } from "./question-card-model";
 import {
@@ -208,6 +211,19 @@ function MessagePartView({
     }
     const printHandoff = parseMaterialPrintPart(part);
     if (printHandoff) return <MaterialPrintCard handoff={printHandoff} />;
+    const stateRecords = parseStateRecordsCardPart(part);
+    if (stateRecords) {
+      // Same card voice mode and the Binder show; a chosen document opens
+      // as its PDF.
+      return (
+        <View style={{ marginTop: space.sm }}>
+          <StateRecordsCard
+            action={stateRecords.action}
+            onOpenDocument={(document) => void WebBrowser.openBrowserAsync(document.pdfUrl)}
+          />
+        </View>
+      );
+    }
     if (part.toolName === "open_planner") {
       const output = part.output as
         | { opened?: boolean; childName?: string | null }

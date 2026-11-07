@@ -31,7 +31,9 @@ mean the packet for your records, or the document you send?"
 1. Call `open_state_records` with the intended action.
 2. Trust the tool result. If it says `no_state`, ask which state she homeschools
    in and direct her to save it in Settings. Never infer a state from location,
-   timezone, or an old conversation.
+   timezone, or an old conversation. If it says `no_native_view`, nothing opened
+   on this surface: point her to the state packet and filing cards in her
+   Binder instead.
 3. If a generation says `needs_school_year_start`, ask exactly one question:
    "What date does your school year start?" When she answers, translate her
    explicit answer to `YYYY-MM-DD`, call `save_school_year_start`, then call
