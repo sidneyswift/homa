@@ -181,6 +181,7 @@ export const nativeAccessibilityHandoffs: readonly NativeAccessibilityHandoff[] 
   { file: "apps/mobile/src/features/lessons/native-lesson-recorder.tsx", callee: "Linking.openSettings", outcome: "Microphone settings open after denial.", owner: "gh#534" },
   { file: "apps/mobile/src/features/lessons/native-lesson-recorder.tsx", callee: "AudioModule.requestRecordingPermissionsAsync", outcome: "Microphone permission is requested after an explicit prime.", owner: "gh#534" },
   { file: "apps/mobile/src/features/chat/onboarding-cards.tsx", callee: "WebBrowser.openBrowserAsync", outcome: "Full progress report opens.", owner: "gh#617" },
+  { file: "apps/mobile/src/features/chat/message-view.tsx", callee: "WebBrowser.openBrowserAsync", outcome: "A state packet or filing PDF opens from the chat's state records card.", owner: "gh#1264" },
   { file: "apps/mobile/src/features/auth/google-sign-in.ts", callee: "WebBrowser.openAuthSessionAsync", outcome: "Google authentication session opens.", owner: "gh#304" },
   { file: "apps/mobile/src/features/auth/apple-sign-in.ts", callee: "AppleAuthentication.signInAsync", outcome: "Apple authentication sheet opens.", owner: "gh#304" },
   { file: "apps/mobile/src/features/billing/use-apple-purchase.ts", callee: "requestPurchase", outcome: "StoreKit purchase begins.", owner: "gh#299" },
